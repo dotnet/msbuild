@@ -81,7 +81,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// An XML document can have many root nodes, but usually we want the single root 
+        /// An XML document can have many root nodes, but usually we want the single root
         /// element. Callers can test each root node in turn with this method, until it returns
         /// true.
         /// </summary>
@@ -154,8 +154,8 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// Finds the location of the first invalid character, if any, in the name of an 
-        /// item, property, or piece of metadata. Returns the location of the first invalid character, or -1 if there are none. 
+        /// Finds the location of the first invalid character, if any, in the name of an
+        /// item, property, or piece of metadata. Returns the location of the first invalid character, or -1 if there are none.
         /// Valid names must match this pattern:  [A-Za-z_][A-Za-z_0-9\-.]*
         /// Note, this is a subset of all possible valid XmlElement names: we use a subset because we also
         /// have to match this same set in our regular expressions, and allowing all valid XmlElement name
@@ -192,8 +192,8 @@ namespace Microsoft.Build.BuildEngine.Shared
         }
 
         /// <summary>
-        /// Load the xml file using XMLTextReader and locate the element and attribute specified and then 
-        /// return the value. This is a quick way to peek at the xml file whithout having the go through 
+        /// Load the xml file using XMLTextReader and locate the element and attribute specified and then
+        /// return the value. This is a quick way to peek at the xml file whithout having the go through
         /// the XMLDocument (MSDN article (Chapter 9 - Improving XML Performance)).
         /// </summary>
         internal static string GetAttributeValueForElementFromFile

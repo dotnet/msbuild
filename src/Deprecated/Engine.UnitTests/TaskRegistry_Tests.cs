@@ -290,13 +290,13 @@ namespace Microsoft.Build.UnitTests
 
         internal static Expander RegistryExpander
         {
-            get 
+            get
             {
                 if (registryExpander == null)
                 {
                     registryExpander = GetExpander();
                 }
-                return registryExpander; 
+                return registryExpander;
             }
         }
 

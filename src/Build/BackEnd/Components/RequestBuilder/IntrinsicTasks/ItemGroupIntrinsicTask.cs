@@ -167,7 +167,7 @@ namespace Microsoft.Build.BackEnd
             // Second, expand the item include and exclude, and filter existing metadata as appropriate.
             List<ProjectItemInstance> itemsToAdd = ExpandItemIntoItems(child, bucket.Expander, keepMetadata, removeMetadata, loggingContext);
 
-            // Third, expand the metadata.           
+            // Third, expand the metadata.
             foreach (ProjectItemGroupTaskMetadataInstance metadataInstance in child.Metadata)
             {
                 bool condition = ConditionEvaluator.EvaluateCondition(
@@ -196,7 +196,7 @@ namespace Microsoft.Build.BackEnd
 
                     string evaluatedValue = bucket.Expander.ExpandIntoStringLeaveEscaped(metadataInstance.Value, expanderOptions, metadataInstance.Location, loggingContext);
 
-                    // This both stores the metadata so we can add it to all the items we just created later, and 
+                    // This both stores the metadata so we can add it to all the items we just created later, and
                     // exposes this metadata to further metadata evaluations in subsequent loop iterations.
                     metadataTable.SetValue(metadataInstance.Name, evaluatedValue);
                 }
@@ -236,7 +236,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Remove items from the world. Removes to items that are part of the project manifest are backed up, so 
+        /// Remove items from the world. Removes to items that are part of the project manifest are backed up, so
         /// they can be reverted when the project is reset after the end of the build.
         /// </summary>
         /// <param name="child">The item specification to evaluate and remove.</param>
@@ -280,7 +280,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Modifies items in the world - specifically, changes their metadata. Changes to items that are part of the project manifest are backed up, so 
+        /// Modifies items in the world - specifically, changes their metadata. Changes to items that are part of the project manifest are backed up, so
         /// they can be reverted when the project is reset after the end of the build.
         /// </summary>
         /// <param name="child">The item specification to evaluate and modify.</param>
@@ -681,7 +681,7 @@ namespace Microsoft.Build.BackEnd
             #region IMetadataTable Members
             // NOTE:  Leaving these methods public so as to avoid having to explicitly define them
             // through the IMetadataTable interface and then cast everywhere they're used.  This class
-            // is private, so it ultimately doesn't matter. 
+            // is private, so it ultimately doesn't matter.
 
             /// <summary>
             /// Gets the specified metadata value.  Returns an empty string if none is set.

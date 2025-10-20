@@ -15,11 +15,17 @@ namespace Microsoft.Build.Tasks
     internal class DirectoryResolver : Resolver
     {
         /// <summary>
+        /// The parent assembly that was used for the SearchPath.
+        /// </summary>
+        public readonly string parentAssembly;
+
+        /// <summary>
         /// Construct.
         /// </summary>
-        public DirectoryResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
+        public DirectoryResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, string parentAssembly)
             : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false)
         {
+            this.parentAssembly = parentAssembly;
         }
 
         /// <inheritdoc/>
@@ -40,8 +46,27 @@ namespace Microsoft.Build.Tasks
             foundPath = null;
             userRequestedSpecificFile = false;
 
-            // Resolve to the given path.
-            string resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, searchPathElement, assembliesConsideredAndRejected);
+            string resolvedPath;
+
+            if (parentAssembly != null)
+            {
+                var searchLocationsWithParentAssembly = new List<ResolutionSearchLocation>();
+
+                // Resolve to the given path.
+                resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, searchPathElement, searchLocationsWithParentAssembly);
+
+                foreach (var searchLocation in searchLocationsWithParentAssembly)
+                {
+                    searchLocation.ParentAssembly = parentAssembly;
+                }
+
+                assembliesConsideredAndRejected.AddRange(searchLocationsWithParentAssembly);
+            }
+            else
+            {
+                resolvedPath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, searchPathElement, assembliesConsideredAndRejected);
+            }
+     
             if (resolvedPath != null)
             {
                 foundPath = resolvedPath;

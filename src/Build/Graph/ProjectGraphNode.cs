@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.BackEnd;
@@ -21,11 +22,15 @@ namespace Microsoft.Build.Graph
         private readonly HashSet<ProjectGraphNode> _projectReferences = new HashSet<ProjectGraphNode>();
         private readonly HashSet<ProjectGraphNode> _referencingProjects = new HashSet<ProjectGraphNode>();
 
+        internal ProjectInterpretation.ProjectType ProjectType { get; }
+
         // No public creation.
         internal ProjectGraphNode(ProjectInstance projectInstance)
         {
             ErrorUtilities.VerifyThrowInternalNull(projectInstance, nameof(projectInstance));
             ProjectInstance = projectInstance;
+
+            ProjectType = ProjectInterpretation.GetProjectType(projectInstance);
         }
 
         /// <summary>

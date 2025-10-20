@@ -24,7 +24,7 @@ namespace Microsoft.Build.BuildEngine
     {
         #region Member Data
 
-        // The task XML element, if this is a persisted target.  
+        // The task XML element, if this is a persisted target.
         private XmlElement taskElement = null;
 
         // This is the "Condition" attribute on the task element.
@@ -93,14 +93,14 @@ namespace Microsoft.Build.BuildEngine
                         this.continueOnErrorAttribute = taskAttribute;
                         break;
 
-                    // this only makes sense in the context of the new OM, 
-                    // so just ignore it.  
+                    // this only makes sense in the context of the new OM,
+                    // so just ignore it.
                     case XMakeAttributes.msbuildRuntime:
                         // do nothing
                         break;
 
-                    // this only makes sense in the context of the new OM, 
-                    // so just ignore it.  
+                    // this only makes sense in the context of the new OM,
+                    // so just ignore it.
                     case XMakeAttributes.msbuildArchitecture:
                         // do nothing
                         break;
@@ -152,7 +152,7 @@ namespace Microsoft.Build.BuildEngine
 
             set
             {
-                // If this Task object is not actually represented by a 
+                // If this Task object is not actually represented by a
                 // task element in the project file, then do not allow
                 // the caller to set the condition.
                 error.VerifyThrowInvalidOperation(this.taskElement != null,
@@ -196,7 +196,7 @@ namespace Microsoft.Build.BuildEngine
 
             set
             {
-                // If this Task object is not actually represented by a 
+                // If this Task object is not actually represented by a
                 // task element in the project file, then do not allow
                 // the caller to set the attribute.
                 error.VerifyThrowInvalidOperation(this.taskElement != null,

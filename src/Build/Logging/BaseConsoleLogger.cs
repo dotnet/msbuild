@@ -1285,7 +1285,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Prepare for next use.
             // Equivalent of sb.Clear() that works on .Net 3.5
-            shared.Length = 0; 
+            shared.Length = 0;
 
             return shared;
         }

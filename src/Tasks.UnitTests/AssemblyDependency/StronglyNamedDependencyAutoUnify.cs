@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Expected:
         /// - There should be exactly one UnifyMe dependency returned and it should be version 2.0.0.0.
         /// Rationale:
-        /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly 
+        /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly
         /// dependency seen.
         /// </summary>
         /// <param name="rarSimulationMode"></param>
@@ -100,11 +100,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// - The AutoUnify flag is set to 'true'.
         /// - Version 1.0.0.0 of UnifyMe exists.
         /// - Version 2.0.0.0 of UnifyMe exists.
-        ///   - DependsOnUnified 2.0.0.0 is on the deny list. 
+        ///   - DependsOnUnified 2.0.0.0 is on the deny list.
         /// Expected:
         /// - There should be exactly one UnifyMe dependency returned and it should be version 1.0.0.0.
         /// Rationale:
-        /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly 
+        /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly
         /// dependency seen. However if the higher assembly is a dependency of an assembly in the deny list it should not be considered during unification.
         /// </summary>
         [Fact]
@@ -183,7 +183,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// - There should be exactly one UnifyMe dependency returned and it should be version 1.0.0.0.
         ///  Also there should be a warning about the primary reference DependsOnUnified 2.0.0.0 having a dependency which was in the deny list.
         /// Rationale:
-        /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly 
+        /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly
         /// dependency seen. However if the higher assembly is a dependency of an assembly in the deny list it should not be considered during unification.
         /// </summary>
         [Fact]
@@ -260,7 +260,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// - Version 2.0.0.0 of UnifyMe exists.
         ///   - UnifyMe 2.0.0.0 is on the deny list because it is higher than what is in the redist list, 1.0.0.0 is also in a deny list because it is not in the subset but is in the redist list.
         /// Expected:
-        /// - There should be no UnifyMe dependency returned 
+        /// - There should be no UnifyMe dependency returned
         /// There should be a warning indicating the primary reference DependsOnUnified 1.0.0.0 has a dependency that in the deny list
         /// There should be a warning indicating the primary reference DependsOnUnified 2.0.0.0 has a dependency that in the deny list
         /// </summary>

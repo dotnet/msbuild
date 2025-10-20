@@ -382,7 +382,7 @@ namespace Microsoft.Build.Utilities
 
                 // We may have stored the dependency table in the cache, but all the other information
                 // (newest file time, number of missing files, etc.) has been reset to default.  Refresh
-                // the data.  
+                // the data.
                 UpdateFileEntryDetails();
 
                 // Log information about what we're using
@@ -396,8 +396,8 @@ namespace Microsoft.Build.Utilities
 
             FileTracker.LogMessageFromResources(_log, MessageImportance.Low, "Tracking_TrackingLogs");
             // Now we need to construct the rest of the table from the TLOG files
-            // If there are any errors in the tlogs, we want to warn, stop parsing tlogs, and empty 
-            // out the dependency table, essentially forcing a rebuild.  
+            // If there are any errors in the tlogs, we want to warn, stop parsing tlogs, and empty
+            // out the dependency table, essentially forcing a rebuild.
             bool encounteredInvalidTLogContents = false;
             string invalidTLogName = null;
             foreach (ITaskItem tlogFileName in TlogFiles)
@@ -476,8 +476,8 @@ namespace Microsoft.Build.Utilities
 
             lock (DependencyTableCache.DependencyTable)
             {
-                // There were problems with the tracking logs -- we've already warned or errored; now we want to make 
-                // sure that we essentially force a rebuild of this particular root. 
+                // There were problems with the tracking logs -- we've already warned or errored; now we want to make
+                // sure that we essentially force a rebuild of this particular root.
                 if (encounteredInvalidTLogContents)
                 {
                     DependencyTableCache.DependencyTable.Remove(tLogRootingMarker);
@@ -655,7 +655,7 @@ namespace Microsoft.Build.Utilities
         }
 
         /// <summary>
-        /// Returns cached value for last write time of file. Update the cache if it is the first 
+        /// Returns cached value for last write time of file. Update the cache if it is the first
         /// time someone asking for that file
         /// </summary>
         public DateTime GetLastWriteTimeUtc(string file)
@@ -734,7 +734,7 @@ namespace Microsoft.Build.Utilities
             if (!inputs.TlogsAvailable || !outputs.TlogsAvailable || inputs.DependencyTable.Count == 0)
             {
                 // 1) The TLogs are somehow missing, which means we need to build
-                // 2) Because we are flat tracking, there are no roots which means that all the input file information 
+                // 2) Because we are flat tracking, there are no roots which means that all the input file information
                 //    comes from the input Tlogs, if they are empty then we must build.
                 Log.LogMessageFromResources(MessageImportance.Low, "Tracking_LogFilesNotAvailable");
             }
@@ -878,7 +878,7 @@ namespace Microsoft.Build.Utilities
                 }
                 else
                 {
-                    // Compact the write tlog                        
+                    // Compact the write tlog
                     outputs.SaveTlog();
 
                     // Compact the read tlog

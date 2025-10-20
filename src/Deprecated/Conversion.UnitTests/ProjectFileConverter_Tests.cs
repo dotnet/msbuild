@@ -86,13 +86,13 @@ namespace Microsoft.Build.UnitTests
     }
 
     /***************************************************************************
-     * 
+     *
      * Class:        ProjectFileConverter_Tests
      * Owner:       jomof
-     * 
-     * This class contains the unit tests for the " ProjectFileConverter" class.  
+     *
+     * This class contains the unit tests for the " ProjectFileConverter" class.
      * See the comments in that class for a description of its purpose.
-     * 
+     *
      **************************************************************************/
     [TestClass]
     public class  ProjectFileConverter_Tests
@@ -101,15 +101,15 @@ namespace Microsoft.Build.UnitTests
          *
          * Method:   ProjectFileConverter_Tests.MakeRelativeWithHash
          * Owner:    jomof
-         * 
-         * Test where paths with '#' in them can be converted into relative 
+         *
+         * Test where paths with '#' in them can be converted into relative
          * paths
-         * 
+         *
          **********************************************************************/
         [TestMethod]
         public void MakeRelativeWithHash()
         {
-            // Intentionally making the paths not the same case, because this should be irrelevant.            
+            // Intentionally making the paths not the same case, because this should be irrelevant.
             string path1 = @"D:\Public\Samples\Visual J# .NET 2003\Crosslanguage\Copy (8) of TilePuzzle\TileDriver\TileDriver.vcproj";
             string path2 = @"D:\public\Samples\Visual J# .NET 2003\Crosslanguage\Copy (8) of TilePuzzle\PUZZLE.vjsproj";
 
@@ -118,15 +118,15 @@ namespace Microsoft.Build.UnitTests
 
             Assert.AreEqual(@"TileDriver\TileDriver.vcproj", rel);
         }
-        
+
         /***********************************************************************
          *
          * Method:   ProjectFileConverter_Tests.MakeRelativeWithSpace
          * Owner:    RGoel
-         * 
+         *
          * Test where paths where the relative path ends up having a <space> in
          * it.
-         * 
+         *
          **********************************************************************/
         [TestMethod]
         public void MakeRelativeWithSpace()
@@ -401,7 +401,7 @@ namespace Microsoft.Build.UnitTests
         public void VbConversionWithMyTypeAlreadySet()
         {
             // **********************************************
-            //                   EVERETT 
+            //                   EVERETT
             // **********************************************
             string everettProjectContents = @"
                 <VisualStudioProject>
@@ -607,7 +607,7 @@ namespace Microsoft.Build.UnitTests
         public void ConvertTrinityWithOfficeDocumentFile()
         {
             // **********************************************
-            //                   EVERETT 
+            //                   EVERETT
             // **********************************************
             string everettProjectContents = @"
                 <VisualStudioProject>
@@ -877,11 +877,11 @@ namespace Microsoft.Build.UnitTests
                     </ItemGroup>
                     <ProjectExtensions>
                         <VisualStudio>
-                            <UserProperties 
-                                OfficeDocumentPath=`.\EXCELPROJECT1.XLS` 
-                                OfficeProjectType=`XLS` 
-                                OfficeProject=`true` 
-                                TrustedAssembly=`c:\rajeev_temp_deleteme\ExcelProject1\ExcelProject1_bin\ExcelProject1.dll` 
+                            <UserProperties
+                                OfficeDocumentPath=`.\EXCELPROJECT1.XLS`
+                                OfficeProjectType=`XLS`
+                                OfficeProject=`true`
+                                TrustedAssembly=`c:\rajeev_temp_deleteme\ExcelProject1\ExcelProject1_bin\ExcelProject1.dll`
                              />
                         </VisualStudio>
                     </ProjectExtensions>
@@ -905,7 +905,7 @@ namespace Microsoft.Build.UnitTests
         public void ConvertEmptyFolders()
         {
             // **********************************************
-            //                   EVERETT 
+            //                   EVERETT
             // **********************************************
             string everettProjectContents = @"
 
@@ -1183,7 +1183,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// This is to test that we convert Everett projects that are part of solutions including
-        /// VC++ projects. 
+        /// VC++ projects.
         /// </summary>
         [TestMethod]
         public void ConvertProjectWithVCInSolutionAndP2Ps()
@@ -1357,7 +1357,7 @@ namespace Microsoft.Build.UnitTests
             File.Delete(everettProjectFile);
             File.Delete(everettSolutionFile);
         }
-        
+
         /// <summary>
         /// This is to test that we convert P2P references correctly by looking up the
         /// referenced project in the given .SLN file.  Force the conversion code to
@@ -1436,7 +1436,7 @@ namespace Microsoft.Build.UnitTests
             // **********************************************
             //                   EVERETT SOLUTION
             // **********************************************
-            ObjectModelHelpers.CreateFileInTempProjectDirectory(@"WindowsApplication1.sln", 
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(@"WindowsApplication1.sln",
 
                 @"Microsoft Visual Studio Solution File, Format Version 8.00
                 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `WindowsApplication1`, `Project\WindowsApplication1.csproj`, `{77E21864-797C-4220-974E-530BB832801B}`
@@ -1472,7 +1472,7 @@ namespace Microsoft.Build.UnitTests
             // **********************************************
             //                   RANDOM OTHER SOLUTION
             // **********************************************
-            ObjectModelHelpers.CreateFileInTempProjectDirectory(@"Project\Random.sln", 
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(@"Project\Random.sln",
 
                 @"Microsoft Visual Studio Solution File, Format Version 8.00
                 Project(`{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}`) = `ClassLibrary2`, `ClassLibrary2\ClassLibrary2.csproj`, `{11111111-9E5C-4FE8-BE84-96F37D47F45A}`
@@ -1553,10 +1553,10 @@ namespace Microsoft.Build.UnitTests
 
             Helpers.CompareProjectXml(whidbeyProjectContents, project.RawXml);
         }
-        
+
         /// <summary>
         /// This is a test for bug VSWhidbey 472064.  We are making sure that if DebugSymbols is true in
-        /// the original project file, then we also emit DebugType to the whidbey project file.  We also 
+        /// the original project file, then we also emit DebugType to the whidbey project file.  We also
         /// emit ErrorReport = prompt to the whidbey project file if the language is C#
         /// </summary>
         /// <owner>FaisalMo</owner>
@@ -1564,12 +1564,12 @@ namespace Microsoft.Build.UnitTests
         public void ConvertEverettProjectWithNoDebugInfoFlag()
         {
             // **********************************************
-            //                   EVERETT 
+            //                   EVERETT
             // **********************************************
             string everettProjectContents = @"
                 <VisualStudioProject>
                     <CSHARP
-                        ProjectType = `Local`                        
+                        ProjectType = `Local`
                         SchemaVersion = `2.0`
                         ProjectGuid = `{172D0AFF-7BF3-4297-8168-792C46DC89DD}`
                     >
@@ -1776,12 +1776,12 @@ namespace Microsoft.Build.UnitTests
         public void ConvertEverettProjectWithSpecialCharaceters()
         {
             // **********************************************
-            //                   EVERETT 
+            //                   EVERETT
             // **********************************************
             string everettProjectContents = @"
                 <VisualStudioProject>
                     <CSHARP
-                        ProjectType = `Local`                        
+                        ProjectType = `Local`
                         SchemaVersion = `2.0`
                         ProjectGuid = `{172D0AFF-7BF3-4297-8168-792C46DC89DD}`
                     >
@@ -1989,9 +1989,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Dev10 Bug 557388: When converting a project to v4.0, if the project contains 
-        /// references to v3.5 and before VC projects (.vcproj), convert that reference to 
-        /// instead reference a .vcxproj of the same name. 
+        /// Dev10 Bug 557388: When converting a project to v4.0, if the project contains
+        /// references to v3.5 and before VC projects (.vcproj), convert that reference to
+        /// instead reference a .vcxproj of the same name.
         /// </summary>
         [TestMethod]
         public void ConvertVCProjectReferenceExtensions()
@@ -2016,9 +2016,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Dev10 Bug 557388: When converting a project to v4.0, if the project contains 
-        /// references to v3.5 and before VC projects (.vcproj), convert that reference to 
-        /// instead reference a .vcxproj of the same name. 
+        /// Dev10 Bug 557388: When converting a project to v4.0, if the project contains
+        /// references to v3.5 and before VC projects (.vcproj), convert that reference to
+        /// instead reference a .vcxproj of the same name.
         /// </summary>
         [TestMethod]
         public void ConvertVCProjectReferenceExtensionsWildcard()
@@ -2043,9 +2043,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Dev10 Bug 557388: When converting a project to v4.0, if the project contains 
-        /// references to v3.5 and before VC projects (.vcproj), convert that reference to 
-        /// instead reference a .vcxproj of the same name. 
+        /// Dev10 Bug 557388: When converting a project to v4.0, if the project contains
+        /// references to v3.5 and before VC projects (.vcproj), convert that reference to
+        /// instead reference a .vcxproj of the same name.
         /// </summary>
         [TestMethod]
         public void ConvertVCProjectReferenceExtensionsTrimNeeded()
@@ -2309,7 +2309,7 @@ namespace Microsoft.Build.UnitTests
                     <Compile Include=""Program.fs"" />
                   </ItemGroup>
                   <Import Project=""$(MSBuildExtensionsPath)\FSharp\1.0\Microsoft.FSharp.Targets"" />
-                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
                          Other similar extension points exist, see Microsoft.Common.targets.
                     <Target Name=""BeforeBuild"">
                     </Target>
@@ -2378,7 +2378,7 @@ namespace Microsoft.Build.UnitTests
                     </Otherwise>
                   </Choose>
                   <Import Project=""$(FSharpTargetsPath)"" Condition=""Exists('$(FSharpTargetsPath)')""/>
-                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
                          Other similar extension points exist, see Microsoft.Common.targets.
                     <Target Name=""BeforeBuild"">
                     </Target>
@@ -2442,7 +2442,7 @@ namespace Microsoft.Build.UnitTests
                     <MinimumVisualStudioVersion Condition=""'$(MinimumVisualStudioVersion)' == ''"">11</MinimumVisualStudioVersion>
                   </PropertyGroup>
                   <Import Project=""$(MSBuildExtensionsPath32)\..\Microsoft SDKs\F#\3.0\Framework\v4.0\Microsoft.Portable.FSharp.Targets"" />
-                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
                        Other similar extension points exist, see Microsoft.Common.targets.
                   <Target Name=""BeforeBuild"">
                   </Target>
@@ -2513,7 +2513,7 @@ namespace Microsoft.Build.UnitTests
                     </Otherwise>
                   </Choose>
                   <Import Project=""$(FSharpTargetsPath)"" Condition=""Exists('$(FSharpTargetsPath)')""/>
-                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
                        Other similar extension points exist, see Microsoft.Common.targets.
                   <Target Name=""BeforeBuild"">
                   </Target>
@@ -2528,7 +2528,7 @@ namespace Microsoft.Build.UnitTests
 
         [TestMethod]
         public void ConvertDev12PortableLibraryProjectFileShouldBeNoOp()
-        { 
+        {
             string asDev12ProjectFile = ObjectModelHelpers.CleanupFileContents(@"
                 <Project ToolsVersion=""msbuilddefaulttoolsversion"" DefaultTargets=""Build"" xmlns=""msbuildnamespace"">
                   <Import Project=""$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"" Condition=""Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"" />
@@ -2581,7 +2581,7 @@ namespace Microsoft.Build.UnitTests
                     <FSharpTargetsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\FSharp\Microsoft.Portable.FSharp.Targets</FSharpTargetsPath>
                   </PropertyGroup>
                   <Import Project=""$(FSharpTargetsPath)"" Condition=""Exists('$(FSharpTargetsPath)')""/>
-                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
                        Other similar extension points exist, see Microsoft.Common.targets.
                   <Target Name=""BeforeBuild"">
                   </Target>
@@ -2646,7 +2646,7 @@ namespace Microsoft.Build.UnitTests
                   </ItemGroup>
                   <Import Project=""$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets"" Condition=""!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')"" />
                   <Import Project=""$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets"" Condition="" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')"" />
-                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
                          Other similar extension points exist, see Microsoft.Common.targets.
                     <Target Name=""BeforeBuild"">
                     </Target>
@@ -2718,7 +2718,7 @@ namespace Microsoft.Build.UnitTests
                     </Otherwise>
                   </Choose>
                   <Import Project=""$(FSharpTargetsPath)"" Condition=""Exists('$(FSharpTargetsPath)')""/>
-                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
                          Other similar extension points exist, see Microsoft.Common.targets.
                     <Target Name=""BeforeBuild"">
                     </Target>
@@ -2785,7 +2785,7 @@ namespace Microsoft.Build.UnitTests
                   </PropertyGroup>
                   <Import Project=""$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets"" Condition=""!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')"" />
                   <Import Project=""$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets"" Condition="" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')"" />
-                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
                          Other similar extension points exist, see Microsoft.Common.targets.
                     <Target Name=""BeforeBuild"">
                     </Target>
@@ -2859,7 +2859,7 @@ namespace Microsoft.Build.UnitTests
                     </Otherwise>
                   </Choose>
                   <Import Project=""$(FSharpTargetsPath)"" Condition=""Exists('$(FSharpTargetsPath)')""/>
-                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
                          Other similar extension points exist, see Microsoft.Common.targets.
                     <Target Name=""BeforeBuild"">
                     </Target>
@@ -2870,7 +2870,7 @@ namespace Microsoft.Build.UnitTests
                 ";
             Helpers.ConvertAndCompare(sampleFSharpDev10ProjectFile, asDev11ProjectFile);
         }
-        
+
         [TestMethod]
         public void ConvertFSharpDev11ProjectFile()
         {
@@ -2923,7 +2923,7 @@ namespace Microsoft.Build.UnitTests
                     <Reference Include=""System.Core"" />
                     <Reference Include=""System.Numerics"" />
                   </ItemGroup>
-                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
                        Other similar extension points exist, see Microsoft.Common.targets.
                   <Target Name=""BeforeBuild"">
                   </Target>
@@ -2996,7 +2996,7 @@ namespace Microsoft.Build.UnitTests
                     <Reference Include=""System.Core"" />
                     <Reference Include=""System.Numerics"" />
                   </ItemGroup>
-                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
                        Other similar extension points exist, see Microsoft.Common.targets.
                   <Target Name=""BeforeBuild"">
                   </Target>
@@ -3062,7 +3062,7 @@ namespace Microsoft.Build.UnitTests
                     <Reference Include=""System.Core"" />
                     <Reference Include=""System.Numerics"" />
                   </ItemGroup>
-                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
                        Other similar extension points exist, see Microsoft.Common.targets.
                   <Target Name=""BeforeBuild"">
                   </Target>
@@ -3134,7 +3134,7 @@ namespace Microsoft.Build.UnitTests
                     <Reference Include=""System.Core"" />
                     <Reference Include=""System.Numerics"" />
                   </ItemGroup>
-                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
                        Other similar extension points exist, see Microsoft.Common.targets.
                   <Target Name=""BeforeBuild"">
                   </Target>
@@ -3202,7 +3202,7 @@ namespace Microsoft.Build.UnitTests
                     <Reference Include=""System.Core"" />
                     <Reference Include=""System.Numerics"" />
                   </ItemGroup>
-                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+                  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
                        Other similar extension points exist, see Microsoft.Common.targets.
                   <Target Name=""BeforeBuild"">
                   </Target>
@@ -3279,7 +3279,7 @@ namespace Microsoft.Build.UnitTests
                   </ItemGroup>
                   <Import Project=""$(MSBuildBinPath)\Microsoft.CSharp.Targets"" />
                   <Import Project=""$(MSBuildExtensionsPath)\Microsoft\Windows Workflow Foundation\v3.0\Workflow.Targets"" />
-                </Project>                
+                </Project>
                     ";
             string wfDev10ProjectFile = ObjectModelHelpers.CleanupFileContents(@"
                     <Project DefaultTargets=""Build"" xmlns=""msbuildnamespace"" ToolsVersion=""msbuilddefaulttoolsversion"">
@@ -3655,7 +3655,7 @@ namespace Microsoft.Build.UnitTests
   </ItemGroup>
   <Import Project=""$(MSBuildBinPath)\Microsoft.VisualBasic.targets"" />
   <Import Project=""$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v9.0\WebApplications\Microsoft.WebApplication.targets"" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name=""BeforeBuild"">
   </Target>
@@ -3844,7 +3844,7 @@ namespace Microsoft.Build.UnitTests
   <Import Project=""$(MSBuildBinPath)\Microsoft.VisualBasic.targets"" />
   <Import Project=""$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets"" Condition=""'$(VSToolsPath)' != ''"" />
   <Import Project=""$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets"" Condition=""false"" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name=""BeforeBuild"">
   </Target>
@@ -5307,7 +5307,7 @@ namespace Microsoft.Build.UnitTests
                           <LastGenOutput>Settings.Designer.vb</LastGenOutput>
                         </None>
                       </ItemGroup>
-                    </Project>  
+                    </Project>
                     ");
 
             Helpers.ConvertAndCompare(ProjectBefore, ProjectAfter);
@@ -5319,7 +5319,7 @@ namespace Microsoft.Build.UnitTests
         [TestMethod]
         public void ConvertCS2005ExcelProjectConversionRequired()
         {
-            string projectBefore = 
+            string projectBefore =
                     @" <VisualStudioProject>
                         <CSHARP
                             ProjectType = ""Local""
@@ -5668,9 +5668,9 @@ namespace Microsoft.Build.UnitTests
         /// Check that when we're upgrading projects referencing and compiling .xaml source files
         /// we are correctly appending Generator and Subtype properties to the source file and not the
         /// reference
-        /// 
+        ///
         /// Check also that project references to vcproj have their extensions fixed to .vcxproj
-        /// 
+        ///
         /// Lastly, make sure that this still happens even if the ToolsVersion is > 3.5.
         /// </summary>
         [TestMethod]
@@ -5735,7 +5735,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Check that when we're upgrading projects referencing and compiling .xaml source files
-        /// that we don't append the Generator and SubType properties to the source file if they 
+        /// that we don't append the Generator and SubType properties to the source file if they
         /// are already set.
         /// </summary>
         [TestMethod]
@@ -5806,8 +5806,8 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Check that when we're upgrading projects referencing and compiling .xaml source files
-        /// that even if there are multiple instances of the metadata, we don't eliminate them -- 
-        /// we just also don't add any more. 
+        /// that even if there are multiple instances of the metadata, we don't eliminate them --
+        /// we just also don't add any more.
         /// </summary>
         [TestMethod]
         public void DontEliminateDuplicateXamlProperties()
@@ -5901,8 +5901,8 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Check that when we're upgrading projects referencing and compiling .xaml source files
-        /// that already have Generator and Subtype metadata, we don't make any changes and 
-        /// don't update the ToolsVersion. 
+        /// that already have Generator and Subtype metadata, we don't make any changes and
+        /// don't update the ToolsVersion.
         /// </summary>
         [TestMethod]
         public void DontUpdateToolsVersionIfNothingChanged()

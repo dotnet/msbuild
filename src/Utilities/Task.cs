@@ -58,7 +58,7 @@ namespace Microsoft.Build.Utilities
         /// <value>The build engine interface available to tasks.</value>
         public IBuildEngine BuildEngine { get; set; }
 
-        // The casts below are always possible because this class is built against the 
+        // The casts below are always possible because this class is built against the
         // Orcas Framework assembly or later, so the version of MSBuild that does not
         // know about IBuildEngine2 will never load it.
         // No setters needed; the Engine always sets through the BuildEngine setter
@@ -115,7 +115,7 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Gets an instance of a TaskLoggingHelper class containing task logging methods.
         /// The taskLoggingHelper is a MarshallByRef object which needs to have MarkAsInactive called
-        /// if the parent task is making the appdomain and marshaling this object into it. If the appdomain is not unloaded at the end of 
+        /// if the parent task is making the appdomain and marshaling this object into it. If the appdomain is not unloaded at the end of
         /// the task execution and the MarkAsInactive method is not called this will result in a leak of the task instances in the appdomain the task was created within.
         /// </summary>
         /// <value>The logging helper object.</value>

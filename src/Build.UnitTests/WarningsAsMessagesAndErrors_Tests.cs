@@ -358,7 +358,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 logger.WarningCount.ShouldBe(2);
                 logger.ErrorCount.ShouldBe(1);
 
-                // The build should STOP when a task logs an error, make sure ReturnFailureWithoutLoggingErrorTask doesn't run. 
+                // The build should STOP when a task logs an error, make sure ReturnFailureWithoutLoggingErrorTask doesn't run.
                 logger.AssertLogDoesntContain("MSB1237");
             }
         }

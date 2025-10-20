@@ -1211,7 +1211,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
 
 
         /// <summary>
-        /// Verifies that the Preprocessor works when the import graph contains unevaluated duplicates.  This can occur if two projects in 
+        /// Verifies that the Preprocessor works when the import graph contains unevaluated duplicates.  This can occur if two projects in
         /// two different folders both import "..\dir.props" or "$(Property)".  Those values will evaluate to different paths at run time
         /// but the preprocessor builds a map of the imports.
         /// </summary>

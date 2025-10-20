@@ -121,7 +121,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <remarks>
         /// This class is designed to be passed to loggers.
-        /// The expense of copying items is only incurred if and when 
+        /// The expense of copying items is only incurred if and when
         /// a logger chooses to enumerate over it.
         /// </remarks>
         internal class TargetOutputItemsInstanceEnumeratorProxy : IEnumerable<TaskItem>

@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks
                 {
                     // Ok, this is slightly complicated.  Changing the base directory in any manner may
                     // result in changes to how we find .resx files.  Therefore, we must clear our out
-                    // cache whenever the base directory changes.  
+                    // cache whenever the base directory changes.
                     resXFiles.Clear();
                     _isDirty = true;
                     baseLinkedFileDirectory = value;
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Tasks
         {
             set
             {
-                // Ensure that the cache is properly initialized with respect to how resgen will 
+                // Ensure that the cache is properly initialized with respect to how resgen will
                 // resolve linked files within .resx files.  ResGen has two different
                 // ways for resolving relative file-paths in linked files. The way
                 // that ResGen resolved relative paths before Whidbey was always to
@@ -126,7 +126,7 @@ namespace Microsoft.Build.Tasks
             // First, try to retrieve the resx information from our hashtable.
             if (!resXFiles.TryGetValue(resxFile, out ResXFile retVal))
             {
-                // Ok, the file wasn't there.  Add it to our cache and return it to the caller.  
+                // Ok, the file wasn't there.  Add it to our cache and return it to the caller.
                 retVal = AddResxFile(resxFile, useMSBuildResXReader, log, logWarningForBinaryFormatter);
             }
             else
@@ -157,7 +157,7 @@ namespace Microsoft.Build.Tasks
 
         internal PortableLibraryFile TryGetPortableLibraryInfo(string libraryPath)
         {
-            // First, try to retrieve the portable library information from our hashtable.  
+            // First, try to retrieve the portable library information from our hashtable.
             portableLibraries.TryGetValue(libraryPath, out PortableLibraryFile retVal);
 
             // The file is in our cache.  Make sure it's up to date.  If not, discard
@@ -198,7 +198,7 @@ namespace Microsoft.Build.Tasks
         {
             var retVal = DeserializeCache<ResGenDependencies>(stateFile, log) ?? new ResGenDependencies();
 
-            // Ensure that the cache is properly initialized with respect to how resgen will 
+            // Ensure that the cache is properly initialized with respect to how resgen will
             // resolve linked files within .resx files.  ResGen has two different
             // ways for resolving relative file-paths in linked files. The way
             // that ResGen resolved relative paths before Whidbey was always to
@@ -314,9 +314,9 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <remarks>
-        /// Represents a single assembly in the dependency cache, which may produce 
+        /// Represents a single assembly in the dependency cache, which may produce
         /// 0 to many ResW files.
-        /// 
+        ///
         /// Must be serializable because instances may be marshaled cross-AppDomain, see <see cref="ProcessResourceFiles.PortableLibraryCacheInfo"/>.
         /// </remarks>
 #if FEATURE_APPDOMAIN

@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            // Dont allow downgrading of reference version due to redist unification because this is automatic rather than something like an appconfig which 
+            // Dont allow downgrading of reference version due to redist unification because this is automatic rather than something like an appconfig which
             // has to be manually set. However if the major version is 255 then we do want to unify down the version number.
             if (assemblyName.Version <= highestVersionFromRedistList.AssemblyNameExtension.Version || assemblyName.Version.Major == 255)
             {
@@ -94,7 +94,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Key value pair, K: Assembly entry of highest value in the redist list. V: AssemblyNameExtension with the version information or null if the name could not be found</returns>
         internal AssemblyEntry FindHighestVersionInRedistList(AssemblyNameExtension assemblyName)
         {
-            // The assembly we are looking for is not listed in a redist list which contains framework assemblies. We do not want to find 
+            // The assembly we are looking for is not listed in a redist list which contains framework assemblies. We do not want to find
             // find non framework assembly entries.
             if (!FrameworkAssemblyEntryInRedist(assemblyName))
             {

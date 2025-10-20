@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
 #nullable disable
@@ -236,26 +237,30 @@ namespace Microsoft.Build.ObjectModelRemoting
         // memory storage of original items (with the Link field) while it is small, some of the MSbuild items can be created
         // in millions so it does adds up otherwise.
 
-        private class LinkedProjectItem : ProjectItem, ILinkableObject
+        private class LinkedProjectItem : ProjectItem, ILinkableObject, IImmutableInstanceProvider<ProjectItemInstance>
         {
             internal LinkedProjectItem(ProjectItemElement xml, Project project, ProjectItemLink link)
                 : base(xml, project)
             {
-                this.Link = link;
+                Link = link;
             }
+
+            public ProjectItemInstance ImmutableInstance { get; set; }
 
             internal override ProjectItemLink Link { get; }
 
             object ILinkableObject.Link => Link;
         }
 
-        private class LinkedProjectItemDefinition : ProjectItemDefinition, ILinkableObject
+        private class LinkedProjectItemDefinition : ProjectItemDefinition, ILinkableObject, IImmutableInstanceProvider<ProjectItemDefinitionInstance>
         {
             internal LinkedProjectItemDefinition(ProjectItemDefinitionLink link, Project project, string itemType)
                 : base(project, itemType)
             {
                 Link = link;
             }
+
+            public ProjectItemDefinitionInstance ImmutableInstance { get; set; }
 
             internal override ProjectItemDefinitionLink Link { get; }
             object ILinkableObject.Link => Link;
@@ -273,7 +278,7 @@ namespace Microsoft.Build.ObjectModelRemoting
             object ILinkableObject.Link => Link;
         }
 
-        private class LinkedProjectProperty : ProjectProperty, ILinkableObject
+        private class LinkedProjectProperty : ProjectProperty, ILinkableObject, IImmutableInstanceProvider<ProjectPropertyInstance>
         {
             internal ProjectPropertyLink Link { get; }
             object ILinkableObject.Link => Link;
@@ -289,6 +294,8 @@ namespace Microsoft.Build.ObjectModelRemoting
             {
                 Link = link;
             }
+
+            public ProjectPropertyInstance ImmutableInstance { get; set;  }
 
             public override string Name => Link.Name;
 

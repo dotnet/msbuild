@@ -14,7 +14,7 @@ namespace Microsoft.Build.BackEnd
     internal delegate void LinkStatusChangedDelegate(INodeEndpoint endpoint, LinkStatus status);
 
     /// <summary>
-    /// Used to receive data from a node 
+    /// Used to receive data from a node
     /// </summary>
     /// <param name="endpoint">The endpoint invoking the delegate.</param>
     /// <param name="packet">The packet received.</param>
@@ -34,7 +34,7 @@ namespace Microsoft.Build.BackEnd
         Inactive,
 
         /// <summary>
-        /// The connection is active, the most recent data has been successfully sent, and the 
+        /// The connection is active, the most recent data has been successfully sent, and the
         /// node is responding to pings.
         /// </summary>
         Active,

@@ -134,7 +134,7 @@ namespace Microsoft.Build.Evaluation
         public bool CanEvaluateElementsWithFalseConditions => _wrapped.CanEvaluateElementsWithFalseConditions;
         public PropertyDictionary<P> Properties => _wrapped.Properties;
         public IEnumerable<D> ItemDefinitionsEnumerable => _wrapped.ItemDefinitionsEnumerable;
-        public ItemDictionary<I> Items => _wrapped.Items;
+        public IItemDictionary<I> Items => _wrapped.Items;
         public List<ProjectItemElement> EvaluatedItemElements => _wrapped.EvaluatedItemElements;
         public PropertyDictionary<ProjectPropertyInstance> EnvironmentVariablePropertiesDictionary => _wrapped.EnvironmentVariablePropertiesDictionary;
         public void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext) => _wrapped.InitializeForEvaluation(toolsetProvider, evaluationContext);

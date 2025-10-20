@@ -65,7 +65,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Creates a metadata backed by XML. 
+        /// Creates a metadata backed by XML.
         /// Constructed during evaluation of a project.
         /// </summary>
         internal ProjectMetadata(IProjectMetadataParent parent, ProjectMetadataElement xml, string evaluatedValueEscaped, ProjectMetadata predecessor)
@@ -106,19 +106,19 @@ namespace Microsoft.Build.Evaluation
 
         /// <summary>
         /// Gets or sets the unevaluated metadata value.
-        /// 
+        ///
         /// As well as updating the unevaluated value, the setter updates the evaluated value, but does not affect anything else in the project until reevaluation. For example,
         ///     --if a piece of metadata named "m" is modified on item of type "i", it does not affect "j" which is evaluated from "@(j->'%(m)')" until reevaluation.
         ///     --if the unevaluated value of "m" is set to something that is modified by evaluation, such as "$(p)", the evaluated value will be set to "$(p)" until reevaluation.
         /// This is a convenience that it is understood does not necessarily leave the project in a perfectly self consistent state.
-        /// 
+        ///
         /// Setting metadata through a ProjectItem may cause the underlying ProjectItemElement to be split, if it originated with an itemlist, wildcard, or semicolon expression,
         /// because it was clear that the caller intended to only affect that particular item.
         /// Setting metadata through a ProjectMetadata does not cause any splitting, because we assume the caller presumably intends to affect all items using the underlying
         /// ProjectMetadataElement. At least, this seems a reasonable assumption, and it avoids the need for metadata to hold a pointer to their containing items.
         /// </summary>
         /// <remarks>
-        /// The containing project will be dirtied by the XML modification.  Unevaluated values are assumed to be passed in escaped as necessary. 
+        /// The containing project will be dirtied by the XML modification.  Unevaluated values are assumed to be passed in escaped as necessary.
         /// </remarks>
         public string UnevaluatedValue
         {

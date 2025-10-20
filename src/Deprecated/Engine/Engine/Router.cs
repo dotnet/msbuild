@@ -39,7 +39,7 @@ namespace Microsoft.Build.BuildEngine
         #region Properties
 
         /// <summary>
-        /// Returns true on the child engine and false otherwise. this is used by the engine to determine if the engine is running on a child 
+        /// Returns true on the child engine and false otherwise. this is used by the engine to determine if the engine is running on a child
         /// process or not. The childMode is set to true in the NodeLocalEngineLoop which is only executed on a child process.
         /// </summary>
         internal bool ChildMode
@@ -90,12 +90,12 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// This method creates a BuildResult using the information contained in a completed build request and
         /// then routes it to the right node. On a child process, this means either consume the result localy,
-        /// or send it to the parent node. On a parent node, this means either consume the result locally or 
+        /// or send it to the parent node. On a parent node, this means either consume the result locally or
         /// send it to a child node
         /// </summary>
         internal void PostDoneNotice(BuildRequest buildRequest)
         {
-            // Create a container with the results of the evaluation 
+            // Create a container with the results of the evaluation
             BuildResult buildResult = buildRequest.GetBuildResult();
 
             // If we're supposed to use caching and this request wasn't restored from cache, cache it
@@ -105,7 +105,7 @@ namespace Microsoft.Build.BuildEngine
                 cacheScope.AddCacheEntryForBuildResults(buildResult);
             }
 
-            // an external request is any request that came from the parent engine, all requests to a child are external 
+            // an external request is any request that came from the parent engine, all requests to a child are external
             // unless the project was alredy loaded on the node itself
             if (buildRequest.IsExternalRequest)
             {
@@ -147,7 +147,7 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// This method is called once the engine has decided to sent a build request to a child node.
-        /// Route the given BuildRequest to the given node. If necessary a routing context is 
+        /// Route the given BuildRequest to the given node. If necessary a routing context is
         /// created to manage future communication with the node regarding the build request.
         /// </summary>
         internal void PostBuildRequest(BuildRequest currentRequest, int nodeIndex)
@@ -212,6 +212,6 @@ namespace Microsoft.Build.BuildEngine
         /// What is the parent Node on which the engine is hosted if we are a child process
         /// </summary>
         private Node parentNode;
-        #endregion 
+        #endregion
     }
 }

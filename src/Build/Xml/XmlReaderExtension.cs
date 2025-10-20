@@ -64,7 +64,7 @@ namespace Microsoft.Build.Internal
             }
             catch
             {
-                // GetXmlReader calls Read() to get Encoding and can throw. If it does, close 
+                // GetXmlReader calls Read() to get Encoding and can throw. If it does, close
                 // the streams as needed.
                 Dispose();
                 throw;

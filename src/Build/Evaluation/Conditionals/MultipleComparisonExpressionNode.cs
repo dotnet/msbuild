@@ -45,11 +45,11 @@ namespace Microsoft.Build.Evaluation
                  "IllFormedCondition",
                  state.Condition);
 
-            // It's sometimes possible to bail out of expansion early if we just need to know whether 
+            // It's sometimes possible to bail out of expansion early if we just need to know whether
             // the result is empty string.
-            // If at least one of the left or the right hand side will evaluate to empty, 
+            // If at least one of the left or the right hand side will evaluate to empty,
             // and we know which do, then we already have enough information to evaluate this expression.
-            // That means we don't have to fully expand a condition like " '@(X)' == '' " 
+            // That means we don't have to fully expand a condition like " '@(X)' == '' "
             // which is a performance advantage if @(X) is a huge item list.
             bool leftEmpty = LeftChild.EvaluatesToEmpty(state, loggingContext);
             bool rightEmpty = RightChild.EvaluatesToEmpty(state, loggingContext);

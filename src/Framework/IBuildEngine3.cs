@@ -9,7 +9,7 @@ using System.Collections.Generic;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// This interface extends IBuildEngine to provide a method allowing building 
+    /// This interface extends IBuildEngine to provide a method allowing building
     /// project files in parallel.
     /// </summary>
     public interface IBuildEngine3 : IBuildEngine2
@@ -22,12 +22,12 @@ namespace Microsoft.Build.Framework
         /// <remarks>
         /// 1) it is acceptable to pass null for both <c>targetNames</c> and <c>targetOutputs</c>
         /// 2) if no targets are specified, the default targets are built
-        /// 
+        ///
         /// </remarks>
         /// <param name="projectFileNames">The project to build.</param>
         /// <param name="targetNames">The targets in the project to build (can be null).</param>
         /// <param name="globalProperties">An array of hashtables of additional global properties to apply
-        ///     to the child project (array entries can be null). 
+        ///     to the child project (array entries can be null).
         ///     The key and value in the hashtable should both be strings.</param>
         /// <param name="removeGlobalProperties">A list of global properties which should be removed.</param>
         /// <param name="toolsVersion">A tools version recognized by the Engine that will be used during this build (can be null).</param>

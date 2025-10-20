@@ -13,7 +13,7 @@ namespace Microsoft.Build.Framework
     /// </summary>
     internal class Traits
     {
-        private static readonly Traits _instance = new Traits();
+        private static Traits _instance = new Traits();
         public static Traits Instance
         {
             get
@@ -135,6 +135,15 @@ namespace Microsoft.Build.Framework
         public readonly bool DebugNodeCommunication;
 
         public readonly bool InProcNodeDisabled = Environment.GetEnvironmentVariable("MSBUILDNOINPROCNODE") == "1";
+
+        public static void UpdateFromEnvironment()
+        {
+            // Re-create Traits instance to update values in Traits according to current environment.
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+            {
+                _instance = new Traits();
+            }
+        }
 
         private static int ParseIntFromEnvironmentVariableOrDefault(string environmentVariable, int defaultValue)
         {
@@ -317,11 +326,6 @@ namespace Microsoft.Build.Framework
         public readonly bool DisableSdkResolutionCache = Environment.GetEnvironmentVariable("MSBUILDDISABLESDKCACHE") == "1";
 
         /// <summary>
-        /// Disable the NuGet-based SDK resolver.
-        /// </summary>
-        public readonly bool DisableNuGetSdkResolver = Environment.GetEnvironmentVariable("MSBUILDDISABLENUGETSDKRESOLVER") == "1";
-
-        /// <summary>
         /// Don't delete TargetPath metadata from associated files found by RAR.
         /// </summary>
         public readonly bool TargetPathForRelatedFiles = Environment.GetEnvironmentVariable("MSBUILDTARGETPATHFORRELATEDFILES") == "1";
@@ -392,11 +396,19 @@ namespace Microsoft.Build.Framework
 #if RUNTIME_TYPE_NETCORE
                     return true;
 #else
-                    return false;
+                    return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
 #endif
                 }
 
                 return value == "1";
+            }
+        }
+
+        public bool UnquoteTargetSwitchParameters
+        {
+            get
+            {
+                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
             }
         }
 
@@ -543,10 +555,10 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Formats the given string using the variable arguments passed in.
-        /// 
+        ///
         /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
         /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
-        /// 
+        ///
         /// Thread safe.
         /// </summary>
         /// <param name="unformatted">The string to format.</param>
@@ -563,7 +575,7 @@ namespace Microsoft.Build.Framework
             if ((args?.Length > 0))
             {
 #if DEBUG
-                // If you accidentally pass some random type in that can't be converted to a string, 
+                // If you accidentally pass some random type in that can't be converted to a string,
                 // FormatResourceString calls ToString() which returns the full name of the type!
                 foreach (object param in args)
                 {

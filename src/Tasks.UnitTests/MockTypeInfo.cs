@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Defer to the base element to get the final type info - this will eventually terminate at a MockTypeInfo node 
+        /// Defer to the base element to get the final type info - this will eventually terminate at a MockTypeInfo node
         /// which returns itself
         /// </summary>
         /// <returns></returns>
@@ -282,7 +282,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        #endregion 
+        #endregion
 
         #region Implemented ITypeInfo members
 

@@ -23,7 +23,7 @@ namespace Microsoft.Build.Evaluation
         /// inside of a condition and the string values that they are being tested against.
         /// So, for example, if the condition was " '$(Configuration)' == 'Debug' ", we
         /// would get passed in leftValue="$(Configuration)" and rightValueExpanded="Debug".
-        /// This call would add the string "Debug" to the list of possible values for the 
+        /// This call would add the string "Debug" to the list of possible values for the
         /// "Configuration" property.
         ///
         /// This method also handles the case when two or more properties are being
@@ -62,7 +62,7 @@ namespace Microsoft.Build.Evaluation
                         string rightValueExpandedPiece;
 
                         // If there was no vertical bar, then just use the remainder of the right-hand-side
-                        // expression as the value of the property, and terminate the loop after this iteration.  
+                        // expression as the value of the property, and terminate the loop after this iteration.
                         // Also, if we're on the last segment of the left-hand-side, then use the remainder
                         // of the right-hand-side expression as the value of the property.
                         if ((indexOfVerticalBar == -1) || lastPiece)
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Evaluation
                         else
                         {
                             // If we found a vertical bar, then the portion before the vertical bar is the
-                            // property value which we will store in our table.  Then remove that portion 
+                            // property value which we will store in our table.  Then remove that portion
                             // from the original string so that the next iteration of the loop can easily search
                             // for the first vertical bar again.
                             rightValueExpandedPiece = rightValueExpanded.Substring(0, indexOfVerticalBar);
@@ -383,7 +383,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// All the state necessary for the evaluation of conditionals so that the expression tree 
+        /// All the state necessary for the evaluation of conditionals so that the expression tree
         /// is stateless and reusable
         /// </summary>
         internal class ConditionEvaluationState<P, I> : IConditionEvaluationState
@@ -414,7 +414,7 @@ namespace Microsoft.Build.Evaluation
             public Dictionary<string, List<string>>? ConditionedPropertiesInProject { get; }
 
             /// <summary>
-            /// PRE collection. 
+            /// PRE collection.
             /// </summary>
             public ProjectRootElementCacheBase? LoadedProjectsCache { get; }
 

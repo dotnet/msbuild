@@ -47,10 +47,10 @@ namespace Microsoft.Build.BuildEngine
 
         /// <summary>
         /// The out of proc logging service is concerned with flushing the events out to the node provider
-        /// to be sent to the parent engine. Events which are not marked with a logger id end up being wrapped 
+        /// to be sent to the parent engine. Events which are not marked with a logger id end up being wrapped
         /// in a NodeLoggingEvent which was a default loggerId of 0. All events posted as BuildEventArgs fall
         /// into this category. Events with a loggerId need be posted as NodeLoggerEventWithLoggerId objects.
-        /// This function is thread safe and is called both from the engine thread and communication threads to 
+        /// This function is thread safe and is called both from the engine thread and communication threads to
         /// ensure that the events are delivered in coherent order.
         /// </summary>
         internal override bool ProcessPostedLoggingEvents()
@@ -76,7 +76,7 @@ namespace Microsoft.Build.BuildEngine
                     processedEvents = true;
                 }
 
-                // Grab all the forwarded events 
+                // Grab all the forwarded events
                 NodeLoggingEvent nodeLoggingEvent = null;
                 while ((nodeLoggingEvent = loggingQueueOfNodeEvents.Dequeue()) != null)
                 {

@@ -1134,14 +1134,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Looks through the parameters of the batchable object, and finds all references to item metadata
         /// (that aren't part of an item transform).  Returns a Hashtable containing a bunch of MetadataReference
-        /// structs.  Each reference to item metadata may or may not be qualified with an item name (e.g., 
+        /// structs.  Each reference to item metadata may or may not be qualified with an item name (e.g.,
         /// %(Culture) vs. %(EmbeddedResource.Culture).
         /// </summary>
         /// <returns>Hashtable containing the metadata references.</returns>
         private static Dictionary<string, MetadataReference> GetConsumedMetadataReferences_OriginalImplementation(string expression)
         {
             // The keys in the hash table are the qualified metadata names (e.g. "EmbeddedResource.Culture"
-            // or just "Culture").  The values are MetadataReference structs, which simply split out the item 
+            // or just "Culture").  The values are MetadataReference structs, which simply split out the item
             // name (possibly null) and the actual metadata name.
             Dictionary<string, MetadataReference> consumedMetadataReferences = new Dictionary<string, MetadataReference>(StringComparer.OrdinalIgnoreCase);
 
@@ -1153,7 +1153,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Looks through a single parameter of the batchable object, and finds all references to item metadata
         /// (that aren't part of an item transform).  Populates a Hashtable containing a bunch of MetadataReference
-        /// structs.  Each reference to item metadata may or may not be qualified with an item name (e.g., 
+        /// structs.  Each reference to item metadata may or may not be qualified with an item name (e.g.,
         /// %(Culture) vs. %(EmbeddedResource.Culture).
         /// </summary>
         /// <param name="batchableObjectParameter"></param>
@@ -1241,7 +1241,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Looks through a single parameter of the batchable object, and finds all references to item metadata
         /// (that aren't part of an item transform).  Populates a MatchCollection object with any regex matches
-        /// found in the input.  Each reference to item metadata may or may not be qualified with an item name (e.g., 
+        /// found in the input.  Each reference to item metadata may or may not be qualified with an item name (e.g.,
         /// %(Culture) vs. %(EmbeddedResource.Culture).
         /// </summary>
         /// <param name="batchableObjectParameter"></param>

@@ -311,7 +311,7 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Returns the exception generated while this result was run, if any. 
+        /// Returns the exception generated while this result was run, if any.
         /// </summary>
         public Exception Exception
         {
@@ -657,8 +657,8 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Creates the target result dictionary and populates it with however many target results are 
-        /// available given the list of targets passed. 
+        /// Creates the target result dictionary and populates it with however many target results are
+        /// available given the list of targets passed.
         /// </summary>
         private static ConcurrentDictionary<string, TargetResult> CreateTargetResultDictionaryWithContents(BuildResult existingResults, string[] targetNames)
         {

@@ -40,7 +40,7 @@ namespace Microsoft.Build.BackEnd
         Blocked,
 
         /// <summary>
-        /// This request has yielded control of the node while it is running a long-running out-of-process program.  Any number of tasks on a 
+        /// This request has yielded control of the node while it is running a long-running out-of-process program.  Any number of tasks on a
         /// node may be in the yielding state.
         /// </summary>
         Yielding,
@@ -506,15 +506,15 @@ namespace Microsoft.Build.BackEnd
         /// of it having been previously scheduled in a multiproc scenario, but before this request was able to execute.
         /// </summary>
         /// <remarks>
-        /// Let A be 'this' project and B be 'blockingRequest' (the request which is going to block A.)  
-        /// An indirect circular dependency exists if there is a dependency path from B to A.  If there is no 
-        /// existing blocked request B' with the same global request id as B, then there can be no path from B to A because B is a brand new 
-        /// request with no other dependencies.  If there is an existing blocked request B' with the same global request ID as B, then we 
+        /// Let A be 'this' project and B be 'blockingRequest' (the request which is going to block A.)
+        /// An indirect circular dependency exists if there is a dependency path from B to A.  If there is no
+        /// existing blocked request B' with the same global request id as B, then there can be no path from B to A because B is a brand new
+        /// request with no other dependencies.  If there is an existing blocked request B' with the same global request ID as B, then we
         /// walk the set of dependencies recursively searching for A.  If A is found, we have a circular dependency.
         /// </remarks>
         private void DetectIndirectCircularDependency(SchedulableRequest blockingRequest)
         {
-            // If there is already a blocked request which has the same configuration id as the blocking request and that blocked request is (recursively) 
+            // If there is already a blocked request which has the same configuration id as the blocking request and that blocked request is (recursively)
             // waiting on this request, then that is an indirect circular dependency.
             SchedulableRequest alternateRequest = _schedulingData.GetBlockedRequestIfAny(blockingRequest.BuildRequest.GlobalRequestId);
             if (alternateRequest == null)
@@ -539,7 +539,7 @@ namespace Microsoft.Build.BackEnd
                 evaluatedRequests.Add(requestToEvaluate);
 
                 // If the request is not scheduled, it's possible that is because it's been scheduled elsewhere and is blocked.
-                // Follow that path if it exists.                        
+                // Follow that path if it exists.
                 if (requestToEvaluate.State == SchedulableRequestState.Unscheduled)
                 {
                     requestToEvaluate = _schedulingData.GetBlockedRequestIfAny(requestToEvaluate.BuildRequest.GlobalRequestId);
@@ -567,7 +567,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void ThrowIndirectCircularDependency(SchedulableRequest blockingRequest, SchedulableRequest requestToEvaluate)
         {
-            // We found a request which has the same global request ID as us in a chain which leads from the (already blocked) request 
+            // We found a request which has the same global request ID as us in a chain which leads from the (already blocked) request
             // which is trying to block us.  Calculate its list of ancestors by walking up the parent list.
             List<SchedulableRequest> ancestors = new List<SchedulableRequest>(16);
             while (requestToEvaluate.Parent != null)
@@ -585,7 +585,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void DetectDirectCircularDependency(SchedulableRequest blockingRequest)
         {
-            // A circular dependency occurs when this project (or any of its ancestors) has the same global request id as the 
+            // A circular dependency occurs when this project (or any of its ancestors) has the same global request id as the
             // blocking request.
             List<SchedulableRequest> ancestors = new List<SchedulableRequest>(16);
             SchedulableRequest currentRequest = this;
@@ -644,7 +644,7 @@ namespace Microsoft.Build.BackEnd
             _requestsWeAreBlockedBy.Remove(blockingRequestKey);
             unblockingRequest._requestsWeAreBlocking.Remove(this);
 
-            // If the request we are blocked by also happens to be unscheduled, remove it as well so we don't try to run it later.  This is 
+            // If the request we are blocked by also happens to be unscheduled, remove it as well so we don't try to run it later.  This is
             // because circular dependency errors cause us to fail all outstanding requests on the current request.  See BuildRequsetEntry.ReportResult.
             if (unblockingRequest.State == SchedulableRequestState.Unscheduled)
             {

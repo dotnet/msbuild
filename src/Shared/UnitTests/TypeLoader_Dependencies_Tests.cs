@@ -33,6 +33,7 @@ namespace Microsoft.Build.UnitTests
                 string dllPath = Path.Combine(dir.Path, TaskDllFileName);
 
                 CheckIfCorrectAssemblyLoaded(output, dllPath);
+                CheckIfCorrectAssemblyLoadedMessageLogged(output);
             }
         }
 
@@ -51,6 +52,7 @@ namespace Microsoft.Build.UnitTests
                 successfulExit.ShouldBeTrue(output);
 
                 CheckIfCorrectAssemblyLoaded(output, newTaskDllPath);
+                CheckIfCorrectAssemblyLoadedMessageLogged(output);
             }
         }
 
@@ -106,6 +108,20 @@ namespace Microsoft.Build.UnitTests
             {
                 scriptOutput.ShouldNotContain(successfulMessage, Case.Insensitive);
             }
+        }
+
+        private void CheckIfCorrectAssemblyLoadedMessageLogged(string scriptOutput)
+        {
+            var assemblyLoadedTaskRun = "Assembly loaded during TaskRun";
+
+#if FEATURE_ASSEMBLYLOADCONTEXT
+            var message = "AssemblyLoadContext: MSBuild plugin";
+#else
+            var message = "AppDomain: [Default]";
+#endif
+
+            scriptOutput.ShouldContain(assemblyLoadedTaskRun);
+            scriptOutput.ShouldContain(message);
         }
     }
 }

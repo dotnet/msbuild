@@ -77,7 +77,7 @@ namespace Microsoft.Build.BackEnd
         void ClearConfigurations();
 
         /// <summary>
-        /// Clear non explicltly loaded configurations. 
+        /// Clear non explicltly loaded configurations.
         /// </summary>
         /// <returns>The configuration ids which have been cleared.</returns>
         List<int> ClearNonExplicitlyLoadedConfigurations();

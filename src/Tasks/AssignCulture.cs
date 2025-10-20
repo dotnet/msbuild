@@ -16,18 +16,18 @@ namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Class: AssignCulture
-    /// 
+    ///
     /// This task takes a list of resource file names and sets an attribute that
     /// contains the culture name embedded in the file name:
-    /// 
+    ///
     ///      MyResources.fr.resx     ==> Culture='fr'
-    /// 
+    ///
     /// The task can also return a list of "Culture-neutral" file names, like:
-    /// 
+    ///
     ///      MyGlyph.fr.bmp          ==> MyGlyph.bmp [Culture='fr']
-    /// 
+    ///
     /// This is because embedded resources are referred to this way.
-    /// 
+    ///
     /// There are plenty of corner cases with this task. See the unit test for
     /// more details.
     /// </summary>
@@ -43,13 +43,13 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// This outgoing list of files is exactly the same as the incoming Files
-        /// list except that an attribute name "Culture" will have been added if 
+        /// list except that an attribute name "Culture" will have been added if
         /// the particular file name is in the form:
-        /// 
+        ///
         ///      MyResource.&lt;any-valid-culture-id&gt;.resx
-        /// 
+        ///
         /// The value of Culture will be "&lt;any-valid-culture-id&gt;".
-        /// 
+        ///
         /// If the incoming item from Files already has a Culture attribute then
         /// that original attribute is used instead.
         /// </summary>
@@ -62,9 +62,9 @@ namespace Microsoft.Build.Tasks
         /// already had a Culture in the incoming Files list as well as items
         /// that were assigned a Culture because they had a valid culture ID
         /// embedded in their file name.
-        /// 
+        ///
         /// The following is always true:
-        /// 
+        ///
         ///      AssignedFiles = AssignedFilesWithCulture + AssignedFilesWithNoCulture
         /// </summary>
         [Output]
@@ -72,10 +72,10 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// This is a subset of AssignedFiles that has all of the items that
-        /// ended up with no Culture assigned to them. 
-        /// 
+        /// ended up with no Culture assigned to them.
+        ///
         /// The following is always true:
-        /// 
+        ///
         ///      AssignedFiles = AssignedFilesWithCulture + AssignedFilesWithNoCulture
         /// </summary>
         [Output]
@@ -84,27 +84,27 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// This list has the same number of items as the Files list or the
         /// AssignedFiles list.
-        /// 
+        ///
         /// Items in this list have the file name from Files or AssignedFiles
         /// but with the culture stripped if it was embedded in the file name.
-        /// 
+        ///
         /// So for example, if the incoming item in Files was:
-        /// 
+        ///
         ///      MyBitmap.fr.bmp
-        /// 
+        ///
         /// then the corresponding file in CultureNeutralAssignedFiles will be:
-        /// 
+        ///
         ///      MyBitmap.bmp
-        /// 
+        ///
         /// The culture will only be stripped if it is a valid culture identifier.
         /// So for example,
-        /// 
+        ///
         ///      MyDifferentFile.XX.txt
-        /// 
+        ///
         /// will result in exactly the same file name:
-        /// 
+        ///
         ///      MyDifferentFile.XX.txt
-        /// 
+        ///
         /// because 'XX' is not a valid culture identifier.
         /// </summary>
         [Output]

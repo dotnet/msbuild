@@ -23,28 +23,28 @@ namespace Microsoft.Build.UnitTests
         /*
         * Method:  SimpleCopyMetadataTo
         * Owner:   jomof
-        * 
+        *
         * Try the most basic CopyMetadataTo(...)
-        * 
+        *
         */
         [Test]
         public void SimpleCopyMetadataTo()
         {
             TaskItem from = new TaskItem("myfile.txt");
             from.SetMetadata("Culture", "fr");
-            
+
             TaskItem to = new TaskItem("myfile.bin");
             from.CopyMetadataTo(to);
-            
+
             Assertion.AssertEquals("fr", to.GetMetadata("Culture"));
         }
-        
+
         /*
         * Method:  CopyMetadataToDoesNotCopyExtension
         * Owner:   jomof
-        * 
+        *
         * Make sure that CopyMetadataTo(...) does not copy extension.
-        * 
+        *
         */
         [Test]
         public void CopyMetadataToDoesNotCopyExtension()
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests
             TaskItem to = new TaskItem("myfile.bin");
 
             from.CopyMetadataTo(to);
-            
+
             Assertion.AssertEquals(".bin", to.GetMetadata("Extension"));
         }
 

@@ -15,6 +15,12 @@ namespace Microsoft.Build.UnitTests.Shared
         public static string PathToCurrentlyRunningMsBuildExe => BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 #if !FEATURE_RUN_EXE_IN_TESTS
         private static readonly string s_dotnetExePath = EnvironmentProvider.GetDotnetExePath();
+
+        public static void ApplyDotnetHostPathEnvironmentVariable(TestEnvironment testEnvironment)
+        {
+            // Built msbuild.dll executed by dotnet.exe needs this environment variable for msbuild tasks such as RoslynCodeTaskFactory.
+            testEnvironment.SetEnvironmentVariable("DOTNET_HOST_PATH", s_dotnetExePath);
+        }
 #endif
 
         /// <summary>
