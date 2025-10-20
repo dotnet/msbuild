@@ -58,7 +58,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     // INTERNAL WARNING: DO NOT USE the Log property in this class! Log points to resources in the task assembly itself, and
     // we want to use resources from Utilities. Use LogPrivate (for private Utilities resources) and LogShared (for shared MSBuild resources)
-    public abstract class ToolTask : Task, IIncrementalTask, ICancelableTask
+    public abstract class ToolTask : Task, IIncrementalTask, ICancelableTask, IMultiThreadableTask
     {
         private static readonly bool s_preserveTempFiles = string.Equals(Environment.GetEnvironmentVariable("MSBUILDPRESERVETOOLTEMPFILES"), "1", StringComparison.Ordinal);
 
@@ -325,6 +325,11 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         protected MessageImportance StandardErrorImportanceToUse => _standardErrorImportanceToUse;
 
+        /// <summary>
+        /// Task environment for multithreaded execution
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
+
         #endregion
 
         #region Private properties
@@ -372,7 +377,7 @@ namespace Microsoft.Build.Utilities
         /// <remarks>This is a method rather than a property so that derived classes (like Exec) can choose to
         /// expose a public WorkingDirectory property, and it would be confusing to have two properties.</remarks>
         /// <returns></returns>
-        protected virtual string GetWorkingDirectory() => null;
+        protected virtual string GetWorkingDirectory() => TaskEnvironment?.ProjectDirectory;
 
         /// <summary>
         /// Implemented in the derived class
@@ -643,7 +648,20 @@ namespace Microsoft.Build.Utilities
                 LogPrivate.LogWarningWithCodeFromResources("ToolTask.CommandTooLong", GetType().Name);
             }
 
-            ProcessStartInfo startInfo = new ProcessStartInfo(pathToTool, commandLine);
+            ProcessStartInfo startInfo;
+
+            // Use TaskEnvironment's ProcessStartInfo if available for proper environment isolation
+            if (TaskEnvironment != null)
+            {
+                startInfo = TaskEnvironment.GetProcessStartInfo();
+                startInfo.FileName = TaskEnvironment.GetAbsolutePath(pathToTool);
+                startInfo.Arguments = commandLine;
+            }
+            else
+            {
+                startInfo = new ProcessStartInfo(pathToTool, commandLine);
+            }
+
             startInfo.CreateNoWindow = true;
             startInfo.UseShellExecute = false;
             startInfo.RedirectStandardError = true;
