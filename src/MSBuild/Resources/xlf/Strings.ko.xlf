@@ -244,6 +244,9 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
         <target state="translated">  -multithreaded
@@ -255,6 +258,9 @@
                      사용되는 최대 스레드 수는 
 에 의해 결정됩니다.
                      -maxCpuCount 스위치에 의해 결정됩니다.
+                     다중 스레드 모드가 켜져 있고
+                     MSBUILDFORCEALLTASKSOUTOFPROC=1인 경우
+                     maxCpuCount는 256보다 클 수 없습니다.
                      (약식: -mt)
     </target>
         <note />
@@ -1505,6 +1511,11 @@
       <trans-unit id="MSBuildDebugPath">
         <source>MSBuild logs and debug information will be at "{0}"</source>
         <target state="translated">MSBuild 로그 및 디버그 정보는 "{0}"에 있습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
+        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
+        <target state="translated">다중 스레드 모드가 켜져 있고 MSBUILDFORCEALLTASKSOUTOFPROC=1인 경우, maxCpuCount는 {0}보다 클 수 없습니다..</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">

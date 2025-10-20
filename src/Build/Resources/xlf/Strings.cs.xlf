@@ -446,6 +446,11 @@
         <target state="translated">Pravidlo vlastní kontroly: {0} se úspěšně zaregistrovalo.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
+        <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
+        <target state="translated">Vlastní TaskFactory {0} pro úlohu {1} nepodporuje spouštění TaskHost mimo proces. Vypněte režim vícevláknového sestavení nebo odeberte vlastní TaskFactory z definic &lt;UsingTask&gt; v souborech projektu.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: Výchozí překladač sady SDK nedokázal přeložit sadu SDK „{0}“, protože adresář „{1}“ neexistoval.</target>

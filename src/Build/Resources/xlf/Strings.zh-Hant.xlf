@@ -446,6 +446,11 @@
         <target state="translated">已成功註冊自訂檢查規則: '{0}'。</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
+        <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
+        <target state="translated">工作 '{1}' 的自訂 TaskFactory '{0}' 不支援進程外 TaskHost 執行。請關閉多執行緒組建模式，或從專案檔中的 &lt;UsingTask&gt; 定義中移除自訂 TaskFactory。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: 預設的 SDK 解析程式無法解析 SDK "{0}"，因為目錄 "{1}" 不存在。</target>

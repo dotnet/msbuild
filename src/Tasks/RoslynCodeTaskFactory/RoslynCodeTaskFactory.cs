@@ -22,7 +22,7 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
-    public sealed class RoslynCodeTaskFactory : ITaskFactory
+    public sealed class RoslynCodeTaskFactory : ITaskFactory, IOutOfProcTaskFactory
     {
         /// <summary>
         /// A set of default namespaces to add so that user does not have to include them.  Make sure that these are covered
@@ -84,7 +84,7 @@ namespace Microsoft.Build.Tasks
         /// A cache of <see cref="RoslynCodeTaskFactoryTaskInfo"/> objects and their corresponding compiled assembly.  This cache ensures that two of the exact same code task
         /// declarations are not compiled multiple times.
         /// </summary>
-        private static readonly ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, Assembly> CompiledAssemblyCache = new ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, Assembly>();
+        private static readonly ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, TaskFactoryUtilities.CachedAssemblyEntry> CompiledAssemblyCache = new ConcurrentDictionary<RoslynCodeTaskFactoryTaskInfo, TaskFactoryUtilities.CachedAssemblyEntry>();
 
         /// <summary>
         /// Stores the path to the directory that this assembly is located in.
@@ -95,6 +95,14 @@ namespace Microsoft.Build.Tasks
         /// Stores an instance of a <see cref="TaskLoggingHelper"/> for logging messages.
         /// </summary>
         private TaskLoggingHelper _log;
+
+        private string _assemblyPath;
+
+        /// <summary>
+        /// Whether this factory should compile for out-of-process execution.
+        /// Set during Initialize() based on environment variables or host context.
+        /// </summary>
+        private bool _compileForOutOfProcess;
 
         /// <summary>
         /// Stores functions that were added to the current app domain. Should be removed once we're finished.
@@ -142,6 +150,9 @@ namespace Microsoft.Build.Tasks
             return _parameters;
         }
 
+        /// <inheritdoc cref="IOutOfProcTaskFactory"/>
+        public string GetAssemblyPath() => _assemblyPath;
+
         /// <inheritdoc cref="ITaskFactory.Initialize"/>
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
         {
@@ -155,6 +166,8 @@ namespace Microsoft.Build.Tasks
 
             _parameters = parameterGroup.Values.ToArray();
 
+            _compileForOutOfProcess = TaskFactoryUtilities.ShouldCompileForOutOfProcess(taskFactoryLoggingHost);
+
             // Attempt to parse and extract everything from the <UsingTask />
             if (!TryLoadTaskBody(_log, _taskName, taskBody, _parameters, out RoslynCodeTaskFactoryTaskInfo taskInfo))
             {
@@ -162,7 +175,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Attempt to compile an assembly (or get one from the cache)
-            if (!TryCompileInMemoryAssembly(taskFactoryLoggingHost, taskInfo, out Assembly assembly))
+            if (!TryCompileAssembly(taskFactoryLoggingHost, taskInfo, out Assembly assembly))
             {
                 return false;
             }
@@ -220,7 +233,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (TaskPropertyInfo propertyInfo in parameters)
             {
-                CreateProperty(codeTypeDeclaration, propertyInfo.Name, propertyInfo.PropertyType);
+                CreateProperty(codeTypeDeclaration, propertyInfo.Name, propertyInfo.PropertyType, null, propertyInfo.Output, propertyInfo.Required);
             }
 
             if (taskInfo.CodeType == RoslynCodeTaskFactoryCodeType.Fragment)
@@ -440,7 +453,7 @@ namespace Microsoft.Build.Tasks
 
                 // Instead of using the inner text of the <Code /> element, read the specified file as source code
                 taskInfo.CodeType = RoslynCodeTaskFactoryCodeType.Class;
-                taskInfo.SourceCode = File.ReadAllText(sourceAttribute.Value.Trim());
+                taskInfo.SourceCode = FileSystems.Default.ReadFileAllText(sourceAttribute.Value.Trim());
             }
 
             if (typeAttribute != null)
@@ -542,8 +555,6 @@ namespace Microsoft.Build.Tasks
                 references = references.Union(value);
             }
 
-            List<string> directoriesToAddToAppDomain = new();
-
             // Loop through the user specified references as well as the default references
             foreach (string reference in references)
             {
@@ -552,7 +563,6 @@ namespace Microsoft.Build.Tasks
                 {
                     // The path could be relative like ..\Assembly.dll so we need to get the full path
                     string fullPath = Path.GetFullPath(reference);
-                    directoriesToAddToAppDomain.Add(Path.GetDirectoryName(fullPath));
                     resolvedAssemblyReferences.Add(fullPath);
                     continue;
                 }
@@ -567,7 +577,7 @@ namespace Microsoft.Build.Tasks
                     Path.Combine(ThisAssemblyDirectoryLazy.Value, ReferenceAssemblyDirectoryName),
                     ThisAssemblyDirectoryLazy.Value,
                 }
-                .FirstOrDefault(p => File.Exists(Path.Combine(p, assemblyFileName)));
+                .FirstOrDefault(p => FileSystems.Default.FileExists(Path.Combine(p, assemblyFileName)));
 
                 if (resolvedDir != null)
                 {
@@ -585,37 +595,23 @@ namespace Microsoft.Build.Tasks
             // Transform the list of resolved assemblies to TaskItems if they were all resolved
             items = hasInvalidReference ? null : resolvedAssemblyReferences.Select(i => (ITaskItem)new TaskItem(i)).ToArray();
 
-            handlerAddedToAppDomain = (_, eventArgs) => TryLoadAssembly(directoriesToAddToAppDomain, new AssemblyName(eventArgs.Name));
+            // Extract directories from resolved assemblies for assembly resolution and manifest creation
+            var directoriesToAddToAppDomain = TaskFactoryUtilities.ExtractUniqueDirectoriesFromAssemblyPaths(resolvedAssemblyReferences.ToList());
+
+            handlerAddedToAppDomain = TaskFactoryUtilities.CreateAssemblyResolver(directoriesToAddToAppDomain);
             AppDomain.CurrentDomain.AssemblyResolve += handlerAddedToAppDomain;
 
-            return !hasInvalidReference;
-
-            static Assembly TryLoadAssembly(List<string> directories, AssemblyName name)
+            // In case of taskhost we cache the resolution to a file placed next to the task assembly
+            // so the taskhost can recreate this tryloadassembly logic
+            if (_compileForOutOfProcess)
             {
-                foreach (string directory in directories)
-                {
-                    string path;
-                    if (!string.IsNullOrEmpty(name.CultureName))
-                    {
-                        path = Path.Combine(directory, name.CultureName, name.Name + ".dll");
-                        if (File.Exists(path))
-                        {
-                            return Assembly.LoadFrom(path);
-                        }
-                    }
-
-                    path = Path.Combine(directory, name.Name + ".dll");
-                    if (File.Exists(path))
-                    {
-                        return Assembly.LoadFrom(path);
-                    }
-                }
-
-                return null;
+                TaskFactoryUtilities.CreateLoadManifest(_assemblyPath, directoriesToAddToAppDomain);
             }
+
+            return !hasInvalidReference;
         }
 
-        private static CodeMemberProperty CreateProperty(CodeTypeDeclaration codeTypeDeclaration, string name, Type type, object defaultValue = null)
+        private static CodeMemberProperty CreateProperty(CodeTypeDeclaration codeTypeDeclaration, string name, Type type, object defaultValue = null, bool isOutput = false, bool isRequired = false)
         {
             CodeMemberField field = new CodeMemberField(new CodeTypeReference(type), "_" + name)
             {
@@ -639,6 +635,18 @@ namespace Microsoft.Build.Tasks
                 HasSet = true
             };
 
+            // Add Output attribute if this is an output property
+            if (isOutput)
+            {
+                property.CustomAttributes.Add(new CodeAttributeDeclaration("Microsoft.Build.Framework.Output"));
+            }
+
+            // Add Required attribute if this is a required property
+            if (isRequired)
+            {
+                property.CustomAttributes.Add(new CodeAttributeDeclaration("Microsoft.Build.Framework.Required"));
+            }
+
             property.GetStatements.Add(new CodeMethodReturnStatement(fieldReference));
 
             CodeAssignStatement fieldAssign = new CodeAssignStatement
@@ -655,29 +663,49 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Attempts to compile the current source code and load the assembly into memory.
+        /// Attempts to compile the current source code.
         /// </summary>
         /// <param name="buildEngine">An <see cref="IBuildEngine"/> to use give to the compiler task so that messages can be logged.</param>
         /// <param name="taskInfo">A <see cref="RoslynCodeTaskFactoryTaskInfo"/> object containing details about the task.</param>
         /// <param name="assembly">The <see cref="Assembly"/> if the source code be compiled and loaded, otherwise <code>null</code>.</param>
-        /// <returns><code>true</code> if the source code could be compiled and loaded, otherwise <code>null</code>.</returns>
-        private bool TryCompileInMemoryAssembly(IBuildEngine buildEngine, RoslynCodeTaskFactoryTaskInfo taskInfo, out Assembly assembly)
+        /// <returns><code>true</code> if the source code could be compiled and loaded, otherwise <code>false</code>.</returns>
+        private bool TryCompileAssembly(IBuildEngine buildEngine, RoslynCodeTaskFactoryTaskInfo taskInfo, out Assembly assembly)
         {
-            // First attempt to get a compiled assembly from the cache
-            if (CompiledAssemblyCache.TryGetValue(taskInfo, out assembly))
+            // Try to get from cache
+            if (CompiledAssemblyCache.TryGetValue(taskInfo, out TaskFactoryUtilities.CachedAssemblyEntry cachedEntry))
             {
-                return true;
+                // For out-of-process scenarios, validate the file still exists
+                if (!string.IsNullOrEmpty(cachedEntry.AssemblyPath) && !FileUtilities.FileExistsNoThrow(cachedEntry.AssemblyPath))
+                {
+                    // Cached assembly file was deleted, remove from cache and recompile
+                    CompiledAssemblyCache.TryRemove(taskInfo, out _);
+                }
+                else
+                {
+                    // Cache entry is valid, use it
+                    assembly = cachedEntry.Assembly;
+                    _assemblyPath = cachedEntry.AssemblyPath;
+                    return true;
+                }
+            }
+
+            assembly = null;
+            // Prepare for compilation
+            string sourceCodePath = FileUtilities.GetTemporaryFileName(".tmp");
+
+            if (_compileForOutOfProcess)
+            {
+                _assemblyPath = TaskFactoryUtilities.GetTemporaryTaskAssemblyPath(); // in a temp directory for this process, persisted until the end of build
+            }
+            else
+            {
+                _assemblyPath = FileUtilities.GetTemporaryFileName(".dll"); // dll in the root of the temp directory, removed immediately after compilation
             }
 
             if (!TryResolveAssemblyReferences(_log, taskInfo, out ITaskItem[] references))
             {
                 return false;
             }
-
-            // The source code cannot actually be compiled "in memory" so instead the source code is written to disk in
-            // the temp folder as well as the assembly.  After compilation, the source code and assembly are deleted.
-            string sourceCodePath = FileUtilities.GetTemporaryFileName(".tmp");
-            string assemblyPath = FileUtilities.GetTemporaryFileName(".dll");
 
             // Delete the code file unless compilation failed or the environment variable MSBUILDLOGCODETASKFACTORYOUTPUT
             // is set (which allows for debugging problems)
@@ -735,7 +763,7 @@ namespace Microsoft.Build.Tasks
                     managedCompiler.NoConfig = true;
                     managedCompiler.NoLogo = true;
                     managedCompiler.Optimize = false;
-                    managedCompiler.OutputAssembly = new TaskItem(assemblyPath);
+                    managedCompiler.OutputAssembly = new TaskItem(_assemblyPath);
                     managedCompiler.References = references;
                     managedCompiler.Sources = [new TaskItem(sourceCodePath)];
                     managedCompiler.NoWarn = "1701;1702";
@@ -760,12 +788,12 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                // Return the assembly which is loaded into memory
-                assembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
+                // Return the compiled assembly
+                assembly = TaskFactoryUtilities.LoadTaskAssembly(_assemblyPath);
 
-                // Attempt to cache the compiled assembly
-                CompiledAssemblyCache.TryAdd(taskInfo, assembly);
-
+                // Cache the assembly path if we compiled for out-of-process execution
+                string cachedAssemblyPath = _compileForOutOfProcess ? _assemblyPath : string.Empty;
+                CompiledAssemblyCache.TryAdd(taskInfo, new TaskFactoryUtilities.CachedAssemblyEntry(assembly, cachedAssemblyPath));
                 return true;
             }
             catch (Exception e)
@@ -775,14 +803,16 @@ namespace Microsoft.Build.Tasks
             }
             finally
             {
-                if (FileSystems.Default.FileExists(assemblyPath))
-                {
-                    File.Delete(assemblyPath);
-                }
-
-                if (deleteSourceCodeFile && FileSystems.Default.FileExists(sourceCodePath))
+                if (deleteSourceCodeFile && sourceCodePath is not null && FileSystems.Default.FileExists(sourceCodePath))
                 {
                     File.Delete(sourceCodePath);
+                }
+
+                // Only delete the assembly if we're not compiling for out-of-process execution
+                if (!_compileForOutOfProcess && !string.IsNullOrEmpty(_assemblyPath) && FileSystems.Default.FileExists(_assemblyPath))
+                {
+                    File.Delete(_assemblyPath);
+                    _assemblyPath = null;
                 }
             }
         }
