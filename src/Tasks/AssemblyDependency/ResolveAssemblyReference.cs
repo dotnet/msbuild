@@ -33,8 +33,13 @@ namespace Microsoft.Build.Tasks
     /// Given a list of assemblyFiles, determine the closure of all assemblyFiles that
     /// depend on those assemblyFiles including second and nth-order dependencies too.
     /// </summary>
-    public class ResolveAssemblyReference : TaskExtension, IIncrementalTask
+    public class ResolveAssemblyReference : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
+        /// <summary>
+        /// Task environment for multithreaded execution
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
+
         /// <summary>
         /// key assembly used to trigger inclusion of facade references.
         /// </summary>
@@ -2102,7 +2107,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void ReadStateFile(FileExists fileExists)
         {
-            _cache = SystemState.DeserializeCache<SystemState>(_stateFile, Log);
+            _cache = SystemState.DeserializeCache<SystemState>(TaskEnvironment.GetAbsolutePath(_stateFile), Log);
 
             // Construct the cache only if we can't find any caches.
             if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
@@ -2129,7 +2134,7 @@ namespace Microsoft.Build.Tasks
             {
                 // Either the cache is dirty (we added or updated an item) or the number of items actually used is less than what
                 // we got by reading the state file prior to execution. Serialize the cache into the state file.
-                _cache.SerializeCache(_stateFile, Log);
+                _cache.SerializeCache(TaskEnvironment.GetAbsolutePath(_stateFile), Log);
             }
         }
         #endregion
@@ -2212,6 +2217,8 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
+                    AbsolutizePathsInInputs();
+
                     FrameworkNameVersioning frameworkMoniker = null;
                     if (!String.IsNullOrEmpty(_targetedFrameworkMoniker))
                     {
@@ -2468,7 +2475,8 @@ namespace Microsoft.Build.Tasks
                         _ignoreTargetFrameworkAttributeVersionMismatch,
                         _unresolveFrameworkAssembliesFromHigherFrameworks,
                         assemblyMetadataCache,
-                        _nonCultureResourceDirectories);
+                        _nonCultureResourceDirectories,
+                        TaskEnvironment);
 
                     dependencyTable.FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences;
 
@@ -3160,7 +3168,7 @@ namespace Microsoft.Build.Tasks
         private void FilterBySubtypeAndTargetFramework()
         {
             var assembliesLeft = new List<ITaskItem>();
-            foreach (ITaskItem assembly in Assemblies)
+            foreach (ITaskItem assembly in _assemblyNames)
             {
                 string subType = assembly.GetMetadata(ItemMetadataNames.subType);
                 if (!string.IsNullOrEmpty(subType))
@@ -3313,5 +3321,54 @@ namespace Microsoft.Build.Tasks
                 p => ReferenceTable.ReadMachineTypeFromPEHeader(p));
         }
         #endregion
+
+        private void AbsolutizePathsInInputs()
+        {
+
+            for (int i = 0; i < _candidateAssemblyFiles.Length; i++)
+            {
+                _candidateAssemblyFiles[i] = TaskEnvironment.GetAbsolutePath(_candidateAssemblyFiles[i]);
+            }
+
+            for (int i = 0; i < _targetFrameworkDirectories.Length; i++)
+            {
+                _targetFrameworkDirectories[i] = TaskEnvironment.GetAbsolutePath(_targetFrameworkDirectories[i]);
+            }
+
+            for (int i = 0; i < _fullFrameworkFolders.Length; i++)
+            {
+                _fullFrameworkFolders[i] = TaskEnvironment.GetAbsolutePath(_fullFrameworkFolders[i]);
+            }
+
+            for (int i = 0; i < _latestTargetFrameworkDirectories.Length; i++)
+            {
+                _latestTargetFrameworkDirectories[i] = TaskEnvironment.GetAbsolutePath(_latestTargetFrameworkDirectories[i]);
+            }
+
+            _appConfigFile = TaskEnvironment.GetAbsolutePath(_appConfigFile);
+            _stateFile = TaskEnvironment.GetAbsolutePath(_stateFile);
+
+            for (int i = 0; i < _installedAssemblyTables.Length; i++)
+            {
+                // TODO: check if it could be URI.
+                // It is said that it's on disk in docu, but code does not prohibit URI.
+                _installedAssemblyTables[i].ItemSpec = TaskEnvironment.GetAbsolutePath(_installedAssemblyTables[i].ItemSpec);
+            }
+
+            for (int i = 0; i < _installedAssemblySubsetTables.Length; i++)
+            {
+                _installedAssemblySubsetTables[i].ItemSpec = TaskEnvironment.GetAbsolutePath(_installedAssemblySubsetTables[i].ItemSpec);
+            }
+
+            for (int i = 0; i < _fullFrameworkAssemblyTables.Length; i++)
+            {
+                _fullFrameworkAssemblyTables[i].ItemSpec = TaskEnvironment.GetAbsolutePath(_fullFrameworkAssemblyTables[i].ItemSpec);
+            }
+
+            for (int i = 0; i < _resolvedSDKReferences.Length; i++)
+            {
+                _resolvedSDKReferences[i].ItemSpec = TaskEnvironment.GetAbsolutePath(_resolvedSDKReferences[i].ItemSpec);
+            }
+        }
     }
 }

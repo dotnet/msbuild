@@ -150,6 +150,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private readonly bool _enableCustomCulture = false;
 
+        private readonly TaskEnvironment _taskEnvironment;
+
         /// <summary>
         /// Should a warning or error be emitted on architecture mismatch.
         /// </summary>
@@ -214,6 +216,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
         /// <param name="nonCultureResourceDirectories"></param>
+        /// <param name="taskEnvironment"></param>
 #else
         /// <summary>
         /// Construct.
@@ -254,6 +257,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
         /// <param name="nonCultureResourceDirectories"></param>
+        /// <param name="taskEnvironment"></param>
 #endif
         internal ReferenceTable(
             IBuildEngine buildEngine,
@@ -296,7 +300,8 @@ namespace Microsoft.Build.Tasks
             bool ignoreFrameworkAttributeVersionMismatch,
             bool unresolveFrameworkAssembliesFromHigherFrameworks,
             ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
-            string[] nonCultureResourceDirectories)
+            string[] nonCultureResourceDirectories,
+            TaskEnvironment taskEnvironment)
         {
             _log = log;
             _findDependencies = findDependencies;
@@ -328,6 +333,7 @@ namespace Microsoft.Build.Tasks
             _assemblyMetadataCache = assemblyMetadataCache;
             _nonCultureResourceDirectories = nonCultureResourceDirectories;
             _enableCustomCulture = enableCustomCulture;
+            _taskEnvironment = taskEnvironment;
 
             // Set condition for when to check assembly version against the target framework version
             _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? ReferenceTable.s_targetFrameworkVersion_40) <= ReferenceTable.s_targetFrameworkVersion_40);
@@ -367,7 +373,8 @@ namespace Microsoft.Build.Tasks
                     getRuntimeVersion,
                     targetedRuntimeVersion,
                     getAssemblyPathInGac,
-                    log);
+                    log,
+                    taskEnvironment);
         }
 
         /// <summary>
@@ -1302,14 +1309,14 @@ namespace Microsoft.Build.Tasks
             // If a reference has the SDKName metadata on it then we will only search using a single resolver, that is the InstalledSDKResolver.
             if (reference.SDKName.Length > 0)
             {
-                jaggedResolvers.Add([new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion)]);
+                jaggedResolvers.Add([new InstalledSDKResolver(_resolvedSDKReferences, "SDKResolver", _getAssemblyName, _fileExists, _getRuntimeVersion, _targetedRuntimeVersion, _taskEnvironment)]);
             }
             else
             {
                 // Do not probe near dependees if the reference is primary and resolved externally. If resolved externally, the search paths should have been specified in such a way to point to the assembly file.
                 if (parentReferenceFolders.Count > 0 && (assemblyName == null || !_externallyResolvedPrimaryReferences.Contains(assemblyName.Name)))
                 {
-                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion));
+                    jaggedResolvers.Add(AssemblyResolution.CompileDirectories(parentReferenceFolders, _fileExists, _getAssemblyName, _getRuntimeVersion, _targetedRuntimeVersion, _taskEnvironment));
                 }
 
                 jaggedResolvers.Add(Resolvers);
@@ -1348,6 +1355,10 @@ namespace Microsoft.Build.Tasks
                 if (isImmutableFrameworkReference)
                 {
                     _externallyResolvedImmutableFiles[resolvedPath] = GetAssemblyNameFromItemMetadata(reference.PrimarySourceItem);
+                }
+                else if (!Path.IsPathRooted(resolvedPath))
+                {
+                    resolvedPath = Path.GetFullPath(_taskEnvironment.GetAbsolutePath(resolvedPath));
                 }
                 reference.FullPath = resolvedPath;
 
