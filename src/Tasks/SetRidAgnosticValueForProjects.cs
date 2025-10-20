@@ -7,14 +7,21 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
-    public sealed class SetRidAgnosticValueForProjects : TaskExtension
+    public sealed class SetRidAgnosticValueForProjects : TaskExtension, IMultiThreadableTask
     {
         public ITaskItem[] Projects { get; set; } = Array.Empty<ITaskItem>();
 
         [Output]
         public ITaskItem[] UpdatedProjects { get; set; } = Array.Empty<ITaskItem>();
+
+        /// <summary>
+        /// The task environment for thread-safe operations.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         public override bool Execute()
         {

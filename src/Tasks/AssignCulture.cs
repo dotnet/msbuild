@@ -32,7 +32,7 @@ namespace Microsoft.Build.Tasks
     /// There are plenty of corner cases with this task. See the unit test for
     /// more details.
     /// </summary>
-    public class AssignCulture : TaskExtension
+    public class AssignCulture : TaskExtension, IMultiThreadableTask
     {
         #region Properties
 
@@ -121,6 +121,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Output]
         public ITaskItem[] CultureNeutralAssignedFiles { get; private set; }
+
+        /// <summary>
+        /// The task environment for thread-safe operations.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         #endregion
 
