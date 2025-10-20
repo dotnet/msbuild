@@ -7,7 +7,7 @@
     <PackageValidationBaselineVersion>17.8.3</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
-    <!-- differentiate experimental insertions to avoid package id conflicts, 
+    <!-- differentiate experimental insertions to avoid package id conflicts,
     it has to be alphabetically after "preview" to avoid downgrade errors in VS -->
     <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">test</PreReleaseVersionLabel>
     <DotNetUseShippingVersions>true</DotNetUseShippingVersions>
