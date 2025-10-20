@@ -1489,8 +1489,12 @@ namespace Microsoft.Build.Execution
 
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
-                    _taskFactoryParameters ??= new();
-                    TaskFactoryParameters.Add(Constants.TaskHostExplicitlyRequested, isTaskHostFactory.ToString());
+                    _taskFactoryParameters ??= [];
+
+                    if (isTaskHostFactory)
+                    {
+                        TaskFactoryParameters.Add(Constants.TaskHostExplicitlyRequested, isTaskHostFactory.ToString());
+                    }
 
                     if (isAssemblyTaskFactory || isTaskHostFactory)
                     {
