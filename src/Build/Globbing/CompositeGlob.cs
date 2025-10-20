@@ -85,7 +85,7 @@ namespace Microsoft.Build.Globbing
         /// <returns>The logical disjunction of the input globs.</returns>
         public static IMSBuildGlob Create(IEnumerable<IMSBuildGlob> globs)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(globs, nameof(globs));
+            ErrorUtilities.VerifyThrowArgumentNull(globs);
 
             if (globs is ImmutableArray<IMSBuildGlob> immutableGlobs)
             {

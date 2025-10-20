@@ -41,8 +41,8 @@ namespace Microsoft.Build.Globbing
         /// <param name="gaps">The gap glob</param>
         internal MSBuildGlobWithGaps(IMSBuildGlob mainGlob, IMSBuildGlob gaps)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(mainGlob, nameof(mainGlob));
-            ErrorUtilities.VerifyThrowArgumentNull(gaps, nameof(gaps));
+            ErrorUtilities.VerifyThrowArgumentNull(mainGlob);
+            ErrorUtilities.VerifyThrowArgumentNull(gaps);
 
             MainGlob = mainGlob;
             Gaps = gaps;
@@ -55,8 +55,8 @@ namespace Microsoft.Build.Globbing
         /// <param name="gaps">The gap glob</param>
         public MSBuildGlobWithGaps(IMSBuildGlob mainGlob, IEnumerable<IMSBuildGlob> gaps)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(mainGlob, nameof(mainGlob));
-            ErrorUtilities.VerifyThrowArgumentNull(gaps, nameof(gaps));
+            ErrorUtilities.VerifyThrowArgumentNull(mainGlob);
+            ErrorUtilities.VerifyThrowArgumentNull(gaps);
 
             MainGlob = mainGlob;
             Gaps = CompositeGlob.Create(gaps);

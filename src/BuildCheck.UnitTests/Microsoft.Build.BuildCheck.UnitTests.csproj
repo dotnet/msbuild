@@ -26,7 +26,8 @@
   <ItemGroup>
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="System.Net.Http" />
+
+    <Reference Include="System.Net.Http" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
 
   <ItemGroup>
@@ -45,5 +46,32 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\IsExternalInit.cs" />
+  </ItemGroup>
+
+  <Target Name="AddGeneratedFile" BeforeTargets="BeforeCompile;CoreCompile" Inputs="$(MSBuildAllProjects)" Outputs="$(IntermediateOutputPath)BuildCheckUnitTestsConstants.cs">
+    <PropertyGroup>
+      <GeneratedText>
+        <![CDATA[
+namespace Microsoft.Build.BuildCheck.UnitTests
+{
+    internal sealed class BuildCheckUnitTestsConstants
+    {
+        public const string MicrosoftBuildPackageVersion = @"$(Version)"%3B
+        public const string RepoRoot = @"$(RepoRoot)"%3B
+    }
+}
+      ]]>
+      </GeneratedText>
+      <GeneratedFilePath>$(IntermediateOutputPath)BuildCheckUnitTestsConstants.cs</GeneratedFilePath>
+    </PropertyGroup>
+    <ItemGroup>
+      <Compile Include="$(GeneratedFilePath)" />
+      <FileWrites Include="$(GeneratedFilePath)" />
+    </ItemGroup>
+    <WriteLinesToFile Lines="$(GeneratedText)" File="$(GeneratedFilePath)" WriteOnlyWhenDifferent="true" Overwrite="true" />
+  </Target>
 
 </Project>

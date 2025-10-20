@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
 namespace Microsoft.Build.Experimental.BuildCheck;
 

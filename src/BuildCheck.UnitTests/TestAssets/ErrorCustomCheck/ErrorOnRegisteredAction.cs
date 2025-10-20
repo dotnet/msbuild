@@ -17,7 +17,7 @@ namespace ErrorCustomCheck
             "Message format: {0}",
             new CheckConfiguration());
 
-        public override string FriendlyName => "ErrorOnEvaluatedPropertiesCheck";
+        public override string FriendlyName => "ErrorOnRegisteredAction";
 
         public override IReadOnlyList<CheckRule> SupportedRules { get; } = new List<CheckRule>() { SupportedRule };
 
@@ -33,7 +33,7 @@ namespace ErrorCustomCheck
 
         private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
         {
-            throw new Exception("something went wrong");
+            throw new Exception("something went wrong when executing registered action");
         }
     }
 }

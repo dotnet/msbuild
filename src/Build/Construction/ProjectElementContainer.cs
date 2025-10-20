@@ -142,7 +142,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public void InsertAfterChild(ProjectElement child, ProjectElement reference)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(child, nameof(child));
+            ErrorUtilities.VerifyThrowArgumentNull(child);
             if (Link != null)
             {
                 ContainerLink.InsertAfterChild(child, reference);
@@ -197,7 +197,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public void InsertBeforeChild(ProjectElement child, ProjectElement reference)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(child, nameof(child));
+            ErrorUtilities.VerifyThrowArgumentNull(child);
 
             if (Link != null)
             {
@@ -292,7 +292,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         public void RemoveChild(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(child, nameof(child));
+            ErrorUtilities.VerifyThrowArgumentNull(child);
 
             ErrorUtilities.VerifyThrowArgument(child.Parent == this, "OM_NodeNotAlreadyParentedByThis");
 
@@ -351,7 +351,7 @@ namespace Microsoft.Build.Construction
         /// <param name="element">The element to act as a template to copy from.</param>
         public virtual void DeepCopyFrom(ProjectElementContainer element)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(element, nameof(element));
+            ErrorUtilities.VerifyThrowArgumentNull(element);
             ErrorUtilities.VerifyThrowArgument(GetType().IsEquivalentTo(element.GetType()), "CannotCopyFromElementOfThatType");
 
             if (this == element)
@@ -388,7 +388,7 @@ namespace Microsoft.Build.Construction
         {
             ErrorUtilities.VerifyThrow(child.Parent == this, "Expected parent already set");
             ErrorUtilities.VerifyThrow(child.PreviousSibling == null && child.NextSibling == null, "Invalid structure");
-            ErrorUtilities.VerifyThrow(Link == null, "External project");
+            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             if (LastChild == null)
             {
@@ -438,7 +438,7 @@ namespace Microsoft.Build.Construction
 
         private void SetElementAsAttributeValue(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "External project");
+            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             // Assumes that child.ExpressedAsAttribute is true
             Debug.Assert(child.ExpressedAsAttribute, nameof(SetElementAsAttributeValue) + " method requires that " +
@@ -449,12 +449,29 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// If child "element" is actually represented as an attribute, update the name in the corresponding Xml attribute
+        /// </summary>
+        /// <param name="child">A child element which might be represented as an attribute</param>
+        /// <param name="oldName">The old name for the child element</param>
+        internal void UpdateElementName(ProjectElement child, string oldName)
+        {
+            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+
+            if (child.ExpressedAsAttribute)
+            {
+                // To rename an attribute, we have to fully remove the old one and add a new one.
+                XmlElement.RemoveAttribute(oldName);
+                SetElementAsAttributeValue(child);
+            }
+        }
+
+        /// <summary>
         /// If child "element" is actually represented as an attribute, update the value in the corresponding Xml attribute
         /// </summary>
         /// <param name="child">A child element which might be represented as an attribute</param>
         internal void UpdateElementValue(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "External project");
+            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             if (child.ExpressedAsAttribute)
             {
@@ -474,7 +491,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal void AddToXml(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "External project");
+            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             if (child.ExpressedAsAttribute)
             {
@@ -580,7 +597,7 @@ namespace Microsoft.Build.Construction
 
         internal void RemoveFromXml(ProjectElement child)
         {
-            ErrorUtilities.VerifyThrow(Link == null, "External project");
+            ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
             if (child.ExpressedAsAttribute)
             {
@@ -818,7 +835,7 @@ namespace Microsoft.Build.Construction
 
             public void CopyTo(T[] array, int arrayIndex)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(array, nameof(array));
+                ErrorUtilities.VerifyThrowArgumentNull(array);
 
                 if (_realizedElements != null)
                 {
@@ -847,7 +864,7 @@ namespace Microsoft.Build.Construction
 
             void ICollection.CopyTo(Array array, int index)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(array, nameof(array));
+                ErrorUtilities.VerifyThrowArgumentNull(array);
 
                 int i = index;
                 foreach (T entry in this)

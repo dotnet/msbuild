@@ -324,7 +324,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentLength(name);
 
             return ImmutableInterlocked.TryRemove(ref _backing, name, out _);
         }
@@ -336,7 +336,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Set(T projectProperty)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectProperty, nameof(projectProperty));
+            ErrorUtilities.VerifyThrowArgumentNull(projectProperty);
 
             _backing = _backing.SetItem(projectProperty.Key, projectProperty);
         }

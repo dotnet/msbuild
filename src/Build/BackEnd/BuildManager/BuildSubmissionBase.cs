@@ -40,7 +40,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         protected internal BuildSubmissionBase(BuildManager buildManager, int submissionId)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(buildManager, nameof(buildManager));
+            ErrorUtilities.VerifyThrowArgumentNull(buildManager);
 
             BuildManager = buildManager;
             SubmissionId = submissionId;

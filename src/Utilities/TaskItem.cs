@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security;
@@ -60,8 +61,12 @@ namespace Microsoft.Build.Utilities
         #region Constructors
 
         /// <summary>
-        /// Default constructor -- we need it so this type is COM-createable.
+        /// Default constructor -- do not use.
         /// </summary>
+        /// <remarks>
+        /// This constructor exists only so that the type is COM-creatable. Prefer <see cref="TaskItem(string, bool)"/>.
+        /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public TaskItem()
         {
             _itemSpec = string.Empty;
@@ -70,14 +75,31 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// This constructor creates a new task item, given the item spec.
         /// </summary>
-        /// <comments>Assumes the itemspec passed in is escaped.</comments>
+        /// <comments>Assumes the itemspec passed in is escaped and represents a file path. </comments>
         /// <param name="itemSpec">The item-spec string.</param>
-        public TaskItem(
-            string itemSpec)
-        {
-            ErrorUtilities.VerifyThrowArgumentNull(itemSpec, nameof(itemSpec));
+        public TaskItem(string itemSpec)
+            : this(itemSpec, treatAsFilePath: true) { }
 
-            _itemSpec = FileUtilities.FixFilePath(itemSpec);
+        /// <summary>
+        /// This constructor creates a new task item, given the item spec.
+        /// </summary>
+        /// <comments>
+        /// Assumes the itemspec passed in is escaped.
+        /// If <see name="treatAsFilePath" /> is set to <see langword="true" />, the value in <see name="itemSpec" />
+        /// will be fixed up as a path by having any backslashes replaced with slashes.
+        /// </comments>
+        /// <param name="itemSpec">The item-spec string.</param>
+        /// <param name="treatAsFilePath">
+        /// Specifies whether or not to treat the value in <see name="itemSpec" />
+        /// as a file path and attempt to normalize it.
+        /// </param>
+        public TaskItem(
+            string itemSpec,
+            bool treatAsFilePath)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(itemSpec);
+
+            _itemSpec = treatAsFilePath ? FileUtilities.FixFilePath(itemSpec) : itemSpec;
         }
 
         /// <summary>
@@ -94,7 +116,7 @@ namespace Microsoft.Build.Utilities
             IDictionary itemMetadata) :
             this(itemSpec)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(itemMetadata, nameof(itemMetadata));
+            ErrorUtilities.VerifyThrowArgumentNull(itemMetadata);
 
             if (itemMetadata.Count > 0)
             {
@@ -119,7 +141,7 @@ namespace Microsoft.Build.Utilities
         public TaskItem(
             ITaskItem sourceItem)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sourceItem, nameof(sourceItem));
+            ErrorUtilities.VerifyThrowArgumentNull(sourceItem);
 
             // Attempt to preserve escaped state
             if (!(sourceItem is ITaskItem2 sourceItemAsITaskItem2))
@@ -238,7 +260,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="metadataName">Name of metadata to remove.</param>
         public void RemoveMetadata(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
+            ErrorUtilities.VerifyThrowArgumentNull(metadataName);
             ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName),
                 "Shared.CannotChangeItemSpecModifiers", metadataName);
 
@@ -257,7 +279,7 @@ namespace Microsoft.Build.Utilities
             string metadataName,
             string metadataValue)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(metadataName, nameof(metadataName));
+            ErrorUtilities.VerifyThrowArgumentLength(metadataName);
 
             // Non-derivable metadata can only be set at construction time.
             // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
@@ -291,7 +313,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="destinationItem">The item to copy metadata to.</param>
         public void CopyMetadataTo(ITaskItem destinationItem)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(destinationItem, nameof(destinationItem));
+            ErrorUtilities.VerifyThrowArgumentNull(destinationItem);
 
             // also copy the original item-spec under a "magic" metadata -- this is useful for tasks that forward metadata
             // between items, and need to know the source item where the metadata came from
@@ -414,7 +436,7 @@ namespace Microsoft.Build.Utilities
         /// <returns>The item-spec of the item.</returns>
         public static explicit operator string(TaskItem taskItemToCast)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(taskItemToCast, nameof(taskItemToCast));
+            ErrorUtilities.VerifyThrowArgumentNull(taskItemToCast);
             return taskItemToCast.ItemSpec;
         }
 
@@ -427,7 +449,7 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         string ITaskItem2.GetMetadataValueEscaped(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName, nameof(metadataName));
+            ErrorUtilities.VerifyThrowArgumentNull(metadataName);
 
             string metadataValue = null;
 
@@ -490,7 +512,7 @@ namespace Microsoft.Build.Utilities
         {
             if (_metadata == null)
             {
-                return Enumerable.Empty<KeyValuePair<string, string>>();
+                return [];
             }
 
             int count = _metadata.Count;

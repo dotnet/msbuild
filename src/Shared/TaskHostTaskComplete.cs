@@ -105,7 +105,7 @@ namespace Microsoft.Build.BackEnd
 #endif
             IDictionary<string, string> buildProcessEnvironment)
         {
-            ErrorUtilities.VerifyThrowInternalNull(result, nameof(result));
+            ErrorUtilities.VerifyThrowInternalNull(result);
 
             _taskResult = result.Result;
             _taskException = result.TaskException;

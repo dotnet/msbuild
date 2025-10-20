@@ -139,7 +139,7 @@ namespace Microsoft.Build.BackEnd
             )
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
-            ErrorUtilities.VerifyThrowInternalNull(taskType, nameof(taskType));
+            ErrorUtilities.VerifyThrowInternalNull(taskType);
 
             _taskLocation = taskLocation;
             _taskLoggingContext = taskLoggingContext;
@@ -483,9 +483,9 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    exceptionMessageArgs = new string[] { _taskType.Type.Name,
+                    exceptionMessageArgs = [_taskType.Type.Name,
                         AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
-                        string.Empty };
+                        string.Empty];
                 }
 
                 _taskLoggingContext.LogFatalError(taskHostTaskComplete.TaskException, new BuildEventFileInfo(_taskLocation), taskHostTaskComplete.TaskExceptionMessage, taskHostTaskComplete.TaskExceptionMessageArgs);

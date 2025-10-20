@@ -365,7 +365,7 @@ namespace Microsoft.Build.Tasks
                 {
                     Debug.Assert(ShouldGenerateSerializer, "GenerateCommandLineCommands() should not be called if ShouldGenerateSerializer is true and SerializationAssembly is null.");
 
-                    SerializationAssembly = new ITaskItem[] { new TaskItem(SerializationAssemblyPath) };
+                    SerializationAssembly = [new TaskItem(SerializationAssemblyPath)];
                 }
 
                 // Add the assembly switch

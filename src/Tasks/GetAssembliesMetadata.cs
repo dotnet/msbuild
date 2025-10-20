@@ -32,7 +32,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Assembly paths.
         /// </summary>
-        private string[] _assemblyPaths = Array.Empty<string>();
+        private string[] _assemblyPaths = [];
 
         /// <summary>
         /// Set of resolved assembly metadata.

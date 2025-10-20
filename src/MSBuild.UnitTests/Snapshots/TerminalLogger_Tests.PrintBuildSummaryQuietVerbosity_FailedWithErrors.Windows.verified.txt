@@ -1,8 +1,0 @@
-﻿]9;4;3;\directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: Warning!
-directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: 
-  A
-  Multi
-  Line
-  Warning!
-directory/[1mfile[m(1,2,3,4): [31;1merror[m [31;1mAA0000[m: Error!
-]9;4;0;\

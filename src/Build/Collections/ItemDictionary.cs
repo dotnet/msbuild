@@ -172,11 +172,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Enumerates item lists per each item type under the lock.
         /// </summary>
-        /// <param name="itemTypeCallback">
-        /// A delegate that accepts the item type string and a list of items of that type.
-        /// Will be called for each item type in the list.
-        /// </param>
-        public void EnumerateItemsPerType(Action<string, IEnumerable<T>> itemTypeCallback)
+        public IEnumerable<(string itemType, IEnumerable<T> itemValue)> EnumerateItemsPerType()
         {
             lock (_itemLists)
             {
@@ -188,8 +184,23 @@ namespace Microsoft.Build.Collections
                         continue;
                     }
 
-                    itemTypeCallback(itemTypeBucket.Key, itemTypeBucket.Value);
+                    yield return (itemTypeBucket.Key, itemTypeBucket.Value);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Enumerates item lists per each item type under the lock.
+        /// </summary>
+        /// <param name="itemTypeCallback">
+        /// A delegate that accepts the item type string and a list of items of that type.
+        /// Will be called for each item type in the list.
+        /// </param>
+        public void EnumerateItemsPerType(Action<string, IEnumerable<T>> itemTypeCallback)
+        {
+            foreach (var tuple in EnumerateItemsPerType())
+            {
+                itemTypeCallback(tuple.itemType, tuple.itemValue);
             }
         }
 

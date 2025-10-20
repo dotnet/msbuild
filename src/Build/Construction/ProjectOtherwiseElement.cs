@@ -30,7 +30,7 @@ namespace Microsoft.Build.Construction
         internal ProjectOtherwiseElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement project)
             : base(xmlElement, parent, project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>

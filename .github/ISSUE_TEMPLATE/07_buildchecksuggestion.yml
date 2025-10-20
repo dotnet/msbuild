@@ -2,6 +2,7 @@ name: 💡 BuildCheck Suggestion
 description: Suggesting a diagnostic check (AKA [BuildCheck](https://github.com/dotnet/msbuild/blob/main/documentation/specs/BuildCheck/BuildCheck.md)) that MSBuild could provide.
 title: "[BuildCheck Suggestion]: "
 labels: ["BuildCheck Suggestion", "Area: BuildCheck"]
+type: 'Feature'
 body:
   - type: textarea
     attributes:

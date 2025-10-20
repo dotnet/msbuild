@@ -394,7 +394,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <inheritdoc />
         public void LogBuildCanceled()
         {
-            string message = ResourceUtilities.GetResourceString("AbortingBuild"); 
+            string message = ResourceUtilities.GetResourceString("AbortingBuild");
             BuildCanceledEventArgs buildEvent = new BuildCanceledEventArgs(message);
 
             ProcessLoggingEvent(buildEvent);

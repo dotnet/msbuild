@@ -789,11 +789,11 @@ my_prop = my_val
         SetEqual(
             new[] { Create("my_prop", "my_val") },
             namedSections[0].Properties);
-        
+
         Assert.True(config.IsRoot);
     }
 
-    
+
     [Fact]
     // [WorkItem(52469, "https://github.com/dotnet/roslyn/issues/52469")]
     public void ConfigWithEscapedValues()
@@ -864,7 +864,7 @@ my_prop = my_val");
         Assert.Equal(0, config.NamedSections.Length);
     }
 
-    
+
     [Fact]
     public void EmptySection()
     {
@@ -877,7 +877,7 @@ my_prop = my_val");
         Assert.Equal(0, config.NamedSections.Length);
     }
 
-    
+
     [Fact]
     public void CaseInsensitivePropKey()
     {
@@ -913,7 +913,7 @@ my_prop = my_other_val");
         Assert.Equal(new[] { Create("my_prop", "my_other_val") }, properties);
     }
 
-    
+
     [Fact]
     public void DuplicateKeysCasing()
     {
@@ -925,7 +925,7 @@ my_PROP = my_other_val");
         Assert.Equal(new[] { Create("my_prop", "my_other_val") }, properties);
     }
 
-    
+
     [Fact]
     public void MissingKey()
     {
@@ -939,7 +939,7 @@ my_prop = my_val2");
             properties);
     }
 
-    
+
 
     [Fact]
     public void MissingVal()
@@ -955,7 +955,7 @@ my_prop2 = my_val");
             properties);
     }
 
-    
+
     [Fact]
     public void SpacesInProperties()
     {
@@ -969,7 +969,7 @@ my_prop2 = my val2");
             properties);
     }
 
-    
+
     [Fact]
     public void EndOfLineComments()
     {
@@ -981,7 +981,7 @@ my_prop2 = my val2 # Comment");
             new[] { Create("my_prop2", "my val2") },
             properties);
     }
-    
+
     [Fact]
     public void SymbolsStartKeys()
     {
@@ -993,7 +993,7 @@ my_prop2 = my val2 # Comment");
         Assert.Equal(0, properties.Count);
     }
 
-    
+
     [Fact]
     public void EqualsAndColon()
     {
@@ -1007,7 +1007,7 @@ my_key2 = my:val");
                     Create("my_key2", "my:val")},
             properties);
     }
-    
+
     [Fact]
     public void SymbolsInProperties()
     {
@@ -1020,7 +1020,7 @@ my_key2 = my@val");
             new[] { Create("my_key2", "my@val") },
             properties);
     }
-    
+
     [Fact]
     public void LongLines()
     {
@@ -1038,7 +1038,7 @@ long: this value continues
             properties);
     }
 
-    
+
     [Fact]
     public void CaseInsensitiveRoot()
     {

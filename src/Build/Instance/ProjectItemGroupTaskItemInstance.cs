@@ -159,15 +159,15 @@ namespace Microsoft.Build.Execution
             ElementLocation conditionLocation,
             List<ProjectItemGroupTaskMetadataInstance> metadata)
         {
-            ErrorUtilities.VerifyThrowInternalNull(itemType, nameof(itemType));
-            ErrorUtilities.VerifyThrowInternalNull(include, nameof(include));
-            ErrorUtilities.VerifyThrowInternalNull(exclude, nameof(exclude));
-            ErrorUtilities.VerifyThrowInternalNull(remove, nameof(remove));
-            ErrorUtilities.VerifyThrowInternalNull(keepMetadata, nameof(keepMetadata));
-            ErrorUtilities.VerifyThrowInternalNull(removeMetadata, nameof(removeMetadata));
-            ErrorUtilities.VerifyThrowInternalNull(keepDuplicates, nameof(keepDuplicates));
-            ErrorUtilities.VerifyThrowInternalNull(condition, nameof(condition));
-            ErrorUtilities.VerifyThrowInternalNull(location, nameof(location));
+            ErrorUtilities.VerifyThrowInternalNull(itemType);
+            ErrorUtilities.VerifyThrowInternalNull(include);
+            ErrorUtilities.VerifyThrowInternalNull(exclude);
+            ErrorUtilities.VerifyThrowInternalNull(remove);
+            ErrorUtilities.VerifyThrowInternalNull(keepMetadata);
+            ErrorUtilities.VerifyThrowInternalNull(removeMetadata);
+            ErrorUtilities.VerifyThrowInternalNull(keepDuplicates);
+            ErrorUtilities.VerifyThrowInternalNull(condition);
+            ErrorUtilities.VerifyThrowInternalNull(location);
 
             _itemType = itemType;
             _include = include;

@@ -255,7 +255,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 Internet => SecurityZone.Internet,
                 _ => throw new ArgumentException(String.Empty /* no message */, nameof(targetZone)),
             };
-            var evidence = new Evidence(new EvidenceBase[] { new Zone(zone), new System.Runtime.Hosting.ActivationArguments(new System.ApplicationIdentity("")) }, null);
+            var evidence = new Evidence([new Zone(zone), new System.Runtime.Hosting.ActivationArguments(new System.ApplicationIdentity(""))], null);
 
             PermissionSet sandbox = SecurityManager.GetStandardSandbox(evidence);
             string resultInString = sandbox.ToString();
@@ -455,7 +455,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             else
             {
-                a = Array.Empty<string>();
+                a = [];
             }
             return a;
         }

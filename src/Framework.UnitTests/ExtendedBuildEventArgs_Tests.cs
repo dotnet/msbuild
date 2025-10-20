@@ -23,11 +23,11 @@ public class ExtendedBuildEventArgs_Tests
             senderName: withOptionalData ? $"UnitTest {Guid.NewGuid()}" : null,
             eventTimestamp: withOptionalData ? DateTime.Parse("3/1/2017 11:11:56 AM") : DateTime.Now,
             messageArgs: withOptionalData ? new object[] { "arg0val", "arg1val" } : null)
-            {
-                ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
-                ExtendedMetadata = withOptionalData ? new Dictionary<string, string?> { {"m1", "v1" }, { "m2", "v2" } } : null,
-                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
-            };
+        {
+            ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
+            ExtendedMetadata = withOptionalData ? new Dictionary<string, string?> { { "m1", "v1" }, { "m2", "v2" } } : null,
+            BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+        };
 
         using MemoryStream stream = new MemoryStream();
         using BinaryWriter bw = new BinaryWriter(stream);
@@ -62,7 +62,7 @@ public class ExtendedBuildEventArgs_Tests
             eventTimestamp: withOptionalData ? DateTime.Parse("3/1/2017 11:11:56 AM") : DateTime.Now,
             messageArgs: withOptionalData ? new object[] { "arg0val", "arg1val" } : null)
         {
-            ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+            ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
             ExtendedMetadata = withOptionalData ? new Dictionary<string, string?> { { "m1", "v1" }, { "m2", "v2" } } : null,
             BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
         };
@@ -101,7 +101,7 @@ public class ExtendedBuildEventArgs_Tests
             eventTimestamp: withOptionalData ? DateTime.Parse("3/1/2017 11:11:56 AM") : DateTime.Now,
             messageArgs: withOptionalData ? new object[] { "arg0val", "arg1val" } : null)
         {
-            ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+            ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
             ExtendedMetadata = withOptionalData ? new Dictionary<string, string?> { { "m1", "v1" }, { "m2", "v2" } } : null,
             BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
         };
@@ -139,7 +139,7 @@ public class ExtendedBuildEventArgs_Tests
             eventTimestamp: withOptionalData ? DateTime.Parse("3/1/2017 11:11:56 AM") : DateTime.Now,
             messageArgs: withOptionalData ? new object[] { "arg0val", "arg1val" } : null)
         {
-            ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+            ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
             ExtendedMetadata = withOptionalData ? new Dictionary<string, string?> { { "m1", "v1" }, { "m2", "v2" } } : null,
             BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
         };
@@ -176,7 +176,7 @@ public class ExtendedBuildEventArgs_Tests
             eventTimestamp: withOptionalData ? DateTime.Parse("3/1/2017 11:11:56 AM") : DateTime.Now,
             messageArgs: withOptionalData ? new object[] { "arg0val", "arg1val" } : null)
         {
-            ExtendedData = withOptionalData ? "{'long-json':'mostly-strings'}" : null,
+            ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
             ExtendedMetadata = withOptionalData ? new Dictionary<string, string?> { { "m1", "v1" }, { "m2", "v2" } } : null,
             BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
         };
