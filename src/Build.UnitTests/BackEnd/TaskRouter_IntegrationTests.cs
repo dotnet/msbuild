@@ -21,8 +21,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     /// <summary>
     /// Integration tests for task routing in multi-threaded mode.
-    /// Tests verify that tasks with IMultiThreadableTask or MSBuildMultiThreadableTaskAttribute
-    /// run in-process, while tasks without these indicators run in TaskHost for isolation.
+    /// Tests verify that tasks with MSBuildMultiThreadableTaskAttribute (non-inheritable)
+    /// run in-process, while tasks without this attribute run in TaskHost for isolation.
+    /// Tasks may also implement IMultiThreadableTask to gain access to TaskEnvironment APIs.
     /// </summary>
     public class TaskRouter_IntegrationTests : IDisposable
     {
@@ -90,11 +91,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verifies that a task with IMultiThreadableTask interface runs in-process
-        /// (not in TaskHost) when MultiThreaded mode is enabled.
+        /// Verifies that a task with IMultiThreadableTask interface but without MSBuildMultiThreadableTaskAttribute
+        /// runs in TaskHost when MultiThreaded mode is enabled. Only the attribute determines routing.
         /// </summary>
         [Fact]
-        public void TaskWithInterface_RunsInProcess_InMultiThreadedMode()
+        public void TaskWithInterface_RunsInTaskHost_InMultiThreadedMode()
         {
             // Arrange
             string projectContent = CreateTestProject(
@@ -127,8 +128,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
 
-            // Verify task was NOT launched in TaskHost (runs in-process)
-            TaskRouterTestHelper.AssertTaskRanInProcess(logger, "InterfaceTestTask");
+            // Verify task was launched in TaskHost (interface alone is not sufficient)
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "InterfaceTestTask");
 
             // Verify task executed successfully
             logger.FullLog.ShouldContain("TaskWithInterface executed");
@@ -225,7 +226,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verifies that a task with interface doesn't use TaskHost in single-threaded mode.
+        /// Verifies that all tasks run in-process in single-threaded mode regardless of attributes.
         /// </summary>
         [Fact]
         public void TaskWithInterface_RunsInProcess_WhenMultiThreadedModeDisabled()
@@ -315,11 +316,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             // Assert
             result.OverallResult.ShouldBe(BuildResultCode.Success);
 
-            // NonEnlightenedTask should use TaskHost
+            // NonEnlightenedTask and InterfaceTask should use TaskHost
             TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "NonEnlightenedTestTask");
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "InterfaceTestTask");
 
-            // Interface and Attribute tasks should NOT use TaskHost
-            TaskRouterTestHelper.AssertTaskRanInProcess(logger, "InterfaceTestTask");
+            // Only Attribute task should NOT use TaskHost
             TaskRouterTestHelper.AssertTaskRanInProcess(logger, "AttributeTestTask");
 
             // All tasks should execute successfully
@@ -330,20 +331,20 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
         /// <summary>
         /// Verifies that explicit TaskHostFactory request overrides routing logic,
-        /// forcing tasks to run in TaskHost even if they would normally run in-process.
+        /// forcing tasks to run in TaskHost even if they have the MSBuildMultiThreadableTaskAttribute.
         /// </summary>
         [Fact]
         public void ExplicitTaskHostFactory_OverridesRoutingLogic()
         {
-            // Arrange - Use a thread-safe task but explicitly request TaskHostFactory
+            // Arrange - Use a task with attribute but explicitly request TaskHostFactory
             string projectContent = $@"
 <Project>
-    <UsingTask TaskName=""InterfaceTestTask"" 
+    <UsingTask TaskName=""AttributeTestTask"" 
                AssemblyFile=""{Assembly.GetExecutingAssembly().Location}""
                TaskFactory=""TaskHostFactory"" />
     
     <Target Name=""TestTarget"">
-        <InterfaceTestTask />
+        <AttributeTestTask />
     </Target>
 </Project>";
 
@@ -374,196 +375,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.OverallResult.ShouldBe(BuildResultCode.Success);
 
             // Task should use TaskHost because TaskHostFactory was explicitly requested
-            // This overrides the normal routing logic which would run this in-process
-            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "InterfaceTestTask");
+            // This overrides the normal routing logic which would run attribute tasks in-process
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "AttributeTestTask");
 
             // Verify task executed successfully
-            logger.FullLog.ShouldContain("TaskWithInterface executed");
+            logger.FullLog.ShouldContain("TaskWithAttribute executed");
         }
 
-        /// <summary>
-        /// Verifies that tasks inheriting IMultiThreadableTask from an unmarked external base class
-        /// run in-process (inheritable semantics by default).
-        /// </summary>
-        [Fact]
-        public void InheritedInterface_RunsInProcess_InMultiThreadedMode()
-        {
-            // Arrange
-            string projectContent = CreateTestProject(
-                taskName: "InheritedInterfaceTestTask",
-                taskClass: "InheritedInterfaceTask");
 
-            string projectFile = Path.Combine(_testProjectsDir, "InheritedInterfaceProject.proj");
-            File.WriteAllText(projectFile, projectContent);
-
-            var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = true,
-                Loggers = new[] { logger },
-                DisableInProcNode = false,
-                EnableNodeReuse = false
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                new[] { "TestTarget" },
-                null);
-
-            // Act
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
-
-            // Assert
-            result.OverallResult.ShouldBe(BuildResultCode.Success);
-
-            // Task should run in-process because it inherits from unmarked external base class
-            // (inheritable semantics)
-            TaskRouterTestHelper.AssertTaskRanInProcess(logger, "InheritedInterfaceTestTask");
-
-            // Verify task executed successfully
-            logger.FullLog.ShouldContain("InheritedInterfaceTask executed");
-        }
-
-        /// <summary>
-        /// Verifies that tasks inheriting IMultiThreadableTask from an InternalMSBuildTaskAttribute-marked
-        /// base class (MSBuild repo tasks) are routed to TaskHost for backward compatibility
-        /// (non-inheritable semantics).
-        /// </summary>
-        [Fact]
-        public void InheritedFromInternalBase_RunsInTaskHost_InMultiThreadedMode()
-        {
-            // Arrange
-            string projectContent = CreateTestProject(
-                taskName: "InheritedFromInternalBaseTestTask",
-                taskClass: "InheritedFromInternalBaseTask");
-
-            string projectFile = Path.Combine(_testProjectsDir, "InheritedFromInternalBaseProject.proj");
-            File.WriteAllText(projectFile, projectContent);
-
-            var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = true,
-                Loggers = new[] { logger },
-                DisableInProcNode = false,
-                EnableNodeReuse = false
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                new[] { "TestTarget" },
-                null);
-
-            // Act
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
-
-            // Assert
-            result.OverallResult.ShouldBe(BuildResultCode.Success);
-
-            // Task should use TaskHost because base class has InternalMSBuildTaskAttribute
-            // (non-inheritable semantics for backward compatibility)
-            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "InheritedFromInternalBaseTestTask");
-
-            // Verify task executed successfully
-            logger.FullLog.ShouldContain("InheritedFromInternalBaseTask executed");
-        }
-
-        /// <summary>
-        /// Verifies that multi-level inheritance from unmarked external base class maintains
-        /// inheritable semantics - tasks should run in-process.
-        /// </summary>
-        [Fact]
-        public void MultiLevelInheritanceFromUnmarkedBase_RunsInProcess_InMultiThreadedMode()
-        {
-            // Arrange
-            string projectContent = CreateTestProject(
-                taskName: "MultiLevelUnmarkedTestTask",
-                taskClass: "MultiLevelUnmarkedTask");
-
-            string projectFile = Path.Combine(_testProjectsDir, "MultiLevelUnmarkedProject.proj");
-            File.WriteAllText(projectFile, projectContent);
-
-            var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = true,
-                Loggers = new[] { logger },
-                DisableInProcNode = false,
-                EnableNodeReuse = false
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                new[] { "TestTarget" },
-                null);
-
-            // Act
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
-
-            // Assert
-            result.OverallResult.ShouldBe(BuildResultCode.Success);
-
-            // Task should run in-process - inheritable semantics through multiple levels
-            TaskRouterTestHelper.AssertTaskRanInProcess(logger, "MultiLevelUnmarkedTestTask");
-
-            // Verify task executed successfully
-            logger.FullLog.ShouldContain("MultiLevelUnmarkedTask executed");
-        }
-
-        /// <summary>
-        /// Verifies that multi-level inheritance from InternalMSBuildTaskAttribute-marked base
-        /// applies non-inheritable semantics - tasks should run in TaskHost even if the attribute
-        /// is on a grandparent class.
-        /// </summary>
-        [Fact]
-        public void MultiLevelInheritanceFromMarkedBase_RunsInTaskHost_InMultiThreadedMode()
-        {
-            // Arrange
-            string projectContent = CreateTestProject(
-                taskName: "MultiLevelMarkedTestTask",
-                taskClass: "MultiLevelMarkedTask");
-
-            string projectFile = Path.Combine(_testProjectsDir, "MultiLevelMarkedProject.proj");
-            File.WriteAllText(projectFile, projectContent);
-
-            var logger = new MockLogger(_output);
-            var buildParameters = new BuildParameters
-            {
-                MultiThreaded = true,
-                Loggers = new[] { logger },
-                DisableInProcNode = false,
-                EnableNodeReuse = false
-            };
-
-            var buildRequestData = new BuildRequestData(
-                projectFile,
-                new Dictionary<string, string>(),
-                null,
-                new[] { "TestTarget" },
-                null);
-
-            // Act
-            var buildManager = BuildManager.DefaultBuildManager;
-            var result = buildManager.Build(buildParameters, buildRequestData);
-
-            // Assert
-            result.OverallResult.ShouldBe(BuildResultCode.Success);
-
-            // Task should use TaskHost - non-inheritable semantics from marked grandparent
-            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "MultiLevelMarkedTestTask");
-
-            // Verify task executed successfully
-            logger.FullLog.ShouldContain("MultiLevelMarkedTask executed");
-        }
 
         private string CreateTestProject(string taskName, string taskClass)
         {
@@ -640,115 +459,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
     }
 
-    /// <summary>
-    /// Base task class that implements IMultiThreadableTask.
-    /// This simulates an external base class (not from MSBuild repo).
-    /// </summary>
-    public class BaseMultiThreadableTask : Task, IMultiThreadableTask
-    {
-        public TaskEnvironment TaskEnvironment { get; set; }
 
-        public override bool Execute()
-        {
-            Log.LogMessage(MessageImportance.High, "BaseMultiThreadableTask executed");
-            return true;
-        }
-    }
-
-    /// <summary>
-    /// Base task class that implements IMultiThreadableTask and is marked with InternalMSBuildTaskAttribute.
-    /// This simulates a task from the MSBuild repository that needs non-inheritable semantics.
-    /// </summary>
-    [InternalMSBuildTask]
-    public class InternalBaseMultiThreadableTask : Task, IMultiThreadableTask
-    {
-        public TaskEnvironment TaskEnvironment { get; set; }
-
-        public override bool Execute()
-        {
-            Log.LogMessage(MessageImportance.High, "InternalBaseMultiThreadableTask executed");
-            return true;
-        }
-    }
-
-    /// <summary>
-    /// Task that inherits from BaseMultiThreadableTask (unmarked external base).
-    /// Should run IN-PROCESS in multi-threaded mode because of inheritable semantics.
-    /// </summary>
-    public class InheritedInterfaceTestTask : BaseMultiThreadableTask
-    {
-        public override bool Execute()
-        {
-            Log.LogMessage(MessageImportance.High, "InheritedInterfaceTask executed");
-            return true;
-        }
-    }
-
-    /// <summary>
-    /// Task that inherits from InternalBaseMultiThreadableTask (marked MSBuild repo base).
-    /// Should run in TaskHost in multi-threaded mode because of non-inheritable semantics
-    /// for backward compatibility.
-    /// </summary>
-    public class InheritedFromInternalBaseTestTask : InternalBaseMultiThreadableTask
-    {
-        public override bool Execute()
-        {
-            Log.LogMessage(MessageImportance.High, "InheritedFromInternalBaseTask executed");
-            return true;
-        }
-    }
-
-    /// <summary>
-    /// Intermediate task class for multi-level inheritance testing (unmarked).
-    /// Inherits from BaseMultiThreadableTask.
-    /// </summary>
-    public class MiddleUnmarkedTask : BaseMultiThreadableTask
-    {
-        public override bool Execute()
-        {
-            Log.LogMessage(MessageImportance.High, "MiddleUnmarkedTask executed");
-            return true;
-        }
-    }
-
-    /// <summary>
-    /// Task that inherits from MiddleUnmarkedTask (multi-level from unmarked base).
-    /// Should run in-process because of inheritable semantics through the chain.
-    /// </summary>
-    public class MultiLevelUnmarkedTestTask : MiddleUnmarkedTask
-    {
-        public override bool Execute()
-        {
-            Log.LogMessage(MessageImportance.High, "MultiLevelUnmarkedTask executed");
-            return true;
-        }
-    }
-
-    /// <summary>
-    /// Intermediate task class for multi-level inheritance testing (from marked base).
-    /// Inherits from InternalBaseMultiThreadableTask.
-    /// </summary>
-    public class MiddleMarkedTask : InternalBaseMultiThreadableTask
-    {
-        public override bool Execute()
-        {
-            Log.LogMessage(MessageImportance.High, "MiddleMarkedTask executed");
-            return true;
-        }
-    }
-
-    /// <summary>
-    /// Task that inherits from MiddleMarkedTask (multi-level from marked base).
-    /// Should run in TaskHost because InternalMSBuildTaskAttribute appears in the hierarchy.
-    /// </summary>
-    public class MultiLevelMarkedTestTask : MiddleMarkedTask
-    {
-        public override bool Execute()
-        {
-            Log.LogMessage(MessageImportance.High, "MultiLevelMarkedTask executed");
-            return true;
-        }
-    }
 
     /// <summary>
     /// Task marked with MSBuildMultiThreadableTaskAttribute.
@@ -782,6 +493,7 @@ namespace Microsoft.Build.Framework
     /// Test attribute to mark tasks as safe for multi-threaded execution.
     /// This is a test copy in this test assembly that will be recognized
     /// by name-based attribute detection in TaskRouter.
+    /// Must match the non-inheritable definition (Inherited = false).
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
     public sealed class MSBuildMultiThreadableTaskAttribute : Attribute
