@@ -18,8 +18,8 @@ namespace Microsoft.Build.Shared
     {
         // For the current user, these correspond to read, write, and execute permissions.
         // Lower order bits correspond to the same for "group" or "other" users.
-        private const int userRWX = 0x100 | 0x80 | 0x40;
         private static string tempFileDirectory = null;
+        private const string msbuildTempFolderPrefix = "MSBuildTemp";
         internal static string TempFileDirectory
         {
             get
@@ -36,35 +36,21 @@ namespace Microsoft.Build.Shared
         // For all native calls, directly check their return values to prevent bad actors from getting in between checking if a directory exists and returning it.
         private static string CreateFolderUnderTemp()
         {
-            string basePath = Path.Combine(Path.GetTempPath(), $"MSBuildTemp{Environment.UserName}");
+            string path = null;
 
-            if (NativeMethodsShared.IsLinux && NativeMethodsShared.mkdir(basePath, userRWX) != 0)
+            if (NativeMethodsShared.IsLinux)
             {
-                if (NativeMethodsShared.chmod(basePath, userRWX) == 0)
-                {
-                    // Current user owns this file; we can read and write to it. It is reasonable here to assume it was created properly by MSBuild and can be used
-                    // for temporary files.
-                }
-                else
-                {
-                    // Another user created a folder pretending to be us! Find a folder we can actually use.
-                    int extraBits = 0;
-                    string pathToCheck = basePath + extraBits;
-                    while (NativeMethodsShared.mkdir(pathToCheck, userRWX) != 0 && NativeMethodsShared.chmod(pathToCheck, userRWX) != 0)
-                    {
-                        extraBits++;
-                        pathToCheck = basePath + extraBits;
-                    }
-
-                    basePath = pathToCheck;
-                }
+#if NET // always true, Linux implies NET
+                path = Directory.CreateTempSubdirectory(msbuildTempFolderPrefix).FullName;
+#endif
             }
             else
             {
-                Directory.CreateDirectory(basePath);
+                path = Path.Combine(Path.GetTempPath(), msbuildTempFolderPrefix);
+                Directory.CreateDirectory(path);
             }
 
-            return FileUtilities.EnsureTrailingSlash(basePath);
+            return FileUtilities.EnsureTrailingSlash(path);
         }
 
         /// <summary>
