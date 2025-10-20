@@ -190,11 +190,6 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ConsoleOutput => !ConsoleToMSBuild ? Array.Empty<ITaskItem>() : _nonEmptyOutput.ToArray();
 
-        /// <summary>
-        /// Task environment for multithreaded execution
-        /// </summary>
-        public TaskEnvironment TaskEnvironment { get; set; }
-
         #endregion
 
         #region Methods
