@@ -23,7 +23,7 @@ namespace Microsoft.Build.Tasks
     /// for it to complete, and then returns True if the process completed successfully, and False if an error occurred.
     /// </summary>
     // UNDONE: ToolTask has a "UseCommandProcessor" flag that duplicates much of the code in this class. Remove the duplication.
-    public class Exec : ToolTaskExtension
+    public class Exec : ToolTaskExtension, IMultiThreadableTask
     {
         #region Constructors
 
@@ -189,6 +189,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Output]
         public ITaskItem[] ConsoleOutput => !ConsoleToMSBuild ? Array.Empty<ITaskItem>() : _nonEmptyOutput.ToArray();
+
+        /// <summary>
+        /// Task environment for multithreaded execution
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         #endregion
 
@@ -458,7 +463,7 @@ namespace Microsoft.Build.Tasks
             // directory use that, otherwise it's the current directory
             _workingDirectory = !string.IsNullOrEmpty(WorkingDirectory)
                 ? WorkingDirectory
-                : Directory.GetCurrentDirectory();
+                : TaskEnvironment?.ProjectDirectory ?? Directory.GetCurrentDirectory();
 
             // check if the working directory we're going to use for the exec command is a UNC path
             workingDirectoryIsUNC = FileUtilitiesRegex.StartsWithUncPattern(_workingDirectory);
