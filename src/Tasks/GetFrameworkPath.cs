@@ -12,7 +12,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Returns the paths to the various frameworks versions.
     /// </summary>
-    public class GetFrameworkPath : TaskExtension
+    public class GetFrameworkPath : TaskExtension, IMultiThreadableTask
     {
         #region ITask Members
 
@@ -144,6 +144,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Output]
         public string FrameworkVersion48Path => s_version48Path.Value;
+
+        /// <summary>
+        /// The task environment for thread-safe operations.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         #endregion
     }

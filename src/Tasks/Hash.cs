@@ -22,7 +22,7 @@ namespace Microsoft.Build.Tasks
     /// Would this need to be revised - XxHash64 from System.Io.Hashing could be used instead for better performance.
     /// (That however currently requires load of additional binary into VS process which has it's own costs)
     /// </remarks>
-    public class Hash : TaskExtension
+    public class Hash : TaskExtension, IMultiThreadableTask
     {
         private const char ItemSeparatorCharacter = '\u2028';
         private static readonly Encoding s_encoding = Encoding.UTF8;
@@ -52,6 +52,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         [Output]
         public string HashResult { get; set; }
+
+        /// <summary>
+        /// The task environment for thread-safe operations.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// Execute the task.

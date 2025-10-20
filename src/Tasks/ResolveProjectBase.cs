@@ -18,7 +18,7 @@ namespace Microsoft.Build.Tasks
     /// Base class for ResolveNonMSBuildProjectOutput and AssignProjectConfiguration, since they have
     /// similar architecture
     /// </summary>
-    public abstract class ResolveProjectBase : TaskExtension
+    public abstract class ResolveProjectBase : TaskExtension, IMultiThreadableTask
     {
         #region Properties
 
@@ -44,6 +44,11 @@ namespace Microsoft.Build.Tasks
         private SolutionConfiguration _solutionConfiguration = SolutionConfiguration.Empty;
 
         private const string attributeProject = "Project";
+
+        /// <summary>
+        /// The task environment for thread-safe operations.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         #endregion
 
