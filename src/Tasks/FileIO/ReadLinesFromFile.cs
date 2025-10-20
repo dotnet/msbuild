@@ -15,13 +15,18 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Read a list of items from a file.
     /// </summary>
-    public class ReadLinesFromFile : TaskExtension
+    public class ReadLinesFromFile : TaskExtension, IMultiThreadableTask
     {
         /// <summary>
         /// File to read lines from.
         /// </summary>
         [Required]
         public ITaskItem File { get; set; }
+
+        /// <summary>
+        /// The task environment for thread-safe operations.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// Receives lines from file.
@@ -38,11 +43,11 @@ namespace Microsoft.Build.Tasks
             bool success = true;
             if (File != null)
             {
-                if (FileSystems.Default.FileExists(File.ItemSpec))
+                if (FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(File.ItemSpec)))
                 {
                     try
                     {
-                        string[] textLines = System.IO.File.ReadAllLines(File.ItemSpec);
+                        string[] textLines = System.IO.File.ReadAllLines(TaskEnvironment.GetAbsolutePath(File.ItemSpec));
 
                         var nonEmptyLines = new List<ITaskItem>();
                         char[] charsToTrim = { '\0', ' ', '\t' };
