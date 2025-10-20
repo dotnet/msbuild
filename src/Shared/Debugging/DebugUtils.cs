@@ -108,6 +108,11 @@ namespace Microsoft.Build.Shared.Debugging
         /// <summary>
         /// Returns true if the current process is an out-of-proc TaskHost node.
         /// </summary>
+        /// <returns>
+        /// True if this process was launched with /nodemode:2 (indicating it's a TaskHost process),
+        /// false otherwise. This is useful for conditionally enabling debugging or other behaviors
+        /// based on whether the code is running in the main MSBuild process or a child TaskHost process.
+        /// </returns>
         public static bool IsInTaskHostNode() => ProcessNodeMode.Value == NodeMode.OutOfProcTaskHostNode;
 
         public static string FindNextAvailableDebugFilePath(string fileName)
