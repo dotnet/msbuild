@@ -382,7 +382,7 @@ namespace Microsoft.Build.BackEnd
                     useTaskFactory = true;
                 }
             }
-            
+
             // Multi-threaded mode routing: Determine if non-thread-safe tasks need TaskHost isolation.
             if (!useTaskFactory 
                 && _loadedType?.Type != null 
@@ -394,7 +394,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
+            _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory, _taskName);
 
             if (useTaskFactory)
             {

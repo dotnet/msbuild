@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd.Logging
@@ -37,6 +38,9 @@ namespace Microsoft.Build.BackEnd.Logging
 
         private int _taskHostTasksExecutedCount = 0;
 
+        // Telemetry for tasks executed in TaskHost - maps task names to counts
+        private readonly Dictionary<string, int> _taskHostTaskUsage = new();
+
         // Telemetry for non-sealed subclasses of Microsoft-owned MSBuild tasks
         // Maps Microsoft task names to counts of their non-sealed usage
         private readonly Dictionary<string, int> _msbuildTaskSubclassUsage = new();
@@ -44,11 +48,21 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Adds a task execution to the telemetry data.
         /// </summary>
-        public void AddTaskExecution(string taskFactoryTypeName, bool isTaskHost)
+        public void AddTaskExecution(string taskFactoryTypeName, bool isTaskHost, string? taskName = null)
         {
             if (isTaskHost)
             {
                 _taskHostTasksExecutedCount++;
+                
+                // Track the specific task name if provided
+                if (!string.IsNullOrEmpty(taskName))
+                {
+                    if (!_taskHostTaskUsage.ContainsKey(taskName!))
+                    {
+                        _taskHostTaskUsage[taskName!] = 0;
+                    }
+                    _taskHostTaskUsage[taskName!]++;
+                }
             }
 
             switch (taskFactoryTypeName)
@@ -132,6 +146,9 @@ namespace Microsoft.Build.BackEnd.Logging
 
             try
             {
+                // Log telemetry summary via standard logging
+                LogTelemetrySummary(loggingService, buildEventContext);
+
                 Dictionary<string, string> taskFactoryProperties = GetTaskFactoryProperties();
                 if (taskFactoryProperties.Count > 0)
                 {
@@ -162,6 +179,39 @@ namespace Microsoft.Build.BackEnd.Logging
                 Clean();
             }
         }
+
+        /// <summary>
+        /// Logs a human-readable summary of project telemetry data via standard logging.
+        /// </summary>
+        private void LogTelemetrySummary(ILoggingService loggingService, BuildEventContext buildEventContext)
+        {
+            var totalTasksExecuted = _assemblyTaskFactoryTasksExecutedCount + 
+                                    _intrinsicTaskFactoryTasksExecutedCount +
+                                    _codeTaskFactoryTasksExecutedCount + 
+                                    _roslynCodeTaskFactoryTasksExecutedCount +
+                                    _xamlTaskFactoryTasksExecutedCount + 
+                                    _customTaskFactoryTasksExecutedCount;
+
+            if (totalTasksExecuted > 0)
+            {
+                // Log basic task execution summary
+                var message = $"Project telemetry: {totalTasksExecuted} tasks executed, {_taskHostTasksExecutedCount} via TaskHost";
+                loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, message);
+
+                // Log TaskHost task breakdown if any tasks ran in TaskHost
+                if (_taskHostTaskUsage.Count > 0)
+                {
+                    var taskHostBreakdown = new List<string>();
+                    foreach (var kvp in _taskHostTaskUsage.OrderByDescending(x => x.Value))
+                    {
+                        taskHostBreakdown.Add($"{kvp.Key}: {kvp.Value}");
+                    }
+                    
+                    loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, 
+                        $"TaskHost tasks: {string.Join(", ", taskHostBreakdown)}");
+                }
+            }
+        }
         
         private void Clean()
         {
@@ -173,6 +223,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _customTaskFactoryTasksExecutedCount = 0;
 
             _taskHostTasksExecutedCount = 0;
+            _taskHostTaskUsage.Clear();
 
             _msbuildTaskSubclassUsage.Clear();
         }

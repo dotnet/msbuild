@@ -1032,7 +1032,7 @@ namespace Microsoft.Build.BackEnd
                         }
 
                         // Track telemetry for non-AssemblyTaskFactory task factories
-                        _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(_taskFactoryWrapper.TaskFactory.GetType().FullName, isTaskHost);
+                        _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(_taskFactoryWrapper.TaskFactory.GetType().FullName, isTaskHost, _taskName);
                     }
                     finally
                     {
