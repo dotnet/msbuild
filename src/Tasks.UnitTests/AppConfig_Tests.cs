@@ -34,7 +34,8 @@ namespace Microsoft.Build.UnitTests
                 "    </runtime>\n" +
                 "</configuration>";
 
-            app.Read(new XmlTextReader(xml, XmlNodeType.Document, null));
+            using var xmlReader = new XmlTextReader(xml, XmlNodeType.Document, null);
+            app.Read(xmlReader);
 
             string s = Summarize(app);
 
@@ -59,7 +60,8 @@ namespace Microsoft.Build.UnitTests
                 "    </runtime>\n" +
                 "</configuration>";
 
-            app.Read(new XmlTextReader(xml, XmlNodeType.Document, null));
+            using var xmlReader = new XmlTextReader(xml, XmlNodeType.Document, null);
+            app.Read(xmlReader);
 
             string s = Summarize(app);
 
@@ -105,7 +107,8 @@ namespace Microsoft.Build.UnitTests
                 "    </system.net>\n" +
                 "</configuration>";
 
-            app.Read(new XmlTextReader(xml, XmlNodeType.Document, null));
+            using var xmlReader = new XmlTextReader(xml, XmlNodeType.Document, null);
+            app.Read(xmlReader);
 
             string s = Summarize(app);
 
@@ -169,7 +172,8 @@ namespace Microsoft.Build.UnitTests
                 "    </system.runtime.remoting>\n" +
                 "</configuration>        ";
 
-            app.Read(new XmlTextReader(xml, XmlNodeType.Document, null));
+            using var xmlReader = new XmlTextReader(xml, XmlNodeType.Document, null);
+            app.Read(xmlReader);
 
             string s = Summarize(app);
 
@@ -194,7 +198,8 @@ namespace Microsoft.Build.UnitTests
                 "    </runtime>\n" +
                 "</configuration>";
 
-            app.Read(new XmlTextReader(xml, XmlNodeType.Document, null));
+            using var xmlReader = new XmlTextReader(xml, XmlNodeType.Document, null);
+            app.Read(xmlReader);
 
             string s = Summarize(app);
 

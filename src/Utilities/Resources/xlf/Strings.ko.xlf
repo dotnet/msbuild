@@ -27,6 +27,11 @@
         <target state="translated">명령이 종료되었습니다(코드: {0}).</target>
         <note />
       </trans-unit>
+      <trans-unit id="LockCheck.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">파일이 "{0}"에 의해 잠겨 있습니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: "{0}"에서 플랫폼 매니페스트 파일을 찾을 수 없습니다.</target>

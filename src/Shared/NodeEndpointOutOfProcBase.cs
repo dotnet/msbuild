@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 #if CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Concurrent;
 #else
@@ -14,6 +15,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
+
 #endif
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
@@ -29,6 +31,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// This is an implementation of INodeEndpoint for the out-of-proc nodes.  It acts only as a client.
     /// </summary>
+    [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is expected to keep the stream open for the process lifetime")]
     internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
     {
         #region Private Data

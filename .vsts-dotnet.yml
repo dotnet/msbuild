@@ -13,6 +13,10 @@ parameters:
   displayName: Optional OptProfDrop Override
   type: string
   default: 'default'
+- name: enableOptProf
+  displayName: Enable OptProf data collection for this build
+  type: boolean
+  default: true
 - name: enableSigningValidation
   displayName: Enable Signing Validation
   type: boolean
@@ -38,13 +42,12 @@ variables:
       value: ${{ parameters.OptProfDropName }}
     - name: SourceBranch
       value: ''
-  # For now skipping apply optimization data for vs16.11, because the run with real signed bits requires being fully automated
-  # while there is no available optimization data for vs16.11.
-  - ${{ if startsWith(variables['Build.SourceBranch'], 'refs/heads/vs16.11') }}:
+  # Override SkipApplyOptimizationData to true when disabling OptProf data collection
+  - ${{ if eq(parameters.EnableOptProf, false) }}:
     - name: SkipApplyOptimizationData
       value: true
   - name: EnableReleaseOneLocBuild
-    value: false # Disable loc for vs17.10 now that it's shipped
+    value: false # disable loc for vs17.11
   - name: Codeql.Enabled
     value: true
   # ensures we don't build and push experimental versions to official feeds as release versions
@@ -115,6 +118,7 @@ extends:
           isExperimental: false
           enableComponentGovernance: true
           signTypeParameter: ${{ parameters.signTypeParameter }}
+          enableOptProf: ${{ parameters.enableOptProf }}
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:

@@ -285,7 +285,9 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// </summary>
         private static ProjectProperty GetFirstProperty(string content)
         {
-            ProjectRootElement projectXml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement projectXml = projectRootElementFromString.Project;
+
             Project project = new Project(projectXml);
             ProjectProperty property = project.GetProperty("p");
 

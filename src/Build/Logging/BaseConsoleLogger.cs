@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using ColorResetter = Microsoft.Build.Logging.ColorResetter;
@@ -75,20 +76,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         public void ParseParameters()
         {
-            if (Parameters == null)
+            foreach (var parameter in LoggerParametersHelper.ParseParameters(Parameters))
             {
-                return;
-            }
-
-            foreach (string parameter in Parameters.Split(parameterDelimiters))
-            {
-                if (string.IsNullOrWhiteSpace(parameter))
-                {
-                    continue;
-                }
-
-                string[] parameterAndValue = parameter.Split(s_parameterValueSplitCharacter);
-                ApplyParameter(parameterAndValue[0], parameterAndValue.Length > 1 ? parameterAndValue[1] : null);
+                ApplyParameter(parameter.Item1, parameter.Item2);
             }
         }
 
@@ -1038,33 +1028,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private bool ApplyVerbosityParameter(string parameterValue)
         {
-            switch (parameterValue.ToUpperInvariant())
+            if (LoggerParametersHelper.TryParseVerbosityParameter(parameterValue, out LoggerVerbosity? verbosity))
             {
-                case "Q":
-                case "QUIET":
-                    Verbosity = LoggerVerbosity.Quiet;
-                    return true;
-                case "M":
-                case "MINIMAL":
-                    Verbosity = LoggerVerbosity.Minimal;
-                    return true;
-                case "N":
-                case "NORMAL":
-                    Verbosity = LoggerVerbosity.Normal;
-                    return true;
-                case "D":
-                case "DETAILED":
-                    Verbosity = LoggerVerbosity.Detailed;
-                    return true;
-                case "DIAG":
-                case "DIAGNOSTIC":
-                    Verbosity = LoggerVerbosity.Diagnostic;
-                    return true;
-                default:
-                    string errorCode;
-                    string helpKeyword;
-                    string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidVerbosity", parameterValue);
-                    throw new LoggerException(message, null, errorCode, helpKeyword);
+                Verbosity = (LoggerVerbosity)verbosity;
+                return true;
+            }
+            else
+            {
+                string errorCode;
+                string helpKeyword;
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out errorCode, out helpKeyword, "InvalidVerbosity", parameterValue);
+                throw new LoggerException(message, null, errorCode, helpKeyword);
             }
         }
 
@@ -1134,16 +1108,6 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal const string projectSeparatorLine =
                  "__________________________________________________";
-
-        /// <summary>
-        /// Console logger parameters delimiters.
-        /// </summary>
-        internal static readonly char[] parameterDelimiters = MSBuildConstants.SemicolonChar;
-
-        /// <summary>
-        /// Console logger parameter value split character.
-        /// </summary>
-        private static readonly char[] s_parameterValueSplitCharacter = MSBuildConstants.EqualsChar;
 
         /// <summary>
         /// When true, accumulate performance numbers.

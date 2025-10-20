@@ -160,6 +160,26 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="LongPaths">
+        <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
+        <target state="translated">Windows kayıt defteri anahtarı LongPathsEnabled ayarına bağlı olarak LongPaths özelliği {0}.</target>
+        <note>"Windows" is the OS, "LongPathsEnabled" should not be localized, and {0} will be "enabled"/"disabled"/"not set"</note>
+      </trans-unit>
+      <trans-unit id="LongPaths_Disabled">
+        <source>disabled</source>
+        <target state="translated">devre dışı</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LongPaths_Enabled">
+        <source>enabled</source>
+        <target state="translated">etkin</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="LongPaths_Missing">
+        <source>not set</source>
+        <target state="translated">ayarlanmadı</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MSBuildVersionMessage">
         <source>MSBuild version {0} for {1}</source>
         <target state="translated">{1} için MSBuild sürüm {0}</target>
@@ -1689,11 +1709,30 @@
       {4}: duration in seconds with 1 decimal point
     </note>
       </trans-unit>
-      <trans-unit id="TestSummary">
-        <source>Test run {0}. Total: {1} Failed: {2} Passed: {3} Skipped: {4}, Duration: {5}s</source>
-        <target state="translated">Test çalıştırması {0}. Toplam: {1} Başarısız: {2} Geçti: {3} Atlandı: {4}, Süre: {5}s</target>
-        <note>{0} string, localized result e.g. Failed surrounded by ANSI colors.
-{1-5} whole number</note>
+      <trans-unit id="TestSummary_BannerAndTotal">
+        <source>Test summary: total: {0}</source>
+        <target state="translated">Test özeti: toplam: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Duration">
+        <source>duration: {0}s</source>
+        <target state="translated">süre: {0}s</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Failed">
+        <source>failed: {0}</source>
+        <target state="translated">başarısız: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Skipped">
+        <source>skipped: {0}</source>
+        <target state="translated">atlandı: {0}</target>
+        <note>{0} whole number</note>
+      </trans-unit>
+      <trans-unit id="TestSummary_Succeeded">
+        <source>succeeded: {0}</source>
+        <target state="translated">başarılı: {0}</target>
+        <note>{0} whole number</note>
       </trans-unit>
       <trans-unit id="UnexpectedParametersError">
         <source>MSBUILD : error MSB1002: This switch does not take any parameters.</source>
