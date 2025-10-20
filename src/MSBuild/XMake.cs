@@ -599,7 +599,10 @@ namespace Microsoft.Build.CommandLine
                     break;
                 case "3":
                     // Value "3" debugs the main MSBuild process but skips debugging child TaskHost processes
-                    Debugger.Launch();
+                    if (!DebugUtils.IsInTaskHostNode())
+                    {
+                        Debugger.Launch();
+                    }
                     break;
 #endif
                 case "2":
