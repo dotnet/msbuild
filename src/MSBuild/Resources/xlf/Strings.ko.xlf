@@ -260,10 +260,10 @@
                      BuildCheck enables evaluating rules to ensure properties
                      of the build. For more info see aka.ms/buildcheck
 	</source>
-        <target state="translated">  -check
-                     빌드하는 동안 BuildChecks를 사용하도록 설정합니다.
-                     BuildCheck는 속성을 확실히 하기 위해 규칙 평가를 사용 설정합니다
-                     확인할 수 있습니다. 자세한 내용은 aka.ms/buildcheck를 참조하세요.
+        <target state="new">  -check
+                     Enables BuildChecks during the build.
+                     BuildCheck enables evaluating rules to ensure properties
+                     of the build. For more info see aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -829,40 +829,40 @@
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
-                     콘솔 로거에 대한 매개 변수입니다. (약식: -clp)
-                     사용 가능한 매개 변수는 다음과 같습니다.
-                        PerformanceSummary--작업, 대상, 프로젝트에서 소요된 시간을 
-                            표시합니다.
-                        Summary--종료 시 오류 및 경고 요약을 표시합니다.
-                        NoSummary--종료 시 오류 및 경고 요약을 표시하지
-                            않습니다.
-                        ErrorsOnly--오류만 표시합니다.
-                        WarningsOnly--경고만 표시합니다.
-                        NoItemAndPropertyList--각 프로젝트 빌드를 시작할 때 항목 및 속성 목록을 
-                            표시하지 않습니다.
-                        ShowCommandLine--TaskCommandLineEvent 메시지를 표시합니다.
-                        ShowTimestamp--메시지 접두사로 타임스탬프를 
-                            표시합니다.
-                        ShowEventId--시작된 이벤트, 완료된 이벤트, 메시지의 eventId를 
-                            표시합니다.
-                        ForceNoAlign--콘솔 버퍼 크기에 텍스트를 맞추지 
-                            않습니다.
-                        DisableConsoleColor--모든 로깅 메시지에 기본 콘솔 색을
-                            사용합니다.
-                        DisableMPLogging--다중 프로세서가 아닌 모드에서 실행할 경우
-                            출력의 다중 프로세서 로깅 스타일을 
-                            사용하지 않도록 설정합니다.
-                        EnableMPLogging--다중 프로세서가 아닌 모드에서 실행할 경우에도
-                            다중 프로세서 로깅 스타일을 사용하도록 설정합니다.
-                            이 로깅 스타일은 기본적으로 활성화됩니다.
-                        ForceConsoleColor--콘솔에서 지원하지 않더라도 ANSI 콘솔 색을
-                            사용합니다
-                        PreferConsoleColor--대상 콘솔에서 지원되는 경우에만
-                             ANSI 콘솔 색을 사용합니다.
-                     Verbosity--이 로거에 대한 -verbosity 설정을 
-                            재정의합니다.
-                     예:
+        <target state="new">  -consoleLoggerParameters:&lt;parameters&gt;
+                     Parameters to console logger. (Short form: -clp)
+                     The available parameters are:
+                        PerformanceSummary--Show time spent in tasks, targets
+                            and projects.
+                        Summary--Show error and warning summary at the end.
+                        NoSummary--Don't show error and warning summary at the
+                            end.
+                        ErrorsOnly--Show only errors.
+                        WarningsOnly--Show only warnings.
+                        NoItemAndPropertyList--Don't show list of items and
+                            properties at the start of each project build.
+                        ShowCommandLine--Show TaskCommandLineEvent messages
+                        ShowTimestamp--Display the Timestamp as a prefix to any
+                            message.
+                        ShowEventId--Show eventId for started events, finished
+                            events, and messages
+                        ForceNoAlign--Does not align the text to the size of
+                            the console buffer
+                        DisableConsoleColor--Use the default console colors
+                            for all logging messages.
+                        DisableMPLogging-- Disable the multiprocessor
+                            logging style of output when running in
+                            non-multiprocessor mode.
+                        EnableMPLogging--Enable the multiprocessor logging
+                            style even when running in non-multiprocessor
+                            mode. This logging style is on by default.
+                        ForceConsoleColor--Use ANSI console colors even if
+                            console does not support it
+                        PreferConsoleColor--Use ANSI console colors only if
+                            target console does support it
+                     Verbosity--overrides the -verbosity setting for this
+                            logger.
+                     Example:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
@@ -2025,42 +2025,42 @@
                        -bl:..\..\custom.binlog
                        -binaryLogger
     </source>
-        <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     모든 빌드 이벤트를 압축된 이진 파일로 직렬화합니다.
-                     기본적으로 이 파일은 현재 디렉터리에 있으며 이름은
-                     "msbuild.binlog"입니다. 이진 로그는 빌드 프로세스를
-                     자세히 설명하는 것으로, 나중에 텍스트 로그를 다시
-                     구성하기 위해 사용할 수 있고 다른 분석 도구에 의해
-                     사용될 수 있습니다. 이진 로그는 일반적으로 가장
-                     상세한 텍스트 진단 수준 로그보다 10~20배 작지만,
-                     더 자세한 정보를 포함하고 있습니다.
-                     (약식: -bl)
+        <target state="new">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
+                     Serializes all build events to a compressed binary file.
+                     By default the file is in the current directory and named
+                     "msbuild.binlog". The binary log is a detailed description
+                     of the build process that can later be used to reconstruct
+                     text logs and used by other analysis tools. A binary log
+                     is usually 10-20x smaller than the most detailed text
+                     diagnostic-level log, but it contains more information.
+                     (Short form: -bl)
 
-                     이진 로거는 기본적으로 빌드 중에 가져온 모든 프로젝트와
-                     발생한 대상 파일을 비롯한 프로젝트 파일의 소스 텍스트를
-                     수집합니다. 선택적 ProjectImports 스위치는 이 동작을 제어합니다.
+                     The binary logger by default collects the source text of
+                     project files, including all imported projects and target
+                     files encountered during the build. The optional
+                     ProjectImports switch controls this behavior:
 
-                      ProjectImports=None     - 프로젝트 가져오기를 수집하지
-                                                않습니다.
-                      ProjectImports=Embed    - 로그 파일에 프로젝트 가져오기를
-                                                포함합니다.
-                      ProjectImports=ZipFile  - 프로젝트 파일을
-                                                output.projectimports.zip에 저장합니다.
-                                                여기서 output은 이진 로그 파일 이름과
-                                                같은 이름입니다.
+                      ProjectImports=None     - Don't collect the project
+                                                imports.
+                      ProjectImports=Embed    - Embed project imports in the
+                                                log file.
+                      ProjectImports=ZipFile  - Save project files to
+                                                output.projectimports.zip
+                                                where output is the same name
+                                                as the binary log file name.
 
-                     ProjectImports의 기본 설정은 Embed입니다.
-                     참고: 로거는 .cs, .cpp 등과 같은 MSBuild가 아닌 소스 파일은
-                     수집하지 않습니다.
+                     The default setting for ProjectImports is Embed.
+                     Note: the logger does not collect non-MSBuild source files
+                     such as .cs, .cpp etc.
 
-                     .binlog 파일을 프로젝트/솔루션 대신 인수로 msbuild.exe에
-                     전달하여 "재생"할 수 있습니다. 다른 로거는 원본 빌드가
-		     발생하고 있는 것처럼 로그 파일에 포함된 정보를 받게 됩니다.
-                     이진 로그 및 해당 사용법에 대한 자세한 내용은
-                     다음 위치에서 확인할 수 있습니다.
+                     A .binlog file can be "played back" by passing it to
+                     msbuild.exe as an argument instead of a project/solution.
+                     Other loggers will receive the information contained
+                     in the log file as if the original build was happening.
+                     You can read more about the binary log and its usages at:
                      https://aka.ms/msbuild/binlog
 
-                     예:
+                     Examples:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None
@@ -2177,7 +2177,7 @@
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
         <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: 로거의 인스턴스를 만들 수 없습니다. {0}</target>
+        <target state="new">MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the
