@@ -30,12 +30,17 @@ namespace Microsoft.Build.Tasks
     /// <comment>
     /// Currently only supports writing .NET attributes.
     /// </comment>
-    public class WriteCodeFragment : TaskExtension
+    public class WriteCodeFragment : TaskExtension, IMultiThreadableTask
     {
         private const string TypeNameSuffix = "_TypeName";
         private const string IsLiteralSuffix = "_IsLiteral";
         private static readonly string[] NamespaceImports = ["System", "System.Reflection"];
         private static readonly IReadOnlyDictionary<string, ParameterType> EmptyParameterTypes = new Dictionary<string, ParameterType>();
+
+        /// <summary>
+        /// The task environment for thread-safe operations.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// Language of code to generate.
@@ -115,7 +120,7 @@ namespace Microsoft.Build.Tasks
 
                 FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(OutputFile.ItemSpec));
 
-                File.WriteAllText(OutputFile.ItemSpec, code); // Overwrites file if it already exists (and can be overwritten)
+                File.WriteAllText(TaskEnvironment?.GetAbsolutePath(OutputFile.ItemSpec) ?? OutputFile.ItemSpec, code); // Overwrites file if it already exists (and can be overwritten)
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
