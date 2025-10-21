@@ -10,10 +10,9 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
-#if NETFRAMEWORK
-using Microsoft.IO;
-#else
 using System.IO;
+#if NETFRAMEWORK
+using MicrosoftIO = Microsoft.IO;
 #endif
 using Shouldly;
 using VerifyTests;
@@ -1311,6 +1310,215 @@ EndGlobal
 
                 success.ShouldBeTrue(customMessage: "TryLoadTaskBody should succeed");
                 taskInfo.SourceCode.ShouldContain("TestTask", customMessage: "Should have loaded code from file");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that absolute paths in multi-threaded mode are passed through unchanged.
+        /// </summary>
+        [Fact]
+        public void TryLoadTaskBody_AbsolutePathPassesThrough()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder testFolder = env.CreateFolder(createFolder: true);
+                string codeFileName = "AbsolutePathTask.cs";
+                string codeContent = "public class AbsolutePathTask : Task { }";
+                TransientTestFile codeFile = env.CreateFile(testFolder, codeFileName, codeContent);
+
+                // Use absolute path
+                string absolutePath = codeFile.Path;
+
+                // Project file in a different directory
+                TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+                string projectFilePath = Path.Combine(projectFolder.Path, "test.proj");
+
+                MockEngine mockEngine = new MockEngine 
+                { 
+                    ProjectFileOfTaskNode = projectFilePath,
+                    IsMultiThreadedBuild = true
+                };
+                
+                TaskLoggingHelper log = new TaskLoggingHelper(mockEngine, "AbsolutePathTask")
+                {
+                    TaskResources = AssemblyResources.PrimaryResources,
+                    HelpKeywordPrefix = "MSBuild."
+                };
+
+                string taskBody = $"<Code Source=\"{absolutePath}\" Language=\"cs\" />";
+                
+                bool success = RoslynCodeTaskFactory.TryLoadTaskBody(
+                    log, 
+                    "AbsolutePathTask", 
+                    taskBody, 
+                    Array.Empty<TaskPropertyInfo>(),
+                    mockEngine,
+                    out RoslynCodeTaskFactoryTaskInfo taskInfo);
+
+                success.ShouldBeTrue(customMessage: "Absolute path should work in multi-threaded mode");
+                taskInfo.SourceCode.ShouldContain("AbsolutePathTask");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that relative paths with parent directory navigation (..) work correctly.
+        /// This is a legitimate use case for shared code files in parent directories.
+        /// </summary>
+        [Fact]
+        public void TryLoadTaskBody_RelativePathWithParentNavigation()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder rootFolder = env.CreateFolder(createFolder: true);
+                
+                // Create shared code in root
+                string sharedCodeContent = "public class SharedTask : Task { }";
+                TransientTestFile sharedCodeFile = env.CreateFile(rootFolder, "SharedTask.cs", sharedCodeContent);
+
+                // Create project in subdirectory
+                TransientTestFolder projectFolder = env.CreateFolder(Path.Combine(rootFolder.Path, "Project"), createFolder: true);
+                string projectFilePath = Path.Combine(projectFolder.Path, "test.proj");
+
+                MockEngine mockEngine = new MockEngine 
+                { 
+                    ProjectFileOfTaskNode = projectFilePath,
+                    IsMultiThreadedBuild = true
+                };
+                
+                TaskLoggingHelper log = new TaskLoggingHelper(mockEngine, "SharedTask")
+                {
+                    TaskResources = AssemblyResources.PrimaryResources,
+                    HelpKeywordPrefix = "MSBuild."
+                };
+
+                // Use relative path with parent directory navigation
+                string taskBody = "<Code Source=\"..\\SharedTask.cs\" Language=\"cs\" />";
+                
+                bool success = RoslynCodeTaskFactory.TryLoadTaskBody(
+                    log, 
+                    "SharedTask", 
+                    taskBody, 
+                    Array.Empty<TaskPropertyInfo>(),
+                    mockEngine,
+                    out RoslynCodeTaskFactoryTaskInfo taskInfo);
+
+                success.ShouldBeTrue(customMessage: "Relative path with .. should work");
+                taskInfo.SourceCode.ShouldContain("SharedTask");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that empty or whitespace source paths are handled with clear error messages.
+        /// </summary>
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData("  ")]
+        public void TryLoadTaskBody_EmptySourcePathFails(string emptyPath)
+        {
+            MockEngine mockEngine = new MockEngine 
+            { 
+                ProjectFileOfTaskNode = "C:\\test\\test.proj",
+                IsMultiThreadedBuild = true
+            };
+            
+            TaskLoggingHelper log = new TaskLoggingHelper(mockEngine, "EmptyPathTask")
+            {
+                TaskResources = AssemblyResources.PrimaryResources,
+                HelpKeywordPrefix = "MSBuild."
+            };
+
+            string taskBody = $"<Code Source=\"{emptyPath}\" Language=\"cs\" />";
+            
+            bool success = RoslynCodeTaskFactory.TryLoadTaskBody(
+                log, 
+                "EmptyPathTask", 
+                taskBody, 
+                Array.Empty<TaskPropertyInfo>(),
+                mockEngine,
+                out RoslynCodeTaskFactoryTaskInfo _);
+
+            // Empty source attribute is already validated by XML parsing
+            success.ShouldBeFalse();
+            mockEngine.Errors.ShouldBeGreaterThan(0);
+        }
+
+        /// <summary>
+        /// Verifies behavior when ProjectFileOfTaskNode is null in multi-threaded mode.
+        /// This should fail with a clear error rather than silently producing incorrect results.
+        /// </summary>
+        [Fact]
+        public void TryLoadTaskBody_NullProjectFileInMultiThreadedMode()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder testFolder = env.CreateFolder(createFolder: true);
+                TransientTestFile codeFile = env.CreateFile(testFolder, "Task.cs", "public class Task { }");
+
+                MockEngine mockEngine = new MockEngine 
+                { 
+                    ProjectFileOfTaskNode = null,
+                    IsMultiThreadedBuild = true
+                };
+                
+                TaskLoggingHelper log = new TaskLoggingHelper(mockEngine, "Task")
+                {
+                    TaskResources = AssemblyResources.PrimaryResources,
+                    HelpKeywordPrefix = "MSBuild."
+                };
+
+                string taskBody = "<Code Source=\"Task.cs\" Language=\"cs\" />";
+                
+                // This should fail - we can't resolve relative paths without a project file
+                Should.Throw<ArgumentNullException>(() =>
+                {
+                    RoslynCodeTaskFactory.TryLoadTaskBody(
+                        log, 
+                        "Task", 
+                        taskBody, 
+                        Array.Empty<TaskPropertyInfo>(),
+                        mockEngine,
+                        out RoslynCodeTaskFactoryTaskInfo _);
+                });
+            }
+        }
+
+        /// <summary>
+        /// Verifies that non-existent source files produce appropriate file not found errors.
+        /// </summary>
+        [Fact]
+        public void TryLoadTaskBody_NonExistentSourceFile()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder testFolder = env.CreateFolder(createFolder: true);
+                string projectFilePath = Path.Combine(testFolder.Path, "test.proj");
+
+                MockEngine mockEngine = new MockEngine 
+                { 
+                    ProjectFileOfTaskNode = projectFilePath,
+                    IsMultiThreadedBuild = true
+                };
+                
+                TaskLoggingHelper log = new TaskLoggingHelper(mockEngine, "NonExistentTask")
+                {
+                    TaskResources = AssemblyResources.PrimaryResources,
+                    HelpKeywordPrefix = "MSBuild."
+                };
+
+                string taskBody = "<Code Source=\"DoesNotExist.cs\" Language=\"cs\" />";
+                
+                // Should throw FileNotFoundException
+                Should.Throw<FileNotFoundException>(() =>
+                {
+                    RoslynCodeTaskFactory.TryLoadTaskBody(
+                        log, 
+                        "NonExistentTask", 
+                        taskBody, 
+                        Array.Empty<TaskPropertyInfo>(),
+                        mockEngine,
+                        out RoslynCodeTaskFactoryTaskInfo _);
+                });
             }
         }
     }
