@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.VisualStudio.Telemetry;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
@@ -14,28 +15,33 @@ namespace Microsoft.Build.Framework.Telemetry
     /// Extension methods for <see cref="Activity"/>. usage in VS OpenTelemetry.
     /// </summary>
     internal static class VSTelemetryActivityExtensions
-    {
+    {     
+
         /// <summary>
         /// Add tags to the activity from a <see cref="IActivityTelemetryDataHolder"/>.
         /// </summary>
-        public static VsTelemetryActivity WithTags(this VsTelemetryActivity activity, IActivityTelemetryDataHolder? dataHolder)
+        public static VsTelemetryActivity WithTags(this VsTelemetryActivity activity, string key, IActivityTelemetryDataHolder? dataHolder)
         {
             if (dataHolder != null)
             {
-                activity.WithTags(dataHolder.GetActivityProperties());
+                activity.WithTag(key, dataHolder.GetActivityProperties());
             }
 
             return activity;
         }
 
         /// <summary>
-        /// Add tags to the activity from a list of TelemetryItems.
+        /// Add tags to the activity from a <see cref="IActivityTelemetryDataHolder"/>.
         /// </summary>
-        public static VsTelemetryActivity WithTags(this VsTelemetryActivity activity, IList<TelemetryItem> tags)
+        public static VsTelemetryActivity WithTags(this VsTelemetryActivity activity, string key, BuildTelemetry? buildTelemetry)
         {
-            foreach (var tag in tags)
+            if (buildTelemetry != null)
             {
-                activity.WithTag(tag);
+                TelemetryComplexProperty dataHolder = new VSBuildTelemetry(buildTelemetry).GetActivityProperties();
+                if (dataHolder != null)
+                {
+                    activity.WithTag(key, dataHolder);
+                }
             }
 
             return activity;
@@ -44,10 +50,9 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Add a tag to the activity from a <see cref="TelemetryItem"/>.
         /// </summary>
-        public static VsTelemetryActivity WithTag(this VsTelemetryActivity activity, TelemetryItem item)
+        public static VsTelemetryActivity WithTag(this VsTelemetryActivity activity, string key, TelemetryComplexProperty telemetryComplexProperty)
         {
-            object value = item.NeedsHashing ? GetHashed(item.Value) : item.Value;
-            activity.SetTag($"{TelemetryConstants.PropertyPrefix}{item.Name}", value);
+            activity.AddComplexProperty($"{TelemetryConstants.PropertyPrefix}{key}", telemetryComplexProperty);
 
             return activity;
         }

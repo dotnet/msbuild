@@ -1,8 +1,10 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
+#if NETFRAMEWORK
+
 using System.Diagnostics;
+using Microsoft.VisualStudio.Telemetry;
 
 namespace Microsoft.Build.Framework.Telemetry;
 
@@ -11,5 +13,7 @@ namespace Microsoft.Build.Framework.Telemetry;
 /// </summary>
 internal interface IActivityTelemetryDataHolder
 {
-    IList<TelemetryItem> GetActivityProperties();
+    TelemetryComplexProperty GetActivityProperties();
 }
+
+#endif

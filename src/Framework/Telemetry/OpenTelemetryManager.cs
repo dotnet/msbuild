@@ -41,11 +41,6 @@ namespace Microsoft.Build.Framework.Telemetry
 
         public string? LoadFailureExceptionMessage { get; set; }
 
-        /// <summary>
-        /// Optional activity source for MSBuild or other telemetry usage.
-        /// </summary>
-        public MSBuildActivitySource? DefaultActivitySource { get; private set; }
-
         private OpenTelemetryManager()
         {
         }
@@ -116,7 +111,6 @@ namespace Microsoft.Build.Framework.Telemetry
         private void InitializeActivitySources()
         {
             _telemetryState = TelemetryState.TracerInitialized;
-            DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace, _sampleRate);
         }
 
 #if NETFRAMEWORK

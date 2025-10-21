@@ -22,6 +22,13 @@ namespace Microsoft.Build.Framework.Telemetry
             _scope = scope;
         }
 
+        public VsTelemetryActivity? AddComplexProperty(string key, TelemetryComplexProperty complexProperty)
+        {
+            _scope.EndEvent.Properties[key] = complexProperty;
+
+            return this;
+        }
+
         public VsTelemetryActivity? AddTag(string key, string? value)
         {
             _scope.EndEvent.Properties[key] = value;

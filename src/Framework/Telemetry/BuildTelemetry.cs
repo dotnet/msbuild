@@ -10,7 +10,7 @@ namespace Microsoft.Build.Framework.Telemetry
     /// <summary>
     /// Telemetry of build.
     /// </summary>
-    internal class BuildTelemetry : TelemetryBase, IActivityTelemetryDataHolder
+    internal class BuildTelemetry : TelemetryBase
     {
         public override string EventName => "build";
 
@@ -143,44 +143,6 @@ namespace Microsoft.Build.Framework.Telemetry
                 if (value != null)
                 {
                     properties[key] = value;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Create a list of properties sent to VS telemetry with the information whether they should be hashed.
-        /// </summary>
-        /// <returns></returns>
-        public IList<TelemetryItem> GetActivityProperties()
-        {
-            List<TelemetryItem> telemetryItems = new(8);
-
-            if (StartAt.HasValue && FinishedAt.HasValue)
-            {
-                telemetryItems.Add(new TelemetryItem(TelemetryConstants.BuildDurationPropertyName, (FinishedAt.Value - StartAt.Value).TotalMilliseconds, false));
-            }
-
-            if (InnerStartAt.HasValue && FinishedAt.HasValue)
-            {
-                telemetryItems.Add(new TelemetryItem(TelemetryConstants.InnerBuildDurationPropertyName, (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds, false));
-            }
-
-            AddIfNotNull(nameof(BuildEngineHost), BuildEngineHost);
-            AddIfNotNull(nameof(BuildSuccess), BuildSuccess?.ToString());
-            AddIfNotNull(nameof(BuildTarget), BuildTarget);
-            AddIfNotNull(nameof(BuildEngineVersion), BuildEngineVersion?.ToString());
-            AddIfNotNull(nameof(BuildCheckEnabled), BuildCheckEnabled?.ToString());
-            AddIfNotNull(nameof(MultiThreadedModeEnabled), MultiThreadedModeEnabled?.ToString());
-            AddIfNotNull(nameof(SACEnabled), SACEnabled?.ToString());
-            AddIfNotNull(nameof(IsStandaloneExecution), IsStandaloneExecution?.ToString());
-
-            return telemetryItems;
-
-            void AddIfNotNull(string key, string? value)
-            {
-                if (value != null)
-                {
-                    telemetryItems.Add(new TelemetryItem(key, value, NeedsHashing: false));
                 }
             }
         }

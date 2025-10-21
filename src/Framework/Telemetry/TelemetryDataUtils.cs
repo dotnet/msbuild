@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using Microsoft.VisualStudio.Telemetry;
+using static Microsoft.Build.Framework.Telemetry.BuildInsights;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
@@ -23,50 +24,41 @@ namespace Microsoft.Build.Framework.Telemetry
                 return null;
             }
 
-            List<TelemetryItem> telemetryItems = new(4);
-
-            if (includeTasksDetails)
-            {
-                telemetryItems.Add(new TelemetryItem(NodeTelemetryTags.Tasks, ConvertTasksDetailsToPropertyBag(telemetryData.TasksExecutionData)));
-            }
-
-            if (includeTargetDetails)
-            {
-                telemetryItems.Add(new TelemetryItem(NodeTelemetryTags.Targets, ConvertTargetsDetailsToPropertyBag(telemetryData.TargetsExecutionData)));
-            }
-
-            TargetsSummaryConverter targetsSummary = new();
+            var targetsSummary = new TargetsSummaryConverter();
             targetsSummary.Process(telemetryData.TargetsExecutionData);
-            telemetryItems.Add(new TelemetryItem(NodeTelemetryTags.TargetsSummary, new TelemetryComplexProperty(ConvertTargetsSummaryToPropertyBag(targetsSummary))));
 
-            TasksSummaryConverter tasksSummary = new();
+            var tasksSummary = new TasksSummaryConverter();
             tasksSummary.Process(telemetryData.TasksExecutionData);
-            telemetryItems.Add(new TelemetryItem(NodeTelemetryTags.TasksSummary, new TelemetryComplexProperty(ConvertTasksSummaryToPropertyBag(tasksSummary))));
 
-            return new NodeTelemetry(telemetryItems);
+            var buildInsights = new BuildInsights(
+                GetTasksDetails(telemetryData.TasksExecutionData),
+                GetTargetsDetails(telemetryData.TargetsExecutionData),
+                GetTargetsSummary(targetsSummary),
+                GetTasksSummary(tasksSummary)
+            );
+
+            return new NodeTelemetry(buildInsights);
         }
 
         /// <summary>
-        /// Converts targets details to a property bag (dictionary) for telemetry.
+        /// Converts targets details to a list of custom objects for telemetry.
         /// </summary>
-        private static Dictionary<string, object> ConvertTargetsDetailsToPropertyBag(
-            Dictionary<TaskOrTargetTelemetryKey, bool> targetsDetails)
+        private static List<TargetDetailInfo> GetTargetsDetails(Dictionary<TaskOrTargetTelemetryKey, bool> targetsDetails)
         {
-            var result = new Dictionary<string, object>();
+            var result = new List<TargetDetailInfo>();
 
             foreach (KeyValuePair<TaskOrTargetTelemetryKey, bool> valuePair in targetsDetails)
             {
-                string keyName = ShouldHashKey(valuePair.Key) ?
-                    ActivityExtensions.GetHashed(valuePair.Key.Name) :
+                string targetName = ShouldHashKey(valuePair.Key) ?
+                    VSTelemetryActivityExtensions.GetHashed(valuePair.Key.Name) :
                     valuePair.Key.Name;
 
-                result[keyName] = new Dictionary<string, object>
-                {
-                    ["WasExecuted"] = valuePair.Value,
-                    ["IsCustom"] = valuePair.Key.IsCustom,
-                    ["IsNuget"] = valuePair.Key.IsNuget,
-                    ["IsMetaProj"] = valuePair.Key.IsMetaProj
-                };
+                result.Add(new TargetDetailInfo(
+                    targetName,
+                    valuePair.Value.ToString(),
+                    valuePair.Key.IsCustom.ToString(),
+                    valuePair.Key.IsNuget.ToString(),
+                    valuePair.Key.IsMetaProj.ToString()));
             }
 
             return result;
@@ -74,164 +66,101 @@ namespace Microsoft.Build.Framework.Telemetry
             static bool ShouldHashKey(TaskOrTargetTelemetryKey key) => key.IsCustom || key.IsMetaProj;
         }
 
+        internal record TargetDetailInfo(string Name, string WasExecuted, string IsCustom, string IsNuget, string IsMetaProj);
+
         /// <summary>
-        /// Converts tasks details to a property bag (dictionary) for telemetry.
+        /// Converts tasks details to a list of custom objects for telemetry.
         /// </summary>
-        private static Dictionary<string, object> ConvertTasksDetailsToPropertyBag(
+        private static List<TaskDetailInfo> GetTasksDetails(
             Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksDetails)
         {
-            var result = new Dictionary<string, object>();
+            var result = new List<TaskDetailInfo>();
 
             foreach (KeyValuePair<TaskOrTargetTelemetryKey, TaskExecutionStats> valuePair in tasksDetails)
             {
-                string keyName = valuePair.Key.IsCustom ?
-                    ActivityExtensions.GetHashed(valuePair.Key.Name) :
+                string taskName = valuePair.Key.IsCustom ?
+                    VSTelemetryActivityExtensions.GetHashed(valuePair.Key.Name) :
                     valuePair.Key.Name;
 
-                result[keyName] = new Dictionary<string, object>
-                {
-                    ["TotalMilliseconds"] = valuePair.Value.CumulativeExecutionTime.TotalMilliseconds,
-                    ["ExecutionsCount"] = valuePair.Value.ExecutionsCount,
-                    ["TotalMemoryBytes"] = valuePair.Value.TotalMemoryBytes,
-                    ["IsCustom"] = valuePair.Key.IsCustom,
-                    ["IsNuget"] = valuePair.Key.IsNuget
-                };
+                result.Add(new TaskDetailInfo(
+                    taskName,
+                    valuePair.Value.CumulativeExecutionTime.TotalMilliseconds.ToString(),
+                    valuePair.Value.ExecutionsCount.ToString(),
+                    valuePair.Value.TotalMemoryBytes.ToString(),
+                    valuePair.Key.IsCustom.ToString(),
+                    valuePair.Key.IsNuget.ToString()));
             }
 
             return result;
         }
 
-        /// <summary>
-        /// Converts targets summary to a property bag (dictionary) for telemetry.
-        /// </summary>
-        private static Dictionary<string, object> ConvertTargetsSummaryToPropertyBag(TargetsSummaryConverter summary)
-        {
-            return new Dictionary<string, object>
-            {
-                ["Loaded"] = CreateTargetStats(
-                    summary.LoadedBuiltinTargetInfo,
-                    summary.LoadedCustomTargetInfo),
-                ["Executed"] = CreateTargetStats(
-                    summary.ExecutedBuiltinTargetInfo,
-                    summary.ExecutedCustomTargetInfo)
-            };
+        internal record TaskDetailInfo(string Name, string TotalMilliseconds, string ExecutionsCount, string TotalMemoryBytes, string IsCustom, string IsNuget);
 
-            static Dictionary<string, object> CreateTargetStats(
+        /// <summary>
+        /// Converts targets summary to a custom object for telemetry.
+        /// </summary>
+        private static TargetsSummaryInfo GetTargetsSummary(TargetsSummaryConverter summary)
+        {
+            return new TargetsSummaryInfo(
+                CreateTargetStats(summary.LoadedBuiltinTargetInfo, summary.LoadedCustomTargetInfo),
+                CreateTargetStats(summary.ExecutedBuiltinTargetInfo, summary.ExecutedCustomTargetInfo));
+
+            static TargetStatsInfo CreateTargetStats(
                 TargetsSummaryConverter.TargetInfo builtinInfo,
                 TargetsSummaryConverter.TargetInfo customInfo)
             {
-                var stats = new Dictionary<string, object>
-                {
-                    ["Total"] = builtinInfo.Total + customInfo.Total
-                };
+                var microsoft = builtinInfo.Total > 0
+                    ? new TargetCategoryInfo(builtinInfo.Total.ToString(), builtinInfo.FromNuget.ToString(), builtinInfo.FromMetaproj.ToString())
+                    : null;
 
-                if (builtinInfo.Total > 0)
-                {
-                    stats["Microsoft"] = new Dictionary<string, object>
-                    {
-                        ["Total"] = builtinInfo.Total,
-                        ["FromNuget"] = builtinInfo.FromNuget,
-                        ["FromMetaproj"] = builtinInfo.FromMetaproj
-                    };
-                }
+                var custom = customInfo.Total > 0
+                    ? new TargetCategoryInfo(customInfo.Total.ToString(), customInfo.FromNuget.ToString(), customInfo.FromMetaproj.ToString())
+                    : null;
 
-                if (customInfo.Total > 0)
-                {
-                    stats["Custom"] = new Dictionary<string, object>
-                    {
-                        ["Total"] = customInfo.Total,
-                        ["FromNuget"] = customInfo.FromNuget,
-                        ["FromMetaproj"] = customInfo.FromMetaproj
-                    };
-                }
-
-                return stats;
+                return new TargetStatsInfo((builtinInfo.Total + customInfo.Total).ToString(), microsoft, custom);
             }
         }
 
+        internal record TargetsSummaryInfo(TargetStatsInfo Loaded, TargetStatsInfo Executed);
+
+        internal record TargetStatsInfo(string Total, TargetCategoryInfo? Microsoft, TargetCategoryInfo? Custom);
+
+        internal record TargetCategoryInfo(string Total, string FromNuget, string FromMetaproj);
+
         /// <summary>
-        /// Converts tasks summary to a property bag (dictionary) for telemetry.
+        /// Converts tasks summary to a custom object for telemetry.
         /// </summary>
-        private static Dictionary<string, object> ConvertTasksSummaryToPropertyBag(TasksSummaryConverter summary)
+        private static TasksSummaryInfo GetTasksSummary(TasksSummaryConverter summary)
         {
-            var result = new Dictionary<string, object>();
+            var microsoft = CreateTaskStats(summary.BuiltinTasksInfo.Total, summary.BuiltinTasksInfo.FromNuget);
+            var custom = CreateTaskStats(summary.CustomTasksInfo.Total, summary.CustomTasksInfo.FromNuget);
 
-            var microsoftDict = new Dictionary<string, object>();
-            AddStatsIfNotEmpty(microsoftDict, "Total", summary.BuiltinTasksInfo.Total);
-            AddStatsIfNotEmpty(microsoftDict, "FromNuget", summary.BuiltinTasksInfo.FromNuget);
-            if (microsoftDict.Count > 0)
+            return new TasksSummaryInfo(microsoft, custom);
+
+            static TaskCategoryStats? CreateTaskStats(TaskExecutionStats total, TaskExecutionStats fromNuget)
             {
-                result["Microsoft"] = microsoftDict;
-            }
+                var totalStats = total.ExecutionsCount > 0
+                    ? new TaskStatsInfo(
+                        total.ExecutionsCount.ToString(),
+                        total.CumulativeExecutionTime.TotalMilliseconds.ToString(),
+                        total.TotalMemoryBytes.ToString())
+                    : null;
 
-            var customDict = new Dictionary<string, object>();
-            AddStatsIfNotEmpty(customDict, "Total", summary.CustomTasksInfo.Total);
-            AddStatsIfNotEmpty(customDict, "FromNuget", summary.CustomTasksInfo.FromNuget);
-            if (customDict.Count > 0)
-            {
-                result["Custom"] = customDict;
-            }
+                var nugetStats = fromNuget.ExecutionsCount > 0
+                    ? new TaskStatsInfo(
+                        fromNuget.ExecutionsCount.ToString(),
+                        fromNuget.CumulativeExecutionTime.TotalMilliseconds.ToString(),
+                        fromNuget.TotalMemoryBytes.ToString())
+                    : null;
 
-            return result;
-
-            static void AddStatsIfNotEmpty(Dictionary<string, object> parent, string key, TaskExecutionStats stats)
-            {
-                if (stats.ExecutionsCount > 0)
-                {
-                    parent[key] = new Dictionary<string, object>
-                    {
-                        ["ExecutionsCount"] = stats.ExecutionsCount,
-                        ["TotalMilliseconds"] = stats.CumulativeExecutionTime.TotalMilliseconds,
-                        ["TotalMemoryBytes"] = stats.TotalMemoryBytes
-                    };
-                }
+                return (totalStats != null || nugetStats != null)
+                    ? new TaskCategoryStats(totalStats, nugetStats)
+                    : null;
             }
         }
 
         private class TargetsSummaryConverter
         {
-            /// <summary>
-            /// Processes target execution data to compile summary statistics for both built-in and custom targets.
-            /// </summary>
-            /// <param name="targetsExecutionData">Dictionary containing target execution data keyed by task identifiers.</param>
-            public void Process(Dictionary<TaskOrTargetTelemetryKey, bool> targetsExecutionData)
-            {
-                foreach (KeyValuePair<TaskOrTargetTelemetryKey, bool> targetPair in targetsExecutionData)
-                {
-                    TaskOrTargetTelemetryKey key = targetPair.Key;
-                    bool wasExecuted = targetPair.Value;
-
-                    // Update loaded targets statistics (all targets are loaded)
-                    UpdateTargetStatistics(key, isExecuted: false);
-
-                    // Update executed targets statistics (only targets that were actually executed)
-                    if (wasExecuted)
-                    {
-                        UpdateTargetStatistics(key, isExecuted: true);
-                    }
-                }
-            }
-
-            private void UpdateTargetStatistics(TaskOrTargetTelemetryKey key, bool isExecuted)
-            {
-                // Select the appropriate target info collections based on execution state
-                TargetInfo builtinTargetInfo = isExecuted ? ExecutedBuiltinTargetInfo : LoadedBuiltinTargetInfo;
-                TargetInfo customTargetInfo = isExecuted ? ExecutedCustomTargetInfo : LoadedCustomTargetInfo;
-
-                // Update either custom or builtin target info based on target type
-                TargetInfo targetInfo = key.IsCustom ? customTargetInfo : builtinTargetInfo;
-
-                targetInfo.Total++;
-                if (key.IsNuget)
-                {
-                    targetInfo.FromNuget++;
-                }
-                if (key.IsMetaProj)
-                {
-                    targetInfo.FromMetaproj++;
-                }
-            }
-
             internal TargetInfo LoadedBuiltinTargetInfo { get; } = new();
 
             internal TargetInfo LoadedCustomTargetInfo { get; } = new();
@@ -240,48 +169,78 @@ namespace Microsoft.Build.Framework.Telemetry
 
             internal TargetInfo ExecutedCustomTargetInfo { get; } = new();
 
+            /// <summary>
+            /// Processes target execution data to compile summary statistics for both built-in and custom targets.
+            /// </summary>
+            public void Process(Dictionary<TaskOrTargetTelemetryKey, bool> targetsExecutionData)
+            {
+                foreach (var kv in targetsExecutionData)
+                {
+                    GetTargetInfo(kv.Key, isExecuted: false).Increment(kv.Key);
+
+                    // Update executed targets statistics (only if executed)
+                    if (kv.Value)
+                    {
+                        GetTargetInfo(kv.Key, isExecuted: true).Increment(kv.Key);
+                    }
+                }
+            }
+
+            private TargetInfo GetTargetInfo(TaskOrTargetTelemetryKey key, bool isExecuted) =>
+                (key.IsCustom, isExecuted) switch
+                {
+                    (true, true) => ExecutedCustomTargetInfo,
+                    (true, false) => LoadedCustomTargetInfo,
+                    (false, true) => ExecutedBuiltinTargetInfo,
+                    (false, false) => LoadedBuiltinTargetInfo
+                };
+
             internal class TargetInfo
             {
-                public int Total { get; internal set; }
+                public int Total { get; private set; }
 
-                public int FromNuget { get; internal set; }
+                public int FromNuget { get; private set; }
 
-                public int FromMetaproj { get; internal set; }
+                public int FromMetaproj { get; private set; }
+
+                internal void Increment(TaskOrTargetTelemetryKey key)
+                {
+                    Total++;
+                    if (key.IsNuget)
+                    {
+                        FromNuget++;
+                    }
+
+                    if (key.IsMetaProj)
+                    {
+                        FromMetaproj++;
+                    }
+                }
             }
         }
 
         private class TasksSummaryConverter
         {
+            internal TasksInfo BuiltinTasksInfo { get; } = new();
+
+            internal TasksInfo CustomTasksInfo { get; } = new();
+
             /// <summary>
             /// Processes task execution data to compile summary statistics for both built-in and custom tasks.
             /// </summary>
-            /// <param name="tasksExecutionData">Dictionary containing task execution data keyed by task identifiers.</param>
             public void Process(Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksExecutionData)
             {
-                foreach (KeyValuePair<TaskOrTargetTelemetryKey, TaskExecutionStats> taskInfo in tasksExecutionData)
+                foreach (KeyValuePair<TaskOrTargetTelemetryKey, TaskExecutionStats> kv in tasksExecutionData)
                 {
-                    UpdateTaskStatistics(BuiltinTasksInfo, CustomTasksInfo, taskInfo.Key, taskInfo.Value);
+                    var taskInfo = kv.Key.IsCustom ? CustomTasksInfo : BuiltinTasksInfo;
+                    taskInfo.Total.Accumulate(kv.Value);
+
+                    if (kv.Key.IsNuget)
+                    {
+                        taskInfo.FromNuget.Accumulate(kv.Value);
+                    }
                 }
             }
-
-            private void UpdateTaskStatistics(
-                TasksInfo builtinTaskInfo,
-                TasksInfo customTaskInfo,
-                TaskOrTargetTelemetryKey key,
-                TaskExecutionStats taskExecutionStats)
-            {
-                TasksInfo taskInfo = key.IsCustom ? customTaskInfo : builtinTaskInfo;
-                taskInfo.Total.Accumulate(taskExecutionStats);
-
-                if (key.IsNuget)
-                {
-                    taskInfo.FromNuget.Accumulate(taskExecutionStats);
-                }
-            }
-
-            internal TasksInfo BuiltinTasksInfo { get; } = new TasksInfo();
-
-            internal TasksInfo CustomTasksInfo { get; } = new TasksInfo();
 
             internal class TasksInfo
             {
@@ -291,14 +250,9 @@ namespace Microsoft.Build.Framework.Telemetry
             }
         }
 
-        private class NodeTelemetry : IActivityTelemetryDataHolder
+        private sealed class NodeTelemetry(BuildInsights insights) : IActivityTelemetryDataHolder
         {
-            private readonly IList<TelemetryItem> _items;
-
-            public NodeTelemetry(IList<TelemetryItem> items) => _items = items;
-
-            public IList<TelemetryItem> GetActivityProperties()
-                => _items;
+            TelemetryComplexProperty IActivityTelemetryDataHolder.GetActivityProperties() => new(insights);
         }
     }
 }

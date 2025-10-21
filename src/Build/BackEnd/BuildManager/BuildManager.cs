@@ -530,11 +530,11 @@ namespace Microsoft.Build.Execution
                     _buildTelemetry = new()
                     {
                         StartAt = now,
-                        IsStandaloneExecution = false,
                     };
                 }
 
                 _buildTelemetry.InnerStartAt = now;
+                _buildTelemetry.IsStandaloneExecution ??= false;
 
                 if (BuildParameters.DumpOpportunisticInternStats)
                 {
@@ -1168,8 +1168,8 @@ namespace Microsoft.Build.Execution
         private void EndBuildTelemetry()
         {
             VSTelemetryManager.StartActivity("Build")?
-                .WithTags(_buildTelemetry)
-                .WithTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
+                .WithTags("generalbuilddata", _buildTelemetry)
+                .WithTags("buildsinsights", _telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
                     includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
                     includeTargetDetails: false))
                 .Dispose();
@@ -3025,8 +3025,7 @@ namespace Microsoft.Build.Execution
                     loggerSwitchParameters: null,
                     verbosity: LoggerVerbosity.Quiet);
 
-                _telemetryConsumingLogger =
-                    new InternalTelemetryConsumingLogger();
+                _telemetryConsumingLogger = new InternalTelemetryConsumingLogger();
 
                 ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(_telemetryConsumingLogger, forwardingLoggerDescription) };
 
@@ -3037,7 +3036,6 @@ namespace Microsoft.Build.Execution
             {
                 loggingService.EnableTargetOutputLogging = true;
             }
-
 
             try
             {
