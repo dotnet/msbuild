@@ -244,6 +244,9 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
         <target state="translated">  -multithreaded
@@ -254,6 +257,9 @@
                      このオプションはサポートされていません。
                      使用されるスレッドの最大数は、
                      -maxCpuCount スイッチによって決まります。
+                     マルチスレッド モードが有効で、
+                     MSBUILDFORCEALLTASKSOUTOFPROC=1 の場合、
+                     maxCpuCount は 256 を超えることはできません。
                      (短い形式: -mt)
     </target>
         <note />
@@ -1504,6 +1510,11 @@
       <trans-unit id="MSBuildDebugPath">
         <source>MSBuild logs and debug information will be at "{0}"</source>
         <target state="translated">MSBuild のログとデバッグ情報は、"{0}" にあります。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
+        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
+        <target state="translated">マルチスレッド モードが有効で、MSBUILDFORCEALLTASKSOUTOFPROC=1 の場合、maxCpuCount は {0} を超えることはできません。</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">

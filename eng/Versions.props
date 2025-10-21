@@ -3,10 +3,11 @@
 <Project>
   <Import Project="Version.Details.props" Condition="Exists('Version.Details.props')" />
   <PropertyGroup>
-    <VersionPrefix>18.0.2</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
-    <PackageValidationBaselineVersion>17.14.8</PackageValidationBaselineVersion>
+    <VersionPrefix>18.1.0</VersionPrefix>
+    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <PackageValidationBaselineVersion>18.0.0-preview-25480-115</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
-    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
+
     <!-- differentiate experimental insertions to avoid package id conflicts, 
      it has to be alphabetically after "preview" to avoid downgrade errors in VS -->
     <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">test</PreReleaseVersionLabel>

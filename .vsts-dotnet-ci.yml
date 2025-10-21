@@ -68,13 +68,17 @@ jobs:
       Write-Host "##vso[task.setvariable variable=onlyDocChanged;isoutput=true]$onlyDocChanged"
     name: SetIfOnlyDocumentionChangedVaribale
     displayName: Check whether only documentation has been updated
+
 - job: BootstrapMSBuildOnFullFrameworkWindows
   dependsOn: IfOnlyDocumentionChanged
   variables:
     onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
+    coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
+    coverageReportName: WindowsFullFrameworkCoverage
   displayName: "Windows Full"
   pool:
     vmImage: 'windows-2022'
+  timeoutInMinutes: 120
   steps:
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: PowerShell@2
@@ -91,12 +95,29 @@ jobs:
       arguments: -onlyDocChanged $(onlyDocChanged)
     env:
       ForceUseXCopyMSBuild: 1
+# Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
+#   - task: PowerShell@2
+#     displayName: Process coverage reports
+#     continueOnError: false
+#     condition: eq(variables.onlyDocChanged, 0)
+#     inputs:
+#       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+#       arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(coverageArtifactsDir) -coverageReportName $(coverageReportName)
+#       pwsh: true
+#   - task: PublishPipelineArtifact@1
+#     displayName: Publish Code Coverage Results
+#     continueOnError: false
+#     condition: eq(variables.onlyDocChanged, 0)
+#     inputs:
+#       targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
+#       artifact: $(coverageReportName)
+#       publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
       testRunTitle: 'Windows-on-full Full Framework'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
+      testRunner: VSTest
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.trx'
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -105,10 +126,10 @@ jobs:
     displayName: Publish .NET Test Results
     inputs:
       testRunTitle: 'Windows-on-full .NET'
-      testRunner: XUnit
+      testRunner: VSTest
       testResultsFiles: |
-        artifacts/TestResults/**/*.xml
-        !**/*UnitTests_net472*.xml
+        artifacts/TestResults/**/*.trx
+        !**/*UnitTests_net472*.trx
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -156,14 +177,16 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)\Verify'
       ArtifactName: 'Windows-on-full Verify $(System.JobAttempt)'
 
-
 - job: BootstrapMSBuildOnCoreWindows
   displayName: "Windows Core"
   dependsOn: IfOnlyDocumentionChanged
   variables:
     onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
+    coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
+    coverageReportName: WindowsCoreCoverage
   pool:
     vmImage: 'windows-2022'
+  timeoutInMinutes: 120
   steps:
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: PowerShell@2
@@ -180,12 +203,29 @@ jobs:
       arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged)'
     env:
       MSBUILDUSESERVER: "1"
+# Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
+#   - task: PowerShell@2
+#     displayName: Process coverage reports
+#     continueOnError: false
+#     condition: eq(variables.onlyDocChanged, 0)
+#     inputs:
+#       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+#       arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(coverageArtifactsDir) -coverageReportName $(coverageReportName)
+#       pwsh: true
+#   - task: PublishPipelineArtifact@1
+#     displayName: Publish Code Coverage Results
+#     continueOnError: false
+#     condition: eq(variables.onlyDocChanged, 0)
+#     inputs:
+#       targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
+#       artifact: $(coverageReportName)
+#       publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
       testRunTitle: 'Windows-on-Core Full Framework'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.xml'
+      testRunner: VSTest
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.trx'
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -194,10 +234,10 @@ jobs:
     displayName: Publish .NET Test Results
     inputs:
       testRunTitle: 'Windows-on-Core .NET'
-      testRunner: XUnit
+      testRunner: VSTest
       testResultsFiles: |
-        artifacts/TestResults/**/*.xml
-        !**/*UnitTests_net472*.xml
+        artifacts/TestResults/**/*.trx
+        !**/*UnitTests_net472*.trx
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -222,6 +262,8 @@ jobs:
   dependsOn: IfOnlyDocumentionChanged
   variables:
     onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
+    coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
+    coverageReportName: WindowsFullReleaseCoverage
   pool:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
       name: NetCore-Public
@@ -229,6 +271,7 @@ jobs:
     ${{ if ne(variables['System.TeamProject'], 'public') }}:
       name: VSEngSS-MicroBuild2022-1ES
       demands: agent.os -equals Windows_NT
+  timeoutInMinutes: 120
   steps:
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: PowerShell@2
@@ -250,12 +293,29 @@ jobs:
       filename: 'eng/cibuild.cmd'
       arguments: '-configuration Release'
     condition: eq(variables.onlyDocChanged, 1)
+# Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
+#   - task: PowerShell@2
+#     displayName: Process coverage reports
+#     continueOnError: false
+#     condition: eq(variables.onlyDocChanged, 0)
+#     inputs:
+#       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+#       arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(coverageArtifactsDir) -coverageReportName $(coverageReportName)
+#       pwsh: true
+#   - task: PublishPipelineArtifact@1
+#     displayName: Publish Code Coverage Results
+#     continueOnError: false
+#     condition: eq(variables.onlyDocChanged, 0)
+#     inputs:
+#       targetPath: $(coverageArtifactsDir)/$(coverageReportName).coverage
+#       artifact: $(coverageReportName)
+#       publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
       testRunTitle: 'Windows-on-full Release Full Framework'
-      testRunner: XUnit
-      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_net472*.xml'
+      testRunner: VSTest
+      testResultsFiles: 'artifacts/TestResults/Release/*UnitTests_net472*.trx'
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -264,10 +324,10 @@ jobs:
     displayName: Publish .NET Test Results
     inputs:
       testRunTitle: 'Windows-on-full Release .NET'
-      testRunner: XUnit
+      testRunner: VSTest
       testResultsFiles: |
-        artifacts/TestResults/**/*.xml
-        !**/*UnitTests_net472*.xml
+        artifacts/TestResults/**/*.trx
+        !**/*UnitTests_net472*.trx
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -303,18 +363,35 @@ jobs:
         arguments: $(Build.SourcesDirectory)/NuGet.config $Token
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
+  - bash: sudo apt-get update
+  - bash: sudo apt-get install -y libxml2
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged)
     displayName: CI Build
     env:
         MSBUILDUSESERVER: "1"
+  - task: Bash@3
+    displayName: Process coverage reports
+    continueOnError: false
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      filePath: $(Build.SourcesDirectory)/eng/process-coverage.sh
+      arguments: --repoRoot $(Build.SourcesDirectory)
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Code Coverage Results
+    continueOnError: false
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
+      artifact: 'LinuxCoreCoverage'
+      publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
       testRunTitle: 'Linux .NET'
-      testRunner: XUnit
+      testRunner: VSTest
       testResultsFiles: |
-        artifacts/TestResults/**/*.xml
-        !**/*UnitTests_net472*.xml
+        artifacts/TestResults/**/*.trx
+        !**/*UnitTests_net472*.trx
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -382,14 +459,29 @@ jobs:
     displayName: CI Build
     env:
         MSBUILDUSESERVER: "1"
+  - task: Bash@3
+    displayName: Process coverage reports
+    continueOnError: false
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      filePath: $(Build.SourcesDirectory)/eng/process-coverage.sh
+      arguments: --repoRoot $(Build.SourcesDirectory)
+  - task: PublishPipelineArtifact@1
+    displayName: Publish Code Coverage Results
+    continueOnError: false
+    condition: eq(variables.onlyDocChanged, 0)
+    inputs:
+      targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
+      artifact: 'MacCoreCoverage'
+      publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
     inputs:
       testRunTitle: 'macOS .NET'
-      testRunner: XUnit
+      testRunner: VSTest
       testResultsFiles: |
-        artifacts/TestResults/**/*.xml
-        !**/*UnitTests_net472*.xml
+        artifacts/TestResults/**/*.trx
+        !**/*UnitTests_net472*.trx
       publishRunAttachments: true
       mergeTestResults: true
     continueOnError: true
@@ -437,4 +529,64 @@ jobs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/Verify'
       ArtifactName: 'macOS Verify $(System.JobAttempt)'
 
+- job: CodeCoverage
+  displayName: "Code Coverage"
+  dependsOn:
+  - BootstrapMSBuildOnFullFrameworkWindows
+  - BootstrapMSBuildOnCoreWindows
+  - FullReleaseOnWindows
+  - CoreBootstrappedOnLinux
+  - CoreOnMac
+  pool:
+    vmImage: 'windows-2022'
+  steps:
+# Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
+#   - task: DownloadPipelineArtifact@2
+#     inputs:
+#       buildType: 'current'
+#       artifactName: 'WindowsFullFrameworkCoverage'
+#       targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/WindowsFullFramework'
+#   - task: DownloadPipelineArtifact@2
+#     inputs:
+#       buildType: 'current'
+#       artifactName: 'WindowsCoreCoverage'
+#       targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/WindowsCore'
+#   - task: DownloadPipelineArtifact@2
+#     inputs:
+#       buildType: 'current'
+#       artifactName: 'WindowsFullReleaseCoverage'
+#       targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/WindowsFullRelease'
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      artifactName: 'LinuxCoreCoverage'
+      targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/LinuxCore'
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      buildType: 'current'
+      artifactName: 'MacCoreCoverage'
+      targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/MacCore'
+
+  - task: PowerShell@2
+    displayName: Process coverage reports
+    inputs:
+      filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
+      arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(Build.SourcesDirectory)/artifacts/CoverageResults
+      pwsh: true
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Artifact $(Build.BuildNumber) Coverage
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
+      ArtifactName: '$(Build.BuildNumber) Coverage'
+    condition: succeededOrFailed()
+  - task: PublishBuildArtifacts@1
+    displayName: Publish Artifact $(Build.BuildNumber) Cobertura
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.cobertura.xml'
+      ArtifactName: '$(Build.BuildNumber) Cobertura'
+    condition: succeededOrFailed()
+  - task: PublishCodeCoverageResults@2
+    inputs:
+      summaryFileLocation: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
+      pathToSources: $(Build.SourcesDirectory)
 - template: /eng/common/templates/jobs/source-build.yml
