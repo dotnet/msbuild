@@ -198,7 +198,7 @@ namespace Microsoft.Build.UnitTests
 
         public bool ContinueOnError => false;
 
-        public string ProjectFileOfTaskNode => String.Empty;
+        public string ProjectFileOfTaskNode { get; set; } = String.Empty;
 
         public int LineNumberOfTaskNode => 0;
 
