@@ -63,19 +63,24 @@ namespace Microsoft.Build.Shared
         internal static void ClearTempFileDirectory()
         {
             tempFileDirectory = null;
+            // Note: We don't clear cleanupRegistered here because ProcessExit handlers
+            // can only be registered once per AppDomain, and we want to avoid registering
+            // multiple handlers. The existing handler will safely no-op if the directory
+            // doesn't exist.
         }
 
         private static string CreateFolderUnderTemp()
         {
-            string path = null;
+            string path;
 
 #if NET
             path = Directory.CreateTempSubdirectory(msbuildTempFolderPrefix).FullName;
 #else
-            // the CreateTempSubdirectory API is not available in .NET Framework
+            // CreateTempSubdirectory API is not available in .NET Framework
             path = Path.Combine(Path.GetTempPath(), $"{msbuildTempFolderPrefix}{Guid.NewGuid():N}");
-#endif
             Directory.CreateDirectory(path);
+#endif
+
             return FileUtilities.EnsureTrailingSlash(path);
         }
 
