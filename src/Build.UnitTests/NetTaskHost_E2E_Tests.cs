@@ -138,7 +138,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [WindowsFullFrameworkOnlyFact]
         public void NetTaskWithImplicitHostParamsTest()
         {
-            using TestEnvironment env = TestEnvironment.Create(_output, setupDotnetEnvVars: true);
+            using TestEnvironment env = TestEnvironment.Create(_output);
             var bootstrapCorePath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core", Constants.DotnetProcessName);
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskWithImplicitParams", "TestNetTaskWithImplicitParams.csproj");
