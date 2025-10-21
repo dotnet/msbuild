@@ -1396,6 +1396,9 @@ namespace Microsoft.Build.Execution
         /// </remarks>
         public void AddSdkResolvedEnvironmentVariable(string name, string value)
         {
+            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ErrorUtilities.VerifyThrowArgumentNull(value);
+
             // If another SDK already set it, we do not overwrite it.
             if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
             {
