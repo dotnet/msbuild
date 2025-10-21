@@ -1391,8 +1391,9 @@ EndGlobal
                     HelpKeywordPrefix = "MSBuild."
                 };
 
-                // Use relative path with parent directory navigation
-                string taskBody = "<Code Source=\"..\\SharedTask.cs\" Language=\"cs\" />";
+                // Use relative path with parent directory navigation (cross-platform)
+                string relativePath = Path.Combine("..", "SharedTask.cs");
+                string taskBody = $"<Code Source=\"{relativePath}\" Language=\"cs\" />";
                 
                 bool success = RoslynCodeTaskFactory.TryLoadTaskBody(
                     log, 

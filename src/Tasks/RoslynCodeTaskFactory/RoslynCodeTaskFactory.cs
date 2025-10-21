@@ -458,7 +458,8 @@ namespace Microsoft.Build.Tasks
                 string sourcePath = sourceAttribute.Value.Trim();
                 
                 bool isMultiThreaded = taskFactoryEngineContext is ITaskFactoryBuildParameterProvider provider && provider.IsMultiThreadedBuild;
-                string projectDirectory = Path.GetDirectoryName(taskFactoryEngineContext.ProjectFileOfTaskNode);
+                string projectFilePath = taskFactoryEngineContext.ProjectFileOfTaskNode;
+                string projectDirectory = !string.IsNullOrEmpty(projectFilePath) ? Path.GetDirectoryName(projectFilePath) : null;
                 string resolvedPath = TaskFactoryUtilities.ResolveTaskSourceCodePath(sourcePath, isMultiThreaded, projectDirectory);
                 
                 taskInfo.SourceCode = FileSystems.Default.ReadFileAllText(resolvedPath);

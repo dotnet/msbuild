@@ -783,7 +783,8 @@ namespace Microsoft.Build.Tasks
                 if (_sourcePath != null)
                 {
                     bool isMultiThreaded = _taskFactoryLoggingHost is ITaskFactoryBuildParameterProvider hostContext && hostContext.IsMultiThreadedBuild;
-                    string projectDirectory = Path.GetDirectoryName(_taskFactoryLoggingHost.ProjectFileOfTaskNode);
+                    string projectFilePath = _taskFactoryLoggingHost.ProjectFileOfTaskNode;
+                    string projectDirectory = !string.IsNullOrEmpty(projectFilePath) ? Path.GetDirectoryName(projectFilePath) : null;
                     string resolvedPath = TaskFactoryUtilities.ResolveTaskSourceCodePath(_sourcePath, isMultiThreaded, projectDirectory);
                     _sourceCode = FileSystems.Default.ReadFileAllText(resolvedPath);
                 }
