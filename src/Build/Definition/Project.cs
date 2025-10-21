@@ -4466,6 +4466,9 @@ namespace Microsoft.Build.Evaluation
             /// <param name="value">Environment variable value.</param>
             public void AddSdkResolvedEnvironmentVariable(string name, string value)
             {
+                ErrorUtilities.VerifyThrowArgumentLength(name);
+                ErrorUtilities.VerifyThrowArgumentNull(value);
+
                 // If another SDK already set it, we do not overwrite it.
                 if (SdkResolvedEnvironmentVariablePropertiesDictionary?.Contains(name) == true)
                 {
