@@ -209,9 +209,6 @@
     <Compile Include="NullableAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeLoader.cs" />
-    <Compile Include="..\MSBuild\LogMessagePacket.cs">
-      <Link>LogMessagePacket.cs</Link>
-    </Compile>
     <Compile Include="OutOfProcTaskHost.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
