@@ -1735,12 +1735,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          that can't multiplatform.  -->
     <ItemGroup Condition="'@(_ProjectsWithPlatformAssignment)' != ''">
       <ProjectsWithNearestPlatform Include="@(_ProjectsWithPlatformAssignment)"/>
-      <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
+      <ProjectsWithNearestPlatform Condition="'%(ProjectsWithNearestPlatform.Identity)' != '' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
         <SetPlatform>Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
       </ProjectsWithNearestPlatform>
 
       <!-- When GetCompatiblePlatform fails to assign NearestPlatform (or determines it's identical to default for the referenced project), undefine Platform and let that project build "on its own" -->
-      <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' == ''">
+      <ProjectsWithNearestPlatform Condition="'%(ProjectsWithNearestPlatform.Identity)' != '' and '%(ProjectsWithNearestPlatform.NearestPlatform)' == ''">
         <UndefineProperties>%(ProjectsWithNearestPlatform.UndefineProperties);Platform</UndefineProperties>
       </ProjectsWithNearestPlatform>
 
@@ -1933,7 +1933,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <UpdatedAnnotatedProjects Remove="@(UpdatedAnnotatedProjects)" />
 
       <!-- If the NearestTargetFramework property was set and the project multi-targets, SetTargetFramework must be set. -->
-      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.NearestTargetFramework)' != '' and '%(AnnotatedProjects.HasSingleTargetFramework)' != 'true'">
+      <AnnotatedProjects Condition="'%(AnnotatedProjects.Identity)' != '' and '%(AnnotatedProjects.NearestTargetFramework)' != '' and '%(AnnotatedProjects.HasSingleTargetFramework)' != 'true'">
         <SetTargetFramework>TargetFramework=%(AnnotatedProjects.NearestTargetFramework)</SetTargetFramework>
       </AnnotatedProjects>
 
@@ -1941,13 +1941,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          If the NearestTargetFramework property was not set or the project has a single TargetFramework, we need to Undefine
          TargetFramework to avoid another project evaluation.
       -->
-      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and ('%(AnnotatedProjects.NearestTargetFramework)' == '' or '%(AnnotatedProjects.HasSingleTargetFramework)' == 'true')">
+      <AnnotatedProjects Condition="'%(AnnotatedProjects.Identity)' != '' and ('%(AnnotatedProjects.NearestTargetFramework)' == '' or '%(AnnotatedProjects.HasSingleTargetFramework)' == 'true')">
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);TargetFramework</UndefineProperties>
       </AnnotatedProjects>
 
       <!-- Add RuntimeIdentifier and SelfContained to the list of global properties that should not flow to the referenced project,
            unless the project is expecting those properties to flow. -->
-      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.IsRidAgnostic)' != 'false'">
+      <AnnotatedProjects Condition="'%(AnnotatedProjects.Identity)' != '' and '%(AnnotatedProjects.IsRidAgnostic)' != 'false'">
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);RuntimeIdentifier;SelfContained</UndefineProperties>
       </AnnotatedProjects>
 
