@@ -2364,8 +2364,8 @@ Errori: {3}</target>
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized</note>
       </trans-unit>
       <trans-unit id="TaskFactoryWillIgnoreTaskFactoryParameters">
-        <source>MSB4219: The TaskFactory "{0}" does not implement ITaskFactory3. The attributes "{1}" and/or "{2}" on the UsingTask declaration for task "{3}" will be ignored.</source>
-        <target state="needs-review-translation">MSB4219: TaskFactory "{0}" non implementa ITaskFactory2. Gli attributi "{1}" e/o "{2}" nella dichiarazione UsingTask per l'attività "{3}" verranno ignorati.</target>
+        <source>MSB4219: The TaskFactory "{0}" does not implement ITaskFactory2. The attributes "{1}" and/or "{2}" on the UsingTask declaration for task "{3}" will be be ignored.</source>
+        <target state="translated">MSB4219: TaskFactory "{0}" non implementa ITaskFactory2. Gli attributi "{1}" e/o "{2}" nella dichiarazione UsingTask per l'attività "{3}" verranno ignorati.</target>
         <note>{StrBegin="MSB4219: "}
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>

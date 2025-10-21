@@ -996,9 +996,16 @@ namespace Microsoft.Build.BackEnd
                         }
                         else
                         {
+                            var taskIdentityMap = new Dictionary<string, string>(3)
+                            {
+                                { nameof(TaskHostParameters.Runtime), taskIdentityParameters.Runtime },
+                                { nameof(TaskHostParameters.Architecture), taskIdentityParameters.Architecture },
+                                { nameof(TaskHostParameters.IsTaskHostFactory), taskIdentityParameters.IsTaskHostFactory.ToString() },
+                            };
+
                             // Normal in-process execution for custom task factories
-                            task = _taskFactoryWrapper.TaskFactory is ITaskFactory3 taskFactory3 ?
-                                taskFactory3.CreateTask(taskFactoryEngineContext, taskIdentityParameters) :
+                            task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
+                                taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityMap) :
                                 _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
                         }
 
@@ -1738,8 +1745,14 @@ namespace Microsoft.Build.BackEnd
         {
             ITask innerTask;
 
-            innerTask = _taskFactoryWrapper.TaskFactory is ITaskFactory3 taskFactory3 ?
-                taskFactory3.CreateTask(taskFactoryEngineContext, taskIdentityParameters) :
+            var taskIdentityMap = new Dictionary<string, string>(3)
+            {
+                { nameof(TaskHostParameters.Runtime), taskIdentityParameters.Runtime },
+                { nameof(TaskHostParameters.Architecture), taskIdentityParameters.Architecture },
+                { nameof(TaskHostParameters.IsTaskHostFactory), taskIdentityParameters.IsTaskHostFactory.ToString() },
+            };
+            innerTask = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
+                taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityMap) :
                 _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
 
             if (innerTask == null)
@@ -1769,7 +1782,10 @@ namespace Microsoft.Build.BackEnd
             TaskHostParameters taskHostParameters = new(XMakeAttributes.GetCurrentMSBuildRuntime(), XMakeAttributes.GetCurrentMSBuildArchitecture());
 
             // Merge with any existing task identity parameters
-            taskHostParameters = TaskHostParameters.MergeTaskHostParameters(taskHostParameters, taskIdentityParameters);
+            if (!taskIdentityParameters.IsEmpty)
+            {
+                taskHostParameters = TaskHostParameters.MergeTaskHostParameters(taskHostParameters, taskIdentityParameters);
+            }
 
             // Clean up the original task since we're going to wrap it
             _taskFactoryWrapper.TaskFactory.CleanupTask(innerTask);

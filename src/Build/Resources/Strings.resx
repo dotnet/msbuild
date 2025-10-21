@@ -1202,7 +1202,7 @@
       LOCALIZATION: "{2}" is a localized message from a CLR/FX exception. Also, Microsoft.Build.Framework should not be localized</comment>
   </data>
   <data name="TaskFactoryWillIgnoreTaskFactoryParameters" xml:space="preserve">
-    <value>MSB4219: The TaskFactory "{0}" does not implement ITaskFactory3. The attributes "{1}" and/or "{2}" on the UsingTask declaration for task "{3}" will be ignored.</value>
+    <value>MSB4219: The TaskFactory "{0}" does not implement ITaskFactory2. The attributes "{1}" and/or "{2}" on the UsingTask declaration for task "{3}" will be be ignored.</value>
     <comment>{StrBegin="MSB4219: "}
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>

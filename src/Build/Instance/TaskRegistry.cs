@@ -1517,10 +1517,17 @@ namespace Microsoft.Build.Execution
                                 bool initialized = false;
                                 try
                                 {
-                                    ITaskFactory3 factory3 = factory as ITaskFactory3;
-                                    if (factory3 != null)
+                                    ITaskFactory2 factory2 = factory as ITaskFactory2;
+                                    if (factory2 != null)
                                     {
-                                        initialized = factory3.Initialize(RegisteredName, TaskFactoryParameters, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
+                                        var taskFactoryParams = new Dictionary<string, string>(3)
+                                        {
+                                            { nameof(TaskHostParameters.Runtime), TaskFactoryParameters.Runtime },
+                                            { nameof(TaskHostParameters.Architecture), TaskFactoryParameters.Architecture },
+                                            { nameof(TaskHostParameters.IsTaskHostFactory), TaskFactoryParameters.IsTaskHostFactory.ToString() },
+                                        };
+
+                                        initialized = factory2.Initialize(RegisteredName, taskFactoryParams, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
                                     }
                                     else
                                     {
