@@ -56,11 +56,6 @@ namespace Microsoft.Build.UnitTests
         /// (MSBuild_*.txt) in the temp directory and treats their presence as test failures.
         /// Set to true to disable this monitoring for tests that expect build failures.
         /// </param>
-        /// <param name="setupDotnetEnvVars">
-        /// When true, configures .NET-specific environment variables including PATH,
-        /// DOTNET_ROOT, and DOTNET_HOST_PATH to point to the bootstrap .NET installation.
-        /// This ensures tests use the correct .NET runtime and SDK versions.
-        /// </param>
         /// <returns>
         /// A configured TestEnvironment instance with the specified settings applied.
         /// </returns>
