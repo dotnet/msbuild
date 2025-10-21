@@ -369,6 +369,17 @@ namespace Microsoft.Build.BackEnd
                 useTaskFactory = _taskHostFactoryExplicitlyRequested;
             }
 
+            // Multi-threaded mode routing: Determine if non-thread-safe tasks need TaskHost isolation.
+            if (!useTaskFactory 
+                && _loadedType?.Type != null 
+                && buildComponentHost?.BuildParameters?.MultiThreaded == true)
+            {
+                if (TaskRouter.NeedsTaskHostInMultiThreadedMode(_loadedType.Type))
+                {
+                    useTaskFactory = true;
+                }
+            }
+
             _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
 
             if (useTaskFactory)
