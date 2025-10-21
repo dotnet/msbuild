@@ -266,13 +266,20 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
-
+            
+            bool taskHostParamsMatchCurrentProc = true;
             if (!taskFactoryIdentityParameters.IsEmpty)
             {
+                taskHostParamsMatchCurrentProc = TaskHostParametersMatchCurrentProcess(taskFactoryIdentityParameters);
                 _factoryIdentityParameters = taskFactoryIdentityParameters;
             }
 
             _taskHostFactoryExplicitlyRequested = taskHostExplicitlyRequested;
+
+            _isTaskHostFactory = (taskFactoryIdentityParameters != null
+                 && taskFactoryIdentityParameters.TryGetValue(Constants.TaskHostExplicitlyRequested, out string isTaskHostFactory)
+                 && isTaskHostFactory.Equals("true", StringComparison.OrdinalIgnoreCase))
+                 || !taskHostParamsMatchCurrentProc;
 
             try
             {
@@ -282,7 +289,7 @@ namespace Microsoft.Build.BackEnd
                 string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);
                 using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(targetLoggingContext, AssemblyLoadingContext.TaskRun, assemblyName);
 
-                _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested);
+                _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested, taskHostParamsMatchCurrentProc);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
             }
             catch (TargetInvocationException e)
@@ -353,6 +360,17 @@ namespace Microsoft.Build.BackEnd
                 // task invocation, then we will run in-proc UNLESS "TaskHostFactory" is explicitly specified
                 // as the task factory.
                 useTaskFactory = _taskHostFactoryExplicitlyRequested;
+            }
+
+            // Multi-threaded mode routing: Determine if non-thread-safe tasks need TaskHost isolation.
+            if (!useTaskFactory 
+                && _loadedType?.Type != null 
+                && buildComponentHost?.BuildParameters?.MultiThreaded == true)
+            {
+                if (TaskRouter.NeedsTaskHostInMultiThreadedMode(_loadedType.Type))
+                {
+                    useTaskFactory = true;
+                }
             }
 
             _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);

@@ -616,8 +616,8 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowArgumentNull(factory);
             ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey(taskHostNodeId), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
-            // if runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
-            string commandLineArgsPlaceholder = "{0} /nologo /nodemode:2 /nodereuse:{1} /low:{2} ";
+            // If runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
+            string commandLineArgsPlaceholder = "\"{0}\" /nologo /nodemode:2 /nodereuse:{1} /low:{2} ";
 
             IList<NodeContext> nodeContexts;
 
