@@ -283,7 +283,7 @@ namespace Microsoft.Build.BackEnd
             // log that we are about to spawn the task host
             string runtime = _taskHostParameters[XMakeAttributes.runtime];
             string architecture = _taskHostParameters[XMakeAttributes.architecture];
-        
+
             _taskLoggingContext.LogComment(MessageImportance.Low, "ExecutingTaskInTaskHost", _taskType.Type.Name, _taskType.Assembly.AssemblyLocation, runtime, architecture);
 
             // set up the node

@@ -132,7 +132,8 @@ namespace Microsoft.Build.Shared
         internal LoadedType Load(
             string typeName,
             AssemblyLoadInfo assembly,
-            bool _)
+            bool useTaskHost = false,
+            bool isTaskHostParamsMatchCurrentProc = true)
         {
             return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly);
         }
