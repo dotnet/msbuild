@@ -17,53 +17,45 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static partial class FileUtilities
     {
-        private static string tempFileDirectory = null;
-        private static int cleanupRegistered = 0;
+        private static Lazy<string> tempFileDirectory = CreateTempFileDirectoryLazy();
+
         private const string msbuildTempFolderPrefix = "MSBuildTemp";
 
-        internal static string TempFileDirectory
+        internal static string TempFileDirectory => tempFileDirectory.Value;
+
+        private static Lazy<string> CreateTempFileDirectoryLazy()
         {
-            get
-            {
-                if (tempFileDirectory == null)
+            return new Lazy<string>(
+                () =>
                 {
                     string path = CreateFolderUnderTemp();
-                    if (Interlocked.CompareExchange(ref tempFileDirectory, path, null) == null)
-                    {
-                        // We won the race - register cleanup for this path
-                        RegisterCleanupOnExit(path);
-                    }
-                }
-
-                return tempFileDirectory;
-            }
+                    RegisterCleanupOnExit(path);
+                    return path;
+                },
+                LazyThreadSafetyMode.ExecutionAndPublication);
         }
 
         private static void RegisterCleanupOnExit(string pathToCleanup)
         {
-            if (Interlocked.CompareExchange(ref cleanupRegistered, 1, 0) == 0)
+            AppDomain.CurrentDomain.ProcessExit += (_, _) =>
             {
-                AppDomain.CurrentDomain.ProcessExit += (_, _) =>
+                try
                 {
-                    try
+                    if (Directory.Exists(pathToCleanup))
                     {
-                        if (Directory.Exists(pathToCleanup))
-                        {
-                            Directory.Delete(pathToCleanup, recursive: true);
-                        }
+                        Directory.Delete(pathToCleanup, recursive: true);
                     }
-                    catch
-                    {
-                        // Best effort - ignore failures during cleanup
-                    }
-                };
-            }
+                }
+                catch
+                {
+                    // Best effort - ignore failures during cleanup
+                }
+            };
         }
 
         internal static void ClearTempFileDirectory()
         {
-            tempFileDirectory = null;
-            /* the directory on disk is deleted on process exit */
+            tempFileDirectory = CreateTempFileDirectoryLazy();
         }
 
         private static string CreateFolderUnderTemp()
