@@ -248,7 +248,7 @@ namespace Microsoft.Build.Tasks
             {
                 // No reference assembly paths could be found, log an error so an invalid build will not be produced.
                 // 1/26/16: Note this was changed from a warning to an error (see GitHub #173).
-                if (pathsToReturn.Count == 0)
+                if (pathsToReturn.Count == 0 && NativeMethodsShared.IsWindows)
                 {
                     // Fixes bad error message when an old SDK assumes "net50" means ".NETFramework 5.0" instead of "netcoreapp 5.0"
                     // https://github.com/dotnet/msbuild/issues/5820
