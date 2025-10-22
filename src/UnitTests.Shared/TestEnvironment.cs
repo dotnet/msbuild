@@ -600,6 +600,9 @@ namespace Microsoft.Build.UnitTests
             _deleteTempDirectory = deleteTempDirectory;
 
             _oldtempPaths = SetTempPath(tempPath);
+            
+            // Clear the cached temp directory so FileUtilities picks up the new TMPDIR/TMP/TEMP
+            FileUtilities.ClearTempFileDirectory();
         }
 
         private static TempPaths SetTempPath(string tempPath)
@@ -645,6 +648,9 @@ namespace Microsoft.Build.UnitTests
         public override void Revert()
         {
             SetTempPaths(_oldtempPaths);
+            
+            // Clear the cached temp directory so FileUtilities picks up the restored TMPDIR/TMP/TEMP
+            FileUtilities.ClearTempFileDirectory();
 
             if (_deleteTempDirectory)
             {
