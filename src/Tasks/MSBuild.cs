@@ -644,20 +644,14 @@ namespace Microsoft.Build.Tasks
                                         // project is the same as the callee project (project == null).
                                         if (rebaseOutputs)
                                         {
-                                            string originalItemSpec = outputItemFromTarget.ItemSpec;
                                             try
                                             {
                                                 outputItemFromTarget.ItemSpec = Path.Combine(projectDirectory[i], outputItemFromTarget.ItemSpec);
-                                                log.LogMessageFromText($"Rebased output item from '{originalItemSpec}' to '{outputItemFromTarget.ItemSpec}' for project '{projects[i].ItemSpec}'", MessageImportance.Low);
                                             }
                                             catch (ArgumentException e)
                                             {
                                                 log.LogWarningWithCodeFromResources(null, projects[i].ItemSpec, 0, 0, 0, 0, "MSBuild.CannotRebaseOutputItemPath", outputItemFromTarget.ItemSpec, e.Message);
                                             }
-                                        }
-                                        else
-                                        {
-                                            log.LogMessageFromText($"Rebase not needed for output item '{outputItemFromTarget.ItemSpec}' from project '{projects[i].ItemSpec}' (RebaseOutputs=false)", MessageImportance.Low);
                                         }
 
                                         // Copy the custom item metadata from the "Projects" items to these
@@ -669,10 +663,6 @@ namespace Microsoft.Build.Tasks
                                         {
                                             outputItemFromTarget.SetMetadata(ItemMetadataNames.msbuildSourceProjectFile, projects[i].GetMetadata(FileUtilities.ItemSpecModifiers.FullPath));
                                         }
-                                    }
-                                    else
-                                    {
-                                        log.LogMessageFromText($"Rebase not needed for output item '{outputItemFromTarget.ItemSpec}' (calling project is same as callee project)", MessageImportance.Low);
                                     }
 
                                     // Set a metadata on the output items called "MSBuildTargetName" which tells you which target produced this item.
