@@ -37,6 +37,7 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// Enumeration of all possible (currently supported) options for handshakes.
     /// </summary>
+    /// <remarks> In case of adding new options, please remember to update the generation of unique task host node id in NodeProviderOutOfProcTaskHost. </remarks>
     [Flags]
     internal enum HandshakeOptions
     {

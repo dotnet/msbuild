@@ -95,6 +95,7 @@
       <Link>Collections\ReadOnlyEmptyCollection.cs</Link>
     </Compile>
     <Compile Include="..\Shared\BufferedReadStream.cs" />
+    <Compile Include="..\Shared\TaskFactoryUtilities.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
@@ -344,6 +345,7 @@
     <Compile Include="BackEnd\Components\RequestBuilder\TargetUpToDateChecker.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\TaskBuilder.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\TaskHost.cs" />
+    <Compile Include="BackEnd\Components\RequestBuilder\TaskRouter.cs" />
     <Compile Include="BackEnd\Shared\BuildRequest.cs" />
     <Compile Include="BackEnd\Shared\BuildRequestBlocker.cs" />
     <Compile Include="BackEnd\Shared\BuildRequestConfiguration.cs" />
@@ -389,6 +391,7 @@
     <Compile Include="Collections\IItemDictionary.cs" />
     <Compile Include="Collections\IMultiDictionary.cs" />
     <Compile Include="Collections\ItemDictionary.cs" />
+    <Compile Include="Collections\ItemDictionarySlim.cs" />
     <Compile Include="Collections\IImmutable.cs" />
     <Compile Include="Collections\MultiDictionary.cs" />
     <Compile Include="Collections\IValued.cs" />
@@ -547,7 +550,7 @@
     <Compile Include="Instance\ProjectTaskOutputPropertyInstance.cs" />
     <Compile Include="Instance\TaskFactories\AssemblyTaskFactory.cs" />
     <Compile Include="Instance\TaskFactories\TaskHostTask.cs" />
-    <Compile Include="Instance\TaskFactoryLoggingHost.cs" />
+    <Compile Include="Instance\TaskFactoryEngineContext.cs" />
     <Compile Include="Instance\TaskFactoryWrapper.cs" />
     <Compile Include="Instance\TaskRegistry.cs" />
     <!-- ######################## -->

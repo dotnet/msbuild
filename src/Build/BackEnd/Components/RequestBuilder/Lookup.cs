@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Collections;
@@ -59,6 +60,15 @@ namespace Microsoft.Build.BackEnd
         #region Fields
 
         /// <summary>
+        /// The first set of items used to create the lookup.
+        /// </summary>
+        /// <remarks>
+        /// This represents the primary table for the outer Scope. This is tracked separately as we don't have control
+        /// over the incoming implementation dictionary, while Scope uses a simplified item dictionary for perf.
+        /// </remarks>
+        private readonly IItemDictionary<ProjectItemInstance> _baseItems;
+
+        /// <summary>
         /// Ordered stack of scopes used for lookup, where each scope references its parent.
         /// Each scope contains multiple tables:
         ///  - the main item table (populated with subsets of lists, in order to create batches)
@@ -94,7 +104,8 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowInternalNull(projectItems);
             ErrorUtilities.VerifyThrowInternalNull(properties);
 
-            _lookupScopes = new Lookup.Scope(this, "Lookup()", projectItems, properties);
+            _baseItems = projectItems;
+            _lookupScopes = new Lookup.Scope(this, "Lookup()", properties);
         }
 
         /// <summary>
@@ -103,6 +114,7 @@ namespace Microsoft.Build.BackEnd
         private Lookup(Lookup that)
         {
             // Add the same tables from the original.
+            _baseItems = that._baseItems;
             _lookupScopes = that._lookupScopes;
 
             // Clones need to share an (item)clone table; the batching engine asks for items from the lookup,
@@ -117,19 +129,19 @@ namespace Microsoft.Build.BackEnd
         // Convenience private properties
         // "Primary" is the "top" or "innermost" scope
         // "Secondary" is the next from the top.
-        private IItemDictionary<ProjectItemInstance> PrimaryTable
+        private ItemDictionarySlim PrimaryTable
         {
             get { return _lookupScopes.Items; }
             set { _lookupScopes.Items = value; }
         }
 
-        private ItemDictionary<ProjectItemInstance> PrimaryAddTable
+        private ItemDictionarySlim PrimaryAddTable
         {
             get { return _lookupScopes.Adds; }
             set { _lookupScopes.Adds = value; }
         }
 
-        private ItemDictionary<ProjectItemInstance> PrimaryRemoveTable
+        private ItemDictionarySlim PrimaryRemoveTable
         {
             get { return _lookupScopes.Removes; }
             set { _lookupScopes.Removes = value; }
@@ -147,19 +159,13 @@ namespace Microsoft.Build.BackEnd
             set { _lookupScopes.PropertySets = value; }
         }
 
-        private IItemDictionary<ProjectItemInstance> SecondaryTable
-        {
-            get { return _lookupScopes.Parent.Items; }
-            set { _lookupScopes.Parent.Items = value; }
-        }
-
-        private ItemDictionary<ProjectItemInstance> SecondaryAddTable
+        private ItemDictionarySlim SecondaryAddTable
         {
             get { return _lookupScopes.Parent.Adds; }
             set { _lookupScopes.Parent.Adds = value; }
         }
 
-        private ItemDictionary<ProjectItemInstance> SecondaryRemoveTable
+        private ItemDictionarySlim SecondaryRemoveTable
         {
             get { return _lookupScopes.Parent.Removes; }
             set { _lookupScopes.Parent.Removes = value; }
@@ -243,7 +249,7 @@ namespace Microsoft.Build.BackEnd
         internal Lookup.Scope EnterScope(string description)
         {
             // We don't create the tables unless we need them
-            Scope scope = new Scope(this, description, null, null);
+            Scope scope = new Scope(this, description, null);
             _lookupScopes = scope;
             return scope;
         }
@@ -311,16 +317,11 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    // When merging remove lists from two or more batches both tables (primary and secondary) may contain identical items. The reason is when removing the items we get the original items rather than a clone
-                    // so the same item may have already been added to the secondary table. If we then try and add the same item from the primary table we will get a duplicate key exception from the
-                    // dictionary. Therefore we must not merge in an item if it already is in the secondary remove table.
-                    foreach (ProjectItemInstance item in PrimaryRemoveTable)
-                    {
-                        if (!SecondaryRemoveTable.Contains(item))
-                        {
-                            SecondaryRemoveTable.Add(item);
-                        }
-                    }
+                    // When merging remove lists from two or more batches both tables (primary and secondary) may contain
+                    // identical items. The reason is when removing the items we get the original items rather than a clone,
+                    // so the same item may have already been added to the secondary table.
+                    // For perf, we concatenate these lists without checking for duplicates, deferring until used.
+                    SecondaryRemoveTable.ImportItems(PrimaryRemoveTable);
                 }
             }
 
@@ -376,22 +377,25 @@ namespace Microsoft.Build.BackEnd
             // adds to the world
             if (PrimaryAddTable != null)
             {
-                SecondaryTable ??= new ItemDictionary<ProjectItemInstance>();
-                SecondaryTable.ImportItems(PrimaryAddTable);
+                foreach (KeyValuePair<string, List<ProjectItemInstance>> kvp in PrimaryAddTable)
+                {
+                    _baseItems.ImportItemsOfType(kvp.Key, kvp.Value);
+                }
             }
 
             if (PrimaryRemoveTable != null)
             {
-                SecondaryTable ??= new ItemDictionary<ProjectItemInstance>();
-                SecondaryTable.RemoveItems(PrimaryRemoveTable);
+                foreach (KeyValuePair<string, List<ProjectItemInstance>> kvp in PrimaryRemoveTable)
+                {
+                    _baseItems.RemoveItems(kvp.Value);
+                }
             }
 
             if (PrimaryModifyTable != null)
             {
                 foreach (KeyValuePair<string, Dictionary<ProjectItemInstance, MetadataModifications>> entry in PrimaryModifyTable)
                 {
-                    SecondaryTable ??= new ItemDictionary<ProjectItemInstance>();
-                    ApplyModificationsToTable(SecondaryTable, entry.Key, entry.Value);
+                    ApplyModificationsToTable(_baseItems, entry.Key, entry.Value);
                 }
             }
 
@@ -433,11 +437,6 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                if (scope.TruncateLookupsAtThisScope)
-                {
-                    break;
-                }
-
                 scope = scope.Parent;
             }
 
@@ -467,46 +466,36 @@ namespace Microsoft.Build.BackEnd
             // plus the first set of regular items we encounter
             // minus any removes
 
-            List<ProjectItemInstance> allAdds = null;
-            List<ProjectItemInstance> allRemoves = null;
+            List<List<ProjectItemInstance>> allAdds = null;
+            List<List<ProjectItemInstance>> allRemoves = null;
             Dictionary<ProjectItemInstance, MetadataModifications> allModifies = null;
             ICollection<ProjectItemInstance> groupFound = null;
 
+            // Iterate through all scopes *except* the outer scope.
+            // The outer scope will always be empty and is currently only used for tracking base properties.
+            // We use the base items only when no other item group is found.
             Scope scope = _lookupScopes;
-            while (scope != null)
+            while (scope.Parent != null)
             {
                 // Accumulate adds while we look downwards
                 if (scope.Adds != null)
                 {
-                    ICollection<ProjectItemInstance> adds = scope.Adds[itemType];
-                    if (adds.Count != 0)
+                    List<ProjectItemInstance> adds = scope.Adds[itemType];
+                    if (adds != null)
                     {
-                        if (allAdds == null)
-                        {
-                            // Use the List<T>(IEnumerable<T>) constructor to avoid an intermediate array allocation.
-                            allAdds = new List<ProjectItemInstance>(adds);
-                        }
-                        else
-                        {
-                            allAdds.AddRange(adds);
-                        }
+                        allAdds ??= [];
+                        allAdds.Add(adds);
                     }
                 }
 
                 // Accumulate removes while we look downwards
                 if (scope.Removes != null)
                 {
-                    ICollection<ProjectItemInstance> removes = scope.Removes[itemType];
-                    if (removes.Count != 0)
+                    List<ProjectItemInstance> removes = scope.Removes[itemType];
+                    if (removes != null)
                     {
-                        if (allRemoves == null)
-                        {
-                            allRemoves = new List<ProjectItemInstance>(removes);
-                        }
-                        else
-                        {
-                            allRemoves.AddRange(removes);
-                        }
+                        allRemoves ??= [];
+                        allRemoves.Add(removes);
                     }
                 }
 
@@ -534,19 +523,21 @@ namespace Microsoft.Build.BackEnd
                 if (scope.Items != null)
                 {
                     groupFound = scope.Items[itemType];
-                    if (groupFound.Count != 0 || scope.Items.HasEmptyMarker(itemType))
+                    if (groupFound?.Count > 0
+                        || (scope.ItemTypesToTruncateAtThisScope != null && scope.ItemTypesToTruncateAtThisScope.Contains(itemType)))
                     {
                         // Found a group: we go no further
                         break;
                     }
                 }
 
-                if (scope.TruncateLookupsAtThisScope)
-                {
-                    break;
-                }
-
                 scope = scope.Parent;
+            }
+
+            // If we've made it to the root scope, use the original items.
+            if (groupFound == null && scope.Parent == null)
+            {
+                groupFound = _baseItems[itemType];
             }
 
             if ((allAdds == null) &&
@@ -561,7 +552,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Set the initial sizes to avoid resizing during import
-            int itemsTypesCount = 1;    // We're only ever importing a single item type
             int itemsCount = groupFound?.Count ?? 0;    // Start with initial set
             itemsCount += allAdds?.Count ?? 0;          // Add all the additions
             itemsCount -= allRemoves?.Count ?? 0;       // Remove the removals
@@ -574,11 +564,26 @@ namespace Microsoft.Build.BackEnd
             // We can't modify the group, because that might
             // be visible to other batches; we have to create
             // a new one.
-            ItemDictionary<ProjectItemInstance> result = new ItemDictionary<ProjectItemInstance>(itemsTypesCount, itemsCount);
+            List<ProjectItemInstance> result = new(itemsCount);
 
-            if (groupFound != null)
+            if (groupFound?.Count > 0)
             {
-                result.ImportItemsOfType(itemType, groupFound);
+                if (allRemoves == null)
+                {
+                    // No removes, so use fast path for ICollection<T>.
+                    result.AddRange(groupFound);
+                }
+                else
+                {
+                    // Otherwise, need to filter any items marked for removal.
+                    foreach (ProjectItemInstance item in groupFound)
+                    {
+                        if (!ShouldRemoveItem(item, allRemoves))
+                        {
+                            result.Add(item);
+                        }
+                    }
+                }
             }
             // Removes are processed after adds; this means when we remove there's no need to concern ourselves
             // with the case where the item being removed is in an add table somewhere. The converse case is not possible
@@ -586,12 +591,25 @@ namespace Microsoft.Build.BackEnd
             // a unique new item.
             if (allAdds != null)
             {
-                result.ImportItemsOfType(itemType, allAdds);
-            }
-
-            if (allRemoves != null)
-            {
-                result.RemoveItems(allRemoves);
+                foreach (List<ProjectItemInstance> adds in allAdds)
+                {
+                    if (allRemoves == null)
+                    {
+                        // No removes, so use fast path for ICollection<T>.
+                        result.AddRange(adds);
+                    }
+                    else
+                    {
+                        // Otherwise, need to filter any items marked for removal.
+                        foreach (ProjectItemInstance item in adds)
+                        {
+                            if (!ShouldRemoveItem(item, allRemoves))
+                            {
+                                result.Add(item);
+                            }
+                        }
+                    }
+                }
             }
 
             // Modifies can be processed last; if a modified item was removed, the modify will be ignored
@@ -600,40 +618,88 @@ namespace Microsoft.Build.BackEnd
                 ApplyModifies(result, allModifies);
             }
 
-            return result[itemType];
+            return result;
+
+            // Helper to perform a linear search across the removes.
+            // PERF: This linear search is still cheaper than combining all removes into hashsets and performing a lookup
+            // due to allocation and hashcode costs, provided that we can quickly filter out false matches.
+            static bool ShouldRemoveItem(ProjectItemInstance item, List<List<ProjectItemInstance>> allRemoves)
+            {
+                ITaskItem2 itemAsTaskItem = item;
+                string evaluatedInclude = itemAsTaskItem.EvaluatedIncludeEscaped;
+
+                foreach (List<ProjectItemInstance> removes in allRemoves)
+                {
+                    foreach (ProjectItemInstance remove in removes)
+                    {
+                        // Get access to allocation-free item spec property.
+                        ITaskItem2 removeAsTaskItem = remove;
+
+                        // Start with the item spec length as a fast filter for false matches.
+                        if (evaluatedInclude.Length == removeAsTaskItem.EvaluatedIncludeEscaped.Length
+                            && StringComparer.Ordinal.Equals(evaluatedInclude, removeAsTaskItem.EvaluatedIncludeEscaped)
+                            && itemAsTaskItem == removeAsTaskItem)
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            }
         }
 
         /// <summary>
         /// Populates with an item group. This is done before the item lookup is used in this scope.
         /// Assumes all the items in the group have the same, provided, type.
         /// Assumes there is no item group of this type in the primary table already.
-        /// Should be used only by batching buckets, and if no items are passed,
-        /// explicitly stores a marker for this item type indicating this.
+        /// Should be used only by batching buckets.
         /// </summary>
         internal void PopulateWithItems(string itemType, ICollection<ProjectItemInstance> group)
         {
-            PrimaryTable ??= new ItemDictionary<ProjectItemInstance>();
-            ICollection<ProjectItemInstance> existing = PrimaryTable[itemType];
-            ErrorUtilities.VerifyThrow(existing.Count == 0, "Cannot add an itemgroup of this type.");
+            // The outer scope should never have primary table populated.
+            MustNotBeOuterScope();
 
-            if (group.Count > 0)
+            if (group.Count == 0)
             {
-                PrimaryTable.ImportItemsOfType(itemType, group);
+                return;
             }
-            else
-            {
-                PrimaryTable.AddEmptyMarker(itemType);
-            }
+
+            PrimaryTable ??= new ItemDictionarySlim();
+            ICollection<ProjectItemInstance> existing = PrimaryTable[itemType];
+            ErrorUtilities.VerifyThrow(existing == null, "Cannot add an itemgroup of this type.");
+
+            PrimaryTable.ImportItemsOfType(itemType, group);
         }
 
         /// <summary>
         /// Populates with an item. This is done before the item lookup is used in this scope.
         /// There may or may not already be a group for it.
+        /// Should be used only by batching buckets.
         /// </summary>
         internal void PopulateWithItem(ProjectItemInstance item)
         {
-            PrimaryTable ??= new ItemDictionary<ProjectItemInstance>();
+            // The outer scope should never have primary table populated.
+            MustNotBeOuterScope();
+
+            PrimaryTable ??= new ItemDictionarySlim();
             PrimaryTable.Add(item);
+        }
+
+        /// <summary>
+        /// Sets the item types to truncate at the current scope.
+        /// </summary>
+        /// <remarks>
+        /// This can only be setup once per-scope, as the truncate set will be frozen for perf.
+        /// </remarks>
+        internal void TruncateLookupsForItemTypes(ICollection<string> itemTypes)
+        {
+            ErrorUtilities.VerifyThrow(_lookupScopes.ItemTypesToTruncateAtThisScope == null, "Cannot add an itemgroup of this type.");
+
+            // Add the item types to truncate at this scope
+            _lookupScopes.ItemTypesToTruncateAtThisScope =
+                itemTypes?.ToFrozenSet(MSBuildNameIgnoreCaseComparer.Default)
+                ?? FrozenSet<string>.Empty;
         }
 
         /// <summary>
@@ -670,7 +736,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Put them in the add table
-            PrimaryAddTable ??= new ItemDictionary<ProjectItemInstance>();
+            PrimaryAddTable ??= new ItemDictionarySlim();
             IEnumerable<ProjectItemInstance> itemsToAdd = group;
             if (doNotAddDuplicates)
             {
@@ -721,36 +787,30 @@ namespace Microsoft.Build.BackEnd
 #endif
 
             // Put in the add table
-            PrimaryAddTable ??= new ItemDictionary<ProjectItemInstance>();
+            PrimaryAddTable ??= new ItemDictionarySlim();
             PrimaryAddTable.Add(item);
         }
 
         /// <summary>
         /// Remove a bunch of items from this scope
         /// </summary>
-        internal void RemoveItems(IEnumerable<ProjectItemInstance> items)
-        {
-            foreach (ProjectItemInstance item in items)
-            {
-                RemoveItem(item);
-            }
-        }
-
-        /// <summary>
-        /// Remove an item from this scope
-        /// </summary>
-        internal void RemoveItem(ProjectItemInstance item)
+        internal void RemoveItems(string itemType, ICollection<ProjectItemInstance> items)
         {
             // Removing from outer scope could be easily implemented, but our code does not do it at present
             MustNotBeOuterScope();
 
-            item = RetrieveOriginalFromCloneTable(item);
+            if (items.Count == 0)
+            {
+                return;
+            }
 
-            // Put in the remove table
-            PrimaryRemoveTable ??= new ItemDictionary<ProjectItemInstance>();
-            PrimaryRemoveTable.Add(item);
+            PrimaryRemoveTable ??= new ItemDictionarySlim();
+            PrimaryRemoveTable.EnsureCapacityForItemType(itemType, items.Count);
 
-            // No need to remove this item from the primary add table if it's
+            IEnumerable<ProjectItemInstance> itemsToRemove = items.Select(RetrieveOriginalFromCloneTable);
+            PrimaryRemoveTable.ImportItemsOfType(itemType, itemsToRemove);
+
+            // No need to remove these items from the primary add table if it's
             // already there -- we always apply removes after adds, so that add
             // will be reversed anyway.
         }
@@ -820,7 +880,7 @@ namespace Microsoft.Build.BackEnd
         /// Apply modifies to a temporary result group.
         /// Items to be modified are virtual-cloned so the original isn't changed.
         /// </summary>
-        private void ApplyModifies(ItemDictionary<ProjectItemInstance> result, Dictionary<ProjectItemInstance, MetadataModifications> allModifies)
+        private void ApplyModifies(List<ProjectItemInstance> result, Dictionary<ProjectItemInstance, MetadataModifications> allModifies)
         {
             // Clone, because we're modifying actual items, and this would otherwise be visible to other batches,
             // and would be "published" even if a target fails.
@@ -829,20 +889,18 @@ namespace Microsoft.Build.BackEnd
             // Store the clone, in case we're asked to modify or remove it later (we will record it against the real item)
             _cloneTable ??= new Dictionary<ProjectItemInstance, ProjectItemInstance>();
 
-            foreach (var modify in allModifies)
+            // Iterate through the result group while replacing any items that have pending modifications.
+            for (int i = 0; i < result.Count; i++)
             {
-                ProjectItemInstance originalItem = modify.Key;
-
-                if (result.Contains(originalItem))
+                ProjectItemInstance originalItem = result[i];
+                if (allModifies.TryGetValue(originalItem, out MetadataModifications modificationsToApply))
                 {
-                    var modificationsToApply = modify.Value;
-
                     // Modify the cloned item and replace the original with it.
-                    ProjectItemInstance cloneItem = modify.Key.DeepClone();
+                    ProjectItemInstance cloneItem = originalItem.DeepClone();
 
                     ApplyMetadataModificationsToItem(modificationsToApply, cloneItem);
 
-                    result.Replace(originalItem, cloneItem);
+                    result[i] = cloneItem;
 
                     // This will be null if the item wasn't in the result group, ie, it had been removed after being modified
                     ErrorUtilities.VerifyThrow(!_cloneTable.ContainsKey(cloneItem), "Should be new, not already in table!");
@@ -972,11 +1030,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Verify item is not in the table
         /// </summary>
-        private void MustNotBeInTable(ItemDictionary<ProjectItemInstance> table, ProjectItemInstance item)
+        private void MustNotBeInTable(ItemDictionarySlim table, ProjectItemInstance item)
         {
-            if (table?.ItemTypes.Contains(item.ItemType) == true)
+            if (table?.ContainsKey(item.ItemType) == true)
             {
-                ICollection<ProjectItemInstance> tableOfItemsOfSameType = table[item.ItemType];
+                List<ProjectItemInstance> tableOfItemsOfSameType = table[item.ItemType];
                 if (tableOfItemsOfSameType != null)
                 {
                     ErrorUtilities.VerifyThrow(!tableOfItemsOfSameType.Contains(item), "Item should not be in table");
@@ -1025,7 +1083,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void MustNotBeOuterScope()
         {
-            ErrorUtilities.VerifyThrow(_lookupScopes.Count > 1, "Operation in outer scope not supported");
+            ErrorUtilities.VerifyThrow(_lookupScopes.Parent != null, "Operation in outer scope not supported");
         }
 
         #endregion
@@ -1165,7 +1223,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Provides an enumeration of the explicit metadata modifications.
             /// </summary>
-            public IEnumerable<KeyValuePair<string, MetadataModification>> ExplicitModifications
+            public Dictionary<string, MetadataModification> ExplicitModifications
             {
                 get { return _modifications; }
             }
@@ -1335,17 +1393,17 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Contains all of the original items at this level in the Lookup
             /// </summary>
-            private IItemDictionary<ProjectItemInstance> _items;
+            private ItemDictionarySlim _items;
 
             /// <summary>
             /// Contains all of the items which have been added at this level in the Lookup
             /// </summary>
-            private ItemDictionary<ProjectItemInstance> _adds;
+            private ItemDictionarySlim _adds;
 
             /// <summary>
             /// Contails all of the items which have been removed at this level in the Lookup
             /// </summary>
-            private ItemDictionary<ProjectItemInstance> _removes;
+            private ItemDictionarySlim _removes;
 
             /// <summary>
             /// Contains all of the metadata which has been changed for items at this level in the Lookup.
@@ -1364,11 +1422,6 @@ namespace Microsoft.Build.BackEnd
             private PropertyDictionary<ProjectPropertyInstance> _propertySets;
 
             /// <summary>
-            /// The managed thread id which entered this scope.
-            /// </summary>
-            private int _threadIdThatEnteredScope;
-
-            /// <summary>
             /// A description of this scope, for error checking
             /// </summary>
             private string _description;
@@ -1380,22 +1433,21 @@ namespace Microsoft.Build.BackEnd
 
             /// <summary>
             /// Indicates whether or not further levels in the Lookup should be consulted beyond this one
-            /// to find the actual value for the desired item or property.
+            /// to find the actual value for the desired item type.
             /// </summary>
-            private bool _truncateLookupsAtThisScope;
+            private FrozenSet<string> _itemTypesToTruncateAtThisScope;
 
-            internal Scope(Lookup lookup, string description, IItemDictionary<ProjectItemInstance> items, PropertyDictionary<ProjectPropertyInstance> properties)
+            internal Scope(Lookup lookup, string description, PropertyDictionary<ProjectPropertyInstance> properties)
             {
                 _owningLookup = lookup;
                 _description = description;
-                _items = items;
+                _items = null;
                 _adds = null;
                 _removes = null;
                 _modifies = null;
                 _properties = properties;
                 _propertySets = null;
-                _threadIdThatEnteredScope = Environment.CurrentManagedThreadId;
-                _truncateLookupsAtThisScope = false;
+                _itemTypesToTruncateAtThisScope = null;
                 Parent = lookup._lookupScopes;
             }
 
@@ -1429,7 +1481,7 @@ namespace Microsoft.Build.BackEnd
             /// include adds or removes unless it's the table in
             /// the outermost scope.
             /// </summary>
-            internal IItemDictionary<ProjectItemInstance> Items
+            internal ItemDictionarySlim Items
             {
                 get { return _items; }
                 set { _items = value; }
@@ -1437,7 +1489,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Adds made in this scope or above.
             /// </summary>
-            internal ItemDictionary<ProjectItemInstance> Adds
+            internal ItemDictionarySlim Adds
             {
                 get { return _adds; }
                 set { _adds = value; }
@@ -1445,7 +1497,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Removes made in this scope or above.
             /// </summary>
-            internal ItemDictionary<ProjectItemInstance> Removes
+            internal ItemDictionarySlim Removes
             {
                 get { return _removes; }
                 set { _removes = value; }
@@ -1476,19 +1528,14 @@ namespace Microsoft.Build.BackEnd
                 get { return _propertySets; }
                 set { _propertySets = value; }
             }
+
             /// <summary>
-            /// ID of thread owning this scope
+            /// Whether to stop lookups going beyond this scope downwards for item types in the set.
             /// </summary>
-            internal int ThreadIdThatEnteredScope
+            internal FrozenSet<string> ItemTypesToTruncateAtThisScope
             {
-                get { return _threadIdThatEnteredScope; }
-            }
-            /// <summary>
-            /// Whether to stop lookups going beyond this scope downwards
-            /// </summary>
-            internal bool TruncateLookupsAtThisScope
-            {
-                get { return _truncateLookupsAtThisScope; }
+                get { return _itemTypesToTruncateAtThisScope; }
+                set { _itemTypesToTruncateAtThisScope = value; }
             }
 
             /// <summary>

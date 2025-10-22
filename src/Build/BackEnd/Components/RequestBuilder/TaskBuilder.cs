@@ -658,7 +658,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private async Task<WorkUnitResult> InitializeAndExecuteTask(TaskLoggingContext taskLoggingContext, ItemBucket bucket, IDictionary<string, string> taskIdentityParameters, TaskHost taskHost, TaskExecutionMode howToExecuteTask)
         {
-            if (!_taskExecutionHost.InitializeForBatch(taskLoggingContext, bucket, taskIdentityParameters))
+            if (!_taskExecutionHost.InitializeForBatch(taskLoggingContext, bucket, taskIdentityParameters, _buildRequestEntry.Request.ScheduledNodeId))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
             }
@@ -669,11 +669,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // UNDONE: Move this and the task host.
                 taskHost.LoggingContext = taskLoggingContext;
-                WorkUnitResult executionResult = await ExecuteInstantiatedTask(_taskExecutionHost, taskLoggingContext, taskHost, bucket, howToExecuteTask);
-
-                ErrorUtilities.VerifyThrow(executionResult != null, "Unexpected null execution result");
-
-                return executionResult;
+                return await ExecuteInstantiatedTask(_taskExecutionHost, taskLoggingContext, taskHost, bucket, howToExecuteTask);
             }
             finally
             {
