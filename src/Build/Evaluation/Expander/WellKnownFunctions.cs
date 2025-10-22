@@ -898,6 +898,35 @@ namespace Microsoft.Build.Evaluation.Expander
                         }
                     }
                 }
+                else if (receiverType.FullName == "Microsoft.Build.Utilities.ToolLocationHelper")
+                {
+                    if (string.Equals(methodName, "GetPlatformSDKLocation", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (ParseArgs.TryGetArgs(args, out string? arg0, out string? arg1))
+                        {
+                            // Use reflection to invoke the method, but avoid the expensive binding process
+                            var method = receiverType.GetMethod("GetPlatformSDKLocation", new[] { typeof(string), typeof(string) });
+                            if (method != null)
+                            {
+                                returnVal = method.Invoke(null, new object?[] { arg0, arg1 });
+                                return true;
+                            }
+                        }
+                    }
+                    else if (string.Equals(methodName, "GetPlatformSDKDisplayName", StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (ParseArgs.TryGetArgs(args, out string? arg0, out string? arg1))
+                        {
+                            // Use reflection to invoke the method, but avoid the expensive binding process
+                            var method = receiverType.GetMethod("GetPlatformSDKDisplayName", new[] { typeof(string), typeof(string) });
+                            if (method != null)
+                            {
+                                returnVal = method.Invoke(null, new object?[] { arg0, arg1 });
+                                return true;
+                            }
+                        }
+                    }
+                }
                 else if (string.Equals(methodName, nameof(Regex.Replace), StringComparison.OrdinalIgnoreCase) && args.Length == 3)
                 {
                     if (ParseArgs.TryGetArgs(args, out string? arg1, out string? arg2, out string? arg3) && arg1 != null && arg2 != null && arg3 != null)
