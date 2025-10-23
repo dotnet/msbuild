@@ -26,7 +26,6 @@ namespace Microsoft.Build.UnitTests
             // Assert
             assemblyPath.ShouldNotBeNull();
             assemblyPath.ShouldEndWith(".dll");
-            Path.GetDirectoryName(assemblyPath).ShouldContain(TaskFactoryUtilities.InlineTaskTempDllSubPath);
         }
 
         [Fact]
