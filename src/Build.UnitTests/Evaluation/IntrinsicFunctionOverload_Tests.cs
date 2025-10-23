@@ -9,9 +9,11 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.Engine.UnitTests.Evaluation
 {
+    [UseInvariantCulture]
     public class IntrinsicFunctionOverload_Tests
     {
         [Fact]
