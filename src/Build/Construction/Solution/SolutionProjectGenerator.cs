@@ -650,6 +650,9 @@ namespace Microsoft.Build.Construction
         internal static bool WouldProjectBuild(SolutionFile solutionFile, string selectedSolutionConfiguration, ProjectInSolution project)
             => solutionFile.IsProjectBuildable(project, selectedSolutionConfiguration);
 
+        internal static bool WouldProjectBuild(SolutionFile solutionFile, string selectedSolutionConfiguration, ProjectInSolution project, ProjectConfigurationInSolution projectConfigurationInSolution)
+            => solutionFile.IsProjectBuildable(project, selectedSolutionConfiguration, projectConfigurationInSolution);
+
         /// <summary>
         /// Private method: generates an MSBuild wrapper project for the solution passed in; the MSBuild wrapper
         /// project to be generated is the private variable "msbuildProject" and the SolutionFile containing information

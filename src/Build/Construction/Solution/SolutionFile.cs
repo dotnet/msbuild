@@ -281,17 +281,24 @@ namespace Microsoft.Build.Construction
             return _solutionFilter?.Contains(FileUtilities.FixFilePath(projectFile)) != false;
         }
 
+        public bool IsProjectBuildable(ProjectInSolution projectInSolution)
+            => IsProjectBuildable(projectInSolution, $"{GetDefaultConfigurationName()}|{GetDefaultPlatformName()}");
+
         internal bool IsProjectBuildable(ProjectInSolution projectInSolution, string selectedSolutionConfiguration)
         {
             _ = projectInSolution.ProjectConfigurations.TryGetValue(selectedSolutionConfiguration, out ProjectConfigurationInSolution projectConfiguration);
+            return IsProjectBuildable(projectInSolution, selectedSolutionConfiguration, projectConfiguration);
+        }
 
+        internal bool IsProjectBuildable(ProjectInSolution projectInSolution, string selectedSolutionConfiguration, ProjectConfigurationInSolution projectConfigurationInSolution)
+        {
             // If the solution filter does not contain this project, do not build it.
             if (!ProjectShouldBuild(projectInSolution.RelativePath))
             {
                 return false;
             }
 
-            if (projectConfiguration == null)
+            if (projectConfigurationInSolution == null)
             {
                 if (projectInSolution.ProjectType == SolutionProjectType.WebProject)
                 {
@@ -310,7 +317,7 @@ namespace Microsoft.Build.Construction
                 return false;
             }
 
-            if (!projectConfiguration.IncludeInBuild)
+            if (!projectConfigurationInSolution.IncludeInBuild)
             {
                 // Not included in the build.
                 return false;
