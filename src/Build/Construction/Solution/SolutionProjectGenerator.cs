@@ -292,8 +292,7 @@ namespace Microsoft.Build.Construction
                             // .. and only if it's known to be MSBuild format, as projects can't use the information otherwise
                             if (dependencyProject.ProjectType == SolutionProjectType.KnownToBeMSBuildFormat)
                             {
-                                if (dependencyProject.ProjectConfigurations.TryGetValue(solutionConfiguration.FullName, out ProjectConfigurationInSolution dependencyProjectConfiguration) &&
-                                    WouldProjectBuild(solutionFile, solutionConfiguration.FullName, dependencyProject, dependencyProjectConfiguration))
+                                if (WouldProjectBuild(solutionFile, solutionConfiguration.FullName, dependencyProject))
                                 {
                                     xw.WriteStartElement("ProjectDependency");
                                     xw.WriteAttributeString("Project", dependencyProjectGuid);
@@ -648,41 +647,8 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Returns true if the specified project will build in the currently selected solution configuration.
         /// </summary>
-        internal static bool WouldProjectBuild(SolutionFile solutionFile, string selectedSolutionConfiguration, ProjectInSolution project, ProjectConfigurationInSolution projectConfiguration)
-        {
-            // If the solution filter does not contain this project, do not build it.
-            if (!solutionFile.ProjectShouldBuild(project.RelativePath))
-            {
-                return false;
-            }
-
-            if (projectConfiguration == null)
-            {
-                if (project.ProjectType == SolutionProjectType.WebProject)
-                {
-                    // Sometimes web projects won't have the configuration we need (Release typically.)  But they should still build if there is
-                    // a solution configuration for it
-                    foreach (SolutionConfigurationInSolution configuration in solutionFile.SolutionConfigurations)
-                    {
-                        if (String.Equals(configuration.FullName, selectedSolutionConfiguration, StringComparison.OrdinalIgnoreCase))
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                // No configuration, so it can't build.
-                return false;
-            }
-
-            if (!projectConfiguration.IncludeInBuild)
-            {
-                // Not included in the build.
-                return false;
-            }
-
-            return true;
-        }
+        internal static bool WouldProjectBuild(SolutionFile solutionFile, string selectedSolutionConfiguration, ProjectInSolution project)
+            => solutionFile.IsProjectBuildable(project, selectedSolutionConfiguration);
 
         /// <summary>
         /// Private method: generates an MSBuild wrapper project for the solution passed in; the MSBuild wrapper
@@ -792,14 +758,14 @@ namespace Microsoft.Build.Construction
             // Now add all of the per-project items, targets and metaprojects.
             foreach (ProjectInSolution project in projectsInOrder)
             {
-                project.ProjectConfigurations.TryGetValue(selectedSolutionConfiguration, out ProjectConfigurationInSolution projectConfiguration);
-                if (!WouldProjectBuild(_solutionFile, selectedSolutionConfiguration, project, projectConfiguration))
+                if (!WouldProjectBuild(_solutionFile, selectedSolutionConfiguration, project))
                 {
                     // Project wouldn't build, so omit it from further processing.
                     continue;
                 }
 
-                bool canBuildDirectly = CanBuildDirectly(traversalInstance, project, projectConfiguration);
+                project.ProjectConfigurations.TryGetValue(selectedSolutionConfiguration, out ProjectConfigurationInSolution projectConfiguration);
+                bool canBuildDirectly = CanBuildDirectly(traversalInstance, project);
 
                 // Add an entry to @(ProjectReference) for the project.  This will be either a reference directly to the project, or to the
                 // metaproject, as appropriate.
@@ -1154,7 +1120,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Returns true if the specified project can be built directly, without using a metaproject.
         /// </summary>
-        private bool CanBuildDirectly(ProjectInstance traversalProject, ProjectInSolution projectToAdd, ProjectConfigurationInSolution projectConfiguration)
+        private bool CanBuildDirectly(ProjectInstance traversalProject, ProjectInSolution projectToAdd)
         {
             // Can we build this project directly, without a metaproject?  We can if it's MSBuild-able and has no references building in this configuration.
             bool canBuildDirectly = false;
@@ -1174,7 +1140,7 @@ namespace Microsoft.Build.Construction
                             dependencyProjectGuid);
                     }
 
-                    if (WouldProjectBuild(_solutionFile, _selectedSolutionConfiguration, dependencyProject, projectConfiguration))
+                    if (WouldProjectBuild(_solutionFile, _selectedSolutionConfiguration, dependencyProject))
                     {
                         // This is a reference we would have to build, so we can't build the project directly.
                         canBuildDirectly = false;
@@ -1332,9 +1298,9 @@ namespace Microsoft.Build.Construction
                 else
                 {
                     if (dependencyProject.ProjectConfigurations.TryGetValue(_selectedSolutionConfiguration, out ProjectConfigurationInSolution dependencyProjectConfiguration) &&
-                        WouldProjectBuild(_solutionFile, _selectedSolutionConfiguration, dependencyProject, dependencyProjectConfiguration))
+                        WouldProjectBuild(_solutionFile, _selectedSolutionConfiguration, dependencyProject))
                     {
-                        bool canBuildDirectly = CanBuildDirectly(traversalProject, dependencyProject, dependencyProjectConfiguration);
+                        bool canBuildDirectly = CanBuildDirectly(traversalProject, dependencyProject);
                         AddProjectReference(traversalProject, metaprojectInstance, dependencyProject, dependencyProjectConfiguration, canBuildDirectly);
                     }
                 }
