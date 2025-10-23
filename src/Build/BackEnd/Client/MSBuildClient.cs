@@ -101,11 +101,6 @@ namespace Microsoft.Build.Experimental
         /// </summary>
         private MSBuildClientPacketPump _packetPump = null!;
 
-        [Obsolete("Use constructor without array parameter.")]
-        public MSBuildClient(string[] commandLine, string msbuildLocation)
-            : this(string.Join(" ", commandLine), msbuildLocation)
-        { }
-
         /// <summary>
         /// Public constructor with parameters.
         /// </summary>
