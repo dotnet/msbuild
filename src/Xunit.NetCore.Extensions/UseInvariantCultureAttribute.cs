@@ -12,22 +12,29 @@ namespace Xunit.NetCore.Extensions
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class UseInvariantCultureAttribute : BeforeAfterTestAttribute
     {
-        private CultureInfo originalCulture = CultureInfo.CurrentCulture;
-        private CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
+        private CultureInfo? originalCulture;
+        private CultureInfo? originalUICulture;
 
         public override void Before(MethodInfo methodUnderTest)
         {
-            originalCulture = Thread.CurrentThread.CurrentCulture;
-            originalUICulture = Thread.CurrentThread.CurrentUICulture;
+            originalCulture = CultureInfo.CurrentCulture;
+            originalUICulture = CultureInfo.CurrentUICulture;
 
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+            CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
         }
 
         public override void After(MethodInfo methodUnderTest)
         {
-            Thread.CurrentThread.CurrentCulture = originalCulture;
-            Thread.CurrentThread.CurrentUICulture = originalUICulture;
+            if (originalCulture != null)
+            {
+                CultureInfo.CurrentCulture = originalCulture;
+            }
+
+            if (originalUICulture != null)
+            {
+                CultureInfo.CurrentUICulture = originalUICulture;
+            }
         }
     }
 }
