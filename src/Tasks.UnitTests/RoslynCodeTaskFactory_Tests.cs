@@ -237,8 +237,6 @@ Log.LogError(Class1.ToPrint());
         [Fact]
         public void OutOfProcRoslynTaskFactoryCachesAssemblyPath()
         {
-            TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
-
             try
             {
                 const string taskBody = @"
@@ -284,7 +282,6 @@ Log.LogError(Class1.ToPrint());
             }
             finally
             {
-                TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
             }
         }
 
