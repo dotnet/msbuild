@@ -55,11 +55,6 @@ namespace Microsoft.Build.Collections
         void EnumerateItemsPerType(Action<string, IEnumerable<T>> itemTypeCallback);
 
         /// <summary>
-        /// Whether the provided item is in this table or not.
-        /// </summary>
-        bool Contains(T projectItem);
-
-        /// <summary>
         /// Add a new item to the collection, at the
         /// end of the list of other items with its key.
         /// </summary>
@@ -92,7 +87,8 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Remove the set of items specified from this dictionary
         /// </summary>
+        /// <param name="itemType">The item type for all removes.</param>
         /// <param name="other">An enumerator over the items to remove.</param>
-        void RemoveItems(IEnumerable<T> other);
+        void RemoveItemsOfType(string itemType, IEnumerable<T> other);
     }
 }
