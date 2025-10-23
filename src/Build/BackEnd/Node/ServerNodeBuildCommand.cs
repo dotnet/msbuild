@@ -15,7 +15,6 @@ namespace Microsoft.Build.BackEnd
     internal sealed class ServerNodeBuildCommand : INodePacket
     {
         private string _commandLine = default!;
-
         private string _startupDirectory = default!;
         private Dictionary<string, string> _buildProcessEnvironment = default!;
         private CultureInfo _culture = default!;
