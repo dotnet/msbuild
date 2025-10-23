@@ -17,7 +17,7 @@ namespace Xunit.NetCore.Extensions
     public class UseInvariantCultureAttribute : BeforeAfterTestAttribute
     {
         private CultureInfo originalCulture = CultureInfo.CurrentCulture;
-        private CultureInfo originalUICulture = CultureInfo.CurrentUICulture    ;
+        private CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
 
         public override void Before(MethodInfo methodUnderTest)
         {
