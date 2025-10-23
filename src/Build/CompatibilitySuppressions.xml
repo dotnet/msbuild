@@ -1,3 +1,32 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!-- https://learn.microsoft.com/dotnet/fundamentals/package-validation/diagnostic-ids -->
-<Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" />
+<Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.OutOfProcServerNode.BuildCallback.BeginInvoke(System.String[],System.AsyncCallback,System.Object)</Target>
+    <Left>lib/net10.0/Microsoft.Build.dll</Left>
+    <Right>lib/net10.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.OutOfProcServerNode.BuildCallback.Invoke(System.String[])</Target>
+    <Left>lib/net10.0/Microsoft.Build.dll</Left>
+    <Right>lib/net10.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.OutOfProcServerNode.BuildCallback.BeginInvoke(System.String[],System.AsyncCallback,System.Object)</Target>
+    <Left>ref/net10.0/Microsoft.Build.dll</Left>
+    <Right>ref/net10.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0002</DiagnosticId>
+    <Target>M:Microsoft.Build.Experimental.OutOfProcServerNode.BuildCallback.Invoke(System.String[])</Target>
+    <Left>ref/net10.0/Microsoft.Build.dll</Left>
+    <Right>ref/net10.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+</Suppressions>
