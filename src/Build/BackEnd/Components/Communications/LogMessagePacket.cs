@@ -19,11 +19,13 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class LogMessagePacket : LogMessagePacketBase
     {
+        private static readonly TargetFinishedTranslator targetFinishedTranslator = new TargetFinishedTranslator(TranslateTargetFinishedEvent);
+
         /// <summary>
         /// Encapsulates the buildEventArg in this packet.
         /// </summary>
         internal LogMessagePacket(KeyValuePair<int, BuildEventArgs>? nodeBuildEvent)
-            : base(nodeBuildEvent, new TargetFinishedTranslator(TranslateTargetFinishedEvent))
+            : base(nodeBuildEvent, targetFinishedTranslator)
         {
         }
 
@@ -31,7 +33,7 @@ namespace Microsoft.Build.BackEnd
         /// Constructor for deserialization
         /// </summary>
         private LogMessagePacket(ITranslator translator)
-            : base(translator, new TargetFinishedTranslator(TranslateTargetFinishedEvent))
+            : base(translator, targetFinishedTranslator)
         {
         }
 
