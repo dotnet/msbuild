@@ -4,6 +4,7 @@
 using System;
 using System.Buffers;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -29,6 +30,8 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class Scheduler : IScheduler
     {
+        private static Meter _schedulerMetrics = new("Microsoft.Build");
+
         /// <summary>
         /// The invalid node id
         /// </summary>
@@ -111,6 +114,11 @@ namespace Microsoft.Build.BackEnd
         /// node limit.
         /// </summary>
         private int _currentOutOfProcNodeCount = 0;
+
+#pragma warning disable IDE0052 // Remove unread private members
+        private readonly ObservableGauge<int> _outOfProcNodeCountGauge;
+        private readonly ObservableGauge<int> _inProcNodeCountGauge;
+#pragma warning restore IDE0052 // Remove unread private members
 
         /// <summary>
         /// The collection of all requests currently known to the system.
@@ -257,6 +265,19 @@ namespace Microsoft.Build.BackEnd
             {
                 _debugDumpPath = FileUtilities.TempFileDirectory;
             }
+
+            _outOfProcNodeCountGauge = _schedulerMetrics.CreateObservableGauge(
+                "msbuild_scheduler_node_count",
+                () => _currentOutOfProcNodeCount,
+                description: "The current count of nodes in the scheduler",
+                unit: "nodes",
+                tags: [new("node.type", "outofproc")]);
+            _inProcNodeCountGauge = _schedulerMetrics.CreateObservableGauge(
+                "msbuild_scheduler_node_count",
+                () => _currentInProcNodeCount,
+                description: "The current count of nodes in the scheduler",
+                unit: "nodes",
+                tags: [new("node.type", "inproc")]);
 
             Reset();
         }
@@ -582,7 +603,7 @@ namespace Microsoft.Build.BackEnd
             DumpConfigurations();
             DumpRequests();
             _schedulingPlan = null;
-            _schedulingData = new SchedulingData();
+            _schedulingData = new SchedulingData(_schedulerMetrics);
             _availableNodes = new Dictionary<int, NodeInfo>(8);
             _pendingRequestCoresCallbacks = new Queue<TaskCompletionSource<int>>();
             _requestBufferPool = ArrayPool<SchedulableRequest>.Create();

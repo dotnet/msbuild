@@ -19,7 +19,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class NodeManager : INodeManager
     {
-        private static System.Diagnostics.Metrics.Meter _nodeMetrics = new("Microsoft.Build.Nodes");
+        private static Meter _nodeMetrics = new("Microsoft.Build");
 
         /// <summary>
         /// The node provider for the in-proc node.
@@ -356,7 +356,7 @@ namespace Microsoft.Build.BackEnd
                 _nodeIdToProvider.Add(node.NodeId, nodeProvider);
             }
             
-            int matchingNodeCount = _nodeIdToProvider.Values.Count(provider => provider == nodeProvider);
+            int matchingNodeCount = _nodeIdToProvider.Count(kvp => kvp.Value == nodeProvider);
             _nodeCountMetric.Record(matchingNodeCount, new KeyValuePair<string, object?>("node.type", nodeProvider == _inProcNodeProvider ? "inproc" : "outofproc"));
 
             return nodes;
