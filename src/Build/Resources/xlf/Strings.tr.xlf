@@ -901,6 +901,11 @@ Hatalar: {3}</target>
         <target state="translated">Bir SDK "{0}" ortam değişkenini "{1}" olarak ayarlamaya çalıştı ancak bu değişken zaten başka bir SDK tarafından ayarlanmıştı.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
+        <source>An SDK set the environment variable "{0}" to "{1}", overriding the ambient environment variable value.</source>
+        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the ambient environment variable value.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SdkEnvironmentVariableSet">
         <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
         <target state="translated">Bir SDK, "{0}" ortam değişkenini "{1}" olarak ayarlamaya çalıştı.</target>
