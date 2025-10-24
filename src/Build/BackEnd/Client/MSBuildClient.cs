@@ -230,7 +230,7 @@ namespace Microsoft.Build.Experimental
         public static bool ShutdownServer(CancellationToken cancellationToken)
         {
             // Neither commandLine nor msbuildlocation is involved in node shutdown
-            var client = new MSBuildClient(commandLine: string.Empty, msbuildLocation: string.Empty);
+            var client = new MSBuildClient(commandLine: null!, msbuildLocation: null!);
 
             return client.TryShutdownServer(cancellationToken);
         }
