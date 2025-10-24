@@ -301,6 +301,8 @@ namespace Microsoft.Build.Logging
         {
             LogMessage("BinLogFilePath=" + FilePath);
             LogMessage("CurrentUICulture=" + System.Globalization.CultureInfo.CurrentUICulture.Name);
+            Console.WriteLine("BinLogFilePath=" + FilePath);
+            Console.WriteLine("CurrentUICulture=" + System.Globalization.CultureInfo.CurrentUICulture.Name);
         }
 
         private void LogMessage(string text)
