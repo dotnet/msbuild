@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
@@ -109,18 +110,79 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly List<SchedulingEvent> _buildEvents = new List<SchedulingEvent>(64);
 
+#pragma warning disable IDE0052 // Remove unread private members
+        private readonly ObservableGauge<int> _buildEventGauge;
+        private readonly ObservableGauge<int> _executingRequestGauge;
+        private readonly ObservableGauge<int> _readyRequestGauge;
+        private readonly ObservableGauge<int> _blockedRequestGauge;
+        private readonly ObservableGauge<int> _yieldingRequestGauge;
+        private readonly ObservableGauge<int> _unscheduledRequestGauge;
+        private readonly List<ObservableGauge<int>> _nodeConfigurationGauges = new();
+#pragma warning restore IDE0052 // Remove unread private members
+
         /// <summary>
         /// The current time for events.  This is set by the scheduler when it does a scheduling cycle in response to an event.
         /// </summary>
         private DateTime _currentEventTime;
+
+        private Func<int, ObservableGauge<int>> _nodeConfigurationCountGaugeFactory;
 
         #endregion
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        public SchedulingData()
+        public SchedulingData(Meter parentMeter)
         {
+            // gauges for request by state
+            _executingRequestGauge = parentMeter.CreateObservableGauge(
+                "msbuild_scheduler_request_count",
+                () => _executingRequests.Count,
+                description: "The current count of requests in the scheduler",
+                unit: "requests",
+                tags: [new("request.type", "executing")]);
+
+            _readyRequestGauge = parentMeter.CreateObservableGauge(
+                "msbuild_scheduler_request_count",
+                () => _readyRequests.Count,
+                description: "The current count of requests in the scheduler",
+                unit: "requests",
+                tags: [new("request.type", "ready")]);
+
+            _blockedRequestGauge = parentMeter.CreateObservableGauge(
+                "msbuild_scheduler_request_count",
+                () => _blockedRequests.Count,
+                description: "The current count of requests in the scheduler",
+                unit: "requests",
+                tags: [new("request.type", "blocked")]);
+
+            _yieldingRequestGauge = parentMeter.CreateObservableGauge(
+                "msbuild_scheduler_request_count",
+                () => _yieldingRequests.Count,
+                description: "The current count of requests in the scheduler",
+                unit: "requests",
+                tags: [new("request.type", "yielding")]);
+
+            _unscheduledRequestGauge = parentMeter.CreateObservableGauge(
+                "msbuild_scheduler_request_count",
+                () => _unscheduledRequests.Count,
+                description: "The current count of requests in the scheduler",
+                unit: "requests",
+                tags: [new("request.type", "unscheduled")]);
+
+            _nodeConfigurationCountGaugeFactory = (nodeId) =>
+                parentMeter.CreateObservableGauge(
+                    "msbuild_scheduler_node_configuration_count",
+                    () => _configurationsByNode.TryGetValue(nodeId, out var configs) ? configs.Count : 0,
+                    description: "The current count of configurations assigned to the node in the scheduler",
+                    unit: "configurations",
+                    tags: [new("node.id", nodeId.ToString())]);
+                    
+            _buildEventGauge = parentMeter.CreateObservableGauge(
+                "msbuild_scheduler_build_event_count",
+                () => _buildEvents.Count,
+                description: "The total count of build events which have occurred during this build",
+                unit: "events");
         }
 
         /// <summary>
@@ -339,6 +401,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             configurationsAssignedToNode = new HashSet<int>();
                             _configurationsByNode[request.AssignedNode] = configurationsAssignedToNode;
+                            _nodeConfigurationGauges.Add(_nodeConfigurationCountGaugeFactory(request.AssignedNode));
                         }
 
                         if (!configurationsAssignedToNode.Contains(request.BuildRequest.ConfigurationId))
