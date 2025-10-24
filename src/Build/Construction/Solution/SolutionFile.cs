@@ -281,6 +281,51 @@ namespace Microsoft.Build.Construction
             return _solutionFilter?.Contains(FileUtilities.FixFilePath(projectFile)) != false;
         }
 
+        public bool IsProjectBuildable(ProjectInSolution projectInSolution)
+            => IsProjectBuildable(projectInSolution, $"{GetDefaultConfigurationName()}|{GetDefaultPlatformName()}");
+
+        internal bool IsProjectBuildable(ProjectInSolution projectInSolution, string selectedSolutionConfiguration)
+        {
+            _ = projectInSolution.ProjectConfigurations.TryGetValue(selectedSolutionConfiguration, out ProjectConfigurationInSolution projectConfiguration);
+            return IsProjectBuildable(projectInSolution, selectedSolutionConfiguration, projectConfiguration);
+        }
+
+        internal bool IsProjectBuildable(ProjectInSolution projectInSolution, string selectedSolutionConfiguration, ProjectConfigurationInSolution projectConfigurationInSolution)
+        {
+            // If the solution filter does not contain this project, do not build it.
+            if (!ProjectShouldBuild(projectInSolution.RelativePath))
+            {
+                return false;
+            }
+
+            if (projectConfigurationInSolution == null)
+            {
+                if (projectInSolution.ProjectType == SolutionProjectType.WebProject)
+                {
+                    // Sometimes web projects won't have the configuration we need (Release typically.)  But they should still build if there is
+                    // a solution configuration for it
+                    foreach (SolutionConfigurationInSolution configuration in SolutionConfigurations)
+                    {
+                        if (String.Equals(configuration.FullName, selectedSolutionConfiguration, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                // No configuration, so it can't build.
+                return false;
+            }
+
+            if (!projectConfigurationInSolution.IncludeInBuild)
+            {
+                // Not included in the build.
+                return false;
+            }
+
+            return true;
+        }
+
         /// <summary>
         /// This method takes a path to a solution file, parses the projects and project dependencies
         /// in the solution file, and creates internal data structures representing the projects within
