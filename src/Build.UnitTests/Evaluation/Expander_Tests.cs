@@ -5210,5 +5210,58 @@ $(
                 logger.AllBuildEvents.Count.ShouldBe(1);
             }
         }
+
+        /// <summary>
+        /// Test ToolLocationHelper.GetPlatformSDKLocation fast path
+        /// </summary>
+        [Fact]
+        public void PropertyFunctionToolLocationHelperGetPlatformSDKLocation()
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            // This should use the fast path and not throw even if the SDK doesn't exist
+            string result = expander.ExpandIntoStringLeaveEscaped("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('Windows', '10.0'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            // The result could be empty if SDK is not installed, but it should not throw
+            result.ShouldNotBeNull();
+        }
+
+        /// <summary>
+        /// Test ToolLocationHelper.GetPlatformSDKDisplayName fast path
+        /// </summary>
+        [Fact]
+        public void PropertyFunctionToolLocationHelperGetPlatformSDKDisplayName()
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            // This should use the fast path and not throw even if the SDK doesn't exist
+            string result = expander.ExpandIntoStringLeaveEscaped("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKDisplayName('Windows', '10.0'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            // The result could be a generated default name if SDK is not installed, but it should not throw
+            result.ShouldNotBeNull();
+        }
+
+        /// <summary>
+        /// Test that both ToolLocationHelper methods work together in the same property expansion
+        /// </summary>
+        [Fact]
+        public void PropertyFunctionToolLocationHelperBothMethodsTogether()
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            // Test both methods in sequence
+            string result1 = expander.ExpandIntoStringLeaveEscaped("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKLocation('Windows', '10.0'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            string result2 = expander.ExpandIntoStringLeaveEscaped("$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPlatformSDKDisplayName('Windows', '10.0'))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            // Both should complete without throwing
+            result1.ShouldNotBeNull();
+            result2.ShouldNotBeNull();
+        }
     }
 }
