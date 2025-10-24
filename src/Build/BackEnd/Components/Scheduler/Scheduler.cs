@@ -118,6 +118,7 @@ namespace Microsoft.Build.BackEnd
 #pragma warning disable IDE0052 // Remove unread private members
         private readonly ObservableGauge<int> _outOfProcNodeCountGauge;
         private readonly ObservableGauge<int> _inProcNodeCountGauge;
+        private readonly ObservableGauge<int> _schedulerRequestCountGauge;
 #pragma warning restore IDE0052 // Remove unread private members
 
         /// <summary>
@@ -278,6 +279,12 @@ namespace Microsoft.Build.BackEnd
                 description: "The current count of nodes in the scheduler",
                 unit: "nodes",
                 tags: [new("node.type", "inproc")]);
+
+            _schedulerRequestCountGauge = _schedulerMetrics.CreateObservableGauge(
+                "msbuild_scheduler_request_count",
+                () => _nextGlobalRequestId,
+                description: "The total count of requests in the scheduler",
+                unit: "requests");
 
             Reset();
         }
