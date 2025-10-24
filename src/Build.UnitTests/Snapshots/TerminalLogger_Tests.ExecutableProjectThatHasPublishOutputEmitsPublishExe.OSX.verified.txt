@@ -1,0 +1,4 @@
+﻿  project [32;1msucceeded[m (0.1s) → 🏃 ]8;;file:///src/bin/Release/project\/src/bin/Release/project]8;;\
+[?25l[1F
+[?25h
+Build [32;1msucceeded[m in 5.0s

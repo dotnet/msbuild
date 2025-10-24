@@ -1,0 +1,15 @@
+﻿]9;4;3;\  project [32;1msucceeded[m (0.1s)
+    ∟📦 ]8;;file:///C:/src/bin/Release/project0.nupkg\C:\src\bin\Release\project0.nupkg]8;;\
+    ∟📦 ]8;;file:///C:/src/bin/Release/project1.nupkg\C:\src\bin\Release\project1.nupkg]8;;\
+    ∟📦 ]8;;file:///C:/src/bin/Release/project2.nupkg\C:\src\bin\Release\project2.nupkg]8;;\
+    ∟📦 ]8;;file:///C:/src/bin/Release/project3.nupkg\C:\src\bin\Release\project3.nupkg]8;;\
+    ∟📦 ]8;;file:///C:/src/bin/Release/project4.nupkg\C:\src\bin\Release\project4.nupkg]8;;\
+    ∟📦 ]8;;file:///C:/src/bin/Release/project5.nupkg\C:\src\bin\Release\project5.nupkg]8;;\
+    ∟📦 ]8;;file:///C:/src/bin/Release/project6.nupkg\C:\src\bin\Release\project6.nupkg]8;;\
+    ∟📦 ]8;;file:///C:/src/bin/Release/project7.nupkg\C:\src\bin\Release\project7.nupkg]8;;\
+    ∟📦 ]8;;file:///C:/src/bin/Release/project8.nupkg\C:\src\bin\Release\project8.nupkg]8;;\
+    ∟📦 ]8;;file:///C:/src/bin/Release/project9.nupkg\C:\src\bin\Release\project9.nupkg]8;;\
+[?25l[1F
+[?25h
+Build [32;1msucceeded[m in 5.0s
+]9;4;0;\
