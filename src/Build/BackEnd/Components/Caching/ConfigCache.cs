@@ -4,6 +4,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
+using System.IO;
+using System.Linq;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -354,6 +357,30 @@ namespace Microsoft.Build.BackEnd
             {
                 _byId = new ConcurrentDictionary<int, BuildRequestConfiguration>();
                 _byMetadata = new ConcurrentDictionary<ConfigurationMetadata, BuildRequestConfiguration>();
+                _configurationMetrics.CreateObservableGauge(
+                "msbuild_configurations_per_project",
+                () => GetConfigurationsPerProjectMeasurements(),
+                description: "The count of configurations per project file during the build",
+                unit: "configurations");
+            }
+            
+            private static Meter _configurationMetrics = new("Microsoft.Build");
+
+#pragma warning disable CA1823 // Avoid unused private fields
+#pragma warning disable IDE0051 // Remove unused private members
+#pragma warning disable CS0169 // Remove unused private members
+            private readonly ObservableGauge<int> _configurationsPerProjectGauge;
+#pragma warning restore CS0169 // Remove unused private members
+#pragma warning restore IDE0051 // Remove unused private members
+#pragma warning restore CA1823 // Avoid unused private fields
+
+            private IEnumerable<Measurement<int>> GetConfigurationsPerProjectMeasurements()
+            {
+                
+                foreach (var kvp in _byMetadata.Keys.GroupBy(k => k.ProjectFullPath))
+                {
+                    yield return new Measurement<int>(kvp.Count(), [new("project.filename", Path.GetFileName(kvp.Key))]);
+                }
             }
 
             internal Configurations(ITranslator translator)
