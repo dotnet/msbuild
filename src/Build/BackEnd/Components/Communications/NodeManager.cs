@@ -4,18 +4,23 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using System.Linq;
 using System.Threading;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
+
     /// <summary>
     /// The NodeManager class is responsible for marshalling data to/from the NodeProviders and organizing the
     /// creation of new nodes on request.
     /// </summary>
     internal class NodeManager : INodeManager
     {
+        private static System.Diagnostics.Metrics.Meter _nodeMetrics = new("Microsoft.Build.Nodes");
+
         /// <summary>
         /// The node provider for the in-proc node.
         /// </summary>
@@ -45,6 +50,7 @@ namespace Microsoft.Build.BackEnd
         /// The next node id to assign to a node.
         /// </summary>
         private int _nextNodeId;
+        private readonly Gauge<int> _nodeCountMetric;
 
         /// <summary>
         /// The nodeID for the inproc node.
@@ -78,6 +84,7 @@ namespace Microsoft.Build.BackEnd
             _nodeIdToProvider = new Dictionary<int, INodeProvider>();
             _packetFactory = new NodePacketFactory();
             _nextNodeId = _inprocNodeId + 1;
+            _nodeCountMetric = _nodeMetrics.CreateGauge<int>("msbuild_active_nodes_count","nodes", "Number of active MSBuild nodes");
         }
 
         #region INodeManager Members
@@ -185,14 +192,14 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownComponent()
         {
-            if (_inProcNodeProvider != null && _inProcNodeProvider is IDisposable)
+            if (_inProcNodeProvider is IDisposable disposableInProcNodeProvider)
             {
-                ((IDisposable)_inProcNodeProvider).Dispose();
+                disposableInProcNodeProvider.Dispose();
             }
 
-            if (_outOfProcNodeProvider != null && _outOfProcNodeProvider is IDisposable)
+            if (_outOfProcNodeProvider is IDisposable disposableOutOfProcNodeProvider)
             {
-                ((IDisposable)_outOfProcNodeProvider).Dispose();
+                disposableOutOfProcNodeProvider.Dispose();
             }
 
             _inProcNodeProvider = null;
@@ -210,6 +217,8 @@ namespace Microsoft.Build.BackEnd
         {
             _packetFactory = new NodePacketFactory();
             _nodeIdToProvider.Clear();
+            _nodeCountMetric.Record(0, new KeyValuePair<string, object?>("node.type", "inproc"));
+            _nodeCountMetric.Record(0, new KeyValuePair<string, object?>("node.type", "outofproc"));
 
             // because the inproc node is always 1 therefore when new nodes are requested we need to start at 2
             _nextNodeId = _inprocNodeId + 1;
@@ -346,6 +355,9 @@ namespace Microsoft.Build.BackEnd
             {
                 _nodeIdToProvider.Add(node.NodeId, nodeProvider);
             }
+            
+            int matchingNodeCount = _nodeIdToProvider.Values.Count(provider => provider == nodeProvider);
+            _nodeCountMetric.Record(matchingNodeCount, new KeyValuePair<string, object?>("node.type", nodeProvider == _inProcNodeProvider ? "inproc" : "outofproc"));
 
             return nodes;
 
