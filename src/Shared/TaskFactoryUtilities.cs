@@ -267,5 +267,28 @@ namespace Microsoft.Build.Shared
 
             return null;
         }
+
+        /// <summary>
+        /// Resolves a potentially relative source code file path for inline task factories.
+        /// In multithreaded mode (/mt), relative paths are resolved relative to the project file directory
+        /// rather than the current working directory. In other modes, the path is returned unchanged.
+        /// </summary>
+        /// <param name="path">The source code file path to resolve (may be relative or absolute).</param>
+        /// <param name="isMultiThreadedBuild">Whether the build is running in multithreaded mode.</param>
+        /// <param name="projectDirectory">The directory of the project file.</param>
+        /// <returns>The resolved absolute path in multithreaded mode, or the original path otherwise.</returns>
+        /// <remarks>
+        /// This method only modifies path resolution in multithreaded builds to maintain
+        /// backward compatibility with existing multi-process build behavior.
+        /// </remarks>
+        public static string ResolveTaskSourceCodePath(string path, bool isMultiThreadedBuild, string projectDirectory)
+        {
+            if (!isMultiThreadedBuild || Path.IsPathRooted(path))
+            {
+                return path;
+            }
+
+            return Path.Combine(projectDirectory, path);
+        }
     }
 }
