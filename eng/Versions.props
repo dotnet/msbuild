@@ -14,7 +14,7 @@
       Don't use shipping versions when building in the VMR unless the VMR directs the build to use shipping versions.
       This can cause issues when building downstream repos in the orchestrated build if the time MSBuild
       is built crosses a UTC date boundary.
-    -->Ư
+    -->
     <DotNetUseShippingVersions Condition="'$(DotNetBuildFromVMR)' != 'true'">true</DotNetUseShippingVersions>
     <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
     <SemanticVersioningV1>true</SemanticVersioningV1>
