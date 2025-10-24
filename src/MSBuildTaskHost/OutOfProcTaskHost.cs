@@ -94,6 +94,10 @@ namespace Microsoft.Build.CommandLine
 
                     Console.ReadLine();
                     break;
+                case "3":
+                    // Value "3" skips debugging for TaskHost processes but debugs the main MSBuild process
+                    // This is useful when you want to debug MSBuild but not the child TaskHost processes
+                    break;
             }
 
             bool restart = false;
