@@ -78,7 +78,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The set of parameters used to decide which host to launch.
         /// </summary>
-        private Dictionary<string, string> _taskHostParameters;
+        private TaskHostParameters _taskHostParameters;
 
         /// <summary>
         /// The type of the task that we are wrapping.
@@ -153,7 +153,7 @@ namespace Microsoft.Build.BackEnd
             IElementLocation taskLocation,
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
-            Dictionary<string, string> taskHostParameters,
+            TaskHostParameters taskHostParameters,
             LoadedType taskType,
             bool taskHostFactoryExplicitlyRequested,
 #if FEATURE_APPDOMAIN
@@ -280,11 +280,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool Execute()
         {
-            // log that we are about to spawn the task host
-            string runtime = _taskHostParameters[XMakeAttributes.runtime];
-            string architecture = _taskHostParameters[XMakeAttributes.architecture];
-        
-            _taskLoggingContext.LogComment(MessageImportance.Low, "ExecutingTaskInTaskHost", _taskType.Type.Name, _taskType.Assembly.AssemblyLocation, runtime, architecture);
+            _taskLoggingContext.LogComment(
+                MessageImportance.Low,
+                "ExecutingTaskInTaskHost",
+                _taskType.Type.Name,
+                _taskType.Assembly.AssemblyLocation,
+                _taskHostParameters.Runtime,
+                _taskHostParameters.Architecture);
 
             // set up the node
             lock (_taskHostLock)
@@ -372,16 +374,16 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    LogErrorUnableToCreateTaskHost(_requiredContext, runtime, architecture, null);
+                    LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null);
                 }
             }
             catch (BuildAbortedException)
             {
-                LogErrorUnableToCreateTaskHost(_requiredContext, runtime, architecture, null);
+                LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null);
             }
             catch (NodeFailedToLaunchException e)
             {
-                LogErrorUnableToCreateTaskHost(_requiredContext, runtime, architecture, e);
+                LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, e);
             }
 
             return _taskExecutionSucceeded;
