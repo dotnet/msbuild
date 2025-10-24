@@ -549,6 +549,8 @@ namespace Microsoft.Build.Internal
                         table[key] = value;
                     }
 
+                    table[Strings.WeakIntern("DOTNET_EnableDiagnostics")] = Strings.WeakIntern("0");
+
 #if !CLR2COMPATIBILITY
                     // Update with the current state.
                     EnvironmentState currentState =
@@ -622,7 +624,7 @@ namespace Microsoft.Build.Internal
             }
 
             // Otherwise, allocate and update with the current state.
-            Dictionary<string, string> table = new(vars.Count, StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> table = new(vars.Count + 1, StringComparer.OrdinalIgnoreCase);
 
             enumerator.Reset();
             while (enumerator.MoveNext())
@@ -632,6 +634,7 @@ namespace Microsoft.Build.Internal
                 string value = Strings.WeakIntern((string)entry.Value);
                 table[key] = value;
             }
+            table[Strings.WeakIntern("DOTNET_EnableDiagnostics")] = Strings.WeakIntern("0");
 
             EnvironmentState newState = new(table.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase));
             s_environmentState = newState;
