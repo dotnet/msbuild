@@ -114,6 +114,7 @@ namespace Microsoft.Build.BackEnd
                     processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
                 }
                 processStartInfo.UseShellExecute = false;
+                processStartInfo.Environment["DOTNET_EnableDiagnostics"] = "0"; // Prevents child dotnet processes from launching a diagnostic port
 
                 Process process;
                 try
