@@ -18,6 +18,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
+using static Microsoft.Build.Shared.XMakeAttributes;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
@@ -1422,9 +1423,7 @@ namespace Microsoft.Build.Execution
 
                     if (isTaskHostFactory)
                     {
-                        _taskFactoryParameters = TaskHostParameters.MergeTaskHostParameters(
-                            _taskFactoryParameters,
-                            new TaskHostParameters(isTaskHostFactory: isTaskHostFactory));
+                        _taskFactoryParameters = TaskHostParameters.MergeTaskHostParameters(_taskFactoryParameters, new TaskHostParameters(isTaskHostFactory: true));
                     }
 
                     if (isAssemblyTaskFactory || isTaskHostFactory)
@@ -1432,7 +1431,6 @@ namespace Microsoft.Build.Execution
                         // If ForceAllTasksOutOfProc is true, we will force all tasks to run in the MSBuild task host
                         // "EXCEPT a small well-known set of tasks that are known to depend on IBuildEngine callbacks
                         // as forcing those out of proc would be just setting them up for known failure"
-
                         bool launchTaskHost =
                             isTaskHostFactory ||
                             (
@@ -1517,8 +1515,8 @@ namespace Microsoft.Build.Execution
                                 bool initialized = false;
                                 try
                                 {
-                                    ITaskFactory2 factory2 = factory as ITaskFactory2;
-                                    if (factory2 != null)
+                                    // for backward compatibility with public interface
+                                    if (factory is ITaskFactory2 factory2)
                                     {
                                         var taskFactoryParams = new Dictionary<string, string>(3)
                                         {
@@ -1528,6 +1526,10 @@ namespace Microsoft.Build.Execution
                                         };
 
                                         initialized = factory2.Initialize(RegisteredName, taskFactoryParams, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
+                                    }
+                                    else if (factory is ITaskFactory3 factory3)
+                                    {
+                                        initialized = factory3.Initialize(RegisteredName, TaskFactoryParameters, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
                                     }
                                     else
                                     {

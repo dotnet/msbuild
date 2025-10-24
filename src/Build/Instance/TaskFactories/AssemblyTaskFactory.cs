@@ -30,7 +30,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// The assembly task factory is used to wrap and construct tasks which are from .net assemblies.
     /// </summary>
-    internal class AssemblyTaskFactory : ITaskFactory2
+    internal class AssemblyTaskFactory : ITaskFactory3
     {
         #region Data
 
@@ -60,14 +60,6 @@ namespace Microsoft.Build.BackEnd
         ///  Parameters owned by this particular task host.
         /// </summary>
         private TaskHostParameters _factoryIdentityParameters;
-
-        /// <summary>
-        /// Tracks whether, in the UsingTask invocation, we were specifically asked to use
-        /// the task host.  If so, that overrides all other concerns, and we will launch
-        /// the task host even if the requested runtime / architecture match that of the
-        /// current MSBuild process.
-        /// </summary>
-        private bool _taskHostFactoryExplicitlyRequested;
 
         /// <summary>
         /// Need to store away the taskloggingcontext used by CreateTaskInstance so that
@@ -266,20 +258,13 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
-            
+
             bool taskHostParamsMatchCurrentProc = true;
             if (!taskFactoryIdentityParameters.IsEmpty)
             {
                 taskHostParamsMatchCurrentProc = TaskHostParametersMatchCurrentProcess(taskFactoryIdentityParameters);
                 _factoryIdentityParameters = taskFactoryIdentityParameters;
             }
-
-            _taskHostFactoryExplicitlyRequested = taskHostExplicitlyRequested;
-
-            _isTaskHostFactory = (taskFactoryIdentityParameters != null
-                 && taskFactoryIdentityParameters.TryGetValue(Constants.TaskHostExplicitlyRequested, out string isTaskHostFactory)
-                 && isTaskHostFactory.Equals("true", StringComparison.OrdinalIgnoreCase))
-                 || !taskHostParamsMatchCurrentProc;
 
             try
             {
@@ -289,7 +274,7 @@ namespace Microsoft.Build.BackEnd
                 string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);
                 using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(targetLoggingContext, AssemblyLoadingContext.TaskRun, assemblyName);
 
-                _loadedType = _typeLoader.Load(taskName, loadInfo, _taskHostFactoryExplicitlyRequested, taskHostParamsMatchCurrentProc);
+                _loadedType = _typeLoader.Load(taskName, loadInfo, taskHostExplicitlyRequested, taskHostParamsMatchCurrentProc);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
             }
             catch (TargetInvocationException e)
@@ -339,7 +324,9 @@ namespace Microsoft.Build.BackEnd
             int scheduledNodeId,
             Func<string, ProjectPropertyInstance> getProperty)
         {
-            bool useTaskFactory = false;
+            // If the type was loaded via MetadataLoadContext, we MUST use TaskFactory since it didn't load any task assemblies in memory.
+            bool useTaskFactory = _loadedType.LoadedViaMetadataLoadContext;
+
             TaskHostParameters mergedParameters = new();
             _taskLoggingContext = taskLoggingContext;
 
@@ -352,14 +339,7 @@ namespace Microsoft.Build.BackEnd
                 VerifyThrowIdentityParametersValid(taskIdentityParameters, taskLocation, _taskName, "MSBuildRuntime", "MSBuildArchitecture");
 
                 mergedParameters = MergeTaskFactoryParameterSets(_factoryIdentityParameters, taskIdentityParameters);
-                useTaskFactory = _taskHostFactoryExplicitlyRequested || !TaskHostParametersMatchCurrentProcess(mergedParameters);
-            }
-            else
-            {
-                // if we don't have any task host parameters specified on either the using task or the
-                // task invocation, then we will run in-proc UNLESS "TaskHostFactory" is explicitly specified
-                // as the task factory.
-                useTaskFactory = _taskHostFactoryExplicitlyRequested;
+                useTaskFactory = _loadedType.LoadedViaMetadataLoadContext || !TaskHostParametersMatchCurrentProcess(mergedParameters);
             }
 
             // Multi-threaded mode routing: Determine if non-thread-safe tasks need TaskHost isolation.
@@ -721,10 +701,52 @@ namespace Microsoft.Build.BackEnd
             _taskLoggingContext.LogError(new BuildEventFileInfo(taskLocation, taskLine, taskColumn), message, messageArgs);
         }
 
+        /// <summary>
+        /// Initializes this factory for instantiating tasks with a particular inline task block and a set of UsingTask parameters.
+        /// </summary>
+        /// <param name="taskName">Name of the task.</param>
+        /// <param name="factoryIdentityParameters">Special parameters that the task factory can use to modify how it executes tasks,
+        /// such as Runtime and Architecture.  The key is the name of the parameter and the value is the parameter's value. This
+        /// is the set of parameters that was set on the UsingTask using e.g. the UsingTask Runtime and Architecture parameters.</param>
+        /// <param name="parameterGroup">The parameter group.</param>
+        /// <param name="taskBody">The task body.</param>
+        /// <param name="taskFactoryLoggingHost">The task factory logging host.</param>
+        /// <returns>A value indicating whether initialization was successful.</returns>
+        /// <remarks>
+        /// <para>MSBuild engine will call this to initialize the factory. This should initialize the factory enough so that the
+        /// factory can be asked whether or not task names can be created by the factory.  If a task factory implements ITaskFactory2,
+        /// this Initialize method will be called in place of ITaskFactory.Initialize.</para>
+        /// <para>
+        /// The taskFactoryLoggingHost will log messages in the context of the target where the task is first used.
+        /// </para>
+        /// </remarks>
         public bool Initialize(string taskName, TaskHostParameters factoryIdentityParameters, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
         {
             ErrorUtilities.ThrowInternalError("Use internal call to properly initialize the assembly task factory");
             return false;
+        }
+
+        /// <summary>
+        /// Create an instance of the task to be used.
+        /// </summary>
+        /// <param name="taskFactoryLoggingHost">
+        /// The task factory logging host will log messages in the context of the task.
+        /// </param>
+        /// <param name="taskIdentityParameters">
+        /// Special parameters that the task factory can use to modify how it executes tasks, such as Runtime and Architecture.
+        /// The key is the name of the parameter and the value is the parameter's value.  This is the set of parameters that was
+        /// set to the task invocation itself, via e.g. the special MSBuildRuntime and MSBuildArchitecture parameters.
+        /// </param>
+        /// <remarks>
+        /// If a task factory implements ITaskFactory2, MSBuild will call this method instead of ITaskFactory.CreateTask.
+        /// </remarks>
+        /// <returns>
+        /// The generated task, or <c>null</c> if the task failed to be created.
+        /// </returns>
+        public ITask CreateTask(IBuildEngine taskFactoryLoggingHost, TaskHostParameters taskIdentityParameters)
+        {
+            ErrorUtilities.ThrowInternalError("Use internal call to properly create a task instance from the assembly task factory");
+            return null;
         }
 
         #endregion

@@ -994,19 +994,28 @@ namespace Microsoft.Build.BackEnd
                             task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, taskFactoryEngineContext, outOfProcTaskFactory, scheduledNodeId);
                             isTaskHost = true;
                         }
+
+                        // Normal in-process execution for custom task factories
                         else
                         {
-                            var taskIdentityMap = new Dictionary<string, string>(3)
+                            // ITaskFactory2 is here for compat reasons
+                            if (_taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2)
                             {
-                                { nameof(TaskHostParameters.Runtime), taskIdentityParameters.Runtime },
-                                { nameof(TaskHostParameters.Architecture), taskIdentityParameters.Architecture },
-                                { nameof(TaskHostParameters.IsTaskHostFactory), taskIdentityParameters.IsTaskHostFactory.ToString() },
-                            };
+                                var taskIdentityMap = new Dictionary<string, string>(3)
+                                {
+                                    { nameof(TaskHostParameters.Runtime), taskIdentityParameters.Runtime },
+                                    { nameof(TaskHostParameters.Architecture), taskIdentityParameters.Architecture },
+                                    { nameof(TaskHostParameters.IsTaskHostFactory), taskIdentityParameters.IsTaskHostFactory.ToString() },
+                                };
 
-                            // Normal in-process execution for custom task factories
-                            task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
-                                taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityMap) :
-                                _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
+                                task = taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityMap);
+                            }
+                            else
+                            {
+                                task = _taskFactoryWrapper.TaskFactory is ITaskFactory3 taskFactory3
+                                    ? taskFactory3.CreateTask(taskFactoryEngineContext, taskIdentityParameters)
+                                    : _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
+                            }
                         }
 
                         // Track telemetry for non-AssemblyTaskFactory task factories
@@ -1745,15 +1754,23 @@ namespace Microsoft.Build.BackEnd
         {
             ITask innerTask;
 
-            var taskIdentityMap = new Dictionary<string, string>(3)
+            // ITaskFactory2 is used for compatibility reasons
+            if (_taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2)
             {
-                { nameof(TaskHostParameters.Runtime), taskIdentityParameters.Runtime },
-                { nameof(TaskHostParameters.Architecture), taskIdentityParameters.Architecture },
-                { nameof(TaskHostParameters.IsTaskHostFactory), taskIdentityParameters.IsTaskHostFactory.ToString() },
-            };
-            innerTask = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
-                taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityMap) :
-                _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
+                var taskIdentityMap = new Dictionary<string, string>(3)
+                {
+                    { nameof(TaskHostParameters.Runtime), taskIdentityParameters.Runtime },
+                    { nameof(TaskHostParameters.Architecture), taskIdentityParameters.Architecture },
+                    { nameof(TaskHostParameters.IsTaskHostFactory), taskIdentityParameters.IsTaskHostFactory.ToString() },
+                };
+                innerTask = taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityMap);
+            }
+            else
+            {
+                innerTask = _taskFactoryWrapper.TaskFactory is ITaskFactory3 taskFactory3
+                    ? taskFactory3.CreateTask(taskFactoryEngineContext, taskIdentityParameters)
+                    : _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
+            }
 
             if (innerTask == null)
             {
