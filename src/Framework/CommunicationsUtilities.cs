@@ -18,6 +18,9 @@ namespace Microsoft.Build.Framework
     /// </summary>
     internal static class FrameworkCommunicationsUtilities
     {
+
+        internal static const string DotnetDiagnosticsEnvironmentVariableName = "DOTNET_EnableDiagnostics";
+
         /// <summary>
         /// Case-insensitive string comparer for environment variable names.
         /// </summary>
@@ -180,6 +183,9 @@ namespace Microsoft.Build.Framework
                         table[key] = value;
                     }
 
+                    // ensure that taskhost nodes don't try to hook into diagnostics
+                    table[Strings.WeakIntern("DOTNET_EnableDiagnostics")] = Strings.WeakIntern("0");
+
                     // Update with the current state.
                     EnvironmentState currentState =
                         new(table.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase), stringBlock.ToArray());
@@ -248,7 +254,7 @@ namespace Microsoft.Build.Framework
             }
 
             // Otherwise, allocate and update with the current state.
-            Dictionary<string, string> table = new(vars.Count, EnvironmentVariableComparer);
+            Dictionary<string, string> table = new(vars.Count + 1, EnvironmentVariableComparer);
 
             enumerator.Reset();
             while (enumerator.MoveNext())
@@ -258,7 +264,8 @@ namespace Microsoft.Build.Framework
                 string value = Strings.WeakIntern((string)entry.Value);
                 table[key] = value;
             }
-
+            // ensure that taskhost nodes don't try to hook into diagnostics
+            table[DotnetDiagnosticsEnvironmentVariableName] = "0";
             EnvironmentState newState = new(table.ToFrozenDictionary(EnvironmentVariableComparer));
             s_environmentState = newState;
 
