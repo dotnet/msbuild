@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+
+    <UseVSTestRunner Condition="'$(IsTestProject)' == 'true'">true</UseVSTestRunner>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsUnitTestProject)' != 'true'">
