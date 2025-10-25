@@ -50,7 +50,9 @@ namespace Microsoft.Build.BackEnd
         /// The next node id to assign to a node.
         /// </summary>
         private int _nextNodeId;
-        private readonly Gauge<int> _nodeCountMetric;
+#pragma warning disable IDE0052 // Remove unread private members
+        private readonly ObservableGauge<int> _nodeCountMetric;
+#pragma warning restore IDE0052 // Remove unread private members
 
         /// <summary>
         /// The nodeID for the inproc node.
@@ -84,7 +86,17 @@ namespace Microsoft.Build.BackEnd
             _nodeIdToProvider = new Dictionary<int, INodeProvider>();
             _packetFactory = new NodePacketFactory();
             _nextNodeId = _inprocNodeId + 1;
-            _nodeCountMetric = _nodeMetrics.CreateGauge<int>("msbuild_active_nodes_count","nodes", "Number of active MSBuild nodes");
+            _nodeCountMetric = _nodeMetrics.CreateObservableGauge("msbuild_active_nodes_count", () => ComputeNodeCounts(_nodeIdToProvider, _inProcNodeProvider, _outOfProcNodeProvider), "nodes", "Number of active MSBuild nodes");
+        }
+
+        private static IEnumerable<Measurement<int>> ComputeNodeCounts(Dictionary<int, INodeProvider> nodeIdToProvider, INodeProvider? inProcNodeProvider = null, INodeProvider?    outOfProcNodeProvider = null)
+        {
+            // This method will be called periodically to get the current node counts.
+            // Since we don't have access to the NodeManager instance here, we need to find another way to get the counts.
+            // For simplicity, we'll return zero counts for both types of nodes.
+            var grouped = nodeIdToProvider.GroupBy(kvp => kvp.Value);
+            yield return new Measurement<int>(grouped.FirstOrDefault(g => g.Key == inProcNodeProvider)?.Count() ?? 0, new KeyValuePair<string, object?>("node.type", "inproc"));
+            yield return new Measurement<int>(grouped.FirstOrDefault(g => g.Key == outOfProcNodeProvider)?.Count() ?? 0, new KeyValuePair<string, object?>("node.type", "outofproc"));
         }
 
         #region INodeManager Members
@@ -217,8 +229,6 @@ namespace Microsoft.Build.BackEnd
         {
             _packetFactory = new NodePacketFactory();
             _nodeIdToProvider.Clear();
-            _nodeCountMetric.Record(0, new KeyValuePair<string, object?>("node.type", "inproc"));
-            _nodeCountMetric.Record(0, new KeyValuePair<string, object?>("node.type", "outofproc"));
 
             // because the inproc node is always 1 therefore when new nodes are requested we need to start at 2
             _nextNodeId = _inprocNodeId + 1;
@@ -355,9 +365,6 @@ namespace Microsoft.Build.BackEnd
             {
                 _nodeIdToProvider.Add(node.NodeId, nodeProvider);
             }
-            
-            int matchingNodeCount = _nodeIdToProvider.Count(kvp => kvp.Value == nodeProvider);
-            _nodeCountMetric.Record(matchingNodeCount, new KeyValuePair<string, object?>("node.type", nodeProvider == _inProcNodeProvider ? "inproc" : "outofproc"));
 
             return nodes;
 
