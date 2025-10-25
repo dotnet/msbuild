@@ -350,6 +350,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private record class Configurations : ITranslatable
         {
+            private static Meter s_configurationMetrics = new("Microsoft.Build");
+#pragma warning disable IDE0052 // Remove unread private members
+            private readonly ObservableGauge<int> _configurationsPerProjectGauge;
+#pragma warning restore IDE0052 // Remove unread private members
             private ConcurrentDictionary<int, BuildRequestConfiguration> _byId;
             private ConcurrentDictionary<ConfigurationMetadata, BuildRequestConfiguration> _byMetadata;
 
@@ -357,22 +361,12 @@ namespace Microsoft.Build.BackEnd
             {
                 _byId = new ConcurrentDictionary<int, BuildRequestConfiguration>();
                 _byMetadata = new ConcurrentDictionary<ConfigurationMetadata, BuildRequestConfiguration>();
-                _configurationMetrics.CreateObservableGauge(
-                "msbuild_configurations_per_project",
-                () => GetConfigurationsPerProjectMeasurements(),
-                description: "The count of configurations per project file during the build",
-                unit: "configurations");
+                _configurationsPerProjectGauge = s_configurationMetrics.CreateObservableGauge(
+                    "msbuild_configurations_per_project",
+                    GetConfigurationsPerProjectMeasurements,
+                    description: "The count of configurations per project file during the build",
+                    unit: "configurations");
             }
-            
-            private static Meter _configurationMetrics = new("Microsoft.Build");
-
-#pragma warning disable CA1823 // Avoid unused private fields
-#pragma warning disable IDE0051 // Remove unused private members
-#pragma warning disable CS0169 // Remove unused private members
-            private readonly ObservableGauge<int> _configurationsPerProjectGauge;
-#pragma warning restore CS0169 // Remove unused private members
-#pragma warning restore IDE0051 // Remove unused private members
-#pragma warning restore CA1823 // Avoid unused private fields
 
             private IEnumerable<Measurement<int>> GetConfigurationsPerProjectMeasurements()
             {

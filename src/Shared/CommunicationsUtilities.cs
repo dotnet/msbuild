@@ -150,7 +150,7 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// An aggregate class for passing around results of a handshake and adjacent information.
     /// ErrorMessage is to propagate error messages where necessary
-    /// </summary> 
+    /// </summary>
     internal class HandshakeResult
     {
         /// <summary>
@@ -224,6 +224,13 @@ namespace Microsoft.Build.Internal
         /// </summary>
         /// <param name="nodeType">
         ///  The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
+        /// </param>
+        /// <param name="predefinedToolsDirectory">
+        /// An optional directory path used for .NET TaskHost handshake salt calculation (only on .NET Framework).
+        /// When specified for .NET TaskHost nodes, this directory path is included in the handshake salt
+        /// to ensure the child dotnet process connects with the expected tools directory context.
+        /// For non-.NET TaskHost nodes or on .NET Core, the MSBuildToolsDirectoryRoot is used instead.
+        /// This parameter is ignored when not running .NET TaskHost on .NET Framework.
         /// </param>
         public Handshake(HandshakeOptions nodeType)
             : this(nodeType, includeSessionId: true, toolsDirectory: null)
