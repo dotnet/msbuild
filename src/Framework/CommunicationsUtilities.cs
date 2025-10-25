@@ -184,7 +184,11 @@ namespace Microsoft.Build.Framework
                     }
 
                     // ensure that taskhost nodes don't try to hook into diagnostics
-                    table[Strings.WeakIntern("DOTNET_EnableDiagnostics")] = Strings.WeakIntern("0");
+#if !CLR2COMPATIBILITY
+                    table[Strings.WeakIntern(DotnetDiagnosticsEnvironmentVariableName)] = Strings.WeakIntern("0");
+#else
+                    table[DotnetDiagnosticsEnvironmentVariableName] = "0";
+#endif
 
                     // Update with the current state.
                     EnvironmentState currentState =
