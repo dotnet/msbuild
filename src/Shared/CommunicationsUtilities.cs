@@ -549,7 +549,11 @@ namespace Microsoft.Build.Internal
                         table[key] = value;
                     }
 
+#if !CLR2COMPATIBILITY
                     table[Strings.WeakIntern("DOTNET_EnableDiagnostics")] = Strings.WeakIntern("0");
+#else
+                    table["DOTNET_EnableDiagnostics"] = "0";
+#endif
 
 #if !CLR2COMPATIBILITY
                     // Update with the current state.
@@ -571,7 +575,7 @@ namespace Microsoft.Build.Internal
             }
         }
 
-#if NET
+#if NET || NETSTANDARD
         /// <summary>
         /// Sets an environment variable using <see cref="Environment.SetEnvironmentVariable(string,string)" />.
         /// </summary>
