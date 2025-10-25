@@ -3,12 +3,7 @@
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
 
-    <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->
-    <DeterministicSourcePaths Condition="'$(IsTestProject)' == 'true'">false</DeterministicSourcePaths>
-
     <UseVSTestRunner Condition="'$(IsTestProject)' == 'true'">true</UseVSTestRunner>
-
-    <ProduceReferenceAssembly Condition="'$(IsTestProject)' != 'true'">true</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsUnitTestProject)' != 'true'">
