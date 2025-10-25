@@ -153,7 +153,7 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// An aggregate class for passing around results of a handshake and adjacent information.
     /// ErrorMessage is to propagate error messages where necessary
-    /// </summary> 
+    /// </summary>
     internal class HandshakeResult
     {
         /// <summary>
@@ -233,7 +233,7 @@ namespace Microsoft.Build.Internal
         /// </param>
         /// <param name="predefinedToolsDirectory">
         /// An optional directory path used for .NET TaskHost handshake salt calculation (only on .NET Framework).
-        /// When specified for .NET TaskHost nodes, this directory path is included in the handshake salt 
+        /// When specified for .NET TaskHost nodes, this directory path is included in the handshake salt
         /// to ensure the child dotnet process connects with the expected tools directory context.
         /// For non-.NET TaskHost nodes or on .NET Core, the MSBuildToolsDirectoryRoot is used instead.
         /// This parameter is ignored when not running .NET TaskHost on .NET Framework.
@@ -553,6 +553,7 @@ namespace Microsoft.Build.Internal
                     // as well (=ExitCode=00000000)  Skip all that start with =.
                     // Read docs about Environment Blocks on MSDN's CreateProcess page.
 
+                    bool isDiagnostic = false;
                     // Format for GetEnvironmentStrings is:
                     // (=HiddenVar=value\0 | Variable=value\0)* \0
                     // See the description of Environment Blocks in MSDN's
@@ -591,7 +592,10 @@ namespace Microsoft.Build.Internal
 #else
                         string key = new string(pEnvironmentBlock, startKey, i - startKey);
 #endif
-
+                        if (key.Equals("DOTNET_DiagnosticPorts", StringComparison.Ordinal))
+                        {
+                            isDiagnostic = true;
+                        }
                         i++;
 
                         // skip over '='
@@ -613,15 +617,18 @@ namespace Microsoft.Build.Internal
                         table[key] = value;
                     }
 
+                    if (isDiagnostic)
+                    {
 #if !CLR2COMPATIBILITY
-                    table[Strings.WeakIntern("DOTNET_EnableDiagnostics")] = Strings.WeakIntern("0");
+                        table[Strings.WeakIntern("DOTNET_EnableDiagnostics")] = Strings.WeakIntern("0");
 #else
-                    table["DOTNET_EnableDiagnostics"] = "0";
+                        table["DOTNET_EnableDiagnostics"] = "0";
 #endif
+                    }
 
 #if !CLR2COMPATIBILITY
-                    // Update with the current state.
-                    EnvironmentState currentState =
+                        // Update with the current state.
+                        EnvironmentState currentState =
                         new(table.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase), stringBlock.ToArray());
                     s_environmentState = currentState;
                     return currentState.EnvironmentVariables;
@@ -695,14 +702,22 @@ namespace Microsoft.Build.Internal
             Dictionary<string, string> table = new(vars.Count + 1, EnvironmentVariableComparer);
 
             enumerator.Reset();
+            bool isDiagnostic = false;
             while (enumerator.MoveNext())
             {
                 DictionaryEntry entry = enumerator.Entry;
                 string key = Strings.WeakIntern((string)entry.Key);
                 string value = Strings.WeakIntern((string)entry.Value);
+                if (key.Equals("DOTNET_DiagnosticPorts", StringComparison.Ordinal))
+                {
+                    isDiagnostic = true;
+                }
                 table[key] = value;
             }
-            table[Strings.WeakIntern("DOTNET_EnableDiagnostics")] = Strings.WeakIntern("0");
+            if (isDiagnostic)
+            {
+                table[Strings.WeakIntern("DOTNET_EnableDiagnostics")] = Strings.WeakIntern("0");
+            }
 
             EnvironmentState newState = new(table.ToFrozenDictionary(EnvironmentVariableComparer));
             s_environmentState = newState;
