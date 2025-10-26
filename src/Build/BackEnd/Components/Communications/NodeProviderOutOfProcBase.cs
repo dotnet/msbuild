@@ -185,7 +185,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         protected IList<NodeContext> GetNodes(
             string msbuildLocation,
-            string commandLineArgs,
+            string[] commandLineArgs,
             int nextNodeId,
             INodePacketFactory factory,
             Handshake hostHandshake,
@@ -196,7 +196,7 @@ namespace Microsoft.Build.BackEnd
 #if DEBUG
             if (Execution.BuildManager.WaitForDebugger)
             {
-                commandLineArgs += " /wfd";
+                commandLineArgs = [..commandLineArgs, " /wfd"];
             }
 #endif
 

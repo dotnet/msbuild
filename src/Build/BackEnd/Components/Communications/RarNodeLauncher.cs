@@ -72,8 +72,7 @@ namespace Microsoft.Build.BackEnd
         private void LaunchNode()
         {
             string msbuildLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-            string commandLineArgs = string.Join(" ", ["/nologo", "/nodemode:3"]);
-            _ = _nodeLauncher.Start(msbuildLocation, commandLineArgs, nodeId: 0);
+            _ = _nodeLauncher.Start(msbuildLocation, ["/nologo", "/nodemode:3"], nodeId: 0);
         }
     }
 }

@@ -831,7 +831,7 @@ namespace Microsoft.Build.Internal
                 if (BitConverter.IsLittleEndian)
                 {
                     Array.Reverse(bytes);
-                }
+            }
 
                 result = HandshakeResult.Success(BitConverter.ToInt32(bytes, 0 /* start index */));
             }

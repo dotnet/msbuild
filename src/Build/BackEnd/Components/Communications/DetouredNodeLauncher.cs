@@ -53,7 +53,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Creates a new MSBuild process
         /// </summary>
-        public Process Start(string msbuildLocation, string commandLineArgs, int nodeId)
+        public Process Start(string msbuildLocation, string[] commandLineArgs, int nodeId)
         {
             // Should always have been set already.
             ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
@@ -67,7 +67,7 @@ namespace Microsoft.Build.BackEnd
 
             // Repeat the executable name as the first token of the command line because the command line
             // parser logic expects it and will otherwise skip the first argument
-            commandLineArgs = $"\"{msbuildLocation}\" {commandLineArgs}";
+            commandLineArgs = [$"\"{msbuildLocation}\"", ..commandLineArgs];
 
             CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
 
@@ -91,7 +91,7 @@ namespace Microsoft.Build.BackEnd
                 SandboxKind = SandboxKind.Default,
                 PipDescription = "MSBuild",
                 PipSemiStableHash = 0,
-                Arguments = commandLineArgs,
+                Arguments = string.Join(" ", commandLineArgs),
                 EnvironmentVariables = _environmentVariables,
                 MaxLengthInMemory = 0, // Don't buffer any output
             };
