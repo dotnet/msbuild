@@ -22,7 +22,7 @@ Run these commands in sequence to set up a complete development environment:
 **Windows:**
 ```cmd
 # Full build with restore - NEVER CANCEL: Takes ~2-3 minutes. Set timeout to 300+ seconds.
-build.cmd --build
+.\build.cmd -v quiet
 
 # Set up bootstrap environment for using built MSBuild
 artifacts\msbuild-build-env.bat
@@ -31,7 +31,7 @@ artifacts\msbuild-build-env.bat
 **macOS/Linux:**
 ```bash
 # Full build with restore - NEVER CANCEL: Takes ~2-3 minutes. Set timeout to 300+ seconds.
-./build.sh --build
+./build.sh -v quiet
 
 # Set up bootstrap environment for using built MSBuild
 source artifacts/sdk-build-env.sh
@@ -41,7 +41,7 @@ source artifacts/sdk-build-env.sh
 **Windows:**
 ```cmd
 # Run all tests - NEVER CANCEL: Takes ~9 minutes but some tests may fail (this is expected). Set timeout to 900+ seconds.
-build.cmd --test
+.\build.cmd -test
 
 # Run individual test project (recommended for validation):
 artifacts\msbuild-build-env.bat
@@ -100,8 +100,8 @@ dotnet artifacts/bin/bootstrap/core/MSBuild.dll --help
 
 ### Always Test These Scenarios After Making Changes:
 1. **Full build validation**: 
-   - Windows: `build.cmd --build` must complete successfully
-   - macOS/Linux: `./build.sh --build` must complete successfully
+   - Windows: `.\build.cmd` must complete successfully
+   - macOS/Linux: `./build.sh` must complete successfully
 2. **Bootstrap environment**: 
    - Windows: `artifacts\msbuild-build-env.bat && dotnet --version` shows correct preview version
    - macOS/Linux: `source artifacts/sdk-build-env.sh && dotnet --version` shows correct preview version
@@ -119,20 +119,20 @@ dotnet artifacts/bin/bootstrap/core/MSBuild.dll --help
 
 ### Build Commands and Timing
 **Windows:**
-- **`build.cmd --build`** - Full build: ~2-3 minutes. NEVER CANCEL. Use 300+ second timeout.
-- **`build.cmd --test`** - Run all tests: ~9 minutes with some failures expected. NEVER CANCEL. Use 900+ second timeout.
-- **`build.cmd --clean`** - Clean build artifacts: ~30 seconds.
+- **`.\build.cmd`** - Full build: ~2-3 minutes. NEVER CANCEL. Use 300+ second timeout.
+- **`.\build.cmd -test`** - Run all tests: ~9 minutes with some failures expected. NEVER CANCEL. Use 900+ second timeout.
+- **`.\build.cmd -clean`** - Clean build artifacts: ~30 seconds.
 
 **macOS/Linux:**
-- **`./build.sh --build`** - Full build: ~2-3 minutes. NEVER CANCEL. Use 300+ second timeout.
-- **`./build.sh --test`** - Run all tests: ~9 minutes with some failures expected. NEVER CANCEL. Use 900+ second timeout.
-- **`./build.sh --clean`** - Clean build artifacts: ~30 seconds.
+- **`./build.sh`** - Full build: ~2-3 minutes. NEVER CANCEL. Use 300+ second timeout.
+- **`./build.sh -test`** - Run all tests: ~9 minutes with some failures expected. NEVER CANCEL. Use 900+ second timeout.
+- **`./build.sh -clean`** - Clean build artifacts: ~30 seconds.
 
 ### Development Workflow
 1. Make your changes to source code
 2. Run the full build to compile (WAIT for completion - takes 2-3 minutes):
-   - Windows: `build.cmd --build`
-   - macOS/Linux: `./build.sh --build`
+   - Windows: `.\build.cmd -v quiet`
+   - macOS/Linux: `./build.sh -v quiet`
 3. Set up environment:
    - Windows: `artifacts\msbuild-build-env.bat`
    - macOS/Linux: `source artifacts/sdk-build-env.sh`

@@ -446,6 +446,11 @@
         <target state="translated">已成功注册自定义检查规则“{0}”。</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
+        <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
+        <target state="translated">任务“{1}”的自定义 TaskFactory“{0}”不支持进程外 TaskHost 执行。关闭多线程生成模式或从项目文件中的 &lt;UsingTask&gt; 定义中移除自定义 TaskFactory。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: 默认 SDK 解析程序解析 SDK“{0}”失败，因为目录“{1}”不存在。</target>
@@ -778,6 +783,20 @@
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
+      <trans-unit id="ProjectFinished_WithTFAndRID">
+        <source>{0}{1} {2} {3} {4} ({5}s)</source>
+        <target state="translated">{0}{1} {2} {3} {4} ({5} 秒)</target>
+        <note>
+      Project finished summary including target framework and runtime identifier information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: runtime identifier (RID)
+      {4}: BuildResult_{X}
+      {5}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: ProjectGraph 不支持具有 ToolsVersion 元数据集的 ProjectReference 项。在“{1}”文件中发现了带有 ToolsVersion 的 ProjectReference“{0}”</target>
@@ -1010,6 +1029,20 @@ Errors: {3}</source>
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestProjectFinished_WithTFAndRID">
+        <source>{0}{1} test {2} {3} {4} ({5}s)</source>
+        <target state="translated">{0}{1} 测试 {2} {3} {4} ({5} 秒)</target>
+        <note>
+      Project finished summary including target framework and runtime identifier information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: runtime identifier (RID)
+      {4}: BuildResult_{X}
+      {5}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>

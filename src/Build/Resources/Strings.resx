@@ -2309,6 +2309,19 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       's' should reflect the localized abbreviation for seconds
     </comment>
   </data>
+  <data name="ProjectFinished_WithTFAndRID" xml:space="preserve">
+    <value>{0}{1} {2} {3} {4} ({5}s)</value>
+    <comment>
+      Project finished summary including target framework and runtime identifier information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: runtime identifier (RID)
+      {4}: BuildResult_{X}
+      {5}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
   <data name="BuildResult_FailedWithErrors" xml:space="preserve">
     <value>failed with {0} error(s)</value>
     <comment>
@@ -2368,6 +2381,19 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       's' should reflect the localized abbreviation for seconds
     </comment>
   </data>
+  <data name="TestProjectFinished_WithTFAndRID" xml:space="preserve">
+    <value>{0}{1} test {2} {3} {4} ({5}s)</value>
+    <comment>
+      Project finished summary including target framework and runtime identifier information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: runtime identifier (RID)
+      {4}: BuildResult_{X}
+      {5}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </comment>
+  </data>
   <data name="ProjectFinished_OutputPath" xml:space="preserve">
     <value> → {0}</value>
     <comment>
@@ -2406,6 +2432,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="OpenTelemetryLoadFailed" xml:space="preserve">
     <value>Loading telemetry libraries failed with exception: {0}.</value>
+  </data>
+  <data name="CustomTaskFactoryOutOfProcNotSupported" xml:space="preserve">
+    <value>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</value>
   </data>
   <data name="NETHostTaskLoad_Failed" xml:space="preserve">
     <value>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.

@@ -817,7 +817,7 @@ namespace Microsoft.Build.CommandLine
             {
                 _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
             }
-            else 
+            else
             {
                 // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
                 _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
@@ -944,7 +944,9 @@ namespace Microsoft.Build.CommandLine
 
                 string taskName = taskConfiguration.TaskName;
                 string taskLocation = taskConfiguration.TaskLocation;
-
+#if !CLR2COMPATIBILITY
+                TaskFactoryUtilities.RegisterAssemblyResolveHandlersFromManifest(taskLocation);
+#endif
                 // We will not create an appdomain now because of a bug
                 // As a fix, we will create the class directly without wrapping it in a domain
                 _taskWrapper = new OutOfProcTaskAppDomainWrapper();
@@ -1218,7 +1220,7 @@ namespace Microsoft.Build.CommandLine
                     return;
                 }
 
-                LogMessagePacket logMessage = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
+                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
                 _nodeEndpoint.SendData(logMessage);
             }
         }

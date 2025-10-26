@@ -562,12 +562,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(@"/h")]
         public void Help(string indicator)
         {
-            MSBuildApp.Execute(
-#if FEATURE_GET_COMMANDLINE
-                @$"c:\bin\msbuild.exe {indicator} ")
-#else
-                new[] { @"c:\bin\msbuild.exe", indicator })
-#endif
+            MSBuildApp.Execute(@$"c:\bin\msbuild.exe {indicator} ")
             .ShouldBe(MSBuildApp.ExitType.Success);
         }
 
@@ -660,19 +655,13 @@ namespace Microsoft.Build.UnitTests
         public void ErrorCommandLine()
         {
             string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
-#if FEATURE_GET_COMMANDLINE
+
             MSBuildApp.Execute(@"c:\bin\msbuild.exe -junk").ShouldBe(MSBuildApp.ExitType.SwitchError);
 
             MSBuildApp.Execute(@"msbuild.exe -t").ShouldBe(MSBuildApp.ExitType.SwitchError);
 
             MSBuildApp.Execute(@"msbuild.exe @bogus.rsp").ShouldBe(MSBuildApp.ExitType.InitializationError);
-#else
-            MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", "-junk" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
 
-            MSBuildApp.Execute(new[] { @"msbuild.exe", "-t" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
-
-            MSBuildApp.Execute(new[] { @"msbuild.exe", "@bogus.rsp" }).ShouldBe(MSBuildApp.ExitType.InitializationError);
-#endif
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
         }
 
@@ -1153,11 +1142,7 @@ namespace Microsoft.Build.UnitTests
                     sw.WriteLine(projectString);
                 }
                 // Should pass
-#if FEATURE_GET_COMMANDLINE
                 MSBuildApp.Execute(@"c:\bin\msbuild.exe " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
-#else
-                MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", quotedProjectFileName }).ShouldBe(MSBuildApp.ExitType.Success);
-#endif
             }
             finally
             {
@@ -1190,21 +1175,9 @@ namespace Microsoft.Build.UnitTests
                 {
                     sw.WriteLine(projectString);
                 }
-#if FEATURE_GET_COMMANDLINE
                 // Should pass
                 MSBuildApp.Execute(@$"c:\bin\msbuild.exe /logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"";""LogFile={logFile}"" /verbosity:detailed " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
 
-#else
-                // Should pass
-                MSBuildApp.Execute(
-                    new[]
-                        {
-                            NativeMethodsShared.IsWindows ? @"c:\bin\msbuild.exe" : "/msbuild.exe",
-                            @$"/logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"";""LogFile={logFile}""",
-                            "/verbosity:detailed",
-                            quotedProjectFileName
-                        }).ShouldBe(MSBuildApp.ExitType.Success);
-#endif
                 File.Exists(logFile).ShouldBeTrue();
 
                 var logFileContents = File.ReadAllText(logFile);
@@ -2879,6 +2852,35 @@ EndGlobal
             success.ShouldBeTrue();
         }
 
+        [Theory]
+        [InlineData("-v:diag -m:1 -tl:off")]
+        [InlineData("-v:diag -m -tl:off")]
+        [InlineData("-v:m -m:1 -tl:off")]
+        [InlineData("-v:m -m -tl:off")]
+        [InlineData("-v:diag -m:1 -tl:on")]
+        [InlineData("-v:diag -m -tl:on")]
+        [InlineData("-v:m -m:1 -tl:on")]
+        [InlineData("-v:m -m -tl:on")]
+        public void PreprocessProjectWell(string arguments)
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(
+                $"""
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup>
+                    <TargetFramework>netstandard2.0</TargetFramework>
+                  </PropertyGroup>
+                </Project>
+                """);
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
+            var preprocessFile = Path.Combine(testProject.TestRoot, "Preprocess.xml");
+            arguments += $" -pp:{preprocessFile}";
+
+            string output = RunnerUtilities.ExecBootstrapedMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, outputHelper: _output, attachProcessId: false);
+            success.ShouldBeTrue();
+            File.Exists(preprocessFile).ShouldBeTrue();
+        }
+
 #if FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// Ensure that tasks get loaded into their own <see cref="System.Runtime.Loader.AssemblyLoadContext"/>.
@@ -2905,6 +2907,20 @@ EndGlobal
         }
 
 #endif
+
+        [Fact]
+        public void ThrowsWhenMaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc()
+        {
+            string projectContent = """
+                <Project>
+                </Project>
+                """;
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
+            string project = testEnvironment.CreateTestProjectWithFiles("project.proj", projectContent).ProjectFile;
+
+            MSBuildApp.Execute(@"c:\bin\msbuild.exe " + project + " / m:257 /mt").ShouldBe(MSBuildApp.ExitType.SwitchError);
+        }
 
         private string CopyMSBuild()
         {

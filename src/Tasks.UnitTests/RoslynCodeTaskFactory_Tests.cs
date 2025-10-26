@@ -41,11 +41,18 @@ namespace Microsoft.Build.Tasks.UnitTests
             _verifySettings.ScrubLinesContaining("Runtime Version:");
         }
 
-        [Fact]
-        public void InlineTaskWithAssemblyPlatformAgnostic()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void InlineTaskWithAssemblyPlatformAgnostic(bool forceOutOfProc)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+                }
+
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
                 string location = Assembly.GetExecutingAssembly().Location;
                 TransientTestFile inlineTask = env.CreateFile(folder, "5106.proj", @$"
@@ -81,12 +88,19 @@ Log.LogError(Alpha.GetString());
             }
         }
 
-        [Fact]
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         [SkipOnPlatform(TestPlatforms.AnyUnix, ".NETFramework 4.0 isn't on unix machines.")]
-        public void InlineTaskWithAssembly()
+        public void InlineTaskWithAssembly(bool forceOutOfProc)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+                }
+
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
                 TransientTestFile assemblyProj = env.CreateFile(folder, "5106.csproj", @$"
                     <Project DefaultTargets=""Build"">
@@ -143,14 +157,17 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
-        [Fact]
-        public void RoslynCodeTaskFactory_ReuseCompilation()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void RoslynCodeTaskFactory_ReuseCompilation(bool forceOutOfProc)
         {
+            int num = forceOutOfProc ? 1 : 2;
             string text1 = $@"
 <Project>
 
   <UsingTask
-    TaskName=""Custom1""
+    TaskName=""Custom{num}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -166,8 +183,8 @@ Log.LogError(Class1.ToPrint());
 
     <Target Name=""Build"">
         <MSBuild Projects=""p2.proj"" Targets=""Build"" />
-        <Custom1 SayHi=""hello1"" />
-        <Custom1 SayHi=""hello2"" />
+        <Custom{num} SayHi=""hello1"" />
+        <Custom{num} SayHi=""hello2"" />
     </Target>
 
 </Project>";
@@ -176,7 +193,7 @@ Log.LogError(Class1.ToPrint());
 <Project>
 
   <UsingTask
-    TaskName=""Custom1""
+    TaskName=""Custom{num}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -191,13 +208,17 @@ Log.LogError(Class1.ToPrint());
   </UsingTask>
 
     <Target Name=""Build"">
-        <Custom1 SayHi=""hello1"" />
-        <Custom1 SayHi=""hello2"" />
+        <Custom{num} SayHi=""hello1"" />
+        <Custom{num} SayHi=""hello2"" />
     </Target>
 
 </Project>";
 
             using var env = TestEnvironment.Create();
+            if (forceOutOfProc)
+            {
+                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+            }
 
             var p2 = env.CreateTestProjectWithFiles("p2.proj", text2);
             text1 = text1.Replace("p2.proj", p2.ProjectFile);
@@ -215,6 +236,57 @@ Log.LogError(Class1.ToPrint());
         }
 
         [Fact]
+        public void OutOfProcRoslynTaskFactoryCachesAssemblyPath()
+        {
+            try
+            {
+                const string taskBody = @"
+                            <Code Type=""Fragment"" Language=""cs"">
+                                Log.LogMessage(""inline execution"");
+                            </Code>";
+
+                var firstFactory = new RoslynCodeTaskFactory();
+                var firstEngine = new MockEngine { ForceOutOfProcessExecution = true };
+                bool initialized = firstFactory.Initialize(
+                    "CachedRoslynInlineTask",
+                    new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
+                    taskBody,
+                    firstEngine);
+                initialized.ShouldBeTrue(firstEngine.Log);
+
+                ITask firstTask = firstFactory.CreateTask(firstEngine);
+                firstTask.ShouldNotBeNull();
+
+                string firstAssemblyPath = ((IOutOfProcTaskFactory)firstFactory).GetAssemblyPath();
+                firstAssemblyPath.ShouldNotBeNullOrEmpty();
+                File.Exists(firstAssemblyPath).ShouldBeTrue();
+
+                firstFactory.CleanupTask(firstTask);
+
+                var secondFactory = new RoslynCodeTaskFactory();
+                var secondEngine = new MockEngine { ForceOutOfProcessExecution = true };
+                bool initializedAgain = secondFactory.Initialize(
+                    "CachedRoslynInlineTask",
+                    new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
+                    taskBody,
+                    secondEngine);
+                initializedAgain.ShouldBeTrue(secondEngine.Log);
+
+                ITask secondTask = secondFactory.CreateTask(secondEngine);
+                secondTask.ShouldNotBeNull();
+
+                string reusedAssemblyPath = ((IOutOfProcTaskFactory)secondFactory).GetAssemblyPath();
+                reusedAssemblyPath.ShouldBe(firstAssemblyPath);
+                File.Exists(reusedAssemblyPath).ShouldBeTrue();
+
+                secondFactory.CleanupTask(secondTask);
+            }
+            finally
+            {
+            }
+        }
+
+        [Fact]
         public void VisualBasicFragment()
         {
             const string fragment = "Dim x = 0";
@@ -224,6 +296,67 @@ Log.LogError(Class1.ToPrint());
                 expectedCodeLanguage: "VB",
                 verifySource: true,
                 expectedCodeType: RoslynCodeTaskFactoryCodeType.Fragment);
+        }
+
+        [Fact]
+        public void RoslynCodeTaskFactoryWithoutCS1702Warning()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                TransientTestFile taskFile = env.CreateFile(folder, "SampleTask.cs", @"
+                using Microsoft.Build.Framework;
+                using Microsoft.Build.Utilities;
+                using System.Text.Json;
+
+                public sealed class SampleTask : Microsoft.Build.Utilities.Task
+                {
+
+                    [Required]
+                    public string InputFileName { get; set; }
+
+                    public override bool Execute()
+                    {
+                        using FileStream stream = File.OpenRead(InputFileName);
+                        var stuff = JsonSerializer.Deserialize<IList<License>>(stream);
+                        return true;
+                    }
+                }
+
+                ");
+
+                TransientTestFile projectFile = env.CreateFile(folder, "Warning.proj", @$"
+                <Project DefaultTargets=""Build"" ToolsVersion=""Current"">
+                  <PropertyGroup>
+                    <TargetFramework>netstandard2.0</TargetFramework>
+                  </PropertyGroup>
+
+                  <ItemGroup>
+                    <PackageReference Include=""System.Memory"" Version=""4.6.3"" />
+                    <PackageReference Include=""System.Text.Json"" Version=""9.0.7"" />
+                  </ItemGroup>
+
+                  <UsingTask TaskName=""SampleTask"" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+                    <ParameterGroup>
+                      <InputFileName ParameterType=""System.String"" Required=""true"" />
+                    </ParameterGroup>
+                    <Task>
+                      <Reference Include=""System.Memory"" />
+                      <Reference Include=""System.Text.Json"" />
+                      <Using Namespace=""System"" />
+                      <Code Type=""Class"" Language=""cs"" Source=""{taskFile.Path}"" />
+                    </Task>
+                  </UsingTask>
+
+                  <Target Name=""Build"" Inputs=""Test.json"" Outputs=""$(OutputPath)\TestTask.output"">
+                    <SampleTask InputFileName=""Test.json"" />
+                  </Target>
+                </Project>
+                ");
+
+                string output = RunnerUtilities.ExecMSBuild(projectFile.Path + " /v:d", out bool success);
+                output.ShouldNotContain("warning CS1702");
+            }
         }
 
         [Fact]
@@ -605,8 +738,10 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
-        [Fact]
-        public void MismatchedTaskNameAndTaskClassName()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MismatchedTaskNameAndTaskClassName(bool forceOutOfProc)
         {
             const string taskName = "SayHello";
             const string className = "HelloWorld";
@@ -640,6 +775,10 @@ namespace InlineTask
 
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+                }
                 TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(projectContent);
                 var logger = proj.BuildProjectExpectFailure();
                 logger.AssertLogContains(errorMessage);
@@ -722,14 +861,17 @@ namespace InlineTask
         }
 
 #if !FEATURE_RUN_EXE_IN_TESTS
-        [Fact]
-        public void RoslynCodeTaskFactory_UsingAPI()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void RoslynCodeTaskFactory_UsingAPI(bool forceOutOfProc)
         {
+            int num = forceOutOfProc ? 3 : 4;
             string text = $@"
 <Project>
 
   <UsingTask
-    TaskName=""Custom1""
+    TaskName=""Custom{num}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -746,12 +888,17 @@ namespace InlineTask
   </UsingTask>
 
     <Target Name=""Build"">
-        <Custom1 SayHi=""World"" />
+        <Custom{num} SayHi=""World"" />
     </Target>
 
 </Project>";
 
             using var env = TestEnvironment.Create();
+            if (forceOutOfProc)
+            {
+                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+            }
+
             RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(env);
             var dotnetPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
 
@@ -846,6 +993,171 @@ namespace InlineTask
             if (verifySource)
             {
                 Verify(taskInfo.SourceCode, _verifySettings).GetAwaiter().GetResult();
+            }
+        }
+
+        /// <summary>
+        /// Verifies that ITaskFactoryBuildParameterProvider.IsMultiThreadedBuild triggers out-of-process compilation
+        /// </summary>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MultiThreadedBuildTriggersOutOfProcCompilation(bool isMultiThreaded)
+        {
+            MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = isMultiThreaded };
+
+            RoslynCodeTaskFactory factory = new RoslynCodeTaskFactory();
+
+            // Use different task names to avoid cache collision between test cases
+            string taskName = isMultiThreaded ? "TestTaskMultiThreaded" : "TestTaskSingleThreaded";
+            
+            string taskBody = @"
+<Code Type=""Fragment"" Language=""cs"">
+    <![CDATA[
+    Log.LogMessage(""Hello from inline task"");
+    ]]>
+</Code>";
+
+            bool success = factory.Initialize(taskName, new Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+            success.ShouldBeTrue();
+
+            // Get assembly path - should be non-null when compiled for out-of-proc
+            string assemblyPath = factory.GetAssemblyPath();
+
+            if (isMultiThreaded)
+            {
+                assemblyPath.ShouldNotBeNullOrEmpty("Assembly should be compiled to disk in multi-threaded mode");
+                File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
+            }
+            else
+            {
+                // In-memory compilation should not produce a persistent assembly path
+                assemblyPath.ShouldBeNullOrEmpty("In-memory compilation should not have a persistent assembly path");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that ForceOutOfProcessExecution property triggers out-of-proc compilation
+        /// </summary>
+        [Fact]
+        public void ForceOutOfProcessExecutionTriggersOutOfProcCompilation()
+        {
+            var mockEngine = new MockEngine
+            {
+                // Set ForceOutOfProcessExecution to true, IsMultiThreadedBuild to false
+                ForceOutOfProcessExecution = true,
+                IsMultiThreadedBuild = false
+            };
+
+            var factory = new RoslynCodeTaskFactory();
+            string taskCode = @"
+<Code Type=""Fragment"" Language=""cs"">
+    <![CDATA[
+    Log.LogMessage(""Test"");
+    ]]>
+</Code>";
+
+            bool success = factory.Initialize("TestTaskForced", new Dictionary<string, TaskPropertyInfo>(), taskCode, mockEngine);
+            success.ShouldBeTrue();
+
+            // Should compile for out-of-proc due to ForceOutOfProcessExecution
+            string assemblyPath = factory.GetAssemblyPath();
+            assemblyPath.ShouldNotBeNullOrEmpty();
+            assemblyPath.ShouldContain(".inline_task.dll");
+        }
+
+        /// <summary>
+        /// Verifies that both ForceOutOfProcessExecution and multi-threaded build work together
+        /// </summary>
+        [Fact]
+        public void BothForceAndMultiThreadedWork()
+        {
+            MockEngine buildEngine = new MockEngine 
+            { 
+                ForceOutOfProcessExecution = true,
+                IsMultiThreadedBuild = true 
+            };
+
+            RoslynCodeTaskFactory factory = new RoslynCodeTaskFactory();
+
+            string taskBody = @"
+<Code Type=""Fragment"" Language=""cs"">
+    <![CDATA[
+    Log.LogMessage(""Hello"");
+    ]]>
+</Code>";
+
+            bool success = factory.Initialize("TestTaskBoth", new Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+            success.ShouldBeTrue();
+
+            string assemblyPath = factory.GetAssemblyPath();
+            assemblyPath.ShouldNotBeNullOrEmpty("Should compile for out-of-proc");
+            File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
+        }
+
+        /// <summary>
+        /// End-to-end test that verifies inline tasks execute successfully when /mt is used.
+        /// This confirms the inline task factory compiles for out-of-process execution and the task runs correctly.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedBuildExecutesInlineTasksSuccessfully()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                
+                // Create a project with an inline task
+                TransientTestFile projectFile = env.CreateFile(folder, "test.proj", @"
+<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+  
+  <!-- Define an inline task using RoslynCodeTaskFactory -->
+  <UsingTask TaskName=""MyInlineTask"" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+    <ParameterGroup>
+      <Message ParameterType=""System.String"" Required=""true"" />
+      <OutputValue ParameterType=""System.String"" Output=""true"" />
+    </ParameterGroup>
+    <Task>
+      <Code Type=""Fragment"" Language=""cs"">
+        <![CDATA[
+        Log.LogMessage(MessageImportance.High, ""Inline task executed: "" + Message);
+        OutputValue = ""Success from inline task"";
+        return true;
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name=""Build"">
+    <Message Text=""Starting inline task test..."" Importance=""High"" />
+    <MyInlineTask Message=""Hello from multi-threaded build!"">
+      <Output TaskParameter=""OutputValue"" PropertyName=""TaskResult"" />
+    </MyInlineTask>
+    <Message Text=""Task result: $(TaskResult)"" Importance=""High"" />
+    <Error Text=""Inline task did not produce expected output"" Condition=""'$(TaskResult)' != 'Success from inline task'"" />
+  </Target>
+
+</Project>");
+
+                // Build with /mt flag with detailed verbosity to see task launching details
+                // The fact that this succeeds proves:
+                // 1. The inline task factory detected multi-threaded mode
+                // 2. It compiled the task to disk (not in-memory)
+                // 3. The task executed successfully in TaskHost for out-of-proc execution
+                string output = RunnerUtilities.ExecMSBuild(
+                    projectFile.Path + " /t:Build /mt /v:detailed", 
+                    out bool success);
+
+                success.ShouldBeTrue(customMessage: "Build with /mt should succeed with inline task");
+                output.ShouldContain("Inline task executed: Hello from multi-threaded build!", 
+                    customMessage: "Inline task should execute and log its message");
+                output.ShouldContain("Task result: Success from inline task",
+                    customMessage: "Inline task should produce output parameter correctly");
+                
+                // Verify the inline task was launched from a temporary assembly (out-of-process execution)
+                output.ShouldContain(".inline_task.dll",
+                    customMessage: "Inline task should be compiled to temporary assembly for out-of-process execution");
+                output.ShouldContain("external task host",
+                    customMessage: "Inline task should be launched in external task host");
             }
         }
     }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="7f2a07b481a3d24677ebcf6a45e7e27c8ff95a4e" BarId="279809" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="d499f9cdfd5b7b7bb291f95a3c14417d5edc969f" BarId="287756" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="9.0.0">
@@ -106,21 +106,21 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.25430.1">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.25513.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>6122520523105dacdd702177a76c9f6b982fd759</Sha>
+      <Sha>e8ca69398033dd1eea35e9667bf857234465de2b</Sha>
     </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="7.0.0-preview.1.229">
+    <Dependency Name="NuGet.Build.Tasks" Version="7.0.0-rc.288">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>9b5c323ed5af962807a5e09a8715009c9529e60a</Sha>
+      <Sha>5514d935e3e77d90d931758cf9e2589735b905a3</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.0.0-2.25429.6">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.3.0-1.25516.1">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>7ef348b9faacaa3862ee7102f70f900bbfe37938</Sha>
+      <Sha>f5dcba88147466b9f989f60bc873c9e083938bf1</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="10.0.0-beta.25430.1">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="10.0.0-beta.25513.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>6122520523105dacdd702177a76c9f6b982fd759</Sha>
+      <Sha>e8ca69398033dd1eea35e9667bf857234465de2b</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

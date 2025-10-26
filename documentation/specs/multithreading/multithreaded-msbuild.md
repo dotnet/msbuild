@@ -217,13 +217,30 @@ With a sidecar TaskHost per node, tasks will get the same constraints and freedo
 
 ## Thread-safe tasks
 
-To mark that a task is multithreaded-MSBuild-aware, we will introduce a new interface that tasks can implement. We will provide a new `TaskExecutionContext` object with information about the task invocation, including the current environment and working directory, so that tasks can access the same information they would have in a single-threaded or out-of-process execution.
+To mark that a task is multithreaded-MSBuild-aware, we use the `MSBuildMultiThreadableTaskAttribute` attribute. Tasks may also implement the `IMultiThreadableTask` interface to gain access to the `TaskEnvironment` object with information about the task invocation, including the current environment and working directory.
 
-To ease task authoring, we will provide a Roslyn analyzer that will check for known-bad API usage, like `System.Environment.GetEnvironmentVariable` or `System.IO.Directory.SetCurrentDirectory`, and suggest alternatives that use the object provided by the engine (such as `context.GetEnvironmentVariable`).
+### Task Routing Strategy
+
+In multithreaded mode, MSBuild determines where each task should execute based on:
+
+* **Thread-safe tasks** (marked with `MSBuildMultiThreadableTaskAttribute`) run **in-process** within thread nodes
+* **All other tasks** (without the attribute) run in **sidecar TaskHost processes** to maintain isolation and compatibility
+
+#### Attribute Semantics
+
+The `MSBuildMultiThreadableTaskAttribute` is **non-inheritable** (`Inherited = false`): each task class must explicitly declare its thread-safety capability. This ensures that:
+
+* Task authors must consciously opt into multithreaded execution for each task class
+* Derived classes cannot accidentally inherit thread-safety assumptions from base classes
+* The routing decision is always explicit and visible in the task's source code
+
+Tasks may optionally implement `IMultiThreadableTask` to access `TaskEnvironment` APIs, but only the attribute determines routing behavior.
 
 ## Tasks transition
 
-In the initial phase of development of multithreaded execution mode, all tasks will run in sidecar taskhosts. Over time, we will update tasks that are maintained by us and our partners (such as MSBuild, SDK, and NuGet) to implement and use the new thread-safe task interface. As these tasks become thread-safe, their execution would be moved into the entry process. Customers' tasks would be executed in the sidecar taskhosts unless they implement the new interface.
+In the initial phase of development of multithreaded execution mode, all tasks will run in sidecar taskhosts. Over time, we will update tasks that are maintained by us and our partners (such as MSBuild, SDK, and NuGet) to add the `MSBuildMultiThreadableTaskAttribute` and ensure thread-safety. As these tasks are marked with the attribute, their execution would be moved into the entry process. Customers' tasks would be executed in the sidecar taskhosts unless they add the attribute to their task classes.
+
+To ease task authoring, we will provide a Roslyn analyzer that will check for known-bad API usage, like `System.Environment.GetEnvironmentVariable` or `System.IO.Directory.SetCurrentDirectory`, and suggest alternatives that use the `TaskEnvironment` object (for tasks that also implement `IMultiThreadableTask`).
 
 ## Interaction with `DisableInProcNode`
 
