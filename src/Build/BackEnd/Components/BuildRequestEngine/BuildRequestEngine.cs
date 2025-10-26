@@ -4,8 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Metrics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd.Logging;
@@ -36,6 +38,8 @@ namespace Microsoft.Build.BackEnd
     /// </remarks>
     internal class BuildRequestEngine : IBuildRequestEngine, IBuildComponent
     {
+        private static Meter s_meter = new Meter("Microsoft.Build", "1.0.0");
+
         /// <summary>
         /// The starting unresolved configuration id assigned by the engine.
         /// </summary>
@@ -70,6 +74,12 @@ namespace Microsoft.Build.BackEnd
         /// Mapping of global request ids to the request entries.
         /// </summary>
         private readonly Dictionary<int, BuildRequestEntry> _requestsByGlobalRequestId;
+
+#pragma warning disable IDE0052 // Remove unread private members
+        private ObservableGauge<int> _requestsGauge;
+        private ObservableGauge<int> _workQueueGauge;
+        private ObservableGauge<int> _engineStatusGauge;
+#pragma warning restore IDE0052 // Remove unread private members
 
         /// <summary>
         /// The list of requests currently waiting to be submitted from RequestBuilders.
@@ -202,11 +212,28 @@ namespace Microsoft.Build.BackEnd
 
             _nodeLoggingContext = loggingContext;
 
+            _requestsGauge = s_meter.CreateObservableGauge("build_request_engine_requests", CollectRequestStatus, "requests", "Number of active build requests in the BuildRequestEngine", tags: [new("nodeId", _nodeLoggingContext.BuildEventContext.NodeId)]);
+            _workQueueGauge = s_meter.CreateObservableGauge("build_request_engine_work_queue_length", () => _workQueue.InputCount, "items", "Number of items in the BuildRequestEngine work queue", tags: [new("nodeId", _nodeLoggingContext.BuildEventContext.NodeId)]);
+            _engineStatusGauge = s_meter.CreateObservableGauge("build_request_engine_status", () => (int)_status, "status", "Current status of the BuildRequestEngine", tags: [new("nodeId", _nodeLoggingContext.BuildEventContext.NodeId)]);
+
             // Create a work queue that will take an action and invoke it.  The generic parameter is the type which ActionBlock.Post() will
             // take (an Action in this case) and the parameter to this constructor is a function which takes that parameter of type Action
             // (which we have named action) and does something with it (in this case calls invoke on it.)
             _workQueue = new ActionBlock<Action>(action => action.Invoke());
             ChangeStatus(BuildRequestEngineStatus.Idle);
+        }
+
+        private IEnumerable<Measurement<int>> CollectRequestStatus()
+        {
+#if NET
+            var requestsByState = _requests.CountBy(r => r.State);
+#else
+            var requestsByState = _requests.GroupBy(r => r.State).ToDictionary(g => g.Key, g => g.Count());
+#endif
+            foreach (var kvp in requestsByState)
+            {
+                yield return new Measurement<int>(kvp.Value, new KeyValuePair<string, object>("state", kvp.Key.ToString()));
+            }
         }
 
         /// <summary>
