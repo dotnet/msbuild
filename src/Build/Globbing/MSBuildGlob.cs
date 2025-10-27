@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using Microsoft.NET.StringTools;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -250,6 +251,35 @@ namespace Microsoft.Build.Globbing
         public static MSBuildGlob Parse(string fileSpec)
         {
             return Parse(string.Empty, fileSpec);
+        }
+
+        /// <summary>
+        ///     Internal factory method that can return either MSBuildGlob or FileSystemGlobbingMSBuildGlob
+        ///     based on the UseFileSystemGlobbingForMSBuildGlob trait.
+        /// </summary>
+        /// <param name="globRoot">The root directory for the glob</param>
+        /// <param name="fileSpec">The file specification pattern</param>
+        /// <returns>An IMSBuildGlob implementation</returns>
+        internal static IMSBuildGlob CreateGlob(string globRoot, string fileSpec)
+        {
+            // Use Microsoft.Extensions.FileSystemGlobbing if the trait is enabled
+            if (Traits.Instance.UseFileSystemGlobbingForMSBuildGlob)
+            {
+                return FileSystemGlobbingMSBuildGlob.Parse(globRoot, fileSpec);
+            }
+
+            return Parse(globRoot, fileSpec);
+        }
+
+        /// <summary>
+        ///     Internal factory method that can return either MSBuildGlob or FileSystemGlobbingMSBuildGlob
+        ///     based on the UseFileSystemGlobbingForMSBuildGlob trait.
+        /// </summary>
+        /// <param name="fileSpec">The file specification pattern</param>
+        /// <returns>An IMSBuildGlob implementation</returns>
+        internal static IMSBuildGlob CreateGlob(string fileSpec)
+        {
+            return CreateGlob(string.Empty, fileSpec);
         }
 
         /// <summary>
