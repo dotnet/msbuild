@@ -680,6 +680,74 @@ namespace Microsoft.Build.UnitTests
             File.Create(_logFile).Dispose();
         }
 
+        [Theory]
+        [InlineData("mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [InlineData("LogFile=mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [InlineData("\"mylog.binlog\"", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [InlineData("LogFile=\"mylog.binlog\"", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [InlineData("mylog.binlog;ProjectImports=None", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.None, false)]
+        [InlineData("ProjectImports=None;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.None, false)]
+        [InlineData("ProjectImports=Embed;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [InlineData("ProjectImports=ZipFile;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.ZipFile, false)]
+        [InlineData("mylog.binlog;OmitInitialInfo", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, true)]
+        [InlineData("OmitInitialInfo;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, true)]
+        [InlineData("ProjectImports=None;OmitInitialInfo;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.None, true)]
+        public void ParseParametersTests(string parametersString, string expectedLogFilePath, BinaryLogger.ProjectImportsCollectionMode expectedImportsMode, bool expectedOmitInitialInfo)
+        {
+            var result = BinaryLogger.ParseParameters(parametersString);
+
+            result.LogFilePath.ShouldBe(expectedLogFilePath);
+            result.ProjectImportsCollectionMode.ShouldBe(expectedImportsMode);
+            result.OmitInitialInfo.ShouldBe(expectedOmitInitialInfo);
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Theory]
+        [InlineData("{}")]  // Wildcard without extension
+        [InlineData("{}.binlog")]  // Wildcard with extension
+        [InlineData("mylog-{}.binlog")]  // Wildcard with prefix
+        [InlineData("LogFile={}.binlog")]  // Wildcard with LogFile= prefix
+        public void ParseParameters_WildcardPath_ReturnsNullPath(string parametersString)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                // Enable Wave17_12 to support wildcard parameters
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                var result = BinaryLogger.ParseParameters(parametersString);
+
+                result.LogFilePath.ShouldBeNull();
+            }
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Fact]
+        public void ParseParameters_NullParameter_ThrowsLoggerException()
+        {
+            Should.Throw<LoggerException>(() => BinaryLogger.ParseParameters(null));
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Theory]
+        [InlineData("invalidparameter")]
+        [InlineData("mylog.txt")]  // Wrong extension
+        [InlineData("LogFile=mylog.txt")]  // Wrong extension with LogFile prefix
+        public void ParseParameters_InvalidParameter_ThrowsLoggerException(string parametersString)
+        {
+            Should.Throw<LoggerException>(() => BinaryLogger.ParseParameters(parametersString));
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
         public void Dispose()
         {
             _env.Dispose();
