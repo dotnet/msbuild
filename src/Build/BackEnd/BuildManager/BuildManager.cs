@@ -1168,10 +1168,9 @@ namespace Microsoft.Build.Execution
         private void EndBuildTelemetry()
         {
             using var activity = TelemetryManager.Instance.StartActivity("Build")
-                ?.SetTag("CheckSimpleParam", "test")
                 ?.SetTag("GeneralBuildData", _buildTelemetry?.GetActivityProperties())
                 ?.SetTag(
-                    "BuildInsights",
+                    "BuildsInsights",
                     _telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
                         includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
                         includeTargetDetails: false))
