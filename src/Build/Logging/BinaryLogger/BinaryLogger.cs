@@ -223,23 +223,37 @@ namespace Microsoft.Build.Logging
         /// <returns>True if the parameter was a ProjectImports parameter; otherwise, false.</returns>
         private static bool TryParseProjectImports(string parameter, BinaryLoggerParameters result)
         {
-            if (string.Equals(parameter, ProjectImportsNoneParameter, StringComparison.OrdinalIgnoreCase))
+            if (TrySetProjectImportsMode(parameter, ProjectImportsNoneParameter, ProjectImportsCollectionMode.None, result))
             {
-                result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.None;
-                result.HasProjectImportsParameter = true;
                 return true;
             }
 
-            if (string.Equals(parameter, ProjectImportsEmbedParameter, StringComparison.OrdinalIgnoreCase))
+            if (TrySetProjectImportsMode(parameter, ProjectImportsEmbedParameter, ProjectImportsCollectionMode.Embed, result))
             {
-                result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.Embed;
-                result.HasProjectImportsParameter = true;
                 return true;
             }
 
-            if (string.Equals(parameter, ProjectImportsZipFileParameter, StringComparison.OrdinalIgnoreCase))
+            if (TrySetProjectImportsMode(parameter, ProjectImportsZipFileParameter, ProjectImportsCollectionMode.ZipFile, result))
             {
-                result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.ZipFile;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Attempts to match and set a ProjectImports mode.
+        /// </summary>
+        /// <param name="parameter">The parameter to check.</param>
+        /// <param name="expectedParameter">The expected parameter string.</param>
+        /// <param name="mode">The mode to set if matched.</param>
+        /// <param name="result">The BinaryLoggerParameters object to update.</param>
+        /// <returns>True if the parameter matched; otherwise, false.</returns>
+        private static bool TrySetProjectImportsMode(string parameter, string expectedParameter, ProjectImportsCollectionMode mode, BinaryLoggerParameters result)
+        {
+            if (string.Equals(parameter, expectedParameter, StringComparison.OrdinalIgnoreCase))
+            {
+                result.ProjectImportsCollectionMode = mode;
                 result.HasProjectImportsParameter = true;
                 return true;
             }
