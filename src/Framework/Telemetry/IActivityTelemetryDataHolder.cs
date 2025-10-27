@@ -3,8 +3,8 @@
 
 #if NETFRAMEWORK
 
+using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.VisualStudio.Telemetry;
 
 namespace Microsoft.Build.Framework.Telemetry;
 
@@ -13,7 +13,7 @@ namespace Microsoft.Build.Framework.Telemetry;
 /// </summary>
 internal interface IActivityTelemetryDataHolder
 {
-    TelemetryComplexProperty GetActivityProperties();
+    Dictionary<string, object> GetActivityProperties();
 }
 
 #endif

@@ -464,7 +464,7 @@ namespace Microsoft.Build.Execution
         public void BeginBuild(BuildParameters parameters)
         {
 #if NETFRAMEWORK
-            VSTelemetryManager telemetryManager = new VSTelemetryManager(isStandalone: false);
+            TelemetryManager.Initialize(isStandalone: false);
 #endif
             if (_previousLowPriority != null)
             {
@@ -1167,12 +1167,16 @@ namespace Microsoft.Build.Execution
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void EndBuildTelemetry()
         {
-            VSTelemetryManager.StartActivity("Build")?
-                .WithTags("generalbuilddata", _buildTelemetry)
-                .WithTags("buildsinsights", _telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
+            var activity = TelemetryManager.StartActivity("Build");
+
+            activity?.SetTag("generalbuilddata", _buildTelemetry?.GetActivityProperties());
+            activity?.SetTag(
+                "buildsinsights",
+                _telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
                     includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
-                    includeTargetDetails: false))
-                .Dispose();
+                    includeTargetDetails: false));
+
+            activity?.Dispose();
         }
 #endif
         /// <summary>

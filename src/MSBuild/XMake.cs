@@ -252,7 +252,7 @@ namespace Microsoft.Build.CommandLine
 
             // Initialize VSTelemetry
 #if NETFRAMEWORK
-            VSTelemetryManager tm = new VSTelemetryManager(isStandalone: true);
+            TelemetryManager.Initialize(isStandalone: true);
 #endif
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
@@ -303,7 +303,7 @@ namespace Microsoft.Build.CommandLine
             }
 
 #if NETFRAMEWORK
-            VSTelemetryManager.Dispose();
+            TelemetryManager.Dispose();
 #endif
             return exitCode;
         }

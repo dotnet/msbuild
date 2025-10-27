@@ -3,6 +3,8 @@
 #if NETFRAMEWORK
 
 using System.Collections.Generic;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.VisualStudio.Telemetry;
 using static Microsoft.Build.Framework.Telemetry.BuildInsights;
 
@@ -49,9 +51,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
             foreach (KeyValuePair<TaskOrTargetTelemetryKey, bool> valuePair in targetsDetails)
             {
-                string targetName = ShouldHashKey(valuePair.Key) ?
-                    VSTelemetryActivityExtensions.GetHashed(valuePair.Key.Name) :
-                    valuePair.Key.Name;
+                string targetName = ShouldHashKey(valuePair.Key) ? GetHashed(valuePair.Key.Name) : valuePair.Key.Name;
 
                 result.Add(new TargetDetailInfo(
                     targetName,
@@ -78,9 +78,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
             foreach (KeyValuePair<TaskOrTargetTelemetryKey, TaskExecutionStats> valuePair in tasksDetails)
             {
-                string taskName = valuePair.Key.IsCustom ?
-                    VSTelemetryActivityExtensions.GetHashed(valuePair.Key.Name) :
-                    valuePair.Key.Name;
+                string taskName = valuePair.Key.IsCustom ? GetHashed(valuePair.Key.Name) : valuePair.Key.Name;
 
                 result.Add(new TaskDetailInfo(
                     taskName,
@@ -92,6 +90,52 @@ namespace Microsoft.Build.Framework.Telemetry
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Depending on the platform, hash the value using an available mechanism.
+        /// </summary>
+        internal static string GetHashed(object value)
+        {
+            return Sha256Hasher.Hash(value.ToString() ?? "");
+        }
+
+        // https://github.com/dotnet/sdk/blob/8bd19a2390a6bba4aa80d1ac3b6c5385527cc311/src/Cli/Microsoft.DotNet.Cli.Utils/Sha256Hasher.cs + workaround for netstandard2.0
+        private static class Sha256Hasher
+        {
+            /// <summary>
+            /// The hashed mac address needs to be the same hashed value as produced by the other distinct sources given the same input. (e.g. VsCode)
+            /// </summary>
+            public static string Hash(string text)
+            {
+                byte[] bytes = Encoding.UTF8.GetBytes(text);
+#if NET
+                byte[] hash = SHA256.HashData(bytes);
+#if NET9_0_OR_GREATER
+                return Convert.ToHexStringLower(hash);
+#else
+                return Convert.ToHexString(hash).ToLowerInvariant();
+#endif
+
+#else
+                // Create the SHA256 object and compute the hash
+                using (var sha256 = SHA256.Create())
+                {
+                    byte[] hash = sha256.ComputeHash(bytes);
+
+                    // Convert the hash bytes to a lowercase hex string (manual loop approach)
+                    var sb = new StringBuilder(hash.Length * 2);
+                    foreach (byte b in hash)
+                    {
+                        sb.AppendFormat("{0:x2}", b);
+                    }
+
+                    return sb.ToString();
+                }
+#endif
+            }
+
+            public static string HashWithNormalizedCasing(string text) => Hash(text.ToUpperInvariant());
         }
 
         internal record TaskDetailInfo(string Name, string TotalMilliseconds, string ExecutionsCount, string TotalMemoryBytes, string IsCustom, string IsNuget);
@@ -252,7 +296,17 @@ namespace Microsoft.Build.Framework.Telemetry
 
         private sealed class NodeTelemetry(BuildInsights insights) : IActivityTelemetryDataHolder
         {
-            TelemetryComplexProperty IActivityTelemetryDataHolder.GetActivityProperties() => new(insights);
+            Dictionary<string, object> IActivityTelemetryDataHolder.GetActivityProperties()
+            {
+                Dictionary<string, object> properties = new();
+
+                properties[nameof(BuildInsights.Tasks)] = insights.Tasks;
+                properties[nameof(BuildInsights.Targets)] = insights.Targets;
+                properties[nameof(BuildInsights.TargetsSummary)] = insights.TargetsSummary;
+                properties[nameof(BuildInsights.TasksSummary)] = insights.TasksSummary;
+
+                return properties;
+            }
         }
     }
 }

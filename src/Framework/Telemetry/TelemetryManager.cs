@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.Telemetry;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
-    internal class VSTelemetryManager
+    internal static class TelemetryManager
     {
         private const string CollectorApiKey = "f3e86b4023cc43f0be495508d51f588a-f70d0e59-0fb0-4473-9f19-b4024cc340be-7296";
 
@@ -15,9 +15,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
         private static bool _disposed;
 
-        public VSTelemetryManager(bool isStandalone) => Initialize(isStandalone);
-
-        private void Initialize(bool isStandalone)
+        public static void Initialize(bool isStandalone)
         {
             if (_telemetrySession != null)
             {
@@ -36,7 +34,7 @@ namespace Microsoft.Build.Framework.Telemetry
             _telemetrySession = TelemetryService.DefaultSession;
         }
 
-        public static VsTelemetryActivity? StartActivity(string name)
+        public static IActivity? StartActivity(string name)
         {
             string eventName = $"{TelemetryConstants.EventPrefix}{name}";
             TelemetryScope<OperationEvent>? operation = _telemetrySession.StartOperation(eventName);

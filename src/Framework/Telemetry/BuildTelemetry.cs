@@ -11,6 +11,9 @@ namespace Microsoft.Build.Framework.Telemetry
     /// Telemetry of build.
     /// </summary>
     internal class BuildTelemetry : TelemetryBase
+#if NETFRAMEWORK
+        , IActivityTelemetryDataHolder
+#endif
     {
         public override string EventName => "build";
 
@@ -104,6 +107,46 @@ namespace Microsoft.Build.Framework.Telemetry
         /// Framework name suitable for display to a user.
         /// </summary>
         public string? BuildEngineFrameworkName { get; set; }
+
+#if NETFRAMEWORK
+        /// <summary>
+        /// Create a list of properties sent to VS telemetry with the information whether they should be hashed.
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string, object> GetActivityProperties()
+        {
+            Dictionary<string, object> telemetryItems = new(8);
+
+            if (StartAt.HasValue && FinishedAt.HasValue)
+            {
+                telemetryItems.Add(TelemetryConstants.BuildDurationPropertyName, (FinishedAt.Value - StartAt.Value).TotalMilliseconds);
+            }
+
+            if (InnerStartAt.HasValue && FinishedAt.HasValue)
+            {
+                telemetryItems.Add(TelemetryConstants.InnerBuildDurationPropertyName, (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds);
+            }
+
+            AddIfNotNull(nameof(BuildEngineHost), BuildEngineHost);
+            AddIfNotNull(nameof(BuildSuccess), BuildSuccess);
+            AddIfNotNull(nameof(BuildTarget), BuildTarget);
+            AddIfNotNull(nameof(BuildEngineVersion), BuildEngineVersion);
+            AddIfNotNull(nameof(BuildCheckEnabled), BuildCheckEnabled);
+            AddIfNotNull(nameof(MultiThreadedModeEnabled), MultiThreadedModeEnabled);
+            AddIfNotNull(nameof(SACEnabled), SACEnabled);
+            AddIfNotNull(nameof(IsStandaloneExecution), IsStandaloneExecution);
+
+            return telemetryItems;
+
+            void AddIfNotNull(string key, object? value)
+            {
+                if (value != null)
+                {
+                    telemetryItems.Add(key, value);
+                }
+            }
+        }
+#endif
 
         public override IDictionary<string, string> GetProperties()
         {

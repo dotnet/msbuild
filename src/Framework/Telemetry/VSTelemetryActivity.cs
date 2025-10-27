@@ -3,13 +3,15 @@
 
 #if NETFRAMEWORK
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Windows.Forms;
 using Microsoft.VisualStudio.Telemetry;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
-    internal class VsTelemetryActivity
+    internal class VsTelemetryActivity : IActivity
     {
         private readonly TelemetryScope<OperationEvent> _scope;
         private TelemetryResult _result = TelemetryResult.Success;
@@ -17,31 +19,19 @@ namespace Microsoft.Build.Framework.Telemetry
 
         private bool _disposed;
 
-        public VsTelemetryActivity(TelemetryScope<OperationEvent> scope)
-        {
-            _scope = scope;
-        }
+        public VsTelemetryActivity(TelemetryScope<OperationEvent> scope) => _scope = scope;
 
-        public VsTelemetryActivity? AddComplexProperty(string key, TelemetryComplexProperty complexProperty)
+        public IActivity? SetTag(string key, object? value)
         {
-            _scope.EndEvent.Properties[key] = complexProperty;
+            if (value != null)
+            {
+                _scope.EndEvent.Properties[$"{TelemetryConstants.PropertyPrefix}{key}"] = new TelemetryComplexProperty(value);
+            }
 
             return this;
         }
 
-        public VsTelemetryActivity? AddTag(string key, string? value)
-        {
-            _scope.EndEvent.Properties[key] = value;
-            return this;
-        }
-
-        public VsTelemetryActivity? SetTag(string key, object? value)
-        {
-            _scope.EndEvent.Properties[key] = value;
-            return this;
-        }
-
-        public VsTelemetryActivity? SetStatus(ActivityStatusCode status, string? description = null)
+        public IActivity? SetStatus(ActivityStatusCode status, string? description = null)
         {
             // Map ActivityStatusCode to TelemetryResult
             _result = status switch
@@ -56,14 +46,14 @@ namespace Microsoft.Build.Framework.Telemetry
             return this;
         }
 
-        public VsTelemetryActivity? AddEvent(ActivityEvent activityEvent)
+        public IActivity? AddEvent(ActivityEvent activityEvent)
         {
             // VS Telemetry doesn't have a direct equivalent to ActivityEvent
             // We could create and immediately post a custom event if needed.
             var telemetryEvent = new TelemetryEvent(activityEvent.Name);
             foreach (KeyValuePair<string, object?> tag in activityEvent.Tags)
             {
-                telemetryEvent.Properties[tag.Key] = tag.Value;
+                telemetryEvent.Properties[$"{TelemetryConstants.PropertyPrefix}{tag.Key}"] = tag.Value;
             }
 
             TelemetryService.DefaultSession.PostEvent(telemetryEvent);
@@ -83,4 +73,34 @@ namespace Microsoft.Build.Framework.Telemetry
         }
     }
 }
+
+/// <summary>
+/// Represents an activity for telemetry tracking.
+/// </summary>
+internal interface IActivity : IDisposable
+{
+    /// <summary>
+    /// Sets a tag on the activity.
+    /// </summary>
+    /// <param name="key">The tag key.</param>
+    /// <param name="value">The tag value.</param>
+    /// <returns>The activity instance for method chaining.</returns>
+    IActivity? SetTag(string key, object? value);
+
+    /// <summary>
+    /// Sets the status of the activity
+    /// </summary>
+    /// <param name="status">The status.</param>
+    /// <param name="description">An optional description.</param>
+    /// <returns>The activity instance for method chaining.</returns>
+    IActivity? SetStatus(ActivityStatusCode status, string? description = null);
+
+    /// <summary>
+    /// Adds an event to the activity.
+    /// </summary>
+    /// <param name="activityEvent">The event to add.</param>
+    /// <returns>The activity instance for method chaining.</returns>
+    IActivity? AddEvent(ActivityEvent activityEvent);
+}
+
 #endif
