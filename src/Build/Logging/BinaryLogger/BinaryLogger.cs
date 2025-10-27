@@ -126,6 +126,14 @@ namespace Microsoft.Build.Logging
         // skip them if they are not known to it. Example of change requiring the increment would be the introduction of strings deduplication)
         internal const int MinimumReaderVersion = 18;
 
+        // Parameter name constants
+        private const string LogFileParameterPrefix = "LogFile=";
+        private const string BinlogFileExtension = ".binlog";
+        private const string OmitInitialInfoParameter = "OmitInitialInfo";
+        private const string ProjectImportsNoneParameter = "ProjectImports=None";
+        private const string ProjectImportsEmbedParameter = "ProjectImports=Embed";
+        private const string ProjectImportsZipFileParameter = "ProjectImports=ZipFile";
+
         private Stream stream;
         private BinaryWriter binaryWriter;
         private BuildEventArgsWriter eventArgsWriter;
@@ -189,7 +197,7 @@ namespace Microsoft.Build.Logging
                     continue;
                 }
 
-                if (string.Equals(parameter, "OmitInitialInfo", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(parameter, OmitInitialInfoParameter, StringComparison.OrdinalIgnoreCase))
                 {
                     result.OmitInitialInfo = true;
                     continue;
@@ -215,21 +223,21 @@ namespace Microsoft.Build.Logging
         /// <returns>True if the parameter was a ProjectImports parameter; otherwise, false.</returns>
         private static bool TryParseProjectImports(string parameter, BinaryLoggerParameters result)
         {
-            if (string.Equals(parameter, "ProjectImports=None", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(parameter, ProjectImportsNoneParameter, StringComparison.OrdinalIgnoreCase))
             {
                 result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.None;
                 result.HasProjectImportsParameter = true;
                 return true;
             }
 
-            if (string.Equals(parameter, "ProjectImports=Embed", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(parameter, ProjectImportsEmbedParameter, StringComparison.OrdinalIgnoreCase))
             {
                 result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.Embed;
                 result.HasProjectImportsParameter = true;
                 return true;
             }
 
-            if (string.Equals(parameter, "ProjectImports=ZipFile", StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(parameter, ProjectImportsZipFileParameter, StringComparison.OrdinalIgnoreCase))
             {
                 result.ProjectImportsCollectionMode = ProjectImportsCollectionMode.ZipFile;
                 result.HasProjectImportsParameter = true;
@@ -255,17 +263,17 @@ namespace Microsoft.Build.Logging
         /// </remarks>
         private static bool TryParsePathParameter(string parameter, out string filePath)
         {
-            bool hasPathPrefix = parameter.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase);
+            bool hasPathPrefix = parameter.StartsWith(LogFileParameterPrefix, StringComparison.OrdinalIgnoreCase);
 
             if (hasPathPrefix)
             {
-                parameter = parameter.Substring("LogFile=".Length);
+                parameter = parameter.Substring(LogFileParameterPrefix.Length);
             }
 
             parameter = parameter.Trim('"');
 
             bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
-            bool hasProperExtension = parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase);
+            bool hasProperExtension = parameter.EndsWith(BinlogFileExtension, StringComparison.OrdinalIgnoreCase);
 
             filePath = parameter;
 
@@ -627,17 +635,17 @@ namespace Microsoft.Build.Logging
 
         private bool TryInterpretPathParameter(string parameter, out string filePath)
         {
-            bool hasPathPrefix = parameter.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase);
+            bool hasPathPrefix = parameter.StartsWith(LogFileParameterPrefix, StringComparison.OrdinalIgnoreCase);
 
             if (hasPathPrefix)
             {
-                parameter = parameter.Substring("LogFile=".Length);
+                parameter = parameter.Substring(LogFileParameterPrefix.Length);
             }
 
             parameter = parameter.Trim('"');
 
             bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
-            bool hasProperExtension = parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase);
+            bool hasProperExtension = parameter.EndsWith(BinlogFileExtension, StringComparison.OrdinalIgnoreCase);
             filePath = parameter;
 
             if (!isWildcard)
@@ -649,7 +657,7 @@ namespace Microsoft.Build.Logging
 
             if (!hasProperExtension)
             {
-                filePath += ".binlog";
+                filePath += BinlogFileExtension;
             }
             return true;
         }
