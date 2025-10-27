@@ -55,9 +55,6 @@
     <Compile Include="..\Shared\ProcessExtensions.cs" />
     <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" />
     <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
-    <Compile Include="..\Shared\UnitTests\LongPathSupportDisabledFactAttribute.cs">
-      <Link>Shared\LongPathSupportDisabledFactAttribute.cs</Link>
-    </Compile>
     <Compile Include="..\UnitTests.Shared\RequiresSymbolicLinksFactAttribute.cs" />
     <Compile Include="..\UnitTests.Shared\RequiresSymbolicLinksTheoryAttribute.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
