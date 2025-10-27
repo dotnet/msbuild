@@ -23,6 +23,9 @@
     <PackageReference Update="System.CodeDom" Version="4.4.0" />
     <PackageReference Update="System.Collections.Immutable" Version="5.0.0" />
     <PackageReference Update="System.Configuration.ConfigurationManager" Version="4.7.0" />
+    <!-- Pin the dependency version to avoid transitive dependency from System.Configuration.ConfigurationManager -->
+    <PackageReference Update="System.Drawing.Common" Version="4.7.2" />
+
     <PackageReference Update="System.Memory" Version="4.5.4" />
     <PackageReference Update="System.Reflection.Metadata" Version="1.6.0" />
     <PackageReference Update="System.Resources.Extensions" Version="4.6.0" />
