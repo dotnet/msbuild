@@ -1167,14 +1167,13 @@ namespace Microsoft.Build.Execution
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void EndBuildTelemetry()
         {
-            var activity = TelemetryManager.StartActivity("Build");
-
-            activity?.SetTag("generalbuilddata", _buildTelemetry?.GetActivityProperties());
-            activity?.SetTag(
-                "buildsinsights",
-                _telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
-                    includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
-                    includeTargetDetails: false));
+            var activity = TelemetryManager.StartActivity("Build")
+                ?.SetTag("generalbuilddata", _buildTelemetry?.GetActivityProperties())
+                ?.SetTag(
+                    "buildsinsights",
+                    _telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
+                        includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
+                        includeTargetDetails: false));
 
             activity?.Dispose();
         }
