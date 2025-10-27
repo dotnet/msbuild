@@ -18,7 +18,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
-using static Microsoft.Build.Shared.XMakeAttributes;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
@@ -956,7 +955,7 @@ namespace Microsoft.Build.Execution
                                string.Equals(x.Architecture, y.Architecture, StringComparison.OrdinalIgnoreCase) &&
                                string.Equals(x.DotnetHostPath, y.DotnetHostPath, StringComparison.OrdinalIgnoreCase) &&
                                string.Equals(x.MSBuildAssemblyPath, y.MSBuildAssemblyPath, StringComparison.OrdinalIgnoreCase) &&
-                               x.IsTaskHostFactory == y.IsTaskHostFactory;
+                               x.TaskHostFactoryExplicitlyRequested == y.TaskHostFactoryExplicitlyRequested;
                     }
                     else
                     {
@@ -1423,7 +1422,7 @@ namespace Microsoft.Build.Execution
 
                     if (isTaskHostFactory)
                     {
-                        _taskFactoryParameters = TaskHostParameters.MergeTaskHostParameters(_taskFactoryParameters, new TaskHostParameters(isTaskHostFactory: true));
+                        _taskFactoryParameters = TaskHostParameters.MergeTaskHostParameters(_taskFactoryParameters, new TaskHostParameters(taskHostFactoryExplicitlyRequested: true));
                     }
 
                     if (isAssemblyTaskFactory || isTaskHostFactory)
@@ -1522,7 +1521,7 @@ namespace Microsoft.Build.Execution
                                         {
                                             { nameof(TaskHostParameters.Runtime), TaskFactoryParameters.Runtime },
                                             { nameof(TaskHostParameters.Architecture), TaskFactoryParameters.Architecture },
-                                            { nameof(TaskHostParameters.IsTaskHostFactory), TaskFactoryParameters.IsTaskHostFactory.ToString() },
+                                            { nameof(TaskHostParameters.TaskHostFactoryExplicitlyRequested), TaskFactoryParameters.TaskHostFactoryExplicitlyRequested.ToString() },
                                         };
 
                                         initialized = factory2.Initialize(RegisteredName, taskFactoryParams, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);

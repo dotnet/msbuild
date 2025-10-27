@@ -1005,7 +1005,7 @@ namespace Microsoft.Build.BackEnd
                                 {
                                     { nameof(TaskHostParameters.Runtime), taskIdentityParameters.Runtime },
                                     { nameof(TaskHostParameters.Architecture), taskIdentityParameters.Architecture },
-                                    { nameof(TaskHostParameters.IsTaskHostFactory), taskIdentityParameters.IsTaskHostFactory.ToString() },
+                                    { nameof(TaskHostParameters.TaskHostFactoryExplicitlyRequested), taskIdentityParameters.TaskHostFactoryExplicitlyRequested.ToString() },
                                 };
 
                                 task = taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityMap);
@@ -1761,7 +1761,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     { nameof(TaskHostParameters.Runtime), taskIdentityParameters.Runtime },
                     { nameof(TaskHostParameters.Architecture), taskIdentityParameters.Architecture },
-                    { nameof(TaskHostParameters.IsTaskHostFactory), taskIdentityParameters.IsTaskHostFactory.ToString() },
+                    { nameof(TaskHostParameters.TaskHostFactoryExplicitlyRequested), taskIdentityParameters.TaskHostFactoryExplicitlyRequested.ToString() },
                 };
                 innerTask = taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityMap);
             }
@@ -1813,7 +1813,7 @@ namespace Microsoft.Build.BackEnd
                 _buildComponentHost,
                 taskHostParameters,
                 taskLoadedType,
-                true,
+                useSidecarTaskHost: false,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup,
 #endif

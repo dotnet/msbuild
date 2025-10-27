@@ -220,7 +220,7 @@ namespace Microsoft.Build.BackEnd
                     architecture: architecture,
                     dotnetHostPath: dotnetHostPath,
                     msBuildAssemblyPath: msBuildAssemblyPath,
-                    isTaskHostFactory: isTaskHostFactory);
+                    taskHostFactoryExplicitlyRequested: isTaskHostFactory);
             }
 
             /// <summary>
@@ -1136,11 +1136,11 @@ namespace Microsoft.Build.BackEnd
                 Translate(ref dotnetHostPath);
                 Translate(ref msBuildAssemblyPath);
 
-                bool hasTaskHostFactory = value.IsTaskHostFactory.HasValue;
+                bool hasTaskHostFactory = value.TaskHostFactoryExplicitlyRequested.HasValue;
                 _writer.Write(hasTaskHostFactory);
                 if (hasTaskHostFactory)
                 {
-                    _writer.Write(value.IsTaskHostFactory.Value);
+                    _writer.Write(value.TaskHostFactoryExplicitlyRequested.Value);
                 }
             }
 

@@ -17,7 +17,7 @@ namespace Microsoft.Build.Framework
         private readonly string? _architecture;
         private readonly string? _dotnetHostPath;
         private readonly string? _msBuildAssemblyPath;
-        private readonly bool? _isTaskHostFactory;
+        private readonly bool? _taskHostFactoryExplicitlyRequested;
 
         /// <summary>
         /// Initializes a new instance of the TaskHostParameters struct with the specified parameters.
@@ -26,19 +26,19 @@ namespace Microsoft.Build.Framework
         /// <param name="architecture">The target architecture (e.g., "x64", "x86", "arm64").</param>
         /// <param name="dotnetHostPath">The path to the dotnet host executable.</param>
         /// <param name="msBuildAssemblyPath">The path to the MSBuild assembly.</param>
-        /// <param name="isTaskHostFactory">Defines if Task Host Factory was explicitly requested.</param>
+        /// <param name="taskHostFactoryExplicitlyRequested">Defines if Task Host Factory was explicitly requested.</param>
         internal TaskHostParameters(
             string? runtime = null,
             string? architecture = null,
             string? dotnetHostPath = null,
             string? msBuildAssemblyPath = null,
-            bool? isTaskHostFactory = null)
+            bool? taskHostFactoryExplicitlyRequested = null)
         {
             _runtime = runtime;
             _architecture = architecture;
             _dotnetHostPath = dotnetHostPath;
             _msBuildAssemblyPath = msBuildAssemblyPath;
-            _isTaskHostFactory = isTaskHostFactory;
+            _taskHostFactoryExplicitlyRequested = taskHostFactoryExplicitlyRequested;
         }
 
         /// <summary>
@@ -66,9 +66,9 @@ namespace Microsoft.Build.Framework
         public string? MSBuildAssemblyPath => _msBuildAssemblyPath;
 
         /// <summary>
-        /// Gets if Task Host Factory was requested explicitly.
+        /// Gets if Task Host Factory was requested explicitly (by specifying TaskHost="TaskHostFactory" in UsingTask element).
         /// </summary>
-        public bool? IsTaskHostFactory => _isTaskHostFactory;
+        public bool? TaskHostFactoryExplicitlyRequested => _taskHostFactoryExplicitlyRequested;
 
         /// <summary>
         /// Gets a value indicating whether returns true if parameters were unset.
@@ -107,7 +107,7 @@ namespace Microsoft.Build.Framework
                 architecture: overrideParameters.Architecture ?? baseParameters.Architecture,
                 dotnetHostPath: overrideParameters.DotnetHostPath ?? baseParameters.DotnetHostPath,
                 msBuildAssemblyPath: overrideParameters.MSBuildAssemblyPath ?? baseParameters.MSBuildAssemblyPath,
-                isTaskHostFactory: overrideParameters.IsTaskHostFactory ?? baseParameters.IsTaskHostFactory);
+                taskHostFactoryExplicitlyRequested: overrideParameters.TaskHostFactoryExplicitlyRequested ?? baseParameters.TaskHostFactoryExplicitlyRequested);
         }
     }
 }

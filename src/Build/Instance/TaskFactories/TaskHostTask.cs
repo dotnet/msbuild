@@ -141,10 +141,13 @@ namespace Microsoft.Build.BackEnd
         private bool _taskExecutionSucceeded = false;
 
         /// <summary>
-        /// This separates the cause where we force all tasks to run in a task host via environment variables and TaskHostFactory
-        /// The difference is that TaskHostFactory requires the TaskHost to be transient i.e. to expire after build.
+        /// If true TaskHostFactory expects the TaskHost not will NOT to expire after build (until it timeouts or is killed).
+        /// This is relevant for the next cases:
+        /// 1) TaskHostFactory is NOT explicitly requested (we always disable node reuse due to the transient nature of task host factory hosts).
+        /// 2) Runtime="NET" is specified in UsingTask.
+        /// 3) Environment variable MSBUILDFORCEALLTASKSOUTOFPROC is set.
         /// </summary>
-        private bool _taskHostFactoryExplicitlyRequested = false;
+        private bool _useSidecarTaskHost = false;
 
         /// <summary>
         /// Constructor.
@@ -155,7 +158,7 @@ namespace Microsoft.Build.BackEnd
             IBuildComponentHost buildComponentHost,
             TaskHostParameters taskHostParameters,
             LoadedType taskType,
-            bool taskHostFactoryExplicitlyRequested,
+            bool useSidecarTaskHost,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -173,7 +176,7 @@ namespace Microsoft.Build.BackEnd
             _appDomainSetup = appDomainSetup;
 #endif
             _taskHostParameters = taskHostParameters;
-            _taskHostFactoryExplicitlyRequested = taskHostFactoryExplicitlyRequested;
+            _useSidecarTaskHost = useSidecarTaskHost;
 
             _packetFactory = new NodePacketFactory();
 
@@ -333,8 +336,7 @@ namespace Microsoft.Build.BackEnd
                         taskHost: true,
 
                         // Determine if we should use node reuse based on build parameters or user preferences (comes from UsingTask element).
-                        // If the user explicitly requested the task host factory, then we always disable node reuse due to the transient nature of task host factory hosts.
-                        nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && !_taskHostFactoryExplicitlyRequested,
+                        nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && _useSidecarTaskHost,
                         taskHostParameters: _taskHostParameters);
 
                     _taskHostNodeId = GenerateTaskHostNodeId(_scheduledNodeId, _requiredContext);

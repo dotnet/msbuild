@@ -57,7 +57,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
                 Assert.Equal(xParams.Architecture, yParams.Architecture);
                 Assert.Equal(xParams.DotnetHostPath, yParams.DotnetHostPath);
                 Assert.Equal(xParams.MSBuildAssemblyPath, yParams.MSBuildAssemblyPath);
-                Assert.Equal(xParams.IsTaskHostFactory, yParams.IsTaskHostFactory);
+                Assert.Equal(xParams.TaskHostFactoryExplicitlyRequested, yParams.TaskHostFactoryExplicitlyRequested);
 
                 return true;
             }
