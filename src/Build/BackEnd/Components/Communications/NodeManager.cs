@@ -4,18 +4,23 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
+using System.Linq;
 using System.Threading;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
+
     /// <summary>
     /// The NodeManager class is responsible for marshalling data to/from the NodeProviders and organizing the
     /// creation of new nodes on request.
     /// </summary>
     internal class NodeManager : INodeManager
     {
+        private static Meter _nodeMetrics = new("Microsoft.Build");
+
         /// <summary>
         /// The node provider for the in-proc node.
         /// </summary>
@@ -45,6 +50,9 @@ namespace Microsoft.Build.BackEnd
         /// The next node id to assign to a node.
         /// </summary>
         private int _nextNodeId;
+#pragma warning disable IDE0052 // Remove unread private members
+        private readonly ObservableGauge<int> _nodeCountMetric;
+#pragma warning restore IDE0052 // Remove unread private members
 
         /// <summary>
         /// The nodeID for the inproc node.
@@ -78,6 +86,17 @@ namespace Microsoft.Build.BackEnd
             _nodeIdToProvider = new Dictionary<int, INodeProvider>();
             _packetFactory = new NodePacketFactory();
             _nextNodeId = _inprocNodeId + 1;
+            _nodeCountMetric = _nodeMetrics.CreateObservableGauge("msbuild_active_nodes_count", () => ComputeNodeCounts(_nodeIdToProvider, _inProcNodeProvider, _outOfProcNodeProvider), "nodes", "Number of active MSBuild nodes");
+        }
+
+        private static IEnumerable<Measurement<int>> ComputeNodeCounts(Dictionary<int, INodeProvider> nodeIdToProvider, INodeProvider? inProcNodeProvider = null, INodeProvider?    outOfProcNodeProvider = null)
+        {
+            // This method will be called periodically to get the current node counts.
+            // Since we don't have access to the NodeManager instance here, we need to find another way to get the counts.
+            // For simplicity, we'll return zero counts for both types of nodes.
+            var grouped = nodeIdToProvider.GroupBy(kvp => kvp.Value);
+            yield return new Measurement<int>(grouped.FirstOrDefault(g => g.Key == inProcNodeProvider)?.Count() ?? 0, new KeyValuePair<string, object?>("node.type", "inproc"));
+            yield return new Measurement<int>(grouped.FirstOrDefault(g => g.Key == outOfProcNodeProvider)?.Count() ?? 0, new KeyValuePair<string, object?>("node.type", "outofproc"));
         }
 
         #region INodeManager Members
@@ -185,14 +204,14 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownComponent()
         {
-            if (_inProcNodeProvider != null && _inProcNodeProvider is IDisposable)
+            if (_inProcNodeProvider is IDisposable disposableInProcNodeProvider)
             {
-                ((IDisposable)_inProcNodeProvider).Dispose();
+                disposableInProcNodeProvider.Dispose();
             }
 
-            if (_outOfProcNodeProvider != null && _outOfProcNodeProvider is IDisposable)
+            if (_outOfProcNodeProvider is IDisposable disposableOutOfProcNodeProvider)
             {
-                ((IDisposable)_outOfProcNodeProvider).Dispose();
+                disposableOutOfProcNodeProvider.Dispose();
             }
 
             _inProcNodeProvider = null;

@@ -6,6 +6,7 @@ This file should be imported by eng/Versions.props
 <Project>
   <PropertyGroup>
     <!-- dotnet/runtime dependencies -->
+    <MicrosoftDiagnosticsNETCoreClientPackageVersion>0.2.621003</MicrosoftDiagnosticsNETCoreClientPackageVersion>
     <SystemCodeDomPackageVersion>9.0.0</SystemCodeDomPackageVersion>
     <SystemCollectionsImmutablePackageVersion>9.0.0</SystemCollectionsImmutablePackageVersion>
     <SystemConfigurationConfigurationManagerPackageVersion>9.0.0</SystemConfigurationConfigurationManagerPackageVersion>
@@ -39,6 +40,7 @@ This file should be imported by eng/Versions.props
     <SystemConfigurationConfigurationManagerVersion>$(SystemConfigurationConfigurationManagerPackageVersion)</SystemConfigurationConfigurationManagerVersion>
     <SystemDiagnosticsDiagnosticSourceVersion>$(SystemDiagnosticsDiagnosticSourcePackageVersion)</SystemDiagnosticsDiagnosticSourceVersion>
     <SystemDiagnosticsEventLogVersion>$(SystemDiagnosticsEventLogPackageVersion)</SystemDiagnosticsEventLogVersion>
+    <MicrosoftDiagnosticsNETCoreClientVersion>$(MicrosoftDiagnosticsNETCoreClientPackageVersion)</MicrosoftDiagnosticsNETCoreClientVersion>
     <SystemFormatsAsn1Version>$(SystemFormatsAsn1PackageVersion)</SystemFormatsAsn1Version>
     <SystemFormatsNrbfVersion>$(SystemFormatsNrbfPackageVersion)</SystemFormatsNrbfVersion>
     <SystemReflectionMetadataVersion>$(SystemReflectionMetadataPackageVersion)</SystemReflectionMetadataVersion>
