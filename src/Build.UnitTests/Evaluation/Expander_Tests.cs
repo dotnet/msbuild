@@ -26,6 +26,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
@@ -3722,6 +3723,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand intrinsic property function calls a static arithmetic method
         /// </summary>
         [Fact]
+        [UseInvariantCulture]
         public void PropertyFunctionStaticMethodIntrinsicMaths()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -4632,6 +4634,7 @@ $(
         }
 
         [Fact]
+        [UseInvariantCulture]
         public void PropertyFunctionMSBuildAddRealArgument()
         {
             // string argument is an integer that exceeds the size of long.
@@ -4739,6 +4742,31 @@ $(
         public void PropertyFunctionStringArrayGetValue()
         {
             TestPropertyFunction("$(X.Split($([System.Convert]::ToString(`.`).ToCharArray())).GetValue($([System.Convert]::ToInt32(0))))", "X", "ab.cd", "ab");
+        }
+
+        /// <summary>
+        /// Test that Char.IsDigit fast-path works correctly
+        /// </summary>
+        [Theory]
+        // Test with digit characters - single char version
+        [InlineData("$([System.Char]::IsDigit('0'))", "True")]
+        [InlineData("$([System.Char]::IsDigit('5'))", "True")]
+        [InlineData("$([System.Char]::IsDigit('9'))", "True")]
+        // Test with non-digit characters - single char version
+        [InlineData("$([System.Char]::IsDigit('a'))", "False")]
+        [InlineData("$([System.Char]::IsDigit(' '))", "False")]
+        [InlineData("$([System.Char]::IsDigit('/'))", "False")]
+        [InlineData("$([System.Char]::IsDigit(':'))", "False")]
+        // Test with string and index version
+        [InlineData("$([System.Char]::IsDigit('abc123def', 3))", "True")]
+        [InlineData("$([System.Char]::IsDigit('abc123def', 4))", "True")]
+        [InlineData("$([System.Char]::IsDigit('abc123def', 5))", "True")]
+        [InlineData("$([System.Char]::IsDigit('abc123def', 0))", "False")]
+        [InlineData("$([System.Char]::IsDigit('abc123def', 2))", "False")]
+        [InlineData("$([System.Char]::IsDigit('hello789', 5))", "True")]
+        public void PropertyFunctionCharIsDigit(string expression, string expected)
+        {
+            TestPropertyFunction(expression, "dummy", "", expected);
         }
 
         private void TestPropertyFunction(string expression, string propertyName, string propertyValue, string expected)

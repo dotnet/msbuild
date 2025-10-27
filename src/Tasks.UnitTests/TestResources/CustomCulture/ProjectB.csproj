@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <OutputType>Library</OutputType>
+    <OutputPath>OutputPathPlaceholder</OutputPath>
+	  <EnableCustomCulture>EnableCustomCulturePlaceholder</EnableCustomCulture>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <NonCultureResourceDirectories>NonCultureResourceDirectoriesPlaceholder</NonCultureResourceDirectories>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProjectA.csproj" />
+  </ItemGroup>
+
+</Project>

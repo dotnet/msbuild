@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.BackEnd.Logging;
@@ -19,7 +20,7 @@ namespace Microsoft.Build.BackEnd
     /// This class represents a collection of items that are homogeneous w.r.t.
     /// a certain set of metadata.
     /// </summary>
-    internal sealed class ItemBucket : IComparable
+    internal struct ItemBucket : IComparable<ItemBucket>
     {
         #region Member data
 
@@ -74,7 +75,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="lookup">The <see cref="Lookup"/> to use for the items in the bucket.</param>
         /// <param name="bucketSequenceNumber">A sequence number indication what order the buckets were created in.</param>
         internal ItemBucket(
-            ICollection<string> itemNames,
+            FrozenSet<string> itemNames,
             Dictionary<string, string> metadata,
             Lookup lookup,
             int bucketSequenceNumber)
@@ -87,15 +88,9 @@ namespace Microsoft.Build.BackEnd
             // Push down the items, so that item changes in this batch are not visible to parallel batches
             _lookupEntry = _lookup.EnterScope("ItemBucket()");
 
-            // Add empty item groups for each of the item names, so that (unless items are added to this bucket) there are
+            // Truncate lookups for each of the item names, so that (unless items are added to this bucket) there are
             // no item types visible in this bucket among the item types being batched on
-            if (itemNames != null)
-            {
-                foreach (string name in itemNames)
-                {
-                    _lookup.PopulateWithItems(name, new List<ProjectItemInstance>());
-                }
-            }
+            _lookup.TruncateLookupsForItemTypes(itemNames);
 
             _metadata = metadata;
 
@@ -119,15 +114,15 @@ namespace Microsoft.Build.BackEnd
         /// Compares this item bucket against the given one. The comparison is
         /// solely based on the values of the item metadata in the buckets.
         /// </summary>
-        /// <param name="obj"></param>
+        /// <param name="other"></param>
         /// <returns>
         /// -1, if this bucket is "less than" the second one
         ///  0, if this bucket is equivalent to the second one
         /// +1, if this bucket is "greater than" the second one
         /// </returns>
-        public int CompareTo(object obj)
+        public int CompareTo(ItemBucket other)
         {
-            return HashTableUtility.Compare(_metadata, ((ItemBucket)obj)._metadata);
+            return HashTableUtility.Compare(_metadata, other._metadata);
         }
 
         /// <summary>

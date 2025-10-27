@@ -12,6 +12,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
 #if !TASKHOST
+using System.Threading;
 using System.Threading.Tasks;
 #endif
 
@@ -25,11 +26,13 @@ namespace Microsoft.Build.Internal
         /// </summary>
         private const int PipeBufferSize = 131_072;
 
+#if NET
         /// <summary>
         /// A timeout for the handshake. This is only used on Unix-like socket implementations, because the
         /// timeout on the PipeStream connection is ignore.
         /// </summary>
         private static readonly int s_handshakeTimeout = NativeMethodsShared.IsWindows ? 0 : 60_000;
+#endif
 
         private readonly NamedPipeServerStream _pipeServer;
 
@@ -45,7 +48,14 @@ namespace Microsoft.Build.Internal
             // SIDs or the client will reject this server.  This is used to avoid attacks where a
             // hacked server creates a less restricted pipe in an attempt to lure us into using it and
             // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
-            PipeAccessRule rule = new(WindowsIdentity.GetCurrent().Owner, PipeAccessRights.ReadWrite, AccessControlType.Allow);
+            PipeAccessRights pipeAccessRights = PipeAccessRights.ReadWrite;
+            if (maxNumberOfServerInstances > 1)
+            {
+                // Multi-instance pipes will fail without this flag.
+                pipeAccessRights |= PipeAccessRights.CreateNewInstance;
+            }
+
+            PipeAccessRule rule = new(WindowsIdentity.GetCurrent().Owner, pipeAccessRights, AccessControlType.Allow);
             PipeSecurity security = new();
             security.AddAccessRule(rule);
             security.SetOwner(rule.IdentityReference);
@@ -70,7 +80,11 @@ namespace Microsoft.Build.Internal
 
         protected override PipeStream NodeStream => _pipeServer;
 
+#if TASKHOST
         internal LinkStatus WaitForConnection()
+#else
+        internal async Task<LinkStatus> WaitForConnectionAsync(CancellationToken cancellationToken)
+#endif
         {
             DateTime originalWaitStartTime = DateTime.UtcNow;
             bool gotValidConnection = false;
@@ -94,9 +108,19 @@ namespace Microsoft.Build.Internal
                     bool connected = resultForConnection.AsyncWaitHandle.WaitOne(waitTimeRemaining, false);
                     _pipeServer.EndWaitForConnection(resultForConnection);
 #else
-                    Task connectionTask = _pipeServer.WaitForConnectionAsync();
-                    CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
-                    bool connected = connectionTask.Wait(waitTimeRemaining);
+                    using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                    cts.CancelAfter(waitTimeRemaining);
+                    bool connected = false;
+                    try
+                    {
+                        CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
+                        await _pipeServer.WaitForConnectionAsync(cts.Token).ConfigureAwait(false);
+                        connected = true;
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        connected = false;
+                    }
 #endif
                     if (!connected)
                     {
@@ -176,26 +200,51 @@ namespace Microsoft.Build.Internal
 
         private bool ValidateHandshake()
         {
-            for (int i = 0; i < HandshakeComponents.Length; i++)
+            int index = 0;
+            foreach (var component in HandshakeComponents.EnumerateComponents())
             {
                 // This will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard.
-                int handshakePart = _pipeServer.ReadIntForHandshake(byteToAccept: i == 0 ? CommunicationsUtilities.handshakeVersion : null, s_handshakeTimeout);
 
-                if (handshakePart != HandshakeComponents[i])
+                if (
+
+                    _pipeServer.TryReadIntForHandshake(byteToAccept: index == 0 ? CommunicationsUtilities.handshakeVersion : null,
+#if NET
+                     s_handshakeTimeout,
+#endif
+                     out HandshakeResult handshakePart))
                 {
-                    CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, HandshakeComponents[i]);
-                    _pipeServer.WriteIntForHandshake(i + 1);
+                    if (handshakePart.Value != component.Value)
+                    {
+                        CommunicationsUtilities.Trace("Handshake failed. Received {0} from host not {1}. Probably the host is a different MSBuild build.", handshakePart, component.Value);
+                        _pipeServer.WriteIntForHandshake(index + 1);
+                        return false;
+                    }
+                }
+                else
+                {
                     return false;
                 }
+
+                index++;
             }
 
             // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
-            _pipeServer.ReadEndOfHandshakeSignal(false, s_handshakeTimeout);
 
-            CommunicationsUtilities.Trace("Successfully connected to parent.");
-            _pipeServer.WriteEndOfHandshakeSignal();
+            if (_pipeServer.TryReadEndOfHandshakeSignal(false,
+#if NET
+            s_handshakeTimeout,
+#endif
+            out HandshakeResult _))
+            {
+                CommunicationsUtilities.Trace("Successfully connected to parent.");
+                _pipeServer.WriteEndOfHandshakeSignal();
 
-            return true;
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY

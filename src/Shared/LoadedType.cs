@@ -2,12 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
-#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -38,7 +36,12 @@ namespace Microsoft.Build.Shared
 
             HasSTAThreadAttribute = CheckForHardcodedSTARequirement();
             LoadedAssemblyName = loadedAssembly.GetName();
-            Path = loadedAssembly.Location;
+            
+            // For inline tasks loaded from bytes, Assembly.Location is empty, so use the original path
+            Path = string.IsNullOrEmpty(loadedAssembly.Location) 
+                ? assemblyLoadInfo.AssemblyLocation 
+                : loadedAssembly.Location;
+            
             LoadedAssembly = loadedAssembly;
 
 #if !NET35
@@ -47,15 +50,15 @@ namespace Microsoft.Build.Shared
             // properties and reflect over them without needing them to be fully loaded, so it also isn't need for TaskHosts.
 
             // MetadataLoadContext-loaded Type objects don't support testing for inherited attributes, so we manually walk the BaseType chain.
-            Type t = type;
+            Type? t = type;
             while (t is not null)
             {
-                if (CustomAttributeData.GetCustomAttributes(t).Any(attr => attr.AttributeType.Name.Equals(nameof(LoadInSeparateAppDomainAttribute))))
+                if (TypeUtilities.HasAttribute<LoadInSeparateAppDomainAttribute>(t))
                 {
                     HasLoadInSeparateAppDomainAttribute = true;
                 }
 
-                if (CustomAttributeData.GetCustomAttributes(t).Any(attr => attr.AttributeType.Name.Equals(nameof(RunInSTAAttribute))))
+                if (TypeUtilities.HasAttribute<RunInSTAAttribute>(t))
                 {
                     HasSTAThreadAttribute = true;
                 }
@@ -81,29 +84,61 @@ namespace Microsoft.Build.Shared
                 bool requiredAttribute = false;
                 foreach (CustomAttributeData attr in CustomAttributeData.GetCustomAttributes(props[i]))
                 {
-                    if (attr.AttributeType.Name.Equals(nameof(OutputAttribute)))
+                    try
                     {
-                        outputAttribute = true;
+                        if (attr.AttributeType?.Name.Equals(nameof(OutputAttribute)) == true)
+                        {
+                            outputAttribute = true;
+                        }
+                        else if (attr.AttributeType?.Name.Equals(nameof(RequiredAttribute)) == true)
+                        {
+                            requiredAttribute = true;
+                        }
                     }
-                    else if (attr.AttributeType.Name.Equals(nameof(RequiredAttribute)))
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
-                        requiredAttribute = true;
+                        // Skip attributes that can't be loaded
+                        continue;
                     }
                 }
 
                 // Check whether it's assignable to ITaskItem or ITaskItem[]. Simplify to just checking for ITaskItem.
-                Type pt = props[i].PropertyType;
-                if (pt.IsArray)
+                Type? pt = null;
+                try
                 {
-                    pt = pt.GetElementType();
+                    pt = props[i].PropertyType;
+                    if (pt.IsArray)
+                    {
+                        pt = pt.GetElementType();
+                    }
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    // Skip properties that can't be loaded
+                    continue;
                 }
 
-                bool isAssignableToITask = iTaskItemType.IsAssignableFrom(pt);
+                bool isAssignableToITask = false;
+                try
+                {
+                    isAssignableToITask = pt != null && iTaskItemType.IsAssignableFrom(pt);
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    // Can't determine assignability, default to false
+                }
 
                 Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, isAssignableToITask);
-                if (loadedViaMetadataLoadContext)
+                if (loadedViaMetadataLoadContext && PropertyAssemblyQualifiedNames != null)
                 {
-                    PropertyAssemblyQualifiedNames[i] = Properties[i].PropertyType.AssemblyQualifiedName;
+                    try
+                    {
+                        PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName ?? string.Empty;
+                    }
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        PropertyAssemblyQualifiedNames[i] = string.Empty;
+                    }
                 }
             }
 #else
@@ -113,7 +148,6 @@ namespace Microsoft.Build.Shared
             IsMarshalByRef = this.Type.IsMarshalByRef;
 #endif
         }
-
 
         #endregion
 
@@ -143,7 +177,7 @@ namespace Microsoft.Build.Shared
             {
                 AssemblyName assemblyName = Type.GetTypeInfo().Assembly.GetName();
                 Version lastVersionToForce = new Version(3, 5);
-                if (assemblyName.Version.CompareTo(lastVersionToForce) > 0)
+                if (assemblyName.Version?.CompareTo(lastVersionToForce) > 0)
                 {
                     if (String.Equals(assemblyName.Name, "PresentationBuildTasks", StringComparison.OrdinalIgnoreCase))
                     {
@@ -180,7 +214,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Assembly-qualified names for properties. Only has a value if this type was loaded using MetadataLoadContext.
         /// </summary>
-        internal string[] PropertyAssemblyQualifiedNames { get; private set; }
+        internal string[]? PropertyAssemblyQualifiedNames { get; private set; }
 
         /// <summary>
         /// Gets the assembly the type was loaded from.

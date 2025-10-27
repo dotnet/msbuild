@@ -60,6 +60,7 @@
     </Compile>
     <Compile Include="..\UnitTests.Shared\RequiresSymbolicLinksFactAttribute.cs" />
     <Compile Include="..\UnitTests.Shared\RequiresSymbolicLinksTheoryAttribute.cs" />
+    <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <EmbeddedResource Include="SampleResx" />
     <EmbeddedResource Include="AssemblyDependency\CacheFileSamples\Microsoft.VisualStudio.LanguageServices.Implementation.csprojAssemblyReference.cache" />
@@ -69,6 +70,9 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="..\Shared\UnitTests\xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TestResources\CustomCulture\**">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="TestResources\Projects\Custom_COM\Custom_COM\Class1.cs">
@@ -136,6 +140,10 @@
     <Compile Remove="AssemblyDependency\VerifyTargetFrameworkAttribute.cs" />
     <Compile Remove="AssemblyDependency\VerifyTargetFrameworkHigherThanRedist.cs" />
     <Compile Remove="AssemblyDependency\WinMDTests.cs" />
+    <Compile Remove="AssemblyDependency\Node\OutOfProcRarClient.cs" />
+    <Compile Remove="AssemblyDependency\Node\OutOfProcRarNodeEndpoint.cs" />
+    <Compile Remove="AssemblyDependency\Node\RarNodeExecuteRequest.cs" />
+    <Compile Remove="AssemblyDependency\Node\RarNodeExecuteResponse.cs" />
     <Compile Remove="ResolveComReference_Tests.cs" />
     <Compile Remove="SdkToolsPathUtility_Tests.cs" />
     <Compile Remove="TlbImp_Tests.cs" />
@@ -162,6 +170,9 @@
     <None Update="TestResources\Manifests\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <EmbeddedResource Update="TestResources\CustomCulture\*.resx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
     <None Update="TestResources\mycert.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

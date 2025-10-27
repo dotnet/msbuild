@@ -24,10 +24,9 @@ using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
-using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
-using Microsoft.Build.Experimental.ProjectCache;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
@@ -36,6 +35,7 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.TelemetryInfra;
 using Microsoft.NET.StringTools;
 using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
@@ -58,12 +58,12 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The object used for thread-safe synchronization of static members.
         /// </summary>
-        private static readonly Object s_staticSyncLock = new Object();
+        private static readonly LockType s_staticSyncLock = new();
 
         /// <summary>
         /// The object used for thread-safe synchronization of BuildManager shared data and the Scheduler.
         /// </summary>
-        private readonly Object _syncLock = new Object();
+        private readonly Object _syncLock = new();
 
         /// <summary>
         /// The singleton instance for the BuildManager.
@@ -459,7 +459,8 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
-            OpenTelemetryManager.Instance.Initialize(isStandalone: false);
+            InitializeTelemetry();
+
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
@@ -557,6 +558,21 @@ namespace Microsoft.Build.Execution
                 if (_buildParameters.UsesOutputCache() && string.IsNullOrWhiteSpace(_buildParameters.OutputResultsCacheFile))
                 {
                     _buildParameters.OutputResultsCacheFile = FileUtilities.NormalizePath("msbuild-cache");
+                }
+
+                // Launch the RAR node before the detoured launcher overrides the default node launcher.
+                if (_buildParameters.EnableRarNode)
+                {
+                    NodeLauncher nodeLauncher = ((IBuildComponentHost)this).GetComponent<NodeLauncher>(BuildComponentType.NodeLauncher);
+                    _ = Task.Run(() =>
+                    {
+                        RarNodeLauncher rarNodeLauncher = new(nodeLauncher);
+
+                        if (!rarNodeLauncher.Start())
+                        {
+                            _buildParameters.EnableRarNode = false;
+                        }
+                    });
                 }
 
 #if FEATURE_REPORTFILEACCESSES
@@ -677,7 +693,7 @@ namespace Microsoft.Build.Execution
 
                 var logger = new BinaryLogger { Parameters = binlogPath };
 
-                return (loggers ?? [logger]);
+                return (loggers ?? []).Concat([logger]);
             }
 
             void InitializeCaches()
@@ -720,6 +736,26 @@ namespace Microsoft.Build.Execution
 
                     _buildParameters.ProjectRootElementCache.DiscardImplicitReferences();
                 }
+            }
+        }
+
+        private void InitializeTelemetry()
+        {
+            OpenTelemetryManager.Instance.Initialize(isStandalone: false);
+            string? failureMessage = OpenTelemetryManager.Instance.LoadFailureExceptionMessage;
+            if (_deferredBuildMessages != null &&
+                failureMessage != null &&
+                _deferredBuildMessages is ICollection<DeferredBuildMessage> deferredBuildMessagesCollection)
+            {
+                deferredBuildMessagesCollection.Add(
+                    new DeferredBuildMessage(
+                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                            "OpenTelemetryLoadFailed",
+                            failureMessage),
+                    MessageImportance.Low));
+
+                // clean up the message from OpenTelemetryManager to avoid double logging it
+                OpenTelemetryManager.Instance.LoadFailureExceptionMessage = null;
             }
         }
 
@@ -779,6 +815,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void CancelAllSubmissions()
         {
+            MSBuildEventSource.Log.CancelSubmissionsStart();
             CancelAllSubmissions(true);
         }
 
@@ -1031,6 +1068,8 @@ namespace Microsoft.Build.Execution
                 {
                     _resultsCache!.ClearResults();
                 }
+
+                TaskRouter.ClearCache();
             }
             catch (Exception e)
             {
@@ -1084,6 +1123,7 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.BuildEngineHost = host;
 
                             _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
+                            _buildTelemetry.MultiThreadedModeEnabled = _buildParameters!.MultiThreaded;
                             var sacState = NativeMethodsShared.GetSACState();
                             // The Enforcement would lead to build crash - but let's have the check for completeness sake.
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
@@ -1196,7 +1236,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void ShutdownAllNodes()
         {
-            MSBuildClient.ShutdownServer(CancellationToken.None);
+            Experimental.MSBuildClient.ShutdownServer(CancellationToken.None);
 
             _nodeManager ??= (INodeManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager);
             _nodeManager.ShutdownAllNodes();
@@ -1923,6 +1963,10 @@ namespace Microsoft.Build.Execution
                 throw new BuildAbortedException();
             }
 
+            LogMessage(
+                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                    "StaticGraphConstructionStarted"));
+
             var projectGraph = submission.BuildRequestData.ProjectGraph;
             if (projectGraph == null)
             {
@@ -2390,8 +2434,8 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            IEnumerable<ScheduleResponse> response = _scheduler!.ReportRequestBlocked(node, blocker);
-            PerformSchedulingActions(response);
+            IEnumerable<ScheduleResponse> responses = _scheduler!.ReportRequestBlocked(node, blocker);
+            PerformSchedulingActions(responses);
         }
 
         /// <summary>
@@ -2405,7 +2449,7 @@ namespace Microsoft.Build.Execution
             {
                 // Resource request requires a response and may be blocking. Our continuation is effectively a callback
                 // to be called once at least one core becomes available.
-                _scheduler!.RequestCores(request.GlobalRequestId, request.NumCores, request.IsBlocking).ContinueWith((Task<int> task) =>
+                _scheduler!.RequestCores(request.GlobalRequestId, request.NumCores, request.IsBlocking).ContinueWith((task) =>
                 {
                     var response = new ResourceResponse(request.GlobalRequestId, task.Result);
                     _nodeManager!.SendData(node, response);
@@ -2780,7 +2824,7 @@ namespace Microsoft.Build.Execution
                     // part of the import graph.
                     _buildParameters?.ProjectRootElementCache?.Clear();
 
-                    FileMatcher.ClearFileEnumerationsCache();
+                    FileMatcher.ClearCaches();
 #if !CLR2COMPATIBILITY
                     FileUtilities.ClearFileExistenceCache();
 #endif
@@ -2814,7 +2858,8 @@ namespace Microsoft.Build.Execution
                     loggingService.IncludeEvaluationProfile,
                     loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent,
                     loggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent,
-                    loggingService.IncludeTaskInputs));
+                    loggingService.IncludeTaskInputs,
+                    loggingService.EnableTargetOutputLogging));
             }
 
             return _nodeConfiguration;
@@ -3002,6 +3047,12 @@ namespace Microsoft.Build.Execution
 
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }
+
+            if (_buildParameters.EnableTargetOutputLogging)
+            {
+                loggingService.EnableTargetOutputLogging = true;
+            }
+
 
             try
             {
@@ -3234,9 +3285,9 @@ namespace Microsoft.Build.Execution
                     return false;
                 }
 
-                if (inputCacheFiles.Any(f => !File.Exists(f)))
+                if (inputCacheFiles.Any(f => !FileSystems.Default.FileExists(f)))
                 {
-                    LogErrorAndShutdown(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("InputCacheFilesDoNotExist", string.Join(";", inputCacheFiles.Where(f => !File.Exists(f)))));
+                    LogErrorAndShutdown(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("InputCacheFilesDoNotExist", string.Join(";", inputCacheFiles.Where(f => !FileSystems.Default.FileExists(f)))));
                     return false;
                 }
 

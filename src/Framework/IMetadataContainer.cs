@@ -13,6 +13,25 @@ namespace Microsoft.Build.Framework
     internal interface IMetadataContainer
     {
         /// <summary>
+        /// Gets the backing metadata dictionary in a serializable wrapper.
+        /// </summary>
+        /// <remarks>
+        /// If the implementation's backing dictionary does not support copy-on-write, it should return the default struct,
+        /// allowing the caller to decide whether to take the reference.
+        /// This can safely be used across AppDomain boundaries.
+        /// </remarks>
+        SerializableMetadata BackingMetadata { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether indicates whether the item has any custom metadata.
+        /// </summary>
+        /// <remarks>
+        /// Used to skip unnecessary enumerations when copying metadata between items, allowing copy-on-write cloning.
+        /// This is independent of a Count property as items may have multiple backing collections that need to be deduped.
+        /// </remarks>
+        bool HasCustomMetadata { get; }
+
+        /// <summary>
         /// Returns a list of metadata names and unescaped values, including
         /// metadata from item definition groups, but not including built-in
         /// metadata. Implementations should be low-overhead as the method
@@ -32,5 +51,11 @@ namespace Microsoft.Build.Framework
         /// to be unique and values are assumed to be escaped.
         /// </param>
         void ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata);
+
+        /// <summary>
+        /// Removes any metadata matching the given names.
+        /// </summary>
+        /// <param name="metadataNames">The metadata names to remove.</param>
+        void RemoveMetadataRange(IEnumerable<string> metadataNames);
     }
 }

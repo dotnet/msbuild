@@ -2624,14 +2624,28 @@ namespace Microsoft.Build.Evaluation
             {
                 var includeItemspec = new EvaluationItemSpec(itemElement.Include, _data.Expander, itemElement.IncludeLocation, itemElement.ContainingProject.DirectoryPath);
 
-                ItemSpecFragment[] includeGlobFragments = includeItemspec.Fragments.Where(f => f is GlobFragment && f.TextFragment.AsSpan().IndexOfAny(s_invalidGlobChars) < 0).ToArray();
-                if (includeGlobFragments.Length == 0)
+                List<ItemSpecFragment> includeGlobFragmentsList = null;
+                foreach (ItemSpecFragment fragment in includeItemspec.Fragments)
+                {
+                    if (fragment is GlobFragment && fragment.TextFragment.AsSpan().IndexOfAny(s_invalidGlobChars) < 0)
+                    {
+                        includeGlobFragmentsList ??= new List<ItemSpecFragment>(includeItemspec.Fragments.Count);
+                        includeGlobFragmentsList.Add(fragment);
+                    }
+                }
+
+                if (includeGlobFragmentsList == null || includeGlobFragmentsList.Count == 0)
                 {
                     return null;
                 }
 
-                ImmutableArray<string> includeGlobStrings = includeGlobFragments.Select(f => f.TextFragment).ToImmutableArray();
-                var includeGlob = CompositeGlob.Create(includeGlobFragments.Select(f => f.ToMSBuildGlob()));
+                string[] includeGlobStrings = new string[includeGlobFragmentsList.Count];
+                for (int i = 0; i < includeGlobStrings.Length; ++i)
+                {
+                    includeGlobStrings[i] = includeGlobFragmentsList[i].TextFragment;
+                }
+
+                var includeGlob = CompositeGlob.Create(includeGlobFragmentsList.Select(f => f.ToMSBuildGlob()));
 
                 IEnumerable<string> excludeFragmentStrings = [];
                 IMSBuildGlob excludeGlob = null;
@@ -2655,7 +2669,7 @@ namespace Microsoft.Build.Evaluation
 
                 var includeGlobWithGaps = CreateIncludeGlobWithGaps(includeGlob, excludeGlob, removeGlob);
 
-                return new GlobResult(itemElement, includeGlobStrings, includeGlobWithGaps, excludeFragmentStrings, removeFragmentStrings);
+                return new GlobResult(itemElement, includeGlobStrings.ToImmutableArray(), includeGlobWithGaps, excludeFragmentStrings, removeFragmentStrings);
             }
 
             private static IMSBuildGlob CreateIncludeGlobWithGaps(IMSBuildGlob includeGlob, IMSBuildGlob excludeGlob, IMSBuildGlob removeGlob)
@@ -3815,7 +3829,7 @@ namespace Microsoft.Build.Evaluation
 
                 // Cause the project to be actually loaded into the collection, and register for
                 // rename notifications so we can subsequently update the collection.
-                _renameHandler = (string oldFullPath) => ProjectCollection.OnAfterRenameLoadedProject(oldFullPath, Owner);
+                _renameHandler = (oldFullPath) => ProjectCollection.OnAfterRenameLoadedProject(oldFullPath, Owner);
 
                 Xml.OnAfterProjectRename += _renameHandler;
                 Xml.OnProjectXmlChanged += ProjectRootElement_ProjectXmlChangedHandler;
@@ -4265,6 +4279,9 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             internal MultiDictionary<string, ProjectItem> ItemsByEvaluatedIncludeCache { get; private set; }
 
+
+            public PropertyDictionary<ProjectPropertyInstance> SdkResolvedEnvironmentVariablePropertiesDictionary { get; private set; }
+
             /// <summary>
             /// Prepares the data object for evaluation.
             /// </summary>
@@ -4285,6 +4302,7 @@ namespace Microsoft.Build.Evaluation
                 AllEvaluatedItemDefinitionMetadata = new List<ProjectMetadata>();
                 AllEvaluatedItems = new List<ProjectItem>();
                 EvaluatedItemElements = new List<ProjectItemElement>();
+                SdkResolvedEnvironmentVariablePropertiesDictionary = new PropertyDictionary<ProjectPropertyInstance>();
                 EvaluationId = BuildEventContext.InvalidEvaluationId;
 
                 _globalPropertiesToTreatAsLocal?.Clear();
@@ -4439,6 +4457,28 @@ namespace Microsoft.Build.Evaluation
             {
                 ItemDefinitions.TryGetValue(itemType, out ProjectItemDefinition itemDefinition);
                 return itemDefinition;
+            }
+
+            /// <summary>
+            /// Add an environment variable (and property) based on the result of an SDK resolver.
+            /// </summary>
+            /// <param name="name">Environment variable name.</param>
+            /// <param name="value">Environment variable value.</param>
+            public void AddSdkResolvedEnvironmentVariable(string name, string value)
+            {
+                // If the property has already been set as an environment variable or by another SDK, we do not overwrite it.
+                if (EnvironmentVariablePropertiesDictionary?.Contains(name) == true
+                    || SdkResolvedEnvironmentVariablePropertiesDictionary?.Contains(name) == true)
+                {
+                    return;
+                }
+
+                ProjectPropertyInstance.SdkResolvedEnvironmentVariablePropertyInstance property = new(name, value);
+
+                SdkResolvedEnvironmentVariablePropertiesDictionary ??= new();
+                SdkResolvedEnvironmentVariablePropertiesDictionary.Set(property);
+
+                SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: null);
             }
 
             /// <summary>

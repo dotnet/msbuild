@@ -32,9 +32,9 @@ namespace Microsoft.Build.UnitTests
      * is somewhat of a no-no for task assemblies.
      *
      **************************************************************************/
-    public sealed class MockEngine : IBuildEngine7
+    public sealed class MockEngine : EngineServices, IBuildEngine10, ITaskFactoryBuildParameterProvider
     {
-        private readonly object _lockObj = new object();  // Protects _log, _output
+        private readonly LockType _lockObj = new LockType();  // Protects _log, _output
         private readonly ITestOutputHelper _output;
         private readonly StringBuilder _log = new StringBuilder();
         private readonly ProjectCollection _projectCollection = new ProjectCollection();
@@ -61,6 +61,18 @@ namespace Microsoft.Build.UnitTests
         public Dictionary<string, string> GlobalProperties { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         public MockLogger MockLogger { get; }
+
+        /// <summary>
+        /// Gets or sets whether the mock engine should report multi-threaded build mode.
+        /// Used to test ITaskFactoryBuildParameterProvider implementation.
+        /// </summary>
+        public bool IsMultiThreadedBuild { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether task factories should be forced to compile for out-of-process execution.
+        /// Used to test ITaskFactoryBuildParameterProvider implementation.
+        /// </summary>
+        public bool ForceOutOfProcessExecution { get; set; }
 
         public MockEngine(bool logToConsole)
         {
@@ -216,6 +228,18 @@ namespace Microsoft.Build.UnitTests
         }
 
         public bool IsRunningMultipleNodes { get; set; }
+
+        public EngineServices EngineServices => this;
+
+        public MessageImportance MinimumMessageImportance { get; set; } = MessageImportance.Low;
+
+        public override bool IsTaskInputLoggingEnabled => SetIsTaskInputLoggingEnabled;
+
+        public override bool IsOutOfProcRarNodeEnabled => SetIsOutOfProcRarNodeEnabled;
+
+        public bool SetIsTaskInputLoggingEnabled { get; set; }
+
+        public bool SetIsOutOfProcRarNodeEnabled { get; set; }
 
         public bool BuildProjectFile(
             string projectFileName,
@@ -472,5 +496,16 @@ namespace Microsoft.Build.UnitTests
             _objectCache.TryRemove(key, out object obj);
             return obj;
         }
+
+        public int RequestCores(int requestedCores) => requestedCores;
+
+        public void ReleaseCores(int coresToRelease)
+        {
+        }
+
+        public bool ShouldTreatWarningAsError(string warningCode) => false;
+
+        public override bool LogsMessagesOfImportance(MessageImportance importance)
+            => importance <= MinimumMessageImportance;
     }
 }

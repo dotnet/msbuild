@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.IO.Compression;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
@@ -103,7 +104,7 @@ namespace Microsoft.Build.Logging
         private BinaryWriter binaryWriter;
         private BuildEventArgsWriter eventArgsWriter;
         private ProjectImportsCollector projectImportsCollector;
-        private string _initialTargetOutputLogging;
+        private bool _initialTargetOutputLogging;
         private bool _initialLogImports;
         private string _initialIsBinaryLoggerEnabled;
 
@@ -162,7 +163,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Initialize(IEventSource eventSource)
         {
-            _initialTargetOutputLogging = Environment.GetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING");
+            _initialTargetOutputLogging = Traits.Instance.EnableTargetOutputLogging;
             _initialLogImports = Traits.Instance.EscapeHatches.LogProjectImports;
             _initialIsBinaryLoggerEnabled = Environment.GetEnvironmentVariable("MSBUILDBINARYLOGGERENABLED");
 
@@ -171,6 +172,7 @@ namespace Microsoft.Build.Logging
             Environment.SetEnvironmentVariable("MSBUILDBINARYLOGGERENABLED", bool.TrueString);
 
             Traits.Instance.EscapeHatches.LogProjectImports = true;
+            Traits.Instance.EnableTargetOutputLogging = true;
             bool logPropertiesAndItemsAfterEvaluation = Traits.Instance.EscapeHatches.LogPropertiesAndItemsAfterEvaluation ?? true;
 
             ProcessParameters(out bool omitInitialInfo);
@@ -313,14 +315,21 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public void Shutdown()
         {
-            Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
+            Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging ? "true" : null);
             Environment.SetEnvironmentVariable("MSBUILDLOGIMPORTS", _initialLogImports ? "1" : null);
             Environment.SetEnvironmentVariable("MSBUILDBINARYLOGGERENABLED", _initialIsBinaryLoggerEnabled);
 
             Traits.Instance.EscapeHatches.LogProjectImports = _initialLogImports;
+            Traits.Instance.EnableTargetOutputLogging = _initialTargetOutputLogging;
 
             if (projectImportsCollector != null)
             {
+                // Write the build check editorconfig file paths to the log
+                foreach (var filePath in EditorConfigParser.EditorConfigFilePaths)
+                {
+                    projectImportsCollector.AddFile(filePath);
+                }
+                EditorConfigParser.ClearEditorConfigFilePaths();
                 projectImportsCollector.Close();
 
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
@@ -335,6 +344,7 @@ namespace Microsoft.Build.Logging
                 projectImportsCollector.FileIOExceptionEvent -= EventSource_AnyEventRaised;
                 projectImportsCollector = null;
             }
+
 
             if (stream != null)
             {

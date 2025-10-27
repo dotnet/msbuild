@@ -47,10 +47,16 @@ namespace Microsoft.Build.Framework
             Metadata = dictionary;
         }
 
+        SerializableMetadata IMetadataContainer.BackingMetadata => default;
+
+        bool IMetadataContainer.HasCustomMetadata => Metadata.Count > 0;
+
         IEnumerable<KeyValuePair<string, string>> IMetadataContainer.EnumerateMetadata() => Metadata;
 
         void IMetadataContainer.ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata)
             => throw new InvalidOperationException($"{nameof(TaskItemData)} does not support write operations");
+
+        void IMetadataContainer.RemoveMetadataRange(IEnumerable<string> metadataNames) => throw new NotImplementedException();
 
         public int MetadataCount => Metadata.Count;
 

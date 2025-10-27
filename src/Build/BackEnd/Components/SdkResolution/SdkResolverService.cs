@@ -33,7 +33,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         /// <summary>
         /// A lock object used for this class.
         /// </summary>
-        private readonly object _lockObject = new object();
+        private readonly LockType _lockObject = new LockType();
 
         /// <summary>
         /// Stores resolver state by build submission ID.
@@ -77,6 +77,9 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
         /// <inheritdoc cref="ISdkResolverService.SendPacket"/>
         public Action<INodePacket> SendPacket { get; }
+
+        /// <inheritdoc cref="ISdkResolverService.IsNodeShutDown"/>
+        public bool IsNodeShutDown { get; set; }
 
         /// <summary>
         /// Determines if the <see cref="SdkReference"/> is the same as the specified version.  If the <paramref name="sdk"/> object has <code>null</code> for the version,
@@ -226,7 +229,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             resolvers = GetResolvers(
                 _generalResolversManifestsRegistry,
                 loggingContext,
-                sdkReferenceLocation).ToList();
+                sdkReferenceLocation);
 
             if (TryResolveSdkUsingSpecifiedResolvers(
                 resolvers,
@@ -250,7 +253,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             if (failOnUnresolvedSdk)
             {
-                loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name, string.Join($"{Environment.NewLine}  ", errors));
+                if (resolvers.Count == 1) // Check if only one resolver was used
+                {
+                    // Log the single resolver's error message directly
+                    loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "SingleResolverFailedToResolveSDK", sdk.Name, resolvers[0].Name, string.Join(Environment.NewLine, errors));
+                }
+                else
+                {
+                    // Log the error with the MSBuild wrapper
+                    loggingContext.LogError(new BuildEventFileInfo(sdkReferenceLocation), "FailedToResolveSDK", sdk.Name, string.Join($"{Environment.NewLine}  ", errors));
+                }
             }
 
             LogWarnings(loggingContext, sdkReferenceLocation, warnings);
@@ -265,16 +277,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             List<SdkResolver> resolvers = new List<SdkResolver>();
             foreach (var resolverManifest in resolversManifests)
             {
-                if (!_manifestToResolvers.TryGetValue(resolverManifest, out IReadOnlyList<SdkResolver> newResolvers))
+                IReadOnlyList<SdkResolver> newResolvers;
+                lock (_lockObject)
                 {
-                    lock (_lockObject)
+                    if (!_manifestToResolvers.TryGetValue(resolverManifest, out newResolvers))
                     {
-                        if (!_manifestToResolvers.TryGetValue(resolverManifest, out newResolvers))
-                        {
-                            // Loading of the needed resolvers.
-                            newResolvers = _sdkResolverLoader.LoadResolversFromManifest(resolverManifest, sdkReferenceLocation);
-                            _manifestToResolvers[resolverManifest] = newResolvers;
-                        }
+                        // Loading of the needed resolvers.
+                        newResolvers = _sdkResolverLoader.LoadResolversFromManifest(resolverManifest, sdkReferenceLocation);
+                        _manifestToResolvers[resolverManifest] = newResolvers;
                     }
                 }
 

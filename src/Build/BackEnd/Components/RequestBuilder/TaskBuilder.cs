@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+
 #if FEATURE_APARTMENT_STATE
 using System.Diagnostics.CodeAnalysis;
 #endif
@@ -120,7 +121,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The object used to synchronize access to the task execution host.
         /// </summary>
-        private Object _taskExecutionHostSync = new Object();
+        private LockType _taskExecutionHostSync = new();
 
         /// <summary>
         /// Constructor
@@ -252,17 +253,17 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Add parameters on any output tags
-            foreach (ProjectTaskInstanceChild taskOutputSpecification in _taskNode.Outputs)
+            // Perf: Moved to indexed based for loop to avoid boxing of the enumerator for IList.
+            for (int i = 0; i < _taskNode.Outputs.Count; i++)
             {
-                ProjectTaskOutputItemInstance outputItemInstance = taskOutputSpecification as ProjectTaskOutputItemInstance;
-                if (outputItemInstance != null)
+                ProjectTaskInstanceChild taskOutputSpecification = _taskNode.Outputs[i];
+                if (taskOutputSpecification is ProjectTaskOutputItemInstance outputItemInstance)
                 {
                     taskParameters.Add(outputItemInstance.TaskParameter);
                     taskParameters.Add(outputItemInstance.ItemType);
                 }
 
-                ProjectTaskOutputPropertyInstance outputPropertyInstance = taskOutputSpecification as ProjectTaskOutputPropertyInstance;
-                if (outputPropertyInstance != null)
+                if (taskOutputSpecification is ProjectTaskOutputPropertyInstance outputPropertyInstance)
                 {
                     taskParameters.Add(outputPropertyInstance.TaskParameter);
                     taskParameters.Add(outputPropertyInstance.PropertyName);
@@ -428,8 +429,10 @@ namespace Microsoft.Build.BackEnd
                     {
                         TaskLoggingContext taskLoggingContext = _targetLoggingContext.LogTaskBatchStarted(_projectFullPath, _targetChildInstance, taskAssemblyLocation);
                         MSBuildEventSource.Log.ExecuteTaskStart(_taskNode?.Name, taskLoggingContext.BuildEventContext.TaskId);
-                        // Can be condition with _componentHost.BuildParameters.IsTelemetryEnabled) - but it's a cheap call
-                        taskFactoryWrapper?.Statistics?.ExecutionStarted();
+                        if (_componentHost.BuildParameters.IsTelemetryEnabled)
+                        {
+                            taskFactoryWrapper?.Statistics?.ExecutionStarted();
+                        }
 
                         _buildRequestEntry.Request.CurrentTaskContext = taskLoggingContext.BuildEventContext;
 
@@ -479,7 +482,10 @@ namespace Microsoft.Build.BackEnd
 
                             // Flag the completion of the task.
                             taskLoggingContext.LogTaskBatchFinished(_projectFullPath, taskResult.ResultCode == WorkUnitResultCode.Success || taskResult.ResultCode == WorkUnitResultCode.Skipped);
-                            taskFactoryWrapper?.Statistics?.ExecutionStopped();
+                            if (_componentHost.BuildParameters.IsTelemetryEnabled)
+                            {
+                                taskFactoryWrapper?.Statistics?.ExecutionStopped();
+                            }
 
                             if (taskResult.ResultCode == WorkUnitResultCode.Failed && _continueOnError == ContinueOnError.WarnAndContinue)
                             {
@@ -532,12 +538,12 @@ namespace Microsoft.Build.BackEnd
 
             // only bother to create a task identity parameter set if we're putting anything in there -- otherwise,
             // a null set will be treated as equivalent to all parameters being "don't care".
-            if (msbuildRuntime != String.Empty || msbuildArchitecture != String.Empty)
+            if (msbuildRuntime != string.Empty || msbuildArchitecture != string.Empty)
             {
                 taskIdentityParameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-                msbuildArchitecture = msbuildArchitecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : msbuildArchitecture.Trim();
-                msbuildRuntime = msbuildRuntime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : msbuildRuntime.Trim();
+                msbuildArchitecture = msbuildArchitecture == string.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : msbuildArchitecture.Trim();
+                msbuildRuntime = msbuildRuntime == string.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : msbuildRuntime.Trim();
 
                 taskIdentityParameters.Add(XMakeAttributes.runtime, msbuildRuntime);
                 taskIdentityParameters.Add(XMakeAttributes.architecture, msbuildArchitecture);
@@ -613,7 +619,8 @@ namespace Microsoft.Build.BackEnd
             {
                 if (howToExecuteTask == TaskExecutionMode.ExecuteTaskAndGatherOutputs)
                 {
-                    if (!_targetLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                    if (_targetLoggingContext.LoggingService.MinimumRequiredMessageImportance > MessageImportance.Low &&
+                        !_targetLoggingContext.LoggingService.OnlyLogCriticalEvents)
                     {
                         // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
                         string expanded = bucket.Expander.ExpandIntoStringAndUnescape(_targetChildInstance.Condition, ExpanderOptions.ExpandAll | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _targetChildInstance.ConditionLocation);
@@ -651,7 +658,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private async Task<WorkUnitResult> InitializeAndExecuteTask(TaskLoggingContext taskLoggingContext, ItemBucket bucket, IDictionary<string, string> taskIdentityParameters, TaskHost taskHost, TaskExecutionMode howToExecuteTask)
         {
-            if (!_taskExecutionHost.InitializeForBatch(taskLoggingContext, bucket, taskIdentityParameters))
+            if (!_taskExecutionHost.InitializeForBatch(taskLoggingContext, bucket, taskIdentityParameters, _buildRequestEntry.Request.ScheduledNodeId))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(_targetChildInstance.Location, "TaskDeclarationOrUsageError", _taskNode.Name);
             }
@@ -662,11 +669,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // UNDONE: Move this and the task host.
                 taskHost.LoggingContext = taskLoggingContext;
-                WorkUnitResult executionResult = await ExecuteInstantiatedTask(_taskExecutionHost, taskLoggingContext, taskHost, bucket, howToExecuteTask);
-
-                ErrorUtilities.VerifyThrow(executionResult != null, "Unexpected null execution result");
-
-                return executionResult;
+                return await ExecuteInstantiatedTask(_taskExecutionHost, taskLoggingContext, taskHost, bucket, howToExecuteTask);
             }
             finally
             {

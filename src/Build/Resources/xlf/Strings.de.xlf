@@ -221,14 +221,14 @@
         <target state="translated">Die Eigenschaften "TargetFramework" und "TargetFrameworks" werden nicht berücksichtigt und sollten nicht in Projekten angegeben werden, die nicht das .NET SDK verwenden.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
-      <trans-unit id="BuildCheck_BC0109_MessageFmt">
+      <trans-unit id="BuildCheck_BC0302_MessageFmt">
         <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
-        <target state="new">Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</target>
+        <target state="translated">Die {0}-Aufgabe aus dem Projekt {1} erstellt ein Projekt mithilfe der {2} CLI. Stattdessen sollte die MSBuild-Aufgabe verwendet werden.</target>
         <note />
       </trans-unit>
-      <trans-unit id="BuildCheck_BC0109_Title">
+      <trans-unit id="BuildCheck_BC0302_Title">
         <source>The 'Exec' task should not be used to build a project.</source>
-        <target state="new">The 'Exec' task should not be used to build a project.</target>
+        <target state="translated">Die "Ausführen"-Aufgabe sollte nicht zum Erstellen eines Projekts verwendet werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
@@ -446,6 +446,11 @@
         <target state="translated">Die benutzerdefinierte Prüfregel „{0}“ wurde erfolgreich registriert.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
+        <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
+        <target state="translated">Die benutzerdefinierte TaskFactory „{0}“ für die Aufgabe „{1}“ unterstützt keine Ausführung des TaskHost außerhalb des Prozesses. Deaktivieren Sie den Multithread-Buildmodus oder entfernen Sie die benutzerdefinierte TaskFactory aus Ihren &lt;UsingTask&gt; Definitionen in den Projektdateien.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: Der SDK-Standardresolver konnte SDK "{0}" nicht auflösen, da das Verzeichnis "{1}" nicht vorhanden war.</target>
@@ -510,11 +515,6 @@
         <target state="translated">MSB3094: "{2}" verweist auf {0} Element(e), und "{3}" verweist auf {1} Element(e). Die Anzahl von Elementen muss identisch sein.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
-      <trans-unit id="GlobExpansionFailed">
-        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">Ausnahme beim Erweitern einer fileSpec mit globs: fileSpec: "{0}", vorausgesetzt, es handelt sich um einen Dateinamen. Ausnahme: {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: Unerwartetes Leerzeichen an Position "{1}" der Bedingung "{0}". Haben Sie vergessen, ein Leerzeichen zu entfernen?</target>
@@ -577,6 +577,18 @@
         <target state="translated">Das Metaprojekt "{0}" wurde generiert.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NETHostTaskLoad_Failed">
+        <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
+    See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
+        <target state="translated">Der Task konnte nicht geladen werden, da er den MSBuild .NET Runtime Task Host erfordert, aber der .NET Runtime Task Host für die angegebene Version nicht gefunden wurde.
+    Weitere Informationen zum Beheben dieses Fehlers finden Sie unter https://aka.ms/nettaskhost.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETHostVersion_Failed">
+        <source>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</source>
+        <target state="translated">Die SDK-Version {0} liegt unter der mindestens erforderlichen Version von {1}. Der .NET Runtime Task Host wird nur unterstützt, wenn .NET SDK 10.0.100-rc1 oder höher verwendet wird.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NoBuildInProgress">
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
         <target state="translated">Der Vorgang kann nicht abgeschlossen werden, da BeginBuild noch nicht aufgerufen wurde.</target>
@@ -628,6 +640,11 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">Die Methode "{0}" kann nicht mit einer Sammlung aufgerufen werden, die NULL oder leere Zielnamen enthält.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OpenTelemetryLoadFailed">
+        <source>Loading telemetry libraries failed with exception: {0}.</source>
+        <target state="translated">Fehler beim Laden von Telemetriebibliotheken. Ausnahme:{0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
@@ -766,6 +783,20 @@
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
+      <trans-unit id="ProjectFinished_WithTFAndRID">
+        <source>{0}{1} {2} {3} {4} ({5}s)</source>
+        <target state="translated">{0}{1} {2} {3} {4} ({5}s)</target>
+        <note>
+      Project finished summary including target framework and runtime identifier information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: runtime identifier (RID)
+      {4}: BuildResult_{X}
+      {5}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: ProjectGraph bietet keine Unterstützung für ProjectReference-Elemente mit dem ToolsVersion-Metadatensatz. In der Datei "{1}" wurde ProjectReference "{0}" mit "ToolsVersion" gefunden.</target>
@@ -822,6 +853,16 @@
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
+      <trans-unit id="SDKPathCheck_Failed">
+        <source>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
+        <target state="translated">Das Verzeichnis existiert nicht: {0}. Der .NET Runtime Task Host konnte nicht instanziiert werden. Weitere Informationen zum Beheben dieses Fehlers finden Sie unter https://aka.ms/nettaskhost.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKPathResolution_Failed">
+        <source>UsingTask with Runtime="NET" was specified in a non-SDK project.</source>
+        <target state="translated">UsingTask mit Runtime="NET" wurde in einem Nicht-SDK-Projekt angegeben.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverAttempt">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
@@ -855,6 +896,26 @@ Fehler: {3}</target>
         <target state="translated">Der SDK-Resolver "{0}" hat NULL zurückgegeben.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySet">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
+        <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen, sie wurde aber bereits als Umgebungsvariable festgelegt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
+        <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen, sie wurde aber bereits von einem anderen SDK festgelegt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableSet">
+        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
+        <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SingleResolverFailedToResolveSDK">
+        <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
+        <target state="translated">SDK „{0}“ konnte vom SDK-Resolver „{1}“ nicht aufgelöst werden. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: Das Projekt "{0}" hat Graphisolationseinschränkungen für das referenzierte Projekt "{1}" übersprungen.</target>
@@ -877,6 +938,11 @@ Fehler: {3}</target>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
         <target state="translated">Statisches Diagramm in {0} Sekunden geladen: {1} Knoten, {2} Edges</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StaticGraphConstructionStarted">
+        <source>Static graph construction started.</source>
+        <target state="translated">Die Erstellung statischer Graphen wurde gestartet.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
@@ -963,6 +1029,20 @@ Fehler: {3}</target>
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestProjectFinished_WithTFAndRID">
+        <source>{0}{1} test {2} {3} {4} ({5}s)</source>
+        <target state="translated">{0}{1} Test {2} {3} {4} ({5}s)</target>
+        <note>
+      Project finished summary including target framework and runtime identifier information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: runtime identifier (RID)
+      {4}: BuildResult_{X}
+      {5}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>

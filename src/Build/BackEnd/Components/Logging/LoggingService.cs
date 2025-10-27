@@ -9,10 +9,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
@@ -255,7 +255,7 @@ namespace Microsoft.Build.BackEnd.Logging
         private AutoResetEvent _dequeueEvent;
 
         /// <summary>
-        /// Event set when queue become empty. 
+        /// Event set when queue become empty.
         /// </summary>
         private ManualResetEvent _emptyQueueEvent;
 
@@ -463,6 +463,15 @@ namespace Microsoft.Build.BackEnd.Logging
             get => _onlyLogCriticalEvents;
 
             set => _onlyLogCriticalEvents = value;
+        }
+
+        /// <summary>
+        /// When true, target outputs (and returns) are logged as well.
+        /// </summary>
+        public bool EnableTargetOutputLogging
+        {
+            get;
+            set;
         }
 
         /// <summary>
@@ -874,6 +883,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Ask the component host if onlyLogCriticalEvents is true or false. If the host does
                 // not have this information default to false.
                 _onlyLogCriticalEvents = buildComponentHost.BuildParameters.OnlyLogCriticalEvents;
+                EnableTargetOutputLogging = buildComponentHost.BuildParameters.EnableTargetOutputLogging;
 
                 _serviceState = LoggingServiceState.Initialized;
 
@@ -1099,7 +1109,9 @@ namespace Microsoft.Build.BackEnd.Logging
                 EventSourceSink eventSourceSink = new EventSourceSink();
 
                 // If the logger is already in the list it should not be registered again.
-                if (_loggers.Contains(centralLogger))
+                // Note here that we are checking for direct equivalence (fast)
+                // and if we're dealing with a reusable logger, we need to check its original logger (slower)
+                if (_loggers.Contains(centralLogger) || _loggers.Any(l => l is ReusableLogger rl && rl.OriginalLogger == centralLogger))
                 {
                     return false;
                 }
@@ -1768,7 +1780,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ILogger UnwrapLoggerType(ILogger log)
             {
-                while (log is ProjectCollection.ReusableLogger reusableLogger)
+                while (log is Microsoft.Build.Logging.ReusableLogger reusableLogger)
                 {
                     log = reusableLogger.OriginalLogger;
                 }
@@ -1814,12 +1826,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </remarks>
         private void UpdateMinimumMessageImportance(ILogger logger)
         {
-            var innerLogger = (logger is ProjectCollection.ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
+            var innerLogger = (logger is ReusableLogger reusableLogger) ? reusableLogger.OriginalLogger : logger;
 
             MessageImportance? minimumImportance = innerLogger switch
             {
-                Build.Logging.ConsoleLogger consoleLogger => consoleLogger.GetMinimumMessageImportance(),
-                Build.Logging.ConfigurableForwardingLogger forwardingLogger => forwardingLogger.GetMinimumMessageImportance(),
+                ConsoleLogger consoleLogger => consoleLogger.GetMinimumMessageImportance(),
+                ConfigurableForwardingLogger forwardingLogger => forwardingLogger.GetMinimumMessageImportance(),
 
                 // The BuildCheck connector logger consumes only high priority messages.
                 BuildCheckForwardingLogger => MessageImportance.High,
@@ -1836,11 +1848,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 // The null logger has no effect on minimum verbosity.
                 Execution.BuildManager.NullLogger => null,
 
-                // The terminal logger consumes only high priority messages.
-                _ => innerLogger.GetType().FullName == "Microsoft.Build.Logging.TerminalLogger.TerminalLogger"
-                    ? MessageImportance.High
-                    // If the logger is not on our allow list, there are no importance guarantees. Fall back to "any importance".
-                    : MessageImportance.Low,
+                TerminalLogger terminalLogger => terminalLogger.GetMinimumMessageImportance(),
+                _ =>
+                    innerLogger.GetType().FullName == "Microsoft.Build.Logging.TerminalLogger"
+                        ? MessageImportance.High
+                        // If the logger is not on our allow list, there are no importance guarantees. Fall back to "any importance".
+                        : MessageImportance.Low,
             };
 
             if (minimumImportance != null)

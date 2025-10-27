@@ -149,11 +149,6 @@ namespace Microsoft.Build.BackEnd
         private bool _isExecuting;
 
         /// <summary>
-        /// The current task builder.
-        /// </summary>
-        private ITaskBuilder _currentTaskBuilder;
-
-        /// <summary>
         /// The constructor.
         /// </summary>
         /// <param name="requestEntry">The build request entry for the target.</param>
@@ -372,7 +367,8 @@ namespace Microsoft.Build.BackEnd
                     projectLoggingContext.BuildEventContext);
                 _state = TargetEntryState.Completed;
 
-                if (!projectLoggingContext.LoggingService.OnlyLogCriticalEvents)
+                if (projectLoggingContext.LoggingService.MinimumRequiredMessageImportance > MessageImportance.Low &&
+                    !projectLoggingContext.LoggingService.OnlyLogCriticalEvents)
                 {
                     // Expand the expression for the Log.  Since we know the condition evaluated to false, leave unexpandable properties in the condition so as not to cause an error
                     string expanded = _expander.ExpandIntoStringAndUnescape(_target.Condition, ExpanderOptions.ExpandPropertiesAndItems | ExpanderOptions.LeavePropertiesUnexpandedOnError | ExpanderOptions.Truncate, _target.ConditionLocation);
@@ -461,7 +457,6 @@ namespace Microsoft.Build.BackEnd
 
                     targetLoggingContext = projectLoggingContext.LogTargetBatchStarted(projectFullPath, _target, parentTargetName, _buildReason);
                     bucket.Initialize(targetLoggingContext);
-                    WorkUnitResult bucketResult = null;
                     targetSuccess = false;
 
                     Lookup.Scope entryForInference = null;
@@ -508,6 +503,10 @@ namespace Microsoft.Build.BackEnd
                                 // as a result we need separate sets of item and property collections to track changes
                                 if (dependencyResult == DependencyAnalysisResult.IncrementalBuild)
                                 {
+                                    // Ensure that these lookups stop at the current scope, regardless of whether items were added.
+                                    lookupForInference.TruncateLookupsForItemTypes(upToDateTargetInputs.ItemTypes);
+                                    lookupForExecution.TruncateLookupsForItemTypes(changedTargetInputs.ItemTypes);
+
                                     // subset the relevant items to those that are up-to-date
                                     foreach (string itemType in upToDateTargetInputs.ItemTypes)
                                     {
@@ -522,7 +521,7 @@ namespace Microsoft.Build.BackEnd
                                 }
 
                                 // We either have some work to do or at least we need to infer outputs from inputs.
-                                bucketResult = await ProcessBucket(taskBuilder, targetLoggingContext, GetTaskExecutionMode(dependencyResult), lookupForInference, lookupForExecution);
+                                WorkUnitResult bucketResult = await ProcessBucket(taskBuilder, targetLoggingContext, GetTaskExecutionMode(dependencyResult), lookupForInference, lookupForExecution);
 
                                 // Now aggregate the result with the existing known results.  There are four rules, assuming the target was not
                                 // skipped due to being up-to-date:
@@ -553,7 +552,7 @@ namespace Microsoft.Build.BackEnd
                                 entryForInference = null;
                                 entryForExecution.LeaveScope();
                                 entryForExecution = null;
-                                targetSuccess = (bucketResult?.ResultCode == WorkUnitResultCode.Success);
+                                targetSuccess = bucketResult.ResultCode == WorkUnitResultCode.Success;
                                 break;
 
                             case DependencyAnalysisResult.SkipNoInputs:
@@ -784,7 +783,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(_targetResult.ResultCode == TargetResultCode.Skipped, "ResultCode must be Skipped. ResultCode is {0}.", _state);
             ErrorUtilities.VerifyThrow(_targetResult.WorkUnitResult.ActionCode == WorkUnitActionCode.Continue, "ActionCode must be Continue. ActionCode is {0}.", _state);
 
-            _targetResult.WorkUnitResult.ActionCode = WorkUnitActionCode.Stop;
+            _targetResult.WorkUnitResult = new WorkUnitResult(_targetResult.WorkUnitResult.ResultCode, WorkUnitActionCode.Stop, _targetResult.WorkUnitResult.Exception);
         }
 
         /// <summary>
@@ -816,46 +815,36 @@ namespace Microsoft.Build.BackEnd
             WorkUnitActionCode finalActionCode = WorkUnitActionCode.Continue;
             WorkUnitResult lastResult = new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null);
 
-            try
+            int currentTask = 0;
+
+            // Walk through all of the tasks and execute them in order.
+            for (; (currentTask < _target.Children.Count) && !_cancellationToken.IsCancellationRequested; ++currentTask)
             {
-                // Grab the task builder so if cancel is called it will have something to operate on.
-                _currentTaskBuilder = taskBuilder;
+                ProjectTargetInstanceChild targetChildInstance = _target.Children[currentTask];
 
-                int currentTask = 0;
+                // Execute the task.
+                lastResult = await taskBuilder.ExecuteTask(targetLoggingContext, _requestEntry, _targetBuilderCallback, targetChildInstance, mode, lookupForInference, lookupForExecution, _cancellationToken);
 
-                // Walk through all of the tasks and execute them in order.
-                for (; (currentTask < _target.Children.Count) && !_cancellationToken.IsCancellationRequested; ++currentTask)
+                if (lastResult.ResultCode == WorkUnitResultCode.Failed)
                 {
-                    ProjectTargetInstanceChild targetChildInstance = _target.Children[currentTask];
-
-                    // Execute the task.
-                    lastResult = await taskBuilder.ExecuteTask(targetLoggingContext, _requestEntry, _targetBuilderCallback, targetChildInstance, mode, lookupForInference, lookupForExecution, _cancellationToken);
-
-                    if (lastResult.ResultCode == WorkUnitResultCode.Failed)
-                    {
-                        aggregatedTaskResult = WorkUnitResultCode.Failed;
-                    }
-                    else if (lastResult.ResultCode == WorkUnitResultCode.Success && aggregatedTaskResult != WorkUnitResultCode.Failed)
-                    {
-                        aggregatedTaskResult = WorkUnitResultCode.Success;
-                    }
-
-                    if (lastResult.ActionCode == WorkUnitActionCode.Stop)
-                    {
-                        finalActionCode = WorkUnitActionCode.Stop;
-                        break;
-                    }
+                    aggregatedTaskResult = WorkUnitResultCode.Failed;
+                }
+                else if (lastResult.ResultCode == WorkUnitResultCode.Success && aggregatedTaskResult != WorkUnitResultCode.Failed)
+                {
+                    aggregatedTaskResult = WorkUnitResultCode.Success;
                 }
 
-                if (_cancellationToken.IsCancellationRequested)
+                if (lastResult.ActionCode == WorkUnitActionCode.Stop)
                 {
-                    aggregatedTaskResult = WorkUnitResultCode.Canceled;
                     finalActionCode = WorkUnitActionCode.Stop;
+                    break;
                 }
             }
-            finally
+
+            if (_cancellationToken.IsCancellationRequested)
             {
-                _currentTaskBuilder = null;
+                aggregatedTaskResult = WorkUnitResultCode.Canceled;
+                finalActionCode = WorkUnitActionCode.Stop;
             }
 
             return new WorkUnitResult(aggregatedTaskResult, finalActionCode, lastResult.Exception);

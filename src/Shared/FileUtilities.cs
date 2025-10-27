@@ -78,7 +78,7 @@ namespace Microsoft.Build.Shared
                 using (new FileStream(pathWithUpperCase, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
                 {
                     string lowerCased = pathWithUpperCase.ToLowerInvariant();
-                    return !File.Exists(lowerCased);
+                    return !FileSystems.Default.FileExists(lowerCased);
                 }
             }
             catch (Exception exc)
@@ -731,6 +731,35 @@ namespace Microsoft.Build.Shared
             return directory;
         }
 
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// Deletes all subdirectories within the specified directory without throwing exceptions.
+        /// This method enumerates all subdirectories in the given directory and attempts to delete
+        /// each one recursively. If any IO-related exceptions occur during enumeration or deletion,
+        /// they are silently ignored.
+        /// </summary>
+        /// <param name="directory">The directory whose subdirectories should be deleted.</param>
+        /// <remarks>
+        /// This method is useful for cleanup operations where partial failure is acceptable.
+        /// It will not delete the root directory itself, only its subdirectories.
+        /// IO exceptions during directory enumeration or deletion are caught and ignored.
+        /// </remarks>
+        internal static void DeleteSubdirectoriesNoThrow(string directory)
+        {
+            try
+            {
+                foreach (string dir in FileSystems.Default.EnumerateDirectories(directory))
+                {
+                    DeleteDirectoryNoThrow(dir, recursive: true, retryCount: 1);
+                }
+            }
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
+            {
+                // If we can't enumerate the directories, ignore. Other cases should be handled by DeleteDirectoryNoThrow.
+            }
+        }
+#endif
+
         /// <summary>
         /// Determines whether the given assembly file name has one of the listed extensions.
         /// </summary>
@@ -1239,7 +1268,7 @@ namespace Microsoft.Build.Shared
             return FixFilePath(path);
         }
 
-        private static bool IsPathTooLong(string path)
+        public static bool IsPathTooLong(string path)
         {
             // >= not > because MAX_PATH assumes a trailing null
             return path.Length >= NativeMethodsShared.MaxPath;
@@ -1565,21 +1594,42 @@ namespace Microsoft.Build.Shared
 
         internal static void ReadFromStream(this Stream stream, byte[] content, int startIndex, int length)
         {
-#if NET
             stream.ReadExactly(content, startIndex, length);
-#else
-            int bytesRead = 0;
-            while (bytesRead < length)
-            {
-                int read = stream.Read(content, startIndex + bytesRead, length - bytesRead);
-                if (read == 0)
-                {
-                    throw new EndOfStreamException();
-                }
-
-                bytesRead += read;
-            }
-#endif
         }
     }
 }
+
+#if !NET
+namespace System.IO
+{
+    internal static class StreamExtensions
+    {
+        internal static void ReadExactly(this Stream stream, byte[] buffer, int offset, int count)
+        {
+            if (buffer == null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+            if (offset < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(offset));
+            }
+            if ((uint)count > buffer.Length - offset)
+            {
+                throw new ArgumentOutOfRangeException(nameof(count));
+            }
+
+            while (count > 0)
+            {
+                int read = stream.Read(buffer, offset, count);
+                if (read <= 0)
+                {
+                    throw new EndOfStreamException();
+                }
+                offset +=read;
+                count -= read;
+            }
+        }
+    }
+}
+#endif

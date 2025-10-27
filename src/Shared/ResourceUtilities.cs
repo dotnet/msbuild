@@ -8,9 +8,6 @@ using System.Diagnostics;
 #endif
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-using System.ComponentModel;
-
-#nullable disable
 
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
@@ -36,7 +33,7 @@ namespace Microsoft.Build.Shared
         /// <param name="code">[out] The message code, or null if there was no code.</param>
         /// <returns>The string without its message code prefix, if any.</returns>
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Scope = "member", Target = "Microsoft.Build.Shared.ResourceUtilities.#ExtractMessageCode(System.Boolean,System.String,System.String&)", Justification = "Unavoidable complexity")]
-        internal static string ExtractMessageCode(bool msbuildCodeOnly, string message, out string code)
+        internal static string ExtractMessageCode(bool msbuildCodeOnly, string message, out string? code)
         {
 #if !BUILDINGAPPXTASKS
             ErrorUtilities.VerifyThrowInternalNull(message);
@@ -159,7 +156,7 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">Resource string to load.</param>
         /// <param name="args">Optional arguments for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceStringStripCodeAndKeyword(out string code, out string helpKeyword, string resourceName, params object[] args)
+        internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName, params object?[]? args)
         {
             helpKeyword = GetHelpKeyword(resourceName);
 
@@ -178,7 +175,7 @@ namespace Microsoft.Build.Shared
         /// <param name="helpKeyword">[out] The MSBuild F1-help keyword for the host IDE, or null.</param>
         /// <param name="resourceName">Resource string to load.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceStringStripCodeAndKeyword(out string code, out string helpKeyword, string resourceName)
+        internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName)
         {
             helpKeyword = GetHelpKeyword(resourceName);
             return ExtractMessageCode(true, GetResourceString(resourceName), out code);
@@ -192,7 +189,7 @@ namespace Microsoft.Build.Shared
         /// <param name="helpKeyword">[out] The MSBuild F1-help keyword for the host IDE, or null.</param>
         /// <param name="resourceName">Resource string to load.</param>
         /// <param name="arg1">Argument for formatting the resource string.</param>
-        internal static string FormatResourceStringStripCodeAndKeyword(out string code, out string helpKeyword, string resourceName, object arg1)
+        internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName, object? arg1)
         {
             helpKeyword = GetHelpKeyword(resourceName);
             return ExtractMessageCode(true, FormatString(GetResourceString(resourceName), arg1), out code);
@@ -207,7 +204,7 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">Resource string to load.</param>
         /// <param name="arg1">First argument for formatting the resource string.</param>
         /// <param name="arg2">Second argument for formatting the resource string.</param>
-        internal static string FormatResourceStringStripCodeAndKeyword(out string code, out string helpKeyword, string resourceName, object arg1, object arg2)
+        internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName, object? arg1, object? arg2)
         {
             helpKeyword = GetHelpKeyword(resourceName);
             return ExtractMessageCode(true, FormatString(GetResourceString(resourceName), arg1, arg2), out code);
@@ -223,17 +220,10 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1">First argument for formatting the resource string.</param>
         /// <param name="arg2">Second argument for formatting the resource string.</param>
         /// <param name="arg3">Third argument for formatting the resource string.</param>
-        internal static string FormatResourceStringStripCodeAndKeyword(out string code, out string helpKeyword, string resourceName, object arg1, object arg2, object arg3)
+        internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName, object? arg1, object? arg2, object? arg3)
         {
             helpKeyword = GetHelpKeyword(resourceName);
             return ExtractMessageCode(true, FormatString(GetResourceString(resourceName), arg1, arg2, arg3), out code);
-        }
-
-        [Obsolete("Use GetResourceString instead.", true)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        internal static string FormatResourceString(string resourceName)
-        {   // Avoids an accidental dependency on FormatResourceString(string, params object[])
-            return null;
         }
 
         /// <summary>
@@ -247,7 +237,7 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">Resource string to load.</param>
         /// <param name="args">Optional arguments for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, params object[] args)
+        internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, params object?[]? args)
             => FormatResourceStringStripCodeAndKeyword(out _, out _, resourceName, args);
 
         // Overloads with 0-3 arguments to avoid array allocations.
@@ -270,7 +260,7 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">Resource string to load.</param>
         /// <param name="arg1">Argument for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, object arg1)
+        internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, object? arg1)
            => FormatResourceStringStripCodeAndKeyword(out _, out _, resourceName, arg1);
 
         /// <summary>
@@ -282,7 +272,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1">First argument for formatting the resource string.</param>
         /// <param name="arg2">Second argument for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, object arg1, object arg2)
+        internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, object? arg1, object? arg2)
             => FormatResourceStringStripCodeAndKeyword(out _, out _, resourceName, arg1, arg2);
 
         /// <summary>
@@ -295,7 +285,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg2">Second argument for formatting the resource string.</param>
         /// <param name="arg3">Third argument for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, object arg1, object arg2, object arg3)
+        internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, object? arg1, object? arg2, object? arg3)
             => FormatResourceStringStripCodeAndKeyword(out _, out _, resourceName, arg1, arg2, arg3);
 
         /// <summary>
@@ -306,7 +296,7 @@ namespace Microsoft.Build.Shared
         /// <param name="args">Optional arguments for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
         /// <remarks>the AssemblyResources.GetString() method is thread-safe.</remarks>
-        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, params object[] args)
+        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, params object?[]? args)
             => FormatString(GetResourceString(resourceName), args);
 
         // Overloads with 0-3 arguments to avoid array allocations.
@@ -327,7 +317,7 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">Resource string to load.</param>
         /// <param name="arg1">Argument for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, object arg1)
+        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, object? arg1)
             => FormatString(GetResourceString(resourceName), arg1);
 
         /// <summary>
@@ -338,7 +328,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1">First argument for formatting the resource string.</param>
         /// <param name="arg2">Second argument for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, object arg1, object arg2)
+        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, object? arg1, object? arg2)
             => FormatString(GetResourceString(resourceName), arg1, arg2);
 
         /// <summary>
@@ -350,7 +340,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg2">Second argument for formatting the resource string.</param>
         /// <param name="arg3">Third argument for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, object arg1, object arg2, object arg3)
+        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, object? arg1, object? arg2, object? arg3)
             => FormatString(GetResourceString(resourceName), arg1, arg2, arg3);
 
         /// <summary>
@@ -364,7 +354,7 @@ namespace Microsoft.Build.Shared
         /// <param name="unformatted">The string to format.</param>
         /// <param name="args">Optional arguments for formatting the given string.</param>
         /// <returns>The formatted string.</returns>
-        internal static string FormatString(string unformatted, params object[] args)
+        internal static string FormatString(string unformatted, params object?[]? args)
         {
             string formatted = unformatted;
 
@@ -389,7 +379,7 @@ namespace Microsoft.Build.Shared
         /// <param name="unformatted">The string to format.</param>
         /// <param name="arg1">Argument for formatting the given string.</param>
         /// <returns>The formatted string.</returns>
-        internal static string FormatString(string unformatted, object arg1)
+        internal static string FormatString(string unformatted, object? arg1)
         {
             ValidateArgsIfDebug([arg1]);
             return string.Format(CultureInfo.CurrentCulture, unformatted, arg1);
@@ -402,7 +392,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1">First argument for formatting the given string.</param>
         /// <param name="arg2">Second argument for formatting the given string.</param>
         /// <returns>The formatted string.</returns>
-        internal static string FormatString(string unformatted, object arg1, object arg2)
+        internal static string FormatString(string unformatted, object? arg1, object? arg2)
         {
             ValidateArgsIfDebug([arg1, arg2]);
             return string.Format(CultureInfo.CurrentCulture, unformatted, arg1, arg2);
@@ -416,18 +406,18 @@ namespace Microsoft.Build.Shared
         /// <param name="arg2">Second argument for formatting the given string.</param>
         /// <param name="arg3">Third argument for formatting the given string.</param>
         /// <returns>The formatted string.</returns>
-        internal static string FormatString(string unformatted, object arg1, object arg2, object arg3)
+        internal static string FormatString(string unformatted, object? arg1, object? arg2, object? arg3)
         {
             ValidateArgsIfDebug([arg1, arg2, arg3]);
             return string.Format(CultureInfo.CurrentCulture, unformatted, arg1, arg2, arg3);
         }
 
         [Conditional("DEBUG")]
-        private static void ValidateArgsIfDebug(object[] args)
+        private static void ValidateArgsIfDebug(object?[] args)
         {
             // If you accidentally pass some random type in that can't be converted to a string,
             // FormatResourceString calls ToString() which returns the full name of the type!
-            foreach (object param in args)
+            foreach (object? param in args)
             {
                 // Check it has a real implementation of ToString() and the type is not actually System.String
                 if (param != null)

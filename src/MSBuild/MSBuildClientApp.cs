@@ -34,13 +34,7 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// The locations of msbuild exe/dll and dotnet.exe would be automatically detected if called from dotnet or msbuild cli. Calling this function from other executables might not work.
         /// </remarks>
-        public static MSBuildApp.ExitType Execute(
-#if FEATURE_GET_COMMANDLINE
-            string commandLine,
-#else
-            string[] commandLine,
-#endif
-            CancellationToken cancellationToken)
+        public static MSBuildApp.ExitType Execute(string commandLine, CancellationToken cancellationToken)
         {
             string msbuildLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 
@@ -62,11 +56,7 @@ namespace Microsoft.Build.CommandLine
         /// <returns>A value of type <see cref="MSBuildApp.ExitType"/> that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
         public static MSBuildApp.ExitType Execute(
-#if FEATURE_GET_COMMANDLINE
             string commandLine,
-#else
-            string[] commandLine,
-#endif
             string msbuildLocation,
             CancellationToken cancellationToken)
         {
@@ -97,28 +87,5 @@ namespace Microsoft.Build.CommandLine
 
             return MSBuildApp.ExitType.MSBuildClientFailure;
         }
-
-        // Copied from NodeProviderOutOfProcBase.cs
-#if RUNTIME_TYPE_NETCORE
-        private static string? CurrentHost;
-        private static string GetCurrentHost()
-        {
-            if (CurrentHost == null)
-            {
-                string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, 2),
-                    NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet");
-                if (File.Exists(dotnetExe))
-                {
-                    CurrentHost = dotnetExe;
-                }
-                else
-                {
-                    CurrentHost = EnvironmentUtilities.ProcessPath ?? throw new InvalidOperationException("Failed to retrieve process executable.");
-                }
-            }
-
-            return CurrentHost;
-        }
-#endif
     }
 }

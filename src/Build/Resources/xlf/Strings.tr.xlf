@@ -221,14 +221,14 @@
         <target state="translated">'TargetFramework' ve 'TargetFrameworks' özellikleri dikkate alınmaz ve .NET SDK kullanmayan projelerde belirtilmeli.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
-      <trans-unit id="BuildCheck_BC0109_MessageFmt">
+      <trans-unit id="BuildCheck_BC0302_MessageFmt">
         <source>Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</source>
-        <target state="new">Task {0} from project {1} builds a project using the {2} CLI. The MSBuild task should be used instead.</target>
+        <target state="translated">{1} projesindeki {0} görevi {2} CLI kullanılan bir proje oluşturur. Bunun yerine MSBuild görevi kullanılmalıdır.</target>
         <note />
       </trans-unit>
-      <trans-unit id="BuildCheck_BC0109_Title">
+      <trans-unit id="BuildCheck_BC0302_Title">
         <source>The 'Exec' task should not be used to build a project.</source>
-        <target state="new">The 'Exec' task should not be used to build a project.</target>
+        <target state="translated">'Exec' görevi, bir projeyi oluşturmak için kullanılmamalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
@@ -446,6 +446,11 @@
         <target state="translated">‘{0}’ özel denetim kuralı başarıyla kaydedildi.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
+        <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
+        <target state="translated">‘{1}’ Görevi için Özel ‘{0}’ TaskFactory, işlem dışı TaskHost yürütmeyi desteklemiyor. Çok iş parçacıklı derleme modunu kapatın veya özel TaskFactory’yi proje dosyalarındaki &lt;UsingTask&gt; tanımlarınızdan kaldırın.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: "{1}" dizini olmadığından, varsayılan SDK çözümleyicisi "{0}" SDK’sını çözümleyemedi.</target>
@@ -510,11 +515,6 @@
         <target state="translated">MSB3094: "{2}", {0} öğeye; "{3}", {1} öğeye başvuruyor. Aynı sayıda öğeye sahip olmaları gerekir.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
-      <trans-unit id="GlobExpansionFailed">
-        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">bir fileSpec globs ile genişletilirken özel durum oluştu: fileSpec: "{0}", dosya adı olduğu varsayılıyor. Özel durum: {1}</target>
-        <note />
-      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: "{0}" koşulunun "{1}" konumunda beklenmeyen boşluk var. Boşluğu kaldırmayı unutmuş olabilirsiniz.</target>
@@ -577,6 +577,18 @@
         <target state="translated">"{0}" meta projesi oluşturuldu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="NETHostTaskLoad_Failed">
+        <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
+    See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
+        <target state="translated">MSBuild .NET Çalışma Zamanı Görev Ana Bilgisayarı gerektirdiği ancak .NET Çalışma Zamanı Görev Ana Bilgisayarı belirtilen sürüm için bulunamadığından görev yüklenemedi.
+    Bu hatayı çözmeyle ilgili ayrıntılar için https://aka.ms/nettaskhost adresini inceleyin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="NETHostVersion_Failed">
+        <source>SDK version {0} is below the minimum required version of {1}. The .NET Runtime Task Host is supported only when using .NET SDK 10.0.100-rc1 or later.</source>
+        <target state="translated">SDK sürümü {0}, gerekli minimum sürüm olan {1} sürümünün altında. .NET Çalışma Zamanı Görev Ana Bilgisayarı yalnızca .NET SDK 10.0.100-rc1 veya üzeri kullanılırken desteklenir.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="NoBuildInProgress">
         <source>The operation cannot be completed because BeginBuild has not yet been called.</source>
         <target state="translated">BeginBuild henüz çağrılmadığı için işlem tamamlanamıyor.</target>
@@ -628,6 +640,11 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">{0} metosu null veya boş hedef adları içeren bir koleksiyonla çağrılamaz.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="OpenTelemetryLoadFailed">
+        <source>Loading telemetry libraries failed with exception: {0}.</source>
+        <target state="translated">Telemetri kitaplıklarının yüklenmesi şu hayatla başarısız oldu: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
@@ -766,6 +783,20 @@
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
+      <trans-unit id="ProjectFinished_WithTFAndRID">
+        <source>{0}{1} {2} {3} {4} ({5}s)</source>
+        <target state="translated">{0}{1} {2} {3} {4} ({5} sn)</target>
+        <note>
+      Project finished summary including target framework and runtime identifier information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: runtime identifier (RID)
+      {4}: BuildResult_{X}
+      {5}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: ProjectGraph, ToolsVersion meta veri kümesine sahip ProjectReference öğelerini desteklemez. "{1}" dosyasında ToolsVersion içeren ProjectReference "{0}" bulundu</target>
@@ -822,6 +853,16 @@
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
+      <trans-unit id="SDKPathCheck_Failed">
+        <source>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
+        <target state="translated">Dizin mevcut değil: {0}. .NET Çalışma Zamanı Görev Ana Bilgisayarı başlatılamadı. Bu hatayı çözmeyle ilgili ayrıntılar için https://aka.ms/nettaskhost adresini inceleyin.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKPathResolution_Failed">
+        <source>UsingTask with Runtime="NET" was specified in a non-SDK project.</source>
+        <target state="translated">Runtime="NET" barındıran UsingTask, SDK olmayan bir projede belirtildi.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SDKResolverAttempt">
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
@@ -855,6 +896,26 @@ Hatalar: {3}</target>
         <target state="translated">SDK çözümleyici "{0}" null döndürdü.</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySet">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
+        <target state="translated">Bir SDK "{0}" ortam değişkenini "{1}" olarak ayarlamaya çalıştı ancak bu değişken zaten bir ortam değişkeni olarak ayarlanmıştı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
+        <target state="translated">Bir SDK "{0}" ortam değişkenini "{1}" olarak ayarlamaya çalıştı ancak bu değişken zaten başka bir SDK tarafından ayarlanmıştı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableSet">
+        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
+        <target state="translated">Bir SDK, "{0}" ortam değişkenini "{1}" olarak ayarlamaya çalıştı.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SingleResolverFailedToResolveSDK">
+        <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
+        <target state="translated">SDK '{0}', SDK çözümleyici '{1}' tarafından çözümlenemedi. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
         <source>MSB4260: Project "{0}" skipped graph isolation constraints on referenced project "{1}"</source>
         <target state="translated">MSB4260: "{0}" projesi, başvurulan "{1}" projesindeki graf yalıtımı kısıtlamalarını atladı</target>
@@ -877,6 +938,11 @@ Hatalar: {3}</target>
       <trans-unit id="StaticGraphConstructionMetrics">
         <source>Static graph loaded in {0} seconds: {1} nodes, {2} edges</source>
         <target state="translated">Statik graf {0} saniye içinde yüklendi: {1} düğüm, {2} uç</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="StaticGraphConstructionStarted">
+        <source>Static graph construction started.</source>
+        <target state="translated">Statik grafik oluşturma işlemi başlatıldı.</target>
         <note />
       </trans-unit>
       <trans-unit id="StaticGraphDoesNotSupportSlnReferences">
@@ -963,6 +1029,20 @@ Hatalar: {3}</target>
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestProjectFinished_WithTFAndRID">
+        <source>{0}{1} test {2} {3} {4} ({5}s)</source>
+        <target state="translated">{0}{1} testi {2} {3} {4} ({5} sn)</target>
+        <note>
+      Project finished summary including target framework and runtime identifier information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: runtime identifier (RID)
+      {4}: BuildResult_{X}
+      {5}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>

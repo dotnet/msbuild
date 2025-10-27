@@ -19,9 +19,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-#if FEATURE_WIN32_REGISTRY
-using Microsoft.Win32;
-#endif
 using ObjectModel = System.Collections.ObjectModel;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 
@@ -54,67 +51,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private const string OverrideTasksFilePattern = "*.overridetasks";
 
-#if FEATURE_WIN32_REGISTRY
-        /// <summary>
-        /// Regkey that we check to see whether Dev10 is installed.  This should exist if any SKU of Dev10 is installed,
-        /// but is not removed even when the last version of Dev10 is uninstalled, due to 10.0\bsln sticking around.
-        /// </summary>
-        private const string Dev10OverallInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0";
 
-        /// <summary>
-        /// Regkey that we check to see whether Dev10 Ultimate is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10UltimateInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\vstscore";
-
-        /// <summary>
-        /// Regkey that we check to see whether Dev10 Premium is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10PremiumInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\vstdcore";
-
-        /// <summary>
-        /// Regkey that we check to see whether Dev10 Professional is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10ProfessionalInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\procore";
-
-        /// <summary>
-        /// Regkey that we check to see whether C# Express 2010 is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10VCSExpressInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vcs\Servicing\10.0\xcor";
-
-        /// <summary>
-        /// Regkey that we check to see whether VB Express 2010 is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10VBExpressInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vb\Servicing\10.0\xcor";
-
-        /// <summary>
-        /// Regkey that we check to see whether VC Express 2010 is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10VCExpressInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vc\Servicing\10.0\xcor";
-
-        /// <summary>
-        /// Regkey that we check to see whether VWD Express 2010 is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10VWDExpressInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vns\Servicing\10.0\xcor";
-
-        /// <summary>
-        /// Regkey that we check to see whether LightSwitch 2010 is installed.  This will exist if it is installed, and be
-        /// properly removed after it has been uninstalled.
-        /// </summary>
-        private const string Dev10LightSwitchInstallKeyRegistryPath = @"Software\Microsoft\DevDiv\vs\Servicing\10.0\vslscore";
-
-        /// <summary>
-        /// Null if it hasn't been figured out yet; true if (some variation of) Visual Studio 2010 is installed on
-        /// the current machine, false otherwise.
-        /// </summary>
-        private static bool? s_dev10IsInstalled = null;
-#endif // FEATURE_WIN32_REGISTRY
 
         /// <summary>
         /// Name of the tools version
@@ -152,14 +89,19 @@ namespace Microsoft.Build.Evaluation
         private PropertyDictionary<ProjectPropertyInstance> _globalProperties;
 
         /// <summary>
+        /// Lock for task registry initialization
+        /// </summary>
+        private readonly LockType _taskRegistryLock = new LockType();
+
+        /// <summary>
         /// indicates if the default tasks file has already been scanned
         /// </summary>
-        private bool _defaultTasksRegistrationAttempted;
+        private volatile bool _defaultTasksRegistrationAttempted;
 
         /// <summary>
         /// indicates if the override tasks file has already been scanned
         /// </summary>
-        private bool _overrideTasksRegistrationAttempted;
+        private volatile bool _overrideTasksRegistrationAttempted;
 
         /// <summary>
         /// holds all the default tasks we know about and the assemblies they exist in
@@ -174,17 +116,17 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Delegate to retrieving files.  For unit testing only.
         /// </summary>
-        private DirectoryGetFiles _getFiles;
+        private readonly DirectoryGetFiles _getFiles;
 
         /// <summary>
         /// Delegate to check to see if a directory exists
         /// </summary>
-        private DirectoryExists _directoryExists = null;
+        private readonly DirectoryExists _directoryExists;
 
         /// <summary>
         /// Delegate for loading Xml.  For unit testing only.
         /// </summary>
-        private LoadXmlFromPath _loadXmlFromPath;
+        private readonly LoadXmlFromPath _loadXmlFromPath;
 
         /// <summary>
         /// Expander to expand the properties and items in the using tasks files
@@ -197,10 +139,11 @@ namespace Microsoft.Build.Evaluation
         private Dictionary<string, SubToolset> _subToolsets;
 
         /// <summary>
-        /// If no sub-toolset is specified, this is the default sub-toolset version.  Null == no default
-        /// sub-toolset, just use the base toolset.
+        /// If no sub-toolset is specified, this is the default sub-toolset version. Null == no default
+        /// sub-toolset, just use the base toolset. Uses lazy initialization for thread safety as this
+        /// is accessed from TaskRegistry initialization which can occur from multiple threads.
         /// </summary>
-        private string _defaultSubToolsetVersion;
+        private readonly Lazy<string> _defaultSubToolsetVersionLazy;
 
         /// <summary>
         /// Map of project import properties to their list of fall-back search paths
@@ -282,6 +225,7 @@ namespace Microsoft.Build.Evaluation
             _environmentProperties = environmentProperties;
             _overrideTasksPath = msbuildOverrideTasksPath;
             _defaultOverrideToolsVersion = defaultOverrideToolsVersion;
+            _defaultSubToolsetVersionLazy = new Lazy<string>(ComputeDefaultSubToolsetVersion);
         }
 
         /// <summary>
@@ -364,6 +308,7 @@ namespace Microsoft.Build.Evaluation
         private Toolset(ITranslator translator)
         {
             ((ITranslatable)this).Translate(translator);
+            _defaultSubToolsetVersionLazy = new Lazy<string>(ComputeDefaultSubToolsetVersion);
         }
 
         /// <summary>
@@ -480,116 +425,52 @@ namespace Microsoft.Build.Evaluation
         ///    the order found. We use the highest-versioned sub-toolset because, in the absence of any other information,
         ///    we assume that higher-versioned tools will be more likely to be able to generate something more correct.
         ///
-        /// Will return null if there is no sub-toolset available (and Dev10 is not installed).
+        /// Will return null if there is no sub-toolset available.
         /// </summary>
         public string DefaultSubToolsetVersion
         {
             get
             {
-                if (_defaultSubToolsetVersion == null)
-                {
-                    // 1) Workaround for ToolsVersion 4.0 + VS 2010
-                    if (String.Equals(ToolsVersion, "4.0", StringComparison.OrdinalIgnoreCase) && Dev10IsInstalled)
-                    {
-                        return Constants.Dev10SubToolsetValue;
-                    }
-
-                    // 2) Otherwise, just pick the highest available.
-                    SortedDictionary<Version, string> subToolsetsWithVersion = new SortedDictionary<Version, string>();
-                    List<string> additionalSubToolsetNames = new List<string>();
-
-                    foreach (string subToolsetName in SubToolsets.Keys)
-                    {
-                        Version subToolsetVersion = VersionUtilities.ConvertToVersion(subToolsetName);
-
-                        if (subToolsetVersion != null)
-                        {
-                            subToolsetsWithVersion.Add(subToolsetVersion, subToolsetName);
-                        }
-                        else
-                        {
-                            // if it doesn't parse to an actual version number, shrug and just add it to the end.
-                            additionalSubToolsetNames.Add(subToolsetName);
-                        }
-                    }
-
-                    List<string> orderedSubToolsetList = new List<string>(additionalSubToolsetNames);
-                    orderedSubToolsetList.AddRange(subToolsetsWithVersion.Values);
-
-                    if (orderedSubToolsetList.Count > 0)
-                    {
-                        _defaultSubToolsetVersion = orderedSubToolsetList[orderedSubToolsetList.Count - 1];
-                    }
-                }
-
-                return _defaultSubToolsetVersion;
+                return _defaultSubToolsetVersionLazy.Value;
             }
         }
 
         /// <summary>
-        /// Null if it hasn't been figured out yet; true if (some variation of) Visual Studio 2010 is installed on
-        /// the current machine, false otherwise.
+        /// Computes the default sub-toolset version for this sub-toolset.
         /// </summary>
-        /// <comments>
-        /// Internal so that unit tests can use it too.
-        /// </comments>
-        internal static bool Dev10IsInstalled
+        private string ComputeDefaultSubToolsetVersion()
         {
-            get
+            // Pick the highest available.
+            SortedDictionary<Version, string> subToolsetsWithVersion = new SortedDictionary<Version, string>();
+            List<string> additionalSubToolsetNames = new List<string>();
+
+            foreach (string subToolsetName in SubToolsets.Keys)
             {
-#if FEATURE_WIN32_REGISTRY
-                if (!NativeMethodsShared.IsWindows)
-                {
-                    return false;
-                }
+                Version subToolsetVersion = VersionUtilities.ConvertToVersion(subToolsetName);
 
-                if (s_dev10IsInstalled == null)
+                if (subToolsetVersion != null)
                 {
-                    try
-                    {
-                        // Figure out whether Dev10 is currently installed using the following heuristic:
-                        // - Check whether the overall key (installed if any version of Dev10 is installed) is there.
-                        //   - If it's not, no version of Dev10 exists or has ever existed on this machine, so return 'false'.
-                        //   - If it is, we know that some version of Dev10 has been installed at some point, but we don't know
-                        //     for sure whether it's still there or not.  Check the inndividual keys for {Pro, Premium, Ultimate,
-                        //     C# Express, VB Express, C++ Express, VWD Express, LightSwitch} 2010
-                        //     - If even one of them exists, return 'true'.
-                        //     - Otherwise, return 'false.
-                        if (!RegistryKeyWrapper.KeyExists(Dev10OverallInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32))
-                        {
-                            s_dev10IsInstalled = false;
-                        }
-                        else if (
-                                    RegistryKeyWrapper.KeyExists(Dev10UltimateInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10PremiumInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10ProfessionalInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10VCSExpressInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10VBExpressInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10VCExpressInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10VWDExpressInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32) ||
-                                    RegistryKeyWrapper.KeyExists(Dev10LightSwitchInstallKeyRegistryPath, RegistryHive.LocalMachine, RegistryView.Registry32))
-                        {
-                            s_dev10IsInstalled = true;
-                        }
-                        else
-                        {
-                            s_dev10IsInstalled = false;
-                        }
-                    }
-                    catch (Exception e) when (!ExceptionHandling.NotExpectedRegistryException(e))
-                    {
-                        // if it's a registry exception, just shrug, eat it, and move on with life on the assumption that whatever
-                        // went wrong, it's pretty clear that Dev10 probably isn't installed.
-                        s_dev10IsInstalled = false;
-                    }
+                    subToolsetsWithVersion.Add(subToolsetVersion, subToolsetName);
                 }
-
-                return s_dev10IsInstalled.Value;
-#else
-                return false;
-#endif
+                else
+                {
+                    // if it doesn't parse to an actual version number, shrug and just add it to the end.
+                    additionalSubToolsetNames.Add(subToolsetName);
+                }
             }
+
+            List<string> orderedSubToolsetList = new List<string>(additionalSubToolsetNames);
+            orderedSubToolsetList.AddRange(subToolsetsWithVersion.Values);
+
+            if (orderedSubToolsetList.Count > 0)
+            {
+                return orderedSubToolsetList[orderedSubToolsetList.Count - 1];
+            }
+
+            return null;
         }
+
+
 
         /// <summary>
         /// Path to look for msbuild override task files.
@@ -878,20 +759,27 @@ namespace Microsoft.Build.Evaluation
         /// <param name="projectRootElementCache">The <see cref="ProjectRootElementCache"/> to use.</param>
         private void RegisterDefaultTasks(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
+            // Synchronization needed because TaskRegistry can be accessed from multiple threads
             if (!_defaultTasksRegistrationAttempted)
             {
-                try
+                lock (_taskRegistryLock)
                 {
-                    _defaultTaskRegistry = new TaskRegistry(projectRootElementCache);
+                    if (!_defaultTasksRegistrationAttempted)
+                    {
+                        try
+                        {
+                            _defaultTaskRegistry = new TaskRegistry(projectRootElementCache);
 
-                    InitializeProperties(loggingContext);
+                            InitializeProperties(loggingContext);
 
-                    string[] defaultTasksFiles = GetTaskFiles(_getFiles, loggingContext, DefaultTasksFilePattern, ToolsPath, "DefaultTasksFileLoadFailureWarning");
-                    LoadAndRegisterFromTasksFile(defaultTasksFiles, loggingContext, "DefaultTasksFileFailure", projectRootElementCache, _defaultTaskRegistry);
-                }
-                finally
-                {
-                    _defaultTasksRegistrationAttempted = true;
+                            string[] defaultTasksFiles = GetTaskFiles(_getFiles, loggingContext, DefaultTasksFilePattern, ToolsPath, "DefaultTasksFileLoadFailureWarning");
+                            LoadAndRegisterFromTasksFile(defaultTasksFiles, loggingContext, "DefaultTasksFileFailure", projectRootElementCache, _defaultTaskRegistry);
+                        }
+                        finally
+                        {
+                            _defaultTasksRegistrationAttempted = true;
+                        }
+                    }
                 }
             }
         }
@@ -984,55 +872,62 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private void RegisterOverrideTasks(LoggingContext loggingContext, ProjectRootElementCacheBase projectRootElementCache)
         {
+            // Synchronization needed because TaskRegistry can be accessed from multiple threads
             if (!_overrideTasksRegistrationAttempted)
             {
-                try
+                lock (_taskRegistryLock)
                 {
-                    _overrideTaskRegistry = new TaskRegistry(projectRootElementCache);
-                    bool overrideDirectoryExists = false;
-
-                    try
+                    if (!_overrideTasksRegistrationAttempted)
                     {
-                        // Make sure the override directory exists and is not empty before trying to find the files
-                        if (!String.IsNullOrEmpty(_overrideTasksPath))
+                        try
                         {
-                            if (Path.IsPathRooted(_overrideTasksPath))
+                            _overrideTaskRegistry = new TaskRegistry(projectRootElementCache);
+                            bool overrideDirectoryExists = false;
+
+                            try
                             {
-                                if (_directoryExists != null)
+                                // Make sure the override directory exists and is not empty before trying to find the files
+                                if (!String.IsNullOrEmpty(_overrideTasksPath))
                                 {
-                                    overrideDirectoryExists = _directoryExists(_overrideTasksPath);
-                                }
-                                else
-                                {
-                                    overrideDirectoryExists = FileSystems.Default.DirectoryExists(_overrideTasksPath);
+                                    if (Path.IsPathRooted(_overrideTasksPath))
+                                    {
+                                        if (_directoryExists != null)
+                                        {
+                                            overrideDirectoryExists = _directoryExists(_overrideTasksPath);
+                                        }
+                                        else
+                                        {
+                                            overrideDirectoryExists = FileSystems.Default.DirectoryExists(_overrideTasksPath);
+                                        }
+                                    }
+
+                                    if (!overrideDirectoryExists)
+                                    {
+                                        string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", _overrideTasksPath);
+                                        loggingContext.LogWarning(null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
+                                    }
                                 }
                             }
-
-                            if (!overrideDirectoryExists)
+                            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                             {
-                                string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", _overrideTasksPath);
+                                string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskProblemWithPath", _overrideTasksPath, e.Message);
                                 loggingContext.LogWarning(null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
                             }
+
+                            if (overrideDirectoryExists)
+                            {
+                                InitializeProperties(loggingContext);
+                                string[] overrideTasksFiles = GetTaskFiles(_getFiles, loggingContext, OverrideTasksFilePattern, _overrideTasksPath, "OverrideTasksFileLoadFailureWarning");
+
+                                // Load and register any override tasks
+                                LoadAndRegisterFromTasksFile(overrideTasksFiles, loggingContext, "OverrideTasksFileFailure", projectRootElementCache, _overrideTaskRegistry);
+                            }
+                        }
+                        finally
+                        {
+                            _overrideTasksRegistrationAttempted = true;
                         }
                     }
-                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-                    {
-                        string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskProblemWithPath", _overrideTasksPath, e.Message);
-                        loggingContext.LogWarning(null, new BuildEventFileInfo(String.Empty /* this warning truly does not involve any file*/), "OverrideTasksFileFailure", rootedPathMessage);
-                    }
-
-                    if (overrideDirectoryExists)
-                    {
-                        InitializeProperties(loggingContext);
-                        string[] overrideTasksFiles = GetTaskFiles(_getFiles, loggingContext, OverrideTasksFilePattern, _overrideTasksPath, "OverrideTasksFileLoadFailureWarning");
-
-                        // Load and register any override tasks
-                        LoadAndRegisterFromTasksFile(overrideTasksFiles, loggingContext, "OverrideTasksFileFailure", projectRootElementCache, _overrideTaskRegistry);
-                    }
-                }
-                finally
-                {
-                    _overrideTasksRegistrationAttempted = true;
                 }
             }
         }

@@ -256,6 +256,16 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Takes a serializer and deserializes the packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
+        }
+
+        /// <summary>
         /// Routes the specified packet. This is called by the Inproc node directly since it does not have to do any deserialization
         /// </summary>
         /// <param name="nodeId">The node from which the packet was received.</param>
@@ -318,7 +328,8 @@ namespace Microsoft.Build.BackEnd
 
             // Assign a global ID to the node we are about to create.
             int fromNodeId;
-            if (nodeProvider is NodeProviderInProc)
+            bool isMultiThreadedModeOn = _componentHost?.BuildParameters.MultiThreaded ?? false;
+            if (nodeProvider is NodeProviderInProc && !isMultiThreadedModeOn)
             {
                 fromNodeId = _inprocNodeId;
             }
@@ -327,7 +338,6 @@ namespace Microsoft.Build.BackEnd
                 // Reserve node numbers for all needed nodes.
                 fromNodeId = Interlocked.Add(ref _nextNodeId, numberOfNodesToCreate) - numberOfNodesToCreate;
             }
-
 
             // Create the node and add it to our mapping.
             IList<NodeInfo> nodes = nodeProvider.CreateNodes(fromNodeId, this, AcquiredNodeConfigurationFactory, numberOfNodesToCreate);

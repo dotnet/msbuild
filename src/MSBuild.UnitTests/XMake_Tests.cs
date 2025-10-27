@@ -10,6 +10,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
 using Microsoft.Build.CommandLine;
@@ -19,6 +20,7 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -29,6 +31,48 @@ namespace Microsoft.Build.UnitTests
 {
     public class XMakeAppTests : IDisposable
     {
+        public static TheoryData<string, MessageImportance> MinimumMessageImportanceTestData
+        {
+            get
+            {
+                var data = new TheoryData<string, MessageImportance>
+                {
+                    { "/v:diagnostic /tl:off", MessageImportance.Low },
+                    { "/v:detailed /tl:off", MessageImportance.Low },
+                    { "/v:normal /tl:off", MessageImportance.Normal },
+                    { "/v:minimal /tl:off", MessageImportance.High },
+                    { "/v:quiet /tl:off", MessageImportance.High - 1 },
+                    { "/v:diagnostic /bl", MessageImportance.Low },
+                    { "/v:detailed /bl", MessageImportance.Low },
+                    { "/v:normal /bl", MessageImportance.Low }, // v:normal but with binary logger so everything must be logged
+                    { "/v:minimal /bl", MessageImportance.Low }, // v:minimal but with binary logger so everything must be logged
+                    { "/v:quiet /bl", MessageImportance.Low }, // v:quiet but with binary logger so everything must be logged
+                    { "/v:diagnostic /check", MessageImportance.Low },
+                    { "/v:detailed /check", MessageImportance.Low },
+                    { "/v:normal /check", MessageImportance.Normal },
+                    { "/v:minimal /check", MessageImportance.High },
+                    { "/v:quiet /check", MessageImportance.High },
+                    { "/v:diagnostic /tl:on", MessageImportance.High },
+                    { "/v:detailed /tl:on", MessageImportance.High },
+                    { "/v:normal /tl:on", MessageImportance.High },
+                    { "/v:minimal /tl:on", MessageImportance.High },
+                    { "/v:quiet /tl:on", MessageImportance.High - 1 }
+                };
+
+                return data;
+            }
+        }
+
+        private static string GenerateMessageImportanceProjectFile(MessageImportance expectedMinimumMessageImportance)
+        {
+            return ObjectModelHelpers.CleanupFileContents($"<Project>\n"
+                + $"  <UsingTask TaskName=\"{typeof(MessageImportanceCheckingTask).FullName}\" AssemblyFile=\"{Assembly.GetExecutingAssembly().Location}\"/>\n"
+                + $"  <Target Name=\"CheckMessageImportance\">\n"
+                + $"    <MessageImportanceCheckingTask ExpectedMinimumMessageImportance=\"{(int)expectedMinimumMessageImportance}\" />\n"
+                + $"  </Target>\n"
+                + "</Project>");
+        }
+
 #if USE_MSBUILD_DLL_EXTN
         private const string MSBuildExeName = "MSBuild.dll";
 #else
@@ -41,8 +85,10 @@ namespace Microsoft.Build.UnitTests
         public XMakeAppTests(ITestOutputHelper output)
         {
             _output = output;
-            _env = UnitTests.TestEnvironment.Create(_output);
+            _env = TestEnvironment.Create(_output);
         }
+
+        private static string TestAssetsRootPath { get; } = Path.Combine(Path.Combine(Path.GetDirectoryName(typeof(XMakeAppTests).Assembly.Location) ?? AppContext.BaseDirectory), "TestAssets");
 
         private const string AutoResponseFileName = "MSBuild.rsp";
 
@@ -516,12 +562,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(@"/h")]
         public void Help(string indicator)
         {
-            MSBuildApp.Execute(
-#if FEATURE_GET_COMMANDLINE
-                @$"c:\bin\msbuild.exe {indicator} ")
-#else
-                new[] { @"c:\bin\msbuild.exe", indicator })
-#endif
+            MSBuildApp.Execute(@$"c:\bin\msbuild.exe {indicator} ")
             .ShouldBe(MSBuildApp.ExitType.Success);
         }
 
@@ -614,19 +655,13 @@ namespace Microsoft.Build.UnitTests
         public void ErrorCommandLine()
         {
             string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
-#if FEATURE_GET_COMMANDLINE
+
             MSBuildApp.Execute(@"c:\bin\msbuild.exe -junk").ShouldBe(MSBuildApp.ExitType.SwitchError);
 
             MSBuildApp.Execute(@"msbuild.exe -t").ShouldBe(MSBuildApp.ExitType.SwitchError);
 
             MSBuildApp.Execute(@"msbuild.exe @bogus.rsp").ShouldBe(MSBuildApp.ExitType.InitializationError);
-#else
-            MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", "-junk" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
 
-            MSBuildApp.Execute(new[] { @"msbuild.exe", "-t" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
-
-            MSBuildApp.Execute(new[] { @"msbuild.exe", "@bogus.rsp" }).ShouldBe(MSBuildApp.ExitType.InitializationError);
-#endif
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
         }
 
@@ -1107,11 +1142,7 @@ namespace Microsoft.Build.UnitTests
                     sw.WriteLine(projectString);
                 }
                 // Should pass
-#if FEATURE_GET_COMMANDLINE
                 MSBuildApp.Execute(@"c:\bin\msbuild.exe " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
-#else
-                MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", quotedProjectFileName }).ShouldBe(MSBuildApp.ExitType.Success);
-#endif
             }
             finally
             {
@@ -1144,21 +1175,9 @@ namespace Microsoft.Build.UnitTests
                 {
                     sw.WriteLine(projectString);
                 }
-#if FEATURE_GET_COMMANDLINE
                 // Should pass
                 MSBuildApp.Execute(@$"c:\bin\msbuild.exe /logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"";""LogFile={logFile}"" /verbosity:detailed " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
 
-#else
-                // Should pass
-                MSBuildApp.Execute(
-                    new[]
-                        {
-                            NativeMethodsShared.IsWindows ? @"c:\bin\msbuild.exe" : "/msbuild.exe",
-                            @$"/logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"";""LogFile={logFile}""",
-                            "/verbosity:detailed",
-                            quotedProjectFileName
-                        }).ShouldBe(MSBuildApp.ExitType.Success);
-#endif
                 File.Exists(logFile).ShouldBeTrue();
 
                 var logFileContents = File.ReadAllText(logFile);
@@ -2490,6 +2509,99 @@ $@"<Project>
         }
 
         [Theory]
+        [InlineData("-logger:,CustomLogger.dll", "CustomLogger.dll")]
+        [InlineData("-logger:,Logger.dll", "Logger.dll")]
+        public void LoggerThrowsIOExceptionWhenDllNotFound(string logger, string expectedLoggerName)
+        {
+            string projectString = "<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
+            var tempDir = _env.CreateFolder();
+            var projectFile = tempDir.CreateFile("iologgertest.proj", projectString);
+
+            var parametersLogger = $"{logger} -verbosity:diagnostic \"{projectFile.Path}\"";
+
+            var output = RunnerUtilities.ExecMSBuild(parametersLogger, out bool successfulExit, _output);
+            successfulExit.ShouldBe(false);
+
+            output.ShouldContain($"Cannot create an instance of the logger {expectedLoggerName}.", customMessage: output);
+        }
+
+        [Theory]
+        [InlineData("-logger:,BadFile.dll", "BadFile.dll")]
+        [InlineData("-distributedlogger:,BadFile.dll", "BadFile.dll")]
+        public void LoggerThrowsBadImageFormatExceptionWhenFileIsInvalid(string logger, string expectedLoggerName)
+        {
+            string projectString = "<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
+            var tempDir = _env.CreateFolder();
+            var projectFile = tempDir.CreateFile("badimagetest.proj", projectString);
+
+            var dllFilePath = Path.Combine(tempDir.Path, expectedLoggerName);
+            File.WriteAllText(dllFilePath, "Invalid content, not a valid .NET assembly.");
+
+            var loggerParam = $"\"{logger}\"";
+            var parametersLogger = $"{loggerParam} -verbosity:diagnostic \"{projectFile.Path}\"";
+
+            var output = RunnerUtilities.ExecMSBuild(parametersLogger, out bool successfulExit, _output);
+            successfulExit.ShouldBe(false);
+
+            output.ShouldContain($"Cannot create an instance of the logger {expectedLoggerName}.", customMessage: output);
+        }
+
+        [Theory]
+        [InlineData("MemberAccessException", "-logger:,", "CustomLogger.dll")]
+        [InlineData("MemberAccessException", "-distributedlogger:,", "CustomLogger.dll")]
+        public void LoggerThrowsMemberAccessExceptionWhenClassIsInvalid(string memberAccess, string loggerTemplate, string expectedLoggerName)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                string projectContent = "<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
+                var tempDir = _env.CreateFolder();
+
+                (string projectFilePath, string tempLoggerProjDir) = CopyTestAssetsToTestEnv(tempDir, projectContent, memberAccess);
+
+                string loggerBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                    $"\"{Path.Combine(tempLoggerProjDir, "CustomLogger.csproj")}\" -restore -verbosity:n", out bool success);
+
+                var loggerDllPath = Path.Combine(tempLoggerProjDir, "artifacts", "bin", "netstandard2.0", expectedLoggerName);
+                var loggerSwitch = $"{loggerTemplate}\"{loggerDllPath}\"";
+                var mainBuildParameters = $"\"{projectFilePath}\" -restore {loggerSwitch} -verbosity:diagnostic";
+
+                string mainBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                    mainBuildParameters,
+                    out bool successfulExit);
+
+                mainBuildLog.ShouldContain($"Cannot create an instance of the logger {loggerDllPath}.", customMessage: mainBuildLog);
+            }
+        }
+
+        [Theory]
+        [InlineData("TargetInvocationException", "-logger:,", "FaultyLogger.dll")]
+        [InlineData("TargetInvocationException", "-distributedlogger:,", "FaultyLogger.dll")]
+        public void LoggerThrowsTargetInvocationException(string targetInvocation, string loggerTemplate, string expectedLoggerName)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                string projectContent = "<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
+                var tempDir = _env.CreateFolder();
+
+                (string projectFilePath, string tempLoggerProjDir) = CopyTestAssetsToTestEnv(tempDir, projectContent, targetInvocation);
+
+                string loggerBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{Path.Combine(tempLoggerProjDir, $"FaultyLogger.csproj")} -restore -verbosity:n", out bool success);
+
+                var loggerDllPath = Path.Combine(tempLoggerProjDir, "artifacts", "bin", "netstandard2.0", expectedLoggerName);
+                var loggerSwitch = $"{loggerTemplate}{loggerDllPath}";
+                var mainBuildParameters = $"{projectFilePath} -restore {loggerSwitch} -verbosity:diagnostic";
+
+                string mainBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                    mainBuildParameters,
+                    out bool successfulExit);
+
+                successfulExit.ShouldBeFalse(mainBuildLog);
+                mainBuildLog.ShouldContain("The logger failed unexpectedly.");
+            }
+        }
+
+        [Theory]
         [InlineData("/interactive")]
         [InlineData("/p:NuGetInteractive=true")]
         [InlineData("/interactive /p:NuGetInteractive=true")]
@@ -2625,7 +2737,8 @@ EndGlobal
                 bool shouldLogHigh = Log.LogsMessagesOfImportance(MessageImportance.High);
                 bool shouldLogNormal = Log.LogsMessagesOfImportance(MessageImportance.Normal);
                 bool shouldLogLow = Log.LogsMessagesOfImportance(MessageImportance.Low);
-                return (MessageImportance)ExpectedMinimumMessageImportance switch
+                var value = (MessageImportance)ExpectedMinimumMessageImportance;
+                var result = value switch
                 {
                     MessageImportance.High - 1 => !shouldLogHigh && !shouldLogNormal && !shouldLogLow,
                     MessageImportance.High => shouldLogHigh && !shouldLogNormal && !shouldLogLow,
@@ -2633,6 +2746,21 @@ EndGlobal
                     MessageImportance.Low => shouldLogHigh && shouldLogNormal && shouldLogLow,
                     _ => false
                 };
+                if (!result)
+                {
+                    var enumName =
+                        value == MessageImportance.High - 1
+                        ? "Nothing"
+#if NET
+                        : Enum.GetName(value);
+#else
+                        : Enum.GetName(typeof(MessageImportance), value);
+#endif
+
+                    Log.LogError($"Expected minimum message importance {enumName} did not match actual logging behavior:\n" +
+                                 $"\tShouldLogHigh={shouldLogHigh}, ShouldLogNormal={shouldLogNormal}, ShouldLogLow={shouldLogLow}");
+                }
+                return result;
             }
         }
 
@@ -2643,7 +2771,7 @@ EndGlobal
         [InlineData("/getProperty:p", false)]
         public void EndToEndVersionMessage(string arguments, bool shouldContainVersionMessage)
         {
-            using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
 
             string projectContents = ObjectModelHelpers.CleanupFileContents("""
                                                                             <Project>
@@ -2672,54 +2800,85 @@ EndGlobal
         }
 
         [Theory]
-        [InlineData("/v:diagnostic", MessageImportance.Low)]
-        [InlineData("/v:detailed", MessageImportance.Low)]
-        [InlineData("/v:normal", MessageImportance.Normal)]
-        [InlineData("/v:minimal", MessageImportance.High)]
-        [InlineData("/v:quiet", MessageImportance.High - 1)]
-
-        [InlineData("/v:diagnostic /bl", MessageImportance.Low)]
-        [InlineData("/v:detailed /bl", MessageImportance.Low)]
-        [InlineData("/v:normal /bl", MessageImportance.Low)] // v:normal but with binary logger so everything must be logged
-        [InlineData("/v:minimal /bl", MessageImportance.Low)] // v:minimal but with binary logger so everything must be logged
-        [InlineData("/v:quiet /bl", MessageImportance.Low)] // v:quiet but with binary logger so everything must be logged
-
-        [InlineData("/v:diagnostic /check", MessageImportance.Low)]
-        [InlineData("/v:detailed /check", MessageImportance.Low)]
-        [InlineData("/v:normal /check", MessageImportance.Normal)]
-        [InlineData("/v:minimal /check", MessageImportance.High)]
-        [InlineData("/v:quiet /check", MessageImportance.High)]
-
-        [InlineData("/v:diagnostic /tl", MessageImportance.Low)]
-        [InlineData("/v:detailed /tl", MessageImportance.Low)]
-        [InlineData("/v:normal /tl", MessageImportance.Normal)]
-        [InlineData("/v:minimal /tl", MessageImportance.High)]
-        [InlineData("/v:quiet /tl", MessageImportance.High - 1)]
-        public void EndToEndMinimumMessageImportance(string arguments, MessageImportance expectedMinimumMessageImportance)
+        [MemberData(nameof(MinimumMessageImportanceTestData))]
+        public void EndToEndMinimumMessageImportance_InProc(string arguments, MessageImportance expectedMinimumMessageImportance)
         {
-            using TestEnvironment testEnvironment = UnitTests.TestEnvironment.Create();
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
 
-            string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
-
-  <UsingTask TaskName=""" + typeof(MessageImportanceCheckingTask).FullName + @""" AssemblyFile=""" + Assembly.GetExecutingAssembly().Location + @"""/>
-
-  <Target Name=""CheckMessageImportance"">
-    <MessageImportanceCheckingTask ExpectedMinimumMessageImportance=""" + (int)expectedMinimumMessageImportance + @""" />
-  </Target>
-
-</Project>");
+            string projectContents = GenerateMessageImportanceProjectFile(expectedMinimumMessageImportance);
 
             TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
 
-            // Build in-proc.
+            // If /bl is specified, set a path for the binlog that is defined by the test environment
+            string pattern = @"/v:(\w+)\s/b";
+            Match match = Regex.Match(arguments, pattern);
+            if (match.Success)
+            {
+                string binlogPath = Path.Combine(testProject.TestRoot, match.Groups[1] + ".binlog");
+                arguments = arguments.Replace("/bl", $"/bl:{binlogPath}");
+            }
+
+            // Build in-proc only.
             RunnerUtilities.ExecMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, _output);
             success.ShouldBeTrue();
+        }
 
-            // Build out-of-proc to exercise both logging code paths.
+        [Theory]
+        [MemberData(nameof(MinimumMessageImportanceTestData))]
+        public void EndToEndMinimumMessageImportance_OutOfProc(string arguments, MessageImportance expectedMinimumMessageImportance)
+        {
+            using var testEnvironment = TestEnvironment.Create();
+
+            // NOTE for this test: out of proc nodes _always_ log every message, so we rewrite the expected minimum message importance to accept every message.
+            expectedMinimumMessageImportance = MessageImportance.Low;
+
+            string projectContents = GenerateMessageImportanceProjectFile(expectedMinimumMessageImportance);
+
+            TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
+
+            // If /bl is specified, set a path for the binlog that is defined by the test environment
+            string pattern = @"/v:(\w+)\s/b";
+            Match match = Regex.Match(arguments, pattern);
+            if (match.Success)
+            {
+                string binlogPath = Path.Combine(testProject.TestRoot, match.Groups[1] + ".binlog");
+                arguments = arguments.Replace("/bl", $"/bl:{binlogPath}");
+            }
+
+            // Build out-of-proc only.
             testEnvironment.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
             testEnvironment.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", "1");
-            RunnerUtilities.ExecMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out success, _output);
+            RunnerUtilities.ExecMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, _output);
             success.ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData("-v:diag -m:1 -tl:off")]
+        [InlineData("-v:diag -m -tl:off")]
+        [InlineData("-v:m -m:1 -tl:off")]
+        [InlineData("-v:m -m -tl:off")]
+        [InlineData("-v:diag -m:1 -tl:on")]
+        [InlineData("-v:diag -m -tl:on")]
+        [InlineData("-v:m -m:1 -tl:on")]
+        [InlineData("-v:m -m -tl:on")]
+        public void PreprocessProjectWell(string arguments)
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(
+                $"""
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup>
+                    <TargetFramework>netstandard2.0</TargetFramework>
+                  </PropertyGroup>
+                </Project>
+                """);
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
+            var preprocessFile = Path.Combine(testProject.TestRoot, "Preprocess.xml");
+            arguments += $" -pp:{preprocessFile}";
+
+            string output = RunnerUtilities.ExecBootstrapedMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, outputHelper: _output, attachProcessId: false);
+            success.ShouldBeTrue();
+            File.Exists(preprocessFile).ShouldBeTrue();
         }
 
 #if FEATURE_ASSEMBLYLOADCONTEXT
@@ -2748,6 +2907,20 @@ EndGlobal
         }
 
 #endif
+
+        [Fact]
+        public void ThrowsWhenMaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc()
+        {
+            string projectContent = """
+                <Project>
+                </Project>
+                """;
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
+            string project = testEnvironment.CreateTestProjectWithFiles("project.proj", projectContent).ProjectFile;
+
+            MSBuildApp.Execute(@"c:\bin\msbuild.exe " + project + " / m:257 /mt").ShouldBe(MSBuildApp.ExitType.SwitchError);
+        }
 
         private string CopyMSBuild()
         {
@@ -2836,6 +3009,26 @@ EndGlobal
             string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {string.Join(" ", arguments)}", out var success, _output);
 
             return (success, output);
+        }
+
+        private (string projectFilePath, string tempLoggerProjDir) CopyTestAssetsToTestEnv(TransientTestFolder tempDir, string projectContent, string folderName)
+        {
+            var testAssetsPath = Path.Combine(TestAssetsRootPath, folderName);
+            var loggerProjDir = Path.Combine(testAssetsPath, "LoggerProject");
+
+            var projectFile = tempDir.CreateFile("loggerproject.proj", projectContent);
+
+            var tempLoggerProjDir = Path.Combine(tempDir.Path, "LoggerProject");
+            Directory.CreateDirectory(tempLoggerProjDir);
+
+            foreach (var file in Directory.GetFiles(loggerProjDir, "*.*", SearchOption.AllDirectories))
+            {
+                var relativePath = file.Substring(loggerProjDir.Length + 1);
+                var destPath = Path.Combine(tempLoggerProjDir, relativePath);
+                Directory.CreateDirectory(Path.GetDirectoryName(destPath));
+                File.Copy(file, destPath, true);
+            }
+            return (projectFile.Path, tempLoggerProjDir);
         }
 
         public void Dispose()

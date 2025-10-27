@@ -812,6 +812,7 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 return;
             }
+
             WriteLinePrefix(e.BuildEventContext, e.Timestamp, false);
             WriteItems(itemList);
             ShownBuildEventContext(e.BuildEventContext);
@@ -1398,22 +1399,6 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 int adjustedPrefixWidth = _prefixWidth + prefixAdjustment;
                 WriteHandler(_consoleOutputAligner.AlignConsoleOutput(message, prefixAlreadyWritten, adjustedPrefixWidth));
-            }
-        }
-
-        /// <summary>
-        /// Write message taking into account whether or not the prefix (timestamp and key) have already been written on the line
-        /// </summary>
-        private void WriteBasedOnPrefix(string nonNullMessage, bool prefixAlreadyWritten, int adjustedPrefixWidth)
-        {
-            if (prefixAlreadyWritten)
-            {
-                WriteHandler(nonNullMessage + Environment.NewLine);
-            }
-            else
-            {
-                // No prefix info has been written, indent the line to the proper location
-                WriteHandler(IndentString(nonNullMessage, adjustedPrefixWidth));
             }
         }
 

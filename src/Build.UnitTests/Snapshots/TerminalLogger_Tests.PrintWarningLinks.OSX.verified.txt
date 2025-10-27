@@ -1,0 +1,8 @@
+﻿  project [33;1msucceeded with 4 warning(s)[m (0.2s)
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1m]8;;https://example.com/\AA0000]8;;\[m: this warning has a link because it has an explicit link
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1m]8;;https://go.microsoft.com/fwlink/?LinkId=keyword\AA0000]8;;\[m: this warning has a link because it has a keyword
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1m]8;;https://example.com/\AA0000]8;;\[m: this warning has a link to example.com because links take precedence over keywords
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mAA0000[m: this warning has no link because it has no link or keyword
+[?25l[1F
+[?25h
+Build [33;1msucceeded with 4 warning(s)[m in 5.0s

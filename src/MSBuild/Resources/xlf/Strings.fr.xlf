@@ -235,6 +235,35 @@ futures
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
     </note>
       </trans-unit>
+      <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
+        <source>  -multithreaded
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
+                     This means that MSBuild will use multiple threads
+                     to build projects in parallel,
+                     instead of multiple processes.
+                     This option is not supported.
+                     The maximum number of threads used is determined by the
+                     -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
+                     (Short form: -mt)
+    </source>
+        <target state="translated">  -multithread
+                     Active le mode EXPERIMENTAL multithread dans MSBuild.
+                     Cela signifie que MSBuild utilisera plusieurs threads
+                     pour générer des projets en parallèle,
+                     au lieu de plusieurs processus.
+                     Cette option n’est pas prise en charge.
+                     Le nombre maximal de threads utilisés est déterminé par le
+                     commutateur -maxCpuCount.
+                     En cas d’activation du mode multithread
+                     et de MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount ne doit pas être supérieur à 256.
+                     (Forme courte : -m)
+    </target>
+        <note />
+      </trans-unit>
       <trans-unit id="HelpMessage_51_GetResultOutputFileSwitch">
         <source>  -getResultOutputFile:file
                      Redirect output from get* into a file.
@@ -259,12 +288,12 @@ futures
         <source>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+                     of the build. For more info see https://aka.ms/buildcheck
 	</source>
         <target state="translated">  -check
                      Active BuildChecks pendant la construction.
                      BuildCheck permet d'évaluer les règles pour garantir les propriétés
-                     de la build. Pour plus d'informations, consultez aka.ms/buildcheck
+                     de la build. Pour plus d'informations, consultez https://aka.ms/build
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -814,9 +843,6 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                             the console buffer
                         DisableConsoleColor--Use the default console colors
                             for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
                         EnableMPLogging--Enable the multiprocessor logging
                             style even when running in non-multiprocessor
                             mode. This logging style is on by default.
@@ -831,41 +857,38 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                                                  Verbosity=minimal
 </source>
         <target state="translated">  -consoleLoggerParameters:&lt;paramètres&gt;
-         Paramètres du journaliseur de la console. (Forme abrégée : -clp)
-         Paramètres disponibles :
-            PerformanceSummary--Affiche la durée des tâches, des cibles
-                et des projets.
-            Summary--Récapitulatif des erreurs et des avertissements à la fin.
-            NoSummary--Aucun récapitulatif des erreurs et des avertissements
-                à la fin.
-            ErrorsOnly--Affiche uniquement les erreurs.
-            WarningsOnly--Affiche uniquement les avertissements.
-            NoItemAndPropertyList--N'affiche pas la liste des éléments et
-                des propriétés au début de chaque build de projet.
-            ShowCommandLine--Affiche les messages de TaskCommandLineEvent
-            ShowTimestamp--Affiche l'horodatage en tant que préfixe des
-                messages.
-            ShowEventId--Affiche eventId pour les événements démarrés et
-                achevés ainsi que les messages
-            ForceNoAlign--N'aligne pas le texte par rapport à la taille de la
-                mémoire tampon de la console
-            DisableConsoleColor--Utilise les couleurs de la console par défaut
-                pour tous les messages de journalisation.
-            DisableMPLogging--Désactive le style de journalisation
-                multiprocesseur de la sortie durant l'exécution en
-                mode non multiprocesseur.
-            EnableMPLogging--Active le style de journalisation multiprocesseur
-                même durant l'exécution en mode non
-                multiprocesseur. Style de journalisation activé par défaut.
-            ForceConsoleColor--Utilise les couleurs de la console ANSI même si
-                cela n'est pas pris en charge par la console
-            PreferConsoleColor-Utilise les couleurs de console ANSI uniquement si
-                            la console cible le prend en charge
-                     Verbosity--Remplace le paramètre -verbosity pour ce
-                            journaliseur.
-                     Exemple:
+                     Paramètres de l’enregistreur d’événements de la console. (Forme abrégée : -clp)
+                     Les paramètres disponibles sont :
+                        PerformanceSummary--Afficher la durée des tâches, des cibles
+                            et des projets.
+                        Summary--Afficher le résumé des erreurs et des avertissements à la fin.
+                        NoSummary--Ne pas afficher le résumé des erreurs et des avertissements à la
+                            fin.
+                        ErrorsOnly--Afficher uniquement les erreurs.
+                        WarningsOnly--Afficher uniquement les avertissements.
+                        NoItemAndPropertyList--Ne pas afficher la liste des éléments et
+                            des propriétés au début de chaque build de projet.
+                        ShowCommandLine--Afficher les messages de TaskCommandLineEvent
+                        ShowTimestamp--Afficher l'horodatage en tant que préfixe de tout
+                            message.
+                        ShowEventId--Afficher l’eventId pour les événements démarrés et
+                            achevés, ainsi que les messages
+                        ForceNoAlign--Ne pas aligner le texte par rapport à la taille de la
+                            mémoire tampon de la console
+                        DisableConsoleColor--Utiliser les couleurs de la console par défaut
+                            pour tous les messages de journalisation.
+                        EnableMPLogging--Activer le style de journalisation multiprocesseur,
+                            même durant une exécution en mode non
+                            multiprocesseur. Ce style de journalisation est activé par défaut.
+                        ForceConsoleColor--Utiliser les couleurs de la console ANSI même si
+                            la console ne les prend pas en charge
+                        PreferConsoleColor--N’utiliser les couleurs de la console ANSI que si
+                            la console cible les prend en charge
+                     Verbosity--Remplace le paramètre -verbosity pour cet
+                            enregistreur d’événement.
+                     Exemple :
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
-                         Verbosity=minimal
+                                                 Verbosity=minimal
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -1489,6 +1512,11 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <target state="translated">Les journaux MSBuild et les informations de débogage seront au "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
+        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
+        <target state="translated">Avec le mode multithread activé et MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount ne peut pas être supérieur à {0}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
         <target state="translated">MSBUILD : error MSB1067: doit fournir un nom de fonctionnalité pour le commutateur featureAvailability.</target>
@@ -1785,6 +1813,11 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <target state="translated">MSBUILD : error MSB1059: les cibles n'ont pas pu être imprimées. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TerminalLoggerNotUsedAutomated">
+        <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
+        <target state="translated">L'enregistreur de terminal n'a pas été utilisé, car il a été détecté que la build s'exécute dans un environnement automatisé.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedDisabled">
         <source>Terminal Logger was not used because build is run in context of a process (e.g. 'dotnet test') that requests direct access to stdout stream.</source>
         <target state="translated">L’enregistreur d’événements de terminal n’a pas été utilisé, car la build est exécutée dans le contexte d’un processus (par exemple, 'dotnet test') qui demande un accès direct au flux stdout.</target>
@@ -1994,6 +2027,14 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                      diagnostic-level log, but it contains more information.
                      (Short form: -bl)
 
+                     The optional LogFile specifies the path where the
+                     binary log is saved. To generate a distinct log file
+                     for each build, the token "{}" can be added into the
+                     path, for example: LogFile=output-{}-log.binlog. Each 
+                     "{}" in the log path is replaced with a unique string
+                     using the timestamp, running process Id and random
+                     string stamp.
+
                      The binary logger by default collects the source text of
                      project files, including all imported projects and target
                      files encountered during the build. The optional
@@ -2028,65 +2069,56 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                        -binaryLogger
     </source>
         <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Sérialise tous les événements de build dans un fichier binaire compressé.
-                     Par défaut, le fichier se trouve dans le répertoire actif et se nomme
+                     Sérialise tous les événements de génération dans un fichier binaire compressé.
+                     Par défaut, le fichier se trouve dans le répertoire actuel et son nom est 
                      "msbuild.binlog". Le journal binaire est une description détaillée
-                     du processus de génération, qui peut servir plus tard à reconstruire
-                     les journaux texte et être utilisé par d'autres outils d'analyse. Un journal binaire
-                     est généralement
-10 à 20
-fois plus petit que le journal
-                     de diagnostic de type texte le plus détaillé, mais il contient plus d'informations.
-                     (Forme abrégée
-: -bl)
+                     du processus de génération que vous pouvez utiliser plus tard pour reconstruire
+                     des journaux texte et être utilisé par d’autres outils d’analyse. Un journal binaire
+                     est généralement 10 à 20 fois plus petit que le journal au niveau du diagnostic
+                     du texte le plus détaillé, mais il contient d’autres informations.
+                     (Forme abrégée : -bl)
 
+                     Le LogFile facultatif spécifie le chemin d’accès où le
+                     journal binaire est enregistré. Pour générer un fichier journal distinct
+                     pour chaque génération, vous pouvez ajouter le jeton « {} » dans le
+                     chemin d’accès, par exemple : LogFile=output-{}-log.binlog. Chaque 
+                     « {} » dans le chemin d’accès du journal est remplacé par une chaîne unique
+                     en utilisant un timestamp, ce qui exécute l’ID de processus et une
+                     empreinte de chaîne aléatoire.
 
-                     Le journaliseur binaire par défaut collecte le texte source
+                     L’enregistreur binaire collecte par défaut le texte source des
+                     fichiers de projet, notamment tous les projets importés et les
+                     fichiers cibles rencontrés pendant la génération. Le commutateur
+                     ProjectImports facultatif contrôle ce comportement :
 
-                     des fichiers projet, notamment tous les projets importés et les
-
-                     fichiers cibles rencontrés pendant la build. Le commutateur
-
-                     ProjectImports facultatif contrôle ce comportement
-:
-
-                      ProjectImports=None     - Ne collecte pas les importations
-                                                du projet.
-                      ProjectImports=Embed    - Incorpore les importations du projet dans
-                                                le fichier journal.
-                      ProjectImports=ZipFile  - Enregistre les fichiers projet dans
+                      ProjectImports=None     – Ne collectez pas les
+                                                importations du projet.
+                      ProjectImports=Embed    – Importations du projet incorporées dans le
+                                                fichier journal.
+                      ProjectImports=ZipFile  – Enregistrez les fichiers du projet dans
                                                 output.projectimports.zip
-                                                où la sortie porte le même nom que
-                                                le fichier journal binaire.
+                                                où la sortie est le même nom
+                                                que le nom du fichier journal binaire.
 
-                     Le paramètre par défaut de ProjectImports est Embed.
-                     Remarque
-: Le journaliseur ne collecte pas les
+                     Le paramètre par défaut pour ProjectImports est Incorporé.
+                     Remarque : l’enregistreur ne collecte pas les fichiers sources non-MSBuild
+                     tels que .cs, .cpp etc.
 
-                     fichiers sources non MSBuild tels que .cs, .cpp etc.
+                     Vous pouvez « lire » un fichier .binlog en le passant à
+                     msbuild.exe en tant qu’argument au lieu d’une solution/d’un projet.
+                     D’autres enregistreurs reçoivent les informations contenues
+                     dans le fichier journal comme si la génération d’origine se produisait.
+                     Vous pouvez lire plus d’informations sur le journal binaire et ses utilisations sur :
+                     https://aka.ms/msbuild/binlog
 
-
-                     Vous pouvez "lire" un fichier .binlog en le passant à
-
-                     msbuild.exe en tant qu'argument plutôt qu'en tant que projet/solution.
-
-                     D'autres enregistreurs d'événements reçoivent les informations
-
-                     contenues dans le fichier journal comme si la build d'origine était en cours de création.
-
-                     Pour plus d'informations sur le journal binaire et ses usages, consultez
-:
-                    https://aka.ms/msbuild/binlog
-
-                     Exemples
-:
-
+                     Exemples :
                        -bl
-
                        -bl:output.binlog
-
                        -bl:output.binlog;ProjectImports=None
-                       -bl:output.binlog;ProjectImports=ZipFile                       -bl:..\..\custom.binlog                       -binaryLogger    </target>
+                       -bl:output.binlog;ProjectImports=ZipFile
+                       -bl:..\..\custom.binlog
+                       -binaryLogger
+    </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "msbuild"
@@ -2195,8 +2227,8 @@ fois plus petit que le journal
         <note />
       </trans-unit>
       <trans-unit id="XMake.LoggerCreationError">
-        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger. {0}</source>
-        <target state="translated">MSBUILD : error MSB1021: Impossible de créer une instance du journal. {0}</target>
+        <source>MSBUILD : error MSB1021: Cannot create an instance of the logger {0}. {1}</source>
+        <target state="translated">MSBUILD : error MSB1021: Impossible de créer une instance du journal {0}. {1}</target>
         <note>{StrBegin="MSBUILD : error MSB1021: "}
       UE: This error is shown when a logger cannot be loaded and instantiated from its assembly.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized. {0} contains a message explaining why the

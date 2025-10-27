@@ -9,6 +9,7 @@ using System.IO;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -27,6 +28,8 @@ namespace Microsoft.Build.Tasks
         internal const string resourcesFileExtension = ".resources";
 
         private ITaskItem[] _resourceFiles;
+
+        private bool _enableCustomCulture;
 
         [SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Taskitem", Justification = "Shipped this way in Dev11 Beta (go-live)")]
@@ -54,6 +57,15 @@ namespace Microsoft.Build.Tasks
                 return _resourceFiles;
             }
             set => _resourceFiles = value;
+        }
+
+        /// <summary>
+        /// Contains the information if custom culture is enabled.
+        /// </summary>
+        public bool EnableCustomCulture
+        {
+            get { return _enableCustomCulture; }
+            set { _enableCustomCulture = value; }
         }
 
         /// <summary>
@@ -178,7 +190,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        if (File.Exists(Path.Combine(Path.GetDirectoryName(fileName), conventionDependentUpon)))
+                        if (FileSystems.Default.FileExists(Path.Combine(Path.GetDirectoryName(fileName), conventionDependentUpon)))
                         {
                             dependentUpon = conventionDependentUpon;
                         }

@@ -31,13 +31,15 @@ namespace Microsoft.Build.Framework.Telemetry
         public static OpenTelemetryManager Instance => s_instance.Value;
 
         private TelemetryState _telemetryState = TelemetryState.Uninitialized;
-        private readonly object _initializeLock = new();
+        private readonly LockType _initializeLock = new LockType();
         private double _sampleRate = TelemetryConstants.DefaultSampleRate;
 
 #if NETFRAMEWORK
         private TracerProvider? _tracerProvider;
         private IOpenTelemetryCollector? _collector;
 #endif
+
+        public string? LoadFailureExceptionMessage { get; set; }
 
         /// <summary>
         /// Optional activity source for MSBuild or other telemetry usage.
@@ -104,6 +106,7 @@ namespace Microsoft.Build.Framework.Telemetry
             {
                 // catch exceptions from loading the OTel SDK or Collector to maintain usability of Microsoft.Build.Framework package in our and downstream tests in VS.
                 _telemetryState = TelemetryState.Unsampled;
+                LoadFailureExceptionMessage = ex.ToString();
                 return;
             }
 #endif

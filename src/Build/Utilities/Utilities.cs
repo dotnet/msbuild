@@ -5,7 +5,11 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if NET
 using System.IO;
+#else
+using Microsoft.IO;
+#endif
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -190,7 +194,7 @@ namespace Microsoft.Build.Internal
 
             // XmlNode.InnerXml is much more expensive than InnerText. Don't use it for trivial cases.
             // (single child node with a trivial value or no child nodes)
-            if (!node.HasChildNodes)
+            if (!node.HasChildNodes || (node.ChildNodes.Count == 1 && node.FirstChild.NodeType == XmlNodeType.Whitespace))
             {
                 return String.Empty;
             }
@@ -595,6 +599,52 @@ namespace Microsoft.Build.Internal
             return environmentProperties;
         }
 
+#if !NET
+        /// <summary>
+        /// Ensures that the capacity of this list is at least the specified <paramref name="capacity"/>.
+        /// If the current capacity of the list is less than specified <paramref name="capacity"/>,
+        /// the capacity is increased by continuously twice current capacity until it is at least the specified <paramref name="capacity"/>.
+        /// </summary>
+        /// <typeparam name="T">The type contained in the list.</typeparam>
+        /// <param name="list">The list to adjust the capacity of.</param>
+        /// <param name="capacity">The minimum capacity to ensure.</param>
+        /// <returns>The new capacity of this list.</returns>
+        public static int EnsureCapacity<T>(this List<T> list, int capacity)
+        {
+            const int DefaultCapacity = 4;
+            const int MaxArrayLength = 0X7FFFFFC7;
+
+            if (capacity < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(capacity));
+            }
+
+            if (capacity > list.Capacity)
+            {
+                // Implementation copied and slightly modified from List's internal implementation.
+                int newCapacity = list.Count == 0 ? DefaultCapacity : 2 * list.Capacity;
+
+                // Allow the list to grow to maximum possible capacity (~2G elements) before encountering overflow.
+                // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
+                if ((uint)newCapacity > MaxArrayLength)
+                {
+                    newCapacity = MaxArrayLength;
+                }
+
+                // If the computed capacity is still less than specified, set to the original argument.
+                // Capacities exceeding Array.MaxLength will be surfaced as OutOfMemoryException by Array.Resize.
+                if (newCapacity < capacity)
+                {
+                    newCapacity = capacity;
+                }
+
+                list.Capacity = newCapacity;
+            }
+
+            return list.Capacity;
+        }
+#endif
+
         /// <summary>
         /// Extension to IEnumerable to get the count if it
         /// can be quickly gotten, otherwise 0.
@@ -803,42 +853,80 @@ namespace Microsoft.Build.Internal
         /// <returns></returns>
         private static IEnumerable<ItemData> CastItemsOneByOne(IEnumerable items, string[] itemTypeNamesToFetch)
         {
-            foreach (var item in items)
+            IEnumerator enumerator = items.GetEnumerator();
+            if (enumerator is List<DictionaryEntry>.Enumerator listEnumerator)
             {
-                string itemType = default;
-                object itemValue = null;
+                while (listEnumerator.MoveNext())
+                {
+                    DictionaryEntry dictionaryEntry = listEnumerator.Current;
+                    string itemType = dictionaryEntry.Key as string;
+                    object itemValue = dictionaryEntry.Value;
 
-                if (item is IItem iitem)
-                {
-                    itemType = iitem.Key;
-                    itemValue = iitem;
-                }
-                else if (item is DictionaryEntry dictionaryEntry)
-                {
-                    itemType = dictionaryEntry.Key as string;
-                    itemValue = dictionaryEntry.Value;
-                }
-                else
-                {
-                    if (item == null)
+                    // if itemTypeNameToFetch was not set - then return all items
+                    if (itemValue != null && (itemTypeNamesToFetch == null || MatchesAnyItemTypeToFetch(itemTypeNamesToFetch, itemType)))
                     {
-                        Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected: {nameof(item)} is null");
+                        // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
+                        //  where the only types that can be assigned are ProjectItem or ProjectItemInstance
+                        // However! NodePacketTranslator and BuildEventArgsReader might deserialize those as TaskItemData
+                        //  (see xml comments of TaskItemData for details)
+                        yield return new ItemData(itemType!, itemValue);
+                    }
+                }
+            }
+            else
+            {
+                while (enumerator.MoveNext())
+                {
+                    object item = enumerator.Current;
+                    string itemType = default;
+                    object itemValue = null;
+
+                    if (item is IItem iitem)
+                    {
+                        itemType = iitem.Key;
+                        itemValue = iitem;
+                    }
+                    else if (item is DictionaryEntry dictionaryEntry)
+                    {
+                        itemType = dictionaryEntry.Key as string;
+                        itemValue = dictionaryEntry.Value;
                     }
                     else
                     {
-                        Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
+                        if (item == null)
+                        {
+                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected: {nameof(item)} is null");
+                        }
+                        else
+                        {
+                            Debug.Fail($"In {nameof(EnumerateItems)}(): Unexpected {nameof(item)} {item} of type {item?.GetType().ToString()}");
+                        }
+                    }
+
+                    // if itemTypeNameToFetch was not set - then return all items
+                    if (itemValue != null && (itemTypeNamesToFetch == null || MatchesAnyItemTypeToFetch(itemTypeNamesToFetch, itemType)))
+                    {
+                        // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
+                        //  where the only types that can be assigned are ProjectItem or ProjectItemInstance
+                        // However! NodePacketTranslator and BuildEventArgsReader might deserialize those as TaskItemData
+                        //  (see xml comments of TaskItemData for details)
+                        yield return new ItemData(itemType!, itemValue);
+                    }
+                }
+            }
+
+            // PERF: This replaces a previous call to Any() that was causing an allocation due to a closure.
+            static bool MatchesAnyItemTypeToFetch(string[] itemTypeNamesToFetch, string itemType)
+            {
+                foreach (string tp in itemTypeNamesToFetch)
+                {
+                    if (MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, tp))
+                    {
+                        return true;
                     }
                 }
 
-                // if itemTypeNameToFetch was not set - then return all items
-                if (itemValue != null && (itemTypeNamesToFetch == null || itemTypeNamesToFetch.Any(tp => MSBuildNameIgnoreCaseComparer.Default.Equals(itemType, tp))))
-                {
-                    // The ProjectEvaluationFinishedEventArgs.Items are currently assigned only in Evaluator.Evaluate()
-                    //  where the only types that can be assigned are ProjectItem or ProjectItemInstance
-                    // However! NodePacketTranslator and BuildEventArgsReader might deserialize those as TaskItemData
-                    //  (see xml comments of TaskItemData for details)
-                    yield return new ItemData(itemType!, itemValue);
-                }
+                return false;
             }
         }
     }

@@ -24,6 +24,7 @@ using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 #if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.FileAccesses;
+
 #endif
 
 #nullable disable
@@ -939,6 +940,8 @@ namespace Microsoft.Build.BackEnd
 
             /// <inheritdoc/>
             public override bool IsTaskInputLoggingEnabled => _taskHost._host.BuildParameters.LogTaskInputs;
+
+            public override bool IsOutOfProcRarNodeEnabled => _taskHost._host.BuildParameters.EnableRarNode;
 
 #if FEATURE_REPORTFILEACCESSES
             /// <summary>

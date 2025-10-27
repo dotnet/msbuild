@@ -1,11 +1,11 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -17,6 +17,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Eventing;
+
 #if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.FileAccesses;
 #endif
@@ -51,7 +53,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The saved environment for the process.
         /// </summary>
-        private IDictionary<string, string> _savedEnvironment;
+        private FrozenDictionary<string, string> _savedEnvironment;
 
         /// <summary>
         /// The component factories.
@@ -344,6 +346,16 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Deserializes a packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator to use as a source for packet data.</param>
+        INodePacket INodePacketFactory.DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
+        }
+
+        /// <summary>
         /// Routes a packet to the appropriate handler.
         /// </summary>
         /// <param name="nodeId">The node id from which the packet was received.</param>
@@ -446,6 +458,14 @@ namespace Microsoft.Build.Execution
         {
             CommunicationsUtilities.Trace("Shutting down with reason: {0}, and exception: {1}.", _shutdownReason, _shutdownException);
 
+            MSBuildEventSource.Log.OutOfProcNodeShutDownStart();
+
+            // Signal the SDK resolver service to shutdown
+            // It should be shut down first so all the requests for SDK resolution are discarded.
+            // Otherwise worker node might stuck in a situation where _buildRequestEngine.CleanupForBuild() waiting for the SDK resolver service response from the main node
+            // and it never comes since we don't listen to _packetReceivedEvent in the middle of the _shutdownEvent.
+            ((IBuildComponent)_sdkResolverService).ShutdownComponent();
+
             // Clean up the engine
             if (_buildRequestEngine != null && _buildRequestEngine.Status != BuildRequestEngineStatus.Uninitialized)
             {
@@ -456,9 +476,6 @@ namespace Microsoft.Build.Execution
                     ((IBuildComponent)_buildRequestEngine).ShutdownComponent();
                 }
             }
-
-            // Signal the SDK resolver service to shutdown
-            ((IBuildComponent)_sdkResolverService).ShutdownComponent();
 
             // Dispose of any build registered objects
             IRegisteredTaskObjectCache objectCache = (IRegisteredTaskObjectCache)(_componentFactories.GetComponent(BuildComponentType.RegisteredTaskObjectCache));
@@ -526,13 +543,14 @@ namespace Microsoft.Build.Execution
 
             CommunicationsUtilities.Trace("Shut down complete.");
 
+            MSBuildEventSource.Log.OutOfProcNodeShutDownStop(_shutdownReason.ToString());
+
             return _shutdownReason;
         }
 
         /// <summary>
         /// Clears all the caches used during the build.
         /// </summary>
-        [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.GC.Collect", Justification = "Required because when calling this method, we want the memory back NOW.")]
         private void CleanupCaches()
         {
             if (_componentFactories.GetComponent(BuildComponentType.ConfigCache) is IConfigCache configCache)
@@ -552,9 +570,6 @@ namespace Microsoft.Build.Execution
                 // We'll experiment here and ship with the best default.
                 s_projectRootElementCacheBase = null;
             }
-
-            // Since we aren't going to be doing any more work, lets clean up all our memory usage.
-            GC.Collect();
         }
 
         /// <summary>
@@ -787,6 +802,10 @@ namespace Microsoft.Build.Execution
                     configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent,
                     configuration.LoggingNodeConfiguration
                         .IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent);
+            }
+            if (configuration.LoggingNodeConfiguration.IncludeTargetOutputs)
+            {
+                _loggingService.EnableTargetOutputLogging = true;
             }
 
             try

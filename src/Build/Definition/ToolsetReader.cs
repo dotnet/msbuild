@@ -28,11 +28,6 @@ namespace Microsoft.Build.Evaluation
     internal abstract class ToolsetReader
     {
         /// <summary>
-        /// The global properties used to read the toolset.
-        /// </summary>
-        private PropertyDictionary<ProjectPropertyInstance> _globalProperties;
-
-        /// <summary>
         /// The environment properties used to read the toolset.
         /// </summary>
         private readonly PropertyDictionary<ProjectPropertyInstance> _environmentProperties;
@@ -45,7 +40,6 @@ namespace Microsoft.Build.Evaluation
             PropertyDictionary<ProjectPropertyInstance> globalProperties)
         {
             _environmentProperties = environmentProperties;
-            _globalProperties = globalProperties;
         }
 
         /// <summary>

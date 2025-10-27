@@ -2838,8 +2838,8 @@
         <note>{StrBegin="MSB3716: "}</note>
       </trans-unit>
       <trans-unit id="WriteCodeFragment.CouldNotInferParameterType">
-        <source>Could not infer the type of parameter "{0}" because the attribute type is unknown. The value will be treated as a string.</source>
-        <target state="translated">Не удалось вывести тип параметра "{0}", так как тип атрибута неизвестен. Значение будет рассматриваться как строка.</target>
+        <source>Could not infer the type of parameter "{0}" because the attribute type "{1}" is unknown. The value will be treated as a string.</source>
+        <target state="translated">Не удалось вывести тип параметра "{0}", так как тип атрибута "{1}" неизвестен. Значение будет рассматриваться как строка.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteCodeFragment.MultipleConstructorsFound">
@@ -3581,6 +3581,16 @@
         <source>MSB3942: Failed to create zip file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
         <target state="translated">MSB3942: не удалось создать ZIP-файл "{0}", так как он уже существует. Удалите или переименуйте файл и повторите попытку.</target>
         <note>{StrBegin="MSB3942: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.ErrorInvalidCompressionLevel">
+        <source>MSB3944: Unsupported compression level '{0}'. Using default compression level instead.</source>
+        <target state="translated">MSB3944: уровень сжатия "{0}" не поддерживается. Вместо этого используется уровень сжатия по умолчанию.</target>
+        <note>{StrBegin="MSB3944: "}</note>
+      </trans-unit>
+      <trans-unit id="ZipDirectory.WarningCompressionLevelUnsupportedOnFramework">
+        <source>MSB3945: Compression level '{0}' is not supported on the .NET Framework version of MSBuild. Using default compression level instead.</source>
+        <target state="translated">MSB3945: уровень сжатия "{0}" не поддерживается в версии .NET Framework для MSBuild. Вместо этого используется уровень сжатия по умолчанию.</target>
+        <note>{StrBegin="MSB3945: "}</note>
       </trans-unit>
     </body>
   </file>

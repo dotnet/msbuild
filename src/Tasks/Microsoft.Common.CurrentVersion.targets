@@ -1639,8 +1639,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     -->
 
   <Target
-    Name="_SplitProjectReferencesByFileExistence"
-    DependsOnTargets="AssignProjectConfiguration">
+    Name="_SplitProjectReferencesByFileExistence">
 
     <!--
         Use this task for matching projects with pre-resolved project outputs set by the IDE
@@ -1736,12 +1735,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          that can't multiplatform.  -->
     <ItemGroup Condition="'@(_ProjectsWithPlatformAssignment)' != ''">
       <ProjectsWithNearestPlatform Include="@(_ProjectsWithPlatformAssignment)"/>
-      <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
+      <ProjectsWithNearestPlatform Condition="'%(ProjectsWithNearestPlatform.Identity)' != '' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
         <SetPlatform>Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
       </ProjectsWithNearestPlatform>
 
       <!-- When GetCompatiblePlatform fails to assign NearestPlatform (or determines it's identical to default for the referenced project), undefine Platform and let that project build "on its own" -->
-      <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' == ''">
+      <ProjectsWithNearestPlatform Condition="'%(ProjectsWithNearestPlatform.Identity)' != '' and '%(ProjectsWithNearestPlatform.NearestPlatform)' == ''">
         <UndefineProperties>%(ProjectsWithNearestPlatform.UndefineProperties);Platform</UndefineProperties>
       </ProjectsWithNearestPlatform>
 
@@ -1934,7 +1933,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <UpdatedAnnotatedProjects Remove="@(UpdatedAnnotatedProjects)" />
 
       <!-- If the NearestTargetFramework property was set and the project multi-targets, SetTargetFramework must be set. -->
-      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.NearestTargetFramework)' != '' and '%(AnnotatedProjects.HasSingleTargetFramework)' != 'true'">
+      <AnnotatedProjects Condition="'%(AnnotatedProjects.Identity)' != '' and '%(AnnotatedProjects.NearestTargetFramework)' != '' and '%(AnnotatedProjects.HasSingleTargetFramework)' != 'true'">
         <SetTargetFramework>TargetFramework=%(AnnotatedProjects.NearestTargetFramework)</SetTargetFramework>
       </AnnotatedProjects>
 
@@ -1942,13 +1941,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          If the NearestTargetFramework property was not set or the project has a single TargetFramework, we need to Undefine
          TargetFramework to avoid another project evaluation.
       -->
-      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and ('%(AnnotatedProjects.NearestTargetFramework)' == '' or '%(AnnotatedProjects.HasSingleTargetFramework)' == 'true')">
+      <AnnotatedProjects Condition="'%(AnnotatedProjects.Identity)' != '' and ('%(AnnotatedProjects.NearestTargetFramework)' == '' or '%(AnnotatedProjects.HasSingleTargetFramework)' == 'true')">
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);TargetFramework</UndefineProperties>
       </AnnotatedProjects>
 
       <!-- Add RuntimeIdentifier and SelfContained to the list of global properties that should not flow to the referenced project,
            unless the project is expecting those properties to flow. -->
-      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.IsRidAgnostic)' != 'false'">
+      <AnnotatedProjects Condition="'%(AnnotatedProjects.Identity)' != '' and '%(AnnotatedProjects.IsRidAgnostic)' != 'false'">
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);RuntimeIdentifier;SelfContained</UndefineProperties>
       </AnnotatedProjects>
 
@@ -2385,6 +2384,10 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <ResolveAssemblyReferencesStateFile Condition="'$(DisableRarCache)'!='true' and '$(ResolveAssemblyReferencesStateFile)' == ''">$(IntermediateOutputPath)$(MSBuildProjectFile).AssemblyReference.cache</ResolveAssemblyReferencesStateFile>
     </PropertyGroup>
 
+    <PropertyGroup>
+      <AllowResolveAssemblyReferencesOutOfProcNode Condition="'$(AllowResolveAssemblyReferencesOutOfProcNode)' == ''">false</AllowResolveAssemblyReferencesOutOfProcNode>
+    </PropertyGroup>
+
     <!-- Make an App.Config item that exists when AutoUnify is false. -->
     <ItemGroup>
       <_ResolveAssemblyReferencesApplicationConfigFileForExes Include="@(AppConfigWithTargetPath)" Condition="'$(AutoGenerateBindingRedirects)'=='true' or '$(AutoUnifyAssemblyReferences)'=='false'"/>
@@ -2411,6 +2414,15 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <Implicit>true</Implicit>
       </Reference>
     </ItemGroup>
+
+    <!--Converts string property NonCultureResourceDirectories to array if present. NonCultureResourceDirectories defines exclusions for the custom cultures.  -->
+    <ItemGroup Condition="'$(NonCultureResourceDirectories)' != ''">
+      <NonCultureResourceDirectory Include="$(NonCultureResourceDirectories)" />
+    </ItemGroup>
+
+    <PropertyGroup Condition="'$(EnableCustomCulture)' == ''">
+      <EnableCustomCulture>false</EnableCustomCulture>
+    </PropertyGroup>
 
     <!--
       Normally, as an optimization, finding dependencies of references marked with ExternallyResolved=true metadata is skipped.
@@ -2465,6 +2477,9 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         FindDependenciesOfExternallyResolvedReferences="$(FindDependenciesOfExternallyResolvedReferences)"
         ContinueOnError="$(ContinueOnError)"
         OutputUnresolvedAssemblyConflicts="$(ResolveAssemblyReferenceOutputUnresolvedAssemblyConflicts)"
+        NonCultureResourceDirectories="@(NonCultureResourceDirectory)"
+        EnableCustomCulture="$(EnableCustomCulture)"
+        AllowOutOfProcNode="$(AllowResolveAssemblyReferencesOutOfProcNode)"
         Condition="'@(Reference)'!='' or '@(_ResolvedProjectReferencePaths)'!='' or '@(_ExplicitReference)' != ''"
         >
 
@@ -2568,24 +2583,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_NewGenerateBindingRedirectsIntermediateAppConfig Condition="Exists('$(_GenerateBindingRedirectsIntermediateAppConfig)')">true</_NewGenerateBindingRedirectsIntermediateAppConfig>
       <AppConfig Condition="$(_NewGenerateBindingRedirectsIntermediateAppConfig) == 'true'">$(_GenerateBindingRedirectsIntermediateAppConfig)</AppConfig>
     </PropertyGroup>
-
-    <PropertyGroup>
-      <ConfigFileExists Condition="Exists('@(AppConfigWithTargetPath->'$(OutDir)%(TargetPath)')')">true</ConfigFileExists>
-      <HasNoBindingRedirects Condition="'@(SuggestedBindingRedirects)' == ''">true</HasNoBindingRedirects>
-    </PropertyGroup>
-
-    <!-- Overwrites .config file with a App.config content if RAR returned empty @(SuggestedBindingRedirects). -->
-    <Copy
-      SourceFiles="@(AppConfigWithTargetPath->'%(FullPath)')"
-      DestinationFiles="$(_GenerateBindingRedirectsIntermediateAppConfig)"
-      SkipUnchangedFiles="true"
-      Condition="'$(ConfigFileExists)' == 'true' and '$(HasNoBindingRedirects)' == 'true' and '$(DesignTimeBuild)' != 'true'">
-      <Output TaskParameter="CopiedFiles" ItemName="FileWrites"/>
-    </Copy>
-    <Touch
-      Files="$(_GenerateBindingRedirectsIntermediateAppConfig)"
-      AlwaysCreate="true"
-      Condition="'$(ConfigFileExists)' == 'true' and '$(HasNoBindingRedirects)' == 'true' and '$(DesignTimeBuild)' != 'true'"/>
 
     <ItemGroup Condition="$(_NewGenerateBindingRedirectsIntermediateAppConfig) == 'true'">
       <AppConfigWithTargetPath Remove="@(AppConfigWithTargetPath)" />
@@ -5411,11 +5408,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!--
         Not using SkipUnchangedFiles="true" by default for backwards compatibility.
         -->
-        
+
     <PropertyGroup>
       <SkipUnchangedFilesOnCopyAlways Condition="'$(SkipUnchangedFilesOnCopyAlways)' == ''">false</SkipUnchangedFilesOnCopyAlways>
     </PropertyGroup>
-        
+
     <Copy
         SourceFiles = "@(_SourceItemsToCopyToOutputDirectoryAlways)"
         DestinationFiles = "@(_SourceItemsToCopyToOutputDirectoryAlways->'$(OutDir)%(TargetPath)')"
@@ -5463,7 +5460,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </Copy>
 
   </Target>
-  
+
   <!--
     ============================================================
                                         _CopyAppConfigFile
@@ -5764,28 +5761,46 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_CleanPriorFileWrites Include="@(_CleanUnfilteredPriorFileWrites)" Exclude="@(_ResolveAssemblyReferenceResolvedFilesAbsolute)"/>
     </ItemGroup>
-
+    
+    <PropertyGroup>
     <!--
         Of shareable files, keep only those that are in the project's directory.
         We never clean shareable files outside of the project directory because
         the build may be to a common output directory and other projects may need
         them.
 
-        Only subtract the outputs from ResolveAssemblyReferences target because that's the
-        only "Resolve" target that tries to resolve assemblies directly from the output
-        directory.
-        -->
-    <FindUnderPath Path="$(MSBuildProjectDirectory)" Files="@(FileWritesShareable)" UpdateToAbsolutePaths="true">
+        The default layout of projects is that everything particular to the project is
+        located under the MSBuildProjectDirectory, so it's considered safe to track/delete those.
+        The assumption was that anything outside the project's directory is shared between multiple projects
+        and should not be deleted by the Clean target.
+
+        However, this is not always the case. The .NET SDK has a feature called Artifacts Layout
+        where project outputs are tracked in _project-specific_ locations under a root that is
+        outside of the project directory. In such cases, we need to be able to track FileWritesShareable
+        even from those locations.
+      -->
+      <TrackFileWritesShareableOutsideOfProjectDirectory Condition=" '$(TrackFileWritesShareableOutsideOfProjectDirectory)' == '' ">false</TrackFileWritesShareableOutsideOfProjectDirectory>
+    </PropertyGroup>
+    
+    <!-- Even if we don't allow cleaning filewrites from outside of the project bubble, we should still include FileWritesShareable that are inside the bubble -->
+    <FindUnderPath Condition="!$(TrackFileWritesShareableOutsideOfProjectDirectory)" Path="$(MSBuildProjectDirectory)" Files="@(FileWritesShareable)" UpdateToAbsolutePaths="true">
       <Output TaskParameter="InPath" ItemName="FileWrites"/>
     </FindUnderPath>
 
-    <!-- Find all files in the final output directory. -->
-    <FindUnderPath Path="$(OutDir)" Files="@(FileWrites)" UpdateToAbsolutePaths="true">
+    <!-- Find all files in the final output directory. Use separate item includes for Files based on condition so we don't create a whole new
+         item list unnecessarily -->
+    <FindUnderPath Path="$(OutDir)" Files="@(FileWrites)" UpdateToAbsolutePaths="true" Condition="!$(TrackFileWritesShareableOutsideOfProjectDirectory)">
+      <Output TaskParameter="InPath" ItemName="_CleanCurrentFileWritesInOutput"/>
+    </FindUnderPath>
+    <FindUnderPath Path="$(OutDir)" Files="@(FileWrites);@(FileWritesShareable)" UpdateToAbsolutePaths="true" Condition="$(TrackFileWritesShareableOutsideOfProjectDirectory)">
       <Output TaskParameter="InPath" ItemName="_CleanCurrentFileWritesInOutput"/>
     </FindUnderPath>
 
-    <!-- Find all files in the intermediate output directory. -->
-    <FindUnderPath Path="$(IntermediateOutputPath)" Files="@(FileWrites)" UpdateToAbsolutePaths="true">
+    <!-- Find all files in the intermediate output directory. Same as above, use Conditions to prevent new item list writes -->
+    <FindUnderPath Path="$(IntermediateOutputPath)" Files="@(FileWrites)" UpdateToAbsolutePaths="true" Condition="!$(TrackFileWritesShareableOutsideOfProjectDirectory)">
+      <Output TaskParameter="InPath" ItemName="_CleanCurrentFileWritesInIntermediate"/>
+    </FindUnderPath>
+    <FindUnderPath Path="$(IntermediateOutputPath)" Files="@(FileWrites);@(FileWritesShareable)" UpdateToAbsolutePaths="true" Condition="$(TrackFileWritesShareableOutsideOfProjectDirectory)">
       <Output TaskParameter="InPath" ItemName="_CleanCurrentFileWritesInIntermediate"/>
     </FindUnderPath>
 

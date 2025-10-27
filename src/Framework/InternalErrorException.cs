@@ -148,6 +148,8 @@ namespace Microsoft.Build.Framework
         }
         #endregion
 
+#if DEBUG
         private static bool RunningTests() => BuildEnvironmentState.s_runningTests;
+#endif
     }
 }

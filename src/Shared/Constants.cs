@@ -63,7 +63,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// The most current Visual Studio Version known to this version of MSBuild.
         /// </summary>
-        internal const string CurrentVisualStudioVersion = "17.0";
+        internal const string CurrentVisualStudioVersion = "18.0";
 
         /// <summary>
         /// The most current ToolsVersion known to this version of MSBuild.
@@ -91,7 +91,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Current version of this MSBuild Engine assembly in the form, e.g, "12.0"
         /// </summary>
-        internal const string CurrentProductVersion = "17.0";
+        internal const string CurrentProductVersion = "18.0";
 
         /// <summary>
         /// Symbol used in ProjectReferenceTarget items to represent default targets
@@ -154,6 +154,11 @@ namespace Microsoft.Build.Shared
         internal const string TargetFrameworks = nameof(TargetFrameworks);
         internal const string TargetFramework = nameof(TargetFramework);
         internal const string UsingMicrosoftNETSdk = nameof(UsingMicrosoftNETSdk);
+
+        /// <summary>
+        /// When true, `SkipNonexistentProjects=Build` becomes the default setting of MSBuild tasks.
+        /// </summary>
+        internal const string BuildNonexistentProjectsByDefault = "_" + nameof(BuildNonexistentProjectsByDefault);
     }
 
     // TODO: Remove these when VS gets updated to setup project cache plugins.

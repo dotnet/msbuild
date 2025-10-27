@@ -1,8 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -107,7 +108,7 @@ namespace Microsoft.Build.Execution
         /// Snapshot of the environment from the configuration this results comes from.
         /// This should only be populated when the configuration for this result is moved between nodes.
         /// </summary>
-        private Dictionary<string, string>? _savedEnvironmentVariables;
+        private FrozenDictionary<string, string>? _savedEnvironmentVariables;
 
         /// <summary>
         /// When this key is in the dictionary <see cref="_savedEnvironmentVariables"/>, serialize the build result version.
@@ -437,7 +438,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
-        Dictionary<string, string>? IBuildResults.SavedEnvironmentVariables
+        FrozenDictionary<string, string>? IBuildResults.SavedEnvironmentVariables
         {
             get => _savedEnvironmentVariables;
 
@@ -655,6 +656,7 @@ namespace Microsoft.Build.Execution
             }
             else
             {
+                IDictionary<string, string>? savedEnvironmentVariables = _savedEnvironmentVariables;
                 Dictionary<string, string> additionalEntries = new();
 
                 if (translator.Mode == TranslationDirection.WriteToStream)
@@ -663,7 +665,7 @@ namespace Microsoft.Build.Execution
                     additionalEntries.Add(SpecialKeyForVersion, String.Empty);
 
                     // Serialize the special key together with _savedEnvironmentVariables dictionary using the workaround overload of TranslateDictionary:
-                    translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, s_additionalEntriesKeys);
+                    translator.TranslateDictionary(ref savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, s_additionalEntriesKeys);
 
                     // Serialize version
                     translator.Translate(ref _version);
@@ -671,7 +673,8 @@ namespace Microsoft.Build.Execution
                 else if (translator.Mode == TranslationDirection.ReadFromStream)
                 {
                     // Read the dictionary using the workaround overload of TranslateDictionary: special keys (additionalEntriesKeys) would be read to additionalEntries instead of the _savedEnvironmentVariables dictionary.
-                    translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, s_additionalEntriesKeys);
+                    translator.TranslateDictionary(ref savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, s_additionalEntriesKeys);
+                    _savedEnvironmentVariables = savedEnvironmentVariables?.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
 
                     // If the special key SpecialKeyForVersion present in additionalEntries, also read a version, otherwise set it to 0.
                     if (additionalEntries is not null && additionalEntries.ContainsKey(SpecialKeyForVersion))

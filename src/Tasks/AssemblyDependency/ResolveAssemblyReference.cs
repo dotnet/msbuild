@@ -16,6 +16,7 @@ using System.Xml.Linq;
 
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
@@ -177,8 +178,10 @@ namespace Microsoft.Build.Tasks
         private ITaskItem[] _resolvedSDKReferences = Array.Empty<TaskItem>();
         private bool _ignoreDefaultInstalledAssemblyTables = false;
         private bool _ignoreDefaultInstalledAssemblySubsetTables = false;
+        private bool _enableCustomCulture = false;
         private string[] _candidateAssemblyFiles = [];
         private string[] _targetFrameworkDirectories = [];
+        private string[] _nonCultureResourceDirectories = [];
         private string[] _searchPaths = [];
         private string[] _allowedAssemblyExtensions = [".winmd", ".dll", ".exe"];
         private string[] _relatedFileExtensions = [".pdb", ".xml", ".pri"];
@@ -420,6 +423,24 @@ namespace Microsoft.Build.Tasks
         {
             get { return _targetFrameworkDirectories; }
             set { _targetFrameworkDirectories = value; }
+        }
+
+        /// <summary>
+        /// Contains list of directories that point to custom culture resources that has to be ignored by MSBuild.
+        /// </summary>
+        public string[] NonCultureResourceDirectories
+        {
+            get { return _nonCultureResourceDirectories; }
+            set { _nonCultureResourceDirectories = value; }
+        }
+
+        /// <summary>
+        /// Contains the information if custom culture is enabled.
+        /// </summary>
+        public bool EnableCustomCulture
+        {
+            get { return _enableCustomCulture; }
+            set { _enableCustomCulture = value; }
         }
 
         /// <summary>
@@ -901,6 +922,11 @@ namespace Microsoft.Build.Tasks
         public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
+        /// Allow the task to run on the out-of-proc node if enabled for this build.
+        /// </summary>
+        public bool AllowOutOfProcNode { get; set; }
+
+        /// <summary>
         /// This is a list of all primary references resolved to full paths.
         ///     bool CopyLocal - whether the given reference should be copied to the output directory.
         ///     string FusionName - the fusion name for this dependency.
@@ -915,7 +941,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ResolvedFiles
         {
-            get { return _resolvedFiles; }
+            get => _resolvedFiles;
+            internal set => _resolvedFiles = value;
         }
 
         /// <summary>
@@ -934,7 +961,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ResolvedDependencyFiles
         {
-            get { return _resolvedDependencyFiles; }
+            get => _resolvedDependencyFiles;
+            internal set => _resolvedDependencyFiles = value;
         }
 
         /// <summary>
@@ -946,7 +974,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] RelatedFiles
         {
-            get { return _relatedFiles; }
+            get => _relatedFiles;
+            internal set => _relatedFiles = value;
         }
 
         /// <summary>
@@ -959,7 +988,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] SatelliteFiles
         {
-            get { return _satelliteFiles; }
+            get => _satelliteFiles;
+            internal set => _satelliteFiles = value;
         }
 
         /// <summary>
@@ -970,7 +1000,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] SerializationAssemblyFiles
         {
-            get { return _serializationAssemblyFiles; }
+            get => _serializationAssemblyFiles;
+            internal set => _serializationAssemblyFiles = value;
         }
 
         /// <summary>
@@ -980,7 +1011,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ScatterFiles
         {
-            get { return _scatterFiles; }
+            get => _scatterFiles;
+            internal set => _scatterFiles = value;
         }
 
         /// <summary>
@@ -991,7 +1023,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] CopyLocalFiles
         {
-            get { return _copyLocalFiles; }
+            get => _copyLocalFiles;
+            internal set => _copyLocalFiles = value;
         }
 
         /// <summary>
@@ -1006,7 +1039,8 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] SuggestedRedirects
         {
-            get { return _suggestedRedirects; }
+            get => _suggestedRedirects;
+            internal set => _suggestedRedirects = value;
         }
 
         /// <summary>
@@ -1031,7 +1065,7 @@ namespace Microsoft.Build.Tasks
         public String DependsOnSystemRuntime
         {
             get;
-            private set;
+            internal set;
         }
 
         /// <summary>
@@ -1041,7 +1075,7 @@ namespace Microsoft.Build.Tasks
         public String DependsOnNETStandard
         {
             get;
-            private set;
+            internal set;
         }
 
         /// <summary>
@@ -1049,7 +1083,11 @@ namespace Microsoft.Build.Tasks
         /// been outputted in MSB3277. Otherwise empty.
         /// </summary>
         [Output]
-        public ITaskItem[] UnresolvedAssemblyConflicts => _unresolvedConflicts.ToArray();
+        public ITaskItem[] UnresolvedAssemblyConflicts
+        {
+            get => [.. _unresolvedConflicts];
+            internal set => _unresolvedConflicts = [.. value];
+        }
 
         #endregion
         #region Logging
@@ -1511,7 +1549,10 @@ namespace Microsoft.Build.Tasks
             }
 
             Log.LogMessage(importance, property, "TargetFrameworkDirectories");
-            Log.LogMessage(importance, indent + String.Join(",", TargetFrameworkDirectories));
+            Log.LogMessage(importance, indent + string.Join(",", TargetFrameworkDirectories));
+
+            Log.LogMessage(importance, property, "NonCultureResourceDirectories");
+            Log.LogMessage(importance, indent + string.Join(",", NonCultureResourceDirectories));
 
             Log.LogMessage(importance, property, "InstalledAssemblyTables");
             foreach (ITaskItem installedAssemblyTable in InstalledAssemblyTables)
@@ -1546,6 +1587,12 @@ namespace Microsoft.Build.Tasks
 
             Log.LogMessage(importance, property, "AutoUnify");
             Log.LogMessage(importance, $"{indent}{AutoUnify}");
+
+            Log.LogMessage(importance, property, "EnableCustomCulture");
+            Log.LogMessage(importance, $"{indent}{EnableCustomCulture}");
+
+            Log.LogMessage(importance, property, "EnableCustomCulture");
+            Log.LogMessage(importance, $"{indent}{EnableCustomCulture}");
 
             Log.LogMessage(importance, property, "CopyLocalDependenciesWhenParentReferenceInGac");
             Log.LogMessage(importance, $"{indent}{_copyLocalDependenciesWhenParentReferenceInGac}");
@@ -2386,6 +2433,7 @@ namespace Microsoft.Build.Tasks
                         _findSatellites,
                         _findSerializationAssemblies,
                         _findRelatedFiles,
+                        _enableCustomCulture,
                         _searchPaths,
                         _allowedAssemblyExtensions,
                         _relatedFileExtensions,
@@ -2419,7 +2467,8 @@ namespace Microsoft.Build.Tasks
                         _warnOrErrorOnTargetArchitectureMismatch,
                         _ignoreTargetFrameworkAttributeVersionMismatch,
                         _unresolveFrameworkAssembliesFromHigherFrameworks,
-                        assemblyMetadataCache);
+                        assemblyMetadataCache,
+                        _nonCultureResourceDirectories);
 
                     dependencyTable.FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences;
 
@@ -3212,6 +3261,35 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
+            if (AllowOutOfProcNode
+                && BuildEngine is IBuildEngine10 buildEngine10
+                && buildEngine10.EngineServices.IsOutOfProcRarNodeEnabled)
+            {
+                try
+                {
+#pragma warning disable CA2000 // The OutOfProcRarClient is disposable but its disposal is handled by RegisterTaskObject.
+                    OutOfProcRarClient rarClient = OutOfProcRarClient.GetInstance(buildEngine10);
+                    bool success = rarClient.Execute(this);
+
+                    // FilesWritten already defines a public setter which no-ops. Changing its visiblity is a breaking
+                    // change, so we can't set it outside of RAR when we check for properties with OutputAttribute.
+                    // It only has two possible states, so we can just compute it here.
+                    if (_stateFile != null && FileUtilities.FileExistsNoThrow(_stateFile))
+                    {
+                        _filesWritten.Add(new TaskItem(_stateFile));
+                    }
+
+                    return success;
+#pragma warning restore CA2000 // Dispose objects before losing scope
+                }
+                catch (Exception ex)
+                {
+                    // If the out-of-proc connection failed, fall back to in-proc.
+                    // TODO: Disable out-of-proc for the remainder of the build if any connection fails.
+                    CommunicationsUtilities.Trace("RAR out-of-proc connection failed, failing back to in-proc. Exception: {0}", ex);
+                }
+            }
+
             return Execute(
                 p => FileUtilities.FileExistsNoThrow(p),
                 p => FileUtilities.DirectoryExistsNoThrow(p),
@@ -3234,7 +3312,6 @@ namespace Microsoft.Build.Tasks
                     => AssemblyInformation.IsWinMDFile(fullPath, getAssemblyRuntimeVersion, fileExists, out imageRuntimeVersion, out isManagedWinmd),
                 p => ReferenceTable.ReadMachineTypeFromPEHeader(p));
         }
-
         #endregion
     }
 }

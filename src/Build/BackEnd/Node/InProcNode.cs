@@ -1,9 +1,9 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System.Collections.Frozen;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.Caching;
@@ -31,7 +31,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The environment at the time the build is started.
         /// </summary>
-        private IDictionary<string, string> _savedEnvironment;
+        private FrozenDictionary<string, string> _savedEnvironment;
 
         /// <summary>
         /// The current directory at the time the build is started.
@@ -103,18 +103,23 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly ResourceRequestDelegate _resourceRequestHandler;
 
+        private readonly int _nodeId;
+
         /// <summary>
         /// Constructor.
         /// </summary>
-        public InProcNode(IBuildComponentHost componentHost, INodeEndpoint inProcNodeEndpoint)
+        public InProcNode(int nodeId, IBuildComponentHost componentHost, INodeEndpoint inProcNodeEndpoint)
         {
+            _nodeId = nodeId;
             _componentHost = componentHost;
             _nodeEndpoint = inProcNodeEndpoint;
             _receivedPackets = new ConcurrentQueue<INodePacket>();
             _packetReceivedEvent = new AutoResetEvent(false);
             _shutdownEvent = new AutoResetEvent(false);
 
-            _buildRequestEngine = componentHost.GetComponent(BuildComponentType.RequestEngine) as IBuildRequestEngine;
+            IBuildComponent buildRequestEngine = BuildRequestEngine.CreateComponent(BuildComponentType.RequestEngine);
+            buildRequestEngine.InitializeComponent(componentHost);
+            _buildRequestEngine = (IBuildRequestEngine)buildRequestEngine;
 
             _engineExceptionEventHandler = OnEngineException;
             _newConfigurationRequestEventHandler = OnNewConfigurationRequest;
@@ -220,6 +225,16 @@ namespace Microsoft.Build.BackEnd
         {
             // The in-proc endpoint shouldn't be serializing, just routing.
             ErrorUtilities.ThrowInternalError("Unexpected call to DeserializeAndRoutePacket on the in-proc node.");
+        }
+
+        /// <summary>
+        /// Not necessary for in-proc node - we don't serialize.
+        /// </summary>
+        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            // The in-proc endpoint shouldn't be serializing, just routing.
+            ErrorUtilities.ThrowInternalError("Unexpected call to DeserializePacket on the in-proc node.");
+            return null;
         }
 
         /// <summary>
@@ -425,6 +440,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleBuildRequest(BuildRequest request)
         {
+            if (_componentHost.BuildParameters.MultiThreaded)
+            {
+                request.ScheduledNodeId = _nodeId;
+            }
             _buildRequestEngine.SubmitBuildRequest(request);
         }
 

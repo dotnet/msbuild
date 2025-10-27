@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,13 +11,14 @@ using Microsoft.Build.Logging;
 using Shouldly;
 using VerifyXunit;
 using Xunit;
-
+using Xunit.NetCore.Extensions;
 using static VerifyXunit.Verifier;
 
 
 namespace Microsoft.Build.CommandLine.UnitTests;
 
 [UsesVerify]
+[UseInvariantCulture]
 public class NodeStatus_Transition_Tests
 {
     public NodeStatus_Transition_Tests()
@@ -29,7 +31,7 @@ public class NodeStatus_Transition_Tests
     {
 #if DEBUG
         // This is testing a Debug.Assert, which won't throw in Release mode.
-        Func<TerminalNodeStatus> newNodeStatus = () => new TerminalNodeStatus("project", "tfm", AnsiCodes.Colorize("colorized target", TerminalColor.Green), new MockStopwatch());
+        Func<TerminalNodeStatus> newNodeStatus = () => new TerminalNodeStatus("project", "tfm", "rid", AnsiCodes.Colorize("colorized target", TerminalColor.Green), new MockStopwatch());
         newNodeStatus.ShouldThrow<ArgumentException>().Message.ShouldContain("Target should not contain any escape codes, if you want to colorize target use the other constructor.");
 #endif
     }
@@ -39,10 +41,10 @@ public class NodeStatus_Transition_Tests
     {
         var rendered = Animate(
             [
-                new("Namespace.Project", "TargetFramework", "Build", new MockStopwatch())
+                new("Namespace.Project", "TargetFramework", null, "Build", new MockStopwatch())
             ],
             [
-               new("Namespace.Project", "TargetFramework", "Testing", new MockStopwatch())
+               new("Namespace.Project", "TargetFramework", null, "Testing", new MockStopwatch())
             ]);
 
         await VerifyReplay(rendered);
@@ -54,7 +56,7 @@ public class NodeStatus_Transition_Tests
         // This test look like there is no change between the frames, but we ask the stopwatch for time they will increase the number.
         // We need this because animations check that NodeStatus reference is the same.
         // And we cannot use MockStopwatch because we don't know when to call Tick on them, and if we do it right away, the time will update in "both" nodes.
-        TerminalNodeStatus node = new("Namespace.Project", "TargetFramework", "Build", new TickingStopwatch());
+        TerminalNodeStatus node = new("Namespace.Project", "TargetFramework", null, "Build", new TickingStopwatch());
         var rendered = Animate(
             [
                 node,
@@ -71,10 +73,10 @@ public class NodeStatus_Transition_Tests
     {
         var rendered = Animate(
             [
-                new("Namespace.Project", "TargetFramework", "Testing", new MockStopwatch())
+                new("Namespace.Project", "TargetFramework", null, "Testing", new MockStopwatch())
             ],
             [
-               new("Namespace.Project", "TargetFramework", TerminalColor.Red, "failed", "MyTestName1", new MockStopwatch())
+               new("Namespace.Project", "TargetFramework", null, TerminalColor.Red, "failed", "MyTestName1", new MockStopwatch())
             ]);
 
         await VerifyReplay(rendered);
@@ -86,7 +88,7 @@ public class NodeStatus_Transition_Tests
         // This test look like there is no change between the frames, but we ask the stopwatch for time they will increase the number.
         // We need this because animations check that NodeStatus reference is the same.
         // And we cannot use MockStopwatch because we don't know when to call Tick on them, and if we do it right away, the time will update in "both" nodes.
-        TerminalNodeStatus node = new("Namespace.Project", "TargetFramework", TerminalColor.Green, "passed", "MyTestName1", new TickingStopwatch());
+        TerminalNodeStatus node = new("Namespace.Project", "TargetFramework", null, TerminalColor.Green, "passed", "MyTestName1", new TickingStopwatch());
         var rendered = Animate(
             [
                 node,

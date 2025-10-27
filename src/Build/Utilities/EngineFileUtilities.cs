@@ -5,13 +5,13 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Components.Logging;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Internal
 {
@@ -594,30 +594,13 @@ namespace Microsoft.Build.Internal
             return _regexMatchCache.Value.GetOrAdd(fileSpec, file => s_lazyWildCardExpansionRegexes.Any(regex => regex.IsMatch(fileSpec)));
         }
 
-        /// <summary>
-        /// Returns a Func that will return true IFF its argument matches any of the specified filespecs.
-        /// Assumes filespec may be escaped, so it unescapes it.
-        /// The returned function makes no escaping assumptions or escaping operations. Its callers should control escaping.
-        /// </summary>
-        /// <param name="filespecsEscaped"></param>
-        /// <param name="currentDirectory"></param>
-        /// <returns>A Func that will return true IFF its argument matches any of the specified filespecs.</returns>
-        internal static Func<string, bool> GetFileSpecMatchTester(IList<string> filespecsEscaped, string? currentDirectory)
-        {
-            var matchers = filespecsEscaped
-                .Select(fs => new Lazy<FileSpecMatcherTester>(() => FileSpecMatcherTester.Parse(currentDirectory, fs)))
-                .ToList();
-
-            return file => matchers.Any(m => m.Value.IsMatch(file));
-        }
-
         internal sealed class IOCache
         {
             private readonly Lazy<ConcurrentDictionary<string, bool>> existenceCache = new Lazy<ConcurrentDictionary<string, bool>>(() => new ConcurrentDictionary<string, bool>(), true);
 
             public bool DirectoryExists(string directory)
             {
-                return existenceCache.Value.GetOrAdd(directory, directory => Directory.Exists(directory));
+                return existenceCache.Value.GetOrAdd(directory, directory => FileSystems.Default.DirectoryExists(directory));
             }
         }
     }

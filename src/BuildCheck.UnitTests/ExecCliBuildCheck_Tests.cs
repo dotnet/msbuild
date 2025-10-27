@@ -74,7 +74,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             }));
 
             _registrationContext.Results.Count.ShouldBe(1);
-            _registrationContext.Results[0].CheckRule.Id.ShouldBe("BC0109");
+            _registrationContext.Results[0].CheckRule.Id.ShouldBe("BC0302");
         }
 
         [Theory]
