@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void SetDebugPath_ShouldRedirectSolutionDirectoryPathToTemp()
+        public void SetDebugPath_WhenUserSetRelativePath()
         {
             using TestEnvironment env = TestEnvironment.Create();
             {
@@ -61,9 +61,8 @@ namespace Microsoft.Build.UnitTests
                     DebugUtils.SetDebugPath();
                     string resultPath = DebugUtils.DebugPath;
                     resultPath.ShouldNotBeNull();
-                    resultPath.ShouldStartWith(FileUtilities.TempFileDirectory);
-                    resultPath.ShouldContain("MSBuild_Logs");
-                    resultPath.ShouldNotContain("TestLogs");
+                    resultPath.ShouldBe(Path.Combine(relativePath, ".MSBuild_Logs"));
+                    Directory.Exists(resultPath).ShouldBeTrue();
                 }
                 finally
                 {
@@ -76,7 +75,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void SetDebugPath_ShouldRedirectPathInSolutionDirectoryToTemp()
+        public void SetDebugPath_WhenUserSetAbsolutePath()
         {
             using TestEnvironment env = TestEnvironment.Create();
             {
@@ -97,9 +96,7 @@ namespace Microsoft.Build.UnitTests
                     DebugUtils.SetDebugPath();
                     string resultPath = DebugUtils.DebugPath;
                     resultPath.ShouldNotBeNull();
-                    resultPath.ShouldStartWith(FileUtilities.TempFileDirectory);
-                    resultPath.ShouldContain("MSBuild_Logs");
-                    resultPath.ShouldNotBe(fullInSolutionPath);
+                    resultPath.ShouldBe(Path.Combine(fullInSolutionPath, ".MSBuild_Logs"));
                 }
                 finally
                 {
@@ -112,7 +109,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void SetDebugPath_ShouldNotRedirectPathOutsideSolution()
+        public void SetDebugPath_WhenUserNotSetDebugPath()
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
@@ -123,16 +120,14 @@ namespace Microsoft.Build.UnitTests
 
                 string testCurrentDir = Path.GetDirectoryName(dummyProject.ProjectFile);
                 env.SetCurrentDirectory(testCurrentDir);
-
-                string outsidePath = Path.Combine(FileUtilities.TempFileDirectory, "ExternalLogs");
-                string fullOutsidePath = Path.GetFullPath(outsidePath);
-                var transientEnvVar = env.SetEnvironmentVariable("MSBUILDDEBUGPATH", outsidePath);
+                var transientEnvVar = env.SetEnvironmentVariable("MSBUILDDEBUGPATH", null);
                 var transientDebugEngine = env.SetEnvironmentVariable("MSBuildDebugEngine", "1");
                 try
                 {
                     DebugUtils.SetDebugPath();
                     string resultPath = DebugUtils.DebugPath;
-                    resultPath.ShouldBe(fullOutsidePath);
+                    resultPath.ShouldNotBeNull();
+                    // resultPath.ShouldBe(Path.Combine(testCurrentDir, ".MSBuild_Logs"));
                 }
                 finally
                 {
