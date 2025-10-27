@@ -11,7 +11,7 @@ namespace Microsoft.Build.Logging;
 /// <summary>
 /// Encapsulates the per-node data shown in live node output.
 /// </summary>
-internal class TerminalNodeStatus
+public class TerminalNodeStatus
 {
     public string Project { get; }
     public string? TargetFramework { get; }
