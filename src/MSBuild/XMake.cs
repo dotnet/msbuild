@@ -233,13 +233,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
         [LoaderOptimization(LoaderOptimization.MultiDomain)]
 #endif
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-        public static int Main(
-#if !FEATURE_GET_COMMANDLINE
-            string[] args
-#endif
-            )
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        public static int Main(string[] args)
         {
             // Setup the console UI.
             using AutomaticEncodingRestorer _ = new();
@@ -263,35 +257,18 @@ namespace Microsoft.Build.CommandLine
             if (
                 Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
-                CanRunServerBasedOnCommandLineSwitches(
-#if FEATURE_GET_COMMANDLINE
-                    Environment.CommandLine))
-#else
-                    ConstructArrayArg(args)))
-#endif
+                CanRunServerBasedOnCommandLineSwitches(Environment.CommandLine))
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
 
                 // Use the client app to execute build in msbuild server. Opt-in feature.
-                exitCode = ((s_initialized && MSBuildClientApp.Execute(
-#if FEATURE_GET_COMMANDLINE
-                Environment.CommandLine,
-#else
-                ConstructArrayArg(args),
-#endif
-                s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
+                exitCode = (s_initialized && MSBuildClientApp.Execute(Environment.CommandLine, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1;
             }
             else
             {
                 // return 0 on success, non-zero on failure
-                exitCode = ((s_initialized && Execute(
-#if FEATURE_GET_COMMANDLINE
-                Environment.CommandLine)
-#else
-                ConstructArrayArg(args))
-#endif
-                == ExitType.Success) ? 0 : 1);
+                exitCode = (s_initialized && Execute(Environment.CommandLine) == ExitType.Success) ? 0 : 1;
             }
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
@@ -310,12 +287,7 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Will not throw. If arguments processing fails, we will not run it on server - no reason as it will not run any build anyway.
         /// </remarks>
-        private static bool CanRunServerBasedOnCommandLineSwitches(
-#if FEATURE_GET_COMMANDLINE
-            string commandLine)
-#else
-            string[] commandLine)
-#endif
+        private static bool CanRunServerBasedOnCommandLineSwitches(string commandLine)
         {
             bool canRunServer = true;
             try
@@ -352,23 +324,6 @@ namespace Microsoft.Build.CommandLine
 
             return canRunServer;
         }
-
-#if !FEATURE_GET_COMMANDLINE
-        /// <summary>
-        /// Insert the command executable path as the first element of the args array.
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        private static string[] ConstructArrayArg(string[] args)
-        {
-            string[] newArgArray = new string[args.Length + 1];
-
-            newArgArray[0] = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-            Array.Copy(args, 0, newArgArray, 1, args.Length);
-
-            return newArgArray;
-        }
-#endif // !FEATURE_GET_COMMANDLINE
 
         /// <summary>
         /// Append output file with elapsedTime
@@ -616,12 +571,7 @@ namespace Microsoft.Build.CommandLine
         /// is ignored.</param>
         /// <returns>A value of type ExitType that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
-        public static ExitType Execute(
-#if FEATURE_GET_COMMANDLINE
-            string commandLine)
-#else
-            string[] commandLine)
-#endif
+        public static ExitType Execute(string commandLine)
         {
             DebuggerLaunchCheck();
 
@@ -638,9 +588,7 @@ namespace Microsoft.Build.CommandLine
             // and those form the great majority of our unnecessary memory use.
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
 
-#if FEATURE_GET_COMMANDLINE
             ErrorUtilities.VerifyThrowArgumentLength(commandLine);
-#endif
 
             AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
 
@@ -652,14 +600,8 @@ namespace Microsoft.Build.CommandLine
             TextWriter targetsWriter = null;
             try
             {
-#if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStart(commandLine);
-#else
-                if (MSBuildEventSource.Log.IsEnabled())
-                {
-                    MSBuildEventSource.Log.MSBuildExeStart(string.Join(" ", commandLine));
-                }
-#endif
+
                 Console.CancelKeyPress += cancelHandler;
 
                 // check the operating system the code is running on
@@ -764,11 +706,7 @@ namespace Microsoft.Build.CommandLine
                                             ref getTargetResult,
                                             ref getResultOutputFile,
                                             recursing: false,
-#if FEATURE_GET_COMMANDLINE
                                             commandLine);
-#else
-                                            string.Join(' ', commandLine));
-#endif
 
                 CommandLineSwitches.SwitchesFromResponseFiles = null;
 
@@ -1068,14 +1006,7 @@ namespace Microsoft.Build.CommandLine
                 preprocessWriter?.Dispose();
                 targetsWriter?.Dispose();
 
-#if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStop(commandLine);
-#else
-                if (MSBuildEventSource.Log.IsEnabled())
-                {
-                    MSBuildEventSource.Log.MSBuildExeStop(string.Join(" ", commandLine));
-                }
-#endif
             }
             /**********************************************************************************************************************
              * WARNING: Do NOT add any more catch blocks above!
@@ -1300,11 +1231,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_REPORTFILEACCESSES
             bool reportFileAccesses,
 #endif
-#if FEATURE_GET_COMMANDLINE
             string commandLine)
-#else
-            string[] commandLine)
-#endif
         {
             // Set limitation for multithreaded and MSBUILDFORCEALLTASKSOUTOFPROC=1. Max is 256 because of unique task host id generation.
             if (multiThreaded && Traits.Instance.ForceAllTasksOutOfProcToTaskHost)
@@ -1558,13 +1485,7 @@ namespace Microsoft.Build.CommandLine
 
                     if (!Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager)
                     {
-                        var commandLineString =
-#if FEATURE_GET_COMMANDLINE
-                            commandLine;
-#else
-                            string.Join(" ", commandLine);
-#endif
-                        messagesToLogInBuildLoggers.AddRange(GetMessagesToLogInBuildLoggers(commandLineString));
+                        messagesToLogInBuildLoggers.AddRange(GetMessagesToLogInBuildLoggers(commandLine));
 
                         // Log a message for every response file and include it in log
                         foreach (var responseFilePath in s_includedResponseFiles)
@@ -1996,26 +1917,15 @@ namespace Microsoft.Build.CommandLine
         /// <param name="switchesNotFromAutoResponseFile"></param>
         /// <param name="fullCommandLine"></param>
         /// <returns>Combined bag of switches.</returns>
-        private static void GatherAllSwitches(
-#if FEATURE_GET_COMMANDLINE
-            string commandLine,
-#else
-            string[] commandLine,
-#endif
+        private static void GatherAllSwitches(string commandLine,
             out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile, out string fullCommandLine)
         {
             ResetGatheringSwitchesState();
 
-#if FEATURE_GET_COMMANDLINE
             // split the command line on (unquoted) whitespace
             var commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
 
             s_exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote(commandLineArgs[0]));
-#else
-            var commandLineArgs = new List<string>(commandLine);
-
-            s_exeName = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-#endif
 
 #if USE_MSBUILD_DLL_EXTN
             var msbuildExtn = ".dll";
@@ -2030,11 +1940,7 @@ namespace Microsoft.Build.CommandLine
             // discard the first piece, because that's the path to the executable -- the rest are args
             commandLineArgs.RemoveAt(0);
 
-#if FEATURE_GET_COMMANDLINE
             fullCommandLine = $"'{commandLine}'";
-#else
-            fullCommandLine = $"'{string.Join(' ', commandLine)}'";
-#endif
 
             // parse the command line, and flag syntax errors and obvious switch errors
             switchesNotFromAutoResponseFile = new CommandLineSwitches();

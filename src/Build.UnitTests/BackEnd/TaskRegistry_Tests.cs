@@ -1244,7 +1244,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => registry.GetRegisteredTask("Task1", "none", null, false, new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1)), ElementLocation.Create("none", 1, 2)));
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => registry.GetRegisteredTask("Task1", "none", null, false, new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1)), ElementLocation.Create("none", 1, 2), false));
 
             exception.ErrorCode.ShouldBe("MSB4175");
 
@@ -2008,7 +2008,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                                                             string expectedArchitecture)
         {
             bool retrievedFromCache;
-            var record = registry.GetTaskRegistrationRecord(TestTaskName, null, taskParameters, exactMatchRequired, _targetLoggingContext, _elementLocation, out retrievedFromCache);
+            var record = registry.GetTaskRegistrationRecord(TestTaskName, null, taskParameters, exactMatchRequired, _targetLoggingContext, _elementLocation, out retrievedFromCache, false);
 
             if (shouldBeRetrieved)
             {
