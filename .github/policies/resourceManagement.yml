@@ -159,6 +159,11 @@ configuration:
             action: Opened
         - isAction:
             action: Reopened
+      # empty PRs will match the swr pattern below (because the implementation doesn't consider the 'empty files list' case)
+      # so we force _any_ file to exist before continuing the condition checks
+      - filesMatchPattern:
+          pattern: ".*"
+          matchAny: true
       - or:
         - filesMatchPattern:
             pattern: ^.+\.swr$
