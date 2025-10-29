@@ -2725,6 +2725,46 @@ $@"<Project>
             file1Bytes.SequenceEqual(file2Bytes).ShouldBeTrue("Binlog files should be identical");
         }
 
+        [Fact]
+        public void MultipleBinaryLogsWithDifferentConfigurationsCreatesSeparateLoggers()
+        {
+            var testProject = _env.CreateFile("TestProject.proj", @"
+            <Project>
+              <Import Project=""Imported.proj"" />
+              <Target Name=""Build"">
+                <Message Text=""Hello World!"" />
+              </Target>
+            </Project>
+            ");
+
+            _env.CreateFile("Imported.proj", @"
+            <Project>
+              <PropertyGroup>
+                <TestProp>Value</TestProp>
+              </PropertyGroup>
+            </Project>
+            ");
+
+            string binLogLocation = _env.DefaultTestDirectory.Path;
+            string binLog1 = Path.Combine(binLogLocation, "with-imports.binlog");
+            string binLog2 = Path.Combine(binLogLocation, "no-imports.binlog");
+
+            // One with default imports, one with ProjectImports=None
+            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.Path}\" \"/bl:{binLog1}\" \"/bl:{binLog2};ProjectImports=None\"", out var success, _output);
+
+            success.ShouldBeTrue(output);
+
+            // Verify both binlog files exist
+            File.Exists(binLog1).ShouldBeTrue("First binlog file should exist");
+            File.Exists(binLog2).ShouldBeTrue("Second binlog file should exist");
+
+            // Verify files are different sizes (one has imports embedded, one doesn't)
+            long size1 = new FileInfo(binLog1).Length;
+            long size2 = new FileInfo(binLog2).Length;
+
+            size1.ShouldBeGreaterThan(size2, "Binlog with imports should be larger than one without");
+        }
+
         [Theory]
         [InlineData("-warnaserror", "", "", false)]
         [InlineData("-warnaserror -warnnotaserror:FOR123", "", "", true)]

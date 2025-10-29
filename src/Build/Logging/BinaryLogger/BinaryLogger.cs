@@ -623,5 +623,38 @@ namespace Microsoft.Build.Logging
             }
             return true;
         }
+
+        /// <summary>
+        /// Extracts the non-file-path parameters from binary logger parameters string.
+        /// This is used to compare configurations between multiple binlog parameters.
+        /// </summary>
+        /// <param name="parameters">The parameters string (e.g., "output.binlog;ProjectImports=None")</param>
+        /// <returns>A normalized string of non-path parameters, or empty string if only path parameters</returns>
+        public static string ExtractNonPathParameters(string parameters)
+        {
+            if (string.IsNullOrEmpty(parameters))
+            {
+                return string.Empty;
+            }
+
+            var paramParts = parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+            var nonPathParams = new List<string>();
+
+            foreach (var parameter in paramParts)
+            {
+                // Skip file path parameters
+                if (TryInterpretPathParameterStatic(parameter, out _))
+                {
+                    continue;
+                }
+
+                // This is a configuration parameter (like ProjectImports=None, OmitInitialInfo, etc.)
+                nonPathParams.Add(parameter);
+            }
+
+            // Sort for consistent comparison
+            nonPathParams.Sort(StringComparer.OrdinalIgnoreCase);
+            return string.Join(";", nonPathParams);
+        }
     }
 }
