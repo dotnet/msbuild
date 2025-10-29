@@ -245,7 +245,10 @@ namespace Microsoft.Build.Shared
             string typeName,
             AssemblyLoadInfo assembly,
             bool useTaskHost = false,
-            bool isTaskHostParamsMatchCurrentProc = true) => GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, useTaskHost, isTaskHostParamsMatchCurrentProc);
+            bool taskHostParamsMatchCurrentProc = true)
+        {
+            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, useTaskHost, taskHostParamsMatchCurrentProc);
+        }
 
         /// <summary>
         /// Loads the specified type if it exists in the given assembly. If the type name is fully qualified, then a match (if
@@ -257,7 +260,7 @@ namespace Microsoft.Build.Shared
             string typeName,
             AssemblyLoadInfo assembly)
         {
-            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false, isTaskHostParamsMatchCurrentProc: true);
+            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false, taskHostParamsMatchCurrentProc: true);
         }
 
         /// <summary>
@@ -270,7 +273,7 @@ namespace Microsoft.Build.Shared
             string typeName,
             AssemblyLoadInfo assembly,
             bool useTaskHost,
-            bool isTaskHostParamsMatchCurrentProc)
+            bool taskHostParamsMatchCurrentProc)
         {
             // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
@@ -281,7 +284,7 @@ namespace Microsoft.Build.Shared
             AssemblyInfoToLoadedTypes typeNameToType =
                 loadInfoToType.GetOrAdd(assembly, (_) => new AssemblyInfoToLoadedTypes(_isDesiredType, _));
 
-            return typeNameToType.GetLoadedTypeByTypeName(typeName, useTaskHost, isTaskHostParamsMatchCurrentProc);
+            return typeNameToType.GetLoadedTypeByTypeName(typeName, useTaskHost, taskHostParamsMatchCurrentProc);
         }
 
         /// <summary>
@@ -368,19 +371,20 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Determine if a given type name is in the assembly or not. Return null if the type is not in the assembly.
             /// </summary>
-            internal LoadedType GetLoadedTypeByTypeName(string typeName, bool useTaskHost, bool isTaskHostParamsMatchCurrentProc)
+            internal LoadedType GetLoadedTypeByTypeName(string typeName, bool useTaskHost, bool taskHostParamsMatchCurrentProc)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeName);
 
-                if (ShouldUseMetadataLoadContext(useTaskHost, isTaskHostParamsMatchCurrentProc))
+                if (ShouldUseMetadataLoadContext(useTaskHost, taskHostParamsMatchCurrentProc))
                 {
                     return GetTypeForOutOfProcExecution(typeName);
                 }
 
                 LoadedType loadedType = TryLoadTypeInProc(typeName);
+
+                // Fall back to metadata load context. It will prepare prerequisites for out of proc execution.
                 if (loadedType == null)
                 {
-                    // Fall back to metadata load context. It will prepare prerequisites for out of proc execution.
                     MSBuildEventSource.Log.FallbackAssemblyLoadStart(typeName);
                     loadedType = GetTypeForOutOfProcExecution(typeName);
                     MSBuildEventSource.Log.FallbackAssemblyLoadStop(typeName);
@@ -389,13 +393,62 @@ namespace Microsoft.Build.Shared
                 return loadedType;
             }
 
-            /// <summary>
-            /// If assembly should use metadata load contxt it will be executed out of proc.
-            /// </summary>
-            /// <param name="useTaskHost">Task Host Parameter was specified explicitly in XML or through environment variable.</param>
-            /// <param name="isTaskHostParamsMatchCurrentProc">The parameter defines if Runtime/Architecture explicitly defined in XML match current process.</param>
-            private bool ShouldUseMetadataLoadContext(bool useTaskHost, bool isTaskHostParamsMatchCurrentProc) =>
-                (useTaskHost || !isTaskHostParamsMatchCurrentProc) && _assemblyLoadInfo.AssemblyFile is not null;
+            private LoadedType GetTypeForOutOfProcExecution(string typeName) => _publicTypeNameToLoadedType
+                .GetOrAdd(typeName, typeName =>
+                {
+                    MSBuildEventSource.Log.LoadAssemblyAndFindTypeStart();
+                    Assembly loadedAssembly = LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo);
+                    SetArchitectureAndRuntime(loadedAssembly);
+                    Type foundType = null;
+                    int numberOfTypesSearched = 0;
+
+                    // Try direct type lookup first (fastest)
+                    if (!string.IsNullOrEmpty(typeName))
+                    {
+                        foundType = loadedAssembly.GetType(typeName, throwOnError: false);
+                        if (foundType != null && foundType.IsPublic && _isDesiredType(foundType, null))
+                        {
+                            numberOfTypesSearched = 1;
+                        }
+                    }
+
+                    // Fallback: enumerate all types for partial matching
+                    if (foundType == null)
+                    {
+                        foreach (Type publicType in loadedAssembly.GetExportedTypes())
+                        {
+                            numberOfTypesSearched++;
+                            try
+                            {
+                                if (_isDesiredType(publicType, null) && (typeName.Length == 0 || IsPartialTypeNameMatch(publicType.FullName, typeName)))
+                                {
+                                    foundType = publicType;
+                                    break;
+                                }
+                            }
+                            catch
+                            {
+                                // Ignore types that can't be loaded/reflected upon.
+                                // These types might be needed out of proc and be resolved there.
+                            }
+                        }
+                    }
+
+                    if (foundType != null)
+                    {
+                        MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
+                        var taskItemType = _context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName);
+                        LoadedType loadedType = new(foundType, _assemblyLoadInfo, loadedAssembly, taskItemType, _runtime, _architecture, loadedViaMetadataLoadContext: true);
+                        _context?.Dispose();
+                        _context = null;
+                        MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
+                        return loadedType;
+                    }
+
+                    MSBuildEventSource.Log.LoadAssemblyAndFindTypeStop(_assemblyLoadInfo.AssemblyFile, numberOfTypesSearched);
+
+                    return null;
+                });
 
             private LoadedType TryLoadTypeInProc(string typeName)
             {
@@ -456,7 +509,7 @@ namespace Microsoft.Build.Shared
                     foreach (KeyValuePair<string, Type> desiredTypeInAssembly in _publicTypeNameToType)
                     {
                         // if type matches partially on its name
-                        if (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
+                        if (typeName.Length == 0 || IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
                         {
                             return desiredTypeInAssembly.Value;
                         }
@@ -466,7 +519,7 @@ namespace Microsoft.Build.Shared
                 });
 
                 return type != null
-                    ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, typeof(ITaskItem), architecture: null, loadedViaMetadataLoadContext: false)
+                    ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, typeof(ITaskItem), loadedViaMetadataLoadContext: false)
                     : null;
             }
 
@@ -561,64 +614,13 @@ namespace Microsoft.Build.Shared
                 }
             }
 
-            private LoadedType GetTypeForOutOfProcExecution(string typeName)
-            {
-                return _publicTypeNameToLoadedType.GetOrAdd(typeName, typeName =>
-                {
-                    MSBuildEventSource.Log.LoadAssemblyAndFindTypeStart();
-                    Assembly loadedAssembly = LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo);
-                    SetArchitectureAndRuntime(loadedAssembly);
-                    Type foundType = null;
-                    int numberOfTypesSearched = 0;
-
-                    // Try direct type lookup first (fastest)
-                    if (!string.IsNullOrEmpty(typeName))
-                    {
-                        foundType = loadedAssembly.GetType(typeName, throwOnError: false);
-                        if (foundType != null && foundType.IsPublic && _isDesiredType(foundType, null))
-                        {
-                            numberOfTypesSearched = 1;
-                        }
-                    }
-
-                    // Fallback: enumerate all types for partial matching
-                    if (foundType == null)
-                    {
-                        foreach (Type publicType in loadedAssembly.GetExportedTypes())
-                        {
-                            numberOfTypesSearched++;
-                            try
-                            {
-                                if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
-                                {
-                                    foundType = publicType;
-                                    break;
-                                }
-                            }
-                            catch
-                            {
-                                // Ignore types that can't be loaded/reflected upon.
-                                // These types might be needed out of proc and be resolved there.
-                            }
-                        }
-                    }
-
-                    if (foundType != null)
-                    {
-                        MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
-                        var taskItemType = _context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName);
-                        LoadedType loadedType = new(foundType, _assemblyLoadInfo, loadedAssembly, taskItemType, _architecture, _runtime, loadedViaMetadataLoadContext: true);
-                        _context?.Dispose();
-                        _context = null;
-                        MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
-                        return loadedType;
-                    }
-
-                    MSBuildEventSource.Log.LoadAssemblyAndFindTypeStop(_assemblyLoadInfo.AssemblyFile, numberOfTypesSearched);
-
-                    return null;
-                });
-            }
+            /// <summary>
+            /// Determine whether an assembly is likely to be used out of process and thus loaded with a <see cref="MetadataLoadContext"/>.
+            /// </summary>
+            /// <param name="useTaskHost">Task Host Parameter was specified explicitly in XML or through environment variable.</param>
+            /// <param name="taskHostParamsMatchCurrentProc">The parameter defines if Runtime/Architecture explicitly defined in XML match current process.</param>
+            private bool ShouldUseMetadataLoadContext(bool useTaskHost, bool taskHostParamsMatchCurrentProc) =>
+                (useTaskHost || !taskHostParamsMatchCurrentProc) && _assemblyLoadInfo.AssemblyFile is not null;
 
             /// <summary>
             /// Scan the assembly pointed to by the assemblyLoadInfo for public types. We will use these public types to do partial name matching on

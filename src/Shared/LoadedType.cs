@@ -25,15 +25,15 @@ namespace Microsoft.Build.Shared
         /// <param name="loadedAssembly">The assembly which has been loaded, if any</param>
         /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
         /// <param name="iTaskItemType">type of an ITaskItem</param>
-        /// <param name="architecture">assembly architecture extracted from PE flags</param>
-        /// <param name="runtime"></param>
+        /// <param name="runtime">Assembly runtime based on assembly attributes.</param>
+        /// <param name="architecture">Assembly architecture extracted from PE flags</param>
         internal LoadedType(
             Type type,
             AssemblyLoadInfo assemblyLoadInfo,
             Assembly loadedAssembly,
             Type iTaskItemType,
-            string? architecture = null,
             string? runtime = null,
+            string? architecture = null,
             bool loadedViaMetadataLoadContext = false)
         {
             ErrorUtilities.VerifyThrow(type != null, "We must have the type.");
@@ -163,9 +163,9 @@ namespace Microsoft.Build.Shared
             }
 #else
             // For v3.5 fallback to old full type approach, as oppose to reflection only
-            HasLoadInSeparateAppDomainAttribute = this.Type.GetTypeInfo().IsDefined(typeof(LoadInSeparateAppDomainAttribute), true /* inherited */);
-            HasSTAThreadAttribute = this.Type.GetTypeInfo().IsDefined(typeof(RunInSTAAttribute), true /* inherited */);
-            IsMarshalByRef = this.Type.IsMarshalByRef;
+            HasLoadInSeparateAppDomainAttribute = Type.GetTypeInfo().IsDefined(typeof(LoadInSeparateAppDomainAttribute), true /* inherited */);
+            HasSTAThreadAttribute = Type.GetTypeInfo().IsDefined(typeof(RunInSTAAttribute), true /* inherited */);
+            IsMarshalByRef = Type.IsMarshalByRef;
 #endif
         }
 

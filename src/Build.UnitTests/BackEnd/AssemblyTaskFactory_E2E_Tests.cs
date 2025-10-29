@@ -27,7 +27,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [WindowsFullFrameworkOnlyFact]
         public void FrameworkTaskArchitectureMissmatchHandledSuccessfullyTest()
         {
-            using TestEnvironment env = TestEnvironment.Create(_output, setupDotnetEnvVars: true);
+            using TestEnvironment env = TestEnvironment.Create(_output);
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleFrameworkTask", "TestTask", "TestTask.csproj");
 

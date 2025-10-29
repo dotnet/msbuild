@@ -997,8 +997,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
                     false,
                     CancellationToken.None);
-                _host.FindTask(null);
-                _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, null, scheduledNodeId: 1);
+                _host.FindTask(TaskHostParameters.Empty);
+                _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
             });
         }
         /// <summary>
@@ -1026,8 +1026,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 false,
                 CancellationToken.None);
 
-            _host.FindTask(null);
-            _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, null, scheduledNodeId: 1);
+            _host.FindTask(TaskHostParameters.Empty);
+            _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
             _logger.AssertLogContains("MSB4036");
         }
 
@@ -1254,7 +1254,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskBuilderTestTask.TaskBuilderTestTaskFactory taskFactory = new TaskBuilderTestTask.TaskBuilderTestTaskFactory();
             taskFactory.ThrowOnExecute = throwOnExecute;
             string taskName = "TaskBuilderTestTask";
-            (_host as TaskExecutionHost)._UNITTESTONLY_TaskFactoryWrapper = new TaskFactoryWrapper(taskFactory, loadedType, taskName, null);
+            (_host as TaskExecutionHost)._UNITTESTONLY_TaskFactoryWrapper = new TaskFactoryWrapper(taskFactory, loadedType, taskName, TaskHostParameters.Empty);
             _host.InitializeForTask(
                 this,
                 tlc,
@@ -1289,8 +1289,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _bucket = new ItemBucket(FrozenSet<string>.Empty, new Dictionary<string, string>(), new Lookup(itemsByName, new PropertyDictionary<ProjectPropertyInstance>()), 0);
             _bucket.Initialize(null);
-            _host.FindTask(null);
-            _host.InitializeForBatch(talc, _bucket, null, scheduledNodeId: 1);
+            _host.FindTask(TaskHostParameters.Empty);
+            _host.InitializeForBatch(talc, _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
             _parametersSetOnTask = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             _outputsReadFromTask = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
         }

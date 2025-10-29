@@ -275,7 +275,7 @@ namespace Microsoft.Build.Shared
                     foreach (KeyValuePair<string, Type> desiredTypeInAssembly in _publicTypeNameToType)
                     {
                         // if type matches partially on its name
-                        if (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
+                        if (typeName.Length == 0 || IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
                         {
                             return desiredTypeInAssembly.Value;
                         }

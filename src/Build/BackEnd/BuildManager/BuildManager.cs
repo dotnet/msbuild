@@ -1068,6 +1068,8 @@ namespace Microsoft.Build.Execution
                 {
                     _resultsCache!.ClearResults();
                 }
+
+                TaskRouter.ClearCache();
             }
             catch (Exception e)
             {
