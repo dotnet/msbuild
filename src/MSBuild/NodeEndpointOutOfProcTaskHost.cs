@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 
 #nullable disable
@@ -31,9 +32,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Returns the host handshake for this node endpoint
         /// </summary>
-        protected override Handshake GetHandshake()
-        {
-            return new Handshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: true, nodeReuse: _nodeReuse));
-        }
+        protected override Handshake GetHandshake() =>
+            new(CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: TaskHostParameters.Empty, nodeReuse: _nodeReuse));
     }
 }

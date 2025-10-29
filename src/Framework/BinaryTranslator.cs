@@ -193,6 +193,37 @@ namespace Microsoft.Build.BackEnd
             public void Translate(ref uint unsignedInteger) => unsignedInteger = _reader.ReadUInt32();
 
             /// <summary>
+            /// Translates a TaskHostParameters.
+            /// </summary>
+            /// <param name="value">The TaskHostParameters to be translated.</param>
+            public void Translate(ref TaskHostParameters value)
+            {
+                string runtime = null;
+                string architecture = null;
+                string dotnetHostPath = null;
+                string msBuildAssemblyPath = null;
+                bool? isTaskHostFactory = null;
+
+                Translate(ref runtime);
+                Translate(ref architecture);
+                Translate(ref dotnetHostPath);
+                Translate(ref msBuildAssemblyPath);
+
+                bool hasTaskHostFactory = _reader.ReadBoolean();
+                if (hasTaskHostFactory)
+                {
+                    isTaskHostFactory = _reader.ReadBoolean();
+                }
+
+                value = new TaskHostParameters(
+                    runtime: runtime,
+                    architecture: architecture,
+                    dotnetHostPath: dotnetHostPath,
+                    msBuildAssemblyPath: msBuildAssemblyPath,
+                    taskHostFactoryExplicitlyRequested: isTaskHostFactory);
+            }
+
+            /// <summary>
             /// Translates an <see langword="int"/> array.
             /// </summary>
             /// <param name="array">The array to be translated.</param>
@@ -1087,6 +1118,30 @@ namespace Microsoft.Build.BackEnd
             public void Translate(ref double value)
             {
                 _writer.Write(value);
+            }
+
+            /// <summary>
+            /// Translates a TaskHostParameters.
+            /// </summary>
+            /// <param name="value">The TaskHostParameters to be translated.</param>
+            public void Translate(ref TaskHostParameters value)
+            {
+                string runtime = value.Runtime;
+                string architecture = value.Architecture;
+                string dotnetHostPath = value.DotnetHostPath;
+                string msBuildAssemblyPath = value.MSBuildAssemblyPath;
+
+                Translate(ref runtime);
+                Translate(ref architecture);
+                Translate(ref dotnetHostPath);
+                Translate(ref msBuildAssemblyPath);
+
+                bool hasTaskHostFactory = value.TaskHostFactoryExplicitlyRequested.HasValue;
+                _writer.Write(hasTaskHostFactory);
+                if (hasTaskHostFactory)
+                {
+                    _writer.Write(value.TaskHostFactoryExplicitlyRequested.Value);
+                }
             }
 
             /// <summary>
