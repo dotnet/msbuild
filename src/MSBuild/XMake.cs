@@ -657,7 +657,7 @@ namespace Microsoft.Build.CommandLine
                 bool reportFileAccesses = false;
 #endif
 
-                CommandLineParser.GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _, out _);
+                CommandLineParser.GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _, out s_exeName);
 
                 CommunicationsUtilities.Trace($"Command line parameters: {commandLine}");
 
