@@ -26,6 +26,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
@@ -3722,6 +3723,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand intrinsic property function calls a static arithmetic method
         /// </summary>
         [Fact]
+        [UseInvariantCulture]
         public void PropertyFunctionStaticMethodIntrinsicMaths()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -4632,6 +4634,7 @@ $(
         }
 
         [Fact]
+        [UseInvariantCulture]
         public void PropertyFunctionMSBuildAddRealArgument()
         {
             // string argument is an integer that exceeds the size of long.
