@@ -238,11 +238,34 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     // This will load the resolver assembly into the default load context if possible, and fall back to LoadFrom context.
                     // We very much prefer the default load context because it allows native images to be used by the CLR, improving startup perf.
-                    AssemblyName assemblyName = new AssemblyName(resolverFileName)
+                    bool isRunningInVS = BuildEnvironmentHelper.Instance.RunningInVisualStudio;
+                    if (!isRunningInVS)
                     {
-                        CodeBase = resolverPath,
-                    };
-                    return Assembly.Load(assemblyName);
+                        // Apply compatibility fallback for external API users
+                        try
+                        {
+                            AssemblyName assemblyName = new AssemblyName(resolverFileName)
+                            {
+                                CodeBase = resolverPath,
+                            };
+                            return Assembly.Load(assemblyName);
+                        }
+                        catch (Exception)
+                        {
+                            // Fallback for external API users only
+                            return Assembly.LoadFrom(resolverPath);
+                        }
+                    }
+                    else
+                    {
+                        // Inside VS: use original optimization (no fallback)
+                        // If it fails, let it fail - VS environment should work
+                        AssemblyName assemblyName = new AssemblyName(resolverFileName)
+                        {
+                            CodeBase = resolverPath,
+                        };
+                        return Assembly.Load(assemblyName);
+                    }
                 }
             }
             return Assembly.LoadFrom(resolverPath);
