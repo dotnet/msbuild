@@ -12,6 +12,7 @@
     <DefineConstants Condition="'$(MSBuildRuntimeType)' == 'Core'">$(DefineConstants);NO_MSBUILDTASKHOST</DefineConstants>
 
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <NoWarn>$(NoWarn);MSB3270</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -128,6 +129,11 @@
 
   <ItemGroup Label="TestAssests" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <ProjectReference Include=".\TestAssets\ExampleNetTask\ExampleTask\ExampleTask.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Label="TestAssests" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <ProjectReference Include=".\TestAssets\ExampleFrameworkTask\ExampleTaskX64\ExampleTaskX64.csproj" />
+    <ProjectReference Include=".\TestAssets\ExampleFrameworkTask\ExampleTaskX86\ExampleTaskX86.csproj" />
   </ItemGroup>
 
   <ItemGroup>
