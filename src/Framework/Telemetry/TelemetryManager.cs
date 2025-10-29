@@ -13,19 +13,17 @@ namespace Microsoft.Build.Framework.Telemetry
 
         private static TelemetrySession? _telemetrySession;
 
-        private static bool _disposed;
-
-        private static readonly TelemetryManager _instance = new TelemetryManager();
+        private static bool s_disposed;
 
         private TelemetryManager()
         {
         }
 
-        public static TelemetryManager Instance => _instance;
+        public static TelemetryManager Instance { get; } = new TelemetryManager();
 
         public void Initialize(bool isStandalone)
         {
-            if (_telemetrySession != null)
+            if (IsOptOut() || _telemetrySession != null)
             {
                 return;
             }
@@ -52,15 +50,20 @@ namespace Microsoft.Build.Framework.Telemetry
 
         public void Dispose()
         {
-            if (_disposed)
+            if (s_disposed)
             {
                 return;
             }
 
             _telemetrySession?.Dispose();
 
-            _disposed = true;
+            s_disposed = true;
         }
+
+        /// <summary>
+        /// Determines if the user has explicitly opted out of telemetry.
+        /// </summary>
+        private bool IsOptOut() => Traits.Instance.FrameworkTelemetryOptOut || Traits.Instance.SdkTelemetryOptOut || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14);
     }
 }
 

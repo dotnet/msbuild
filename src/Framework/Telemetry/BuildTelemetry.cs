@@ -112,7 +112,6 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Create a list of properties sent to VS telemetry with the information whether they should be hashed.
         /// </summary>
-        /// <returns></returns>
         public Dictionary<string, object> GetActivityProperties()
         {
             Dictionary<string, object> telemetryItems = new(8);

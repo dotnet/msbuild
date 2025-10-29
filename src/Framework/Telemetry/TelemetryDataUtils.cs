@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.VisualStudio.Telemetry;
 using static Microsoft.Build.Framework.Telemetry.BuildInsights;
 
 namespace Microsoft.Build.Framework.Telemetry
@@ -36,8 +35,7 @@ namespace Microsoft.Build.Framework.Telemetry
                 GetTasksDetails(telemetryData.TasksExecutionData),
                 GetTargetsDetails(telemetryData.TargetsExecutionData),
                 GetTargetsSummary(targetsSummary),
-                GetTasksSummary(tasksSummary)
-            );
+                GetTasksSummary(tasksSummary));
 
             return new NodeTelemetry(buildInsights);
         }
@@ -298,12 +296,13 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             Dictionary<string, object> IActivityTelemetryDataHolder.GetActivityProperties()
             {
-                Dictionary<string, object> properties = new();
-
-                properties[nameof(BuildInsights.Tasks)] = insights.Tasks;
-                properties[nameof(BuildInsights.Targets)] = insights.Targets;
-                properties[nameof(BuildInsights.TargetsSummary)] = insights.TargetsSummary;
-                properties[nameof(BuildInsights.TasksSummary)] = insights.TasksSummary;
+                Dictionary<string, object> properties = new()
+                {
+                    [nameof(BuildInsights.Tasks)] = insights.Tasks,
+                    [nameof(BuildInsights.Targets)] = insights.Targets,
+                    [nameof(BuildInsights.TargetsSummary)] = insights.TargetsSummary,
+                    [nameof(BuildInsights.TasksSummary)] = insights.TasksSummary,
+                };
 
                 return properties;
             }

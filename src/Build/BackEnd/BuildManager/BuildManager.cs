@@ -284,7 +284,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a new unnamed build manager.
         /// Normally there is only one build manager in a process, and it is the default build manager.
-        /// Access it with <see cref="BuildManager.DefaultBuildManager"/>
+        /// Access it with <see cref="DefaultBuildManager"/>.
         /// </summary>
         public BuildManager()
             : this("Unnamed")
@@ -294,7 +294,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a new build manager with an arbitrary distinct name.
         /// Normally there is only one build manager in a process, and it is the default build manager.
-        /// Access it with <see cref="BuildManager.DefaultBuildManager"/>
+        /// Access it with <see cref="DefaultBuildManager"/>.
         /// </summary>
         public BuildManager(string hostName)
         {
@@ -340,12 +340,12 @@ namespace Microsoft.Build.Execution
 
             /// <summary>
             /// This is the state the BuildManager is in after <see cref="BeginBuild(BuildParameters)"/> has been called but before <see cref="EndBuild()"/> has been called.
-            /// <see cref="BuildManager.PendBuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.BuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.PendBuildRequest(GraphBuildRequestData)"/>, <see cref="BuildManager.BuildRequest(GraphBuildRequestData)"/>, and <see cref="BuildManager.EndBuild()"/> may be called in this state.
+            /// <see cref="PendBuildRequest(BuildRequestData)"/>, <see cref="BuildRequest(BuildRequestData)"/>, <see cref="PendBuildRequest(GraphBuildRequestData)"/>, <see cref="BuildManager.BuildRequest(GraphBuildRequestData)"/>, and <see cref="BuildManager.EndBuild()"/> may be called in this state.
             /// </summary>
             Building,
 
             /// <summary>
-            /// This is the state the BuildManager is in after <see cref="BuildManager.EndBuild()"/> has been called but before all existing submissions have completed.
+            /// This is the state the BuildManager is in after <see cref="EndBuild()"/> has been called but before all existing submissions have completed.
             /// </summary>
             WaitingForBuildToComplete
         }
@@ -1167,16 +1167,14 @@ namespace Microsoft.Build.Execution
         [MethodImpl(MethodImplOptions.NoInlining)]
         private void EndBuildTelemetry()
         {
-            using var activity = TelemetryManager.Instance.StartActivity("Build")
-                ?.SetTag("GeneralBuildData", _buildTelemetry?.GetActivityProperties())
-                ?.SetTag(
-                    "BuildsInsights",
-                    _telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
+            using IActivity? activity = TelemetryManager.Instance.StartActivity("Build")
+                ?.SetTags(_buildTelemetry)
+                ?.SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
                         includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
-                        includeTargetDetails: false))
-                ?.SetStatus(ActivityStatusCode.Ok);
+                        includeTargetDetails: false));
         }
 #endif
+
         /// <summary>
         /// Convenience method.  Submits a lone build request and blocks until results are available.
         /// </summary>

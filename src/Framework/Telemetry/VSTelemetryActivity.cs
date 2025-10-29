@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.VisualStudio.Telemetry;
 
 namespace Microsoft.Build.Framework.Telemetry
@@ -20,6 +21,21 @@ namespace Microsoft.Build.Framework.Telemetry
 
         public VsTelemetryActivity(TelemetryScope<OperationEvent> scope) => _scope = scope;
 
+        public IActivity? SetTags(IActivityTelemetryDataHolder? dataHolder)
+        {
+            Dictionary<string, object>? tags = dataHolder?.GetActivityProperties();
+
+            if (tags != null)
+            {
+                foreach (KeyValuePair<string, object> tag in tags)
+                {
+                    _ = SetTag(tag.Key, tag.Value);
+                }
+            }
+
+            return this;
+        }
+
         public IActivity? SetTag(string key, object? value)
         {
             if (value != null)
@@ -29,22 +45,6 @@ namespace Microsoft.Build.Framework.Telemetry
 
             return this;
         }
-
-        public IActivity? SetStatus(ActivityStatusCode status, string? description = null)
-        {
-            // Map ActivityStatusCode to TelemetryResult
-            _result = status switch
-            {
-                ActivityStatusCode.Ok => TelemetryResult.Success,
-                ActivityStatusCode.Error => TelemetryResult.Failure,
-                _ => TelemetryResult.None,
-            };
-
-            _resultSummary = description;
-
-            return this;
-        }
-
         public IActivity? AddEvent(ActivityEvent activityEvent)
         {
             // VS Telemetry doesn't have a direct equivalent to ActivityEvent
@@ -81,18 +81,17 @@ internal interface IActivity : IDisposable
     /// <summary>
     /// Sets a tag on the activity.
     /// </summary>
+    /// <param name="dataHolder">Telemetry data holder.</param>
+    /// <returns>The activity instance for method chaining.</returns>
+    IActivity? SetTags(IActivityTelemetryDataHolder? dataHolder);
+
+    /// <summary>
+    /// Sets a tag on the activity.
+    /// </summary>
     /// <param name="key">The tag key.</param>
     /// <param name="value">The tag value.</param>
     /// <returns>The activity instance for method chaining.</returns>
     IActivity? SetTag(string key, object? value);
-
-    /// <summary>
-    /// Sets the status of the activity
-    /// </summary>
-    /// <param name="status">The status.</param>
-    /// <param name="description">An optional description.</param>
-    /// <returns>The activity instance for method chaining.</returns>
-    IActivity? SetStatus(ActivityStatusCode status, string? description = null);
 
     /// <summary>
     /// Adds an event to the activity.
