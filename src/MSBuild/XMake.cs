@@ -3949,9 +3949,38 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            string arguments = binaryLoggerParameters[binaryLoggerParameters.Length - 1];
+            // Use the first parameter set as the primary logger configuration
+            string primaryArguments = binaryLoggerParameters[0];
+            BinaryLogger logger = new BinaryLogger { Parameters = primaryArguments };
 
-            BinaryLogger logger = new BinaryLogger { Parameters = arguments };
+            // If we have multiple binlog parameters, collect all the distinct file paths
+            if (binaryLoggerParameters.Length > 1)
+            {
+                var filePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var additionalFilePaths = new List<string>();
+
+                // Extract the primary file path (will be resolved during Initialize)
+                string primaryPath = BinaryLogger.ExtractFilePathFromParameters(primaryArguments);
+                filePaths.Add(primaryPath);
+
+                // Process additional parameters and extract their file paths
+                for (int i = 1; i < binaryLoggerParameters.Length; i++)
+                {
+                    string filePath = BinaryLogger.ExtractFilePathFromParameters(binaryLoggerParameters[i]);
+
+                    // Only add if it's distinct
+                    if (filePaths.Add(filePath))
+                    {
+                        additionalFilePaths.Add(filePath);
+                    }
+                }
+
+                // Set the additional paths on the primary logger
+                if (additionalFilePaths.Count > 0)
+                {
+                    logger.AdditionalFilePaths = additionalFilePaths;
+                }
+            }
 
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.

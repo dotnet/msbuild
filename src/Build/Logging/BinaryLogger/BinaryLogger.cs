@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
@@ -136,6 +137,12 @@ namespace Microsoft.Build.Logging
         public ProjectImportsCollectionMode CollectProjectImports { get; set; } = ProjectImportsCollectionMode.Embed;
 
         internal string FilePath { get; private set; }
+
+        /// <summary>
+        /// Gets or sets additional output file paths. When set, the binlog will be copied to all these paths
+        /// after the build completes. The primary FilePath will be used as the temporary write location.
+        /// </summary>
+        public List<string> AdditionalFilePaths { get; set; }
 
         /// <summary> Gets or sets the verbosity level.</summary>
         /// <remarks>
@@ -355,6 +362,38 @@ namespace Microsoft.Build.Logging
                 stream.Dispose();
                 stream = null;
             }
+
+            // Copy the binlog file to additional destinations if specified
+            if (AdditionalFilePaths != null && AdditionalFilePaths.Count > 0)
+            {
+                foreach (var additionalPath in AdditionalFilePaths)
+                {
+                    try
+                    {
+                        string directory = Path.GetDirectoryName(additionalPath);
+                        if (!string.IsNullOrEmpty(directory))
+                        {
+                            Directory.CreateDirectory(directory);
+                        }
+                        File.Copy(FilePath, additionalPath, overwrite: true);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the error but don't fail the build
+                        string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                            out string errorCode,
+                            out string helpKeyword,
+                            "ErrorCopyingBinaryLog",
+                            FilePath,
+                            additionalPath,
+                            ex.Message);
+                        
+                        // Note: We can't write this error to the binlog itself since the stream is already closed
+                        // The error will be logged to the console or other active loggers
+                        Console.Error.WriteLine(message);
+                    }
+                }
+            }
         }
 
         private void RawEvents_LogDataSliceReceived(BinaryLogRecordKind recordKind, Stream stream)
@@ -514,5 +553,75 @@ namespace Microsoft.Build.Logging
 
         private static string ExpandPathParameter(string parameters)
             => $"{DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")}--{EnvironmentUtilities.CurrentProcessId}--{StringUtils.GenerateRandomString(6)}";
+
+        /// <summary>
+        /// Extracts the file path from binary logger parameters string.
+        /// This is a helper method for processing multiple binlog parameters.
+        /// </summary>
+        /// <param name="parameters">The parameters string (e.g., "output.binlog" or "output.binlog;ProjectImports=None")</param>
+        /// <returns>The resolved file path, or "msbuild.binlog" if no path is specified</returns>
+        public static string ExtractFilePathFromParameters(string parameters)
+        {
+            if (string.IsNullOrEmpty(parameters))
+            {
+                return Path.GetFullPath("msbuild.binlog");
+            }
+
+            var paramParts = parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+            string filePath = null;
+
+            foreach (var parameter in paramParts)
+            {
+                if (TryInterpretPathParameterStatic(parameter, out string extractedPath))
+                {
+                    filePath = extractedPath;
+                    break;
+                }
+            }
+
+            if (filePath == null)
+            {
+                filePath = "msbuild.binlog";
+            }
+
+            try
+            {
+                return Path.GetFullPath(filePath);
+            }
+            catch
+            {
+                // If path resolution fails, return the original path
+                return filePath;
+            }
+        }
+
+        private static bool TryInterpretPathParameterStatic(string parameter, out string filePath)
+        {
+            bool hasPathPrefix = parameter.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase);
+
+            if (hasPathPrefix)
+            {
+                parameter = parameter.Substring("LogFile=".Length);
+            }
+
+            parameter = parameter.Trim('"');
+
+            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
+            bool hasProperExtension = parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase);
+            filePath = parameter;
+
+            if (!isWildcard)
+            {
+                return hasProperExtension;
+            }
+
+            filePath = parameter.Replace("{}", ExpandPathParameter(string.Empty), StringComparison.Ordinal);
+
+            if (!hasProperExtension)
+            {
+                filePath += ".binlog";
+            }
+            return true;
+        }
     }
 }
