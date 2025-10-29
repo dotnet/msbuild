@@ -1,6 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
+using Microsoft.Build.Framework;
+
 namespace Microsoft.Build.Framework
 {
     /// <summary>
@@ -109,5 +112,15 @@ namespace Microsoft.Build.Framework
                 msBuildAssemblyPath: overrideParameters.MSBuildAssemblyPath ?? baseParameters.MSBuildAssemblyPath,
                 taskHostFactoryExplicitlyRequested: overrideParameters.TaskHostFactoryExplicitlyRequested ?? baseParameters.TaskHostFactoryExplicitlyRequested);
         }
+
+        /// <summary>
+        /// The method was added to sustain compatibility with ITaskFactory2 factoryIdentityParameters parameters dictionary.
+        /// </summary>
+        internal Dictionary<string, string> ToDictionary() => new(3)
+        {
+            { nameof(Runtime), Runtime ?? string.Empty },
+            { nameof(Architecture), Architecture ?? string.Empty },
+            { nameof(TaskHostFactoryExplicitlyRequested), TaskHostFactoryExplicitlyRequested?.ToString() ?? string.Empty },
+        };
     }
 }

@@ -574,12 +574,14 @@ namespace Microsoft.Build.BackEnd
             // Both have values - need to merge them
             if (!XMakeAttributes.TryMergeRuntimeValues(taskIdentityParameters.Runtime, factoryIdentityParameters.Runtime, out var mergedRuntime))
             {
-                ErrorUtilities.ThrowInternalError("How did we get two runtime values that were unmergeable?");
+                ErrorUtilities.ThrowInternalError("How did we get two runtime values that were unmergeable? " +
+                    $"TaskIdentity Runtime: {taskIdentityParameters.Runtime}, FactoryIdentity Runtime: {factoryIdentityParameters.Runtime}.");
             }
 
             if (!XMakeAttributes.TryMergeArchitectureValues(taskIdentityParameters.Architecture, factoryIdentityParameters.Architecture, out var mergedArchitecture))
             {
-                ErrorUtilities.ThrowInternalError("How did we get two architecture values that were unmergeable?");
+                ErrorUtilities.ThrowInternalError("How did we get two architecture values that were unmergeable? " +
+                    $"TaskIdentity Architecture: {taskIdentityParameters.Architecture}, FactoryIdentity Architecture: {factoryIdentityParameters.Architecture}.");
             }
 
             return new TaskHostParameters(
