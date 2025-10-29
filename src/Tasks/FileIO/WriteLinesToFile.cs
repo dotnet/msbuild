@@ -70,6 +70,8 @@ namespace Microsoft.Build.Tasks
 
             if (File != null)
             {
+                string filePath = FileUtilities.NormalizePath(File.ItemSpec);
+
                 // do not return if Lines is null, because we may
                 // want to delete the file in that case
                 StringBuilder buffer = new StringBuilder();
@@ -97,10 +99,10 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
-                    var directoryPath = Path.GetDirectoryName(FileUtilities.NormalizePath(File.ItemSpec));
+                    Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
                     if (Overwrite)
                     {
-                        Directory.CreateDirectory(directoryPath);
                         string contentsAsString = buffer.ToString();
 
                         // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
@@ -109,20 +111,20 @@ namespace Microsoft.Build.Tasks
                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
                             try
                             {
-                                if (FileUtilities.FileExistsNoThrow(File.ItemSpec))
+                                if (FileUtilities.FileExistsNoThrow(filePath))
                                 {
-                                    string existingContents = FileSystems.Default.ReadFileAllText(File.ItemSpec);
+                                    string existingContents = FileSystems.Default.ReadFileAllText(filePath);
                                     if (existingContents.Length == buffer.Length)
                                     {
                                         if (existingContents.Equals(contentsAsString))
                                         {
-                                            Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", File.ItemSpec);
-                                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, true);
+                                            Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", filePath);
+                                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, true);
                                             return true;
                                         }
                                         else if (FailIfNotIncremental)
                                         {
-                                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", filePath);
                                             return false;
                                         }
                                     }
@@ -130,28 +132,27 @@ namespace Microsoft.Build.Tasks
                             }
                             catch (IOException)
                             {
-                                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
+                                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", filePath);
                             }
-                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, false);
+                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, false);
                         }
 
-                        System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
+                        System.IO.File.WriteAllText(filePath, contentsAsString, encoding);
                     }
                     else
                     {
                         if (WriteOnlyWhenDifferent)
                         {
-                            Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", File.ItemSpec);
+                            Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", filePath);
                         }
-
-                        Directory.CreateDirectory(directoryPath);
-                        System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);
+                        
+                        System.IO.File.AppendAllText(filePath, buffer.ToString(), encoding);
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    string lockedFileMessage = LockCheck.GetLockedFileMessage(File.ItemSpec);
-                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", File.ItemSpec, e.Message, lockedFileMessage);
+                    string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
+                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, e.Message, lockedFileMessage);
                     success = false;
                 }
             }
