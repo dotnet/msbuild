@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 using Microsoft.Build.Collections;
 
 #if FEATURE_APPDOMAIN
@@ -128,7 +127,7 @@ namespace Microsoft.Build.BackEnd
                     _parameterTypeCode = typeCode;
                     _wrappedParameter = wrappedParameter;
                 }
-                else if (typeof(ITaskItem[]).GetTypeInfo().IsAssignableFrom(wrappedParameterType.GetTypeInfo()))
+                else if (typeof(ITaskItem[]).IsAssignableFrom(wrappedParameterType))
                 {
                     _parameterType = TaskParameterType.ITaskItemArray;
                     ITaskItem[] inputAsITaskItemArray = (ITaskItem[])wrappedParameter;
@@ -144,7 +143,7 @@ namespace Microsoft.Build.BackEnd
 
                     _wrappedParameter = taskItemArrayParameter;
                 }
-                else if (wrappedParameterType.GetElementType().GetTypeInfo().IsValueType)
+                else if (wrappedParameterType.GetElementType().IsValueType)
                 {
                     _parameterType = TaskParameterType.ValueTypeArray;
                     _wrappedParameter = wrappedParameter;
@@ -179,7 +178,7 @@ namespace Microsoft.Build.BackEnd
                     _parameterType = TaskParameterType.ITaskItem;
                     _wrappedParameter = new TaskParameterTaskItem((ITaskItem)wrappedParameter);
                 }
-                else if (wrappedParameterType.GetTypeInfo().IsValueType)
+                else if (wrappedParameterType.IsValueType)
                 {
                     _parameterType = TaskParameterType.ValueType;
                     _wrappedParameter = wrappedParameter;

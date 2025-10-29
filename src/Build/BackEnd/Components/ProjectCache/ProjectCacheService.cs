@@ -451,13 +451,7 @@ namespace Microsoft.Build.ProjectCache
             IEnumerable<Type> GetTypes<T>(Assembly assembly)
             {
                 return assembly.ExportedTypes
-                    .Select(type => new { type, info = type.GetTypeInfo() })
-                    .Where(
-                        t => t.info.IsClass &&
-                             t.info.IsPublic &&
-                             !t.info.IsAbstract &&
-                             typeof(T).IsAssignableFrom(t.type))
-                    .Select(t => t.type);
+                    .Where(t => t.IsClass && t.IsPublic && !t.IsAbstract && typeof(T).IsAssignableFrom(t));
             }
         }
 

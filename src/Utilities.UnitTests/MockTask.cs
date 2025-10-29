@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private void RegisterResources() => Log.TaskResources = new ResourceManager("Microsoft.Build.Utilities.UnitTests.strings", typeof(MockTask).GetTypeInfo().Assembly);
+        private void RegisterResources() => Log.TaskResources = new ResourceManager("Microsoft.Build.Utilities.UnitTests.strings", typeof(MockTask).Assembly);
 
         public override bool Execute() => true;
     }

@@ -1070,7 +1070,6 @@ namespace Microsoft.Build.UnitTests.Definition
             });
         }
 
-#if FEATURE_ASSEMBLY_LOCATION
         // Verify that anyone with a task named "ItemDefinitionGroup" can still
         // use it by fully qualifying the name.
         [Fact]
@@ -1083,11 +1082,10 @@ namespace Microsoft.Build.UnitTests.Definition
                             <Microsoft.Build.UnitTests.Definition.ItemDefinitionGroup/>
                         </Target>
                     </Project>
-               ", new Uri(Assembly.GetExecutingAssembly().EscapedCodeBase).LocalPath));
+               ", Assembly.GetExecutingAssembly().Location));
 
             Assert.Contains("In ItemDefinitionGroup task.", ml.FullLog);
         }
-#endif
 
         [Fact]
         public void MetadataOnItemWins()

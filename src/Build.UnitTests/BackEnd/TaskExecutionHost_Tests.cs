@@ -1223,8 +1223,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private static bool IsTaskFactoryClass(Type type, object unused)
         {
-            return type.GetTypeInfo().IsClass &&
-                !type.GetTypeInfo().IsAbstract &&
+            return type.IsClass &&
+                !type.IsAbstract &&
                 (type.GetInterface("Microsoft.Build.Framework.ITaskFactory") != null);
         }
 
@@ -1247,7 +1247,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(Assembly.GetAssembly(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory)).FullName, null);
 #else
-            AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).GetTypeInfo().FullName, null);
+            AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).FullName, null);
 #endif
             LoadedType loadedType = new LoadedType(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory), loadInfo, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).Assembly, typeof(ITaskItem));
 

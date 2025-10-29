@@ -331,11 +331,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 _initializedService.ShutdownComponent();
                 string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
-#if FEATURE_ASSEMBLY_LOCATION
-                LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
-#else
-                LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
-#endif
+                LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).Assembly.FullName, true);
                 _initializedService.RegisterDistributedLogger(null, description);
             });
         }
@@ -347,13 +343,8 @@ namespace Microsoft.Build.UnitTests.Logging
         {
             string configurableClassName = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
             string distributedClassName = "Microsoft.Build.Logging.DistributedFileLogger";
-#if FEATURE_ASSEMBLY_LOCATION
-            LoggerDescription configurableDescription = CreateLoggerDescription(configurableClassName, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
-            LoggerDescription distributedDescription = CreateLoggerDescription(distributedClassName, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
-#else
-            LoggerDescription configurableDescription = CreateLoggerDescription(configurableClassName, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
-            LoggerDescription distributedDescription = CreateLoggerDescription(distributedClassName, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
-#endif
+            LoggerDescription configurableDescription = CreateLoggerDescription(configurableClassName, typeof(ProjectCollection).Assembly.FullName, true);
+            LoggerDescription distributedDescription = CreateLoggerDescription(distributedClassName, typeof(ProjectCollection).Assembly.FullName, true);
 
             DistributedFileLogger fileLogger = new DistributedFileLogger();
             RegularILogger regularILogger = new RegularILogger();
@@ -384,13 +375,8 @@ namespace Microsoft.Build.UnitTests.Logging
             string configurableClassNameA = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
             string configurableClassNameB = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
 
-#if FEATURE_ASSEMBLY_LOCATION
-            LoggerDescription configurableDescriptionA = CreateLoggerDescription(configurableClassNameA, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
-            LoggerDescription configurableDescriptionB = CreateLoggerDescription(configurableClassNameB, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
-#else
-            LoggerDescription configurableDescriptionA = CreateLoggerDescription(configurableClassNameA, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
-            LoggerDescription configurableDescriptionB = CreateLoggerDescription(configurableClassNameB, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
-#endif
+            LoggerDescription configurableDescriptionA = CreateLoggerDescription(configurableClassNameA, typeof(ProjectCollection).Assembly.FullName, true);
+            LoggerDescription configurableDescriptionB = CreateLoggerDescription(configurableClassNameB, typeof(ProjectCollection).Assembly.FullName, true);
 
             RegularILogger regularILoggerA = new RegularILogger();
             RegularILogger regularILoggerB = new RegularILogger();
@@ -430,11 +416,7 @@ namespace Microsoft.Build.UnitTests.Logging
         public void RegisterDuplicateCentralLogger()
         {
             string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
-#if FEATURE_ASSEMBLY_LOCATION
-            LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
-#else
-            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
-#endif
+            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).Assembly.FullName, true);
 
             RegularILogger regularILogger = new RegularILogger();
             Assert.True(_initializedService.RegisterDistributedLogger(regularILogger, description));
@@ -458,11 +440,7 @@ namespace Microsoft.Build.UnitTests.Logging
         public void RegisterDuplicateForwardingLoggerLogger()
         {
             string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
-#if FEATURE_ASSEMBLY_LOCATION
-            LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
-#else
-            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
-#endif
+            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).Assembly.FullName, true);
 
             RegularILogger regularILogger = new RegularILogger();
             Assert.True(_initializedService.RegisterDistributedLogger(regularILogger, description));
@@ -523,11 +501,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
-#if FEATURE_ASSEMBLY_LOCATION
-                LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
-#else
-                LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
-#endif
+                LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).Assembly.FullName, true);
                 _initializedService.ShutdownComponent();
                 List<LoggerDescription> tempList = new List<LoggerDescription>();
                 tempList.Add(description);
@@ -545,13 +519,8 @@ namespace Microsoft.Build.UnitTests.Logging
             EventSourceSink sink = new EventSourceSink();
             EventSourceSink sink2 = new EventSourceSink();
             List<LoggerDescription> loggerDescriptions = new List<LoggerDescription>();
-#if FEATURE_ASSEMBLY_LOCATION
-            loggerDescriptions.Add(CreateLoggerDescription(configurableClassName, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true));
-            loggerDescriptions.Add(CreateLoggerDescription(distributedClassName, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true));
-#else
-            loggerDescriptions.Add(CreateLoggerDescription(configurableClassName, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true));
-            loggerDescriptions.Add(CreateLoggerDescription(distributedClassName, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true));
-#endif
+            loggerDescriptions.Add(CreateLoggerDescription(configurableClassName, typeof(ProjectCollection).Assembly.FullName, true));
+            loggerDescriptions.Add(CreateLoggerDescription(distributedClassName, typeof(ProjectCollection).Assembly.FullName, true));
 
             // Register some descriptions with a sink
             _initializedService.InitializeNodeLoggers(loggerDescriptions, sink, 1);
@@ -608,11 +577,7 @@ namespace Microsoft.Build.UnitTests.Logging
         public void RegisterDuplicateDistributedCentralLogger()
         {
             string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
-#if FEATURE_ASSEMBLY_LOCATION
-            LoggerDescription description = CreateLoggerDescription(className, Assembly.GetAssembly(typeof(ProjectCollection)).FullName, true);
-#else
-            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
-#endif
+            LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).Assembly.FullName, true);
 
             RegularILogger regularILogger = new RegularILogger();
             Assert.True(_initializedService.RegisterDistributedLogger(regularILogger, description));
@@ -1105,11 +1070,7 @@ namespace Microsoft.Build.UnitTests.Logging
             InitializeLoggingService();
             if (className != null)
             {
-#if FEATURE_ASSEMBLY_LOCATION
-                Assembly thisAssembly = Assembly.GetAssembly(typeof(LoggingService_Tests));
-#else
-                Assembly thisAssembly = typeof(LoggingService_Tests).GetTypeInfo().Assembly;
-#endif
+                Assembly thisAssembly = typeof(LoggingService_Tests).Assembly;
                 string loggerAssemblyName = thisAssembly.FullName;
                 LoggerDescription centralLoggerDescrption = CreateLoggerDescription(className, loggerAssemblyName, true);
                 _initializedService.RegisterDistributedLogger(null, centralLoggerDescrption);
