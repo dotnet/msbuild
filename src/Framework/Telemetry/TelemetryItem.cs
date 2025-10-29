@@ -37,7 +37,7 @@ internal sealed class BuildInsights
 
     internal record TaskCategoryStats(TaskStatsInfo? Total, TaskStatsInfo? FromNuget);
 
-    internal record TaskStatsInfo(string ExecutionsCount, string TotalMilliseconds, string TotalMemoryBytes);
+    internal record TaskStatsInfo(int ExecutionsCount, double TotalMilliseconds, long TotalMemoryBytes);
 }
 
 #endif

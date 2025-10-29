@@ -53,10 +53,10 @@ namespace Microsoft.Build.Framework.Telemetry
 
                 result.Add(new TargetDetailInfo(
                     targetName,
-                    valuePair.Value.ToString(),
-                    valuePair.Key.IsCustom.ToString(),
-                    valuePair.Key.IsNuget.ToString(),
-                    valuePair.Key.IsMetaProj.ToString()));
+                    valuePair.Value,
+                    valuePair.Key.IsCustom,
+                    valuePair.Key.IsNuget,
+                    valuePair.Key.IsMetaProj));
             }
 
             return result;
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Framework.Telemetry
             static bool ShouldHashKey(TaskOrTargetTelemetryKey key) => key.IsCustom || key.IsMetaProj;
         }
 
-        internal record TargetDetailInfo(string Name, string WasExecuted, string IsCustom, string IsNuget, string IsMetaProj);
+        internal record TargetDetailInfo(string Name, bool WasExecuted, bool IsCustom, bool IsNuget, bool IsMetaProj);
 
         /// <summary>
         /// Converts tasks details to a list of custom objects for telemetry.
@@ -80,11 +80,11 @@ namespace Microsoft.Build.Framework.Telemetry
 
                 result.Add(new TaskDetailInfo(
                     taskName,
-                    valuePair.Value.CumulativeExecutionTime.TotalMilliseconds.ToString(),
-                    valuePair.Value.ExecutionsCount.ToString(),
-                    valuePair.Value.TotalMemoryBytes.ToString(),
-                    valuePair.Key.IsCustom.ToString(),
-                    valuePair.Key.IsNuget.ToString()));
+                    valuePair.Value.CumulativeExecutionTime.TotalMilliseconds,
+                    valuePair.Value.ExecutionsCount,
+                    valuePair.Value.TotalMemoryBytes,
+                    valuePair.Key.IsCustom,
+                    valuePair.Key.IsNuget));
             }
 
             return result;
@@ -93,10 +93,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Depending on the platform, hash the value using an available mechanism.
         /// </summary>
-        internal static string GetHashed(object value)
-        {
-            return Sha256Hasher.Hash(value.ToString() ?? "");
-        }
+        internal static string GetHashed(object value) => Sha256Hasher.Hash(value?.ToString() ?? "");
 
         // https://github.com/dotnet/sdk/blob/8bd19a2390a6bba4aa80d1ac3b6c5385527cc311/src/Cli/Microsoft.DotNet.Cli.Utils/Sha256Hasher.cs + workaround for netstandard2.0
         private static class Sha256Hasher
@@ -136,7 +133,7 @@ namespace Microsoft.Build.Framework.Telemetry
             public static string HashWithNormalizedCasing(string text) => Hash(text.ToUpperInvariant());
         }
 
-        internal record TaskDetailInfo(string Name, string TotalMilliseconds, string ExecutionsCount, string TotalMemoryBytes, string IsCustom, string IsNuget);
+        internal record TaskDetailInfo(string Name, double TotalMilliseconds, int ExecutionsCount, long TotalMemoryBytes, bool IsCustom, bool IsNuget);
 
         /// <summary>
         /// Converts targets summary to a custom object for telemetry.
@@ -152,22 +149,22 @@ namespace Microsoft.Build.Framework.Telemetry
                 TargetsSummaryConverter.TargetInfo customInfo)
             {
                 var microsoft = builtinInfo.Total > 0
-                    ? new TargetCategoryInfo(builtinInfo.Total.ToString(), builtinInfo.FromNuget.ToString(), builtinInfo.FromMetaproj.ToString())
+                    ? new TargetCategoryInfo(builtinInfo.Total, builtinInfo.FromNuget, builtinInfo.FromMetaproj)
                     : null;
 
                 var custom = customInfo.Total > 0
-                    ? new TargetCategoryInfo(customInfo.Total.ToString(), customInfo.FromNuget.ToString(), customInfo.FromMetaproj.ToString())
+                    ? new TargetCategoryInfo(customInfo.Total, customInfo.FromNuget, customInfo.FromMetaproj)
                     : null;
 
-                return new TargetStatsInfo((builtinInfo.Total + customInfo.Total).ToString(), microsoft, custom);
+                return new TargetStatsInfo(builtinInfo.Total + customInfo.Total, microsoft, custom);
             }
         }
 
         internal record TargetsSummaryInfo(TargetStatsInfo Loaded, TargetStatsInfo Executed);
 
-        internal record TargetStatsInfo(string Total, TargetCategoryInfo? Microsoft, TargetCategoryInfo? Custom);
+        internal record TargetStatsInfo(int Total, TargetCategoryInfo? Microsoft, TargetCategoryInfo? Custom);
 
-        internal record TargetCategoryInfo(string Total, string FromNuget, string FromMetaproj);
+        internal record TargetCategoryInfo(int Total, int FromNuget, int FromMetaproj);
 
         /// <summary>
         /// Converts tasks summary to a custom object for telemetry.
@@ -183,16 +180,16 @@ namespace Microsoft.Build.Framework.Telemetry
             {
                 var totalStats = total.ExecutionsCount > 0
                     ? new TaskStatsInfo(
-                        total.ExecutionsCount.ToString(),
-                        total.CumulativeExecutionTime.TotalMilliseconds.ToString(),
-                        total.TotalMemoryBytes.ToString())
+                        total.ExecutionsCount,
+                        total.CumulativeExecutionTime.TotalMilliseconds,
+                        total.TotalMemoryBytes)
                     : null;
 
                 var nugetStats = fromNuget.ExecutionsCount > 0
                     ? new TaskStatsInfo(
-                        fromNuget.ExecutionsCount.ToString(),
-                        fromNuget.CumulativeExecutionTime.TotalMilliseconds.ToString(),
-                        fromNuget.TotalMemoryBytes.ToString())
+                        fromNuget.ExecutionsCount,
+                        fromNuget.CumulativeExecutionTime.TotalMilliseconds,
+                        fromNuget.TotalMemoryBytes)
                     : null;
 
                 return (totalStats != null || nugetStats != null)
