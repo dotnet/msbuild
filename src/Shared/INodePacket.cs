@@ -222,7 +222,29 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         RarNodeExecuteResponse, // 0x15
 
-        // Reserve space for future core packet types (0x16-0x3B available for expansion)
+        /// <summary>
+        /// A request to invoke a method on the ITaskHost object in the parent process.
+        /// Used by TaskHostProxy in out-of-process task hosts to forward ITaskHost calls
+        /// from the child process to the parent process where the actual ITaskHost lives.
+        /// Sent by: Child process (MSBuildTaskHost.exe) via TaskHostProxy
+        /// Received by: Parent process (msbuild.exe) via HostObjectCallHandler
+        /// Contains: CallId (int), MethodName (string)
+        /// Flow: Child blocks waiting for corresponding HostObjectResponse.
+        /// </summary>
+        HostObjectRequest, // 0x16
+
+        /// <summary>
+        /// A response to a HostObjectRequest packet, containing the result of the method
+        /// invocation from the parent process. Sent back to the child process to complete
+        /// the proxied ITaskHost method call and unblock the waiting task thread.
+        /// Sent by: Parent process (msbuild.exe) via HostObjectCallHandler
+        /// Received by: Child process (MSBuildTaskHost.exe) via TaskHostProxy
+        /// Contains: CallId (int), ReturnValue (object), ExceptionMessage (string), ExceptionType (string)
+        /// Flow: Unblocks the waiting thread in TaskHostProxy that initiated the call.
+        /// </summary>
+        HostObjectResponse, // 0x17
+
+        // Reserve space for future core packet types (0x18-0x3B available for expansion)
 
         // Server command packets placed at end of safe range to maintain separation from core packets
         #region ServerNode enums 

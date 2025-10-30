@@ -164,6 +164,14 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private bool _nodeReuse;
 
+#if NETCOREAPP
+        /// <summary>
+        /// The proxy for ITaskHost that forwards calls to the parent process.
+        /// Created when parent has a HostObject to proxy.
+        /// </summary>
+        private HostObjectProxy _taskHostProxy;
+#endif
+
 #if !CLR2COMPATIBILITY
         /// <summary>
         /// The task object cache.
@@ -203,6 +211,10 @@ namespace Microsoft.Build.CommandLine
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostConfiguration, TaskHostConfiguration.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostTaskCancelled, TaskHostTaskCancelled.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
+
+#if NETCOREAPP
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.HostObjectResponse, HostObjectResponse.FactoryForDeserialization, this);
+#endif
 
 #if !CLR2COMPATIBILITY
             EngineServices = new EngineServicesImpl(this);
@@ -725,6 +737,12 @@ namespace Microsoft.Build.CommandLine
                 case NodePacketType.NodeBuildComplete:
                     HandleNodeBuildComplete(packet as NodeBuildComplete);
                     break;
+#if NETCOREAPP
+                case NodePacketType.HostObjectResponse:
+                    _taskHostProxy?.HandleResponse(packet as HostObjectResponse);
+                    break;
+#endif
+
             }
         }
 
@@ -736,6 +754,9 @@ namespace Microsoft.Build.CommandLine
         {
             ErrorUtilities.VerifyThrow(!_isTaskExecuting, "Why are we getting a TaskHostConfiguration packet while we're still executing a task?");
             _currentConfiguration = taskHostConfiguration;
+#if NETCOREAPP
+            _taskHostProxy = new HostObjectProxy(_nodeEndpoint);
+#endif
 
             // Kick off the task running thread.
             _taskRunnerThread = new Thread(new ParameterizedThreadStart(RunTask));
@@ -950,6 +971,13 @@ namespace Microsoft.Build.CommandLine
                 // We will not create an appdomain now because of a bug
                 // As a fix, we will create the class directly without wrapping it in a domain
                 _taskWrapper = new OutOfProcTaskAppDomainWrapper();
+
+#if NETCOREAPP
+                if (_taskHostProxy != null)
+                {
+                    _taskWrapper.SetHostObject(_taskHostProxy);
+                }
+#endif
 
                 taskResult = _taskWrapper.ExecuteTask(
                     this as IBuildEngine,

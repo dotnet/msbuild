@@ -646,6 +646,9 @@
       <Link>SharedUtilities\FileUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TempFileUtilities.cs" />
+    <Compile Include="..\Shared\HostObjectRequest.cs" />
+    <Compile Include="..\Shared\HostObjectResponse.cs" />
+    <Compile Include="..\Shared\HostObjectCallHandler.cs" />
     <Compile Include="..\Shared\Modifiers.cs" />
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <Link>SharedUtilities\FileUtilitiesRegex.cs</Link>

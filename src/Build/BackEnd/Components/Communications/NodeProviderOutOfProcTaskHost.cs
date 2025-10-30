@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -193,6 +194,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
+            foreach (int nodeId in _hostObjectHandlers.Keys.ToList())
+            {
+                CleanupHostObjectHandler(nodeId);
+            }
+
             ShutdownAllNodes(ComponentHost.BuildParameters.EnableNodeReuse, NodeContextTerminated);
         }
         #endregion
@@ -217,6 +223,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.HostObjectRequest, HostObjectRequest.FactoryForDeserialization, this);
         }
 
         /// <summary>
@@ -300,6 +307,23 @@ namespace Microsoft.Build.BackEnd
         #region INodePacketHandler Members
 
         /// <summary>
+        /// NEW: Handles HostObjectRequest packets from child processes.
+        /// </summary>
+        private void HandleHostObjectRequest(int nodeId, HostObjectRequest requestPacket)
+        {
+            if (_hostObjectHandlers.TryGetValue(nodeId, out HostObjectCallHandler handler))
+            {
+                handler.HandleMethodCall(requestPacket);
+            }
+            else
+            {
+                // Log error - we received a method call but don't have a handler set up
+                ErrorUtilities.ThrowInternalError(
+                    $"Received HostObjectRequest for node {nodeId} but no handler is registered.");
+            }
+        }
+
+        /// <summary>
         /// This method is invoked by the NodePacketRouter when a packet is received and is intended for
         /// this recipient.
         /// </summary>
@@ -313,6 +337,12 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
+                if (packet.Type == NodePacketType.HostObjectRequest)
+                {
+                    HandleHostObjectRequest(node, packet as HostObjectRequest);
+                    return;
+                }
+
                 ErrorUtilities.VerifyThrow(packet.Type == NodePacketType.NodeShutdown, "We should only ever handle packets of type NodeShutdown -- everything else should only come in when there's an active task");
 
                 // May also be removed by unnatural termination, so don't assume it's there
@@ -332,6 +362,33 @@ namespace Microsoft.Build.BackEnd
         }
 
         #endregion
+
+        /// <summary>
+        /// Maps node IDs to their HostObjectCallHandler instances.
+        /// </summary>
+        private readonly ConcurrentDictionary<int, HostObjectCallHandler> _hostObjectHandlers = new ConcurrentDictionary<int, HostObjectCallHandler>();
+
+        /// <summary>
+        /// NEW: Sets up the HostObject handler for a specific node.
+        /// Should be called before sending TaskHostConfiguration if the task has a HostObject.
+        /// </summary>
+        internal void SetupHostObjectHandler(int nodeId, ITaskHost hostObject)
+        {
+            if (hostObject != null && _nodeContexts.TryGetValue(nodeId, out NodeContext context))
+            {
+                var handler = new HostObjectCallHandler(hostObject, context.SendData);
+                _hostObjectHandlers[nodeId] = handler;
+            }
+        }
+
+        /// <summary>
+        /// NEW: Cleans up the HostObject handler for a specific node.
+        /// Should be called when task completes or node disconnects.
+        /// </summary>
+        internal void CleanupHostObjectHandler(int nodeId)
+        {
+            _hostObjectHandlers.TryRemove(nodeId, out _);
+        }
 
         /// <summary>
         /// Static factory for component creation.
@@ -608,6 +665,8 @@ namespace Microsoft.Build.BackEnd
 
             _nodeIdToPacketFactory.Remove(nodeId);
             _nodeIdToPacketHandler.Remove(nodeId);
+
+            CleanupHostObjectHandler(nodeId);
         }
 
         /// <summary>
@@ -705,6 +764,8 @@ namespace Microsoft.Build.BackEnd
         private void NodeContextTerminated(int nodeId)
         {
             _nodeContexts.TryRemove(nodeId, out _);
+
+            CleanupHostObjectHandler(nodeId);
 
             // May also be removed by unnatural termination, so don't assume it's there
             lock (_activeNodes)

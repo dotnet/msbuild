@@ -30,6 +30,12 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private ITask wrappedTask;
 
+        /// <summary>
+        /// The HostObject to be set on the task after instantiation.
+        /// Set via SetHostObject() before calling ExecuteTask().
+        /// </summary>
+        protected ITaskHost _pendingHostObject;
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// This is an appDomain instance if any is created for running this task
@@ -301,6 +307,12 @@ namespace Microsoft.Build.CommandLine
 #endif
                     );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+
+                if (_pendingHostObject != null)
+                {
+                    wrappedTask.HostObject = _pendingHostObject;
+                }
+
                 wrappedTask.BuildEngine = oopTaskHostNode;
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
