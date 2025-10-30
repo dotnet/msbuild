@@ -397,65 +397,60 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test that external API users (not in VS) get fallback behavior - Assembly.Load fails but Assembly.LoadFrom succeeds
+        /// Combined test: when running in VS, no fallback (throws); when external, fallback succeeds.
         /// </summary>
-        [Fact]
-        public void LoadResolverAssembly_MSBuildSdkResolver_ExternalAPIUser_FallbackSucceeds()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void LoadResolverAssembly_MSBuildSdkResolver_BehavesByEnvironment(bool shouldFail)
         {
             using (var env = TestEnvironment.Create(_output))
             {
-                // Create testable loader that can control VS environment
-                var testLoader = new TestableSdkResolverLoader { MockRunningInVisualStudio = false };
-
                 // Create resolver folder structure with the specific name that triggers special logic
                 var testRoot = env.CreateFolder().Path;
                 var resolverFolder = Path.Combine(testRoot, "Microsoft.DotNet.MSBuildSdkResolver");
                 Directory.CreateDirectory(resolverFolder);
-                
+
                 // Create assembly file with the exact name that triggers special logic
                 var assemblyFile = Path.Combine(resolverFolder, "Microsoft.DotNet.MSBuildSdkResolver.dll");
                 var sourceAssembly = typeof(SdkResolverLoader).Assembly;
                 File.Copy(sourceAssembly.Location, assemblyFile, true);
 
-                // Set the test path for the loader
-                testLoader.TestSdkResolversPath = testRoot;
+                // Prepare environment toggle directly in the test
+                var originalEnvironment = BuildEnvironmentHelper.Instance;
+                try
+                {
+                    var mockEnvironment = new BuildEnvironment(
+                        originalEnvironment.Mode,
+                        originalEnvironment.CurrentMSBuildExePath,
+                        originalEnvironment.RunningTests,
+                        originalEnvironment.RunningInMSBuildExe,
+                        /*RunningInVisualStudio*/ shouldFail,
+                        originalEnvironment.VisualStudioInstallRootDirectory);
 
-                // Test external API user (not in VS) - should succeed with fallback
-                var resolvers = testLoader.LoadAllResolvers(new MockElementLocation("file"));
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(mockEnvironment);
 
-                // Should succeed because Assembly.Load fails but Assembly.LoadFrom succeeds
-                resolvers.ShouldNotBeNull();
-                resolvers.Count.ShouldBeGreaterThan(0);
-            }
-        }
+                    // Use mock loader to feed our resolver path without relying on MSBuildToolsDirectory
+                    var loader = new MockSdkResolverLoader
+                    {
+                        FindPotentialSdkResolversFunc = (_, __) => new List<string> { assemblyFile }
+                    };
 
-        /// <summary>
-        /// Test that Visual Studio users do NOT get fallback behavior - they only try Assembly.Load and fail
-        /// </summary>
-        [Fact]
-        public void LoadResolverAssembly_MSBuildSdkResolver_VisualStudioUser_NoFallback()
-        {
-            using (var env = TestEnvironment.Create(_output))
-            {
-                // Create testable loader that simulates VS environment
-                var testLoader = new TestableSdkResolverLoader { MockRunningInVisualStudio = true };
-
-                // Create resolver folder structure with the specific name that triggers special logic
-                var testRoot = env.CreateFolder().Path;
-                var resolverFolder = Path.Combine(testRoot, "Microsoft.DotNet.MSBuildSdkResolver");
-                Directory.CreateDirectory(resolverFolder);
-                
-                // Create assembly file with the exact name that triggers special logic
-                var assemblyFile = Path.Combine(resolverFolder, "Microsoft.DotNet.MSBuildSdkResolver.dll");
-                var sourceAssembly = typeof(SdkResolverLoader).Assembly;
-                File.Copy(sourceAssembly.Location, assemblyFile, true);
-
-                // Set the test path for the loader
-                testLoader.TestSdkResolversPath = testRoot;
-
-                // Test VS user - should fail because no fallback
-                Should.Throw<InvalidProjectFileException>(() => 
-                    testLoader.LoadAllResolvers(new MockElementLocation("file")));
+                    if (shouldFail)
+                    {
+                        Should.Throw<InvalidProjectFileException>(() => loader.LoadAllResolvers(new MockElementLocation("file")));
+                    }
+                    else
+                    {
+                        var resolvers = loader.LoadAllResolvers(new MockElementLocation("file"));
+                        resolvers.ShouldNotBeNull();
+                        resolvers.Count.ShouldBeGreaterThan(0);
+                    }
+                }
+                finally
+                {
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(originalEnvironment);
+                }
             }
         }
 
@@ -564,64 +559,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        private sealed class TestableSdkResolverLoader : SdkResolverLoader
-        {
-            public bool MockRunningInVisualStudio { get; set; } = false;
-            public string TestSdkResolversPath { get; set; }
-
-            internal override IReadOnlyList<SdkResolver> LoadAllResolvers(ElementLocation location)
-            {
-                // Store original environment
-                var originalEnvironment = BuildEnvironmentHelper.Instance;
-                
-                try
-                {
-                    // Create a mock BuildEnvironment that returns our controlled value
-                    var mockEnvironment = new BuildEnvironment(
-                        originalEnvironment.Mode,
-                        originalEnvironment.CurrentMSBuildExePath,
-                        originalEnvironment.RunningTests,
-                        originalEnvironment.RunningInMSBuildExe,
-                        MockRunningInVisualStudio, // Our controlled value
-                        originalEnvironment.VisualStudioInstallRootDirectory);
-
-                    // Reset the instance for testing
-                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(mockEnvironment);
-
-                    // Use test path if provided, otherwise use default
-                    if (!string.IsNullOrEmpty(TestSdkResolversPath))
-                    {
-                        return LoadAllResolversFromTestPath(location);
-                    }
-
-                    // Call the real LoadAllResolvers method
-                    return base.LoadAllResolvers(location);
-                }
-                finally
-                {
-                    // Restore original environment
-                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(originalEnvironment);
-                }
-            }
-
-            private IReadOnlyList<SdkResolver> LoadAllResolversFromTestPath(ElementLocation location)
-            {
-                var resolvers = new List<SdkResolver> { new DefaultSdkResolver() };
-                
-                var potentialResolvers = FindPotentialSdkResolvers(TestSdkResolversPath, location);
-
-                if (potentialResolvers.Count == 0)
-                {
-                    return resolvers;
-                }
-
-                foreach (var potentialResolver in potentialResolvers)
-                {
-                    LoadResolvers(potentialResolver, location, resolvers);
-                }
-
-                return resolvers.OrderBy(t => t.Priority).ToList();
-            }
-        }
+        // Removed TestableSdkResolverLoader; tests now set environment directly and use MockSdkResolverLoader
     }
 }
