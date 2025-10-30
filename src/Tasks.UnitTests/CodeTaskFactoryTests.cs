@@ -758,8 +758,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OutOfProcCodeTaskFactoryCachesAssemblyPath()
         {
-            TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
-
             try
                         {
                                 const string taskElementContents = @"<Code Type=""Fragment"" Language=""cs"">
@@ -805,7 +803,6 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
             }
         }
 

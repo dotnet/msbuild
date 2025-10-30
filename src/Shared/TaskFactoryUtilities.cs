@@ -27,10 +27,6 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class TaskFactoryUtilities
     {
-        /// <summary>
-        /// The sub-path within the temporary directory where compiled inline tasks are located.
-        /// </summary>
-        public const string InlineTaskTempDllSubPath = nameof(InlineTaskTempDllSubPath);
         public const string InlineTaskSuffix = "inline_task.dll";
         public const string InlineTaskLoadManifestSuffix = ".loadmanifest";
 
@@ -57,30 +53,13 @@ namespace Microsoft.Build.Shared
             public bool IsValid => string.IsNullOrEmpty(AssemblyPath) || FileUtilities.FileExistsNoThrow(AssemblyPath);
         }
 
-
-        /// <summary>
-        /// Creates a process-specific temporary directory for inline task assemblies.
-        /// </summary>
-        /// <returns>The path to the created temporary directory.</returns>
-        public static string CreateProcessSpecificTemporaryTaskDirectory()
-        {
-            string processSpecificInlineTaskDir = Path.Combine(
-                FileUtilities.TempFileDirectory,
-                InlineTaskTempDllSubPath,
-                $"pid_{EnvironmentUtilities.CurrentProcessId}");
-
-            Directory.CreateDirectory(processSpecificInlineTaskDir);
-            return processSpecificInlineTaskDir;
-        }
-
         /// <summary>
         /// Gets a temporary file path for an inline task assembly in the process-specific directory.
         /// </summary>
         /// <returns>The full path to the temporary file.</returns>
         public static string GetTemporaryTaskAssemblyPath()
         {
-            string taskDir = CreateProcessSpecificTemporaryTaskDirectory();
-            return FileUtilities.GetTemporaryFile(taskDir, fileName: null, extension: "inline_task.dll", createFile: false);
+            return FileUtilities.GetTemporaryFile(directory: null, fileName: null, extension: "inline_task.dll", createFile: false);
         }
 
         /// <summary>
@@ -254,28 +233,6 @@ namespace Microsoft.Build.Shared
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Cleans up the current process's inline task directory by deleting the temporary directory
-        /// and its contents used for inline task assemblies for this specific process.
-        /// This should be called at the end of a build to prevent dangling DLL files.
-        /// </summary>
-        /// <remarks>
-        /// On Windows platforms, this may fail to delete files that are still locked by the current process.
-        /// However, it will clean up any files that are no longer in use.
-        /// </remarks>
-        public static void CleanCurrentProcessInlineTaskDirectory()
-        {
-            string processSpecificInlineTaskDir = Path.Combine(
-                FileUtilities.TempFileDirectory,
-                InlineTaskTempDllSubPath,
-                $"pid_{EnvironmentUtilities.CurrentProcessId}");
-                
-            if (FileSystems.Default.DirectoryExists(processSpecificInlineTaskDir))
-            {
-                FileUtilities.DeleteDirectoryNoThrow(processSpecificInlineTaskDir, recursive: true);
-            }
         }
 
         /// <summary>
