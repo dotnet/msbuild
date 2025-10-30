@@ -127,7 +127,7 @@ namespace Microsoft.Build.UnitTests
                     DebugUtils.SetDebugPath();
                     string resultPath = DebugUtils.DebugPath;
                     resultPath.ShouldNotBeNull();
-                    // resultPath.ShouldBe(Path.Combine(testCurrentDir, ".MSBuild_Logs"));
+                    resultPath.ShouldBe(Path.Combine(testCurrentDir, ".MSBuild_Logs"));
                 }
                 finally
                 {
