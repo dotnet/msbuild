@@ -86,12 +86,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A mapping of all of the INodePacketFactories wrapped by this provider.
         /// </summary>
-        private IDictionary<int, INodePacketFactory> _nodeIdToPacketFactory;
+        private ConcurrentDictionary<int, INodePacketFactory> _nodeIdToPacketFactory;
 
         /// <summary>
         /// A mapping of all of the INodePacketHandlers wrapped by this provider.
         /// </summary>
-        private IDictionary<int, INodePacketHandler> _nodeIdToPacketHandler;
+        private ConcurrentDictionary<int, INodePacketHandler> _nodeIdToPacketHandler;
 
         /// <summary>
         /// Keeps track of the set of nodes for which we have not yet received shutdown notification.
@@ -207,8 +207,8 @@ namespace Microsoft.Build.BackEnd
         {
             this.ComponentHost = host;
             _nodeContexts = new ConcurrentDictionary<int, NodeContext>();
-            _nodeIdToPacketFactory = new Dictionary<int, INodePacketFactory>();
-            _nodeIdToPacketHandler = new Dictionary<int, INodePacketHandler>();
+            _nodeIdToPacketFactory = new ConcurrentDictionary<int, INodePacketFactory>();
+            _nodeIdToPacketHandler = new ConcurrentDictionary<int, INodePacketHandler>();
             _activeNodes = new HashSet<int>();
 
             _noNodesActiveEvent = new ManualResetEvent(true);
@@ -606,8 +606,8 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrow(_nodeIdToPacketFactory.ContainsKey(nodeId) && _nodeIdToPacketHandler.ContainsKey(nodeId), "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
 
-            _nodeIdToPacketFactory.Remove(nodeId);
-            _nodeIdToPacketHandler.Remove(nodeId);
+            _nodeIdToPacketFactory.TryRemove(nodeId, out _);
+            _nodeIdToPacketHandler.TryRemove(nodeId, out _);
         }
 
         /// <summary>
