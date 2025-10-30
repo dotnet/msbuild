@@ -39,7 +39,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                object result = null;
+                object? result = null;
 
                 switch (callPacket.MethodName)
                 {

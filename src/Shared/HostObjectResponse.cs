@@ -9,9 +9,42 @@ namespace Microsoft.Build.BackEnd
 {
     internal class HostObjectResponse : INodePacket
     {
+        public HostObjectResponse()
+        {
+            ExceptionMessage = string.Empty;
+            ExceptionType = string.Empty;
+            ExceptionStackTrace = string.Empty;
+            _exceptionMessage = string.Empty;
+            _exceptionType = string.Empty;
+            _exceptionStackTrace = string.Empty;
+        }
+
+        public HostObjectResponse(int callId, object returnValue)
+        {
+            CallId = callId;
+            ReturnValue = returnValue;
+            ExceptionMessage = string.Empty;
+            ExceptionType = string.Empty;
+            ExceptionStackTrace = string.Empty;
+            _exceptionMessage = string.Empty;
+            _exceptionType = string.Empty;
+            _exceptionStackTrace = string.Empty;
+        }
+
+        public HostObjectResponse(int callId, Exception exception)
+        {
+            CallId = callId;
+            ExceptionMessage = exception?.Message ?? string.Empty;
+            ExceptionType = exception?.GetType().FullName ?? string.Empty;
+            ExceptionStackTrace = exception?.StackTrace ?? string.Empty;
+            _exceptionMessage = ExceptionMessage;
+            _exceptionType = ExceptionType;
+            _exceptionStackTrace = ExceptionStackTrace;
+        }
+
         public int CallId { get; set; }
 
-        public object ReturnValue { get; set; }
+        public object? ReturnValue { get; set; }
 
         public string ExceptionMessage { get; set; }
 
@@ -20,24 +53,6 @@ namespace Microsoft.Build.BackEnd
         public string ExceptionStackTrace { get; set; }
 
         public NodePacketType Type => NodePacketType.HostObjectResponse;
-
-        public HostObjectResponse()
-        {
-        }
-
-        public HostObjectResponse(int callId, object returnValue)
-        {
-            CallId = callId;
-            ReturnValue = returnValue;
-        }
-
-        public HostObjectResponse(int callId, Exception exception)
-        {
-            CallId = callId;
-            ExceptionMessage = exception?.Message;
-            ExceptionType = exception?.GetType().FullName;
-            ExceptionStackTrace = exception?.StackTrace;
-        }
 
         public void Translate(ITranslator translator)
         {
@@ -104,7 +119,7 @@ namespace Microsoft.Build.BackEnd
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
                 // Writing: serialize the array
-                ITaskItem[] items = ReturnValue as ITaskItem[];
+                ITaskItem[]? items = ReturnValue as ITaskItem[];
                 int count = items?.Length ?? 0;
                 translator.Translate(ref count);
 
@@ -144,7 +159,7 @@ namespace Microsoft.Build.BackEnd
                     for (int i = 0; i < count; i++)
                     {
                         // Read ItemSpec
-                        string itemSpec = null;
+                        string? itemSpec = null;
                         translator.Translate(ref itemSpec);
 
                         // Read metadata count
@@ -155,8 +170,8 @@ namespace Microsoft.Build.BackEnd
                         // Read each metadata key-value pair
                         for (int j = 0; j < metadataCount; j++)
                         {
-                            string name = null;
-                            string value = null;
+                            string? name = null;
+                            string? value = null;
                             translator.Translate(ref name);
                             translator.Translate(ref value);
                             metadata.Add(name, value);

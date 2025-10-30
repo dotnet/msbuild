@@ -6,16 +6,11 @@ namespace Microsoft.Build.BackEnd
     internal class HostObjectRequest : INodePacket
     {
         private int _callId;
-        private string _methodName;
-
-        public int CallId { get; set; }
-
-        public string MethodName { get; set; }
-
-        public NodePacketType Type => NodePacketType.HostObjectRequest;
+        private string _methodName = string.Empty;
 
         public HostObjectRequest()
         {
+            MethodName = string.Empty;
         }
 
         public HostObjectRequest(int callId, string methodName)
@@ -23,6 +18,12 @@ namespace Microsoft.Build.BackEnd
             CallId = callId;
             MethodName = methodName;
         }
+
+        public int CallId { get; set; }
+
+        public string MethodName { get; set; }
+
+        public NodePacketType Type => NodePacketType.HostObjectRequest;
 
         public void Translate(ITranslator translator)
         {

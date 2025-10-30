@@ -21,22 +21,19 @@ namespace Microsoft.Build.CommandLine
         private int _nextCallId = 0;
 
         // Synchronization for blocking calls
-        private readonly Dictionary<int, ManualResetEvent> _pendingCalls = new Dictionary<int, ManualResetEvent>();
-        private readonly Dictionary<int, HostObjectResponse> _responses = new Dictionary<int, HostObjectResponse>();
-        private readonly object _callLock = new object();
+        private readonly Dictionary<int, ManualResetEvent> _pendingCalls = new();
+        private readonly Dictionary<int, HostObjectResponse> _responses = new();
+        private readonly object _callLock = new();
 
         // Cache for items once retrieved
-        private ITaskItem[] _cachedItems;
+        private ITaskItem[] _cachedItems = [];
         private bool _itemsRetrieved = false;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="endpoint">The node endpoint for communicating with parent process.</param>
-        public HostObjectProxy(NodeEndpointOutOfProcTaskHost endpoint)
-        {
-            _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
-        }
+        public HostObjectProxy(NodeEndpointOutOfProcTaskHost endpoint) => _endpoint = endpoint ?? throw new ArgumentNullException(nameof(endpoint));
 
         /// <summary>
         /// Called by OutOfProcTaskHostNode when a TaskHostMethodResponse packet arrives
@@ -49,7 +46,7 @@ namespace Microsoft.Build.CommandLine
             {
                 _responses[response.CallId] = response;
 
-                if (_pendingCalls.TryGetValue(response.CallId, out ManualResetEvent waitHandle))
+                if (_pendingCalls.TryGetValue(response.CallId, out ManualResetEvent? waitHandle))
                 {
                     waitHandle.Set();
                 }
@@ -62,7 +59,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="methodName">Name of the method to invoke.</param>
         /// <returns>The return value from the parent process.</returns>
-        private object InvokeRemoteMethod(string methodName)
+        private object? InvokeRemoteMethod(string methodName)
         {
             int callId = Interlocked.Increment(ref _nextCallId);
             ManualResetEvent waitHandle = new ManualResetEvent(false);
@@ -102,7 +99,7 @@ namespace Microsoft.Build.CommandLine
                         $"Remote TaskHost method '{methodName}' threw {response.ExceptionType}: {response.ExceptionMessage}\n{response.ExceptionStackTrace}");
                 }
 
-                return response.ReturnValue;
+                return response?.ReturnValue;
             }
             finally
             {
