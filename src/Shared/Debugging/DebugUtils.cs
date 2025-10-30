@@ -32,11 +32,9 @@ namespace Microsoft.Build.Shared.Debugging
         {
             string environmentDebugPath = FileUtilities.TrimAndStripAnyQuotes(Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH"));
             string debugDirectory = environmentDebugPath;
-            bool needsSubfolder = !string.IsNullOrWhiteSpace(environmentDebugPath) &&
-                          !debugDirectory.EndsWith(".MSBuild_Logs", StringComparison.OrdinalIgnoreCase);
             if (Traits.Instance.DebugEngine)
             {
-                if (needsSubfolder && FileUtilities.CanWriteToDirectory(debugDirectory))
+                if (!string.IsNullOrWhiteSpace(debugDirectory) && FileUtilities.CanWriteToDirectory(debugDirectory))
                 {
                     // Add a dedicated ".MSBuild_Logs" folder inside the user-specified path, either always or when in solution directory.
                     debugDirectory = Path.Combine(debugDirectory, ".MSBuild_Logs");
