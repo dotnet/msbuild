@@ -96,11 +96,12 @@ namespace Microsoft.Build.UnitTests
         public void GatherCommandLineSwitchesTwoProperties()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
             var arguments = new List<string>();
             arguments.AddRange(new[] { "/p:a=b", "/p:c=d" });
 
-            CommandLineParser.GatherCommandLineSwitches(arguments, switches);
+            parser.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.Property];
             parameters[0].ShouldBe("a=b");
@@ -111,13 +112,14 @@ namespace Microsoft.Build.UnitTests
         public void GatherCommandLineSwitchesAnyDash()
         {
             var switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
             var arguments = new List<string> {
                 "-p:a=b",
                 "--p:maxcpucount=8"
             };
 
-            CommandLineParser.GatherCommandLineSwitches(arguments, switches);
+            parser.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.Property];
             parameters[0].ShouldBe("a=b");
@@ -128,11 +130,12 @@ namespace Microsoft.Build.UnitTests
         public void GatherCommandLineSwitchesMaxCpuCountWithArgument()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
             var arguments = new List<string>();
             arguments.AddRange(new[] { "/m:2" });
 
-            CommandLineParser.GatherCommandLineSwitches(arguments, switches);
+            parser.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
             parameters[0].ShouldBe("2");
@@ -145,11 +148,12 @@ namespace Microsoft.Build.UnitTests
         public void GatherCommandLineSwitchesMaxCpuCountWithoutArgument()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
             var arguments = new List<string>();
             arguments.AddRange(new[] { "/m:3", "/m" });
 
-            CommandLineParser.GatherCommandLineSwitches(arguments, switches);
+            parser.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
             parameters[1].ShouldBe(Convert.ToString(NativeMethodsShared.GetLogicalCoreCount()));
@@ -165,11 +169,12 @@ namespace Microsoft.Build.UnitTests
         public void GatherCommandLineSwitchesMaxCpuCountWithoutArgumentButWithColon()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
             var arguments = new List<string>();
             arguments.AddRange(new[] { "/m:" });
 
-            CommandLineParser.GatherCommandLineSwitches(arguments, switches);
+            parser.GatherCommandLineSwitches(arguments, switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
             parameters.Length.ShouldBe(0);

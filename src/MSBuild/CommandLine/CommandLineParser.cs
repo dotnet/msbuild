@@ -17,13 +17,13 @@ using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.CommandLine
 {
-    internal static class CommandLineParser
+    internal class CommandLineParser
     {
         /// <summary>
         /// Used to keep track of response files to prevent them from
         /// being included multiple times (or even recursively).
         /// </summary>
-        private static List<string> includedResponseFiles;
+        private List<string> includedResponseFiles;
 
         /// <summary>
         /// The name of the auto-response file.
@@ -43,9 +43,9 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Whether switches from the auto-response file are being used.
         /// </summary>
-        internal static bool usingSwitchesFromAutoResponseFile = false;
+        internal bool usingSwitchesFromAutoResponseFile = false;
 
-        internal static IReadOnlyList<string> IncludedResponseFiles => includedResponseFiles ?? (IReadOnlyList<string>)Array.Empty<string>();
+        internal IReadOnlyList<string> IncludedResponseFiles => includedResponseFiles ?? (IReadOnlyList<string>)Array.Empty<string>();
 
         /// <summary>
         /// Gets all specified switches, from the command line, as well as all
@@ -56,7 +56,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="switchesNotFromAutoResponseFile"></param>
         /// <param name="fullCommandLine"></param>
         /// <returns>Combined bag of switches.</returns>
-        internal static void GatherAllSwitches(
+        internal void GatherAllSwitches(
             string commandLine,
             out CommandLineSwitches switchesFromAutoResponseFile,
             out CommandLineSwitches switchesNotFromAutoResponseFile,
@@ -106,7 +106,7 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Internal for unit testing only.
         /// </remarks>
-        internal static void GatherCommandLineSwitches(List<string> commandLineArgs, CommandLineSwitches commandLineSwitches, string commandLine = "")
+        internal void GatherCommandLineSwitches(List<string> commandLineArgs, CommandLineSwitches commandLineSwitches, string commandLine = "")
         {
             foreach (string commandLineArg in commandLineArgs)
             {
@@ -202,7 +202,7 @@ namespace Microsoft.Build.CommandLine
         /// Identifies if there is rsp files near the project file
         /// </summary>
         /// <returns>true if there autoresponse file was found</returns>
-        internal static bool CheckAndGatherProjectAutoResponseFile(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches commandLineSwitches, bool recursing, string commandLine)
+        internal bool CheckAndGatherProjectAutoResponseFile(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches commandLineSwitches, bool recursing, string commandLine)
         {
             bool found = false;
 
@@ -324,7 +324,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="unquotedCommandLineArg"></param>
         /// <param name="commandLineSwitches"></param>
-        private static void GatherResponseFileSwitch(string unquotedCommandLineArg, CommandLineSwitches commandLineSwitches, string commandLine)
+        private void GatherResponseFileSwitch(string unquotedCommandLineArg, CommandLineSwitches commandLineSwitches, string commandLine)
         {
             try
             {
@@ -531,13 +531,13 @@ namespace Microsoft.Build.CommandLine
         /// switches from the auto-response file with the switches passed in.
         /// Returns true if the response file was found.
         /// </summary>
-        private static bool GatherAutoResponseFileSwitches(string path, CommandLineSwitches switchesFromAutoResponseFile, string commandLine)
+        private bool GatherAutoResponseFileSwitches(string path, CommandLineSwitches switchesFromAutoResponseFile, string commandLine)
         {
             string autoResponseFile = Path.Combine(path, autoResponseFileName);
             return GatherAutoResponseFileSwitchesFromFullPath(autoResponseFile, switchesFromAutoResponseFile, commandLine);
         }
 
-        private static bool GatherAutoResponseFileSwitchesFromFullPath(string autoResponseFile, CommandLineSwitches switchesFromAutoResponseFile, string commandLine)
+        private bool GatherAutoResponseFileSwitchesFromFullPath(string autoResponseFile, CommandLineSwitches switchesFromAutoResponseFile, string commandLine)
         {
             bool found = false;
 
@@ -607,7 +607,7 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        internal static void ResetGatheringSwitchesState()
+        internal void ResetGatheringSwitchesState()
         {
             includedResponseFiles = new List<string>();
             usingSwitchesFromAutoResponseFile = false;

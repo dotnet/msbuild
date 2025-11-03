@@ -143,6 +143,8 @@ namespace Microsoft.Build.CommandLine
 
         private static readonly char[] s_commaSemicolon = { ',', ';' };
 
+        private static CommandLineParser commandLineParser;
+
         /// <summary>
         /// Static constructor
         /// </summary>
@@ -158,6 +160,7 @@ namespace Microsoft.Build.CommandLine
                 //  any configuration file exceptions can be caught here.                     //
                 ////////////////////////////////////////////////////////////////////////////////
                 s_exePath = Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath);
+                commandLineParser = new CommandLineParser();
 
                 s_initialized = true;
             }
@@ -292,9 +295,9 @@ namespace Microsoft.Build.CommandLine
             bool canRunServer = true;
             try
             {
-                CommandLineParser.GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out string fullCommandLine, out s_exeName);
+                commandLineParser.GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out string fullCommandLine, out s_exeName);
                 CommandLineSwitches commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
-                if (CommandLineParser.CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, false, fullCommandLine))
+                if (commandLineParser.CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, false, fullCommandLine))
                 {
                     commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
                 }
@@ -657,7 +660,7 @@ namespace Microsoft.Build.CommandLine
                 bool reportFileAccesses = false;
 #endif
 
-                CommandLineParser.GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _, out s_exeName);
+                commandLineParser.GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _, out s_exeName);
 
                 CommunicationsUtilities.Trace($"Command line parameters: {commandLine}");
 
@@ -1147,7 +1150,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void ResetBuildState()
         {
-            CommandLineParser.ResetGatheringSwitchesState();
+            commandLineParser.ResetGatheringSwitchesState();
         }
 
         /// <summary>
@@ -1481,7 +1484,7 @@ namespace Microsoft.Build.CommandLine
                         messagesToLogInBuildLoggers.AddRange(GetMessagesToLogInBuildLoggers(commandLine));
 
                         // Log a message for every response file and include it in log
-                        foreach (var responseFilePath in CommandLineParser.IncludedResponseFiles)
+                        foreach (var responseFilePath in commandLineParser.IncludedResponseFiles)
                         {
                             messagesToLogInBuildLoggers.Add(
                                 new BuildManager.DeferredBuildMessage(
@@ -2043,7 +2046,7 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    bool foundProjectAutoResponseFile = CommandLineParser.CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, recursing, commandLine);
+                    bool foundProjectAutoResponseFile = commandLineParser.CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, recursing, commandLine);
 
                     if (foundProjectAutoResponseFile)
                     {
