@@ -40,11 +40,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private const string responseFilePathReplacement = "%MSBuildThisFileDirectory%";
 
-        /// <summary>
-        /// Whether switches from the auto-response file are being used.
-        /// </summary>
-        internal bool usingSwitchesFromAutoResponseFile = false;
-
         internal IReadOnlyList<string> IncludedResponseFiles => includedResponseFiles ?? (IReadOnlyList<string>)Array.Empty<string>();
 
         /// <summary>
@@ -554,12 +549,6 @@ namespace Microsoft.Build.CommandLine
                         switchesFromAutoResponseFile.GetParameterlessSwitchCommandLineArg(CommandLineSwitches.ParameterlessSwitch.NoAutoResponse), commandLine);
                 }
 
-                if (switchesFromAutoResponseFile.HaveAnySwitchesBeenSet())
-                {
-                    // we picked up some switches from the auto-response file
-                    usingSwitchesFromAutoResponseFile = true;
-                }
-
                 // Throw errors found in the response file
                 switchesFromAutoResponseFile.ThrowErrors();
             }
@@ -610,7 +599,6 @@ namespace Microsoft.Build.CommandLine
         internal void ResetGatheringSwitchesState()
         {
             includedResponseFiles = new List<string>();
-            usingSwitchesFromAutoResponseFile = false;
             CommandLineSwitches.SwitchesFromResponseFiles = new();
         }
     }
