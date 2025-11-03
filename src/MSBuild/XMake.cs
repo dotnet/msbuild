@@ -659,7 +659,7 @@ namespace Microsoft.Build.CommandLine
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
 
-                CommunicationsUtilities.Trace($"Command line parameters: {commandLine}");
+                CommunicationsUtilities.Trace($"Command line parameters: \"{string.Join(' ', commandLine)}\"");
 
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,

@@ -189,6 +189,17 @@ namespace Microsoft.Build.Internal
         // Helper method to validate handshake option presence
         internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option) => (hostContext & option) == option;
 
+        internal static IEnumerable<HandshakeOptions> GetIndividualHandshakeOptions(HandshakeOptions options)
+        {
+            foreach (HandshakeOptions option in Enum.GetValues(typeof(HandshakeOptions)))
+            {
+                if (option != HandshakeOptions.None && IsHandshakeOptionEnabled(options, option))
+                {
+                    yield return option;
+                }
+            }
+        }
+
         // Source options of the handshake.
         internal HandshakeOptions HandshakeOptions { get; }
 
@@ -199,15 +210,15 @@ namespace Microsoft.Build.Internal
             // Build handshake options with version in upper bits
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
             var options = (int)nodeType | (handshakeVersion << 24);
-            CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
+            CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, string.Join(",", GetIndividualHandshakeOptions(nodeType)));
 
             // Calculate salt from environment and tools directory
             bool isNetTaskHost = IsHandshakeOptionEnabled(nodeType, NetTaskHostFlags);
-            string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
+            string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT");
             string toolsDirectory = GetToolsDirectory(isNetTaskHost, predefinedToolsDirectory);
-            int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
+            int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt ?? ""}{toolsDirectory}");
 
-            CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt);
+            CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt ?? "<not specified>");
             CommunicationsUtilities.Trace("Tools directory root is {0}", toolsDirectory);
 
             // Get session ID if needed (expensive call)
