@@ -2,8 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Reflection;
 using Microsoft.Build.Framework;
+
+#if FEATURE_APPDOMAIN
+using System.Reflection;
+#endif
 
 namespace Microsoft.Build.Shared
 {
@@ -32,8 +35,8 @@ namespace Microsoft.Build.Shared
         /// <returns>true, if specified type is a task</returns>
         internal static bool IsTaskClass(Type type, object unused)
         {
-            return type.GetTypeInfo().IsClass && !type.GetTypeInfo().IsAbstract && (
-                type.GetTypeInfo().GetInterface("Microsoft.Build.Framework.ITask") != null);
+            return type.IsClass && !type.IsAbstract &&
+                type.GetInterface("Microsoft.Build.Framework.ITask") != null;
         }
 
         /// <summary>
@@ -146,14 +149,14 @@ namespace Microsoft.Build.Shared
                         taskColumn,
                         "ConflictingTaskAssembly",
                         loadedType.Assembly.AssemblyFile,
-                        loadedType.Type.GetTypeInfo().Assembly.Location);
+                        loadedType.Type.Assembly.Location);
 
                         taskInstanceInOtherAppDomain = null;
                     }
                 }
                 else
                 {
-                    taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceAndUnwrap(loadedType.Type.GetTypeInfo().Assembly.FullName, loadedType.Type.FullName);
+                    taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceAndUnwrap(loadedType.Type.Assembly.FullName, loadedType.Type.FullName);
                 }
 
                 return  taskInstanceInOtherAppDomain;

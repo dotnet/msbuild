@@ -55,6 +55,15 @@ namespace Microsoft.Build.Shared
             // folders in a NuGet package).
             fullPath = FileUtilities.NormalizePath(fullPath);
 
+            AssemblyName assemblyName = AssemblyLoadContext.GetAssemblyName(fullPath);
+            if (MSBuildLoadContext.WellKnownAssemblyNames.Contains(assemblyName.Name))
+            {
+                // If this is a well-known assembly, load it directly, ensuring that
+                // it is loaded only once. Some tests might pass a well-known assembly
+                // to this method.
+                return Assembly.Load(assemblyName);
+            }
+
             if (Traits.Instance.EscapeHatches.UseSingleLoadContext)
             {
                 return LoadUsingLegacyDefaultContext(fullPath);

@@ -1,14 +1,7 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Globalization;
 using System.Reflection;
-
-#if !FEATURE_CULTUREINFO_GETCULTURES
-using System.Linq;
-using Microsoft.Build.Framework;
-#endif
 
 #nullable disable
 
@@ -19,52 +12,6 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class AssemblyUtilities
     {
-#if !FEATURE_CULTUREINFO_GETCULTURES
-        // True when the cached method info objects have been set.
-        private static bool s_initialized;
-
-        // Cached method info
-        private static PropertyInfo s_assemblylocationProperty;
-        private static MethodInfo s_cultureInfoGetCultureMethod;
-
-        private static Lazy<CultureInfo[]> s_validCultures = new Lazy<CultureInfo[]>(() => GetValidCultures(), true);
-#endif
-
-#if !CLR2COMPATIBILITY
-        private static Lazy<Assembly> s_entryAssembly = new Lazy<Assembly>(() => GetEntryAssembly());
-        public static Assembly EntryAssembly => s_entryAssembly.Value;
-#else
-        public static Assembly EntryAssembly = GetEntryAssembly();
-#endif
-
-        public static string GetAssemblyLocation(Assembly assembly)
-        {
-#if FEATURE_ASSEMBLY_LOCATION
-            return assembly.Location;
-#else
-            // Assembly.Location is only available in .netstandard1.5, but MSBuild needs to target 1.3.
-            // use reflection to access the property
-            Initialize();
-
-            if (s_assemblylocationProperty == null)
-            {
-                throw new NotSupportedException("Type Assembly does not have the Location property");
-            }
-
-            return (string)s_assemblylocationProperty.GetValue(assembly);
-#endif
-        }
-
-#if CLR2COMPATIBILITY
-        /// <summary>
-        /// Shim for the lack of <see cref="System.Reflection.IntrospectionExtensions.GetTypeInfo"/> in .NET 3.5.
-        /// </summary>
-        public static Type GetTypeInfo(this Type t)
-        {
-            return t;
-        }
-#endif
-
         public static AssemblyName CloneIfPossible(this AssemblyName assemblyNameToClone)
         {
 #if CLR2COMPATIBILITY
@@ -101,71 +48,5 @@ namespace Microsoft.Build.Shared
 #endif
 
         }
-
-#if !FEATURE_CULTUREINFO_GETCULTURES
-        public static bool CultureInfoHasGetCultures()
-        {
-            return s_cultureInfoGetCultureMethod != null;
-        }
-#endif // !FEATURE_CULTUREINFO_GETCULTURES
-
-        public static CultureInfo[] GetAllCultures()
-        {
-#if FEATURE_CULTUREINFO_GETCULTURES
-            return CultureInfo.GetCultures(CultureTypes.AllCultures);
-#else
-            Initialize();
-
-            if (!CultureInfoHasGetCultures())
-            {
-                throw new NotSupportedException("CultureInfo does not have the method GetCultures");
-            }
-
-            return s_validCultures.Value;
-#endif
-        }
-
-#if !FEATURE_CULTUREINFO_GETCULTURES
-        /// <summary>
-        /// Initialize static fields. Doesn't need to be thread safe.
-        /// </summary>
-        private static void Initialize()
-        {
-            if (s_initialized)
-            {
-                return;
-            }
-
-            s_assemblylocationProperty = typeof(Assembly).GetProperty("Location", typeof(string));
-            s_cultureInfoGetCultureMethod = typeof(CultureInfo).GetMethod("GetCultures");
-
-            s_initialized = true;
-        }
-#endif // !FEATURE_CULTUREINFO_GETCULTURES
-
-        private static Assembly GetEntryAssembly()
-        {
-            return System.Reflection.Assembly.GetEntryAssembly();
-        }
-
-#if !FEATURE_CULTUREINFO_GETCULTURES
-        private static CultureInfo[] GetValidCultures()
-        {
-            var cultureTypesType = s_cultureInfoGetCultureMethod?.GetParameters().FirstOrDefault()?.ParameterType;
-
-            FrameworkErrorUtilities.VerifyThrow(cultureTypesType?.Name == "CultureTypes" &&
-                                       Enum.IsDefined(cultureTypesType, "AllCultures"),
-                                       "GetCulture is expected to accept CultureTypes.AllCultures");
-
-            var allCulturesEnumValue = Enum.Parse(cultureTypesType, "AllCultures", true);
-
-            var cultures = s_cultureInfoGetCultureMethod.Invoke(null, [allCulturesEnumValue]) as CultureInfo[];
-
-            // CultureInfo.GetCultures should work if all reflection checks pass
-            FrameworkErrorUtilities.VerifyThrowInternalNull(cultures);
-
-            return cultures;
-        }
-#endif
     }
 }
