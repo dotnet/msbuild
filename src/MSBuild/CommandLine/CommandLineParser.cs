@@ -42,15 +42,17 @@ namespace Microsoft.Build.CommandLine
 
         internal IReadOnlyList<string> IncludedResponseFiles => includedResponseFiles ?? (IReadOnlyList<string>)Array.Empty<string>();
 
-        /// <summary>
-        /// Gets all specified switches, from the command line, as well as all
-        /// response files, including the auto-response file.
-        /// </summary>
-        /// <param name="commandLine"></param>
-        /// <param name="switchesFromAutoResponseFile"></param>
-        /// <param name="switchesNotFromAutoResponseFile"></param>
-        /// <param name="fullCommandLine"></param>
-        /// <returns>Combined bag of switches.</returns>
+        public (CommandLineSwitches commandLineSwitches, CommandLineSwitches responseFileSwitches) Parse(IEnumerable<string> commandLineArgs)
+        {
+            GatherAllSwitches(
+                commandLineArgs,
+                $"'{string.Join(" ", commandLineArgs)}'",
+                out CommandLineSwitches responseFileSwitches,
+                out CommandLineSwitches commandLineSwitches);
+
+            return (commandLineSwitches, responseFileSwitches);
+        }
+
         internal void GatherAllSwitches(
             string commandLine,
             out CommandLineSwitches switchesFromAutoResponseFile,
@@ -58,10 +60,8 @@ namespace Microsoft.Build.CommandLine
             out string fullCommandLine,
             out string exeName)
         {
-            ResetGatheringSwitchesState();
-
             // split the command line on (unquoted) whitespace
-            var commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
+            List<string> commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
 
             exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote(commandLineArgs[0]));
 
@@ -75,10 +75,34 @@ namespace Microsoft.Build.CommandLine
                 exeName += msbuildExtn;
             }
 
-            // discard the first piece, because that's the path to the executable -- the rest are args
-            commandLineArgs.RemoveAt(0);
-
             fullCommandLine = $"'{commandLine}'";
+
+            GatherAllSwitches(
+                commandLineArgs,
+                fullCommandLine,
+                out switchesFromAutoResponseFile,
+                out switchesNotFromAutoResponseFile);
+        }
+
+        /// <summary>
+        /// Gets all specified switches, from the command line, as well as all
+        /// response files, including the auto-response file.
+        /// </summary>
+        /// <param name="commandLine"></param>
+        /// <param name="switchesFromAutoResponseFile"></param>
+        /// <param name="switchesNotFromAutoResponseFile"></param>
+        /// <param name="fullCommandLine"></param>
+        /// <returns>Combined bag of switches.</returns>
+        private void GatherAllSwitches(
+            IEnumerable<string> commandLineArgs,
+            string fullCommandLine,
+            out CommandLineSwitches switchesFromAutoResponseFile,
+            out CommandLineSwitches switchesNotFromAutoResponseFile)
+        {
+            ResetGatheringSwitchesState();
+
+            // discard the first piece, because that's the path to the executable -- the rest are args
+            commandLineArgs = commandLineArgs.Skip(1);
 
             // parse the command line, and flag syntax errors and obvious switch errors
             switchesNotFromAutoResponseFile = new CommandLineSwitches();
@@ -101,7 +125,7 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Internal for unit testing only.
         /// </remarks>
-        internal void GatherCommandLineSwitches(List<string> commandLineArgs, CommandLineSwitches commandLineSwitches, string commandLine = "")
+        internal void GatherCommandLineSwitches(IEnumerable<string> commandLineArgs, CommandLineSwitches commandLineSwitches, string commandLine = "")
         {
             foreach (string commandLineArg in commandLineArgs)
             {
