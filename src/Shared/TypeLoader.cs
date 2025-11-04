@@ -380,21 +380,80 @@ namespace Microsoft.Build.Shared
                     return GetTypeForOutOfProcExecution(typeName);
                 }
 
+                LoadedType loadedType;
+
                 try
                 {
-                    return LoadInProc(typeName);
+                    loadedType = LoadInProc(typeName);
                 }
                 catch
                 {
-                    // The assembly can't be loaded in-proc due to architecture or runtime mismatch that was discovered during in-proc load. 
+                    // The assembly can't be loaded in-proc due to architecture or runtime mismatch that was discovered during in-proc load.
+                    // Fall back to metadata load context. It will prepare prerequisites for out of proc execution.
+                    MSBuildEventSource.Log.FallbackAssemblyLoadStart(typeName);
+                    loadedType = GetTypeForOutOfProcExecution(typeName);
+                    MSBuildEventSource.Log.FallbackAssemblyLoadStop(typeName);
                 }
 
-                // Fall back to metadata load context. It will prepare prerequisites for out of proc execution.
-                MSBuildEventSource.Log.FallbackAssemblyLoadStart(typeName);
-                var loadedType = GetTypeForOutOfProcExecution(typeName);
-                MSBuildEventSource.Log.FallbackAssemblyLoadStop(typeName);
-
                 return loadedType;
+            }
+
+            /// <summary>
+            /// Normal in-proc loading path.
+            /// Only one thread should be doing operations on this instance of the object at a time
+            /// This loads the assembly for actual execution (not metadata-only).
+            /// </summary>
+            /// <param name="typeName">The type to be loaded.</param>
+            private LoadedType LoadInProc(string typeName)
+            {
+                Type type = _typeNameToType.GetOrAdd(typeName, (key) =>
+                {
+                    if ((_assemblyLoadInfo.AssemblyName != null) && (typeName.Length > 0))
+                    {
+                        try
+                        {
+                            // try to load the type using its assembly qualified name
+                            Type t2 = Type.GetType(typeName + "," + _assemblyLoadInfo.AssemblyName, false /* don't throw on error */, true /* case-insensitive */);
+                            if (t2 != null)
+                            {
+                                return !_isDesiredType(t2, null) ? null : t2;
+                            }
+                        }
+                        catch (ArgumentException)
+                        {
+                            // Type.GetType() will throw this exception if the type name is invalid -- but we have no idea if it's the
+                            // type or the assembly name that's the problem -- so just ignore the exception, because we're going to
+                            // check the existence/validity of the assembly and type respectively, below anyway
+                        }
+                    }
+
+                    if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
+                    {
+                        lock (_lockObject)
+                        {
+                            if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
+                            {
+                                ScanAssemblyForPublicTypes();
+                                Interlocked.Exchange(ref _haveScannedPublicTypes, ~0);
+                            }
+                        }
+                    }
+
+                    foreach (KeyValuePair<string, Type> desiredTypeInAssembly in _publicTypeNameToType)
+                    {
+                        // if type matches partially on its name
+                        if (typeName.Length == 0 || IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
+                        {
+                            return desiredTypeInAssembly.Value;
+                        }
+                    }
+
+                    return null;
+                });
+
+                return type != null
+                    ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, typeof(ITaskItem), loadedViaMetadataLoadContext: false)
+                    : null;
             }
 
             /// <summary>
@@ -461,64 +520,6 @@ namespace Microsoft.Build.Shared
 
                     return null;
                 });
-
-            /// <summary>
-            /// Normal in-proc loading path.
-            /// Only one thread should be doing operations on this instance of the object at a time
-            /// This loads the assembly for actual execution (not metadata-only).
-            /// </summary>
-            /// <param name="typeName">The type to be loaded.</param>
-            private LoadedType LoadInProc(string typeName)
-            {
-                Type type = _typeNameToType.GetOrAdd(typeName, (key) =>
-                {
-                    if ((_assemblyLoadInfo.AssemblyName != null) && (typeName.Length > 0))
-                    {
-                        try
-                        {
-                            // try to load the type using its assembly qualified name
-                            Type t2 = Type.GetType(typeName + "," + _assemblyLoadInfo.AssemblyName, false /* don't throw on error */, true /* case-insensitive */);
-                            if (t2 != null)
-                            {
-                                return !_isDesiredType(t2, null) ? null : t2;
-                            }
-                        }
-                        catch (ArgumentException)
-                        {
-                            // Type.GetType() will throw this exception if the type name is invalid -- but we have no idea if it's the
-                            // type or the assembly name that's the problem -- so just ignore the exception, because we're going to
-                            // check the existence/validity of the assembly and type respectively, below anyway
-                        }
-                    }
-
-                    if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
-                    {
-                        lock (_lockObject)
-                        {
-                            if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
-                            {
-                                ScanAssemblyForPublicTypes();
-                                Interlocked.Exchange(ref _haveScannedPublicTypes, ~0);
-                            }
-                        }
-                    }
-
-                    foreach (KeyValuePair<string, Type> desiredTypeInAssembly in _publicTypeNameToType)
-                    {
-                        // if type matches partially on its name
-                        if (typeName.Length == 0 || IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
-                        {
-                            return desiredTypeInAssembly.Value;
-                        }
-                    }
-
-                    return null;
-                });
-
-                return type != null
-                    ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, typeof(ITaskItem), loadedViaMetadataLoadContext: false)
-                    : null;
-            }
 
             /// <summary>
             /// Gets architecture and runtime from the assembly using MetadataLoadContext.
