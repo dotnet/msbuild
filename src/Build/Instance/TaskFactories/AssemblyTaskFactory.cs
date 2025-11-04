@@ -343,8 +343,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Multi-threaded mode routing: Determine if non-thread-safe tasks need TaskHost isolation.
-            if (!useTaskFactory 
-                && _loadedType?.Type != null 
+            if (!useTaskFactory
+                && _loadedType?.Type != null
                 && buildComponentHost?.BuildParameters?.MultiThreaded == true)
             {
                 if (TaskRouter.NeedsTaskHostInMultiThreadedMode(_loadedType.Type))
@@ -359,10 +359,8 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowInternalNull(buildComponentHost);
 
-                string runtime = mergedParameters.Runtime ?? XMakeAttributes.GetCurrentMSBuildRuntime();
-                string architecture = mergedParameters.Architecture ?? XMakeAttributes.GetCurrentMSBuildArchitecture();
-
-                (mergedParameters, bool isNetRuntime) = AddNetHostParamsIfNeeded(runtime, architecture, getProperty);
+                mergedParameters = UpdateTaskHostParameters(mergedParameters);
+                (mergedParameters, bool isNetRuntime) = AddNetHostParamsIfNeeded(mergedParameters, getProperty);
 
                 bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false)
                     || isNetRuntime;
@@ -425,6 +423,30 @@ namespace Microsoft.Build.BackEnd
 
                 return taskInstance;
             }
+        }
+
+        /// <summary>
+        /// Overrides runtime/architecture with values from assembly metadata if available.
+        /// These values are more reliable since they are determined during assembly load.
+        /// </summary>
+        private TaskHostParameters UpdateTaskHostParameters(TaskHostParameters taskHostParameters)
+        {
+            // Determine runtime: prefer loaded type's runtime, fallback to parameter or current.
+            string runtime = !string.IsNullOrEmpty(_loadedType?.Runtime)
+                ? _loadedType.Runtime
+                : taskHostParameters.Runtime ?? XMakeAttributes.GetCurrentMSBuildRuntime();
+
+            // Determine architecture: prefer loaded type's architecture, fallback to parameter or current
+            string architecture = !string.IsNullOrEmpty(_loadedType?.Architecture)
+                ? _loadedType.Architecture
+                : taskHostParameters.Architecture ?? XMakeAttributes.GetCurrentMSBuildArchitecture();
+
+            return new TaskHostParameters(
+                runtime: runtime,
+                architecture: architecture,
+                dotnetHostPath: taskHostParameters.DotnetHostPath,
+                msBuildAssemblyPath: taskHostParameters.MSBuildAssemblyPath,
+                taskHostFactoryExplicitlyRequested: taskHostParameters.TaskHostFactoryExplicitlyRequested);
         }
 
         /// <summary>
@@ -574,12 +596,14 @@ namespace Microsoft.Build.BackEnd
             // Both have values - need to merge them
             if (!XMakeAttributes.TryMergeRuntimeValues(taskIdentityParameters.Runtime, factoryIdentityParameters.Runtime, out var mergedRuntime))
             {
-                ErrorUtilities.ThrowInternalError("How did we get two runtime values that were unmergeable?");
+                ErrorUtilities.ThrowInternalError("How did we get two runtime values that were unmergeable? " +
+                    $"TaskIdentity Runtime: {taskIdentityParameters.Runtime}, FactoryIdentity Runtime: {factoryIdentityParameters.Runtime}.");
             }
 
             if (!XMakeAttributes.TryMergeArchitectureValues(taskIdentityParameters.Architecture, factoryIdentityParameters.Architecture, out var mergedArchitecture))
             {
-                ErrorUtilities.ThrowInternalError("How did we get two architecture values that were unmergeable?");
+                ErrorUtilities.ThrowInternalError("How did we get two architecture values that were unmergeable? " +
+                    $"TaskIdentity Architecture: {taskIdentityParameters.Architecture}, FactoryIdentity Architecture: {factoryIdentityParameters.Architecture}.");
             }
 
             return new TaskHostParameters(
@@ -595,14 +619,13 @@ namespace Microsoft.Build.BackEnd
         /// Returns a new TaskHostParameters with .NET host parameters added, or the original if not needed.
         /// </summary>
         private static (TaskHostParameters TaskHostParams, bool isNetRuntime) AddNetHostParamsIfNeeded(
-            string runtime,
-            string architecture,
+            TaskHostParameters taskHostParameters,
             Func<string, ProjectPropertyInstance> getProperty)
         {
             // Only add .NET host parameters if runtime is .NET
-            if (!runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
+            if (taskHostParameters.Runtime != XMakeAttributes.MSBuildRuntimeValues.net)
             {
-                return (new TaskHostParameters(runtime, architecture), isNetRuntime: false);
+                return (taskHostParameters, isNetRuntime: false);
             }
 
             string dotnetHostPath = getProperty(Constants.DotnetHostPathEnvVarName)?.EvaluatedValue;
@@ -611,12 +634,12 @@ namespace Microsoft.Build.BackEnd
                 ? Path.GetDirectoryName(ridGraphPath) ?? string.Empty
                 : string.Empty;
 
-            // Only create new parameters if we have valid .NET host paths
+            // Create new parameters only if we have valid .NET host paths
             return string.IsNullOrEmpty(dotnetHostPath) || string.IsNullOrEmpty(msBuildAssemblyPath)
-                ? (new TaskHostParameters(runtime, architecture), isNetRuntime: false)
+                ? (taskHostParameters, isNetRuntime: false)
                 : (new TaskHostParameters(
-                    runtime: runtime,
-                    architecture: architecture,
+                    runtime: taskHostParameters.Runtime,
+                    architecture: taskHostParameters.Architecture,
                     dotnetHostPath: dotnetHostPath,
                     msBuildAssemblyPath: msBuildAssemblyPath),
                     isNetRuntime: true);
@@ -672,7 +695,7 @@ namespace Microsoft.Build.BackEnd
 
             // Check if the assembly is a Microsoft assembly by name
             string assemblyName = _loadedType.Assembly.AssemblyName;
-            if (!string.IsNullOrEmpty(assemblyName) && Framework.FileClassifier.IsMicrosoftAssembly(assemblyName))
+            if (!string.IsNullOrEmpty(assemblyName) && FileClassifier.IsMicrosoftAssembly(assemblyName))
             {
                 return true;
             }
@@ -682,13 +705,13 @@ namespace Microsoft.Build.BackEnd
             if (!string.IsNullOrEmpty(assemblyFile))
             {
                 // Check if it's built-in MSBuild logic (e.g., from MSBuild installation)
-                if (Framework.FileClassifier.Shared.IsBuiltInLogic(assemblyFile))
+                if (FileClassifier.Shared.IsBuiltInLogic(assemblyFile))
                 {
                     return true;
                 }
 
                 // Check if it's a Microsoft package from NuGet cache
-                if (Framework.FileClassifier.Shared.IsMicrosoftPackageInNugetCache(assemblyFile))
+                if (FileClassifier.Shared.IsMicrosoftPackageInNugetCache(assemblyFile))
                 {
                     return true;
                 }

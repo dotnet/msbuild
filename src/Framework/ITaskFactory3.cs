@@ -11,6 +11,18 @@ namespace Microsoft.Build.Framework
     /// Interface that a task factory Instance should implement if it wants to be able to
     /// use new UsingTask parameters such as Runtime and Architecture.
     /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Before implementing a custom task factory, consider whether your scenario can be addressed by MSBuild's built-in 
+    /// task factories (such as AssemblyTaskFactory for tasks in compiled assemblies, TaskHostFactory for inline tasks, 
+    /// or RoslynCodeTaskFactory for C# code tasks). Custom task factories add complexity and maintenance burden, and 
+    /// most scenarios can be handled by the existing MSBuild infrastructure.
+    /// </para>
+    /// <para>
+    /// If you have an existing custom task factory implementation, we recommend evaluating whether migrating to 
+    /// MSBuild's built-in task factories would be feasible for your use case.
+    /// </para>
+    /// </remarks>
     public interface ITaskFactory3 : ITaskFactory2
     {
         /// <summary>

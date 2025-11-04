@@ -425,7 +425,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            if (this.TaskInstance is IIncrementalTask incrementalTask)
+            if (TaskInstance is IIncrementalTask incrementalTask)
             {
                 incrementalTask.FailIfNotIncremental = _buildComponentHost.BuildParameters.Question;
             }
@@ -1001,14 +1001,7 @@ namespace Microsoft.Build.BackEnd
                             // ITaskFactory2 is here for compat reasons
                             if (_taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2)
                             {
-                                var taskIdentityMap = new Dictionary<string, string>(3)
-                                {
-                                    { nameof(TaskHostParameters.Runtime), taskIdentityParameters.Runtime },
-                                    { nameof(TaskHostParameters.Architecture), taskIdentityParameters.Architecture },
-                                    { nameof(TaskHostParameters.TaskHostFactoryExplicitlyRequested), taskIdentityParameters.TaskHostFactoryExplicitlyRequested.ToString() },
-                                };
-
-                                task = taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityMap);
+                                task = taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityParameters.ToDictionary());
                             }
                             else
                             {
@@ -1757,13 +1750,7 @@ namespace Microsoft.Build.BackEnd
             // ITaskFactory2 is used for compatibility reasons
             if (_taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2)
             {
-                var taskIdentityMap = new Dictionary<string, string>(3)
-                {
-                    { nameof(TaskHostParameters.Runtime), taskIdentityParameters.Runtime },
-                    { nameof(TaskHostParameters.Architecture), taskIdentityParameters.Architecture },
-                    { nameof(TaskHostParameters.TaskHostFactoryExplicitlyRequested), taskIdentityParameters.TaskHostFactoryExplicitlyRequested.ToString() },
-                };
-                innerTask = taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityMap);
+                innerTask = taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityParameters.ToDictionary());
             }
             else
             {

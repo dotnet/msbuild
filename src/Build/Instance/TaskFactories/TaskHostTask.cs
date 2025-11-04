@@ -141,7 +141,7 @@ namespace Microsoft.Build.BackEnd
         private bool _taskExecutionSucceeded = false;
 
         /// <summary>
-        /// If true TaskHostFactory expects the TaskHost not will NOT to expire after build (until it timeouts or is killed).
+        /// If true TaskHostFactory expects the TaskHost not will NOT expire after build (until it timeouts or is killed).
         /// This is relevant for the next cases:
         /// 1) TaskHostFactory is NOT explicitly requested (we always disable node reuse due to the transient nature of task host factory hosts).
         /// 2) Runtime="NET" is specified in UsingTask.
