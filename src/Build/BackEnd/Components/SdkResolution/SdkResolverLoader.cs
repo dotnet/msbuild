@@ -239,15 +239,18 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     // This will load the resolver assembly into the default load context if possible, and fall back to LoadFrom context.
                     // We very much prefer the default load context because it allows native images to be used by the CLR, improving startup perf.
                     bool isRunningInVS = BuildEnvironmentHelper.Instance.RunningInVisualStudio;
-                    if (!isRunningInVS)
+                    AssemblyName assemblyName = CreateAssemblyNameWithCodeBase(resolverFileName, resolverPath);
+                    if (isRunningInVS)
+                    {
+                        // Inside VS use optimization without a fallback. VS environment should not fail loading. 
+                        // If for some reason it fails, we will want to find it out rather than silently catch the exception and allow a performance regression.
+                        return Assembly.Load(assemblyName);
+                    }
+                    else
                     {
                         // Apply compatibility fallback for external API users
                         try
                         {
-                            AssemblyName assemblyName = new AssemblyName(resolverFileName)
-                            {
-                                CodeBase = resolverPath,
-                            };
                             return Assembly.Load(assemblyName);
                         }
                         catch (Exception)
@@ -256,16 +259,6 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                             return Assembly.LoadFrom(resolverPath);
                         }
                     }
-                    else
-                    {
-                        // Inside VS: use original optimization (no fallback)
-                        // If it fails, let it fail - VS environment should work
-                        AssemblyName assemblyName = new AssemblyName(resolverFileName)
-                        {
-                            CodeBase = resolverPath,
-                        };
-                        return Assembly.Load(assemblyName);
-                    }
                 }
             }
             return Assembly.LoadFrom(resolverPath);
@@ -273,6 +266,16 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return s_loader.LoadFromPath(resolverPath);
 #endif
         }
+
+#if !FEATURE_ASSEMBLYLOADCONTEXT
+        private AssemblyName CreateAssemblyNameWithCodeBase(string assemblyName, string codeBase)
+        {
+            return new AssemblyName(assemblyName)
+            {
+                CodeBase = codeBase,
+            };
+        }
+#endif
 
         protected internal virtual IReadOnlyList<SdkResolver> LoadResolversFromManifest(SdkResolverManifest manifest, ElementLocation location)
         {
