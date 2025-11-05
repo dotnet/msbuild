@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -85,6 +86,15 @@ namespace Microsoft.Build.BackEnd
         private bool _isTaskInputLoggingEnabled;
 
         /// <summary>
+        /// Target name that is requesting the task execution.
+        /// </summary>
+        private string _targetName;
+
+#if !NET35
+        private HostServices _hostServices;
+#endif
+
+        /// <summary>
         /// The set of parameters to apply to the task prior to execution.
         /// </summary>
         private Dictionary<string, TaskParameter> _taskParameters;
@@ -96,56 +106,15 @@ namespace Microsoft.Build.BackEnd
 
         private ICollection<string> _warningsAsMessages;
 
-#if FEATURE_APPDOMAIN
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="nodeId">The ID of the node being configured.</param>
-        /// <param name="startupDirectory">The startup directory for the task being executed.</param>
-        /// <param name="buildProcessEnvironment">The set of environment variables to apply to the task execution process.</param>
-        /// <param name="culture">The culture of the thread that will execute the task.</param>
-        /// <param name="uiCulture">The UI culture of the thread that will execute the task.</param>
-        /// <param name="appDomainSetup">The AppDomainSetup that may be used to pass information to an AppDomainIsolated task.</param>
-        /// <param name="lineNumberOfTask">The line number of the location from which this task was invoked.</param>
-        /// <param name="columnNumberOfTask">The column number of the location from which this task was invoked.</param>
-        /// <param name="projectFileOfTask">The project file from which this task was invoked.</param>
-        /// <param name="continueOnError">Flag to continue with the build after a the task failed</param>
-        /// <param name="taskName">Name of the task.</param>
-        /// <param name="taskLocation">Location of the assembly the task is to be loaded from.</param>
-        /// <param name="isTaskInputLoggingEnabled">Whether task inputs are logged.</param>
-        /// <param name="taskParameters">Parameters to apply to the task.</param>
-        /// <param name="globalParameters">global properties for the current project.</param>
-        /// <param name="warningsAsErrors">Warning codes to be treated as errors for the current project.</param>
-        /// <param name="warningsNotAsErrors">Warning codes not to be treated as errors for the current project.</param>
-        /// <param name="warningsAsMessages">Warning codes to be treated as messages for the current project.</param>
-#else
-        /// <summary>
-        /// Constructor.
-        /// </summary>
-        /// <param name="nodeId">The ID of the node being configured.</param>
-        /// <param name="startupDirectory">The startup directory for the task being executed.</param>
-        /// <param name="buildProcessEnvironment">The set of environment variables to apply to the task execution process.</param>
-        /// <param name="culture">The culture of the thread that will execute the task.</param>
-        /// <param name="uiCulture">The UI culture of the thread that will execute the task.</param>
-        /// <param name="lineNumberOfTask">The line number of the location from which this task was invoked.</param>
-        /// <param name="columnNumberOfTask">The column number of the location from which this task was invoked.</param>
-        /// <param name="projectFileOfTask">The project file from which this task was invoked.</param>
-        /// <param name="continueOnError">Flag to continue with the build after a the task failed</param>
-        /// <param name="taskName">Name of the task.</param>
-        /// <param name="taskLocation">Location of the assembly the task is to be loaded from.</param>
-        /// <param name="isTaskInputLoggingEnabled">Whether task inputs are logged.</param>
-        /// <param name="taskParameters">Parameters to apply to the task.</param>
-        /// <param name="globalParameters">global properties for the current project.</param>
-        /// <param name="warningsAsErrors">Warning codes to be logged as errors for the current project.</param>
-        /// <param name="warningsNotAsErrors">Warning codes not to be treated as errors for the current project.</param>
-        /// <param name="warningsAsMessages">Warning codes to be treated as messages for the current project.</param>
-#endif
         public TaskHostConfiguration(
             int nodeId,
             string startupDirectory,
             IDictionary<string, string> buildProcessEnvironment,
             CultureInfo culture,
             CultureInfo uiCulture,
+#if !NET35
+            HostServices hostServices,
+#endif
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -155,6 +124,7 @@ namespace Microsoft.Build.BackEnd
             bool continueOnError,
             string taskName,
             string taskLocation,
+            string targetName,
             bool isTaskInputLoggingEnabled,
             IDictionary<string, object> taskParameters,
             Dictionary<string, string> globalParameters,
@@ -180,6 +150,9 @@ namespace Microsoft.Build.BackEnd
 
             _culture = culture;
             _uiCulture = uiCulture;
+#if !NET35
+            _hostServices = hostServices;
+#endif
 #if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
 #endif
@@ -189,6 +162,7 @@ namespace Microsoft.Build.BackEnd
             _continueOnError = continueOnError;
             _taskName = taskName;
             _taskLocation = taskLocation;
+            _targetName = targetName;
             _isTaskInputLoggingEnabled = isTaskInputLoggingEnabled;
             _warningsAsErrors = warningsAsErrors;
             _warningsNotAsErrors = warningsNotAsErrors;
@@ -277,6 +251,18 @@ namespace Microsoft.Build.BackEnd
         }
 #endif
 
+#if !NET35
+        /// <summary>
+        /// The HostServices to be used by the task host.
+        /// </summary>
+        public HostServices HostServices
+        {
+            [DebuggerStepThrough]
+            get
+            { return _hostServices; }
+        }
+#endif
+
         /// <summary>
         /// Line number where the instance of this task is defined.
         /// </summary>
@@ -295,6 +281,17 @@ namespace Microsoft.Build.BackEnd
             [DebuggerStepThrough]
             get
             { return _columnNumberOfTask; }
+        }
+
+
+        /// <summary>
+        /// Target name that is requesting the task execution.
+        /// </summary>
+        public string TargetName
+        {
+            [DebuggerStepThrough]
+            get
+            { return _targetName; }
         }
 
         /// <summary>
@@ -444,6 +441,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _projectFileOfTask);
             translator.Translate(ref _taskName);
             translator.Translate(ref _taskLocation);
+            translator.Translate(ref _targetName);
             translator.Translate(ref _isTaskInputLoggingEnabled);
             translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
             translator.Translate(ref _continueOnError);
@@ -468,6 +466,12 @@ namespace Microsoft.Build.BackEnd
                                  collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
 #else
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
+#endif
+#if !NET35
+            if (translator.PacketVersion >= 2 && _hostServices != null)
+            {
+                translator.Translate(ref _hostServices);
+            }
 #endif
         }
 

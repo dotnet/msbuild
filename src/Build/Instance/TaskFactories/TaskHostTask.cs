@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -149,6 +150,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _useSidecarTaskHost = false;
 
+#if !NET35
+        private HostServices _hostServices;
+#endif
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -162,6 +167,9 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
+#if !NET35
+            HostServices hostServices,
+#endif
             int scheduledNodeId)
         {
             ErrorUtilities.VerifyThrowInternalNull(taskType);
@@ -174,6 +182,9 @@ namespace Microsoft.Build.BackEnd
             _taskType = taskType;
 #if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
+#endif
+#if !NET35
+            _hostServices = hostServices;
 #endif
             _taskHostParameters = taskHostParameters;
             _useSidecarTaskHost = useSidecarTaskHost;
@@ -312,6 +323,9 @@ namespace Microsoft.Build.BackEnd
                         CommunicationsUtilities.GetEnvironmentVariables(),
                         _buildComponentHost.BuildParameters.Culture,
                         _buildComponentHost.BuildParameters.UICulture,
+#if !NET35
+                        _hostServices,
+#endif
 #if FEATURE_APPDOMAIN
                         _appDomainSetup,
 #endif
@@ -321,6 +335,7 @@ namespace Microsoft.Build.BackEnd
                         BuildEngine.ContinueOnError,
                         _taskType.Type.FullName,
                         taskLocation,
+                        _taskLoggingContext?.TargetLoggingContext?.Target?.Name,
                         _buildComponentHost.BuildParameters.LogTaskInputs,
                         _setParameters,
                         new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),

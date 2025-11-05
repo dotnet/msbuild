@@ -377,6 +377,9 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif
+#if !NET35
+                    null,
+#endif
                     scheduledNodeId);
                 return task;
             }

@@ -42,15 +42,5 @@ namespace Microsoft.Build.CommandLine
 
             return false;
         }
-
-        /// <summary>
-        /// Sets the HostObject that will be assigned to the task after instantiation.
-        /// This must be called BEFORE ExecuteTask() is called.
-        /// </summary>
-        /// <param name="hostObject">The host object to set on the task.</param>
-        internal void SetHostObject(ITaskHost hostObject)
-        {
-            _pendingHostObject = hostObject;
-        }
     }
 }

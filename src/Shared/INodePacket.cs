@@ -315,11 +315,13 @@ namespace Microsoft.Build.BackEnd
         /// Version 1: Introduced for the .NET Task Host protocol. This version
         /// excludes the translation of appDomainConfig within TaskHostConfiguration
         /// to maintain backward compatibility and reduce serialization overhead.
+        ///
+        /// Version 2: Adds support of HostServices translation in TaskHostConfiguration.
         /// 
         /// When incrementing this version, ensure compatibility with existing
         /// task hosts and update the corresponding deserialization logic.
         /// </summary>
-        public const byte PacketVersion = 1;
+        public const byte PacketVersion = 2;
 
         // Flag bits in upper 2 bits
         private const byte ExtendedHeaderFlag = 0x40;  // Bit 6: 01000000

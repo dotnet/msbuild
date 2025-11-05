@@ -221,6 +221,10 @@ namespace Microsoft.Build.BackEnd
             set => _taskFactoryWrapper = value;
         }
 
+#if !NET35
+        private HostServices _hostServices;
+#endif
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// App domain configuration.
@@ -247,9 +251,19 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize to run a specific task.
         /// </summary>
-        public void InitializeForTask(IBuildEngine2 buildEngine, TargetLoggingContext loggingContext, ProjectInstance projectInstance, string taskName, ElementLocation taskLocation, ITaskHost taskHost, bool continueOnError,
+        public void InitializeForTask(
+            IBuildEngine2 buildEngine,
+            TargetLoggingContext loggingContext,
+            ProjectInstance projectInstance,
+            string taskName,
+            ElementLocation taskLocation,
+            ITaskHost taskHost,
+            bool continueOnError,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
+#endif
+#if !NET35
+            HostServices hostServices,
 #endif
             bool isOutOfProc, CancellationToken cancellationToken)
         {
@@ -263,6 +277,9 @@ namespace Microsoft.Build.BackEnd
             _taskExecutionIdle.Set();
 #if FEATURE_APPDOMAIN
             AppDomainSetup = appDomainSetup;
+#endif
+#if !NET35
+            _hostServices = hostServices;
 #endif
             IsOutOfProc = isOutOfProc;
         }
@@ -1803,6 +1820,9 @@ namespace Microsoft.Build.BackEnd
                 useSidecarTaskHost: false,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup,
+#endif
+#if !NET35
+                _hostServices,
 #endif
                 scheduledNodeId);
         }

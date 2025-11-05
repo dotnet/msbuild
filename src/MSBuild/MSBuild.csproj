@@ -145,9 +145,6 @@
     <Compile Include="PerformanceLogEventListener.cs" />
     <Compile Include="JsonOutputFormatter.cs" />
     <Compile Include="XMake.cs" />
-    <Compile Include="HostObjectProxy.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'"/>
-    <Compile Include="..\Shared\HostObjectRequest.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
-    <Compile Include="..\Shared\HostObjectResponse.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
     <!-- This is to enable CodeMarkers in MSBuild.exe -->
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />
