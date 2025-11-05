@@ -61,12 +61,11 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -reportFileAccesses[:True|Falsch]
-                     Führt dazu, dass MSBuild Dateizugriffe an alle konfigurierten
- meldet
-                     Projektcache-Plug-Ins.
+        <target state="translated">  -reportFileAccesses[:True|False]
+                     Führt dazu, dass MSBuild Dateizugriffe auf ein beliebiges konfiguriertes
+                     Projektcache-Plug-In meldet.
 
-                     Dieses Kennzeichen ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
+                     Dieses Flag ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -117,7 +116,7 @@
                      the specified targets will be executed.
     </source>
         <target state="translated">  -getTargetResult:targetName,...
-                     Schreiben Sie den Ausgabewert eines oder mehrerer Ziele aus und
+                     Schreiben Sie den Ausgabewert eines oder mehrerer Ziele aus, und
                      die angegebenen Ziele werden ausgeführt.
     </target>
         <note>
@@ -145,15 +144,15 @@
                      Überprüft die Verfügbarkeit von Features. Das Ergebnis ist eine der
                      Zeichenfolgen "Undefined", "Available", "NotAvailable" und
                      "Preview".
-                     –Undefinied: Die Verfügbarkeit des Features ist nicht definiert
+                     – Undefinied: Die Verfügbarkeit des Features ist nicht definiert
                      (der Featurename ist für den Prüfer der Featureverfügbarkeit
                      unbekannt)
-                     -NotAvailable: Das Feature ist nicht verfügbar (im Gegensatz zu
+                     – NotAvailable: Das Feature ist nicht verfügbar (im Gegensatz zu
                      "Undefined", wo der Featurename für den Prüfer der Featureverfügbarkeit
                      bekannt ist und er weiß, dass das Feature von der
                      aktuellen MSBuild-Engine nicht unterstützt wird)
-                     -Available: Das Feature ist verfügbar
-                     -Preview: Das Feature befindet sich in der Vorschau (nicht stabil)
+                     – Available: Das Feature ist verfügbar
+                     – Preview: Das Feature befindet sich in der Vorschau (nicht stabil)
                      (Kurzform: -fa)
     </target>
         <note>
@@ -175,15 +174,15 @@
                      (Short form: -tl)
     </source>
         <target state="translated">  -terminalLogger[:auto,on,off]
-                     Aktiviert oder deaktiviert die Terminalprotokollierung. Terminal-Logger
+                     Aktiviert oder deaktiviert die Terminalprotokollierung. Terminalprotokollierung
                      bietet verbesserte Buildausgabe auf der Konsole in Echtzeit,
                      logisch nach Projekt organisiert und entwickelt, um
                      verwertbare Informationen hervorzuheben. Geben Sie "auto" an (oder verwenden Sie die Option
-                     ohne Argumente), um den Terminal-Logger nur zu verwenden, wenn die
-                     Standardausgabe nicht umgeleitet wird. Analysieren Sie die Ausgabe nicht
+                     ohne Argumente), um die Terminalprotokollierung nur zu verwenden, wenn die
+                     Standardausgabe nicht umgeleitet wird. Analysieren Sie die Ausgabe nicht,
                      oder vertrauen Sie darauf, dass sie in zukünftigen
                      Versionen unverändert bleibt. Diese Option ist in MSBuild 17.8 und
-                     später verfügbar.
+                     höher verfügbar.
                      (Kurzform: -tl)
     </target>
         <note>
@@ -212,19 +211,19 @@
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                     Parameter für Terminal-Logger. (Kurzform: -tlp)
+                     Parameter für die Terminalprotokollierung. (Kurzform: -tlp)
                      Die verfügbaren Parameter.
-                        default: Gibt das Standardverhalten des Terminal-
-                        Loggers an. Erfordert einen der folgenden Werte:
+                        default: Gibt das Standardverhalten der
+                        Terminalprotokollierung an. Erfordert einen der folgenden Werte:
                            – "on", "true" erzwingt die Verwendung von TerminalLogger, auch
-                            wenn er deaktiviert werden sollte.
+                            bei einer Deaktivierung.
                            – "off", "true" erzwingt die Nichtverwendung von TerminalLogger, auch
-                            wenn er aktiviert werden sollte.
+                            bei einer Aktivierung.
                            – "auto" aktiviert TerminalLogger, wenn das Terminal
                             dies unterstützt, und die Sitzung nicht umgeleitet wurde
                             stdout/stderr
-                        verbosity: Überschreiben Sie die Einstellung "-verbosity" für diesen
-                        Logger
+                        verbosity: Überschreiben Sie die Einstellung "-verbosity" für diese
+                        Protokollierung
                         showCommandLine: TaskCommandLineEvent-Meldungen anzeigen
 
                       Beispiel: 
@@ -249,18 +248,18 @@
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
-                     Aktiviert den EXPERIMENTELLEN Multithreadmodus in MSBuild.
-                     Dies bedeutet, dass MSBuild mehrere Threads verwendet,
-                     um Projekte parallel zu erstellen,
-                     anstatt mehrere Prozesse zu nutzen.
-                     Diese Option wird nicht unterstützt.
-                     Die maximale Anzahl der verwendeten Threads wird durch den
-                     -maxCpuCount-Schalter bestimmt.
-                     Wenn der Multithreadmodus aktiviert ist auf
-                     und MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     darf maxCpuCount nicht größer als 256 sein.
-                     (Kurzform: -mt)
+        <target state="new">  -multithreaded
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
+                     This means that MSBuild will use multiple threads
+                     to build projects in parallel,
+                     instead of multiple processes.
+                     This option is not supported.
+                     The maximum number of threads used is determined by the
+                     -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
+                     (Short form: -mt)
     </target>
         <note />
       </trans-unit>
@@ -292,7 +291,7 @@
 	</source>
         <target state="translated">  -check
                      Aktiviert BuildChecks während des Builds.
-                     BuildCheck ermöglicht die Regelauswertung, um Eigenschaften 
+                     BuildCheck ermöglicht die Regelauswertung, um Eigenschaften
                      des Builds sicherzustellen. Weitere Informationen finden Sie unter https://aka.ms/buildcheck
 	</target>
         <note>
@@ -770,11 +769,11 @@ Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
         <target state="translated">  -logger:&lt;Protokollierung&gt;   Mithilfe dieser Protokollierung werden Ereignisse von MSBuild protokolliert. Um mehrere Protokollierungen anzugeben, 
                      wird jede Protokollierung gesondert angegeben.
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
-                       [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
+                       [&lt;Klasse&gt;,]&lt;assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
                      Die Syntax für die &lt;Protokollierungsklasse&gt; lautet:
                         [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
-                       {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
+                        {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
                      Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
@@ -856,38 +855,38 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </source>
-        <target state="translated">  -consoleLoggerParameters:&lt;Parameter&gt;
-                   Parameter für die Konsolenprotokollierung. (Kurz form: -clp)
-                   Verfügbar sind die Parameter:
-                        PerformanceSummary - In Aufgaben, Zielen und Projekten
-                          aufgewendete Zeit anzeigen.
-                   Summary - Fehler- und Warnungszusammenfassung am Ende anzeigen.
-                    NoSummary - Keine Fehler- und Warnungszusammenfassung am Ende 
-                          anzeigen.
-                   ErrorsOnly - Nur Fehler anzeigen.
-                   WarningsOnly - Nur Warnungen anzeigen.
-                   NoItemAndPropertyList - Keine Liste der Elemente und
-                        Eigenschaften am Anfang jedes Projektbuilds anzeigen.
-                   ShowCommandLine - TaskCommandLineEvent-Meldungen anzeigen
-                   ShowTimestamp - Zeitstempel als Präfix für eine beliebige
-                          Meldung anzeigen.
-                   ShowEventId- eventId für begonnene, abgeschlossene
-                          Ereignisse und Meldungen anzeigen
-                   ForceNoAlign - Text wird nicht an der Größe des
-                         Konsolenpuffers ausgerichtet
-                   DisableConsoleColor - Standardkonsolenfarben für alle
-                          Protokollierungsmeldungen anzeigen.
-                   EnableMPLogging - Multiprozessor-Protokollierungsstil aktivieren,
-                          auch wenn er im Nicht-Multiprozessormodus
-                          ausgeführt wird. Dieser Protokollierungsstil ist standardmäßig aktiviert.
-                   ForceConsoleColor - ANSI-Konsolenfarben auch dann verwenden,
-                          wenn die Konsole sie nicht unterstützt
-                   PreferConsoleColor - ANSI-Konsolenfarben nur anzeigen,
-                          wenn die Zielkonsole sie unterstützt
-                   Verbosity - überschreibt die Ausführlichkeitseinstellung für diese
-                          Protokollierung.
-                   Beispiel:
-                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
+        <target state="translated">  -consoleloggerparameters:&lt;Parameter&gt;
+                     Parameter für die Konsolenprotokollierung. (Kurzform: -clp)
+                     Folgende Parameter sind verfügbar:
+                        PerformanceSummary: Zeigt die in Aufgaben, Zielen und
+                            Projekten verbrachte Zeit an.
+                        Summary: Zeigt abschließend eine Zusammenfassung der Fehler und Warnungen an.
+                        NoSummary: Zeigt keine Fehler- und Warnungsübersicht am
+                            Ende an.
+                        ErrorsOnly: Zeigt nur Fehler an.
+                        WarningsOnly: Zeigt nur Warnungen an.
+                        NoItemAndPropertyList: Zeigt keine Liste der Elemente
+                            und Eigenschaften am Anfang jeder Projekterstellung an.
+                        ShowCommandLine: Zeigt TaskCommandLineEvent-Meldungen an.
+                        ShowTimestamp: Zeigt den Timestamp als Präfix einer
+                            Meldung an.
+                        ShowEventId: Zeigt die eventId für gestartete
+                            Ereignisse, abgeschlossene Ereignisse und Meldungen an.
+                        ForceNoAlign: Richtet den Text nicht an der Größe des
+                            Konsolenpuffers aus.
+                        DisableConsoleColor: Verwendet die Standardkonsolenfarben
+                            für alle Protokollierungsmeldungen.
+                        EnableMPLogging: Aktiviert die Multiprozessorprotokollierungs
+                            -Stil auch bei Ausführung im nicht-multiprozessorbasierten
+                            Modus. Dieser Protokollierungsstil ist standardmäßig aktiviert.
+                        ANSI-Konsolenfarben, wenn
+                            die Konsole dies nicht unterstützt.
+                        PreferConsoleColor: Verwendet die ANSI-Konsolenfarben nur, wenn
+                            die Zielkonsole dies unterstützt.
+                     Verbosity: Überschreibt die Einstellung für -verbosity für
+                            diese Protokollierung.
+                     Beispiel: 
+                        -consoleloggerparameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
         <note>
@@ -1046,11 +1045,11 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
                      gesondert angegeben.
                      (Kurzform -dl)
                      Die Syntax für die &lt;Protokollierung&gt; lautet:
-                       [&lt;Klasse&gt;,]&lt;Assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
+                       [&lt;Klasse&gt;,]&lt;assembly&gt;[,&lt;Optionen&gt;][;&lt;Parameter&gt;]
                      Die Syntax für die &lt;Protokollierungsklasse&gt; lautet:
                         [&lt;Teilweiser oder vollständiger Namespace&gt;.]&lt;Name der Protokollierungsklasse&gt;
                      Die Syntax für die &lt;Protokollierungsassembly&gt; lautet:
-                       {&lt;Assemblyname&gt;[,&lt;strong name&gt;] | &lt;Assemblydatei&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Die Protokollierungsoptionen geben an, wie MSBuild die Protokollierung erstellt.
                      Die &lt;Protokollierungsparameter&gt; sind optional und werden genau 
                      so an die Protokollierung übergeben, wie sie eingegeben wurden. (Kurzform: -l)
@@ -1514,7 +1513,7 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
       </trans-unit>
       <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
         <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
-        <target state="translated">Bei aktiviertem MultiThreaded-Modus und MSBUILDFORCEALLTASKSOUTOFPROC=1 darf maxCpuCount nicht größer als {0} sein.</target>
+        <target state="new">With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
@@ -1751,12 +1750,12 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
       </trans-unit>
       <trans-unit id="SAC_Enforcement">
         <source>1: in enforcement</source>
-        <target state="translated">1: bei der Erzwingung</target>
+        <target state="translated">1: bei der Durchsetzung</target>
         <note />
       </trans-unit>
       <trans-unit id="SAC_Evaluation">
         <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
-        <target state="translated">2: in Auswertung. Es wird empfohlen, Smart App Control in der Entwicklungsumgebung zu deaktivieren, da andernfalls die Leistung beeinträchtigt werden könnte.</target>
+        <target state="translated">2: in Auswertung. Es wird empfohlen, Smart App Control in der Entwicklungsumgebung zu deaktivieren, da andernfalls die Leistung beeinträchtigt werden könnte</target>
         <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Off">
@@ -2072,23 +2071,23 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
                      Standardmäßig befindet sich die Datei im aktuellen Verzeichnis und hat den Namen
                      „msbuild.binlog“. Das binäre Protokoll ist eine detaillierte Beschreibung
                      des Buildprozesses, der später zum Rekonstruieren von
-                     Textprotokollen dient und der von anderen Analysetools verwendet wird. Detaillierte
-                     Textprotokolle auf Diagnoseebene sind in der Regel 10–20-mal so groß wie
-                     binäre Protokolle, letztere enthalten jedoch mehr Informationen.
+                     Textprotokollen dient und der von anderen Analysetools verwendet wird. Ein binäres Protokoll
+                     ist in der Regel 10-20 mal kleiner als das ausführlichste
+                     Text-Protokoll auf Diagnoseebene, enthält aber weitere Informationen.
                      (Kurzform: -bl)
 
                      Die optionale LogFile gibt den Pfad an, in dem das
                      Binärprotokoll gespeichert wird. Um eine eigene Protokolldatei
-                     für jeden Build zu generieren, kann das Token "{}" zum
+                     für jeden Build zu generieren, kann das Token „{}“ zum
                      Pfad hinzugefügt werden, z. B.: LogFile=output-{}-log.binlog. Jedes 
-                     "{}" im Protokollpfad wird durch eine eindeutige Zeichenfolge ersetzt,
+                     „{}“ im Protokollpfad wird durch eine eindeutige Zeichenfolge ersetzt,
                      indem Zeitstempel, ID des ausgeführten Prozesses und ein zufälliger
                      Zeichenfolgenstempel verwendet werden.
 
                      Die binäre Protokollierung erfasst standardmäßig den Quelltext von
                      Projektdateien, einschließlich aller beim Buildvorgang aufgetretenen
-                     importierten Projekte und Zieldateien. Der optionale Schalter
-                     ProjectImports steuert dieses Verhalten:
+                     importierten Projekte und Zieldateien. Der optionale
+                     ProjectImports-Schalter steuert dieses Verhalten:
 
                       ProjectImports=None:      – Projektimporte nicht
                                                 erfassen
