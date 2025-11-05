@@ -153,7 +153,7 @@ namespace Microsoft.Build.Engine.UnitTests
             successTestTask.ShouldBeTrue();
             testTaskOutput.ShouldContain($"The task is executed in process: dotnet");
             testTaskOutput.ShouldContain($"Process path: {dotnetPath}", customMessage: testTaskOutput);
-            testTaskOutput.ShouldContain("/nodereuse:False");
+            testTaskOutput.ShouldContain("/nodereuse:True");
         }
     }
 }
