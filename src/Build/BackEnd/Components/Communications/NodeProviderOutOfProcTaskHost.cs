@@ -507,23 +507,20 @@ namespace Microsoft.Build.BackEnd
         /// - RuntimeHostPath: The path to the dotnet executable that will host the .NET runtime
         /// - MSBuildAssemblyPath: The full path to MSBuild.dll that will be loaded by the dotnet host.
         /// </returns>
-        internal static (string RuntimeHostPath, string MSBuildAssemblyPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, Dictionary<string, string> taskHostParameters)
+        internal static (string RuntimeHostPath, string MSBuildAssemblyPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, TaskHostParameters taskHostParameters)
         {
             ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
-            taskHostParameters.TryGetValue(Constants.DotnetHostPath, out string runtimeHostPath);
-            var msbuildAssemblyPath = GetMSBuildAssemblyPath(taskHostParameters);
-
-            return (runtimeHostPath, msbuildAssemblyPath);
+            return (taskHostParameters.DotnetHostPath, GetMSBuildAssemblyPath(taskHostParameters));
         }
 
-        private static string GetMSBuildAssemblyPath(Dictionary<string, string> taskHostParameters)
+        private static string GetMSBuildAssemblyPath(TaskHostParameters taskHostParameters)
         {
-            if (taskHostParameters.TryGetValue(Constants.MSBuildAssemblyPath, out string msbuildAssemblyPath))
+            if (taskHostParameters.MSBuildAssemblyPath != null)
             {
-                ValidateNetHostSdkVersion(msbuildAssemblyPath);
+                ValidateNetHostSdkVersion(taskHostParameters.MSBuildAssemblyPath);
 
-                return msbuildAssemblyPath;
+                return taskHostParameters.MSBuildAssemblyPath;
             }
 
             throw new InvalidProjectFileException(ResourceUtilities.GetResourceString("NETHostTaskLoad_Failed"));
@@ -629,7 +626,7 @@ namespace Microsoft.Build.BackEnd
             INodePacketFactory factory,
             INodePacketHandler handler,
             TaskHostConfiguration configuration,
-            Dictionary<string, string> taskHostParameters)
+            TaskHostParameters taskHostParameters)
         {
             bool nodeCreationSucceeded;
             if (!_nodeContexts.ContainsKey(taskHostNodeId))
@@ -672,7 +669,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates a new MSBuild or MSBuildTaskHost process acting as a child node.
         /// </summary>
-        internal bool CreateNode(HandshakeOptions hostContext, int taskHostNodeId, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, Dictionary<string, string> taskHostParameters)
+        internal bool CreateNode(HandshakeOptions hostContext, int taskHostNodeId, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, TaskHostParameters taskHostParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory);
             ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey(taskHostNodeId), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
