@@ -342,52 +342,11 @@ EndGlobal
         [InlineData(true)]  // .slnx
         public void SolutionFilterSupportsUnixStylePaths(bool convertToSlnx)
         {
-            using TestEnvironment testEnvironment = TestEnvironment.Create();
-            TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
-            TransientTestFolder src = testEnvironment.CreateFolder(Path.Combine(folder.Path, "src"), createFolder: true);
-            TransientTestFolder nested = testEnvironment.CreateFolder(Path.Combine(src.Path, "nested"), createFolder: true);
-            
-            TransientTestFile project1 = testEnvironment.CreateFile(src, "Project1.csproj",
-                @"<Project><Target Name=""Build""><Message Text=""Project1""/></Target></Project>");
-            TransientTestFile project2 = testEnvironment.CreateFile(nested, "Project2.csproj",
-                @"<Project><Target Name=""Build""><Message Text=""Project2""/></Target></Project>");
-            
-            // Create solution with Windows-style paths (using backslashes)
-            TransientTestFile sln = testEnvironment.CreateFile(folder, "Test.sln",
-                @"Microsoft Visual Studio Solution File, Format Version 12.00
-Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project1"", ""src\Project1.csproj"", ""{11111111-1111-1111-1111-111111111111}""
-EndProject
-Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project2"", ""src\nested\Project2.csproj"", ""{22222222-2222-2222-2222-222222222222}""
-EndProject
-Global
-    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-    EndGlobalSection
-    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-    EndGlobalSection
-EndGlobal
-");
-            
-            // Create solution filter with Unix-style paths (using forward slashes)
-            string slnPathForFilter = (convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path).Replace("\\", "\\\\");
-            TransientTestFile slnf = testEnvironment.CreateFile(folder, "Test.slnf",
-                @"{
-                  ""solution"": {
-                    ""path"": """ + slnPathForFilter + @""",
-                    ""projects"": [
-                      ""src/Project1.csproj"",
-                      ""src/nested/Project2.csproj""
-                    ]
-                  }
-                }");
-            
-            // This should not throw an exception
-            SolutionFile solution = SolutionFile.Parse(slnf.Path);
-            
-            // Verify projects are found (using either style of path separator)
-            solution.ProjectShouldBuild("src\\Project1.csproj").ShouldBeTrue();
-            solution.ProjectShouldBuild("src/Project1.csproj").ShouldBeTrue();
-            solution.ProjectShouldBuild("src\\nested\\Project2.csproj").ShouldBeTrue();
-            solution.ProjectShouldBuild("src/nested/Project2.csproj").ShouldBeTrue();
+            TestSolutionFilterWithPathSeparators(
+                convertToSlnx,
+                solutionPathSeparator: '\\',
+                filterProject1Path: "src/Project1.csproj",
+                filterProject2Path: "src/nested/Project2.csproj");
         }
 
         /// <summary>
@@ -398,52 +357,11 @@ EndGlobal
         [InlineData(true)]  // .slnx
         public void SolutionFilterSupportsWindowsStylePaths(bool convertToSlnx)
         {
-            using TestEnvironment testEnvironment = TestEnvironment.Create();
-            TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
-            TransientTestFolder src = testEnvironment.CreateFolder(Path.Combine(folder.Path, "src"), createFolder: true);
-            TransientTestFolder nested = testEnvironment.CreateFolder(Path.Combine(src.Path, "nested"), createFolder: true);
-            
-            TransientTestFile project1 = testEnvironment.CreateFile(src, "Project1.csproj",
-                @"<Project><Target Name=""Build""><Message Text=""Project1""/></Target></Project>");
-            TransientTestFile project2 = testEnvironment.CreateFile(nested, "Project2.csproj",
-                @"<Project><Target Name=""Build""><Message Text=""Project2""/></Target></Project>");
-            
-            // Create solution with Unix-style paths (using forward slashes)  
-            TransientTestFile sln = testEnvironment.CreateFile(folder, "Test.sln",
-                @"Microsoft Visual Studio Solution File, Format Version 12.00
-Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project1"", ""src/Project1.csproj"", ""{11111111-1111-1111-1111-111111111111}""
-EndProject
-Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project2"", ""src/nested/Project2.csproj"", ""{22222222-2222-2222-2222-222222222222}""
-EndProject
-Global
-    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-    EndGlobalSection
-    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-    EndGlobalSection
-EndGlobal
-");
-            
-            // Create solution filter with Windows-style paths (using backslashes)
-            string slnPathForFilter2 = (convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path).Replace("\\", "\\\\");
-            TransientTestFile slnf = testEnvironment.CreateFile(folder, "Test.slnf",
-                @"{
-                  ""solution"": {
-                    ""path"": """ + slnPathForFilter2 + @""",
-                    ""projects"": [
-                      ""src\\Project1.csproj"",
-                      ""src\\nested\\Project2.csproj""
-                    ]
-                  }
-                }");
-            
-            // This should not throw an exception
-            SolutionFile solution = SolutionFile.Parse(slnf.Path);
-            
-            // Verify projects are found (using either style of path separator)
-            solution.ProjectShouldBuild("src\\Project1.csproj").ShouldBeTrue();
-            solution.ProjectShouldBuild("src/Project1.csproj").ShouldBeTrue();
-            solution.ProjectShouldBuild("src\\nested\\Project2.csproj").ShouldBeTrue();
-            solution.ProjectShouldBuild("src/nested/Project2.csproj").ShouldBeTrue();
+            TestSolutionFilterWithPathSeparators(
+                convertToSlnx,
+                solutionPathSeparator: '/',
+                filterProject1Path: "src\\Project1.csproj",
+                filterProject2Path: "src\\nested\\Project2.csproj");
         }
 
         /// <summary>
@@ -454,22 +372,43 @@ EndGlobal
         [InlineData(true)]  // .slnx
         public void SolutionFilterSupportsMixedPathSeparators(bool convertToSlnx)
         {
+            TestSolutionFilterWithPathSeparators(
+                convertToSlnx,
+                solutionPathSeparator: '\\',
+                filterProject1Path: "src/Project1.csproj",
+                filterProject2Path: "src\\nested\\Project2.csproj");
+        }
+
+        /// <summary>
+        /// Helper method that tests solution filter path separator handling.
+        /// Creates a solution with projects using one separator style, and a filter using different separators.
+        /// </summary>
+        private void TestSolutionFilterWithPathSeparators(
+            bool convertToSlnx,
+            char solutionPathSeparator,
+            string filterProject1Path,
+            string filterProject2Path)
+        {
             using TestEnvironment testEnvironment = TestEnvironment.Create();
             TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
             TransientTestFolder src = testEnvironment.CreateFolder(Path.Combine(folder.Path, "src"), createFolder: true);
             TransientTestFolder nested = testEnvironment.CreateFolder(Path.Combine(src.Path, "nested"), createFolder: true);
             
-            TransientTestFile project1 = testEnvironment.CreateFile(src, "Project1.csproj",
+            // Create project files
+            testEnvironment.CreateFile(src, "Project1.csproj",
                 @"<Project><Target Name=""Build""><Message Text=""Project1""/></Target></Project>");
-            TransientTestFile project2 = testEnvironment.CreateFile(nested, "Project2.csproj",
+            testEnvironment.CreateFile(nested, "Project2.csproj",
                 @"<Project><Target Name=""Build""><Message Text=""Project2""/></Target></Project>");
             
-            // Create solution with Windows-style paths
+            // Create solution file with specified path separator
+            string project1Path = $"src{solutionPathSeparator}Project1.csproj";
+            string project2Path = $"src{solutionPathSeparator}nested{solutionPathSeparator}Project2.csproj";
+            
             TransientTestFile sln = testEnvironment.CreateFile(folder, "Test.sln",
-                @"Microsoft Visual Studio Solution File, Format Version 12.00
-Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project1"", ""src\Project1.csproj"", ""{11111111-1111-1111-1111-111111111111}""
+                $@"Microsoft Visual Studio Solution File, Format Version 12.00
+Project(""{{9A19103F-16F7-4668-BE54-9A1E7A4F7556}}"") = ""Project1"", ""{project1Path}"", ""{{11111111-1111-1111-1111-111111111111}}""
 EndProject
-Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project2"", ""src\nested\Project2.csproj"", ""{22222222-2222-2222-2222-222222222222}""
+Project(""{{9A19103F-16F7-4668-BE54-9A1E7A4F7556}}"") = ""Project2"", ""{project2Path}"", ""{{22222222-2222-2222-2222-222222222222}}""
 EndProject
 Global
     GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -479,28 +418,30 @@ Global
 EndGlobal
 ");
             
-            // Create solution filter with one Unix-style and one Windows-style path
-            string slnPathForFilter3 = (convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path).Replace("\\", "\\\\");
+            // Create solution filter with specified project paths
+            string slnPath = (convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path).Replace("\\", "\\\\");
             TransientTestFile slnf = testEnvironment.CreateFile(folder, "Test.slnf",
                 @"{
                   ""solution"": {
-                    ""path"": """ + slnPathForFilter3 + @""",
+                    ""path"": """ + slnPath + @""",
                     ""projects"": [
-                      ""src/Project1.csproj"",
-                      ""src\\nested\\Project2.csproj""
+                      """ + filterProject1Path.Replace("\\", "\\\\") + @""",
+                      """ + filterProject2Path.Replace("\\", "\\\\") + @"""
                     ]
                   }
                 }");
             
-            // This should not throw an exception
+            // Parse should not throw an exception
             SolutionFile solution = SolutionFile.Parse(slnf.Path);
             
-            // Verify projects are found
+            // Verify projects are found regardless of which path separator style is used
             solution.ProjectShouldBuild("src\\Project1.csproj").ShouldBeTrue();
             solution.ProjectShouldBuild("src/Project1.csproj").ShouldBeTrue();
             solution.ProjectShouldBuild("src\\nested\\Project2.csproj").ShouldBeTrue();
             solution.ProjectShouldBuild("src/nested/Project2.csproj").ShouldBeTrue();
         }
+
+
 
         private static string ConvertToSlnx(string slnPath)
         {
