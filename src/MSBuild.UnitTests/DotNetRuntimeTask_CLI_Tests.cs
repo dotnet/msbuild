@@ -38,10 +38,12 @@ namespace Microsoft.Build.UnitTests
             {
                 // Use the same ProcessIdTask from Microsoft.Build.Engine.UnitTests that is built during the repo build
                 // Construct the path to the Microsoft.Build.Engine.UnitTests assembly dynamically
-                // since we don't have a direct reference to it from this test project
+                // The assembly is in a sibling directory: ../Microsoft.Build.Engine.UnitTests/net472/Microsoft.Build.Engine.UnitTests.dll
                 string currentAssemblyPath = Assembly.GetExecutingAssembly().Location;
                 string currentDirectory = Path.GetDirectoryName(currentAssemblyPath)!;
-                string taskAssemblyPath = Path.Combine(currentDirectory, "Microsoft.Build.Engine.UnitTests.dll");
+                // Navigate to parent directory and then to the Build.UnitTests assembly directory
+                string taskAssemblyPath = Path.Combine(currentDirectory, "..", "Microsoft.Build.Engine.UnitTests", Path.GetFileName(currentDirectory), "Microsoft.Build.Engine.UnitTests.dll");
+                taskAssemblyPath = Path.GetFullPath(taskAssemblyPath);
                 
                 string projectContent = $@"
 <Project>
