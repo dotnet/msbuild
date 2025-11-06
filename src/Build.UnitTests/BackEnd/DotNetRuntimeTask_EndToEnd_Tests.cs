@@ -65,9 +65,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 logger.Errors[0].Code.ShouldBe("MSB4233");
 
                 // Error message should contain the task name and indicate .NET runtime is not supported
-                logger.Errors[0].Message.ShouldContain("ProcessIdTask");
-                logger.Errors[0].Message.ShouldContain(".NET runtime");
-                logger.Errors[0].Message.ShouldContain("MSBuild 18.0");
+                string errorMessage = logger.Errors[0].Message;
+                errorMessage.ShouldContain("ProcessIdTask");
+                errorMessage.ShouldContain(".NET runtime");
+                errorMessage.ShouldContain("MSBuild 18.0");
             }
 #endif
         }
