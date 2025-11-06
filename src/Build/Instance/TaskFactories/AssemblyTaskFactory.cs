@@ -317,6 +317,9 @@ namespace Microsoft.Build.BackEnd
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
             TaskHostParameters taskIdentityParameters,
+#if !NET35
+            HostServices hostServices,
+#endif
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -378,7 +381,7 @@ namespace Microsoft.Build.BackEnd
                     appDomainSetup,
 #endif
 #if !NET35
-                    null,
+                    hostServices,
 #endif
                     scheduledNodeId);
                 return task;

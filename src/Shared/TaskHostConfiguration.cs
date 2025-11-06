@@ -468,7 +468,7 @@ namespace Microsoft.Build.BackEnd
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
 #endif
 #if !NET35
-            if (translator.PacketVersion >= 2 && _hostServices != null)
+            if (translator.PacketVersion >= 2)
             {
                 translator.Translate(ref _hostServices);
             }

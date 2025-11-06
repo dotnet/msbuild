@@ -975,7 +975,14 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_taskFactoryWrapper.TaskFactory is AssemblyTaskFactory assemblyTaskFactory)
                 {
-                    task = assemblyTaskFactory.CreateTaskInstance(_taskLocation, _taskLoggingContext, _buildComponentHost, taskIdentityParameters,
+                    task = assemblyTaskFactory.CreateTaskInstance(
+                        _taskLocation,
+                        _taskLoggingContext,
+                        _buildComponentHost,
+                        taskIdentityParameters,
+#if !NET35
+                        _hostServices,
+#endif
 #if FEATURE_APPDOMAIN
                         AppDomainSetup,
 #endif
