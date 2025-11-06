@@ -448,7 +448,7 @@ namespace Microsoft.Build.Execution
         internal TaskFactoryWrapper GetRegisteredTask(
             string taskName,
             string taskProjectFile,
-            TaskHostParameters taskIdentityParameters,
+            in TaskHostParameters taskIdentityParameters,
             bool exactMatchRequired,
             TargetLoggingContext targetLoggingContext,
             ElementLocation elementLocation,
@@ -506,7 +506,7 @@ namespace Microsoft.Build.Execution
         internal RegisteredTaskRecord GetTaskRegistrationRecord(
             string taskName,
             string taskProjectFile,
-            TaskHostParameters taskIdentityParameters,
+            in TaskHostParameters taskIdentityParameters,
             bool exactMatchRequired,
             TargetLoggingContext targetLoggingContext,
             ElementLocation elementLocation,
@@ -675,7 +675,7 @@ namespace Microsoft.Build.Execution
             string taskName,
             AssemblyLoadInfo assemblyLoadInfo,
             string taskFactory,
-            TaskHostParameters taskFactoryParameters,
+            in TaskHostParameters taskFactoryParameters,
             RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord,
             LoggingContext loggingContext,
             ProjectUsingTaskElement projectUsingTaskInXml,
@@ -786,7 +786,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Constructor.
             /// </summary>
-            internal RegisteredTaskIdentity(string name, TaskHostParameters taskIdentityParameters)
+            internal RegisteredTaskIdentity(string name, in TaskHostParameters taskIdentityParameters)
             {
                 _name = name;
                 _taskIdentityParameters = taskIdentityParameters.IsEmpty ? TaskHostParameters.Empty : taskIdentityParameters;
@@ -934,7 +934,7 @@ namespace Microsoft.Build.Execution
                 /// Internal so that RegisteredTaskRecord can use this function in its determination of whether the task factory
                 /// supports a certain task identity.
                 /// </summary>
-                private static bool IdentityParametersMatch(TaskHostParameters x, TaskHostParameters y, bool exactMatchRequired)
+                private static bool IdentityParametersMatch(in TaskHostParameters x, in TaskHostParameters y, bool exactMatchRequired)
                 {
                     // Both empty - match
                     if (x.IsEmpty && y.IsEmpty)
@@ -1152,7 +1152,7 @@ namespace Microsoft.Build.Execution
                 string registeredName,
                 AssemblyLoadInfo assemblyLoadInfo,
                 string taskFactory,
-                TaskHostParameters taskFactoryParameters,
+                in TaskHostParameters taskFactoryParameters,
                 ParameterGroupAndTaskElementRecord inlineTask,
                 int registrationOrderId,
                 string containingFileFullPath)
@@ -1393,7 +1393,7 @@ namespace Microsoft.Build.Execution
             /// Given a Registered task record and a task name. Check create an instance of the task factory using the record.
             /// If the factory is a assembly task factory see if the assemblyFile has the correct task inside of it.
             /// </summary>
-            internal TaskFactoryWrapper GetTaskFactoryFromRegistrationRecord(string taskName, string taskProjectFile, TaskHostParameters taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, bool isMultiThreadedBuild)
+            internal TaskFactoryWrapper GetTaskFactoryFromRegistrationRecord(string taskName, string taskProjectFile, in TaskHostParameters taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, bool isMultiThreadedBuild)
             {
                 if (CanTaskBeCreatedByFactory(taskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, isMultiThreadedBuild))
                 {
@@ -1422,7 +1422,7 @@ namespace Microsoft.Build.Execution
 
                     if (isTaskHostFactory)
                     {
-                        _taskFactoryParameters = TaskHostParameters.MergeTaskHostParameters(_taskFactoryParameters, new TaskHostParameters(taskHostFactoryExplicitlyRequested: true));
+                        _taskFactoryParameters = _taskFactoryParameters.WithTaskHostFactoryExplicitlyRequested(true);
                     }
 
                     if (isAssemblyTaskFactory || isTaskHostFactory)
