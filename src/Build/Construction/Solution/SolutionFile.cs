@@ -278,7 +278,7 @@ namespace Microsoft.Build.Construction
 
         internal bool ProjectShouldBuild(string projectFile)
         {
-            return _solutionFilter?.Contains(NormalizePathSeparators(projectFile)) != false;
+            return _solutionFilter?.Contains(FileUtilities.NormalizePathSeparatorsToForwardSlash(projectFile)) != false;
         }
 
         /// <summary>
@@ -648,7 +648,7 @@ namespace Microsoft.Build.Construction
                 _solutionFilter = new HashSet<string>(_pathComparer);
                 foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
                 {
-                    _solutionFilter.Add(NormalizePathSeparators(project.GetString()));
+                    _solutionFilter.Add(FileUtilities.NormalizePathSeparatorsToForwardSlash(project.GetString()));
                 }
             }
             catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
@@ -908,7 +908,7 @@ namespace Microsoft.Build.Construction
 
             foreach (ProjectInSolution project in _projectsInOrder)
             {
-                projectPaths.Add(NormalizePathSeparators(project.RelativePath));
+                projectPaths.Add(FileUtilities.NormalizePathSeparatorsToForwardSlash(project.RelativePath));
             }
 
             foreach (string project in _solutionFilter)
@@ -924,18 +924,6 @@ namespace Microsoft.Build.Construction
                         _solutionFile);
                 }
             }
-        }
-
-        /// <summary>
-        /// Normalizes path separators in a relative path to use forward slashes on all platforms.
-        /// This ensures consistent path comparison regardless of which separator style is used in
-        /// solution filter files (.slnf) or solution files (.sln/.slnx).
-        /// </summary>
-        private static string NormalizePathSeparators(string path)
-        {
-            // Normalize both backslashes and forward slashes to forward slashes
-            // This allows .slnf files to use either style and work on all platforms
-            return FileUtilities.NormalizePathSeparatorsToForwardSlash(path);
         }
 
         /// <summary>
