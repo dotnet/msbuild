@@ -354,19 +354,18 @@ EndGlobal
             
             // Create solution with Windows-style paths (using backslashes)
             TransientTestFile sln = testEnvironment.CreateFile(folder, "Test.sln",
-                @"
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project1"", ""src\Project1.csproj"", ""{11111111-1111-1111-1111-111111111111}""
-                EndProject
-                Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project2"", ""src\nested\Project2.csproj"", ""{22222222-2222-2222-2222-222222222222}""
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                    EndGlobalSection
-                EndGlobal
-                ");
+                @"Microsoft Visual Studio Solution File, Format Version 12.00
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project1"", ""src\Project1.csproj"", ""{11111111-1111-1111-1111-111111111111}""
+EndProject
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project2"", ""src\nested\Project2.csproj"", ""{22222222-2222-2222-2222-222222222222}""
+EndProject
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+    EndGlobalSection
+EndGlobal
+");
             
             // Create solution filter with Unix-style paths (using forward slashes)
             string slnPathForFilter = (convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path).Replace("\\", "\\\\");
@@ -411,19 +410,18 @@ EndGlobal
             
             // Create solution with Unix-style paths (using forward slashes)  
             TransientTestFile sln = testEnvironment.CreateFile(folder, "Test.sln",
-                @"
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project1"", ""src/Project1.csproj"", ""{11111111-1111-1111-1111-111111111111}""
-                EndProject
-                Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project2"", ""src/nested/Project2.csproj"", ""{22222222-2222-2222-2222-222222222222}""
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                    EndGlobalSection
-                EndGlobal
-                ");
+                @"Microsoft Visual Studio Solution File, Format Version 12.00
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project1"", ""src/Project1.csproj"", ""{11111111-1111-1111-1111-111111111111}""
+EndProject
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project2"", ""src/nested/Project2.csproj"", ""{22222222-2222-2222-2222-222222222222}""
+EndProject
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+    EndGlobalSection
+EndGlobal
+");
             
             // Create solution filter with Windows-style paths (using backslashes)
             string slnPathForFilter2 = (convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path).Replace("\\", "\\\\");
@@ -468,19 +466,18 @@ EndGlobal
             
             // Create solution with Windows-style paths
             TransientTestFile sln = testEnvironment.CreateFile(folder, "Test.sln",
-                @"
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project1"", ""src\Project1.csproj"", ""{11111111-1111-1111-1111-111111111111}""
-                EndProject
-                Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project2"", ""src\nested\Project2.csproj"", ""{22222222-2222-2222-2222-222222222222}""
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                    EndGlobalSection
-                EndGlobal
-                ");
+                @"Microsoft Visual Studio Solution File, Format Version 12.00
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project1"", ""src\Project1.csproj"", ""{11111111-1111-1111-1111-111111111111}""
+EndProject
+Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Project2"", ""src\nested\Project2.csproj"", ""{22222222-2222-2222-2222-222222222222}""
+EndProject
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+    EndGlobalSection
+EndGlobal
+");
             
             // Create solution filter with one Unix-style and one Windows-style path
             string slnPathForFilter3 = (convertToSlnx ? ConvertToSlnx(sln.Path) : sln.Path).Replace("\\", "\\\\");

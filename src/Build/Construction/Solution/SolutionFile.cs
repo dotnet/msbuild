@@ -915,10 +915,6 @@ namespace Microsoft.Build.Construction
             {
                 if (!projectPaths.Contains(project))
                 {
-                    // Enhanced error message for debugging
-                    var debugInfo = $"Filter project '{project}' not found. Available projects: [{string.Join(", ", projectPaths.Select(p => $"'{p}'"))}]";
-                    System.Diagnostics.Trace.WriteLine(debugInfo);
-                    
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                         "SubCategoryForSolutionParsingErrors",
                         new BuildEventFileInfo(FileUtilities.GetFullPath(project, Path.GetDirectoryName(_solutionFile))),
@@ -939,7 +935,7 @@ namespace Microsoft.Build.Construction
         {
             // Normalize both backslashes and forward slashes to forward slashes
             // This allows .slnf files to use either style and work on all platforms
-            return string.IsNullOrEmpty(path) ? path : path.Trim().Replace('\\', '/');
+            return FileUtilities.NormalizePathSeparatorsToForwardSlash(path);
         }
 
         /// <summary>
