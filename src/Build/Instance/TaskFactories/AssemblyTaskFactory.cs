@@ -594,9 +594,6 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Adds the properties necessary for NET task host instantiation.
-        /// </summary>
-        /// <summary>
         /// Adds the properties necessary for .NET task host instantiation if the runtime is .NET.
         /// Returns a new TaskHostParameters with .NET host parameters added, or the original if not needed.
         /// </summary>
