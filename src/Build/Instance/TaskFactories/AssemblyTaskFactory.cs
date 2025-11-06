@@ -548,47 +548,34 @@ namespace Microsoft.Build.BackEnd
         /// is impossible (we shouldn't ever get to this point if it is ...)
         /// </summary>
         private static TaskHostParameters MergeTaskFactoryParameterSets(
-    in TaskHostParameters factoryIdentityParameters,
-    in TaskHostParameters taskIdentityParameters)
+            in TaskHostParameters factoryIdentityParameters,
+            in TaskHostParameters taskIdentityParameters)
         {
-            // Both empty
             if (factoryIdentityParameters.IsEmpty && taskIdentityParameters.IsEmpty)
             {
                 return TaskHostParameters.Empty;
             }
 
-            // Only factory has values
             if (taskIdentityParameters.IsEmpty)
             {
                 string normalizedRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(factoryIdentityParameters.Runtime);
                 string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(factoryIdentityParameters.Architecture);
 
-                // Check if normalization changed anything
-                if (normalizedRuntime == factoryIdentityParameters.Runtime &&
-                    normalizedArch == factoryIdentityParameters.Architecture)
-                {
-                    return factoryIdentityParameters;  // ✅ Zero allocation
-                }
-
-                return new TaskHostParameters(normalizedRuntime, normalizedArch);
+                return normalizedRuntime == factoryIdentityParameters.Runtime && normalizedArch == factoryIdentityParameters.Architecture
+                    ? factoryIdentityParameters
+                    : new TaskHostParameters(normalizedRuntime, normalizedArch);
             }
 
-            // Only task has values
             if (factoryIdentityParameters.IsEmpty)
             {
                 string normalizedRuntime = XMakeAttributes.GetExplicitMSBuildRuntime(taskIdentityParameters.Runtime);
                 string normalizedArch = XMakeAttributes.GetExplicitMSBuildArchitecture(taskIdentityParameters.Architecture);
 
-                if (normalizedRuntime == taskIdentityParameters.Runtime &&
-                    normalizedArch == taskIdentityParameters.Architecture)
-                {
-                    return taskIdentityParameters;  // ✅ Zero allocation
-                }
-
-                return new TaskHostParameters(normalizedRuntime, normalizedArch);
+                return normalizedRuntime == taskIdentityParameters.Runtime && normalizedArch == taskIdentityParameters.Architecture
+                    ? taskIdentityParameters
+                    : new TaskHostParameters(normalizedRuntime, normalizedArch);
             }
 
-            // Both have values - need to merge them
             if (!XMakeAttributes.TryMergeRuntimeValues(taskIdentityParameters.Runtime, factoryIdentityParameters.Runtime, out var mergedRuntime))
             {
                 ErrorUtilities.ThrowInternalError("How did we get two runtime values that were unmergeable? " +
