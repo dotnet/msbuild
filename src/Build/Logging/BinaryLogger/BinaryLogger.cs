@@ -142,6 +142,11 @@ namespace Microsoft.Build.Logging
         /// Gets or sets additional output file paths. When set, the binlog will be copied to all these paths
         /// after the build completes. The primary FilePath will be used as the temporary write location.
         /// </summary>
+        /// <remarks>
+        /// This property is intended for internal use by MSBuild command-line processing.
+        /// It should not be set by external code or logger implementations.
+        /// Use multiple logger instances with different Parameters instead.
+        /// </remarks>
         public List<string> AdditionalFilePaths { get; set; }
 
         /// <summary> Gets or sets the verbosity level.</summary>
