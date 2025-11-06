@@ -19,11 +19,9 @@
     <!-- https://github.com/NuGet/Home/issues/8684 -->
     <NoWarn>$(NoWarn);NU5131</NoWarn>
 
+    <!-- TODO: This is not a good idea. We are in props here, but individual projects might alter IsTestProject property, so we don't read the correct value here. -->
     <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->
     <DeterministicSourcePaths Condition="'$(IsTestProject)' == 'true'">false</DeterministicSourcePaths>
-
-    <UseVSTestRunner Condition="'$(IsTestProject)' == 'true'">true</UseVSTestRunner>
-
     <ProduceReferenceAssembly Condition="'$(IsTestProject)' != 'true'">true</ProduceReferenceAssembly>
 
     <!-- Set up BeforeCommon.targets. Arcade uses this property as well, so don't overwrite it. -->
