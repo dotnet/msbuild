@@ -278,7 +278,7 @@ namespace Microsoft.Build.Construction
 
         internal bool ProjectShouldBuild(string projectFile)
         {
-            return _solutionFilter?.Contains(FileUtilities.FixFilePath(projectFile)) != false;
+            return _solutionFilter?.Contains(NormalizePathSeparators(projectFile)) != false;
         }
 
         /// <summary>
@@ -648,7 +648,7 @@ namespace Microsoft.Build.Construction
                 _solutionFilter = new HashSet<string>(_pathComparer);
                 foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
                 {
-                    _solutionFilter.Add(FileUtilities.FixFilePath(project.GetString()));
+                    _solutionFilter.Add(NormalizePathSeparators(project.GetString()));
                 }
             }
             catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
@@ -908,13 +908,17 @@ namespace Microsoft.Build.Construction
 
             foreach (ProjectInSolution project in _projectsInOrder)
             {
-                projectPaths.Add(FileUtilities.FixFilePath(project.RelativePath));
+                projectPaths.Add(NormalizePathSeparators(project.RelativePath));
             }
 
             foreach (string project in _solutionFilter)
             {
                 if (!projectPaths.Contains(project))
                 {
+                    // Enhanced error message for debugging
+                    var debugInfo = $"Filter project '{project}' not found. Available projects: [{string.Join(", ", projectPaths.Select(p => $"'{p}'"))}]";
+                    System.Diagnostics.Trace.WriteLine(debugInfo);
+                    
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile(
                         "SubCategoryForSolutionParsingErrors",
                         new BuildEventFileInfo(FileUtilities.GetFullPath(project, Path.GetDirectoryName(_solutionFile))),
@@ -924,6 +928,18 @@ namespace Microsoft.Build.Construction
                         _solutionFile);
                 }
             }
+        }
+
+        /// <summary>
+        /// Normalizes path separators in a relative path to use forward slashes on all platforms.
+        /// This ensures consistent path comparison regardless of which separator style is used in
+        /// solution filter files (.slnf) or solution files (.sln/.slnx).
+        /// </summary>
+        private static string NormalizePathSeparators(string path)
+        {
+            // Normalize both backslashes and forward slashes to forward slashes
+            // This allows .slnf files to use either style and work on all platforms
+            return string.IsNullOrEmpty(path) ? path : path.Trim().Replace('\\', '/');
         }
 
         /// <summary>
