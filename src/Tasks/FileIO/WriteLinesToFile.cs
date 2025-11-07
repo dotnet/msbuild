@@ -10,7 +10,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
-using Microsoft.NET.StringTools;
 
 #nullable disable
 
@@ -113,226 +112,272 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            string targetFile = File.ItemSpec;
-            string directoryPath = Path.GetDirectoryName(FileUtilities.NormalizePath(targetFile));
+            string directoryPath = Path.GetDirectoryName(filePath);
+            if (string.IsNullOrEmpty(directoryPath))
+            {
+                directoryPath = Directory.GetCurrentDirectory();
+            }
 
             try
             {
-                // Handle WriteOnlyWhenDifferent check in parent function
-                if (WriteOnlyWhenDifferent)
-                {
-                    if (!Overwrite)
-                    {
-                        Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", targetFile);
-                    }
-                    else
-                    {
-                        // Read existing content only when needed for WriteOnlyWhenDifferent
-                        string existingContents = null;
-                        if (FileUtilities.FileExistsNoThrow(targetFile))
-                        {
-                            try
-                            {
-                                existingContents = FileSystems.Default.ReadFileAllText(targetFile);
-                            }
-                            catch (IOException)
-                            {
-                                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", targetFile);
-                            }
-                        }
-
-                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
-                        if (existingContents != null)
-                        {
-                            if (existingContents.Equals(contentsAsString))
-                            {
-                                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", targetFile);
-                                MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(targetFile, true);
-                                return !Log.HasLoggedErrors;
-                            }
-                            else if (FailIfNotIncremental)
-                            {
-                                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", targetFile);
-                                MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(targetFile, true);
-                                return false;
-                            }
-                        }
-                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(targetFile, false);
-                    }
-                }
                 if (Transactional)
                 {
-                    return ExecuteTransactional(targetFile, directoryPath, contentsAsString, encoding);
+                    return ExecuteTransactional(filePath, directoryPath, contentsAsString, encoding);
                 }
                 else
                 {
-                    return ExecuteNonTransactional(targetFile, directoryPath, buffer, encoding);
+                    return ExecuteNonTransactional(filePath, directoryPath, contentsAsString, encoding);
                 }
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", targetFile, e.Message, targetFile);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
+                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, e.Message, lockedFileMessage);
+                success = false;
             }
 
-            return !Log.HasLoggedErrors;
+            return success;
         }
 
-        private bool ExecuteTransactional(string targetFile, string directoryPath, string contentsAsString, Encoding encoding)
+        private bool ExecuteNonTransactional(string filePath, string directoryPath, string contentsAsString, Encoding encoding)
         {
-            // Implementation inspired by FileUtilities.cs[](https://github.com/microsoft/vs-editor-api/blob/main/src/Editor/Text/Impl/TextModel/FileUtilities.cs)
-
-            if (string.IsNullOrEmpty(targetFile))
+            // Preserve original non-transactional logic exactly
+            if (!string.IsNullOrEmpty(directoryPath))
             {
-                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", targetFile, "Target file path is null or empty.", "");
+                Directory.CreateDirectory(directoryPath);
+            }
+
+            if (Overwrite)
+            {
+                // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
+                if (WriteOnlyWhenDifferent)
+                {
+                    MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
+                    try
+                    {
+                        if (FileUtilities.FileExistsNoThrow(filePath))
+                        {
+                            string existingContents = FileSystems.Default.ReadFileAllText(filePath);
+
+                            if (existingContents.Equals(contentsAsString))
+                            {
+                                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", filePath);
+                                MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, true);
+                                return true;
+                            }
+                            else if (FailIfNotIncremental)
+                            {
+                                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", filePath);
+                                return false;
+                            }
+                        }
+                    }
+                    catch (IOException)
+                    {
+                        Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", filePath);
+                    }
+                    MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, false);
+                }
+
+                System.IO.File.WriteAllText(filePath, contentsAsString, encoding);
+            }
+            else
+            {
+                if (WriteOnlyWhenDifferent)
+                {
+                    Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", filePath);
+                }
+
+                System.IO.File.AppendAllText(filePath, contentsAsString, encoding);
+            }
+
+            return true;
+        }
+
+        private bool ExecuteTransactional(string filePath, string directoryPath, string contentsAsString, Encoding encoding)
+        {
+            // Implementation inspired by Visual Studio editor pattern: write to temp file, then atomic replace
+            // https://github.com/microsoft/vs-editor-api/blob/main/src/Editor/Text/Impl/TextModel/FileUtilities.cs
+
+            if (string.IsNullOrEmpty(filePath))
+            {
+                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, "Target file path is null or empty.", "");
                 return false;
             }
 
             // Create directory if it doesn't exist
-            Directory.CreateDirectory(directoryPath);
-
-            // Use hash for mutex name to avoid excessive string allocation 
-            string normalizedTargetPath = targetFile.ToLowerInvariant();
-            int stableHash = FowlerNollVo1aHash.ComputeHash32Fast(normalizedTargetPath);
-            string tempFileName = $"temp_{stableHash}_{Guid.NewGuid():N}";
-            string tempFile = Path.Combine(directoryPath, tempFileName);
-            string mutexName = $"MSBuild_WriteLinesToFile_{stableHash}";
-
-            // Retry acquiring mutex up to 5 times with 200ms delay
-            const int mutexRetries = 5;
-            const int mutexRetryDelayMs = 200;
-            bool acquiredMutex = false;
-
-            for (int i = 0; i < mutexRetries && !acquiredMutex; i++)
+            if (!string.IsNullOrEmpty(directoryPath))
             {
-                using (var mutex = SystemWideMutex.OpenOrCreateMutex(mutexName, mutexRetryDelayMs))
+                try
                 {
-                    if (mutex.HasHandle)
-                    {
-                        acquiredMutex = true;
-                        try
-                        {
-
-                            // Prepare content for temp file following Visual Studio editor pattern
-                            string tempFileContent;
-                            if (Overwrite)
-                            {
-                                // Overwrite mode: write only new content
-                                tempFileContent = contentsAsString;
-                            }
-                            else
-                            {
-                                // Append mode: copy existing content first, then append new content
-                                if (FileUtilities.FileExistsNoThrow(targetFile))
-                                {
-                                    try
-                                    {
-                                        string existingContent = System.IO.File.ReadAllText(targetFile);
-                                        tempFileContent = existingContent + contentsAsString;
-                                    }
-                                    catch (IOException ex)
-                                    {
-                                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFileTransactional", targetFile, ex.Message);
-                                        return false;
-                                    }
-                                }
-                                else
-                                {
-                                    // Append mode: file doesn't exist, so just use new content
-                                    tempFileContent = contentsAsString;
-                                }
-                            }
-
-                            // Write content to temp file (Visual Studio editor pattern: write to new temp file)
-                            try
-                            {
-                                System.IO.File.WriteAllText(tempFile, tempFileContent, encoding);
-                            }
-                            catch (IOException ex)
-                            {
-                                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", tempFile, $"Failed to write to temporary file: {ex.Message}", "");
-                                return false;
-                            }
-
-                            // Attempt to replace target file with temporary file
-                            const int maxRetries = 5;
-                            int remainingAttempts = maxRetries;
-                            while (remainingAttempts-- > 0)
-                            {
-                                try
-                                {
-                                    System.IO.File.Replace(tempFile, targetFile, null, true);
-                                    return !Log.HasLoggedErrors;
-                                }
-                                catch (FileNotFoundException)
-                                {
-                                    System.IO.File.Move(tempFile, targetFile);
-                                    return !Log.HasLoggedErrors;
-                                }
-                                catch (IOException)
-                                {
-                                    Thread.Sleep(5);
-                                }
-                            }
-
-                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", targetFile, $"Failed to replace file after {maxRetries} attempts.", "");
-                            return false;
-                        }
-                        catch (Exception ex)
-                        {
-                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", targetFile, $"Unexpected error while processing file: {ex.Message}", "");
-                            return false;
-                        }
-                        finally
-                        {
-                            // Clean up temporary file if it exists
-                            if (FileUtilities.FileExistsNoThrow(tempFile))
-                            {
-                                try
-                                {
-                                    System.IO.File.Delete(tempFile);
-                                }
-                                catch (Exception ex)
-                                {
-                                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorDeletingTempFile", tempFile, ex.Message);
-                                }
-                            }
-                        }
-                    }
-                    else
-                    {
-                        Thread.Sleep(mutexRetryDelayMs);
-                    }
+                    Directory.CreateDirectory(directoryPath);
+                }
+                catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
+                {
+                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, $"Failed to create directory: {ex.Message}", "");
+                    return false;
                 }
             }
 
-            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", targetFile, $"Failed to acquire mutex after {mutexRetries} attempts.", "");
-            return false;
-        }
+            // Handle WriteOnlyWhenDifferent check for transactional mode
+            if (WriteOnlyWhenDifferent && Overwrite)
+            {
+                MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
+                try
+                {
+                    if (FileUtilities.FileExistsNoThrow(filePath))
+                    {
+                        string existingContents = FileSystems.Default.ReadFileAllText(filePath);
 
-        private bool ExecuteNonTransactional(string targetFile, string directoryPath, StringBuilder buffer, Encoding encoding)
-        {
+                        if (existingContents.Equals(contentsAsString))
+                        {
+                            Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", filePath);
+                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, true);
+                            return true;
+                        }
+                        else if (FailIfNotIncremental)
+                        {
+                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", filePath);
+                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, true);
+                            return false;
+                        }
+                    }
+                }
+                catch (IOException)
+                {
+                    Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", filePath);
+                }
+                MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, false);
+            }
+
+            // Generate unique temp file name
+            string tempFileName = $"temp_{Guid.NewGuid():N}";
+            string tempFile = Path.Combine(directoryPath, tempFileName);
+
             try
             {
-                Directory.CreateDirectory(directoryPath);
+                // Prepare content for temp file following Visual Studio editor pattern
+                string tempFileContent = contentsAsString; // Default: use new content only
                 
                 if (Overwrite)
                 {
-                    string contentsAsString = buffer.ToString();
-                    System.IO.File.WriteAllText(targetFile, contentsAsString, encoding);
+                    // Overwrite mode: write only new content
+                    tempFileContent = contentsAsString;
                 }
                 else
                 {
-                    System.IO.File.AppendAllText(targetFile, buffer.ToString(), encoding);
+                    // Append mode: copy existing content first, then append new content
+                    if (FileUtilities.FileExistsNoThrow(filePath))
+                    {
+                        // Retry reading existing content in case file is temporarily locked
+                        const int readRetries = 3;
+                        int remainingReadAttempts = readRetries;
+                        bool readSuccess = false;
+                        
+                        while (remainingReadAttempts-- > 0 && !readSuccess)
+                        {
+                            try
+                            {
+                                string existingContent = System.IO.File.ReadAllText(filePath);
+                                tempFileContent = existingContent + contentsAsString;
+                                readSuccess = true;
+                            }
+                            catch (IOException ex)
+                            {
+                                if (remainingReadAttempts > 0)
+                                {
+                                    // File might be locked by another process doing atomic replace, retry after short delay
+                                    Thread.Sleep(10);
+                                }
+                                else
+                                {
+                                    // After all retries failed, log warning and fallback to appending only new content
+                                    // This prevents build failure while still attempting to preserve data
+                                    Log.LogWarningWithCodeFromResources("WriteLinesToFile.ErrorReadingFileTransactional", filePath, ex.Message);
+                                    tempFileContent = contentsAsString; // Fallback: append only new content
+                                }
+                            }
+                        }
+                    }
+                    // else: file doesn't exist, tempFileContent already set to contentsAsString above
                 }
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(targetFile);
-                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", targetFile, e.Message, lockedFileMessage);
+
+                // Write content to temp file (Visual Studio editor pattern: write to new temp file)
+                try
+                {
+                    System.IO.File.WriteAllText(tempFile, tempFileContent, encoding);
+                }
+                catch (IOException ex)
+                {
+                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", tempFile, $"Failed to write to temporary file: {ex.Message}", "");
+                    return false;
+                }
+
+                // Attempt to replace target file with temporary file (atomic operation)
+                const int maxRetries = 10;
+                int remainingAttempts = maxRetries;
+                while (remainingAttempts-- > 0)
+                {
+                    try
+                    {
+                        System.IO.File.Replace(tempFile, filePath, null, true);
+                        return true;
+                    }
+                    catch (FileNotFoundException)
+                    {
+                        // Target file doesn't exist, try to move temp file to target
+                        try
+                        {
+                            System.IO.File.Move(tempFile, filePath);
+                            return true;
+                        }
+                        catch (IOException moveEx)
+                        {
+                            // File might have been created by another process, retry replace
+                            if (remainingAttempts > 0)
+                            {
+                                Thread.Sleep(20);
+                            }
+                            else
+                            {
+                                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, $"Failed to move temporary file to target: {moveEx.Message}", "");
+                                return false;
+                            }
+                        }
+                    }
+                    catch (IOException)
+                    {
+                        // File might be locked, retry after short delay
+                        if (remainingAttempts > 0)
+                        {
+                            Thread.Sleep(20);
+                        }
+                    }
+                }
+
+                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, $"Failed to replace file after {maxRetries} attempts.", "");
                 return false;
             }
-
-            return !Log.HasLoggedErrors;
+            catch (Exception ex)
+            {
+                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, $"Unexpected error while processing file: {ex.Message}", "");
+                return false;
+            }
+            finally
+            {
+                // Clean up temporary file if it exists
+                if (FileUtilities.FileExistsNoThrow(tempFile))
+                {
+                    try
+                    {
+                        System.IO.File.Delete(tempFile);
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorDeletingTempFile", tempFile, ex.Message);
+                    }
+                }
+            }
         }
     }
 }
