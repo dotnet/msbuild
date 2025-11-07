@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Build.Framework
@@ -8,7 +9,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// A readonly struct that represents task host parameters used to determine which host process to launch.
     /// </summary>
-    public readonly struct TaskHostParameters
+    public readonly struct TaskHostParameters : IEquatable<TaskHostParameters>
     {
         /// <summary>
         /// A static empty instance to avoid allocations when default parameters are needed.
@@ -72,6 +73,33 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public bool? TaskHostFactoryExplicitlyRequested => _taskHostFactoryExplicitlyRequested;
 
+        public override bool Equals(object? obj)
+      => obj is TaskHostParameters other && Equals(other);
+
+        public bool Equals(TaskHostParameters other)
+        {
+            // ONLY compare the fields that matter for process identity
+            return StringComparer.OrdinalIgnoreCase.Equals(Runtime ?? "", other.Runtime ?? "") &&
+                   StringComparer.OrdinalIgnoreCase.Equals(Architecture ?? "", other.Architecture ?? "") &&
+                   TaskHostFactoryExplicitlyRequested == other.TaskHostFactoryExplicitlyRequested;
+            // Do NOT compare DotnetHostPath and MSBuildAssemblyPath!
+        }
+
+        public override int GetHashCode()
+        {
+            // Manual hash code implementation for compatibility with .NET Framework 4.7.2
+            var comparer = StringComparer.OrdinalIgnoreCase;
+
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 31 + comparer.GetHashCode(Runtime ?? "");
+                hash = hash * 31 + comparer.GetHashCode(Architecture ?? "");
+                hash = hash * 31 + (TaskHostFactoryExplicitlyRequested?.GetHashCode() ?? 0);
+                return hash;
+            }
+        }
+
         /// <summary>
         /// Gets a value indicating whether returns true if parameters were unset.
         /// </summary>
@@ -134,7 +162,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The method was added to sustain compatibility with ITaskFactory2 factoryIdentityParameters parameters dictionary.
         /// </summary>
-        internal Dictionary<string, string> ToDictionary() => new(3)
+        internal Dictionary<string, string> ToDictionary() => new(3, StringComparer.OrdinalIgnoreCase)
         {
             { nameof(Runtime), Runtime ?? string.Empty },
             { nameof(Architecture), Architecture ?? string.Empty },
