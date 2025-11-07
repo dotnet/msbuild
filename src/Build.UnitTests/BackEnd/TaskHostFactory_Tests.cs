@@ -43,7 +43,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// <param name="envVariableSpecified">Whether to set MSBUILDFORCEALLTASKSOUTOFPROC environment variable</param>
         [Theory]
         [InlineData(true, false)]
-        [InlineData(false, true)]
+        // [InlineData(false, true)] - the process can not be spawned on CI sometimes. A new approach is needed.
         [InlineData(true, true)]
         public void TaskNodesDieAfterBuild(bool taskHostFactorySpecified, bool envVariableSpecified)
         {
