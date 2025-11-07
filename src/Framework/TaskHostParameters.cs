@@ -113,6 +113,25 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        /// Creates a new instance of <see cref="TaskHostParameters"/> with the specified value for the
+        /// <see cref="TaskHostFactoryExplicitlyRequested"/> property.
+        /// </summary>
+        internal TaskHostParameters WithTaskHostFactoryExplicitlyRequested(bool taskHostFactoryExplicitlyRequested)
+        {
+            if (_taskHostFactoryExplicitlyRequested == taskHostFactoryExplicitlyRequested)
+            {
+                return this;
+            }
+
+            return new TaskHostParameters(
+                runtime: _runtime,
+                architecture: _architecture,
+                dotnetHostPath: _dotnetHostPath,
+                msBuildAssemblyPath: _msBuildAssemblyPath,
+                taskHostFactoryExplicitlyRequested: taskHostFactoryExplicitlyRequested);
+        }
+
+        /// <summary>
         /// The method was added to sustain compatibility with ITaskFactory2 factoryIdentityParameters parameters dictionary.
         /// </summary>
         internal Dictionary<string, string> ToDictionary() => new(3)
