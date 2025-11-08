@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
                     ");
 
                 string projectPath = Path.Combine(projectFolder.Path, "ClassLibrary.csproj");
-                string msbuildParameters = "\"" + projectPath + "\"";
+                string msbuildParameters = "\"" + projectPath + "\" -logger:ConsoleLogger";
 
                 RunnerUtilities.ExecMSBuild(msbuildParameters, out bool successfulExit);
                 successfulExit.ShouldBeTrue();
@@ -76,7 +76,7 @@ namespace Microsoft.Build.UnitTests
                     ");
 
                 string projectPath = Path.Combine(projectFolder.Path, "ClassLibrary.csproj");
-                string msbuildParameters = "\"" + projectPath + "\"";
+                string msbuildParameters = "\"" + projectPath + "\" -logger:ConsoleLogger";
 
                 Directory.Exists(perfLogPath).ShouldBeFalse();
 
