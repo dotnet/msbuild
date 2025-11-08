@@ -180,6 +180,7 @@
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
     <Compile Include="Logging\ProjectTrackingLoggerBase.cs" />
     <Compile Include="Logging\TerminalLogger\**\*.cs" />
+    <Compile Include="Logging\CICDLogger\**\*.cs" />
     <Compile Include="Logging\ReusableLogger.cs" />
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
     <Compile Include="TelemetryInfra\ITelemetryForwarder.cs" />

@@ -3,7 +3,7 @@
 
 using System;
 using System.IO;
-using Microsoft.Build.CommandLine.CICDLogger.AzureDevOps;
+using Microsoft.Build.Logging.CICDLogger.AzureDevOps;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;

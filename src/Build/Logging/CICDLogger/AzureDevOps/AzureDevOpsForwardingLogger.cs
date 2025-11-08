@@ -5,12 +5,12 @@ using Microsoft.Build.Framework;
 
 #nullable enable
 
-namespace Microsoft.Build.CommandLine.CICDLogger.GitLab;
+namespace Microsoft.Build.Logging.CICDLogger.AzureDevOps;
 
 /// <summary>
-/// Forwarding logger for GitLab CI that filters and forwards events from build nodes to the central logger.
+/// Forwarding logger for Azure DevOps that filters and forwards events from build nodes to the central logger.
 /// </summary>
-public sealed class GitLabForwardingLogger : IForwardingLogger
+public sealed class AzureDevOpsForwardingLogger : IForwardingLogger
 {
     /// <inheritdoc/>
     public IEventRedirector? BuildEventRedirector { get; set; }

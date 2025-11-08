@@ -145,12 +145,6 @@
     <Compile Include="PerformanceLogEventListener.cs" />
     <Compile Include="JsonOutputFormatter.cs" />
     <Compile Include="XMake.cs" />
-    <Compile Include="CICDLogger\GitHubActions\GitHubActionsLogger.cs" />
-    <Compile Include="CICDLogger\GitHubActions\GitHubActionsForwardingLogger.cs" />
-    <Compile Include="CICDLogger\AzureDevOps\AzureDevOpsLogger.cs" />
-    <Compile Include="CICDLogger\AzureDevOps\AzureDevOpsForwardingLogger.cs" />
-    <Compile Include="CICDLogger\GitLab\GitLabLogger.cs" />
-    <Compile Include="CICDLogger\GitLab\GitLabForwardingLogger.cs" />
     <!-- This is to enable CodeMarkers in MSBuild.exe -->
     <!-- Win32 RC Files -->
     <RCResourceFile Include="native.rc" />

@@ -6,11 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Logging;
 
 #nullable enable
 
-namespace Microsoft.Build.CommandLine.CICDLogger.AzureDevOps;
+namespace Microsoft.Build.Logging.CICDLogger.AzureDevOps;
 
 /// <summary>
 /// Data captured from project evaluation.
@@ -292,7 +291,7 @@ public sealed class AzureDevOpsLogger : ProjectTrackingLoggerBase<AzureDevOpsEva
         if (!string.IsNullOrEmpty(file))
         {
             output.Append(";sourcepath=");
-            output.Append(EscapeProperty(file));
+            output.Append(EscapeProperty(file!));
 
             if (lineNumber > 0)
             {
@@ -310,7 +309,7 @@ public sealed class AzureDevOpsLogger : ProjectTrackingLoggerBase<AzureDevOpsEva
         if (!string.IsNullOrEmpty(code))
         {
             output.Append(";code=");
-            output.Append(EscapeProperty(code));
+            output.Append(EscapeProperty(code!));
         }
 
         output.Append(']');

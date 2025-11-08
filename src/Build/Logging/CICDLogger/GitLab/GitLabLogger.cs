@@ -5,11 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Logging;
 
 #nullable enable
 
-namespace Microsoft.Build.CommandLine.CICDLogger.GitLab;
+namespace Microsoft.Build.Logging.CICDLogger.GitLab;
 
 /// <summary>
 /// Data captured from project evaluation.
@@ -308,7 +307,7 @@ public sealed class GitLabLogger : ProjectTrackingLoggerBase<GitLabEvalData, obj
 
         if (!string.IsNullOrEmpty(file))
         {
-            _write(file);
+            _write(file!);
 
             if (lineNumber > 0)
             {
@@ -329,7 +328,7 @@ public sealed class GitLabLogger : ProjectTrackingLoggerBase<GitLabEvalData, obj
 
         if (!string.IsNullOrEmpty(code))
         {
-            _write(code);
+            _write(code!);
             _write(": ");
         }
 

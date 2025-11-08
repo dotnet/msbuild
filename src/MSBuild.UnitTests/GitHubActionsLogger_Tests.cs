@@ -3,7 +3,7 @@
 
 using System;
 using System.IO;
-using Microsoft.Build.CommandLine.CICDLogger.GitHubActions;
+using Microsoft.Build.Logging.CICDLogger.GitHubActions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
