@@ -73,17 +73,12 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public bool? TaskHostFactoryExplicitlyRequested => _taskHostFactoryExplicitlyRequested;
 
-        public override bool Equals(object? obj)
-      => obj is TaskHostParameters other && Equals(other);
+        public override bool Equals(object? obj) => obj is TaskHostParameters other && Equals(other);
 
-        public bool Equals(TaskHostParameters other)
-        {
-            // ONLY compare the fields that matter for process identity
-            return StringComparer.OrdinalIgnoreCase.Equals(Runtime ?? "", other.Runtime ?? "") &&
-                   StringComparer.OrdinalIgnoreCase.Equals(Architecture ?? "", other.Architecture ?? "") &&
-                   TaskHostFactoryExplicitlyRequested == other.TaskHostFactoryExplicitlyRequested;
-            // Do NOT compare DotnetHostPath and MSBuildAssemblyPath!
-        }
+        public bool Equals(TaskHostParameters other) =>
+            StringComparer.OrdinalIgnoreCase.Equals(Runtime ?? string.Empty, other.Runtime ?? string.Empty)
+            && StringComparer.OrdinalIgnoreCase.Equals(Architecture ?? string.Empty, other.Architecture ?? string.Empty)
+            && TaskHostFactoryExplicitlyRequested == other.TaskHostFactoryExplicitlyRequested;
 
         public override int GetHashCode()
         {
@@ -93,9 +88,10 @@ namespace Microsoft.Build.Framework
             unchecked
             {
                 int hash = 17;
-                hash = hash * 31 + comparer.GetHashCode(Runtime ?? "");
-                hash = hash * 31 + comparer.GetHashCode(Architecture ?? "");
+                hash = hash * 31 + comparer.GetHashCode(Runtime ?? string.Empty);
+                hash = hash * 31 + comparer.GetHashCode(Architecture ?? string.Empty);
                 hash = hash * 31 + (TaskHostFactoryExplicitlyRequested?.GetHashCode() ?? 0);
+
                 return hash;
             }
         }

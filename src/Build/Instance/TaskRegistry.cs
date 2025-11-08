@@ -950,18 +950,16 @@ namespace Microsoft.Build.Execution
                             return false;
                         }
 
-                        // For exact match, all properties must be equal (case-insensitive)
+                        // For exact match, only identity properties must be equal
+                        // Paths are NOT part of identity - they're just resolved locations
                         return string.Equals(x.Runtime, y.Runtime, StringComparison.OrdinalIgnoreCase) &&
                                string.Equals(x.Architecture, y.Architecture, StringComparison.OrdinalIgnoreCase) &&
-                               string.Equals(x.DotnetHostPath, y.DotnetHostPath, StringComparison.OrdinalIgnoreCase) &&
-                               string.Equals(x.MSBuildAssemblyPath, y.MSBuildAssemblyPath, StringComparison.OrdinalIgnoreCase) &&
                                x.TaskHostFactoryExplicitlyRequested == y.TaskHostFactoryExplicitlyRequested;
                     }
                     else
                     {
                         // Fuzzy match: null is treated as "don't care"
                         // Only check runtime and architecture for fuzzy matching
-
                         string runtimeX = x.Runtime;
                         string runtimeY = y.Runtime;
                         string architectureX = x.Architecture;
