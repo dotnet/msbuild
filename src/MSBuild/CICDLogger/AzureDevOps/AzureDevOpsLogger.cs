@@ -157,16 +157,25 @@ public sealed class AzureDevOpsLogger : ProjectTrackingLoggerBase<AzureDevOpsEva
             return;
         }
 
-        // Buffer high-importance messages for project summary
-        if (e.Importance == MessageImportance.High && projectData != null)
+        // First question: should I care about this message?
+        bool shouldLog = e.Importance == MessageImportance.High ||
+                        (e.Importance == MessageImportance.Normal && Verbosity >= LoggerVerbosity.Normal) ||
+                        (e.Importance == MessageImportance.Low && Verbosity >= LoggerVerbosity.Detailed);
+
+        if (!shouldLog)
         {
-            projectData.ImportantMessages.Add(e);
+            return;
         }
 
-        if (e.Importance == MessageImportance.High ||
-            (e.Importance == MessageImportance.Normal && Verbosity >= LoggerVerbosity.Normal) ||
-            (e.Importance == MessageImportance.Low && Verbosity >= LoggerVerbosity.Detailed))
+        // Second question: do I log it now or at the end of the project build?
+        if (projectData != null)
         {
+            // Buffer for output at project finished
+            projectData.ImportantMessages.Add(e);
+        }
+        else
+        {
+            // No project context, write immediately
             _write(e.Message ?? string.Empty);
             _write(Environment.NewLine);
         }
@@ -205,8 +214,8 @@ public sealed class AzureDevOpsLogger : ProjectTrackingLoggerBase<AzureDevOpsEva
                 header.Append($" - {projectData.Errors.Count} error(s), {projectData.Warnings.Count} warning(s)");
             }
 
-            // Output section header
-            _write($"##[section]{header}");
+            // Output group header (collapsible)
+            _write($"##[group]{header}");
             _write(Environment.NewLine);
 
             // Output important messages
@@ -227,6 +236,10 @@ public sealed class AzureDevOpsLogger : ProjectTrackingLoggerBase<AzureDevOpsEva
             {
                 WriteWarning(warning);
             }
+
+            // End the group
+            _write("##[endgroup]");
+            _write(Environment.NewLine);
         }
     }
 
