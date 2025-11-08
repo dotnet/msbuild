@@ -99,7 +99,7 @@ namespace Microsoft.Build.Engine.UnitTests
             int pidOfServerProcess = ParseNumber(output, "Server ID is ");
             pidOfInitialProcess.ShouldNotBe(pidOfServerProcess, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
 
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
+            output = ExecMSBuildWithConsoleLogger(project.Path, out success);
             success.ShouldBeTrue();
             int newPidOfInitialProcess = ParseNumber(output, "Process ID is ");
             newPidOfInitialProcess.ShouldNotBe(pidOfServerProcess, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
@@ -125,7 +125,7 @@ namespace Microsoft.Build.Engine.UnitTests
             RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, sleepProject.Path, out _);
 
             // Ensure that a new build can still succeed and that its server node is different.
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
+            output = ExecMSBuildWithConsoleLogger(project.Path, out success);
 
             success.ShouldBeTrue();
             newPidOfInitialProcess = ParseNumber(output, "Process ID is ");
@@ -152,14 +152,14 @@ namespace Microsoft.Build.Engine.UnitTests
             pidOfInitialProcess.ShouldNotBe(pidOfServerProcess, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
 
             Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "");
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
+            output = ExecMSBuildWithConsoleLogger(project.Path, out success);
             success.ShouldBeTrue();
             pidOfInitialProcess = ParseNumber(output, "Process ID is ");
             int pidOfNewserverProcess = ParseNumber(output, "Server ID is ");
             pidOfInitialProcess.ShouldBe(pidOfNewserverProcess, "We did not start a server node to execute the target, so its pid should be the same.");
 
             Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
+            output = ExecMSBuildWithConsoleLogger(project.Path, out success);
             success.ShouldBeTrue();
             pidOfInitialProcess = ParseNumber(output, "Process ID is ");
             pidOfNewserverProcess = ParseNumber(output, "Server ID is ");
@@ -211,13 +211,13 @@ namespace Microsoft.Build.Engine.UnitTests
 
             Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
 
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
+            output = ExecMSBuildWithConsoleLogger(project.Path, out success);
             success.ShouldBeTrue();
             ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
 
             Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
+            output = ExecMSBuildWithConsoleLogger(project.Path, out success);
             success.ShouldBeTrue();
             pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Server ID is "), "The server should be otherwise occupied.");
             pidOfServerProcess.ShouldNotBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
@@ -345,6 +345,14 @@ namespace Microsoft.Build.Engine.UnitTests
             }
             pidOfNewServerProcess.ShouldBe(pidOfServerProcess);
             output.ShouldContain($@":MSBuildStartupDirectory:{Environment.CurrentDirectory}:");
+        }
+
+        /// <summary>
+        /// Execute MSBuild with explicit console logger to prevent CI/CD logger auto-detection in test environments.
+        /// </summary>
+        private string ExecMSBuildWithConsoleLogger(string projectPath, out bool success)
+        {
+            return RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{projectPath} -logger:ConsoleLogger", out success, false, _output);
         }
 
         private int ParseNumber(string searchString, string toFind)

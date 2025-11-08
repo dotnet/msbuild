@@ -36,6 +36,9 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
+using Microsoft.Build.Logging.CICDLogger.GitHubActions;
+using Microsoft.Build.Logging.CICDLogger.AzureDevOps;
+using Microsoft.Build.Logging.CICDLogger.GitLab;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using FileLogger = Microsoft.Build.Logging.FileLogger;
@@ -3823,10 +3826,21 @@ namespace Microsoft.Build.CommandLine
             // Add any loggers which have been specified on the command line
             distributedLoggerRecords = ProcessDistributedLoggerSwitch(distributedLoggerSwitchParameters, verbosity);
 
+            // Check if we should use a CI/CD provider-specific logger
+            bool useCICDLogger = false;
+            if (!useSimpleErrorLogger && !terminalloggerOptIn && !noConsoleLogger)
+            {
+                useCICDLogger = TryProcessCICDLogger(distributedLoggerRecords, verbosity, cpuCount, loggers);
+            }
+
             // Otherwise choose default console logger: None, TerminalLogger, or the older ConsoleLogger
             if (useSimpleErrorLogger)
             {
                 loggers.Add(new SimpleErrorLogger());
+            }
+            else if (useCICDLogger)
+            {
+                // CI/CD logger was already processed
             }
             else if (terminalloggerOptIn)
             {
@@ -4056,6 +4070,63 @@ namespace Microsoft.Build.CommandLine
             var tlForwardingType = typeof(ForwardingTerminalLogger);
             LoggerDescription forwardingLoggerDescription = new LoggerDescription(tlForwardingType.FullName, tlForwardingType.Assembly.FullName, null, loggerParameters, effectiveVerbosity);
             return new DistributedLoggerRecord(centralLogger, forwardingLoggerDescription);
+        }
+
+        /// <summary>
+        /// Attempts to detect and configure a CI/CD provider-specific logger.
+        /// </summary>
+        /// <returns>true if a CI/CD logger was configured; otherwise, false.</returns>
+        private static bool TryProcessCICDLogger(
+            List<DistributedLoggerRecord> distributedLoggerRecords,
+            LoggerVerbosity verbosity,
+            int cpuCount,
+            List<ILogger> loggers)
+        {
+            INodeLogger cicdLogger = null;
+            Type forwardingLoggerType = null;
+
+            // Check for GitHub Actions
+            if (GitHubActionsLogger.IsEnabled())
+            {
+                cicdLogger = new GitHubActionsLogger { Verbosity = verbosity };
+                forwardingLoggerType = typeof(GitHubActionsForwardingLogger);
+            }
+            // Check for Azure DevOps
+            else if (AzureDevOpsLogger.IsEnabled())
+            {
+                cicdLogger = new AzureDevOpsLogger { Verbosity = verbosity };
+                forwardingLoggerType = typeof(AzureDevOpsForwardingLogger);
+            }
+            // Check for GitLab CI
+            else if (GitLabLogger.IsEnabled())
+            {
+                cicdLogger = new GitLabLogger { Verbosity = verbosity };
+                forwardingLoggerType = typeof(GitLabForwardingLogger);
+            }
+
+            if (cicdLogger != null && forwardingLoggerType != null)
+            {
+                // For single-process builds or when in-proc node is enabled, use the logger directly
+                if (cpuCount == 1 && !Traits.Instance.InProcNodeDisabled)
+                {
+                    loggers.Add(cicdLogger);
+                }
+                else
+                {
+                    // For multi-process builds, use distributed logger pattern
+                    LoggerDescription forwardingLoggerDescription = new LoggerDescription(
+                        forwardingLoggerType.FullName,
+                        forwardingLoggerType.Assembly.FullName,
+                        null,
+                        string.Empty,
+                        verbosity);
+                    distributedLoggerRecords.Add(new DistributedLoggerRecord(cicdLogger, forwardingLoggerDescription));
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>

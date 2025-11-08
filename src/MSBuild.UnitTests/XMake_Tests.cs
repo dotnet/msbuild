@@ -3006,7 +3006,9 @@ EndGlobal
                 }
             }
 
-            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.ProjectFile}\" {string.Join(" ", arguments)}", out var success, _output);
+            // Explicitly use console logger to prevent CI/CD logger auto-detection in test environments
+            string allArguments = $"\"{testProject.ProjectFile}\" -logger:ConsoleLogger {string.Join(" ", arguments)}";
+            string output = RunnerUtilities.ExecMSBuild(allArguments, out var success, _output);
 
             return (success, output);
         }
