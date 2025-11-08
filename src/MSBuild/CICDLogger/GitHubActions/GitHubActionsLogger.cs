@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
@@ -22,6 +23,21 @@ public sealed class GitHubActionsEvalData
 }
 
 /// <summary>
+/// Wrapper for build events with timestamps to maintain ordering.
+/// </summary>
+public sealed class TimestampedBuildEvent
+{
+    public DateTime Timestamp { get; }
+    public BuildEventArgs Event { get; }
+
+    public TimestampedBuildEvent(BuildEventArgs evt)
+    {
+        Event = evt;
+        Timestamp = evt.Timestamp;
+    }
+}
+
+/// <summary>
 /// Data stored for each project during the build.
 /// </summary>
 public sealed class GitHubActionsProjectData
@@ -29,9 +45,10 @@ public sealed class GitHubActionsProjectData
     public string? ProjectFile { get; set; }
     public string? TargetFramework { get; set; }
     public string? RuntimeIdentifier { get; set; }
-    public List<BuildErrorEventArgs> Errors { get; } = new();
-    public List<BuildWarningEventArgs> Warnings { get; } = new();
-    public List<BuildMessageEventArgs> ImportantMessages { get; } = new();
+    public List<TimestampedBuildEvent> Events { get; } = new();
+    
+    public int ErrorCount => Events.Count(e => e.Event is BuildErrorEventArgs);
+    public int WarningCount => Events.Count(e => e.Event is BuildWarningEventArgs);
 }
 
 /// <summary>
@@ -56,6 +73,18 @@ public sealed class GitHubActionsLogger : ProjectTrackingLoggerBase<GitHubAction
 
     /// <inheritdoc/>
     public override string? Parameters { get; set; }
+
+    /// <inheritdoc/>
+    public override void Initialize(IEventSource eventSource, int nodeCount)
+    {
+        // Check for ACTIONS_STEP_DEBUG to force diagnostic verbosity
+        if (Traits.IsEnvVarOneOrTrue("ACTIONS_STEP_DEBUG"))
+        {
+            Verbosity = LoggerVerbosity.Diagnostic;
+        }
+
+        base.Initialize(eventSource, nodeCount);
+    }
 
     /// <summary>
     /// Detects if GitHub Actions environment is active.
@@ -126,12 +155,12 @@ public sealed class GitHubActionsLogger : ProjectTrackingLoggerBase<GitHubAction
         if (projectData != null)
         {
             // Buffer error for output at project finished
-            projectData.Errors.Add(e);
+            projectData.Events.Add(new TimestampedBuildEvent(e));
         }
         else
         {
             // No project context, write immediately
-            WriteError(e);
+            WriteDiagnostic("error", e.File, e.LineNumber, e.ColumnNumber, e.EndColumnNumber, e.Code, e.Message);
         }
     }
 
@@ -142,12 +171,12 @@ public sealed class GitHubActionsLogger : ProjectTrackingLoggerBase<GitHubAction
         if (projectData != null)
         {
             // Buffer warning for output at project finished
-            projectData.Warnings.Add(e);
+            projectData.Events.Add(new TimestampedBuildEvent(e));
         }
         else
         {
             // No project context, write immediately
-            WriteWarning(e);
+            WriteDiagnostic("warning", e.File, e.LineNumber, e.ColumnNumber, e.EndColumnNumber, e.Code, e.Message);
         }
     }
 
@@ -172,7 +201,7 @@ public sealed class GitHubActionsLogger : ProjectTrackingLoggerBase<GitHubAction
         if (projectData != null)
         {
             // Buffer for output at project finished
-            projectData.ImportantMessages.Add(e);
+            projectData.Events.Add(new TimestampedBuildEvent(e));
         }
         else
         {
@@ -210,32 +239,31 @@ public sealed class GitHubActionsLogger : ProjectTrackingLoggerBase<GitHubAction
             {
                 header.Append(" - Failed");
             }
-            else if (projectData.Errors.Count > 0 || projectData.Warnings.Count > 0)
+            else if (projectData.ErrorCount > 0 || projectData.WarningCount > 0)
             {
-                header.Append($" - {projectData.Errors.Count} error(s), {projectData.Warnings.Count} warning(s)");
+                header.Append($" - {projectData.ErrorCount} error(s), {projectData.WarningCount} warning(s)");
             }
 
             // Use groups to collapse project output in GitHub Actions
             _write($"::group::{header}");
             _write(Environment.NewLine);
 
-            // Output important messages
-            foreach (var message in projectData.ImportantMessages)
+            // Output all events in timestamp order
+            foreach (var timestampedEvent in projectData.Events.OrderBy(e => e.Timestamp))
             {
-                _write(message.Message ?? string.Empty);
-                _write(Environment.NewLine);
-            }
-
-            // Output all errors for this project
-            foreach (var error in projectData.Errors)
-            {
-                WriteError(error);
-            }
-
-            // Output all warnings for this project
-            foreach (var warning in projectData.Warnings)
-            {
-                WriteWarning(warning);
+                switch (timestampedEvent.Event)
+                {
+                    case BuildErrorEventArgs error:
+                        WriteDiagnostic("error", error.File, error.LineNumber, error.ColumnNumber, error.EndColumnNumber, error.Code, error.Message);
+                        break;
+                    case BuildWarningEventArgs warning:
+                        WriteDiagnostic("warning", warning.File, warning.LineNumber, warning.ColumnNumber, warning.EndColumnNumber, warning.Code, warning.Message);
+                        break;
+                    case BuildMessageEventArgs message:
+                        _write(message.Message ?? string.Empty);
+                        _write(Environment.NewLine);
+                        break;
+                }
             }
 
             _write("::endgroup::");
@@ -257,6 +285,9 @@ public sealed class GitHubActionsLogger : ProjectTrackingLoggerBase<GitHubAction
             }
             _write(Environment.NewLine);
         }
+
+        // Write build summary to GITHUB_STEP_SUMMARY file if available
+        WriteStepSummary(e, projectData, buildData);
     }
 
     #endregion
@@ -264,92 +295,196 @@ public sealed class GitHubActionsLogger : ProjectTrackingLoggerBase<GitHubAction
     #region Helper methods
 
     /// <summary>
-    /// Writes an error using GitHub Actions workflow commands.
+    /// Writes the build summary to the GitHub Step Summary file.
     /// </summary>
-    private void WriteError(BuildErrorEventArgs e)
+    private void WriteStepSummary(BuildFinishedEventArgs e, GitHubActionsProjectData[] projectData, GitHubActionsBuildData buildData)
     {
-        // Format: ::error file={name},line={line},col={col},endColumn={endCol},title={title}::{message}
-        var output = new StringBuilder();
-        output.Append("::error");
-
-        if (!string.IsNullOrEmpty(e.File))
+        var summaryFile = Environment.GetEnvironmentVariable("GITHUB_STEP_SUMMARY");
+        if (string.IsNullOrEmpty(summaryFile))
         {
-            output.Append(" file=");
-            output.Append(EscapeProperty(e.File));
+            return;
+        }
 
-            if (e.LineNumber > 0)
+        try
+        {
+            using var writer = new System.IO.StreamWriter(summaryFile, append: true);
+            
+            // Write header
+            writer.WriteLine("## Build Summary");
+            writer.WriteLine();
+
+            // Write overall status
+            if (e.Succeeded)
             {
-                output.Append(",line=");
-                output.Append(e.LineNumber);
+                writer.WriteLine("✅ **Build Succeeded**");
+            }
+            else
+            {
+                writer.WriteLine("❌ **Build Failed**");
+            }
+            writer.WriteLine();
 
-                if (e.ColumnNumber > 0)
+            // Write summary table
+            writer.WriteLine($"- **Total Errors:** {buildData.TotalErrors}");
+            writer.WriteLine($"- **Total Warnings:** {buildData.TotalWarnings}");
+            writer.WriteLine();
+
+            // Write per-project details
+            if (projectData.Length > 0)
+            {
+                writer.WriteLine("### Project Details");
+                writer.WriteLine();
+
+                foreach (var project in projectData)
                 {
-                    output.Append(",col=");
-                    output.Append(e.ColumnNumber);
-
-                    if (e.EndColumnNumber > 0)
+                    // Project header
+                    writer.Write("#### ");
+                    writer.Write(project.ProjectFile ?? "project");
+                    
+                    if (!string.IsNullOrEmpty(project.TargetFramework))
                     {
-                        output.Append(",endColumn=");
-                        output.Append(e.EndColumnNumber);
+                        writer.Write(" (");
+                        writer.Write(project.TargetFramework);
+                        if (!string.IsNullOrEmpty(project.RuntimeIdentifier))
+                        {
+                            writer.Write(" | ");
+                            writer.Write(project.RuntimeIdentifier);
+                        }
+                        writer.Write(")");
+                    }
+                    writer.WriteLine();
+                    writer.WriteLine();
+
+                    if (project.ErrorCount > 0 || project.WarningCount > 0)
+                    {
+                        writer.WriteLine($"- Errors: {project.ErrorCount}");
+                        writer.WriteLine($"- Warnings: {project.WarningCount}");
+                        writer.WriteLine();
+
+                        // Write diagnostics ordered by timestamp
+                        if (project.Events.Count > 0)
+                        {
+                            writer.WriteLine("<details>");
+                            writer.WriteLine("<summary>View Diagnostics</summary>");
+                            writer.WriteLine();
+
+                            foreach (var timestampedEvent in project.Events.OrderBy(e => e.Timestamp))
+                            {
+                                switch (timestampedEvent.Event)
+                                {
+                                    case BuildErrorEventArgs error:
+                                        writer.Write("❌ **Error** ");
+                                        if (!string.IsNullOrEmpty(error.Code))
+                                        {
+                                            writer.Write($"`{error.Code}` ");
+                                        }
+                                        if (!string.IsNullOrEmpty(error.File))
+                                        {
+                                            writer.Write($"in `{error.File}`");
+                                            if (error.LineNumber > 0)
+                                            {
+                                                writer.Write($" (line {error.LineNumber}");
+                                                if (error.ColumnNumber > 0)
+                                                {
+                                                    writer.Write($", col {error.ColumnNumber}");
+                                                }
+                                                writer.Write(")");
+                                            }
+                                        }
+                                        writer.WriteLine();
+                                        writer.WriteLine($"  {error.Message}");
+                                        writer.WriteLine();
+                                        break;
+
+                                    case BuildWarningEventArgs warning:
+                                        writer.Write("⚠️ **Warning** ");
+                                        if (!string.IsNullOrEmpty(warning.Code))
+                                        {
+                                            writer.Write($"`{warning.Code}` ");
+                                        }
+                                        if (!string.IsNullOrEmpty(warning.File))
+                                        {
+                                            writer.Write($"in `{warning.File}`");
+                                            if (warning.LineNumber > 0)
+                                            {
+                                                writer.Write($" (line {warning.LineNumber}");
+                                                if (warning.ColumnNumber > 0)
+                                                {
+                                                    writer.Write($", col {warning.ColumnNumber}");
+                                                }
+                                                writer.Write(")");
+                                            }
+                                        }
+                                        writer.WriteLine();
+                                        writer.WriteLine($"  {warning.Message}");
+                                        writer.WriteLine();
+                                        break;
+                                }
+                            }
+
+                            writer.WriteLine("</details>");
+                            writer.WriteLine();
+                        }
+                    }
+                    else
+                    {
+                        writer.WriteLine("✅ No errors or warnings");
+                        writer.WriteLine();
                     }
                 }
             }
-        }
 
-        if (!string.IsNullOrEmpty(e.Code))
+            writer.WriteLine("---");
+            writer.WriteLine($"*Build completed at {DateTime.Now:yyyy-MM-dd HH:mm:ss}*");
+        }
+        catch
         {
-            output.Append(",title=");
-            output.Append(EscapeProperty(e.Code));
+            // Silently fail if we can't write to the summary file (permission issues, etc.)
         }
-
-        output.Append("::");
-        output.Append(EscapeData(e.Message ?? string.Empty));
-        output.AppendLine();
-
-        _write(output.ToString());
     }
 
     /// <summary>
-    /// Writes a warning using GitHub Actions workflow commands.
+    /// Writes a diagnostic (error or warning) using GitHub Actions workflow commands.
     /// </summary>
-    private void WriteWarning(BuildWarningEventArgs e)
+    private void WriteDiagnostic(string type, string? file, int lineNumber, int columnNumber, int endColumnNumber, string? code, string? message)
     {
-        // Format: ::warning file={name},line={line},col={col},endColumn={endCol},title={title}::{message}
+        // Format: ::{type} file={name},line={line},col={col},endColumn={endCol},title={title}::{message}
         var output = new StringBuilder();
-        output.Append("::warning");
+        output.Append("::");
+        output.Append(type);
 
-        if (!string.IsNullOrEmpty(e.File))
+        if (!string.IsNullOrEmpty(file))
         {
             output.Append(" file=");
-            output.Append(EscapeProperty(e.File));
+            output.Append(EscapeProperty(file));
 
-            if (e.LineNumber > 0)
+            if (lineNumber > 0)
             {
                 output.Append(",line=");
-                output.Append(e.LineNumber);
+                output.Append(lineNumber);
 
-                if (e.ColumnNumber > 0)
+                if (columnNumber > 0)
                 {
                     output.Append(",col=");
-                    output.Append(e.ColumnNumber);
+                    output.Append(columnNumber);
 
-                    if (e.EndColumnNumber > 0)
+                    if (endColumnNumber > 0)
                     {
                         output.Append(",endColumn=");
-                        output.Append(e.EndColumnNumber);
+                        output.Append(endColumnNumber);
                     }
                 }
             }
         }
 
-        if (!string.IsNullOrEmpty(e.Code))
+        if (!string.IsNullOrEmpty(code))
         {
             output.Append(",title=");
-            output.Append(EscapeProperty(e.Code));
+            output.Append(EscapeProperty(code));
         }
 
         output.Append("::");
-        output.Append(EscapeData(e.Message ?? string.Empty));
+        output.Append(EscapeData(message ?? string.Empty));
         output.AppendLine();
 
         _write(output.ToString());

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 
@@ -20,6 +21,21 @@ public sealed class GitLabEvalData
 }
 
 /// <summary>
+/// Wrapper for build events with timestamps to maintain ordering.
+/// </summary>
+public sealed class TimestampedBuildEvent
+{
+    public DateTime Timestamp { get; }
+    public BuildEventArgs Event { get; }
+
+    public TimestampedBuildEvent(BuildEventArgs evt)
+    {
+        Event = evt;
+        Timestamp = evt.Timestamp;
+    }
+}
+
+/// <summary>
 /// Data stored for each project during the build.
 /// </summary>
 public sealed class GitLabProjectData
@@ -27,10 +43,11 @@ public sealed class GitLabProjectData
     public string? ProjectFile { get; set; }
     public string? TargetFramework { get; set; }
     public string? RuntimeIdentifier { get; set; }
-    public List<BuildErrorEventArgs> Errors { get; } = new();
-    public List<BuildWarningEventArgs> Warnings { get; } = new();
-    public List<BuildMessageEventArgs> ImportantMessages { get; } = new();
+    public List<TimestampedBuildEvent> Events { get; } = new();
     public int SectionId { get; set; }
+    
+    public int ErrorCount => Events.Count(e => e.Event is BuildErrorEventArgs);
+    public int WarningCount => Events.Count(e => e.Event is BuildWarningEventArgs);
 }
 
 /// <summary>
@@ -126,12 +143,12 @@ public sealed class GitLabLogger : ProjectTrackingLoggerBase<GitLabEvalData, obj
         if (projectData != null)
         {
             // Buffer error for output at project finished
-            projectData.Errors.Add(e);
+            projectData.Events.Add(new TimestampedBuildEvent(e));
         }
         else
         {
             // No project context, write immediately
-            WriteError(e);
+            WriteDiagnostic("ERROR", "\x1b[31m", e.File, e.LineNumber, e.ColumnNumber, e.Code, e.Message);
         }
     }
 
@@ -142,12 +159,12 @@ public sealed class GitLabLogger : ProjectTrackingLoggerBase<GitLabEvalData, obj
         if (projectData != null)
         {
             // Buffer warning for output at project finished
-            projectData.Warnings.Add(e);
+            projectData.Events.Add(new TimestampedBuildEvent(e));
         }
         else
         {
             // No project context, write immediately
-            WriteWarning(e);
+            WriteDiagnostic("WARNING", "\x1b[33m", e.File, e.LineNumber, e.ColumnNumber, e.Code, e.Message);
         }
     }
 
@@ -172,7 +189,7 @@ public sealed class GitLabLogger : ProjectTrackingLoggerBase<GitLabEvalData, obj
         if (projectData != null)
         {
             // Buffer for output at project finished
-            projectData.ImportantMessages.Add(e);
+            projectData.Events.Add(new TimestampedBuildEvent(e));
         }
         else
         {
@@ -215,9 +232,9 @@ public sealed class GitLabLogger : ProjectTrackingLoggerBase<GitLabEvalData, obj
             {
                 headerText += " - Failed";
             }
-            else if (projectData.Errors.Count > 0 || projectData.Warnings.Count > 0)
+            else if (projectData.ErrorCount > 0 || projectData.WarningCount > 0)
             {
-                headerText += $" - {projectData.Errors.Count} error(s), {projectData.Warnings.Count} warning(s)";
+                headerText += $" - {projectData.ErrorCount} error(s), {projectData.WarningCount} warning(s)";
             }
 
             // Use collapsible sections in GitLab CI
@@ -229,23 +246,22 @@ public sealed class GitLabLogger : ProjectTrackingLoggerBase<GitLabEvalData, obj
             _write($"\x1b[36m{headerText}\x1b[0m");  // Cyan color for header
             _write(Environment.NewLine);
 
-            // Output important messages
-            foreach (var message in projectData.ImportantMessages)
+            // Output all events in timestamp order
+            foreach (var timestampedEvent in projectData.Events.OrderBy(e => e.Timestamp))
             {
-                _write(message.Message ?? string.Empty);
-                _write(Environment.NewLine);
-            }
-
-            // Output all errors for this project
-            foreach (var error in projectData.Errors)
-            {
-                WriteError(error);
-            }
-
-            // Output all warnings for this project
-            foreach (var warning in projectData.Warnings)
-            {
-                WriteWarning(warning);
+                switch (timestampedEvent.Event)
+                {
+                    case BuildErrorEventArgs error:
+                        WriteDiagnostic("ERROR", "\x1b[31m", error.File, error.LineNumber, error.ColumnNumber, error.Code, error.Message);
+                        break;
+                    case BuildWarningEventArgs warning:
+                        WriteDiagnostic("WARNING", "\x1b[33m", warning.File, warning.LineNumber, warning.ColumnNumber, warning.Code, warning.Message);
+                        break;
+                    case BuildMessageEventArgs message:
+                        _write(message.Message ?? string.Empty);
+                        _write(Environment.NewLine);
+                        break;
+                }
             }
 
             // End collapsible section
@@ -279,28 +295,28 @@ public sealed class GitLabLogger : ProjectTrackingLoggerBase<GitLabEvalData, obj
     #region Helper methods
 
     /// <summary>
-    /// Writes an error using GitLab formatting.
+    /// Writes a diagnostic (error or warning) using GitLab formatting.
     /// </summary>
-    private void WriteError(BuildErrorEventArgs e)
+    private void WriteDiagnostic(string type, string colorCode, string? file, int lineNumber, int columnNumber, string? code, string? message)
     {
         // GitLab uses ANSI color codes for formatting
-        // Red color for errors
-        _write("\x1b[31m");  // Red
-        _write("ERROR: ");
+        _write(colorCode);  // Color code (red for errors, yellow for warnings)
+        _write(type);
+        _write(": ");
 
-        if (!string.IsNullOrEmpty(e.File))
+        if (!string.IsNullOrEmpty(file))
         {
-            _write(e.File);
+            _write(file);
 
-            if (e.LineNumber > 0)
+            if (lineNumber > 0)
             {
                 _write("(");
-                _write(e.LineNumber.ToString());
+                _write(lineNumber.ToString());
 
-                if (e.ColumnNumber > 0)
+                if (columnNumber > 0)
                 {
                     _write(",");
-                    _write(e.ColumnNumber.ToString());
+                    _write(columnNumber.ToString());
                 }
 
                 _write(")");
@@ -309,54 +325,13 @@ public sealed class GitLabLogger : ProjectTrackingLoggerBase<GitLabEvalData, obj
             _write(": ");
         }
 
-        if (!string.IsNullOrEmpty(e.Code))
+        if (!string.IsNullOrEmpty(code))
         {
-            _write(e.Code);
+            _write(code);
             _write(": ");
         }
 
-        _write(e.Message ?? string.Empty);
-        _write("\x1b[0m");  // Reset color
-        _write(Environment.NewLine);
-    }
-
-    /// <summary>
-    /// Writes a warning using GitLab formatting.
-    /// </summary>
-    private void WriteWarning(BuildWarningEventArgs e)
-    {
-        // Yellow color for warnings
-        _write("\x1b[33m");  // Yellow
-        _write("WARNING: ");
-
-        if (!string.IsNullOrEmpty(e.File))
-        {
-            _write(e.File);
-
-            if (e.LineNumber > 0)
-            {
-                _write("(");
-                _write(e.LineNumber.ToString());
-
-                if (e.ColumnNumber > 0)
-                {
-                    _write(",");
-                    _write(e.ColumnNumber.ToString());
-                }
-
-                _write(")");
-            }
-
-            _write(": ");
-        }
-
-        if (!string.IsNullOrEmpty(e.Code))
-        {
-            _write(e.Code);
-            _write(": ");
-        }
-
-        _write(e.Message ?? string.Empty);
+        _write(message ?? string.Empty);
         _write("\x1b[0m");  // Reset color
         _write(Environment.NewLine);
     }

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
@@ -21,6 +22,21 @@ public sealed class AzureDevOpsEvalData
 }
 
 /// <summary>
+/// Wrapper for build events with timestamps to maintain ordering.
+/// </summary>
+public sealed class TimestampedBuildEvent
+{
+    public DateTime Timestamp { get; }
+    public BuildEventArgs Event { get; }
+
+    public TimestampedBuildEvent(BuildEventArgs evt)
+    {
+        Event = evt;
+        Timestamp = evt.Timestamp;
+    }
+}
+
+/// <summary>
 /// Data stored for each project during the build.
 /// </summary>
 public sealed class AzureDevOpsProjectData
@@ -28,9 +44,10 @@ public sealed class AzureDevOpsProjectData
     public string? ProjectFile { get; set; }
     public string? TargetFramework { get; set; }
     public string? RuntimeIdentifier { get; set; }
-    public List<BuildErrorEventArgs> Errors { get; } = new();
-    public List<BuildWarningEventArgs> Warnings { get; } = new();
-    public List<BuildMessageEventArgs> ImportantMessages { get; } = new();
+    public List<TimestampedBuildEvent> Events { get; } = new();
+    
+    public int ErrorCount => Events.Count(e => e.Event is BuildErrorEventArgs);
+    public int WarningCount => Events.Count(e => e.Event is BuildWarningEventArgs);
 }
 
 /// <summary>
@@ -125,12 +142,12 @@ public sealed class AzureDevOpsLogger : ProjectTrackingLoggerBase<AzureDevOpsEva
         if (projectData != null)
         {
             // Buffer error for output at project finished
-            projectData.Errors.Add(e);
+            projectData.Events.Add(new TimestampedBuildEvent(e));
         }
         else
         {
             // No project context, write immediately
-            WriteError(e);
+            WriteDiagnostic("error", e.File, e.LineNumber, e.ColumnNumber, e.Code, e.Message);
         }
     }
 
@@ -141,12 +158,12 @@ public sealed class AzureDevOpsLogger : ProjectTrackingLoggerBase<AzureDevOpsEva
         if (projectData != null)
         {
             // Buffer warning for output at project finished
-            projectData.Warnings.Add(e);
+            projectData.Events.Add(new TimestampedBuildEvent(e));
         }
         else
         {
             // No project context, write immediately
-            WriteWarning(e);
+            WriteDiagnostic("warning", e.File, e.LineNumber, e.ColumnNumber, e.Code, e.Message);
         }
     }
 
@@ -171,7 +188,7 @@ public sealed class AzureDevOpsLogger : ProjectTrackingLoggerBase<AzureDevOpsEva
         if (projectData != null)
         {
             // Buffer for output at project finished
-            projectData.ImportantMessages.Add(e);
+            projectData.Events.Add(new TimestampedBuildEvent(e));
         }
         else
         {
@@ -209,32 +226,31 @@ public sealed class AzureDevOpsLogger : ProjectTrackingLoggerBase<AzureDevOpsEva
             {
                 header.Append(" - Failed");
             }
-            else if (projectData.Errors.Count > 0 || projectData.Warnings.Count > 0)
+            else if (projectData.ErrorCount > 0 || projectData.WarningCount > 0)
             {
-                header.Append($" - {projectData.Errors.Count} error(s), {projectData.Warnings.Count} warning(s)");
+                header.Append($" - {projectData.ErrorCount} error(s), {projectData.WarningCount} warning(s)");
             }
 
             // Output group header (collapsible)
             _write($"##[group]{header}");
             _write(Environment.NewLine);
 
-            // Output important messages
-            foreach (var message in projectData.ImportantMessages)
+            // Output all events in timestamp order
+            foreach (var timestampedEvent in projectData.Events.OrderBy(e => e.Timestamp))
             {
-                _write(message.Message ?? string.Empty);
-                _write(Environment.NewLine);
-            }
-
-            // Output all errors for this project
-            foreach (var error in projectData.Errors)
-            {
-                WriteError(error);
-            }
-
-            // Output all warnings for this project
-            foreach (var warning in projectData.Warnings)
-            {
-                WriteWarning(warning);
+                switch (timestampedEvent.Event)
+                {
+                    case BuildErrorEventArgs error:
+                        WriteDiagnostic("error", error.File, error.LineNumber, error.ColumnNumber, error.Code, error.Message);
+                        break;
+                    case BuildWarningEventArgs warning:
+                        WriteDiagnostic("warning", warning.File, warning.LineNumber, warning.ColumnNumber, warning.Code, warning.Message);
+                        break;
+                    case BuildMessageEventArgs message:
+                        _write(message.Message ?? string.Empty);
+                        _write(Environment.NewLine);
+                        break;
+                }
             }
 
             // End the group
@@ -264,25 +280,9 @@ public sealed class AzureDevOpsLogger : ProjectTrackingLoggerBase<AzureDevOpsEva
     #region Helper methods
 
     /// <summary>
-    /// Writes an error using Azure DevOps logging commands.
+    /// Writes a diagnostic (error or warning) using Azure DevOps logging commands.
     /// </summary>
-    private void WriteError(BuildErrorEventArgs e)
-    {
-        _write(FormatDiagnostic("error", e.File, e.LineNumber, e.ColumnNumber, e.Code, e.Message));
-    }
-
-    /// <summary>
-    /// Writes a warning using Azure DevOps logging commands.
-    /// </summary>
-    private void WriteWarning(BuildWarningEventArgs e)
-    {
-        _write(FormatDiagnostic("warning", e.File, e.LineNumber, e.ColumnNumber, e.Code, e.Message));
-    }
-
-    /// <summary>
-    /// Formats a diagnostic (error or warning) using Azure DevOps logging commands.
-    /// </summary>
-    private string FormatDiagnostic(string type, string? file, int lineNumber, int columnNumber, string? code, string? message)
+    private void WriteDiagnostic(string type, string? file, int lineNumber, int columnNumber, string? code, string? message)
     {
         // Format: ##vso[task.logissue type={type};sourcepath=file;linenumber=line;columnnumber=col;code=code;]message
         var output = new StringBuilder();
@@ -317,7 +317,7 @@ public sealed class AzureDevOpsLogger : ProjectTrackingLoggerBase<AzureDevOpsEva
         output.Append(EscapeData(message ?? string.Empty));
         output.AppendLine();
 
-        return output.ToString();
+        _write(output.ToString());
     }
 
     /// <summary>
