@@ -3,7 +3,7 @@
 
 using Microsoft.Build.Framework;
 
-#nullable disable
+#nullable enable
 
 namespace Microsoft.Build.CommandLine.CICDLogger.AzureDevOps;
 
@@ -13,7 +13,7 @@ namespace Microsoft.Build.CommandLine.CICDLogger.AzureDevOps;
 public sealed class AzureDevOpsForwardingLogger : IForwardingLogger
 {
     /// <inheritdoc/>
-    public IEventRedirector BuildEventRedirector { get; set; }
+    public IEventRedirector? BuildEventRedirector { get; set; }
 
     /// <inheritdoc/>
     public int NodeId { get; set; }
@@ -22,7 +22,7 @@ public sealed class AzureDevOpsForwardingLogger : IForwardingLogger
     public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Normal;
 
     /// <inheritdoc/>
-    public string Parameters { get; set; }
+    public string? Parameters { get; set; }
 
     /// <inheritdoc/>
     public void Initialize(IEventSource eventSource, int nodeCount)

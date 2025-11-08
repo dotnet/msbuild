@@ -6,7 +6,7 @@ using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-#nullable disable
+#nullable enable
 
 namespace Microsoft.Build.CommandLine.CICDLogger.GitHubActions;
 
@@ -22,7 +22,7 @@ public sealed class GitHubActionsLogger : INodeLogger
     public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Normal;
 
     /// <inheritdoc/>
-    public string Parameters { get; set; }
+    public string? Parameters { get; set; }
 
     /// <summary>
     /// Detects if GitHub Actions environment is active.
@@ -92,7 +92,7 @@ public sealed class GitHubActionsLogger : INodeLogger
         }
 
         output.Append("::");
-        output.Append(EscapeData(e.Message));
+        output.Append(EscapeData(e.Message ?? string.Empty));
         output.AppendLine();
 
         _write(output.ToString());
@@ -135,7 +135,7 @@ public sealed class GitHubActionsLogger : INodeLogger
         }
 
         output.Append("::");
-        output.Append(EscapeData(e.Message));
+        output.Append(EscapeData(e.Message ?? string.Empty));
         output.AppendLine();
 
         _write(output.ToString());
@@ -152,7 +152,7 @@ public sealed class GitHubActionsLogger : INodeLogger
             (e.Importance == MessageImportance.Normal && Verbosity >= LoggerVerbosity.Normal) ||
             (e.Importance == MessageImportance.Low && Verbosity >= LoggerVerbosity.Detailed))
         {
-            _write(e.Message);
+            _write(e.Message ?? string.Empty);
             _write(Environment.NewLine);
         }
     }

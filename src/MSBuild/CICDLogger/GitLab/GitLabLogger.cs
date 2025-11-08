@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Build.Framework;
 
-#nullable disable
+#nullable enable
 
 namespace Microsoft.Build.CommandLine.CICDLogger.GitLab;
 
@@ -21,7 +21,7 @@ public sealed class GitLabLogger : INodeLogger
     public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Normal;
 
     /// <inheritdoc/>
-    public string Parameters { get; set; }
+    public string? Parameters { get; set; }
 
     /// <summary>
     /// Detects if GitLab CI environment is active.
@@ -88,7 +88,7 @@ public sealed class GitLabLogger : INodeLogger
             _write(": ");
         }
 
-        _write(e.Message);
+        _write(e.Message ?? string.Empty);
         _write("\x1b[0m");  // Reset color
         _write(Environment.NewLine);
     }
@@ -126,7 +126,7 @@ public sealed class GitLabLogger : INodeLogger
             _write(": ");
         }
 
-        _write(e.Message);
+        _write(e.Message ?? string.Empty);
         _write("\x1b[0m");  // Reset color
         _write(Environment.NewLine);
     }
@@ -142,7 +142,7 @@ public sealed class GitLabLogger : INodeLogger
             (e.Importance == MessageImportance.Normal && Verbosity >= LoggerVerbosity.Normal) ||
             (e.Importance == MessageImportance.Low && Verbosity >= LoggerVerbosity.Detailed))
         {
-            _write(e.Message);
+            _write(e.Message ?? string.Empty);
             _write(Environment.NewLine);
         }
     }
