@@ -300,8 +300,10 @@ public sealed class GitLabLogger : ProjectTrackingLoggerBase<GitLabEvalData, obj
     private void WriteDiagnostic(string type, string colorCode, string? file, int lineNumber, int columnNumber, string? code, string? message)
     {
         // GitLab uses ANSI color codes for formatting
+        // Only colorize the type for better legibility
         _write(colorCode);  // Color code (red for errors, yellow for warnings)
         _write(type);
+        _write("\x1b[0m");  // Reset color after type
         _write(": ");
 
         if (!string.IsNullOrEmpty(file))
@@ -332,7 +334,6 @@ public sealed class GitLabLogger : ProjectTrackingLoggerBase<GitLabEvalData, obj
         }
 
         _write(message ?? string.Empty);
-        _write("\x1b[0m");  // Reset color
         _write(Environment.NewLine);
     }
 
