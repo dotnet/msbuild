@@ -137,6 +137,9 @@ namespace Microsoft.Build.UnitTests
                     DebugUtils.SetDebugPath();
                 }
             }
+        }
+
+        [Fact]
         public void IsInTaskHostNode_ReturnsFalseForCentralNode()
         {
             // When running in the main test process (no /nodemode argument),
