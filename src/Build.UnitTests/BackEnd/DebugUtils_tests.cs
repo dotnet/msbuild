@@ -137,6 +137,11 @@ namespace Microsoft.Build.UnitTests
                     DebugUtils.SetDebugPath();
                 }
             }
+        public void IsInTaskHostNode_ReturnsFalseForCentralNode()
+        {
+            // When running in the main test process (no /nodemode argument),
+            // we should not be in a TaskHost node
+            DebugUtils.IsInTaskHostNode().ShouldBeFalse();
         }
     }
 }

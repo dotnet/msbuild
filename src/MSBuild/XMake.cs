@@ -552,6 +552,13 @@ namespace Microsoft.Build.CommandLine
                 case "1":
                     Debugger.Launch();
                     break;
+                case "3":
+                    // Value "3" debugs the main MSBuild process but skips debugging child TaskHost processes
+                    if (!DebugUtils.IsInTaskHostNode())
+                    {
+                        Debugger.Launch();
+                    }
+                    break;
 #endif
                 case "2":
                     // Sometimes easier to attach rather than deal with JIT prompt
