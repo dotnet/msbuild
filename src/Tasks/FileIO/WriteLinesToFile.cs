@@ -161,9 +161,9 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                // Use transactional mode by default (enabled via ChangeWave 17.16)
-                // Users can opt-out by setting MSBUILDDISABLEFEATURESFROMVERSION=17.16
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_16))
+                // Use transactional mode by default (enabled via ChangeWave 17.14)
+                // Users can opt-out by setting MSBUILDDISABLEFEATURESFROMVERSION=17.14
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
                 {
                     return ExecuteTransactional(filePath, directoryPath, contentsAsString, encoding);
                 }
@@ -264,7 +264,7 @@ namespace Microsoft.Build.Tasks
                                 tempFileContent = existingContent + contentsAsString;
                                 readSuccess = true;
                             }
-                            catch (IOException ex)
+                            catch (IOException)
                             {
                                 if (remainingReadAttempts > 0)
                                 {

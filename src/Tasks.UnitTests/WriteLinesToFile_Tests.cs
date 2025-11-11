@@ -522,7 +522,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 // Disable transactional mode via changewave to test non-transactional behavior
                 ChangeWaves.ResetStateForTests();
-                testEnv.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_16.ToString());
+                testEnv.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_14.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
                 var outputFile = testEnv.CreateFile("output.txt").Path;
                 var projectCount = 20; 
