@@ -51,11 +51,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool WriteOnlyWhenDifferent { get; set; }
 
-        /// <summary>
-        /// If true, use transactional write mode: write to a temp file, rename existing file, rename temp file to target, and delete old file.
-        /// Retries renaming if the file is locked.
-        /// </summary>
-        public bool Transactional { get; set; }
 
         /// <summary>
         /// Question whether this task is incremental.
@@ -118,94 +113,7 @@ namespace Microsoft.Build.Tasks
                 directoryPath = Directory.GetCurrentDirectory();
             }
 
-            try
-            {
-                if (Transactional)
-                {
-                    return ExecuteTransactional(filePath, directoryPath, contentsAsString, encoding);
-                }
-                else
-                {
-                    return ExecuteNonTransactional(filePath, directoryPath, contentsAsString, encoding);
-                }
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
-                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, e.Message, lockedFileMessage);
-                success = false;
-            }
-
-            return success;
-        }
-
-        private bool ExecuteNonTransactional(string filePath, string directoryPath, string contentsAsString, Encoding encoding)
-        {
-            // Preserve original non-transactional logic exactly
-            if (!string.IsNullOrEmpty(directoryPath))
-            {
-                Directory.CreateDirectory(directoryPath);
-            }
-
-            if (Overwrite)
-            {
-                // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
-                if (WriteOnlyWhenDifferent)
-                {
-                    MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
-                    try
-                    {
-                        if (FileUtilities.FileExistsNoThrow(filePath))
-                        {
-                            string existingContents = FileSystems.Default.ReadFileAllText(filePath);
-
-                            if (existingContents.Equals(contentsAsString))
-                            {
-                                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", filePath);
-                                MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, true);
-                                return true;
-                            }
-                            else if (FailIfNotIncremental)
-                            {
-                                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", filePath);
-                                return false;
-                            }
-                        }
-                    }
-                    catch (IOException)
-                    {
-                        Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", filePath);
-                    }
-                    MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, false);
-                }
-
-                System.IO.File.WriteAllText(filePath, contentsAsString, encoding);
-            }
-            else
-            {
-                if (WriteOnlyWhenDifferent)
-                {
-                    Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", filePath);
-                }
-
-                System.IO.File.AppendAllText(filePath, contentsAsString, encoding);
-            }
-
-            return true;
-        }
-
-        private bool ExecuteTransactional(string filePath, string directoryPath, string contentsAsString, Encoding encoding)
-        {
-            // Implementation inspired by Visual Studio editor pattern: write to temp file, then atomic replace
-            // https://github.com/microsoft/vs-editor-api/blob/main/src/Editor/Text/Impl/TextModel/FileUtilities.cs
-
-            if (string.IsNullOrEmpty(filePath))
-            {
-                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, "Target file path is null or empty.", "");
-                return false;
-            }
-
-            // Create directory if it doesn't exist
+            // Create directory if it doesn't exist (common to both transactional and non-transactional modes)
             if (!string.IsNullOrEmpty(directoryPath))
             {
                 try
@@ -219,8 +127,9 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            // Handle WriteOnlyWhenDifferent check for transactional mode
-            if (WriteOnlyWhenDifferent && Overwrite)
+            // Check WriteOnlyWhenDifferent condition before deciding which execution mode to use
+            // This logic is common to both transactional and non-transactional modes
+            if (Overwrite && WriteOnlyWhenDifferent)
             {
                 MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
                 try
@@ -248,6 +157,79 @@ namespace Microsoft.Build.Tasks
                     Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", filePath);
                 }
                 MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, false);
+            }
+
+            try
+            {
+                // Use transactional mode by default (enabled via ChangeWave 17.16)
+                // Users can opt-out by setting MSBUILDDISABLEFEATURESFROMVERSION=17.16
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_16))
+                {
+                    return ExecuteTransactional(filePath, directoryPath, contentsAsString, encoding);
+                }
+                else
+                {
+                    return ExecuteNonTransactional(filePath, directoryPath, contentsAsString, encoding);
+                }
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
+                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, e.Message, lockedFileMessage);
+            }
+
+            return !Log.HasLoggedErrors;
+        }
+
+        /// <summary>
+        /// Logs a warning when WriteOnlyWhenDifferent is set but Overwrite is false.
+        /// This is a shared helper method to ensure consistent behavior between transactional and non-transactional modes.
+        /// </summary>
+        private void LogWarningIfWriteOnlyWhenDifferentUnused(string filePath)
+        {
+            if (WriteOnlyWhenDifferent && !Overwrite)
+            {
+                Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", filePath);
+            }
+        }
+
+        private bool ExecuteNonTransactional(string filePath, string directoryPath, string contentsAsString, Encoding encoding)
+        {
+            // Directory creation is already handled in Execute() method
+            if (Overwrite)
+            {
+                // WriteOnlyWhenDifferent check is already done in Execute() method
+                System.IO.File.WriteAllText(filePath, contentsAsString, encoding);
+            }
+            else
+            {
+                // Log warning when WriteOnlyWhenDifferent is set but Overwrite is false
+                LogWarningIfWriteOnlyWhenDifferentUnused(filePath);
+
+                System.IO.File.AppendAllText(filePath, contentsAsString, encoding);
+            }
+
+            return !Log.HasLoggedErrors;
+        }
+
+        private bool ExecuteTransactional(string filePath, string directoryPath, string contentsAsString, Encoding encoding)
+        {
+            // Implementation inspired by Visual Studio editor pattern: write to temp file, then atomic replace
+            // https://github.com/microsoft/vs-editor-api/blob/main/src/Editor/Text/Impl/TextModel/FileUtilities.cs
+
+            if (string.IsNullOrEmpty(filePath))
+            {
+                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, "Target file path is null or empty.", "");
+                return false;
+            }
+
+            // Directory creation is already handled in Execute() method
+            // WriteOnlyWhenDifferent check for Overwrite mode is already done in Execute() method
+            // Only handle warning for WriteOnlyWhenDifferent when Overwrite is false
+            if (WriteOnlyWhenDifferent && !Overwrite)
+            {
+                // Log warning when WriteOnlyWhenDifferent is set but Overwrite is false
+                LogWarningIfWriteOnlyWhenDifferentUnused(filePath);
             }
 
             // Generate unique temp file name
@@ -291,9 +273,8 @@ namespace Microsoft.Build.Tasks
                                 }
                                 else
                                 {
-                                    // After all retries failed, log warning and fallback to appending only new content
+                                    // After all retries failed, fallback to appending only new content
                                     // This prevents build failure while still attempting to preserve data
-                                    Log.LogWarningWithCodeFromResources("WriteLinesToFile.ErrorReadingFileTransactional", filePath, ex.Message);
                                     tempFileContent = contentsAsString; // Fallback: append only new content
                                 }
                             }
@@ -314,14 +295,17 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // Attempt to replace target file with temporary file (atomic operation)
-                const int maxRetries = 10;
+                // Use exponential backoff to handle high contention scenarios
+                const int maxRetries = 20;
                 int remainingAttempts = maxRetries;
+                int baseDelayMs = 10;
+                int currentDelayMs = baseDelayMs;
                 while (remainingAttempts-- > 0)
                 {
                     try
                     {
                         System.IO.File.Replace(tempFile, filePath, null, true);
-                        return true;
+                        return !Log.HasLoggedErrors;
                     }
                     catch (FileNotFoundException)
                     {
@@ -329,14 +313,16 @@ namespace Microsoft.Build.Tasks
                         try
                         {
                             System.IO.File.Move(tempFile, filePath);
-                            return true;
+                            return !Log.HasLoggedErrors;
                         }
                         catch (IOException moveEx)
                         {
                             // File might have been created by another process, retry replace
                             if (remainingAttempts > 0)
                             {
-                                Thread.Sleep(20);
+                                Thread.Sleep(currentDelayMs);
+                                // Exponential backoff: increase delay for next retry
+                                currentDelayMs = Math.Min(currentDelayMs * 2, 200); // Cap at 200ms
                             }
                             else
                             {
@@ -347,10 +333,12 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (IOException)
                     {
-                        // File might be locked, retry after short delay
+                        // File might be locked, retry after delay with exponential backoff
                         if (remainingAttempts > 0)
                         {
-                            Thread.Sleep(20);
+                            Thread.Sleep(currentDelayMs);
+                            // Exponential backoff: increase delay for next retry
+                            currentDelayMs = Math.Min(currentDelayMs * 2, 200); // Cap at 200ms
                         }
                     }
                 }
