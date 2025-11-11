@@ -622,7 +622,8 @@ namespace Microsoft.Build.UnitTests
         public void TargetsSwitchParameter()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
-            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/targets:targets.txt" }, switches);
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(new List<string>() { "/targets:targets.txt" }, switches);
 
             switches.HaveErrors().ShouldBeFalse();
             switches[CommandLineSwitches.ParameterizedSwitch.Targets].ShouldBe(new[] { "targets.txt" });
@@ -632,7 +633,8 @@ namespace Microsoft.Build.UnitTests
         public void TargetsSwitchDoesNotSupportMultipleOccurrences()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
-            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/targets /targets" }, switches);
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(new List<string>() { "/targets /targets" }, switches);
 
             switches.HaveErrors().ShouldBeTrue();
         }
@@ -709,8 +711,9 @@ namespace Microsoft.Build.UnitTests
         public void GraphBuildSwitchCanHaveParameters()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string> { "/graph", "/graph:true;  NoBuild  ;;  ;", "/graph:foo" }, switches);
+            parser.GatherCommandLineSwitches(new List<string> { "/graph", "/graph:true;  NoBuild  ;;  ;", "/graph:foo" }, switches);
 
             switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(new[] { "true", "  NoBuild  ", "  ", "foo" });
 
@@ -721,8 +724,9 @@ namespace Microsoft.Build.UnitTests
         public void GraphBuildSwitchCanBeParameterless()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string> { "/graph" }, switches);
+            parser.GatherCommandLineSwitches(new List<string> { "/graph" }, switches);
 
             switches[CommandLineSwitches.ParameterizedSwitch.GraphBuild].ShouldBe(Array.Empty<string>());
 
@@ -733,8 +737,9 @@ namespace Microsoft.Build.UnitTests
         public void InputResultsCachesSupportsMultipleOccurrence()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/irc", "/irc:a;b", "/irc:c;d" }, switches);
+            parser.GatherCommandLineSwitches(new List<string>() { "/irc", "/irc:a;b", "/irc:c;d" }, switches);
 
             switches[CommandLineSwitches.ParameterizedSwitch.InputResultsCaches].ShouldBe(new[] { null, "a", "b", "c", "d" });
 
@@ -745,8 +750,9 @@ namespace Microsoft.Build.UnitTests
         public void OutputResultsCache()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/orc:a" }, switches);
+            parser.GatherCommandLineSwitches(new List<string>() { "/orc:a" }, switches);
 
             switches[CommandLineSwitches.ParameterizedSwitch.OutputResultsCache].ShouldBe(new[] { "a" });
 
@@ -757,8 +763,9 @@ namespace Microsoft.Build.UnitTests
         public void OutputResultsCachesDoesNotSupportMultipleOccurrences()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>() { "/orc:a", "/orc:b" }, switches);
+            parser.GatherCommandLineSwitches(new List<string>() { "/orc:a", "/orc:b" }, switches);
 
             switches.HaveErrors().ShouldBeTrue();
         }
@@ -1288,8 +1295,9 @@ namespace Microsoft.Build.UnitTests
         public void ProcessWarnAsErrorSwitchNotSpecified()
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "" }), commandLineSwitches);
+            parser.GatherCommandLineSwitches(new List<string>(new[] { "" }), commandLineSwitches);
 
             Assert.Null(MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches));
         }
@@ -1303,8 +1311,9 @@ namespace Microsoft.Build.UnitTests
             ISet<string> expectedWarningsAsErrors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "a", "B", "c", "D", "e" };
 
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[]
+            parser.GatherCommandLineSwitches(new List<string>(new[]
             {
                 "\"/warnaserror: a,B ; c \"", // Leading, trailing, leading and trailing whitespace
                 "/warnaserror:A,b,C",         // Repeats of different case
@@ -1328,8 +1337,9 @@ namespace Microsoft.Build.UnitTests
         public void ProcessWarnAsErrorSwitchEmptySwitchClearsSet()
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[]
+            parser.GatherCommandLineSwitches(new List<string>(new[]
             {
                 "/warnaserror:a;b;c",
                 "/warnaserror",
@@ -1351,8 +1361,9 @@ namespace Microsoft.Build.UnitTests
             ISet<string> expectedWarningsAsErors = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "e", "f", "g" };
 
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[]
+            parser.GatherCommandLineSwitches(new List<string>(new[]
             {
                 "/warnaserror:a;b;c",
                 "/warnaserror",
@@ -1373,8 +1384,9 @@ namespace Microsoft.Build.UnitTests
         public void ProcessWarnAsErrorSwitchEmpty()
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/warnaserror" }), commandLineSwitches);
+            parser.GatherCommandLineSwitches(new List<string>(new[] { "/warnaserror" }), commandLineSwitches);
 
             ISet<string> actualWarningsAsErrors = MSBuildApp.ProcessWarnAsErrorSwitch(commandLineSwitches);
 
@@ -1390,10 +1402,11 @@ namespace Microsoft.Build.UnitTests
         public void ProcessWarnAsMessageSwitchEmpty()
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
             // Set "expanded" content to match the placeholder so the verify can use the exact resource string as "expected."
             string command = "{0}";
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/warnasmessage" }), commandLineSwitches, command);
+            parser.GatherCommandLineSwitches(new List<string>(new[] { "/warnasmessage" }), commandLineSwitches, command);
 
             VerifySwitchError(commandLineSwitches, "/warnasmessage", AssemblyResources.GetString("MissingWarnAsMessageParameterError"));
         }
@@ -1410,13 +1423,15 @@ namespace Microsoft.Build.UnitTests
                 env.SetEnvironmentVariable("ENVIRONMENTVARIABLE", string.Empty);
 
                 CommandLineSwitches commandLineSwitches = new();
+                CommandLineParser parser = new CommandLineParser();
+
                 string fullCommandLine = "msbuild validProject.csproj %ENVIRONMENTVARIABLE%";
-                MSBuildApp.GatherCommandLineSwitches(new List<string>() { "validProject.csproj", "%ENVIRONMENTVARIABLE%" }, commandLineSwitches, fullCommandLine);
+                parser.GatherCommandLineSwitches(new List<string>() { "validProject.csproj", "%ENVIRONMENTVARIABLE%" }, commandLineSwitches, fullCommandLine);
                 VerifySwitchError(commandLineSwitches, "%ENVIRONMENTVARIABLE%", String.Format(AssemblyResources.GetString("EnvironmentVariableAsSwitch"), fullCommandLine));
 
                 commandLineSwitches = new();
                 fullCommandLine = "msbuild %ENVIRONMENTVARIABLE% validProject.csproj";
-                MSBuildApp.GatherCommandLineSwitches(new List<string>() { "%ENVIRONMENTVARIABLE%", "validProject.csproj" }, commandLineSwitches, fullCommandLine);
+                parser.GatherCommandLineSwitches(new List<string>() { "%ENVIRONMENTVARIABLE%", "validProject.csproj" }, commandLineSwitches, fullCommandLine);
                 VerifySwitchError(commandLineSwitches, "%ENVIRONMENTVARIABLE%", String.Format(AssemblyResources.GetString("EnvironmentVariableAsSwitch"), fullCommandLine));
             }
         }
@@ -1430,8 +1445,9 @@ namespace Microsoft.Build.UnitTests
             ISet<string> expectedWarningsAsMessages = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "a", "B", "c", "D", "e" };
 
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[]
+            parser.GatherCommandLineSwitches(new List<string>(new[]
             {
                 "\"/warnasmessage: a,B ; c \"", // Leading, trailing, leading and trailing whitespace
                 "/warnasmessage:A,b,C",         // Repeats of different case
@@ -1455,8 +1471,9 @@ namespace Microsoft.Build.UnitTests
         public void ProcessProfileEvaluationEmpty()
         {
             CommandLineSwitches commandLineSwitches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            MSBuildApp.GatherCommandLineSwitches(new List<string>(new[] { "/profileevaluation" }), commandLineSwitches);
+            parser.GatherCommandLineSwitches(new List<string>(new[] { "/profileevaluation" }), commandLineSwitches);
             commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ProfileEvaluation][0].ShouldBe("no-file");
         }
 
