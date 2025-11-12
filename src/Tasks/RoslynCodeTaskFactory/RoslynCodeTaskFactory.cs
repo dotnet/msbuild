@@ -169,7 +169,7 @@ namespace Microsoft.Build.Tasks
             _compileForOutOfProcess = TaskFactoryUtilities.ShouldCompileForOutOfProcess(taskFactoryLoggingHost);
 
             // Attempt to parse and extract everything from the <UsingTask />
-            if (!TryLoadTaskBody(_log, _taskName, taskBody, _parameters, out RoslynCodeTaskFactoryTaskInfo taskInfo))
+            if (!TryLoadTaskBody(_log, _taskName, taskBody, _parameters, taskFactoryLoggingHost, out RoslynCodeTaskFactoryTaskInfo taskInfo))
             {
                 return false;
             }
@@ -287,6 +287,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="taskName">The name of the task.</param>
         /// <param name="taskBody">The raw inner XML string of the &lt;UsingTask />&gt; to parse and validate.</param>
         /// <param name="parameters">An <see cref="ICollection{TaskPropertyInfo}"/> containing parameters for the task.</param>
+        /// <param name="taskFactoryEngineContext">The build engine context, used to resolve relative Source paths in multithreaded mode.</param>
         /// <param name="taskInfo">A <see cref="RoslynCodeTaskFactoryTaskInfo"/> object that receives the details of the parsed task.</param>
         /// <returns><c>true</c> if the task body was successfully parsed, otherwise <c>false</c>.</returns>
         /// <remarks>
@@ -303,7 +304,7 @@ namespace Microsoft.Build.Tasks
         /// ]]>
         /// </code>
         /// </remarks>
-        internal static bool TryLoadTaskBody(TaskLoggingHelper log, string taskName, string taskBody, ICollection<TaskPropertyInfo> parameters, out RoslynCodeTaskFactoryTaskInfo taskInfo)
+        internal static bool TryLoadTaskBody(TaskLoggingHelper log, string taskName, string taskBody, ICollection<TaskPropertyInfo> parameters, IBuildEngine taskFactoryEngineContext, out RoslynCodeTaskFactoryTaskInfo taskInfo)
         {
             taskInfo = new RoslynCodeTaskFactoryTaskInfo
             {
@@ -453,7 +454,15 @@ namespace Microsoft.Build.Tasks
 
                 // Instead of using the inner text of the <Code /> element, read the specified file as source code
                 taskInfo.CodeType = RoslynCodeTaskFactoryCodeType.Class;
-                taskInfo.SourceCode = FileSystems.Default.ReadFileAllText(sourceAttribute.Value.Trim());
+                
+                string sourcePath = sourceAttribute.Value.Trim();
+                
+                bool isMultiThreaded = taskFactoryEngineContext is ITaskFactoryBuildParameterProvider provider && provider.IsMultiThreadedBuild;
+                string projectFilePath = taskFactoryEngineContext.ProjectFileOfTaskNode;
+                string projectDirectory = !string.IsNullOrEmpty(projectFilePath) ? Path.GetDirectoryName(projectFilePath) : null;
+                string resolvedPath = TaskFactoryUtilities.ResolveTaskSourceCodePath(sourcePath, isMultiThreaded, projectDirectory);
+                
+                taskInfo.SourceCode = FileSystems.Default.ReadFileAllText(resolvedPath);
             }
 
             if (typeAttribute != null)
