@@ -343,8 +343,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Multi-threaded mode routing: Determine if non-thread-safe tasks need TaskHost isolation.
-            if (!useTaskFactory 
-                && _loadedType?.Type != null 
+            if (!useTaskFactory
+                && _loadedType?.Type != null
                 && buildComponentHost?.BuildParameters?.MultiThreaded == true)
             {
                 if (TaskRouter.NeedsTaskHostInMultiThreadedMode(_loadedType.Type))
@@ -359,6 +359,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowInternalNull(buildComponentHost);
 
+                mergedParameters = UpdateTaskHostParameters(mergedParameters);
                 (mergedParameters, bool isNetRuntime) = AddNetHostParamsIfNeeded(mergedParameters, getProperty);
 
                 bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false)
@@ -422,6 +423,30 @@ namespace Microsoft.Build.BackEnd
 
                 return taskInstance;
             }
+        }
+
+        /// <summary>
+        /// Overrides runtime/architecture with values from assembly metadata if available.
+        /// These values are more reliable since they are determined during assembly load.
+        /// </summary>
+        private TaskHostParameters UpdateTaskHostParameters(TaskHostParameters taskHostParameters)
+        {
+            // Determine runtime: prefer loaded type's runtime, fallback to parameter or current.
+            string runtime = !string.IsNullOrEmpty(_loadedType?.Runtime)
+                ? _loadedType.Runtime
+                : taskHostParameters.Runtime ?? XMakeAttributes.GetCurrentMSBuildRuntime();
+
+            // Determine architecture: prefer loaded type's architecture, fallback to parameter or current
+            string architecture = !string.IsNullOrEmpty(_loadedType?.Architecture)
+                ? _loadedType.Architecture
+                : taskHostParameters.Architecture ?? XMakeAttributes.GetCurrentMSBuildArchitecture();
+
+            return new TaskHostParameters(
+                runtime: runtime,
+                architecture: architecture,
+                dotnetHostPath: taskHostParameters.DotnetHostPath,
+                msBuildAssemblyPath: taskHostParameters.MSBuildAssemblyPath,
+                taskHostFactoryExplicitlyRequested: taskHostParameters.TaskHostFactoryExplicitlyRequested);
         }
 
         /// <summary>
@@ -676,7 +701,7 @@ namespace Microsoft.Build.BackEnd
 
             // Check if the assembly is a Microsoft assembly by name
             string assemblyName = _loadedType.Assembly.AssemblyName;
-            if (!string.IsNullOrEmpty(assemblyName) && Framework.FileClassifier.IsMicrosoftAssembly(assemblyName))
+            if (!string.IsNullOrEmpty(assemblyName) && FileClassifier.IsMicrosoftAssembly(assemblyName))
             {
                 return true;
             }
@@ -686,13 +711,13 @@ namespace Microsoft.Build.BackEnd
             if (!string.IsNullOrEmpty(assemblyFile))
             {
                 // Check if it's built-in MSBuild logic (e.g., from MSBuild installation)
-                if (Framework.FileClassifier.Shared.IsBuiltInLogic(assemblyFile))
+                if (FileClassifier.Shared.IsBuiltInLogic(assemblyFile))
                 {
                     return true;
                 }
 
                 // Check if it's a Microsoft package from NuGet cache
-                if (Framework.FileClassifier.Shared.IsMicrosoftPackageInNugetCache(assemblyFile))
+                if (FileClassifier.Shared.IsMicrosoftPackageInNugetCache(assemblyFile))
                 {
                     return true;
                 }

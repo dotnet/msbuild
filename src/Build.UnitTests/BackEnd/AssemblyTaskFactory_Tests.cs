@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Expect a false answer when we ask for a task which is not in the factory.
         /// </summary>
-        [Fact]
+        [WindowsFullFrameworkOnlyFact]
         public void CreatableByTaskFactoryNotInAssembly()
         {
             Assert.False(_taskFactory.TaskNameCreatableByFactory("NotInAssembly", TaskHostParameters.Empty, String.Empty, null, ElementLocation.Create(".", 1, 1)));
@@ -695,7 +695,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(_loadedType.Assembly.Equals(_loadInfo)); // "Expected the AssemblyLoadInfo to be equal"
         }
 
-        #endregion
+#endregion
 
         #region InternalClasses
         /// <summary>

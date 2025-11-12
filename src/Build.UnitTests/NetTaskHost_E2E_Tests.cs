@@ -78,7 +78,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 testTaskOutput, 
                 @"Arg\[0\]:\s*(.+)", 
                 System.Text.RegularExpressions.RegexOptions.CultureInvariant);
-            
+
             msBuildDllPathMatch.Success.ShouldBeTrue();
             string msBuildDllPath = msBuildDllPathMatch.Groups[1].Value.Trim();
 
@@ -151,9 +151,17 @@ namespace Microsoft.Build.Engine.UnitTests
             }
 
             successTestTask.ShouldBeTrue();
+
+            // Output from the task where only Runtime was specified
             testTaskOutput.ShouldContain($"The task is executed in process: dotnet");
             testTaskOutput.ShouldContain($"Process path: {dotnetPath}", customMessage: testTaskOutput);
             testTaskOutput.ShouldContain("/nodereuse:True");
+
+            // Output from the task where only TaskHost was specified
+            testTaskOutput.ShouldContain($"Hello TEST FROM MESSAGE");
+
+            // Output from the task where neither TaskHost nor Runtime were specified
+            testTaskOutput.ShouldContain("Found item: Banana");
         }
     }
 }
