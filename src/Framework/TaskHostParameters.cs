@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 
 namespace Microsoft.Build.Framework
@@ -8,7 +9,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// A readonly struct that represents task host parameters used to determine which host process to launch.
     /// </summary>
-    public readonly struct TaskHostParameters
+    public readonly struct TaskHostParameters : IEquatable<TaskHostParameters>
     {
         /// <summary>
         /// A static empty instance to avoid allocations when default parameters are needed.
@@ -72,6 +73,29 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public bool? TaskHostFactoryExplicitlyRequested => _taskHostFactoryExplicitlyRequested;
 
+        public override bool Equals(object? obj) => obj is TaskHostParameters other && Equals(other);
+
+        public bool Equals(TaskHostParameters other) =>
+            StringComparer.OrdinalIgnoreCase.Equals(Runtime ?? string.Empty, other.Runtime ?? string.Empty)
+            && StringComparer.OrdinalIgnoreCase.Equals(Architecture ?? string.Empty, other.Architecture ?? string.Empty)
+            && TaskHostFactoryExplicitlyRequested == other.TaskHostFactoryExplicitlyRequested;
+
+        public override int GetHashCode()
+        {
+            // Manual hash code implementation for compatibility with .NET Framework 4.7.2
+            var comparer = StringComparer.OrdinalIgnoreCase;
+
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 31 + comparer.GetHashCode(Runtime ?? string.Empty);
+                hash = hash * 31 + comparer.GetHashCode(Architecture ?? string.Empty);
+                hash = hash * 31 + (TaskHostFactoryExplicitlyRequested?.GetHashCode() ?? 0);
+
+                return hash;
+            }
+        }
+
         /// <summary>
         /// Gets a value indicating whether returns true if parameters were unset.
         /// </summary>
@@ -113,9 +137,28 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        /// Creates a new instance of <see cref="TaskHostParameters"/> with the specified value for the
+        /// <see cref="TaskHostFactoryExplicitlyRequested"/> property.
+        /// </summary>
+        internal TaskHostParameters WithTaskHostFactoryExplicitlyRequested(bool taskHostFactoryExplicitlyRequested)
+        {
+            if (_taskHostFactoryExplicitlyRequested == taskHostFactoryExplicitlyRequested)
+            {
+                return this;
+            }
+
+            return new TaskHostParameters(
+                runtime: _runtime,
+                architecture: _architecture,
+                dotnetHostPath: _dotnetHostPath,
+                msBuildAssemblyPath: _msBuildAssemblyPath,
+                taskHostFactoryExplicitlyRequested: taskHostFactoryExplicitlyRequested);
+        }
+
+        /// <summary>
         /// The method was added to sustain compatibility with ITaskFactory2 factoryIdentityParameters parameters dictionary.
         /// </summary>
-        internal Dictionary<string, string> ToDictionary() => new(3)
+        internal Dictionary<string, string> ToDictionary() => new(3, StringComparer.OrdinalIgnoreCase)
         {
             { nameof(Runtime), Runtime ?? string.Empty },
             { nameof(Architecture), Architecture ?? string.Empty },
