@@ -97,14 +97,15 @@ namespace Microsoft.Build.Execution
                     try
                     {
                         errorInfo.GetDescription(out string description);
-                        errorInfo.GetSource(out string source);
-                        errorInfo.GetHelpFile(out string helpFile);
-                        errorInfo.GetHelpContext(out int helpContext);
-
                         AppendIfNotEmpty(nameof(description), description);
+
+                        errorInfo.GetSource(out string source);
                         AppendIfNotEmpty(nameof(source), source);
+
+                        errorInfo.GetHelpFile(out string helpFile);
                         AppendIfNotEmpty("help file", helpFile);
 
+                        errorInfo.GetHelpContext(out int helpContext);
                         if (helpContext != 0)
                         {
                             errorMessage.AppendLine($"help context: {helpContext}");
