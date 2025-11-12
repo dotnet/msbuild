@@ -89,36 +89,31 @@ namespace Microsoft.Build.Execution
             errorMessage.AppendLine($"Failed to get object '{itemName}' from Running Object Table.");
             errorMessage.AppendLine($"HRESULT: 0x{hr:X8} ({hr})");
 
-            if (NativeMethodsShared.IsWindows)
+            if (NativeMethodsShared.IsWindows && Ole32.GetErrorInfo(0, out IErrorInfo errorInfo) == 0 && errorInfo != null)
             {
                 // Try to get IErrorInfo for detailed error information
-                if (Ole32.GetErrorInfo(0, out IErrorInfo errorInfo) == 0 && errorInfo != null)
+                try
                 {
-                    try
+                    errorInfo.GetDescription(out string description);
+                    errorInfo.GetSource(out string source);
+                    errorInfo.GetHelpFile(out string helpFile);
+                    errorInfo.GetHelpContext(out int helpContext);
+                    
+                    AppendIfNotEmpty(nameof(description), description);
+                    AppendIfNotEmpty(nameof(source), source);
+                    AppendIfNotEmpty("help file", helpFile);
+                    if (helpContext != 0)
                     {
-                        errorInfo.GetDescription(out string description);
-                        AppendIfNotEmpty(nameof(description), description);
-
-                        errorInfo.GetSource(out string source);
-                        AppendIfNotEmpty(nameof(source), source);
-
-                        errorInfo.GetHelpFile(out string helpFile);
-                        AppendIfNotEmpty("help file", helpFile);
-
-                        errorInfo.GetHelpContext(out int helpContext);
-                        if (helpContext != 0)
-                        {
-                            errorMessage.AppendLine($"help context: {helpContext}");
-                        }
+                        errorMessage.AppendLine($"help context: {helpContext}");
                     }
-                    catch
-                    {
-                        // If we can't get error info details, just continue with the basic code.
-                    }
-                    finally
-                    {
-                        Marshal.ReleaseComObject(errorInfo);
-                    }
+                }
+                catch
+                {
+                    // If we can't get error info details, just continue with the basic code.
+                }
+                finally
+                {
+                    Marshal.ReleaseComObject(errorInfo);
                 }
             }
 
