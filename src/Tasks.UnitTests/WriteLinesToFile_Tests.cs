@@ -411,10 +411,9 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 // Build using ProjectCollection as recommended by Change Waves documentation
                 // This ensures change wave state is properly respected
-                var mockLogger = new MockLogger(_output);
                 using (var collection = new ProjectCollection(
                     globalProperties: null,
-                    loggers: new[] { mockLogger },
+                    loggers: null,
                     remoteLoggers: null,
                     toolsetDefinitionLocations: ToolsetDefinitionLocations.Default,
                     maxNodeCount: Environment.ProcessorCount,
