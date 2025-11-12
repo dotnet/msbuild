@@ -2019,7 +2019,7 @@ Erros: {3}</target>
       </trans-unit>
       <trans-unit id="OldWrapperGeneratedOldSolutionVersion">
         <source>Using the MSBuild v3.5 solution wrapper generator with a tools version of {0} because the solution file format was version {1} and no tools version was supplied.</source>
-        <target state="translated">Usando o gerador de wrapper da solução MSBuild v3.5 com uma versão de ferramentas {0} porque o formato de arquivo da solução era versão {1} e nenhuma versão de ferramentas foi fornecida.</target>
+        <target state="translated">Usando o gerador de wrapper da solução MSBuild v3.5 com uma versão de ferramentas {0} porque o formato de arquivo de solução era versão {1} e nenhuma versão de ferramentas foi fornecida.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionBuildingSolutionConfiguration">
