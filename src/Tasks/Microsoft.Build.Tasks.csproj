@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
@@ -303,7 +303,6 @@
     <Compile Include="SignFile.cs" />
     <Compile Include="System.Design.cs" />
     <Compile Include="system.design\stronglytypedresourcebuilder.cs" />
-    <Compile Include="SystemWideMutex.cs" />
     <Compile Include="TaskExtension.cs" />
     <Compile Include="TaskTranslatorHelpers.cs" />
     <Compile Include="Telemetry.cs" />
