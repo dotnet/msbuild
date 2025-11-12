@@ -458,7 +458,7 @@ namespace Microsoft.Build.BackEnd
             return (taskHostParameters.DotnetHostPath, GetMSBuildAssemblyPath(taskHostParameters));
         }
 
-        private static string GetMSBuildAssemblyPath(TaskHostParameters taskHostParameters)
+        private static string GetMSBuildAssemblyPath(in TaskHostParameters taskHostParameters)
         {
             if (taskHostParameters.MSBuildAssemblyPath != null)
             {
@@ -570,7 +570,7 @@ namespace Microsoft.Build.BackEnd
             INodePacketFactory factory,
             INodePacketHandler handler,
             TaskHostConfiguration configuration,
-            TaskHostParameters taskHostParameters)
+            in TaskHostParameters taskHostParameters)
         {
             bool nodeCreationSucceeded;
             if (!_nodeContexts.ContainsKey(taskHostNodeId))
@@ -611,7 +611,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates a new MSBuild or MSBuildTaskHost process acting as a child node.
         /// </summary>
-        internal bool CreateNode(HandshakeOptions hostContext, int taskHostNodeId, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, TaskHostParameters taskHostParameters)
+        internal bool CreateNode(HandshakeOptions hostContext, int taskHostNodeId, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, in TaskHostParameters taskHostParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory);
             ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey(taskHostNodeId), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
