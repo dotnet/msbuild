@@ -340,7 +340,7 @@ namespace Microsoft.Build.CommandLine
 #if !NET35
                 if (_hostServices != null)
                 {
-                    wrappedTask.HostObject = _hostServices.GetHostObject(taskLocation, targetName, taskName);
+                    wrappedTask.HostObject = _hostServices.GetHostObject(taskFile, targetName, taskName);
                 }
 #endif
 
