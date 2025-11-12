@@ -106,6 +106,54 @@ namespace Microsoft.Build.BackEnd
 
         private ICollection<string> _warningsAsMessages;
 
+#if FEATURE_APPDOMAIN
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TaskHostConfiguration"/> class.
+        /// </summary>
+        /// <param name="nodeId">The ID of the node being configured.</param>
+        /// <param name="startupDirectory">The startup directory for the task being executed.</param>
+        /// <param name="buildProcessEnvironment">The set of environment variables to apply to the task execution process.</param>
+        /// <param name="culture">The culture of the thread that will execute the task.</param>
+        /// <param name="uiCulture">The UI culture of the thread that will execute the task.</param>
+        /// <param name="hostServices">The host services to be used by the task host.</param>
+        /// <param name="appDomainSetup">The AppDomainSetup that may be used to pass information to an AppDomainIsolated task.</param>
+        /// <param name="lineNumberOfTask">The line number of the location from which this task was invoked.</param>
+        /// <param name="columnNumberOfTask">The column number of the location from which this task was invoked.</param>
+        /// <param name="projectFileOfTask">The project file from which this task was invoked.</param>
+        /// <param name="continueOnError">A flag to indicate whether to continue with the build after the task fails.</param>
+        /// <param name="taskName">The name of the task.</param>
+        /// <param name="taskLocation">The location of the assembly from which the task is to be loaded.</param>
+        /// <param name="targetName">The name of the target that is requesting the task execution.</param>
+        /// <param name="isTaskInputLoggingEnabled">A flag to indicate whether task inputs are logged.</param>
+        /// <param name="taskParameters">The parameters to apply to the task.</param>
+        /// <param name="globalParameters">The global properties for the current project.</param>
+        /// <param name="warningsAsErrors">A collection of warning codes to be treated as errors.</param>
+        /// <param name="warningsNotAsErrors">A collection of warning codes not to be treated as errors.</param>
+        /// <param name="warningsAsMessages">A collection of warning codes to be treated as messages.</param>
+#else
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TaskHostConfiguration"/> class.
+        /// </summary>
+        /// <param name="nodeId">The ID of the node being configured.</param>
+        /// <param name="startupDirectory">The startup directory for the task being executed.</param>
+        /// <param name="buildProcessEnvironment">The set of environment variables to apply to the task execution process.</param>
+        /// <param name="culture">The culture of the thread that will execute the task.</param>
+        /// <param name="uiCulture">The UI culture of the thread that will execute the task.</param>
+        /// <param name="hostServices">The host services to be used by the task host.</param>
+        /// <param name="lineNumberOfTask">The line number of the location from which this task was invoked.</param>
+        /// <param name="columnNumberOfTask">The column number of the location from which this task was invoked.</param>
+        /// <param name="projectFileOfTask">The project file from which this task was invoked.</param>
+        /// <param name="continueOnError">A flag to indicate whether to continue with the build after the task fails.</param>
+        /// <param name="taskName">The name of the task.</param>
+        /// <param name="taskLocation">The location of the assembly from which the task is to be loaded.</param>
+        /// <param name="targetName">The name of the target that is requesting the task execution.</param>
+        /// <param name="isTaskInputLoggingEnabled">A flag to indicate whether task inputs are logged.</param>
+        /// <param name="taskParameters">The parameters to apply to the task.</param>
+        /// <param name="globalParameters">The global properties for the current project.</param>
+        /// <param name="warningsAsErrors">A collection of warning codes to be treated as errors.</param>
+        /// <param name="warningsNotAsErrors">A collection of warning codes not to be treated as errors.</param>
+        /// <param name="warningsAsMessages">A collection of warning codes to be treated as messages.</param>
+#endif
         public TaskHostConfiguration(
             int nodeId,
             string startupDirectory,
