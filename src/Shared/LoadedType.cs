@@ -23,10 +23,10 @@ namespace Microsoft.Build.Shared
         /// <param name="type">The Type to be loaded</param>
         /// <param name="assemblyLoadInfo">Information used to load the assembly</param>
         /// <param name="loadedAssembly">The assembly which has been loaded, if any</param>
-        /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
         /// <param name="iTaskItemType">type of an ITaskItem</param>
         /// <param name="runtime">Assembly runtime based on assembly attributes.</param>
         /// <param name="architecture">Assembly architecture extracted from PE flags</param>
+        /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
         internal LoadedType(
             Type type,
             AssemblyLoadInfo assemblyLoadInfo,
@@ -187,8 +187,7 @@ namespace Microsoft.Build.Shared
         public bool IsMarshalByRef { get; }
 
         /// <summary>
-        /// Gets whether this type was loaded via MetadataLoadContext.
-        /// If true, the assembly will be pushed out of process.
+        /// Gets whether this type was loaded by using MetadataLoadContext.
         /// </summary>
         public bool LoadedViaMetadataLoadContext { get; }
 

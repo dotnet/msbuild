@@ -339,7 +339,6 @@ namespace Microsoft.Build.BackEnd
                 VerifyThrowIdentityParametersValid(taskIdentityParameters, taskLocation, _taskName, "MSBuildRuntime", "MSBuildArchitecture");
 
                 mergedParameters = MergeTaskFactoryParameterSets(_factoryIdentityParameters, taskIdentityParameters);
-
                 useTaskFactory = _loadedType.LoadedViaMetadataLoadContext || !TaskHostParametersMatchCurrentProcess(mergedParameters);
             }
 
@@ -361,8 +360,7 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrowInternalNull(buildComponentHost);
 
                 mergedParameters = UpdateTaskHostParameters(mergedParameters);
-
-                (mergedParameters, bool isNetRuntime) = AddNetHostParamsIfNeeded(mergedParameters.Runtime, mergedParameters.Architecture, getProperty);
+                (mergedParameters, bool isNetRuntime) = AddNetHostParamsIfNeeded(mergedParameters, getProperty);
 
                 bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false)
                     || isNetRuntime;
@@ -433,7 +431,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskHostParameters UpdateTaskHostParameters(TaskHostParameters taskHostParameters)
         {
-            // Determine runtime: prefer loaded type's runtime, fallback to parameter or current
+            // Determine runtime: prefer loaded type's runtime, fallback to parameter or current.
             string runtime = !string.IsNullOrEmpty(_loadedType?.Runtime)
                 ? _loadedType.Runtime
                 : taskHostParameters.Runtime ?? XMakeAttributes.GetCurrentMSBuildRuntime();
@@ -621,14 +619,13 @@ namespace Microsoft.Build.BackEnd
         /// Returns a new TaskHostParameters with .NET host parameters added, or the original if not needed.
         /// </summary>
         private static (TaskHostParameters TaskHostParams, bool isNetRuntime) AddNetHostParamsIfNeeded(
-            string runtime,
-            string architecture,
+            TaskHostParameters taskHostParameters,
             Func<string, ProjectPropertyInstance> getProperty)
         {
             // Only add .NET host parameters if runtime is .NET
-            if (!runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
+            if (taskHostParameters.Runtime != XMakeAttributes.MSBuildRuntimeValues.net)
             {
-                return (new TaskHostParameters(runtime, architecture), isNetRuntime: false);
+                return (taskHostParameters, isNetRuntime: false);
             }
 
             string dotnetHostPath = getProperty(Constants.DotnetHostPathEnvVarName)?.EvaluatedValue;
@@ -637,12 +634,12 @@ namespace Microsoft.Build.BackEnd
                 ? Path.GetDirectoryName(ridGraphPath) ?? string.Empty
                 : string.Empty;
 
-            // Only create new parameters if we have valid .NET host paths
+            // Create new parameters only if we have valid .NET host paths
             return string.IsNullOrEmpty(dotnetHostPath) || string.IsNullOrEmpty(msBuildAssemblyPath)
-                ? (new TaskHostParameters(runtime, architecture), isNetRuntime: false)
+                ? (taskHostParameters, isNetRuntime: false)
                 : (new TaskHostParameters(
-                    runtime: runtime,
-                    architecture: architecture,
+                    runtime: taskHostParameters.Runtime,
+                    architecture: taskHostParameters.Architecture,
                     dotnetHostPath: dotnetHostPath,
                     msBuildAssemblyPath: msBuildAssemblyPath),
                     isNetRuntime: true);

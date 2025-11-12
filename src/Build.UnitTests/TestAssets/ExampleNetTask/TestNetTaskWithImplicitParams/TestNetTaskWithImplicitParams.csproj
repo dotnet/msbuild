@@ -14,11 +14,11 @@
              Runtime="NET"/>
   
   <UsingTask TaskName="Microsoft.Build.Tasks.Message"
-             AssemblyFile="$(PrunePackageDataRoot)\..\Microsoft.Build.Tasks.Core.dll"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"
              TaskFactory="TaskHostFactory" />
 
   <UsingTask TaskName="Microsoft.Build.Tasks.FindInList"
-             AssemblyFile="$(PrunePackageDataRoot)\..\Microsoft.Build.Tasks.Core.dll" />
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" />
 
   <ItemGroup>
     <MyItems Include="Apple" />
