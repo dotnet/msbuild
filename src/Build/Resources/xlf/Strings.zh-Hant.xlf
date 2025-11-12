@@ -2019,7 +2019,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="OldWrapperGeneratedOldSolutionVersion">
         <source>Using the MSBuild v3.5 solution wrapper generator with a tools version of {0} because the solution file format was version {1} and no tools version was supplied.</source>
-        <target state="translated">使用工具版本為 {0} 的 MSBuild v3.5 方案包裝函式產生器，因為方案檔案格式的版本為 {1}，而且沒有提供工具版本。</target>
+        <target state="translated">使用工具版本為 {0} 的 MSBuild v3.5 解決方案包裝函式產生器，因為解決方案檔案格式的版本為 {1}，而且沒有提供工具版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionBuildingSolutionConfiguration">
