@@ -239,6 +239,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), TaskHostParameters.Empty,
+#if !NET35
+            null,
+#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -270,6 +273,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 TaskHostParameters taskParameters = new (XMakeAttributes.MSBuildRuntimeValues.any, XMakeAttributes.MSBuildArchitectureValues.any);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+#if !NET35
+            null,
+#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -301,6 +307,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 TaskHostParameters taskParameters = new (XMakeAttributes.GetCurrentMSBuildRuntime(), XMakeAttributes.GetCurrentMSBuildArchitecture());
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+#if !NET35
+            null,
+#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -334,6 +343,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 SetupTaskFactory(taskParameters, false /* don't want task host */);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), TaskHostParameters.Empty,
+#if !NET35
+            null,
+#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -367,6 +379,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 SetupTaskFactory(taskParameters, false /* don't want task host */);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), TaskHostParameters.Empty,
+#if !NET35
+            null,
+#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -402,6 +417,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 TaskHostParameters taskParameters = new (architecture: XMakeAttributes.MSBuildArchitectureValues.currentArchitecture);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+#if !NET35
+            null,
+#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -435,6 +453,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 SetupTaskFactory(taskParameters, false /* don't want task host */);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), TaskHostParameters.Empty,
+#if !NET35
+            null,
+#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -466,6 +487,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 TaskHostParameters taskParameters = new(XMakeAttributes.MSBuildRuntimeValues.clr2, XMakeAttributes.MSBuildArchitectureValues.any);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+#if !NET35
+            null,
+#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -501,6 +525,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 TaskHostParameters taskParameters = new(architecture: XMakeAttributes.MSBuildArchitectureValues.any);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+#if !NET35
+            null,
+#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -532,6 +559,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 SetupTaskFactory(TaskHostParameters.Empty, true /* want task host */, true);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), TaskHostParameters.Empty,
+#if !NET35
+            null,
+#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -565,6 +595,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 SetupTaskFactory(taskParameters, true /* want task host */, isTaskHostFactory: true);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), TaskHostParameters.Empty,
+#if !NET35
+            null,
+#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -598,6 +631,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 TaskHostParameters taskParameters = new (XMakeAttributes.MSBuildRuntimeValues.any, XMakeAttributes.MSBuildArchitectureValues.any);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+#if !NET35
+            null,
+#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -632,6 +668,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 // #1: don't launch task host
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), TaskHostParameters.Empty,
+#if !NET35
+            null,
+#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -655,6 +694,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 TaskHostParameters taskParameters = new(XMakeAttributes.MSBuildRuntimeValues.clr2, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture);
 
                 createdTask = _taskFactory.CreateTaskInstance(ElementLocation.Create("MSBUILD"), null, new MockHost(), taskParameters,
+#if !NET35
+            null,
+#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif

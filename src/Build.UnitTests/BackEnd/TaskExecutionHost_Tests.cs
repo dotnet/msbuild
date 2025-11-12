@@ -995,6 +995,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     null,
 #endif
+#if !NET35
+                    null,
+#endif
                     false,
                     CancellationToken.None);
                 _host.FindTask(TaskHostParameters.Empty);
@@ -1021,6 +1024,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 this,
                 false,
 #if FEATURE_APPDOMAIN
+                null,
+#endif
+#if !NET35
                 null,
 #endif
                 false,
@@ -1264,6 +1270,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 this,
                 false,
 #if FEATURE_APPDOMAIN
+                null,
+#endif
+#if !NET35
                 null,
 #endif
                 false,

@@ -317,6 +317,9 @@ namespace Microsoft.Build.BackEnd
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
             in TaskHostParameters taskIdentityParameters,
+#if !NET35
+            HostServices hostServices,
+#endif
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -373,6 +376,9 @@ namespace Microsoft.Build.BackEnd
                     useSidecarTaskHost: useSidecarTaskHost,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
+#endif
+#if !NET35
+                    hostServices,
 #endif
                     scheduledNodeId);
                 return task;
