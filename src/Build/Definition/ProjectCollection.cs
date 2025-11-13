@@ -1221,63 +1221,57 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentLength(fileName);
             fileName = FileUtilities.NormalizePath(fileName);
 
-            using (_locker.EnterDisposableWriteLock())
+            if (globalProperties == null)
             {
-                if (globalProperties == null)
-                {
-                    globalProperties = GlobalProperties;
-                }
-                else
-                {
-                    // We need to update the set of global properties to merge in the ProjectCollection global properties --
-                    // otherwise we might end up declaring "not matching" a project that actually does ... and then throw
-                    // an exception when we go to actually add the newly created project to the ProjectCollection.
-                    // BUT remember that project global properties win -- don't override a property that already exists.
-                    foreach (KeyValuePair<string, string> globalProperty in GlobalProperties)
-                    {
-                        if (!globalProperties.ContainsKey(globalProperty.Key))
-                        {
-                            globalProperties.Add(globalProperty);
-                        }
-                    }
-                }
-
-                // We do not control the current directory at this point, but assume that if we were
-                // passed a relative path, the caller assumes we will prepend the current directory.
-                string toolsVersionFromProject = null;
-
-                if (toolsVersion == null)
-                {
-                    // Load the project XML to get any ToolsVersion attribute.
-                    // If there isn't already an equivalent project loaded, the real load we'll do will be satisfied from the cache.
-                    // If there is already an equivalent project loaded, we'll never need this XML -- but it'll already
-                    // have been loaded by that project so it will have been satisfied from the ProjectRootElementCache.
-                    // Either way, no time wasted.
-                    try
-                    {
-                        ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(fileName, globalProperties, toolsVersion, ProjectRootElementCache, true /*explicitlyloaded*/);
-                        toolsVersionFromProject = (xml.ToolsVersion.Length > 0) ? xml.ToolsVersion : DefaultToolsVersion;
-                    }
-                    catch (InvalidProjectFileException ex)
-                    {
-                        var buildEventContext = new BuildEventContext(0 /* node ID */, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
-                        LoggingService.LogInvalidProjectFileError(buildEventContext, ex);
-                        throw;
-                    }
-                }
-
-                string effectiveToolsVersion = Utilities.GenerateToolsVersionToUse(toolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion, out _);
-                Project project = _loadedProjects.GetMatchingProjectIfAny(fileName, globalProperties, effectiveToolsVersion);
-
-                if (project == null)
-                {
-                    // The Project constructor adds itself to our collection,
-                    // it is not done by us
-                    project = new Project(fileName, globalProperties, effectiveToolsVersion, this);
-                }
-
-                return project;
+                globalProperties = GlobalProperties;
             }
+            else
+            {
+                // We need to update the set of global properties to merge in the ProjectCollection global properties --
+                // otherwise we might end up declaring "not matching" a project that actually does ... and then throw
+                // an exception when we go to actually add the newly created project to the ProjectCollection.
+                // BUT remember that project global properties win -- don't override a property that already exists.
+                foreach (KeyValuePair<string, string> globalProperty in GlobalProperties)
+                {
+                    if (!globalProperties.ContainsKey(globalProperty.Key))
+                    {
+                        globalProperties.Add(globalProperty);
+                    }
+                }
+            }
+
+            // We do not control the current directory at this point, but assume that if we were
+            // passed a relative path, the caller assumes we will prepend the current directory.
+            string toolsVersionFromProject = null;
+
+            if (toolsVersion == null)
+            {
+                // Load the project XML to get any ToolsVersion attribute.
+                // If there isn't already an equivalent project loaded, the real load we'll do will be satisfied from the cache.
+                // If there is already an equivalent project loaded, we'll never need this XML -- but it'll already
+                // have been loaded by that project so it will have been satisfied from the ProjectRootElementCache.
+                // Either way, no time wasted.
+                try
+                {
+                    ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(fileName, globalProperties, toolsVersion, ProjectRootElementCache, isExplicitlyLoaded: true);
+                    toolsVersionFromProject = (xml.ToolsVersion.Length > 0) ? xml.ToolsVersion : DefaultToolsVersion;
+                }
+                catch (InvalidProjectFileException ex)
+                {
+                    var buildEventContext = new BuildEventContext(nodeId: 0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+                    LoggingService.LogInvalidProjectFileError(buildEventContext, ex);
+                    throw;
+                }
+            }
+
+            string effectiveToolsVersion = Utilities.GenerateToolsVersionToUse(toolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion, out _);
+            Project project = _loadedProjects.GetMatchingProjectIfAny(fileName, globalProperties, effectiveToolsVersion);
+
+            // The Project constructor adds itself to our collection,
+            // it is not done by us
+            project ??= new Project(fileName, globalProperties, effectiveToolsVersion, this);
+
+            return project;
         }
 
         /// <summary>
