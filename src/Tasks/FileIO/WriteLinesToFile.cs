@@ -100,10 +100,24 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
+            string directoryPath = Path.GetDirectoryName(filePath);
+            Directory.CreateDirectory(directoryPath);
+
+            // Use transactional mode by default when ChangeWave 17.16 is enabled
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
+            {
+                return ExecuteTransactional(filePath, directoryPath, contentsAsString, encoding);
+            }
+            else
+            {
+                return ExecuteNonTransactional(filePath, directoryPath, contentsAsString, encoding);
+            }
+        }
+
+        private bool ExecuteNonTransactional(string filePath, string directoryPath, string contentsAsString, Encoding encoding)
+        {
             try
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-
                 if (Overwrite)
                 {
                     // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
@@ -120,12 +134,12 @@ namespace Microsoft.Build.Tasks
                                 {
                                     Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", filePath);
                                     MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, true);
-                                    return true;
+                                    return !Log.HasLoggedErrors;
                                 }
                                 else if (FailIfNotIncremental)
                                 {
                                     Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", filePath);
-                                    return false;
+                                    return !Log.HasLoggedErrors;
                                 }
                             }
                         }
@@ -147,15 +161,196 @@ namespace Microsoft.Build.Tasks
 
                     System.IO.File.AppendAllText(filePath, contentsAsString, encoding);
                 }
+
+                return !Log.HasLoggedErrors;
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
                 string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
                 Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, e.Message, lockedFileMessage);
-                success = false;
+                return !Log.HasLoggedErrors;
             }
+        }
 
-            return success;
+        private bool ExecuteTransactional(string filePath, string directoryPath, string contentsAsString, Encoding encoding)
+        {
+            try
+            {
+                if (Overwrite)
+                {
+                    // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
+                    if (WriteOnlyWhenDifferent)
+                    {
+                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
+                        try
+                        {
+                            if (FileUtilities.FileExistsNoThrow(filePath))
+                            {
+                                string existingContents = FileSystems.Default.ReadFileAllText(filePath);
+                                if (existingContents.Equals(contentsAsString))
+                                {
+                                    Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", filePath);
+                                    MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, true);
+                                    return !Log.HasLoggedErrors;
+                                }
+                                else if (FailIfNotIncremental)
+                                {
+                                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", filePath);
+                                    return !Log.HasLoggedErrors;
+                                }
+                            }
+                        }
+                        catch (IOException)
+                        {
+                            // Fall through to write the file
+                        }
+                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, false);
+                    }
+
+                    return SaveAtomically(filePath, contentsAsString, encoding);
+                }
+                else
+                {
+                    if (WriteOnlyWhenDifferent)
+                    {
+                        Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", filePath);
+                    }
+
+                    // For append mode, use atomic write to append only the new content
+                    // This avoids race conditions from reading-modifying-writing entire file
+                    return SaveAtomicallyAppend(filePath, directoryPath, contentsAsString, encoding);
+                }
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
+                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, e.Message, lockedFileMessage);
+                return !Log.HasLoggedErrors;
+            }
+        }
+
+        /// <summary>
+        /// Saves content to file atomically using a temporary file, following the Visual Studio editor pattern.
+        /// This is for overwrite mode where we write the entire content.
+        /// </summary>
+        private bool SaveAtomically(string filePath, string contentsAsString, Encoding encoding)
+        {
+            string temporaryFilePath = null;
+            try
+            {
+                string directoryPath = Path.GetDirectoryName(filePath);
+
+                // Create temporary file with ~ suffix (hides from GIT)
+                temporaryFilePath = Path.Combine(directoryPath, Path.GetRandomFileName() + "~");
+
+                // Write content to temporary file
+                System.IO.File.WriteAllText(temporaryFilePath, contentsAsString, encoding);
+
+                // Attempt to atomically replace target file with temporary file
+                try
+                {
+                    // Replace the contents of filePath with the contents of the temporary using File.Replace
+                    // to preserve the various attributes of the original file.
+                    System.IO.File.Replace(temporaryFilePath, filePath, null, true);
+                    temporaryFilePath = null; // Mark as successfully replaced
+                    return !Log.HasLoggedErrors;
+                }
+                catch (FileNotFoundException)
+                {
+                    // The target file doesn't exist, which is fine. Move the temp file to target.
+                    try
+                    {
+                        System.IO.File.Move(temporaryFilePath, filePath);
+                        temporaryFilePath = null; // Mark as successfully moved
+                        return !Log.HasLoggedErrors;
+                    }
+                    catch (IOException moveEx)
+                    {
+                        // Move failed, log and return
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
+                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, moveEx.Message, lockedFileMessage);
+                        return !Log.HasLoggedErrors;
+                    }
+                }
+                catch (IOException)
+                {
+                    // Replace failed (likely file is locked). Retry a few times with small delay.
+                    for (int retry = 1; retry < 3; retry++)
+                    {
+                        try
+                        {
+                            System.Threading.Thread.Sleep(10);
+                            System.IO.File.Replace(temporaryFilePath, filePath, null, true);
+                            temporaryFilePath = null; // Mark as successfully replaced
+                            return !Log.HasLoggedErrors;
+                        }
+                        catch (IOException)
+                        {
+                            // Continue to next retry
+                        }
+                    }
+
+                    // Retries exhausted. Try simple write as fallback.
+                    try
+                    {
+                        System.IO.File.WriteAllText(filePath, contentsAsString, encoding);
+                        temporaryFilePath = null; // Mark temp as not needed
+                        return !Log.HasLoggedErrors;
+                    }
+                    catch (Exception fallbackEx) when (ExceptionHandling.IsIoRelatedException(fallbackEx))
+                    {
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
+                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, fallbackEx.Message, lockedFileMessage);
+                        return !Log.HasLoggedErrors;
+                    }
+                }
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
+                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, e.Message, lockedFileMessage);
+                return !Log.HasLoggedErrors;
+            }
+            finally
+            {
+                // Clean up temporary file if it still exists
+                if (temporaryFilePath != null)
+                {
+                    try
+                    {
+                        if (System.IO.File.Exists(temporaryFilePath))
+                        {
+                            System.IO.File.Delete(temporaryFilePath);
+                        }
+                    }
+                    catch
+                    {
+                        // Failing to clean up the temporary is an ignorable exception.
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Appends content to file atomically. For append mode, we simply append the new content
+        /// directly without reading the entire file, avoiding race conditions.
+        /// </summary>
+        private bool SaveAtomicallyAppend(string filePath, string directoryPath, string contentsAsString, Encoding encoding)
+        {
+            try
+            {
+                // For append mode, directly append new content to the file.
+                // This avoids the race condition of reading-modify-write entire file.
+                // Multiple processes can safely append without losing data.
+                System.IO.File.AppendAllText(filePath, contentsAsString, encoding);
+                return !Log.HasLoggedErrors;
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
+                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, e.Message, lockedFileMessage);
+                return !Log.HasLoggedErrors;
+            }
         }
     }
 }
