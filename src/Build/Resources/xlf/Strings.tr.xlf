@@ -2019,7 +2019,7 @@ Hatalar: {3}</target>
       </trans-unit>
       <trans-unit id="OldWrapperGeneratedOldSolutionVersion">
         <source>Using the MSBuild v3.5 solution wrapper generator with a tools version of {0} because the solution file format was version {1} and no tools version was supplied.</source>
-        <target state="translated">Çözüm dosyası sürümü {1} olduğu için ve araçlar sürümü verilmediği için {0} araçlar sürümüne sahip MSBuild v3.5 çözüm sarmalayıcı oluşturucusu kullanılıyor.</target>
+        <target state="translated">Çözüm dosyası biçiminin sürümü {1} olduğu için ve araçlar sürümü verilmediği için {0} araçlar sürümüne sahip MSBuild v3.5 çözüm sarmalayıcı oluşturucusu kullanılıyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionBuildingSolutionConfiguration">
