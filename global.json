@@ -8,7 +8,7 @@
     "errorMessage": "The .NET SDK could not be found, please run a command-line build with ./build.cmd."
   },
   "tools": {
-    "dotnet": "10.0.100-rc.1.25451.107",
+    "dotnet": "10.0.100",
     "vs": {
       "version": "17.13.0"
     },
