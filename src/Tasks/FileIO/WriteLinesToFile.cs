@@ -103,7 +103,16 @@ namespace Microsoft.Build.Tasks
             string directoryPath = Path.GetDirectoryName(filePath);
             Directory.CreateDirectory(directoryPath);
 
-            // Use transactional mode by default when ChangeWave 17.16 is enabled
+            // Handle WriteOnlyWhenDifferent check for Overwrite mode before executing
+            if (Overwrite && WriteOnlyWhenDifferent)
+            {
+                if (!ShouldWriteFileForOverwrite(filePath, contentsAsString))
+                {
+                    return !Log.HasLoggedErrors;
+                }
+            }
+
+            // Use transactional mode by default when ChangeWave 17.14 is enabled
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
             {
                 return ExecuteTransactional(filePath, directoryPath, contentsAsString, encoding);
@@ -120,36 +129,6 @@ namespace Microsoft.Build.Tasks
             {
                 if (Overwrite)
                 {
-                    // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
-                    if (WriteOnlyWhenDifferent)
-                    {
-                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
-                        try
-                        {
-                            if (FileUtilities.FileExistsNoThrow(filePath))
-                            {
-                                string existingContents = FileSystems.Default.ReadFileAllText(filePath);
-
-                                if (existingContents.Equals(contentsAsString))
-                                {
-                                    Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", filePath);
-                                    MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, true);
-                                    return !Log.HasLoggedErrors;
-                                }
-                                else if (FailIfNotIncremental)
-                                {
-                                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", filePath);
-                                    return !Log.HasLoggedErrors;
-                                }
-                            }
-                        }
-                        catch (IOException)
-                        {
-                            Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", filePath);
-                        }
-                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, false);
-                    }
-
                     System.IO.File.WriteAllText(filePath, contentsAsString, encoding);
                 }
                 else
@@ -178,35 +157,6 @@ namespace Microsoft.Build.Tasks
             {
                 if (Overwrite)
                 {
-                    // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
-                    if (WriteOnlyWhenDifferent)
-                    {
-                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
-                        try
-                        {
-                            if (FileUtilities.FileExistsNoThrow(filePath))
-                            {
-                                string existingContents = FileSystems.Default.ReadFileAllText(filePath);
-                                if (existingContents.Equals(contentsAsString))
-                                {
-                                    Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", filePath);
-                                    MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, true);
-                                    return !Log.HasLoggedErrors;
-                                }
-                                else if (FailIfNotIncremental)
-                                {
-                                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", filePath);
-                                    return !Log.HasLoggedErrors;
-                                }
-                            }
-                        }
-                        catch (IOException)
-                        {
-                            // Fall through to write the file
-                        }
-                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, false);
-                    }
-
                     return SaveAtomically(filePath, contentsAsString, encoding);
                 }
                 else
@@ -351,6 +301,47 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, e.Message, lockedFileMessage);
                 return !Log.HasLoggedErrors;
             }
+        }
+
+        /// <summary>
+        /// Checks if file should be written for Overwrite mode, considering WriteOnlyWhenDifferent option.
+        /// </summary>
+        /// <returns>True if file should be written, false if write should be skipped.</returns>
+        private bool ShouldWriteFileForOverwrite(string filePath, string contentsAsString)
+        {
+            if (!WriteOnlyWhenDifferent)
+            {
+                return true; // Always write if WriteOnlyWhenDifferent is false
+            }
+
+            MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
+            try
+            {
+                if (FileUtilities.FileExistsNoThrow(filePath))
+                {
+                    string existingContents = FileSystems.Default.ReadFileAllText(filePath);
+
+                    if (existingContents.Equals(contentsAsString))
+                    {
+                        Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", filePath);
+                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, true);
+                        return false; // Skip write - content is identical
+                    }
+                    else if (FailIfNotIncremental)
+                    {
+                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", filePath);
+                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, false);
+                        return false; // Skip write - file differs and FailIfNotIncremental is set
+                    }
+                }
+            }
+            catch (IOException)
+            {
+                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", filePath);
+            }
+
+            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, false);
+            return true; // Proceed with write
         }
     }
 }
