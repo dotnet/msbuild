@@ -66,6 +66,7 @@ extends:
   parameters:
     featureFlags:
       autoBaseline: true
+      incrementalSDLBinaryAnalysis: true
     pool:
       name: VSEngSS-MicroBuild2022-1ES
       os: windows
