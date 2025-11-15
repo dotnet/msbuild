@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Shared
@@ -55,10 +56,18 @@ namespace Microsoft.Build.Shared
             }
 
             // respect plugin.dll.json with the AssemblyDependencyResolver
-            string? assemblyPath = _resolver?.ResolveAssemblyToPath(assemblyName);
-            if (assemblyPath != null)
+            if (_resolver is not null)
             {
-                return LoadFromAssemblyPath(assemblyPath);
+                string? assemblyPath = _resolver.ResolveAssemblyToPath(assemblyName);
+                if (assemblyPath != null)
+                {
+                    return LoadFromAssemblyPath(assemblyPath);
+                }
+
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
+                {
+                    return null;
+                }
             }
 
             // Fall back to the older MSBuild-on-Core behavior to continue to support
