@@ -21,7 +21,6 @@ using Microsoft.NET.StringTools;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
-using TaskEngineAssemblyResolver = Microsoft.Build.BackEnd.Logging.TaskEngineAssemblyResolver;
 
 #nullable disable
 
@@ -1442,15 +1441,19 @@ namespace Microsoft.Build.Execution
                     }
                     else
                     {
+#if FEATURE_APPDOMAIN
                         // We are not one of the default factories.
                         TaskEngineAssemblyResolver resolver = null;
+#endif
 
                         try
                         {
+#if FEATURE_APPDOMAIN
                             // Add a resolver to allow us to resolve types from the assembly when loading into the current appdomain.
                             resolver = new TaskEngineAssemblyResolver();
                             resolver.Initialize(taskFactoryLoadInfo.AssemblyFile);
                             resolver.InstallHandler();
+#endif
 
                             try
                             {
@@ -1600,11 +1603,13 @@ namespace Microsoft.Build.Execution
                         }
                         finally
                         {
+#if FEATURE_APPDOMAIN
                             if (resolver != null)
                             {
                                 resolver.RemoveHandler();
                                 resolver = null;
                             }
+#endif
                         }
                     }
 
