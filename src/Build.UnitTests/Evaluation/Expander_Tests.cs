@@ -424,6 +424,44 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains(@"DirChain5: Value1\$||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||$##$Value2\");
         }
 
+        /// <summary>
+        /// Test that chained item functions work with whitespace before the second arrow operator
+        /// </summary>
+        [Fact]
+        public void ItemFunctionChainingWithWhitespaceBeforeArrow()
+        {
+            string content = @"
+ <Project>
+    <ItemGroup>
+        <I Include=`A`>
+            <M>F</M>
+        </I>
+        <I Include=`B`>
+            <M>T</M>
+        </I>
+        <I Include=`C`>
+            <M>T</M>
+        </I>
+        <!-- Test with space before second arrow -->
+        <Test1 Include=`@(I -> WithMetadataValue('M', 'T') -> WithMetadataValue('M', 'T'))` />
+        <!-- Test without space before second arrow -->
+        <Test2 Include=`@(I -> WithMetadataValue('M', 'T')-> WithMetadataValue('M', 'T'))` />
+    </ItemGroup>
+
+    <Target Name=`Build`>
+        <Message Text=`Test1: [@(Test1)]` />
+        <Message Text=`Test2: [@(Test2)]` />
+    </Target>
+</Project>
+                ";
+
+            MockLogger log = Helpers.BuildProjectWithNewOMExpectSuccess(content);
+
+            // Both should produce the same result: B and C
+            log.AssertLogContains("Test1: [B;C]");
+            log.AssertLogContains("Test2: [B;C]");
+        }
+
         [Fact]
         public void ExpandItemVectorFunctionsCount1()
         {

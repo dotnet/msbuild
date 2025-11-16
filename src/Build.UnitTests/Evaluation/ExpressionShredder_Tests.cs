@@ -1156,6 +1156,55 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.False(expressions.MoveNext());
         }
 
+        /// <summary>
+        /// Test that item function chaining works with whitespace before arrow operators
+        /// </summary>
+        [Fact]
+        public void ExtractItemVectorExpressionsChainedFunctionsWithWhitespace()
+        {
+            string expression;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
+            ExpressionShredder.ItemExpressionCapture capture;
+
+            // Test with space before second arrow: ") ->"
+            expression = "@(I -> WithMetadataValue('M', 'T') -> WithMetadataValue('M', 'T'))";
+            expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
+            Assert.Equal("I", capture.ItemType);
+            Assert.Equal(2, capture.Captures.Count);
+            Assert.Equal("WithMetadataValue", capture.Captures[0].FunctionName);
+            Assert.Equal("'M', 'T'", capture.Captures[0].FunctionArguments);
+            Assert.Equal("WithMetadataValue", capture.Captures[1].FunctionName);
+            Assert.Equal("'M', 'T'", capture.Captures[1].FunctionArguments);
+
+            // Test without space before second arrow: ")->"
+            expression = "@(I -> WithMetadataValue('M', 'T')-> WithMetadataValue('M', 'T'))";
+            expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
+            Assert.Equal("I", capture.ItemType);
+            Assert.Equal(2, capture.Captures.Count);
+            Assert.Equal("WithMetadataValue", capture.Captures[0].FunctionName);
+            Assert.Equal("'M', 'T'", capture.Captures[0].FunctionArguments);
+            Assert.Equal("WithMetadataValue", capture.Captures[1].FunctionName);
+            Assert.Equal("'M', 'T'", capture.Captures[1].FunctionArguments);
+
+            // Test with multiple spaces and chained functions
+            expression = "@(I->Distinct() -> Reverse() ->Count())";
+            expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
+            Assert.Equal("I", capture.ItemType);
+            Assert.Equal(3, capture.Captures.Count);
+            Assert.Equal("Distinct", capture.Captures[0].FunctionName);
+            Assert.Equal("Reverse", capture.Captures[1].FunctionName);
+            Assert.Equal("Count", capture.Captures[2].FunctionName);
+        }
+
         #region Original code to produce canonical results
 
         /// <summary>
