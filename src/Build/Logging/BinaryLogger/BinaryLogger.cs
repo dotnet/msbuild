@@ -90,9 +90,10 @@ namespace Microsoft.Build.Logging
         // The minimum version of the binary log reader that can read log of above version.
         internal const int ForwardCompatibilityMinimalVersion = 18;
 
-        // The current version of the binary log representation.
-        // Changes with each update of the binary log format.
-        internal const int FileFormatVersion = 25;
+        /// <summary>
+        /// The current version of the binary log file format that this version of MSBuild supports.
+        /// </summary>
+        public const int FileFormatVersion = 25;
 
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being
