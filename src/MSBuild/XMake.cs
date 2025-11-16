@@ -3932,7 +3932,9 @@ namespace Microsoft.Build.CommandLine
 
             try
             {
-                replayEventSource.Replay(binaryLogFilePath, s_buildCancellationSource.Token);
+                // Use the BinaryReader overload to ensure AllowForwardCompatibility is respected
+                using var binaryReader = BinaryLogReplayEventSource.OpenReader(binaryLogFilePath);
+                replayEventSource.Replay(binaryReader, s_buildCancellationSource.Token);
 
                 // Emit a warning if the log file version is newer than what we support
                 if (replayEventSource.FileFormatVersion > BinaryLogger.FileFormatVersion)
