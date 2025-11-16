@@ -1280,18 +1280,16 @@ namespace Microsoft.Build.BackEnd
 
             parameter.Initialized = true;
 
-            // PERF: Be careful to avoid unnecessary string allocations. Appending '_taskName + "_" + parameter.Name' happens in both paths,
-            // but we don't want to allocate the string if we don't need to.
-            string key = "DisableLogTaskParameter_" + _taskName + "_" + parameter.Name;
-
-            if (string.Equals(lookup.GetProperty(key)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
+            // Use the precomputed lookup keys from the TaskFactoryWrapper to avoid allocations on the hot path
+            string key = _taskFactoryWrapper.GetDisableLogTaskParameterKey(parameter.Name);
+            if (key != null && string.Equals(lookup.GetProperty(key)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
             {
                 parameter.Log = false;
             }
             else
             {
-                string metadataKey = "DisableLogTaskParameterItemMetadata_" + _taskName + "_" + parameter.Name;
-                if (string.Equals(lookup.GetProperty(metadataKey)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
+                string metadataKey = _taskFactoryWrapper.GetDisableLogTaskParameterItemMetadataKey(parameter.Name);
+                if (metadataKey != null && string.Equals(lookup.GetProperty(metadataKey)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
                 {
                     parameter.LogItemMetadata = false;
                 }
