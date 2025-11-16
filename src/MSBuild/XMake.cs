@@ -3937,11 +3937,7 @@ namespace Microsoft.Build.CommandLine
                 // Emit a warning if the log file version is newer than what we support
                 if (replayEventSource.FileFormatVersion > BinaryLogger.FileFormatVersion)
                 {
-                    var warningMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
-                        "UnsupportedLogFileFormat",
-                        replayEventSource.FileFormatVersion,
-                        replayEventSource.MinimumReaderVersion,
-                        BinaryLogger.FileFormatVersion);
+                    var warningMessage = $"The log file format version is {replayEventSource.FileFormatVersion} with minimum required reader version {replayEventSource.MinimumReaderVersion}, whereas this version of MSBuild only supports versions up to {BinaryLogger.FileFormatVersion}.";
                     Console.WriteLine(warningMessage);
                 }
             }

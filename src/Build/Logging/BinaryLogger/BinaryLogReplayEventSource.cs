@@ -197,8 +197,8 @@ namespace Microsoft.Build.Logging
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> indicating the replay should stop as soon as possible.</param>
         public void Replay(string sourceFilePath, CancellationToken cancellationToken)
         {
-            using var eventsReader = OpenBuildEventsReader(sourceFilePath);
-            Replay(eventsReader, cancellationToken);
+            using var binaryReader = OpenReader(sourceFilePath);
+            Replay(binaryReader, true, cancellationToken);
         }
 
         /// <summary>
