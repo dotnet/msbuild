@@ -3894,6 +3894,13 @@ namespace Microsoft.Build.CommandLine
                 AllowForwardCompatibility = true
             };
 
+            // Subscribe to RecoverableReadError to handle forward compatibility issues
+            replayEventSource.RecoverableReadError += e =>
+            {
+                // Output recoverable errors as warnings to the console
+                Console.WriteLine(e.GetFormattedMessage());
+            };
+
             var eventSource = isBuildCheckEnabled ?
                 BuildCheckReplayModeConnector.GetMergedEventSource(BuildManager.DefaultBuildManager, replayEventSource) :
                 replayEventSource;
