@@ -31,10 +31,10 @@ jobs:
       dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
       dropMetadataContainerName: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
 
-    # # Publish bootstrapper info
-    # - output: buildArtifacts
-    #   PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
-    #   ArtifactName: MicroBuildOutputs
+    # Publish bootstrapper info
+    - output: buildArtifacts
+      PathtoPublish: '$(Build.SourcesDirectory)\artifacts\MicroBuild\Output'
+      ArtifactName: MicroBuildOutputs
 
     # RAINES TODO: switch to pipeline?
     # RAINES TODO: how to get always()?
@@ -168,7 +168,7 @@ jobs:
       arguments: -configuration $(BuildConfiguration)
                 -task VisualStudio.BuildIbcTrainingSettings
                 /p:VisualStudioDropName=$(VisualStudio.DropName)
-                /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
+                /p:BootstrapperInfoPath=$(Build.SourcesDirectory)\artifacts\MicroBuild\Output\BootstrapperInfo.json
                 /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
     displayName: 'OptProf - Build IBC training settings'
     condition: and(succeeded(), ${{ parameters.enableOptProf }})
