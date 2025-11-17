@@ -22,6 +22,50 @@ jobs:
 
   timeoutInMinutes: 180
 
+  templateContext:
+    outputParentDirectory: '$(Build.SourcesDirectory)\artifacts'
+    outputs:
+    # Publish OptProf configuration files
+    - output: artifactsDrop
+      sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
+      dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
+      dropMetadataContainerName: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
+
+    # Publish bootstrapper info
+    - output: buildArtifacts
+      PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
+      ArtifactName: MicroBuildOutputs
+
+    # RAINES TODO: switch to pipeline?
+    # RAINES TODO: how to get always()?
+    - output: buildArtifacts
+      PathtoPublish: 'artifacts\log\$(BuildConfiguration)'
+      ArtifactName: logs
+
+    # Publish an artifact that the RoslynInsertionTool is able to find by its name.
+    # RAINES TODO: what uses this?
+    - output: buildArtifacts
+      PathtoPublish: 'artifacts\VSSetup\$(BuildConfiguration)'
+      ArtifactName: VSSetup
+
+    # Archive NuGet packages to DevOps.
+    # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the
+    # arcade templates depend on the name.
+    - output: buildArtifacts
+      PathtoPublish: 'artifacts\packages\$(BuildConfiguration)'
+      ArtifactName: PackageArtifacts
+
+    # Publish "IntelliSense" XSD files to their own artifact
+    # so it can be consumed by the insertion-to-VS job
+    - output: pipelineArtifact
+      targetPath: 'artifacts\xsd'
+      artifactName: xsd
+
+    # Publish Asset Manifests for Build Asset Registry job
+    - output: buildArtifacts
+      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/AssetManifest'
+      ArtifactName: AssetManifests
+
   variables:
   - group: Publish-Build-Assets
   - name: TeamName
@@ -106,17 +150,6 @@ jobs:
   # Required by Microsoft policy
   - template: /eng/common/templates-official/steps/generate-sbom.yml@self
 
-  # Publish OptProf configuration files
-  - task: 1ES.PublishArtifactsDrop@1
-    inputs:
-      dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
-      buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
-      sourcePath: '$(Build.SourcesDirectory)\artifacts\OptProf\$(BuildConfiguration)\Data'
-      toLowerCase: false
-      usePat: true
-    displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
-    condition: and(succeeded(), ${{ parameters.enableOptProf }})
-
   # Build VS bootstrapper
   # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
   - task: MicroBuildBuildVSBootstrapper@3
@@ -140,22 +173,6 @@ jobs:
     displayName: 'OptProf - Build IBC training settings'
     condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
-  # Publish bootstrapper info
-  - task: 1ES.PublishBuildArtifacts@1
-    inputs:
-      PathtoPublish: $(Build.StagingDirectory)\MicroBuild\Output
-      ArtifactName: MicroBuildOutputs
-      ArtifactType: Container
-    displayName: 'OptProf - Publish Artifact: MicroBuildOutputs'
-    condition: succeeded()
-
-  - task: 1ES.PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: logs'
-    inputs:
-      PathtoPublish: 'artifacts\log\$(BuildConfiguration)'
-      ArtifactName: logs
-    condition: succeededOrFailed()
-
   # Publishes setup VSIXes to a drop.
   # Note: The insertion tool looks for the display name of this task in the logs.
   - task: 1ES.MicroBuildVstsDrop@1
@@ -169,40 +186,6 @@ jobs:
       vsDropServiceUri: 'https://vsdrop.corp.microsoft.com/file/v1'
     condition: succeeded()
 
-  # Publish an artifact that the RoslynInsertionTool is able to find by its name.
-  - task: 1ES.PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: VSSetup'
-    inputs:
-      PathtoPublish: 'artifacts\VSSetup\$(BuildConfiguration)'
-      ArtifactName: VSSetup
-    condition: succeeded()
-
-  # Archive NuGet packages to DevOps.
-  # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the
-  # arcade templates depend on the name.
-  - task: 1ES.PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: packages'
-    inputs:
-      PathtoPublish: 'artifacts\packages\$(BuildConfiguration)'
-      ArtifactName: PackageArtifacts
-    condition: succeeded()
-
-  # Publish "IntelliSense" XSD files to their own artifact
-  # so it can be consumed by the insertion-to-VS job
-  - task: 1ES.PublishPipelineArtifact@1
-    displayName: 'Publish Artifact: xsd'
-    inputs:
-      path: 'artifacts\xsd'
-      artifactName: xsd
-    condition: succeeded()
-
-  # Publish Asset Manifests for Build Asset Registry job
-  - task: 1ES.PublishBuildArtifacts@1
-    displayName: Publish Asset Manifests
-    inputs:
-      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/log/$(BuildConfiguration)/AssetManifest'
-      ArtifactName: AssetManifests
-    condition: succeeded()
 
   # Tag the build at the very end when we know it's been successful.
   - task: colinsalmcorner.colinsalmcorner-buildtasks.tag-build-task.tagBuildOrRelease@0
