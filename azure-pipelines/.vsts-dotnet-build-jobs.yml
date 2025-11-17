@@ -31,7 +31,7 @@ jobs:
       dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
       dropMetadataContainerName: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
 
-    # Publish bootstrapper info
+    # Publish bootstrapper info for OptProf data collection run to consume
     - output: buildArtifacts
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts\MicroBuild\Output'
       ArtifactName: MicroBuildOutputs
@@ -42,8 +42,7 @@ jobs:
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts\log\$(BuildConfiguration)'
       ArtifactName: logs
 
-    # Publish an artifact that the RoslynInsertionTool is able to find by its name.
-    # RAINES TODO: what uses this?
+    # Publish test configuration for OptProf data collection
     - output: buildArtifacts
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)'
       ArtifactName: VSSetup
