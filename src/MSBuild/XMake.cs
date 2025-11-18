@@ -669,8 +669,6 @@ namespace Microsoft.Build.CommandLine
 
                 commandLineParser.GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _, out s_exeName);
 
-                CommunicationsUtilities.Trace($"Command line parameters: {commandLine}");
-
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,
                                             switchesNotFromAutoResponseFile,
