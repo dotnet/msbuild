@@ -7,6 +7,9 @@ using System.IO;
 using System.Reflection;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Framework;
+#if NETFRAMEWORK
+using Microsoft.IO;
+#endif
 
 namespace Microsoft.Build.Shared
 {
@@ -283,10 +286,14 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         public static string ResolveTaskSourceCodePath(string path, bool isMultiThreadedBuild, string projectDirectory)
         {
-            if (!isMultiThreadedBuild || Path.IsPathRooted(path))
+// Path.IsPathFullyQualified is not available in .NET Standard 2.0
+// in .NET Framework it's provided by package and in .NET it's built-in
+#if NETFRAMEWORK || NET
+            if (!isMultiThreadedBuild || Path.IsPathFullyQualified(path))
             {
                 return path;
             }
+#endif
 
             return Path.Combine(projectDirectory, path);
         }
