@@ -85,11 +85,15 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// A mapping of all of the INodePacketFactories wrapped by this provider.
+        /// Thread-safe to support parallel taskhost creation in /mt mode where multiple thread nodes
+        /// can simultaneously create their own taskhosts.
         /// </summary>
         private ConcurrentDictionary<int, INodePacketFactory> _nodeIdToPacketFactory;
 
         /// <summary>
         /// A mapping of all of the INodePacketHandlers wrapped by this provider.
+        /// Thread-safe to support parallel taskhost creation in /mt mode where multiple thread nodes
+        /// can simultaneously create their own taskhosts.
         /// </summary>
         private ConcurrentDictionary<int, INodePacketHandler> _nodeIdToPacketHandler;
 
@@ -604,10 +608,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void DisconnectFromHost(int nodeId)
         {
-            ErrorUtilities.VerifyThrow(_nodeIdToPacketFactory.ContainsKey(nodeId) && _nodeIdToPacketHandler.ContainsKey(nodeId), "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
+            bool successRemoveFactory = _nodeIdToPacketFactory.TryRemove(nodeId, out _);
+            bool successRemoveHandler = _nodeIdToPacketHandler.TryRemove(nodeId, out _);
 
-            _nodeIdToPacketFactory.TryRemove(nodeId, out _);
-            _nodeIdToPacketHandler.TryRemove(nodeId, out _);
+            ErrorUtilities.VerifyThrow(successRemoveFactory && successRemoveHandler, "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
         }
 
         /// <summary>
