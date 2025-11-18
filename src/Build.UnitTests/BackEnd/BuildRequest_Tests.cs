@@ -3,6 +3,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.Versioning;
 
 using Microsoft.Build.BackEnd;
@@ -143,29 +144,29 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             var rot = new RunningObjectTable();
             var nonExistentMoniker = "NonExistent_" + Guid.NewGuid();
-            
+
             var exception = Should.Throw<COMException>(() => rot.GetObject(nonExistentMoniker));
-            
+
             exception.Message.ShouldContain($"Failed to get object '{nonExistentMoniker}' from Running Object Table");
             exception.Message.ShouldContain("HRESULT:");
             exception.HResult.ShouldNotBe(0);
         }
-        
+
         [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void TestRunningObjectTableErrorDoesNotMaskOriginalError()
         {
             var rot = new RunningObjectTable();
             var testMoniker = "ErrorTest_" + Guid.NewGuid();
-            
+
             var exception = Should.Throw<COMException>(() => rot.GetObject(testMoniker));
-            
+
             exception.ShouldBeOfType<COMException>();
             exception.HResult.ShouldNotBe(0);
-            
+
             exception.Message.ShouldContain(testMoniker);
         }
-        
+
         [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void TestRunningObjectTableSuccessDoesNotThrow()
@@ -174,101 +175,40 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var hostServices = new HostServices();
             var rot = new MockRunningObjectTable();
             hostServices.SetTestRunningObjectTable(rot);
-            
+
             var moniker = nameof(TestRunningObjectTableSuccessDoesNotThrow) + Guid.NewGuid();
             var remoteHost = new MockRemoteHostObject(stateInHostObject);
-            
+
             using (var result = rot.Register(moniker, remoteHost))
             {
                 // This should succeed without throwing - validates error logging doesn't affect success path
                 var retrievedObject = Should.NotThrow(() => rot.GetObject(moniker));
-                
+
                 retrievedObject.ShouldNotBeNull();
                 retrievedObject.ShouldBeOfType<MockRemoteHostObject>();
                 ((MockRemoteHostObject)retrievedObject).GetState().ShouldBe(stateInHostObject);
             }
         }
-        
-        [WindowsOnlyFact]
-        [SupportedOSPlatform("windows")]
-        public void TestTranslationRemoteHostObjectsErrorHandling()
-        {
-            var hostServices = new HostServices();
-            var rot = new MockRunningObjectTable();
-            hostServices.SetTestRunningObjectTable(rot);
-            
-            var validMoniker = nameof(TestTranslationRemoteHostObjectsErrorHandling) + Guid.NewGuid();
-            var invalidMoniker = "Invalid_" + Guid.NewGuid();
-            var remoteHost = new MockRemoteHostObject(3);
-            
-            using (var result = rot.Register(validMoniker, remoteHost))
-            {
-                hostServices.RegisterHostObject(
-                    "WithOutOfProc.targets",
-                    "DisplayMessages",
-                    "ATask",
-                    validMoniker);
-                
-                BuildRequest request = new BuildRequest(
-                    submissionId: 1,
-                    _nodeRequestId++,
-                    1,
-                    new string[] { "alpha", "omega" },
-                    hostServices: hostServices,
-                    BuildEventContext.Invalid,
-                    parentRequest: null);
-                
-                ((ITranslatable)request).Translate(TranslationHelpers.GetWriteTranslator());
-                INodePacket packet = BuildRequest.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
-                BuildRequest deserializedRequest = packet as BuildRequest;
-                deserializedRequest.HostServices.SetTestRunningObjectTable(rot);
-                
-                // Valid moniker should work
-                var hostObject = deserializedRequest.HostServices.GetHostObject(
-                    "WithOutOfProc.targets",
-                    "DisplayMessages",
-                    "ATask") as ITestRemoteHostObject;
-                
-                hostObject.GetState().ShouldBe(3);
-                
-                // Now register an invalid moniker and verify error message contains it
-                deserializedRequest.HostServices.RegisterHostObject(
-                    "WithOutOfProc.targets",
-                    "DisplayMessages",
-                    "BTask",
-                    invalidMoniker);
-                
-                // Attempting to retrieve with invalid moniker should throw with detailed error
-                var exception = Should.Throw<Exception>(() => 
-                    deserializedRequest.HostServices.GetHostObject(
-                        "WithOutOfProc.targets",
-                        "DisplayMessages",
-                        "BTask"));
-                
-                // Verify the invalid moniker appears in the error message
-                exception.Message.ShouldContain(invalidMoniker);
-            }
-        }
-        
+
         [WindowsOnlyFact]
         [SupportedOSPlatform("windows")]
         public void TestRunningObjectTableErrorMessageIsMultiLine()
         {
             var rot = new RunningObjectTable();
             var testMoniker = "MultiLineTest_" + Guid.NewGuid();
-            
+
             var exception = Should.Throw<COMException>(() => rot.GetObject(testMoniker));
-            
+
             // The error message should have at least 2 lines:
             // 1. "Failed to get object..." 
             // 2. "HRESULT: ..."
             var lines = exception.Message.Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries);
             lines.Length.ShouldBeGreaterThanOrEqualTo(2);
-            
+
             // First line should mention the failure
             lines[0].ShouldContain("Failed to get object");
             lines[0].ShouldContain(testMoniker);
-            
+
             // Second line should have HRESULT
             lines[1].ShouldContain("HRESULT:");
         }

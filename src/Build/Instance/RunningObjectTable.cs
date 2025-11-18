@@ -21,12 +21,14 @@ namespace Microsoft.Build.Execution
     internal class RunningObjectTable : IRunningObjectTableWrapper
     {
         private readonly Task<IRunningObjectTable> _rotTask;
+
         public RunningObjectTable()
         {
             if (!NativeMethodsShared.IsWindows)
             {
                 return;
             }
+
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
             {
                 Ole32.GetRunningObjectTable(0, out var rot);
@@ -46,6 +48,7 @@ namespace Microsoft.Build.Execution
                 });
             }
         }
+
         /// <summary>
         /// Attempts to retrieve an item from the ROT.
         /// </summary>
