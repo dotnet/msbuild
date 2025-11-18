@@ -326,8 +326,8 @@ namespace Microsoft.Build.Experimental
                     {
                         case 0:
                             HandleCancellation();
-                            // After the cancelation, we want to wait to server gracefuly finish the build.
-                            // We have to replace the cancelation handle, because WaitAny would cause to repeatedly hit this branch of code.
+                            // After the cancellation, we want to wait to server gracefully finish the build.
+                            // We have to replace the cancellation handle, because WaitAny would cause to repeatedly hit this branch of code.
                             waitHandles[0] = CancellationToken.None.WaitHandle;
                             break;
 
