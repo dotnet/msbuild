@@ -10,6 +10,7 @@ using System.Security;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -62,6 +63,8 @@ namespace Microsoft.Build.CommandLine
         {
             // split the command line on (unquoted) whitespace
             List<string> commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
+
+            CommunicationsUtilities.Trace($"Command line parameters: {string.Join(" ", commandLineArgs)}");
 
             exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote(commandLineArgs[0]));
 
