@@ -3846,7 +3846,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     contribute to incremental build inconsistencies.
     ============================================================
     -->
-  <Target Name="_GenerateCompileDependencyCache" Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildingProject)' == 'true'" DependsOnTargets="ResolveAssemblyReferences;_GenerateCompileInputs">
+  <Target Name="_GenerateCompileDependencyCache" Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildingProject)' == 'true'" DependsOnTargets="ResolveAssemblyReferences;PrepareResources;_GenerateCompileInputs">
+    
+    <!-- If _GenerateCompileInputs was skipped and _CoreCompileResourceInputs is empty, populate it here.
+         This handles the NoBuild publish scenario where _GenerateCompileInputs runs once but its items
+         are not available when CoreCompile needs them later. PrepareResources dependency ensures that
+         resource metadata (OutputResource) is set before we populate the items. -->
+    <ItemGroup Condition="'@(_CoreCompileResourceInputs)' == ''">
+      <_CoreCompileResourceInputs Include="@(EmbeddedResource->'%(OutputResource)')" Condition="'%(EmbeddedResource.WithCulture)' == 'false' and '%(EmbeddedResource.Type)' == 'Resx'" />
+      <_CoreCompileResourceInputs Include="@(EmbeddedResource)" Condition="'%(EmbeddedResource.WithCulture)' == 'false' and '%(EmbeddedResource.Type)' == 'Non-Resx' " />
+      <_CoreCompileResourceInputs Include="@(ManifestResourceWithNoCulture)" Condition="'%(ManifestResourceWithNoCulture.EmittedForCompatibilityOnly)'==''">
+        <Type>Resx</Type>
+        <WithCulture>false</WithCulture>
+      </_CoreCompileResourceInputs>
+      <_CoreCompileResourceInputs Include="@(ManifestNonResxWithNoCultureOnDisk)" Condition="'%(ManifestNonResxWithNoCultureOnDisk.EmittedForCompatibilityOnly)'==''">
+        <Type>Non-Resx</Type>
+        <WithCulture>false</WithCulture>
+      </_CoreCompileResourceInputs>
+    </ItemGroup>
+    
     <ItemGroup>
       <CustomAdditionalCompileInputs Include="$(IntermediateOutputPath)$(MSBuildProjectFile).CoreCompileInputs.cache" />
       <CoreCompileCache Include="@(Compile)" />
