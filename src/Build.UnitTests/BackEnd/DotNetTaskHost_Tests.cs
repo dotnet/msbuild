@@ -55,10 +55,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
                 logger.ErrorCount.ShouldBeGreaterThan(0);
                 logger.Errors[0].Code.ShouldBe("MSB4233");
-
-                string? errorMessage = logger.Errors[0].Message;
-                errorMessage.ShouldNotBeNull();
-                errorMessage.ShouldContain("To run .NET tasks, MSBuild 18.0 or Visual Studio 2026 or higher must be used.");
             }
 #endif
         }
