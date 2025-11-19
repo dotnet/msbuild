@@ -1203,6 +1203,43 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal("Distinct", capture.Captures[0].FunctionName);
             Assert.Equal("Reverse", capture.Captures[1].FunctionName);
             Assert.Equal("Count", capture.Captures[2].FunctionName);
+
+            // Test trailing whitespace after function call
+            expression = "@(I -> Count() )";
+            expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
+            Assert.Equal("I", capture.ItemType);
+            Assert.Equal(1, capture.Captures.Count);
+            Assert.Equal("Count", capture.Captures[0].FunctionName);
+
+            // Test trailing whitespace after quoted transform
+            expression = "@(I -> 'Replacement' )";
+            expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
+            capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
+            Assert.Equal("I", capture.ItemType);
+            Assert.Equal(1, capture.Captures.Count);
+            Assert.Equal("Replacement", capture.Captures[0].Value);
+            Assert.Null(capture.Captures[0].FunctionName);
+        }
+
+        /// <summary>
+        /// Test that invalid syntax after whitespace is properly rejected
+        /// </summary>
+        [Fact]
+        public void ExtractItemVectorExpressionsInvalidSyntaxAfterWhitespace()
+        {
+            string expression;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
+
+            // Invalid syntax after whitespace - should not be parsed as item expression
+            expression = "@(I -> Count() invalid)";
+            expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            // Should not find a valid expression due to invalid syntax
+            Assert.False(expressions.MoveNext());
         }
 
         #region Original code to produce canonical results
