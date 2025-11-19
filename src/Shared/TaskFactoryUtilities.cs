@@ -3,10 +3,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Framework;
+#if NETFRAMEWORK
+using Microsoft.IO;
+#else
+using System.IO;
+#endif
 
 namespace Microsoft.Build.Shared
 {
@@ -136,9 +140,9 @@ namespace Microsoft.Build.Shared
                 if (!string.IsNullOrEmpty(assemblyPath) && FileSystems.Default.FileExists(assemblyPath))
                 {
                     string? directory = Path.GetDirectoryName(assemblyPath);
-                    if (!string.IsNullOrEmpty(directory) && seenDirectories.Add(directory))
+                    if (!string.IsNullOrEmpty(directory) && seenDirectories.Add(directory!))
                     {
-                        directories.Add(directory);
+                        directories.Add(directory!);
                     }
                 }
             }
@@ -266,6 +270,33 @@ namespace Microsoft.Build.Shared
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Resolves a potentially relative source code file path for inline task factories.
+        /// In multithreaded mode (/mt), relative paths are resolved relative to the project file directory
+        /// rather than the current working directory. In other modes, the path is returned unchanged.
+        /// </summary>
+        /// <param name="path">The source code file path to resolve (may be relative or absolute).</param>
+        /// <param name="isMultiThreadedBuild">Whether the build is running in multithreaded mode.</param>
+        /// <param name="projectDirectory">The directory of the project file.</param>
+        /// <returns>The resolved absolute path in multithreaded mode, or the original path otherwise.</returns>
+        /// <remarks>
+        /// This method only modifies path resolution in multithreaded builds to maintain
+        /// backward compatibility with existing multi-process build behavior.
+        /// </remarks>
+        public static string ResolveTaskSourceCodePath(string path, bool isMultiThreadedBuild, string projectDirectory)
+        {
+// Path.IsPathFullyQualified is not available in .NET Standard 2.0
+// in .NET Framework it's provided by package and in .NET it's built-in
+#if NETFRAMEWORK || NET
+            if (!isMultiThreadedBuild || Path.IsPathFullyQualified(path))
+            {
+                return path;
+            }
+#endif
+
+            return Path.Combine(projectDirectory, path);
         }
     }
 }
