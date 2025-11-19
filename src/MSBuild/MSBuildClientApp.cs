@@ -34,7 +34,13 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// The locations of msbuild exe/dll and dotnet.exe would be automatically detected if called from dotnet or msbuild cli. Calling this function from other executables might not work.
         /// </remarks>
-        public static MSBuildApp.ExitType Execute(string commandLine, CancellationToken cancellationToken)
+        public static MSBuildApp.ExitType Execute(
+#if FEATURE_GET_COMMANDLINE
+            string commandLine,
+#else
+            string[] commandLine,
+#endif
+            CancellationToken cancellationToken)
         {
             string msbuildLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 
@@ -56,7 +62,11 @@ namespace Microsoft.Build.CommandLine
         /// <returns>A value of type <see cref="MSBuildApp.ExitType"/> that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
         public static MSBuildApp.ExitType Execute(
+#if FEATURE_GET_COMMANDLINE
             string commandLine,
+#else
+            string[] commandLine,
+#endif
             string msbuildLocation,
             CancellationToken cancellationToken)
         {
