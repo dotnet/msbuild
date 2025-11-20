@@ -236,8 +236,14 @@ extends:
                   )
               }
               $propsValue = $props -join ";"
-              Write-Host "Setting InsertPackagePropsValues to '$propsValue'"
-              Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($propsValue)"
+
+              # As of 18.0, don't update PackageReferences so that VS packages like VSSDK
+              # can choose their own versioning and don't always depend on a super fresh MSBuild
+              if ("$(InsertTargetBranch)" -in @("rel/d17.10", "rel/d17.12", "rel/d17.14"))
+              {
+                  Write-Host "Setting InsertPackagePropsValues to '$propsValue'"
+                  Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($propsValue)"
+              }
 
               # autocomplete main
               $autocomplete = "false"

@@ -143,22 +143,6 @@ extends:
 
               Write-Host "##vso[task.setvariable variable=FinalTargetBranch]$finalTargetBranch"
 
-        - task: Powershell@2
-          name: PwshMungeExternalAPIsPkgVersion
-          displayName: Munge ExternalAPIs package version
-          inputs:
-            targetType: inline
-            script: |
-              $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/VS.ExternalAPIs.*.nupkg"
-              $packageFile = Get-ChildItem -Path $folder -Filter VS.ExternalAPIs.*.nupkg | Select-Object -First 1
-              $packageVersion = $packageFile.BaseName.TrimStart("VS.ExternalAPIs.MSBuild")
-              Write-Host "Setting MSBuild_ExtApisPackageVersion to '$packageVersion'"
-              Write-Host "##vso[task.setvariable variable=MSBuild_ExtApisPackageVersion]$($packageVersion)"
-              $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/Microsoft.NET.StringTools*.nupkg"
-              $packageFile = Get-ChildItem -Path $folder -Filter Microsoft.NET.StringTools*.nupkg | Select-Object -First 1
-              $packageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
-              Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$packageVersion'"
-              Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($packageVersion)"
         - task: 1ES.PublishNuGet@1
           displayName: 'Push MSBuild CoreXT packages'
           inputs:
@@ -176,7 +160,6 @@ extends:
             TeamEmail: $(TeamEmail)
             TargetBranch: $(FinalTargetBranch)
             InsertionPayloadName: $(InsertPayloadName)
-            PackagePropsValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
             InsertionDescription: $(InsertDescription)
             ComponentJsonValues: $(InsertJsonValues)
             DefaultConfigValues: $(InsertConfigValues)
