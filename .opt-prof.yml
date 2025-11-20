@@ -93,3 +93,26 @@ stages:
         arguments: -BootstrapperInfoJsonURI '$(Pipeline.Workspace)\ComponentBuildUnderTest\MicroBuildOutputs\BootstrapperInfo.json' -VSBranch '$(VSBootstrapperBranch)' -OutVariableName 'VisualStudio.InstallationUnderTest.BootstrapperURL'
     preDeployAndRunTestsStepList:
     - download: ComponentBuildUnderTest
+    prePublishOptimizationInputsDropStepList:
+    - powershell: |
+        try {
+          $metadataPath = Get-ChildItem -Path '$(Pipeline.Workspace)\ComponentBuildUnderTest\OptProf' -Filter 'Metadata.json' -Recurse -ErrorAction Stop | Select-Object -First 1
+          if (-not $metadataPath) {
+            throw "Metadata.json was not found under $(Pipeline.Workspace)\ComponentBuildUnderTest\OptProf"
+          }
+
+          $metadata = Get-Content -Raw -Path $metadataPath.FullName | ConvertFrom-Json
+          $dropName = $metadata.OptimizationData
+          if ([string]::IsNullOrWhiteSpace($dropName)) {
+            throw 'Metadata.json did not include an OptimizationData value'
+          }
+
+          Write-Host "PreviousOptimizationInputsDropName: $dropName"
+          Set-AzurePipelinesVariable 'PreviousOptimizationInputsDropName' $dropName
+        }
+        catch {
+          Write-Host $_
+          Write-Error 'Failed to set PreviousOptimizationInputsDropName pipeline variable'
+          throw
+        }
+      displayName: Set PreviousOptimizationInputsDropName
