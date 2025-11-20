@@ -10,11 +10,9 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -58,15 +56,10 @@ namespace Microsoft.Build.UnitTests
         /// (MSBuild_*.txt) in the temp directory and treats their presence as test failures.
         /// Set to true to disable this monitoring for tests that expect build failures.
         /// </param>
-        /// <param name="setupDotnetEnvVars">
-        /// When true, configures .NET-specific environment variables including PATH,
-        /// DOTNET_ROOT, and DOTNET_HOST_PATH to point to the bootstrap .NET installation.
-        /// This ensures tests use the correct .NET runtime and SDK versions.
-        /// </param>
         /// <returns>
         /// A configured TestEnvironment instance with the specified settings applied.
         /// </returns>
-        public static TestEnvironment Create(ITestOutputHelper output = null, bool ignoreBuildErrorFiles = false, bool setupDotnetEnvVars = false)
+        public static TestEnvironment Create(ITestOutputHelper output = null, bool ignoreBuildErrorFiles = false)
         {
             var env = new TestEnvironment(output ?? new DefaultOutput());
 
@@ -76,27 +69,12 @@ namespace Microsoft.Build.UnitTests
                 env.WithInvariant(new BuildFailureLogInvariant());
             }
 
-            if (setupDotnetEnvVars)
-            {
-                SetupDotnetEnvironmentVariables();
-            }
-
             // Clear these two environment variables first in case pre-setting affects the test.
             env.SetEnvironmentVariable("MSBUILDLIVELOGGER", null);
             env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", null);
             env.SetEnvironmentVariable("MSBUILDUSESERVER", null);
 
             return env;
-
-            void SetupDotnetEnvironmentVariables()
-            {
-                var coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
-                var bootstrapCorePath = Path.Combine(coreDirectory, Constants.DotnetProcessName);
-
-                _ = env.SetEnvironmentVariable("PATH", $"{coreDirectory}{Path.PathSeparator}{Environment.GetEnvironmentVariable("PATH")}");
-                _ = env.SetEnvironmentVariable("DOTNET_ROOT", coreDirectory);
-                _ = env.SetEnvironmentVariable("DOTNET_HOST_PATH", bootstrapCorePath);
-            }
         }
 
         private TestEnvironment(ITestOutputHelper output)
@@ -364,6 +342,22 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Gets the original value of an environment variable. Can be needed to assert in a test.
+        /// </summary>
+        public string GetEnvironmentVariable(string variableName)
+        {
+            for (int i = 0; i < _variants.Count; i++)
+            {
+                if (_variants[i] is TransientTestEnvironmentVariable ttev && ttev.EnvironmentVariableName == variableName)
+                {
+                    return ttev.OriginalValue;
+                }
+            }
+
+            return null;
+        }
+
+        /// <summary>
         ///     Create an test variant used to change the value of an environment variable during a test. Original value
         ///     will be restored when complete.
         /// </summary>
@@ -605,7 +599,14 @@ namespace Microsoft.Build.UnitTests
             TempPath = tempPath;
             _deleteTempDirectory = deleteTempDirectory;
 
+            // Ensure the temp directory exists before setting it as TMPDIR
+            // This is required because Directory.CreateTempSubdirectory() expects TMPDIR to exist
+            Directory.CreateDirectory(tempPath);
+
             _oldtempPaths = SetTempPath(tempPath);
+            
+            // Clear the cached temp directory so FileUtilities picks up the new TMPDIR/TMP/TEMP
+            FileUtilities.ClearTempFileDirectory();
         }
 
         private static TempPaths SetTempPath(string tempPath)
@@ -651,6 +652,9 @@ namespace Microsoft.Build.UnitTests
         public override void Revert()
         {
             SetTempPaths(_oldtempPaths);
+            
+            // Clear the cached temp directory so FileUtilities picks up the restored TMPDIR/TMP/TEMP
+            FileUtilities.ClearTempFileDirectory();
 
             if (_deleteTempDirectory)
             {
@@ -810,10 +814,11 @@ namespace Microsoft.Build.UnitTests
             Environment.SetEnvironmentVariable(environmentVariableName, newValue);
         }
 
-        public override void Revert()
-        {
-            Environment.SetEnvironmentVariable(_environmentVariableName, _originalValue);
-        }
+        public string EnvironmentVariableName => _environmentVariableName;
+
+        public string OriginalValue => _originalValue;
+
+        public override void Revert() => Environment.SetEnvironmentVariable(_environmentVariableName, _originalValue);
     }
 
     public class TransientWorkingDirectory : TransientTestState

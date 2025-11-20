@@ -46,6 +46,17 @@ namespace Microsoft.Build.UnitTests
             runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             runningTestsField.SetValue(null, true);
 
+            // BuildEnvironment instance may be initialized in some tests' static members before s_runningTests is set
+            // So reset the instance with running tests enabled
+            var currentBuildEnvironment = BuildEnvironmentHelper.Instance;
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(
+                new BuildEnvironment(
+                    currentBuildEnvironment.Mode,
+                    currentBuildEnvironment.CurrentMSBuildExePath,
+                    runningTests: true,
+                    currentBuildEnvironment.RunningInMSBuildExe,
+                    currentBuildEnvironment.RunningInVisualStudio,
+                    currentBuildEnvironment.VisualStudioInstallRootDirectory));
 
             // Note: build error files will be initialized in test environments for particular tests, also we don't have output to report error files into anyway...
             _testEnvironment = TestEnvironment.Create(output: null, ignoreBuildErrorFiles: true);

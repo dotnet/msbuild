@@ -845,7 +845,7 @@ namespace Microsoft.Build.Execution
                             _globalProperties.Set(globalProperty.DeepClone(isImmutable: true));
                         }
 
-                        var environmentProperty = that._environmentVariableProperties.GetProperty(desiredProperty);
+                        var environmentProperty = that._environmentVariableProperties?.GetProperty(desiredProperty);
                         if (environmentProperty != null)
                         {
                             _environmentVariableProperties.Set(environmentProperty.DeepClone(isImmutable: true));

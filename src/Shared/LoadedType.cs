@@ -36,7 +36,13 @@ namespace Microsoft.Build.Shared
 
             HasSTAThreadAttribute = CheckForHardcodedSTARequirement();
             LoadedAssemblyName = loadedAssembly.GetName();
-            Path = loadedAssembly.Location;
+            LoadedViaMetadataLoadContext = loadedViaMetadataLoadContext;
+
+            // For inline tasks loaded from bytes, Assembly.Location is empty, so use the original path
+            Path = string.IsNullOrEmpty(loadedAssembly.Location)
+                ? assemblyLoadInfo.AssemblyLocation
+                : loadedAssembly.Location;
+
             LoadedAssembly = loadedAssembly;
 
 #if !NET35
@@ -160,6 +166,11 @@ namespace Microsoft.Build.Shared
         /// Gets whether this type implements MarshalByRefObject.
         /// </summary>
         public bool IsMarshalByRef { get; }
+
+        /// <summary>
+        /// Gets whether this type was loaded by using MetadataLoadContext.
+        /// </summary>
+        public bool LoadedViaMetadataLoadContext { get; }
 
         /// <summary>
         /// Determines if the task has a hardcoded requirement for STA thread usage.

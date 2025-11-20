@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using static Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig.EditorConfigGlobsMatcher;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
@@ -51,7 +52,7 @@ internal sealed class EditorConfigParser
         {
             var editorConfig = _editorConfigFileCache.GetOrAdd(editorConfigFilePath, (key) =>
             {
-                return EditorConfigFile.Parse(File.ReadAllText(editorConfigFilePath));
+                return EditorConfigFile.Parse(FileSystems.Default.ReadFileAllText(editorConfigFilePath));
             });
             editorConfigFilePaths.Add(editorConfigFilePath);
             editorConfigDataFromFilesList.Add(editorConfig);

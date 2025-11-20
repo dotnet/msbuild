@@ -183,16 +183,15 @@ namespace Microsoft.Build.Execution
         /// <returns>The metadata value, or an null if none exists.</returns>
         string IMetadataTable.GetEscapedValueIfPresent(string specifiedItemType, string name)
         {
-            if (specifiedItemType == null || String.Equals(_itemType, specifiedItemType, StringComparison.OrdinalIgnoreCase))
+            if (_metadata == null)
             {
-                ProjectMetadataInstance metadatum = GetMetadata(name);
-                if (metadatum != null)
-                {
-                    return metadatum.EvaluatedValueEscaped;
-                }
+                return null;
             }
 
-            return null;
+            bool matchesItemType = specifiedItemType == null || String.Equals(_itemType, specifiedItemType, StringComparison.OrdinalIgnoreCase);
+            return matchesItemType && _metadata.TryGetValue(name, out string value)
+                ? value
+                : null;
         }
 
         #endregion

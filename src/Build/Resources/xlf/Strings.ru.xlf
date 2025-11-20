@@ -446,6 +446,11 @@
         <target state="translated">Правило настраиваемой проверки "{0}" успешно зарегистрировано.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
+        <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
+        <target state="translated">Настраиваемый TaskFactory '{0}' для задачи '{1}' не поддерживает выполнение TaskHost вне процесса. Отключите многопоточный режим сборки или удалите настраиваемый TaskFactory из &lt;UsingTask&gt; в файлах проекта.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: стандартному сопоставителю пакетов SDK не удалось разрешить пакет SDK "{0}", так как каталог "{1}" не существует.</target>

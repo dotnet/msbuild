@@ -243,6 +243,9 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
         <target state="translated">  -multithreaded
@@ -253,6 +256,9 @@
                      Этот параметр не поддерживается.
                      Максимальное количество используемых потоков определяется
                      параметром -maxCpuCount.
+                     Если многопоточный режим включён
+                     и MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount не может быть больше 256.
                      (Краткая форма: -mt)
     </target>
         <note />
@@ -1502,6 +1508,11 @@
       <trans-unit id="MSBuildDebugPath">
         <source>MSBuild logs and debug information will be at "{0}"</source>
         <target state="translated">Журналы MSBuild и отладочные сведения будут доступны по адресу "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
+        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
+        <target state="translated">Если включён многопоточный режим и MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount не может быть больше {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
