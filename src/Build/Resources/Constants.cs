@@ -394,6 +394,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.StringComparer", new Tuple<string, Type>(null, typeof(StringComparer)));
                         availableStaticMethods.TryAdd("System.TimeSpan", new Tuple<string, Type>(null, typeof(TimeSpan)));
                         availableStaticMethods.TryAdd("System.Text.RegularExpressions.Regex", new Tuple<string, Type>(null, typeof(Regex)));
+                        availableStaticMethods.TryAdd("System.Uri", new Tuple<string, Type>(null, typeof(Uri)));
                         availableStaticMethods.TryAdd("System.UriBuilder", new Tuple<string, Type>(null, typeof(UriBuilder)));
                         availableStaticMethods.TryAdd("System.Version", new Tuple<string, Type>(null, typeof(Version)));
                         availableStaticMethods.TryAdd("Microsoft.Build.Utilities.ToolLocationHelper", new Tuple<string, Type>("Microsoft.Build.Utilities.ToolLocationHelper, Microsoft.Build.Utilities.Core, Version=" + MSBuildConstants.CurrentAssemblyVersion + ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", null));
