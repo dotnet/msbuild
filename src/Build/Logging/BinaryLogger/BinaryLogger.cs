@@ -19,7 +19,7 @@ namespace Microsoft.Build.Logging
     public sealed class BinaryLoggerParameters
     {
         /// <summary>
-        /// Gets the log file path. May be null if not specified (defaults to "msbuild.binlog").
+        /// Gets the log file path. Returns null if not specified or if the path contains wildcards.
         /// </summary>
         public string LogFilePath { get; internal set; }
 
