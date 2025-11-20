@@ -4566,7 +4566,17 @@ namespace Microsoft.Build.CommandLine
             bool isBuildCheckEnabled)
         {
 
-            var replayEventSource = new BinaryLogReplayEventSource();
+            var replayEventSource = new BinaryLogReplayEventSource()
+            {
+                AllowForwardCompatibility = true
+            };
+
+            // Subscribe to RecoverableReadError to handle forward compatibility issues
+            replayEventSource.RecoverableReadError += e =>
+            {
+                // Output recoverable errors as warnings to the console
+                Console.WriteLine(e.GetFormattedMessage());
+            };
 
             var eventSource = isBuildCheckEnabled ?
                 BuildCheckReplayModeConnector.GetMergedEventSource(BuildManager.DefaultBuildManager, replayEventSource) :
@@ -4599,7 +4609,16 @@ namespace Microsoft.Build.CommandLine
 
             try
             {
-                replayEventSource.Replay(binaryLogFilePath, s_buildCancellationSource.Token);
+                // Use the BinaryReader overload to ensure AllowForwardCompatibility is respected
+                using var binaryReader = BinaryLogReplayEventSource.OpenReader(binaryLogFilePath);
+                replayEventSource.Replay(binaryReader, s_buildCancellationSource.Token);
+
+                // Emit a warning if the log file version is newer than what we support
+                if (replayEventSource.FileFormatVersion > BinaryLogger.FileFormatVersion)
+                {
+                    var warningMessage = $"The log file format version is {replayEventSource.FileFormatVersion} with minimum required reader version {replayEventSource.MinimumReaderVersion}, whereas this version of MSBuild only supports versions up to {BinaryLogger.FileFormatVersion}.";
+                    Console.WriteLine(warningMessage);
+                }
             }
             catch (Exception ex)
             {
