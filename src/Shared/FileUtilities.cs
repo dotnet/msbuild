@@ -575,11 +575,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The path with all backslashes replaced by forward slashes, or the original path if null/empty</returns>
         internal static string NormalizePathSeparatorsToForwardSlash(string path)
         {
-            // On non-Windows platforms, FixFilePath already converts backslashes to forward slashes
-            // On Windows, we need to do the conversion ourselves
-            return Path.DirectorySeparatorChar == '\\' 
-                ? (string.IsNullOrEmpty(path) ? path : path.Replace('\\', '/'))
-                : FixFilePath(path);
+            return string.IsNullOrEmpty(path) ? path : path.Replace('\\', '/');
         }
 
 #if !CLR2COMPATIBILITY
