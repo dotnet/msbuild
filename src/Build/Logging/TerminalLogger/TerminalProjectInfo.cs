@@ -7,6 +7,21 @@ using System.Linq;
 
 namespace Microsoft.Build.Logging;
 
+internal enum ProjectOutputKind
+{
+    Unknown,
+    Library,
+    Executable,
+    Package
+}
+
+internal enum SdkOutputType
+{
+    Unknown,
+    Library,
+    Exe // includes WinExe
+}
+
 /// <summary>
 /// A struct containing relevant evaluation-time data that may not be knowable just from ProjectStart events.
 /// </summary>
@@ -14,7 +29,8 @@ namespace Microsoft.Build.Logging;
 /// <param name="ProjectFile"></param>
 /// <param name="TargetFramework"></param>
 /// <param name="RuntimeIdentifier"></param>
-internal record struct EvalProjectInfo(TerminalLogger.EvalContext context, string? ProjectFile, string? TargetFramework, string? RuntimeIdentifier)
+/// <param name="OutputType"></param>
+internal record struct EvalProjectInfo(TerminalLogger.EvalContext context, string? ProjectFile, string? TargetFramework, string? RuntimeIdentifier, SdkOutputType OutputType)
 {
     public readonly int Id => context.Id;
 }
@@ -25,17 +41,21 @@ internal record struct EvalProjectInfo(TerminalLogger.EvalContext context, strin
 internal sealed class TerminalProjectInfo
 {
     private List<TerminalBuildMessage>? _buildMessages;
+    private readonly TerminalLogger.ProjectContext _context;
+    private readonly EvalProjectInfo _evalInfo;
 
     /// <summary>
     /// Initialized a new <see cref="TerminalProjectInfo"/> with the given <paramref name="evalInfo"/> .
     /// </summary>
     /// <param name="context">The ProjectContext of this project execution.</param>
     /// <param name="evalInfo">A subset of the interesting eval-time data for this running project</param>
+    /// <param name="entryTargets">The entry targets of the project, or null if not specified.</param>
     /// <param name="stopwatch">A stopwatch to time the build of the project.</param>
-    public TerminalProjectInfo(TerminalLogger.ProjectContext context, EvalProjectInfo evalInfo, StopwatchAbstraction? stopwatch)
+    public TerminalProjectInfo(TerminalLogger.ProjectContext context, EvalProjectInfo evalInfo, string[]? entryTargets, StopwatchAbstraction? stopwatch)
     {
-        _evalInfo = evalInfo;
         _context = context;
+        _evalInfo = evalInfo;
+        EntryTargets = entryTargets;
 
         if (stopwatch is not null)
         {
@@ -64,9 +84,9 @@ internal sealed class TerminalProjectInfo
     public StopwatchAbstraction Stopwatch { get; }
 
     /// <summary>
-    /// Full path to the primary output of the project, if known.
+    /// The primary output(s) of the project, if known.
     /// </summary>
-    public ReadOnlyMemory<char>? OutputPath { get; set; }
+    public List<(ReadOnlyMemory<char> absolutePath, ProjectOutputKind kind)>? Outputs { get; set; }
 
     /// <summary>
     /// Full path to the 'root' of this project's source control repository, if known.
@@ -82,8 +102,17 @@ internal sealed class TerminalProjectInfo
     /// The runtime identifier of the project or null if platform-agnostic.
     /// </summary>
     public string? RuntimeIdentifier => _evalInfo.RuntimeIdentifier;
-    private readonly TerminalLogger.ProjectContext _context;
-    private readonly EvalProjectInfo _evalInfo;
+
+    /// <summary>
+    /// The list of targets being built for this project instance. If null, the default targets are being built.
+    /// </summary>
+    public string[]? EntryTargets { get; }
+
+    /// <summary>
+    /// The primary output type of the project, which may be unknown.
+    /// </summary>
+    public SdkOutputType OutputType => _evalInfo.OutputType;
+
 
     /// <summary>
     /// True when the project has run target with name "_TestRunStart" defined in <see cref="TerminalLogger._testStartTarget"/>.
