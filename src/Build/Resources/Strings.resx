@@ -1238,10 +1238,6 @@
     <value>MSB4217: Task host node exited prematurely. Diagnostic information may be found in files in the temporary files directory named MSBuild_*.failure.txt. {0}</value>
     <comment>{StrBegin="MSB4217: "}</comment>
   </data>
-  <data name="TaskRuntimeNET" xml:space="preserve">
-    <value>MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, use "dotnet build" or Visual Studio 2026 or higher.</value>
-    <comment>{StrBegin="MSB4233: "}{Locked=".NET"}{Locked="dotnet build"}{Locked="Visual Studio 2026"}LOCALIZATION: .NET, dotnet build, and Visual Studio 2026 should not be localized.</comment>
-  </data>
   <data name="TaskParametersError" xml:space="preserve">
     <value>MSB4063: The "{0}" task could not be initialized with its input parameters. {1}</value>
     <comment>{StrBegin="MSB4063: "}</comment>
