@@ -1,0 +1,9 @@
+{
+    "sdk": {
+        // This global.json is needed to prevent builds running in tests using the bootstrap layout from walking
+        // up the repo tree and resolving our sdk.paths, instead of the bootstrap layout's SDK.
+        // See https://github.com/dotnet/runtime/issues/118488 for details.
+        "allowPrerelease": true,
+        "rollForward": "latestMajor"
+    }
+}

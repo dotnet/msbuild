@@ -40,8 +40,8 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
             assembly = Assembly.LoadFrom(checkAcquisitionData.AssemblyPath);
 #endif
 
-            IList<Type> availableTypes = assembly.GetExportedTypes();
-            IList<Type> checkTypes = availableTypes.Where(t => typeof(Check).IsAssignableFrom(t)).ToArray();
+            Type[] availableTypes = assembly.GetExportedTypes();
+            Type[] checkTypes = availableTypes.Where(t => typeof(Check).IsAssignableFrom(t)).ToArray();
 
             foreach (Type checkCandidate in checkTypes)
             {
@@ -49,7 +49,7 @@ internal class BuildCheckAcquisitionModule : IBuildCheckAcquisitionModule
                 checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckRegistered", checkCandidate.Name, checkCandidate.Assembly);
             }
 
-            if (availableTypes.Count != checkTypes.Count)
+            if (availableTypes.Length != checkTypes.Length)
             {
                 availableTypes.Except(checkTypes).ToList()
                     .ForEach(t => checkContext.DispatchAsComment(MessageImportance.Normal, "CustomCheckBaseTypeNotAssignable", t.Name, t.Assembly));

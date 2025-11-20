@@ -1,24 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="a7c1bb4a6d1f933d4812d15f712030fc91e0184a" BarId="288391" />
   <ProductDependencies>
-    <!-- Intermediate is necessary for source build. -->
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-reference-packages" Version="9.0.0-alpha.1.25081.6">
-      <Uri>https://github.com/dotnet/source-build-reference-packages</Uri>
-      <Sha>1cec3b4a8fb07138136a1ca1e04763bfcf7841db</Sha>
-      <SourceBuild RepoName="source-build-reference-packages" ManagedOnly="true" />
-    </Dependency>
-    <!-- Intermediate is necessary for source build. -->
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.source-build-externals" Version="9.0.0-alpha.1.25160.2">
-      <Uri>https://github.com/dotnet/source-build-externals</Uri>
-      <Sha>e2c3c1329ea432b36e4570d977271454e8abb0a0</Sha>
-      <SourceBuild RepoName="source-build-externals" ManagedOnly="true" />
-    </Dependency>
-    <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="Microsoft.Bcl.Cryptography" Version="9.0.0">
-      <Uri>https://github.com/dotnet/runtime</Uri>
-      <Sha>
-      </Sha>
-    </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="9.0.0">
       <Uri>https://github.com/dotnet/runtime</Uri>
@@ -50,7 +33,7 @@
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Formats.Asn1" Version="9.0.0">
+    <Dependency Name="System.Formats.Asn1" Version="9.0.6">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
@@ -80,13 +63,13 @@
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="9.0.0">
+    <Dependency Name="System.Security.Cryptography.ProtectedData" Version="9.0.6">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.Pkcs" Version="9.0.0">
+    <Dependency Name="System.Security.Cryptography.Pkcs" Version="9.0.6">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
@@ -123,36 +106,21 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="9.0.0-beta.25555.4">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.25469.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>9eaf7b289d5003a94ee23658f057a6c06ddcd570</Sha>
+      <Sha>6275af47ebda0d394d4a5a401b77bc6f2304204a</Sha>
     </Dependency>
-    <!-- Intermediate is necessary for source build. -->
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.arcade" Version="9.0.0-beta.25555.4">
-      <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>9eaf7b289d5003a94ee23658f057a6c06ddcd570</Sha>
-      <SourceBuild RepoName="arcade" ManagedOnly="true" />
-    </Dependency>
-    <Dependency Name="Microsoft.DotNet.XliffTasks" Version="9.0.0-beta.25555.4">
-      <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>9eaf7b289d5003a94ee23658f057a6c06ddcd570</Sha>
-    </Dependency>
-    <Dependency Name="NuGet.Build.Tasks" Version="6.14.0-rc.116">
+    <Dependency Name="NuGet.Build.Tasks" Version="7.0.0-preview.2.254">
       <Uri>https://github.com/nuget/nuget.client</Uri>
-      <Sha>0da03caba83448ee887f0f1846dd05e1f1705d45</Sha>
+      <Sha>c69588acc9bb46f38370c2b8cdedf57aea5ec904</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="4.14.0-3.25157.4">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.0.0-2.25459.9">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>46223204b646f96104bac46f9dfa4959da9d86ac</Sha>
+      <Sha>5d47bb1c178652caa40b55664c06c74e35edebdf</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.SourceBuild.Intermediate.roslyn" Version="4.14.0-3.25157.4">
-      <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>46223204b646f96104bac46f9dfa4959da9d86ac</Sha>
-      <SourceBuild RepoName="roslyn" ManagedOnly="true" />
-    </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="9.0.0-beta.25555.4">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="10.0.0-beta.25469.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>9eaf7b289d5003a94ee23658f057a6c06ddcd570</Sha>
+      <Sha>6275af47ebda0d394d4a5a401b77bc6f2304204a</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

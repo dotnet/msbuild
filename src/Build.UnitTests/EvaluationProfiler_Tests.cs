@@ -5,7 +5,6 @@ using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Xml;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -149,29 +148,29 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // Initial properties (pass 0)
             // There are no XML elements representing initial properties, so just checking the pass is triggered
-            Assert.Single(profiledElements.Where(location => location.EvaluationPass == EvaluationPass.InitialProperties));
+            Assert.Single(profiledElements, location => location.EvaluationPass == EvaluationPass.InitialProperties);
 
             // Properties (pass 1)
-            Assert.Single(profiledElements.Where(location => location.ElementName == "PropertyGroup"));
-            Assert.Single(profiledElements.Where(location => location.ElementName == "appname"));
+            Assert.Single(profiledElements, location => location.ElementName == "PropertyGroup");
+            Assert.Single(profiledElements, location => location.ElementName == "appname");
 
             // Item definition group (pass 2)
-            Assert.Single(profiledElements.Where(location => location.ElementName == "ItemDefinitionGroup"));
-            Assert.Single(profiledElements.Where(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.ItemDefinitionGroups));
+            Assert.Single(profiledElements, location => location.ElementName == "ItemDefinitionGroup");
+            Assert.Single(profiledElements, location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.ItemDefinitionGroups);
 
             // Item groups (pass 3 and 3.1)
-            Assert.Single(profiledElements.Where(location => location.ElementName == "ItemGroup"));
+            Assert.Single(profiledElements, location => location.ElementName == "ItemGroup");
             Assert.Equal(2, profiledElements.Count(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.Items));
-            Assert.Single(profiledElements.Where(location => location.ElementName == "Condition" & location.EvaluationPass == EvaluationPass.Items));
+            Assert.Single(profiledElements, location => location.ElementName == "Condition" & location.EvaluationPass == EvaluationPass.Items);
             Assert.Equal(2, profiledElements.Count(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.LazyItems));
 
             // Using tasks (pass 4)
             // The using element itself is evaluated as part of pass 0, so just checking the overall pass is triggered by the corresponding element
-            Assert.Single(profiledElements.Where(location => location.EvaluationPass == EvaluationPass.UsingTasks));
+            Assert.Single(profiledElements, location => location.EvaluationPass == EvaluationPass.UsingTasks);
 
             // Targets (pass 5)
             Assert.Equal(2, profiledElements.Count(location => location.ElementName == "Message"));
-            Assert.Single(profiledElements.Where(location => location.ElementName == "Target"));
+            Assert.Single(profiledElements, location => location.ElementName == "Target");
         }
 
         [Fact]
@@ -196,7 +195,7 @@ namespace Microsoft.Build.Engine.UnitTests
             Assert.Equal(2, profiledElements.Count(location => location.ElementName == "TestGlob" & location.EvaluationPass == EvaluationPass.LazyItems));
 
             // There should be one aggregated entry representing the total glob time
-            Assert.Single(profiledElements.Where(location => location.EvaluationPass == EvaluationPass.TotalGlobbing));
+            Assert.Single(profiledElements, location => location.EvaluationPass == EvaluationPass.TotalGlobbing);
             var totalGlob = profiledElements.Find(evaluationLocation =>
                 evaluationLocation.EvaluationPass == EvaluationPass.TotalGlobbing);
             // And it should aggregate the result of the 2 glob locations

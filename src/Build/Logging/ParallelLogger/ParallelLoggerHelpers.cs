@@ -140,7 +140,6 @@ namespace Microsoft.Build.BackEnd.Logging
 
             ProjectStartedEventMinimumFields startedEvent = GetProjectStartedEvent(currentKey);
 
-            List<string> stackTrace = new List<string>();
             // If there is no started event then there should be no stack trace
             // this is a valid situation if the event occures in the engine or outside the context of a project
             // or the event is raised before the project started event
@@ -150,19 +149,18 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             List<ProjectStartedEventMinimumFields> projectStackTrace = GetProjectCallStack(e);
-            foreach (ProjectStartedEventMinimumFields projectStartedEvent in projectStackTrace)
+
+            string[] stackTrace = new string[projectStackTrace.Count];
+            for (int i = 0; i < stackTrace.Length; i++)
             {
-                if (!string.IsNullOrEmpty(projectStartedEvent.TargetNames))
-                {
-                    stackTrace.Add(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStackWithTargetNames", projectStartedEvent.ProjectFile, projectStartedEvent.TargetNames, projectStartedEvent.FullProjectKey));
-                }
-                else
-                {
-                    stackTrace.Add(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStackWithDefaultTargets", projectStartedEvent.ProjectFile, projectStartedEvent.FullProjectKey));
-                }
+                ProjectStartedEventMinimumFields projectStartedEvent = projectStackTrace[i];
+
+                stackTrace[stackTrace.Length - i - 1] = !string.IsNullOrEmpty(projectStartedEvent.TargetNames) ?
+                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStackWithTargetNames", projectStartedEvent.ProjectFile, projectStartedEvent.TargetNames, projectStartedEvent.FullProjectKey) :
+                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ProjectStackWithDefaultTargets", projectStartedEvent.ProjectFile, projectStartedEvent.FullProjectKey);
             }
-            stackTrace.Reverse();
-            return stackTrace.ToArray();
+
+            return stackTrace;
         }
 
         /// <summary>

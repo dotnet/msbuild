@@ -118,6 +118,7 @@
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.exe.config" />
       <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.exe.config" />
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll.config" />
+      <FreshlyBuiltBinariesx64 Remove="$(X64BinPath)**\Microsoft.VisualStudio.SolutionPersistence.dll" />
 
       <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.Tasks.Core.dll" />
       <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.dll" />

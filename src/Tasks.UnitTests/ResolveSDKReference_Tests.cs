@@ -12,7 +12,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.NetCore.Extensions;
 using SDKReference = Microsoft.Build.Tasks.ResolveSDKReference.SDKReference;
 
 #nullable disable

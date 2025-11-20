@@ -7,7 +7,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 

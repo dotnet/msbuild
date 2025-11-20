@@ -5,7 +5,7 @@
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <OutputType>Library</OutputType>
     <OutputPath>OutputPathPlaceholder</OutputPath>
-	<EnableCustomCulture>EnableCustomCulturePlaceholder</EnableCustomCulture>
+	  <EnableCustomCulture>EnableCustomCulturePlaceholder</EnableCustomCulture>
   </PropertyGroup>
 
   <PropertyGroup>

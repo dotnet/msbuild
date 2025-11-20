@@ -9,7 +9,6 @@ using System.Linq;
 using System.Security.AccessControl;
 using System.Security.Principal;
 #endif
-using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Xml;
@@ -19,10 +18,7 @@ using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
-using Shouldly;
 using Xunit;
-using Microsoft.Build.Framework;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 

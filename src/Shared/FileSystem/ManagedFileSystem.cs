@@ -18,6 +18,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public static ManagedFileSystem Singleton() => ManagedFileSystem.Instance;
 
+#if FEATURE_MSIOREDIST
         private static bool ShouldUseMicrosoftIO
         {
             get
@@ -31,6 +32,7 @@ namespace Microsoft.Build.Shared.FileSystem
 #endif
             }
         }
+#endif
 
         protected ManagedFileSystem() { }
 

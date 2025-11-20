@@ -387,7 +387,7 @@ namespace Microsoft.NET.StringTools
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint RotateLeft(uint value, int offset)
         {
-#if NETCOREAPP
+#if NET
             return System.Numerics.BitOperations.RotateLeft(value, offset);
 #else
             // Copied from System\Numerics\BitOperations.cs in dotnet/runtime as the routine is not available on .NET Framework.

@@ -34,6 +34,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\GlobalUsings.cs">
+      <Link>GlobalUsings.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\EncodingStringWriter.cs">
       <Link>EncodingStringWriter.cs</Link>
     </Compile>

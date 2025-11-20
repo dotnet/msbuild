@@ -5,12 +5,11 @@
 /*  This test is designed especially to test Configuration parsing in net5.0
  *  which means it WON'T work in net472 and thus we don't run it in net472 */
 
+using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-
-using Xunit;
-using System.Collections.Generic;
 using Shouldly;
+using Xunit;
 
 #nullable disable
 

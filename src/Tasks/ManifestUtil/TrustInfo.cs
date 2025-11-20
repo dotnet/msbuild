@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 #if !RUNTIME_TYPE_NETCORE
@@ -790,7 +789,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 output.Flush();
             }
             document.Save(output);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "ManifestWriter.WriteTrustInfo t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"ManifestWriter.WriteTrustInfo t={Environment.TickCount - t1}");
         }
     }
 }
