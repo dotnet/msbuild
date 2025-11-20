@@ -38,14 +38,7 @@ namespace Microsoft.Build.Collections
         /// Dictionary of item lists used as a backing store.
         /// This collection provides quick access to the ordered set of items of a particular type.
         /// </summary>
-        private readonly Dictionary<string, LinkedList<T>> _itemLists;
-
-        /// <summary>
-        /// Dictionary of items in the collection, to speed up Contains,
-        /// Remove, and Replace. For those operations, we look up here,
-        /// then modify the other dictionary to match.
-        /// </summary>
-        private readonly Dictionary<T, LinkedListNode<T>> _nodes;
+        private readonly Dictionary<string, List<T>> _itemLists;
 
         /// <summary>
         /// Constructor for an empty collection.
@@ -53,8 +46,7 @@ namespace Microsoft.Build.Collections
         public ItemDictionary()
         {
             // Tracing.Record("new item dictionary");
-            _itemLists = new Dictionary<string, LinkedList<T>>(MSBuildNameIgnoreCaseComparer.Default);
-            _nodes = new Dictionary<T, LinkedListNode<T>>();
+            _itemLists = new Dictionary<string, List<T>>(MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>
@@ -64,8 +56,7 @@ namespace Microsoft.Build.Collections
         public ItemDictionary(int initialItemTypesCapacity, int initialItemsCapacity = 0)
         {
             // Tracing.Record("new item dictionary");
-            _itemLists = new Dictionary<string, LinkedList<T>>(initialItemTypesCapacity, MSBuildNameIgnoreCaseComparer.Default);
-            _nodes = new Dictionary<T, LinkedListNode<T>>(initialItemsCapacity);
+            _itemLists = new Dictionary<string, List<T>>(initialItemTypesCapacity, MSBuildNameIgnoreCaseComparer.Default);
         }
 
         /// <summary>
@@ -74,15 +65,29 @@ namespace Microsoft.Build.Collections
         public ItemDictionary(IEnumerable<T> items)
         {
             // Tracing.Record("new item dictionary");
-            _itemLists = new Dictionary<string, LinkedList<T>>(MSBuildNameIgnoreCaseComparer.Default);
-            _nodes = new Dictionary<T, LinkedListNode<T>>();
+            _itemLists = new Dictionary<string, List<T>>(MSBuildNameIgnoreCaseComparer.Default);
             ImportItems(items);
         }
 
         /// <summary>
         /// Number of items in total, for debugging purposes.
         /// </summary>
-        public int Count => _nodes.Count;
+        public int Count
+        {
+            get
+            {
+                int count = 0;
+                lock (_itemLists)
+                {
+                    foreach (List<T> list in _itemLists.Values)
+                    {
+                        count += list.Count;
+                    }
+                }
+
+                return count;
+            }
+        }
 
         /// <summary>
         /// Get the item types that have at least one item in this collection
@@ -117,7 +122,7 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                LinkedList<T> list;
+                List<T> list;
                 lock (_itemLists)
                 {
                     if (!_itemLists.TryGetValue(itemtype, out list))
@@ -137,13 +142,12 @@ namespace Microsoft.Build.Collections
         {
             lock (_itemLists)
             {
-                foreach (ICollection<T> list in _itemLists.Values)
+                foreach (List<T> list in _itemLists.Values)
                 {
                     list.Clear();
                 }
 
                 _itemLists.Clear();
-                _nodes.Clear();
             }
         }
 
@@ -227,11 +231,19 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Whether the provided item is in this table or not.
         /// </summary>
-        public bool Contains(T projectItem)
+        bool ICollection<T>.Contains(T projectItem)
         {
             lock (_itemLists)
             {
-                return _nodes.ContainsKey(projectItem);
+                foreach (List<T> list in _itemLists.Values)
+                {
+                    if (list.Contains(projectItem))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
         }
 
@@ -259,23 +271,31 @@ namespace Microsoft.Build.Collections
         {
             lock (_itemLists)
             {
-                if (!_nodes.TryGetValue(projectItem, out LinkedListNode<T> node))
+                if (!_itemLists.TryGetValue(projectItem.Key, out List<T> list))
                 {
                     return false;
                 }
 
-                LinkedList<T> list = node.List;
-                list.Remove(node);
-                _nodes.Remove(projectItem);
-
-                // Save memory
-                if (list.Count == 0)
+                // Searching for a single object - just compare the reference pointer.
+                for (int i = 0; i < list.Count; i++)
                 {
-                    _itemLists.Remove(projectItem.Key);
-                }
+                    T candidateItem = list[i];
+                    if (ReferenceEquals(candidateItem, projectItem))
+                    {
+                        list.RemoveAt(i);
 
-                return true;
+                        // Save memory if the item type is now empty.
+                        if (list.Count == 0)
+                        {
+                            _itemLists.Remove(projectItem.Key);
+                        }
+
+                        return true;
+                    }
+                }
             }
+
+            return false;
         }
 
         /// <summary>
@@ -303,20 +323,21 @@ namespace Microsoft.Build.Collections
         {
             lock (_itemLists)
             {
-                if (!_itemLists.TryGetValue(itemType, out LinkedList<T> list))
+                if (!_itemLists.TryGetValue(itemType, out List<T> list))
                 {
-                    list = new LinkedList<T>();
+                    list = new List<T>();
                     _itemLists[itemType] = list;
                 }
 
-                foreach (T item in items)
+                int count = list.Count;
+                list.AddRange(items);
+
+                for (int i = count; i < list.Count; i++)
                 {
 #if DEBUG
                     // Debug only: hot code path
-                    ErrorUtilities.VerifyThrow(String.Equals(itemType, item.Key, StringComparison.OrdinalIgnoreCase), "Item type mismatch");
+                    ErrorUtilities.VerifyThrow(String.Equals(itemType, list[i].Key, StringComparison.OrdinalIgnoreCase), "Item type mismatch");
 #endif
-                    LinkedListNode<T> node = list.AddLast(item);
-                    _nodes.Add(item, node);
                 }
             }
         }
@@ -324,25 +345,51 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Remove the set of items specified from this dictionary
         /// </summary>
+        /// <param name="itemType">The item type for all removes.</param>
         /// <param name="other">An enumerator over the items to remove.</param>
-        public void RemoveItems(IEnumerable<T> other)
+        public void RemoveItemsOfType(string itemType, IEnumerable<T> other)
         {
-            foreach (T item in other)
+            lock (_itemLists)
             {
-                Remove(item);
+                if (!_itemLists.TryGetValue(itemType, out List<T> list))
+                {
+                    return;
+                }
+
+                // Since we'll need to search and remove an unknown number of items, we'll build up a new list of items to
+                // keep, using the incoming enumerable as a set, and swap out the result at the end.
+                // This minimizes the upper bound of ops and allocations here.
+                List<T> listWithRemoves = new(list.Count);
+                HashSet<T> itemsToRemove = new(other);
+                foreach (T item in list)
+                {
+                    if (!itemsToRemove.Contains(item))
+                    {
+                        listWithRemoves.Add(item);
+                    }
+                }
+
+                if (listWithRemoves.Count > 0)
+                {
+                    _itemLists[itemType] = listWithRemoves;
+                }
+                else
+                {
+                    // If the clone is empty, remove the item type from the dictionary
+                    _itemLists.Remove(itemType);
+                }
             }
         }
 
         private void AddProjectItem(T projectItem)
         {
-            if (!_itemLists.TryGetValue(projectItem.Key, out LinkedList<T> list))
+            if (!_itemLists.TryGetValue(projectItem.Key, out List<T> list))
             {
-                list = new LinkedList<T>();
+                list = new List<T>();
                 _itemLists[projectItem.Key] = list;
             }
 
-            LinkedListNode<T> node = list.AddLast(projectItem);
-            _nodes.Add(projectItem, node);
+            list.Add(projectItem);
         }
 
         public void CopyTo(T[] array, int arrayIndex)
