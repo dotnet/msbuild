@@ -186,7 +186,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        private static MetadataLoadContext LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
+        private static MetadataLoadContext CreateMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
         {
             string path = assemblyLoadInfo.AssemblyFile;
             string[] localAssemblies = Directory.GetFiles(Path.GetDirectoryName(path), "*.dll");
@@ -381,7 +381,7 @@ namespace Microsoft.Build.Shared
                 return _publicTypeNameToLoadedType.GetOrAdd(typeName, typeName =>
                 {
                     MSBuildEventSource.Log.LoadAssemblyAndFindTypeStart();
-                    using MetadataLoadContext context = LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo);
+                    using MetadataLoadContext context = CreateMetadataLoadContext(_assemblyLoadInfo);
                     Assembly loadedAssembly = context.LoadFromAssemblyPath(_assemblyLoadInfo.AssemblyFile);
                     Type foundType = null;
                     int numberOfTypesSearched = 0;
