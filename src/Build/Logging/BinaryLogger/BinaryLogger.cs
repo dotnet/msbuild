@@ -223,22 +223,9 @@ namespace Microsoft.Build.Logging
         /// <returns>True if the parameter was a ProjectImports parameter; otherwise, false.</returns>
         private static bool TryParseProjectImports(string parameter, BinaryLoggerParameters result)
         {
-            if (TrySetProjectImportsMode(parameter, ProjectImportsNoneParameter, ProjectImportsCollectionMode.None, result))
-            {
-                return true;
-            }
-
-            if (TrySetProjectImportsMode(parameter, ProjectImportsEmbedParameter, ProjectImportsCollectionMode.Embed, result))
-            {
-                return true;
-            }
-
-            if (TrySetProjectImportsMode(parameter, ProjectImportsZipFileParameter, ProjectImportsCollectionMode.ZipFile, result))
-            {
-                return true;
-            }
-
-            return false;
+            return TrySetProjectImportsMode(parameter, ProjectImportsNoneParameter, ProjectImportsCollectionMode.None, result)
+                || TrySetProjectImportsMode(parameter, ProjectImportsEmbedParameter, ProjectImportsCollectionMode.Embed, result)
+                || TrySetProjectImportsMode(parameter, ProjectImportsZipFileParameter, ProjectImportsCollectionMode.ZipFile, result);
         }
 
         /// <summary>
