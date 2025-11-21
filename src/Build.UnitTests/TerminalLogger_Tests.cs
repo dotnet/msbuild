@@ -18,11 +18,13 @@ using VerifyTests;
 using VerifyXunit;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.NetCore.Extensions;
 using static VerifyXunit.Verifier;
 
 namespace Microsoft.Build.UnitTests
 {
     [UsesVerify]
+    [UseInvariantCulture]
     public class TerminalLogger_Tests : IEventSource, IDisposable
     {
         private const int _nodeCount = 8;
@@ -50,7 +52,6 @@ namespace Microsoft.Build.UnitTests
 
         private VerifySettings _settings = new();
 
-        private readonly CultureInfo _originalCulture = Thread.CurrentThread.CurrentCulture;
         private readonly ITestOutputHelper _outputHelper;
 
         public TerminalLogger_Tests(ITestOutputHelper outputHelper)
@@ -64,9 +65,6 @@ namespace Microsoft.Build.UnitTests
             _terminallogger.CreateStopwatch = () => new MockStopwatch();
 
             UseProjectRelativeDirectory("Snapshots");
-
-            // Avoids issues with different cultures on different machines
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
         }
 
         [Theory]
@@ -164,7 +162,6 @@ namespace Microsoft.Build.UnitTests
         public void Dispose()
         {
             _terminallogger.Shutdown();
-            Thread.CurrentThread.CurrentCulture = _originalCulture;
         }
 
         #endregion

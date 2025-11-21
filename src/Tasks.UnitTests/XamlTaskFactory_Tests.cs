@@ -450,8 +450,6 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
     [Fact]
     public void OutOfProcXamlTaskFactoryProvidesAssemblyPath()
     {
-      TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
-
       try
       {
         const string taskElementContents = @"<ProjectSchemaDefinitions xmlns=""clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"">
@@ -480,7 +478,6 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
       }
       finally
       {
-        TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
       }
     }
 

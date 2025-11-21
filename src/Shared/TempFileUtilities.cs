@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -16,62 +17,60 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static partial class FileUtilities
     {
-        // For the current user, these correspond to read, write, and execute permissions.
-        // Lower order bits correspond to the same for "group" or "other" users.
-        private const int userRWX = 0x100 | 0x80 | 0x40;
-        private static string tempFileDirectory = null;
+        private static Lazy<string> tempFileDirectory = CreateTempFileDirectoryLazy();
+
         private const string msbuildTempFolderPrefix = "MSBuildTemp";
 
-        internal static string TempFileDirectory
+        internal static string TempFileDirectory => tempFileDirectory.Value;
+
+        private static Lazy<string> CreateTempFileDirectoryLazy()
         {
-            get
+            return new Lazy<string>(
+                () =>
+                {
+                    string path = CreateFolderUnderTemp();
+                    RegisterCleanupOnExit(path);
+                    return path;
+                },
+                LazyThreadSafetyMode.ExecutionAndPublication);
+        }
+
+        private static void RegisterCleanupOnExit(string pathToCleanup)
+        {
+            AppDomain.CurrentDomain.ProcessExit += (_, _) =>
             {
-                return tempFileDirectory ??= CreateFolderUnderTemp();
-            }
+                try
+                {
+                    if (Directory.Exists(pathToCleanup))
+                    {
+                        Directory.Delete(pathToCleanup, recursive: true);
+                    }
+                }
+                catch
+                {
+                    // Best effort - ignore failures during cleanup
+                }
+            };
         }
 
         internal static void ClearTempFileDirectory()
         {
-            tempFileDirectory = null;
+            tempFileDirectory = CreateTempFileDirectoryLazy();
         }
 
-        // For all native calls, directly check their return values to prevent bad actors from getting in between checking if a directory exists and returning it.
         private static string CreateFolderUnderTemp()
         {
-            // On windows Username with Unicode chars can give issues, so we dont append username to the temp folder name.
-            string msbuildTempFolder = NativeMethodsShared.IsWindows ?
-                msbuildTempFolderPrefix :
-                msbuildTempFolderPrefix + Environment.UserName;
+            string path;
 
-            string basePath = Path.Combine(Path.GetTempPath(), msbuildTempFolder);
+#if NET
+            path = Directory.CreateTempSubdirectory(msbuildTempFolderPrefix).FullName;
+#else
+            // CreateTempSubdirectory API is not available in .NET Framework
+            path = Path.Combine(Path.GetTempPath(), $"{msbuildTempFolderPrefix}{Guid.NewGuid():N}");
+            Directory.CreateDirectory(path);
+#endif
 
-            if (NativeMethodsShared.IsLinux && NativeMethodsShared.mkdir(basePath, userRWX) != 0)
-            {
-                if (NativeMethodsShared.chmod(basePath, userRWX) == 0)
-                {
-                    // Current user owns this file; we can read and write to it. It is reasonable here to assume it was created properly by MSBuild and can be used
-                    // for temporary files.
-                }
-                else
-                {
-                    // Another user created a folder pretending to be us! Find a folder we can actually use.
-                    int extraBits = 0;
-                    string pathToCheck = basePath + extraBits;
-                    while (NativeMethodsShared.mkdir(pathToCheck, userRWX) != 0 && NativeMethodsShared.chmod(pathToCheck, userRWX) != 0)
-                    {
-                        extraBits++;
-                        pathToCheck = basePath + extraBits;
-                    }
-
-                    basePath = pathToCheck;
-                }
-            }
-            else
-            {
-                Directory.CreateDirectory(basePath);
-            }
-
-            return FileUtilities.EnsureTrailingSlash(basePath);
+            return FileUtilities.EnsureTrailingSlash(path);
         }
 
         /// <summary>

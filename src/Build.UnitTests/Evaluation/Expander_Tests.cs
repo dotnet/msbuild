@@ -26,6 +26,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
 using ProjectItemInstanceFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.ProjectItemInstanceFactory;
@@ -421,6 +422,44 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains(@"DirChain3: Value1\||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||$##Value2\");
             logger.AssertLogContains(@"DirChain4: Value1\$||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||$##Value2\");
             logger.AssertLogContains(@"DirChain5: Value1\$||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||$##$Value2\");
+        }
+
+        /// <summary>
+        /// Test that chained item functions work with whitespace before the second arrow operator
+        /// </summary>
+        [Fact]
+        public void ItemFunctionChainingWithWhitespaceBeforeArrow()
+        {
+            string content = @"
+ <Project>
+    <ItemGroup>
+        <I Include=`A`>
+            <M>F</M>
+        </I>
+        <I Include=`B`>
+            <M>T</M>
+        </I>
+        <I Include=`C`>
+            <M>T</M>
+        </I>
+        <!-- Test with space before second arrow -->
+        <Test1 Include=`@(I -> WithMetadataValue('M', 'T') -> WithMetadataValue('M', 'T'))` />
+        <!-- Test without space before second arrow -->
+        <Test2 Include=`@(I -> WithMetadataValue('M', 'T')-> WithMetadataValue('M', 'T'))` />
+    </ItemGroup>
+
+    <Target Name=`Build`>
+        <Message Text=`Test1: [@(Test1)]` />
+        <Message Text=`Test2: [@(Test2)]` />
+    </Target>
+</Project>
+                ";
+
+            MockLogger log = Helpers.BuildProjectWithNewOMExpectSuccess(content);
+
+            // Both should produce the same result: B and C
+            log.AssertLogContains("Test1: [B;C]");
+            log.AssertLogContains("Test2: [B;C]");
         }
 
         [Fact]
@@ -3200,6 +3239,26 @@ namespace Microsoft.Build.UnitTests.Evaluation
             expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expectedExpansion);
         }
 
+        [Theory]
+        [InlineData("AString", "HelloWorld", "$(AString.EndsWith('World'))", "True")]
+        [InlineData("AString", "HelloWorld", "$(AString.EndsWith('world'))", "False")]
+        [InlineData("AString", "HelloWorld", "$(AString.EndsWith('WORLD', 'StringComparison.Ordinal'))", "False")]
+        [InlineData("AString", "HelloWorld", "$(AString.EndsWith('WORLD', 'StringComparison.OrdinalIgnoreCase'))", "True")]
+        [InlineData("AString", "HelloWorld", "$(AString.EndsWith('world', 'StringComparison.OrdinalIgnoreCase'))", "True")]
+        [InlineData("AString", "HelloWorld", "$(AString.EndsWith('Hello', 'StringComparison.Ordinal'))", "False")]
+        [InlineData("AString", "HelloWorld", "$(AString.EndsWith('', 'StringComparison.Ordinal'))", "True")]
+        [InlineData("AString", "C:\\Path\\File.txt", "$(AString.EndsWith('.TXT', 'StringComparison.OrdinalIgnoreCase'))", "True")]
+        [InlineData("AString", "C:\\Path\\File.txt", "$(AString.EndsWith('.TXT', 'StringComparison.Ordinal'))", "False")]
+        public void StringEndsWithTests(string propertyName, string propertyValue, string propertyFunction, string expectedExpansion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>
+            { [propertyName] = ProjectPropertyInstance.Create(propertyName, propertyValue) };
+
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expectedExpansion);
+        }
+
         [Fact]
         public void IsOsPlatformShouldBeCaseInsensitiveToParameter()
         {
@@ -3722,6 +3781,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Expand intrinsic property function calls a static arithmetic method
         /// </summary>
         [Fact]
+        [UseInvariantCulture]
         public void PropertyFunctionStaticMethodIntrinsicMaths()
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -4632,6 +4692,7 @@ $(
         }
 
         [Fact]
+        [UseInvariantCulture]
         public void PropertyFunctionMSBuildAddRealArgument()
         {
             // string argument is an integer that exceeds the size of long.
