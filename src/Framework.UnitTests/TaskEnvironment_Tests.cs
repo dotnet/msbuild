@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    public class TaskEnvironmentTests
+    public class TaskEnvironment_Tests
     {
         private const string StubEnvironmentName = "Stub";
         private const string MultithreadedEnvironmentName = "Multithreaded";
@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests
             return environmentType switch
             {
                 StubEnvironmentName => new TaskEnvironment(StubTaskEnvironmentDriver.Instance),
-                MultithreadedEnvironmentName => new TaskEnvironment(new MultithreadedTaskEnvironmentDriver(GetResolvedTempPath())),
+                MultithreadedEnvironmentName => new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(GetResolvedTempPath())),
                 _ => throw new ArgumentException($"Unknown environment type: {environmentType}")
             };
         }
@@ -351,7 +351,7 @@ namespace Microsoft.Build.UnitTests
 
             // On Windows, environment variables are case-insensitive; on Unix-like systems, they are case-sensitive
             var comparer = NativeMethods.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
-            var multithreadedEnvironment = new TaskEnvironment(new MultithreadedTaskEnvironmentDriver(
+            var multithreadedEnvironment = new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(
                 GetResolvedTempPath(),
                 new Dictionary<string, string>(comparer)));
 

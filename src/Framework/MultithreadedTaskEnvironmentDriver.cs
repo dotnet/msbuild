@@ -12,7 +12,7 @@ namespace Microsoft.Build.Framework
     /// for use in multithreaded mode where tasks may be executed in parallel. This allows each project to maintain its own
     /// isolated environment state without affecting other concurrently building projects.
     /// </summary>
-    internal sealed class MultithreadedTaskEnvironmentDriver : ITaskEnvironmentDriver
+    internal sealed class MultiThreadedTaskEnvironmentDriver : ITaskEnvironmentDriver
     {
         /// <summary>
         /// String comparer for environment variable names based on the current platform.
@@ -25,12 +25,12 @@ namespace Microsoft.Build.Framework
         private AbsolutePath _currentDirectory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MultithreadedTaskEnvironmentDriver"/> class
+        /// Initializes a new instance of the <see cref="MultiThreadedTaskEnvironmentDriver"/> class
         /// with the specified working directory and optional environment variables.
         /// </summary>
         /// <param name="currentDirectoryFullPath">The initial working directory.</param>
         /// <param name="environmentVariables">Dictionary of environment variables to use.</param>
-        public MultithreadedTaskEnvironmentDriver(
+        public MultiThreadedTaskEnvironmentDriver(
             string currentDirectoryFullPath,
             IDictionary<string, string> environmentVariables)
         {
@@ -39,11 +39,11 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="MultithreadedTaskEnvironmentDriver"/> class
+        /// Initializes a new instance of the <see cref="MultiThreadedTaskEnvironmentDriver"/> class
         /// with the specified working directory and environment variables from the current process.
         /// </summary>
         /// <param name="currentDirectoryFullPath">The initial working directory.</param>
-        public MultithreadedTaskEnvironmentDriver(string currentDirectoryFullPath)
+        public MultiThreadedTaskEnvironmentDriver(string currentDirectoryFullPath)
         {
             // Copy environment variables from the current process
             var variables = Environment.GetEnvironmentVariables();
