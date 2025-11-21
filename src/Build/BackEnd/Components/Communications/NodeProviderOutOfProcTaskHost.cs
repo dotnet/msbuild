@@ -594,20 +594,6 @@ namespace Microsoft.Build.BackEnd
             TaskHostConfiguration configuration,
             Dictionary<string, string> taskHostParameters)
         {
-#if NETFRAMEWORK
-            // MSB4233: Check if .NET runtime is requested, which is not supported in .NET Framework builds of MSBuild (17.14 and earlier).
-            // All .NET Core/5+ MSBuilds and all 18.0+ builds do support .NET runtime tasks, so this check is not needed there.
-            // This provides a clear error message instead of the confusing "MSBuild.dll not found" error that would otherwise occur.
-            if ((hostContext & HandshakeOptions.NET) == HandshakeOptions.NET)
-            {
-                ProjectFileErrorUtilities.ThrowInvalidProjectFile(
-                    new BuildEventFileInfo(configuration.ProjectFileOfTask, configuration.LineNumberOfTask, configuration.ColumnNumberOfTask),
-                    "TaskRuntimeNET",
-                    configuration.TaskName,
-                    configuration.TaskLocation);
-            }
-#endif
-
             bool nodeCreationSucceeded;
             if (!_nodeContexts.ContainsKey(hostContext))
             {
