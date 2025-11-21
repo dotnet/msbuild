@@ -139,6 +139,7 @@ effect. Be it eliminating allocations, simplifying tight loops, reordering cases
 address the elephant in the room: the file I/O resulting from scanning of assemblies, checking their timestamps, and reading/writing on-disk caches.
 
 For regular project references the system works as about as efficient as possible.
+
 - In a cold scenario, where there is no state in memory or on disk, the referenced assembly file has to be scanned for its name and dependencies.
 - In a warm scenario, where there is no state in memory but a disk cache exists, the assembly name and dependencies are read from the cache, together with the
 corresponding timestamp which is compared to the current timestamp of the assembly file. If they match the cached data is used.
@@ -188,6 +189,7 @@ enlistment - the system may prime by building the full solution and then the dev
 cache and get sub-optimal first-time build performance.
 
 Saving of the per-project disk cache may be further optimized by
+
 - Keeping the timestamp of the cache file in memory and skipping the save if the relevant cache items haven't become dirty (i.e. the dependencies have not changed)
 *and* the timestamp of the cache file hasn't changed since the last save. In hot inner loop scenarios this would reduce the save to a timestamp check.
 - Saving the file asynchronously, i.e. not blocking the build on completing the save operation.

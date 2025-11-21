@@ -1,0 +1,55 @@
+name: Create Perf Branch on /perfstar comment
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  create_perf_branch:
+    if: |
+      github.event.issue.pull_request &&
+      github.event.comment.body == '/perfstar' &&
+      contains(fromJSON('["COLLABORATOR", "MEMBER", "OWNER"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get PR information
+        id: pr_info
+        run: |
+          PR_DATA=$(gh pr view ${{ github.event.issue.number }} --json headRefName,headRefOid,headRepository)
+          HEAD_REF=$(echo $PR_DATA | jq -r '.headRefName')
+          HEAD_SHA=$(echo $PR_DATA | jq -r '.headRefOid')
+          HEAD_REPO=$(echo $PR_DATA | jq -r '.headRepository.nameWithOwner')
+          
+          echo "pr_head_branch=${HEAD_REF}" >> $GITHUB_OUTPUT
+          echo "pr_head_sha=${HEAD_SHA}" >> $GITHUB_OUTPUT
+          echo "pr_head_repo=${HEAD_REPO}" >> $GITHUB_OUTPUT
+          echo "new_branch_name=perf/${HEAD_REF}" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create and push perf branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Ensure we can access the PR's commits (especially important for forks)
+          git fetch origin pull/${{ github.event.issue.number }}/head:pr-${{ github.event.issue.number }}-head
+          
+          # Create branch from PR head
+          git checkout -b ${{ steps.pr_info.outputs.new_branch_name }} ${{ steps.pr_info.outputs.pr_head_sha }}
+          
+          # Merge main branch
+          git fetch origin main
+          git merge origin/main --no-ff --no-edit -m "Merge main into ${{ steps.pr_info.outputs.new_branch_name }} for perf testing"
+          
+          # Push branch
+          git push origin ${{ steps.pr_info.outputs.new_branch_name }}

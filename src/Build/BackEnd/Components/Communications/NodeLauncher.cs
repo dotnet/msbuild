@@ -38,12 +38,12 @@ namespace Microsoft.Build.BackEnd
         public Process Start(string msbuildLocation, string commandLineArgs, int nodeId)
         {
             // Disable MSBuild server for a child process.
-            // In case of starting msbuild server it prevents an infinite recurson. In case of starting msbuild node we also do not want this variable to be set.
+            // In case of starting msbuild server it prevents an infinite recursion. In case of starting msbuild node we also do not want this variable to be set.
             return DisableMSBuildServer(() => StartInternal(msbuildLocation, commandLineArgs));
         }
 
         /// <summary>
-        /// Creates a new MSBuild process
+        /// Creates new MSBuild or dotnet process.
         /// </summary>
         private Process StartInternal(string msbuildLocation, string commandLineArgs)
         {

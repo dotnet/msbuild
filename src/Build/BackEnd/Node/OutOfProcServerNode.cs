@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -213,6 +211,16 @@ namespace Microsoft.Build.Experimental
         }
 
         /// <summary>
+        /// Deserializes a packet.
+        /// </summary>
+        /// <param name="packetType">The packet type.</param>
+        /// <param name="translator">The translator to use as a source for packet data.</param>
+        INodePacket INodePacketFactory.DeserializePacket(NodePacketType packetType, ITranslator translator)
+        {
+            return _packetFactory.DeserializePacket(packetType, translator);
+        }
+
+        /// <summary>
         /// Routes a packet to the appropriate handler.
         /// </summary>
         /// <param name="nodeId">The node id from which the packet was received.</param>
@@ -350,7 +358,7 @@ namespace Microsoft.Build.Experimental
             using var serverBusyMutex = ServerNamedMutex.OpenOrCreateMutex(name: _serverBusyMutexName, createdNew: out var holdsMutex);
             if (!holdsMutex)
             {
-                // Client must have send request message to server even though serer is busy.
+                // Client must have send request message to server even though server is busy.
                 // It is not a race condition, as client exclusivity is also guaranteed by name pipe which allows only one client to connect.
                 _shutdownException = new InvalidOperationException("Client requested build while server is busy processing previous client build request.");
                 _shutdownReason = NodeEngineShutdownReason.Error;
@@ -438,7 +446,7 @@ namespace Microsoft.Build.Experimental
         {
             private readonly Action<string> _writeCallback;
             private readonly Timer _timer;
-            private readonly object _lock = new();
+            private readonly LockType _lock = new LockType();
             private readonly StringWriter _internalWriter;
 
             public RedirectConsoleWriter(Action<string> writeCallback)

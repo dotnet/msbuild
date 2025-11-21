@@ -25,9 +25,9 @@ namespace Microsoft.Build.UnitTests
     public partial class TestEnvironment
     {
         // reset the default build manager and the state it might have accumulated from other tests
-#pragma warning disable CA1823 // Avoid unused private fields
+#pragma warning disable CA1823, IDE0052 // Avoid unused private fields
         private object _resetBuildManager = new ResetDefaultBuildManager();
-#pragma warning restore CA1823 // Avoid unused private fields
+#pragma warning restore CA1823, IDE0052 // Avoid unused private fields
 
         private sealed class ResetDefaultBuildManager
         {
@@ -159,7 +159,6 @@ namespace Microsoft.Build.UnitTests
             result.Add(GetMockLogger());
 
 #if MICROSOFT_BUILD_ENGINE_UNITTESTS
-            result.Add(GetSerialLogger());
             result.Add(GetParallelLogger());
 #endif
 
@@ -173,14 +172,6 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if MICROSOFT_BUILD_ENGINE_UNITTESTS
-
-        private (ILogger, Func<string>) GetSerialLogger()
-        {
-            var sb = new StringBuilder();
-            var serialFromBuild = new SerialConsoleLogger(LoggerVerbosity.Diagnostic, t => sb.Append(t), colorSet: null, colorReset: null);
-            serialFromBuild.Parameters = "NOPERFORMANCESUMMARY";
-            return (serialFromBuild, () => sb.ToString());
-        }
 
         private (ILogger, Func<string>) GetParallelLogger()
         {

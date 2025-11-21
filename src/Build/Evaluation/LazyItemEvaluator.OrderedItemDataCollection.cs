@@ -41,7 +41,6 @@ namespace Microsoft.Build.Evaluation
 
                 #region IEnumerable implementation
 
-                private ImmutableList<ItemData>.Enumerator GetEnumerator() => _listBuilder.GetEnumerator();
                 IEnumerator<ItemData> IEnumerable<ItemData>.GetEnumerator() => _listBuilder.GetEnumerator();
 
                 System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => _listBuilder.GetEnumerator();

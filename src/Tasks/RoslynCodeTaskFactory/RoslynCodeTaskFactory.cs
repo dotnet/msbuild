@@ -536,10 +536,10 @@ namespace Microsoft.Build.Tasks
             // Start with the user specified references and include all of the default references that are language agnostic
             IEnumerable<string> references = taskInfo.References.Union(DefaultReferences[String.Empty]);
 
-            if (DefaultReferences.ContainsKey(taskInfo.CodeLanguage))
+            if (DefaultReferences.TryGetValue(taskInfo.CodeLanguage, out IEnumerable<string> value))
             {
                 // Append default references for the specific language
-                references = references.Union(DefaultReferences[taskInfo.CodeLanguage]);
+                references = references.Union(value);
             }
 
             List<string> directoriesToAddToAppDomain = new();
@@ -738,6 +738,7 @@ namespace Microsoft.Build.Tasks
                     managedCompiler.OutputAssembly = new TaskItem(assemblyPath);
                     managedCompiler.References = references;
                     managedCompiler.Sources = [new TaskItem(sourceCodePath)];
+                    managedCompiler.NoWarn = "1701;1702";
                     managedCompiler.TargetType = "Library";
                     managedCompiler.UseSharedCompilation = false;
 

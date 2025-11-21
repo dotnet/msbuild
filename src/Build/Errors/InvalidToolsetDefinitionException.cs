@@ -1,11 +1,11 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 using Microsoft.Build.Framework.BuildException;
 using Microsoft.Build.Shared;
-using System;
-using System.Runtime.Serialization;
-using System.Collections.Generic;
 #if FEATURE_SECURITY_PERMISSIONS
 using System.Security.Permissions;
 #endif
@@ -18,7 +18,7 @@ namespace Microsoft.Build.Exceptions
     /// Exception subclass that ToolsetReaders should throw.
     /// </summary>
     [Serializable]
-    public class InvalidToolsetDefinitionException : BuildExceptionBase
+    public class InvalidToolsetDefinitionException : BuildExceptionBase // CodeQL [SM02227] The dangerous method is called only in debug build. It's safe for release build.
     {
         /// <summary>
         /// The MSBuild error code corresponding with this exception.

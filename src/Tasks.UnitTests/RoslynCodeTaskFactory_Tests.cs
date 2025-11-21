@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -225,6 +224,67 @@ Log.LogError(Class1.ToPrint());
                 expectedCodeLanguage: "VB",
                 verifySource: true,
                 expectedCodeType: RoslynCodeTaskFactoryCodeType.Fragment);
+        }
+
+        [Fact]
+        public void RoslynCodeTaskFactoryWithoutCS1702Warning()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                TransientTestFile taskFile = env.CreateFile(folder, "SampleTask.cs", @"
+                using Microsoft.Build.Framework;
+                using Microsoft.Build.Utilities;
+                using System.Text.Json;
+
+                public sealed class SampleTask : Microsoft.Build.Utilities.Task
+                {
+
+                    [Required]
+                    public string InputFileName { get; set; }
+
+                    public override bool Execute()
+                    {
+                        using FileStream stream = File.OpenRead(InputFileName);
+                        var stuff = JsonSerializer.Deserialize<IList<License>>(stream);
+                        return true;
+                    }
+                }
+
+                ");
+
+                TransientTestFile projectFile = env.CreateFile(folder, "Warning.proj", @$"
+                <Project DefaultTargets=""Build"" ToolsVersion=""Current"">
+                  <PropertyGroup>
+                    <TargetFramework>netstandard2.0</TargetFramework>
+                  </PropertyGroup>
+
+                  <ItemGroup>
+                    <PackageReference Include=""System.Memory"" Version=""4.6.3"" />
+                    <PackageReference Include=""System.Text.Json"" Version=""9.0.7"" />
+                  </ItemGroup>
+
+                  <UsingTask TaskName=""SampleTask"" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+                    <ParameterGroup>
+                      <InputFileName ParameterType=""System.String"" Required=""true"" />
+                    </ParameterGroup>
+                    <Task>
+                      <Reference Include=""System.Memory"" />
+                      <Reference Include=""System.Text.Json"" />
+                      <Using Namespace=""System"" />
+                      <Code Type=""Class"" Language=""cs"" Source=""{taskFile.Path}"" />
+                    </Task>
+                  </UsingTask>
+
+                  <Target Name=""Build"" Inputs=""Test.json"" Outputs=""$(OutputPath)\TestTask.output"">
+                    <SampleTask InputFileName=""Test.json"" />
+                  </Target>
+                </Project>
+                ");
+
+                string output = RunnerUtilities.ExecMSBuild(projectFile.Path + " /v:d", out bool success);
+                output.ShouldNotContain("warning CS1702");
+            }
         }
 
         [Fact]

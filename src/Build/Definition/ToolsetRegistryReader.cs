@@ -3,7 +3,6 @@
 
 #if FEATURE_WIN32_REGISTRY
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;

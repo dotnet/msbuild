@@ -98,6 +98,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' != 'true'">
+    <NoWarn>$(NoWarn);IDE0005</NoWarn>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <DocumentationFile/>
   </PropertyGroup>
