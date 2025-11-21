@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
@@ -150,6 +151,11 @@ namespace Microsoft.Build.BackEnd
         private bool _useSidecarTaskHost = false;
 
         /// <summary>
+        /// The project file of the task node.
+        /// </summary>
+        private string _projectFileOfTaskNode;
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         public TaskHostTask(
@@ -162,7 +168,8 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            int scheduledNodeId)
+            int scheduledNodeId,
+            string projectFileOfTaskNode)
         {
             ErrorUtilities.VerifyThrowInternalNull(taskType);
 
@@ -177,6 +184,7 @@ namespace Microsoft.Build.BackEnd
 #endif
             _taskHostParameters = taskHostParameters;
             _useSidecarTaskHost = useSidecarTaskHost;
+            _projectFileOfTaskNode = projectFileOfTaskNode;
 
             _packetFactory = new NodePacketFactory();
 
@@ -305,10 +313,12 @@ namespace Microsoft.Build.BackEnd
                 taskLocation = _taskType?.Assembly?.AssemblyLocation ?? string.Empty;
             }
 
+            string startupDirectory = GetStartupDirectory(_projectFileOfTaskNode, _buildComponentHost.BuildParameters.MultiThreaded);
+
             TaskHostConfiguration hostConfiguration =
                 new TaskHostConfiguration(
                         _buildComponentHost.BuildParameters.NodeId,
-                        NativeMethodsShared.GetCurrentDirectory(),
+                        startupDirectory,
                         CommunicationsUtilities.GetEnvironmentVariables(),
                         _buildComponentHost.BuildParameters.Culture,
                         _buildComponentHost.BuildParameters.UICulture,
@@ -667,6 +677,35 @@ namespace Microsoft.Build.BackEnd
             {
                 _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskHostNodeFailedToLaunch", _taskType.Type.Name, runtime, architecture, msbuildLocation, e.ErrorCode, e.Message);
             }
+        }
+
+        /// <summary>
+        /// Calculates the startup directory for the task host.
+        /// </summary>
+        internal static string GetStartupDirectory(string projectFileOfTaskNode, bool isMultiThreaded)
+        {
+            string startupDirectory = null;
+            if (isMultiThreaded)
+            {
+                try
+                {
+                    if (!string.IsNullOrEmpty(projectFileOfTaskNode))
+                    {
+                        startupDirectory = Path.GetDirectoryName(projectFileOfTaskNode);
+                    }
+                }
+                catch (Exception)
+                {
+                    // If Path.GetDirectoryName fails, we'll fall back to GetCurrentDirectory
+                }
+            }
+
+            if (string.IsNullOrEmpty(startupDirectory))
+            {
+                startupDirectory = NativeMethodsShared.GetCurrentDirectory();
+            }
+
+            return startupDirectory;
         }
     }
 }

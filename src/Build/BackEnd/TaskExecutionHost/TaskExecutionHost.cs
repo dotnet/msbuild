@@ -964,7 +964,8 @@ namespace Microsoft.Build.BackEnd
 #endif
                         IsOutOfProc,
                         scheduledNodeId,
-                        ProjectInstance.GetProperty);
+                        ProjectInstance.GetProperty,
+                        _projectInstance.FullPath);
                 }
                 else
                 {
@@ -1804,7 +1805,8 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                 AppDomainSetup,
 #endif
-                scheduledNodeId);
+                scheduledNodeId,
+                _projectInstance.FullPath);
         }
     }
 }
