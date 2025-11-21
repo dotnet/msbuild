@@ -665,6 +665,7 @@ public sealed partial class TerminalLogger : INodeLogger
             {
                 _restoreContext = c;
                 int nodeIndex = NodeIndexForContext(e.BuildEventContext);
+                EnsureNodeCapacity(nodeIndex);
                 _nodes[nodeIndex] = new TerminalNodeStatus(e.ProjectFile!, targetFramework, runtimeIdentifier, "Restore", _projects[c].Stopwatch);
             }
         }
@@ -981,7 +982,22 @@ public sealed partial class TerminalLogger : INodeLogger
     private void UpdateNodeStatus(BuildEventContext buildEventContext, TerminalNodeStatus? nodeStatus)
     {
         int nodeIndex = NodeIndexForContext(buildEventContext);
+        EnsureNodeCapacity(nodeIndex);
         _nodes[nodeIndex] = nodeStatus;
+    }
+
+    /// <summary>
+    /// Ensures that the <see cref="_nodes"/> array has enough capacity to accommodate the given index.
+    /// This is necessary for binary log replay scenarios where the replay may use fewer nodes than the original build.
+    /// </summary>
+    private void EnsureNodeCapacity(int nodeIndex)
+    {
+        if (nodeIndex >= _nodes.Length)
+        {
+            // Resize to accommodate the new index plus some extra capacity
+            int newSize = Math.Max(nodeIndex + 1, _nodes.Length * 2);
+            Array.Resize(ref _nodes, newSize);
+        }
     }
 
     /// <summary>
@@ -1100,7 +1116,9 @@ public sealed partial class TerminalLogger : INodeLogger
 
             if (hasProject && project!.IsTestProject)
             {
-                TerminalNodeStatus? node = _nodes[NodeIndexForContext(buildEventContext)];
+                int nodeIndex = NodeIndexForContext(buildEventContext);
+                EnsureNodeCapacity(nodeIndex);
+                TerminalNodeStatus? node = _nodes[nodeIndex];
 
                 // Consumes test update messages produced by VSTest and MSTest runner.
                 if (e is IExtendedBuildEventArgs extendedMessage)
