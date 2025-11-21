@@ -3,9 +3,9 @@
 <Project>
   <Import Project="Version.Details.props" Condition="Exists('Version.Details.props')" />
   <PropertyGroup>
-    <VersionPrefix>18.1.0</VersionPrefix>
+    <VersionPrefix>18.3.0</VersionPrefix>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <PackageValidationBaselineVersion>18.0.0-preview-25480-115</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>18.0.2</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
     <!-- differentiate experimental insertions to avoid package id conflicts, 
@@ -73,7 +73,7 @@
     <MicrosoftCodeAnalysisPooledObjectsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisPooledObjectsVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <BootstrapSdkVersion>10.0.100-rc.1.25451.107</BootstrapSdkVersion>
+    <BootstrapSdkVersion>10.0.100</BootstrapSdkVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386

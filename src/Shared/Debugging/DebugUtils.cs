@@ -27,25 +27,25 @@ namespace Microsoft.Build.Shared.Debugging
         }
 
         // DebugUtils are initialized early on by the test runner - during preparing data for DataMemeberAttribute of some test,
-        //  for that reason it is not easily possible to inject the DebugPath in tests via env var (unless we want to run expensive exec style test).
+        // for that reason it is not easily possible to inject the DebugPath in tests via env var (unless we want to run expensive exec style test).
         internal static void SetDebugPath()
         {
             string environmentDebugPath = FileUtilities.TrimAndStripAnyQuotes(Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH"));
             string debugDirectory = environmentDebugPath;
-
             if (Traits.Instance.DebugEngine)
             {
                 if (!string.IsNullOrWhiteSpace(debugDirectory) && FileUtilities.CanWriteToDirectory(debugDirectory))
                 {
-                    // Debug directory is writable; no need for fallbacks
+                    // Add a dedicated ".MSBuild_Logs" folder inside the user-specified path, either always or when in solution directory.
+                    debugDirectory = Path.Combine(debugDirectory, ".MSBuild_Logs");
                 }
                 else if (FileUtilities.CanWriteToDirectory(Directory.GetCurrentDirectory()))
                 {
-                    debugDirectory = Path.Combine(Directory.GetCurrentDirectory(), "MSBuild_Logs");
+                    debugDirectory = Path.Combine(Directory.GetCurrentDirectory(), ".MSBuild_Logs");
                 }
                 else
                 {
-                    debugDirectory = Path.Combine(FileUtilities.TempFileDirectory, "MSBuild_Logs");
+                    debugDirectory = Path.Combine(FileUtilities.TempFileDirectory, ".MSBuild_Logs");
                 }
 
                 // Out of proc nodes do not know the startup directory so set the environment variable for them.
