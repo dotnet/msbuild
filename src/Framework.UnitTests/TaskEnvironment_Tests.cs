@@ -119,6 +119,8 @@ namespace Microsoft.Build.UnitTests
             string var2Name = $"{prefix}_VAR2";
             string var3Name = $"{prefix}_VAR3";
 
+            var originalEnvironment = taskEnvironment.GetEnvironmentVariables().ToDictionary(k => k.Key, v => v.Value);
+
             try
             {
                 taskEnvironment.SetEnvironmentVariable(var1Name, "initial_value1");
@@ -139,6 +141,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
+                taskEnvironment.SetEnvironment(originalEnvironment);
                 Environment.SetEnvironmentVariable(var1Name, null);
                 Environment.SetEnvironmentVariable(var2Name, null);
                 Environment.SetEnvironmentVariable(var3Name, null);
@@ -231,6 +234,7 @@ namespace Microsoft.Build.UnitTests
             string testDirectory = GetResolvedTempPath();
             string testVarName = $"MSBUILD_PROCESS_TEST_{environmentType}_{Guid.NewGuid():N}";
             string testVarValue = "process_test_value";
+            string originalDirectory = Directory.GetCurrentDirectory();
 
             try
             {
@@ -258,6 +262,7 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable(testVarName, null);
+                Directory.SetCurrentDirectory(originalDirectory);
             }
         }
 
