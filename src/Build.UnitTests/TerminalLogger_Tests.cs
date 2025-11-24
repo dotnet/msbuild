@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests
             testEnvironment.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", evnVariableValue);
 
             string[]? args = argsString?.Split(' ');
-            ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(args, supportsAnsi, outputIsScreen, default);
+            (ILogger logger, _) = TerminalLogger.CreateTerminalOrConsoleLoggerWithForwarding(args, supportsAnsi, outputIsScreen, default);
 
             logger.ShouldNotBeNull();
             logger.GetType().ShouldBe(expectedType);
@@ -231,7 +231,7 @@ namespace Microsoft.Build.UnitTests
         public void CreateTerminalOrConsoleLogger_ParsesVerbosity(string? argsString, LoggerVerbosity expectedVerbosity)
         {
             string[]? args = argsString?.Split(' ');
-            ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(args, true, true, default);
+            (ILogger logger, _) = TerminalLogger.CreateTerminalOrConsoleLoggerWithForwarding(args, true, true, default);
 
             logger.ShouldNotBeNull();
             logger.Verbosity.ShouldBe(expectedVerbosity);

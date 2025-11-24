@@ -256,16 +256,32 @@ public sealed partial class TerminalLogger : INodeLogger
     public static ILogger CreateTerminalOrConsoleLogger(string[]? args = null)
     {
         (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
-
-        return CreateTerminalOrConsoleLogger(args, supportsAnsi, outputIsScreen, originalConsoleMode);
+        var (logger, _forwardingLogger) = CreateTerminalOrConsoleLoggerWithForwarding(args, supportsAnsi, outputIsScreen, originalConsoleMode);
+        return logger;
     }
 
-    internal static ILogger CreateTerminalOrConsoleLogger(string[]? args, bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode)
+    /// <summary>
+    /// Creates a Terminal logger if possible, or a Console logger. If the created logger supports remote logging,
+    /// also provides a ForwardingLoggerRecord to wrap it for forwarding.
+    /// </summary>
+    /// <param name="args">Command line arguments for the logger configuration. Currently, only 'tl|terminallogger' and 'v|verbosity' are supported right now.</param>
+    public static (ILogger, ForwardingLoggerRecord?) CreateTerminalOrConsoleLoggerWithForwarding(string[]? args = null)
+    {
+        (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
+        var (logger, forwardingLogger) = CreateTerminalOrConsoleLoggerWithForwarding(args, supportsAnsi, outputIsScreen, originalConsoleMode);
+        return (logger, forwardingLogger);
+    }
+
+    internal static (ILogger, ForwardingLoggerRecord?) CreateTerminalOrConsoleLoggerWithForwarding(string[]? args, bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode)
     {
         LoggerVerbosity verbosity = LoggerVerbosity.Normal;
         string tlEnvVariable = Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty;
         string tlArg = string.Empty;
+        string tlpArg = string.Empty;
         string? verbosityArg = string.Empty;
+
+        ILogger loggerToReturn;
+        ForwardingLoggerRecord? forwardingLogger;
 
         if (args != null)
         {
@@ -276,6 +292,9 @@ public sealed partial class TerminalLogger : INodeLogger
 
             MatchCollection verbosityMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:v|verbosity):(?'value'\w+)", RegexOptions.IgnoreCase);
             verbosityArg = verbosityMatches.OfType<Match>().LastOrDefault()?.Groups["value"].Value;
+
+            MatchCollection tlpMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:tlp|terminalloggerparameters):(?'value'.+)", RegexOptions.IgnoreCase);
+            tlpArg = string.Join(";", tlpMatches.OfType<Match>().Select(m => m.Groups["value"].Value).Where(v => !string.IsNullOrEmpty(v)));
         }
 
         verbosityArg = verbosityArg?.ToLowerInvariant() switch
@@ -302,26 +321,39 @@ public sealed partial class TerminalLogger : INodeLogger
         // if forced, always use the Terminal Logger
         if (isForced)
         {
-            return new TerminalLogger(verbosity, originalConsoleMode);
+            loggerToReturn = new TerminalLogger(verbosity, originalConsoleMode);
+            forwardingLogger = TerminalLoggerForwardingRecord(loggerToReturn, tlpArg, verbosity);
         }
 
         // If explicitly disabled, always use console logger
         if (isDisabled)
         {
             NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
-            return new ConsoleLogger(verbosity);
+            loggerToReturn = new ConsoleLogger(verbosity);
+            forwardingLogger = null;
         }
 
         // If not forced and system doesn't support terminal features, fall back to console logger
         if (effectiveValue == "auto" && supportsAnsi && outputIsScreen)
         {
-            return new TerminalLogger(verbosity, originalConsoleMode);
+            loggerToReturn = new TerminalLogger(verbosity, originalConsoleMode);
+            forwardingLogger = TerminalLoggerForwardingRecord(loggerToReturn, tlpArg, verbosity);
         }
         else
         {
             // otherwise the state only allows fallback to console logger
             NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
-            return new ConsoleLogger(verbosity);
+            loggerToReturn = new ConsoleLogger(verbosity);
+            forwardingLogger = null;
+        }
+
+        return (loggerToReturn, forwardingLogger);
+
+        static ForwardingLoggerRecord TerminalLoggerForwardingRecord(ILogger loggerToReturn, string tlpArg, LoggerVerbosity verbosity)
+        {
+            var tlForwardingType = typeof(ForwardingTerminalLogger);
+            LoggerDescription forwardingLoggerDescription = new LoggerDescription(tlForwardingType.FullName, tlForwardingType.Assembly.FullName, null, tlpArg, verbosity);
+            return new ForwardingLoggerRecord(loggerToReturn, forwardingLoggerDescription);
         }
     }
 
