@@ -237,6 +237,9 @@ namespace Microsoft.Build.UnitTests
             logger.Verbosity.ShouldBe(expectedVerbosity);
         }
 
+
+        #region Helper methods to create BuildEventArgs with BuildEventContext
+
         /// <summary>
         /// Helper function to create a BuildEventContext keyed to specific scenarios.
         /// When you want to refer to the same eval properties, use the same evalId.
@@ -657,6 +660,7 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
+        #region Helper methods to call specific orders of messages
         private void CallAllTypesOfMessagesWarningAndError()
         {
             _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs(_immediateMessageString, MessageImportance.High));
@@ -687,6 +691,7 @@ namespace Microsoft.Build.UnitTests
                 "TLTESTFINISH",
                 new Dictionary<string, string?>() { { "total", "10" }, { "passed", "7" }, { "skipped", "2" }, { "failed", "1" } }));
         }
+        #endregion
 
         [Fact]
         public Task PrintBuildSummaryQuietVerbosity_FailedWithErrors()
@@ -1057,48 +1062,57 @@ namespace Microsoft.Build.UnitTests
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
-        public async Task DisplayNodesRestoresStatusAfterMSBuildTaskYields_TestProject()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task DisplayNodesRestoresStatusAfterMSBuildTaskYields_TestProject(bool runOnCentralNode)
         {
             // 1. Start Build
             _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
 
+            // the project can be evaluated and built either locally or remotely - so the actual innards should happen on either the central or remote event source
+
+            var targetNodeEventSource = runOnCentralNode ? _centralNodeEventSource : _remoteNodeEventSource;
+            // default build context is for the 'central' node
+            var buildContext = runOnCentralNode ? null : MakeBuildEventContext(nodeId: 1);
+
             // 2. Project Eval Finished
-            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
+            targetNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile, buildEventContext: buildContext));
 
             // 3. Project Started
-            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile));
+            targetNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, buildEventContext: buildContext));
 
             // 4. Target Started (Test Target)
             // This should set the display name to "Testing"
-            _centralNodeEventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "_TestRunStart"));
+            targetNodeEventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "_TestRunStart", buildEventContext: buildContext));
 
             // 5. Task Started (The "Outer" task)
-            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "OuterTask"));
+            targetNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "OuterTask", buildEventContext: buildContext));
 
             // Verify status shows Testing
             _terminallogger.DisplayNodes();
 
             // 6. MSBuild Task Started (Yield)
-            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "MSBuild"));
+            targetNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "MSBuild", buildEventContext: buildContext));
 
             // Verify status is cleared
             _terminallogger.DisplayNodes();
 
             // 7. MSBuild Task Finished (Resume)
             // This should restore the status to "Testing" (not "_TestRunStart")
-            _centralNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "MSBuild", true));
+            targetNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "MSBuild", true, buildEventContext: buildContext));
 
             // 8. Verify status shows Testing again
             _terminallogger.DisplayNodes();
 
             // Cleanup
-            _centralNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "OuterTask", true));
-            _centralNodeEventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs(_projectFile, "_TestRunStart", true));
-            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, true));
+            targetNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "OuterTask", true, buildEventContext: buildContext));
+            targetNodeEventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs(_projectFile, "_TestRunStart", true, buildEventContext: buildContext));
+            targetNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, true, buildEventContext: buildContext));
+
             _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
 
-            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform().UseParameters(runOnCentralNode);
         }
     }
 }
