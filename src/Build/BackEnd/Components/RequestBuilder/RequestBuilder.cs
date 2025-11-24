@@ -1086,7 +1086,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
                 {
-                    _requestEntry.TaskEnvironment.ProjectDirectory = new Framework.PathHelpers.AbsolutePath(_requestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
+                    _requestEntry.TaskEnvironment.ProjectDirectory = new Framework.AbsolutePath(_requestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
                 }
                 else
                 {
@@ -1429,7 +1429,7 @@ namespace Microsoft.Build.BackEnd
                 
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_0))
                 {
-                    _requestEntry.TaskEnvironment.ProjectDirectory = new Framework.PathHelpers.AbsolutePath(_requestEntry.RequestConfiguration.SavedCurrentDirectory, ignoreRootedCheck: true);
+                    _requestEntry.TaskEnvironment.ProjectDirectory = new Framework.AbsolutePath(_requestEntry.RequestConfiguration.SavedCurrentDirectory, ignoreRootedCheck: true);
                 }
                 else
                 {

@@ -345,7 +345,7 @@ namespace Microsoft.Build.BackEnd
             ElementLocation taskLocation,
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
-            IDictionary<string, string> taskIdentityParameters,
+            in TaskHostParameters taskIdentityParameters,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
