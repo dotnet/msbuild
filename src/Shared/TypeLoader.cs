@@ -39,7 +39,7 @@ namespace Microsoft.Build.Shared
         private static readonly ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfReflectionOnlyLoadedTypesByFilter = new ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
 
         /// <summary>
-        /// Type filter for this typeloader
+        /// Type filter for this typeloader.
         /// </summary>
         private Func<Type, object, bool> _isDesiredType;
 
@@ -48,7 +48,14 @@ namespace Microsoft.Build.Shared
         private static readonly string[] runtimeAssemblies = findRuntimeAssembliesWithMicrosoftBuildFramework();
         private static string microsoftBuildFrameworkPath;
 
-        // We need to append Microsoft.Build.Framework from next to the executing assembly first to make sure it's loaded before the runtime variant.
+        /// <summary>
+        /// Gathers a list of runtime assemblies for the <see cref="MetadataLoadContext"/>.
+        /// This includes assemblies from the MSBuild installation directory, the current .NET runtime directory,
+        /// and on .NET Framework, assemblies from older framework versions (2.0, 3.5).
+        /// The path to the current `Microsoft.Build.Framework.dll` is also stored to ensure it's prioritized
+        /// for resolving essential types like <see cref="ITaskItem"/>.
+        /// These paths are used to create a <see cref="PathAssemblyResolver"/> for the <see cref="MetadataLoadContext"/>.
+        /// </summary>
         private static string[] findRuntimeAssembliesWithMicrosoftBuildFramework()
         {
             string msbuildDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -56,7 +63,15 @@ namespace Microsoft.Build.Shared
             string[] msbuildAssemblies = Directory.GetFiles(msbuildDirectory, "*.dll");
             string[] runtimeAssemblies = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
 
+#if NETFRAMEWORK
+            string[] msbuildCLR2Assemblies = Directory.GetFiles(FrameworkLocationHelper.PathToDotNetFrameworkV20, "*.dll");
+            string[] msbuildCLR35Assemblies = Directory.GetFiles(FrameworkLocationHelper.PathToDotNetFrameworkV35, "*.dll");
+
+            return [.. runtimeAssemblies, .. msbuildAssemblies, .. msbuildCLR2Assemblies, .. msbuildCLR35Assemblies];
+#else
+
             return [.. runtimeAssemblies, .. msbuildAssemblies];
+#endif
         }
 
         /// <summary>
@@ -191,7 +206,10 @@ namespace Microsoft.Build.Shared
         private static Assembly LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
         {
             string path = assemblyLoadInfo.AssemblyFile;
-            string[] localAssemblies = Directory.GetFiles(Path.GetDirectoryName(path), "*.dll");
+            string assemblyDirectory = Path.GetDirectoryName(path);
+            string[] dlls = Directory.GetFiles(assemblyDirectory, "*.dll");
+            string[] exes = Directory.GetFiles(assemblyDirectory, "*.exe");
+            string[] localAssemblies = [..dlls, .. exes];
 
             // Deduplicate between MSBuild assemblies and task dependencies.
             Dictionary<string, string> assembliesDictionary = new(localAssemblies.Length + runtimeAssemblies.Length);
