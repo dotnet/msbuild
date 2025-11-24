@@ -373,6 +373,7 @@ public sealed partial class TerminalLogger : INodeLogger
         eventSource.TargetStarted += TargetStarted;
         eventSource.TargetFinished += TargetFinished;
         eventSource.TaskStarted += TaskStarted;
+        eventSource.TaskFinished += TaskFinished;
         eventSource.StatusEventRaised += StatusEventRaised;
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
@@ -954,6 +955,7 @@ public sealed partial class TerminalLogger : INodeLogger
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
 
             string targetName = e.TargetName;
+            project.CurrentTarget = targetName;
             if (targetName == CachePluginStartTarget)
             {
                 project.IsCachePluginProject = true;
@@ -1038,6 +1040,25 @@ public sealed partial class TerminalLogger : INodeLogger
             if (_projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
             {
                 project.Stopwatch.Stop();
+            }
+        }
+    }
+
+    /// <summary>
+    /// The <see cref="IEventSource.TaskFinished"/> callback.
+    /// </summary>
+    private void TaskFinished(object sender, TaskFinishedEventArgs e)
+    {
+        var buildEventContext = e.BuildEventContext;
+        if (_restoreContext is null && buildEventContext is not null && e.TaskName == "MSBuild")
+        {
+            if (_projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
+            {
+                project.Stopwatch.Start();
+
+                string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
+                TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, project.CurrentTarget ?? "", project.Stopwatch);
+                UpdateNodeStatus(buildEventContext, nodeStatus);
             }
         }
     }
