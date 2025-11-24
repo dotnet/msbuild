@@ -2,6 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if NETFRAMEWORK
+using IOPath = Microsoft.IO.Path;
+#else
+using IOPath = System.IO.Path;
+#endif
+
 
 namespace Microsoft.Build.Framework
 {
@@ -54,10 +60,14 @@ namespace Microsoft.Build.Framework
                 throw new ArgumentException("Path must not be null or empty.", nameof(path));
             }
 
-            if (!System.IO.Path.IsPathRooted(path))
+            // Path.IsPathFullyQualified is not available in .NET Standard 2.0
+            // in .NET Framework it's provided by package and in .NET it's built-in
+#if NETFRAMEWORK || NET
+            if (!IOPath.IsPathFullyQualified(path))
             {
                 throw new ArgumentException("Path must be rooted.", nameof(path));
             }
+#endif
         }
 
         /// <summary>
