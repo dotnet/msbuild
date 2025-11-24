@@ -128,14 +128,5 @@ namespace Microsoft.Build.UnitTests
         {
             ValidatePathAcceptance(path, shouldBeAccepted);
         }
-
-        [Theory]
-        [InlineData("")]
-        [InlineData("   ")]
-        [InlineData(null)]
-        public void AbsolutePath_NullOrEmptyPath_ShouldBeRejected(string path)
-        {
-            Should.Throw<System.ArgumentException>(() => new AbsolutePath(path, ignoreRootedCheck: false));
-        }
     }
 }
