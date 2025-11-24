@@ -964,8 +964,6 @@ public sealed partial class TerminalLogger : INodeLogger
 
             if (targetName == _testStartTarget)
             {
-                targetName = "Testing";
-
                 // Use the minimal start time, so if we run tests in parallel, we can calculate duration
                 // as this start time, minus time when tests finished.
                 _testStartTime = _testStartTime == null
@@ -975,7 +973,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 project.IsTestProject = true;
             }
 
-            TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, targetName, project.Stopwatch);
+            TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, GetDisplayTargetName(targetName), project.Stopwatch);
             UpdateNodeStatus(buildEventContext, nodeStatus);
         }
     }
@@ -1057,7 +1055,9 @@ public sealed partial class TerminalLogger : INodeLogger
                 project.Stopwatch.Start();
 
                 string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
-                TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, project.CurrentTarget ?? "", project.Stopwatch);
+                string targetName = project.CurrentTarget ?? "";
+
+                TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, GetDisplayTargetName(targetName), project.Stopwatch);
                 UpdateNodeStatus(buildEventContext, nodeStatus);
             }
         }
@@ -1411,6 +1411,17 @@ public sealed partial class TerminalLogger : INodeLogger
     #endregion
 
     #region Helpers
+
+    /// <summary>
+    /// Returns the display name for the given target.
+    /// </summary>
+    /// <remarks>
+    /// This is used to map internal target names (like _TestRunStart) to user-friendly names (like Testing).
+    /// </remarks>
+    private static string GetDisplayTargetName(string targetName)
+    {
+        return targetName == _testStartTarget ? "Testing" : targetName;
+    }
 
     /// <summary>
     /// Construct a build result summary string.

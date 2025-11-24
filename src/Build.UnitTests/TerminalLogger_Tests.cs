@@ -986,5 +986,49 @@ namespace Microsoft.Build.UnitTests
 
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
+
+        [Fact]
+        public async Task DisplayNodesRestoresStatusAfterMSBuildTaskYields_TestProject()
+        {
+            // 1. Start Build
+            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+
+            // 2. Project Eval Finished
+            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile));
+
+            // 3. Project Started
+            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile));
+
+            // 4. Target Started (Test Target)
+            // This should set the display name to "Testing"
+            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "_TestRunStart"));
+
+            // 5. Task Started (The "Outer" task)
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "OuterTask"));
+
+            // Verify status shows Testing
+            _terminallogger.DisplayNodes();
+
+            // 6. MSBuild Task Started (Yield)
+            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "MSBuild"));
+
+            // Verify status is cleared
+            _terminallogger.DisplayNodes();
+
+            // 7. MSBuild Task Finished (Resume)
+            // This should restore the status to "Testing" (not "_TestRunStart")
+            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "MSBuild", true));
+
+            // 8. Verify status shows Testing again
+            _terminallogger.DisplayNodes();
+
+            // Cleanup
+            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "OuterTask", true));
+            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile, "_TestRunStart", true));
+            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, true));
+            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(true));
+
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
     }
 }
