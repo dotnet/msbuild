@@ -45,7 +45,8 @@ jobs:
       }
 
       if (!($isInitialCommit -or $isVersionBumped)) {
-        throw "Hello! I noticed that you're targeting one of our servicing branches. You need to increase the revision version number (the last part) of 'VersionPrefix' in eng/Versions.props."
+        Write-Host "##vso[task.logissue type=error;sourcepath=eng/Versions.props;linenumber=6;]Hello! I noticed that you're targeting one of our servicing branches. You need to increase the revision version number (the last part) of 'VersionPrefix' in eng/Versions.props."
+        exit 1
       }
     condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
     displayName: "Check if patch version is bumped up"
@@ -267,7 +268,7 @@ jobs:
   pool:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
       name: NetCore-Public
-      demands: ImageOverride -equals windows.vs2022preview.scout.amd64.open
+      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
     ${{ if ne(variables['System.TeamProject'], 'public') }}:
       name: VSEngSS-MicroBuild2022-1ES
       demands: agent.os -equals Windows_NT
