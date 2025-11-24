@@ -44,6 +44,7 @@ parameters:
     values:
       - auto
       - main
+      - rel/d18.3
       - rel/d18.0
       - rel/d17.14
       - rel/d17.13
@@ -66,7 +67,9 @@ parameters:
 variables:
   # `auto` should work every time and selecting a branch in parameters is likely to fail due to incompatible versions in MSBuild and VS
   - name: AutoInsertTargetBranch
-    ${{ if eq(variables['Build.SourceBranchName'], 'vs18.0') }}:
+    ${{ if eq(variables['Build.SourceBranchName'], 'vs18.3') }}:
+      value: 'rel/d18.3'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs18.0') }}:
       value: 'rel/d18.0'
     ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.14') }}:
       value: 'rel/d17.14'
@@ -233,8 +236,19 @@ extends:
                   )
               }
               $propsValue = $props -join ";"
-              Write-Host "Setting InsertPackagePropsValues to '$propsValue'"
-              Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($propsValue)"
+
+              # For 18.0+, don't update PackageReferences so that VS packages like VSSDK
+              # can choose their own versioning and don't always depend on a super fresh MSBuild
+              if ("$(InsertTargetBranch)" -in @("rel/d17.10", "rel/d17.12", "rel/d17.14"))
+              {
+                  Write-Host "Setting InsertPackagePropsValues to '$propsValue'"
+                  Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($propsValue)"
+              }
+              else
+              {
+                  Write-Host "Unsetting InsertPackagePropsValues"
+                  Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]"
+              }
 
               # autocomplete main
               $autocomplete = "false"

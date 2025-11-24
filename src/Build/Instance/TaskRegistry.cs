@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -16,7 +15,6 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
@@ -420,17 +418,16 @@ namespace Microsoft.Build.Execution
                 parameterGroupAndTaskElementRecord.ExpandUsingTask<P, I>(projectUsingTaskXml, expander, expanderOptions);
             }
 
-            Dictionary<string, string> taskFactoryParameters = null;
+            TaskHostParameters taskFactoryParameters = TaskHostParameters.Empty;
             string runtime = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Runtime, expanderOptions, projectUsingTaskXml.RuntimeLocation);
             string architecture = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Architecture, expanderOptions, projectUsingTaskXml.ArchitectureLocation);
             string overrideUsingTask = expander.ExpandIntoStringLeaveEscaped(projectUsingTaskXml.Override, expanderOptions, projectUsingTaskXml.OverrideLocation);
 
-            if ((runtime != String.Empty) || (architecture != String.Empty))
+            if ((runtime != string.Empty) || (architecture != string.Empty))
             {
-                taskFactoryParameters = CreateTaskFactoryParametersDictionary();
-
-                taskFactoryParameters.Add(XMakeAttributes.runtime, runtime == String.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : runtime);
-                taskFactoryParameters.Add(XMakeAttributes.architecture, architecture == String.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
+                taskFactoryParameters = new TaskHostParameters(
+                    runtime == string.Empty ? XMakeAttributes.MSBuildRuntimeValues.any : runtime,
+                    architecture == string.Empty ? XMakeAttributes.MSBuildArchitectureValues.any : architecture);
             }
 
             taskRegistry.RegisterTask(
@@ -444,13 +441,6 @@ namespace Microsoft.Build.Execution
                 ConversionUtilities.ValidBooleanTrue(overrideUsingTask));
         }
 
-        private static Dictionary<string, string> CreateTaskFactoryParametersDictionary(int? initialCount = null)
-        {
-            return initialCount == null
-                ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-                : new Dictionary<string, string>(initialCount.Value, StringComparer.OrdinalIgnoreCase);
-        }
-
         /// <summary>
         /// Given a task name, this method retrieves the task class. If the task has been requested before, it will be found in
         /// the class cache; otherwise, &lt;UsingTask&gt; declarations will be used to search the appropriate assemblies.
@@ -458,10 +448,11 @@ namespace Microsoft.Build.Execution
         internal TaskFactoryWrapper GetRegisteredTask(
             string taskName,
             string taskProjectFile,
-            IDictionary<string, string> taskIdentityParameters,
+            in TaskHostParameters taskIdentityParameters,
             bool exactMatchRequired,
             TargetLoggingContext targetLoggingContext,
-            ElementLocation elementLocation)
+            ElementLocation elementLocation,
+            bool isMultiThreadedBuild)
         {
 #if DEBUG
             ErrorUtilities.VerifyThrowInternalError(_isInitialized, "Attempt to read from TaskRegistry before its initialization was finished.");
@@ -469,14 +460,14 @@ namespace Microsoft.Build.Execution
             TaskFactoryWrapper taskFactory = null;
 
             // If there are no usingtask tags in the project don't bother caching or looking for tasks locally
-            RegisteredTaskRecord record = GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out bool retrievedFromCache);
+            RegisteredTaskRecord record = GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out bool retrievedFromCache, isMultiThreadedBuild);
 
             if (record != null)
             {
                 // if the given task name is longer than the registered task name
                 // we will use the longer name to help disambiguate between multiple matches
                 string mostSpecificTaskName = (taskName.Length > record.RegisteredName.Length) ? taskName : record.RegisteredName;
-                taskFactory = record.GetTaskFactoryFromRegistrationRecord(mostSpecificTaskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation);
+                taskFactory = record.GetTaskFactoryFromRegistrationRecord(mostSpecificTaskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, isMultiThreadedBuild);
 
                 if (taskFactory != null && !retrievedFromCache)
                 {
@@ -510,19 +501,21 @@ namespace Microsoft.Build.Execution
         /// <param name="targetLoggingContext">The logging context.</param>
         /// <param name="elementLocation">The location of the task element in the project file.</param>
         /// <param name="retrievedFromCache">True if the record was retrieved from the cache.</param>
+        /// <param name="isMultiThreadedBuild">Whether the build is running in multi-threaded mode.</param>
         /// <returns>The task registration record, or null if none was found.</returns>
         internal RegisteredTaskRecord GetTaskRegistrationRecord(
             string taskName,
             string taskProjectFile,
-            IDictionary<string, string> taskIdentityParameters,
+            in TaskHostParameters taskIdentityParameters,
             bool exactMatchRequired,
             TargetLoggingContext targetLoggingContext,
             ElementLocation elementLocation,
-            out bool retrievedFromCache)
+            out bool retrievedFromCache,
+            bool isMultiThreadedBuild)
         {
             RegisteredTaskRecord taskRecord = null;
             retrievedFromCache = false;
-            RegisteredTaskIdentity taskIdentity = new RegisteredTaskIdentity(taskName, taskIdentityParameters);
+            RegisteredTaskIdentity taskIdentity = new(taskName, taskIdentityParameters);
 
             // Project-level override tasks are keyed by task name (unqualified).
             // Because Foo.Bar and Baz.Bar are both valid, they are stored
@@ -545,7 +538,7 @@ namespace Microsoft.Build.Execution
             if (_toolset != null)
             {
                 TaskRegistry toolsetRegistry = _toolset.GetOverrideTaskRegistry(targetLoggingContext, RootElementCache);
-                taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
+                taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache, isMultiThreadedBuild);
             }
 
             // Try the current task registry
@@ -580,7 +573,7 @@ namespace Microsoft.Build.Execution
                                 // parameters.
                                 if (record != null)
                                 {
-                                    if (record.CanTaskBeCreatedByFactory(taskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation))
+                                    if (record.CanTaskBeCreatedByFactory(taskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, isMultiThreadedBuild))
                                     {
                                         retrievedFromCache = true;
                                         return record;
@@ -597,14 +590,14 @@ namespace Microsoft.Build.Execution
 
                 // look for the given task name in the registry; if not found, gather all registered task names that partially
                 // match the given name
-                taskRecord = GetMatchingRegistration(taskName, registrations, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation);
+                taskRecord = GetMatchingRegistration(taskName, registrations, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, isMultiThreadedBuild);
             }
 
             // If we didn't find the task but we have a fallback registry in the toolset state, try that one.
             if (taskRecord == null && _toolset != null)
             {
                 TaskRegistry toolsetRegistry = _toolset.GetTaskRegistry(targetLoggingContext, RootElementCache);
-                taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache);
+                taskRecord = toolsetRegistry.GetTaskRegistrationRecord(taskName, taskProjectFile, taskIdentityParameters, exactMatchRequired, targetLoggingContext, elementLocation, out retrievedFromCache, isMultiThreadedBuild);
             }
 
             // Cache the result, even if it is null.  We should never again do the work we just did, for this task name.
@@ -682,7 +675,7 @@ namespace Microsoft.Build.Execution
             string taskName,
             AssemblyLoadInfo assemblyLoadInfo,
             string taskFactory,
-            Dictionary<string, string> taskFactoryParameters,
+            in TaskHostParameters taskFactoryParameters,
             RegisteredTaskRecord.ParameterGroupAndTaskElementRecord inlineTaskRecord,
             LoggingContext loggingContext,
             ProjectUsingTaskElement projectUsingTaskInXml,
@@ -764,9 +757,10 @@ namespace Microsoft.Build.Execution
             string taskName,
             IEnumerable<RegisteredTaskRecord> taskRecords,
             string taskProjectFile,
-            IDictionary<string, string> taskIdentityParameters,
+            TaskHostParameters taskIdentityParameters,
             TargetLoggingContext targetLoggingContext,
-            ElementLocation elementLocation)
+            ElementLocation elementLocation,
+            bool isMultiThreadedBuild)
             =>
                 taskRecords.FirstOrDefault(r =>
                     r.CanTaskBeCreatedByFactory(
@@ -776,7 +770,8 @@ namespace Microsoft.Build.Execution
                         taskProjectFile,
                         taskIdentityParameters,
                         targetLoggingContext,
-                        elementLocation));
+                        elementLocation,
+                        isMultiThreadedBuild));
 
         /// <summary>
         /// An object representing the identity of a task -- not just task name, but also
@@ -786,34 +781,15 @@ namespace Microsoft.Build.Execution
         internal class RegisteredTaskIdentity : ITranslatable
         {
             private string _name;
-            private IDictionary<string, string> _taskIdentityParameters;
+            private TaskHostParameters _taskIdentityParameters;
 
             /// <summary>
-            /// Constructor
+            /// Constructor.
             /// </summary>
-            internal RegisteredTaskIdentity(string name, IDictionary<string, string> taskIdentityParameters)
+            internal RegisteredTaskIdentity(string name, in TaskHostParameters taskIdentityParameters)
             {
                 _name = name;
-
-                // The ReadOnlyDictionary is a *wrapper*, the Dictionary is the copy.
-                _taskIdentityParameters = taskIdentityParameters == null ? null : new ReadOnlyDictionary<string, string>(CreateTaskIdentityParametersDictionary(taskIdentityParameters));
-            }
-
-            private static IDictionary<string, string> CreateTaskIdentityParametersDictionary(IDictionary<string, string> initialState = null, int? initialCount = null)
-            {
-                ErrorUtilities.VerifyThrow(initialState == null || initialCount == null, "at most one can be non-null");
-
-                if (initialState != null)
-                {
-                    return new Dictionary<string, string>(initialState, StringComparer.OrdinalIgnoreCase);
-                }
-
-                if (initialCount != null)
-                {
-                    return new Dictionary<string, string>(initialCount.Value, StringComparer.OrdinalIgnoreCase);
-                }
-
-                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                _taskIdentityParameters = taskIdentityParameters.IsEmpty ? TaskHostParameters.Empty : taskIdentityParameters;
             }
 
             public RegisteredTaskIdentity()
@@ -829,12 +805,9 @@ namespace Microsoft.Build.Execution
             }
 
             /// <summary>
-            /// The identity parameters
+            /// The identity parameters.
             /// </summary>
-            public IDictionary<string, string> TaskIdentityParameters
-            {
-                get { return _taskIdentityParameters; }
-            }
+            public TaskHostParameters TaskIdentityParameters => _taskIdentityParameters;
 
             /// <summary>
             /// Comparer used to figure out whether two RegisteredTaskIdentities are equal or not.
@@ -888,14 +861,9 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 public static bool IsPartialMatch(RegisteredTaskIdentity x, RegisteredTaskIdentity y)
                 {
-                    if (TypeLoader.IsPartialTypeNameMatch(x.Name, y.Name))
-                    {
-                        return IdentityParametersMatch(x.TaskIdentityParameters, y.TaskIdentityParameters, false /* fuzzy match */);
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    return TypeLoader.IsPartialTypeNameMatch(x.Name, y.Name)
+                        ? IdentityParametersMatch(x.TaskIdentityParameters, y.TaskIdentityParameters, false /* fuzzy match */)
+                        : false;
                 }
 
                 /// <summary>
@@ -939,20 +907,11 @@ namespace Microsoft.Build.Execution
                     // Since equality for the exact comparer depends on the exact values of the parameters,
                     // we need our hash code to depend on them as well. However, for fuzzy matches, we just
                     // need the ultimate meaning of the parameters to be the same.
-                    string runtime = null;
-                    string architecture = null;
-
-                    if (obj.TaskIdentityParameters != null)
-                    {
-                        obj.TaskIdentityParameters.TryGetValue(XMakeAttributes.runtime, out runtime);
-                        obj.TaskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out architecture);
-                    }
-
                     int paramHash;
                     if (_exactMatchRequired)
                     {
-                        int runtimeHash = runtime == null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(runtime);
-                        int architectureHash = architecture == null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(architecture);
+                        int runtimeHash = obj.TaskIdentityParameters.Runtime == null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(obj.TaskIdentityParameters.Runtime);
+                        int architectureHash = obj.TaskIdentityParameters.Architecture == null ? 0 : StringComparer.OrdinalIgnoreCase.GetHashCode(obj.TaskIdentityParameters.Architecture);
 
                         paramHash = runtimeHash ^ architectureHash;
                     }
@@ -971,65 +930,40 @@ namespace Microsoft.Build.Execution
                 }
 
                 /// <summary>
-                /// Returns true if the two dictionaries representing sets of task identity parameters match; false otherwise.
+                /// Returns true if the two TaskHostParameters match; false otherwise.
                 /// Internal so that RegisteredTaskRecord can use this function in its determination of whether the task factory
                 /// supports a certain task identity.
                 /// </summary>
-                private static bool IdentityParametersMatch(IDictionary<string, string> x, IDictionary<string, string> y, bool exactMatchRequired)
+                private static bool IdentityParametersMatch(in TaskHostParameters x, in TaskHostParameters y, bool exactMatchRequired)
                 {
-                    if (x == null && y == null)
+                    // Both empty - match
+                    if (x.IsEmpty && y.IsEmpty)
                     {
                         return true;
                     }
 
                     if (exactMatchRequired)
                     {
-                        if (x == null || y == null)
+                        // For exact match, one empty means no match
+                        if (x.IsEmpty || y.IsEmpty)
                         {
                             return false;
                         }
 
-                        if (x.Count != y.Count)
-                        {
-                            return false;
-                        }
-
-                        // make sure that each parameter value matches as well
-                        foreach (KeyValuePair<string, string> param in x)
-                        {
-                            string value;
-                            if (y.TryGetValue(param.Key, out value))
-                            {
-                                if (!String.Equals(param.Value, value, StringComparison.OrdinalIgnoreCase))
-                                {
-                                    return false;
-                                }
-                            }
-                            else
-                            {
-                                return false;
-                            }
-                        }
+                        // For exact match, only identity properties must be equal
+                        // Paths are NOT part of identity - they're just resolved locations
+                        return string.Equals(x.Runtime, y.Runtime, StringComparison.OrdinalIgnoreCase) &&
+                               string.Equals(x.Architecture, y.Architecture, StringComparison.OrdinalIgnoreCase) &&
+                               x.TaskHostFactoryExplicitlyRequested == y.TaskHostFactoryExplicitlyRequested;
                     }
                     else
                     {
-                        // we need to fuzzy-match the parameters as well
-                        string runtimeX = null;
-                        string runtimeY = null;
-                        string architectureX = null;
-                        string architectureY = null;
-
-                        if (x != null)
-                        {
-                            x.TryGetValue(XMakeAttributes.runtime, out runtimeX);
-                            x.TryGetValue(XMakeAttributes.architecture, out architectureX);
-                        }
-
-                        if (y != null)
-                        {
-                            y.TryGetValue(XMakeAttributes.runtime, out runtimeY);
-                            y.TryGetValue(XMakeAttributes.architecture, out architectureY);
-                        }
+                        // Fuzzy match: null is treated as "don't care"
+                        // Only check runtime and architecture for fuzzy matching
+                        string runtimeX = x.Runtime;
+                        string runtimeY = y.Runtime;
+                        string architectureX = x.Architecture;
+                        string architectureY = y.Architecture;
 
                         // null is OK -- it's treated as a "don't care"
                         if (!XMakeAttributes.RuntimeValuesMatch(runtimeX, runtimeY))
@@ -1043,7 +977,7 @@ namespace Microsoft.Build.Execution
                         }
                     }
 
-                    // if we didn't return before now, all parameters were found and matched.
+                    // if we didn't return before now, all parameters matched
                     return true;
                 }
             }
@@ -1051,14 +985,7 @@ namespace Microsoft.Build.Execution
             public void Translate(ITranslator translator)
             {
                 translator.Translate(ref _name);
-
-                IDictionary<string, string> taskIdentityParameters = _taskIdentityParameters;
-                translator.TranslateDictionary(ref taskIdentityParameters, count => CreateTaskIdentityParametersDictionary(null, count));
-
-                if (translator.Mode == TranslationDirection.ReadFromStream && taskIdentityParameters != null)
-                {
-                    _taskIdentityParameters = new ReadOnlyDictionary<string, string>(taskIdentityParameters);
-                }
+                translator.Translate(ref _taskIdentityParameters);
             }
         }
 
@@ -1152,9 +1079,9 @@ namespace Microsoft.Build.Execution
             private Dictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
 
             /// <summary>
-            /// Set of parameters that can be used by the task factory specifically.
+            /// Parameters that can be used by the task factory specifically.
             /// </summary>
-            private Dictionary<string, string> _taskFactoryParameters;
+            private TaskHostParameters _taskFactoryParameters;
 
             /// <summary>
             /// Encapsulates the parameters and the body of the task element for the inline task.
@@ -1181,7 +1108,7 @@ namespace Microsoft.Build.Execution
             {
                 public short ExecutedCount { get; private set; } = 0;
                 public long TotalMemoryConsumption { get; private set; } = 0;
-                private readonly Stopwatch _executedSw  = new Stopwatch();
+                private readonly Stopwatch _executedSw = new Stopwatch();
                 private long _memoryConsumptionOnStart;
 
                 public TimeSpan ExecutedTime => _executedSw.Elapsed;
@@ -1223,7 +1150,7 @@ namespace Microsoft.Build.Execution
                 string registeredName,
                 AssemblyLoadInfo assemblyLoadInfo,
                 string taskFactory,
-                Dictionary<string, string> taskFactoryParameters,
+                in TaskHostParameters taskFactoryParameters,
                 ParameterGroupAndTaskElementRecord inlineTask,
                 int registrationOrderId,
                 string containingFileFullPath)
@@ -1236,11 +1163,13 @@ namespace Microsoft.Build.Execution
                 _parameterGroupAndTaskBody = inlineTask;
                 _registrationOrderId = registrationOrderId;
 
-                if (String.IsNullOrEmpty(taskFactory))
+                if (string.IsNullOrEmpty(taskFactory))
                 {
-                    if (taskFactoryParameters != null)
+                    if (!taskFactoryParameters.IsEmpty)
                     {
-                        ErrorUtilities.VerifyThrow(taskFactoryParameters.Count == 2, "if the parameter dictionary is non-null, it should contain both parameters when we get here!");
+                        ErrorUtilities.VerifyThrow(
+                            taskFactoryParameters.Runtime != null && taskFactoryParameters.Architecture != null,
+                            "if the parameters are non-null, it should contain both Runtime and Architecture when we get here!");
                     }
 
                     _taskFactory = AssemblyTaskFactory;
@@ -1319,13 +1248,12 @@ namespace Microsoft.Build.Execution
             }
 
             /// <summary>
-            /// Gets the set of parameters for the task factory
+            /// Gets the set of parameters for the task factory.
             /// </summary>
-            internal IDictionary<string, string> TaskFactoryParameters
+            internal TaskHostParameters TaskFactoryParameters
             {
                 [DebuggerStepThrough]
-                get
-                { return _taskFactoryParameters; }
+                get => _taskFactoryParameters;
             }
 
             /// <summary>
@@ -1355,7 +1283,7 @@ namespace Microsoft.Build.Execution
             /// loads an external file and uses that to generate the tasks.
             /// </summary>
             /// <returns>true if the task can be created by the factory, false if it cannot be created</returns>
-            internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
+            internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, TaskHostParameters taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, bool isMultiThreadedBuild)
             {
                 // First check (fast path - no locking)
                 if (_taskNamesCreatableByFactory == null)
@@ -1387,7 +1315,7 @@ namespace Microsoft.Build.Execution
 
                 try
                 {
-                    bool haveTaskFactory = GetTaskFactory(targetLoggingContext, elementLocation, taskProjectFile);
+                    bool haveTaskFactory = GetTaskFactory(targetLoggingContext, elementLocation, taskProjectFile, isMultiThreadedBuild);
 
                     // Create task Factory will only actually create a factory once.
                     if (haveTaskFactory)
@@ -1463,9 +1391,9 @@ namespace Microsoft.Build.Execution
             /// Given a Registered task record and a task name. Check create an instance of the task factory using the record.
             /// If the factory is a assembly task factory see if the assemblyFile has the correct task inside of it.
             /// </summary>
-            internal TaskFactoryWrapper GetTaskFactoryFromRegistrationRecord(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
+            internal TaskFactoryWrapper GetTaskFactoryFromRegistrationRecord(string taskName, string taskProjectFile, in TaskHostParameters taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, bool isMultiThreadedBuild)
             {
-                if (CanTaskBeCreatedByFactory(taskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation))
+                if (CanTaskBeCreatedByFactory(taskName, taskProjectFile, taskIdentityParameters, targetLoggingContext, elementLocation, isMultiThreadedBuild))
                 {
                     return _taskFactoryWrapperInstance;
                 }
@@ -1477,7 +1405,7 @@ namespace Microsoft.Build.Execution
             /// Create an instance of the task factory and load it from the assembly.
             /// </summary>
             /// <exception cref="InvalidProjectFileException">If the task factory could not be properly created an InvalidProjectFileException will be thrown</exception>
-            private bool GetTaskFactory(TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, string taskProjectFile)
+            private bool GetTaskFactory(TargetLoggingContext targetLoggingContext, ElementLocation elementLocation, string taskProjectFile, bool isMultiThreadedBuild)
             {
                 // see if we have already created the factory before, only create it once
                 if (_taskFactoryWrapperInstance == null)
@@ -1489,15 +1417,17 @@ namespace Microsoft.Build.Execution
 
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
-                    _taskFactoryParameters ??= new();
-                    TaskFactoryParameters.Add(Constants.TaskHostExplicitlyRequested, isTaskHostFactory.ToString());
+
+                    if (isTaskHostFactory)
+                    {
+                        _taskFactoryParameters = _taskFactoryParameters.WithTaskHostFactoryExplicitlyRequested(true);
+                    }
 
                     if (isAssemblyTaskFactory || isTaskHostFactory)
                     {
                         // If ForceAllTasksOutOfProc is true, we will force all tasks to run in the MSBuild task host
                         // "EXCEPT a small well-known set of tasks that are known to depend on IBuildEngine callbacks
                         // as forcing those out of proc would be just setting them up for known failure"
-
                         bool launchTaskHost =
                             isTaskHostFactory ||
                             (
@@ -1577,15 +1507,26 @@ namespace Microsoft.Build.Execution
 #else
                                 factory = (ITaskFactory)Activator.CreateInstance(loadedType.Type);
 #endif
-                                TaskFactoryLoggingHost taskFactoryLoggingHost = new TaskFactoryLoggingHost(true /*I dont have the data at this point, the safest thing to do is make sure events are serializable*/, elementLocation, targetLoggingContext);
+                                TaskFactoryEngineContext taskFactoryLoggingHost = new TaskFactoryEngineContext(true /*I dont have the data at this point, the safest thing to do is make sure events are serializable*/, elementLocation, targetLoggingContext, isMultiThreadedBuild, Traits.Instance.ForceTaskFactoryOutOfProc);
 
                                 bool initialized = false;
                                 try
                                 {
-                                    ITaskFactory2 factory2 = factory as ITaskFactory2;
-                                    if (factory2 != null)
+                                    // for backward compatibility with public interface
+                                    if (factory is ITaskFactory2 factory2)
                                     {
-                                        initialized = factory2.Initialize(RegisteredName, TaskFactoryParameters, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
+                                        var taskFactoryParams = new Dictionary<string, string>(3)
+                                        {
+                                            { nameof(TaskHostParameters.Runtime), TaskFactoryParameters.Runtime },
+                                            { nameof(TaskHostParameters.Architecture), TaskFactoryParameters.Architecture },
+                                            { nameof(TaskHostParameters.TaskHostFactoryExplicitlyRequested), TaskFactoryParameters.TaskHostFactoryExplicitlyRequested.ToString() },
+                                        };
+
+                                        initialized = factory2.Initialize(RegisteredName, taskFactoryParams, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
+                                    }
+                                    else if (factory is ITaskFactory3 factory3)
+                                    {
+                                        initialized = factory3.Initialize(RegisteredName, TaskFactoryParameters, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
                                     }
                                     else
                                     {
@@ -1593,8 +1534,8 @@ namespace Microsoft.Build.Execution
 
                                         // TaskFactoryParameters will always be null unless specifically created to have runtime and architecture parameters.
                                         // In case TaskHostFactory is explicitly requested, we will now have a parameter for that.
-                                        bool containsArchOrRuntimeParam = TaskFactoryParameters?.TryGetValue(XMakeAttributes.runtime, out _) == true
-                                                                          || TaskFactoryParameters?.TryGetValue(XMakeAttributes.architecture, out _) == true;
+                                        bool containsArchOrRuntimeParam = TaskFactoryParameters.Runtime != null
+                                                                          || TaskFactoryParameters.Architecture != null;
 
                                         if (initialized && containsArchOrRuntimeParam)
                                         {
@@ -1937,14 +1878,7 @@ namespace Microsoft.Build.Execution
                 translator.Translate(ref _parameterGroupAndTaskBody);
                 translator.Translate(ref _registrationOrderId);
                 translator.Translate(ref _definingFileFullPath);
-
-                IDictionary<string, string> localParameters = _taskFactoryParameters;
-                translator.TranslateDictionary(ref localParameters, count => CreateTaskFactoryParametersDictionary(count));
-
-                if (translator.Mode == TranslationDirection.ReadFromStream && localParameters != null)
-                {
-                    _taskFactoryParameters = (Dictionary<string, string>)localParameters;
-                }
+                translator.Translate(ref _taskFactoryParameters);
             }
 
             internal static RegisteredTaskRecord FactoryForDeserialization(ITranslator translator)

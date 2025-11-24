@@ -210,6 +210,11 @@ namespace Microsoft.Build.Evaluation.Expander
                     returnVal = text.EndsWith(arg0);
                     return true;
                 }
+                else if (ParseArgs.TryGetArgs(args, out arg0, out StringComparison arg1) && arg0 != null)
+                {
+                    returnVal = text.EndsWith(arg0, arg1);
+                    return true;
+                }
             }
             else if (string.Equals(methodName, nameof(string.ToLower), StringComparison.OrdinalIgnoreCase))
             {

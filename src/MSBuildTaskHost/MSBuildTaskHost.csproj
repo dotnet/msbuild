@@ -209,9 +209,6 @@
     <Compile Include="NullableAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TypeLoader.cs" />
-    <Compile Include="..\MSBuild\LogMessagePacket.cs">
-      <Link>LogMessagePacket.cs</Link>
-    </Compile>
     <Compile Include="OutOfProcTaskHost.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
@@ -229,6 +226,7 @@
     <Compile Include="..\Framework\InterningReadTranslator.cs" />
     <Compile Include="..\Framework\InterningWriteTranslator.cs" />
     <Compile Include="..\Framework\InternPathIds.cs" />
+    <Compile Include="..\Framework\TaskHostParameters.cs" />
 
     <Compile Include="..\Framework\IConstrainedEqualityComparer.cs" />
     <Compile Include="..\Framework\ImmutableDictionaryExtensions.cs" />

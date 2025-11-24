@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Build.Framework.PathHelpers;
 
 namespace Microsoft.Build.Framework
 {

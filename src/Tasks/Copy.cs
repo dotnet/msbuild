@@ -61,9 +61,7 @@ namespace Microsoft.Build.Tasks
                     {
                         AutoResetEvent autoResetEvent = new AutoResetEvent(false);
                         copyThreadSignals[i] = autoResetEvent;
-
-                        // specify the smallest stack size - 64kb
-                        Thread newThread = new Thread(ParallelCopyTask, 64 * 1024);
+                        Thread newThread = new Thread(ParallelCopyTask);
                         newThread.IsBackground = true;
                         newThread.Name = "Parallel Copy Thread";
                         newThread.Start(autoResetEvent);
