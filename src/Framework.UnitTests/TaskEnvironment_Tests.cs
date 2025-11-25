@@ -35,9 +35,11 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Gets the fully resolved temp directory path. On macOS, Path.GetTempPath() returns "/tmp/folders/..."
-        /// which is a symbolic link that resolves to "/private/tmp/folders/...". This method ensures we get
-        /// the canonical path to avoid test failures when comparing paths that should be equivalent.
+        /// Gets the fully resolved temp directory path. On macOS, Path.GetTempPath() returns paths starting with "/var/..."
+        /// which is a symbolic link that resolves to "/private/var/...".
+        /// The StubTaskEnvironmentDriver uses Directory.SetCurrentDirectory which resolves symlinks, while
+        /// MultiThreadedTaskEnvironmentDriver stores the path as-is.
+        /// This method ensures we get the canonical path to avoid test failures when comparing paths between the two drivers.
         /// </summary>
         /// <returns>The fully resolved temp directory path</returns>
         private static string GetResolvedTempPath()
@@ -45,15 +47,26 @@ namespace Microsoft.Build.UnitTests
             string tempPath = Path.GetFullPath(Path.GetTempPath());
 
             // On macOS, /tmp is typically a symbolic link to /private/tmp
-            // Manually resolve this common case to match file system behavior
+            // And /var is typically a symbolic link to /private/var
+            // We need to manually resolve this because StubTaskEnvironmentDriver (via Directory.SetCurrentDirectory)
+            // will resolve the symlink, but MultiThreadedTaskEnvironmentDriver will not.
+            // By resolving it here, we ensure both drivers operate on the same canonical path string.
 #if NET5_0_OR_GREATER
             bool IsMacOS = OperatingSystem.IsMacOS();
 #else
             bool IsMacOS = Microsoft.Build.Framework.OperatingSystem.IsMacOS();
 #endif
-            if (IsMacOS && tempPath.StartsWith("/tmp"))
+            if (IsMacOS)
             {
-                tempPath = tempPath.Replace("/tmp", "/private/tmp");
+                // On macOS, /tmp -> /private/tmp and /var -> /private/var
+                if (tempPath.StartsWith("/tmp/", StringComparison.OrdinalIgnoreCase) || string.Equals(tempPath, "/tmp", StringComparison.OrdinalIgnoreCase))
+                {
+                    tempPath = "/private" + tempPath;
+                }
+                else if (tempPath.StartsWith("/var/", StringComparison.OrdinalIgnoreCase) || string.Equals(tempPath, "/var", StringComparison.OrdinalIgnoreCase))
+                {
+                    tempPath = "/private" + tempPath;
+                }
             }
             
             return tempPath;
