@@ -112,6 +112,12 @@ namespace Microsoft.Build.BackEnd
         private ConcurrentDictionary<int, TaskHostNodeKey> _nodeIdToNodeKey;
 
         /// <summary>
+        /// Counter for generating unique communication node IDs.
+        /// Incremented atomically for each new node created.
+        /// </summary>
+        private int _nextNodeId;
+
+        /// <summary>
         /// Packet factory we use if there's not already one associated with a particular context.
         /// </summary>
         private NodePacketFactory _localPacketFactory;
@@ -235,6 +241,7 @@ namespace Microsoft.Build.BackEnd
             _nodeKeyToPacketHandler = new ConcurrentDictionary<TaskHostNodeKey, INodePacketHandler>();
             _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
             _activeNodes = [];
+            _nextNodeId = 1;
 
             _noNodesActiveEvent = new ManualResetEvent(true);
             _localPacketFactory = new NodePacketFactory();
@@ -650,9 +657,8 @@ namespace Microsoft.Build.BackEnd
             // If runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
             string commandLineArgsPlaceholder = "\"{0}\" /nologo /nodemode:2 /nodereuse:{1} /low:{2} ";
 
-            // Generate a unique node ID for communication purposes.
-            // We use a simple hash of the TaskHostNodeKey to ensure uniqueness across different keys.
-            int communicationNodeId = nodeKey.GetHashCode();
+            // Generate a unique node ID for communication purposes using atomic increment.
+            int communicationNodeId = Interlocked.Increment(ref _nextNodeId);
 
             // Create callbacks that capture the TaskHostNodeKey
             void OnNodeContextCreated(NodeContext context) => NodeContextCreated(context, nodeKey);
