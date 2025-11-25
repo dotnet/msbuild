@@ -252,11 +252,11 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Creates a Terminal logger if possible, or a Console logger.
     /// </summary>
-    /// <param name="args">Command line arguments for the logger configuration. Currently, only 'tl|terminallogger' and 'v|verbosity' are supported right now.</param>
+    /// <param name="args">Command line arguments for the logger configuration. Currently, only 'tl|terminallogger', 'v|verbosity', 'tlp|terminalloggerparameters', and 'clp|consoleloggerparameters' are supported.</param>
     public static ILogger CreateTerminalOrConsoleLogger(string[]? args = null)
     {
         (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
-        var (logger, _forwardingLogger) = CreateTerminalOrConsoleLoggerWithForwarding(args, supportsAnsi, outputIsScreen, originalConsoleMode);
+        var (logger, _) = CreateTerminalOrConsoleLoggerWithForwarding(args, supportsAnsi, outputIsScreen, originalConsoleMode);
         return logger;
     }
 
@@ -264,7 +264,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// Creates a Terminal logger if possible, or a Console logger. If the created logger supports remote logging,
     /// also provides a ForwardingLoggerRecord to wrap it for forwarding.
     /// </summary>
-    /// <param name="args">Command line arguments for the logger configuration. Currently, only 'tl|terminallogger' and 'v|verbosity' are supported right now.</param>
+    /// <param name="args">Command line arguments for the logger configuration. Currently, only 'tl|terminallogger', 'v|verbosity', 'tlp|terminalloggerparameters', and 'clp|consoleloggerparameters' are supported.</param>
     public static (ILogger, ForwardingLoggerRecord?) CreateTerminalOrConsoleLoggerWithForwarding(string[]? args = null)
     {
         (bool supportsAnsi, bool outputIsScreen, uint? originalConsoleMode) = NativeMethodsShared.QueryIsScreenAndTryEnableAnsiColorCodes();
@@ -278,6 +278,7 @@ public sealed partial class TerminalLogger : INodeLogger
         string tlEnvVariable = Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty;
         string tlArg = string.Empty;
         string tlpArg = string.Empty;
+        string clpArg = string.Empty;
         string? verbosityArg = string.Empty;
 
         ILogger loggerToReturn;
@@ -295,6 +296,9 @@ public sealed partial class TerminalLogger : INodeLogger
 
             MatchCollection tlpMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:tlp|terminalloggerparameters):(?'value'.+)", RegexOptions.IgnoreCase);
             tlpArg = string.Join(";", tlpMatches.OfType<Match>().Select(m => m.Groups["value"].Value).Where(v => !string.IsNullOrEmpty(v)));
+
+            MatchCollection clpMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:clp|consoleloggerparameters):(?'value'.+)", RegexOptions.IgnoreCase);
+            clpArg = string.Join(";", clpMatches.OfType<Match>().Select(m => m.Groups["value"].Value).Where(v => !string.IsNullOrEmpty(v)));
         }
 
         verbosityArg = verbosityArg?.ToLowerInvariant() switch
@@ -321,22 +325,22 @@ public sealed partial class TerminalLogger : INodeLogger
         // if forced, always use the Terminal Logger
         if (isForced)
         {
-            loggerToReturn = new TerminalLogger(verbosity, originalConsoleMode);
+            loggerToReturn = new TerminalLogger(verbosity, originalConsoleMode) { Parameters = tlpArg };
             forwardingLogger = TerminalLoggerForwardingRecord(loggerToReturn, tlpArg, verbosity);
         }
 
         // If explicitly disabled, always use console logger
-        if (isDisabled)
+        else if (isDisabled)
         {
             NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
-            loggerToReturn = new ConsoleLogger(verbosity);
+            loggerToReturn = new ConsoleLogger(verbosity) { Parameters = clpArg };
             forwardingLogger = null;
         }
 
         // If not forced and system doesn't support terminal features, fall back to console logger
-        if (effectiveValue == "auto" && supportsAnsi && outputIsScreen)
+        else if (effectiveValue == "auto" && supportsAnsi && outputIsScreen)
         {
-            loggerToReturn = new TerminalLogger(verbosity, originalConsoleMode);
+            loggerToReturn = new TerminalLogger(verbosity, originalConsoleMode) { Parameters = tlpArg };
             forwardingLogger = TerminalLoggerForwardingRecord(loggerToReturn, tlpArg, verbosity);
         }
         else
