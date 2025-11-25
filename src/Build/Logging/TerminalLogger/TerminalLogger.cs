@@ -33,6 +33,7 @@ namespace Microsoft.Build.Logging;
 public sealed partial class TerminalLogger : INodeLogger
 {
     private const string FilePathPattern = " -> ";
+    private const string MSBuildTaskName = "MSBuild";
 
 #if NET
     private static readonly SearchValues<string> _authProviderMessageKeywords = SearchValues.Create(["[CredentialProvider]", "--interactive"], StringComparison.OrdinalIgnoreCase);
@@ -785,7 +786,7 @@ public sealed partial class TerminalLogger : INodeLogger
             }
         }
     }
-    
+
     private void CaptureEvalContext(ProjectEvaluationFinishedEventArgs evalFinish)
     {
         var buildEventContext = evalFinish.BuildEventContext;
@@ -1030,7 +1031,7 @@ public sealed partial class TerminalLogger : INodeLogger
     private void TaskStarted(object sender, TaskStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (_restoreContext is null && buildEventContext is not null && e.TaskName == "MSBuild")
+        if (_restoreContext is null && buildEventContext is not null && e.TaskName == MSBuildTaskName)
         {
             // This will yield the node, so preemptively mark it idle
             UpdateNodeStatus(buildEventContext, null);
@@ -1048,18 +1049,16 @@ public sealed partial class TerminalLogger : INodeLogger
     private void TaskFinished(object sender, TaskFinishedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (_restoreContext is null && buildEventContext is not null && e.TaskName == "MSBuild")
+        if (_restoreContext is null && buildEventContext is not null && e.TaskName == MSBuildTaskName
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
         {
-            if (_projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
-            {
-                project.Stopwatch.Start();
+            project.Stopwatch.Start();
 
-                string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
-                string targetName = project.CurrentTarget ?? "";
+            string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
+            string targetName = project.CurrentTarget ?? "";
 
-                TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, GetDisplayTargetName(targetName), project.Stopwatch);
-                UpdateNodeStatus(buildEventContext, nodeStatus);
-            }
+            TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, GetDisplayTargetName(targetName), project.Stopwatch);
+            UpdateNodeStatus(buildEventContext, nodeStatus);
         }
     }
 
