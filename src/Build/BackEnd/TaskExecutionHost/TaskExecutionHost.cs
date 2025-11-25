@@ -1800,7 +1800,7 @@ namespace Microsoft.Build.BackEnd
                 _buildComponentHost,
                 taskHostParameters,
                 taskLoadedType,
-                useSidecarTaskHost: false,
+                useSidecarTaskHost: true,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup,
 #endif

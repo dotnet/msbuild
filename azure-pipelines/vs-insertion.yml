@@ -237,12 +237,17 @@ extends:
               }
               $propsValue = $props -join ";"
 
-              # As of 18.0, don't update PackageReferences so that VS packages like VSSDK
+              # For 18.0+, don't update PackageReferences so that VS packages like VSSDK
               # can choose their own versioning and don't always depend on a super fresh MSBuild
               if ("$(InsertTargetBranch)" -in @("rel/d17.10", "rel/d17.12", "rel/d17.14"))
               {
                   Write-Host "Setting InsertPackagePropsValues to '$propsValue'"
                   Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($propsValue)"
+              }
+              else
+              {
+                  Write-Host "Unsetting InsertPackagePropsValues"
+                  Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]"
               }
 
               # autocomplete main
@@ -282,8 +287,8 @@ extends:
             targetType: inline
             script: |
               Write-Host "InsertTargetBranch: $(InsertTargetBranch)"
-        - task: MicroBuildInsertVsPayload@4
-          name: MicroBuildInsertVsPayload_4
+        - task: MicroBuildInsertVsPayload@5
+          name: MicroBuildInsertVsPayload_5
           displayName: Insert VS Payload
           inputs:
             LinkWorkItemsToPR: true
@@ -300,3 +305,6 @@ extends:
             AutoCompletePR: $(AutoCompleteEnabled)
             AutoCompleteMergeStrategy: Squash
             InsertionBuildPolicy: Request Perf DDRITs
+            ConnectedVSDropServiceName: 'VSEng-VSDrop-MI'
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
