@@ -22,6 +22,7 @@ using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContex
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
+using Microsoft.Build.BackEnd.Logging;
 
 #nullable disable
 
@@ -252,7 +253,7 @@ namespace Microsoft.Build.BackEnd
             string taskElementContents,
             in TaskHostParameters taskFactoryIdentityParameters,
             bool taskHostExplicitlyRequested,
-            TargetLoggingContext targetLoggingContext,
+            LoggingContext targetLoggingContext,
             ElementLocation elementLocation,
             string taskProjectFile)
         {
@@ -273,8 +274,7 @@ namespace Microsoft.Build.BackEnd
 
                 string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);
                 using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(targetLoggingContext, AssemblyLoadingContext.TaskRun, assemblyName);
-
-                _loadedType = _typeLoader.Load(taskName, loadInfo, taskHostExplicitlyRequested, taskHostParamsMatchCurrentProc);
+                _loadedType = _typeLoader.Load(taskName, loadInfo, targetLoggingContext.LogWarning, taskHostExplicitlyRequested, taskHostParamsMatchCurrentProc);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
             }
             catch (TargetInvocationException e)
@@ -426,20 +426,20 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Overrides runtime/architecture with values from assembly metadata if available.
-        /// These values are more reliable since they are determined during assembly load.
+        /// Overrides runtime/architecture with values from task host parameters if available.
+        /// The explicitly specified parameters always take precedence over assembly metadata.
         /// </summary>
         private TaskHostParameters UpdateTaskHostParameters(TaskHostParameters taskHostParameters)
         {
-            // Determine runtime: prefer loaded type's runtime, fallback to parameter or current.
-            string runtime = !string.IsNullOrEmpty(_loadedType?.Runtime)
-                ? _loadedType.Runtime
-                : taskHostParameters.Runtime ?? XMakeAttributes.GetCurrentMSBuildRuntime();
+            // Determine runtime: prefer explicit parameter, fallback to loaded type's runtime or current.
+            string runtime = taskHostParameters.Runtime
+                ?? _loadedType?.Runtime
+                ?? XMakeAttributes.GetCurrentMSBuildRuntime();
 
-            // Determine architecture: prefer loaded type's architecture, fallback to parameter or current
-            string architecture = !string.IsNullOrEmpty(_loadedType?.Architecture)
-                ? _loadedType.Architecture
-                : taskHostParameters.Architecture ?? XMakeAttributes.GetCurrentMSBuildArchitecture();
+            // Determine architecture: prefer explicit parameter, fallback to loaded type's architecture or current
+            string architecture = taskHostParameters.Architecture
+                ?? _loadedType?.Architecture
+                ?? XMakeAttributes.GetCurrentMSBuildArchitecture();
 
             return new TaskHostParameters(
                 runtime: runtime,
@@ -450,7 +450,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Is the given task name able to be created by the task factory. In the case of an assembly task factory
+        /// Is the given task name able to to be created by the task factory. In the case of an assembly task factory
         /// this question is answered by checking the assembly wrapped by the task factory to see if it exists.
         /// </summary>
         internal bool TaskNameCreatableByFactory(string taskName, in TaskHostParameters taskIdentityParameters, string taskProjectFile, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
@@ -490,6 +490,13 @@ namespace Microsoft.Build.BackEnd
                 // taskName may be null
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
             }
+#if NETCOREAPP
+            catch (FileNotFoundException e)
+            {
+                // The specified task assembly could not be found, it might be misspelled. It usually discovered during MetadataLoadContext run.
+                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
+            }
+#endif
             catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
@@ -498,7 +505,7 @@ namespace Microsoft.Build.BackEnd
             return false;
         }
 
-        #endregion
+#endregion
 
         #region Private members
 

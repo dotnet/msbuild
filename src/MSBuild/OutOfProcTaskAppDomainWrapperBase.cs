@@ -116,8 +116,9 @@ namespace Microsoft.Build.CommandLine
                 taskType = typeLoader.Load(
                     taskName,
                     AssemblyLoadInfo.Create(null, taskLocation),
-                    /*useTaskHost*/ false,
-                    /*isTaskHostParamsMatchCurrentProc*/ true);
+                    logWarning: (format, args) => { },
+                    useTaskHost: false,
+                    taskHostParamsMatchCurrentProc: true);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -390,16 +391,16 @@ namespace Microsoft.Build.CommandLine
         private void LogErrorDelegate(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs)
         {
             buildEngine.LogErrorEvent(new BuildErrorEventArgs(
-                                                    null,
-                                                    null,
-                                                    taskLocation,
-                                                    taskLine,
-                                                    taskColumn,
-                                                    0,
-                                                    0,
-                                                    ResourceUtilities.FormatString(AssemblyResources.GetString(message), messageArgs),
-                                                    null,
-                                                    taskName));
+                null,
+                null,
+                taskLocation,
+                taskLine,
+                taskColumn,
+                0,
+                0,
+                ResourceUtilities.FormatString(AssemblyResources.GetString(message), messageArgs),
+                null,
+                taskName));
         }
     }
 }

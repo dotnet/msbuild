@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -25,7 +26,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [WindowsFullFrameworkOnlyFact]
-        public void FrameworkTaskArchitectureMissmatchHandledSuccessfullyTest()
+        public void FrameworkTaskArchitectureMismatchHandledSuccessfullyTest()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
@@ -43,6 +44,24 @@ namespace Microsoft.Build.Engine.UnitTests
             testTaskOutput.ShouldContain("The task is executed in process: MSBuild");
             testTaskOutput.ShouldContain("PlatformTarget: x86");
             testTaskOutput.ShouldContain("PlatformTarget: x64");
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void FrameworkTaskArchitectureMismatchReportsWarningTest()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleFrameworkTask", "TestTask", "TestTask.csproj");
+
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
+
+            if (!successTestTask)
+            {
+                _output.WriteLine(testTaskOutput);
+            }
+
+            successTestTask.ShouldBeTrue();
+            testTaskOutput.ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("AssemblyLoad_Warning", "ExampleTaskX64"));
         }
     }
 }

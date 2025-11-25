@@ -90,6 +90,13 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Delegate used to log warning messages with formatted string support.
+        /// </summary>
+        /// <param name="format">A composite format string for the warning message.</param>
+        /// <param name="args">An array of objects to format into the warning message.</param>
+        internal delegate void LogWarningDelegate(string format, params object[] args);
+
+        /// <summary>
         /// Given two type names, looks for a partial match between them. A partial match is considered valid only if it occurs on
         /// the right side (tail end) of the name strings, and at the start of a class or namespace name.
         /// </summary>
@@ -241,10 +248,11 @@ namespace Microsoft.Build.Shared
         internal LoadedType Load(
             string typeName,
             AssemblyLoadInfo assembly,
+            LogWarningDelegate logWarning,
             bool useTaskHost = false,
             bool taskHostParamsMatchCurrentProc = true)
         {
-            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, useTaskHost, taskHostParamsMatchCurrentProc);
+            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, useTaskHost, taskHostParamsMatchCurrentProc, logWarning);
         }
 
         /// <summary>
@@ -255,10 +263,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The loaded type, or null if the type was not found.</returns>
         internal LoadedType ReflectionOnlyLoad(
             string typeName,
-            AssemblyLoadInfo assembly)
-        {
-            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false, taskHostParamsMatchCurrentProc: true);
-        }
+            AssemblyLoadInfo assembly) => GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false, taskHostParamsMatchCurrentProc: true, logWarning: (format, args) => { });
 
         /// <summary>
         /// Loads the specified type if it exists in the given assembly. If the type name is fully qualified, then a match (if
@@ -270,7 +275,8 @@ namespace Microsoft.Build.Shared
             string typeName,
             AssemblyLoadInfo assembly,
             bool useTaskHost,
-            bool taskHostParamsMatchCurrentProc)
+            bool taskHostParamsMatchCurrentProc,
+            LogWarningDelegate logWarning)
         {
             // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
@@ -281,7 +287,7 @@ namespace Microsoft.Build.Shared
             AssemblyInfoToLoadedTypes typeNameToType =
                 loadInfoToType.GetOrAdd(assembly, (_) => new AssemblyInfoToLoadedTypes(_isDesiredType, _));
 
-            return typeNameToType.GetLoadedTypeByTypeName(typeName, useTaskHost, taskHostParamsMatchCurrentProc);
+            return typeNameToType.GetLoadedTypeByTypeName(typeName, useTaskHost, taskHostParamsMatchCurrentProc, logWarning);
         }
 
         /// <summary>
@@ -368,7 +374,11 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Determine if a given type name is in the assembly or not. Return null if the type is not in the assembly.
             /// </summary>
-            internal LoadedType GetLoadedTypeByTypeName(string typeName, bool useTaskHost, bool taskHostParamsMatchCurrentProc)
+            internal LoadedType GetLoadedTypeByTypeName(
+                string typeName,
+                bool useTaskHost,
+                bool taskHostParamsMatchCurrentProc,
+                LogWarningDelegate logWarning)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeName);
 
@@ -389,6 +399,7 @@ namespace Microsoft.Build.Shared
                     // Fall back to metadata load context. It will prepare prerequisites for out of proc execution.
                     MSBuildEventSource.Log.FallbackAssemblyLoadStart(typeName);
                     loadedType = GetTypeForOutOfProcExecution(typeName);
+                    logWarning("AssemblyLoad_Warning", loadedType?.LoadedAssemblyName?.Name);
                     MSBuildEventSource.Log.FallbackAssemblyLoadStop(typeName);
                 }
 

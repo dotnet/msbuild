@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.14.0" />
+    <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.14.28" />
   </ItemGroup>
 
 </Project>
