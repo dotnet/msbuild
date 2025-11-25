@@ -87,24 +87,29 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// A mapping of all of the INodePacketFactories wrapped by this provider.
-        /// Keyed by the communication node ID (NodeContext.NodeId).
         /// Thread-safe to support parallel taskhost creation in /mt mode where multiple thread nodes
         /// can simultaneously create their own taskhosts.
         /// </summary>
-        private ConcurrentDictionary<int, INodePacketFactory> _nodeIdToPacketFactory;
+        private ConcurrentDictionary<TaskHostNodeKey, INodePacketFactory> _nodeKeyToPacketFactory;
 
         /// <summary>
         /// A mapping of all of the INodePacketHandlers wrapped by this provider.
-        /// Keyed by the communication node ID (NodeContext.NodeId).
         /// Thread-safe to support parallel taskhost creation in /mt mode where multiple thread nodes
         /// can simultaneously create their own taskhosts.
         /// </summary>
-        private ConcurrentDictionary<int, INodePacketHandler> _nodeIdToPacketHandler;
+        private ConcurrentDictionary<TaskHostNodeKey, INodePacketHandler> _nodeKeyToPacketHandler;
 
         /// <summary>
-        /// Keeps track of the set of node IDs for which we have not yet received shutdown notification.
+        /// Keeps track of the set of nodes for which we have not yet received shutdown notification.
         /// </summary>
-        private HashSet<int> _activeNodes;
+        private HashSet<TaskHostNodeKey> _activeNodes;
+
+        /// <summary>
+        /// Maps from NodeContext.NodeId (int) to TaskHostNodeKey for packet routing.
+        /// When packets come in from the communication layer, they include the int node ID,
+        /// which we need to map back to the TaskHostNodeKey to look up the appropriate handler.
+        /// </summary>
+        private ConcurrentDictionary<int, TaskHostNodeKey> _nodeIdToNodeKey;
 
         /// <summary>
         /// Counter for generating unique communication node IDs.
@@ -232,8 +237,9 @@ namespace Microsoft.Build.BackEnd
         {
             this.ComponentHost = host;
             _nodeContexts = new ConcurrentDictionary<TaskHostNodeKey, NodeContext>();
-            _nodeIdToPacketFactory = new ConcurrentDictionary<int, INodePacketFactory>();
-            _nodeIdToPacketHandler = new ConcurrentDictionary<int, INodePacketHandler>();
+            _nodeKeyToPacketFactory = new ConcurrentDictionary<TaskHostNodeKey, INodePacketFactory>();
+            _nodeKeyToPacketHandler = new ConcurrentDictionary<TaskHostNodeKey, INodePacketHandler>();
+            _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
             _activeNodes = [];
             _nextNodeId = 1;
 
@@ -284,7 +290,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
-            if (_nodeIdToPacketFactory.TryGetValue(nodeId, out INodePacketFactory nodePacketFactory))
+            if (_nodeIdToNodeKey.TryGetValue(nodeId, out TaskHostNodeKey nodeKey) &&
+                _nodeKeyToPacketFactory.TryGetValue(nodeKey, out INodePacketFactory nodePacketFactory))
             {
                 nodePacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
             }
@@ -311,7 +318,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to route.</param>
         public void RoutePacket(int nodeId, INodePacket packet)
         {
-            if (_nodeIdToPacketFactory.TryGetValue(nodeId, out INodePacketFactory nodePacketFactory))
+            if (_nodeIdToNodeKey.TryGetValue(nodeId, out TaskHostNodeKey nodeKey) &&
+                _nodeKeyToPacketFactory.TryGetValue(nodeKey, out INodePacketFactory nodePacketFactory))
             {
                 nodePacketFactory.RoutePacket(nodeId, packet);
             }
@@ -333,7 +341,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
-            if (_nodeIdToPacketHandler.TryGetValue(node, out INodePacketHandler packetHandler))
+            if (_nodeIdToNodeKey.TryGetValue(node, out TaskHostNodeKey nodeKey) &&
+                _nodeKeyToPacketHandler.TryGetValue(nodeKey, out INodePacketHandler packetHandler))
             {
                 packetHandler.PacketReceived(node, packet);
             }
@@ -342,16 +351,19 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrow(packet.Type == NodePacketType.NodeShutdown, "We should only ever handle packets of type NodeShutdown -- everything else should only come in when there's an active task");
 
                 // May also be removed by unnatural termination, so don't assume it's there
-                lock (_activeNodes)
+                if (_nodeIdToNodeKey.TryGetValue(node, out nodeKey))
                 {
-                    if (_activeNodes.Contains(node))
+                    lock (_activeNodes)
                     {
-                        _activeNodes.Remove(node);
-                    }
+                        if (_activeNodes.Contains(nodeKey))
+                        {
+                            _activeNodes.Remove(nodeKey);
+                        }
 
-                    if (_activeNodes.Count == 0)
-                    {
-                        _noNodesActiveEvent.Set();
+                        if (_activeNodes.Count == 0)
+                        {
+                            _noNodesActiveEvent.Set();
+                        }
                     }
                 }
             }
@@ -610,8 +622,8 @@ namespace Microsoft.Build.BackEnd
             if (nodeCreationSucceeded)
             {
                 NodeContext context = _nodeContexts[nodeKey];
-                _nodeIdToPacketFactory[context.NodeId] = factory;
-                _nodeIdToPacketHandler[context.NodeId] = handler;
+                _nodeKeyToPacketFactory[nodeKey] = factory;
+                _nodeKeyToPacketHandler[nodeKey] = handler;
 
                 // Configure the node.
                 context.SendData(configuration);
@@ -626,13 +638,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void DisconnectFromHost(TaskHostNodeKey nodeKey)
         {
-            if (_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
-            {
-                bool successRemoveFactory = _nodeIdToPacketFactory.TryRemove(context.NodeId, out _);
-                bool successRemoveHandler = _nodeIdToPacketHandler.TryRemove(context.NodeId, out _);
+            bool successRemoveFactory = _nodeKeyToPacketFactory.TryRemove(nodeKey, out _);
+            bool successRemoveHandler = _nodeKeyToPacketHandler.TryRemove(nodeKey, out _);
 
-                ErrorUtilities.VerifyThrow(successRemoveFactory && successRemoveHandler, "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
-            }
+            ErrorUtilities.VerifyThrow(successRemoveFactory && successRemoveHandler, "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
         }
 
         /// <summary>
@@ -641,6 +650,7 @@ namespace Microsoft.Build.BackEnd
         internal bool CreateNode(TaskHostNodeKey nodeKey, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, in TaskHostParameters taskHostParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory);
+            ErrorUtilities.VerifyThrow(!_nodeKeyToPacketFactory.ContainsKey(nodeKey), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
             HandshakeOptions hostContext = nodeKey.HandshakeOptions;
 
@@ -721,13 +731,14 @@ namespace Microsoft.Build.BackEnd
         private void NodeContextCreated(NodeContext context, TaskHostNodeKey nodeKey)
         {
             _nodeContexts[nodeKey] = context;
+            _nodeIdToNodeKey[context.NodeId] = nodeKey;
 
             // Start the asynchronous read.
             context.BeginAsyncPacketRead();
 
             lock (_activeNodes)
             {
-                _activeNodes.Add(context.NodeId);
+                _activeNodes.Add(nodeKey);
             }
             _noNodesActiveEvent.Reset();
         }
@@ -738,13 +749,14 @@ namespace Microsoft.Build.BackEnd
         private void NodeContextTerminated(int nodeId, TaskHostNodeKey nodeKey)
         {
             _nodeContexts.TryRemove(nodeKey, out _);
+            _nodeIdToNodeKey.TryRemove(nodeId, out _);
 
             // May also be removed by unnatural termination, so don't assume it's there
             lock (_activeNodes)
             {
-                if (_activeNodes.Contains(nodeId))
+                if (_activeNodes.Contains(nodeKey))
                 {
-                    _activeNodes.Remove(nodeId);
+                    _activeNodes.Remove(nodeKey);
                 }
 
                 if (_activeNodes.Count == 0)
@@ -759,28 +771,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void NodeContextTerminated(int nodeId)
         {
-            // Find the nodeKey for this nodeId by iterating through _nodeContexts
-            foreach (var kvp in _nodeContexts)
+            // Find the nodeKey for this nodeId
+            if (_nodeIdToNodeKey.TryGetValue(nodeId, out TaskHostNodeKey nodeKey))
             {
-                if (kvp.Value.NodeId == nodeId)
-                {
-                    NodeContextTerminated(nodeId, kvp.Key);
-                    return;
-                }
-            }
-
-            // Node might already be removed, just clean up _activeNodes
-            lock (_activeNodes)
-            {
-                if (_activeNodes.Contains(nodeId))
-                {
-                    _activeNodes.Remove(nodeId);
-                }
-
-                if (_activeNodes.Count == 0)
-                {
-                    _noNodesActiveEvent.Set();
-                }
+                NodeContextTerminated(nodeId, nodeKey);
             }
         }
 
