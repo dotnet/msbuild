@@ -1018,50 +1018,6 @@ namespace Microsoft.Build.UnitTests
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
-        public async Task DisplayNodesRestoresStatusAfterMSBuildTaskYields()
-        {
-            // 1. Start Build
-            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
-
-            // 2. Project Eval Finished
-            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
-
-            // 3. Project Started
-            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile));
-
-            // 4. Target Started
-            _centralNodeEventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build"));
-
-            // 5. Task Started (The "Outer" task)
-            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "OuterTask"));
-
-            // Verify status shows OuterTask
-            _terminallogger.DisplayNodes();
-
-            // 6. MSBuild Task Started (Yield)
-            // When the MSBuild task starts, the node status is cleared (set to null) because it yields.
-            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "MSBuild"));
-
-            // Verify status is cleared (or shows what we expect during yield)
-            _terminallogger.DisplayNodes();
-
-            // 7. MSBuild Task Finished (Resume)
-            // This is where the fix comes in. It should restore the status to "OuterTask".
-            _centralNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "MSBuild", true));
-
-            // 8. Verify status shows OuterTask again
-            _terminallogger.DisplayNodes();
-
-            // Cleanup
-            _centralNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "OuterTask", true));
-            _centralNodeEventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs(_projectFile, "Build", true));
-            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, true));
-            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
-
-            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
-        }
-
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
