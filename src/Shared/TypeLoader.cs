@@ -64,9 +64,15 @@ namespace Microsoft.Build.Shared
             string[] runtimeAssemblies = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
 
 #if NETFRAMEWORK
-            string[] msbuildCLR2Assemblies = Directory.GetFiles(FrameworkLocationHelper.PathToDotNetFrameworkV20, "*.dll");
-            string[] msbuildCLR35Assemblies = Directory.GetFiles(FrameworkLocationHelper.PathToDotNetFrameworkV35, "*.dll");
+            string v20Path = FrameworkLocationHelper.PathToDotNetFrameworkV20;
+            string v35Path = FrameworkLocationHelper.PathToDotNetFrameworkV35;
 
+            string[] msbuildCLR2Assemblies = !string.IsNullOrEmpty(v20Path) && Directory.Exists(v20Path)
+                ? Directory.GetFiles(v20Path, "*.dll")
+                : [];
+            string[] msbuildCLR35Assemblies = !string.IsNullOrEmpty(v35Path) && Directory.Exists(v35Path)
+                ? Directory.GetFiles(v35Path, "*.dll")
+                : [];
             return [.. runtimeAssemblies, .. msbuildAssemblies, .. msbuildCLR2Assemblies, .. msbuildCLR35Assemblies];
 #else
 
