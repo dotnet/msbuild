@@ -15,22 +15,22 @@ namespace Microsoft.Build.Framework
     /// <remarks>
     /// Implemented as a singleton since it has no instance state.
     /// </remarks>
-    internal sealed class StubTaskEnvironmentDriver : ITaskEnvironmentDriver
+    internal sealed class MultiProcessTaskEnvironmentDriver : ITaskEnvironmentDriver
     {
         /// <summary>
         /// The singleton instance.
         /// </summary>
-        private static readonly StubTaskEnvironmentDriver s_instance = new StubTaskEnvironmentDriver();
+        private static readonly MultiProcessTaskEnvironmentDriver s_instance = new MultiProcessTaskEnvironmentDriver();
 
         /// <summary>
         /// Gets the singleton instance of StubTaskEnvironmentDriver.
         /// </summary>
-        public static StubTaskEnvironmentDriver Instance => s_instance;
+        public static MultiProcessTaskEnvironmentDriver Instance => s_instance;
 
         /// <summary>
         /// Private constructor to enforce singleton pattern.
         /// </summary>
-        private StubTaskEnvironmentDriver() { }
+        private MultiProcessTaskEnvironmentDriver() { }
 
         /// <inheritdoc/>
         public AbsolutePath ProjectDirectory 

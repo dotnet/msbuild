@@ -12,6 +12,9 @@ namespace Microsoft.Build.Framework
     /// for use in multithreaded mode where tasks may be executed in parallel. This allows each project to maintain its own
     /// isolated environment state without affecting other concurrently building projects.
     /// </summary>
+    /// <remarks>
+    /// This class is not accessed from multiple threads. Each msbuild thread node has its own instance to work with.
+    /// </remarks>
     internal sealed class MultiThreadedTaskEnvironmentDriver : ITaskEnvironmentDriver
     {
         /// <summary>
