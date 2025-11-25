@@ -277,8 +277,8 @@ public sealed partial class TerminalLogger : INodeLogger
         LoggerVerbosity verbosity = LoggerVerbosity.Normal;
         string tlEnvVariable = Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty;
         string? tlArg = null;
-        string? tlpArg = null;
-        string? clpArg = null;
+        List<string> tlpArg = new();
+        List<string> clpArg = new();
         string? verbosityArg = null;
 
         ILogger loggerToReturn;
@@ -293,14 +293,31 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             foreach (var arg in args)
             {
-                tlArg = tlArgRegex.Matches(arg).OfType<Match>().LastOrDefault()?.Groups["value"].Value;
-                verbosityArg = verbosityArgRegex.Matches(arg).OfType<Match>().LastOrDefault()?.Groups["value"].Value;
+                var tlArgMatches = tlArgRegex.Matches(arg);
+                if (tlArgMatches.Any())
+                {
+                    // overriding, last one wins
+                    tlArg = tlArgMatches.Last().Groups["value"].Value;
+                }
 
-                MatchCollection tlpMatches = tlpArgRegex.Matches(arg);
-                tlpArg = tlpMatches.Count > 0 ? string.Join(";", tlpMatches.OfType<Match>().Select(m => m.Groups["value"].Value).Where(v => !string.IsNullOrEmpty(v))) : null;
+                var verbosityArgMatches = verbosityArgRegex.Matches(arg);
+                if (verbosityArgMatches.Any())
+                {
+                    // overriding, last one wins
+                    verbosityArg = verbosityArgMatches.Last().Groups["value"].Value;
+                }
 
-                MatchCollection clpMatches = clpArgRegex.Matches(arg);
-                clpArg = clpMatches.Count > 0 ? string.Join(";", clpMatches.OfType<Match>().Select(m => m.Groups["value"].Value).Where(v => !string.IsNullOrEmpty(v))) : null;
+                var tlpMatches = tlpArgRegex.Matches(arg);
+                if (tlpMatches.Any())
+                {
+                    tlpArg.AddRange(tlpMatches.OfType<Match>().Select(m => m.Groups["value"].Value).Where(v => !string.IsNullOrEmpty(v)));
+                }
+
+                var clpMatches = clpArgRegex.Matches(arg);
+                if (clpMatches.Any())
+                {
+                    clpArg.AddRange(clpMatches.OfType<Match>().Select(m => m.Groups["value"].Value).Where(v => !string.IsNullOrEmpty(v)));
+                }
             }
         }
 
@@ -324,33 +341,35 @@ public sealed partial class TerminalLogger : INodeLogger
 
         bool isForced = IsTerminalLoggerEnabled(effectiveValue);
         bool isDisabled = IsTerminalLoggerDisabled(effectiveValue);
+        var tlpArgString = string.Join(";", tlpArg);
+        var clpArgString = string.Join(";", clpArg);
 
         // if forced, always use the Terminal Logger
         if (isForced)
         {
-            loggerToReturn = new TerminalLogger(verbosity, originalConsoleMode) { Parameters = tlpArg };
-            forwardingLogger = TerminalLoggerForwardingRecord(loggerToReturn, tlpArg, verbosity);
+            loggerToReturn = new TerminalLogger(verbosity, originalConsoleMode) { Parameters = tlpArgString };
+            forwardingLogger = TerminalLoggerForwardingRecord(loggerToReturn, tlpArgString, verbosity);
         }
 
         // If explicitly disabled, always use console logger
         else if (isDisabled)
         {
             NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
-            loggerToReturn = new ConsoleLogger(verbosity) { Parameters = clpArg };
+            loggerToReturn = new ConsoleLogger(verbosity) { Parameters = clpArgString };
             forwardingLogger = null;
         }
 
         // If not forced and system doesn't support terminal features, fall back to console logger
         else if (effectiveValue == "auto" && supportsAnsi && outputIsScreen)
         {
-            loggerToReturn = new TerminalLogger(verbosity, originalConsoleMode) { Parameters = tlpArg };
-            forwardingLogger = TerminalLoggerForwardingRecord(loggerToReturn, tlpArg, verbosity);
+            loggerToReturn = new TerminalLogger(verbosity, originalConsoleMode) { Parameters = tlpArgString };
+            forwardingLogger = TerminalLoggerForwardingRecord(loggerToReturn, tlpArgString, verbosity);
         }
         else
         {
             // otherwise the state only allows fallback to console logger
             NativeMethodsShared.RestoreConsoleMode(originalConsoleMode);
-            loggerToReturn = new ConsoleLogger(verbosity);
+            loggerToReturn = new ConsoleLogger(verbosity) { Parameters = clpArgString };
             forwardingLogger = null;
         }
 
