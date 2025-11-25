@@ -276,29 +276,32 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         LoggerVerbosity verbosity = LoggerVerbosity.Normal;
         string tlEnvVariable = Environment.GetEnvironmentVariable("MSBUILDTERMINALLOGGER") ?? string.Empty;
-        string tlArg = string.Empty;
-        string tlpArg = string.Empty;
-        string clpArg = string.Empty;
-        string? verbosityArg = string.Empty;
+        string? tlArg = null;
+        string? tlpArg = null;
+        string? clpArg = null;
+        string? verbosityArg = null;
 
         ILogger loggerToReturn;
         ForwardingLoggerRecord? forwardingLogger;
 
+        Regex tlArgRegex = new(@"(?:/|-|--)(?:tl|terminallogger):(?'value'on|off|true|false|auto)", RegexOptions.IgnoreCase);
+        Regex verbosityArgRegex = new(@"(?:/|-|--)(?:v|verbosity):(?'value'\w+)", RegexOptions.IgnoreCase);
+        Regex tlpArgRegex = new(@"(?:/|-|--)(?:tlp|terminalloggerparameters):(?'value'.+)", RegexOptions.IgnoreCase);
+        Regex clpArgRegex = new(@"(?:/|-|--)(?:clp|consoleloggerparameters):(?'value'.+)", RegexOptions.IgnoreCase);
+
         if (args != null)
         {
-            string argsString = string.Join(" ", args);
+            foreach (var arg in args)
+            {
+                tlArg = tlArgRegex.Matches(arg).OfType<Match>().LastOrDefault()?.Groups["value"].Value;
+                verbosityArg = verbosityArgRegex.Matches(arg).OfType<Match>().LastOrDefault()?.Groups["value"].Value;
 
-            MatchCollection tlMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:tl|terminallogger):(?'value'on|off|true|false|auto)", RegexOptions.IgnoreCase);
-            tlArg = tlMatches.OfType<Match>().LastOrDefault()?.Groups["value"].Value ?? string.Empty;
+                MatchCollection tlpMatches = tlpArgRegex.Matches(arg);
+                tlpArg = tlpMatches.Count > 0 ? string.Join(";", tlpMatches.OfType<Match>().Select(m => m.Groups["value"].Value).Where(v => !string.IsNullOrEmpty(v))) : null;
 
-            MatchCollection verbosityMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:v|verbosity):(?'value'\w+)", RegexOptions.IgnoreCase);
-            verbosityArg = verbosityMatches.OfType<Match>().LastOrDefault()?.Groups["value"].Value;
-
-            MatchCollection tlpMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:tlp|terminalloggerparameters):(?'value'.+)", RegexOptions.IgnoreCase);
-            tlpArg = string.Join(";", tlpMatches.OfType<Match>().Select(m => m.Groups["value"].Value).Where(v => !string.IsNullOrEmpty(v)));
-
-            MatchCollection clpMatches = Regex.Matches(argsString, @"(?:/|-|--)(?:clp|consoleloggerparameters):(?'value'.+)", RegexOptions.IgnoreCase);
-            clpArg = string.Join(";", clpMatches.OfType<Match>().Select(m => m.Groups["value"].Value).Where(v => !string.IsNullOrEmpty(v)));
+                MatchCollection clpMatches = clpArgRegex.Matches(arg);
+                clpArg = clpMatches.Count > 0 ? string.Join(";", clpMatches.OfType<Match>().Select(m => m.Groups["value"].Value).Where(v => !string.IsNullOrEmpty(v))) : null;
+            }
         }
 
         verbosityArg = verbosityArg?.ToLowerInvariant() switch
@@ -353,7 +356,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
         return (loggerToReturn, forwardingLogger);
 
-        static ForwardingLoggerRecord TerminalLoggerForwardingRecord(ILogger loggerToReturn, string tlpArg, LoggerVerbosity verbosity)
+        static ForwardingLoggerRecord TerminalLoggerForwardingRecord(ILogger loggerToReturn, string? tlpArg, LoggerVerbosity verbosity)
         {
             var tlForwardingType = typeof(ForwardingTerminalLogger);
             LoggerDescription forwardingLoggerDescription = new LoggerDescription(tlForwardingType.FullName, tlForwardingType.Assembly.FullName, null, tlpArg, verbosity);
