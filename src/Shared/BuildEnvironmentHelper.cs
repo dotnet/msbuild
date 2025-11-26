@@ -38,6 +38,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static readonly string[] s_msBuildExeNames = { "MSBuild.exe", "MSBuild.dll" };
 
+        public static bool IsRunningOnCoreClr { get; } =
+#if NET
+            true;
+#else
+            false;
+#endif
+
         /// <summary>
         /// Gets the cached Build Environment instance.
         /// </summary>
