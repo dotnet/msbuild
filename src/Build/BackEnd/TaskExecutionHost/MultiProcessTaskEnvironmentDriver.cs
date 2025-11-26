@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -53,22 +53,19 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public IReadOnlyDictionary<string, string> GetEnvironmentVariables()
         {
-            return EnvironmentUtilities.GetEnvironmentVariables();
+            return CommunicationsUtilities.GetEnvironmentVariables();
         }
 
         /// <inheritdoc/>
         public void SetEnvironmentVariable(string name, string? value)
         {
-            Environment.SetEnvironmentVariable(name, value);
+            CommunicationsUtilities.SetEnvironmentVariable(name, value);
         }
 
         /// <inheritdoc/>
         public void SetEnvironment(IDictionary<string, string> newEnvironment)
         {
-            EnvironmentUtilities.SetEnvironment(
-                newEnvironment,
-                GetEnvironmentVariables,
-                SetEnvironmentVariable);
+            CommunicationsUtilities.SetEnvironment(newEnvironment);
         }
 
         /// <inheritdoc/>

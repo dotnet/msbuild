@@ -1,10 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -31,7 +33,7 @@ namespace Microsoft.Build.BackEnd
             string currentDirectoryFullPath,
             IDictionary<string, string> environmentVariables)
         {
-            _environmentVariables = new Dictionary<string, string>(environmentVariables, EnvironmentUtilities.EnvironmentVariableComparer);
+            _environmentVariables = new Dictionary<string, string>(environmentVariables, CommunicationsUtilities.EnvironmentVariableComparer);
             _currentDirectory = new AbsolutePath(currentDirectoryFullPath, ignoreRootedCheck: true);
         }
 
@@ -42,7 +44,13 @@ namespace Microsoft.Build.BackEnd
         /// <param name="currentDirectoryFullPath">The initial working directory.</param>
         public MultiThreadedTaskEnvironmentDriver(string currentDirectoryFullPath)
         {
-            _environmentVariables = EnvironmentUtilities.CopyCurrentEnvironmentVariables();
+            IDictionary variables = Environment.GetEnvironmentVariables();
+            _environmentVariables = new Dictionary<string, string>(variables.Count, CommunicationsUtilities.EnvironmentVariableComparer);
+            foreach (DictionaryEntry entry in variables)
+            {
+                _environmentVariables[(string)entry.Key] = (string)entry.Value!;
+            }
+
             _currentDirectory = new AbsolutePath(currentDirectoryFullPath, ignoreRootedCheck: true);
         }
 
