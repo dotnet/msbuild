@@ -36,7 +36,7 @@ namespace Microsoft.Build.Framework
         public AbsolutePath ProjectDirectory 
         { 
             get => new AbsolutePath(Directory.GetCurrentDirectory(), ignoreRootedCheck: true);
-            set => Directory.SetCurrentDirectory(value.Path);
+            set => Directory.SetCurrentDirectory(value.Value);
         }
 
         /// <inheritdoc/>

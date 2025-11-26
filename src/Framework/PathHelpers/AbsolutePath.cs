@@ -3,11 +3,10 @@
 
 using System;
 #if NETFRAMEWORK
-using IOPath = Microsoft.IO.Path;
+using Microsoft.IO;
 #else
-using IOPath = System.IO.Path;
+using System.IO;
 #endif
-
 
 namespace Microsoft.Build.Framework
 {
@@ -20,32 +19,33 @@ namespace Microsoft.Build.Framework
     public readonly struct AbsolutePath
     {
         /// <summary>
-        /// Gets the string representation of this path.
+        /// The normalized string representation of this path.
         /// </summary>
-        public string Path { get; }
+        public string Value { get; }
 
         /// <summary>
-        /// Creates a new instance of AbsolutePath.
+        /// Initializes a new instance of the <see cref="AbsolutePath"/> struct.
         /// </summary>
         /// <param name="path">The absolute path string.</param>
         public AbsolutePath(string path)
         {
             ValidatePath(path);
-            Path = path;
+            Value = path;
         }
 
         /// <summary>
-        /// Creates a new instance of AbsolutePath.
+        /// Initializes a new instance of the <see cref="AbsolutePath"/> struct.
         /// </summary>
         /// <param name="path">The absolute path string.</param>
         /// <param name="ignoreRootedCheck">If true, skips checking whether the path is rooted.</param>
+        /// <remarks>For internal and testing use, when we want to force bypassing the rooted check.</remarks>
         internal AbsolutePath(string path, bool ignoreRootedCheck)
         {
             if (!ignoreRootedCheck) 
             {
                 ValidatePath(path);
             }
-            Path = path;
+            Value = path;
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Framework
             // Path.IsPathFullyQualified is not available in .NET Standard 2.0
             // in .NET Framework it's provided by package and in .NET it's built-in
 #if NETFRAMEWORK || NET
-            if (!IOPath.IsPathFullyQualified(path))
+            if (!Path.IsPathFullyQualified(path))
             {
                 throw new ArgumentException("Path must be rooted.", nameof(path));
             }
@@ -71,25 +71,22 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Creates a new absolute path by combining a absolute path with a relative path.
+        /// Initializes a new instance of the <see cref="AbsolutePath"/> struct by combining an absolute path with a relative path.
         /// </summary>
         /// <param name="path">The path to combine with the base path.</param>
         /// <param name="basePath">The base path to combine with.</param>
-        public AbsolutePath(string path, AbsolutePath basePath)
-        {
-            Path = System.IO.Path.Combine(basePath.Path, path);
-        }
+        public AbsolutePath(string path, AbsolutePath basePath) => Value = Path.Combine(basePath.Value, path);
 
         /// <summary>
         /// Implicitly converts an AbsolutePath to a string.
         /// </summary>
         /// <param name="path">The path to convert.</param>
-        public static implicit operator string(AbsolutePath path) => path.Path;
+        public static implicit operator string(AbsolutePath path) => path.Value;
 
         /// <summary>
         /// Returns the string representation of this path.
         /// </summary>
         /// <returns>The path as a string.</returns>
-        public override string ToString() => Path;
+        public override string ToString() => Value;
     }
 }

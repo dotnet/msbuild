@@ -176,13 +176,13 @@ namespace Microsoft.Build.UnitTests
                 taskEnvironment.ProjectDirectory = new AbsolutePath(testDirectory, ignoreRootedCheck: true);
                 var retrievedDirectory = taskEnvironment.ProjectDirectory;
 
-                retrievedDirectory.Path.ShouldBe(testDirectory);
+                retrievedDirectory.Value.ShouldBe(testDirectory);
 
                 // Change to alternate directory
                 taskEnvironment.ProjectDirectory = new AbsolutePath(alternateDirectory, ignoreRootedCheck: true);
                 var newRetrievedDirectory = taskEnvironment.ProjectDirectory;
 
-                newRetrievedDirectory.Path.ShouldBe(alternateDirectory);
+                newRetrievedDirectory.Value.ShouldBe(alternateDirectory);
 
                 // Verify behavior differs based on environment type
                 if (environmentType == StubEnvironmentName)
@@ -217,9 +217,9 @@ namespace Microsoft.Build.UnitTests
 
                 var absolutePath = taskEnvironment.GetAbsolutePath(relativePath);
 
-                Path.IsPathRooted(absolutePath.Path).ShouldBeTrue();
+                Path.IsPathRooted(absolutePath.Value).ShouldBeTrue();
                 string expectedPath = Path.Combine(baseDirectory, relativePath);
-                absolutePath.Path.ShouldBe(expectedPath);
+                absolutePath.Value.ShouldBe(expectedPath);
             }
             finally
             {
@@ -236,7 +236,7 @@ namespace Microsoft.Build.UnitTests
 
             var resultPath = taskEnvironment.GetAbsolutePath(absoluteInputPath);
 
-            resultPath.Path.ShouldBe(absoluteInputPath);
+            resultPath.Value.ShouldBe(absoluteInputPath);
         }
 
         [Theory]

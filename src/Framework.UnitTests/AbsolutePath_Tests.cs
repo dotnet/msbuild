@@ -16,7 +16,7 @@ namespace Microsoft.Build.UnitTests
             {
                 // Should not throw - these are truly absolute paths
                 var absolutePath = new AbsolutePath(path);
-                absolutePath.Path.ShouldBe(path);
+                absolutePath.Value.ShouldBe(path);
             }
             else
             {
@@ -32,8 +32,8 @@ namespace Microsoft.Build.UnitTests
             string absolutePathString = Path.GetTempPath();
             var absolutePath = new AbsolutePath(absolutePathString);
 
-            absolutePath.Path.ShouldBe(absolutePathString);
-            Path.IsPathRooted(absolutePath.Path).ShouldBeTrue();
+            absolutePath.Value.ShouldBe(absolutePathString);
+            Path.IsPathRooted(absolutePath.Value).ShouldBeTrue();
         }
 
         [Theory]
@@ -48,10 +48,10 @@ namespace Microsoft.Build.UnitTests
             var basePath = new AbsolutePath(baseDirectory);
             var absolutePath = new AbsolutePath(relativePath, basePath);
 
-            Path.IsPathRooted(absolutePath.Path).ShouldBeTrue();
+            Path.IsPathRooted(absolutePath.Value).ShouldBeTrue();
             
             string expectedPath = Path.Combine(baseDirectory, relativePath);
-            absolutePath.Path.ShouldBe(expectedPath);
+            absolutePath.Value.ShouldBe(expectedPath);
         }
 
         [Fact]
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests
             else
             {
                 var absolutePath = new AbsolutePath(path, ignoreRootedCheck: ignoreRootedCheck);
-                absolutePath.Path.ShouldBe(path);
+                absolutePath.Value.ShouldBe(path);
             }
         }
 

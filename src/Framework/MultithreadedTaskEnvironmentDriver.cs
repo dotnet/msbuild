@@ -116,7 +116,7 @@ namespace Microsoft.Build.Framework
         {
             var startInfo = new ProcessStartInfo
             {
-                WorkingDirectory = ProjectDirectory.Path
+                WorkingDirectory = ProjectDirectory.Value
             };
 
             // Set environment variables
