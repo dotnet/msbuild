@@ -146,8 +146,8 @@ extends:
               Write-Host "##vso[task.setvariable variable=FinalTargetBranch]$finalTargetBranch"
 
         - task: Powershell@2
-          name: PwshMungeExternalAPIsPkgVersion
-          displayName: Munge ExternalAPIs package version
+          name: PwshMungeMSBuildPkgVersion
+          displayName: Munge Build package version
           inputs:
             targetType: inline
             script: |
