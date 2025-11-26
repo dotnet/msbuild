@@ -489,7 +489,11 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _projectFileOfTask);
             translator.Translate(ref _taskName);
             translator.Translate(ref _taskLocation);
-            translator.Translate(ref _targetName);
+            if (translator.PacketVersion >= 2)
+            {
+                translator.Translate(ref _targetName);
+            }
+
             translator.Translate(ref _isTaskInputLoggingEnabled);
             translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
             translator.Translate(ref _continueOnError);

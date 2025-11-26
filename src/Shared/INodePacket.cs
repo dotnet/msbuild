@@ -294,7 +294,7 @@ namespace Microsoft.Build.BackEnd
         /// excludes the translation of appDomainConfig within TaskHostConfiguration
         /// to maintain backward compatibility and reduce serialization overhead.
         ///
-        /// Version 2: Adds support of HostServices translation in TaskHostConfiguration.
+        /// Version 2: Adds support of HostServices and target name translation in TaskHostConfiguration.
         /// 
         /// When incrementing this version, ensure compatibility with existing
         /// task hosts and update the corresponding deserialization logic.
