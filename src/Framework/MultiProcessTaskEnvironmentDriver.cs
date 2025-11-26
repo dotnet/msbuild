@@ -52,7 +52,7 @@ namespace Microsoft.Build.Framework
         /// <inheritdoc/>
         public IReadOnlyDictionary<string, string> GetEnvironmentVariables()
         {
-            return EnvironmentUtilities.CopyCurrentEnvironmentVariables();
+            return EnvironmentUtilities.GetEnvironmentVariables();
         }
 
         /// <inheritdoc/>

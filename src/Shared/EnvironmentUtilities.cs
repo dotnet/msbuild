@@ -10,6 +10,10 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading;
 
+#if !CLR2COMPATIBILITY
+using System.Collections.Frozen;
+#endif
+
 namespace Microsoft.Build.Shared
 {
     internal static partial class EnvironmentUtilities
@@ -27,12 +31,124 @@ namespace Microsoft.Build.Shared
 #endif
         private static volatile string? s_processName;
 
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// Cached environment state to avoid repeated allocations when environment hasn't changed.
+        /// </summary>
+        private static EnvironmentState? s_cachedEnvironment;
+
+        /// <summary>
+        /// Container for cached environment state.
+        /// </summary>
+        private sealed record class EnvironmentState(FrozenDictionary<string, string> Variables, int Count);
+#endif
+
         /// <summary>
         /// Gets the string comparer for environment variable names based on the current platform.
         /// On Windows, environment variables are case-insensitive; on Unix-like systems, they are case-sensitive.
         /// </summary>
         internal static StringComparer EnvironmentVariableComparer =>
             NativeMethodsShared.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// Retrieves the environment variables from the current process with caching.
+        /// Uses a frozen dictionary for optimal read performance.
+        /// </summary>
+        /// <returns>A frozen dictionary of environment variables.</returns>
+        /// <remarks>
+        /// Caches the environment so that subsequent calls are fast. The cache is invalidated
+        /// if the count of environment variables changes.
+        /// </remarks>
+        internal static FrozenDictionary<string, string> GetEnvironmentVariables()
+        {
+            IDictionary currentEnvironment = Environment.GetEnvironmentVariables();
+            EnvironmentState? currentState = s_cachedEnvironment;
+
+            // If the count differs, invalidate the cache
+            if (currentState == null || currentState.Count != currentEnvironment.Count)
+            {
+                // If on Windows, use P/Invoke for optimized environment variable reading
+                FrozenDictionary<string, string> frozenVars = NativeMethodsShared.IsWindows
+                    ? GetEnvironmentVariablesWindows()
+                    : CreateFrozenEnvironment(currentEnvironment);
+
+                currentState = new EnvironmentState(frozenVars, frozenVars.Count);
+                s_cachedEnvironment = currentState;
+            }
+
+            return currentState.Variables;
+        }
+
+        /// <summary>
+        /// Creates a frozen dictionary from an IDictionary of environment variables.
+        /// </summary>
+        private static FrozenDictionary<string, string> CreateFrozenEnvironment(IDictionary variables)
+        {
+            var dictionary = new Dictionary<string, string>(variables.Count, EnvironmentVariableComparer);
+
+            foreach (DictionaryEntry entry in variables)
+            {
+                if (entry.Key is string key && entry.Value is string value)
+                {
+                    dictionary[key] = value;
+                }
+            }
+
+            return dictionary.ToFrozenDictionary(EnvironmentVariableComparer);
+        }
+
+        /// <summary>
+        /// Optimized environment variable reading for Windows using P/Invoke.
+        /// </summary>
+        private static unsafe FrozenDictionary<string, string> GetEnvironmentVariablesWindows()
+        {
+            char* pStrings = GetEnvironmentStringsW();
+            if (pStrings == null)
+            {
+                throw new OutOfMemoryException();
+            }
+
+            try
+            {
+                var results = new Dictionary<string, string>(EnvironmentVariableComparer);
+
+                char* currentPtr = pStrings;
+                while (true)
+                {
+                    ReadOnlySpan<char> entry = new ReadOnlySpan<char>(currentPtr, int.MaxValue);
+                    entry = entry.Slice(0, entry.IndexOf('\0'));
+                    if (entry.IsEmpty)
+                    {
+                        break;
+                    }
+
+                    int equalsIndex = entry.IndexOf('=');
+                    // Skip entries that start with '=' (hidden environment variables like =C:)
+                    if (equalsIndex > 0)
+                    {
+                        string key = entry.Slice(0, equalsIndex).ToString();
+                        string value = entry.Slice(equalsIndex + 1).ToString();
+                        results[key] = value;
+                    }
+
+                    currentPtr += entry.Length + 1;
+                }
+
+                return results.ToFrozenDictionary(EnvironmentVariableComparer);
+            }
+            finally
+            {
+                FreeEnvironmentStringsW(pStrings);
+            }
+        }
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern unsafe char* GetEnvironmentStringsW();
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        private static extern unsafe bool FreeEnvironmentStringsW(char* lpszEnvironmentBlock);
+#endif
 
         /// <summary>Gets the unique identifier for the current process.</summary>
         public static int CurrentProcessId
