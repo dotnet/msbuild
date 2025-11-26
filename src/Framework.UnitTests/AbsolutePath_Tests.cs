@@ -68,6 +68,67 @@ namespace Microsoft.Build.UnitTests
             (path1 == differentPath).ShouldBeFalse();
         }
 
+        [Fact]
+        public void AbsolutePath_Inequality_ShouldWorkCorrectly()
+        {
+            string testPath = Path.GetTempPath();
+            var path1 = new AbsolutePath(testPath);
+            var differentPath = new AbsolutePath(Path.Combine(testPath, "different"));
+
+            (path1 != differentPath).ShouldBeTrue();
+#pragma warning disable CS1718 // Comparison made to same variable
+            (path1 != path1).ShouldBeFalse();
+#pragma warning restore CS1718 // Comparison made to same variable
+        }
+
+        [Fact]
+        public void AbsolutePath_GetHashCode_ShouldBeConsistentWithEquals()
+        {
+            string testPath = Path.GetTempPath();
+            var path1 = new AbsolutePath(testPath);
+            var path2 = new AbsolutePath(testPath);
+
+            // Equal objects must have equal hash codes
+            path1.Equals(path2).ShouldBeTrue();
+            path1.GetHashCode().ShouldBe(path2.GetHashCode());
+        }
+
+        [Fact]
+        public void AbsolutePath_Equals_WithObject_ShouldWorkCorrectly()
+        {
+            string testPath = Path.GetTempPath();
+            var path1 = new AbsolutePath(testPath);
+            object path2 = new AbsolutePath(testPath);
+            object notAPath = "not a path";
+
+            path1.Equals(path2).ShouldBeTrue();
+            path1.Equals(notAPath).ShouldBeFalse();
+            path1.Equals(null).ShouldBeFalse();
+        }
+
+        [WindowsOnlyFact]
+        public void AbsolutePath_CaseInsensitive_OnWindows()
+        {
+            // On Windows, paths are case-insensitive
+            var lowerPath = new AbsolutePath("C:\\foo\\bar", ignoreRootedCheck: true);
+            var upperPath = new AbsolutePath("C:\\FOO\\BAR", ignoreRootedCheck: true);
+
+            lowerPath.Equals(upperPath).ShouldBeTrue();
+            (lowerPath == upperPath).ShouldBeTrue();
+            lowerPath.GetHashCode().ShouldBe(upperPath.GetHashCode());
+        }
+
+        [UnixOnlyFact]
+        public void AbsolutePath_CaseSensitive_OnLinux()
+        {
+            // On Linux, paths are case-sensitive
+            var lowerPath = new AbsolutePath("/foo/bar");
+            var upperPath = new AbsolutePath("/FOO/BAR");
+
+            lowerPath.Equals(upperPath).ShouldBeFalse();
+            (lowerPath == upperPath).ShouldBeFalse();
+        }
+
         [Theory]
         [InlineData("not/rooted/path", false, true)]
         [InlineData("not/rooted/path", true, false)]

@@ -14,10 +14,20 @@ namespace Microsoft.Build.Framework
     /// Represents an absolute file system path.
     /// </summary>
     /// <remarks>
-    /// This struct ensures that paths are always in absolute form and properly formatted.
+    /// This struct wraps a string representing an absolute file system path.
+    /// Path equality comparisons are case-sensitive or case-insensitive depending on the operating system's
+    /// file system conventions (case-sensitive on Linux, case-insensitive on Windows and macOS).
+    /// Does not perform any normalization beyond validating the path is fully qualified.
+    /// A default instance (created via <c>default(AbsolutePath)</c>) has a null Value 
+    /// and should not be used. Two default instances are considered equal.
     /// </remarks>
-    public readonly struct AbsolutePath
+    public readonly struct AbsolutePath : IEquatable<AbsolutePath>
     {
+        /// <summary>
+        /// The string comparer to use for path comparisons, based on OS file system case sensitivity.
+        /// </summary>
+        private static readonly StringComparer s_pathComparer = NativeMethods.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
+
         /// <summary>
         /// The normalized string representation of this path.
         /// </summary>
@@ -82,6 +92,42 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="path">The path to convert.</param>
         public static implicit operator string(AbsolutePath path) => path.Value;
+
+        /// <summary>
+        /// Determines whether two <see cref="AbsolutePath"/> instances are equal.
+        /// </summary>
+        /// <param name="left">The first path to compare.</param>
+        /// <param name="right">The second path to compare.</param>
+        /// <returns><c>true</c> if the paths are equal; otherwise, <c>false</c>.</returns>
+        public static bool operator ==(AbsolutePath left, AbsolutePath right) => left.Equals(right);
+
+        /// <summary>
+        /// Determines whether two <see cref="AbsolutePath"/> instances are not equal.
+        /// </summary>
+        /// <param name="left">The first path to compare.</param>
+        /// <param name="right">The second path to compare.</param>
+        /// <returns><c>true</c> if the paths are not equal; otherwise, <c>false</c>.</returns>
+        public static bool operator !=(AbsolutePath left, AbsolutePath right) => !left.Equals(right);
+
+        /// <summary>
+        /// Determines whether the specified object is equal to the current <see cref="AbsolutePath"/>.
+        /// </summary>
+        /// <param name="obj">The object to compare with the current instance.</param>
+        /// <returns><c>true</c> if the specified object is an <see cref="AbsolutePath"/> and is equal to the current instance; otherwise, <c>false</c>.</returns>
+        public override bool Equals(object? obj) => obj is AbsolutePath other && Equals(other);
+
+        /// <summary>
+        /// Determines whether the specified <see cref="AbsolutePath"/> is equal to the current instance.
+        /// </summary>
+        /// <param name="other">The <see cref="AbsolutePath"/> to compare with the current instance.</param>
+        /// <returns><c>true</c> if the paths are equal according to the operating system's file system case sensitivity rules; otherwise, <c>false</c>.</returns>
+        public bool Equals(AbsolutePath other) => s_pathComparer.Equals(Value, other.Value);
+
+        /// <summary>
+        /// Returns a hash code for this <see cref="AbsolutePath"/>.
+        /// </summary>
+        /// <returns>A hash code that is consistent with the equality comparison.</returns>
+        public override int GetHashCode() => Value is null ? 0 : s_pathComparer.GetHashCode(Value);
 
         /// <summary>
         /// Returns the string representation of this path.
