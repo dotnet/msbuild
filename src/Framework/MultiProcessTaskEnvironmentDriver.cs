@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -51,20 +52,7 @@ namespace Microsoft.Build.Framework
         /// <inheritdoc/>
         public IReadOnlyDictionary<string, string> GetEnvironmentVariables()
         {
-            var variables = Environment.GetEnvironmentVariables();
-            // On Windows, environment variables are case-insensitive; on Unix-like systems, they are case-sensitive
-            var comparer = NativeMethods.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
-            var result = new Dictionary<string, string>(variables.Count, comparer);
-
-            foreach (string key in variables.Keys)
-            {
-                if (variables[key] is string value)
-                {
-                    result[key] = value;
-                }
-            }
-
-            return result;
+            return EnvironmentUtilities.CopyCurrentEnvironmentVariables();
         }
 
         /// <inheritdoc/>
@@ -76,24 +64,10 @@ namespace Microsoft.Build.Framework
         /// <inheritdoc/>
         public void SetEnvironment(IDictionary<string, string> newEnvironment)
         {
-            // First, delete all no longer set variables
-            IReadOnlyDictionary<string, string> currentEnvironment = GetEnvironmentVariables();
-            foreach (KeyValuePair<string, string> entry in currentEnvironment)
-            {
-                if (!newEnvironment.ContainsKey(entry.Key))
-                {
-                    SetEnvironmentVariable(entry.Key, null);
-                }
-            }
-
-            // Then, make sure the new ones have their new values.
-            foreach (KeyValuePair<string, string> entry in newEnvironment)
-            {
-                if (!currentEnvironment.TryGetValue(entry.Key, out string? currentValue) || currentValue != entry.Value)
-                {
-                    SetEnvironmentVariable(entry.Key, entry.Value);
-                }
-            }
+            EnvironmentUtilities.SetEnvironment(
+                newEnvironment,
+                GetEnvironmentVariables,
+                SetEnvironmentVariable);
         }
 
         /// <inheritdoc/>

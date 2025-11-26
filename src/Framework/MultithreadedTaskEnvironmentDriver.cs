@@ -1,9 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -17,12 +17,6 @@ namespace Microsoft.Build.Framework
     /// </remarks>
     internal sealed class MultiThreadedTaskEnvironmentDriver : ITaskEnvironmentDriver
     {
-        /// <summary>
-        /// String comparer for environment variable names based on the current platform.
-        /// On Windows, environment variables are case-insensitive; on Unix-like systems, they are case-sensitive.
-        /// </summary>
-        private static readonly StringComparer EnvironmentVariableComparer = 
-            NativeMethods.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
 
         private readonly Dictionary<string, string> _environmentVariables;
         private AbsolutePath _currentDirectory;
@@ -37,7 +31,7 @@ namespace Microsoft.Build.Framework
             string currentDirectoryFullPath,
             IDictionary<string, string> environmentVariables)
         {
-            _environmentVariables = new Dictionary<string, string>(environmentVariables, EnvironmentVariableComparer);
+            _environmentVariables = new Dictionary<string, string>(environmentVariables, EnvironmentUtilities.EnvironmentVariableComparer);
             _currentDirectory = new AbsolutePath(currentDirectoryFullPath, ignoreRootedCheck: true);
         }
 
@@ -48,18 +42,7 @@ namespace Microsoft.Build.Framework
         /// <param name="currentDirectoryFullPath">The initial working directory.</param>
         public MultiThreadedTaskEnvironmentDriver(string currentDirectoryFullPath)
         {
-            // Copy environment variables from the current process
-            var variables = Environment.GetEnvironmentVariables();
-            _environmentVariables = new Dictionary<string, string>(variables.Count, EnvironmentVariableComparer);
-
-            foreach (string key in variables.Keys)
-            {
-                if (variables[key] is string value)
-                {
-                    _environmentVariables[key] = value;
-                }
-            }
-
+            _environmentVariables = EnvironmentUtilities.CopyCurrentEnvironmentVariables();
             _currentDirectory = new AbsolutePath(currentDirectoryFullPath, ignoreRootedCheck: true);
         }
 

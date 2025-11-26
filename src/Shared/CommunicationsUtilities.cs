@@ -645,9 +645,10 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void SetEnvironment(IDictionary<string, string> newEnvironment)
         {
+#if CLR2COMPATIBILITY
+            // In .NET 3.5, Dictionary doesn't implement IReadOnlyDictionary, so we handle it directly
             if (newEnvironment != null)
             {
-                // First, delete all no longer set variables
                 IDictionary<string, string> currentEnvironment = GetEnvironmentVariables();
                 foreach (KeyValuePair<string, string> entry in currentEnvironment)
                 {
@@ -657,7 +658,6 @@ namespace Microsoft.Build.Internal
                     }
                 }
 
-                // Then, make sure the new ones have their new values.
                 foreach (KeyValuePair<string, string> entry in newEnvironment)
                 {
                     if (!currentEnvironment.TryGetValue(entry.Key, out string currentValue) || currentValue != entry.Value)
@@ -666,6 +666,12 @@ namespace Microsoft.Build.Internal
                     }
                 }
             }
+#else
+            EnvironmentUtilities.SetEnvironment(
+                newEnvironment,
+                () => GetEnvironmentVariables(),
+                SetEnvironmentVariable);
+#endif
         }
 
 #nullable enable
