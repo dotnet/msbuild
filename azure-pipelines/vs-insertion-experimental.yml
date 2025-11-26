@@ -67,15 +67,15 @@ extends:
       displayName: VS insertion
       variables:
         VSDropPath: https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(SourceBranchName)/$(MSBuild_CI_BuildNumber)
-        VSManVersionSuffix: $(MSBuild_ExtApisPackageVersion)+$(MSBuild_CI_SourceVersion)
+        VSManVersionSuffix: $(MSBuild_PackageVersion)+$(MSBuild_CI_SourceVersion)
         StandardVSManPath: Microsoft.Build.vsman{$(VSManVersionSuffix)}=$(VSDropPath);Microsoft.Build.vsman
         Arm64VSManPath: Microsoft.Build.Arm64.vsman{$(VSManVersionSuffix)}=$(VSDropPath);Microsoft.Build.Arm64.vsman
         UnGACVSManPath: Microsoft.Build.UnGAC.vsman=$(VSDropPath);Microsoft.Build.UnGAC.vsman
         InsertJsonValues: $(StandardVSManPath),$(Arm64VSManPath),$(UnGACVSManPath)
-        InsertConfigValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion)
+        InsertConfigValues: VS.ExternalAPIs.MSBuild=$(MSBuild_PackageVersion)
         InsertCustomScriptExecutionCommand: $(Pipeline.Workspace)\xsd\Update-MSBuildXsds.ps1
-        InsertDescription: Insert MSBuild $(MSBuild_CI_BuildNumber) from the branch $(SourceBranchName) at commit $(MSBuild_CI_SourceVersion). Corresponding package version is $(MSBuild_ExtApisPackageVersion)
-        InsertPayloadName: '[Experimental] [Skip-SymbolCheck] MSBuild $(SourceBranchName) $(MSBuild_ExtApisPackageVersion)'
+        InsertDescription: Insert MSBuild $(MSBuild_CI_BuildNumber) from the branch $(SourceBranchName) at commit $(MSBuild_CI_SourceVersion). Corresponding package version is $(MSBuild_PackageVersion)
+        InsertPayloadName: '[Experimental] [Skip-SymbolCheck] MSBuild $(SourceBranchName) $(MSBuild_PackageVersion)'
       jobs:
       - job: PushPackagesAndInsert
         displayName: Push Packages and Insert VS payload
@@ -154,13 +154,8 @@ extends:
               $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/VS.ExternalAPIs.*.nupkg"
               $packageFile = Get-ChildItem -Path $folder -Filter VS.ExternalAPIs.*.nupkg | Select-Object -First 1
               $packageVersion = $packageFile.BaseName.TrimStart("VS.ExternalAPIs.MSBuild")
-              Write-Host "Setting MSBuild_ExtApisPackageVersion to '$packageVersion'"
-              Write-Host "##vso[task.setvariable variable=MSBuild_ExtApisPackageVersion]$($packageVersion)"
-              $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/Microsoft.NET.StringTools*.nupkg"
-              $packageFile = Get-ChildItem -Path $folder -Filter Microsoft.NET.StringTools*.nupkg | Select-Object -First 1
-              $packageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
-              Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$packageVersion'"
-              Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($packageVersion)"
+              Write-Host "Setting MSBuild_PackageVersion to '$packageVersion'"
+              Write-Host "##vso[task.setvariable variable=MSBuild_PackageVersion]$($packageVersion)"
               
         - task: 1ES.PublishNuGet@1
           displayName: 'Push MSBuild CoreXT packages'
