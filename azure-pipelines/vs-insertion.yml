@@ -121,6 +121,8 @@ variables:
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
+    settings:
+      networkIsolationPolicy: Permissive,CFSClean
     pool:
       name: VSEngSS-MicroBuild2022-1ES
     customBuildTags:

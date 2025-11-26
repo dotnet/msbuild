@@ -58,6 +58,8 @@ variables:
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
+    settings:
+      networkIsolationPolicy: Permissive,CFSClean
     pool:
       name: VSEngSS-MicroBuild2022-1ES
     stages:
@@ -143,7 +145,22 @@ extends:
 
               Write-Host "##vso[task.setvariable variable=FinalTargetBranch]$finalTargetBranch"
 
-        - task: 1ES.PublishNuGet@1
+        - task: Powershell@2
+          name: PwshMungeExternalAPIsPkgVersion
+          displayName: Munge ExternalAPIs package version
+          inputs:
+            targetType: inline
+            script: |
+              $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/VS.ExternalAPIs.*.nupkg"
+              $packageFile = Get-ChildItem -Path $folder -Filter VS.ExternalAPIs.*.nupkg | Select-Object -First 1
+              $packageVersion = $packageFile.BaseName.TrimStart("VS.ExternalAPIs.MSBuild")
+              Write-Host "Setting MSBuild_ExtApisPackageVersion to '$packageVersion'"
+              Write-Host "##vso[task.setvariable variable=MSBuild_ExtApisPackageVersion]$($packageVersion)"
+              $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/Microsoft.NET.StringTools*.nupkg"
+              $packageFile = Get-ChildItem -Path $folder -Filter Microsoft.NET.StringTools*.nupkg | Select-Object -First 1
+              $packageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
+              Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$packageVersion'"
+              Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($packageVersion)"
           displayName: 'Push MSBuild CoreXT packages'
           inputs:
             packageParentPath: '$(Build.ArtifactStagingDirectory)'
