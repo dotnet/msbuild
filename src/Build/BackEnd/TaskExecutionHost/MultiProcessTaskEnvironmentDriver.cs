@@ -5,9 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Framework
+namespace Microsoft.Build.BackEnd
 {
     /// <summary>
     /// Default implementation of <see cref="ITaskEnvironmentDriver"/> that directly interacts with the file system

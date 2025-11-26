@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
-using static Microsoft.Build.Shared.FileMatcher;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -328,7 +328,7 @@ namespace Microsoft.Build.UnitTests
                 string upperVarName = testVarName.ToUpperInvariant();
                 string lowerVarName = testVarName.ToLowerInvariant();
                 
-                if (NativeMethods.IsWindows)
+                if (Microsoft.Build.Framework.NativeMethods.IsWindows)
                 {
                     // On Windows, environment variables should be case-insensitive
                     
@@ -383,7 +383,7 @@ namespace Microsoft.Build.UnitTests
             string testVarValue = "multithreaded_test_value";
 
             // On Windows, environment variables are case-insensitive; on Unix-like systems, they are case-sensitive
-            var comparer = NativeMethods.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+            var comparer = Microsoft.Build.Framework.NativeMethods.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
             var multithreadedEnvironment = new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(
                 GetResolvedTempPath(),
                 new Dictionary<string, string>(comparer)));

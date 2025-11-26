@@ -3,9 +3,10 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Framework
+namespace Microsoft.Build.BackEnd
 {
     /// <summary>
     /// Implementation of <see cref="ITaskEnvironmentDriver"/> that virtualizes environment variables and current directory
@@ -17,7 +18,6 @@ namespace Microsoft.Build.Framework
     /// </remarks>
     internal sealed class MultiThreadedTaskEnvironmentDriver : ITaskEnvironmentDriver
     {
-
         private readonly Dictionary<string, string> _environmentVariables;
         private AbsolutePath _currentDirectory;
 
@@ -46,6 +46,7 @@ namespace Microsoft.Build.Framework
             _currentDirectory = new AbsolutePath(currentDirectoryFullPath, ignoreRootedCheck: true);
         }
 
+        /// <inheritdoc/>
         public AbsolutePath ProjectDirectory
         {
             get => _currentDirectory;
