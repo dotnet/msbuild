@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests
             lowerPath.GetHashCode().ShouldBe(upperPath.GetHashCode());
         }
 
-        [UnixOnlyFact]
+        [LinuxOnlyFact]
         public void AbsolutePath_CaseSensitive_OnLinux()
         {
             // On Linux, paths are case-sensitive

@@ -26,7 +26,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The string comparer to use for path comparisons, based on OS file system case sensitivity.
         /// </summary>
-        private static readonly StringComparer s_pathComparer = NativeMethods.OSUsesCaseSensitivePaths ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
+        private static readonly StringComparer s_pathComparer = NativeMethods.IsFileSystemCaseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
 
         /// <summary>
         /// The normalized string representation of this path.
