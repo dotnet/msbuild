@@ -23,18 +23,15 @@ namespace Microsoft.Build.Framework
         private static readonly MultiProcessTaskEnvironmentDriver s_instance = new MultiProcessTaskEnvironmentDriver();
 
         /// <summary>
-        /// Gets the singleton instance of StubTaskEnvironmentDriver.
+        /// Gets the singleton instance of <see cref="MultiProcessTaskEnvironmentDriver"/>.
         /// </summary>
         public static MultiProcessTaskEnvironmentDriver Instance => s_instance;
 
-        /// <summary>
-        /// Private constructor to enforce singleton pattern.
-        /// </summary>
         private MultiProcessTaskEnvironmentDriver() { }
 
         /// <inheritdoc/>
-        public AbsolutePath ProjectDirectory 
-        { 
+        public AbsolutePath ProjectDirectory
+        {
             get => new AbsolutePath(Directory.GetCurrentDirectory(), ignoreRootedCheck: true);
             set => Directory.SetCurrentDirectory(value.Value);
         }
