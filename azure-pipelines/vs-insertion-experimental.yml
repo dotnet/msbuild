@@ -161,6 +161,8 @@ extends:
               $packageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
               Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$packageVersion'"
               Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($packageVersion)"
+              
+        - task: 1ES.PublishNuGet@1
           displayName: 'Push MSBuild CoreXT packages'
           inputs:
             packageParentPath: '$(Build.ArtifactStagingDirectory)'
