@@ -46,6 +46,7 @@ namespace Microsoft.Build.Shared
         private static MetadataLoadContext _context;
 
         private static readonly string[] runtimeAssemblies = findRuntimeAssembliesWithMicrosoftBuildFramework();
+
         private static string microsoftBuildFrameworkPath;
 
         /// <summary>
@@ -63,7 +64,23 @@ namespace Microsoft.Build.Shared
             string[] msbuildAssemblies = Directory.GetFiles(msbuildDirectory, "*.dll");
             string[] runtimeAssemblies = Directory.GetFiles(RuntimeEnvironment.GetRuntimeDirectory(), "*.dll");
 
+            return [.. runtimeAssemblies, .. msbuildAssemblies];
+        }
+
 #if NETFRAMEWORK
+        private static readonly string[] runtimeAssembliesCLR2_35 = findRuntimeAssembliesWithMicrosoftBuildFrameworkCLR2CLR35();
+
+        /// <summary>
+        /// Gathers a list of runtime assemblies for the <see cref="MetadataLoadContext"/>.
+        /// This includes assemblies from the MSBuild installation directory, the current .NET runtime directory,
+        /// and on .NET Framework, assemblies from older framework versions (2.0, 3.5).
+        /// The path to the current `Microsoft.Build.Framework.dll` is also stored to ensure it's prioritized
+        /// for resolving essential types like <see cref="ITaskItem"/>.
+        /// These paths are used to create a <see cref="PathAssemblyResolver"/> for the <see cref="MetadataLoadContext"/>.
+        /// </summary>
+        private static string[] findRuntimeAssembliesWithMicrosoftBuildFrameworkCLR2CLR35()
+        {
+            string msbuildDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string v20Path = FrameworkLocationHelper.PathToDotNetFrameworkV20;
             string v35Path = FrameworkLocationHelper.PathToDotNetFrameworkV35;
 
@@ -73,12 +90,9 @@ namespace Microsoft.Build.Shared
             string[] msbuildCLR35Assemblies = !string.IsNullOrEmpty(v35Path) && Directory.Exists(v35Path)
                 ? Directory.GetFiles(v35Path, "*.dll")
                 : [];
-            return [.. runtimeAssemblies, .. msbuildAssemblies, .. msbuildCLR2Assemblies, .. msbuildCLR35Assemblies];
-#else
-
-            return [.. runtimeAssemblies, .. msbuildAssemblies];
-#endif
+            return [.. msbuildCLR2Assemblies, .. msbuildCLR35Assemblies];
         }
+#endif
 
         /// <summary>
         /// Constructor.
@@ -209,7 +223,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        private static Assembly LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
+        private static Assembly LoadAssemblyUsingMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo, bool taskHostParamsMatchCurrentProc)
         {
             string path = assemblyLoadInfo.AssemblyFile;
             string assemblyDirectory = Path.GetDirectoryName(path);
@@ -228,8 +242,18 @@ namespace Microsoft.Build.Shared
             {
                 assembliesDictionary[Path.GetFileName(runtimeAssembly)] = runtimeAssembly;
             }
+#if NETFRAMEWORK
+            if (!taskHostParamsMatchCurrentProc)
+            {
+                foreach (string runtimeAssembly in runtimeAssembliesCLR2_35)
+                {
+                    assembliesDictionary[Path.GetFileName(runtimeAssembly)] = runtimeAssembly;
+                }
+            }
+#endif
 
             _context = new(new PathAssemblyResolver(assembliesDictionary.Values));
+
             return _context.LoadFromAssemblyPath(path);
         }
 
@@ -357,7 +381,7 @@ namespace Microsoft.Build.Shared
 
                 if (ShouldUseMetadataLoadContext(useTaskHost, taskHostParamsMatchCurrentProc))
                 {
-                    return GetLoadedTypeFromTypeNameUsingMetadataLoadContext(typeName);
+                    return GetLoadedTypeFromTypeNameUsingMetadataLoadContext(typeName, taskHostParamsMatchCurrentProc);
                 }
 
                 // Only one thread should be doing operations on this instance of the object at a time.
@@ -417,12 +441,12 @@ namespace Microsoft.Build.Shared
             private bool ShouldUseMetadataLoadContext(bool useTaskHost, bool taskHostParamsMatchCurrentProc) =>
                 (useTaskHost || !taskHostParamsMatchCurrentProc) && _assemblyLoadInfo.AssemblyFile is not null;
 
-            private LoadedType GetLoadedTypeFromTypeNameUsingMetadataLoadContext(string typeName)
+            private LoadedType GetLoadedTypeFromTypeNameUsingMetadataLoadContext(string typeName, bool taskHostParamsMatchCurrentProc)
             {
                 return _publicTypeNameToLoadedType.GetOrAdd(typeName, typeName =>
                 {
                     MSBuildEventSource.Log.LoadAssemblyAndFindTypeStart();
-                    Assembly loadedAssembly = LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo);
+                    Assembly loadedAssembly = LoadAssemblyUsingMetadataLoadContext(_assemblyLoadInfo, taskHostParamsMatchCurrentProc);
                     Type foundType = null;
                     int numberOfTypesSearched = 0;
 
