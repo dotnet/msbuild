@@ -242,7 +242,7 @@ namespace Microsoft.Build.BackEnd
             _nodeIdToPacketFactory = new ConcurrentDictionary<int, INodePacketFactory>();
             _nodeIdToPacketHandler = new ConcurrentDictionary<int, INodePacketHandler>();
             _activeNodes = [];
-            _nextNodeId = 1;
+            _nextNodeId = 0;
 
             _noNodesActiveEvent = new ManualResetEvent(true);
             _localPacketFactory = new NodePacketFactory();
