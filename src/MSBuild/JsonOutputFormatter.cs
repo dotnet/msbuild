@@ -161,7 +161,7 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Attempts to get metadata from an ITaskItem. If the metadata is a built-in modifier
+        /// Attempts to get metadata from an ITaskItem. If the metadata is a built-in metadata
         /// (like FullPath, Directory, etc.) and the item spec contains illegal path characters,
         /// this will catch the InvalidOperationException and return an empty string.
         /// </summary>
@@ -180,7 +180,7 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Attempts to get metadata value from a ProjectItemInstance. If the metadata is a built-in modifier
+        /// Attempts to get metadata value from a ProjectItemInstance. If the metadata is a built-in metadata
         /// (like FullPath, Directory, etc.) and the item spec contains illegal path characters,
         /// this will catch the InvalidOperationException and return an empty string.
         /// </summary>
@@ -199,7 +199,7 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Attempts to get metadata value from a ProjectItem. If the metadata is a built-in modifier
+        /// Attempts to get metadata value from a ProjectItem. If the metadata is a built-in metadata
         /// (like FullPath, Directory, etc.) and the item spec contains illegal path characters,
         /// this will catch the InvalidOperationException and return an empty string.
         /// </summary>
