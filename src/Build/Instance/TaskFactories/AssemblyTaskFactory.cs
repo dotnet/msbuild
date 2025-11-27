@@ -22,6 +22,7 @@ using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContex
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
+using Microsoft.Build.BackEnd.Logging;
 
 #nullable disable
 
@@ -252,7 +253,7 @@ namespace Microsoft.Build.BackEnd
             string taskElementContents,
             in TaskHostParameters taskFactoryIdentityParameters,
             bool taskHostExplicitlyRequested,
-            TargetLoggingContext targetLoggingContext,
+            LoggingContext targetLoggingContext,
             ElementLocation elementLocation,
             string taskProjectFile)
         {
@@ -273,8 +274,7 @@ namespace Microsoft.Build.BackEnd
 
                 string assemblyName = loadInfo.AssemblyName ?? Path.GetFileName(loadInfo.AssemblyFile);
                 using var assemblyLoadsTracker = AssemblyLoadsTracker.StartTracking(targetLoggingContext, AssemblyLoadingContext.TaskRun, assemblyName);
-
-                _loadedType = _typeLoader.Load(taskName, loadInfo, taskHostExplicitlyRequested, taskHostParamsMatchCurrentProc);
+                _loadedType = _typeLoader.Load(taskName, loadInfo, targetLoggingContext.LogWarning, taskHostExplicitlyRequested, taskHostParamsMatchCurrentProc);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(_loadedType != null, elementLocation, "TaskLoadFailure", taskName, loadInfo.AssemblyLocation, String.Empty);
             }
             catch (TargetInvocationException e)
@@ -343,8 +343,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Multi-threaded mode routing: Determine if non-thread-safe tasks need TaskHost isolation.
-            if (!useTaskFactory 
-                && _loadedType?.Type != null 
+            if (!useTaskFactory
+                && _loadedType?.Type != null
                 && buildComponentHost?.BuildParameters?.MultiThreaded == true)
             {
                 if (TaskRouter.NeedsTaskHostInMultiThreadedMode(_loadedType.Type))
@@ -359,6 +359,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ErrorUtilities.VerifyThrowInternalNull(buildComponentHost);
 
+                mergedParameters = UpdateTaskHostParameters(mergedParameters);
                 (mergedParameters, bool isNetRuntime) = AddNetHostParamsIfNeeded(mergedParameters, getProperty);
 
                 bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false)
@@ -425,7 +426,31 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Is the given task name able to be created by the task factory. In the case of an assembly task factory
+        /// Overrides runtime/architecture with values from task host parameters if available.
+        /// The explicitly specified parameters always take precedence over assembly metadata.
+        /// </summary>
+        private TaskHostParameters UpdateTaskHostParameters(TaskHostParameters taskHostParameters)
+        {
+            // Determine runtime: prefer explicit parameter, fallback to loaded type's runtime or current.
+            string runtime = taskHostParameters.Runtime
+                ?? _loadedType?.Runtime
+                ?? XMakeAttributes.GetCurrentMSBuildRuntime();
+
+            // Determine architecture: prefer explicit parameter, fallback to loaded type's architecture or current
+            string architecture = taskHostParameters.Architecture
+                ?? _loadedType?.Architecture
+                ?? XMakeAttributes.GetCurrentMSBuildArchitecture();
+
+            return new TaskHostParameters(
+                runtime: runtime,
+                architecture: architecture,
+                dotnetHostPath: taskHostParameters.DotnetHostPath,
+                msBuildAssemblyPath: taskHostParameters.MSBuildAssemblyPath,
+                taskHostFactoryExplicitlyRequested: taskHostParameters.TaskHostFactoryExplicitlyRequested);
+        }
+
+        /// <summary>
+        /// Is the given task name able to to be created by the task factory. In the case of an assembly task factory
         /// this question is answered by checking the assembly wrapped by the task factory to see if it exists.
         /// </summary>
         internal bool TaskNameCreatableByFactory(string taskName, in TaskHostParameters taskIdentityParameters, string taskProjectFile, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
@@ -465,6 +490,13 @@ namespace Microsoft.Build.BackEnd
                 // taskName may be null
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
             }
+#if NETCOREAPP
+            catch (FileNotFoundException e)
+            {
+                // The specified task assembly could not be found, it might be misspelled. It usually discovered during MetadataLoadContext run.
+                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
+            }
+#endif
             catch (Exception e) when (!ExceptionHandling.NotExpectedReflectionException(e))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _loadedType.Assembly.AssemblyLocation, e.Message);
@@ -473,7 +505,7 @@ namespace Microsoft.Build.BackEnd
             return false;
         }
 
-        #endregion
+#endregion
 
         #region Private members
 
@@ -676,7 +708,7 @@ namespace Microsoft.Build.BackEnd
 
             // Check if the assembly is a Microsoft assembly by name
             string assemblyName = _loadedType.Assembly.AssemblyName;
-            if (!string.IsNullOrEmpty(assemblyName) && Framework.FileClassifier.IsMicrosoftAssembly(assemblyName))
+            if (!string.IsNullOrEmpty(assemblyName) && FileClassifier.IsMicrosoftAssembly(assemblyName))
             {
                 return true;
             }
@@ -686,13 +718,13 @@ namespace Microsoft.Build.BackEnd
             if (!string.IsNullOrEmpty(assemblyFile))
             {
                 // Check if it's built-in MSBuild logic (e.g., from MSBuild installation)
-                if (Framework.FileClassifier.Shared.IsBuiltInLogic(assemblyFile))
+                if (FileClassifier.Shared.IsBuiltInLogic(assemblyFile))
                 {
                     return true;
                 }
 
                 // Check if it's a Microsoft package from NuGet cache
-                if (Framework.FileClassifier.Shared.IsMicrosoftPackageInNugetCache(assemblyFile))
+                if (FileClassifier.Shared.IsMicrosoftPackageInNugetCache(assemblyFile))
                 {
                     return true;
                 }
