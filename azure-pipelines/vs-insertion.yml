@@ -121,6 +121,8 @@ variables:
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
+    settings:
+      networkIsolationPolicy: Permissive,CFSClean
     pool:
       name: VSEngSS-MicroBuild2022-1ES
     customBuildTags:
@@ -287,8 +289,8 @@ extends:
             targetType: inline
             script: |
               Write-Host "InsertTargetBranch: $(InsertTargetBranch)"
-        - task: MicroBuildInsertVsPayload@4
-          name: MicroBuildInsertVsPayload_4
+        - task: MicroBuildInsertVsPayload@5
+          name: MicroBuildInsertVsPayload_5
           displayName: Insert VS Payload
           inputs:
             LinkWorkItemsToPR: true
@@ -305,3 +307,6 @@ extends:
             AutoCompletePR: $(AutoCompleteEnabled)
             AutoCompleteMergeStrategy: Squash
             InsertionBuildPolicy: Request Perf DDRITs
+            ConnectedVSDropServiceName: 'VSEng-VSDrop-MI'
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
