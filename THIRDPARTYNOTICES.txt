@@ -65,11 +65,3 @@ CONDITIONS OF ANY KIND, either express or implied. See the License for the speci
 language governing permissions and limitations under the License.
 
 -------------------------------
-
-Notice for Microsoft.VisualStudio.Telemetry
--------------------------------
-MSBuild.exe is distributed with Microsoft.VisualStudio.Telemetry binary.
-
-Project:      Microsoft.VisualStudio.Telemetry
-Copyright:    (c) Microsoft Corporation
-License:      https://visualstudio.microsoft.com/license-terms/mt736442/

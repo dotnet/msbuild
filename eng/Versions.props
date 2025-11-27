@@ -55,7 +55,7 @@
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <MicrosoftVisualStudioOpenTelemetryVersion>0.2.104-beta</MicrosoftVisualStudioOpenTelemetryVersion>
+    <MicrosoftVisualStudioTelemetryVersion>17.14.18</MicrosoftVisualStudioTelemetryVersion>
     <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Packages.props -->
   </PropertyGroup>
   <!-- Toolset Dependencies -->

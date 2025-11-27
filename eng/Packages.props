@@ -40,9 +40,7 @@
     <PackageVersion Include="System.Threading.Tasks.Dataflow" Version="$(SystemThreadingTasksDataflowVersion)" />
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsVersion)" />
     <PackageVersion Include="xunit.console" Version="$(XUnitVersion)" />
-    <PackageVersion Include="Microsoft.VisualStudio.OpenTelemetry.Collector" Version="$(MicrosoftVisualStudioOpenTelemetryVersion)" />
-    <PackageVersion Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" Version="$(MicrosoftVisualStudioOpenTelemetryVersion)" />
-    <PackageVersion Include="Microsoft.VisualStudio.Telemetry" Version="17.14.18" />
+    <PackageVersion Include="Microsoft.VisualStudio.Telemetry" Version="$(MicrosoftVisualStudioTelemetryVersion)" />
     <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Packages.props -->
   </ItemGroup>
 </Project>

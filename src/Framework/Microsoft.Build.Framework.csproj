@@ -24,7 +24,7 @@
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
     <Reference Include="System.Xaml" />
     <PackageReference Include="System.Text.Json" />
-    <!-- Telemetry in Framework-->
+    <!-- Telemetry in Visual Studio scenarios -->
     <PackageReference Include="Microsoft.VisualStudio.Telemetry" PrivateAssets="all" />
   </ItemGroup>
 
