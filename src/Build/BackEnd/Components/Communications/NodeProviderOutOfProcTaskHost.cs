@@ -86,6 +86,12 @@ namespace Microsoft.Build.BackEnd
         private ConcurrentDictionary<TaskHostNodeKey, NodeContext> _nodeContexts;
 
         /// <summary>
+        /// Reverse mapping from communication node ID to TaskHostNodeKey.
+        /// Used for O(1) lookup when handling node termination from ShutdownAllNodes.
+        /// </summary>
+        private ConcurrentDictionary<int, TaskHostNodeKey> _nodeIdToNodeKey;
+
+        /// <summary>
         /// A mapping of all of the INodePacketFactories wrapped by this provider.
         /// Keyed by the communication node ID (NodeContext.NodeId) for O(1) packet routing.
         /// Thread-safe to support parallel taskhost creation in /mt mode where multiple thread nodes
@@ -232,6 +238,7 @@ namespace Microsoft.Build.BackEnd
         {
             this.ComponentHost = host;
             _nodeContexts = new ConcurrentDictionary<TaskHostNodeKey, NodeContext>();
+            _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
             _nodeIdToPacketFactory = new ConcurrentDictionary<int, INodePacketFactory>();
             _nodeIdToPacketHandler = new ConcurrentDictionary<int, INodePacketHandler>();
             _activeNodes = [];
@@ -627,13 +634,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void DisconnectFromHost(TaskHostNodeKey nodeKey)
         {
-            if (_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
-            {
-                bool successRemoveFactory = _nodeIdToPacketFactory.TryRemove(context.NodeId, out _);
-                bool successRemoveHandler = _nodeIdToPacketHandler.TryRemove(context.NodeId, out _);
+            ErrorUtilities.VerifyThrow(_nodeContexts.TryGetValue(nodeKey, out NodeContext context), "Node context not found for key: {0}. Was the node created?", nodeKey);
 
-                ErrorUtilities.VerifyThrow(successRemoveFactory && successRemoveHandler, "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
-            }
+            bool successRemoveFactory = _nodeIdToPacketFactory.TryRemove(context.NodeId, out _);
+            bool successRemoveHandler = _nodeIdToPacketHandler.TryRemove(context.NodeId, out _);
+
+            ErrorUtilities.VerifyThrow(successRemoveFactory && successRemoveHandler, "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
         }
 
         /// <summary>
@@ -642,6 +648,7 @@ namespace Microsoft.Build.BackEnd
         internal bool CreateNode(TaskHostNodeKey nodeKey, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, in TaskHostParameters taskHostParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory);
+            ErrorUtilities.VerifyThrow(!_nodeContexts.ContainsKey(nodeKey), "We should not already have a node for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
             HandshakeOptions hostContext = nodeKey.HandshakeOptions;
 
@@ -653,7 +660,6 @@ namespace Microsoft.Build.BackEnd
 
             // Create callbacks that capture the TaskHostNodeKey
             void OnNodeContextCreated(NodeContext context) => NodeContextCreated(context, nodeKey);
-            void OnNodeContextTerminated(int nodeId) => NodeContextTerminated(nodeId, nodeKey);
 
             IList<NodeContext> nodeContexts;
 
@@ -675,7 +681,7 @@ namespace Microsoft.Build.BackEnd
                     this,
                     handshake,
                     OnNodeContextCreated,
-                    OnNodeContextTerminated,
+                    NodeContextTerminated,
                     1);
 
                 return nodeContexts.Count == 1;
@@ -699,7 +705,7 @@ namespace Microsoft.Build.BackEnd
                 this,
                 new Handshake(hostContext),
                 OnNodeContextCreated,
-                OnNodeContextTerminated,
+                NodeContextTerminated,
                 1);
 
             return nodeContexts.Count == 1;
@@ -722,6 +728,7 @@ namespace Microsoft.Build.BackEnd
         private void NodeContextCreated(NodeContext context, TaskHostNodeKey nodeKey)
         {
             _nodeContexts[nodeKey] = context;
+            _nodeIdToNodeKey[context.NodeId] = nodeKey;
 
             // Start the asynchronous read.
             context.BeginAsyncPacketRead();
@@ -734,49 +741,20 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Method called when a context terminates.
+        /// Method called when a context terminates (called from CreateNode callbacks or ShutdownAllNodes).
         /// </summary>
-        private void NodeContextTerminated(int nodeId, TaskHostNodeKey nodeKey)
+        private void NodeContextTerminated(int nodeId)
         {
-            _nodeContexts.TryRemove(nodeKey, out _);
+            // Remove from nodeKey-based lookup if we have it
+            if (_nodeIdToNodeKey.TryRemove(nodeId, out TaskHostNodeKey nodeKey))
+            {
+                _nodeContexts.TryRemove(nodeKey, out _);
+            }
 
             // May also be removed by unnatural termination, so don't assume it's there
             lock (_activeNodes)
             {
-                if (_activeNodes.Contains(nodeId))
-                {
-                    _activeNodes.Remove(nodeId);
-                }
-
-                if (_activeNodes.Count == 0)
-                {
-                    _noNodesActiveEvent.Set();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Method called when a context terminates (called from ShutdownAllNodes).
-        /// </summary>
-        private void NodeContextTerminated(int nodeId)
-        {
-            // Find the nodeKey for this nodeId by iterating through _nodeContexts
-            foreach (var kvp in _nodeContexts)
-            {
-                if (kvp.Value.NodeId == nodeId)
-                {
-                    NodeContextTerminated(nodeId, kvp.Key);
-                    return;
-                }
-            }
-
-            // Node might already be removed, just clean up _activeNodes
-            lock (_activeNodes)
-            {
-                if (_activeNodes.Contains(nodeId))
-                {
-                    _activeNodes.Remove(nodeId);
-                }
+                _activeNodes.Remove(nodeId);
 
                 if (_activeNodes.Count == 0)
                 {
