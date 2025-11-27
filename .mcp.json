@@ -1,0 +1,7 @@
+{
+  "servers": {
+    "codebase-insights": {
+      "url": "http://98.71.32.114:8000/sse"
+    }
+  }
+}
