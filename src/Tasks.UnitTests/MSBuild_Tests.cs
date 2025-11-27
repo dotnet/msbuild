@@ -35,6 +35,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Creates an MSBuild task with TaskEnvironment properly initialized for test scenarios.
+        /// </summary>
+        private static MSBuild CreateMSBuildTask()
+        {
+            return new MSBuild { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+        }
+
+        /// <summary>
         /// If we pass in an item spec that is over the max path but it can be normalized down to something under the max path, we should still work and not
         /// throw a path too long exception
         /// </summary>
@@ -73,12 +81,9 @@ namespace Microsoft.Build.UnitTests
                 projectFile1 += tempPathNoRoot;
                 try
                 {
-                    MSBuild msbuildTask = new MSBuild
-                    {
-                        BuildEngine = new MockEngine(_testOutput),
-
-                        Projects = new ITaskItem[] { new TaskItem(projectFile1) }
-                    };
+                    MSBuild msbuildTask = CreateMSBuildTask();
+                    msbuildTask.BuildEngine = new MockEngine(_testOutput);
+                    msbuildTask.Projects = new ITaskItem[] { new TaskItem(projectFile1) };
 
                     msbuildTask.Execute().ShouldBeTrue("Build failed.  See 'Standard Out' tab for details.");
                 }
@@ -122,7 +127,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                MSBuild msbuildTask = new MSBuild();
+                MSBuild msbuildTask = CreateMSBuildTask();
                 msbuildTask.BuildEngine = new MockEngine();
 
                 msbuildTask.Projects = new ITaskItem[] { new TaskItem(projectFile1), new TaskItem(projectFile2) };
@@ -518,7 +523,7 @@ namespace Microsoft.Build.UnitTests
                 projects[1].SetMetadata("Properties", "MyProp=1");
                 projects[3].SetMetadata("Properties", "MyProp=1");
 
-                MSBuild msbuildTask = new MSBuild();
+                MSBuild msbuildTask = CreateMSBuildTask();
                 msbuildTask.BuildEngine = new MockEngine();
                 msbuildTask.Projects = projects;
                 msbuildTask.Properties = new string[] { "MyProp=0" };
@@ -576,7 +581,7 @@ namespace Microsoft.Build.UnitTests
                 projects[1].SetMetadata("Properties", "MyProp=1");
                 projects[3].SetMetadata("Properties", "MyProp=1");
 
-                MSBuild msbuildTask = new MSBuild();
+                MSBuild msbuildTask = CreateMSBuildTask();
                 msbuildTask.BuildEngine = new MockEngine();
 
                 msbuildTask.Projects = projects;
@@ -632,7 +637,7 @@ namespace Microsoft.Build.UnitTests
                 projects[1].SetMetadata("Properties", "");
                 projects[3].SetMetadata("Properties", "MyProp=1");
 
-                MSBuild msbuildTask = new MSBuild();
+                MSBuild msbuildTask = CreateMSBuildTask();
                 msbuildTask.BuildEngine = new MockEngine();
 
                 msbuildTask.Projects = projects;
@@ -687,7 +692,7 @@ namespace Microsoft.Build.UnitTests
                 projects[1].SetMetadata("Properties", "=1");
                 projects[3].SetMetadata("Properties", "=;1");
 
-                MSBuild msbuildTask = new MSBuild();
+                MSBuild msbuildTask = CreateMSBuildTask();
                 msbuildTask.BuildEngine = new MockEngine();
 
                 msbuildTask.Projects = projects;
@@ -734,7 +739,7 @@ namespace Microsoft.Build.UnitTests
                 projects[0].SetMetadata("AdditionalProperties", "MyPropA=1");
                 projects[1].SetMetadata("AdditionalProperties", "MyPropA=0");
 
-                MSBuild msbuildTask = new MSBuild();
+                MSBuild msbuildTask = CreateMSBuildTask();
                 msbuildTask.BuildEngine = new MockEngine();
                 msbuildTask.Properties = new string[] { "MyPropG=1" };
                 msbuildTask.Projects = projects;
@@ -793,7 +798,7 @@ namespace Microsoft.Build.UnitTests
                 projects[0].SetMetadata("Properties", "MyPropG=1");
                 projects[1].SetMetadata("Properties", "MyPropG=0");
 
-                MSBuild msbuildTask = new MSBuild();
+                MSBuild msbuildTask = CreateMSBuildTask();
                 msbuildTask.BuildEngine = new MockEngine();
                 msbuildTask.Projects = projects;
 
@@ -848,7 +853,7 @@ namespace Microsoft.Build.UnitTests
                 projects[0].SetMetadata("AdditionalProperties", "MyPropA=1");
                 projects[1].SetMetadata("AdditionalProperties", "MyPropA=1");
 
-                MSBuild msbuildTask = new MSBuild();
+                MSBuild msbuildTask = CreateMSBuildTask();
                 msbuildTask.BuildEngine = new MockEngine();
                 msbuildTask.Projects = projects;
 
@@ -906,7 +911,7 @@ namespace Microsoft.Build.UnitTests
                     new TaskItem(projectFile2)
                 };
 
-                MSBuild msbuildTask = new MSBuild();
+                MSBuild msbuildTask = CreateMSBuildTask();
                 msbuildTask.BuildEngine = new MockEngine();
                 msbuildTask.Projects = projects;
 
@@ -956,7 +961,7 @@ namespace Microsoft.Build.UnitTests
                 // running in the system
                 for (int i = 0; i < 4; i++)
                 {
-                    MSBuild msbuildTask = new MSBuild();
+                    MSBuild msbuildTask = CreateMSBuildTask();
                     // By default IsMultipleNodesIs false
                     MockEngine mockEngine = new MockEngine();
                     mockEngine.IsRunningMultipleNodes = false;
@@ -1058,7 +1063,7 @@ namespace Microsoft.Build.UnitTests
                 // running in the system
                 for (int i = 0; i < 4; i++)
                 {
-                    MSBuild msbuildTask = new MSBuild();
+                    MSBuild msbuildTask = CreateMSBuildTask();
                     MockEngine mockEngine = new MockEngine();
                     mockEngine.IsRunningMultipleNodes = true;
                     msbuildTask.BuildEngine = mockEngine;
@@ -1156,7 +1161,7 @@ namespace Microsoft.Build.UnitTests
                     new TaskItem(project1)
                 };
 
-                MSBuild msbuildTask = new MSBuild();
+                MSBuild msbuildTask = CreateMSBuildTask();
                 MockEngine mockEngine = new MockEngine();
                 mockEngine.IsRunningMultipleNodes = true;
                 msbuildTask.BuildEngine = mockEngine;
@@ -1173,7 +1178,7 @@ namespace Microsoft.Build.UnitTests
                     new TaskItem(project2), new TaskItem(project1)
                 };
 
-                msbuildTask = new MSBuild();
+                msbuildTask = CreateMSBuildTask();
                 mockEngine = new MockEngine();
                 mockEngine.IsRunningMultipleNodes = true;
                 msbuildTask.BuildEngine = mockEngine;
@@ -1220,7 +1225,7 @@ namespace Microsoft.Build.UnitTests
                 for (int i = 0; i < 6; i++)
                 {
                     // Test the case where the error is in the last target
-                    MSBuild msbuildTask = new MSBuild();
+                    MSBuild msbuildTask = CreateMSBuildTask();
                     MockEngine mockEngine = new MockEngine();
                     msbuildTask.BuildEngine = mockEngine;
                     msbuildTask.Projects = projects;
@@ -1337,7 +1342,7 @@ namespace Microsoft.Build.UnitTests
                     new TaskItem(projectFile2)
                 };
 
-                MSBuild msbuildTask = new MSBuild();
+                MSBuild msbuildTask = CreateMSBuildTask();
                 msbuildTask.BuildEngine = new MockEngine();
                 msbuildTask.Projects = projects;
 
