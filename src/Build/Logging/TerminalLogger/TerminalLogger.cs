@@ -33,6 +33,7 @@ namespace Microsoft.Build.Logging;
 public sealed partial class TerminalLogger : INodeLogger
 {
     private const string FilePathPattern = " -> ";
+    private const string MSBuildTaskName = "MSBuild";
 
 #if NET
     private static readonly SearchValues<string> _authProviderMessageKeywords = SearchValues.Create(["[CredentialProvider]", "--interactive"], StringComparison.OrdinalIgnoreCase);
@@ -373,6 +374,7 @@ public sealed partial class TerminalLogger : INodeLogger
         eventSource.TargetStarted += TargetStarted;
         eventSource.TargetFinished += TargetFinished;
         eventSource.TaskStarted += TaskStarted;
+        eventSource.TaskFinished += TaskFinished;
         eventSource.StatusEventRaised += StatusEventRaised;
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += WarningRaised;
@@ -784,7 +786,7 @@ public sealed partial class TerminalLogger : INodeLogger
             }
         }
     }
-    
+
     private void CaptureEvalContext(ProjectEvaluationFinishedEventArgs evalFinish)
     {
         var buildEventContext = evalFinish.BuildEventContext;
@@ -954,6 +956,7 @@ public sealed partial class TerminalLogger : INodeLogger
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
 
             string targetName = e.TargetName;
+            project.CurrentTarget = targetName;
             if (targetName == CachePluginStartTarget)
             {
                 project.IsCachePluginProject = true;
@@ -962,8 +965,6 @@ public sealed partial class TerminalLogger : INodeLogger
 
             if (targetName == _testStartTarget)
             {
-                targetName = "Testing";
-
                 // Use the minimal start time, so if we run tests in parallel, we can calculate duration
                 // as this start time, minus time when tests finished.
                 _testStartTime = _testStartTime == null
@@ -973,7 +974,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 project.IsTestProject = true;
             }
 
-            TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, targetName, project.Stopwatch);
+            TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, GetDisplayTargetName(targetName), project.Stopwatch);
             UpdateNodeStatus(buildEventContext, nodeStatus);
         }
     }
@@ -1030,7 +1031,7 @@ public sealed partial class TerminalLogger : INodeLogger
     private void TaskStarted(object sender, TaskStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
-        if (_restoreContext is null && buildEventContext is not null && e.TaskName == "MSBuild")
+        if (_restoreContext is null && buildEventContext is not null && e.TaskName == MSBuildTaskName)
         {
             // This will yield the node, so preemptively mark it idle
             UpdateNodeStatus(buildEventContext, null);
@@ -1039,6 +1040,25 @@ public sealed partial class TerminalLogger : INodeLogger
             {
                 project.Stopwatch.Stop();
             }
+        }
+    }
+
+    /// <summary>
+    /// The <see cref="IEventSource.TaskFinished"/> callback.
+    /// </summary>
+    private void TaskFinished(object sender, TaskFinishedEventArgs e)
+    {
+        var buildEventContext = e.BuildEventContext;
+        if (_restoreContext is null && buildEventContext is not null && e.TaskName == MSBuildTaskName
+            && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
+        {
+            project.Stopwatch.Start();
+
+            string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
+            string targetName = project.CurrentTarget ?? "";
+
+            TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, GetDisplayTargetName(targetName), project.Stopwatch);
+            UpdateNodeStatus(buildEventContext, nodeStatus);
         }
     }
 
@@ -1100,30 +1120,36 @@ public sealed partial class TerminalLogger : INodeLogger
 
             if (hasProject && project!.IsTestProject)
             {
-                var node = _nodes[NodeIndexForContext(buildEventContext)];
+                TerminalNodeStatus? node = _nodes[NodeIndexForContext(buildEventContext)];
 
                 // Consumes test update messages produced by VSTest and MSTest runner.
-                if (node != null && e is IExtendedBuildEventArgs extendedMessage)
+                if (e is IExtendedBuildEventArgs extendedMessage)
                 {
                     switch (extendedMessage.ExtendedType)
                     {
                         case "TLTESTPASSED":
                             {
-                                var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
-                                var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
+                                if (node != null)
+                                {
+                                    var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
+                                    var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Green, indicator, displayName, project.Stopwatch);
-                                UpdateNodeStatus(buildEventContext, status);
+                                    var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Green, indicator, displayName, project.Stopwatch);
+                                    UpdateNodeStatus(buildEventContext, status);
+                                }
                                 break;
                             }
 
                         case "TLTESTSKIPPED":
                             {
-                                var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
-                                var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
+                                if (node != null)
+                                {
+                                    var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
+                                    var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
-                                UpdateNodeStatus(buildEventContext, status);
+                                    var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
+                                    UpdateNodeStatus(buildEventContext, status);
+                                }
                                 break;
                             }
 
@@ -1390,6 +1416,17 @@ public sealed partial class TerminalLogger : INodeLogger
     #endregion
 
     #region Helpers
+
+    /// <summary>
+    /// Returns the display name for the given target.
+    /// </summary>
+    /// <remarks>
+    /// This is used to map internal target names (like _TestRunStart) to user-friendly names (like Testing).
+    /// </remarks>
+    private static string GetDisplayTargetName(string targetName)
+    {
+        return targetName == _testStartTarget ? "Testing" : targetName;
+    }
 
     /// <summary>
     /// Construct a build result summary string.

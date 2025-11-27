@@ -14,12 +14,6 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Experimental.BuildCheck;
 #endif
 
-#if !TASKHOST && !MSBUILDENTRYPOINTEXE
-using Microsoft.Build.Collections;
-using Microsoft.Build.Framework.Profiler;
-using System.Collections;
-#endif
-
 #nullable disable
 
 namespace Microsoft.Build.Shared
@@ -259,7 +253,7 @@ namespace Microsoft.Build.Shared
     /// Build Event Type
     /// Build Event Args
     /// </summary>
-    internal abstract class LogMessagePacketBase : INodePacket
+    internal class LogMessagePacketBase : INodePacket
     {
         /// <summary>
         /// The packet version, which is based on the CLR version. Cached because querying Environment.Version each time becomes an allocation bottleneck.
@@ -277,11 +271,6 @@ namespace Microsoft.Build.Shared
         /// Dictionary of methods used to write BuildEventArgs.
         /// </summary>
         private static readonly Dictionary<LoggingEventType, MethodInfo> s_writeMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
-
-        /// <summary>
-        /// Delegate for translating targetfinished events.
-        /// </summary>
-        private TargetFinishedTranslator _targetFinishedTranslator = null;
 
         #region Data
 
@@ -308,32 +297,22 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Encapsulates the buildEventArg in this packet.
         /// </summary>
-        internal LogMessagePacketBase(KeyValuePair<int, BuildEventArgs>? nodeBuildEvent, TargetFinishedTranslator targetFinishedTranslator)
+        internal LogMessagePacketBase(KeyValuePair<int, BuildEventArgs>? nodeBuildEvent)
         {
             ErrorUtilities.VerifyThrow(nodeBuildEvent != null, "nodeBuildEvent was null");
             _buildEvent = nodeBuildEvent.Value.Value;
             _sinkId = nodeBuildEvent.Value.Key;
             _eventType = GetLoggingEventId(_buildEvent);
-            _targetFinishedTranslator = targetFinishedTranslator;
         }
 
         /// <summary>
         /// Constructor for deserialization
         /// </summary>
-        protected LogMessagePacketBase(ITranslator translator, TargetFinishedTranslator targetFinishedTranslator = null)
-        {
-            _targetFinishedTranslator = targetFinishedTranslator;
-            Translate(translator);
-        }
+        internal LogMessagePacketBase(ITranslator translator) => Translate(translator);
 
         #endregion
 
         #region Delegates
-
-        /// <summary>
-        /// Delegate for translating TargetFinishedEventArgs
-        /// </summary>
-        internal delegate void TargetFinishedTranslator(ITranslator translator, TargetFinishedEventArgs finishedEvent);
 
         /// <summary>
         /// Delegate representing a method on the BuildEventArgs classes used to write to a stream.
@@ -425,18 +404,7 @@ namespace Microsoft.Build.Shared
             // Make sure the other side knows what sort of serialization is coming
             translator.Translate(ref packetVersion);
 
-            bool eventCanSerializeItself = methodInfo != null;
-
-#if !TASKHOST && !MSBUILDENTRYPOINTEXE
-            if (_buildEvent is ProjectEvaluationStartedEventArgs
-                or ProjectEvaluationFinishedEventArgs
-                or ResponseFileUsedEventArgs)
-            {
-                // switch to serialization methods that we provide in this file
-                // and don't use the WriteToStream inherited from LazyFormattedBuildEventArgs
-                eventCanSerializeItself = false;
-            }
-#endif
+            bool eventCanSerializeItself = EventCanSerializeItself(_eventType, methodInfo);
 
             translator.Translate(ref eventCanSerializeItself);
 
@@ -446,10 +414,7 @@ namespace Microsoft.Build.Shared
                 ArgsWriterDelegate writerMethod = (ArgsWriterDelegate)CreateDelegateRobust(typeof(ArgsWriterDelegate), _buildEvent, methodInfo);
                 writerMethod(translator.Writer);
 
-                if (_eventType == LoggingEventType.TargetFinishedEvent && _targetFinishedTranslator != null)
-                {
-                    _targetFinishedTranslator(translator, (TargetFinishedEventArgs)_buildEvent);
-                }
+                TranslateAdditionalProperties(translator, _eventType, _buildEvent);
             }
             else
             {
@@ -497,10 +462,7 @@ namespace Microsoft.Build.Shared
                 _buildEvent.CreateFromStream(translator.Reader, packetVersion);
 #endif
 
-                if (_eventType == LoggingEventType.TargetFinishedEvent && _targetFinishedTranslator != null)
-                {
-                    _targetFinishedTranslator(translator, (TargetFinishedEventArgs)_buildEvent);
-                }
+                TranslateAdditionalProperties(translator, _eventType, _buildEvent);
             }
             else
             {
@@ -509,6 +471,21 @@ namespace Microsoft.Build.Shared
             }
 
             _eventType = GetLoggingEventId(_buildEvent);
+        }
+
+        /// <summary>
+        /// Returns whether to use the event's own serialization method, if found.
+        /// If false, defers to overridable implementations in <see cref="WriteEventToStream"/> and
+        /// <see cref="ReadEventFromStream"/>.
+        /// </summary>
+        protected virtual bool EventCanSerializeItself(LoggingEventType eventType, MethodInfo methodInfo)
+            => methodInfo != null;
+
+        /// <summary>
+        /// Translates additional properties that are not handled by the default serialization.
+        /// </summary>
+        protected virtual void TranslateAdditionalProperties(ITranslator translator, LoggingEventType eventType, BuildEventArgs buildEvent)
+        {
         }
 
         #region Private Methods
@@ -797,21 +774,11 @@ namespace Microsoft.Build.Shared
         /// Given a build event that is presumed to be 2.0 (due to its lack of a "WriteToStream" method) and its
         /// LoggingEventType, serialize that event to the stream.
         /// </summary>
-        private void WriteEventToStream(BuildEventArgs buildEvent, LoggingEventType eventType, ITranslator translator)
+        /// <remarks>
+        /// Override to customize serialization per-assembly without relying on compile directives.
+        /// </remarks>
+        protected virtual void WriteEventToStream(BuildEventArgs buildEvent, LoggingEventType eventType, ITranslator translator)
         {
-#if !TASKHOST && !MSBUILDENTRYPOINTEXE
-            if (eventType == LoggingEventType.ProjectEvaluationStartedEvent)
-            {
-                WriteProjectEvaluationStartedEventToStream((ProjectEvaluationStartedEventArgs)buildEvent, translator);
-                return;
-            }
-            else if (eventType == LoggingEventType.ProjectEvaluationFinishedEvent)
-            {
-                WriteProjectEvaluationFinishedEventToStream((ProjectEvaluationFinishedEventArgs)buildEvent, translator);
-                return;
-            }
-#endif
-
             string message = buildEvent.Message;
             string helpKeyword = buildEvent.HelpKeyword;
             string senderName = buildEvent.SenderName;
@@ -939,207 +906,6 @@ namespace Microsoft.Build.Shared
 #endif
         }
 
-#if !TASKHOST && !MSBUILDENTRYPOINTEXE
-        private void WriteProjectEvaluationStartedEventToStream(ProjectEvaluationStartedEventArgs args, ITranslator translator)
-        {
-            WriteEvaluationEvent(args, args.ProjectFile, args.RawTimestamp, translator);
-        }
-
-        private void WriteProjectEvaluationFinishedEventToStream(ProjectEvaluationFinishedEventArgs args, ITranslator translator)
-        {
-            WriteEvaluationEvent(args, args.ProjectFile, args.RawTimestamp, translator);
-
-            WriteProperties(args.GlobalProperties, translator);
-            WriteProperties(args.Properties, translator);
-            WriteItems(args.Items, translator);
-            WriteProfileResult(args.ProfilerResult, translator);
-        }
-
-        private static void WriteEvaluationEvent(BuildStatusEventArgs args, string projectFile, DateTime timestamp, ITranslator translator)
-        {
-            var buildEventContext = args.BuildEventContext;
-            translator.Translate(ref buildEventContext);
-            translator.Translate(ref timestamp);
-            translator.Translate(ref projectFile);
-        }
-
-        private void WriteProfileResult(ProfilerResult? result, ITranslator translator)
-        {
-            bool hasValue = result.HasValue;
-            translator.Translate(ref hasValue);
-            if (hasValue)
-            {
-                var value = result.Value;
-                var count = value.ProfiledLocations.Count;
-                translator.Translate(ref count);
-
-                foreach (var item in value.ProfiledLocations)
-                {
-                    WriteEvaluationLocation(translator, item.Key);
-                    WriteProfiledLocation(translator, item.Value);
-                }
-            }
-        }
-
-        private void WriteEvaluationLocation(ITranslator translator, EvaluationLocation evaluationLocation)
-        {
-            string elementName = evaluationLocation.ElementName;
-            string elementDescription = evaluationLocation.ElementDescription;
-            string evaluationPassDescription = evaluationLocation.EvaluationPassDescription;
-            string file = evaluationLocation.File;
-            int kind = (int)evaluationLocation.Kind;
-            int evaluationPass = (int)evaluationLocation.EvaluationPass;
-            bool lineHasValue = evaluationLocation.Line.HasValue;
-            int line = lineHasValue ? evaluationLocation.Line.Value : 0;
-            long id = evaluationLocation.Id;
-            bool parentIdHasValue = evaluationLocation.ParentId.HasValue;
-            long parentId = parentIdHasValue ? evaluationLocation.ParentId.Value : 0;
-
-            translator.Translate(ref elementName);
-            translator.Translate(ref elementDescription);
-            translator.Translate(ref evaluationPassDescription);
-            translator.Translate(ref file);
-
-            translator.Translate(ref kind);
-            translator.Translate(ref evaluationPass);
-
-            translator.Translate(ref lineHasValue);
-            if (lineHasValue)
-            {
-                translator.Translate(ref line);
-            }
-
-            translator.Translate(ref id);
-            translator.Translate(ref parentIdHasValue);
-            if (parentIdHasValue)
-            {
-                translator.Translate(ref parentId);
-            }
-        }
-
-        private void WriteProfiledLocation(ITranslator translator, ProfiledLocation profiledLocation)
-        {
-            int numberOfHits = profiledLocation.NumberOfHits;
-            TimeSpan exclusiveTime = profiledLocation.ExclusiveTime;
-            TimeSpan inclusiveTime = profiledLocation.InclusiveTime;
-            translator.Translate(ref numberOfHits);
-            translator.Translate(ref exclusiveTime);
-            translator.Translate(ref inclusiveTime);
-        }
-
-        [ThreadStatic]
-        private static List<KeyValuePair<string, string>> reusablePropertyList;
-
-        [ThreadStatic]
-        private static List<(string itemType, object item)> reusableItemList;
-
-        private void WriteProperties(IEnumerable properties, ITranslator translator)
-        {
-            var writer = translator.Writer;
-            if (properties == null)
-            {
-                writer.Write((byte)0);
-                return;
-            }
-
-            if (reusablePropertyList == null)
-            {
-                reusablePropertyList = new List<KeyValuePair<string, string>>();
-            }
-
-            // it is expensive to access a ThreadStatic field every time
-            var list = reusablePropertyList;
-
-            Internal.Utilities.EnumerateProperties(properties, list, static (list, kvp) => list.Add(kvp));
-
-            BinaryWriterExtensions.Write7BitEncodedInt(writer, list.Count);
-
-            foreach (var item in list)
-            {
-                writer.Write(item.Key);
-                writer.Write(item.Value);
-            }
-
-            list.Clear();
-        }
-
-        private void WriteItems(IEnumerable items, ITranslator translator)
-        {
-            var writer = translator.Writer;
-            if (items == null)
-            {
-                writer.Write((byte)0);
-                return;
-            }
-
-            if (reusableItemList == null)
-            {
-                reusableItemList = new List<(string itemType, object item)>();
-            }
-
-            var list = reusableItemList;
-
-            Internal.Utilities.EnumerateItems(items, dictionaryEntry =>
-            {
-                list.Add((dictionaryEntry.Key as string, dictionaryEntry.Value));
-            });
-
-            BinaryWriterExtensions.Write7BitEncodedInt(writer, list.Count);
-
-            foreach (var kvp in list)
-            {
-                writer.Write(kvp.itemType);
-                if (kvp.item is ITaskItem taskItem)
-                {
-                    writer.Write(taskItem.ItemSpec);
-                    WriteMetadata(taskItem, writer);
-                }
-                else
-                {
-                    writer.Write(kvp.item?.ToString() ?? "");
-                    writer.Write((byte)0);
-                }
-            }
-
-            list.Clear();
-        }
-
-        private void WriteMetadata(object metadataContainer, BinaryWriter writer)
-        {
-            if (metadataContainer is ITaskItem taskItem)
-            {
-                var metadata = taskItem.EnumerateMetadata();
-
-                if (reusablePropertyList == null)
-                {
-                    reusablePropertyList = new List<KeyValuePair<string, string>>();
-                }
-
-                // it is expensive to access a ThreadStatic field every time
-                var list = reusablePropertyList;
-
-                foreach (var item in metadata)
-                {
-                    list.Add(item);
-                }
-
-                BinaryWriterExtensions.Write7BitEncodedInt(writer, list.Count);
-                foreach (var kvp in list)
-                {
-                    writer.Write(kvp.Key ?? string.Empty);
-                    writer.Write(kvp.Value ?? string.Empty);
-                }
-
-                list.Clear();
-            }
-            else
-            {
-                writer.Write((byte)0);
-            }
-        }
-
-#endif
-
         #endregion
 
         #region Reads from Stream
@@ -1148,19 +914,11 @@ namespace Microsoft.Build.Shared
         /// Given a build event that is presumed to be 2.0 (due to its lack of a "ReadFromStream" method) and its
         /// LoggingEventType, read that event from the stream.
         /// </summary>
-        private BuildEventArgs ReadEventFromStream(LoggingEventType eventType, ITranslator translator)
+        /// <remarks>
+        /// Override to customize serialization per-assembly without relying on compile directives.
+        /// </remarks>
+        protected virtual BuildEventArgs ReadEventFromStream(LoggingEventType eventType, ITranslator translator)
         {
-#if !TASKHOST && !MSBUILDENTRYPOINTEXE
-            if (eventType == LoggingEventType.ProjectEvaluationStartedEvent)
-            {
-                return ReadProjectEvaluationStartedEventFromStream(translator);
-            }
-            else if (eventType == LoggingEventType.ProjectEvaluationFinishedEvent)
-            {
-                return ReadProjectEvaluationFinishedEventFromStream(translator);
-            }
-#endif
-
             string message = null;
             string helpKeyword = null;
             string senderName = null;
@@ -1309,213 +1067,6 @@ namespace Microsoft.Build.Shared
 
             return buildEvent;
         }
-
-#if !TASKHOST && !MSBUILDENTRYPOINTEXE
-        private ProjectEvaluationStartedEventArgs ReadProjectEvaluationStartedEventFromStream(ITranslator translator)
-        {
-            var (buildEventContext, timestamp, projectFile) = ReadEvaluationEvent(translator);
-
-            var args = new ProjectEvaluationStartedEventArgs(
-                ResourceUtilities.GetResourceString("EvaluationStarted"), projectFile);
-
-            args.BuildEventContext = buildEventContext;
-            args.RawTimestamp = timestamp;
-            args.ProjectFile = projectFile;
-
-            return args;
-        }
-
-        private ProjectEvaluationFinishedEventArgs ReadProjectEvaluationFinishedEventFromStream(ITranslator translator)
-        {
-            var (buildEventContext, timestamp, projectFile) = ReadEvaluationEvent(translator);
-
-            var args = new ProjectEvaluationFinishedEventArgs(
-                ResourceUtilities.GetResourceString("EvaluationFinished"), projectFile);
-
-            args.BuildEventContext = buildEventContext;
-            args.RawTimestamp = timestamp;
-            args.ProjectFile = projectFile;
-
-            args.GlobalProperties = ReadProperties(translator);
-            args.Properties = ReadProperties(translator);
-            args.Items = ReadItems(translator);
-            args.ProfilerResult = ReadProfileResult(translator);
-
-            return args;
-        }
-
-        private (BuildEventContext buildEventContext, DateTime timestamp, string projectFile)
-            ReadEvaluationEvent(ITranslator translator)
-        {
-            BuildEventContext buildEventContext = null;
-            translator.Translate(ref buildEventContext);
-
-            DateTime timestamp = default;
-            translator.Translate(ref timestamp);
-
-            string projectFile = null;
-            translator.Translate(ref projectFile);
-
-            return (buildEventContext, timestamp, projectFile);
-        }
-
-        private IEnumerable ReadProperties(ITranslator translator)
-        {
-            var reader = translator.Reader;
-            int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
-            if (count == 0)
-            {
-                return (DictionaryEntry[])[];
-            }
-
-            var list = new ArrayList(count);
-            for (int i = 0; i < count; i++)
-            {
-                string key = reader.ReadString();
-                string value = reader.ReadString();
-                var entry = new DictionaryEntry(key, value);
-                list.Add(entry);
-            }
-
-            return list;
-        }
-
-        private IEnumerable ReadItems(ITranslator translator)
-        {
-            var reader = translator.Reader;
-
-            int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
-            if (count == 0)
-            {
-                return (DictionaryEntry[])[];
-            }
-
-            var list = new ArrayList(count);
-            for (int i = 0; i < count; i++)
-            {
-                string itemType = reader.ReadString();
-                string evaluatedValue = reader.ReadString();
-                var metadata = ReadMetadata(reader);
-                var taskItemData = new TaskItemData(evaluatedValue, metadata);
-                var entry = new DictionaryEntry(itemType, taskItemData);
-                list.Add(entry);
-            }
-
-            return list;
-        }
-
-        private IDictionary<string, string> ReadMetadata(BinaryReader reader)
-        {
-            int count = BinaryReaderExtensions.Read7BitEncodedInt(reader);
-            if (count == 0)
-            {
-                return null;
-            }
-
-            var list = ArrayDictionary<string, string>.Create(count);
-            for (int i = 0; i < count; i++)
-            {
-                string key = reader.ReadString();
-                string value = reader.ReadString();
-                list.Add(key, value);
-            }
-
-            return list;
-        }
-
-        private ProfilerResult? ReadProfileResult(ITranslator translator)
-        {
-            bool hasValue = false;
-            translator.Translate(ref hasValue);
-            if (!hasValue)
-            {
-                return null;
-            }
-
-            int count = 0;
-            translator.Translate(ref count);
-
-            var dictionary = new ArrayDictionary<EvaluationLocation, ProfiledLocation>(count);
-
-            for (int i = 0; i < count; i++)
-            {
-                var evaluationLocation = ReadEvaluationLocation(translator);
-                var profiledLocation = ReadProfiledLocation(translator);
-                dictionary.Add(evaluationLocation, profiledLocation);
-            }
-
-            var result = new ProfilerResult(dictionary);
-            return result;
-        }
-
-        private EvaluationLocation ReadEvaluationLocation(ITranslator translator)
-        {
-            string elementName = default;
-            string elementDescription = default;
-            string evaluationPassDescription = default;
-            string file = default;
-            int kind = default;
-            int evaluationPass = default;
-            bool lineHasValue = default;
-            int line = default;
-            long id = default;
-            bool parentIdHasValue = default;
-            long parentId = default;
-
-            translator.Translate(ref elementName);
-            translator.Translate(ref elementDescription);
-            translator.Translate(ref evaluationPassDescription);
-            translator.Translate(ref file);
-
-            translator.Translate(ref kind);
-            translator.Translate(ref evaluationPass);
-
-            translator.Translate(ref lineHasValue);
-            if (lineHasValue)
-            {
-                translator.Translate(ref line);
-            }
-
-            translator.Translate(ref id);
-            translator.Translate(ref parentIdHasValue);
-            if (parentIdHasValue)
-            {
-                translator.Translate(ref parentId);
-            }
-
-            var evaluationLocation = new EvaluationLocation(
-                id,
-                parentIdHasValue ? parentId : null,
-                (EvaluationPass)evaluationPass,
-                evaluationPassDescription,
-                file,
-                lineHasValue ? line : null,
-                elementName,
-                elementDescription,
-                (EvaluationLocationKind)kind);
-
-            return evaluationLocation;
-        }
-
-        private ProfiledLocation ReadProfiledLocation(ITranslator translator)
-        {
-            int numberOfHits = default;
-            TimeSpan exclusiveTime = default;
-            TimeSpan inclusiveTime = default;
-
-            translator.Translate(ref numberOfHits);
-            translator.Translate(ref exclusiveTime);
-            translator.Translate(ref inclusiveTime);
-
-            var profiledLocation = new ProfiledLocation(
-                inclusiveTime,
-                exclusiveTime,
-                numberOfHits);
-
-            return profiledLocation;
-        }
-
-#endif
 
         #endregion
 
