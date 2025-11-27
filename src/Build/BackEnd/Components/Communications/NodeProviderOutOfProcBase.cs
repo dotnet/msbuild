@@ -173,7 +173,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If we're able to connect to such a process, send a packet requesting its termination
                     CommunicationsUtilities.Trace("Shutting down node with pid = {0}", nodeProcess.Id);
-                    NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode);
+                    NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode, result.NegotiatedPacketVersion);
                     nodeContext.SendData(new NodeBuildComplete(false /* no node reuse */));
                     nodeStream.Dispose();
                 }
