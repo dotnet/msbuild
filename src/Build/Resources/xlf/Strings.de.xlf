@@ -18,6 +18,11 @@
         <target state="translated">MSB4249: Das Websiteprojekt "{0}" kann nicht erstellt werden. Der ASP.NET-Compiler steht nur in der .NET Framework-Version von MSBuild zur Verfügung.</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
+      <trans-unit id="AssemblyLoad_Warning">
+        <source>The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</source>
+        <target state="new">The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
         <source>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</source>
         <target state="translated">MSB4002: Fehler beim Abrufen der Attribute für Parameter in der {0}-Aufgabe. {1}</target>
@@ -514,6 +519,11 @@
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}" verweist auf {0} Element(e), und "{3}" verweist auf {1} Element(e). Die Anzahl von Elementen muss identisch sein.</target>
         <note>{StrBegin="MSB3094: "}</note>
+      </trans-unit>
+      <trans-unit id="HostObjectFailure">
+        <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
+        <target state="new">The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</target>
+        <note>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
