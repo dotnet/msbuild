@@ -1080,11 +1080,18 @@ namespace Microsoft.Build.BackEnd
         /// This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project.
         /// No errors are masked by doing this: errors loading the project from disk are reported at load time, if necessary.
         /// </summary>
-        private void SetProjectCurrentDirectory()
+        private void SetProjectDirectory()
         {
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
-                NativeMethodsShared.SetCurrentDirectory(_requestEntry.ProjectRootDirectory);
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
+                {
+                    _requestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_requestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
+                }
+                else
+                {
+                    NativeMethodsShared.SetCurrentDirectory(_requestEntry.ProjectRootDirectory);
+                }
             }
         }
 
@@ -1134,7 +1141,14 @@ namespace Microsoft.Build.BackEnd
                     {
                         foreach (ProjectPropertyInstance environmentProperty in environmentProperties)
                         {
-                            Environment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue, EnvironmentVariableTarget.Process);
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
+                            {
+                                _requestEntry.TaskEnvironment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue);
+                            }
+                            else
+                            {
+                                Environment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue, EnvironmentVariableTarget.Process);
+                            }
                         }
                     }
 
@@ -1190,7 +1204,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.RequestConfiguration.Project.ProjectFileLocation, "NoTargetSpecified");
 
                 // Set the current directory to that required by the project.
-                SetProjectCurrentDirectory();
+                SetProjectDirectory();
 
                 // Transfer results and state from the previous node, if necessary.
                 // In order for the check for target completeness for this project to be valid, all of the target results from the project must be present
@@ -1353,8 +1367,16 @@ namespace Microsoft.Build.BackEnd
         {
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
-                _requestEntry.RequestConfiguration.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
-                _requestEntry.RequestConfiguration.SavedEnvironmentVariables = CommunicationsUtilities.GetEnvironmentVariables();
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
+                {
+                    _requestEntry.RequestConfiguration.SavedCurrentDirectory = _requestEntry.TaskEnvironment.ProjectDirectory.Value;
+                    _requestEntry.RequestConfiguration.SavedEnvironmentVariables = _requestEntry.TaskEnvironment.GetEnvironmentVariables();
+                }
+                else
+                {
+                    _requestEntry.RequestConfiguration.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
+                    _requestEntry.RequestConfiguration.SavedEnvironmentVariables = CommunicationsUtilities.GetEnvironmentVariables();
+                }
             }
         }
 
@@ -1412,24 +1434,41 @@ namespace Microsoft.Build.BackEnd
 
                 // Restore the saved environment variables.
                 SetEnvironmentVariableBlock(_requestEntry.RequestConfiguration.SavedEnvironmentVariables);
-                NativeMethodsShared.SetCurrentDirectory(_requestEntry.RequestConfiguration.SavedCurrentDirectory);
+                
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
+                {
+                    _requestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_requestEntry.RequestConfiguration.SavedCurrentDirectory, ignoreRootedCheck: true);
+                }
+                else
+                {
+                    NativeMethodsShared.SetCurrentDirectory(_requestEntry.RequestConfiguration.SavedCurrentDirectory);
+                }
             }
         }
 
         /// <summary>
         /// Sets the environment block to the set of saved variables.
         /// </summary>
-        private void SetEnvironmentVariableBlock(FrozenDictionary<string, string> savedEnvironment)
+        private void SetEnvironmentVariableBlock(IReadOnlyDictionary<string, string> savedEnvironment)
         {
-            FrozenDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
-            ClearVariablesNotInEnvironment(savedEnvironment, currentEnvironment);
-            UpdateEnvironmentVariables(savedEnvironment, currentEnvironment);
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
+            {
+                // Use bulk update for TaskEnvironment - more efficient and correct
+                _requestEntry.TaskEnvironment.SetEnvironment(savedEnvironment);
+            }
+            else
+            {
+                FrozenDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+                ClearVariablesNotInEnvironment(savedEnvironment, currentEnvironment);
+                UpdateEnvironmentVariables(savedEnvironment, currentEnvironment);
+            }
         }
 
         /// <summary>
-        /// Clears from the current environment any variables which do not exist in the saved environment
+        /// Clears from the current environment any variables which do not exist in the saved environment.
+        /// Note: Only used when Wave18_3 is NOT enabled; when enabled, SetEnvironmentVariableBlock uses bulk SetEnvironment.
         /// </summary>
-        private void ClearVariablesNotInEnvironment(FrozenDictionary<string, string> savedEnvironment, FrozenDictionary<string, string> currentEnvironment)
+        private void ClearVariablesNotInEnvironment(IReadOnlyDictionary<string, string> savedEnvironment, IReadOnlyDictionary<string, string> currentEnvironment)
         {
             foreach (KeyValuePair<string, string> entry in currentEnvironment)
             {
@@ -1442,16 +1481,16 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Updates the current environment with values in the saved environment which differ or are not yet set.
+        /// Note: Only used when Wave18_3 is NOT enabled; when enabled, SetEnvironmentVariableBlock uses bulk SetEnvironment.
         /// </summary>
-        private void UpdateEnvironmentVariables(FrozenDictionary<string, string> savedEnvironment, FrozenDictionary<string, string> currentEnvironment)
+        private void UpdateEnvironmentVariables(IReadOnlyDictionary<string, string> savedEnvironment, IReadOnlyDictionary<string, string> currentEnvironment)
         {
             foreach (KeyValuePair<string, string> entry in savedEnvironment)
             {
                 // If the environment doesn't have the variable set, or if its value differs from what we have saved, set it
                 // to the saved value.  Doing the comparison before setting is faster than unconditionally setting it using
                 // the API.
-                string value;
-                if (!currentEnvironment.TryGetValue(entry.Key, out value) || !String.Equals(entry.Value, value, StringComparison.Ordinal))
+                if (!currentEnvironment.TryGetValue(entry.Key, out string value) || !String.Equals(entry.Value, value, StringComparison.Ordinal))
                 {
                     Environment.SetEnvironmentVariable(entry.Key, entry.Value);
                 }

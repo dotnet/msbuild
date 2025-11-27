@@ -19,7 +19,8 @@ namespace Microsoft.Build.BackEnd
     /// <remarks>
     /// This class implements the "MSBuild" task, which hands off child project files to the MSBuild engine to be built.
     /// </remarks>
-    internal class MSBuild : ITask
+    [MSBuildMultiThreadableTask]
+    internal class MSBuild : ITask, IMultiThreadableTask
     {
         /// <summary>
         /// Enum describing the behavior when a project doesn't exist on disk.
@@ -215,6 +216,11 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         /// </summary>
         public bool SkipNonexistentTargets { get; set; }
+
+        /// <summary>
+        /// Task environment for isolated execution.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
         #endregion
 
         #region ITask Members
@@ -310,7 +316,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ITaskItem project = Projects[i];
 
-                string projectPath = FileUtilities.AttemptToShortenPath(project.ItemSpec);
+                AbsolutePath projectPath = TaskEnvironment.GetAbsolutePath(FileUtilities.AttemptToShortenPath(project.ItemSpec));
 
                 if (StopOnFirstFailure && !success)
                 {
@@ -368,7 +374,8 @@ namespace Microsoft.Build.BackEnd
                                                 _targetOutputs,
                                                 UnloadProjectsOnCompletion,
                                                 ToolsVersion,
-                                                SkipNonexistentTargets);
+                                                SkipNonexistentTargets,
+                                                TaskEnvironment);
 
                         if (!executeResult)
                         {
@@ -439,7 +446,8 @@ namespace Microsoft.Build.BackEnd
                 _targetOutputs,
                 UnloadProjectsOnCompletion,
                 ToolsVersion,
-                SkipNonexistentTargets);
+                SkipNonexistentTargets,
+                TaskEnvironment);
 
             if (!executeResult)
             {
@@ -531,7 +539,8 @@ namespace Microsoft.Build.BackEnd
             List<ITaskItem> targetOutputs,
             bool unloadProjectsOnCompletion,
             string toolsVersion,
-            bool skipNonexistentTargets)
+            bool skipNonexistentTargets,
+            TaskEnvironment taskEnvironment)
         {
             bool success = true;
 
@@ -539,14 +548,13 @@ namespace Microsoft.Build.BackEnd
             // build, because it'll all be in the immediately subsequent ProjectStarted event.
 
             var projectDirectory = new string[projects.Length];
-            var projectNames = new string[projects.Length];
+            var projectNames = new AbsolutePath[projects.Length];
             var toolsVersions = new string[projects.Length];
             var projectProperties = new Dictionary<string, string>[projects.Length];
             var undefinePropertiesPerProject = new List<string>[projects.Length];
 
             for (int i = 0; i < projectNames.Length; i++)
             {
-                projectNames[i] = null;
                 projectProperties[i] = propertiesTable;
 
                 if (projects[i] != null)
@@ -554,7 +562,7 @@ namespace Microsoft.Build.BackEnd
                     // Retrieve projectDirectory only the first time.  It never changes anyway.
                     string projectPath = FileUtilities.AttemptToShortenPath(projects[i].ItemSpec);
                     projectDirectory[i] = Path.GetDirectoryName(projectPath);
-                    projectNames[i] = projects[i].ItemSpec;
+                    projectNames[i] = taskEnvironment.GetAbsolutePath(projects[i].ItemSpec);
                     toolsVersions[i] = toolsVersion;
 
                     // If the user specified a different set of global properties for this project, then
@@ -563,7 +571,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (!PropertyParser.GetTableWithEscaping(
                                 log,
-                                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]),
+                                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projects[i].ItemSpec),
                                 ItemMetadataNames.PropertiesMetadataName,
                                 projects[i].GetMetadata(ItemMetadataNames.PropertiesMetadataName).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries),
                                 out Dictionary<string, string> preProjectPropertiesTable))
@@ -592,7 +600,7 @@ namespace Microsoft.Build.BackEnd
 
                         if (log != null && propertiesToUndefine.Length > 0)
                         {
-                            log.LogMessageFromResources(MessageImportance.Low, "General.ProjectUndefineProperties", projectNames[i]);
+                            log.LogMessageFromResources(MessageImportance.Low, "General.ProjectUndefineProperties", projectNames[i].Value);
                             foreach (string property in propertiesToUndefine)
                             {
                                 undefinePropertiesPerProject[i].Add(property);
@@ -607,7 +615,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (!PropertyParser.GetTableWithEscaping(
                                 log,
-                                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]),
+                                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i].Value),
                                 ItemMetadataNames.AdditionalPropertiesMetadataName,
                                 projects[i].GetMetadata(ItemMetadataNames.AdditionalPropertiesMetadataName).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries),
                                 out Dictionary<string, string> additionalProjectPropertiesTable))
@@ -660,7 +668,7 @@ namespace Microsoft.Build.BackEnd
                 // as the *calling* project file.
 
                 var taskHost = (TaskHost)buildEngine;
-                BuildEngineResult result = await taskHost.InternalBuildProjects(projectNames, targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */, skipNonexistentTargets);
+                BuildEngineResult result = await taskHost.InternalBuildProjects(projectNames.ToStringArray(), targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */, skipNonexistentTargets);
 
                 bool currentTargetResult = result.Result;
                 IList<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = result.TargetOutputsPerProject;

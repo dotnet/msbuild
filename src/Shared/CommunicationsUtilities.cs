@@ -650,12 +650,21 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Updates the environment to match the provided dictionary.
         /// </summary>
+#if CLR2COMPATIBILITY
         internal static void SetEnvironment(IDictionary<string, string> newEnvironment)
         {
             if (newEnvironment != null)
             {
                 // First, delete all no longer set variables
                 IDictionary<string, string> currentEnvironment = GetEnvironmentVariables();
+#else
+        internal static void SetEnvironment(IReadOnlyDictionary<string, string> newEnvironment)
+        {
+            if (newEnvironment != null)
+            {
+                // First, delete all no longer set variables
+                IReadOnlyDictionary<string, string> currentEnvironment = GetEnvironmentVariables();
+#endif
                 foreach (KeyValuePair<string, string> entry in currentEnvironment)
                 {
                     if (!newEnvironment.ContainsKey(entry.Key))

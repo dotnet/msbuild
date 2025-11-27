@@ -19,7 +19,8 @@ namespace Microsoft.Build.BackEnd
     /// id validation checks to fail.
     /// </remarks>
     [RunInMTA]
-    internal class CallTarget : ITask
+    [MSBuildMultiThreadableTask]
+    internal class CallTarget : ITask, IMultiThreadableTask
     {
         /// <summary>
         /// The task logging helper
@@ -56,6 +57,11 @@ namespace Microsoft.Build.BackEnd
         /// Deprecated. Does nothing.
         /// </summary>
         public bool UseResultsCache { get; set; } = false;
+
+        /// <summary>
+        /// Task environment for isolated execution.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         #endregion
 
@@ -113,7 +119,8 @@ namespace Microsoft.Build.BackEnd
                 targetOutputs: _targetOutputs,
                 unloadProjectsOnCompletion: false,
                 toolsVersion: null,
-                skipNonexistentTargets: false);
+                skipNonexistentTargets: false,
+                taskEnvironment: TaskEnvironment);
         }
 
         #endregion

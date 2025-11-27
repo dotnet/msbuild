@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Frozen;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
 
@@ -33,7 +32,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Set of environment variables for the configuration this result came from
         /// </summary>
-        FrozenDictionary<string, string> SavedEnvironmentVariables { get; set; }
+        IReadOnlyDictionary<string, string> SavedEnvironmentVariables { get; set; }
 
         /// <summary>
         /// The current directory for the configuration this result came from

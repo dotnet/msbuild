@@ -19,7 +19,8 @@ namespace Microsoft.Build.Tasks
     /// RequestBuilder which spawned them.
     /// </remarks>
     [RunInMTA]
-    public class MSBuild : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class MSBuild : TaskExtension, IMultiThreadableTask
     {
         /// <summary>
         /// Enum describing the behavior when a project doesn't exist on disk.
@@ -187,6 +188,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] TargetAndPropertyListSeparators { get; set; }
 
+        /// <summary>
+        /// Task environment for isolated execution.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
+
         #endregion
 
         #region ITask Members
@@ -334,7 +340,8 @@ namespace Microsoft.Build.Tasks
                                 Log,
                                 _targetOutputs,
                                 UnloadProjectsOnCompletion,
-                                ToolsVersion))
+                                ToolsVersion,
+                                TaskEnvironment))
                         {
                             success = false;
                         }
@@ -398,7 +405,8 @@ namespace Microsoft.Build.Tasks
                                 Log,
                                 _targetOutputs,
                                 UnloadProjectsOnCompletion,
-                                ToolsVersion))
+                                ToolsVersion,
+                                TaskEnvironment))
                 {
                     success = false;
                 }
@@ -488,7 +496,8 @@ namespace Microsoft.Build.Tasks
             TaskLoggingHelper log,
             List<ITaskItem> targetOutputs,
             bool unloadProjectsOnCompletion,
-            string toolsVersion)
+            string toolsVersion,
+            TaskEnvironment taskEnvironment)
         {
             bool success = true;
 
@@ -496,14 +505,14 @@ namespace Microsoft.Build.Tasks
             // build, because it'll all be in the immediately subsequent ProjectStarted event.
 
             var projectDirectory = new string[projects.Count];
-            var projectNames = new string[projects.Count];
+            var projectNames = new AbsolutePath[projects.Count];
             var toolsVersions = new string[projects.Count];
             var projectProperties = new Dictionary<string, string>[projects.Count];
             var undefinePropertiesPerProject = new IList<string>[projects.Count];
 
             for (int i = 0; i < projectNames.Length; i++)
             {
-                projectNames[i] = null;
+                projectNames[i] = default;
                 projectProperties[i] = propertiesTable;
 
                 if (projects[i] != null)
@@ -511,7 +520,7 @@ namespace Microsoft.Build.Tasks
                     // Retrieve projectDirectory only the first time.  It never changes anyway.
                     string projectPath = FileUtilities.AttemptToShortenPath(projects[i].ItemSpec);
                     projectDirectory[i] = Path.GetDirectoryName(projectPath);
-                    projectNames[i] = projects[i].ItemSpec;
+                    projectNames[i] = taskEnvironment.GetAbsolutePath(projects[i].ItemSpec);
                     toolsVersions[i] = toolsVersion;
 
                     // If the user specified a different set of global properties for this project, then
@@ -519,7 +528,7 @@ namespace Microsoft.Build.Tasks
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("Properties")))
                     {
                         if (!PropertyParser.GetTableWithEscaping(
-                             log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(MSBuildConstants.SemicolonChar),
+                             log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projects[i].ItemSpec), "Properties", projects[i].GetMetadata("Properties").Split(MSBuildConstants.SemicolonChar),
                               out Dictionary<string, string> preProjectPropertiesTable))
                         {
                             return false;
@@ -545,7 +554,7 @@ namespace Microsoft.Build.Tasks
 
                         if (log != null && propertiesToUndefine.Length > 0)
                         {
-                            log.LogMessageFromResources(MessageImportance.Low, "General.ProjectUndefineProperties", projectNames[i]);
+                            log.LogMessageFromResources(MessageImportance.Low, "General.ProjectUndefineProperties", projectNames[i].Value);
                             foreach (string property in propertiesToUndefine)
                             {
                                 undefinePropertiesPerProject[i].Add(property);
@@ -559,7 +568,7 @@ namespace Microsoft.Build.Tasks
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("AdditionalProperties")))
                     {
                         if (!PropertyParser.GetTableWithEscaping(
-                             log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(MSBuildConstants.SemicolonChar),
+                             log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i].Value), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(MSBuildConstants.SemicolonChar),
                               out Dictionary<string, string> additionalProjectPropertiesTable))
                         {
                             return false;
@@ -609,7 +618,7 @@ namespace Microsoft.Build.Tasks
                 // as the *calling* project file.
 
                 BuildEngineResult result =
-                    buildEngine.BuildProjectFilesInParallel(projectNames, targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */);
+                    buildEngine.BuildProjectFilesInParallel(projectNames.ToStringArray(), targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */);
 
                 bool currentTargetResult = result.Result;
                 IList<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = result.TargetOutputsPerProject;

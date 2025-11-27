@@ -63,7 +63,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <inheritdoc/>
-        public void SetEnvironment(IDictionary<string, string> newEnvironment)
+        public void SetEnvironment(IReadOnlyDictionary<string, string> newEnvironment)
         {
             CommunicationsUtilities.SetEnvironment(newEnvironment);
         }

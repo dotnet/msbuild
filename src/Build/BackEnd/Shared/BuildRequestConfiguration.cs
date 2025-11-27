@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -14,6 +13,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -132,7 +132,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
-        private FrozenDictionary<string, string> _savedEnvironmentVariables;
+        private IReadOnlyDictionary<string, string> _savedEnvironmentVariables;
 
         /// <summary>
         /// Holds a snapshot of the current working directory at the time we blocked.
@@ -617,7 +617,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
-        public FrozenDictionary<string, string> SavedEnvironmentVariables
+        public IReadOnlyDictionary<string, string> SavedEnvironmentVariables
         {
             get => _savedEnvironmentVariables;
 
@@ -939,7 +939,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _transferredProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.Translate(ref _resultsNodeId);
             translator.Translate(ref _savedCurrentDirectory);
-            translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
+            translator.TranslateDictionary(ref _savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer);
 
             // if the  entire state is translated, then the transferred state represents the full evaluation data
             if (translator.Mode == TranslationDirection.ReadFromStream && _transferredState?.TranslateEntireState == true)

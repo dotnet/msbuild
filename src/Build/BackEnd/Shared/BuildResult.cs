@@ -3,13 +3,13 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -108,7 +108,7 @@ namespace Microsoft.Build.Execution
         /// Snapshot of the environment from the configuration this results comes from.
         /// This should only be populated when the configuration for this result is moved between nodes.
         /// </summary>
-        private FrozenDictionary<string, string>? _savedEnvironmentVariables;
+        private IReadOnlyDictionary<string, string>? _savedEnvironmentVariables;
 
         /// <summary>
         /// When this key is in the dictionary <see cref="_savedEnvironmentVariables"/>, serialize the build result version.
@@ -438,7 +438,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
-        FrozenDictionary<string, string>? IBuildResults.SavedEnvironmentVariables
+        IReadOnlyDictionary<string, string>? IBuildResults.SavedEnvironmentVariables
         {
             get => _savedEnvironmentVariables;
 
@@ -652,11 +652,11 @@ namespace Microsoft.Build.Execution
             if (_version == 0)
             {
                 // Escape hatch: serialize/deserialize without version field.
-                translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
+                translator.TranslateDictionary(ref _savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer);
             }
             else
             {
-                IDictionary<string, string>? savedEnvironmentVariables = _savedEnvironmentVariables;
+                IDictionary<string, string>? savedEnvironmentVariables = _savedEnvironmentVariables as IDictionary<string, string>;
                 Dictionary<string, string> additionalEntries = new();
 
                 if (translator.Mode == TranslationDirection.WriteToStream)
@@ -665,7 +665,7 @@ namespace Microsoft.Build.Execution
                     additionalEntries.Add(SpecialKeyForVersion, String.Empty);
 
                     // Serialize the special key together with _savedEnvironmentVariables dictionary using the workaround overload of TranslateDictionary:
-                    translator.TranslateDictionary(ref savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, s_additionalEntriesKeys);
+                    translator.TranslateDictionary(ref savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer, ref additionalEntries, s_additionalEntriesKeys);
 
                     // Serialize version
                     translator.Translate(ref _version);
@@ -673,8 +673,8 @@ namespace Microsoft.Build.Execution
                 else if (translator.Mode == TranslationDirection.ReadFromStream)
                 {
                     // Read the dictionary using the workaround overload of TranslateDictionary: special keys (additionalEntriesKeys) would be read to additionalEntries instead of the _savedEnvironmentVariables dictionary.
-                    translator.TranslateDictionary(ref savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, s_additionalEntriesKeys);
-                    _savedEnvironmentVariables = savedEnvironmentVariables?.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+                    translator.TranslateDictionary(ref savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer, ref additionalEntries, s_additionalEntriesKeys);
+                    _savedEnvironmentVariables = (IReadOnlyDictionary<string, string>)savedEnvironmentVariables;
 
                     // If the special key SpecialKeyForVersion present in additionalEntries, also read a version, otherwise set it to 0.
                     if (additionalEntries is not null && additionalEntries.ContainsKey(SpecialKeyForVersion))
