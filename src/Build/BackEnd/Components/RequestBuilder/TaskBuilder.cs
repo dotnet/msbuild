@@ -165,7 +165,20 @@ namespace Microsoft.Build.BackEnd
 
             if (_taskNode != null && requestEntry.Request.HostServices != null)
             {
-                _taskHostObject = requestEntry.Request.HostServices.GetHostObject(requestEntry.RequestConfiguration.Project.FullPath, loggingContext.Target.Name, _taskNode.Name);
+                try
+                {
+                    _taskHostObject = requestEntry.Request.HostServices.GetHostObject(requestEntry.RequestConfiguration.Project.FullPath, loggingContext.Target.Name, _taskNode.Name);
+                }
+                catch (HostObjectException ex)
+                {
+                    loggingContext.LogWarning(
+                        null,
+                        new BuildEventFileInfo(taskInstance.Location),
+                        "HostObjectFailure",
+                        _taskNode.Name,
+                        ex.Message);
+                    _taskHostObject = null;
+                }
             }
 
             _projectFullPath = requestEntry.RequestConfiguration.Project.FullPath;

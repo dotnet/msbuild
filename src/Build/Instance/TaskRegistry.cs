@@ -1463,7 +1463,7 @@ namespace Microsoft.Build.Execution
                                 }
 
                                 // Make sure we only look for task factory classes when loading based on the name
-                                loadedType = s_taskFactoryTypeLoader.Load(TaskFactoryAttributeName, taskFactoryLoadInfo);
+                                loadedType = s_taskFactoryTypeLoader.Load(TaskFactoryAttributeName, taskFactoryLoadInfo, targetLoggingContext.LogWarning);
 
                                 if (loadedType == null)
                                 {
