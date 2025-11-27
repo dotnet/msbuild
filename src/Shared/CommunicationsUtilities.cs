@@ -161,8 +161,8 @@ namespace Microsoft.Build.Internal
         public string ErrorMessage { get; }
 
         /// <summary>
-        /// The negotiated packet version from the child node.
-        /// It's needed to ensure both sides of the communication can read data from the pipe correctly.
+        /// The negotiated packet version with the child node.
+        /// It's needed to ensure both sides of the communication can read/write data in pipe.
         /// </summary>
         public byte NegotiatedPacketVersion { get; }
 

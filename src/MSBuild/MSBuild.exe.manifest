@@ -45,10 +45,4 @@
         tlbid="{D8A9BA71-4724-481D-9CA7-0DA23A1D615C}"
         proxyStubClsid32="{00020424-0000-0000-C000-000000000046}" />
 
-  <comInterfaceExternalProxyStub
-        iid="{F652935A-3BBE-4DCE-AADC-AC1A219A8E11}"
-        name="ITaskItemList"
-        tlbid="{D8A9BA71-4724-481D-9CA7-0DA23A1D615C}"
-        proxyStubClsid32="{00020424-0000-0000-C000-000000000046}" />
-
 </assembly>
