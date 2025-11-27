@@ -452,9 +452,14 @@ namespace Microsoft.Build.BackEnd
                             _pipeServer.TryReadEndOfHandshakeSignal(false, out HandshakeResult _))
 #endif
                             {
+                                // Send supported PacketVersion after EndOfHandshakeSignal
+                                // Based on this parent node decides how to communicate with the child.
+                                _pipeServer.WriteIntForHandshake(Handshake.PacketVersionFromChildMarker);  // Marker: PacketVersion follows
+                                _pipeServer.WriteIntForHandshake(NodePacketTypeExtensions.PacketVersion);
+                                CommunicationsUtilities.Trace("Sent PacketVersion: {0}", NodePacketTypeExtensions.PacketVersion);
+
                                 CommunicationsUtilities.Trace("Successfully connected to parent.");
                                 _pipeServer.WriteEndOfHandshakeSignal();
-
 #if FEATURE_SECURITY_PERMISSIONS
                                 // We will only talk to a host that was started by the same user as us.  Even though the pipe access is set to only allow this user, we want to ensure they
                                 // haven't attempted to change those permissions out from under us.  This ensures that the only way they can truly gain access is to be impersonating the
@@ -696,16 +701,18 @@ namespace Microsoft.Build.BackEnd
                             bool hasExtendedHeader = NodePacketTypeExtensions.HasExtendedHeader(rawType);
                             NodePacketType packetType = hasExtendedHeader ? NodePacketTypeExtensions.GetNodePacketType(rawType) : (NodePacketType)rawType;
 
-                            byte version = 0;
+                            byte parentVersion = 0;
                             if (hasExtendedHeader)
                             {
-                                version = NodePacketTypeExtensions.ReadVersion(localReadPipe);
+                                parentVersion = NodePacketTypeExtensions.ReadVersion(localReadPipe);
                             }
 
                             try
                             {
                                 ITranslator readTranslator = BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer);
-                                readTranslator.PacketVersion = version;
+
+                                // parent sends a packet version that is already negotiated during handshake.
+                                readTranslator.NegotiatedPacketVersion = parentVersion;
                                 _packetFactory.DeserializeAndRoutePacket(0, packetType, readTranslator);
                             }
                             catch (Exception e)

@@ -465,7 +465,7 @@ namespace Microsoft.Build.BackEnd
             // If the packet version is bigger then 0, it means the task host will running under .NET.
             // Although MSBuild.exe runs under .NET Framework and has AppDomain support,
             // we don't transmit AppDomain config when communicating with dotnet.exe (it is not supported in .NET 5+).
-            if (translator.PacketVersion == 0)
+            if (translator.NegotiatedPacketVersion == 0)
             {
                 byte[] appDomainConfigBytes = null;
 
@@ -489,7 +489,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _projectFileOfTask);
             translator.Translate(ref _taskName);
             translator.Translate(ref _taskLocation);
-            if (translator.PacketVersion >= 2)
+            if (translator.NegotiatedPacketVersion >= 2)
             {
                 translator.Translate(ref _targetName);
             }
@@ -520,7 +520,7 @@ namespace Microsoft.Build.BackEnd
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
 #endif
 #if !NET35
-            if (translator.PacketVersion >= 2)
+            if (translator.NegotiatedPacketVersion >= 2)
             {
                 translator.Translate(ref _hostServices);
             }
