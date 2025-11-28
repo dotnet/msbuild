@@ -20,6 +20,7 @@ namespace Microsoft.Build.Engine.UnitTests
     /// This task checks that TaskEnvironment is properly provided and tests different
     /// environment variable behavior between multithreaded and single-threaded modes.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class EnvironmentIsolationTestTask : Task, IMultiThreadableTask
     {
         public TaskEnvironment TaskEnvironment { get; set; } = null!;
@@ -125,7 +126,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Theory]
-        [InlineData(false, "/m /nodereuse:false /mt")]
+        [InlineData(true, "/m /nodereuse:false /mt")]
         [InlineData(false, "/m /nodereuse:false")]
         public void MSBuildTask_EnvironmentIsolation(bool isMultithreaded, string msbuildArgs)
         {
