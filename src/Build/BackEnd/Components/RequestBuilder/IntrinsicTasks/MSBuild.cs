@@ -548,7 +548,7 @@ namespace Microsoft.Build.BackEnd
             // build, because it'll all be in the immediately subsequent ProjectStarted event.
 
             var projectDirectory = new string[projects.Length];
-            var projectNames = new AbsolutePath[projects.Length];
+            var projectNames = new string[projects.Length];
             var toolsVersions = new string[projects.Length];
             var projectProperties = new Dictionary<string, string>[projects.Length];
             var undefinePropertiesPerProject = new List<string>[projects.Length];
@@ -562,7 +562,7 @@ namespace Microsoft.Build.BackEnd
                     // Retrieve projectDirectory only the first time.  It never changes anyway.
                     string projectPath = FileUtilities.AttemptToShortenPath(projects[i].ItemSpec);
                     projectDirectory[i] = Path.GetDirectoryName(projectPath);
-                    projectNames[i] = taskEnvironment.GetAbsolutePath(projects[i].ItemSpec);
+                    projectNames[i] = projects[i].ItemSpec;
                     toolsVersions[i] = toolsVersion;
 
                     // If the user specified a different set of global properties for this project, then
@@ -600,7 +600,7 @@ namespace Microsoft.Build.BackEnd
 
                         if (log != null && propertiesToUndefine.Length > 0)
                         {
-                            log.LogMessageFromResources(MessageImportance.Low, "General.ProjectUndefineProperties", projectNames[i].Value);
+                            log.LogMessageFromResources(MessageImportance.Low, "General.ProjectUndefineProperties", projectNames[i]);
                             foreach (string property in propertiesToUndefine)
                             {
                                 undefinePropertiesPerProject[i].Add(property);
@@ -615,7 +615,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (!PropertyParser.GetTableWithEscaping(
                                 log,
-                                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i].Value),
+                                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]),
                                 ItemMetadataNames.AdditionalPropertiesMetadataName,
                                 projects[i].GetMetadata(ItemMetadataNames.AdditionalPropertiesMetadataName).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries),
                                 out Dictionary<string, string> additionalProjectPropertiesTable))
@@ -668,7 +668,7 @@ namespace Microsoft.Build.BackEnd
                 // as the *calling* project file.
 
                 var taskHost = (TaskHost)buildEngine;
-                BuildEngineResult result = await taskHost.InternalBuildProjects(projectNames.ToStringArray(), targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */, skipNonexistentTargets);
+                BuildEngineResult result = await taskHost.InternalBuildProjects(projectNames, targetList, projectProperties, undefinePropertiesPerProject, toolsVersions, true /* ask that target outputs are returned in the buildengineresult */, skipNonexistentTargets);
 
                 bool currentTargetResult = result.Result;
                 IList<IDictionary<string, ITaskItem[]>> targetOutputsPerProject = result.TargetOutputsPerProject;
