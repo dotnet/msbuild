@@ -151,7 +151,7 @@ namespace Microsoft.Build.BackEnd
         private bool _useSidecarTaskHost = false;
 
 #if !NET35
-        private HostServices _hostServices;
+        private readonly HostServices _hostServices;
 #endif
 
         /// <summary>

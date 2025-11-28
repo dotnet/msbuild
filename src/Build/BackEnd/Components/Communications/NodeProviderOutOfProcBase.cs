@@ -647,7 +647,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// The minimum packet version supported by both the host and the node.
             /// </summary>
-            private byte _negotiatedPacketVersion;
+            private readonly byte _negotiatedPacketVersion;
 
 
 #if FEATURE_APM

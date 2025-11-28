@@ -178,7 +178,7 @@ namespace Microsoft.Build.Internal
             Status = status;
             Value = value;
             ErrorMessage = errorMessage;
-            NegotiatedPacketVersion = 1;
+            NegotiatedPacketVersion = negotiatedPacketVersion;
         }
 
         /// <summary>
