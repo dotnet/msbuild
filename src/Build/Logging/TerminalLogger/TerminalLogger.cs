@@ -286,37 +286,32 @@ public sealed partial class TerminalLogger : INodeLogger
         ILogger loggerToReturn;
         ForwardingLoggerRecord? forwardingLogger;
 
-        Regex tlArgRegex = TerminalLoggerArgPattern();
-        Regex verbosityArgRegex = VerbosityArgPattern();
-        Regex tlpArgRegex = TerminalLoggerParametersArgPattern();
-        Regex clpArgRegex = ConsoleLoggerParametersArgPattern();
-
         if (args != null)
         {
             foreach (string arg in args)
             {
-                var tlArgMatches = tlArgRegex.Matches(arg);
+                var tlArgMatches = TerminalLoggerArgPattern.Matches(arg);
                 if (tlArgMatches.Count > 0)
                 {
                     // overriding, last one wins
                     tlArg = tlArgMatches[^1].Groups["value"].Value;
                 }
 
-                var verbosityArgMatches = verbosityArgRegex.Matches(arg);
+                var verbosityArgMatches = VerbosityArgPattern.Matches(arg);
                 if (verbosityArgMatches.Count > 0)
                 {
                     // overriding, last one wins
                     verbosityArg = verbosityArgMatches[^1].Groups["value"].Value;
                 }
 
-                var tlpMatches = tlpArgRegex.Matches(arg);
+                var tlpMatches = TerminalLoggerParametersArgPattern.Matches(arg);
                 if (tlpMatches.Count > 0)
                 {
                     // can be multiple, accumulate all
                     tlpArg.AddRange(tlpMatches.OfType<Match>().Select(m => m.Groups["value"].Value).Where(v => !string.IsNullOrEmpty(v)));
                 }
 
-                var clpMatches = clpArgRegex.Matches(arg);
+                var clpMatches = ConsoleLoggerParametersArgPattern.Matches(arg);
                 if (clpMatches.Count > 0)
                 {
                     // can be multiple, accumulate all
@@ -1756,12 +1751,27 @@ public sealed partial class TerminalLogger : INodeLogger
     }
     #endregion
     
-    [GeneratedRegex(@"(?:/|-|--)(?:tl|terminallogger):(?'value'on|off|true|false|auto)", RegexOptions.IgnoreCase, "en-US")]
-    private static partial Regex TerminalLoggerArgPattern();
-    [GeneratedRegex(@"(?:/|-|--)(?:v|verbosity):(?'value'\w+)", RegexOptions.IgnoreCase, "en-US")]
-    private static partial Regex VerbosityArgPattern();
-    [GeneratedRegex(@"(?:/|-|--)(?:tlp|terminalloggerparameters):(?'value'.+)", RegexOptions.IgnoreCase, "en-US")]
-    private static partial Regex TerminalLoggerParametersArgPattern();
-    [GeneratedRegex(@"(?:/|-|--)(?:clp|consoleloggerparameters):(?'value'.+)", RegexOptions.IgnoreCase, "en-US")]
-    private static partial Regex ConsoleLoggerParametersArgPattern();
+    #region Regex Patterns
+    // Regex patterns for command line argument parsing
+    private const string s_terminalLoggerArgPattern = @"(?:/|-|--)(?:tl|terminallogger):(?'value'on|off|true|false|auto)";
+    private const string s_verbosityArgPattern = @"(?:/|-|--)(?:v|verbosity):(?'value'\w+)";
+    private const string s_terminalLoggerParametersArgPattern = @"(?:/|-|--)(?:tlp|terminalloggerparameters):(?'value'.+)";
+    private const string s_consoleLoggerParametersArgPattern = @"(?:/|-|--)(?:clp|consoleloggerparameters):(?'value'.+)";
+
+#if NET
+    [GeneratedRegex(s_terminalLoggerArgPattern, RegexOptions.IgnoreCase)]
+    private static partial Regex TerminalLoggerArgPattern { get; }
+    [GeneratedRegex(s_verbosityArgPattern, RegexOptions.IgnoreCase)]
+    private static partial Regex VerbosityArgPattern { get; }
+    [GeneratedRegex(s_terminalLoggerParametersArgPattern, RegexOptions.IgnoreCase)]
+    private static partial Regex TerminalLoggerParametersArgPattern { get; }
+    [GeneratedRegex(s_consoleLoggerParametersArgPattern, RegexOptions.IgnoreCase)]
+    private static partial Regex ConsoleLoggerParametersArgPattern { get; }
+#else
+    private static Regex TerminalLoggerArgPattern { get; } = new Regex(s_terminalLoggerArgPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static Regex VerbosityArgPattern { get; } = new Regex(s_verbosityArgPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static Regex TerminalLoggerParametersArgPattern { get; } = new Regex(s_terminalLoggerParametersArgPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+    private static Regex ConsoleLoggerParametersArgPattern { get; } = new Regex(s_consoleLoggerParametersArgPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled);
+#endif
+    #endregion
 }
