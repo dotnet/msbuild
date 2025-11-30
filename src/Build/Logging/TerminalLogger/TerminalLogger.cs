@@ -79,7 +79,7 @@ public sealed partial class TerminalLogger : INodeLogger
     internal const TerminalColor TargetFrameworkColor = TerminalColor.Cyan;
     internal const TerminalColor RuntimeIdentifierColor = TerminalColor.Magenta;
 
-    internal Func<StopwatchAbstraction>? CreateStopwatch = null;
+    internal Func<StopwatchAbstraction>? _createStopwatch = null;
 
     /// <summary>
     /// Name of target that identifies the project cache plugin run has just started.
@@ -89,7 +89,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Protects access to state shared between the logger callbacks and the rendering thread.
     /// </summary>
-    private readonly LockType _lock = new LockType();
+    private readonly LockType _lock = new();
 
     /// <summary>
     /// A cancellation token to signal the rendering thread that it should exit.
@@ -102,9 +102,9 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <remarks>
     /// Keyed by an ID that gets passed to logger callbacks, this allows us to quickly look up the corresponding project.
     /// </remarks>
-    private readonly Dictionary<ProjectContext, TerminalProjectInfo> _projects = new();
+    private readonly Dictionary<ProjectContext, TerminalProjectInfo> _projects = [];
 
-    private readonly Dictionary<EvalContext, EvalProjectInfo> _evals = new();
+    private readonly Dictionary<EvalContext, EvalProjectInfo> _projectEvaluations = [];
 
     /// <summary>
     /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
@@ -249,6 +249,8 @@ public sealed partial class TerminalLogger : INodeLogger
         _originalConsoleMode = originalConsoleMode;
     }
 
+    #region  Logger argument parsing and factory methods
+
     /// <summary>
     /// Creates a Terminal logger if possible, or a Console logger.
     /// </summary>
@@ -284,38 +286,40 @@ public sealed partial class TerminalLogger : INodeLogger
         ILogger loggerToReturn;
         ForwardingLoggerRecord? forwardingLogger;
 
-        Regex tlArgRegex = new(@"(?:/|-|--)(?:tl|terminallogger):(?'value'on|off|true|false|auto)", RegexOptions.IgnoreCase);
-        Regex verbosityArgRegex = new(@"(?:/|-|--)(?:v|verbosity):(?'value'\w+)", RegexOptions.IgnoreCase);
-        Regex tlpArgRegex = new(@"(?:/|-|--)(?:tlp|terminalloggerparameters):(?'value'.+)", RegexOptions.IgnoreCase);
-        Regex clpArgRegex = new(@"(?:/|-|--)(?:clp|consoleloggerparameters):(?'value'.+)", RegexOptions.IgnoreCase);
+        Regex tlArgRegex = TerminalLoggerArgPattern();
+        Regex verbosityArgRegex = VerbosityArgPattern();
+        Regex tlpArgRegex = TerminalLoggerParametersArgPattern();
+        Regex clpArgRegex = ConsoleLoggerParametersArgPattern();
 
         if (args != null)
         {
-            foreach (var arg in args)
+            foreach (string arg in args)
             {
                 var tlArgMatches = tlArgRegex.Matches(arg);
-                if (tlArgMatches.Any())
+                if (tlArgMatches.Count > 0)
                 {
                     // overriding, last one wins
-                    tlArg = tlArgMatches.Last().Groups["value"].Value;
+                    tlArg = tlArgMatches[^1].Groups["value"].Value;
                 }
 
                 var verbosityArgMatches = verbosityArgRegex.Matches(arg);
-                if (verbosityArgMatches.Any())
+                if (verbosityArgMatches.Count > 0)
                 {
                     // overriding, last one wins
-                    verbosityArg = verbosityArgMatches.Last().Groups["value"].Value;
+                    verbosityArg = verbosityArgMatches[^1].Groups["value"].Value;
                 }
 
                 var tlpMatches = tlpArgRegex.Matches(arg);
-                if (tlpMatches.Any())
+                if (tlpMatches.Count > 0)
                 {
+                    // can be multiple, accumulate all
                     tlpArg.AddRange(tlpMatches.OfType<Match>().Select(m => m.Groups["value"].Value).Where(v => !string.IsNullOrEmpty(v)));
                 }
 
                 var clpMatches = clpArgRegex.Matches(arg);
-                if (clpMatches.Any())
+                if (clpMatches.Count > 0)
                 {
+                    // can be multiple, accumulate all
                     clpArg.AddRange(clpMatches.OfType<Match>().Select(m => m.Groups["value"].Value).Where(v => !string.IsNullOrEmpty(v)));
                 }
             }
@@ -337,12 +341,18 @@ public sealed partial class TerminalLogger : INodeLogger
         }
 
         // Command line arguments take precedence over environment variables
-        string effectiveValue = !string.IsNullOrEmpty(tlArg) ? tlArg : !string.IsNullOrEmpty(tlEnvVariable) ? tlEnvVariable : "auto";
+        string effectiveValue =
+             (tlArg, tlEnvVariable) switch
+             {
+                 (not null and not "", _) => tlArg,
+                 (_, not null and not "") => tlEnvVariable,
+                 _ => "auto",
+             };
 
         bool isForced = IsTerminalLoggerEnabled(effectiveValue);
         bool isDisabled = IsTerminalLoggerDisabled(effectiveValue);
-        var tlpArgString = string.Join(";", tlpArg);
-        var clpArgString = string.Join(";", clpArg);
+        string tlpArgString = string.Join(";", tlpArg);
+        string clpArgString = string.Join(";", clpArg);
 
         // if forced, always use the Terminal Logger
         if (isForced)
@@ -386,8 +396,8 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Checks if the given value indicates TerminalLogger should be enabled/forced.
     /// </summary>
-    /// <param name="value">The value to check (from command line or environment variable)</param>
-    /// <returns>True if the value indicates TerminalLogger should be enabled</returns>
+    /// <param name="value">The value to check (from command line or environment variable).</param>
+    /// <returns>True if the value indicates TerminalLogger should be enabled.</returns>
     private static bool IsTerminalLoggerEnabled(string? value) =>
         value is { Length: > 0 } &&
             (value.Equals("on", StringComparison.InvariantCultureIgnoreCase) ||
@@ -396,12 +406,14 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Checks if the given value indicates TerminalLogger should be disabled.
     /// </summary>
-    /// <param name="value">The value to check (from command line or environment variable)</param>
-    /// <returns>True if the value indicates TerminalLogger should be disabled</returns>
+    /// <param name="value">The value to check (from command line or environment variable).</param>
+    /// <returns>True if the value indicates TerminalLogger should be disabled.</returns>
     private static bool IsTerminalLoggerDisabled(string? value) =>
         value is { Length: > 0 } &&
             (value.Equals("off", StringComparison.InvariantCultureIgnoreCase) ||
              value.Equals("false", StringComparison.InvariantCultureIgnoreCase));
+
+    #endregion
 
     #region INodeLogger implementation
 
@@ -590,15 +602,15 @@ public sealed partial class TerminalLogger : INodeLogger
                 Terminal.WriteLine("");
                 if (_testRunSummaries.Any())
                 {
-                    var total = _testRunSummaries.Sum(t => t.Total);
-                    var failed = _testRunSummaries.Sum(t => t.Failed);
-                    var passed = _testRunSummaries.Sum(t => t.Passed);
-                    var skipped = _testRunSummaries.Sum(t => t.Skipped);
-                    var testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
+                    int total = _testRunSummaries.Sum(t => t.Total);
+                    int failed = _testRunSummaries.Sum(t => t.Failed);
+                    int passed = _testRunSummaries.Sum(t => t.Passed);
+                    int skipped = _testRunSummaries.Sum(t => t.Skipped);
+                    string testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
 
-                    var colorizeFailed = failed > 0;
-                    var colorizePassed = passed > 0 && _buildErrorsCount == 0 && failed == 0;
-                    var colorizeSkipped = skipped > 0 && skipped == total && _buildErrorsCount == 0 && failed == 0;
+                    bool colorizeFailed = failed > 0;
+                    bool colorizePassed = passed > 0 && _buildErrorsCount == 0 && failed == 0;
+                    bool colorizeSkipped = skipped > 0 && skipped == total && _buildErrorsCount == 0 && failed == 0;
 
                     string summaryAndTotalText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_BannerAndTotal", total);
                     string failedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Failed", failed);
@@ -710,14 +722,14 @@ public sealed partial class TerminalLogger : INodeLogger
             EvalContext evalContext = new(e.BuildEventContext);
             string? targetFramework = null;
             string? runtimeIdentifier = null;
-            if (_evals.TryGetValue(evalContext, out EvalProjectInfo evalInfo))
+            if (_projectEvaluations.TryGetValue(evalContext, out EvalProjectInfo evalInfo))
             {
                 targetFramework = evalInfo.TargetFramework;
                 runtimeIdentifier = evalInfo.RuntimeIdentifier;
             }
             System.Diagnostics.Debug.Assert(evalInfo != default, "EvalProjectInfo should have been captured before ProjectStarted");
 
-            TerminalProjectInfo projectInfo = new(c, evalInfo, CreateStopwatch?.Invoke());
+            TerminalProjectInfo projectInfo = new(c, evalInfo, _createStopwatch?.Invoke());
             _projects[c] = projectInfo;
 
             // First ever restore in the build is starting.
@@ -811,7 +823,7 @@ public sealed partial class TerminalLogger : INodeLogger
                         // Print the output path as a link if we have it.
                         if (outputPath is { } outputPathSpan)
                         {
-                            (var projectDisplayPath, var urlLink) = DetermineOutputPathToRender(outputPathSpan, _initialWorkingDirectory.AsMemory(), project.SourceRoot);
+                            (string? projectDisplayPath, var urlLink) = DetermineOutputPathToRender(outputPathSpan, _initialWorkingDirectory.AsMemory(), project.SourceRoot);
                             Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath", CreateLink(urlLink, projectDisplayPath.ToString())));
                         }
                         else
@@ -855,7 +867,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
         EvalContext c = new(buildEventContext);
 
-        if (!_evals.TryGetValue(c, out EvalProjectInfo _))
+        if (!_projectEvaluations.TryGetValue(c, out EvalProjectInfo _))
         {
             string? tfm = null;
             string? rid = null;
@@ -876,8 +888,8 @@ public sealed partial class TerminalLogger : INodeLogger
                         break;
                 }
             }
-            var evalInfo = new EvalProjectInfo(c, evalFinish.ProjectFile!, tfm, rid);
-            _evals[c] = evalInfo;
+            var evalInfo = new EvalProjectInfo(c, evalFinish.ProjectFile, tfm, rid);
+            _projectEvaluations[c] = evalInfo;
         }
     }
 
@@ -1135,7 +1147,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
         if (message is not null && e.Importance == MessageImportance.High)
         {
-            var hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project);
+            bool hasProject = _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project);
 
             // Detect project output path by matching high-importance messages against the "$(MSBuildProjectName) -> ..."
             // pattern used by the CopyFilesToOutputDirectory target.
@@ -1189,8 +1201,8 @@ public sealed partial class TerminalLogger : INodeLogger
                             {
                                 if (node != null)
                                 {
-                                    var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
-                                    var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
+                                    string indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
+                                    string displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
                                     var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Green, indicator, displayName, project.Stopwatch);
                                     UpdateNodeStatus(buildEventContext, status);
@@ -1202,8 +1214,8 @@ public sealed partial class TerminalLogger : INodeLogger
                             {
                                 if (node != null)
                                 {
-                                    var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
-                                    var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
+                                    string indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
+                                    string displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
                                     var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
                                     UpdateNodeStatus(buildEventContext, status);
@@ -1403,7 +1415,7 @@ public sealed partial class TerminalLogger : INodeLogger
     private void ThreadProc()
     {
         // 1_000 / 30 is a poor approx of 30Hz
-        var count = 0;
+        int count = 0;
         while (!_cts.Token.WaitHandle.WaitOne(1_000 / 30))
         {
             count++;
@@ -1431,8 +1443,8 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     internal void DisplayNodes(bool updateSize = true)
     {
-        var width = updateSize ? Terminal.Width : _currentFrame.Width;
-        var height = updateSize ? Terminal.Height : _currentFrame.Height;
+        int width = updateSize ? Terminal.Width : _currentFrame.Width;
+        int height = updateSize ? Terminal.Height : _currentFrame.Height;
         TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: width, height: height);
 
         // Do not render delta but clear everything if Terminal width or height have changed.
@@ -1557,9 +1569,7 @@ public sealed partial class TerminalLogger : INodeLogger
             : path;
     }
 
-    private string FormatWarningMessage(BuildWarningEventArgs e, string indent)
-    {
-        return FormatEventMessage(
+    private string FormatWarningMessage(BuildWarningEventArgs e, string indent) => FormatEventMessage(
                 category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
                 subcategory: e.Subcategory,
                 message: e.Message,
@@ -1571,11 +1581,8 @@ public sealed partial class TerminalLogger : INodeLogger
                 endColumnNumber: e.EndColumnNumber,
                 indent,
                 terminalWidth: Terminal.Width);
-    }
 
-    private string FormatInformationalMessage(BuildMessageEventArgs e)
-    {
-        return FormatEventMessage(
+    private string FormatInformationalMessage(BuildMessageEventArgs e) => FormatEventMessage(
                 category: null,
                 subcategory: e.Subcategory,
                 message: e.Message,
@@ -1588,7 +1595,6 @@ public sealed partial class TerminalLogger : INodeLogger
                 indent: string.Empty,
                 terminalWidth: Terminal.Width,
                 requireFileAndLinePortion: false);
-    }
 
     /// <summary>
     /// Renders message with just code/category/message data.
@@ -1596,9 +1602,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// messages that lack a specific project context, such as the .NET
     /// SDK's 'preview version' message, while not removing the code.
     /// </summary>
-    private string FormatSimpleMessageWithoutFileData(BuildMessageEventArgs e, string indent)
-    {
-        return FormatEventMessage(
+    private string FormatSimpleMessageWithoutFileData(BuildMessageEventArgs e, string indent) => FormatEventMessage(
                 category: AnsiCodes.Colorize("info", TerminalColor.Default),
                 subcategory: null,
                 message: e.Message,
@@ -1612,11 +1616,8 @@ public sealed partial class TerminalLogger : INodeLogger
                 terminalWidth: Terminal.Width,
                 requireFileAndLinePortion: false,
                 prependIndentation: true);
-    }
 
-    private string FormatErrorMessage(BuildErrorEventArgs e, string indent, bool requireFileAndLinePortion = true)
-    {
-        return FormatEventMessage(
+    private string FormatErrorMessage(BuildErrorEventArgs e, string indent, bool requireFileAndLinePortion = true) => FormatEventMessage(
                 category: AnsiCodes.Colorize("error", TerminalColor.Red),
                 subcategory: e.Subcategory,
                 message: e.Message,
@@ -1629,7 +1630,6 @@ public sealed partial class TerminalLogger : INodeLogger
                 indent,
                 terminalWidth: Terminal.Width,
                 requireFileAndLinePortion: requireFileAndLinePortion);
-    }
 
     private static string FormatEventMessage(
             string? category,
@@ -1754,6 +1754,14 @@ public sealed partial class TerminalLogger : INodeLogger
             start += length;
         }
     }
-
     #endregion
+    
+    [GeneratedRegex(@"(?:/|-|--)(?:tl|terminallogger):(?'value'on|off|true|false|auto)", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex TerminalLoggerArgPattern();
+    [GeneratedRegex(@"(?:/|-|--)(?:v|verbosity):(?'value'\w+)", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex VerbosityArgPattern();
+    [GeneratedRegex(@"(?:/|-|--)(?:tlp|terminalloggerparameters):(?'value'.+)", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex TerminalLoggerParametersArgPattern();
+    [GeneratedRegex(@"(?:/|-|--)(?:clp|consoleloggerparameters):(?'value'.+)", RegexOptions.IgnoreCase, "en-US")]
+    private static partial Regex ConsoleLoggerParametersArgPattern();
 }

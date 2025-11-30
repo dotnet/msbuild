@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests
             
             _terminallogger = new TerminalLogger(_mockTerminal);
             _terminallogger.Initialize(_centralNodeEventSource, _nodeCount);
-            _terminallogger.CreateStopwatch = () => new MockStopwatch();
+            _terminallogger._createStopwatch = () => new MockStopwatch();
 
             _remoteTerminalLogger = new ForwardingTerminalLogger();
             _remoteTerminalLogger.BuildEventRedirector = new EventRedirectorToSink(0, _centralNodeEventSource);
@@ -833,11 +833,11 @@ namespace Microsoft.Build.UnitTests
         {
             List<MockStopwatch> stopwatches = new();
 
-            Func<StopwatchAbstraction>? createStopwatch = _terminallogger.CreateStopwatch;
+            Func<StopwatchAbstraction>? createStopwatch = _terminallogger._createStopwatch;
 
             try
             {
-                _terminallogger.CreateStopwatch = () =>
+                _terminallogger._createStopwatch = () =>
                 {
                     MockStopwatch stopwatch = new();
                     stopwatches.Add(stopwatch);
@@ -860,7 +860,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                _terminallogger.CreateStopwatch = createStopwatch;
+                _terminallogger._createStopwatch = createStopwatch;
             }
         }
 
