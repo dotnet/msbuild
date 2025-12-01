@@ -1139,13 +1139,16 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (project.SdkResolvedEnvironmentVariablePropertiesDictionary is PropertyDictionary<ProjectPropertyInstance> environmentProperties)
                     {
-                        foreach (ProjectPropertyInstance environmentProperty in environmentProperties)
+                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
                         {
-                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
+                            foreach (ProjectPropertyInstance environmentProperty in environmentProperties)
                             {
                                 _requestEntry.TaskEnvironment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue);
                             }
-                            else
+                        }
+                        else
+                        {
+                            foreach (ProjectPropertyInstance environmentProperty in environmentProperties)
                             {
                                 Environment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue, EnvironmentVariableTarget.Process);
                             }
