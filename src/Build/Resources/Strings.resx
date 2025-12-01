@@ -2449,6 +2449,13 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="SDKPathCheck_Failed" xml:space="preserve">
     <value>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</value>
   </data>
+  <data name="AssemblyLoad_Warning" xml:space="preserve">
+    <value>The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</value>
+  </data>
+  <data name="HostObjectFailure" xml:space="preserve">
+    <value>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</value>
+    <comment>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</comment>
+  </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 

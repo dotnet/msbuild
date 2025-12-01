@@ -80,9 +80,17 @@ namespace Microsoft.Build.UnitTests
 
             env.SetEnvironmentVariable("MSBUILDLOADALLFILESASWRITEABLE", "1");
 
+#if FEATURE_GET_COMMANDLINE
             MSBuildApp.Execute(@"c:\bin\msbuild.exe """ + inputFile.Path +
                 (NativeMethodsShared.IsUnixLike ? @""" -pp:""" : @""" /pp:""") + outputFile.Path + @"""")
                 .ShouldBe(MSBuildApp.ExitType.Success);
+#else
+            Assert.Equal(
+                MSBuildApp.ExitType.Success,
+                MSBuildApp.Execute(
+                    new[] { @"c:\bin\msbuild.exe", '"' + inputFile.Path + '"',
+                '"' + (NativeMethodsShared.IsUnixLike ? "-pp:" : "/pp:") + outputFile.Path + '"'}));
+#endif
 
             bool foundDoNotModify = false;
             foreach (string line in File.ReadLines(outputFile.Path))
