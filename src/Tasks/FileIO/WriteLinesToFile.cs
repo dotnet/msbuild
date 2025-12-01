@@ -7,7 +7,6 @@ using System.Text;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -319,9 +318,8 @@ namespace Microsoft.Build.Tasks
             {
                 if (FileUtilities.FileExistsNoThrow(filePath))
                 {
-                    string existingContents = FileSystems.Default.ReadFileAllText(filePath);
-
-                    if (existingContents.Equals(contentsAsString))
+                    // Use stream-based comparison to avoid loading entire file into memory
+                    if (FilesAreIdentical(filePath, contentsAsString))
                     {
                         Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", filePath);
                         MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, true);
@@ -342,6 +340,55 @@ namespace Microsoft.Build.Tasks
 
             MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, false);
             return true; // Proceed with write
+        }
+
+        /// <summary>
+        /// Compares file contents with the given string using streams to avoid loading the entire file into memory.
+        /// Uses the default encoding for the comparison.
+        /// </summary>
+        /// <returns>True if file contents are identical to the provided string, false otherwise.</returns>
+        private bool FilesAreIdentical(string filePath, string contentsAsString)
+        {
+            try
+            {
+                byte[] newContentBytes = s_defaultEncoding.GetBytes(contentsAsString);
+
+                using (FileStream fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 4096))
+                {
+                    // Quick check: file size must match
+                    if (fileStream.Length != newContentBytes.Length)
+                    {
+                        return false;
+                    }
+
+                    // Compare bytes in chunks to avoid loading entire file into memory
+                    byte[] fileBuffer = new byte[4096];
+                    int newContentOffset = 0;
+
+                    int bytesRead;
+                    while ((bytesRead = fileStream.Read(fileBuffer, 0, fileBuffer.Length)) > 0)
+                    {
+                        // Compare current chunk with the corresponding part of new content
+                        for (int i = 0; i < bytesRead; i++)
+                        {
+                            if (fileBuffer[i] != newContentBytes[newContentOffset + i])
+                            {
+                                return false; // Difference found, files are not identical
+                            }
+                        }
+
+                        newContentOffset += bytesRead;
+                    }
+
+                    // All bytes matched
+                    return true;
+                }
+            }
+            catch (Exception)
+            {
+                // If we can't read the file, treat it as different so write proceeds
+                return false;
+            }
         }
     }
 }
