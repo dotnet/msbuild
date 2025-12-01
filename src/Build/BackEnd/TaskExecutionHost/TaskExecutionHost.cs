@@ -425,7 +425,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            if (this.TaskInstance is IIncrementalTask incrementalTask)
+            if (TaskInstance is IIncrementalTask incrementalTask)
             {
                 incrementalTask.FailIfNotIncremental = _buildComponentHost.BuildParameters.Question;
             }
@@ -1800,7 +1800,7 @@ namespace Microsoft.Build.BackEnd
                 _buildComponentHost,
                 taskHostParameters,
                 taskLoadedType,
-                useSidecarTaskHost: false,
+                useSidecarTaskHost: true,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup,
 #endif

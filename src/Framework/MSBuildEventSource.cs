@@ -697,6 +697,18 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(96, shutdownReason);
         }
+
+        [Event(97, Keywords = Keywords.All)]
+        public void FallbackAssemblyLoadStart(string assemblyName)
+        {
+            WriteEvent(97);
+        }
+
+        [Event(98, Keywords = Keywords.All)]
+        public void FallbackAssemblyLoadStop(string assemblyName)
+        {
+            WriteEvent(98);
+        }
         #endregion
     }
 }

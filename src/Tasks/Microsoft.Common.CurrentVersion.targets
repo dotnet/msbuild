@@ -666,7 +666,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!-- Users familiar with how some other repos work try to use NoWarn with MSBuild in place of MSBuildWarningsAsMessages. -->
   <PropertyGroup>
-    <MSBuildWarningsAsMessages Condition="'$(MSBuildWarningsAsMessages)'==''">$(NoWarn)</MSBuildWarningsAsMessages>
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);$(NoWarn)</MSBuildWarningsAsMessages>
     <MSBuildWarningsAsErrors Condition="'$(MSBuildWarningsAsErrors)'==''">$(WarningsAsErrors)</MSBuildWarningsAsErrors>
     <MSBuildWarningsNotAsErrors Condition="'$(MSBuildWarningsNotAsErrors)'==''">$(WarningsNotAsErrors)</MSBuildWarningsNotAsErrors>
   </PropertyGroup>
