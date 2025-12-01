@@ -111,8 +111,8 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            // Use transactional mode by default when ChangeWave 17.14 is enabled
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_14))
+            // Use transactional mode by default when ChangeWave 18.3 is enabled
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
             {
                 return ExecuteTransactional(filePath, directoryPath, contentsAsString, encoding);
             }
