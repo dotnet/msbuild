@@ -833,7 +833,9 @@ namespace Microsoft.Build.Internal
         /// Extension method to read a series of bytes from a stream.
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
         /// </summary>
-        internal static bool TryReadIntForHandshake(this PipeStream stream, byte? byteToAccept,
+        internal static bool TryReadIntForHandshake(
+            this PipeStream stream,
+            byte? byteToAccept,
 #if NETCOREAPP2_1_OR_GREATER
             int timeout,
 #endif

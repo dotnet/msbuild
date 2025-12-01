@@ -540,7 +540,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // We got a connection.
                 CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
-                result = HandshakeResult.Success(0);
+                result = HandshakeResult.Success(0, innerResult.NegotiatedPacketVersion);
                 return true;
             }
             else
