@@ -152,7 +152,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The task environment for virtualized environment operations.
         /// </summary>
-        private TaskEnvironment _taskEnvironment;
+        private readonly TaskEnvironment _taskEnvironment;
 
         /// <summary>
         /// Constructor.

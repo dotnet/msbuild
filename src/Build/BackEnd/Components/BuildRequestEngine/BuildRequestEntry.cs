@@ -120,7 +120,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="request">The originating build request.</param>
         /// <param name="requestConfiguration">The build request configuration.</param>
-        /// <param name="taskEnvironment">Task enviroment information that would be passed to tasks executing for the build request.</param>
+        /// <param name="taskEnvironment">Task environment information that would be passed to tasks executing for the build request.</param>
         internal BuildRequestEntry(BuildRequest request, BuildRequestConfiguration requestConfiguration, TaskEnvironment taskEnvironment)
         {
             ErrorUtilities.VerifyThrowArgumentNull(request);
