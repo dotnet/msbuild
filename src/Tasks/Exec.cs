@@ -367,21 +367,40 @@ namespace Microsoft.Build.Tasks
                 if (!string.IsNullOrWhiteSpace(Command))
                 {
                     sw.Write(Command);
-                }
 
-                // Append command arguments if provided
-                if (CommandArguments != null && CommandArguments.Length > 0)
+                    // Append command arguments if provided
+                    if (CommandArguments != null && CommandArguments.Length > 0)
+                    {
+                        foreach (string arg in CommandArguments)
+                        {
+                            sw.Write(' ');
+                            if (NativeMethodsShared.IsUnixLike)
+                            {
+                                sw.Write(EscapeArgumentForUnix(arg));
+                            }
+                            else
+                            {
+                                sw.Write(EscapeArgumentForWindows(arg));
+                            }
+                        }
+                    }
+                }
+                else if (CommandArguments != null && CommandArguments.Length > 0)
                 {
-                    foreach (string arg in CommandArguments)
+                    // If no Command but we have CommandArguments, treat the first argument as the command
+                    // and the rest as arguments
+                    sw.Write(CommandArguments[0]);
+
+                    for (int i = 1; i < CommandArguments.Length; i++)
                     {
                         sw.Write(' ');
                         if (NativeMethodsShared.IsUnixLike)
                         {
-                            sw.Write(EscapeArgumentForUnix(arg));
+                            sw.Write(EscapeArgumentForUnix(CommandArguments[i]));
                         }
                         else
                         {
-                            sw.Write(EscapeArgumentForWindows(arg));
+                            sw.Write(EscapeArgumentForWindows(CommandArguments[i]));
                         }
                     }
                 }
