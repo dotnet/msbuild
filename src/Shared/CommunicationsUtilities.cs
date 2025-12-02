@@ -676,7 +676,7 @@ namespace Microsoft.Build.Internal
                 // Then, make sure the new ones have their new values.
                 foreach (KeyValuePair<string, string> entry in newEnvironment)
                 {
-                    if (!currentEnvironment.TryGetValue(entry.Key, out string currentValue) || currentValue != entry.Value)
+                    if (!currentEnvironment.TryGetValue(entry.Key, out string currentValue) || !EnvironmentVariableComparer.Equals(currentValue, entry.Value))
                     {
                         SetEnvironmentVariable(entry.Key, entry.Value);
                     }
