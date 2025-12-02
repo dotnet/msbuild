@@ -123,14 +123,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             return Task<WorkUnitResult>.FromResult(new WorkUnitResult(WorkUnitResultCode.Success, WorkUnitActionCode.Continue, null));
         }
 
-        /// <summary>
-        /// Sets the task environment on the TaskExecutionHost for use with IMultiThreadableTask instances.
-        /// </summary>
-        /// <param name="taskEnvironment">The task environment to set, or null to clear.</param>
-        public void SetTaskEnvironment(TaskEnvironment taskEnvironment)
-        {
-        }
-
         #endregion
 
         #region IBuildComponent Members

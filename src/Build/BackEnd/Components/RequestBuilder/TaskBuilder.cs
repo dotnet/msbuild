@@ -131,16 +131,6 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Sets the task environment on the TaskExecutionHost for use with IMultiThreadableTask instances.
-        /// </summary>
-        /// <param name="taskEnvironment">The task environment to set, or null to clear.</param>
-        public void SetTaskEnvironment(TaskEnvironment taskEnvironment)
-        {
-            ErrorUtilities.VerifyThrow(_taskExecutionHost != null, "TaskExecutionHost must be initialized before setting TaskEnvironment.");
-            _taskExecutionHost.TaskEnvironment = taskEnvironment;
-        }
-
-        /// <summary>
         /// Builds the task specified by the XML.
         /// </summary>
         /// <param name="loggingContext">The logging context of the target</param>
@@ -165,6 +155,13 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(taskInstance != null, "Need to specify the task instance.");
 
             _buildRequestEntry = requestEntry;
+
+            // Set TaskEnvironment from the request entry for IMultiThreadableTask instances
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
+            {
+                _taskExecutionHost.TaskEnvironment = requestEntry.TaskEnvironment;
+            }
+
             _targetBuilderCallback = targetBuilderCallback;
             _cancellationToken = cancellationToken;
             _targetChildInstance = taskInstance;
