@@ -9,6 +9,17 @@ Enable MSBuild to be invoked directly as a native executable (`MSBuild.exe` / `M
 - Consistency with Roslyn compilers (`csc`, `vbc`) which already use app hosts
 - Simplified invocation model
 
+### Important consideration
+The .NET SDK currently invokes MSBuild in two modes:
+
+| Mode | Current Behavior | After App Host |
+|------|------------------|----------------|
+| **In-proc** | SDK loads `MSBuild.dll` directly | No change |
+| **Out-of-proc** | SDK launches `dotnet exec MSBuild.dll` | No change in v1 |
+
+The AppHost introduction does not break SDK integration since we are not modifying the in-proc flow. The SDK will continue to load `MSBuild.dll` directly for in-proc scenarios right away.
+The transition to in-proc task-host will be handled later in coordination with SDK team.
+
 ### Critical: COM Manifest for Out-of-Proc Host Objects
 
 A key driver for this work is enabling **registration-free COM** for out-of-proc task host objects. Currently, when running via `dotnet.exe`, we cannot embed the required manifest declarations - and even if we could, it would be the wrong level of abstraction for `dotnet.exe` to contain MSBuild-specific COM interface definitions.
