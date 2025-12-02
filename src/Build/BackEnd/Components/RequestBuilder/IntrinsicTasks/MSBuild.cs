@@ -374,8 +374,7 @@ namespace Microsoft.Build.BackEnd
                                                 _targetOutputs,
                                                 UnloadProjectsOnCompletion,
                                                 ToolsVersion,
-                                                SkipNonexistentTargets,
-                                                TaskEnvironment);
+                                                SkipNonexistentTargets);
 
                         if (!executeResult)
                         {
@@ -446,8 +445,7 @@ namespace Microsoft.Build.BackEnd
                 _targetOutputs,
                 UnloadProjectsOnCompletion,
                 ToolsVersion,
-                SkipNonexistentTargets,
-                TaskEnvironment);
+                SkipNonexistentTargets);
 
             if (!executeResult)
             {
@@ -539,8 +537,7 @@ namespace Microsoft.Build.BackEnd
             List<ITaskItem> targetOutputs,
             bool unloadProjectsOnCompletion,
             string toolsVersion,
-            bool skipNonexistentTargets,
-            TaskEnvironment taskEnvironment)
+            bool skipNonexistentTargets)
         {
             bool success = true;
 
@@ -571,7 +568,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (!PropertyParser.GetTableWithEscaping(
                                 log,
-                                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projects[i].ItemSpec),
+                                ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]),
                                 ItemMetadataNames.PropertiesMetadataName,
                                 projects[i].GetMetadata(ItemMetadataNames.PropertiesMetadataName).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries),
                                 out Dictionary<string, string> preProjectPropertiesTable))
