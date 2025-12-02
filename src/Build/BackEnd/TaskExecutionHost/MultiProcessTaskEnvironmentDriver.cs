@@ -34,7 +34,7 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public AbsolutePath ProjectDirectory
         {
-            get => new AbsolutePath(Directory.GetCurrentDirectory(), ignoreRootedCheck: true);
+            get => new AbsolutePath(NativeMethodsShared.GetCurrentDirectory(), ignoreRootedCheck: true);
             set => NativeMethodsShared.SetCurrentDirectory(value.Value);
         }
 
