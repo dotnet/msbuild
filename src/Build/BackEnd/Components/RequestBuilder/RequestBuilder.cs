@@ -905,8 +905,8 @@ namespace Microsoft.Build.BackEnd
 
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
-                entryToComplete.RequestConfiguration.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
-                entryToComplete.RequestConfiguration.SavedEnvironmentVariables = CommunicationsUtilities.GetEnvironmentVariables();
+                entryToComplete.RequestConfiguration.SavedCurrentDirectory = entryToComplete.TaskEnvironment.ProjectDirectory.Value;
+                entryToComplete.RequestConfiguration.SavedEnvironmentVariables = entryToComplete.TaskEnvironment.GetEnvironmentVariables().ToFrozenDictionary(CommunicationsUtilities.EnvironmentVariableComparer);
             }
 
             entryToComplete.Complete(result);
@@ -1074,11 +1074,8 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// This method is called to reset the current directory to the one appropriate for this project.  It should be called any time
-        /// the project is resumed.
-        /// If the directory does not exist, does nothing.
-        /// This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project.
-        /// No errors are masked by doing this: errors loading the project from disk are reported at load time, if necessary.
+        /// Sets the project directory on the request's <see cref="TaskEnvironment"/>.
+        /// Called when the project is resumed to ensure tasks see the correct working directory.
         /// </summary>
         private void SetProjectDirectory()
         {
@@ -1347,7 +1344,8 @@ namespace Microsoft.Build.BackEnd
             => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Saves the current operating environment.
+        /// Saves the current operating environment (working directory and environment variables)
+        /// from the request's <see cref="TaskEnvironment"/> to the configuration for later restoration.
         /// </summary>
         private void SaveOperatingEnvironment()
         {
@@ -1384,7 +1382,8 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Sets the operationg environment to the initial build environment.
+        /// Sets the operating environment to the initial build environment via the request's <see cref="TaskEnvironment"/>.
+        /// Uses saved environment if available, otherwise the original build process environment.
         /// </summary>
         private void InitializeOperatingEnvironment()
         {
@@ -1401,7 +1400,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Restores a previously saved operating environment.
+        /// Restores a previously saved operating environment to the request's <see cref="TaskEnvironment"/>.
         /// </summary>
         private void RestoreOperatingEnvironment()
         {
