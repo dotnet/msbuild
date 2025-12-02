@@ -20,7 +20,7 @@ namespace Microsoft.Build.BackEnd
     /// </remarks>
     [RunInMTA]
     [MSBuildMultiThreadableTask]
-    internal class CallTarget : ITask, IMultiThreadableTask
+    internal class CallTarget : ITask
     {
         /// <summary>
         /// The task logging helper
@@ -57,11 +57,6 @@ namespace Microsoft.Build.BackEnd
         /// Deprecated. Does nothing.
         /// </summary>
         public bool UseResultsCache { get; set; } = false;
-
-        /// <summary>
-        /// Task environment for isolated execution.
-        /// </summary>
-        public TaskEnvironment TaskEnvironment { get; set; }
 
         #endregion
 
@@ -119,8 +114,7 @@ namespace Microsoft.Build.BackEnd
                 targetOutputs: _targetOutputs,
                 unloadProjectsOnCompletion: false,
                 toolsVersion: null,
-                skipNonexistentTargets: false,
-                taskEnvironment: TaskEnvironment);
+                skipNonexistentTargets: false);
         }
 
         #endregion
