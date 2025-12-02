@@ -129,6 +129,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="taskName">The name of the task.</param>
         /// <param name="taskLocation">The location of the assembly from which the task is to be loaded.</param>
         /// <param name="targetName">The name of the target that is requesting the task execution.</param>
+        /// <param name="projectFile">The project path that invokes the task.</param>
         /// <param name="isTaskInputLoggingEnabled">A flag to indicate whether task inputs are logged.</param>
         /// <param name="taskParameters">The parameters to apply to the task.</param>
         /// <param name="globalParameters">The global properties for the current project.</param>
@@ -152,6 +153,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="taskName">The name of the task.</param>
         /// <param name="taskLocation">The location of the assembly from which the task is to be loaded.</param>
         /// <param name="targetName">The name of the target that is requesting the task execution.</param>
+        /// <param name="projectFile">The project path that invokes the task.</param>
         /// <param name="isTaskInputLoggingEnabled">A flag to indicate whether task inputs are logged.</param>
         /// <param name="taskParameters">The parameters to apply to the task.</param>
         /// <param name="globalParameters">The global properties for the current project.</param>
