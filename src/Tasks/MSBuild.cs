@@ -20,7 +20,7 @@ namespace Microsoft.Build.Tasks
     /// </remarks>
     [RunInMTA]
     [MSBuildMultiThreadableTask]
-    public class MSBuild : TaskExtension, IMultiThreadableTask
+    public class MSBuild : TaskExtension
     {
         /// <summary>
         /// Enum describing the behavior when a project doesn't exist on disk.
@@ -188,11 +188,6 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] TargetAndPropertyListSeparators { get; set; }
 
-        /// <summary>
-        /// Task environment for isolated execution.
-        /// </summary>
-        public TaskEnvironment TaskEnvironment { get; set; }
-
         #endregion
 
         #region ITask Members
@@ -340,8 +335,7 @@ namespace Microsoft.Build.Tasks
                                 Log,
                                 _targetOutputs,
                                 UnloadProjectsOnCompletion,
-                                ToolsVersion,
-                                TaskEnvironment))
+                                ToolsVersion))
                         {
                             success = false;
                         }
@@ -405,8 +399,7 @@ namespace Microsoft.Build.Tasks
                                 Log,
                                 _targetOutputs,
                                 UnloadProjectsOnCompletion,
-                                ToolsVersion,
-                                TaskEnvironment))
+                                ToolsVersion))
                 {
                     success = false;
                 }
@@ -496,8 +489,7 @@ namespace Microsoft.Build.Tasks
             TaskLoggingHelper log,
             List<ITaskItem> targetOutputs,
             bool unloadProjectsOnCompletion,
-            string toolsVersion,
-            TaskEnvironment taskEnvironment)
+            string toolsVersion)
         {
             bool success = true;
 
@@ -527,7 +519,7 @@ namespace Microsoft.Build.Tasks
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("Properties")))
                     {
                         if (!PropertyParser.GetTableWithEscaping(
-                             log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projects[i].ItemSpec), "Properties", projects[i].GetMetadata("Properties").Split(MSBuildConstants.SemicolonChar),
+                             log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projects[i]), "Properties", projects[i].GetMetadata("Properties").Split(MSBuildConstants.SemicolonChar),
                               out Dictionary<string, string> preProjectPropertiesTable))
                         {
                             return false;
