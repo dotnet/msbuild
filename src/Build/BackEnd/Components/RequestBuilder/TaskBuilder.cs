@@ -156,11 +156,7 @@ namespace Microsoft.Build.BackEnd
 
             _buildRequestEntry = requestEntry;
 
-            // Set TaskEnvironment from the request entry for IMultiThreadableTask instances
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
-            {
-                _taskExecutionHost.TaskEnvironment = requestEntry.TaskEnvironment;
-            }
+            _taskExecutionHost.TaskEnvironment = requestEntry.TaskEnvironment;
 
             _targetBuilderCallback = targetBuilderCallback;
             _cancellationToken = cancellationToken;
@@ -435,14 +431,7 @@ namespace Microsoft.Build.BackEnd
                     // If that directory does not exist, do nothing. (Do not check first as it is almost always there and it is slow)
                     // This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project.
                     // No errors are masked by doing this: errors loading the project from disk are reported at load time, if necessary.
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
-                    {
-                        _buildRequestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_buildRequestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
-                    }
-                    else
-                    {
-                        NativeMethodsShared.SetCurrentDirectory(_buildRequestEntry.ProjectRootDirectory);
-                    }
+                    _buildRequestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_buildRequestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
                 }
 
                 if (howToExecuteTask == TaskExecutionMode.ExecuteTaskAndGatherOutputs)

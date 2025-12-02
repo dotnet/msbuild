@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -1084,14 +1083,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
-                {
-                    _requestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_requestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
-                }
-                else
-                {
-                    NativeMethodsShared.SetCurrentDirectory(_requestEntry.ProjectRootDirectory);
-                }
+                _requestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_requestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
             }
         }
 
@@ -1139,19 +1131,9 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (project.SdkResolvedEnvironmentVariablePropertiesDictionary is PropertyDictionary<ProjectPropertyInstance> environmentProperties)
                     {
-                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
+                        foreach (ProjectPropertyInstance environmentProperty in environmentProperties)
                         {
-                            foreach (ProjectPropertyInstance environmentProperty in environmentProperties)
-                            {
-                                _requestEntry.TaskEnvironment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue);
-                            }
-                        }
-                        else
-                        {
-                            foreach (ProjectPropertyInstance environmentProperty in environmentProperties)
-                            {
-                                Environment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue, EnvironmentVariableTarget.Process);
-                            }
+                            _requestEntry.TaskEnvironment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue);
                         }
                     }
 
@@ -1370,16 +1352,8 @@ namespace Microsoft.Build.BackEnd
         {
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
-                {
-                    _requestEntry.RequestConfiguration.SavedCurrentDirectory = _requestEntry.TaskEnvironment.ProjectDirectory.Value;
-                    _requestEntry.RequestConfiguration.SavedEnvironmentVariables = _requestEntry.TaskEnvironment.GetEnvironmentVariables();
-                }
-                else
-                {
-                    _requestEntry.RequestConfiguration.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
-                    _requestEntry.RequestConfiguration.SavedEnvironmentVariables = CommunicationsUtilities.GetEnvironmentVariables();
-                }
+                _requestEntry.RequestConfiguration.SavedCurrentDirectory = _requestEntry.TaskEnvironment.ProjectDirectory.Value;
+                _requestEntry.RequestConfiguration.SavedEnvironmentVariables = _requestEntry.TaskEnvironment.GetEnvironmentVariables();
             }
         }
 
@@ -1437,15 +1411,7 @@ namespace Microsoft.Build.BackEnd
 
                 // Restore the saved environment variables.
                 SetEnvironmentVariableBlock(_requestEntry.RequestConfiguration.SavedEnvironmentVariables);
-                
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
-                {
-                    _requestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_requestEntry.RequestConfiguration.SavedCurrentDirectory, ignoreRootedCheck: true);
-                }
-                else
-                {
-                    NativeMethodsShared.SetCurrentDirectory(_requestEntry.RequestConfiguration.SavedCurrentDirectory);
-                }
+                _requestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_requestEntry.RequestConfiguration.SavedCurrentDirectory, ignoreRootedCheck: true);
             }
         }
 
@@ -1454,50 +1420,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void SetEnvironmentVariableBlock(IReadOnlyDictionary<string, string> savedEnvironment)
         {
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
-            {
-                // Use bulk update for TaskEnvironment - more efficient and correct
-                _requestEntry.TaskEnvironment.SetEnvironment(savedEnvironment);
-            }
-            else
-            {
-                FrozenDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
-                ClearVariablesNotInEnvironment(savedEnvironment, currentEnvironment);
-                UpdateEnvironmentVariables(savedEnvironment, currentEnvironment);
-            }
-        }
-
-        /// <summary>
-        /// Clears from the current environment any variables which do not exist in the saved environment.
-        /// Note: Only used when Wave18_3 is NOT enabled; when enabled, SetEnvironmentVariableBlock uses bulk SetEnvironment.
-        /// </summary>
-        private void ClearVariablesNotInEnvironment(IReadOnlyDictionary<string, string> savedEnvironment, IReadOnlyDictionary<string, string> currentEnvironment)
-        {
-            foreach (KeyValuePair<string, string> entry in currentEnvironment)
-            {
-                if (!savedEnvironment.ContainsKey(entry.Key))
-                {
-                    Environment.SetEnvironmentVariable(entry.Key, null);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Updates the current environment with values in the saved environment which differ or are not yet set.
-        /// Note: Only used when Wave18_3 is NOT enabled; when enabled, SetEnvironmentVariableBlock uses bulk SetEnvironment.
-        /// </summary>
-        private void UpdateEnvironmentVariables(IReadOnlyDictionary<string, string> savedEnvironment, IReadOnlyDictionary<string, string> currentEnvironment)
-        {
-            foreach (KeyValuePair<string, string> entry in savedEnvironment)
-            {
-                // If the environment doesn't have the variable set, or if its value differs from what we have saved, set it
-                // to the saved value.  Doing the comparison before setting is faster than unconditionally setting it using
-                // the API.
-                if (!currentEnvironment.TryGetValue(entry.Key, out string value) || !String.Equals(entry.Value, value, StringComparison.Ordinal))
-                {
-                    Environment.SetEnvironmentVariable(entry.Key, entry.Value);
-                }
-            }
+            // TaskEnvironment.SetEnvironment delegates to the appropriate driver:
+            // - MultiThreadedTaskEnvironmentDriver: updates virtualized environment dictionary
+            // - MultiProcessTaskEnvironmentDriver: calls CommunicationsUtilities.SetEnvironment (same as legacy behavior)
+            _requestEntry.TaskEnvironment.SetEnvironment(savedEnvironment);
         }
 
         /// <summary>
