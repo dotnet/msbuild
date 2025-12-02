@@ -51,7 +51,7 @@ namespace Microsoft.Build.Framework
         /// Removes variables not present in the new environment and updates or adds those that are.
         /// </summary>
         /// <param name="newEnvironment">The new environment variable collection.</param>
-        void SetEnvironment(IReadOnlyDictionary<string, string> newEnvironment);
+        void SetEnvironment(IDictionary<string, string> newEnvironment);
 
         /// <summary>
         /// Gets a ProcessStartInfo configured with the current environment and working directory.

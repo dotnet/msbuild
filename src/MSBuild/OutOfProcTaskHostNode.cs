@@ -92,11 +92,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// The saved environment for the process.
         /// </summary>
-#if CLR2COMPATIBILITY
         private IDictionary<string, string> _savedEnvironment;
-#else
-        private IReadOnlyDictionary<string, string> _savedEnvironment;
-#endif
 
         /// <summary>
         /// The event which is set when we should shut down.
@@ -656,7 +652,7 @@ namespace Microsoft.Build.CommandLine
             shutdownException = null;
 
             // Snapshot the current environment
-            _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+            _savedEnvironment = (IDictionary<string, string>)CommunicationsUtilities.GetEnvironmentVariables();
 
             _nodeReuse = nodeReuse;
             _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(nodeReuse);
@@ -1095,11 +1091,7 @@ namespace Microsoft.Build.CommandLine
                 updatedEnvironment = environment;
             }
 
-#if CLR2COMPATIBILITY
             CommunicationsUtilities.SetEnvironment(updatedEnvironment);
-#else
-            CommunicationsUtilities.SetEnvironment((IReadOnlyDictionary<string, string>)updatedEnvironment);
-#endif
         }
 
         /// <summary>

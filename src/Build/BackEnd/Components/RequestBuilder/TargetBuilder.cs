@@ -174,7 +174,6 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
-
                 // If there are still targets left on the stack, they need to be removed from the 'active targets' list
                 foreach (TargetEntry target in _targetsToBuild)
                 {

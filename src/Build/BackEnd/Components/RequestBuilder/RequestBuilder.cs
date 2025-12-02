@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -1353,7 +1354,7 @@ namespace Microsoft.Build.BackEnd
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
                 _requestEntry.RequestConfiguration.SavedCurrentDirectory = _requestEntry.TaskEnvironment.ProjectDirectory.Value;
-                _requestEntry.RequestConfiguration.SavedEnvironmentVariables = _requestEntry.TaskEnvironment.GetEnvironmentVariables();
+                _requestEntry.RequestConfiguration.SavedEnvironmentVariables = _requestEntry.TaskEnvironment.GetEnvironmentVariables().ToFrozenDictionary(CommunicationsUtilities.EnvironmentVariableComparer);
             }
         }
 
@@ -1418,7 +1419,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Sets the environment block to the set of saved variables.
         /// </summary>
-        private void SetEnvironmentVariableBlock(IReadOnlyDictionary<string, string> savedEnvironment)
+        private void SetEnvironmentVariableBlock(IDictionary<string, string> savedEnvironment)
         {
             // TaskEnvironment.SetEnvironment delegates to the appropriate driver:
             // - MultiThreadedTaskEnvironmentDriver: updates virtualized environment dictionary

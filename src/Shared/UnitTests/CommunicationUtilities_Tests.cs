@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests
             CommunicationsUtilities.SetEnvironmentVariable(testName1, testValue);
             try
             {
-                IReadOnlyDictionary<string, string> envVars = CommunicationsUtilities.GetEnvironmentVariables();
+                IDictionary<string, string> envVars = CommunicationsUtilities.GetEnvironmentVariables();
 
                 CommunicationsUtilities.SetEnvironmentVariable(testName1, null);
                 CommunicationsUtilities.SetEnvironmentVariable(testName2, testValue);

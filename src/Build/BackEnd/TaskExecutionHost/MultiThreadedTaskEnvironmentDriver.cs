@@ -93,7 +93,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <inheritdoc/>
-        public void SetEnvironment(IReadOnlyDictionary<string, string> newEnvironment)
+        public void SetEnvironment(IDictionary<string, string> newEnvironment)
         {
             // Simply replace the entire environment dictionary
             _environmentVariables.Clear();

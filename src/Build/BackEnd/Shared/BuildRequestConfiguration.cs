@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -132,7 +133,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
-        private IReadOnlyDictionary<string, string> _savedEnvironmentVariables;
+        private FrozenDictionary<string, string> _savedEnvironmentVariables;
 
         /// <summary>
         /// Holds a snapshot of the current working directory at the time we blocked.
@@ -617,7 +618,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
-        public IReadOnlyDictionary<string, string> SavedEnvironmentVariables
+        public FrozenDictionary<string, string> SavedEnvironmentVariables
         {
             get => _savedEnvironmentVariables;
 

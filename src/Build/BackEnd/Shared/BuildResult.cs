@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -108,7 +109,7 @@ namespace Microsoft.Build.Execution
         /// Snapshot of the environment from the configuration this results comes from.
         /// This should only be populated when the configuration for this result is moved between nodes.
         /// </summary>
-        private IReadOnlyDictionary<string, string>? _savedEnvironmentVariables;
+        private FrozenDictionary<string, string>? _savedEnvironmentVariables;
 
         /// <summary>
         /// When this key is in the dictionary <see cref="_savedEnvironmentVariables"/>, serialize the build result version.
@@ -438,7 +439,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
-        IReadOnlyDictionary<string, string>? IBuildResults.SavedEnvironmentVariables
+        FrozenDictionary<string, string>? IBuildResults.SavedEnvironmentVariables
         {
             get => _savedEnvironmentVariables;
 
@@ -674,7 +675,7 @@ namespace Microsoft.Build.Execution
                 {
                     // Read the dictionary using the workaround overload of TranslateDictionary: special keys (additionalEntriesKeys) would be read to additionalEntries instead of the _savedEnvironmentVariables dictionary.
                     translator.TranslateDictionary(ref savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer, ref additionalEntries, s_additionalEntriesKeys);
-                    _savedEnvironmentVariables = (IReadOnlyDictionary<string, string>)savedEnvironmentVariables;
+                    _savedEnvironmentVariables = savedEnvironmentVariables?.ToFrozenDictionary(CommunicationsUtilities.EnvironmentVariableComparer);
 
                     // If the special key SpecialKeyForVersion present in additionalEntries, also read a version, otherwise set it to 0.
                     if (additionalEntries is not null && additionalEntries.ContainsKey(SpecialKeyForVersion))

@@ -64,7 +64,7 @@ namespace Microsoft.Build.Framework
         /// This mirrors the behavior of CommunicationsUtilities.SetEnvironment but operates on this TaskEnvironment.
         /// </summary>
         /// <param name="newEnvironment">The new environment variables to set.</param>
-        internal void SetEnvironment(IReadOnlyDictionary<string, string> newEnvironment) => _driver.SetEnvironment(newEnvironment);
+        internal void SetEnvironment(IDictionary<string, string> newEnvironment) => _driver.SetEnvironment(newEnvironment);
 
         /// <summary>
         /// Creates a new ProcessStartInfo configured for the current task execution environment.
