@@ -155,6 +155,11 @@ namespace Microsoft.Build.BackEnd
 #endif
 
         /// <summary>
+        /// The project file path that requests task execution.
+        /// </summary>
+        private string _projectFile;
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         public TaskHostTask(
@@ -164,6 +169,7 @@ namespace Microsoft.Build.BackEnd
             TaskHostParameters taskHostParameters,
             LoadedType taskType,
             bool useSidecarTaskHost,
+            string projectFile,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -186,6 +192,7 @@ namespace Microsoft.Build.BackEnd
 #if !NET35
             _hostServices = hostServices;
 #endif
+            _projectFile = projectFile;
             _taskHostParameters = taskHostParameters;
             _useSidecarTaskHost = useSidecarTaskHost;
 
@@ -336,6 +343,7 @@ namespace Microsoft.Build.BackEnd
                         _taskType.Type.FullName,
                         taskLocation,
                         _taskLoggingContext?.TargetLoggingContext?.Target?.Name,
+                        _projectFile,
                         _buildComponentHost.BuildParameters.LogTaskInputs,
                         _setParameters,
                         new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),

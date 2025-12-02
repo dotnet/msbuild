@@ -317,6 +317,7 @@ namespace Microsoft.Build.BackEnd
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
             in TaskHostParameters taskIdentityParameters,
+            string projectFile,
 #if !NET35
             HostServices hostServices,
 #endif
@@ -375,6 +376,7 @@ namespace Microsoft.Build.BackEnd
                     mergedParameters,
                     _loadedType,
                     useSidecarTaskHost: useSidecarTaskHost,
+                    projectFile,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif

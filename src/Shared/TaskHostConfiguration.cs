@@ -90,6 +90,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string _targetName;
 
+        /// <summary>
+        /// Project file path that is requesting the task execution.
+        /// </summary>
+        private string _projectFile;
+
 #if !NET35
         private HostServices _hostServices;
 #endif
@@ -173,6 +178,7 @@ namespace Microsoft.Build.BackEnd
             string taskName,
             string taskLocation,
             string targetName,
+            string projectFile,
             bool isTaskInputLoggingEnabled,
             IDictionary<string, object> taskParameters,
             Dictionary<string, string> globalParameters,
@@ -331,6 +337,15 @@ namespace Microsoft.Build.BackEnd
             { return _columnNumberOfTask; }
         }
 
+        /// <summary>
+        /// Project file path that is requesting the task execution.
+        /// </summary>
+        public string ProjectFile
+        {
+            [DebuggerStepThrough]
+            get
+            { return _projectFile; }
+        }
 
         /// <summary>
         /// Target name that is requesting the task execution.
@@ -492,6 +507,10 @@ namespace Microsoft.Build.BackEnd
             if (translator.NegotiatedPacketVersion >= 2)
             {
                 translator.Translate(ref _targetName);
+                translator.Translate(ref _projectFile);
+#if !NET35    
+                translator.Translate(ref _hostServices);
+#endif
             }
 
             translator.Translate(ref _isTaskInputLoggingEnabled);
@@ -518,12 +537,6 @@ namespace Microsoft.Build.BackEnd
                                  collectionFactory: count => new HashSet<string>(StringComparer.OrdinalIgnoreCase));
 #else
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
-#endif
-#if !NET35
-            if (translator.NegotiatedPacketVersion >= 2)
-            {
-                translator.Translate(ref _hostServices);
-            }
 #endif
         }
 

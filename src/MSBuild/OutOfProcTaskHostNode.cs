@@ -959,6 +959,7 @@ namespace Microsoft.Build.CommandLine
                     taskConfiguration.LineNumberOfTask,
                     taskConfiguration.ColumnNumberOfTask,
                     taskConfiguration.TargetName,
+                    taskConfiguration.ProjectFile,
 #if FEATURE_APPDOMAIN
                     taskConfiguration.AppDomainSetup,
 #endif

@@ -106,6 +106,7 @@ namespace Microsoft.Build.CommandLine
                 int taskLine,
                 int taskColumn,
                 string targetName,
+                string projectFile,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
 #endif
@@ -162,6 +163,7 @@ namespace Microsoft.Build.CommandLine
                     taskLine,
                     taskColumn,
                     targetName,
+                    projectFile,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif
@@ -185,6 +187,7 @@ namespace Microsoft.Build.CommandLine
                     taskLine,
                     taskColumn,
                     targetName,
+                    projectFile,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif
@@ -229,6 +232,7 @@ namespace Microsoft.Build.CommandLine
                 int taskLine,
                 int taskColumn,
                 string targetName,
+                string projectFile,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
 #endif
@@ -253,6 +257,7 @@ namespace Microsoft.Build.CommandLine
                                                 taskLine,
                                                 taskColumn,
                                                 targetName,
+                                                projectFile,
 #if FEATURE_APPDOMAIN
                                                 appDomainSetup,
 #endif
@@ -310,6 +315,7 @@ namespace Microsoft.Build.CommandLine
                 int taskLine,
                 int taskColumn,
                 string targetName,
+                string projectFile,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
 #endif
@@ -345,7 +351,7 @@ namespace Microsoft.Build.CommandLine
 #if !NET35
                 if (_hostServices != null)
                 {
-                    wrappedTask.HostObject = _hostServices.GetHostObject(taskFile, targetName, taskName);
+                    wrappedTask.HostObject = _hostServices.GetHostObject(projectFile, targetName, taskName);
                 }
 #endif
 

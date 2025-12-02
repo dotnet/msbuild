@@ -104,7 +104,7 @@ namespace Microsoft.Build.BackEnd
         private TargetLoggingContext _targetLoggingContext;
 
         /// <summary>
-        /// Full path to the project, for errors
+        /// Full path to the project.
         /// </summary>
         private string _projectFullPath;
 
@@ -327,6 +327,7 @@ namespace Microsoft.Build.BackEnd
                         _taskNode.Location,
                         _taskHostObject,
                         _continueOnError != ContinueOnError.ErrorAndStop,
+                        _projectFullPath,
 #if FEATURE_APPDOMAIN
                         taskHost.AppDomainSetup,
 #endif

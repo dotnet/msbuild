@@ -992,6 +992,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     ElementLocation.Create("none", 1, 1),
                     this,
                     false,
+                    projectFile: string.Empty,
 #if FEATURE_APPDOMAIN
                     null,
 #endif
@@ -1023,6 +1024,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ElementLocation.Create("none", 1, 1),
                 this,
                 false,
+                projectFile: string.Empty,
 #if FEATURE_APPDOMAIN
                 null,
 #endif
@@ -1269,6 +1271,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ElementLocation.Create("none", 1, 1),
                 this,
                 false,
+                projectFile: string.Empty,
 #if FEATURE_APPDOMAIN
                 null,
 #endif

@@ -109,6 +109,11 @@ namespace Microsoft.Build.BackEnd
         private string _taskName;
 
         /// <summary>
+        /// The project file path that runs the task.
+        /// </summary>
+        private string _projectFile;
+
+        /// <summary>
         /// The XML location of the task element.
         /// </summary>
         private ElementLocation _taskLocation;
@@ -259,18 +264,21 @@ namespace Microsoft.Build.BackEnd
             ElementLocation taskLocation,
             ITaskHost taskHost,
             bool continueOnError,
+            string projectFile,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
 #if !NET35
             HostServices hostServices,
 #endif
-            bool isOutOfProc, CancellationToken cancellationToken)
+            bool isOutOfProc,
+            CancellationToken cancellationToken)
         {
             _buildEngine = buildEngine;
             _projectInstance = projectInstance;
             _targetLoggingContext = loggingContext;
             _taskName = taskName;
+            _projectFile = projectFile;
             _taskLocation = taskLocation;
             _cancellationTokenRegistration = cancellationToken.Register(Cancel);
             _taskHost = taskHost;
@@ -980,6 +988,7 @@ namespace Microsoft.Build.BackEnd
                         _taskLoggingContext,
                         _buildComponentHost,
                         taskIdentityParameters,
+                        _projectFile,
 #if !NET35
                         _hostServices,
 #endif
@@ -1825,6 +1834,7 @@ namespace Microsoft.Build.BackEnd
                 taskHostParameters,
                 taskLoadedType,
                 useSidecarTaskHost: true,
+                _projectFile,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup,
 #endif
