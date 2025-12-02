@@ -19,7 +19,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Creates a stub TaskEnvironment for testing purposes.
         /// </summary>
-        private static TaskEnvironment CreateStubTaskEnvironment() => new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+        private static TaskEnvironment CreateStubTaskEnvironment() => TaskEnvironmentHelper.CreateForTest();
 
         [Fact]
         public void TestConstructorGood()

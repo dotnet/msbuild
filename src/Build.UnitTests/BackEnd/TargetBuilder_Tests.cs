@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Creates a stub TaskEnvironment for testing that uses the current process environment.
         /// </summary>
-        private static TaskEnvironment CreateStubTaskEnvironment() => new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+        private static TaskEnvironment CreateStubTaskEnvironment() => TaskEnvironmentHelper.CreateForTest();
 
 #pragma warning disable xUnit1013
 

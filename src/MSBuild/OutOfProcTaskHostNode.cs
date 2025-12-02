@@ -652,7 +652,7 @@ namespace Microsoft.Build.CommandLine
             shutdownException = null;
 
             // Snapshot the current environment
-            _savedEnvironment = (IDictionary<string, string>)CommunicationsUtilities.GetEnvironmentVariables();
+            _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
             _nodeReuse = nodeReuse;
             _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(nodeReuse);
