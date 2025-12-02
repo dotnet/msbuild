@@ -1367,6 +1367,7 @@ namespace Microsoft.Build.UnitTests
             // ensure we clean up, but only if we made a new project collection
             using var _ = disposable;
             using ProjectFromString projectFromString = new(content, globalProperties, null, projectCollection);
+            projectFromString.Project.FullPath = "test.proj";
             Project project = projectFromString.Project;
             logger ??= new MockLogger
             {

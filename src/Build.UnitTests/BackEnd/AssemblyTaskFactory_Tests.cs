@@ -244,7 +244,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     new MockHost(),
                     TaskHostParameters.Empty,
-                    projectFile: string.Empty,
+                    projectFile: "proj.proj",
 #if !NET35
                     hostServices: null,
 #endif
@@ -283,7 +283,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     new MockHost(),
                     taskParameters,
-                    projectFile: string.Empty,
+                    projectFile: "proj.proj",
 #if !NET35
                     hostServices: null,
 #endif
@@ -322,7 +322,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     new MockHost(),
                     taskParameters,
-                    projectFile: string.Empty,
+                    projectFile: "proj.proj",
 #if !NET35
                     hostServices: null,
 #endif
@@ -363,7 +363,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     new MockHost(),
                     TaskHostParameters.Empty,
-                    projectFile: string.Empty,
+                    projectFile: "proj.proj",
 #if !NET35
                     hostServices: null,
 #endif
@@ -404,7 +404,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     new MockHost(),
                     TaskHostParameters.Empty,
-                    projectFile: string.Empty,
+                    projectFile: "proj.proj",
 #if !NET35
                     hostServices: null,
 #endif
@@ -447,7 +447,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     new MockHost(),
                     taskParameters,
-                    projectFile: string.Empty,
+                    projectFile: "proj.proj",
 #if !NET35
                     hostServices: null,
 #endif
@@ -488,7 +488,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     new MockHost(),
                     TaskHostParameters.Empty,
-                    projectFile: string.Empty,
+                    projectFile: "proj.proj",
 #if !NET35
                     hostServices: null,
 #endif
@@ -527,7 +527,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     new MockHost(),
                     taskParameters,
-                    projectFile: string.Empty,
+                    projectFile: "proj.proj",
 #if !NET35
                     hostServices: null,
 #endif
@@ -570,7 +570,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     new MockHost(),
                     taskParameters,
-                    projectFile: string.Empty,
+                    projectFile: "proj.proj",
 #if !NET35
                     hostServices: null,
 #endif
@@ -609,7 +609,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     new MockHost(),
                     TaskHostParameters.Empty,
-                    projectFile: string.Empty,
+                    projectFile: "proj.proj",
 #if !NET35
                     hostServices: null,
 #endif
@@ -650,7 +650,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     new MockHost(),
                     TaskHostParameters.Empty,
-                    projectFile: string.Empty,
+                    projectFile: "proj.proj",
 #if !NET35
                     hostServices: null,
 #endif
@@ -691,7 +691,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     new MockHost(),
                     taskParameters,
-                    projectFile: string.Empty,
+                    projectFile: "proj.proj",
 #if !NET35
                     hostServices: null,
 #endif
@@ -733,7 +733,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     new MockHost(),
                     TaskHostParameters.Empty,
-                    projectFile: string.Empty,
+                    projectFile: "proj.proj",
 #if !NET35
                     hostServices: null,
 #endif
@@ -764,7 +764,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
                     new MockHost(),
                     taskParameters,
-                    projectFile: string.Empty,
+                    projectFile: "proj.proj",
 #if !NET35
                     hostServices: null,
 #endif
