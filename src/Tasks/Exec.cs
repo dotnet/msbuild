@@ -214,12 +214,15 @@ namespace Microsoft.Build.Tasks
                 return "\"\"";
             }
 
+            // Characters that require quoting in Windows cmd.exe
+            // Based on cmd.exe special characters
+            char[] specialChars = { ' ', '\t', '"', '&', '|', '<', '>', '^', '%', '(', ')', '!', '=', ';', ',' };
+
             // Check if the argument contains special characters that need quoting
             bool needsQuoting = false;
             foreach (char c in argument)
             {
-                if (c == ' ' || c == '\t' || c == '"' || c == '&' || c == '|' || c == '<' || c == '>' || 
-                    c == '^' || c == '%' || c == '(' || c == ')' || c == '!' || c == '=' || c == ';' || c == ',')
+                if (Array.IndexOf(specialChars, c) >= 0)
                 {
                     needsQuoting = true;
                     break;
@@ -388,8 +391,15 @@ namespace Microsoft.Build.Tasks
                 else if (CommandArguments != null && CommandArguments.Length > 0)
                 {
                     // If no Command but we have CommandArguments, treat the first argument as the command
-                    // and the rest as arguments
-                    sw.Write(CommandArguments[0]);
+                    // and the rest as arguments. Escape the command if it contains special characters.
+                    if (NativeMethodsShared.IsUnixLike)
+                    {
+                        sw.Write(EscapeArgumentForUnix(CommandArguments[0]));
+                    }
+                    else
+                    {
+                        sw.Write(EscapeArgumentForWindows(CommandArguments[0]));
+                    }
 
                     for (int i = 1; i < CommandArguments.Length; i++)
                     {
