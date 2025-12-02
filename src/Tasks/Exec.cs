@@ -58,6 +58,7 @@ namespace Microsoft.Build.Tasks
         private Encoding _standardErrorEncoding;
         private Encoding _standardOutputEncoding;
         private string _command;
+        private string[] _commandArguments;
 
         // '^' before _any_ character escapes that character, don't escape it.
         private static readonly char[] _charactersToEscape = { '(', ')', '=', ';', '!', ',', '&', ' ' };
@@ -66,7 +67,6 @@ namespace Microsoft.Build.Tasks
 
         #region Properties
 
-        [Required]
         public string Command
         {
             get => _command;
@@ -81,6 +81,16 @@ namespace Microsoft.Build.Tasks
         }
 
         public string WorkingDirectory { get; set; }
+
+        /// <summary>
+        /// Array of command-line arguments to append to the Command.
+        /// Each argument will be properly escaped for the target shell.
+        /// </summary>
+        public string[] CommandArguments
+        {
+            get => _commandArguments;
+            set => _commandArguments = value;
+        }
 
         public bool IgnoreExitCode { get; set; }
 
@@ -193,12 +203,110 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region Methods
+
+        /// <summary>
+        /// Escapes an argument for Windows cmd.exe.
+        /// </summary>
+        private static string EscapeArgumentForWindows(string argument)
+        {
+            if (string.IsNullOrEmpty(argument))
+            {
+                return "\"\"";
+            }
+
+            // Check if the argument contains special characters that need quoting
+            bool needsQuoting = false;
+            foreach (char c in argument)
+            {
+                if (c == ' ' || c == '\t' || c == '"' || c == '&' || c == '|' || c == '<' || c == '>' || 
+                    c == '^' || c == '%' || c == '(' || c == ')' || c == '!' || c == '=' || c == ';' || c == ',')
+                {
+                    needsQuoting = true;
+                    break;
+                }
+            }
+
+            if (!needsQuoting)
+            {
+                return argument;
+            }
+
+            StringBuilder escaped = new StringBuilder();
+            escaped.Append('"');
+
+            for (int i = 0; i < argument.Length; i++)
+            {
+                char c = argument[i];
+
+                if (c == '"')
+                {
+                    // Escape double quotes by doubling them
+                    escaped.Append("\"\"");
+                }
+                else if (c == '%')
+                {
+                    // Escape percent signs
+                    escaped.Append("%%");
+                }
+                else
+                {
+                    escaped.Append(c);
+                }
+            }
+
+            escaped.Append('"');
+            return escaped.ToString();
+        }
+
+        /// <summary>
+        /// Escapes an argument for Unix sh.
+        /// </summary>
+        private static string EscapeArgumentForUnix(string argument)
+        {
+            if (string.IsNullOrEmpty(argument))
+            {
+                return "''";
+            }
+
+            // Use single quotes for Unix, which preserve everything literally except single quotes
+            // For single quotes within the string, we end the quoted string, add an escaped single quote, and start a new quoted string
+            if (argument.IndexOf('\'') == -1)
+            {
+                return "'" + argument + "'";
+            }
+
+            // If there are single quotes, we need to handle them specially
+            StringBuilder escaped = new StringBuilder();
+            escaped.Append('\'');
+
+            foreach (char c in argument)
+            {
+                if (c == '\'')
+                {
+                    // End current quote, add escaped quote, start new quote
+                    escaped.Append("'\\''");
+                }
+                else
+                {
+                    escaped.Append(c);
+                }
+            }
+
+            escaped.Append('\'');
+            return escaped.ToString();
+        }
+
         /// <summary>
         /// Write out a temporary batch file with the user-specified command in it.
         /// </summary>
         private void CreateTemporaryBatchFile()
         {
-            var encoding = EncodingUtilities.BatchFileEncoding(Command + WorkingDirectory, UseUtf8Encoding);
+            string contentForEncoding = Command + WorkingDirectory;
+            if (CommandArguments != null)
+            {
+                contentForEncoding += string.Join(" ", CommandArguments);
+            }
+            var encoding = EncodingUtilities.BatchFileEncoding(contentForEncoding, UseUtf8Encoding);
 
             // Temporary file with the extension .Exec.bat
             _batchFile = FileUtilities.GetTemporaryFileName(".exec.cmd");
@@ -255,7 +363,30 @@ namespace Microsoft.Build.Tasks
                     sw.WriteLine("#!/bin/sh");
                 }
 
-                sw.WriteLine(Command);
+                // Write the command if provided
+                if (!string.IsNullOrWhiteSpace(Command))
+                {
+                    sw.Write(Command);
+                }
+
+                // Append command arguments if provided
+                if (CommandArguments != null && CommandArguments.Length > 0)
+                {
+                    foreach (string arg in CommandArguments)
+                    {
+                        sw.Write(' ');
+                        if (NativeMethodsShared.IsUnixLike)
+                        {
+                            sw.Write(EscapeArgumentForUnix(arg));
+                        }
+                        else
+                        {
+                            sw.Write(EscapeArgumentForWindows(arg));
+                        }
+                    }
+                }
+
+                sw.WriteLine(); // End the command line
 
                 if (!NativeMethodsShared.IsUnixLike)
                 {
@@ -311,18 +442,24 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         protected override bool HandleTaskExecutionErrors()
         {
+            string fullCommand = Command ?? string.Empty;
+            if (CommandArguments != null && CommandArguments.Length > 0)
+            {
+                fullCommand += " " + string.Join(" ", CommandArguments);
+            }
+
             if (IgnoreExitCode)
             {
                 // Don't log when EchoOff and IgnoreExitCode.
                 if (!EchoOff)
                 {
-                    Log.LogMessageFromResources(MessageImportance.Normal, "Exec.CommandFailedNoErrorCode", Command, ExitCode);
+                    Log.LogMessageFromResources(MessageImportance.Normal, "Exec.CommandFailedNoErrorCode", fullCommand, ExitCode);
                 }
                 return true;
             }
 
             // Don't emit expanded form of Command when EchoOff is set.
-            string commandForLog = EchoOff ? "..." : Command;
+            string commandForLog = EchoOff ? "..." : fullCommand;
             if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
             {
                 Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", commandForLog, ExitCode);
@@ -357,7 +494,12 @@ namespace Microsoft.Build.Tasks
             // Dont print the command line if Echo is Off.
             if (!EchoOff)
             {
-                base.LogToolCommand(Command);
+                string commandToLog = Command ?? string.Empty;
+                if (CommandArguments != null && CommandArguments.Length > 0)
+                {
+                    commandToLog += " " + string.Join(" ", CommandArguments);
+                }
+                base.LogToolCommand(commandToLog);
             }
         }
 
@@ -447,8 +589,8 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            // Make sure that at least the Command property was set
-            if (Command.Trim().Length == 0)
+            // Make sure that at least the Command property was set, unless CommandArguments is provided
+            if (string.IsNullOrWhiteSpace(Command) && (CommandArguments == null || CommandArguments.Length == 0))
             {
                 Log.LogErrorWithCodeFromResources("Exec.MissingCommandError");
                 return false;
