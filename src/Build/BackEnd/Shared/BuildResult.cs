@@ -657,7 +657,7 @@ namespace Microsoft.Build.Execution
             }
             else
             {
-                IDictionary<string, string>? savedEnvironmentVariables = _savedEnvironmentVariables as IDictionary<string, string>;
+                IDictionary<string, string>? savedEnvironmentVariables = _savedEnvironmentVariables;
                 Dictionary<string, string> additionalEntries = new();
 
                 if (translator.Mode == TranslationDirection.WriteToStream)
