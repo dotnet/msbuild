@@ -19,7 +19,6 @@ namespace Microsoft.Build.Tasks
     /// RequestBuilder which spawned them.
     /// </remarks>
     [RunInMTA]
-    [MSBuildMultiThreadableTask]
     public class MSBuild : TaskExtension
     {
         /// <summary>
@@ -504,6 +503,7 @@ namespace Microsoft.Build.Tasks
 
             for (int i = 0; i < projectNames.Length; i++)
             {
+                projectNames[i] = null;
                 projectProperties[i] = propertiesTable;
 
                 if (projects[i] != null)
@@ -519,7 +519,7 @@ namespace Microsoft.Build.Tasks
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata("Properties")))
                     {
                         if (!PropertyParser.GetTableWithEscaping(
-                             log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projects[i]), "Properties", projects[i].GetMetadata("Properties").Split(MSBuildConstants.SemicolonChar),
+                             log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(MSBuildConstants.SemicolonChar),
                               out Dictionary<string, string> preProjectPropertiesTable))
                         {
                             return false;
