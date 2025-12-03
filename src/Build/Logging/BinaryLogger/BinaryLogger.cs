@@ -854,19 +854,27 @@ namespace Microsoft.Build.Logging
             public IReadOnlyList<string> AdditionalFilePaths { get; }
 
             /// <summary>
+            /// List of duplicate file paths that were filtered out.
+            /// </summary>
+            public IReadOnlyList<string> DuplicateFilePaths { get; }
+
+            /// <summary>
             /// Initializes a new instance of the <see cref="ProcessedBinaryLoggerParameters"/> struct.
             /// </summary>
             /// <param name="distinctParameterSets">List of distinct parameter sets that need separate logger instances.</param>
             /// <param name="allConfigurationsIdentical">Whether all parameter sets have identical configurations.</param>
             /// <param name="additionalFilePaths">Additional file paths to copy the binlog to.</param>
+            /// <param name="duplicateFilePaths">List of duplicate file paths that were filtered out.</param>
             public ProcessedBinaryLoggerParameters(
                 IReadOnlyList<string> distinctParameterSets,
                 bool allConfigurationsIdentical,
-                IReadOnlyList<string> additionalFilePaths)
+                IReadOnlyList<string> additionalFilePaths,
+                IReadOnlyList<string> duplicateFilePaths)
             {
                 DistinctParameterSets = distinctParameterSets;
                 AllConfigurationsIdentical = allConfigurationsIdentical;
                 AdditionalFilePaths = additionalFilePaths;
+                DuplicateFilePaths = duplicateFilePaths;
             }
         }
 
@@ -879,17 +887,18 @@ namespace Microsoft.Build.Logging
         {
             var distinctParameterSets = new List<string>();
             var additionalFilePaths = new List<string>();
+            var duplicateFilePaths = new List<string>();
             bool allConfigurationsIdentical = true;
 
             if (binaryLoggerParameters == null || binaryLoggerParameters.Length == 0)
             {
-                return new ProcessedBinaryLoggerParameters(distinctParameterSets, allConfigurationsIdentical, additionalFilePaths);
+                return new ProcessedBinaryLoggerParameters(distinctParameterSets, allConfigurationsIdentical, additionalFilePaths, duplicateFilePaths);
             }
 
             if (binaryLoggerParameters.Length == 1)
             {
                 distinctParameterSets.Add(binaryLoggerParameters[0]);
-                return new ProcessedBinaryLoggerParameters(distinctParameterSets, allConfigurationsIdentical, additionalFilePaths);
+                return new ProcessedBinaryLoggerParameters(distinctParameterSets, allConfigurationsIdentical, additionalFilePaths, duplicateFilePaths);
             }
 
             string primaryArguments = binaryLoggerParameters[0];
@@ -913,6 +922,11 @@ namespace Microsoft.Build.Logging
                     }
                     distinctParameterSets.Add(currentParams);
                 }
+                else
+                {
+                    // Track duplicate paths for logging
+                    duplicateFilePaths.Add(currentFilePath);
+                }
             }
 
             // If all configurations are identical, compute additional file paths for copying
@@ -924,7 +938,7 @@ namespace Microsoft.Build.Logging
                 }
             }
 
-            return new ProcessedBinaryLoggerParameters(distinctParameterSets, allConfigurationsIdentical, additionalFilePaths);
+            return new ProcessedBinaryLoggerParameters(distinctParameterSets, allConfigurationsIdentical, additionalFilePaths, duplicateFilePaths);
         }
     }
 }

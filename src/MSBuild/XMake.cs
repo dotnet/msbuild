@@ -4061,6 +4061,12 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
+            // Log a message if duplicate paths were filtered out
+            if (processedParams.DuplicateFilePaths.Count > 0)
+            {
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("DuplicateBinaryLoggerPathsIgnored", string.Join(", ", processedParams.DuplicateFilePaths)));
+            }
+
             if (processedParams.AllConfigurationsIdentical && processedParams.AdditionalFilePaths.Count > 0)
             {
                 // Optimized approach: single logger writing to one file, then copy to additional locations
