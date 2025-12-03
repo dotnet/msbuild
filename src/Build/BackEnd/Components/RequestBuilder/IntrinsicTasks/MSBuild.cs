@@ -552,6 +552,7 @@ namespace Microsoft.Build.BackEnd
 
             for (int i = 0; i < projectNames.Length; i++)
             {
+                projectNames[i] = null;
                 projectProperties[i] = propertiesTable;
 
                 if (projects[i] != null)

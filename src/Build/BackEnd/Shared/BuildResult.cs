@@ -675,8 +675,8 @@ namespace Microsoft.Build.Execution
                 {
                     // Read the dictionary using the workaround overload of TranslateDictionary: special keys (additionalEntriesKeys) would be read to additionalEntries instead of the _savedEnvironmentVariables dictionary.
                     translator.TranslateDictionary(ref savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer, ref additionalEntries, s_additionalEntriesKeys);
-                    // the .ToFrozenDictionary() call is a no-op since all code assign a FrozenDictionary to _savedEnvironmentVariables
-                    _savedEnvironmentVariables = savedEnvironmentVariables?.ToFrozenDictionary(CommunicationsUtilities.EnvironmentVariableComparer);
+                    _savedEnvironmentVariables = savedEnvironmentVariables?
+                        .ToFrozenDictionary(CommunicationsUtilities.EnvironmentVariableComparer); // no-op if already frozen
 
                     // If the special key SpecialKeyForVersion present in additionalEntries, also read a version, otherwise set it to 0.
                     if (additionalEntries is not null && additionalEntries.ContainsKey(SpecialKeyForVersion))
