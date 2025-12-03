@@ -167,7 +167,7 @@ jobs:
       arguments: -configuration $(BuildConfiguration)
                 -task VisualStudio.BuildIbcTrainingSettings
                 /p:VisualStudioDropName=$(VisualStudio.DropName)
-                /p:BootstrapperInfoPath=$(Build.SourcesDirectory)\artifacts\MicroBuild\Output\BootstrapperInfo.json
+                /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
                 /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
     displayName: 'OptProf - Build IBC training settings'
     condition: and(succeeded(), ${{ parameters.enableOptProf }})
