@@ -4053,65 +4053,25 @@ namespace Microsoft.Build.CommandLine
             // Since we always want task inputs for a binary logger, set it to diagnostic.
             verbosity = LoggerVerbosity.Diagnostic;
 
-            if (binaryLoggerParameters.Length == 1)
+            // Process the parameters to get distinct paths and configuration info
+            var processedParams = BinaryLogger.ProcessParameters(binaryLoggerParameters);
+
+            if (processedParams.DistinctParameterSets.Count == 0)
             {
-                // Simple case: single binary logger
-                BinaryLogger logger = new BinaryLogger { Parameters = binaryLoggerParameters[0] };
-                loggers.Add(logger);
                 return;
             }
 
-            // Multiple binlog parameters - determine if we can use the optimized single-write approach
-            // or need to create separate logger instances
-            string primaryArguments = binaryLoggerParameters[0];
-            string primaryNonPathParams = BinaryLogger.ExtractNonPathParameters(primaryArguments);
-
-            bool allConfigurationsIdentical = true;
-            var distinctFilePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var distinctParameterSets = new List<string>();
-
-            // Check if all parameter sets have the same non-path configuration
-            for (int i = 0; i < binaryLoggerParameters.Length; i++)
-            {
-                string currentParams = binaryLoggerParameters[i];
-                string currentNonPathParams = BinaryLogger.ExtractNonPathParameters(currentParams);
-                string currentFilePath = BinaryLogger.ExtractFilePathFromParameters(currentParams);
-
-                // Check if this is a duplicate file path
-                if (distinctFilePaths.Add(currentFilePath))
-                {
-                    // Only add if configuration matches the primary
-                    if (string.Equals(primaryNonPathParams, currentNonPathParams, StringComparison.OrdinalIgnoreCase))
-                    {
-                        distinctParameterSets.Add(currentParams);
-                    }
-                    else
-                    {
-                        allConfigurationsIdentical = false;
-                        // Still add it - we'll create separate loggers below
-                        distinctParameterSets.Add(currentParams);
-                    }
-                }
-            }
-
-            if (allConfigurationsIdentical && distinctParameterSets.Count > 1)
+            if (processedParams.AllConfigurationsIdentical && processedParams.AdditionalFilePaths.Count > 0)
             {
                 // Optimized approach: single logger writing to one file, then copy to additional locations
-                BinaryLogger logger = new BinaryLogger { Parameters = primaryArguments };
-                
-                var additionalFilePaths = new List<string>();
-                for (int i = 1; i < distinctParameterSets.Count; i++)
-                {
-                    additionalFilePaths.Add(BinaryLogger.ExtractFilePathFromParameters(distinctParameterSets[i]));
-                }
-                
-                logger.AdditionalFilePaths = additionalFilePaths;
+                BinaryLogger logger = new BinaryLogger { Parameters = processedParams.DistinctParameterSets[0] };
+                logger.AdditionalFilePaths = processedParams.AdditionalFilePaths;
                 loggers.Add(logger);
             }
             else
             {
                 // Create separate logger instances for each distinct configuration
-                foreach (string paramSet in distinctParameterSets)
+                foreach (string paramSet in processedParams.DistinctParameterSets)
                 {
                     BinaryLogger logger = new BinaryLogger { Parameters = paramSet };
                     loggers.Add(logger);

@@ -517,6 +517,15 @@ namespace Microsoft.Build.Logging
             }
 
 
+            // Log additional file paths before closing stream (so they're recorded in the binlog)
+            if (AdditionalFilePaths != null && AdditionalFilePaths.Count > 0 && stream != null)
+            {
+                foreach (var additionalPath in AdditionalFilePaths)
+                {
+                    LogMessage("BinLogCopyDestination=" + additionalPath);
+                }
+            }
+
             if (stream != null)
             {
                 // It's hard to determine whether we're at the end of decoding GZipStream
@@ -544,6 +553,7 @@ namespace Microsoft.Build.Logging
                     catch (Exception ex)
                     {
                         // Log the error but don't fail the build
+                        // Note: We can't use LogMessage here since the stream is already closed
                         string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
                             out string errorCode,
                             out string helpKeyword,
@@ -552,9 +562,7 @@ namespace Microsoft.Build.Logging
                             additionalPath,
                             ex.Message);
                         
-                        // Note: We can't write this error to the binlog itself since the stream is already closed
-                        // The error will be logged to the console or other active loggers
-                        Console.Error.WriteLine(message);
+                        throw new LoggerException(message, ex, errorCode, helpKeyword);
                     }
                 }
             }
@@ -814,6 +822,83 @@ namespace Microsoft.Build.Logging
             // Sort for consistent comparison
             nonPathParams.Sort(StringComparer.OrdinalIgnoreCase);
             return string.Join(";", nonPathParams);
+        }
+
+        /// <summary>
+        /// Result of processing multiple binary logger parameter sets.
+        /// </summary>
+        public class ProcessedBinaryLoggerParameters
+        {
+            /// <summary>
+            /// List of distinct parameter sets that need separate logger instances.
+            /// </summary>
+            public List<string> DistinctParameterSets { get; set; } = new List<string>();
+
+            /// <summary>
+            /// If true, all parameter sets have identical configurations (only file paths differ),
+            /// so a single logger can be used with file copying for additional paths.
+            /// </summary>
+            public bool AllConfigurationsIdentical { get; set; } = true;
+
+            /// <summary>
+            /// Additional file paths to copy the binlog to (only valid when AllConfigurationsIdentical is true).
+            /// </summary>
+            public List<string> AdditionalFilePaths { get; set; } = new List<string>();
+        }
+
+        /// <summary>
+        /// Processes multiple binary logger parameter sets and returns distinct paths and configuration info.
+        /// </summary>
+        /// <param name="binaryLoggerParameters">Array of parameter strings from command line</param>
+        /// <returns>Processed result with distinct parameter sets and configuration info</returns>
+        public static ProcessedBinaryLoggerParameters ProcessParameters(string[] binaryLoggerParameters)
+        {
+            var result = new ProcessedBinaryLoggerParameters();
+
+            if (binaryLoggerParameters == null || binaryLoggerParameters.Length == 0)
+            {
+                return result;
+            }
+
+            if (binaryLoggerParameters.Length == 1)
+            {
+                result.DistinctParameterSets.Add(binaryLoggerParameters[0]);
+                return result;
+            }
+
+            string primaryArguments = binaryLoggerParameters[0];
+            string primaryNonPathParams = ExtractNonPathParameters(primaryArguments);
+
+            var distinctFilePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            // Check if all parameter sets have the same non-path configuration
+            for (int i = 0; i < binaryLoggerParameters.Length; i++)
+            {
+                string currentParams = binaryLoggerParameters[i];
+                string currentNonPathParams = ExtractNonPathParameters(currentParams);
+                string currentFilePath = ExtractFilePathFromParameters(currentParams);
+
+                // Check if this is a duplicate file path
+                if (distinctFilePaths.Add(currentFilePath))
+                {
+                    if (!string.Equals(primaryNonPathParams, currentNonPathParams, StringComparison.OrdinalIgnoreCase))
+                    {
+                        result.AllConfigurationsIdentical = false;
+                    }
+                    result.DistinctParameterSets.Add(currentParams);
+                }
+            }
+
+            // If all configurations are identical, compute additional file paths for copying
+            if (result.AllConfigurationsIdentical && result.DistinctParameterSets.Count > 1)
+            {
+                for (int i = 1; i < result.DistinctParameterSets.Count; i++)
+                {
+                    result.AdditionalFilePaths.Add(ExtractFilePathFromParameters(result.DistinctParameterSets[i]));
+                }
+            }
+
+            return result;
         }
     }
 }
