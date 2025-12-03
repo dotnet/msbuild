@@ -96,9 +96,9 @@ stages:
     - download: ComponentBuildUnderTest
     prePublishOptimizationInputsDropStepList:
     - download: ComponentBuildUnderTest
-      artifact: OptProf
+      artifact: VSSetup
       patterns: '**\Metadata.json'
-      displayName: Download Bootstrapper Information
+      displayName: Download Optprof Metadata # to determine LKG data source
     - powershell: |
         try {
           $metadataPath = Get-ChildItem -Path '$(Pipeline.Workspace)\ComponentBuildUnderTest\OptProf' -Filter 'Metadata.json' -Recurse -ErrorAction Stop | Select-Object -First 1
