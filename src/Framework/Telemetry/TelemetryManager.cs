@@ -36,13 +36,6 @@ namespace Microsoft.Build.Framework.Telemetry
 
         public static TelemetryManager Instance { get; } = new TelemetryManager();
 
-        /// <summary>
-        /// Starts a new telemetry activity.
-        /// </summary>
-        /// <param name="name">Name of the telemetry event without prefix.</param>
-        /// <returns>An <see cref="IActivity"/> or null if telemetry is not initialized or opted out.</returns>
-        public IActivity? StartActivity(string name) => DefaultActivitySource?.StartActivity(name);
-
         public void Initialize(bool isStandalone)
         {
             if (IsOptOut())
