@@ -49,11 +49,11 @@ NativeMethodsShared.CurrentThreadWorkingDirectory = requestEntry.ProjectRootDire
 
 ---
 
-### 2. MetadataLoadContext Thread Safety
+### 2. MetadataLoadContext Thread Safety (Race Condition Fix #12653)
 
 **Status:** Missing from main branch
 
-**Description:** The feature branch implements thread-safe access to `MetadataLoadContext` used for task type loading, preventing race conditions during concurrent task discovery.
+**Description:** The feature branch implements thread-safe access to `MetadataLoadContext` used for task type loading, preventing race conditions during concurrent task discovery. This fix addresses crashes and race conditions that occur when multiple threads attempt to load task types simultaneously in `/mt /m` mode.
 
 **Changes Required:**
 
@@ -274,6 +274,25 @@ public void SetTaskEnvironment(TaskEnvironment taskEnvironment)
 - Handle TaskHost lifecycle correctly in multithreaded scenarios
 
 **Rationale:** Tasks running in TaskHost processes need consistent environment regardless of execution mode.
+
+---
+
+### 11. Additional Concurrent Collections
+
+**Status:** Some already in main, others may be needed
+
+**Description:** Various internal data structures may need to be converted to thread-safe collections for multithreaded execution.
+
+**Known Conversions:**
+- `NodeProviderOutOfProcTaskHost._nodeIdToPacketFactory` - **Already in main** (changed to `ConcurrentDictionary`)
+- `NodeProviderOutOfProcTaskHost._nodeIdToPacketHandler` - **Already in main** (changed to `ConcurrentDictionary`)
+
+**May Still Need Review:**
+- Other internal caches and registries that are accessed during concurrent task execution
+- Task factory registries
+- Logger state management
+
+**Rationale:** Without thread-safe collections, concurrent access can cause race conditions, data corruption, or crashes in multithreaded builds.
 
 ---
 
