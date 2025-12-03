@@ -600,6 +600,8 @@ namespace Microsoft.Build.CommandLine
             // and those form the great majority of our unnecessary memory use.
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
 
+            ErrorUtilities.VerifyThrowArgumentLength(commandLine);
+
             AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
 
             ExitType exitType = ExitType.Success;
@@ -1957,10 +1959,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             // discard the first piece, because that's the path to the executable -- the rest are args
-            if (commandLineArgs.Count > 0)
-            {
-                commandLineArgs.RemoveAt(0);
-            }
+            commandLineArgs.RemoveAt(0);
 
             fullCommandLine = $"'{string.Join(" ", commandLine)}'";
 

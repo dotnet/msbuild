@@ -256,7 +256,7 @@ namespace Microsoft.Build.UnitTests
                 msbuildTempXsdFilenames = PrepareSchemaFiles();
                 string quotedProjectFile = "\"" + projectFilename + "\"";
 
-                Assert.Equal(MSBuildApp.ExitType.Success, MSBuildApp.Execute([@"c:\foo\msbuild.exe", quotedProjectFile, "/validate:\"{msbuildTempXsdFilenames[0]}\""]));
+                Assert.Equal(MSBuildApp.ExitType.Success, MSBuildApp.Execute([@"c:\foo\msbuild.exe", quotedProjectFile, $"/validate:\"{msbuildTempXsdFilenames[0]}\""]));
 
                 // ProjectSchemaValidationHandler.VerifyProjectSchema
                 //    (
