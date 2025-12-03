@@ -332,9 +332,12 @@ namespace Microsoft.Build.Shared
             private ConcurrentDictionary<string, Type> _typeNameToType;
 
             /// <summary>
-            /// List of public types in the assembly which match the type filter and their corresponding types
+            /// List of public types in the assembly which match the type filter and their corresponding types.
+            /// This dictionary is populated once during ScanAssemblyForPublicTypes() under a lock,
+            /// then read concurrently. We use ConcurrentDictionary to ensure thread-safe iteration
+            /// while scanning may still be in progress from another thread's GetOrAdd delegate.
             /// </summary>
-            private Dictionary<string, Type> _publicTypeNameToType;
+            private ConcurrentDictionary<string, Type> _publicTypeNameToType;
 
             private ConcurrentDictionary<string, LoadedType> _publicTypeNameToLoadedType;
 
@@ -361,7 +364,7 @@ namespace Microsoft.Build.Shared
                 _isDesiredType = typeFilter;
                 _assemblyLoadInfo = loadInfo;
                 _typeNameToType = new(StringComparer.OrdinalIgnoreCase);
-                _publicTypeNameToType = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+                _publicTypeNameToType = new(StringComparer.OrdinalIgnoreCase);
                 _publicTypeNameToLoadedType = new(StringComparer.OrdinalIgnoreCase);
             }
 
@@ -520,7 +523,7 @@ namespace Microsoft.Build.Shared
                 {
                     if (_isDesiredType(publicType, null))
                     {
-                        _publicTypeNameToType.Add(publicType.FullName, publicType);
+                        _publicTypeNameToType.TryAdd(publicType.FullName, publicType);
                     }
                 }
             }
