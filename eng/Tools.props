@@ -4,6 +4,6 @@
   </PropertyGroup>
 
   <Target Name="UpdateOptProfMetadataJson" AfterTargets="_DownloadVisualStudioOptimizationDataOpt">
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command &quot;($json = Get-Content '$(OptProfMetadataJson)' -Raw | ConvertFrom-Json); $json.OptimizationData = '$(_DropName)'; $json | ConvertTo-Json | Set-Content '$(BUILD_STAGINGDIRECTORY)\artifacts\VSSetup\$(Configuration)\Metadata.json'&quot;" />
+    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command &quot;($json = Get-Content '$(OptProfMetadataJson)' -Raw | ConvertFrom-Json); $json | Add-Member -MemberType NoteProperty -Name 'OptimizationData' -Value '$(_DropName)' -Force; $json | ConvertTo-Json | Set-Content '$(BUILD_STAGINGDIRECTORY)\artifacts\VSSetup\$(Configuration)\Metadata.json'&quot;" />
   </Target>
 </Project>
