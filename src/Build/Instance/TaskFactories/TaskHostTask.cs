@@ -316,8 +316,8 @@ namespace Microsoft.Build.BackEnd
             TaskHostConfiguration hostConfiguration =
                 new TaskHostConfiguration(
                         _buildComponentHost.BuildParameters.NodeId,
-                        NativeMethodsShared.GetCurrentDirectory(),
-                        CommunicationsUtilities.GetEnvironmentVariables(),
+                        _taskEnvironment.ProjectDirectory,
+                        (IDictionary<string, string>)_taskEnvironment.GetEnvironmentVariables(),
                         _buildComponentHost.BuildParameters.Culture,
                         _buildComponentHost.BuildParameters.UICulture,
 #if FEATURE_APPDOMAIN
