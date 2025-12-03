@@ -3,10 +3,8 @@
 
 #if NETFRAMEWORK
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Build.Framework.Telemetry;
 using Microsoft.VisualStudio.Telemetry;
 
 namespace Microsoft.Build.Framework.Telemetry
@@ -71,34 +69,6 @@ namespace Microsoft.Build.Framework.Telemetry
             _disposed = true;
         }
     }
-}
-
-/// <summary>
-/// Represents an activity for telemetry tracking.
-/// </summary>
-internal interface IActivity : IDisposable
-{
-    /// <summary>
-    /// Sets a tag on the activity.
-    /// </summary>
-    /// <param name="dataHolder">Telemetry data holder.</param>
-    /// <returns>The activity instance for method chaining.</returns>
-    IActivity? SetTags(IActivityTelemetryDataHolder? dataHolder);
-
-    /// <summary>
-    /// Sets a tag on the activity.
-    /// </summary>
-    /// <param name="key">The tag key.</param>
-    /// <param name="value">The tag value.</param>
-    /// <returns>The activity instance for method chaining.</returns>
-    IActivity? SetTag(string key, object? value);
-
-    /// <summary>
-    /// Adds an event to the activity.
-    /// </summary>
-    /// <param name="activityEvent">The event to add.</param>
-    /// <returns>The activity instance for method chaining.</returns>
-    IActivity? AddEvent(ActivityEvent activityEvent);
 }
 
 #endif

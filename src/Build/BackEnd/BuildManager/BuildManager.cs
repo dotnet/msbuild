@@ -1160,17 +1160,24 @@ namespace Microsoft.Build.Execution
             }
         }
 
-#if NETFRAMEWORK
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private void EndBuildTelemetry()
         {
-            using IActivity? activity = TelemetryManager.Instance.StartActivity(TelemetryConstants.Build)
+            //OpenTelemetryManager.Instance.DefaultActivitySource?
+            //  .StartActivity("Build")?
+            //  .WithTags(_buildTelemetry)
+            //  .WithTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
+            //      includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
+            //      includeTargetDetails: false))
+            //  .WithStartTime(_buildTelemetry!.InnerStartAt)
+            //  .Dispose();
+
+            using IActivity? activity = TelemetryManager.Instance.DefaultActivitySource!
+                .StartActivity(TelemetryConstants.Build)
                 ?.SetTags(_buildTelemetry)
                 ?.SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
                         includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
                         includeTargetDetails: false));
         }
-#endif
 
         /// <summary>
         /// Convenience method.  Submits a lone build request and blocks until results are available.

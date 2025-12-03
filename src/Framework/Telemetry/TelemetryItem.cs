@@ -1,8 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if NETFRAMEWORK
-
 using System.Collections.Generic;
 using static Microsoft.Build.Framework.Telemetry.TelemetryDataUtils;
 
@@ -39,5 +37,3 @@ internal sealed class BuildInsights
 
     internal record TaskStatsInfo(int ExecutionsCount, double TotalMilliseconds, long TotalMemoryBytes);
 }
-
-#endif
