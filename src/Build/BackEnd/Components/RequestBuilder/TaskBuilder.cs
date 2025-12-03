@@ -156,8 +156,6 @@ namespace Microsoft.Build.BackEnd
 
             _buildRequestEntry = requestEntry;
 
-            _taskExecutionHost.TaskEnvironment = requestEntry.TaskEnvironment;
-
             _targetBuilderCallback = targetBuilderCallback;
             _cancellationToken = cancellationToken;
             _targetChildInstance = taskInstance;
@@ -326,7 +324,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                         taskHost.AppDomainSetup,
 #endif
-                        taskHost.IsOutOfProc, _cancellationToken);
+                        taskHost.IsOutOfProc, _cancellationToken, _buildRequestEntry.TaskEnvironment);
                 }
 
                 List<string> taskParameterValues = CreateListOfParameterValues();

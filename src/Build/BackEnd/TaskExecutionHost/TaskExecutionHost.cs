@@ -256,7 +256,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            bool isOutOfProc, CancellationToken cancellationToken)
+            bool isOutOfProc, CancellationToken cancellationToken, TaskEnvironment taskEnvironment)
         {
             _buildEngine = buildEngine;
             _projectInstance = projectInstance;
@@ -270,6 +270,7 @@ namespace Microsoft.Build.BackEnd
             AppDomainSetup = appDomainSetup;
 #endif
             IsOutOfProc = isOutOfProc;
+            TaskEnvironment = taskEnvironment;
         }
 
         /// <summary>
