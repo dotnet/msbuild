@@ -147,6 +147,11 @@ namespace Microsoft.Build.Tasks
         private TaskLoggingHelper _log;
 
         /// <summary>
+        /// The build engine provided during Initialize.
+        /// </summary>
+        private IBuildEngine _taskFactoryLoggingHost;
+
+        /// <summary>
         /// Whether this factory should compile for out-of-process execution.
         /// Set during Initialize() based on environment variables or host context.
         /// </summary>
@@ -185,6 +190,7 @@ namespace Microsoft.Build.Tasks
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> taskParameters, string taskElementContents, IBuildEngine taskFactoryLoggingHost)
         {
             _nameOfTask = taskName;
+            _taskFactoryLoggingHost = taskFactoryLoggingHost;
             _log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName)
             {
                 TaskResources = AssemblyResources.PrimaryResources,
@@ -776,7 +782,11 @@ namespace Microsoft.Build.Tasks
                 // If our code is in a separate file, then read it in here
                 if (_sourcePath != null)
                 {
-                    _sourceCode = FileSystems.Default.ReadFileAllText(_sourcePath);
+                    bool isMultiThreaded = _taskFactoryLoggingHost is ITaskFactoryBuildParameterProvider hostContext && hostContext.IsMultiThreadedBuild;
+                    string projectFilePath = _taskFactoryLoggingHost.ProjectFileOfTaskNode;
+                    string projectDirectory = !string.IsNullOrEmpty(projectFilePath) ? Path.GetDirectoryName(projectFilePath) : null;
+                    string resolvedPath = TaskFactoryUtilities.ResolveTaskSourceCodePath(_sourcePath, isMultiThreaded, projectDirectory);
+                    _sourceCode = FileSystems.Default.ReadFileAllText(resolvedPath);
                 }
 
                 // A fragment is essentially the contents of the execute method (except the final return true/false)

@@ -149,18 +149,12 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Returns true if the given string is a valid member of the MSBuildRuntimeValues set
         /// </summary>
-        internal static bool IsValidMSBuildRuntimeValue(string runtime)
-        {
-            return runtime == null || ValidMSBuildRuntimeValues.Contains(runtime);
-        }
+        internal static bool IsValidMSBuildRuntimeValue(string runtime) => runtime == null || ValidMSBuildRuntimeValues.Contains(runtime);
 
         /// <summary>
         /// Returns true if the given string is a valid member of the MSBuildArchitectureValues set
         /// </summary>
-        internal static bool IsValidMSBuildArchitectureValue(string architecture)
-        {
-            return architecture == null || ValidMSBuildArchitectureValues.Contains(architecture);
-        }
+        internal static bool IsValidMSBuildArchitectureValue(string architecture) => architecture == null || ValidMSBuildArchitectureValues.Contains(architecture);
 
         /// <summary>
         /// Compares two members of MSBuildRuntimeValues, returning true if they count as a match, and false otherwise.
