@@ -236,10 +236,9 @@ namespace Microsoft.Build.CommandLine
         public static int Main(string[] args)
         {
             // When invoked from SDK, insert the command executable path as the first element of the args array.
-            if (BuildEnvironmentHelper.IsRunningOnCoreClr)
-            {
-                args = [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, ..args];
-            }
+            args = BuildEnvironmentHelper.IsRunningOnCoreClr ?
+                [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, .. args] :
+                QuotingUtilities.SplitUnquoted(Environment.CommandLine).ToArray();
 
             // Setup the console UI.
             using AutomaticEncodingRestorer _ = new();
@@ -600,8 +599,6 @@ namespace Microsoft.Build.CommandLine
             // with our OM and modify and save them. They'll never do this for Microsoft.*.targets, though,
             // and those form the great majority of our unnecessary memory use.
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
-
-            ErrorUtilities.VerifyThrowArgumentLength(commandLine);
 
             AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
 
@@ -1960,7 +1957,10 @@ namespace Microsoft.Build.CommandLine
             }
 
             // discard the first piece, because that's the path to the executable -- the rest are args
-            commandLineArgs.RemoveAt(0);
+            if (commandLineArgs.Count > 0)
+            {
+                commandLineArgs.RemoveAt(0);
+            }
 
             fullCommandLine = $"'{string.Join(" ", commandLine)}'";
 
@@ -2498,8 +2498,8 @@ namespace Microsoft.Build.CommandLine
             bool useTerminalLogger = ProcessTerminalLoggerConfiguration(commandLineSwitches, out string aggregatedTerminalLoggerParameters);
 
             // This is temporary until we can remove the need for the environment variable.
-                // DO NOT use this environment variable for any new features as it will be removed without further notice.
-                Environment.SetEnvironmentVariable("_MSBUILDTLENABLED", useTerminalLogger ? "1" : "0");
+            // DO NOT use this environment variable for any new features as it will be removed without further notice.
+            Environment.SetEnvironmentVariable("_MSBUILDTLENABLED", useTerminalLogger ? "1" : "0");
 
             DisplayVersionMessageIfNeeded(recursing, useTerminalLogger, commandLineSwitches);
 
