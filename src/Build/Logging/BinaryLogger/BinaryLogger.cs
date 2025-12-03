@@ -306,7 +306,7 @@ namespace Microsoft.Build.Logging
         /// It should not be set by external code or logger implementations.
         /// Use multiple logger instances with different Parameters instead.
         /// </remarks>
-        public List<string> AdditionalFilePaths { get; set; }
+        public IReadOnlyList<string> AdditionalFilePaths { get; set; }
 
         /// <summary> Gets or sets the verbosity level.</summary>
         /// <remarks>
@@ -729,9 +729,11 @@ namespace Microsoft.Build.Logging
         /// <returns>The resolved file path, or "msbuild.binlog" if no path is specified</returns>
         public static string ExtractFilePathFromParameters(string parameters)
         {
+            const string DefaultBinlogFileName = "msbuild" + BinlogFileExtension;
+
             if (string.IsNullOrEmpty(parameters))
             {
-                return Path.GetFullPath("msbuild.binlog");
+                return Path.GetFullPath(DefaultBinlogFileName);
             }
 
             var paramParts = parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
@@ -748,7 +750,7 @@ namespace Microsoft.Build.Logging
 
             if (filePath == null)
             {
-                filePath = "msbuild.binlog";
+                filePath = DefaultBinlogFileName;
             }
 
             try
@@ -762,19 +764,25 @@ namespace Microsoft.Build.Logging
             }
         }
 
+        /// <summary>
+        /// Attempts to interpret a parameter string as a file path.
+        /// </summary>
+        /// <param name="parameter">The parameter to interpret (e.g., "LogFile=output.binlog" or "output.binlog")</param>
+        /// <param name="filePath">The extracted file path if the parameter is a path, otherwise the original parameter</param>
+        /// <returns>True if the parameter is a valid file path (ends with .binlog or contains wildcards), false otherwise</returns>
         private static bool TryInterpretPathParameterStatic(string parameter, out string filePath)
         {
-            bool hasPathPrefix = parameter.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase);
+            bool hasPathPrefix = parameter.StartsWith(LogFileParameterPrefix, StringComparison.OrdinalIgnoreCase);
 
             if (hasPathPrefix)
             {
-                parameter = parameter.Substring("LogFile=".Length);
+                parameter = parameter.Substring(LogFileParameterPrefix.Length);
             }
 
             parameter = parameter.Trim('"');
 
             bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
-            bool hasProperExtension = parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase);
+            bool hasProperExtension = parameter.EndsWith(BinlogFileExtension, StringComparison.OrdinalIgnoreCase);
             filePath = parameter;
 
             if (!isWildcard)
@@ -786,7 +794,7 @@ namespace Microsoft.Build.Logging
 
             if (!hasProperExtension)
             {
-                filePath += ".binlog";
+                filePath += BinlogFileExtension;
             }
             return true;
         }
@@ -827,23 +835,39 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Result of processing multiple binary logger parameter sets.
         /// </summary>
-        public class ProcessedBinaryLoggerParameters
+        public readonly struct ProcessedBinaryLoggerParameters
         {
             /// <summary>
             /// List of distinct parameter sets that need separate logger instances.
             /// </summary>
-            public List<string> DistinctParameterSets { get; set; } = new List<string>();
+            public IReadOnlyList<string> DistinctParameterSets { get; }
 
             /// <summary>
             /// If true, all parameter sets have identical configurations (only file paths differ),
             /// so a single logger can be used with file copying for additional paths.
             /// </summary>
-            public bool AllConfigurationsIdentical { get; set; } = true;
+            public bool AllConfigurationsIdentical { get; }
 
             /// <summary>
             /// Additional file paths to copy the binlog to (only valid when AllConfigurationsIdentical is true).
             /// </summary>
-            public List<string> AdditionalFilePaths { get; set; } = new List<string>();
+            public IReadOnlyList<string> AdditionalFilePaths { get; }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ProcessedBinaryLoggerParameters"/> struct.
+            /// </summary>
+            /// <param name="distinctParameterSets">List of distinct parameter sets that need separate logger instances.</param>
+            /// <param name="allConfigurationsIdentical">Whether all parameter sets have identical configurations.</param>
+            /// <param name="additionalFilePaths">Additional file paths to copy the binlog to.</param>
+            public ProcessedBinaryLoggerParameters(
+                IReadOnlyList<string> distinctParameterSets,
+                bool allConfigurationsIdentical,
+                IReadOnlyList<string> additionalFilePaths)
+            {
+                DistinctParameterSets = distinctParameterSets;
+                AllConfigurationsIdentical = allConfigurationsIdentical;
+                AdditionalFilePaths = additionalFilePaths;
+            }
         }
 
         /// <summary>
@@ -853,17 +877,19 @@ namespace Microsoft.Build.Logging
         /// <returns>Processed result with distinct parameter sets and configuration info</returns>
         public static ProcessedBinaryLoggerParameters ProcessParameters(string[] binaryLoggerParameters)
         {
-            var result = new ProcessedBinaryLoggerParameters();
+            var distinctParameterSets = new List<string>();
+            var additionalFilePaths = new List<string>();
+            bool allConfigurationsIdentical = true;
 
             if (binaryLoggerParameters == null || binaryLoggerParameters.Length == 0)
             {
-                return result;
+                return new ProcessedBinaryLoggerParameters(distinctParameterSets, allConfigurationsIdentical, additionalFilePaths);
             }
 
             if (binaryLoggerParameters.Length == 1)
             {
-                result.DistinctParameterSets.Add(binaryLoggerParameters[0]);
-                return result;
+                distinctParameterSets.Add(binaryLoggerParameters[0]);
+                return new ProcessedBinaryLoggerParameters(distinctParameterSets, allConfigurationsIdentical, additionalFilePaths);
             }
 
             string primaryArguments = binaryLoggerParameters[0];
@@ -883,22 +909,22 @@ namespace Microsoft.Build.Logging
                 {
                     if (!string.Equals(primaryNonPathParams, currentNonPathParams, StringComparison.OrdinalIgnoreCase))
                     {
-                        result.AllConfigurationsIdentical = false;
+                        allConfigurationsIdentical = false;
                     }
-                    result.DistinctParameterSets.Add(currentParams);
+                    distinctParameterSets.Add(currentParams);
                 }
             }
 
             // If all configurations are identical, compute additional file paths for copying
-            if (result.AllConfigurationsIdentical && result.DistinctParameterSets.Count > 1)
+            if (allConfigurationsIdentical && distinctParameterSets.Count > 1)
             {
-                for (int i = 1; i < result.DistinctParameterSets.Count; i++)
+                for (int i = 1; i < distinctParameterSets.Count; i++)
                 {
-                    result.AdditionalFilePaths.Add(ExtractFilePathFromParameters(result.DistinctParameterSets[i]));
+                    additionalFilePaths.Add(ExtractFilePathFromParameters(distinctParameterSets[i]));
                 }
             }
 
-            return result;
+            return new ProcessedBinaryLoggerParameters(distinctParameterSets, allConfigurationsIdentical, additionalFilePaths);
         }
     }
 }
