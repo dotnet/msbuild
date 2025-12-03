@@ -7,6 +7,15 @@ using Microsoft.VisualStudio.Telemetry;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
+    /// <summary>
+    /// Manages telemetry collection and reporting for MSBuild.
+    /// This class provides a centralized way to initialize, configure, and manage telemetry sessions.
+    /// </summary>
+    /// <remarks>
+    /// The TelemetryManager is a singleton that handles both standalone and integrated telemetry scenarios.
+    /// On .NET Framework, it integrates with Visual Studio telemetry services.
+    /// On .NET Core it provides a lightweight telemetry implementation though exposing an activity source.
+    /// </remarks>
     internal class TelemetryManager
     {
 #if NETFRAMEWORK
