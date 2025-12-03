@@ -18,9 +18,9 @@ internal static class TelemetryConstants
     public const string PropertyPrefix = "VS.MSBuild.";
 
     /// <summary>
-    /// "Microsoft.VisualStudio.OpenTelemetry.*" namespace is required by VS exporting/collection.
+    /// "Microsoft.Build.Telemetry.*" namespace is required by VS exporting/collection.
     /// </summary>
-    public const string ActivitySourceNamespacePrefix = "Microsoft.VisualStudio.OpenTelemetry.MSBuild.";
+    public const string ActivitySourceNamespacePrefix = "Microsoft.Build.Telemetry";
 
     /// <summary>
     /// Namespace of the default ActivitySource handling e.g. End of build telemetry.

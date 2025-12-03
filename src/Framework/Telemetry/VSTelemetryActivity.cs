@@ -13,7 +13,6 @@ namespace Microsoft.Build.Framework.Telemetry
     {
         private readonly TelemetryScope<OperationEvent> _scope;
         private TelemetryResult _result = TelemetryResult.Success;
-        private string? _resultSummary;
 
         private bool _disposed;
 
@@ -43,6 +42,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
             return this;
         }
+
         public IActivity? AddEvent(ActivityEvent activityEvent)
         {
             // VS Telemetry doesn't have a direct equivalent to ActivityEvent
@@ -65,7 +65,7 @@ namespace Microsoft.Build.Framework.Telemetry
             }
 
             // End the operation
-            _scope.End(_result, _resultSummary);
+            _scope.End(_result);
             _disposed = true;
         }
     }

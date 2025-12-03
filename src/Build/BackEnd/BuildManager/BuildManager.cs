@@ -1115,9 +1115,8 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
-#if NETFRAMEWORK
                             EndBuildTelemetry();
-#endif
+
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
                         }
@@ -1162,15 +1161,6 @@ namespace Microsoft.Build.Execution
 
         private void EndBuildTelemetry()
         {
-            //OpenTelemetryManager.Instance.DefaultActivitySource?
-            //  .StartActivity("Build")?
-            //  .WithTags(_buildTelemetry)
-            //  .WithTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
-            //      includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
-            //      includeTargetDetails: false))
-            //  .WithStartTime(_buildTelemetry!.InnerStartAt)
-            //  .Dispose();
-
             using IActivity? activity = TelemetryManager.Instance.DefaultActivitySource!
                 .StartActivity(TelemetryConstants.Build)
                 ?.SetTags(_buildTelemetry)
