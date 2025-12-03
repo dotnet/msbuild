@@ -40,6 +40,10 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             string eventName = $"{TelemetryConstants.EventPrefix}{name}";
 
+#if NETFRAMEWORK
+            TelemetryScope<OperationEvent>? operation = _telemetrySession?.StartOperation(eventName);
+            return operation != null ? new VsTelemetryActivity(operation) : null;
+#else
             Activity? activity = Activity.Current?.HasRemoteParent == true
                 ? _source.StartActivity(eventName, ActivityKind.Internal, parentId: Activity.Current.ParentId)
                 : _source.StartActivity(eventName);
@@ -51,10 +55,6 @@ namespace Microsoft.Build.Framework.Telemetry
 
             activity.SetTag("SampleRate", TelemetryConstants.DefaultSampleRate);
 
-#if NETFRAMEWORK
-            TelemetryScope<OperationEvent>? operation = _telemetrySession?.StartOperation(eventName);
-            return operation != null ? new VsTelemetryActivity(operation) : null;
-#else
             return new DiagnosticActivity(activity);
 #endif
         }
