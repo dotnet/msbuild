@@ -688,31 +688,7 @@ namespace Microsoft.Build.Logging
 
         private bool TryInterpretPathParameter(string parameter, out string filePath)
         {
-            bool hasPathPrefix = parameter.StartsWith(LogFileParameterPrefix, StringComparison.OrdinalIgnoreCase);
-
-            if (hasPathPrefix)
-            {
-                parameter = parameter.Substring(LogFileParameterPrefix.Length);
-            }
-
-            parameter = parameter.Trim('"');
-
-            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
-            bool hasProperExtension = parameter.EndsWith(BinlogFileExtension, StringComparison.OrdinalIgnoreCase);
-            filePath = parameter;
-
-            if (!isWildcard)
-            {
-                return hasProperExtension;
-            }
-
-            filePath = parameter.Replace("{}", GetUniqueStamp(), StringComparison.Ordinal);
-
-            if (!hasProperExtension)
-            {
-                filePath += BinlogFileExtension;
-            }
-            return true;
+            return TryInterpretPathParameterCore(parameter, GetUniqueStamp, out filePath);
         }
 
         private string GetUniqueStamp()
@@ -772,6 +748,18 @@ namespace Microsoft.Build.Logging
         /// <returns>True if the parameter is a valid file path (ends with .binlog or contains wildcards), false otherwise</returns>
         private static bool TryInterpretPathParameterStatic(string parameter, out string filePath)
         {
+            return TryInterpretPathParameterCore(parameter, () => ExpandPathParameter(string.Empty), out filePath);
+        }
+
+        /// <summary>
+        /// Core logic for interpreting a parameter string as a file path.
+        /// </summary>
+        /// <param name="parameter">The parameter to interpret</param>
+        /// <param name="wildcardExpander">Function to expand wildcard placeholders</param>
+        /// <param name="filePath">The extracted file path</param>
+        /// <returns>True if the parameter is a valid file path</returns>
+        private static bool TryInterpretPathParameterCore(string parameter, Func<string> wildcardExpander, out string filePath)
+        {
             bool hasPathPrefix = parameter.StartsWith(LogFileParameterPrefix, StringComparison.OrdinalIgnoreCase);
 
             if (hasPathPrefix)
@@ -790,7 +778,7 @@ namespace Microsoft.Build.Logging
                 return hasProperExtension;
             }
 
-            filePath = parameter.Replace("{}", ExpandPathParameter(string.Empty), StringComparison.Ordinal);
+            filePath = parameter.Replace("{}", wildcardExpander(), StringComparison.Ordinal);
 
             if (!hasProperExtension)
             {
@@ -905,6 +893,7 @@ namespace Microsoft.Build.Logging
             string primaryNonPathParams = ExtractNonPathParameters(primaryArguments);
 
             var distinctFilePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var extractedFilePaths = new List<string>();
 
             // Check if all parameter sets have the same non-path configuration
             for (int i = 0; i < binaryLoggerParameters.Length; i++)
@@ -921,6 +910,7 @@ namespace Microsoft.Build.Logging
                         allConfigurationsIdentical = false;
                     }
                     distinctParameterSets.Add(currentParams);
+                    extractedFilePaths.Add(currentFilePath);
                 }
                 else
                 {
@@ -930,11 +920,12 @@ namespace Microsoft.Build.Logging
             }
 
             // If all configurations are identical, compute additional file paths for copying
+            // Use the pre-extracted paths to avoid redundant ExtractFilePathFromParameters calls
             if (allConfigurationsIdentical && distinctParameterSets.Count > 1)
             {
-                for (int i = 1; i < distinctParameterSets.Count; i++)
+                for (int i = 1; i < extractedFilePaths.Count; i++)
                 {
-                    additionalFilePaths.Add(ExtractFilePathFromParameters(distinctParameterSets[i]));
+                    additionalFilePaths.Add(extractedFilePaths[i]);
                 }
             }
 
