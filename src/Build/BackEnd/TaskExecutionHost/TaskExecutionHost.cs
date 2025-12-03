@@ -602,14 +602,19 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
+            // If TaskInstance is still set (e.g., due to an exception during InitializeForBatch after
+            // TaskInstance was assigned but before CleanupForBatch could be called), clean it up now.
+            if (TaskInstance != null)
+            {
+                CleanupForBatch();
+            }
+
             _taskFactoryWrapper = null;
 
             // We must null this out because it could be a COM object (or any other ref-counted object) which needs to
             // be released.
             _taskHost = null;
             CleanupCancellationToken();
-
-            ErrorUtilities.VerifyThrow(TaskInstance == null, "Task Instance should be null");
         }
 
         /// <summary>
