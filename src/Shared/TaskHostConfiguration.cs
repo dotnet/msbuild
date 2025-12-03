@@ -215,6 +215,7 @@ namespace Microsoft.Build.BackEnd
             _lineNumberOfTask = lineNumberOfTask;
             _columnNumberOfTask = columnNumberOfTask;
             _projectFileOfTask = projectFileOfTask;
+            _projectFile = projectFile;
             _continueOnError = continueOnError;
             _taskName = taskName;
             _taskLocation = taskLocation;
