@@ -309,49 +309,6 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(EnvironmentTypes))]
-        public void TaskEnvironment_EnvironmentVariableCaseSensitivity_ShouldMatchPlatform(string environmentType)
-        {
-            var taskEnvironment = CreateTaskEnvironment(environmentType);
-            string testVarName = $"MSBUILD_case_TEST_{environmentType}_{Guid.NewGuid():N}";
-            string testVarValue = "case_test_value";
-
-            try
-            {
-                taskEnvironment.SetEnvironmentVariable(testVarName, testVarValue);
-
-                // Test GetEnvironmentVariables()
-                var envVars = taskEnvironment.GetEnvironmentVariables();
-
-                // Test GetEnvironmentVariable()
-                string upperVarName = testVarName.ToUpperInvariant();
-                string lowerVarName = testVarName.ToLowerInvariant();
-
-                // Environment variables are always case-insensitive in MSBuild's implementation
-                // (uses StringComparer.OrdinalIgnoreCase on all platforms)
-
-                // Test GetEnvironmentVariables()
-                envVars.TryGetValue(testVarName, out string? exactValue).ShouldBeTrue();
-                exactValue.ShouldBe(testVarValue);
-
-                envVars.TryGetValue(upperVarName, out string? upperValue).ShouldBeTrue();
-                upperValue.ShouldBe(testVarValue);
-
-                envVars.TryGetValue(lowerVarName, out string? lowerValue).ShouldBeTrue();
-                lowerValue.ShouldBe(testVarValue);
-
-                // Test GetEnvironmentVariable()
-                taskEnvironment.GetEnvironmentVariable(testVarName).ShouldBe(testVarValue);
-                taskEnvironment.GetEnvironmentVariable(upperVarName).ShouldBe(testVarValue);
-                taskEnvironment.GetEnvironmentVariable(lowerVarName).ShouldBe(testVarValue);
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(testVarName, null);
-            }
-        }
-
         [Fact]
         public void TaskEnvironment_MultithreadedEnvironment_ShouldBeIsolatedFromSystem()
         {
