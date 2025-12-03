@@ -349,7 +349,7 @@ namespace Microsoft.Build.CommandLine
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
 #if !NET35
-                if (_hostServices != null)
+                if (projectFile != null && _hostServices != null)
                 {
                     wrappedTask.HostObject = _hostServices.GetHostObject(projectFile, targetName, taskName);
                 }
