@@ -322,7 +322,8 @@ namespace Microsoft.Build.BackEnd
 #endif
             bool isOutOfProc,
             int scheduledNodeId,
-            Func<string, ProjectPropertyInstance> getProperty)
+            Func<string, ProjectPropertyInstance> getProperty,
+            TaskEnvironment taskEnvironment)
         {
             // If the type was loaded via MetadataLoadContext, we MUST use TaskFactory since it didn't load any task assemblies in memory.
             bool useTaskFactory = _loadedType.LoadedViaMetadataLoadContext;
@@ -375,7 +376,8 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif
-                    scheduledNodeId);
+                    scheduledNodeId,
+                    taskEnvironment: taskEnvironment);
                 return task;
             }
             else
