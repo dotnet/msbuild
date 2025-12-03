@@ -235,7 +235,7 @@ namespace Microsoft.Build.CommandLine
 #endif
         public static int Main(string[] args)
         {
-            // When invoked from SDK, insert the command executable path as the first element of the args array.
+            // When running on CoreCLR(.NET), insert the command executable path as the first element of the args array.
             args = BuildEnvironmentHelper.IsRunningOnCoreClr ?
                 [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, .. args] :
                 QuotingUtilities.SplitUnquoted(Environment.CommandLine).ToArray();
