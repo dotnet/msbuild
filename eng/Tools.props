@@ -1,9 +1,12 @@
 <Project>
   <PropertyGroup>
     <OptProfMetadataJson>$(BUILD_STAGINGDIRECTORY)\InsertionOutputs\Metadata.json</OptProfMetadataJson>
+    <OptProfMetadataOutputDir>$(ArtifactsDir)\VSSetup\$(Configuration)</OptProfMetadataOutputDir>
+    <OptProfMetadataOutputPath>$(OptProfMetadataOutputDir)\Metadata.json</OptProfMetadataOutputPath>
   </PropertyGroup>
 
   <Target Name="UpdateOptProfMetadataJson" AfterTargets="_DownloadVisualStudioOptimizationDataOpt">
-    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command &quot;($json = Get-Content '$(OptProfMetadataJson)' -Raw | ConvertFrom-Json); $json | Add-Member -MemberType NoteProperty -Name 'OptimizationData' -Value '$(_DropName)' -Force; $json | ConvertTo-Json | Set-Content '$(BUILD_STAGINGDIRECTORY)\artifacts\VSSetup\$(Configuration)\Metadata.json'&quot;" />
+    <MakeDir Directories="$(OptProfMetadataOutputDir)" />
+    <Exec Command="powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command &quot;($json = Get-Content '$(OptProfMetadataJson)' -Raw | ConvertFrom-Json); $json | Add-Member -MemberType NoteProperty -Name 'OptimizationData' -Value '$(_DropName)' -Force; $json | ConvertTo-Json | Set-Content '$(OptProfMetadataOutputPath)'&quot;" />
   </Target>
 </Project>
