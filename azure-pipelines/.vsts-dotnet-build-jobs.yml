@@ -197,34 +197,36 @@ jobs:
 
       $paths = @(
         "OptProf/$(BuildConfiguration)/Data",
-        '$(Build.StagingDirectory)/MicroBuild/Output',
+        "$(Build.StagingDirectory)/MicroBuild/Output",
         "log/$(BuildConfiguration)",
         "VSSetup/$(BuildConfiguration)",
         "packages/$(BuildConfiguration)",
-        'xsd'
+        "xsd"
       )
 
-      foreach ($relativePath in $paths) {
-        $from = Join-Path $sourceRoot $relativePath
-        if (-not (Test-Path $from)) {
-          continue
+      foreach ($path in $paths) {
+        $from = [System.IO.Path]::Join($sourceRoot, $path)
+
+        $destinationSubPath = if ($path -eq "$(Build.StagingDirectory)/MicroBuild/Output") {
+          "MicroBuild/Output"
+        } else {
+          $path
         }
 
-        $to = Join-Path $targetRoot $relativePath
+        $to = Join-Path $targetRoot $destinationSubPath
+
+        Write-Host "Moving '$from' -> '$to'"
+
         $parent = Split-Path $to -Parent
         if (-not (Test-Path $parent)) {
           New-Item -Path $parent -ItemType Directory -Force | Out-Null
         }
 
-        $robocopyResult = & robocopy $from $to /E /MOVE /NFL /NDL /NJH /NJS /NP
+        $robocopyResult = & robocopy $from $to /E /MOVE /NFL /NDL /NJH /NJS /NP /MT:8
         $exitCode = $LASTEXITCODE
         if ($exitCode -ge 8) {
           $robocopyResult | Out-String | Write-Host
-          throw "Robocopy failed with exit code $exitCode while moving '$relativePath'."
-        }
-
-        if (Test-Path $from) {
-          Remove-Item $from -Recurse -Force
+          throw "Robocopy failed with exit code $exitCode while moving '$path' to '$destinationSubPath'."
         }
       }
 
