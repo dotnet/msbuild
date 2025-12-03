@@ -122,6 +122,7 @@ extends:
 
     - stage: build
       displayName: Build
+      dependsOn: [] # empty dependency list to enable parallelization with localization stage
       jobs:
       - template: /azure-pipelines/.vsts-dotnet-build-jobs.yml@self
         parameters:
