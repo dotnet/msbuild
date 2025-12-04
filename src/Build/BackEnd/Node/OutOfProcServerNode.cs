@@ -25,7 +25,12 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// A callback used to execute command line build.
         /// </summary>
-        public delegate (int exitCode, string exitType) BuildCallback(string commandLine);
+        public delegate (int exitCode, string exitType) BuildCallback(
+#if FEATURE_GET_COMMANDLINE
+            string commandLine);
+#else
+            string[] commandLine);
+#endif
 
         private readonly BuildCallback _buildFunction;
 

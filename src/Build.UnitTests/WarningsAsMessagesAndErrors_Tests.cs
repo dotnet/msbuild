@@ -555,5 +555,123 @@ namespace Microsoft.Build.Engine.UnitTests
                 logger.ErrorCount.ShouldBe(0);
             }
         }
+
+        /// <summary>
+        /// NoWarn should be honored in addition to MSBuildWarningsAsMessages when both are set.
+        /// This tests the fix in Microsoft.Common.CurrentVersion.targets where NoWarn was ignored
+        /// if MSBuildWarningsAsMessages was already set.
+        /// See: https://github.com/dotnet/msbuild/issues/12808
+        /// </summary>
+        [Fact]
+        public void NoWarnHonoredWhenMSBuildWarningsAsMessagesIsSetViaTargets()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                // NoWarn sets NAT013, MSBuildWarningsAsMessages sets NAT011 and NAT012
+                // Both should be treated as messages (not warnings) when Common targets are imported
+                var content = """
+                <Project DefaultTargets="Build" xmlns="msbuildnamespace" ToolsVersion="msbuilddefaulttoolsversion">
+                    <Import Project="$(MSBuildToolsPath)\Microsoft.Common.props"/>
+
+                    <PropertyGroup>
+                        <Platform>AnyCPU</Platform>
+                        <Configuration>Debug</Configuration>
+                        <OutputPath>bin\Debug</OutputPath>
+                        <NoWarn>NAT013</NoWarn>
+                        <MSBuildWarningsAsMessages>NAT011;NAT012</MSBuildWarningsAsMessages>
+                    </PropertyGroup>
+
+                    <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets"/>
+
+                    <Target Name="Build">
+                        <Warning Code="NAT011" Text="Warning from MSBuildWarningsAsMessages 1" />
+                        <Warning Code="NAT012" Text="Warning from MSBuildWarningsAsMessages 2" />
+                        <Warning Code="NAT013" Text="Warning from NoWarn" />
+                    </Target>
+                </Project>
+                """;
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(content);
+
+                MockLogger logger = proj.BuildProjectExpectSuccess();
+                logger.WarningCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(0);
+            }
+        }
+
+        /// <summary>
+        /// NoWarn should work when MSBuildWarningsAsMessages is NOT set via targets (original behavior).
+        /// </summary>
+        [Fact]
+        public void NoWarnWorksWhenMSBuildWarningsAsMessagesIsNotSetViaTargets()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                // NoWarn sets NAT013, MSBuildWarningsAsMessages is not set
+                // NAT013 should be treated as a message (not a warning) when Common targets are imported
+                var content = """
+                <Project DefaultTargets="Build" xmlns="msbuildnamespace" ToolsVersion="msbuilddefaulttoolsversion">
+                    <Import Project="$(MSBuildToolsPath)\Microsoft.Common.props"/>
+
+                    <PropertyGroup>
+                        <Platform>AnyCPU</Platform>
+                        <Configuration>Debug</Configuration>
+                        <OutputPath>bin\Debug</OutputPath>
+                        <NoWarn>NAT013</NoWarn>
+                    </PropertyGroup>
+
+                    <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets"/>
+
+                    <Target Name="Build">
+                        <Warning Code="NAT013" Text="Warning from NoWarn" />
+                    </Target>
+                </Project>
+                """;
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(content);
+
+                MockLogger logger = proj.BuildProjectExpectSuccess();
+                logger.WarningCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(0);
+            }
+        }
+
+        /// <summary>
+        /// Duplicate diagnostic codes in both NoWarn and MSBuildWarningsAsMessages should be handled correctly.
+        /// When the same code appears in both properties, the warning should still be treated as a message.
+        /// </summary>
+        [Fact]
+        public void DuplicateDiagnosticCodesInNoWarnAndMSBuildWarningsAsMessagesAreHandled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                // NAT012 is in both NoWarn and MSBuildWarningsAsMessages
+                // This tests that duplicate codes are handled correctly
+                var content = """
+                <Project DefaultTargets="Build" xmlns="msbuildnamespace" ToolsVersion="msbuilddefaulttoolsversion">
+                    <Import Project="$(MSBuildToolsPath)\Microsoft.Common.props"/>
+
+                    <PropertyGroup>
+                        <Platform>AnyCPU</Platform>
+                        <Configuration>Debug</Configuration>
+                        <OutputPath>bin\Debug</OutputPath>
+                        <NoWarn>NAT012;NAT013</NoWarn>
+                        <MSBuildWarningsAsMessages>NAT011;NAT012</MSBuildWarningsAsMessages>
+                    </PropertyGroup>
+
+                    <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets"/>
+
+                    <Target Name="Build">
+                        <Warning Code="NAT011" Text="Warning from MSBuildWarningsAsMessages only" />
+                        <Warning Code="NAT012" Text="Warning from both NoWarn and MSBuildWarningsAsMessages" />
+                        <Warning Code="NAT013" Text="Warning from NoWarn only" />
+                    </Target>
+                </Project>
+                """;
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(content);
+
+                MockLogger logger = proj.BuildProjectExpectSuccess();
+                logger.WarningCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(0);
+            }
+        }
     }
 }
