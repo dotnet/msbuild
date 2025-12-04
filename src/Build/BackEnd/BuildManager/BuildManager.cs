@@ -1161,8 +1161,8 @@ namespace Microsoft.Build.Execution
 
         private void EndBuildTelemetry()
         {
-            using IActivity? activity = TelemetryManager.Instance.DefaultActivitySource!
-                .StartActivity(TelemetryConstants.Build)
+            using IActivity? activity = TelemetryManager.Instance?.DefaultActivitySource
+                ?.StartActivity(TelemetryConstants.Build)
                 ?.SetTags(_buildTelemetry)
                 ?.SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
                         includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
