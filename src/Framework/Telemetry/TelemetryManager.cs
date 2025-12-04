@@ -83,6 +83,11 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Determines if the user has explicitly opted out of telemetry.
         /// </summary>
-        private bool IsOptOut() => Traits.Instance.FrameworkTelemetryOptOut || Traits.Instance.SdkTelemetryOptOut;
+        private bool IsOptOut() =>
+#if NETFRAMEWORK
+            Traits.Instance.FrameworkTelemetryOptOut;
+#else
+            Traits.Instance.SdkTelemetryOptOut;
+#endif
     }
 }

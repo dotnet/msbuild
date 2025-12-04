@@ -3005,6 +3005,9 @@ namespace Microsoft.Build.Execution
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }
 
+            // respect value coming from environment variable.
+            _buildParameters.IsTelemetryEnabled |= Traits.Instance.TelemetryOptIn;
+
             if (_buildParameters.IsTelemetryEnabled)
             {
                 TelemetryManager.Instance.Initialize(isStandalone: false);
