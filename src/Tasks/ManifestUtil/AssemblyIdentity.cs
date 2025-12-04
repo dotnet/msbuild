@@ -1,7 +1,6 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,7 +13,10 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Serialization;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -142,7 +144,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         public AssemblyIdentity(AssemblyIdentity identity)
         {
             if (identity == null)
+            {
                 return;
+            }
+
             _name = identity._name;
             _version = identity._version;
             _publicKeyToken = identity._publicKeyToken;
@@ -188,8 +193,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             var document = new XmlDocument();
             try
             {
-                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                using (XmlReader xmlReader = XmlReader.Create(path, readerSettings))
+                var readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                FileStream fs = File.OpenRead(path);
+                using (XmlReader xmlReader = XmlReader.Create(fs, readerSettings))
                 {
                     document.Load(xmlReader);
                 }
@@ -268,12 +274,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     {
                         identity = new AssemblyIdentity(r.Name, r.Version, r.PublicKeyToken, r.Culture, r.ProcessorArchitecture);
                     }
-                    catch (ArgumentException e)
+                    catch (ArgumentException e) when (e.HResult == unchecked((int)0x80070057))
                     {
-                        if (e.HResult != unchecked((int)0x80070057))
-                        {
-                            throw;
-                        }
                         // 0x80070057 - "Value does not fall within the expected range." is returned from 
                         // GetAssemblyIdentityFromFile for WinMD components
                     }

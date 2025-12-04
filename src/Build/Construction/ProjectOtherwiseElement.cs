@@ -1,12 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using Microsoft.Build.Collections;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -55,17 +55,17 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get an enumerator over any child item groups
         /// </summary>
-        public ICollection<ProjectItemGroupElement> ItemGroups => new ReadOnlyCollection<ProjectItemGroupElement>(Children.OfType<ProjectItemGroupElement>());
+        public ICollection<ProjectItemGroupElement> ItemGroups => GetChildrenOfType<ProjectItemGroupElement>();
 
         /// <summary>
         /// Get an enumerator over any child property groups
         /// </summary>
-        public ICollection<ProjectPropertyGroupElement> PropertyGroups => new ReadOnlyCollection<ProjectPropertyGroupElement>(Children.OfType<ProjectPropertyGroupElement>());
+        public ICollection<ProjectPropertyGroupElement> PropertyGroups => GetChildrenOfType<ProjectPropertyGroupElement>();
 
         /// <summary>
         /// Get an enumerator over any child chooses
         /// </summary>
-        public ICollection<ProjectChooseElement> ChooseElements => new ReadOnlyCollection<ProjectChooseElement>(Children.OfType<ProjectChooseElement>());
+        public ICollection<ProjectChooseElement> ChooseElements => GetChildrenOfType<ProjectChooseElement>();
 
         #endregion
 

@@ -1,20 +1,21 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using Microsoft.Build.Utilities;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
     /// <remarks>
     /// Base class for task state files.
     /// </remarks>
-    [Serializable()]
-    internal class StateFileBase
+    internal abstract class StateFileBase
     {
         // Current version for serialization. This should be changed when breaking changes
         // are made to this class.
@@ -22,15 +23,20 @@ namespace Microsoft.Build.Tasks
         // Version 4/5 - VS2017.7:
         //   Unify .NET Core + Full Framework. Custom serialization on some types that are no
         //   longer [Serializable].
-        private const byte CurrentSerializationVersion = 5;
+        internal const byte CurrentSerializationVersion = 6;
 
         // Version this instance is serialized with.
         private byte _serializedVersion = CurrentSerializationVersion;
 
         /// <summary>
+        /// True if <see cref="SerializeCache"/> should create the state file and serialize ourselves, false otherwise.
+        /// </summary>
+        internal virtual bool HasStateToSave => true;
+
+        /// <summary>
         /// Writes the contents of this object out to the specified file.
         /// </summary>
-        internal virtual void SerializeCache(string stateFile, TaskLoggingHelper log)
+        internal virtual void SerializeCache(string stateFile, TaskLoggingHelper log, bool serializeEmptyState = false)
         {
             try
             {
@@ -41,32 +47,35 @@ namespace Microsoft.Build.Tasks
                         File.Delete(stateFile);
                     }
 
-                    using (var s = new FileStream(stateFile, FileMode.CreateNew))
+                    if (serializeEmptyState || HasStateToSave)
                     {
-                        var formatter = new BinaryFormatter();
-                        formatter.Serialize(s, this);
+                        using (var s = new FileStream(stateFile, FileMode.CreateNew))
+                        {
+                            var translator = BinaryTranslator.GetWriteTranslator(s);
+                            translator.Translate(ref _serializedVersion);
+                            Translate(translator);
+                        }
                     }
                 }
             }
-            catch (Exception e)
+            // If there was a problem writing the file (like it's read-only or locked on disk, for
+            // example), then eat the exception and log a warning.  Otherwise, rethrow.
+            catch (Exception e) when (!ExceptionHandling.NotExpectedSerializationException(e))
             {
-                // If there was a problem writing the file (like it's read-only or locked on disk, for
-                // example), then eat the exception and log a warning.  Otherwise, rethrow.
-                if (ExceptionHandling.NotExpectedSerializationException(e))
-                    throw;
-
                 // Not being able to serialize the cache is not an error, but we let the user know anyway.
                 // Don't want to hold up processing just because we couldn't read the file.
                 log.LogWarningWithCodeFromResources("General.CouldNotWriteStateFile", stateFile, e.Message);
             }
         }
 
+        public abstract void Translate(ITranslator translator);
+
         /// <summary>
         /// Reads the specified file from disk into a StateFileBase derived object.
         /// </summary>
-        internal static StateFileBase DeserializeCache(string stateFile, TaskLoggingHelper log, Type requiredReturnType)
+        internal static T DeserializeCache<T>(string stateFile, TaskLoggingHelper log) where T : StateFileBase
         {
-            StateFileBase retVal = null;
+            T retVal = null;
 
             // First, we read the cache from disk if one exists, or if one does not exist, we create one.
             try
@@ -75,43 +84,38 @@ namespace Microsoft.Build.Tasks
                 {
                     using (FileStream s = File.OpenRead(stateFile))
                     {
-                        var formatter = new BinaryFormatter();
-                        object deserializedObject = formatter.Deserialize(s);
-                        retVal = deserializedObject as StateFileBase;
+                        using var translator = BinaryTranslator.GetReadTranslator(s, InterningBinaryReader.PoolingBuffer);
 
-                        // If the deserialized object is null then there would be no cast error but retVal would still be null
-                        // only log the message if there would have been a cast error
-                        if (retVal == null && deserializedObject != null)
+                        byte version = 0;
+                        translator.Translate(ref version);
+                        // If the version is wrong, log a message not a warning. This could be a valid cache with the wrong version preventing correct deserialization.
+                        // For the latter case, internals may be unexpectedly null.
+                        if (version != CurrentSerializationVersion)
                         {
-                            // When upgrading to Visual Studio 2008 and running the build for the first time the resource cache files are replaced which causes a cast error due
-                            // to a new version number on the tasks class. "Unable to cast object of type 'Microsoft.Build.Tasks.SystemState' to type 'Microsoft.Build.Tasks.StateFileBase".
-                            // If there is an invalid cast, a message rather than a warning should be emitted.
                             log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
+                            return null;
                         }
 
-                        if ((retVal != null) && (!requiredReturnType.IsInstanceOfType(retVal)))
+                        var constructors = typeof(T).GetConstructors();
+                        foreach (var constructor in constructors)
+                        {
+                            var parameters = constructor.GetParameters();
+                            if (parameters.Length == 1 && parameters[0].ParameterType == typeof(ITranslator))
+                            {
+                                retVal = constructor.Invoke(new object[] { translator }) as T;
+                            }
+                        }
+
+                        if (retVal == null)
                         {
                             log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile,
                                 log.FormatResourceString("General.IncompatibleStateFileType"));
-                            retVal = null;
-                        }
-
-                        // If we get back a valid object and internals were changed, things are likely to be null. Check the version before we use it.
-                        if (retVal != null && retVal._serializedVersion != CurrentSerializationVersion)
-                        {
-                            log.LogMessageFromResources("General.CouldNotReadStateFileMessage", stateFile, log.FormatResourceString("General.IncompatibleStateFileType"));
-                            retVal = null;
                         }
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 // The deserialization process seems like it can throw just about 
                 // any exception imaginable.  Catch them all here.
                 // Not being able to deserialize the cache is not an error, but we let the user know anyway.

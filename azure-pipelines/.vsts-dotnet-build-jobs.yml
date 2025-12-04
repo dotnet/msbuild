@@ -24,9 +24,9 @@ jobs:
   - name: TeamName
     value: MSBuild
   - name: VisualStudio.MajorVersion
-    value: 16
+    value: 17
   - name: VisualStudio.ChannelName
-    value: 'int.d16.11'
+    value: 'int.d17.8' # MSBuild's vs17.8 branch corresponds to this VS channel
   - name: VisualStudio.DropName
     value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
@@ -40,7 +40,7 @@ jobs:
       command: restore
       feedsToUse: config
       restoreSolution: 'eng\common\internal\Tools.csproj'
-      nugetConfigPath: '.\NuGet.config'
+      nugetConfigPath: 'eng\common\internal\NuGet.config'
       restoreDirectory: '$(Build.SourcesDirectory)\.packages'
 
   - task: MicroBuildSigningPlugin@4
@@ -212,13 +212,20 @@ jobs:
     displayName: Execute cleanup tasks
     condition: succeededOrFailed()
 
+  - template: /eng/common/templates-official/steps/component-governance.yml@self
+    parameters:
+      ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
+        disableComponentGovernance: false
+      ${{ else }}:
+        disableComponentGovernance: true
+
 - template: /eng/common/templates-official/jobs/source-build.yml@self
   parameters:
     platforms:
       - name: Managed
         pool:
           name: AzurePipelines-EO
-          image: 1ESPT-Ubuntu22.04
+          image: AzurePipelinesUbuntu22.04compliantGPT
           os: linux
 
 - template: /eng/common/templates-official/job/publish-build-assets.yml@self

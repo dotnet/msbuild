@@ -18,8 +18,6 @@
 
   <ItemGroup>
     <PackageReference Include="Shouldly" />
-    <PackageReference Include="xunit.core" />
-    <PackageReference Include="xunit.assert" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,15 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
+using System.Xml;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System;
-using System.Collections.Generic;
-
 using Expander = Microsoft.Build.Evaluation.Expander<Microsoft.Build.Evaluation.ProjectProperty, Microsoft.Build.Evaluation.ProjectItem>;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -46,7 +48,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Valid attributes on usingtask element
         /// </summary>
-        private static readonly HashSet<string> ValidAttributesOnUsingTask = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.taskName, XMakeAttributes.assemblyFile, XMakeAttributes.assemblyName, XMakeAttributes.taskFactory, XMakeAttributes.architecture, XMakeAttributes.runtime, XMakeAttributes.requiredPlatform, XMakeAttributes.requiredRuntime };
+        private static readonly HashSet<string> ValidAttributesOnUsingTask = new HashSet<string> { XMakeAttributes.condition, XMakeAttributes.label, XMakeAttributes.taskName, XMakeAttributes.assemblyFile, XMakeAttributes.assemblyName, XMakeAttributes.taskFactory, XMakeAttributes.architecture, XMakeAttributes.runtime, XMakeAttributes.requiredPlatform, XMakeAttributes.requiredRuntime, XMakeAttributes.overrideUsingTask };
 
         /// <summary>
         /// Valid attributes on target element
@@ -127,7 +129,10 @@ namespace Microsoft.Build.Construction
             // XML guarantees exactly one root element
             XmlElementWithLocation element = _document.DocumentElement as XmlElementWithLocation;
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject(element != null, ElementLocation.Create(_document.FullPath), "NoRootProjectElement", XMakeElements.project);
+            if (element is null)
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(ElementLocation.Create(_document.FullPath), "NoRootProjectElement", XMakeElements.project);
+            }
             ProjectErrorUtilities.VerifyThrowInvalidProject(element.Name != XMakeElements.visualStudioProject, element.Location, "ProjectUpgradeNeeded", _project.FullPath);
             ProjectErrorUtilities.VerifyThrowInvalidProject(element.LocalName == XMakeElements.project, element.Location, "UnrecognizedElement", element.Name);
 
@@ -176,7 +181,7 @@ namespace Microsoft.Build.Construction
                         break;
 
                     case XMakeElements.itemDefinitionGroup:
-                        _project.AppendParentedChildNoChecks(ParseProjectItemDefinitionGroupElement(childElement));
+                        _project.AppendParentedChildNoChecks(ParseProjectItemDefinitionGroupElement(childElement, _project));
                         break;
 
                     case XMakeElements.choose:
@@ -279,7 +284,7 @@ namespace Microsoft.Build.Construction
                 exclusiveItemOperation = XMakeAttributes.update;
             }
 
-            //  At most one of the include, remove, or update attributes may be specified
+            // At most one of the include, remove, or update attributes may be specified
             if (exclusiveAttributeCount > 1)
             {
                 XmlAttributeWithLocation errorAttribute = remove.Length > 0 ? (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.remove] : (XmlAttributeWithLocation)element.Attributes[XMakeAttributes.update];
@@ -319,7 +324,7 @@ namespace Microsoft.Build.Construction
                 }
                 else if (isValidMetadataNameInAttribute)
                 {
-                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute.Name, attribute.Value);
+                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute);
                     metadatum.ExpressedAsAttribute = true;
                     metadatum.Parent = item;
 
@@ -354,7 +359,7 @@ namespace Microsoft.Build.Construction
                 return;
             }
 
-            //  Case insensitive comparison so that mis-capitalizing an attribute like Include or Exclude results in an easy to understand
+            // Case insensitive comparison so that mis-capitalizing an attribute like Include or Exclude results in an easy to understand
             //  error instead of unexpected behavior
             if (KnownAttributesOnItemIgnoreCase.Contains(name))
             {
@@ -363,7 +368,7 @@ namespace Microsoft.Build.Construction
                 return;
             }
 
-            //  Reserve attributes starting with underscores in case we need to add more built-in attributes later
+            // Reserve attributes starting with underscores in case we need to add more built-in attributes later
             if (name[0] == '_')
             {
                 isReservedAttributeName = false;
@@ -421,14 +426,12 @@ namespace Microsoft.Build.Construction
 
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {
-                ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
+                ProjectErrorUtilities.VerifyThrowInvalidProject(
                     childElement.Name == XMakeElements.import,
                     childElement.Location,
                     "UnrecognizedChildElement",
                     childElement.Name,
-                    element.Name
-                );
+                    element.Name);
 
                 ProjectImportElement item = ParseProjectImportElement(childElement, importGroup);
 
@@ -443,14 +446,12 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectImportElement ParseProjectImportElement(XmlElementWithLocation element, ProjectElementContainer parent)
         {
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-            (
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 parent is ProjectRootElement || parent is ProjectImportGroupElement,
                 element.Location,
                 "UnrecognizedParentElement",
                 parent,
-                element
-            );
+                element);
 
             ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnImport);
             ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(element, XMakeAttributes.project);
@@ -512,15 +513,13 @@ namespace Microsoft.Build.Construction
             string assemblyName = element.GetAttribute(XMakeAttributes.assemblyName);
             string assemblyFile = element.GetAttribute(XMakeAttributes.assemblyFile);
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-            (
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 (assemblyName.Length > 0) ^ (assemblyFile.Length > 0),
                 element.Location,
                 "UsingTaskAssemblySpecification",
                 XMakeElements.usingTask,
                 XMakeAttributes.assemblyName,
-                XMakeAttributes.assemblyFile
-            );
+                XMakeAttributes.assemblyFile);
 
             ProjectXmlUtilities.VerifyThrowProjectAttributeEitherMissingOrNotEmpty(element, XMakeAttributes.assemblyName);
             ProjectXmlUtilities.VerifyThrowProjectAttributeEitherMissingOrNotEmpty(element, XMakeAttributes.assemblyFile);
@@ -630,6 +629,14 @@ namespace Microsoft.Build.Construction
                         {
                             ProjectErrorUtilities.ThrowInvalidProject(onError.Location, "NodeMustBeLastUnderElement", XMakeElements.onError, XMakeElements.target, childElement.Name);
                         }
+                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6))
+                        {
+                            if (childElement.ChildNodes.Count == 1 && childElement.FirstChild.NodeType == XmlNodeType.Text)
+                            {
+                                // If the element has inner text and no other child elements except text, then this should be a property and throw invalid child element of <Target>
+                                ProjectErrorUtilities.ThrowInvalidProject(childElement.Location, "PropertyOutsidePropertyGroupInTarget", childElement.Name, childElement.ParentNode.Name);
+                            }
+                        }
 
                         child = ParseProjectTaskElement(childElement, target);
                         break;
@@ -648,15 +655,13 @@ namespace Microsoft.Build.Construction
         {
             foreach (XmlAttributeWithLocation attribute in element.Attributes)
             {
-                ProjectErrorUtilities.VerifyThrowInvalidProject
-                (
+                ProjectErrorUtilities.VerifyThrowInvalidProject(
                     !XMakeAttributes.IsBadlyCasedSpecialTaskAttribute(attribute.Name),
                     attribute.Location,
                     "BadlyCasedSpecialTaskAttribute",
                     attribute.Name,
                     element.Name,
-                    element.Name
-                );
+                    element.Name);
             }
 
             ProjectTaskElement task = new ProjectTaskElement(element, parent, _project);
@@ -685,13 +690,11 @@ namespace Microsoft.Build.Construction
             XmlAttributeWithLocation itemNameAttribute = element.GetAttributeWithLocation(XMakeAttributes.itemName);
             XmlAttributeWithLocation propertyNameAttribute = element.GetAttributeWithLocation(XMakeAttributes.propertyName);
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject
-            (
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
                 (String.IsNullOrWhiteSpace(itemNameAttribute?.Value) && !String.IsNullOrWhiteSpace(propertyNameAttribute?.Value)) || (!String.IsNullOrWhiteSpace(itemNameAttribute?.Value) && String.IsNullOrWhiteSpace(propertyNameAttribute?.Value)),
                 element.Location,
                 "InvalidTaskOutputSpecification",
-                parent.Name
-            );
+                parent.Name);
 
             ProjectXmlUtilities.VerifyThrowProjectAttributeEitherMissingOrNotEmpty(element, itemNameAttribute, XMakeAttributes.itemName);
             ProjectXmlUtilities.VerifyThrowProjectAttributeEitherMissingOrNotEmpty(element, propertyNameAttribute, XMakeAttributes.propertyName);
@@ -704,11 +707,11 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Parse a ProjectItemDefinitionGroupElement
         /// </summary>
-        private ProjectItemDefinitionGroupElement ParseProjectItemDefinitionGroupElement(XmlElementWithLocation element)
+        private ProjectItemDefinitionGroupElement ParseProjectItemDefinitionGroupElement(XmlElementWithLocation element, ProjectElementContainer parent)
         {
             ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnlyConditionAndLabel);
 
-            ProjectItemDefinitionGroupElement itemDefinitionGroup = new ProjectItemDefinitionGroupElement(element, _project, _project);
+            ProjectItemDefinitionGroupElement itemDefinitionGroup = new ProjectItemDefinitionGroupElement(element, parent, _project);
 
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {
@@ -741,7 +744,7 @@ namespace Microsoft.Build.Construction
                 }
                 else if (isValidMetadataNameInAttribute)
                 {
-                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute.Name, attribute.Value);
+                    ProjectMetadataElement metadatum = _project.CreateMetadataElement(attribute);
                     metadatum.ExpressedAsAttribute = true;
                     metadatum.Parent = itemDefinition;
 
@@ -858,6 +861,10 @@ namespace Microsoft.Build.Construction
 
                     case XMakeElements.choose:
                         child = ParseProjectChooseElement(childElement, parent, nestingDepth);
+                        break;
+
+                    case XMakeElements.itemDefinitionGroup:
+                        child = ParseProjectItemDefinitionGroupElement(childElement, parent);
                         break;
 
                     default:

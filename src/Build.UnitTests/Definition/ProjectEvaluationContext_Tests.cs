@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -18,6 +18,8 @@ using Shouldly;
 using Xunit;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.Definition
 {
     /// <summary>
@@ -32,8 +34,8 @@ namespace Microsoft.Build.UnitTests.Definition
             _resolver = new SdkUtilities.ConfigurableMockSdkResolver(
                 new Dictionary<string, SdkResult>
                 {
-                    {"foo", new SdkResult(new SdkReference("foo", "1.0.0", null), "path", "1.0.0", null)},
-                    {"bar", new SdkResult(new SdkReference("bar", "1.0.0", null), "path", "1.0.0", null)}
+                    {"foo", new SdkResult(new SdkReference("foo", "1.0.0", null), "path", "1.0.0", null) },
+                    {"bar", new SdkResult(new SdkReference("bar", "1.0.0", null), "path", "1.0.0", null) }
                 });
         }
 
@@ -47,9 +49,9 @@ namespace Microsoft.Build.UnitTests.Definition
 
         private static void SetResolverForContext(EvaluationContext context, SdkResolver resolver)
         {
-            var sdkService = (SdkResolverService) context.SdkResolverService;
+            var sdkService = (SdkResolverService)context.SdkResolverService;
 
-            sdkService.InitializeForTests(null, new List<SdkResolver> {resolver});
+            sdkService.InitializeForTests(null, new List<SdkResolver> { resolver });
         }
 
         [Theory]
@@ -107,8 +109,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     {
                         ProjectCollection = projectCollection,
                         EvaluationContext = evaluationContext
-                    }
-                );
+                    });
             }
 
             fileSystem.ExistenceChecks.OrderBy(kvp => kvp.Key)
@@ -119,7 +120,7 @@ namespace Microsoft.Build.UnitTests.Definition
                         {Path.Combine(_env.DefaultTestDirectory.Path, "2.file"), 1}
                     }.OrderBy(kvp => kvp.Key));
 
-            fileSystem.DirectoryEntryExistsCalls.ShouldBe(2);
+            fileSystem.FileOrDirectoryExistsCalls.ShouldBe(2);
         }
 
         [Fact]
@@ -127,6 +128,58 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             var fileSystem = new Helpers.LoggingFileSystem();
             Should.Throw<ArgumentException>(() => EvaluationContext.Create(EvaluationContext.SharingPolicy.Isolated, fileSystem));
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void EvaluationShouldUseDirectoryCache(bool useProjectInstance)
+        {
+            var projectFile = _env.CreateFile("1.proj", @"<Project> <Import Project='1.file' Condition=`Exists('1.file')`/> <ItemGroup><Compile Include='*.cs'/></ItemGroup> </Project>".Cleanup()).Path;
+
+            var projectCollection = _env.CreateProjectCollection().Collection;
+            var directoryCacheFactory = new Helpers.LoggingDirectoryCacheFactory();
+
+            int expectedEvaluationId;
+            if (useProjectInstance)
+            {
+                var projectInstance = ProjectInstance.FromFile(
+                    projectFile,
+                    new ProjectOptions
+                    {
+                        ProjectCollection = projectCollection,
+                        DirectoryCacheFactory = directoryCacheFactory,
+                    });
+                expectedEvaluationId = projectInstance.EvaluationId;
+            }
+            else
+            {
+                var project = Project.FromFile(
+                    projectFile,
+                    new ProjectOptions
+                    {
+                        ProjectCollection = projectCollection,
+                        DirectoryCacheFactory = directoryCacheFactory,
+                    });
+                expectedEvaluationId = project.LastEvaluationId;
+            }
+
+            directoryCacheFactory.DirectoryCaches.Count.ShouldBe(1);
+            var directoryCache = directoryCacheFactory.DirectoryCaches[0];
+
+            directoryCache.EvaluationId.ShouldBe(expectedEvaluationId);
+
+            directoryCache.ExistenceChecks.OrderBy(kvp => kvp.Key).ShouldBe(
+                new Dictionary<string, int>
+                {
+                    { _env.DefaultTestDirectory.Path, 1},
+                    { Path.Combine(_env.DefaultTestDirectory.Path, "1.file"), 2 }
+                }.OrderBy(kvp => kvp.Key));
+            directoryCache.Enumerations.ShouldBe(
+                new Dictionary<string, int>
+                {
+                    { _env.DefaultTestDirectory.Path, 1 }
+                });
         }
 
         [Theory]
@@ -322,8 +375,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     File.WriteAllText(Path.Combine(projectDirectory, $"{evaluationCount}.cs"), "");
 
                     ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
-                }
-                );
+                });
         }
 
         public static IEnumerable<object[]> ContextDisambiguatesRelativeGlobsData
@@ -371,7 +423,7 @@ namespace Microsoft.Build.UnitTests.Definition
             File.WriteAllText(Path.Combine(projectDirectory2, $"2.{evaluationCount}.cs"), "");
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     new ProjectSpecification(
                         Path.Combine(projectDirectory1, "1"),
@@ -403,8 +455,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                     File.WriteAllText(Path.Combine(projectDirectory1, $"1.{evaluationCount}.cs"), "");
                     File.WriteAllText(Path.Combine(projectDirectory2, $"2.{evaluationCount}.cs"), "");
-                }
-                );
+                });
         }
 
         [Theory]
@@ -427,7 +478,7 @@ namespace Microsoft.Build.UnitTests.Definition
             File.WriteAllText(Path.Combine(project2GlobDirectory, $"2.{evaluationCount}.cs"), "");
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     new ProjectSpecification(
                         Path.Combine(project1Directory, "1"),
@@ -461,8 +512,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                     File.WriteAllText(Path.Combine(project1GlobDirectory, $"1.{evaluationCount}.cs"), "");
                     File.WriteAllText(Path.Combine(project2GlobDirectory, $"2.{evaluationCount}.cs"), "");
-                }
-                );
+                });
         }
 
         [Theory]
@@ -489,7 +539,7 @@ namespace Microsoft.Build.UnitTests.Definition
             File.WriteAllText(Path.Combine(project1GlobDirectory, $"{evaluationCount}.cs"), "");
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     // first project uses a relative path
                     new ProjectSpecification(
@@ -532,8 +582,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     evaluationCount++;
 
                     File.WriteAllText(Path.Combine(project1GlobDirectory, $"{evaluationCount}.cs"), "");
-                }
-                );
+                });
         }
 
         [Theory]
@@ -557,7 +606,7 @@ namespace Microsoft.Build.UnitTests.Definition
             File.WriteAllText(Path.Combine(globDirectory.Path, $"{evaluationCount}.cs"), "");
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     new ProjectSpecification(
                         Path.Combine(project1Directory.Path, "1"),
@@ -593,8 +642,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     evaluationCount++;
 
                     File.WriteAllText(Path.Combine(globDirectory.Path, $"{evaluationCount}.cs"), "");
-                }
-                );
+                });
         }
 
         [Theory]
@@ -605,7 +653,7 @@ namespace Microsoft.Build.UnitTests.Definition
             ContextCachesCommonOutOfProjectCone(itemSpecPathIsRelative: false, policy: policy, expectedGlobExpansions: expectedGlobExpansions);
         }
 
-        [Theory (Skip="https://github.com/Microsoft/msbuild/issues/3889")]
+        [Theory(Skip = "https://github.com/dotnet/msbuild/issues/3889")]
         [MemberData(nameof(ContextPinsGlobExpansionCacheData))]
         // projects should cache glob expansions when the __relative__ glob is shared between projects and points outside of project cone
         public void ContextCachesCommonOutOfProjectConeRelativeGlob(EvaluationContext.SharingPolicy policy, string[][] expectedGlobExpansions)
@@ -666,8 +714,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     File.WriteAllText(Path.Combine(globDirectory.Path, $"{evaluationCount}.cs"), "");
 
                     ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
-                }
-                );
+                });
         }
 
         private static string[] _projectsWithGlobImports =
@@ -704,8 +751,7 @@ namespace Microsoft.Build.UnitTests.Definition
                     File.WriteAllText(Path.Combine(projectDirectory, $"{evaluationCount}.props"), $"<Project><ItemGroup><i Include=`{evaluationCount}.cs`/></ItemGroup></Project>".Cleanup());
 
                     ObjectModelHelpers.AssertItems(expectedGlobExpansion, project.GetItems("i"));
-                }
-                );
+                });
         }
 
         private static string[] _projectsWithConditions =
@@ -754,6 +800,7 @@ namespace Microsoft.Build.UnitTests.Definition
                         project.GetPropertyValue("p").ShouldBe("val");
                     }
                     else
+                    {
                         switch (policy)
                         {
                             case EvaluationContext.SharingPolicy.Shared:
@@ -765,8 +812,8 @@ namespace Microsoft.Build.UnitTests.Definition
                             default:
                                 throw new ArgumentOutOfRangeException(nameof(policy), policy, null);
                         }
-                }
-                );
+                    }
+                });
         }
 
         [Theory]
@@ -783,7 +830,7 @@ namespace Microsoft.Build.UnitTests.Definition
             int evaluationCount = 0;
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     $@"<Project>
                       <PropertyGroup>
@@ -837,7 +884,7 @@ namespace Microsoft.Build.UnitTests.Definition
             int evaluationCount = 0;
 
             EvaluateProjects(
-                new []
+                new[]
                 {
                     $@"<Project>
                       <PropertyGroup>

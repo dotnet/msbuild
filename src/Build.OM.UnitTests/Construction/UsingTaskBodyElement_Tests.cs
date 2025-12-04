@@ -1,13 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -37,7 +38,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask AssemblyFile='af' TaskFactory='AssemblyFactory'>
                             <Task NotValidAttribute='OHI'/>
                        </UsingTask>
@@ -46,8 +47,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
                 Assert.True(false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Create a task body outside of a using task
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Task>
                             Contents
                         </Task>
@@ -66,8 +66,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Set body value
@@ -108,8 +107,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectUsingTaskBodyElement body = GetBodyXml();
                 body.TaskBody = null;
                 Assert.True(false);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify setting the value of evaluate to null will wipe out the element and then the property will return true by default.
@@ -130,7 +128,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectUsingTaskBodyElement GetBodyXml()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <UsingTask TaskName='SuperTask' AssemblyFile='af' TaskFactory='AssemblyFactory'>
                             <Task Evaluate='false'>Contents</Task>
                        </UsingTask>

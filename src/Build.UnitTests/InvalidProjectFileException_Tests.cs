@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -8,6 +8,8 @@ using Microsoft.Build.Exceptions;
 
 using Xunit;
 using Xunit.Abstractions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -18,42 +20,6 @@ namespace Microsoft.Build.UnitTests
         public InvalidProjectFileExceptionTests(ITestOutputHelper output)
         {
             _testOutput = output;
-        }
-
-        /// <summary>
-        /// Verify I implemented ISerializable correctly
-        /// </summary>
-        [Fact]
-        public void SerializeDeserialize()
-        {
-            InvalidProjectFileException e = new InvalidProjectFileException(
-                "projectFile",
-                1, 2, 3, 4,
-                "message",
-                "errorSubcategory",
-                "errorCode",
-                "helpKeyword");
-
-            using (MemoryStream memstr = new MemoryStream())
-            {
-                BinaryFormatter frm = new BinaryFormatter();
-
-                frm.Serialize(memstr, e);
-                memstr.Position = 0;
-
-                InvalidProjectFileException e2 = (InvalidProjectFileException)frm.Deserialize(memstr);
-
-                Assert.Equal(e.ColumnNumber, e2.ColumnNumber);
-                Assert.Equal(e.EndColumnNumber, e2.EndColumnNumber);
-                Assert.Equal(e.EndLineNumber, e2.EndLineNumber);
-                Assert.Equal(e.ErrorCode, e2.ErrorCode);
-                Assert.Equal(e.ErrorSubcategory, e2.ErrorSubcategory);
-                Assert.Equal(e.HasBeenLogged, e2.HasBeenLogged);
-                Assert.Equal(e.HelpKeyword, e2.HelpKeyword);
-                Assert.Equal(e.LineNumber, e2.LineNumber);
-                Assert.Equal(e.Message, e2.Message);
-                Assert.Equal(e.ProjectFile, e2.ProjectFile);
-            }
         }
 
         /// <summary>
@@ -89,7 +55,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Regression test for https://github.com/Microsoft/msbuild/issues/1286
+        /// Regression test for https://github.com/dotnet/msbuild/issues/1286
         /// </summary>
         [Fact]
         public void LogErrorShouldHavePathAndLocation()
@@ -112,7 +78,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Assert.Equal(3, e.LineNumber);
                 Assert.Equal(38, e.ColumnNumber);
-                Assert.Equal(file, e.ProjectFile); // https://github.com/Microsoft/msbuild/issues/1286
+                Assert.Equal(file, e.ProjectFile); // https://github.com/dotnet/msbuild/issues/1286
             }
             finally
             {

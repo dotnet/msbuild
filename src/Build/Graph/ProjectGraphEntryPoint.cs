@@ -1,8 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Graph
 {
@@ -29,12 +31,12 @@ namespace Microsoft.Build.Graph
         {
             ErrorUtilities.VerifyThrowArgumentLength(projectFile, nameof(projectFile));
 
-            ProjectFile = projectFile;
+            ProjectFile = FileUtilities.NormalizePath(projectFile);
             GlobalProperties = globalProperties;
         }
 
         /// <summary>
-        /// Gets the project file to use for this entry point.
+        /// Gets the full path to the project file to use for this entry point.
         /// </summary>
         public string ProjectFile { get; }
 
@@ -59,7 +61,7 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        internal IEnumerable<ProjectGraphEntryPoint> AsEnumerable()
+        internal readonly IEnumerable<ProjectGraphEntryPoint> AsEnumerable()
         {
             yield return this;
         }

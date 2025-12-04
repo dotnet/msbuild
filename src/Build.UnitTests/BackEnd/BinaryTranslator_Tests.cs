@@ -1,15 +1,22 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
-using Microsoft.Build.BackEnd;
 using System.IO;
+using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.BuildException;
 using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -18,6 +25,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class BinaryTranslator_Tests
     {
+        static BinaryTranslator_Tests()
+        {
+            SerializationContractInitializer.Initialize();
+        }
+
         /// <summary>
         /// Tests the SerializationMode property
         /// </summary>
@@ -25,11 +37,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSerializationMode()
         {
             MemoryStream stream = new MemoryStream();
-            ITranslator translator = BinaryTranslator.GetReadTranslator(stream, null);
-            Assert.Equal(TranslationDirection.ReadFromStream, translator.Mode);
+            using ITranslator readTranslator = BinaryTranslator.GetReadTranslator(stream, InterningBinaryReader.PoolingBuffer);
+            Assert.Equal(TranslationDirection.ReadFromStream, readTranslator.Mode);
 
-            translator = BinaryTranslator.GetWriteTranslator(stream);
-            Assert.Equal(TranslationDirection.WriteToStream, translator.Mode);
+            using ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(stream);
+            Assert.Equal(TranslationDirection.WriteToStream, writeTranslator.Mode);
         }
 
         /// <summary>
@@ -125,7 +137,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TestSerializeStringArray()
         {
-            HelperTestArray(new string[] { }, StringComparer.Ordinal);
+            HelperTestArray(Array.Empty<string>(), StringComparer.Ordinal);
             HelperTestArray(new string[] { "foo", "bar" }, StringComparer.Ordinal);
             HelperTestArray(null, StringComparer.Ordinal);
         }
@@ -169,34 +181,122 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(value, deserializedValue);
         }
 
-        /// <summary>
-        /// Tests serializing using the DotNet serializer.
-        /// </summary>
         [Fact]
-        public void TestSerializeDotNet()
+        public void TestSerializeException()
         {
-            ArgumentNullException value = new ArgumentNullException("The argument was null", new InsufficientMemoryException());
-            TranslationHelpers.GetWriteTranslator().TranslateDotNet(ref value);
+            Exception value = new ArgumentNullException("The argument was null");
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
 
-            ArgumentNullException deserializedValue = null;
-            TranslationHelpers.GetReadTranslator().TranslateDotNet(ref deserializedValue);
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
 
-            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
         }
 
-        /// <summary>
-        /// Tests serializing using the DotNet serializer passing in null.
-        /// </summary>
         [Fact]
-        public void TestSerializeDotNetNull()
+        public void TestSerializeException_NestedWithStack()
         {
-            ArgumentNullException value = null;
-            TranslationHelpers.GetWriteTranslator().TranslateDotNet(ref value);
+            Exception value = null;
+            try
+            {
+                // Intentionally throw a nested exception with a stack trace.
+                value = value.InnerException;
+            }
+            catch (Exception e)
+            {
+                value = new ArgumentNullException("The argument was null", e);
+            }
 
-            ArgumentNullException deserializedValue = null;
-            TranslationHelpers.GetReadTranslator().TranslateDotNet(ref deserializedValue);
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
 
-            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue));
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
+        }
+
+        [Fact]
+        public void TestSerializeBuildException_NestedWithStack()
+        {
+            Exception value = null;
+            try
+            {
+                throw new InvalidProjectFileException("sample message");
+            }
+            catch (Exception e)
+            {
+                try
+                {
+                    throw new ArgumentNullException("The argument was null", e);
+                }
+                catch (Exception exception)
+                {
+                    value = new InternalErrorException("Another message", exception);
+                }
+            }
+
+            Assert.NotNull(value);
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason), diffReason);
+        }
+
+        public static IEnumerable<object[]> GetBuildExceptionsAsTestData()
+            => AppDomain
+                .CurrentDomain
+                .GetAssemblies()
+                // TaskHost is copying code files - so has a copy of types with identical names.
+                .Where(a => !a.FullName!.StartsWith("MSBuildTaskHost", StringComparison.CurrentCultureIgnoreCase))
+                .SelectMany(s => s.GetTypes())
+                .Where(BuildExceptionSerializationHelper.IsSupportedExceptionType)
+                .Select(t => new object[] { t });
+
+        [Theory]
+        [MemberData(nameof(GetBuildExceptionsAsTestData))]
+        public void TestSerializationOfBuildExceptions(Type exceptionType)
+        {
+            Exception e = (Exception)Activator.CreateInstance(exceptionType, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.CreateInstance | BindingFlags.Instance, null, new object[]{"msg", new GenericBuildTransferredException() }, System.Globalization.CultureInfo.CurrentCulture);
+            Exception remote;
+            try
+            {
+                throw e;
+            }
+            catch (Exception exception)
+            {
+                remote = exception;
+            }
+
+            Assert.NotNull(remote);
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref remote);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(remote, deserializedValue, out string diffReason, true), $"Exception type {exceptionType.FullName} not properly de/serialized: {diffReason}");
+        }
+
+        [Fact]
+        public void TestInvalidProjectFileException_NestedWithStack()
+        {
+            Exception value = null;
+            try
+            {
+                throw new InvalidProjectFileException("sample message", new InternalErrorException("Another message"));
+            }
+            catch (Exception e)
+            {
+                value = e;
+            }
+
+            TranslationHelpers.GetWriteTranslator().TranslateException(ref value);
+
+            Exception deserializedValue = null;
+            TranslationHelpers.GetReadTranslator().TranslateException(ref deserializedValue);
+
+            Assert.True(TranslationHelpers.CompareExceptions(value, deserializedValue, out string diffReason, true), diffReason);
         }
 
         /// <summary>
@@ -545,11 +645,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 HashAlgorithm = System.Configuration.Assemblies.AssemblyHashAlgorithm.SHA256,
                 VersionCompatibility = AssemblyVersionCompatibility.SameMachine,
                 CodeBase = "C:\\src",
-                KeyPair = new StrongNameKeyPair(new byte[] { 4, 3, 2, 1 }),
                 ContentType = AssemblyContentType.WindowsRuntime,
                 CultureName = "zh-HK",
             };
-            value.SetPublicKey(new byte[]{ 3, 2, 1});
+            value.SetPublicKey(new byte[] { 3, 2, 1 });
             value.SetPublicKeyToken(new byte[] { 8, 7, 6, 5, 4, 3, 2, 1 });
 
             TranslationHelpers.GetWriteTranslator().Translate(ref value);
@@ -778,10 +877,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             public override bool Equals(object obj)
             {
-                if (ReferenceEquals(null, obj)) return false;
-                if (ReferenceEquals(this, obj)) return true;
-                if (obj.GetType() != this.GetType()) return false;
-                return Equals((BaseClass) obj);
+                if (ReferenceEquals(null, obj))
+                {
+                    return false;
+                }
+
+                if (ReferenceEquals(this, obj))
+                {
+                    return true;
+                }
+
+                if (obj.GetType() != this.GetType())
+                {
+                    return false;
+                }
+
+                return Equals((BaseClass)obj);
             }
 
             public override int GetHashCode()
@@ -792,7 +903,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Gets a comparer.
             /// </summary>
-            static public IComparer<BaseClass> Comparer
+            public static IComparer<BaseClass> Comparer
             {
                 get { return new BaseClassComparer(); }
             }
@@ -830,7 +941,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Comparer for BaseClass.
             /// </summary>
-            private class BaseClassComparer : IComparer<BaseClass>
+            private sealed class BaseClassComparer : IComparer<BaseClass>
             {
                 /// <summary>
                 /// Constructor.
@@ -860,7 +971,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Derived class for testing.
         /// </summary>
-        private class DerivedClass : BaseClass
+        private sealed class DerivedClass : BaseClass
         {
             /// <summary>
             /// A field.
@@ -886,7 +997,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Gets a comparer.
             /// </summary>
-            static new public IComparer<DerivedClass> Comparer
+            public static new IComparer<DerivedClass> Comparer
             {
                 get { return new DerivedClassComparer(); }
             }
@@ -915,7 +1026,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             /// <summary>
             /// Comparer for DerivedClass.
             /// </summary>
-            private class DerivedClassComparer : IComparer<DerivedClass>
+            private sealed class DerivedClassComparer : IComparer<DerivedClass>
             {
                 /// <summary>
                 /// Constructor

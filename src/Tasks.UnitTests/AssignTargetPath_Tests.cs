@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
@@ -9,9 +9,11 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class AssignTargetPath_Tests
+    public sealed class AssignTargetPath_Tests
     {
         [Fact]
         public void Regress314791()
@@ -105,42 +107,5 @@ namespace Microsoft.Build.UnitTests
             t.AssignedFiles.Length.ShouldBe(1);
             t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe(targetPath);
         }
-
-        [Theory]
-        [InlineData("c:/fully/qualified/path.txt")]
-        [InlineData("test/output/file.txt")]
-        [InlineData(@"some\dir\to\file.txt")]
-        [InlineData("file.txt")]
-        [InlineData("file")]
-        public void TargetPathAlreadySet_DisabledUnderChangeWave16_10(string targetPath)
-        {
-            using TestEnvironment env = TestEnvironment.Create();
-            string link = "c:/some/path";
-
-            ChangeWaves.ResetStateForTests();
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_10.ToString());
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
-            AssignTargetPath t = new AssignTargetPath();
-            t.BuildEngine = new MockEngine();
-            Dictionary<string, string> metaData = new Dictionary<string, string>();
-            metaData.Add("TargetPath", targetPath);
-            metaData.Add("Link", link);
-            t.Files = new ITaskItem[]
-                          {
-                              new TaskItem(
-                                  itemSpec: NativeMethodsShared.IsWindows ? @"c:\f1\f2\file.txt" : "/f1/f2/file.txt",
-                                  itemMetadata: metaData)
-                          };
-            t.RootFolder = NativeMethodsShared.IsWindows ? @"c:\f1\f2" : "/f1/f2";
-
-            t.Execute().ShouldBeTrue();
-            t.AssignedFiles.Length.ShouldBe(1);
-            t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe(link);
-            ChangeWaves.ResetStateForTests();
-        }
     }
 }
-
-
-

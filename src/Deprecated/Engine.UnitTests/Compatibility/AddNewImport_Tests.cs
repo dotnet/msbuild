@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -328,7 +332,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 InvokeAddNewImportMethod(p, projectPath, "true");
                 Assertion.AssertEquals(0, p.Imports.Count);
                 object o = p.EvaluatedItems;  // force evaluation of imported projects.
-                Assertion.AssertEquals(0, p.Imports.Count); // This is bonkers, should be 1 because the XML DOES contain the import node.
+                Assertion.AssertEquals(0, p.Imports.Count); // Should be 1 because the XML DOES contain the import node.
             }
             finally
             {

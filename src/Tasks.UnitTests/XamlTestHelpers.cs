@@ -1,8 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
-
-using Microsoft.CSharp;
-using Microsoft.Build.Tasks.Xaml;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.CodeDom;
@@ -12,7 +9,11 @@ using System.IO;
 using System.Reflection;
 using System.Xaml;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Tasks.Xaml;
+using Microsoft.CSharp;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -230,7 +231,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 return (string)task.GetType().InvokeMember("GetCommandLine_ForUnitTestsOnly", BindingFlags.Public | BindingFlags.NonPublic |
-                                    BindingFlags.Instance | BindingFlags.InvokeMethod, null, task, new object[] { });
+                                    BindingFlags.Instance | BindingFlags.InvokeMethod, null, task, Array.Empty<object>());
             }
             catch (TargetInvocationException e)
             {

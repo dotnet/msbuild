@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -8,7 +8,9 @@ using System.IO;
 using System.Security;
 using System.Text;
 using System.Xml;
+#if !NETFRAMEWORK || MONO
 using Microsoft.Build.Shared;
+#endif
 
 using XMakeAttributes = Microsoft.Build.Shared.XMakeAttributes;
 using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtilities;
@@ -16,6 +18,8 @@ using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
 using System.Collections.ObjectModel;
 using System.Linq;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -43,7 +47,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Web Deployment (.wdproj) projects
         /// </summary>
-        WebDeploymentProject, //  MSBuildFormat, but Whidbey-era ones specify ProjectReferences differently
+        WebDeploymentProject, // MSBuildFormat, but Whidbey-era ones specify ProjectReferences differently
         /// <summary>
         /// Project inside an Enterprise Template project
         /// </summary>
@@ -146,7 +150,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string RelativePath
         {
-            get { return _relativePath; }
+            get
+            {
+                return _relativePath;
+            }
+
             internal set
             {
 #if NETFRAMEWORK && !MONO
@@ -291,10 +299,11 @@ namespace Microsoft.Build.Construction
             try
             {
                 // Read project thru a XmlReader with proper setting to avoid DTD processing
-                var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
                 var projectDocument = new XmlDocument();
 
-                using (XmlReader xmlReader = XmlReader.Create(AbsolutePath, xrSettings))
+                FileStream fs = File.OpenRead(AbsolutePath);
+                using (XmlReader xmlReader = XmlReader.Create(fs, xrSettings))
                 {
                     // Load the project file and get the first node    
                     projectDocument.Load(xmlReader);
@@ -333,7 +342,7 @@ namespace Microsoft.Build.Construction
                     // This is a bit of a special case, but an rptproj file will contain a Project with no schema that is
                     // not an MSBuild file. It will however have ToolsVersion="2.0" which is not supported with an empty
                     // schema. This is not a great solution, but it should cover the customer reported issue. See:
-                    // https://github.com/Microsoft/msbuild/issues/2064
+                    // https://github.com/dotnet/msbuild/issues/2064
                     if (emptyNamespace && !projectElementInvalid && mainProjectElement.GetAttribute("ToolsVersion") != "2.0")
                     {
                         _canBeMSBuildProjectFile = true;

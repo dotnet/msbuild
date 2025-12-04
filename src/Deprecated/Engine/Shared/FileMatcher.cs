@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.IO;
@@ -17,8 +21,8 @@ namespace Microsoft.Build.BuildEngine.Shared
     {
         private const string recursiveDirectoryMatch = "**";
         private const string dotdot = "..";
-        private static readonly string directorySeparator = new string(Path.DirectorySeparatorChar,1);
-        private static readonly string altDirectorySeparator = new string(Path.AltDirectorySeparatorChar,1);
+        private static readonly string directorySeparator = new string(Path.DirectorySeparatorChar, 1);
+        private static readonly string altDirectorySeparator = new string(Path.AltDirectorySeparatorChar, 1);
 
         private static readonly char[] wildcardCharacters = { '*', '?' };
         internal static readonly char[] directorySeparatorCharacters = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
@@ -143,7 +147,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             string path,
             string filespec,     // can be null
             string projectDirectory,
-            bool   stripProjectDirectory
+            bool stripProjectDirectory
         )
         {
             try
@@ -299,7 +303,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 // If there is a zero-length part, then that means there was an extra slash.
                 if (parts[i].Length == 0)
                 {
-                    longParts[i-startingElement] = String.Empty;
+                    longParts[i - startingElement] = String.Empty;
                 }
                 else
                 {
@@ -318,7 +322,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                         {
                             // The next part doesn't exist. Therefore, no more of the path will exist.
                             // Just return the rest.
-                            for (int j = i; j<parts.Length; ++j)
+                            for (int j = i; j < parts.Length; ++j)
                             {
                                 longParts[j - startingElement] = parts[j];
                             }
@@ -339,7 +343,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 }
             }
 
-            return pathRoot + String.Join (directorySeparator, longParts);
+            return pathRoot + String.Join(directorySeparator, longParts);
         }
 
         /// <summary>
@@ -446,9 +450,9 @@ namespace Microsoft.Build.BuildEngine.Shared
                  */
 
                 // We know the fixed director part now.
-                fixedDirectoryPart = filespec.Substring (0, indexOfLastDirectorySeparator + 1);
+                fixedDirectoryPart = filespec.Substring(0, indexOfLastDirectorySeparator + 1);
                 wildcardDirectoryPart = String.Empty;
-                filenamePart = filespec.Substring (indexOfLastDirectorySeparator + 1);
+                filenamePart = filespec.Substring(indexOfLastDirectorySeparator + 1);
                 return;
             }
 
@@ -469,17 +473,17 @@ namespace Microsoft.Build.BuildEngine.Shared
                  *      dir?\**
                  */
                 fixedDirectoryPart = String.Empty;
-                wildcardDirectoryPart = filespec.Substring (0, indexOfLastDirectorySeparator + 1);
-                filenamePart = filespec.Substring (indexOfLastDirectorySeparator + 1);
+                wildcardDirectoryPart = filespec.Substring(0, indexOfLastDirectorySeparator + 1);
+                filenamePart = filespec.Substring(indexOfLastDirectorySeparator + 1);
                 return;
             }
 
             /*
              * There is at least one wildcard and one dir separator, split parts out.
              */
-            fixedDirectoryPart = filespec.Substring(0, indexOfSeparatorBeforeWildCard+1);
-            wildcardDirectoryPart = filespec.Substring(indexOfSeparatorBeforeWildCard+1, indexOfLastDirectorySeparator-indexOfSeparatorBeforeWildCard);
-            filenamePart = filespec.Substring(indexOfLastDirectorySeparator+1);
+            fixedDirectoryPart = filespec.Substring(0, indexOfSeparatorBeforeWildCard + 1);
+            wildcardDirectoryPart = filespec.Substring(indexOfSeparatorBeforeWildCard + 1, indexOfLastDirectorySeparator - indexOfSeparatorBeforeWildCard);
+            filenamePart = filespec.Substring(indexOfLastDirectorySeparator + 1);
         }
 
         /// <summary>
@@ -491,7 +495,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             string[] paths
         )
         {
-            for (int i=0; i < paths.Length; i++)
+            for (int i = 0; i < paths.Length; i++)
             {
                 if (paths[i].StartsWith(".\\", StringComparison.Ordinal))
                 {
@@ -500,7 +504,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             }
         }
 
-      
+
         /// <summary>
         /// Checks if the char is a DirectorySeparatorChar or a AltDirectorySeparatorChar
         /// </summary>
@@ -522,7 +526,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         )
         {
             bool directoryLastCharIsSeparator = IsDirectorySeparator(projectDirectory[projectDirectory.Length - 1]);
-             for (int i = 0; i < paths.Length; i++)
+            for (int i = 0; i < paths.Length; i++)
             {
                 if (paths[i].StartsWith(projectDirectory, StringComparison.Ordinal))
                 {
@@ -567,7 +571,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             Regex regexFileMatch,           // can be null
             bool needsRecursion,
             string projectDirectory,
-            bool   stripProjectDirectory,
+            bool stripProjectDirectory,
             GetFileSystemEntries getFileSystemEntries
         )
         {
@@ -577,7 +581,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             ErrorUtilities.VerifyThrow((filespec != null) || (regexFileMatch != null),
                 "Need either a file-spec or a regular expression to match files.");
 
-            ErrorUtilities.VerifyThrow(remainingWildcardDirectory!=null, "Expected non-null remaning wildcard directory.");
+            ErrorUtilities.VerifyThrow(remainingWildcardDirectory != null, "Expected non-null remaning wildcard directory.");
 
             /*
              * Get the matching files.
@@ -621,7 +625,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             /*
              * Recurse into subdirectories.
              */
-            if (needsRecursion && remainingWildcardDirectory.Length>0)
+            if (needsRecursion && remainingWildcardDirectory.Length > 0)
             {
                 // Find the next directory piece.
                 string pattern = null;
@@ -1153,7 +1157,7 @@ namespace Microsoft.Build.BuildEngine.Shared
              * might potentially do a lot of that.
              */
             System.Collections.ArrayList arrayListOfFiles = new System.Collections.ArrayList();
-            System.Collections.IList listOfFiles = (System.Collections.IList) arrayListOfFiles;
+            System.Collections.IList listOfFiles = (System.Collections.IList)arrayListOfFiles;
 
             /*
              * Analyze the file spec and get the information we need to do the matching.
@@ -1226,7 +1230,7 @@ namespace Microsoft.Build.BuildEngine.Shared
                 (wildcardDirectoryPart.Length > 0) &&
                 // the specification is not a simple "**"
                 (wildcardDirectoryPart != (recursiveDirectoryMatch + directorySeparator));
-                // then we need to use the regular expression
+            // then we need to use the regular expression
 
             // if we're not using the regular expression, get the file pattern extension
             string extensionPart = matchWithRegex

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,8 @@ using System.Linq;
 using System.Xml;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+
+#nullable disable
 
 namespace Microsoft.Build.Utilities
 {
@@ -313,9 +315,10 @@ namespace Microsoft.Build.Utilities
                 if (FileSystems.Default.FileExists(sdkManifestPath))
                 {
                     XmlDocument doc = new XmlDocument();
-                    XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                    XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
 
-                    using (XmlReader xmlReader = XmlReader.Create(sdkManifestPath, readerSettings))
+                    FileStream fs = File.OpenRead(sdkManifestPath);
+                    using (XmlReader xmlReader = XmlReader.Create(fs, readerSettings))
                     {
                         doc.Load(xmlReader);
                     }
@@ -352,13 +355,8 @@ namespace Microsoft.Build.Utilities
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-
                 ReadError = true;
                 ReadErrorMessage = e.Message;
             }

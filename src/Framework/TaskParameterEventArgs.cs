@@ -1,13 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -31,14 +32,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Creates an instance of this class for the given task parameter.
         /// </summary>
-        public TaskParameterEventArgs
-        (
+        public TaskParameterEventArgs(
             TaskParameterMessageKind kind,
             string itemType,
             IList items,
             bool logItemMetadata,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : base(null, null, null, MessageImportance.Low, eventTimestamp)
         {
             Kind = kind;
@@ -87,6 +86,8 @@ namespace Microsoft.Build.Framework
             BuildEventContext = reader.ReadOptionalBuildEventContext();
             Kind = (TaskParameterMessageKind)reader.Read7BitEncodedInt();
             ItemType = reader.ReadOptionalString();
+            LineNumber = reader.Read7BitEncodedInt();
+            ColumnNumber = reader.Read7BitEncodedInt();
             Items = ReadItems(reader);
         }
 
@@ -134,6 +135,8 @@ namespace Microsoft.Build.Framework
             writer.WriteOptionalBuildEventContext(BuildEventContext);
             writer.Write7BitEncodedInt((int)Kind);
             writer.WriteOptionalString(ItemType);
+            writer.Write7BitEncodedInt(LineNumber);
+            writer.Write7BitEncodedInt(ColumnNumber);
             WriteItems(writer, Items);
         }
 

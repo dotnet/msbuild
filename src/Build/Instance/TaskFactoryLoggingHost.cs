@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.Build.Framework;
@@ -12,6 +12,8 @@ using System.Runtime.Remoting;
 #endif
 using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -335,7 +337,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal bool IsEventSerializable(BuildEventArgs e)
         {
-            if (!e.GetType().GetTypeInfo().IsSerializable)
+#pragma warning disable SYSLIB0050
+            // Types which are not serializable and are not IExtendedBuildEventArgs as
+            // those always implement custom serialization by WriteToStream and CreateFromStream.
+            if (!e.GetType().GetTypeInfo().IsSerializable && e is not IExtendedBuildEventArgs)
+#pragma warning restore SYSLIB0050
             {
                 _loggingContext.LogWarning(null, new BuildEventFileInfo(string.Empty), "ExpectedEventToBeSerializable", e.GetType().Name);
                 return false;

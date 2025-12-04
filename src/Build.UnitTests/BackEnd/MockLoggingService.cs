@@ -1,17 +1,18 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
-
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -160,6 +161,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// List of warnings to not treat as errors.
+        /// </summary>
+        public ISet<string> WarningsNotAsErrors
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
         /// List of warnings to treat as low importance messages.
         /// </summary>
         public ISet<string> WarningsAsMessages
@@ -223,12 +233,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
             set { }
         }
 
+        public MessageImportance MinimumRequiredMessageImportance
+        {
+            get => MessageImportance.Low;
+        }
+
         public void AddWarningsAsMessages(BuildEventContext buildEventContext, ISet<string> codes)
         {
             throw new NotImplementedException();
         }
 
         public void AddWarningsAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void AddWarningsNotAsErrors(BuildEventContext buildEventContext, ISet<string> codes)
         {
             throw new NotImplementedException();
         }
@@ -469,9 +489,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <inheritdoc />
         public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
-        {
-            return new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
-        }
+            => new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
+
+        /// <inheritdoc />
+        public BuildEventContext CreateProjectCacheBuildEventContext(int submissionId, int evaluationId, int projectInstanceId, string projectFile)
+            => new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
 
         /// <inheritdoc />
         public void LogProjectEvaluationStarted(BuildEventContext eventContext, string projectFile)
@@ -494,7 +516,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Logs a project started event
         /// </summary>
-        public BuildEventContext LogProjectStarted(BuildEventContext nodeBuildEventContext, int submissionId, int projectId, BuildEventContext parentBuildEventContext, string projectFile, string targetNames, IEnumerable<DictionaryEntry> properties, IEnumerable<DictionaryEntry> items, int evaluationId = BuildEventContext.InvalidEvaluationId)
+        public BuildEventContext LogProjectStarted(
+            BuildEventContext nodeBuildEventContext,
+            int submissionId,
+            int configurationId,
+            BuildEventContext parentBuildEventContext,
+            string projectFile,
+            string targetNames,
+            IEnumerable<DictionaryEntry> properties,
+            IEnumerable<DictionaryEntry> items,
+            int evaluationId = BuildEventContext.InvalidEvaluationId,
+            int projectContextId = BuildEventContext.InvalidProjectContextId)
         {
             return new BuildEventContext(0, 0, 0, 0);
         }
@@ -553,7 +585,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <param name="projectFile">The project file</param>
         /// <param name="projectFileOfTaskNode">The project file containing the task node.</param>
         /// <returns>The task logging context</returns>
-        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode)
+        public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column)
         {
             return new BuildEventContext(0, 0, 0, 0);
         }
@@ -590,7 +622,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             throw new NotImplementedException();
         }
 
+        public ICollection<string> GetWarningsNotAsErrors(BuildEventContext context)
+        {
+            throw new NotImplementedException();
+        }
+
         public ICollection<string> GetWarningsAsMessages(BuildEventContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void LogIncludeFile(BuildEventContext buildEventContext, string filePath)
         {
             throw new NotImplementedException();
         }

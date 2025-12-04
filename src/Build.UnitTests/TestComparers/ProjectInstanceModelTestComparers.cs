@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -13,6 +13,8 @@ using EvaluatorData =
     Microsoft.Build.Evaluation.IEvaluatorData<Microsoft.Build.Execution.ProjectPropertyInstance, Microsoft.Build.Execution.ProjectItemInstance,
         Microsoft.Build.Execution.ProjectMetadataInstance, Microsoft.Build.Execution.ProjectItemDefinitionInstance>;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests.TestComparers
 {
     public static class ProjectInstanceModelTestComparers
@@ -25,7 +27,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
                 Assert.Equal(x.Properties, y.Properties, EqualityComparer<ProjectPropertyInstance>.Default);
                 Assert.Equal(x.TestEnvironmentalProperties, y.TestEnvironmentalProperties, EqualityComparer<ProjectPropertyInstance>.Default);
                 Helpers.AssertDictionariesEqual(x.GlobalProperties, y.GlobalProperties);
-                Assert.Equal(((EvaluatorData) x).GlobalPropertiesToTreatAsLocal, ((EvaluatorData) y).GlobalPropertiesToTreatAsLocal);
+                Assert.Equal(((EvaluatorData)x).GlobalPropertiesToTreatAsLocal, ((EvaluatorData)y).GlobalPropertiesToTreatAsLocal);
 
                 Assert.Equal(x.Items.ToArray(), y.Items.ToArray(), ProjectItemInstance.ProjectItemInstanceEqualityComparer.Default);
 
@@ -117,22 +119,22 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
             {
                 if (x is ProjectItemGroupTaskInstance)
                 {
-                    return new TargetItemGroupComparer().Equals((ProjectItemGroupTaskInstance) x, (ProjectItemGroupTaskInstance) y);
+                    return new TargetItemGroupComparer().Equals((ProjectItemGroupTaskInstance)x, (ProjectItemGroupTaskInstance)y);
                 }
 
                 if (x is ProjectPropertyGroupTaskInstance)
                 {
-                    return new TargetPropertyGroupComparer().Equals((ProjectPropertyGroupTaskInstance) x, (ProjectPropertyGroupTaskInstance) y);
+                    return new TargetPropertyGroupComparer().Equals((ProjectPropertyGroupTaskInstance)x, (ProjectPropertyGroupTaskInstance)y);
                 }
 
                 if (x is ProjectOnErrorInstance)
                 {
-                    return new TargetOnErrorComparer().Equals((ProjectOnErrorInstance) x, (ProjectOnErrorInstance) y);
+                    return new TargetOnErrorComparer().Equals((ProjectOnErrorInstance)x, (ProjectOnErrorInstance)y);
                 }
 
                 if (x is ProjectTaskInstance)
                 {
-                    return new TargetTaskComparer().Equals((ProjectTaskInstance) x, (ProjectTaskInstance) y);
+                    return new TargetTaskComparer().Equals((ProjectTaskInstance)x, (ProjectTaskInstance)y);
                 }
 
                 throw new NotImplementedException();
@@ -182,6 +184,12 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
                 Assert.Equal(x.KeepMetadataLocation, y.KeepMetadataLocation, new Helpers.ElementLocationComparerIgnoringType());
                 Assert.Equal(x.RemoveMetadataLocation, y.RemoveMetadataLocation, new Helpers.ElementLocationComparerIgnoringType());
                 Assert.Equal(x.ConditionLocation, y.ConditionLocation, new Helpers.ElementLocationComparerIgnoringType());
+
+                Assert.Equal(x.MatchOnMetadata, y.MatchOnMetadata);
+                Assert.Equal(x.MatchOnMetadataLocation, y.MatchOnMetadataLocation, new Helpers.ElementLocationComparerIgnoringType());
+
+                Assert.Equal(x.MatchOnMetadataOptions, y.MatchOnMetadataOptions);
+                Assert.Equal(x.MatchOnMetadataOptionsLocation, y.MatchOnMetadataOptionsLocation, new Helpers.ElementLocationComparerIgnoringType());
 
                 Assert.Equal(x.Metadata, y.Metadata, new TargetItemMetadataComparer());
 
@@ -249,7 +257,7 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
         }
     }
 
-    internal class TargetSpecificationComparer : IEqualityComparer<TargetSpecification>
+    internal sealed class TargetSpecificationComparer : IEqualityComparer<TargetSpecification>
     {
         public bool Equals(TargetSpecification x, TargetSpecification y)
         {
@@ -351,11 +359,11 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
             {
                 if (x is ProjectTaskOutputItemInstance)
                 {
-                    return new ProjectTaskOutputItemComparer().Equals((ProjectTaskOutputItemInstance) x, (ProjectTaskOutputItemInstance) y);
+                    return new ProjectTaskOutputItemComparer().Equals((ProjectTaskOutputItemInstance)x, (ProjectTaskOutputItemInstance)y);
                 }
                 if (x is ProjectTaskOutputPropertyInstance)
                 {
-                    return new ProjectTaskOutputPropertyComparer().Equals((ProjectTaskOutputPropertyInstance) x, (ProjectTaskOutputPropertyInstance) y);
+                    return new ProjectTaskOutputPropertyComparer().Equals((ProjectTaskOutputPropertyInstance)x, (ProjectTaskOutputPropertyInstance)y);
                 }
 
                 throw new NotImplementedException();

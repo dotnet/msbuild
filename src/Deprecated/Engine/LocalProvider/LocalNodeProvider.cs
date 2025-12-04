@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Collections;
@@ -59,14 +63,14 @@ namespace Microsoft.Build.BuildEngine
             }
 
             /* If we dont get a path passed in as a parameter, we can only assume that our path
-             is in the current appdomain basedirectory, this is the base directory 
+             is in the current appdomain basedirectory, this is the base directory
               that the assembly resolver uses to probe for assemblies
            */
             if (string.IsNullOrEmpty(this.locationOfMSBuildExe))
             {
                 this.locationOfMSBuildExe = AppDomain.CurrentDomain.BaseDirectory;
             }
-            if ( (cpuCount - 1) <= 0)
+            if ((cpuCount - 1) <= 0)
             {
                 return;
             }
@@ -90,7 +94,7 @@ namespace Microsoft.Build.BuildEngine
                 lastUsedNodeNumber = nodeData[i].NodeNumber + 1;
             }
 
-            // Set up the callback 
+            // Set up the callback
             this.engineCallback = parentEngineCallback;
             this.parentGlobalProperties = parentGlobalPropertyGroup;
             this.toolsetSearchLocations = toolSetSearchLocations;
@@ -122,7 +126,7 @@ namespace Microsoft.Build.BuildEngine
 
             if (String.Equals(parameterName, "MAXCPUCOUNT", StringComparison.OrdinalIgnoreCase))
             {
-                 try
+                try
                 {
                     this.cpuCount = Convert.ToInt32(parameterValue, CultureInfo.InvariantCulture);
                 }
@@ -166,7 +170,7 @@ namespace Microsoft.Build.BuildEngine
 
         public INodeDescription[] QueryNodeDescriptions()
         {
-            return new INodeDescription[cpuCount-1];
+            return new INodeDescription[cpuCount - 1];
         }
 
         public void AssignNodeIdentifiers(int[] nodeIds)
@@ -228,7 +232,7 @@ namespace Microsoft.Build.BuildEngine
             if (nodeData[nodeIndex].NodeState != NodeState.Launched)
             {
                 // Note that we have to check the node status again inside the mutex. This
-                // ensures that that after flipping the status to launched inside the mutex 
+                // ensures that that after flipping the status to launched inside the mutex
                 // there will be no more writes to the queue of targets waiting to be sent
                 lock (nodeStateLock)
                 {
@@ -319,7 +323,7 @@ namespace Microsoft.Build.BuildEngine
                 }
             }
 
-            // Reset the shutdown response received properties incase the nodes are going 
+            // Reset the shutdown response received properties incase the nodes are going
             // to be used for another build on the same engine.
             foreach (LocalNodeInfo nodeInfo in nodeData)
             {
@@ -409,7 +413,7 @@ namespace Microsoft.Build.BuildEngine
                 // before shutting down the node
                 while (nodeData[i].NodeState == NodeState.LaunchInProgress && !nodeData[i].CommunicationFailed)
                 {
-                   Thread.Sleep(500);
+                    Thread.Sleep(500);
                 }
 
                 if (nodeData[i].NodeState == NodeState.Launched)
@@ -459,7 +463,7 @@ namespace Microsoft.Build.BuildEngine
             }
             catch (System.ComponentModel.Win32Exception)
             {
-                // The exception indicates that the child process is no longer running or 
+                // The exception indicates that the child process is no longer running or
                 // the parent cannot access the child process information due to insufficent security permissions
             }
         }
@@ -481,7 +485,7 @@ namespace Microsoft.Build.BuildEngine
 
                 if (isUninitialized)
                 {
-                      return true;
+                    return true;
                 }
 
                 bool isInvalidProcessId = nodeData[nodeId].ProcessId == LocalNodeInfo.invalidProcessId;
@@ -490,7 +494,7 @@ namespace Microsoft.Build.BuildEngine
                 {
                     return true;
                 }
-           }
+            }
             catch (ArgumentException)
             {
                 // Process already exited
@@ -531,7 +535,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal void RecordNodeResponse(int nodeId, Node.NodeShutdownLevel shutdownLevel, int totalTaskTime)
         {
-              // If the node is shutting down - decrease the count of active nodes
+            // If the node is shutting down - decrease the count of active nodes
             if (shutdownLevel == Node.NodeShutdownLevel.ErrorShutdown ||
                 shutdownLevel == Node.NodeShutdownLevel.PoliteShutdown)
             {
@@ -697,7 +701,7 @@ namespace Microsoft.Build.BuildEngine
                         nodeInUseEvent.Close();
 
                         // If the node is still active and has not replied to the initialization message it must
-                        // be in bad state - try to get that node to exit 
+                        // be in bad state - try to get that node to exit
                         if (!nodeConnected && checkIfNodeActive(nodeData[nodeIndex].NodeNumber))
                         {
                             EventWaitHandle nodeShutdownEvent = new EventWaitHandle(false, EventResetMode.ManualReset, LocalNodeProviderGlobalNames.NodeErrorShutdownEventName(nodeData[nodeIndex].NodeNumber));
@@ -727,7 +731,7 @@ namespace Microsoft.Build.BuildEngine
         /// for a given index. The node is running if the global mutex with a
         /// "Node_" + nodeId + "_ActiveReady" as a name was created
         /// </summary>
-        private static  bool checkIfNodeActive(int nodeNumber)
+        private static bool checkIfNodeActive(int nodeNumber)
         {
             bool nodeIsActive = false;
             EventWaitHandle nodeActiveHandle = null;
@@ -738,7 +742,7 @@ namespace Microsoft.Build.BuildEngine
             }
             catch (WaitHandleCannotBeOpenedException)
             {
-                // Assume that the node is not running 
+                // Assume that the node is not running
             }
             finally
             {
@@ -756,7 +760,7 @@ namespace Microsoft.Build.BuildEngine
             EventWaitHandle nodeReadyEvent = null;
 
             string msbuildLocation = Path.Combine(locationOfMSBuildExe, "MSBuild.exe");
-            ErrorUtilities.VerifyThrow(File.Exists(msbuildLocation),"Msbuild.exe cannot be found at: "+msbuildLocation);
+            ErrorUtilities.VerifyThrow(File.Exists(msbuildLocation), "Msbuild.exe cannot be found at: " + msbuildLocation);
 
             bool exitedDueToError = true;
             try
@@ -971,13 +975,13 @@ namespace Microsoft.Build.BuildEngine
                     nodeData[i].SharedMemoryFromNode = null;
                 }
             }
-       }
+        }
 
         #endregion
 
         #region Data
         private IEngineCallback engineCallback;
-        private  ManualResetEvent exitCommunicationThreads;
+        private ManualResetEvent exitCommunicationThreads;
 
         private ManualResetEvent responseCountChangeEvent;
         private int activeNodeCount;

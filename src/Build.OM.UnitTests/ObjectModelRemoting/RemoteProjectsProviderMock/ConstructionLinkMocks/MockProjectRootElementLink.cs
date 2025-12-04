@@ -1,19 +1,21 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
-    using System.Collections.Generic;
     using System;
+    using System.Collections.Generic;
     using System.IO;
     using System.Text;
     using System.Xml;
     using Microsoft.Build.Construction;
     using Microsoft.Build.ObjectModelRemoting;
 
-    internal class MockProjectRootElementLinkRemoter : MockProjectElementContainerLinkRemoter
+    internal sealed class MockProjectRootElementLinkRemoter : MockProjectElementContainerLinkRemoter
     {
-        ProjectRootElement ProjectXml => (ProjectRootElement)Source;
+        private ProjectRootElement ProjectXml => (ProjectRootElement)Source;
 
         public override ProjectElement CreateLinkedObject(IImportHolder holder)
         {
@@ -34,7 +36,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         public string DirectoryPath => this.ProjectXml.DirectoryPath;
         public string FullPath { get => this.ProjectXml.FullPath; set => this.ProjectXml.FullPath = value; }
         public ElementLocation ProjectFileLocation => this.ProjectXml.ProjectFileLocation;
-        public Encoding Encoding => this.ProjectXml.Encoding; //!! more complicated in reality when passing cross process.
+        public Encoding Encoding => this.ProjectXml.Encoding; // !! more complicated in reality when passing cross process.
         public string RawXml => this.ProjectXml.RawXml;
         public bool PreserveFormatting => this.ProjectXml.PreserveFormatting;
         public MockProjectChooseElementLinkRemoter CreateChooseElement()
@@ -51,7 +53,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
         public MockProjectItemElementLinkRemoter CreateItemElement(string itemType, string include)
         {
-            return (MockProjectItemElementLinkRemoter) this.Export(this.ProjectXml.CreateItemElement(itemType, include));
+            return (MockProjectItemElementLinkRemoter)this.Export(this.ProjectXml.CreateItemElement(itemType, include));
         }
         public MockProjectItemDefinitionElementLinkRemoter CreateItemDefinitionElement(string itemType)
         {
@@ -144,7 +146,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     }
 
 
-    internal class MockProjectRootElementLink : ProjectRootElementLink, ILinkMock, IProjectElementLinkHelper, IProjectElementContainerLinkHelper
+    internal sealed class MockProjectRootElementLink : ProjectRootElementLink, ILinkMock, IProjectElementLinkHelper, IProjectElementContainerLinkHelper
     {
         public MockProjectRootElementLink(MockProjectRootElementLinkRemoter proxy, IImportHolder holder)
         {

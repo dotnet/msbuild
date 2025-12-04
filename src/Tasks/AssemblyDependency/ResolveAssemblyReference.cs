@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -21,13 +21,15 @@ using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
     /// Given a list of assemblyFiles, determine the closure of all assemblyFiles that
     /// depend on those assemblyFiles including second and nth-order dependencies too.
     /// </summary>
-    public class ResolveAssemblyReference : TaskExtension
+    public class ResolveAssemblyReference : TaskExtension, IIncrementalTask
     {
         /// <summary>
         /// key assembly used to trigger inclusion of facade references.
@@ -38,6 +40,11 @@ namespace Microsoft.Build.Tasks
         /// additional key assembly used to trigger inclusion of facade references.
         /// </summary>
         private const string NETStandardAssemblyName = "netstandard";
+
+        /// <summary>
+        /// The well-known CLR 4.0 metadata version used in all managed assemblies.
+        /// </summary>
+        private const string DotNetAssemblyRuntimeVersion = "v4.0.30319";
 
         /// <summary>
         /// Delegate to a method that takes a targetFrameworkDirectory and returns an array of redist or subset list paths
@@ -81,6 +88,7 @@ namespace Microsoft.Build.Tasks
             public static string LogAttributeFormat;
             public static string LogTaskPropertyFormat;
             public static string NoBecauseParentReferencesFoundInGac;
+            public static string NoBecauseBadImage;
             public static string NotCopyLocalBecauseConflictVictim;
             public static string NotCopyLocalBecauseEmbedded;
             public static string NotCopyLocalBecauseFrameworksFiles;
@@ -130,6 +138,7 @@ namespace Microsoft.Build.Tasks
                 IsAWinMdFile = GetResourceFourSpaces("ResolveAssemblyReference.IsAWinMdFile");
                 LogAttributeFormat = GetResourceEightSpaces("ResolveAssemblyReference.LogAttributeFormat");
                 LogTaskPropertyFormat = GetResource("ResolveAssemblyReference.LogTaskPropertyFormat");
+                NoBecauseBadImage = GetResourceFourSpaces("ResolveAssemblyReference.NoBecauseBadImage");
                 NoBecauseParentReferencesFoundInGac = GetResourceFourSpaces("ResolveAssemblyReference.NoBecauseParentReferencesFoundInGac");
                 NotCopyLocalBecauseConflictVictim = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseConflictVictim");
                 NotCopyLocalBecauseEmbedded = GetResourceFourSpaces("ResolveAssemblyReference.NotCopyLocalBecauseEmbedded");
@@ -320,7 +329,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] TargetFrameworkSubsets
         {
-            get { return _targetFrameworkSubsets; }
+            get
+            {
+                return _targetFrameworkSubsets;
+            }
+
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "TargetFrameworkSubsets");
@@ -448,7 +461,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] InstalledAssemblySubsetTables
         {
-            get { return _installedAssemblySubsetTables; }
+            get
+            {
+                return _installedAssemblySubsetTables;
+            }
+
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "InstalledAssemblySubsetTables");
@@ -475,7 +492,11 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public ITaskItem[] FullFrameworkAssemblyTables
         {
-            get { return _fullFrameworkAssemblyTables; }
+            get
+            {
+                return _fullFrameworkAssemblyTables;
+            }
+
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "FullFrameworkAssemblyTables");
@@ -872,6 +893,8 @@ namespace Microsoft.Build.Tasks
             }
         }
 
+        public bool FailIfNotIncremental { get; set; }
+
         /// <summary>
         /// This is a list of all primary references resolved to full paths.
         ///     bool CopyLocal - whether the given reference should be copied to the output directory.
@@ -1034,29 +1057,28 @@ namespace Microsoft.Build.Tasks
         /// <param name="idealAssemblyRemappingsIdentities">Array of identities of ideal assembly remappings.</param>
         /// <param name="generalResolutionExceptions">List of exceptions that were not attributable to a particular fusion name.</param>
         /// <returns></returns>
-        private bool LogResults
-        (
+        private bool LogResults(
             ReferenceTable dependencyTable,
             List<DependentAssembly> idealAssemblyRemappings,
             List<AssemblyNameReference> idealAssemblyRemappingsIdentities,
-            List<Exception> generalResolutionExceptions
-        )
+            List<Exception> generalResolutionExceptions)
         {
             bool success = true;
             MSBuildEventSource.Log.RarLogResultsStart();
             {
                 /*
                 PERF NOTE: The Silent flag turns off logging completely from the task side. This means
-                we avoid the String.Formats that would normally occur even if the verbosity was set to 
+                we avoid the String.Formats that would normally occur even if the verbosity was set to
                 quiet at the engine level.
                 */
                 if (!Silent)
                 {
                     // First, loop over primaries and display information.
-                    foreach (AssemblyNameExtension assemblyName in dependencyTable.References.Keys)
+                    foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in dependencyTable.References)
                     {
+                        AssemblyNameExtension assemblyName = assembly.Key;
                         string fusionName = assemblyName.FullName;
-                        Reference primaryCandidate = dependencyTable.GetReference(assemblyName);
+                        Reference primaryCandidate = assembly.Value;
 
                         if (primaryCandidate.IsPrimary && !(primaryCandidate.IsConflictVictim && primaryCandidate.IsCopyLocal))
                         {
@@ -1065,10 +1087,11 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Second, loop over dependencies and display information.
-                    foreach (AssemblyNameExtension assemblyName in dependencyTable.References.Keys)
+                    foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in dependencyTable.References)
                     {
+                        AssemblyNameExtension assemblyName = assembly.Key;
                         string fusionName = assemblyName.FullName;
-                        Reference dependencyCandidate = dependencyTable.GetReference(assemblyName);
+                        Reference dependencyCandidate = assembly.Value;
 
                         if (!dependencyCandidate.IsPrimary && !(dependencyCandidate.IsConflictVictim && dependencyCandidate.IsCopyLocal))
                         {
@@ -1077,17 +1100,21 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Third, show conflicts and their resolution.
-                    foreach (AssemblyNameExtension assemblyName in dependencyTable.References.Keys)
+                    foreach (KeyValuePair<AssemblyNameExtension, Reference> assembly in dependencyTable.References)
                     {
+                        AssemblyNameExtension assemblyName = assembly.Key;
                         string fusionName = assemblyName.FullName;
-                        Reference conflictCandidate = dependencyTable.GetReference(assemblyName);
+                        Reference conflictCandidate = assembly.Value;
 
                         if (conflictCandidate.IsConflictVictim)
                         {
                             bool logWarning = idealAssemblyRemappingsIdentities.Any(i => i.assemblyName.FullName.Equals(fusionName) && i.reference.GetConflictVictims().Count == 0);
                             StringBuilder logConflict = StringBuilderCache.Acquire();
                             LogConflict(conflictCandidate, fusionName, logConflict);
-                            StringBuilder logDependencies = logWarning ? logConflict.AppendLine() : StringBuilderCache.Acquire();
+
+                            // If we are logging warnings append it into existing StringBuilder, otherwise build details by new StringBuilder.
+                            // Remark: There is no point to use StringBuilderCache.Acquire() here as at this point StringBuilderCache already rent StringBuilder for this thread
+                            StringBuilder logDependencies = logWarning ? logConflict.AppendLine() : new StringBuilder();
 
                             // Log the assemblies and primary source items which are related to the conflict which was just logged.
                             Reference victor = dependencyTable.GetReference(conflictCandidate.ConflictVictorName);
@@ -1102,13 +1129,13 @@ namespace Microsoft.Build.Tasks
                             string details = string.Empty;
                             if (logWarning)
                             {
-                                // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference	
+                                // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
                                 // chosen was not the conflict victor in a version comparison. In other words, the victor was older.
                                 Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts", assemblyName.Name, output);
                             }
                             else
                             {
-                                details = StringBuilderCache.GetStringAndRelease(logDependencies);
+                                details = logDependencies.ToString();
                                 Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), output);
                                 Log.LogMessage(MessageImportance.Low, details);
                             }
@@ -1147,30 +1174,28 @@ namespace Microsoft.Build.Tasks
                             {
                                 foreach (AssemblyNameExtension conflictVictim in conflictVictims)
                                 {
-                                    // Make note we only output a conflict suggestion if the reference has at 
-                                    // least one conflict victim - that way we don't suggest redirects to 
+                                    // Make note we only output a conflict suggestion if the reference has at
+                                    // least one conflict victim - that way we don't suggest redirects to
                                     // assemblies that don't exist at runtime. For example, this avoids us suggesting
                                     // a redirect from Foo 1.0.0.0 -> 2.0.0.0 in the following:
                                     //
                                     //      Project -> Foo, 1.0.0.0
                                     //      Project -> Bar -> Foo, 2.0.0.0
                                     //
-                                    // Above, Foo, 1.0.0.0 wins out and is copied to the output directory because 
+                                    // Above, Foo, 1.0.0.0 wins out and is copied to the output directory because
                                     // it is a primary reference.
                                     foundAtLeastOneValidBindingRedirect = true;
 
                                     Reference victimReference = dependencyTable.GetReference(conflictVictim);
                                     var newVerStr = idealRemapping.BindingRedirects[j].NewVersion.ToString();
-                                    Log.LogMessageFromResources
-                                    (
+                                    Log.LogMessageFromResources(
                                         MessageImportance.High,
                                         "ResolveAssemblyReference.ConflictRedirectSuggestion",
                                         idealRemappingPartialAssemblyName,
                                         conflictVictim.Version,
                                         victimReference.FullPath,
                                         newVerStr,
-                                        reference.FullPath
-                                    );
+                                        reference.FullPath);
 
                                     if (!SupportsBindingRedirectGeneration && !AutoUnify)
                                     {
@@ -1232,9 +1257,8 @@ namespace Microsoft.Build.Tasks
                     // Log general resolution exceptions.
                     foreach (Exception error in generalResolutionExceptions)
                     {
-                        if (error is InvalidReferenceAssemblyNameException)
+                        if (error is InvalidReferenceAssemblyNameException e)
                         {
-                            InvalidReferenceAssemblyNameException e = (InvalidReferenceAssemblyNameException)error;
                             Log.LogWarningWithCodeFromResources("General.MalformedAssemblyName", e.SourceItemSpec);
                         }
                         else
@@ -1247,15 +1271,15 @@ namespace Microsoft.Build.Tasks
             }
 
 #if FEATURE_WIN32_REGISTRY
-            if (dependencyTable.Resolvers != null)
+            MessageImportance messageImportance = MessageImportance.Low;
+            if (dependencyTable.Resolvers != null && Log.LogsMessagesOfImportance(messageImportance))
             {
                 foreach (Resolver r in dependencyTable.Resolvers)
                 {
-                    if (r is AssemblyFoldersExResolver)
+                    if (r is AssemblyFoldersExResolver assemblyFoldersExResolver)
                     {
-                        AssemblyFoldersEx assemblyFoldersEx = ((AssemblyFoldersExResolver)r).AssemblyFoldersExLocations;
+                        AssemblyFoldersEx assemblyFoldersEx = assemblyFoldersExResolver.AssemblyFoldersExLocations;
 
-                        MessageImportance messageImportance = MessageImportance.Low;
                         if (assemblyFoldersEx != null && _showAssemblyFoldersExLocations.TryGetValue(r.SearchPath, out messageImportance))
                         {
                             Log.LogMessageFromResources(messageImportance, "ResolveAssemblyReference.AssemblyFoldersExSearchLocations", r.SearchPath);
@@ -1286,7 +1310,9 @@ namespace Microsoft.Build.Tasks
 
             var buffer = new StringBuilder(a.Length * 2);
             for (int i = 0; i < a.Length; ++i)
+            {
                 buffer.Append(a[i].ToString("x2", CultureInfo.InvariantCulture));
+            }
 
             return buffer.ToString();
         }
@@ -1347,6 +1373,10 @@ namespace Microsoft.Build.Tasks
         {
             // Set an importance level to be used for secondary messages.
             MessageImportance importance = ChooseReferenceLoggingImportance(reference);
+            if (!Log.LogsMessagesOfImportance(importance))
+            {
+                return;
+            }
 
             // Log the fusion name and whether this is a primary or a dependency.
             LogPrimaryOrDependency(reference, fusionName, importance);
@@ -1413,7 +1443,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void LogInputs()
         {
-            if (Traits.Instance.EscapeHatches.LogTaskInputs || Silent)
+            MessageImportance importance = MessageImportance.Low;
+            if (Silent || Log.IsTaskInputLoggingEnabled || !Log.LogsMessagesOfImportance(importance))
             {
                 // the inputs will be logged automatically anyway, avoid duplication in the logs
                 return;
@@ -1421,7 +1452,6 @@ namespace Microsoft.Build.Tasks
 
             string indent = Strings.FourSpaces;
             string property = Strings.LogTaskPropertyFormat;
-            MessageImportance importance = MessageImportance.Low;
 
             Log.LogMessage(importance, property, "TargetFrameworkMoniker");
             Log.LogMessage(importance, indent + _targetedFrameworkMoniker);
@@ -1669,7 +1699,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else if (itemError is BadImageReferenceException)
                 {
-                    message = Log.FormatResourceString("ResolveAssemblyReference.FailedWithException", itemError.InnerException?.ToString() ?? itemError.ToString());
+                    message = Log.FormatResourceString("ResolveAssemblyReference.FailedWithException", itemError.Message);
                     helpKeyword = "MSBuild.ResolveAssemblyReference.FailedWithException";
                     dependencyProblem = false;
                 }
@@ -1748,8 +1778,7 @@ namespace Microsoft.Build.Tasks
                         }
 
                         if ((messageImportance == MessageImportance.Low && (importance == MessageImportance.Normal || importance == MessageImportance.High)) ||
-                            (messageImportance == MessageImportance.Normal && importance == MessageImportance.High)
-                           )
+                            (messageImportance == MessageImportance.Normal && importance == MessageImportance.High))
                         {
                             _showAssemblyFoldersExLocations[location.SearchPath] = importance;
                         }
@@ -1920,6 +1949,10 @@ namespace Microsoft.Build.Tasks
                         Log.LogMessage(importance, Strings.NoBecauseParentReferencesFoundInGac);
                         break;
 
+                    case CopyLocalState.NoBecauseBadImage:
+                        Log.LogMessage(importance, Strings.NoBecauseBadImage);
+                        break;
+
                     default:
                         Debug.Assert(false, "Should have handled this case.");
                         break;
@@ -1935,7 +1968,7 @@ namespace Microsoft.Build.Tasks
             if (!reference.IsUnresolvable && !reference.IsBadImage)
             {
                 // Don't log the overwhelming default as it just pollutes the logs.
-                if (reference.ImageRuntime != "v4.0.30319")
+                if (reference.ImageRuntime != DotNetAssemblyRuntimeVersion)
                 {
                     Log.LogMessage(importance, Strings.ImageRuntimeVersion, reference.ImageRuntime);
                 }
@@ -2003,12 +2036,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void ReadStateFile(FileExists fileExists)
         {
-            _cache = SystemState.DeserializeCacheByTranslator(_stateFile, Log);
+            _cache = SystemState.DeserializeCache<SystemState>(_stateFile, Log);
 
             // Construct the cache only if we can't find any caches.
             if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
             {
-                _cache = SystemState.DeserializePrecomputedCachesByTranslator(AssemblyInformationCachePaths, Log, fileExists);
+                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths, Log, fileExists);
             }
 
             if (_cache == null)
@@ -2022,13 +2055,21 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void WriteStateFile()
         {
-            if (!String.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
+            if (!string.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
             {
-                _cache.SerializePrecomputedCacheByTranslator(AssemblyInformationCacheOutputPath, Log);
+                _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log);
             }
-            else if (!String.IsNullOrEmpty(_stateFile) && _cache.IsDirty)
+            else if (!string.IsNullOrEmpty(_stateFile) && (_cache.IsDirty || _cache.instanceLocalOutgoingFileStateCache.Count < _cache.instanceLocalFileStateCache.Count))
             {
-                _cache.SerializeCacheByTranslator(_stateFile, Log);
+                // Either the cache is dirty (we added or updated an item) or the number of items actually used is less than what
+                // we got by reading the state file prior to execution. Serialize the cache into the state file.
+                if (FailIfNotIncremental)
+                {
+                    Log.LogErrorFromResources("ResolveAssemblyReference.WritingCacheFile", _stateFile);
+                    return;
+                }
+
+                _cache.SerializeCache(_stateFile, Log);
             }
         }
         #endregion
@@ -2087,8 +2128,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="readMachineTypeFromPEHeader">Delegate use to read machine type from PE Header</param>
         /// <returns>True if there was success.</returns>
 #endif
-        internal bool Execute
-        (
+        internal bool Execute(
             FileExists fileExists,
             DirectoryExists directoryExists,
             GetDirectories getDirectories,
@@ -2105,8 +2145,7 @@ namespace Microsoft.Build.Tasks
 #endif
             GetAssemblyPathInGac getAssemblyPathInGac,
             IsWinMDFile isWinMDFile,
-            ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader
-        )
+            ReadMachineTypeFromPEHeader readMachineTypeFromPEHeader)
         {
             bool success = true;
             MSBuildEventSource.Log.RarOverallStart();
@@ -2185,7 +2224,7 @@ namespace Microsoft.Build.Tasks
                             inclusionListSubsetTableInfo = GetInstalledAssemblyTableInfo(IgnoreDefaultInstalledAssemblySubsetTables, InstalledAssemblySubsetTables, new GetListPath(inclusionList.GetSubsetListPathsFromDisk), TargetFrameworkDirectories);
                             if (inclusionListSubsetTableInfo.Length > 0 && (redistList?.Count > 0))
                             {
-                                exclusionList = redistList.GenerateBlackList(inclusionListSubsetTableInfo, inclusionListErrors, inclusionListErrorFilesNames);
+                                exclusionList = redistList.GenerateDenyList(inclusionListSubsetTableInfo, inclusionListErrors, inclusionListErrorFilesNames);
                             }
                             else
                             {
@@ -2207,7 +2246,7 @@ namespace Microsoft.Build.Tasks
                             if (targetingProfile)
                             {
                                 // When targeting a profile we want the redist list to be the full framework redist list, since this is what should be used
-                                // when unifying assemblies ect. 
+                                // when unifying assemblies ect.
                                 AssemblyTableInfo[] fullRedistAssemblyTableInfo = null;
                                 RedistList fullFrameworkRedistList = null;
 
@@ -2259,16 +2298,46 @@ namespace Microsoft.Build.Tasks
 
                     // Load any prior saved state.
                     ReadStateFile(fileExists);
-                    _cache.SetGetLastWriteTime(getLastWriteTime);
                     _cache.SetInstalledAssemblyInformation(installedAssemblyTableInfo);
 
                     // Cache delegates.
-                    getAssemblyName = _cache.CacheDelegate(getAssemblyName);
                     getAssemblyMetadata = _cache.CacheDelegate(getAssemblyMetadata);
-                    fileExists = _cache.CacheDelegate(fileExists);
+                    fileExists = _cache.CacheDelegate();
                     directoryExists = _cache.CacheDelegate(directoryExists);
                     getDirectories = _cache.CacheDelegate(getDirectories);
-                    getRuntimeVersion = _cache.CacheDelegate(getRuntimeVersion);
+
+                    ReferenceTable dependencyTable = null;
+
+                    // Wrap the GetLastWriteTime callback with a check for SDK/immutable files.
+                    _cache.SetGetLastWriteTime(path =>
+                    {
+                        if (dependencyTable?.IsImmutableFile(path) == true)
+                        {
+                            // We don't want to perform I/O to see what the actual timestamp on disk is so we return a fixed made up value.
+                            // Note that this value makes the file exist per the check in SystemState.FileTimestampIndicatesFileExists.
+                            return SystemState.FileState.ImmutableFileLastModifiedMarker;
+                        }
+                        return getLastWriteTime(path);
+                    });
+
+                    // Wrap the GetAssemblyName and GetRuntimeVersion callbacks with a check for SDK/immutable files.
+                    GetAssemblyName originalGetAssemblyName = getAssemblyName;
+                    getAssemblyName = _cache.CacheDelegate(path =>
+                    {
+                        AssemblyNameExtension assemblyName = dependencyTable?.GetImmutableFileAssemblyName(path);
+                        return assemblyName ?? originalGetAssemblyName(path);
+                    });
+
+                    GetAssemblyRuntimeVersion originalGetRuntimeVersion = getRuntimeVersion;
+                    getRuntimeVersion = _cache.CacheDelegate(path =>
+                    {
+                        if (dependencyTable?.IsImmutableFile(path) == true)
+                        {
+                            // There are no WinRT assemblies in the SDK, everything has the .NET metadata version.
+                            return DotNetAssemblyRuntimeVersion;
+                        }
+                        return originalGetRuntimeVersion(path);
+                    });
 
                     _projectTargetFramework = FrameworkVersionFromString(_projectTargetFrameworkAsString);
 
@@ -2298,8 +2367,7 @@ namespace Microsoft.Build.Tasks
                             : null;
 
                     // Start the table of dependencies with all of the primary references.
-                    ReferenceTable dependencyTable = new ReferenceTable
-                    (
+                    dependencyTable = new ReferenceTable(
                         BuildEngine,
                         _findDependencies,
                         _findSatellites,
@@ -2338,8 +2406,7 @@ namespace Microsoft.Build.Tasks
                         _warnOrErrorOnTargetArchitectureMismatch,
                         _ignoreTargetFrameworkAttributeVersionMismatch,
                         _unresolveFrameworkAssembliesFromHigherFrameworks,
-                        assemblyMetadataCache
-                        );
+                        assemblyMetadataCache);
 
                     dependencyTable.FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences;
 
@@ -2354,15 +2421,13 @@ namespace Microsoft.Build.Tasks
                     if (AutoUnify && FindDependencies)
                     {
                         // Compute all dependencies.
-                        dependencyTable.ComputeClosure
-                        (
+                        dependencyTable.ComputeClosure(
                             // Use any app.config specified binding redirects so that later when we output suggested redirects
                             // for the GenerateBindingRedirects target, we don't suggest ones that the user already wrote
                             appConfigRemappedAssemblies,
                             _assemblyFiles,
                             _assemblyNames,
-                            generalResolutionExceptions
-                        );
+                            generalResolutionExceptions);
 
                         try
                         {
@@ -2383,19 +2448,17 @@ namespace Microsoft.Build.Tasks
                             dependencyTable.RemoveReferencesMarkedForExclusion(true /* Remove the reference and do not warn*/, subsetOrProfileName);
                         }
 
-                        // Based on the closure, get a table of ideal remappings needed to 
+                        // Based on the closure, get a table of ideal remappings needed to
                         // produce zero conflicts.
-                        dependencyTable.ResolveConflicts
-                        (
+                        dependencyTable.ResolveConflicts(
                             out autoUnifiedRemappedAssemblies,
-                            out autoUnifiedRemappedAssemblyReferences
-                        );
+                            out autoUnifiedRemappedAssemblyReferences);
                     }
 
                     IReadOnlyCollection<DependentAssembly> allRemappedAssemblies = CombineRemappedAssemblies(appConfigRemappedAssemblies, autoUnifiedRemappedAssemblies);
                     List<DependentAssembly> idealAssemblyRemappings = autoUnifiedRemappedAssemblies;
                     List<AssemblyNameReference> idealAssemblyRemappingsIdentities = autoUnifiedRemappedAssemblyReferences;
-                    bool shouldRerunClosure = autoUnifiedRemappedAssemblies?.Count > 0  || excludedReferencesExist;
+                    bool shouldRerunClosure = autoUnifiedRemappedAssemblies?.Count > 0 || excludedReferencesExist;
 
                     if (!AutoUnify || !FindDependencies || shouldRerunClosure)
                     {
@@ -2422,30 +2485,26 @@ namespace Microsoft.Build.Tasks
                         }
 
                         // Resolve any conflicts.
-                        dependencyTable.ResolveConflicts
-                        (
+                        dependencyTable.ResolveConflicts(
                             out idealAssemblyRemappings,
-                            out idealAssemblyRemappingsIdentities
-                        );
+                            out idealAssemblyRemappingsIdentities);
                     }
 
                     // Build the output tables.
-                    dependencyTable.GetReferenceItems
-                    (
+                    dependencyTable.GetReferenceItems(
                         out _resolvedFiles,
                         out _resolvedDependencyFiles,
                         out _relatedFiles,
                         out _satelliteFiles,
                         out _serializationAssemblyFiles,
                         out _scatterFiles,
-                        out _copyLocalFiles
-                    );
+                        out _copyLocalFiles);
 
                     // If we're not finding dependencies, then don't suggest redirects (they're only about dependencies).
                     if (FindDependencies)
                     {
-                        // Build the table of suggested redirects. If we're auto-unifying, we want to output all the 
-                        // assemblies that we auto-unified so that GenerateBindingRedirects can consume them, 
+                        // Build the table of suggested redirects. If we're auto-unifying, we want to output all the
+                        // assemblies that we auto-unified so that GenerateBindingRedirects can consume them,
                         // not just the required ones for build to succeed
                         List<DependentAssembly> remappings = AutoUnify ? autoUnifiedRemappedAssemblies : idealAssemblyRemappings;
                         List<AssemblyNameReference> remappedReferences = AutoUnify ? autoUnifiedRemappedAssemblyReferences : idealAssemblyRemappingsIdentities;
@@ -2539,7 +2598,7 @@ namespace Microsoft.Build.Tasks
                                 {
                                     // Its pretty hard to get here, you need an assembly that contains a valid reference
                                     // to a dependent assembly that, in turn, throws a FileLoadException during GetAssemblyName.
-                                    // Still it happened once, with an older version of the CLR. 
+                                    // Still it happened once, with an older version of the CLR.
 
                                     // ...falling through and relying on the targetAssemblyName==null behavior below...
                                 }
@@ -2616,7 +2675,7 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    // in case of P2P that have not build the reference can be resolved but file does not exist on disk. 
+                    // in case of P2P that have not build the reference can be resolved but file does not exist on disk.
                     if (fileExists(resolvedReference.FullPath))
                     {
                         FrameworkNameVersioning frameworkName;
@@ -2624,12 +2683,8 @@ namespace Microsoft.Build.Tasks
                         getAssemblyMetadata(resolvedReference.FullPath, assemblyMetadataCache, out result, out scatterFiles, out frameworkName);
                     }
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
                 }
             }
 
@@ -2642,10 +2697,14 @@ namespace Microsoft.Build.Tasks
         private static IReadOnlyCollection<DependentAssembly> CombineRemappedAssemblies(IReadOnlyCollection<DependentAssembly> first, IReadOnlyCollection<DependentAssembly> second)
         {
             if (first == null)
+            {
                 return second;
+            }
 
             if (second == null)
+            {
                 return first;
+            }
 
             var combined = new List<DependentAssembly>(first.Count + second.Count);
             combined.AddRange(first);
@@ -2715,7 +2774,7 @@ namespace Microsoft.Build.Tasks
                     // Any errors reading the profile redist list will already be logged, we do not need to re-log the errors here.
                     List<Exception> inclusionListErrors = new List<Exception>();
                     List<string> inclusionListErrorFilesNames = new List<string>();
-                    exclusionList = fullFrameworkRedistList.GenerateBlackList(installedAssemblyTableInfo, inclusionListErrors, inclusionListErrorFilesNames);
+                    exclusionList = fullFrameworkRedistList.GenerateDenyList(installedAssemblyTableInfo, inclusionListErrors, inclusionListErrorFilesNames);
                 }
 
                 // Could get into this situation if the redist list files were full of junk and no assemblies were read in.
@@ -2838,7 +2897,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader");
+            Log.LogMessageFromResources(MessageImportance.Low, "ResolveAssemblyReference.TargetFrameworkAllowListLogHeader");
             if (inclusionListSubsetTableInfo != null)
             {
                 foreach (AssemblyTableInfo inclusionListInfo in inclusionListSubsetTableInfo)
@@ -2894,7 +2953,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            // No subset names were passed in to search for in the targetframework directories and no installed subset tables were provided, we have nothing to use to 
+            // No subset names were passed in to search for in the targetframework directories and no installed subset tables were provided, we have nothing to use to
             // generate the exclusion list with, so do not continue.
             if (_targetFrameworkSubsets.Length == 0 && _installedAssemblySubsetTables.Length == 0)
             {
@@ -2976,22 +3035,15 @@ namespace Microsoft.Build.Tasks
                 // Whidbey behavior was to accept a single TargetFrameworkDirectory, and multiple
                 // InstalledAssemblyTables, under the assumption that all of the InstalledAssemblyTables
                 // were related to the single TargetFrameworkDirectory.  If inputs look like the Whidbey
-                // case, let's make sure we behave the same way.
-
+                // case, let's make sure we behave the same way. Otherwise, use non-empty metadata.
                 if (String.IsNullOrEmpty(frameworkDirectory))
                 {
                     if (TargetFrameworkDirectories?.Length == 1)
                     {
                         // Exactly one TargetFrameworkDirectory, so assume it's related to this
                         // InstalledAssemblyTable.
-
                         frameworkDirectory = TargetFrameworkDirectories[0];
                     }
-                }
-                else
-                {
-                    // The metadata on the item was non-empty, so use it.
-                    frameworkDirectory = FileUtilities.EnsureTrailingSlash(frameworkDirectory);
                 }
 
                 tableMap[installedAssemblyTable.ItemSpec] = new AssemblyTableInfo(installedAssemblyTable.ItemSpec, frameworkDirectory);
@@ -3147,26 +3199,27 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
-            return Execute
-            (
-                new FileExists(p => FileUtilities.FileExistsNoThrow(p)),
-                new DirectoryExists(p => FileUtilities.DirectoryExistsNoThrow(p)),
-                new GetDirectories(Directory.GetDirectories),
-                new GetAssemblyName(AssemblyNameExtension.GetAssemblyNameEx),
-                new GetAssemblyMetadata(AssemblyInformation.GetAssemblyMetadata),
+            return Execute(
+                p => FileUtilities.FileExistsNoThrow(p),
+                p => FileUtilities.DirectoryExistsNoThrow(p),
+                (p, searchPattern) => Directory.GetDirectories(p, searchPattern),
+                p => AssemblyNameExtension.GetAssemblyNameEx(p),
+                (string path, ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache, out AssemblyNameExtension[] dependencies, out string[] scatterFiles, out FrameworkNameVersioning frameworkName)
+                    => AssemblyInformation.GetAssemblyMetadata(path, assemblyMetadataCache, out dependencies, out scatterFiles, out frameworkName),
 #if FEATURE_WIN32_REGISTRY
-                new GetRegistrySubKeyNames(RegistryHelper.GetSubKeyNames),
-                new GetRegistrySubKeyDefaultValue(RegistryHelper.GetDefaultValue),
+                (baseKey, subkey) => RegistryHelper.GetSubKeyNames(baseKey, subkey),
+                (baseKey, subkey) => RegistryHelper.GetDefaultValue(baseKey, subkey),
 #endif
-                new GetLastWriteTime(NativeMethodsShared.GetLastWriteFileUtcTime),
-                new GetAssemblyRuntimeVersion(AssemblyInformation.GetRuntimeVersion),
+                p => NativeMethodsShared.GetLastWriteFileUtcTime(p),
+                p => AssemblyInformation.GetRuntimeVersion(p),
 #if FEATURE_WIN32_REGISTRY
-                new OpenBaseKey(RegistryHelper.OpenBaseKey),
+                (hive, view) => RegistryHelper.OpenBaseKey(hive, view),
 #endif
-                new GetAssemblyPathInGac(GetAssemblyPathInGac),
-                new IsWinMDFile(AssemblyInformation.IsWinMDFile),
-                new ReadMachineTypeFromPEHeader(ReferenceTable.ReadMachineTypeFromPEHeader)
-            );
+                (assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fileExists, fullFusionName, specificVersion)
+                    => GetAssemblyPathInGac(assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fileExists, fullFusionName, specificVersion),
+                (string fullPath, GetAssemblyRuntimeVersion getAssemblyRuntimeVersion, FileExists fileExists, out string imageRuntimeVersion, out bool isManagedWinmd)
+                    => AssemblyInformation.IsWinMDFile(fullPath, getAssemblyRuntimeVersion, fileExists, out imageRuntimeVersion, out isManagedWinmd),
+                p => ReferenceTable.ReadMachineTypeFromPEHeader(p));
         }
 
         #endregion

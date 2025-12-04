@@ -1,12 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Tasks;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class VisualBasicParserUtilititesTests
+    public sealed class VisualBasicParserUtilititesTests
     {
         // Try just and empty file
         [Fact]
@@ -19,8 +21,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void SimpleForm()
         {
-            AssertParse
-            (
+            AssertParse(
                 @"
         rem This is my class
         <DefaultInstanceProperty(&qtGetInstance&qt)> Public ClAsS Form1
@@ -33,8 +34,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Namespace()
         {
-            AssertParse
-            (
+            AssertParse(
                 @"
     ' This is my Namespace
     NamEspacE Goofy.Mickey
@@ -50,8 +50,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NestedNamespace()
         {
-            AssertParse
-            (
+            AssertParse(
                 @"
     Namespace Goofy
         Namespace Mickey
@@ -64,8 +63,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NestedAndEndedNamespace()
         {
-            AssertParse
-            (
+            AssertParse(
                 @"
     Namespace Goofy
         Namespace Mickey
@@ -85,8 +83,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NamespaceElementBeginsWithRem()
         {
-            AssertParse
-(
+            AssertParse(
     @"
     ' This is my Namespace
     NamEspacE Artist.Painter.Rembrandt
@@ -108,15 +105,10 @@ namespace Microsoft.Build.UnitTests
         {
             source = source.Replace("&qt", "\"");
 
-            ExtractedClassName className = VisualBasicParserUtilities.GetFirstClassNameFullyQualified
-            (
-                StreamHelpers.StringToStream(source)
-            );
+            ExtractedClassName className = VisualBasicParserUtilities.GetFirstClassNameFullyQualified(
+                StreamHelpers.StringToStream(source));
 
             Assert.Equal(expectedClassName, className.Name);
         }
     }
 }
-
-
-

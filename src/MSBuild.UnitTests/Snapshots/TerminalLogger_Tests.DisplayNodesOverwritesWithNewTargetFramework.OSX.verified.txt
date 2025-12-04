@@ -1,0 +1,5 @@
+﻿[?25l[1F
+  project [36;1mtfName[m Build (0.0s)
+[?25h[?25l[2F
+  project [36;1mtf2[m Build (0.0s)[K
+[?25h

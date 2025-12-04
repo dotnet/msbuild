@@ -1,14 +1,15 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -25,7 +26,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void AddImportWhenNoImportGroupExists()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='a.proj' />
                     </Project>
                 ";
@@ -35,7 +36,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             project.AddImport("b.proj");
 
             string expectedContent = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='a.proj' />
                         <Import Project='b.proj' />
                     </Project>
@@ -52,7 +53,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void AddImportToLastImportGroupWithNoCondition()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='a.proj' />
                         <ImportGroup>
                             <Import Project='b.proj' />
@@ -74,7 +75,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             project.AddImport("e.proj");
 
             string expectedContent = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='a.proj' />
                         <ImportGroup>
                             <Import Project='b.proj' />
@@ -103,7 +104,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void AddImportOnlyConditionedImportGroupsExist()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='a.proj' />
                         <ImportGroup Condition='c1'>
                             <Import Project='b.proj' />
@@ -119,7 +120,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             project.AddImport("d.proj");
 
             string expectedContent = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Import Project='a.proj' />
                         <ImportGroup Condition='c1'>
                             <Import Project='b.proj' />
@@ -142,7 +143,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
 
-            Assert.Null(project.Imports.GetEnumerator().Current);
+            Assert.Empty(project.Imports);
         }
 
         /// <summary>
@@ -152,7 +153,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadNoChild()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ImportGroup />
                     </Project>
                 ";
@@ -161,7 +162,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             ProjectImportGroupElement importGroup = (ProjectImportGroupElement)Helpers.GetFirst(project.ImportGroups);
 
-            Assert.Null(project.Imports.GetEnumerator().Current);
+            Assert.Empty(project.Imports);
             Assert.Equal(0, Helpers.Count(importGroup.Imports));
         }
 
@@ -174,7 +175,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ImportGroup>
                             <Import/>
                         </ImportGroup>
@@ -182,8 +183,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Checks that an InvalidProjectFileException is thrown when an invalid
@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ImportGroup>
                             <PropertyGroup />
                         </ImportGroup>
@@ -203,8 +203,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Checks that an InvalidProjectFileException is thrown when an ImportGroup is placed
@@ -216,7 +215,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <ImportGroup />
                         </PropertyGroup>
@@ -224,8 +223,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read import group with unexpected attribute
@@ -236,14 +234,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ImportGroup X='Y'/>
                     </Project>
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read basic valid import group
@@ -252,7 +249,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadBasic()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ImportGroup>
                             <Import Project='i1.proj' />
                             <Import Project='i2.proj' Condition='c'/>
@@ -280,7 +277,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadMultipleImportGroups()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ImportGroup>
                             <Import Project='i1.proj' />
                             <Import Project='i2.proj' Condition='c'/>
@@ -315,7 +312,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void SetProjectValid()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ImportGroup>
                             <Import Project='i1.proj' />
                         </ImportGroup>
@@ -342,7 +339,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<ArgumentException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ImportGroup>
                             <Import Project='i1.proj' />
                         </ImportGroup>
@@ -356,8 +353,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectImportElement import = (ProjectImportElement)Helpers.GetFirst(importGroup.Imports);
 
                 import.Project = String.Empty;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set the condition value

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.Build.Framework;
@@ -9,6 +9,8 @@ using Shouldly;
 using Xunit;
 
 #pragma warning disable 0219
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -120,7 +122,6 @@ namespace Microsoft.Build.UnitTests
             EventArgsFormatting.FormatEventMessage("error", "CS",
                       null, "312", "source.cs", 233, 236, 4, 8, 0);
             // No exception was thrown
-
         }
 
         /// <summary>
@@ -162,8 +163,7 @@ namespace Microsoft.Build.UnitTests
                 MyLogger l = new MyLogger();
                 BuildErrorEventArgs beea = null;
                 l.FormatErrorEvent(beea);
-            }
-           );
+            });
         }
         /// <summary>
         /// Check null handling
@@ -176,15 +176,14 @@ namespace Microsoft.Build.UnitTests
                 MyLogger l = new MyLogger();
                 BuildWarningEventArgs bwea = null;
                 l.FormatWarningEvent(bwea);
-            }
-           );
+            });
         }
     }
 
     /// <summary>
     /// Minimal logger implementation
     /// </summary>
-    internal class MyLogger : Logger
+    internal sealed class MyLogger : Logger
     {
         public override void Initialize(IEventSource eventSource)
         {
@@ -192,4 +191,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-

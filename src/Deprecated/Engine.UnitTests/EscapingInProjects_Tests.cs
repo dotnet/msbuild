@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
+
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -748,13 +752,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
         /// <summary>
         /// Build a .SLN file using MSBuild.  The .SLN and the projects contained within
-        /// have all sorts of crazy characters in their name (courtesy of DanMose who apparently
+        /// have all sorts of different characters in their name (courtesy of DanMose who apparently
         /// just ran his fingers up and down the on the upper row of his keyboard :) ).  There
         /// is even a P2P reference between the two projects in the .SLN.
         /// </summary>
         /// <owner>RGoel</owner>
         [Test]
-        public void SolutionWithLotsaCrazyCharacters()
+        public void SolutionWithLotsaDifferentCharacters()
         {
             if (ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35) == null)
             {
