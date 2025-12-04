@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="78c39718bb6e8008ba9d2dbd00d550bee6be9f59" BarId="293020" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="29eefe27a350eb8b0bcbababa7863a0d1086295d" BarId="293166" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="9.0.11">
