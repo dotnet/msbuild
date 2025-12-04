@@ -1,6 +1,5 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
-#if NETFRAMEWORK
 
 using System.Collections.Generic;
 using System.Security.Cryptography;
@@ -107,7 +106,7 @@ namespace Microsoft.Build.Framework.Telemetry
 #if NET
                 byte[] hash = SHA256.HashData(bytes);
 #if NET9_0_OR_GREATER
-                return Convert.ToHexStringLower(hash);
+                return System.Convert.ToHexStringLower(hash);
 #else
                 return Convert.ToHexString(hash).ToLowerInvariant();
 #endif
@@ -306,5 +305,3 @@ namespace Microsoft.Build.Framework.Telemetry
         }
     }
 }
-
-#endif

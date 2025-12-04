@@ -463,9 +463,6 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
-#if NETFRAMEWORK
-            TelemetryManager.Instance.Initialize(isStandalone: false);
-#endif
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
@@ -1115,9 +1112,8 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
-#if NETFRAMEWORK
                             EndBuildTelemetry();
-#endif
+
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
                         }
@@ -1160,17 +1156,15 @@ namespace Microsoft.Build.Execution
             }
         }
 
-#if NETFRAMEWORK
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private void EndBuildTelemetry()
         {
-            using IActivity? activity = TelemetryManager.Instance.StartActivity(TelemetryConstants.Build)
+            using IActivity? activity = TelemetryManager.Instance?.DefaultActivitySource
+                ?.StartActivity(TelemetryConstants.Build)
                 ?.SetTags(_buildTelemetry)
                 ?.SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
                         includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
                         includeTargetDetails: false));
         }
-#endif
 
         /// <summary>
         /// Convenience method.  Submits a lone build request and blocks until results are available.
@@ -3013,6 +3007,8 @@ namespace Microsoft.Build.Execution
 
             if (_buildParameters.IsTelemetryEnabled)
             {
+                TelemetryManager.Instance.Initialize(isStandalone: false);
+
                 // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportance.Low is used)
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
                 LoggerDescription forwardingLoggerDescription = new LoggerDescription(
@@ -3244,6 +3240,8 @@ namespace Microsoft.Build.Execution
                     {
                         s_singletonInstance = null;
                     }
+
+                    TelemetryManager.Instance?.Dispose();
 
                     _disposed = true;
                 }

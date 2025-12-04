@@ -10,10 +10,7 @@ namespace Microsoft.Build.Framework.Telemetry
     /// <summary>
     /// Telemetry of build.
     /// </summary>
-    internal class BuildTelemetry : TelemetryBase
-#if NETFRAMEWORK
-        , IActivityTelemetryDataHolder
-#endif
+    internal class BuildTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     {
         public override string EventName => "build";
 
@@ -108,9 +105,8 @@ namespace Microsoft.Build.Framework.Telemetry
         /// </summary>
         public string? BuildEngineFrameworkName { get; set; }
 
-#if NETFRAMEWORK
         /// <summary>
-        /// Create a list of properties sent to VS telemetry with the information whether they should be hashed.
+        /// Create a list of properties sent to VS telemetry.
         /// </summary>
         public Dictionary<string, object> GetActivityProperties()
         {
@@ -145,7 +141,6 @@ namespace Microsoft.Build.Framework.Telemetry
                 }
             }
         }
-#endif
 
         public override IDictionary<string, string> GetProperties()
         {

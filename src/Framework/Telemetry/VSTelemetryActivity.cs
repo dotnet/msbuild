@@ -3,19 +3,21 @@
 
 #if NETFRAMEWORK
 
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Build.Framework.Telemetry;
 using Microsoft.VisualStudio.Telemetry;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
+    /// <summary>
+    /// Represents a Visual Studio telemetry activity that wraps a <see cref="TelemetryScope{T}"/>.
+    /// This class provides an implementation of <see cref="IActivity"/> for the VS Telemetry system,
+    /// allowing telemetry data to be collected and sent when running on .NET Framework.
+    /// </summary>
     internal class VsTelemetryActivity : IActivity
     {
         private readonly TelemetryScope<OperationEvent> _scope;
         private TelemetryResult _result = TelemetryResult.Success;
-        private string? _resultSummary;
 
         private bool _disposed;
 
@@ -45,6 +47,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
             return this;
         }
+
         public IActivity? AddEvent(ActivityEvent activityEvent)
         {
             // VS Telemetry doesn't have a direct equivalent to ActivityEvent
@@ -67,38 +70,10 @@ namespace Microsoft.Build.Framework.Telemetry
             }
 
             // End the operation
-            _scope.End(_result, _resultSummary);
+            _scope.End(_result);
             _disposed = true;
         }
     }
-}
-
-/// <summary>
-/// Represents an activity for telemetry tracking.
-/// </summary>
-internal interface IActivity : IDisposable
-{
-    /// <summary>
-    /// Sets a tag on the activity.
-    /// </summary>
-    /// <param name="dataHolder">Telemetry data holder.</param>
-    /// <returns>The activity instance for method chaining.</returns>
-    IActivity? SetTags(IActivityTelemetryDataHolder? dataHolder);
-
-    /// <summary>
-    /// Sets a tag on the activity.
-    /// </summary>
-    /// <param name="key">The tag key.</param>
-    /// <param name="value">The tag value.</param>
-    /// <returns>The activity instance for method chaining.</returns>
-    IActivity? SetTag(string key, object? value);
-
-    /// <summary>
-    /// Adds an event to the activity.
-    /// </summary>
-    /// <param name="activityEvent">The event to add.</param>
-    /// <returns>The activity instance for method chaining.</returns>
-    IActivity? AddEvent(ActivityEvent activityEvent);
 }
 
 #endif

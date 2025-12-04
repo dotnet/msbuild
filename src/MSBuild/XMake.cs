@@ -251,9 +251,7 @@ namespace Microsoft.Build.CommandLine
             KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow, IsStandaloneExecution = true};
 
             // Initialize VSTelemetry
-#if NETFRAMEWORK
-            TelemetryManager.Instance.Initialize(isStandalone: true);
-#endif
+            TelemetryManager.Instance?.Initialize(isStandalone: true);
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
@@ -302,9 +300,8 @@ namespace Microsoft.Build.CommandLine
                 DumpCounters(false /* log to console */);
             }
 
-#if NETFRAMEWORK
-            TelemetryManager.Instance.Dispose();
-#endif
+            TelemetryManager.Instance?.Dispose();
+
             return exitCode;
         }
 
