@@ -60,7 +60,7 @@ namespace Microsoft.Build.Framework.Telemetry
                 _telemetrySession = TelemetryService.DefaultSession;
             }
 
-            DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace, _telemetrySession);
+            DefaultActivitySource = new MSBuildActivitySource(_telemetrySession);
 #else
             DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
 #endif

@@ -9,22 +9,21 @@ using Microsoft.VisualStudio.Telemetry;
 namespace Microsoft.Build.Framework.Telemetry
 {
     /// <summary>
-    /// Wrapper class for ActivitySource with a <see cref="StartActivity(string)"/> method that wraps Activity name with VS prefix.
+    /// Wrapper class for ActivitySource with a <see cref="StartActivity(string)"/> method that wraps Activity name with MSBuild prefix.
     /// On .NET Framework, activities are also forwarded to VS Telemetry.
     /// </summary>
     internal class MSBuildActivitySource
     {
-        private readonly ActivitySource _source;
-
 #if NETFRAMEWORK
         private readonly TelemetrySession? _telemetrySession;
 
-        public MSBuildActivitySource(string name, TelemetrySession? telemetrySession)
+        public MSBuildActivitySource(TelemetrySession? telemetrySession)
         {
-            _source = new ActivitySource(name);
             _telemetrySession = telemetrySession;
         }
 #else
+        private readonly ActivitySource _source;
+
         public MSBuildActivitySource(string name)
         {
             _source = new ActivitySource(name);
