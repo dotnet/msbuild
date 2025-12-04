@@ -126,5 +126,12 @@ namespace Microsoft.Build.BackEnd
 
             return startInfo;
         }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            // Clear the thread-static to prevent pollution between builds on the same thread.
+            FileUtilities.CurrentThreadWorkingDirectory = null;
+        }
     }
 }
