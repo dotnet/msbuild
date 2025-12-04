@@ -131,8 +131,9 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyResources.cs" />
     <Compile Include="AutomaticEncodingRestorer.cs" />
-    <Compile Include="CommandLineSwitches.cs" />
-    <Compile Include="CommandLineSwitchException.cs" />
+    <Compile Include="CommandLine\CommandLineParser.cs" />
+    <Compile Include="CommandLine\CommandLineSwitches.cs" />
+    <Compile Include="CommandLine\CommandLineSwitchException.cs" />
     <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
     <Compile Include="DistributedLoggerRecord.cs" />
     <Compile Include="InitializationException.cs" />
@@ -207,7 +208,7 @@
 
   <Target Name="AvoidValueTupleConflict" BeforeTargets="ResolveAssemblyReferences">
     <ItemGroup>
-      <Reference Remove="@(Reference->WithMetadataValue(`NuGetPackageId`, `System.ValueTuple`))" />
+      <Reference Remove="@(Reference-&gt;WithMetadataValue(`NuGetPackageId`, `System.ValueTuple`))" />
     </ItemGroup>
   </Target>
 
