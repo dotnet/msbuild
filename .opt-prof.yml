@@ -101,9 +101,9 @@ stages:
       displayName: Download Optprof Metadata # to determine LKG data source
     - powershell: |
         try {
-          $metadataPath = Get-ChildItem -Path '$(Pipeline.Workspace)\ComponentBuildUnderTest\OptProf' -Filter 'Metadata.json' -Recurse -ErrorAction Stop | Select-Object -First 1
+          $metadataPath = Get-ChildItem -Path '$(Pipeline.Workspace)\ComponentBuildUnderTest\VSSetup' -Filter 'Metadata.json' -Recurse -ErrorAction Stop | Select-Object -First 1
           if (-not $metadataPath) {
-            throw "Metadata.json was not found under $(Pipeline.Workspace)\ComponentBuildUnderTest\OptProf"
+            throw "Metadata.json was not found under $(Pipeline.Workspace)\ComponentBuildUnderTest\VSSetup"
           }
 
           $metadata = Get-Content -Raw -Path $metadataPath.FullName | ConvertFrom-Json
