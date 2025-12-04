@@ -205,7 +205,7 @@ jobs:
       )
 
       foreach ($path in $paths) {
-        $from = [System.IO.Path]::Join($sourceRoot, $path)
+        $from = [System.IO.Path]::Combine($sourceRoot, $path)
 
         $destinationSubPath = if ($path -eq "$(Build.StagingDirectory)/MicroBuild/Output") {
           "MicroBuild/Output"
