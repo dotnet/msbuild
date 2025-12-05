@@ -9,6 +9,11 @@ using Microsoft.VisualStudio.Telemetry;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
+    /// <summary>
+    /// Represents a Visual Studio telemetry activity that wraps a <see cref="TelemetryScope{T}"/>.
+    /// This class provides an implementation of <see cref="IActivity"/> for the VS Telemetry system,
+    /// allowing telemetry data to be collected and sent when running on .NET Framework.
+    /// </summary>
     internal class VsTelemetryActivity : IActivity
     {
         private readonly TelemetryScope<OperationEvent> _scope;

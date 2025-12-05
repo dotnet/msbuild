@@ -463,9 +463,6 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
-#if NETFRAMEWORK
-            TelemetryManager.Instance.Initialize(isStandalone: false);
-#endif
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
@@ -3008,8 +3005,13 @@ namespace Microsoft.Build.Execution
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }
 
+            // respect value coming from environment variable.
+            _buildParameters.IsTelemetryEnabled |= Traits.Instance.TelemetryOptIn;
+
             if (_buildParameters.IsTelemetryEnabled)
             {
+                TelemetryManager.Instance.Initialize(isStandalone: false);
+
                 // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportance.Low is used)
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
                 LoggerDescription forwardingLoggerDescription = new LoggerDescription(
@@ -3241,6 +3243,8 @@ namespace Microsoft.Build.Execution
                     {
                         s_singletonInstance = null;
                     }
+
+                    TelemetryManager.Instance?.Dispose();
 
                     _disposed = true;
                 }

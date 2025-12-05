@@ -106,7 +106,7 @@ namespace Microsoft.Build.Framework.Telemetry
         public string? BuildEngineFrameworkName { get; set; }
 
         /// <summary>
-        /// Create a list of properties sent to VS telemetry with the information whether they should be hashed.
+        /// Create a list of properties sent to VS telemetry.
         /// </summary>
         public Dictionary<string, object> GetActivityProperties()
         {
