@@ -880,8 +880,6 @@ namespace Microsoft.Build.BackEnd
             {
                 try
                 {
-                    _projectLoggingContext.ProjectTelemetry.LogProjectTelemetry(_projectLoggingContext.LoggingService, _projectLoggingContext.BuildEventContext);
-
                     _projectLoggingContext.LogProjectFinished(result.OverallResult == BuildResultCode.Success);
                 }
                 catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))

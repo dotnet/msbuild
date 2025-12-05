@@ -994,7 +994,6 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     TaskFactoryEngineContext taskFactoryEngineContext = new TaskFactoryEngineContext(_buildEngine.IsRunningMultipleNodes, _taskLocation, _taskLoggingContext, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false, Traits.Instance.ForceTaskFactoryOutOfProc);
-                    bool isTaskHost = false;
                     try
                     {
                         // Check if we should force out-of-process execution for non-AssemblyTaskFactory instances
@@ -1017,7 +1016,6 @@ namespace Microsoft.Build.BackEnd
                             }
 
                             task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, taskFactoryEngineContext, outOfProcTaskFactory, scheduledNodeId);
-                            isTaskHost = true;
                         }
 
                         // Normal in-process execution for custom task factories
@@ -1035,9 +1033,6 @@ namespace Microsoft.Build.BackEnd
                                     : _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
                             }
                         }
-
-                        // Track telemetry for non-AssemblyTaskFactory task factories
-                        _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(_taskFactoryWrapper.TaskFactory.GetType().FullName, isTaskHost, _taskName);
                     }
                     finally
                     {

@@ -233,7 +233,6 @@
     <Compile Include="BackEnd\Components\Logging\LoggingServiceLogMethods.cs" />
     <Compile Include="BackEnd\Components\Logging\NodeLoggingContext.cs" />
     <Compile Include="BackEnd\Components\Logging\ProjectLoggingContext.cs" />
-    <Compile Include="BackEnd\Components\Logging\ProjectTelemetry.cs" />
     <Compile Include="BackEnd\Components\Logging\TargetLoggingContext.cs" />
     <Compile Include="BackEnd\Components\Logging\TaskLoggingContext.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\IntrinsicTasks\CallTarget.cs" />
