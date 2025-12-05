@@ -155,6 +155,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(taskInstance != null, "Need to specify the task instance.");
 
             _buildRequestEntry = requestEntry;
+
             _targetBuilderCallback = targetBuilderCallback;
             _cancellationToken = cancellationToken;
             _targetChildInstance = taskInstance;
@@ -165,7 +166,20 @@ namespace Microsoft.Build.BackEnd
 
             if (_taskNode != null && requestEntry.Request.HostServices != null)
             {
-                _taskHostObject = requestEntry.Request.HostServices.GetHostObject(requestEntry.RequestConfiguration.Project.FullPath, loggingContext.Target.Name, _taskNode.Name);
+                try
+                {
+                    _taskHostObject = requestEntry.Request.HostServices.GetHostObject(requestEntry.RequestConfiguration.Project.FullPath, loggingContext.Target.Name, _taskNode.Name);
+                }
+                catch (HostObjectException ex)
+                {
+                    loggingContext.LogWarning(
+                        null,
+                        new BuildEventFileInfo(taskInstance.Location),
+                        "HostObjectFailure",
+                        _taskNode.Name,
+                        ex.Message);
+                    _taskHostObject = null;
+                }
             }
 
             _projectFullPath = requestEntry.RequestConfiguration.Project.FullPath;
@@ -310,7 +324,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                         taskHost.AppDomainSetup,
 #endif
-                        taskHost.IsOutOfProc, _cancellationToken);
+                        taskHost.IsOutOfProc, _cancellationToken, _buildRequestEntry.TaskEnvironment);
                 }
 
                 List<string> taskParameterValues = CreateListOfParameterValues();
@@ -415,7 +429,7 @@ namespace Microsoft.Build.BackEnd
                     // If that directory does not exist, do nothing. (Do not check first as it is almost always there and it is slow)
                     // This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project.
                     // No errors are masked by doing this: errors loading the project from disk are reported at load time, if necessary.
-                    NativeMethodsShared.SetCurrentDirectory(_buildRequestEntry.ProjectRootDirectory);
+                    _buildRequestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_buildRequestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
                 }
 
                 if (howToExecuteTask == TaskExecutionMode.ExecuteTaskAndGatherOutputs)

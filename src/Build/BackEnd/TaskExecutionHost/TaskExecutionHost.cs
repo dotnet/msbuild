@@ -160,6 +160,11 @@ namespace Microsoft.Build.BackEnd
         private readonly PropertyTrackingSetting _propertyTrackingSettings;
 
         /// <summary>
+        /// The task environment to be used by IMultiThreadableTask instances.
+        /// </summary>
+        internal TaskEnvironment TaskEnvironment { get; set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         internal TaskExecutionHost(IBuildComponentHost host)
@@ -251,7 +256,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            bool isOutOfProc, CancellationToken cancellationToken)
+            bool isOutOfProc, CancellationToken cancellationToken, TaskEnvironment taskEnvironment)
         {
             _buildEngine = buildEngine;
             _projectInstance = projectInstance;
@@ -265,6 +270,7 @@ namespace Microsoft.Build.BackEnd
             AppDomainSetup = appDomainSetup;
 #endif
             IsOutOfProc = isOutOfProc;
+            TaskEnvironment = taskEnvironment;
         }
 
         /// <summary>
@@ -367,6 +373,11 @@ namespace Microsoft.Build.BackEnd
 
             TaskInstance.BuildEngine = _buildEngine;
             TaskInstance.HostObject = _taskHost;
+            
+            if (TaskInstance is IMultiThreadableTask multiThreadableTask)
+            {
+                multiThreadableTask.TaskEnvironment = TaskEnvironment;
+            }
 
             return true;
 
@@ -425,7 +436,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            if (this.TaskInstance is IIncrementalTask incrementalTask)
+            if (TaskInstance is IIncrementalTask incrementalTask)
             {
                 incrementalTask.FailIfNotIncremental = _buildComponentHost.BuildParameters.Question;
             }
@@ -614,6 +625,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
+                Debug.Assert(TaskInstance is not IMultiThreadableTask multiThreadableTask || multiThreadableTask.TaskEnvironment != null, "task environment missing for multi-threadable task");
                 taskReturnValue = TaskInstance.Execute();
             }
             finally
@@ -964,7 +976,8 @@ namespace Microsoft.Build.BackEnd
 #endif
                         IsOutOfProc,
                         scheduledNodeId,
-                        ProjectInstance.GetProperty);
+                        ProjectInstance.GetProperty,
+                        TaskEnvironment);
                 }
                 else
                 {
@@ -1804,7 +1817,8 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                 AppDomainSetup,
 #endif
-                scheduledNodeId);
+                scheduledNodeId,
+                TaskEnvironment);
         }
     }
 }

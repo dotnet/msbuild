@@ -6,11 +6,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
+using static Microsoft.Build.Shared.XMakeAttributes;
 
 #nullable disable
 
@@ -27,6 +29,26 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static readonly CoreClrAssemblyLoader s_coreClrAssemblyLoader = new CoreClrAssemblyLoader();
 #endif
+
+        /// <summary>
+        /// Assembly name that indicates .NET Core/5+ if present as a referenced assembly.
+        /// </summary>
+        private const string SystemRuntimeAssemblyName = "System.Runtime";
+
+        /// <summary>
+        /// NET target moniker name.
+        /// </summary>
+        private const string DotNetCoreIdentifier = ".NETCore";
+
+        /// <summary>
+        /// Assembly custom attribute name.
+        /// </summary>
+        private const string TargetFrameworkAttributeName = "TargetFrameworkAttribute";
+
+        /// <summary>
+        /// Versioning namespace name.
+        /// </summary>
+        private const string VersioningNamespaceName = "System.Runtime.Versioning";
 
         /// <summary>
         /// Cache to keep track of the assemblyLoadInfos based on a given type filter.
@@ -66,6 +88,13 @@ namespace Microsoft.Build.Shared
 
             _isDesiredType = isDesiredType;
         }
+
+        /// <summary>
+        /// Delegate used to log warning messages with formatted string support.
+        /// </summary>
+        /// <param name="format">A composite format string for the warning message.</param>
+        /// <param name="args">An array of objects to format into the warning message.</param>
+        internal delegate void LogWarningDelegate(string format, params object[] args);
 
         /// <summary>
         /// Given two type names, looks for a partial match between them. A partial match is considered valid only if it occurs on
@@ -189,6 +218,11 @@ namespace Microsoft.Build.Shared
         private static MetadataLoadContext CreateMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
         {
             string path = assemblyLoadInfo.AssemblyFile;
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+            {
+                throw new FileNotFoundException(null, assemblyLoadInfo.AssemblyLocation);
+            }
+
             string[] localAssemblies = Directory.GetFiles(Path.GetDirectoryName(path), "*.dll");
 
             // Deduplicate between MSBuild assemblies and task dependencies.
@@ -214,10 +248,11 @@ namespace Microsoft.Build.Shared
         internal LoadedType Load(
             string typeName,
             AssemblyLoadInfo assembly,
+            LogWarningDelegate logWarning,
             bool useTaskHost = false,
             bool taskHostParamsMatchCurrentProc = true)
         {
-            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, useTaskHost, taskHostParamsMatchCurrentProc);
+            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly, useTaskHost, taskHostParamsMatchCurrentProc, logWarning);
         }
 
         /// <summary>
@@ -228,10 +263,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The loaded type, or null if the type was not found.</returns>
         internal LoadedType ReflectionOnlyLoad(
             string typeName,
-            AssemblyLoadInfo assembly)
-        {
-            return GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false, taskHostParamsMatchCurrentProc: true);
-        }
+            AssemblyLoadInfo assembly) => GetLoadedType(s_cacheOfReflectionOnlyLoadedTypesByFilter, typeName, assembly, useTaskHost: false, taskHostParamsMatchCurrentProc: true, logWarning: (format, args) => { });
 
         /// <summary>
         /// Loads the specified type if it exists in the given assembly. If the type name is fully qualified, then a match (if
@@ -243,7 +275,8 @@ namespace Microsoft.Build.Shared
             string typeName,
             AssemblyLoadInfo assembly,
             bool useTaskHost,
-            bool taskHostParamsMatchCurrentProc)
+            bool taskHostParamsMatchCurrentProc,
+            LogWarningDelegate logWarning)
         {
             // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
@@ -254,7 +287,7 @@ namespace Microsoft.Build.Shared
             AssemblyInfoToLoadedTypes typeNameToType =
                 loadInfoToType.GetOrAdd(assembly, (_) => new AssemblyInfoToLoadedTypes(_isDesiredType, _));
 
-            return typeNameToType.GetLoadedTypeByTypeName(typeName, useTaskHost, taskHostParamsMatchCurrentProc);
+            return typeNameToType.GetLoadedTypeByTypeName(typeName, useTaskHost, taskHostParamsMatchCurrentProc, logWarning);
         }
 
         /// <summary>
@@ -307,6 +340,23 @@ namespace Microsoft.Build.Shared
             private Assembly _loadedAssembly;
 
             /// <summary>
+            /// The architecture requirement of the assembly.
+            /// </summary>
+            private string _architecture;
+
+            /// <summary>
+            /// The runtime requirement of the assembly.
+            /// Detected by examining referenced assemblies for System.Runtime (indicates .NET Core/5+).
+            /// </summary>
+            private string _runtime;
+
+            /// <summary>
+            /// Flag to track if we've already attempted to get assembly runtime/architecture.
+            /// This prevents repeated expensive PE header reads.
+            /// </summary>
+            private volatile bool _hasReadRuntimeAndArchitecture;
+
+            /// <summary>
             /// Given a type filter, and an assembly to load the type information from determine if a given type name is in the assembly or not.
             /// </summary>
             internal AssemblyInfoToLoadedTypes(Func<Type, object, bool> typeFilter, AssemblyLoadInfo loadInfo)
@@ -322,18 +372,48 @@ namespace Microsoft.Build.Shared
             }
 
             /// <summary>
-            /// Determine if a given type name is in the assembly or not. Return null if the type is not in the assembly
+            /// Determine if a given type name is in the assembly or not. Return null if the type is not in the assembly.
             /// </summary>
-            internal LoadedType GetLoadedTypeByTypeName(string typeName, bool useTaskHost, bool taskHostParamsMatchCurrentProc)
+            internal LoadedType GetLoadedTypeByTypeName(
+                string typeName,
+                bool useTaskHost,
+                bool taskHostParamsMatchCurrentProc,
+                LogWarningDelegate logWarning)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeName);
 
                 if (ShouldUseMetadataLoadContext(useTaskHost, taskHostParamsMatchCurrentProc))
                 {
-                    return GetLoadedTypeFromTypeNameUsingMetadataLoadContext(typeName);
+                    return GetTypeForOutOfProcExecution(typeName);
                 }
 
-                // Only one thread should be doing operations on this instance of the object at a time.
+                LoadedType loadedType;
+
+                try
+                {
+                    loadedType = LoadInProc(typeName);
+                }
+                catch
+                {
+                    // The assembly can't be loaded in-proc due to architecture or runtime mismatch that was discovered during in-proc load.
+                    // Fall back to metadata load context. It will prepare prerequisites for out of proc execution.
+                    MSBuildEventSource.Log.FallbackAssemblyLoadStart(typeName);
+                    loadedType = GetTypeForOutOfProcExecution(typeName);
+                    logWarning("AssemblyLoad_Warning", loadedType?.LoadedAssemblyName?.Name);
+                    MSBuildEventSource.Log.FallbackAssemblyLoadStop(typeName);
+                }
+
+                return loadedType;
+            }
+
+            /// <summary>
+            /// Normal in-proc loading path.
+            /// Only one thread should be doing operations on this instance of the object at a time
+            /// This loads the assembly for actual execution (not metadata-only).
+            /// </summary>
+            /// <param name="typeName">The type to be loaded.</param>
+            private LoadedType LoadInProc(string typeName)
+            {
                 Type type = _typeNameToType.GetOrAdd(typeName, (key) =>
                 {
                     if ((_assemblyLoadInfo.AssemblyName != null) && (typeName.Length > 0))
@@ -370,7 +450,7 @@ namespace Microsoft.Build.Shared
                     foreach (KeyValuePair<string, Type> desiredTypeInAssembly in _publicTypeNameToType)
                     {
                         // if type matches partially on its name
-                        if (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
+                        if (typeName.Length == 0 || IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
                         {
                             return desiredTypeInAssembly.Value;
                         }
@@ -379,7 +459,9 @@ namespace Microsoft.Build.Shared
                     return null;
                 });
 
-                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, typeof(ITaskItem), loadedViaMetadataLoadContext: false) : null;
+                return type != null
+                    ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, typeof(ITaskItem), loadedViaMetadataLoadContext: false)
+                    : null;
             }
 
             /// <summary>
@@ -390,13 +472,14 @@ namespace Microsoft.Build.Shared
             private bool ShouldUseMetadataLoadContext(bool useTaskHost, bool taskHostParamsMatchCurrentProc) =>
                 (useTaskHost || !taskHostParamsMatchCurrentProc) && _assemblyLoadInfo.AssemblyFile is not null;
 
-            private LoadedType GetLoadedTypeFromTypeNameUsingMetadataLoadContext(string typeName)
-            {
-                return _publicTypeNameToLoadedType.GetOrAdd(typeName, typeName =>
+            private LoadedType GetTypeForOutOfProcExecution(string typeName) => _publicTypeNameToLoadedType
+                .GetOrAdd(typeName, typeName =>
                 {
                     MSBuildEventSource.Log.LoadAssemblyAndFindTypeStart();
                     using MetadataLoadContext context = CreateMetadataLoadContext(_assemblyLoadInfo);
                     Assembly loadedAssembly = context.LoadFromAssemblyPath(_assemblyLoadInfo.AssemblyFile);
+                    SetArchitectureAndRuntime(loadedAssembly);
+
                     Type foundType = null;
                     int numberOfTypesSearched = 0;
 
@@ -418,7 +501,7 @@ namespace Microsoft.Build.Shared
                             numberOfTypesSearched++;
                             try
                             {
-                                if (_isDesiredType(publicType, null) && (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(publicType.FullName, typeName)))
+                                if (_isDesiredType(publicType, null) && (typeName.Length == 0 || IsPartialTypeNameMatch(publicType.FullName, typeName)))
                                 {
                                     foundType = publicType;
                                     break;
@@ -436,7 +519,8 @@ namespace Microsoft.Build.Shared
                     {
                         MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
                         var taskItemType = context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName);
-                        LoadedType loadedType = new(foundType, _assemblyLoadInfo, loadedAssembly, taskItemType, loadedViaMetadataLoadContext: true);
+                        LoadedType loadedType = new(foundType, _assemblyLoadInfo, loadedAssembly, taskItemType, _runtime, _architecture, loadedViaMetadataLoadContext: true);
+ 
                         MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
                         return loadedType;
                     }
@@ -445,6 +529,96 @@ namespace Microsoft.Build.Shared
 
                     return null;
                 });
+
+            /// <summary>
+            /// Gets architecture and runtime from the assembly using MetadataLoadContext.
+            /// </summary>
+            private void SetArchitectureAndRuntime(Assembly assembly)
+            {
+                if (_hasReadRuntimeAndArchitecture)
+                {
+                    return;
+                }
+
+                try
+                {
+                    SetRuntime();
+                    SetArchitecture();
+                    _hasReadRuntimeAndArchitecture = true;
+                }
+                catch
+                {
+                    // If we fail to read the assembly for any reason don't throw, just reset the values.
+                    _architecture = null;
+                    _runtime = null;
+                    _hasReadRuntimeAndArchitecture = false;
+                }
+
+                void SetRuntime()
+                {
+                    string targetFramework = null;
+                    try
+                    {
+                        CustomAttributeData targetFrameworkAttr = assembly?
+                            .GetCustomAttributesData()?
+                            .FirstOrDefault(a => a.AttributeType.Name == TargetFrameworkAttributeName && a.AttributeType.Namespace == VersioningNamespaceName);
+
+                        if (targetFrameworkAttr != null && targetFrameworkAttr.ConstructorArguments.Count > 0)
+                        {
+                            // the final value looks like: ".NETFramework,Version=v3.5"
+                            targetFramework = targetFrameworkAttr.ConstructorArguments[0].Value as string ?? string.Empty;
+                            _runtime = targetFramework.StartsWith(DotNetCoreIdentifier) ? MSBuildRuntimeValues.net : MSBuildRuntimeValues.clr4;
+                        }
+                    }
+                    catch
+                    {
+                        // something went wrong with reading the custom attribute!
+                    }
+
+                    if (targetFramework == null && _runtime == null)
+                    {
+                        bool hasSystemRuntime = assembly.GetReferencedAssemblies().Any(a => string.Equals(a.Name, SystemRuntimeAssemblyName, StringComparison.OrdinalIgnoreCase));
+                        if (hasSystemRuntime)
+                        {
+                            _runtime = MSBuildRuntimeValues.net;
+                        }
+                    }
+                }
+
+                void SetArchitecture()
+                {
+                    Module module = assembly?.Modules?.FirstOrDefault();
+                    if (module == null)
+                    {
+                        return;
+                    }
+
+                    module.GetPEKind(out PortableExecutableKinds peKind, out ImageFileMachine machine);
+
+                    bool isILOnly = (peKind & PortableExecutableKinds.ILOnly) != 0;
+                    bool requires32Bit = (peKind & PortableExecutableKinds.Required32Bit) != 0;
+                    bool prefers32Bit = (peKind & PortableExecutableKinds.Preferred32Bit) != 0;
+
+                    if (requires32Bit || prefers32Bit)
+                    {
+                        _architecture = MSBuildArchitectureValues.x86;
+                        return;
+                    }
+
+                    if (isILOnly && machine == ImageFileMachine.I386)
+                    {
+                        _architecture = MSBuildArchitectureValues.any;
+                        return;
+                    }
+
+                    _architecture = machine switch
+                    {
+                        ImageFileMachine.I386 => MSBuildArchitectureValues.x86,
+                        ImageFileMachine.AMD64 => MSBuildArchitectureValues.x64,
+                        (ImageFileMachine)0xAA64 => MSBuildArchitectureValues.arm64,
+                        _ => MSBuildArchitectureValues.any,
+                    };
+                }
             }
 
             /// <summary>

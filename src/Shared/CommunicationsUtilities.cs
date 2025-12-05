@@ -374,6 +374,13 @@ namespace Microsoft.Build.Internal
         internal delegate void LogDebugCommunications(string format, params object[] stuff);
 
         /// <summary>
+        /// On Windows, environment variables should be case-insensitive;
+        /// on Unix-like systems, they should be case-sensitive, but this might be a breaking change in an edge case.
+        /// https://github.com/dotnet/msbuild/issues/12858
+        /// </summary>
+        internal static StringComparer EnvironmentVariableComparer => StringComparer.OrdinalIgnoreCase;
+
+        /// <summary>
         /// Gets or sets the node connection timeout.
         /// </summary>
         internal static int NodeConnectionTimeout
@@ -622,7 +629,7 @@ namespace Microsoft.Build.Internal
             }
 
             // Otherwise, allocate and update with the current state.
-            Dictionary<string, string> table = new(vars.Count, StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> table = new(vars.Count, EnvironmentVariableComparer);
 
             enumerator.Reset();
             while (enumerator.MoveNext())
@@ -633,7 +640,7 @@ namespace Microsoft.Build.Internal
                 table[key] = value;
             }
 
-            EnvironmentState newState = new(table.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase));
+            EnvironmentState newState = new(table.ToFrozenDictionary(EnvironmentVariableComparer));
             s_environmentState = newState;
 
             return newState.EnvironmentVariables;

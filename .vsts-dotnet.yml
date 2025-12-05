@@ -49,7 +49,7 @@ variables:
     - name: SkipApplyOptimizationData
       value: true
   - name: EnableReleaseOneLocBuild
-    value: true # Enable loc for vs18.1
+    value: false # Temp DISABLE to localize vs 17.14
   - name: Codeql.Enabled
     value: true
   - group: DotNet-MSBuild-SDLValidation-Params
@@ -122,6 +122,7 @@ extends:
 
     - stage: build
       displayName: Build
+      dependsOn: [] # empty dependency list to enable parallelization with localization stage
       jobs:
       - template: /azure-pipelines/.vsts-dotnet-build-jobs.yml@self
         parameters:

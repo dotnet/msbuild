@@ -121,6 +121,8 @@ variables:
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
+    settings:
+      networkIsolationPolicy: Permissive,CFSClean
     pool:
       name: VSEngSS-MicroBuild2022-1ES
     customBuildTags:
@@ -267,19 +269,6 @@ extends:
             packagesToPush: $(MSBuildPackagePattern);$(StringToolsPackagePattern);$(ExternalAPIsPackagePattern)
             nuGetFeedType: internal
             publishVstsFeed: VS
-            allowPackageConflicts: false
-        - template: /azure-pipelines/WIFtoPATauth.yml@self
-          parameters:
-            wifServiceConnectionName: azure-public/vside package push
-            deadPATServiceConnectionId: 42175e93-c771-4a4f-a132-3cca78f44b3b
-        - task: 1ES.PublishNuGet@1
-          condition: ${{ eq(parameters.SkipUploadingPackages, false) }}
-          displayName: 'Push MSBuild packages to VSSDK'
-          inputs:
-            packageParentPath: '$(Build.ArtifactStagingDirectory)'
-            packagesToPush: $(MSBuildPackagePattern);$(StringToolsPackagePattern)
-            nuGetFeedType: external
-            publishFeedCredentials: azure-public/vssdk
             allowPackageConflicts: false
         - task: PowerShell@2
           name: PrintTargetBranch
