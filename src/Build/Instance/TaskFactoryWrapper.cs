@@ -39,16 +39,32 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public readonly IReadOnlyDictionary<string, TaskPropertyInfo> PropertyInfoCache;
 
+            /// <summary>
+            /// Cache of precomputed DisableLogTaskParameter property keys for each parameter.
+            /// Maps parameter name to "DisableLogTaskParameter_{taskName}_{parameterName}"
+            /// </summary>
+            public readonly IReadOnlyDictionary<string, string> DisableLogTaskParameterKeys;
+
+            /// <summary>
+            /// Cache of precomputed DisableLogTaskParameterItemMetadata property keys for each parameter.
+            /// Maps parameter name to "DisableLogTaskParameterItemMetadata_{taskName}_{parameterName}"
+            /// </summary>
+            public readonly IReadOnlyDictionary<string, string> DisableLogTaskParameterItemMetadataKeys;
+
             public PropertyData(
                 IReadOnlyDictionary<string, string> namesOfPropertiesWithRequiredAttribute,
                 IReadOnlyDictionary<string, string> namesOfPropertiesWithOutputAttribute,
                 IReadOnlyDictionary<string, string> namesOfPropertiesWithAmbiguousMatches,
-                IReadOnlyDictionary<string, TaskPropertyInfo> propertyInfoCache)
+                IReadOnlyDictionary<string, TaskPropertyInfo> propertyInfoCache,
+                IReadOnlyDictionary<string, string> disableLogTaskParameterKeys,
+                IReadOnlyDictionary<string, string> disableLogTaskParameterItemMetadataKeys)
             {
                 NamesOfPropertiesWithRequiredAttribute = namesOfPropertiesWithRequiredAttribute;
                 NamesOfPropertiesWithOutputAttribute = namesOfPropertiesWithOutputAttribute;
                 NamesOfPropertiesWithAmbiguousMatches = namesOfPropertiesWithAmbiguousMatches;
                 PropertyInfoCache = propertyInfoCache;
+                DisableLogTaskParameterKeys = disableLogTaskParameterKeys;
+                DisableLogTaskParameterItemMetadataKeys = disableLogTaskParameterItemMetadataKeys;
             }
         }
 
@@ -168,6 +184,26 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public TaskHostParameters FactoryIdentityParameters => _factoryIdentityParameters;
 
+        /// <summary>
+        /// Gets the precomputed DisableLogTaskParameter property key for a parameter.
+        /// Returns null if the parameter name is not found.
+        /// </summary>
+        internal string? GetDisableLogTaskParameterKey(string parameterName)
+        {
+            _propertyData.Value.DisableLogTaskParameterKeys.TryGetValue(parameterName, out string? key);
+            return key;
+        }
+
+        /// <summary>
+        /// Gets the precomputed DisableLogTaskParameterItemMetadata property key for a parameter.
+        /// Returns null if the parameter name is not found.
+        /// </summary>
+        internal string? GetDisableLogTaskParameterItemMetadataKey(string parameterName)
+        {
+            _propertyData.Value.DisableLogTaskParameterItemMetadataKeys.TryGetValue(parameterName, out string? key);
+            return key;
+        }
+
         #endregion
 
         #region Methods.
@@ -265,6 +301,8 @@ namespace Microsoft.Build.Execution
             Dictionary<string, string>? namesOfPropertiesWithRequiredAttribute = null;
             Dictionary<string, string>? namesOfPropertiesWithOutputAttribute = null;
             Dictionary<string, string>? namesOfPropertiesWithAmbiguousMatches = null;
+            Dictionary<string, string>? disableLogTaskParameterKeys = null;
+            Dictionary<string, string>? disableLogTaskParameterItemMetadataKeys = null;
 
             bool taskTypeImplementsIGeneratedTask = typeof(IGeneratedTask).IsAssignableFrom(_taskFactory.TaskType);
             TaskPropertyInfo[] propertyInfos = _taskFactory.GetTaskParameters();
@@ -325,13 +363,28 @@ namespace Microsoft.Build.Execution
                     // we have a output attribute defined, keep a record of that
                     namesOfPropertiesWithOutputAttribute[propertyInfo.Name] = String.Empty;
                 }
+
+                // Precompute the DisableLogTaskParameter lookup keys to avoid allocations in the hot path
+                if (disableLogTaskParameterKeys == null)
+                {
+                    disableLogTaskParameterKeys = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                }
+                disableLogTaskParameterKeys[propertyInfo.Name] = "DisableLogTaskParameter_" + _taskName + "_" + propertyInfo.Name;
+
+                if (disableLogTaskParameterItemMetadataKeys == null)
+                {
+                    disableLogTaskParameterItemMetadataKeys = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                }
+                disableLogTaskParameterItemMetadataKeys[propertyInfo.Name] = "DisableLogTaskParameterItemMetadata_" + _taskName + "_" + propertyInfo.Name;
             }
 
             return new PropertyData(
                 (IReadOnlyDictionary<string, string>?)namesOfPropertiesWithRequiredAttribute ?? ReadOnlyEmptyDictionary<string, string>.Instance,
                 (IReadOnlyDictionary<string, string>?)namesOfPropertiesWithOutputAttribute ?? ReadOnlyEmptyDictionary<string, string>.Instance,
                 (IReadOnlyDictionary<string, string>?)namesOfPropertiesWithAmbiguousMatches ?? ReadOnlyEmptyDictionary<string, string>.Instance,
-                (IReadOnlyDictionary<string, TaskPropertyInfo>?)propertyInfoCache ?? ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance);
+                (IReadOnlyDictionary<string, TaskPropertyInfo>?)propertyInfoCache ?? ReadOnlyEmptyDictionary<string, TaskPropertyInfo>.Instance,
+                (IReadOnlyDictionary<string, string>?)disableLogTaskParameterKeys ?? ReadOnlyEmptyDictionary<string, string>.Instance,
+                (IReadOnlyDictionary<string, string>?)disableLogTaskParameterItemMetadataKeys ?? ReadOnlyEmptyDictionary<string, string>.Instance);
         }
         #endregion
     }
