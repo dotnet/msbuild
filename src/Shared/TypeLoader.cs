@@ -69,14 +69,7 @@ namespace Microsoft.Build.Shared
 
         private static string microsoftBuildFrameworkPath;
 
-        /// <summary>
-        /// Gathers a list of runtime assemblies for the <see cref="MetadataLoadContext"/>.
-        /// This includes assemblies from the MSBuild installation directory, the current .NET runtime directory,
-        /// and on .NET Framework, assemblies from older framework versions (2.0, 3.5).
-        /// The path to the current `Microsoft.Build.Framework.dll` is also stored to ensure it's prioritized
-        /// for resolving essential types like <see cref="ITaskItem"/>.
-        /// These paths are used to create a <see cref="PathAssemblyResolver"/> for the <see cref="MetadataLoadContext"/>.
-        /// </summary>
+        // We need to append Microsoft.Build.Framework from next to the executing assembly first to make sure it's loaded before the runtime variant.
         private static string[] findRuntimeAssembliesWithMicrosoftBuildFramework()
         {
             string msbuildDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -88,7 +81,7 @@ namespace Microsoft.Build.Shared
         }
 
 #if NETFRAMEWORK
-        private static readonly string[] runtimeAssembliesCLR2_35 = findRuntimeAssembliesWithMicrosoftBuildFrameworkCLR2CLR35();
+        private static readonly (string[] CLR35Assemblies, string[] CLR2Assemblies) _runtimeAssembliesCLR35_20 = FindRuntimeAssembliesWithMicrosoftBuildFrameworkCLR2CLR35();
 
         /// <summary>
         /// Gathers a list of runtime assemblies for the <see cref="MetadataLoadContext"/>.
@@ -98,7 +91,7 @@ namespace Microsoft.Build.Shared
         /// for resolving essential types like <see cref="ITaskItem"/>.
         /// These paths are used to create a <see cref="PathAssemblyResolver"/> for the <see cref="MetadataLoadContext"/>.
         /// </summary>
-        private static string[] findRuntimeAssembliesWithMicrosoftBuildFrameworkCLR2CLR35()
+        private static (string[] CLR35Assemblies, string[] CLR2Assemblies) FindRuntimeAssembliesWithMicrosoftBuildFrameworkCLR2CLR35()
         {
             string msbuildDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string v20Path = FrameworkLocationHelper.PathToDotNetFrameworkV20;
@@ -110,7 +103,8 @@ namespace Microsoft.Build.Shared
             string[] msbuildCLR35Assemblies = !string.IsNullOrEmpty(v35Path) && Directory.Exists(v35Path)
                 ? Directory.GetFiles(v35Path, "*.dll")
                 : [];
-            return [.. msbuildCLR2Assemblies, .. msbuildCLR35Assemblies];
+
+            return (msbuildCLR35Assemblies, msbuildCLR2Assemblies);
         }
 #endif
 
@@ -250,41 +244,61 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        private static MetadataLoadContext CreateMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo, bool taskHostParamsMatchCurrentProc)
+        private static MetadataLoadContext CreateMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
         {
-            string path = assemblyLoadInfo.AssemblyFile;
-            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+            string assemblyFilePath = assemblyLoadInfo.AssemblyFile;
+            if (string.IsNullOrEmpty(assemblyFilePath) || !File.Exists(assemblyFilePath))
             {
                 throw new FileNotFoundException(null, assemblyLoadInfo.AssemblyLocation);
             }
 
-            string assemblyDirectory = Path.GetDirectoryName(path);
+            string assemblyDirectory = Path.GetDirectoryName(assemblyFilePath);
             string[] dlls = Directory.GetFiles(assemblyDirectory, "*.dll");
             string[] exes = Directory.GetFiles(assemblyDirectory, "*.exe");
             string[] localAssemblies = [.. dlls, .. exes];
+
+#if !NETFRAMEWORK
 
             // Deduplicate between MSBuild assemblies and task dependencies.
             Dictionary<string, string> assembliesDictionary = new(localAssemblies.Length + runtimeAssemblies.Length);
             foreach (string localPath in localAssemblies)
             {
-                assembliesDictionary.Add(Path.GetFileName(localPath), localPath);
+                assembliesDictionary[Path.GetFileName(localPath)] = localPath;
             }
 
             foreach (string runtimeAssembly in runtimeAssemblies)
             {
                 assembliesDictionary[Path.GetFileName(runtimeAssembly)] = runtimeAssembly;
             }
-#if NETFRAMEWORK
-            if (!taskHostParamsMatchCurrentProc)
+
+            return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
+
+#else
+            // Merge all assembly tiers into one dictionary with priority:
+            // CLR2 < CLR3.5 < Local < Runtime (later entries overwrite earlier ones)
+            Dictionary<string, string> assembliesDictionary = new(StringComparer.OrdinalIgnoreCase);
+
+            // Add assemblies in priority order (later entries overwrite earlier ones)
+            AddAssembliesToDictionary(
+                assembliesDictionary,
+                _runtimeAssembliesCLR35_20.CLR2Assemblies,
+                _runtimeAssembliesCLR35_20.CLR35Assemblies,
+                localAssemblies,
+                runtimeAssemblies);
+
+            return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
+
+            static void AddAssembliesToDictionary(Dictionary<string, string> assembliesDictionary, params string[][] assemblyPathArrays)
             {
-                foreach (string runtimeAssembly in runtimeAssembliesCLR2_35)
+                foreach (string[] assemblyPaths in assemblyPathArrays)
                 {
-                    assembliesDictionary[Path.GetFileName(runtimeAssembly)] = runtimeAssembly;
+                    foreach (string path in assemblyPaths)
+                    {
+                        assembliesDictionary[Path.GetFileName(path)] = path;
+                    }
                 }
             }
 #endif
-
-            return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
         }
 
         /// <summary>
@@ -431,7 +445,7 @@ namespace Microsoft.Build.Shared
 
                 if (ShouldUseMetadataLoadContext(useTaskHost, taskHostParamsMatchCurrentProc))
                 {
-                    return GetTypeForOutOfProcExecution(typeName, taskHostParamsMatchCurrentProc);
+                    return GetTypeForOutOfProcExecution(typeName);
                 }
 
                 LoadedType loadedType;
@@ -445,7 +459,7 @@ namespace Microsoft.Build.Shared
                     // The assembly can't be loaded in-proc due to architecture or runtime mismatch that was discovered during in-proc load.
                     // Fall back to metadata load context. It will prepare prerequisites for out of proc execution.
                     MSBuildEventSource.Log.FallbackAssemblyLoadStart(typeName);
-                    loadedType = GetTypeForOutOfProcExecution(typeName, taskHostParamsMatchCurrentProc);
+                    loadedType = GetTypeForOutOfProcExecution(typeName);
                     logWarning("AssemblyLoad_Warning", loadedType?.LoadedAssemblyName?.Name);
                     MSBuildEventSource.Log.FallbackAssemblyLoadStop(typeName);
                 }
@@ -519,62 +533,64 @@ namespace Microsoft.Build.Shared
             private bool ShouldUseMetadataLoadContext(bool useTaskHost, bool taskHostParamsMatchCurrentProc) =>
                 (useTaskHost || !taskHostParamsMatchCurrentProc) && _assemblyLoadInfo.AssemblyFile is not null;
 
-            private LoadedType GetTypeForOutOfProcExecution(string typeName, bool taskHostParamsMatchCurrentProc) => _publicTypeNameToLoadedType.GetOrAdd(typeName, typeName =>
-                                                                                                                                  {
-                                                                                                                                      MSBuildEventSource.Log.LoadAssemblyAndFindTypeStart();
-                                                                                                                                      using MetadataLoadContext context = CreateMetadataLoadContext(_assemblyLoadInfo, taskHostParamsMatchCurrentProc);
-                                                                                                                                      Assembly loadedAssembly = context.LoadFromAssemblyPath(_assemblyLoadInfo.AssemblyFile);
-                                                                                                                                      SetArchitectureAndRuntime(loadedAssembly);
+            private LoadedType GetTypeForOutOfProcExecution(string typeName) => _publicTypeNameToLoadedType
+                .GetOrAdd(typeName, typeName =>
+                {
+                    MSBuildEventSource.Log.LoadAssemblyAndFindTypeStart();
+                    using MetadataLoadContext context = CreateMetadataLoadContext(_assemblyLoadInfo);
+                    Assembly loadedAssembly = context.LoadFromAssemblyPath(_assemblyLoadInfo.AssemblyFile);
+                    SetArchitectureAndRuntime(loadedAssembly);
 
-                                                                                                                                      Type foundType = null;
-                                                                                                                                      int numberOfTypesSearched = 0;
+                    Type foundType = null;
+                    int numberOfTypesSearched = 0;
 
-                                                                                                                                      // Try direct type lookup first (fastest)
-                                                                                                                                      if (!string.IsNullOrEmpty(typeName))
-                                                                                                                                      {
-                                                                                                                                          foundType = loadedAssembly.GetType(typeName, throwOnError: false);
-                                                                                                                                          if (foundType != null && foundType.IsPublic && _isDesiredType(foundType, null))
-                                                                                                                                          {
-                                                                                                                                              numberOfTypesSearched = 1;
-                                                                                                                                          }
-                                                                                                                                      }
+                    // Try direct type lookup first (fastest)
+                    if (!string.IsNullOrEmpty(typeName))
+                    {
+                        foundType = loadedAssembly.GetType(typeName, throwOnError: false);
+                        if (foundType != null && foundType.IsPublic && _isDesiredType(foundType, null))
+                        {
+                            numberOfTypesSearched = 1;
+                        }
+                    }
 
-                                                                                                                                      // Fallback: enumerate all types for partial matching
-                                                                                                                                      if (foundType == null)
-                                                                                                                                      {
-                                                                                                                                          foreach (Type publicType in loadedAssembly.GetExportedTypes())
-                                                                                                                                          {
-                                                                                                                                              numberOfTypesSearched++;
-                                                                                                                                              try
-                                                                                                                                              {
-                                                                                                                                                  if (_isDesiredType(publicType, null) && (typeName.Length == 0 || IsPartialTypeNameMatch(publicType.FullName, typeName)))
-                                                                                                                                                  {
-                                                                                                                                                      foundType = publicType;
-                                                                                                                                                      break;
-                                                                                                                                                  }
-                                                                                                                                              }
-                                                                                                                                              catch
-                                                                                                                                              {
-                                                                                                                                                  // Ignore types that can't be loaded/reflected upon.
-                                                                                                                                                  // These types might be needed out of proc and be resolved there.
-                                                                                                                                              }
-                                                                                                                                          }
-                                                                                                                                      }
+                    // Fallback: enumerate all types for partial matching
+                    if (foundType == null)
+                    {
+                        foreach (Type publicType in loadedAssembly.GetExportedTypes())
+                        {
+                            numberOfTypesSearched++;
+                            try
+                            {
+                                if (_isDesiredType(publicType, null) && (typeName.Length == 0 || IsPartialTypeNameMatch(publicType.FullName, typeName)))
+                                {
+                                    foundType = publicType;
+                                    break;
+                                }
+                            }
+                            catch
+                            {
+                                // Ignore types that can't be loaded/reflected upon.
+                                // These types might be needed out of proc and be resolved there.
+                            }
+                        }
+                    }
 
-                                                                                                                                      if (foundType != null)
-                                                                                                                                      {
-                                                                                                                                          MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
-                                                                                                                                          var taskItemType = context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName);
-                                                                                                                                          LoadedType loadedType = new(foundType, _assemblyLoadInfo, loadedAssembly, taskItemType, _runtime, _architecture, loadedViaMetadataLoadContext: true);
+                    if (foundType != null)
+                    {
+                        MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
+                        var taskItemType = context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName);
+                        LoadedType loadedType = new(foundType, _assemblyLoadInfo, loadedAssembly, taskItemType, _runtime, _architecture, loadedViaMetadataLoadContext: true);
 
-                                                                                                                                          MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
-                                                                                                                                          return loadedType;
-                                                                                                                                      }
+                        MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
+                        return loadedType;
+                    }
 
-                                                                                                                                      MSBuildEventSource.Log.LoadAssemblyAndFindTypeStop(_assemblyLoadInfo.AssemblyFile, numberOfTypesSearched);
+                    MSBuildEventSource.Log.LoadAssemblyAndFindTypeStop(_assemblyLoadInfo.AssemblyFile, numberOfTypesSearched);
 
-                                                                                                                                      return null;
-                                                                                                                                  });
+                    return null;
+                });
+
             /// <summary>
             /// Gets architecture and runtime from the assembly using MetadataLoadContext.
             /// </summary>
