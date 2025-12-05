@@ -150,6 +150,11 @@ namespace Microsoft.Build.BackEnd
         private bool _useSidecarTaskHost = false;
 
         /// <summary>
+        /// The task environment for virtualized environment operations.
+        /// </summary>
+        private readonly TaskEnvironment _taskEnvironment;
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         public TaskHostTask(
@@ -162,9 +167,11 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            int scheduledNodeId)
+            int scheduledNodeId,
+            TaskEnvironment taskEnvironment)
         {
             ErrorUtilities.VerifyThrowInternalNull(taskType);
+            ErrorUtilities.VerifyThrowInternalNull(taskEnvironment);
 
             _scheduledNodeId = scheduledNodeId;
 
@@ -177,6 +184,7 @@ namespace Microsoft.Build.BackEnd
 #endif
             _taskHostParameters = taskHostParameters;
             _useSidecarTaskHost = useSidecarTaskHost;
+            _taskEnvironment = taskEnvironment;
 
             _packetFactory = new NodePacketFactory();
 
@@ -308,8 +316,8 @@ namespace Microsoft.Build.BackEnd
             TaskHostConfiguration hostConfiguration =
                 new TaskHostConfiguration(
                         _buildComponentHost.BuildParameters.NodeId,
-                        NativeMethodsShared.GetCurrentDirectory(),
-                        CommunicationsUtilities.GetEnvironmentVariables(),
+                        _taskEnvironment.ProjectDirectory,
+                        (IDictionary<string, string>)_taskEnvironment.GetEnvironmentVariables(),
                         _buildComponentHost.BuildParameters.Culture,
                         _buildComponentHost.BuildParameters.UICulture,
 #if FEATURE_APPDOMAIN
@@ -525,8 +533,8 @@ namespace Microsoft.Build.BackEnd
             // If it crashed, or if it failed, it didn't succeed.
             _taskExecutionSucceeded = taskHostTaskComplete.TaskResult == TaskCompleteType.Success ? true : false;
 
-            // reset the environment, as though the task were executed in this process all along.
-            CommunicationsUtilities.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
+            // Update the task environment with the environment changes from the task host execution
+            _taskEnvironment.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
 
             // If it crashed during the execution phase, then we can effectively replicate the inproc task execution
             // behaviour by just throwing here and letting the taskbuilder code take care of it the way it would
