@@ -191,6 +191,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml" />
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" /><!-- for consistency with Framework via transitives -->
   </ItemGroup>
 
   <ItemGroup>
