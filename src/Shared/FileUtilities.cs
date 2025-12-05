@@ -48,6 +48,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string cacheDirectory = null;
 
+        /// <summary>
+        /// Thread-static working directory for use during property/item expansion in multithreaded mode.
+        /// Set by MultiThreadedTaskEnvironmentDriver when building projects.
+        /// </summary>
+        [ThreadStatic]
+        internal static string CurrentThreadWorkingDirectory = null;
+
 #if CLR2COMPATIBILITY
         internal static string TempFileDirectory => Path.GetTempPath();
 #endif

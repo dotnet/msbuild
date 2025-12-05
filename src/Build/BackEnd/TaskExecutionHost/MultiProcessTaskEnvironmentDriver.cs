@@ -73,5 +73,11 @@ namespace Microsoft.Build.BackEnd
         {
             return new ProcessStartInfo();
         }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            // Singleton instance, no cleanup needed.
+        }
     }
 }

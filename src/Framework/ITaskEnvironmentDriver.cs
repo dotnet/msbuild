@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -12,7 +13,7 @@ namespace Microsoft.Build.Framework
     /// <remarks>
     /// If we ever consider making any part of this API public, strongly consider making an abstract class instead of a public interface.
     /// </remarks>
-    internal interface ITaskEnvironmentDriver
+    internal interface ITaskEnvironmentDriver : IDisposable
     {
         /// <summary>
         /// Gets or sets the current working directory for the task environment.
