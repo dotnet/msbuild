@@ -1750,6 +1750,86 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void RemoveAllItemsInListWithWhitespace()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+            <Target Name='t'>
+                <ItemGroup>
+                    <i1 Include='a1'/>
+                    <i1 Include='a2'/>
+                    <i1 Include='a3'/>
+                    <i1 Remove=' @(i1) '/>
+                </ItemGroup>
+            </Target></Project>");
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            ExecuteTask(task, lookup);
+
+            lookup.GetItems("i1").ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void RemoveAllItemsInListCaseInsensitive()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+            <Target Name='t'>
+                <ItemGroup>
+                    <Foo Include='item1'/>
+                    <Foo Include='item2'/>
+                    <Foo Remove='@(foo)'/>
+                </ItemGroup>
+            </Target></Project>");
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            ExecuteTask(task, lookup);
+
+            lookup.GetItems("Foo").ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void RemoveAllItemsInListWithManyItems()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+            <Target Name='t'>
+                <ItemGroup>
+                    <i1 Include='a1;a2;a3;a4;a5;a6;a7;a8;a9;a10'/>
+                    <i1 Remove='@(i1)'/>
+                </ItemGroup>
+            </Target></Project>");
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            ExecuteTask(task, lookup);
+
+            lookup.GetItems("i1").ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void RemoveAllItemsInListWithMetadata()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(
+            @"<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+            <Target Name='t'>
+                <ItemGroup>
+                    <i1 Include='a1'>
+                        <m>v1</m>
+                    </i1>
+                    <i1 Include='a2'>
+                        <m>v2</m>
+                    </i1>
+                    <i1 Remove='@(i1)'/>
+                </ItemGroup>
+            </Target></Project>");
+            IntrinsicTask task = CreateIntrinsicTask(content);
+            Lookup lookup = LookupHelpers.CreateEmptyLookup();
+            ExecuteTask(task, lookup);
+
+            lookup.GetItems("i1").ShouldBeEmpty();
+        }
+
+        [Fact]
         public void RemoveWithItemReferenceOnMatchingMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(
