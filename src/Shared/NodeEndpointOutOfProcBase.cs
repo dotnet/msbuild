@@ -121,6 +121,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BinaryWriter _binaryWriter;
 
+        /// <summary>
+        /// Represents the version of the parent packet associated with the node instantiation.
+        /// </summary>
+        private byte _parentPacketVersion;
+
 #if NET
         /// <summary>
         /// The set of property names from handshake responsible for node version.
@@ -217,9 +222,9 @@ namespace Microsoft.Build.BackEnd
         #region Construction
 
         /// <summary>
-        /// Instantiates an endpoint to act as a client
+        /// Instantiates an endpoint to act as a client.
         /// </summary>
-        internal void InternalConstruct(string pipeName = null)
+        internal void InternalConstruct(string pipeName = null, byte parentPacketVersion = 1)
         {
             _status = LinkStatus.Inactive;
             _asyncDataMonitor = new object();
@@ -227,6 +232,7 @@ namespace Microsoft.Build.BackEnd
 
             _packetStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetStream);
+            _parentPacketVersion = parentPacketVersion;
 
             pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
@@ -454,9 +460,12 @@ namespace Microsoft.Build.BackEnd
                             {
                                 // Send supported PacketVersion after EndOfHandshakeSignal
                                 // Based on this parent node decides how to communicate with the child.
-                                _pipeServer.WriteIntForHandshake(Handshake.PacketVersionFromChildMarker);  // Marker: PacketVersion follows
-                                _pipeServer.WriteIntForHandshake(NodePacketTypeExtensions.PacketVersion);
-                                CommunicationsUtilities.Trace("Sent PacketVersion: {0}", NodePacketTypeExtensions.PacketVersion);
+                                if (_parentPacketVersion >= 2)
+                                {
+                                    _pipeServer.WriteIntForHandshake(Handshake.PacketVersionFromChildMarker);  // Marker: PacketVersion follows
+                                    _pipeServer.WriteIntForHandshake(NodePacketTypeExtensions.PacketVersion);
+                                    CommunicationsUtilities.Trace("Sent PacketVersion: {0}", NodePacketTypeExtensions.PacketVersion);
+                                }
 
                                 CommunicationsUtilities.Trace("Successfully connected to parent.");
                                 _pipeServer.WriteEndOfHandshakeSignal();

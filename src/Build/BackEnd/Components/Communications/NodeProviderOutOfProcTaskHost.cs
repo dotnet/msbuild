@@ -621,7 +621,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey(taskHostNodeId), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
             // If runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
-            string commandLineArgsPlaceholder = "\"{0}\" /nologo /nodemode:2 /nodereuse:{1} /low:{2} ";
+            string commandLineArgsPlaceholder = "\"{0}\" /nologo /nodemode:2 /nodereuse:{1} /low:{2} /parentpktversion:{3} ";
 
             IList<NodeContext> nodeContexts;
 
@@ -638,7 +638,7 @@ namespace Microsoft.Build.BackEnd
                 // There is always one task host per host context so we always create just 1 one task host node here.      
                 nodeContexts = GetNodes(
                     runtimeHostPath,
-                    string.Format(commandLineArgsPlaceholder, Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority),
+                    string.Format(commandLineArgsPlaceholder, Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority, NodePacketTypeExtensions.PacketVersion),
                     taskHostNodeId,
                     this,
                     handshake,
@@ -662,7 +662,7 @@ namespace Microsoft.Build.BackEnd
 
             nodeContexts = GetNodes(
                 msbuildLocation,
-                string.Format(commandLineArgsPlaceholder, string.Empty, NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority),
+                string.Format(commandLineArgsPlaceholder, string.Empty, NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority, NodePacketTypeExtensions.PacketVersion),
                 taskHostNodeId,
                 this,
                 new Handshake(hostContext),
