@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using System.Threading;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
@@ -124,7 +125,15 @@ namespace Microsoft.Build.Shared
                 {
                     // perf improvement for the same appdomain case - we already have the type object
                     // and don't want to go through reflection to recreate it from the name.
-                    return (ITask?)Activator.CreateInstance(loadedType.Type);
+                    try
+                    {
+                        return (ITask?)Activator.CreateInstance(loadedType.Type);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"[TaskLoader] Thread {Thread.CurrentThread.ManagedThreadId}: EXCEPTION creating task '{loadedType.Type.FullName}' from assembly '{loadedType.Type.Assembly.Location}': {ex}");
+                        throw;
+                    }
                 }
 
 #if FEATURE_APPDOMAIN

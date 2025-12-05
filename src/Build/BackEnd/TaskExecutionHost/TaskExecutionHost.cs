@@ -1060,16 +1060,18 @@ namespace Microsoft.Build.BackEnd
             {
                 // Exception thrown by the called code itself
                 // Log the stack, so the task vendor can fix their code
+                Debugger.Launch();
                 _taskLoggingContext.LogError(
                     new BuildEventFileInfo(_taskLocation),
                     "TaskInstantiationFailureError",
                     _taskName,
                     _taskFactoryWrapper.TaskFactory.FactoryName,
-                    Environment.NewLine + e.InnerException);
+                    Environment.NewLine + e.InnerException + Environment.NewLine + "XXXXXXXXXXX" + Environment.NewLine + e.StackTrace);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
                 // Reflection related exception
+                Console.Error.WriteLine($"[TaskExecutionHost] Thread {Environment.CurrentManagedThreadId}: EXCEPTION during task instantiation for '{_taskName}': {e}");
                 _taskLoggingContext.LogError(
                     new BuildEventFileInfo(_taskLocation),
                     "TaskInstantiationFailureError",

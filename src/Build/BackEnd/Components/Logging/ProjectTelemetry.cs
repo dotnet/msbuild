@@ -2,15 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Threading;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd.Logging
 {
     /// <summary>
     /// Tracks telemetry data for a project build.
+    /// This class is thread-safe and can be accessed from multiple threads concurrently.
     /// </summary>
     internal class ProjectTelemetry
     {
@@ -39,56 +42,55 @@ namespace Microsoft.Build.BackEnd.Logging
         private int _taskHostTasksExecutedCount = 0;
 
         // Telemetry for tasks executed in TaskHost - maps task names to counts
-        private readonly Dictionary<string, int> _taskHostTaskUsage = new();
+        // Using ConcurrentDictionary for thread-safe access from multiple task execution threads
+        private readonly ConcurrentDictionary<string, int> _taskHostTaskUsage = new();
 
         // Telemetry for non-sealed subclasses of Microsoft-owned MSBuild tasks
         // Maps Microsoft task names to counts of their non-sealed usage
-        private readonly Dictionary<string, int> _msbuildTaskSubclassUsage = new();
+        // Using ConcurrentDictionary for thread-safe access from multiple task execution threads
+        private readonly ConcurrentDictionary<string, int> _msbuildTaskSubclassUsage = new();
 
         /// <summary>
         /// Adds a task execution to the telemetry data.
+        /// This method is thread-safe.
         /// </summary>
         public void AddTaskExecution(string taskFactoryTypeName, bool isTaskHost, string? taskName = null)
         {
             if (isTaskHost)
             {
-                _taskHostTasksExecutedCount++;
+                Interlocked.Increment(ref _taskHostTasksExecutedCount);
                 
                 // Track the specific task name if provided
                 if (!string.IsNullOrEmpty(taskName))
                 {
-                    if (!_taskHostTaskUsage.ContainsKey(taskName!))
-                    {
-                        _taskHostTaskUsage[taskName!] = 0;
-                    }
-                    _taskHostTaskUsage[taskName!]++;
+                    _taskHostTaskUsage.AddOrUpdate(taskName!, 1, (_, count) => count + 1);
                 }
             }
 
             switch (taskFactoryTypeName)
             {
                 case AssemblyTaskFactoryTypeName:
-                    _assemblyTaskFactoryTasksExecutedCount++;
+                    Interlocked.Increment(ref _assemblyTaskFactoryTasksExecutedCount);
                     break;
 
                 case IntrinsicTaskFactoryTypeName:
-                    _intrinsicTaskFactoryTasksExecutedCount++;
+                    Interlocked.Increment(ref _intrinsicTaskFactoryTasksExecutedCount);
                     break;
 
                 case CodeTaskFactoryTypeName:
-                    _codeTaskFactoryTasksExecutedCount++;
+                    Interlocked.Increment(ref _codeTaskFactoryTasksExecutedCount);
                     break;
 
                 case RoslynCodeTaskFactoryTypeName:
-                    _roslynCodeTaskFactoryTasksExecutedCount++;
+                    Interlocked.Increment(ref _roslynCodeTaskFactoryTasksExecutedCount);
                     break;
 
                 case XamlTaskFactoryTypeName:
-                    _xamlTaskFactoryTasksExecutedCount++;
+                    Interlocked.Increment(ref _xamlTaskFactoryTasksExecutedCount);
                     break;
 
                 default:
-                    _customTaskFactoryTasksExecutedCount++;
+                    Interlocked.Increment(ref _customTaskFactoryTasksExecutedCount);
                     break;
             }
         }
@@ -96,6 +98,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Tracks subclasses of Microsoft-owned MSBuild tasks.
         /// If the task is a subclass of a Microsoft-owned task, increments the usage count for that base task.
+        /// This method is thread-safe.
         /// </summary>
         /// <param name="taskType">The type of the task being loaded.</param>
         /// <param name="isMicrosoftOwned">Whether the task itself is Microsoft-owned.</param>
@@ -121,11 +124,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // Track it only if it's NOT itself Microsoft-owned (i.e., user-authored subclass)
                     if (!isMicrosoftOwned)
                     {
-                        if (!_msbuildTaskSubclassUsage.ContainsKey(baseTypeName))
-                        {
-                            _msbuildTaskSubclassUsage[baseTypeName] = 0;
-                        }
-                        _msbuildTaskSubclassUsage[baseTypeName]++;
+                        _msbuildTaskSubclassUsage.AddOrUpdate(baseTypeName, 1, (_, count) => count + 1);
                     }
                     // Stop at the first Microsoft-owned base class we find
                     break;
@@ -199,7 +198,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 loggingService.LogCommentFromText(buildEventContext, MessageImportance.Low, message);
 
                 // Log TaskHost task breakdown if any tasks ran in TaskHost
-                if (_taskHostTaskUsage.Count > 0)
+                if (!_taskHostTaskUsage.IsEmpty)
                 {
                     var taskHostBreakdown = new List<string>();
                     foreach (var kvp in _taskHostTaskUsage.OrderByDescending(x => x.Value))

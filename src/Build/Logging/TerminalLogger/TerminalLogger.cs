@@ -650,12 +650,18 @@ public sealed partial class TerminalLogger : INodeLogger
             EvalContext evalContext = new(e.BuildEventContext);
             string? targetFramework = null;
             string? runtimeIdentifier = null;
-            if (_evals.TryGetValue(evalContext, out EvalProjectInfo evalInfo))
+            if (!_evals.TryGetValue(evalContext, out EvalProjectInfo evalInfo))
+            {
+                // If evaluation info was not captured (e.g., project loaded from cache or events
+                // arrived out of order in multi-threaded scenarios), create a minimal EvalProjectInfo
+                // using information from the ProjectStarted event.
+                evalInfo = new EvalProjectInfo(evalContext, e.ProjectFile, TargetFramework: null, RuntimeIdentifier: null);
+            }
+            else
             {
                 targetFramework = evalInfo.TargetFramework;
                 runtimeIdentifier = evalInfo.RuntimeIdentifier;
             }
-            System.Diagnostics.Debug.Assert(evalInfo != default, "EvalProjectInfo should have been captured before ProjectStarted");
 
             TerminalProjectInfo projectInfo = new(c, evalInfo, CreateStopwatch?.Invoke());
             _projects[c] = projectInfo;

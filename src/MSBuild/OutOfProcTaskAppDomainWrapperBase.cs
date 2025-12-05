@@ -3,11 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-#if FEATURE_APPDOMAIN
 using System.Threading;
-#endif
 using System.Reflection;
-
+using System.Diagnostics;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -120,7 +118,7 @@ namespace Microsoft.Build.CommandLine
                 // If it's a TargetInvocationException, we only care about the contents of the inner exception,
                 // so just save that instead.
                 Exception exceptionToReturn = e is TargetInvocationException ? e.InnerException : e;
-
+                Console.Error.WriteLine($"[OutOfProcTaskHost] Thread {Thread.CurrentThread.ManagedThreadId}: EXCEPTION loading task type '{taskName}' from '{taskLocation}': {exceptionToReturn}");
                 return new OutOfProcTaskHostTaskResult(
                                 TaskCompleteType.CrashedDuringInitialization,
                                 exceptionToReturn,
@@ -313,7 +311,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     exceptionToReturn = e.InnerException;
                 }
-
+                Console.Error.WriteLine($"[OutOfProcTaskHost] Thread {Thread.CurrentThread.ManagedThreadId}: EXCEPTION instantiating task '{taskName}' from '{taskLocation}': {exceptionToReturn}");
                 return new OutOfProcTaskHostTaskResult(
                     TaskCompleteType.CrashedDuringInitialization,
                     exceptionToReturn,
