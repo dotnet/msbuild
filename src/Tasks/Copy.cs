@@ -21,7 +21,8 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A task that copies files.
     /// </summary>
-    public class Copy : TaskExtension, IIncrementalTask, ICancelableTask
+    [MSBuildMultiThreadableTask]
+    public class Copy : TaskExtension, IIncrementalTask, ICancelableTask, IMultiThreadableTask
     {
         internal const string AlwaysRetryEnvVar = "MSBUILDALWAYSRETRY";
         internal const string AlwaysOverwriteReadOnlyFilesEnvVar = "MSBUILDALWAYSOVERWRITEREADONLYFILES";
@@ -184,6 +185,11 @@ namespace Microsoft.Build.Tasks
         public bool OverwriteReadOnlyFiles { get; set; }
 
         public bool FailIfNotIncremental { get; set; }
+
+        /// <summary>
+        /// Task environment for multithreaded execution
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         #endregion
 
@@ -370,9 +376,11 @@ namespace Microsoft.Build.Tasks
             if (!hardLinkCreated && !symbolicLinkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                Log.LogMessage(MessageImportance.Normal, FileComment, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath);
+                string sourceFilePath = TaskEnvironment?.GetAbsolutePath(sourceFileState.Name) ?? sourceFileState.Name;
+                string destinationFilePath = TaskEnvironment?.GetAbsolutePath(destinationFileState.Name) ?? destinationFileState.Name;
+                Log.LogMessage(MessageImportance.Normal, FileComment, sourceFilePath, destinationFilePath);
 
-                File.Copy(sourceFileState.Name, destinationFileState.Name, true);
+                File.Copy(sourceFilePath, destinationFilePath, true);
             }
 
             // If the destinationFile file exists, then make sure it's read-write.
@@ -444,7 +452,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Environment variable stomps on user-requested value if it's set.
-            if (Environment.GetEnvironmentVariable(AlwaysOverwriteReadOnlyFilesEnvVar) != null)
+            if (TaskEnvironment?.GetEnvironmentVariable(AlwaysOverwriteReadOnlyFilesEnvVar) != null)
             {
                 OverwriteReadOnlyFiles = true;
             }
@@ -510,7 +518,7 @@ namespace Microsoft.Build.Tasks
 
                 if (!copyComplete)
                 {
-                    if (DoCopyIfNecessary(new FileState(SourceFiles[i].ItemSpec), new FileState(DestinationFiles[i].ItemSpec), copyFile))
+                    if (DoCopyIfNecessary(new FileState(SourceFiles[i].ItemSpec, TaskEnvironment), new FileState(DestinationFiles[i].ItemSpec, TaskEnvironment), copyFile))
                     {
                         filesActuallyCopied[destPath] = SourceFiles[i].ItemSpec;
                         copyComplete = true;
@@ -656,8 +664,8 @@ namespace Microsoft.Build.Tasks
                             if (!copyComplete)
                             {
                                 if (DoCopyIfNecessary(
-                                    new FileState(sourceItem.ItemSpec),
-                                    new FileState(destItem.ItemSpec),
+                                    new FileState(sourceItem.ItemSpec, TaskEnvironment),
+                                    new FileState(destItem.ItemSpec, TaskEnvironment),
                                     copyFile))
                                 {
                                     copyComplete = true;
@@ -1085,15 +1093,15 @@ namespace Microsoft.Build.Tasks
         /// Compares two paths to see if they refer to the same file. We can't solve the general
         /// canonicalization problem, so we just compare strings on the full paths.
         /// </summary>
-        private static bool PathsAreIdentical(FileState source, FileState destination)
+        private bool PathsAreIdentical(FileState source, FileState destination)
         {
             if (string.Equals(source.Name, destination.Name, FileUtilities.PathComparison))
             {
                 return true;
             }
 
-            source.FileNameFullPath = Path.GetFullPath(source.Name);
-            destination.FileNameFullPath = Path.GetFullPath(destination.Name);
+            source.FileNameFullPath = TaskEnvironment?.GetAbsolutePath(source.Name) ?? Path.GetFullPath(source.Name);
+            destination.FileNameFullPath = TaskEnvironment?.GetAbsolutePath(destination.Name) ?? Path.GetFullPath(destination.Name);
             return string.Equals(source.FileNameFullPath, destination.FileNameFullPath, FileUtilities.PathComparison);
         }
 
