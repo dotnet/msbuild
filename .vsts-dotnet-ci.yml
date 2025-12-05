@@ -533,11 +533,14 @@ jobs:
 - job: CodeCoverage
   displayName: "Code Coverage"
   dependsOn:
+  - IfOnlyDocumentionChanged
   - BootstrapMSBuildOnFullFrameworkWindows
   - BootstrapMSBuildOnCoreWindows
   - FullReleaseOnWindows
   - CoreBootstrappedOnLinux
   - CoreOnMac
+  variables:
+    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
   pool:
     vmImage: 'windows-2022'
   steps:
@@ -562,11 +565,13 @@ jobs:
       buildType: 'current'
       artifactName: 'LinuxCoreCoverage'
       targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/LinuxCore'
+    condition: eq(variables.onlyDocChanged, 0)
   - task: DownloadPipelineArtifact@2
     inputs:
       buildType: 'current'
       artifactName: 'MacCoreCoverage'
       targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/MacCore'
+    condition: eq(variables.onlyDocChanged, 0)
 
   - task: PowerShell@2
     displayName: Process coverage reports
@@ -574,20 +579,22 @@ jobs:
       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
       arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(Build.SourcesDirectory)/artifacts/CoverageResults
       pwsh: true
+    condition: eq(variables.onlyDocChanged, 0)
   - task: PublishBuildArtifacts@1
     displayName: Publish Artifact $(Build.BuildNumber) Coverage
     inputs:
       PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
       ArtifactName: '$(Build.BuildNumber) Coverage'
-    condition: succeededOrFailed()
+    condition: and(succeededOrFailed(), eq(variables.onlyDocChanged, 0))
   - task: PublishBuildArtifacts@1
     displayName: Publish Artifact $(Build.BuildNumber) Cobertura
     inputs:
       PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.cobertura.xml'
       ArtifactName: '$(Build.BuildNumber) Cobertura'
-    condition: succeededOrFailed()
+    condition: and(succeededOrFailed(), eq(variables.onlyDocChanged, 0))
   - task: PublishCodeCoverageResults@2
     inputs:
       summaryFileLocation: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
       pathToSources: $(Build.SourcesDirectory)
+    condition: eq(variables.onlyDocChanged, 0)
 - template: /eng/common/templates/jobs/source-build.yml

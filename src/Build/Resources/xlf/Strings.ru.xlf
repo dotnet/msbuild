@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="AssemblyLoad_Warning">
         <source>The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</source>
-        <target state="new">The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</target>
+        <target state="translated">Для настраиваемой задачи "{0}" потребовался возврат к выполнению вне процесса, поскольку в определении UsingTask не указаны правильные атрибуты Runtime и Architecture. При этом снижается производительность сборки. Обновите элемент UsingTask, чтобы атрибуты Runtime и Architecture были указаны явным образом (например, Runtime="CLR4" Architecture="x64"), или используйте TaskFactory="TaskHostFactory".</target>
         <note />
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
@@ -522,7 +522,7 @@
       </trans-unit>
       <trans-unit id="HostObjectFailure">
         <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
-        <target state="new">The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</target>
+        <target state="translated">Задаче "{0}" не удалось получить объект узла. {1} Обратитесь к автору задачи, чтобы сообщить об этой проблеме.</target>
         <note>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">

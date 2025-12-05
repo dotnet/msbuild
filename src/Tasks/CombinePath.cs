@@ -15,6 +15,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Task to call Path.Combine.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class CombinePath : TaskExtension
     {
         private ITaskItem[] _paths;
