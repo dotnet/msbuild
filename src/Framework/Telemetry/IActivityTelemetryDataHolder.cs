@@ -11,5 +11,5 @@ namespace Microsoft.Build.Framework.Telemetry;
 /// </summary>
 internal interface IActivityTelemetryDataHolder
 {
-    IList<TelemetryItem> GetActivityProperties();
+    Dictionary<string, object> GetActivityProperties();
 }

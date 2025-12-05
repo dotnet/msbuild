@@ -160,7 +160,7 @@ namespace Microsoft.Build.Framework
 
         public bool EnableTargetOutputLogging = IsEnvVarOneOrTrue("MSBUILDTARGETOUTPUTLOGGING");
 
-        // for VS17.14
+        // for VS18.*
         public readonly bool TelemetryOptIn = IsEnvVarOneOrTrue("MSBUILD_TELEMETRY_OPTIN");
         public readonly bool SlnParsingWithSolutionPersistenceOptIn = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_PARSE_SLN_WITH_SOLUTIONPERSISTENCE"));
 
