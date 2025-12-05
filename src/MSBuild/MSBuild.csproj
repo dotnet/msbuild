@@ -59,6 +59,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\FrameworkLocationHelper.cs">
+      <Link>Shared\FrameworkLocationHelper.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
