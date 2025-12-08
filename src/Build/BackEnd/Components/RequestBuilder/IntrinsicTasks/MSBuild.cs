@@ -19,7 +19,8 @@ namespace Microsoft.Build.BackEnd
     /// <remarks>
     /// This class implements the "MSBuild" task, which hands off child project files to the MSBuild engine to be built.
     /// </remarks>
-    internal class MSBuild : ITask
+    [MSBuildMultiThreadableTask]
+    internal class MSBuild : ITask, IMultiThreadableTask
     {
         /// <summary>
         /// Enum describing the behavior when a project doesn't exist on disk.
@@ -215,6 +216,11 @@ namespace Microsoft.Build.BackEnd
         /// </remarks>
         /// </summary>
         public bool SkipNonexistentTargets { get; set; }
+
+        /// <summary>
+        /// Task environment for isolated execution.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
         #endregion
 
         #region ITask Members
@@ -310,7 +316,7 @@ namespace Microsoft.Build.BackEnd
             {
                 ITaskItem project = Projects[i];
 
-                string projectPath = FileUtilities.AttemptToShortenPath(project.ItemSpec);
+                AbsolutePath projectPath = TaskEnvironment.GetAbsolutePath(FileUtilities.AttemptToShortenPath(project.ItemSpec));
 
                 if (StopOnFirstFailure && !success)
                 {

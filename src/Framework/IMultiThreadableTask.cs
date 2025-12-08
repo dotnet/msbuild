@@ -32,6 +32,6 @@ namespace Microsoft.Build.Framework
         /// This property is set on behalf of the Task by the MSBuild engine before the Task is executed. It should <strong>never</strong> be set by a Task itself.
         /// </remarks>
         /// <value>Task environment which provides access to project current directory and environment variables.</value>
-        TaskEnvironment TaskEnvironment { get; internal set; }
+        TaskEnvironment TaskEnvironment { get; set; }
     }
 }
