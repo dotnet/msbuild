@@ -20,6 +20,8 @@ Enable binary logging in CI/CD pipelines without modifying artifacts on disk.
 
 > **Note:** The `deferred` mode for `-check` is not currently supported. Enabling this feature requires changes to the MSBuild codebase. See section "Build Check (-check) Handling" below.
 
+> **Recommendation:** For CI/CD use, specify a path with the `{}` placeholder (e.g., `-bl:logs/build{}.binlog`) to generate unique filenames and avoid overwriting logs across multiple build invocations.
+
 **All other switches are blocked** to maintain diagnosability.
 
 ### Rationale
@@ -37,8 +39,7 @@ Environment variables that unexpectedly affect build behavior are notoriously di
 
 Since `MSBUILD_LOGGING_ARGS` only allows logging switches (`-bl` and `-check`), traditional precedence concerns don't apply:
 
-- **`-bl` is additive:** Each `-bl` argument creates a separate binlog file. Multiple sources specifying `-bl` simply result in multiple binlog files-there's no conflict to resolve.
-
+- **`-bl` is additive:** Each `-bl` argument creates a separate binlog file (requires [#12706](https://github.com/dotnet/msbuild/pull/12706)). Multiple sources specifying `-bl` simply result in multiple binlog files-there's no conflict to resolve.
 
 ## Implementation Flow
 
@@ -84,6 +85,8 @@ set MSBUILD_LOGGING_ARGS=-bl:build{}.binlog
 
 Issues are logged as **warnings**. Note that users with `/warnaserror` enabled will see these as errors-by opting into this environment variable, users also opt into these diagnostics.
 
+### Messages
+
 - **Informational:** "Using arguments from MSBUILD_LOGGING_ARGS environment variable: {0}" - build continues with arguments applied
 - **Unsupported argument:** "MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed." - the specific invalid argument is skipped, other valid arguments in the same env var are still processed (e.g., `-bl:a.binlog -maxcpucount:4` → `-bl:a.binlog` is applied, `-maxcpucount:4` is ignored with warning)
 - **Malformed input:** "Error processing MSBUILD_LOGGING_ARGS environment variable: {0}" - the entire environment variable is skipped to avoid partial/unpredictable behavior, build proceeds as if the env var was not set
@@ -94,18 +97,17 @@ Issues are logged as **warnings**. Note that users with `/warnaserror` enabled w
 
 `-check:deferred` enables binlog replay analysis with reduced build-time overhead:
 
-- **During build:** Flag recorded in binlog, BuildCheck NOT activated
+- **During build:** Flag recorded in binlog along with additional data needed for checks; BuildCheck NOT activated
 - **During replay:** Binlog reader activates BuildCheck for analysis
 
-**Rationale:** BuildCheck analysis can be expensive. Environment variable is for diagnostics that can be analyzed later, allowing teams to record data with reduced performance impact.
+**Rationale:** BuildCheck analysis can be expensive. Environment variable is for diagnostics that can be analyzed later, allowing teams to record data with reduced performance impact compared to running checks during the build.
 
 ### Example Workflow
-
 ```bash
 # 1. Configure environment
 set MSBUILD_LOGGING_ARGS=-bl:build{}.binlog -check:deferred
 
-# 2. Run build (normal speed, no BuildCheck overhead)
+# 2. Run build (reduced overhead, no BuildCheck analysis during build)
 msbuild solution.sln
 
 # 3. Later: Replay binlog (BuildCheck analyzes recorded events)
@@ -124,9 +126,9 @@ msbuild build{}.binlog
 - Set `MSBUILD_LOGGING_ARGS=-bl:build{}.binlog`
 - Works with `-noAutoResponse`
 - No file creation needed
+- The `{}` placeholder generates unique filenames for each build invocation
 
 ### Combining Both Approaches
-
 ```bash
 # Environment provides base logging
 set MSBUILD_LOGGING_ARGS=-bl:base{}.binlog -check:deferred
@@ -134,5 +136,5 @@ set MSBUILD_LOGGING_ARGS=-bl:base{}.binlog -check:deferred
 # Command line adds specific logging
 msbuild solution.sln -bl:detailed.binlog
 
-# Result: Two binlog files created (base.binlog + detailed.binlog)
+# Result: Two binlog files created (base{...}.binlog + detailed.binlog)
 ```
