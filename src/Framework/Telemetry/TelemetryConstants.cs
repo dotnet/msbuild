@@ -3,7 +3,7 @@
 namespace Microsoft.Build.Framework.Telemetry;
 
 /// <summary>
-/// Constants for VS OpenTelemetry for basic configuration and appropriate naming for VS exporting/collection.
+/// Constants for VS Telemetry for basic configuration and appropriate naming for VS exporting/collection.
 /// </summary>
 internal static class TelemetryConstants
 {
@@ -26,11 +26,6 @@ internal static class TelemetryConstants
     /// Namespace of the default ActivitySource handling e.g. End of build telemetry.
     /// </summary>
     public const string DefaultActivitySourceNamespace = $"{ActivitySourceNamespacePrefix}Default";
-
-    /// <summary>
-    /// For VS OpenTelemetry Collector to apply the correct privacy policy.
-    /// </summary>
-    public const string VSMajorVersion = "18.0";
 
     /// <summary>
     /// Sample rate for the default namespace.
