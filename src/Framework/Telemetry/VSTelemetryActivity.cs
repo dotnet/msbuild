@@ -17,12 +17,12 @@ namespace Microsoft.Build.Framework.Telemetry
     internal class VsTelemetryActivity : IActivity
     {
         private readonly TelemetryScope<OperationEvent> _scope;
-        private readonly TelemetrySession _session;
+        private readonly TelemetrySession? _session;
         private TelemetryResult _result = TelemetryResult.Success;
 
         private bool _disposed;
 
-        public VsTelemetryActivity(TelemetryScope<OperationEvent> scope, TelemetrySession session)
+        public VsTelemetryActivity(TelemetryScope<OperationEvent> scope, TelemetrySession? session)
         {
             _scope = scope;
             _session = session;
@@ -69,7 +69,8 @@ namespace Microsoft.Build.Framework.Telemetry
                 telemetryEvent.Properties[$"{TelemetryConstants.PropertyPrefix}{tag.Key}"] = tag.Value;
             }
 
-            _session.PostEvent(telemetryEvent);
+            _session?.PostEvent(telemetryEvent);
+
             return this;
         }
 
