@@ -17,7 +17,7 @@ internal sealed class ItemDisposalCheck : Check
 {
     private const string RuleId = "BC0303";
 
-    public static CheckRule SupportedRule = new CheckRule(
+    public static readonly CheckRule SupportedRule = new CheckRule(
         RuleId,
         "PrivateItemsNotDisposed",
         ResourceUtilities.GetResourceString("BuildCheck_BC0303_Title"),
@@ -97,6 +97,16 @@ internal sealed class ItemDisposalCheck : Check
     private void AnalyzeTarget(ProjectTargetElement target, BuildCheckDataContext<ParsedItemsCheckData> context)
 #pragma warning restore CS0618
     {
+        AnalyzeTargetCore(target, result => context.ReportResult(result));
+    }
+
+    /// <summary>
+    /// Core logic for analyzing a single target for private items that are not properly disposed.
+    /// </summary>
+    /// <param name="target">The target to analyze.</param>
+    /// <param name="reportResult">Callback to report violations.</param>
+    private void AnalyzeTargetCore(ProjectTargetElement target, System.Action<BuildCheckResult> reportResult)
+    {
         // Collect all item types that are referenced in Outputs or Returns attributes
         HashSet<string> exposedItemTypes = GetExposedItemTypes(target);
 
@@ -151,7 +161,7 @@ internal sealed class ItemDisposalCheck : Check
             }
 
             // Report the violation
-            context.ReportResult(BuildCheckResult.CreateBuiltIn(
+            reportResult(BuildCheckResult.CreateBuiltIn(
                 SupportedRule,
                 firstIncludeElement.IncludeLocation ?? firstIncludeElement.Location,
                 itemType,
@@ -227,65 +237,6 @@ internal sealed class ItemDisposalCheck : Check
     /// </summary>
     private void AnalyzeTargetForTesting(ProjectTargetElement target, List<BuildCheckResult> results)
     {
-        // Collect all item types that are referenced in Outputs or Returns attributes
-        HashSet<string> exposedItemTypes = GetExposedItemTypes(target);
-
-        // Track item types that have Include operations and need cleanup
-        // Key: item type (case-insensitive), Value: first Include element for that type
-        Dictionary<string, ProjectItemElement> pendingPrivateItems = new(MSBuildNameIgnoreCaseComparer.Default);
-
-        // Single pass: process operations in order
-        // An Include adds an item type to pending list
-        // A Remove after an Include clears that item type from pending
-        foreach (ProjectItemGroupElement itemGroup in target.ItemGroups)
-        {
-            foreach (ProjectItemElement item in itemGroup.Items)
-            {
-                string itemType = item.ItemType;
-
-                // Check if this is a private item (starts with underscore)
-                if (!IsPrivateItemType(itemType))
-                {
-                    continue;
-                }
-
-                // Check for Include operation (creates items)
-                if (!string.IsNullOrEmpty(item.Include))
-                {
-                    // Record this Include - only if not already tracked
-                    if (!pendingPrivateItems.ContainsKey(itemType))
-                    {
-                        pendingPrivateItems[itemType] = item;
-                    }
-                }
-
-                // Check for Remove operation - clears pending Include
-                if (!string.IsNullOrEmpty(item.Remove))
-                {
-                    // Remove clears the pending Include for this item type
-                    pendingPrivateItems.Remove(itemType);
-                }
-            }
-        }
-
-        // Report items that still have pending Includes (not cleaned up)
-        foreach (var kvp in pendingPrivateItems)
-        {
-            string itemType = kvp.Key;
-            ProjectItemElement firstIncludeElement = kvp.Value;
-
-            // Skip if item type is exposed via Outputs or Returns
-            if (exposedItemTypes.Contains(itemType))
-            {
-                continue;
-            }
-
-            // Report the violation
-            results.Add(BuildCheckResult.CreateBuiltIn(
-                SupportedRule,
-                firstIncludeElement.IncludeLocation ?? firstIncludeElement.Location,
-                itemType,
-                target.Name));
-        }
+        AnalyzeTargetCore(target, results.Add);
     }
 }
