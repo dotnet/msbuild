@@ -15,10 +15,11 @@ The .NET SDK currently invokes MSBuild in two modes:
 | Mode | Current Behavior | After App Host |
 |------|------------------|----------------|
 | **In-proc** | SDK loads `MSBuild.dll` directly | No change |
-| **Out-of-proc** | SDK launches `dotnet exec MSBuild.dll` | No change in v1 |
+| **Out-of-proc** | SDK launches `dotnet exec MSBuild.dll` | SDK will launch `MSBuild.exe` |
 
-The AppHost introduction does not break SDK integration since we are not modifying the in-proc flow. The SDK will continue to load `MSBuild.dll` directly for in-proc scenarios right away.
-The transition to in-proc task-host will be handled later in coordination with SDK team.
+The AppHost introduction does not break SDK integration since we are not modifying the in-proc flow. The SDK will continue to load `MSBuild.dll` directly for in-proc scenarios.
+
+**SDK out-of-proc consideration**: The SDK can be configured to run MSBuild out-of-proc today via `DOTNET_CLI_RUN_MSBUILD_OUTOFPROC`, and this pattern will likely become more common as AOT work progresses for CLI commands that wrap MSBuild invocations. When the SDK does launch MSBuild out-of-proc, it will use the new app host (`MSBuild.exe`) when available.
 
 ### Critical: COM Manifest for Out-of-Proc Host Objects
 
@@ -120,42 +121,37 @@ When running under the SDK, the runtime may be in a non-standard location. The S
 
 ### Solution
 
-Before launching an app host process, set `DOTNET_ROOT`:
-
+Before launching an app host process, set `DOTNET_ROOT` in the `ProcessStartInfo.Environment`:
 ```csharp
 // Derive DOTNET_ROOT from DOTNET_HOST_PATH
 var dotnetHostPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+
+if (string.IsNullOrEmpty(dotnetHostPath))
+{
+    // DOTNET_HOST_PATH should always be set when running under the SDK.
+    // If not set, fail fast rather than guessing - this indicates an unexpected environment.
+    throw new InvalidOperationException("DOTNET_HOST_PATH is not set. Cannot determine runtime location.");
+}
+
 var dotnetRoot = Path.GetDirectoryName(dotnetHostPath);
 
-Environment.SetEnvironmentVariable("DOTNET_ROOT", dotnetRoot);
+var startInfo = new ProcessStartInfo(appHostPath, arguments);
+
+// Set DOTNET_ROOT for the app host to find the runtime
+startInfo.Environment["DOTNET_ROOT"] = dotnetRoot;
+
+// Clear architecture-specific overrides that would take precedence over DOTNET_ROOT
+startInfo.Environment.Remove("DOTNET_ROOT_X64");
+startInfo.Environment.Remove("DOTNET_ROOT_X86");
+startInfo.Environment.Remove("DOTNET_ROOT_ARM64");
 ```
+
+**Note**: Using `ProcessStartInfo.Environment` is thread-safe and scoped to the child process only, avoiding any need for locking or save/restore patterns on the parent process environment.
 
 ### Edge Cases
 
 | Issue | Solution |
 |-------|----------|
-| `DOTNET_HOST_PATH` not set | Search `PATH` for `dotnet` executable |
-| Architecture-specific vars override `DOTNET_ROOT` | Unset `DOTNET_ROOT_X64`, `DOTNET_ROOT_X86`, `DOTNET_ROOT_ARM64` before launch |
-| Multi-threaded env var access | Use locking + save/restore pattern |
-| App host doesn't exist | Fall back to `dotnet MSBuild.dll` |
-
-## Expected Result
-
-### SDK Directory Structure
-
-```
-sdk/<version>/
-├── MSBuild.dll                 # Managed assembly
-├── MSBuild.exe                 # Windows app host (NEW)
-├── MSBuild                     # Unix app host (NEW, no extension)
-├── MSBuild.deps.json
-├── MSBuild.runtimeconfig.json
-└── ...
-```
-
-### Invocation
-
-| Before | After |
-|--------|-------|
-| `dotnet /sdk/MSBuild.dll proj.csproj` | `/sdk/MSBuild proj.csproj` |
-| Process name: `dotnet` | Process name: `MSBuild` |
+| `DOTNET_HOST_PATH` not set | Fail with clear error. This should always be set by the SDK; if missing, it indicates an unexpected/unsupported environment. |
+| Architecture-specific vars override `DOTNET_ROOT` | Clear `DOTNET_ROOT_X64`, `DOTNET_ROOT_X86`, `DOTNET_ROOT_ARM64` in `ProcessStartInfo.Environment` (see code above) |
+| App host doesn't exist | Fall back to `dotnet MSBuild.dll` and **log a message** indicating fallback (e.g., for debugging older SDK scenarios) |
