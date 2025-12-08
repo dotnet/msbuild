@@ -24,7 +24,7 @@ The transition to in-proc task-host will be handled later in coordination with S
 
 A key driver for this work is enabling **registration-free COM** for out-of-proc task host objects. Currently, when running via `dotnet.exe`, we cannot embed the required manifest declarations - and even if we could, it would be the wrong level of abstraction for `dotnet.exe` to contain MSBuild-specific COM interface definitions.
 
-**Background**: Remote host objects (e.g., for accessing unsaved file changes from VS) must be registered in the [Running Object Table (ROT)](https://docs.microsoft.com/en-us/windows/desktop/api/objidl/nn-objidl-irunningobjecttable). The `ITaskHost` interface requires registration-free COM configuration in the MSBuild executable manifest.
+**Background**: Remote host objects (e.g., for accessing unsaved file changes from VS) must be registered in the [Running Object Table (ROT)](https://docs.microsoft.com/windows/desktop/api/objidl/nn-objidl-irunningobjecttable). The `ITaskHost` interface requires registration-free COM configuration in the MSBuild executable manifest.
 
 **Required manifest additions for `MSBuild.exe.manifest`:**
 
@@ -58,7 +58,7 @@ An **app host** is a small native executable that:
 
 It is functionally equivalent to `dotnet.exe MSBuild.dll`, but as a standalone executable.
 
-**Note**: The app host does NOT include .NET CLI functionality. (e.g. MSBuild.exe nuget add` wouldn't work — those are CLI features, not app host features).
+**Note**: The app host does NOT include .NET CLI functionality. (e.g. `MSBuild.exe nuget add` wouldn't work — those are CLI features, not app host features).
 
 ### Reference Implementation
 
@@ -77,13 +77,13 @@ Roslyn added app host support in [PR #80026](https://github.com/dotnet/roslyn/pu
 
 The SDK will then produce both `MSBuild.dll` and `MSBuild.exe` (Windows) / `MSBuild` (Unix).
 
-### 2. Packaging 2. Installer Repository (dotnet/dotnet VMR)
+### 2. Installer Repository (dotnet/dotnet VMR)
 The app host creation happens in the installer/layout targets, similar to how Roslyn app hosts are created (PR https://github.com/dotnet/dotnet/pull/3180).
 
 ### 3. Node Launching Logic
 
 Update node provider to launch `MSBuild.exe` instead of `dotnet MSBuild.dll`:
-The path resolution logic remains the same, since MSBuild.exe will be shipped in every sdk version. 
+The path resolution logic remains the same, since MSBuild.exe will be shipped in every SDK version. 
 
 ### 4. Backward Compatibility (Critical)
 
