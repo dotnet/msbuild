@@ -17,11 +17,22 @@ namespace Microsoft.Build.Framework.Telemetry
     internal class VsTelemetryActivity : IActivity
     {
         private readonly TelemetryScope<OperationEvent> _scope;
+        private readonly TelemetrySession _session;
         private TelemetryResult _result = TelemetryResult.Success;
 
         private bool _disposed;
 
-        public VsTelemetryActivity(TelemetryScope<OperationEvent> scope) => _scope = scope;
+        public VsTelemetryActivity(TelemetryScope<OperationEvent> scope, TelemetrySession session)
+        {
+            _scope = scope;
+            _session = session;
+        }
+
+        public IActivity? SetResult(TelemetryResult result)
+        {
+            _result = result;
+            return this;
+        }
 
         public IActivity? SetTags(IActivityTelemetryDataHolder? dataHolder)
         {
@@ -50,15 +61,15 @@ namespace Microsoft.Build.Framework.Telemetry
 
         public IActivity? AddEvent(ActivityEvent activityEvent)
         {
-            // VS Telemetry doesn't have a direct equivalent to ActivityEvent
-            // We could create and immediately post a custom event if needed.
+            // VS Telemetry doesn't have a direct equivalent to ActivityEvent.
+            // We create and post a custom event to the session associated with this activity.
             var telemetryEvent = new TelemetryEvent(activityEvent.Name);
             foreach (KeyValuePair<string, object?> tag in activityEvent.Tags)
             {
                 telemetryEvent.Properties[$"{TelemetryConstants.PropertyPrefix}{tag.Key}"] = tag.Value;
             }
 
-            TelemetryService.DefaultSession.PostEvent(telemetryEvent);
+            _session.PostEvent(telemetryEvent);
             return this;
         }
 
@@ -69,7 +80,6 @@ namespace Microsoft.Build.Framework.Telemetry
                 return;
             }
 
-            // End the operation
             _scope.End(_result);
             _disposed = true;
         }

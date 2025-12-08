@@ -42,7 +42,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
 #if NETFRAMEWORK
             TelemetryScope<OperationEvent>? operation = _telemetrySession?.StartOperation(eventName);
-            return operation != null ? new VsTelemetryActivity(operation) : null;
+            return operation != null ? new VsTelemetryActivity(operation, _telemetrySession) : null;
 #else
             Activity? activity = Activity.Current?.HasRemoteParent == true
                 ? _source.StartActivity(eventName, ActivityKind.Internal, parentId: Activity.Current.ParentId)
