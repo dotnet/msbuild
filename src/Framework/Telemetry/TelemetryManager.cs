@@ -21,6 +21,11 @@ namespace Microsoft.Build.Framework.Telemetry
     /// </remarks>
     internal class TelemetryManager
     {
+        /// <summary>
+        /// Lock object for thread-safe initialization and disposal.
+        /// </summary>
+        private static readonly object s_lock = new object();
+
         private static bool s_initialized;
         private static bool s_disposed;
 
@@ -37,35 +42,38 @@ namespace Microsoft.Build.Framework.Telemetry
 
         public void Initialize(bool isStandalone)
         {
-            if (s_initialized)
+            lock (s_lock)
             {
-                return;
-            }
+                if (s_initialized)
+                {
+                    return;
+                }
 
-            s_initialized = true;
+                s_initialized = true;
 
-            if (IsOptOut())
-            {
-                return;
-            }
+                if (IsOptOut())
+                {
+                    return;
+                }
 
 #if NETFRAMEWORK
-            try
-            {
-                InitializeVsTelemetry(isStandalone);
-            }
-            catch (Exception ex) when (
-                ex is FileNotFoundException or
-                FileLoadException or
-                TypeLoadException)
-            {
-                // Microsoft.VisualStudio.Telemetry is not available outside VS.
-                // This is expected in standalone MSBuild.exe scenarios.
-                DefaultActivitySource = null;
-            }
+                try
+                {
+                    InitializeVsTelemetry(isStandalone);
+                }
+                catch (Exception ex) when (
+                    ex is FileNotFoundException or
+                    FileLoadException or
+                    TypeLoadException)
+                {
+                    // Microsoft.VisualStudio.Telemetry is not available outside VS.
+                    // This is expected in standalone MSBuild.exe scenarios.
+                    DefaultActivitySource = null;
+                }
 #else
-            DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
+                DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
 #endif
+            }
         }
 
 #if NETFRAMEWORK
@@ -81,25 +89,28 @@ namespace Microsoft.Build.Framework.Telemetry
 
         public void Dispose()
         {
-            if (s_disposed)
+            lock (s_lock)
             {
-                return;
-            }
+                if (s_disposed)
+                {
+                    return;
+                }
 
 #if NETFRAMEWORK
-            try
-            {
-                DisposeVsTelemetry();
-            }
-            catch (Exception ex) when (
-                ex is FileNotFoundException or
-                FileLoadException or
-                TypeLoadException)
-            {
-                // Assembly was never loaded, nothing to dispose.
-            }
+                try
+                {
+                    DisposeVsTelemetry();
+                }
+                catch (Exception ex) when (
+                    ex is FileNotFoundException or
+                    FileLoadException or
+                    TypeLoadException)
+                {
+                    // Assembly was never loaded, nothing to dispose.
+                }
 #endif
-            s_disposed = true;
+                s_disposed = true;
+            }
         }
 
 #if NETFRAMEWORK
@@ -110,7 +121,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Determines if the user has explicitly opted out of telemetry.
         /// </summary>
-        private bool IsOptOut() =>
+        private static bool IsOptOut() =>
 #if NETFRAMEWORK
             Traits.Instance.FrameworkTelemetryOptOut;
 #else
@@ -124,42 +135,47 @@ namespace Microsoft.Build.Framework.Telemetry
     /// This separation ensures the VS Telemetry assembly is only loaded when methods
     /// on this class are actually invoked.
     /// </summary>
+    /// <remarks>
+    /// Thread-safety: All public methods on this class must be called under the
+    /// <see cref="TelemetryManager"/> lock to ensure thread-safe access to static state.
+    /// Callers must not invoke <see cref="Initialize"/> or <see cref="Dispose"/> concurrently.
+    /// </remarks>
     internal static class VsTelemetryInitializer
     {
         // Telemetry API key for Visual Studio telemetry service.
         private const string CollectorApiKey = "f3e86b4023cc43f0be495508d51f588a-f70d0e59-0fb0-4473-9f19-b4024cc340be-7296";
 
-        private static TelemetrySession? _telemetrySession;
-        private static bool _ownsSession;
+        private static TelemetrySession? s_telemetrySession;
+        private static bool s_ownsSession;
 
         public static MSBuildActivitySource Initialize(bool isStandalone)
         {
             if (isStandalone)
             {
-                _telemetrySession = TelemetryService.CreateAndGetDefaultSession(CollectorApiKey);
+                s_telemetrySession = TelemetryService.CreateAndGetDefaultSession(CollectorApiKey);
                 TelemetryService.DefaultSession.IsOptedIn = true;
                 TelemetryService.DefaultSession.Start();
-                _ownsSession = true;
+                s_ownsSession = true;
             }
             else
             {
-                _telemetrySession = TelemetryService.DefaultSession;
-                _ownsSession = false;
+                s_telemetrySession = TelemetryService.DefaultSession;
+                s_ownsSession = false;
             }
 
-            return new MSBuildActivitySource(_telemetrySession);
+            return new MSBuildActivitySource(s_telemetrySession);
         }
 
         public static void Dispose()
         {
             // Only dispose the session if we created it (standalone scenario).
             // In VS, the session is owned by VS and should not be disposed by MSBuild.
-            if (_ownsSession)
+            if (s_ownsSession)
             {
-                _telemetrySession?.Dispose();
+                s_telemetrySession?.Dispose();
             }
 
-            _telemetrySession = null;
+            s_telemetrySession = null;
         }
     }
 #endif
