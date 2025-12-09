@@ -16,7 +16,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <param name="telemetryData">Data about tasks and target forwarded from nodes.</param>
         /// <param name="includeTasksDetails">Controls whether Task details should attached to the telemetry.</param>
         /// <param name="includeTargetDetails">Controls whether Target details should be attached to the telemetry.</param>
-        /// <returns>Node Telemetry data wrapped in <see cref="IActivityTelemetryDataHolder"/> a list of properties that can be attached as tags to a <see cref="System.Diagnostics.Activity"/>.</returns>
+        /// <returns>Node Telemetry data wrapped in <see cref="IActivityTelemetryDataHolder"/> a list of properties that can be attached as tags to a <see cref="IActivity"/>.</returns>
         public static IActivityTelemetryDataHolder? AsActivityDataHolder(this IWorkerNodeTelemetryData? telemetryData, bool includeTasksDetails, bool includeTargetDetails)
         {
             if (telemetryData == null)
