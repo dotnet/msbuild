@@ -4,7 +4,6 @@
 #if NETFRAMEWORK
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.VisualStudio.Telemetry;
 
 namespace Microsoft.Build.Framework.Telemetry
@@ -17,21 +16,13 @@ namespace Microsoft.Build.Framework.Telemetry
     internal class VsTelemetryActivity : IActivity
     {
         private readonly TelemetryScope<OperationEvent> _scope;
-        private readonly TelemetrySession? _session;
         private TelemetryResult _result = TelemetryResult.Success;
 
         private bool _disposed;
 
-        public VsTelemetryActivity(TelemetryScope<OperationEvent> scope, TelemetrySession? session)
+        public VsTelemetryActivity(TelemetryScope<OperationEvent> scope)
         {
             _scope = scope;
-            _session = session;
-        }
-
-        public IActivity? SetResult(TelemetryResult result)
-        {
-            _result = result;
-            return this;
         }
 
         public IActivity? SetTags(IActivityTelemetryDataHolder? dataHolder)
@@ -55,21 +46,6 @@ namespace Microsoft.Build.Framework.Telemetry
             {
                 _scope.EndEvent.Properties[$"{TelemetryConstants.PropertyPrefix}{key}"] = new TelemetryComplexProperty(value);
             }
-
-            return this;
-        }
-
-        public IActivity? AddEvent(ActivityEvent activityEvent)
-        {
-            // VS Telemetry doesn't have a direct equivalent to ActivityEvent.
-            // We create and post a custom event to the session associated with this activity.
-            var telemetryEvent = new TelemetryEvent(activityEvent.Name);
-            foreach (KeyValuePair<string, object?> tag in activityEvent.Tags)
-            {
-                telemetryEvent.Properties[$"{TelemetryConstants.PropertyPrefix}{tag.Key}"] = tag.Value;
-            }
-
-            _session?.PostEvent(telemetryEvent);
 
             return this;
         }
