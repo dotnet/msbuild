@@ -49,7 +49,7 @@ variables:
     - name: SkipApplyOptimizationData
       value: true
   - name: EnableReleaseOneLocBuild
-    value: false # Temp DISABLE to localize vs 17.14
+    value: true
   - name: Codeql.Enabled
     value: true
   - group: DotNet-MSBuild-SDLValidation-Params
