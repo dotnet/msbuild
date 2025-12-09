@@ -3,7 +3,7 @@
 <Project>
   <Import Project="Version.Details.props" Condition="Exists('Version.Details.props')" />
   <PropertyGroup>
-    <VersionPrefix>18.0.6</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
+    <VersionPrefix>18.0.7</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
     <PackageValidationBaselineVersion>17.14.8</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
     <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
@@ -72,7 +72,7 @@
     <MicrosoftCodeAnalysisPooledObjectsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisPooledObjectsVersion>
   </PropertyGroup>
   <PropertyGroup>
-    <BootstrapSdkVersion>10.0.100-rc.1.25451.107</BootstrapSdkVersion>
+    <BootstrapSdkVersion>10.0.100</BootstrapSdkVersion>
   </PropertyGroup>
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
@@ -91,3 +91,4 @@
     </PropertyGroup>
   </Target>
 </Project>
+
