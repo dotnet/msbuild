@@ -81,7 +81,7 @@ namespace Microsoft.Build.Shared
         }
 
 #if NETFRAMEWORK
-        private static readonly (string[] CLR35Assemblies, string[] CLR2Assemblies) _runtimeAssembliesCLR35_20 = FindRuntimeAssembliesWithMicrosoftBuildFrameworkCLR2CLR35();
+        private static readonly string[] _runtimeAssembliesCLR35_20 = FindRuntimeAssembliesWithMicrosoftBuildFrameworkCLR2CLR35();
 
         /// <summary>
         /// Gathers a list of runtime assemblies for the <see cref="MetadataLoadContext"/>.
@@ -91,20 +91,19 @@ namespace Microsoft.Build.Shared
         /// for resolving essential types like <see cref="ITaskItem"/>.
         /// These paths are used to create a <see cref="PathAssemblyResolver"/> for the <see cref="MetadataLoadContext"/>.
         /// </summary>
-        private static (string[] CLR35Assemblies, string[] CLR2Assemblies) FindRuntimeAssembliesWithMicrosoftBuildFrameworkCLR2CLR35()
+        private static string[] FindRuntimeAssembliesWithMicrosoftBuildFrameworkCLR2CLR35()
         {
-            string msbuildDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string v20Path = FrameworkLocationHelper.PathToDotNetFrameworkV20;
             string v35Path = FrameworkLocationHelper.PathToDotNetFrameworkV35;
 
-            string[] msbuildCLR2Assemblies = !string.IsNullOrEmpty(v20Path) && Directory.Exists(v20Path)
+            string[] clr2Assemblies = !string.IsNullOrEmpty(v20Path) && Directory.Exists(v20Path)
                 ? Directory.GetFiles(v20Path, "*.dll")
                 : [];
-            string[] msbuildCLR35Assemblies = !string.IsNullOrEmpty(v35Path) && Directory.Exists(v35Path)
+            string[] clr35Assemblies = !string.IsNullOrEmpty(v35Path) && Directory.Exists(v35Path)
                 ? Directory.GetFiles(v35Path, "*.dll")
                 : [];
 
-            return (msbuildCLR35Assemblies, msbuildCLR2Assemblies);
+            return [.. clr2Assemblies, .. clr35Assemblies];
         }
 #endif
 
@@ -274,15 +273,14 @@ namespace Microsoft.Build.Shared
             return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
 
 #else
-            // Merge all assembly tiers into one dictionary with priority:
+           // Merge all assembly tiers into one dictionary with priority:
             // CLR2 < CLR3.5 < Local < Runtime (later entries overwrite earlier ones)
             Dictionary<string, string> assembliesDictionary = new(StringComparer.OrdinalIgnoreCase);
 
             // Add assemblies in priority order (later entries overwrite earlier ones)
             AddAssembliesToDictionary(
                 assembliesDictionary,
-                _runtimeAssembliesCLR35_20.CLR2Assemblies,
-                _runtimeAssembliesCLR35_20.CLR35Assemblies,
+                _runtimeAssembliesCLR35_20,
                 localAssemblies,
                 runtimeAssemblies);
 
