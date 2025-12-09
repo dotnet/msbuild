@@ -35,9 +35,8 @@ namespace Microsoft.Build.Engine.UnitTests
             WorkerNodeTelemetryData? workerNodeTelemetryData = null;
             InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeTelemetryData = dt;
 
-            var testProject =
-                """
-                        <Project>
+            var testProject = """
+                            <Project>
                             <Target Name="Build">
                                 <Message Text="Hello World"/>
                                 <CreateItem Include="foo.bar">
@@ -75,9 +74,51 @@ namespace Microsoft.Build.Engine.UnitTests
             WorkerNodeTelemetryData? workerNodeData = null;
             InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeData = dt;
 
+            var testProject = """
+                                      <Project>
+                                      <UsingTask
+                                          TaskName="Task01"
+                                          TaskFactory="RoslynCodeTaskFactory"
+                                          AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+                                          <ParameterGroup />
+                                          <Task>
+                                            <Code Type="Fragment" Language="cs">
+                                              Log.LogMessage(MessageImportance.Low, "Hello, world!");
+                                            </Code>
+                                          </Task>
+                                       </UsingTask>
+                                       <UsingTask
+                                         TaskName="Task02"
+                                         TaskFactory="RoslynCodeTaskFactory"
+                                         AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+                                         <ParameterGroup />
+                                         <Task>
+                                           <Code Type="Fragment" Language="cs">
+                                             Log.LogMessage(MessageImportance.High, "Hello, world!");
+                                           </Code>
+                                         </Task>
+                                      </UsingTask>
+                                          <Target Name="Build" DependsOnTargets="BeforeBuild">
+                                              <Message Text="Hello World"/>
+                                              <CreateItem Include="foo.bar">
+                                                  <Output TaskParameter="Include" ItemName="I" />
+                                              </CreateItem>
+                                              <Task01 />
+                                              <Message Text="Bye World"/>
+                                          </Target>
+                                          <Target Name="BeforeBuild">
+                                              <Message Text="Hello World"/>
+                                              <Task01 />
+                                          </Target>
+                                          <Target Name="NotExecuted">
+                                              <Message Text="Hello World"/>
+                                          </Target>
+                                      </Project>
+                              """;
+
             MockLogger logger = new MockLogger(_output);
             Helpers.BuildProjectContentUsingBuildManager(
-                GetTestProject(),
+                testProject,
                 logger,
                 new BuildParameters() { IsTelemetryEnabled = true }).OverallResult.ShouldBe(BuildResultCode.Success);
 
@@ -247,55 +288,5 @@ namespace Microsoft.Build.Engine.UnitTests
 
             public void Shutdown() { }
         }
-
-#region test project
-        private static string GetTestProject() =>
-            """
-           <Project>
-           <UsingTask
-               TaskName="Task01"
-               TaskFactory="RoslynCodeTaskFactory"
-               AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
-               <ParameterGroup />
-               <Task>
-                 <Code Type = "Fragment" Language="cs">
-                   Log.LogMessage(MessageImportance.Low, "Hello, world!");
-                 </Code>
-               </Task>
-            </UsingTask>
-           
-            <UsingTask
-              TaskName = "Task02"
-              TaskFactory="RoslynCodeTaskFactory"
-              AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
-              <ParameterGroup />
-              <Task>
-                <Code Type = "Fragment" Language="cs">
-                  Log.LogMessage(MessageImportance.High, "Hello, world!");
-                </Code>
-              </Task>
-           </UsingTask>
-           
-               <Target Name = "Build" DependsOnTargets="BeforeBuild">
-                   <Message Text = "Hello World" />
-                   < CreateItem Include="foo.bar">
-                       <Output TaskParameter = "Include" ItemName="I" />
-                   </CreateItem>
-                   <Task01 />
-                   <Message Text = "Bye World" />
-               </ Target >
-           
-               < Target Name="BeforeBuild">
-                   <Message Text = "Hello World" />
-                   < Task01 />
-               </ Target >
-           
-               < Target Name="NotExecuted">
-                   <Message Text = "Hello World" />
-               </ Target >
-           </ Project >
-           """;
-#endregion
-
     }
 }
