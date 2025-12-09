@@ -2,7 +2,7 @@
 
   <!-- Import references updated by Dependabot.
        This file is for package references updated manually or by Darc/Maestro. -->
-  <Import Project="dependabot\Directory.Packages.props" />
+  <Import Project="$(RepositoryEngineeringDir)dependabot\Directory.Packages.props" />
 
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
