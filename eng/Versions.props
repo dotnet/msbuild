@@ -48,9 +48,9 @@
         However, we can update, binding-redirect to, and distribute the newest version (that matches the VS-referenced versions) in order to get the benefits of updating.
         See uses of $(UseFrozenMaintenancePackageVersions) for details.
     -->
-    <SystemMemoryVersion>4.6.0</SystemMemoryVersion>
-    <SystemRuntimeCompilerServicesUnsafeVersion>6.1.0</SystemRuntimeCompilerServicesUnsafeVersion>
-    <SystemThreadingTasksExtensionsVersion>4.6.0</SystemThreadingTasksExtensionsVersion>
+    <SystemMemoryVersion>4.6.3</SystemMemoryVersion>
+    <SystemRuntimeCompilerServicesUnsafeVersion>6.1.2</SystemRuntimeCompilerServicesUnsafeVersion>
+    <SystemThreadingTasksExtensionsVersion>4.6.3</SystemThreadingTasksExtensionsVersion>
   </PropertyGroup>
 
   <PropertyGroup>

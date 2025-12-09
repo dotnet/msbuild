@@ -150,11 +150,11 @@
     <UseFrozenMaintenancePackageVersions Condition="'$(UseFrozenMaintenancePackageVersions)' == '' AND '$(IsUnitTestProject)' != 'true' AND $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net472')) AND '$(OutputType)' != 'exe'">true</UseFrozenMaintenancePackageVersions>
 
     <FrozenMicrosoftIORedistVersion>6.0.1</FrozenMicrosoftIORedistVersion>
-    <FrozenSystemMemoryVersion>4.5.5</FrozenSystemMemoryVersion>
-    <FrozenSystemRuntimeCompilerServicesUnsafeVersion>6.0.0</FrozenSystemRuntimeCompilerServicesUnsafeVersion>
-    <FrozenSystemThreadingTasksExtensionsVersion>4.5.4</FrozenSystemThreadingTasksExtensionsVersion>
-    <FrozenSystemBuffersVersion>4.5.1</FrozenSystemBuffersVersion>
-    <FrozenSystemNumericsVectorsVersion>4.5.0</FrozenSystemNumericsVectorsVersion>
+    <FrozenSystemMemoryVersion>4.6.3</FrozenSystemMemoryVersion>
+    <FrozenSystemRuntimeCompilerServicesUnsafeVersion>6.1.2</FrozenSystemRuntimeCompilerServicesUnsafeVersion>
+    <FrozenSystemThreadingTasksExtensionsVersion>4.6.3</FrozenSystemThreadingTasksExtensionsVersion>
+    <FrozenSystemBuffersVersion>4.6.1</FrozenSystemBuffersVersion>
+    <FrozenSystemNumericsVectorsVersion>4.6.1</FrozenSystemNumericsVectorsVersion>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(UseFrozenMaintenancePackageVersions)' == 'true'">
