@@ -4,7 +4,6 @@
 #if NETFRAMEWORK
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.VisualStudio.Telemetry;
 
 namespace Microsoft.Build.Framework.Telemetry
@@ -21,7 +20,10 @@ namespace Microsoft.Build.Framework.Telemetry
 
         private bool _disposed;
 
-        public VsTelemetryActivity(TelemetryScope<OperationEvent> scope) => _scope = scope;
+        public VsTelemetryActivity(TelemetryScope<OperationEvent> scope)
+        {
+            _scope = scope;
+        }
 
         public IActivity? SetTags(IActivityTelemetryDataHolder? dataHolder)
         {
@@ -48,20 +50,6 @@ namespace Microsoft.Build.Framework.Telemetry
             return this;
         }
 
-        public IActivity? AddEvent(ActivityEvent activityEvent)
-        {
-            // VS Telemetry doesn't have a direct equivalent to ActivityEvent
-            // We could create and immediately post a custom event if needed.
-            var telemetryEvent = new TelemetryEvent(activityEvent.Name);
-            foreach (KeyValuePair<string, object?> tag in activityEvent.Tags)
-            {
-                telemetryEvent.Properties[$"{TelemetryConstants.PropertyPrefix}{tag.Key}"] = tag.Value;
-            }
-
-            TelemetryService.DefaultSession.PostEvent(telemetryEvent);
-            return this;
-        }
-
         public void Dispose()
         {
             if (_disposed)
@@ -69,7 +57,6 @@ namespace Microsoft.Build.Framework.Telemetry
                 return;
             }
 
-            // End the operation
             _scope.End(_result);
             _disposed = true;
         }
