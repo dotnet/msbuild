@@ -154,12 +154,12 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(ProjectPath);
             AddIfNotNull(ServerFallbackReason);
             AddIfNotNull(BuildTarget);
-            AddIfNotNull(BuildEngineVersion?.ToString());
-            AddIfNotNull(BuildSuccess?.ToString());
-            AddIfNotNull(BuildCheckEnabled?.ToString());
-            AddIfNotNull(MultiThreadedModeEnabled?.ToString());
-            AddIfNotNull(SACEnabled?.ToString());
-            AddIfNotNull(IsStandaloneExecution?.ToString());
+            AddIfNotNull(BuildEngineVersion?.ToString(), nameof(BuildEngineVersion));
+            AddIfNotNull(BuildSuccess?.ToString(), nameof(BuildSuccess));
+            AddIfNotNull(BuildCheckEnabled?.ToString(), nameof(BuildCheckEnabled));
+            AddIfNotNull(MultiThreadedModeEnabled?.ToString(), nameof(MultiThreadedModeEnabled));
+            AddIfNotNull(SACEnabled?.ToString(), nameof(SACEnabled));
+            AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
 
             // Calculate durations
             if (StartAt.HasValue && FinishedAt.HasValue)
