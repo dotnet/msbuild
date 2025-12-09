@@ -262,7 +262,7 @@
 	</source>
         <target state="translated">  -check
                      빌드하는 동안 BuildChecks를 사용하도록 설정합니다.
-                     BuildCheck는 속성을 확실히 하기 위해 규칙 평가를 사용 설정합니다
+                     BuildCheck를 사용하면 규칙을 평가하여 빌드의 속성을 
                      확인할 수 있습니다. 자세한 내용은 aka.ms/buildcheck를 참조하세요.
 	</target>
         <note>
@@ -832,37 +832,37 @@
         <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
                      콘솔 로거에 대한 매개 변수입니다. (약식: -clp)
                      사용 가능한 매개 변수는 다음과 같습니다.
-                        PerformanceSummary--작업, 대상, 프로젝트에서 소요된 시간을 
-                            표시합니다.
-                        Summary--종료 시 오류 및 경고 요약을 표시합니다.
-                        NoSummary--종료 시 오류 및 경고 요약을 표시하지
+                        PerformanceSummary--작업, 목표, 프로젝트에
+                            소요된 시간을 표시합니다.
+                        Summary--끝에 오류 및 경고 요약을 표시합니다.
+                        NoSummary--끝에 오류 및 경고 요약을 표시하지
                             않습니다.
                         ErrorsOnly--오류만 표시합니다.
                         WarningsOnly--경고만 표시합니다.
-                        NoItemAndPropertyList--각 프로젝트 빌드를 시작할 때 항목 및 속성 목록을 
-                            표시하지 않습니다.
-                        ShowCommandLine--TaskCommandLineEvent 메시지를 표시합니다.
-                        ShowTimestamp--메시지 접두사로 타임스탬프를 
+                        NoItemAndPropertyList--각 프로젝트 빌드를 시작할 때
+                            항목 및 속성 목록을 표시하지 않습니다.
+                        showCommandLine--TaskCommandLineEvent 메시지 표시
+                        ShowTimestamp--모든 메시지 앞에 타임스탬프를 접두사로
                             표시합니다.
-                        ShowEventId--시작된 이벤트, 완료된 이벤트, 메시지의 eventId를 
-                            표시합니다.
-                        ForceNoAlign--콘솔 버퍼 크기에 텍스트를 맞추지 
-                            않습니다.
-                        DisableConsoleColor--모든 로깅 메시지에 기본 콘솔 색을
-                            사용합니다.
-                        DisableMPLogging--다중 프로세서가 아닌 모드에서 실행할 경우
+                        ShowEventId--시작된 이벤트, 완료된 이벤트 및 메시지의
+                            이벤트 ID 표시
+                        ForceNoAlign--콘솔 버퍼 크기에 맞게 텍스트를
+                            정렬하지 않습니다.
+                        DisableConsoleColor--모든 로깅 메시지에 대해
+                            기본 콘솔 색상을 사용합니다.
+                        DisableMPLogging--다중 프로세서가 아닌 모드에서 실행할 경우 
                             출력의 다중 프로세서 로깅 스타일을 
                             사용하지 않도록 설정합니다.
-                        EnableMPLogging--다중 프로세서가 아닌 모드에서 실행할 경우에도
-                            다중 프로세서 로깅 스타일을 사용하도록 설정합니다.
-                            이 로깅 스타일은 기본적으로 활성화됩니다.
-                        ForceConsoleColor--콘솔에서 지원하지 않더라도 ANSI 콘솔 색을
-                            사용합니다
-                        PreferConsoleColor--대상 콘솔에서 지원되는 경우에만
-                             ANSI 콘솔 색을 사용합니다.
-                     Verbosity--이 로거에 대한 -verbosity 설정을 
+                        EnableMPLogging--다중 프로세서가 아닌 모드에서 실행할 경우에도 
+                            다중 프로세서 로깅 스타일을
+                            활성화합니다. 이 로깅 스타일은 기본적으로 켜집니다.
+                        ForceConsoleColor--콘솔에서 지원하지 않더라도 ANSI 콘솔 색을 
+                            사용합니다.
+                        PreferConsoleColor--대상 콘솔에서 지원하는 경우에만
+                            ANSI 콘솔 색상을 사용합니다.
+                     Verbosity--이 로거에 대한 -세부 정보 표시 설정을 
                             재정의합니다.
-                     예:
+                     예: 
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
@@ -2032,7 +2032,7 @@
                      자세히 설명하는 것으로, 나중에 텍스트 로그를 다시
                      구성하기 위해 사용할 수 있고 다른 분석 도구에 의해
                      사용될 수 있습니다. 이진 로그는 일반적으로 가장
-                     상세한 텍스트 진단 수준 로그보다 10~20배 작지만,
+                     상세한 텍스트 진단 수준 로그보다 10~007E;20배 작지만,
                      더 자세한 정보를 포함하고 있습니다.
                      (약식: -bl)
 

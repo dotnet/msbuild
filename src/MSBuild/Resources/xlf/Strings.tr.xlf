@@ -262,9 +262,8 @@
 	</source>
         <target state="translated">  -check
                      Derleme sırasında BuildChecks seçeneğini etkinleştirir.
-                     BuildCheck, özelliklerin güvenliğini sağlamak için
-                     kuralların değerlendirilmesini sağlar. Daha fazla bilgi için aka.ms/buildcheck
- adresine bakın
+                     BuildCheck, derleme özelliklerini sağlamak için kuralların
+                     değerlendirilmesini sağlar. Daha fazla bilgi için aka.ms/buildcheck sayfasına bakın
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -831,38 +830,38 @@
                                                  Verbosity=minimal
 </source>
         <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Konsol günlüğü için parametreler. (Kısa form: -clp)
-                     Mevcut parametreler:
-                        PerformanceSummary--Görevlerde, hedeflerde harcanan zamanı göster
-                            ve projelerde.
-                        Summary--Sonunda hata ve uyarı özetini göster.
-                        NoSummary--Sonunda hata ve uyarı özeti
+                     Konsol günlükçüsüne giden parametreler. (Kısa form: -clp)
+                     Kullanılabilir parametreler şunlardır:
+                        PerformanceSummary--Görevlerde, hedeflerde ve 
+                            projelerde harcanan süreyi göster.
+                        Summary--Sonda hata ve uyarı özetini göster.
+                        NoSummary--Sonda hata ve uyarı özetini
                             gösterme.
                         ErrorsOnly--Yalnızca hataları göster.
                         WarningsOnly--Yalnızca uyarıları göster.
-                        NoItemAndPropertyList--Her proje derlemesinin başlangıcında öğe
-                            ve özellik listesini gösterme.
-                        ShowCommandLine--TaskCommandLineEvent mesajlarını göster
-                        ShowTimestamp--Zaman Damgasını herhangi bir iletinin öneki olarak
-                            görüntüleyin.
-                        ShowEventId--Başlatılan olaylar, biten olaylar ve mesajlar için
-                            eventId'i göster
-                        ForceNoAlign--Metni konsol arabelleğinin boyutuna
-                            hizalamaz
-                        DisableConsoleColor--Tüm günlük iletileri için varsayılan konsol
-                            renklerini kullanın.
-                        DisableMPLogging-- Çok işlemcili olmayan modda
-                            çalışırken çıktının çok işlemcili günlüğe kaydetme stilini
-                            devre dışı bırakın.
-                        EnableMPLogging--Çok işlemcili olmayan modda çalışırken bile
-                            çok işlemcili günlüğe kaydetme stilini
-                            etkinleştirin. Bu günlük kaydı stili varsayılan olarak açıktır.
+                        NoItemAndPropertyList--Öğe ve özelliklerin listesini
+                            her proje derlemesinin başında gösterme.
+                        ShowCommandLine--TaskCommandLineEvent iletilerini göster
+                        ShowTimestamp--Zaman damgasını her
+                            iletinin başında önek olarak göster.
+                        ShowEventId--Başlatılan olaylar, tamamlanan olaylar
+                            ve iletiler için olay kimliğini göster
+                        ForceNoAlign--Metni konsol arabelleğinin boyutuna göre
+                            uyarlama
+                        DisableConsoleColor--Tüm günlük iletileri için
+                            varsayılan konsol renklerini kullan.
+                        DisableMPLogging--Çoklu işlemci olmayan modda 
+                            çalışırken çıkışta çok işlemcili günlük stilini
+                            devre dışı bırak.
+                        EnableMPLogging--Çok işlemci olmayan modda çalışırken
+                            bile çok işlemcili günlük stilini
+                            etkinleştir. Bu günlüğe kaydetme stili varsayılan olarak açıktır.
                         ForceConsoleColor--Konsol desteklemese bile ANSI
-                            konsol renklerini kullanın
-                        PreferConsoleColor--ANSI konsol renklerini yalnızca
-                            hedef konsol destekliyorsa kullanın
-                     Verbosity--bu günlükçü için -verbosity ayarını geçersiz
-                            kılar.
+                            konsol renklerini kullan
+                        PreferConsoleColor--Hedef konsol destekliyorsa
+                            yalnızca ANSI konsol renklerini kullan
+                     Verbosity--Bu günlükçü için -verbosity ayarını
+                            geçersiz kılar.
                      Örnek:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
