@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
@@ -25,12 +24,5 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <param name="value">The tag value.</param>
         /// <returns>The activity instance for method chaining.</returns>
         IActivity? SetTag(string key, object? value);
-
-        /// <summary>
-        /// Adds an event to the activity.
-        /// </summary>
-        /// <param name="activityEvent">The event to add.</param>
-        /// <returns>The activity instance for method chaining.</returns>
-        IActivity? AddEvent(ActivityEvent activityEvent);
     }
 }
