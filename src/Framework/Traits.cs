@@ -181,19 +181,6 @@ namespace Microsoft.Build.Framework
                 : defaultValue;
         }
 
-        /// <summary>
-        /// Parse a double from an environment variable with invariant culture.
-        /// </summary>
-        private static double? ParseDoubleFromEnvironmentVariable(string environmentVariable)
-        {
-            return double.TryParse(Environment.GetEnvironmentVariable(environmentVariable),
-                                  NumberStyles.Float,
-                                  CultureInfo.InvariantCulture,
-                                  out double result)
-                ? result
-                : null;
-        }
-
         internal static bool IsEnvVarOneOrTrue(string name)
         {
             string? value = Environment.GetEnvironmentVariable(name);
