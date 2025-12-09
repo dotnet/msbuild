@@ -37,7 +37,7 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             if (value != null)
             {
-                _activity.SetTag(key, value);
+                _activity.SetTag($"{TelemetryConstants.PropertyPrefix}{key}", value);
             }
 
             return this;
