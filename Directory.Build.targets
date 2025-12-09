@@ -19,7 +19,7 @@
 
   <!-- Global Analyzer Config -->
   <ItemGroup>
-    <!-- Include Common.globalconfig for non-deprecated projects-->
+    <!-- Include Common.globalconfig -->
     <EditorConfigFiles Include="$(MSBuildThisFileDirectory)eng/Common.globalconfig" />
   </ItemGroup>
 
