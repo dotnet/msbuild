@@ -19,7 +19,6 @@
 
   <!-- Global Analyzer Config -->
   <ItemGroup>
-    <!-- Include Common.globalconfig -->
     <EditorConfigFiles Include="$(MSBuildThisFileDirectory)eng/Common.globalconfig" />
   </ItemGroup>
 
