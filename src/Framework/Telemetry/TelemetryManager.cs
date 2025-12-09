@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #if NETFRAMEWORK
-using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.Telemetry;
 #endif
 
