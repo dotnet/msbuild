@@ -832,35 +832,35 @@
         <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
                      Parámetros del registrador de consola. (Forma corta: -clp)
                      Los parámetros disponibles son:
-                        PerformanceSummary-- muestra el tiempo empleado en tareas, destinos
+                        PerformanceSummary: muestra el tiempo empleado en tareas, destinos
                             y proyectos.
-                        Summary-- muestra un resumen de errores y advertencias al final.
-                        NoSummary-- no muestra el resumen de errores y advertencias al
+                        Summary: muestra un resumen de errores y advertencias al final.
+                        NoSummary: no muestra el resumen de errores y advertencias al
                             final.
-                        ErrorsOnly-- muestra solo errores.
-                        WarningsOnly-- muestra solo advertencias.
-                        NoItemAndPropertyList-- no muestra la lista de elementos y
+                        ErrorsOnly: muestra solo errores.
+                        WarningsOnly: muestra solo advertencias.
+                        NoItemAndPropertyList: no muestra la lista de elementos y
                             propiedades al principio de cada compilación del proyecto.
-                        ShowCommandLine-- muestra los mensajes de TaskCommandLineEvent
-                        ShowTimestamp-- muestra la marca de tiempo como un prefijo en los
+                        ShowCommandLine: muestra los mensajes de TaskCommandLineEvent
+                        ShowTimestamp: muestra la marca de tiempo como un prefijo en los
                             mensajes.
-                        ShowEventId-- muestra el eventId para los eventos iniciados, los eventos 
-                            finalizados y los mensajes
-                        ForceNoAlign-- no alinea el texto al tamaño del
+                        ShowEventId: muestra el identificador de evento para los eventos iniciados, los eventos 
+                            finalizados y los mensajes.
+                        ForceNoAlign: no alinea el texto al tamaño del
                             búfer de la consola
-                        DisableConsoleColor-- usa los colores de consola predeterminados
+                        DisableConsoleColor: usa los colores de consola predeterminados
                             para todos los mensajes de registro.
-                        DisableMPLogging-- deshabilita el estilo de registro de resultados
+                        DisableMPLogging: deshabilita el estilo de registro de resultados
                             de multiprocesador al ejecutarse en el
                             modo de no multiprocesador.
-                        EnableMPLogging-- habilita el estilo de registro de
+                        EnableMPLogging: habilita el estilo de registro de
                             multiprocesador aunque se ejecute en el modo de
                             no multiprocesador. Este estilo de registro está habilitado de forma predeterminada.
-                        ForceConsoleColor-- usa los colores de consola ANSI incluso si
-                            la consola no lo admite
-                        PreferConsoleColor-- usa colores de consola ANSI solo si
-                            la consola de destino sí lo admite
-                     Verbosity-- invalida el valor -verbosity para este
+                     ForceConsoleColor: usa los colores de consola ANSI incluso si
+                            la consola no lo admite.
+                        PreferConsoleColor--usa los colores de consola ANSI solo si
+                            la consola lo admite
+                        Verbosity: invalida el valor -verbosity para este
                             registrador.
                      Ejemplo:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;

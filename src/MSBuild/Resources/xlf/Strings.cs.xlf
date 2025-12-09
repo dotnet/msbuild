@@ -835,24 +835,24 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                                                  Verbosity=minimal
 </source>
         <target state="translated">  -consoleloggerparameters:&lt;parameters&gt;
-                     Parametry protokolovacího nástroje konzoly. (Krátký tvar: -clp)
-                     Dostupné parametry:
+                     Parametry do protokolovacího nástroje konzoly. (Krátký tvar: -clp)
+                     Dostupné parametry jsou:
                         PerformanceSummary – zobrazí dobu zpracování úloh, cílů
                             a projektů.
-                        Summary – na konci zobrazí souhrn chyb a upozornění.
-                        NoSummary – na konci nezobrazí souhrny chyb
-                            a upozornění.
+                        Summary – zobrazí souhrn chyb a upozornění na konci.
+                        NoSummary – nezobrazí souhrny chyb a upozornění na
+                            konci.
                         ErrorsOnly – zobrazí jenom chyby.
                         WarningsOnly – zobrazí jenom upozornění.
                         NoItemAndPropertyList – nezobrazí na začátku sestavení každého
                             projektu seznamy položek a vlastností.
-                        ShowCommandLine – zobrazí zprávy TaskCommandLineEvent
+                        ShowCommandLine – zobrazí zprávy TaskCommandLineEvent.
                         ShowTimestamp – před každou zprávou zobrazí
                             časové razítko.
                         ShowEventId – zobrazí ID události pro spuštěné a dokončené
-                            události a zprávy
-                        ForceNoAlign – nenastavuje text podle velikosti vyrovnávací
-                            paměti konzoly
+                            události a zprávy.
+                        ForceNoAlign – nenastav9 text podle velikosti vyrovnávací
+                            paměti konzoly.
                         DisableConsoleColor – použije výchozí barvy konzoly
                             pro všechny zprávy protokolování.
                         DisableMPLogging – zakáže víceprocesorový styl výstupu
@@ -863,12 +863,12 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                             režimu. Tento styl protokolování je výchozí. 
                         ForceConsoleColor – použije barvy konzoly ANSI,
                             i když to konzola nepodporuje.
-                        PreferConsoleColor--Barvy konzoly ANSI použít pouze v případě, že
-                            je cílová konzole podporuje
-                     Verbosity – potlačí nastavení -verbosity
+                        PreferConsoleColor– použije barvy konzoly ANSI, pouze pokud
+                            to cílová konzola podporuje.
+                        Verbosity – potlačí nastavení -verbosity
                             pro tento protokolovací nástroj.
                      Příklad:
-                        -consoleloggerparameters:PerformanceSummary;NoSummary;
+                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
         <note>
@@ -2033,48 +2033,48 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                        -binaryLogger
     </source>
         <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     Serializuje všechny události sestavení do komprimovaného
-                     binárního souboru. Tento soubor se standardně nachází
-                     v aktuálním adresáři a má název msbuild.binlog. Binární
-                     protokol je podrobný popis procesu sestavení, který se
+                     Serializuje všechny události sestavení do komprimovaného binárního souboru.
+                     Tento soubor se standardně nachází v aktuálním adresáři a má název msbuild.binlog.
+                     Binární protokol je podrobný popis procesu sestavení, který se
                      dá později použít k rekonstrukci textových protokolů
                      a který můžou používat jiné nástroje pro analýzu.
                      Binární protokol má obvykle 10–20krát menší velikost než
-                     nejpodrobnější textový protokol na úrovni diagnostiky,
-                     ale obsahuje více informací.
+                     nejpodrobnější textový protokol na úrovni diagnostiky, ale obsahuje více informací.
                      (Krátký tvar: -bl)
 
                      Binární protokolovací nástroj standardně shromažďuje
                      zdrojový text projektových souborů včetně všech
                      importovaných projektů a cílových souborů zjištěných
-                     při sestavování. Toto chování řídí volitelný parametr
-                     ProjectImports:
-                      ProjectImports=None     - Neshromažďovat importované
-                                                projekty
+                     při sestavování. Toto chování řídí volitelný parametr ProjectImports:
+
+                     ProjectImports=None     - Neshromažďovat importované
+                                                 projekty.
                       ProjectImports=Embed    - Vložit importované projekty
-                                                do souboru protokolu
+                     do souboru protokolu.
                       ProjectImports=ZipFile  - Uložit projektové soubory
                                                 do output.projectimports.zip,
                                                 kde output je stejný název
-                                                jako název souboru binárního
-                                                protokolu
+                                                jako název souboru binárního protokolu.
+
                      Výchozí nastavení pro ProjectImports je Embed.
                      Poznámka: Protokolovací nástroj neshromažďuje zdrojové
                      soubory nepatřící pod MSBuild, jako .cs, .cpp atd.
+
                      Soubor .binlog se dá znovu přehrát“ tak, že se předá
                      souboru msbuild.exe jako argument místo projektu/řešení.
                      Jiné protokolovací nástroje obdrží informace obsažené
                      v souboru protokolu, jako by šlo o původní sestavení.
-                     Více o binárním protokolu a jeho použití si můžete
-                     přečíst na stránce:
+                     Více o binárním protokolu a jeho použití si můžete přečíst na stránce:
                      https://aka.ms/msbuild/binlog
+
                      Příklady:
                        -bl
                        -bl:output.binlog
                        -bl:output.binlog;ProjectImports=None
                        -bl:output.binlog;ProjectImports=ZipFile
-                       -bl:..\\..\\custom.binlog
-                       -binaryLogger    </target>
+                       -bl:..\..\custom.binlog
+                       -binaryLogger
+    </target>
         <note>
       LOCALIZATION: The following should not be localized:
       1) "msbuild"
