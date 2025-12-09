@@ -176,19 +176,19 @@
       <Reference Include="$(NuGetPackageRoot)microsoft.io.redist\$(FrozenMicrosoftIORedistVersion)\lib\net472\Microsoft.IO.Redist.dll" />
 
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Buffers' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemBuffersVersion)'))" />
-      <Reference Include="$(NuGetPackageRoot)system.buffers\$(FrozenSystemBuffersVersion)\lib\net461\System.Buffers.dll" />
+      <Reference Include="$(NuGetPackageRoot)system.buffers\$(FrozenSystemBuffersVersion)\lib\net462\System.Buffers.dll" />
 
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Memory' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemMemoryVersion)'))" />
-      <Reference Include="$(NuGetPackageRoot)system.memory\$(FrozenSystemMemoryVersion)\lib\net461\System.Memory.dll" />
+      <Reference Include="$(NuGetPackageRoot)system.memory\$(FrozenSystemMemoryVersion)\lib\net462\System.Memory.dll" />
 
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Numerics.Vectors' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemNumericsVectorsVersion)'))" />
-      <Reference Include="$(NuGetPackageRoot)system.numerics.vectors\$(FrozenSystemNumericsVectorsVersion)\lib\net46\System.Numerics.Vectors.dll" />
+      <Reference Include="$(NuGetPackageRoot)system.numerics.vectors\$(FrozenSystemNumericsVectorsVersion)\lib\net462\System.Numerics.Vectors.dll" />
 
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Runtime.CompilerServices.Unsafe' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemRuntimeCompilerServicesUnsafeVersion)'))" />
-      <Reference Include="$(NuGetPackageRoot)system.runtime.compilerservices.unsafe\$(FrozenSystemRuntimeCompilerServicesUnsafeVersion)\lib\net461\System.Runtime.CompilerServices.Unsafe.dll" />
+      <Reference Include="$(NuGetPackageRoot)system.runtime.compilerservices.unsafe\$(FrozenSystemRuntimeCompilerServicesUnsafeVersion)\lib\net462\System.Runtime.CompilerServices.Unsafe.dll" />
 
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Threading.Tasks.Extensions' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemThreadingTasksExtensionsVersion)'))" />
-      <Reference Include="$(NuGetPackageRoot)system.threading.tasks.extensions\$(FrozenSystemThreadingTasksExtensionsVersion)\lib\net461\System.Threading.Tasks.Extensions.dll" />
+      <Reference Include="$(NuGetPackageRoot)system.threading.tasks.extensions\$(FrozenSystemThreadingTasksExtensionsVersion)\lib\net462\System.Threading.Tasks.Extensions.dll" />
     </ItemGroup>
   </Target>
 
