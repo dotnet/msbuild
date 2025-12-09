@@ -7,6 +7,7 @@ using Microsoft.VisualStudio.Telemetry;
 
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
