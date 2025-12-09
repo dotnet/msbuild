@@ -928,7 +928,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="TaskRuntimeNET">
         <source>MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, use "dotnet build" or Visual Studio 2026 or higher.</source>
-        <target state="new">MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, use "dotnet build" or Visual Studio 2026 or higher.</target>
+        <target state="translated">MSB4233: 從組件「{1}」的工作「{0}」指定要隨 .NET 執行階段載入，但此版本的 MSBuild 不支援以該執行階段載入工作。若要執行 .NET 工作，請使用「dotnet build」 或 Visual Studio 2026 或更新版本。</target>
         <note>{StrBegin="MSB4233: "}{Locked=".NET"}{Locked="dotnet build"}{Locked="Visual Studio 2026"}LOCALIZATION: .NET, dotnet build, and Visual Studio 2026 should not be localized.</note>
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
@@ -1929,7 +1929,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="OldWrapperGeneratedOldSolutionVersion">
         <source>Using the MSBuild v3.5 solution wrapper generator with a tools version of {0} because the solution file format was version {1} and no tools version was supplied.</source>
-        <target state="translated">使用工具版本為 {0} 的 MSBuild v3.5 方案包裝函式產生器，因為方案檔案格式的版本為 {1}，而且沒有提供工具版本。</target>
+        <target state="translated">使用工具版本為 {0} 的 MSBuild v3.5 解決方案包裝函式產生器，因為解決方案檔案格式的版本為 {1}，而且沒有提供工具版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionBuildingSolutionConfiguration">

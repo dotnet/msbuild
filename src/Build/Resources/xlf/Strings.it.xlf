@@ -928,7 +928,7 @@ Errori: {3}</target>
       </trans-unit>
       <trans-unit id="TaskRuntimeNET">
         <source>MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, use "dotnet build" or Visual Studio 2026 or higher.</source>
-        <target state="new">MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, use "dotnet build" or Visual Studio 2026 or higher.</target>
+        <target state="translated">MSB4233: l'attività "{0}" dall'assembly "{1}" è stata specificata per il caricamento con il runtime .NET, ma questa versione di MSBuild non supporta il caricamento di attività con quel runtime. Per eseguire attività .NET, usare "dotnet build" o Visual Studio 2026 o versioni successive.</target>
         <note>{StrBegin="MSB4233: "}{Locked=".NET"}{Locked="dotnet build"}{Locked="Visual Studio 2026"}LOCALIZATION: .NET, dotnet build, and Visual Studio 2026 should not be localized.</note>
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
@@ -1929,7 +1929,7 @@ Errori: {3}</target>
       </trans-unit>
       <trans-unit id="OldWrapperGeneratedOldSolutionVersion">
         <source>Using the MSBuild v3.5 solution wrapper generator with a tools version of {0} because the solution file format was version {1} and no tools version was supplied.</source>
-        <target state="translated">Verrà usato il generatore di wrapper per soluzioni MSBuild 3.5 con la versione {0} degli strumenti perché la versione del formato del file di soluzione è {1} e non è stata indicata alcuna versione per gli strumenti.</target>
+        <target state="translated">Verrà usato il generatore di wrapper per soluzioni MSBuild v3.5 con la versione {0} degli strumenti perché la versione del formato file della soluzione è {1} e non è stata indicata alcuna versione per gli strumenti.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionBuildingSolutionConfiguration">

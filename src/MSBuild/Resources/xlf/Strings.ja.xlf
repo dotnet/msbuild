@@ -830,39 +830,39 @@
                                                  Verbosity=minimal
 </source>
         <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
-                     コンソール ロガーへのパラメーターです。(短縮形: -clp)
-                     利用可能なパラメーター: 
-                        PerformanceSummary--タスク、ターゲット、プロジェクトにかかった時間を
+                     コンソール ロガーへのパラメーター。(短い形式: -clp)
+                     使用可能なパラメーター: 
+                        PerformanceSummary--タスク、ターゲット、プロジェクトに費やされた時間を
                             表示します。
-                        Summary--最後にエラーと警告の概要を表示します。
-                        NoSummary--最後にエラーと警告の概要を表示
-                            しません。
-                        ErrorsOnly--エラーのみを表示します。
-                        WarningsOnly--警告のみを表示します。
-                        NoItemAndPropertyList--各プロジェクトのビルド開始時に、
-                            項目とプロパティのリストを表示しません。
-                        ShowCommandLine--TaskCommandLineEvent メッセージを表示します
-                        ShowTimestamp--Timestamp を任意のメッセージへのプレフィックスとして
-                            表示します。
-                        ShowEventId--開始されたイベント、終了したイベント、
-                            メッセージの eventId を表示します。
-                        ForceNoAlign--テキストを、コンソール バッファーの
-                            サイズに合わせません
-                        DisableConsoleColor--すべてのログ メッセージに対して
-                            既定のコンソール カラーを使用します。
-                        DisableMPLogging-- 非マルチプロセッサ モードで
-                            実行する際、マルチプロセッサの
-                            出力ログ形式を無効にします。
-                        EnableMPLogging--非マルチプロセッサ モードで
-                            実行する場合も、マルチプロセッサのログ形式を有効にします。
-                            このログ形式は、既定で有効です。
-                        ForceConsoleColor--コンソールでサポートされていない場合でも、
-                            ANSI コンソール カラーを使用します
-                        PreferConsoleColor--ターゲット コンソールでサポートしている場合のみ
-                            ANSI コンソール カラーを使用します
-                     Verbosity--このロガーの -verbosity 設定を
-                            上書きします。
-                     例::
+                        Summary--最後にエラーと警告の要約を表示します。
+                        NoSummary--最後にエラーと警告の要約を
+                            表示しません。
+                        ErrorsOnly-- エラーのみを表示します。
+                        WarningsOnly-- 警告のみを表示します。
+                        NoItemAndPropertyList--各プロジェクト ビルドの開始時に
+                            アイテムとプロパティの一覧を表示しません。
+                        showCommandLine--TaskCommandLineEvent メッセージを表示します
+                        ShowTimestamp-- Timestamp をプレフィックスとして任意の
+                            メッセージに表示します。
+                        ShowEventId-- 開始されたイベント、終了したイベント、メッセージに eventId を
+                            表示します
+                        ForceNoAlign--テキストをコンソール バッファーのサイズに合わせて
+                            配置しません
+                        DisableConsoleColor--すべてのログ メッセージに既定のコンソールの色を
+                            使用します。
+                        DisableMPLogging-- 非マルチプロセッサ モードで実行されている場合、
+                            出力のマルチプロセッサのログ スタイルを
+                            無効にします。
+                        EnableMPLogging-- 非マルチプロセッサ モードで実行されている場合でも、
+                            マルチプロセッサのログ スタイルを
+                            有効にします。このログ スタイルは既定でオンになっています。
+                        ForceConsoleColor--コンソールではサポートされていない場合でも、
+                            ANSI コンソールの色を使用します
+                        PreferConsoleColor--ターゲット コンソールでサポートされていない場合のみ、
+                            ANSI コンソールの色を使用します
+                     Verbosity--このロガーの -verbosity 設定をオーバーライド
+                            します。
+                     例: 
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>

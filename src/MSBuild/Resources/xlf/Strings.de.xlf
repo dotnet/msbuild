@@ -841,7 +841,7 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
                         WarningsOnly: Zeigt nur Warnungen an.
                         NoItemAndPropertyList: Zeigt keine Liste der Elemente
                             und Eigenschaften am Anfang jeder Projekterstellung an.
-                        ShowCommandLine: Zeigt TaskCommandLineEvent-Meldungen an. 
+                        ShowCommandLine: Zeigt TaskCommandLineEvent-Meldungen an.
                         ShowTimestamp: Zeigt den Timestamp als Präfix einer
                             Meldung an.
                         ShowEventId: Zeigt die eventId für gestartete
@@ -852,18 +852,18 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
                             für alle Protokollierungsmeldungen.
                         DisableMPLogging: Deaktiviert die Ausgabe wie
                             bei der Mehrprozessorprotokollierung im Modus mit nur einem Prozessor.
-                        EnableMPLogging: Aktiviert das Format der
-                            Mehrprozessorprotokollierung auch bei der Ausführung
+                            EnableMPLogging: Aktiviert das Format der
+                        Mehrprozessorprotokollierung auch bei der Ausführung
                             im Modus mit nur einem Prozessor.
-Dieses Protokollierungsformat ist standardmäßig aktiviert.
-                         ForceConsoleColor: Verwendet selbst dann
-                            ANSI-Konsolenfarben, wenn die Konsole dies nicht unterstützt.
-                        PreferConsoleColor: Verwendet ANSI-Konsolenfarben nur,
-                            wenn die Zielkonsole dies unterstützt.
-                     Verbosity: Überschreibt die Einstellung für -verbosity für
+                            Modus. ForceConsoleColor: Verwendet selbst dann
+                        ANSI-Konsolenfarben, wenn
+                            die Konsole dies nicht unterstützt.
+                        PreferConsoleColor: Verwendet ANSI-Konsolenfarben nur, wenn
+                            die Zielkonsole dies unterstützt.
+                     Verbosity: Überschreibt die Einstellung für -verbosity für 
                             diese Protokollierung.
-                     Beispiel:
-                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
+                     Beispiel: 
+                        -consoleloggerparameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
         <note>

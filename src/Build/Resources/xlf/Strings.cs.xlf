@@ -928,7 +928,7 @@ Chyby: {3}</target>
       </trans-unit>
       <trans-unit id="TaskRuntimeNET">
         <source>MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, use "dotnet build" or Visual Studio 2026 or higher.</source>
-        <target state="new">MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, use "dotnet build" or Visual Studio 2026 or higher.</target>
+        <target state="translated">MSB4233: Úloha {0} ze sestavení {1} byla určena k načtení s .NET runtime, ale tato verze MSBuild nepodporuje načítání úloh s tímto modulem runtime. Pokud chcete spouštět úlohy .NET, použijte dotnet build nebo Visual Studio 2026 nebo vyšší verze.</target>
         <note>{StrBegin="MSB4233: "}{Locked=".NET"}{Locked="dotnet build"}{Locked="Visual Studio 2026"}LOCALIZATION: .NET, dotnet build, and Visual Studio 2026 should not be localized.</note>
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">

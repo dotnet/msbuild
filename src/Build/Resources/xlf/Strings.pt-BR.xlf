@@ -928,7 +928,7 @@ Erros: {3}</target>
       </trans-unit>
       <trans-unit id="TaskRuntimeNET">
         <source>MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, use "dotnet build" or Visual Studio 2026 or higher.</source>
-        <target state="new">MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, use "dotnet build" or Visual Studio 2026 or higher.</target>
+        <target state="translated">MSB4233: a tarefa "{0}" do assembly "{1}" foi especificada para ser carregada com o runtime do .NET, mas esta versão do MSBuild não dá suporte ao carregamento de tarefas com esse runtime. Para executar tarefas do .NET, use "dotnet build" ou o Visual Studio 2026 ou superior.</target>
         <note>{StrBegin="MSB4233: "}{Locked=".NET"}{Locked="dotnet build"}{Locked="Visual Studio 2026"}LOCALIZATION: .NET, dotnet build, and Visual Studio 2026 should not be localized.</note>
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
@@ -1929,7 +1929,7 @@ Erros: {3}</target>
       </trans-unit>
       <trans-unit id="OldWrapperGeneratedOldSolutionVersion">
         <source>Using the MSBuild v3.5 solution wrapper generator with a tools version of {0} because the solution file format was version {1} and no tools version was supplied.</source>
-        <target state="translated">Usando o gerador de wrapper da solução MSBuild v3.5 com uma versão de ferramentas {0} porque o formato de arquivo da solução era versão {1} e nenhuma versão de ferramentas foi fornecida.</target>
+        <target state="translated">Usando o gerador de wrapper da solução MSBuild v3.5 com uma versão de ferramentas {0} porque o formato de arquivo de solução era versão {1} e nenhuma versão de ferramentas foi fornecida.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionBuildingSolutionConfiguration">

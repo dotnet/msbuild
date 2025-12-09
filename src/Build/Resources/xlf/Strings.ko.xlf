@@ -928,7 +928,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="TaskRuntimeNET">
         <source>MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, use "dotnet build" or Visual Studio 2026 or higher.</source>
-        <target state="new">MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, use "dotnet build" or Visual Studio 2026 or higher.</target>
+        <target state="translated">MSB4233: 어셈블리 "{1}"의 작업 "{0}"이(가) .NET 런타임과 함께 로드되도록 지정되었지만 이 버전의 MSBuild는 해당 런타임으로의 작업 로드를 지원하지 않습니다. .NET 작업을 실행하려면 "dotnet build" 또는 Visual Studio 2026 이상을 사용하세요.</target>
         <note>{StrBegin="MSB4233: "}{Locked=".NET"}{Locked="dotnet build"}{Locked="Visual Studio 2026"}LOCALIZATION: .NET, dotnet build, and Visual Studio 2026 should not be localized.</note>
       </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
