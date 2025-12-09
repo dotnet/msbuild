@@ -86,7 +86,7 @@ ates https://learn.microsoft.com/en-gb/dotnet/fundamentals/syslib-diagnostics/sy
 
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-    <DirectoryPackagesPropsPath>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', 'eng', 'Packages.props'))</DirectoryPackagesPropsPath>
+    <DirectoryPackagesPropsPath>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', 'eng', 'Directory.Packages.props'))</DirectoryPackagesPropsPath>
 
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
   </PropertyGroup>
