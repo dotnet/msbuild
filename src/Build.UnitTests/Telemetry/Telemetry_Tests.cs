@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.Json;
+using System.Threading;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
@@ -159,12 +159,19 @@ namespace Microsoft.Build.Engine.UnitTests
             env.SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", null);
 
             var capturedActivities = new List<Activity>();
+            using var activityStoppedEvent = new ManualResetEventSlim(false);
             using var listener = new ActivityListener
             {
                 ShouldListenTo = source => source.Name.StartsWith(TelemetryConstants.DefaultActivitySourceNamespace),
                 Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
                 ActivityStarted = a => { lock (capturedActivities) { capturedActivities.Add(a); } },
-                ActivityStopped = _ => { }
+                ActivityStopped = a =>
+                {
+                    if (a.DisplayName == "VS/MSBuild/Build")
+                    {
+                        activityStoppedEvent.Set();
+                    }
+                },
             };
             ActivitySource.AddActivityListener(listener);
 
@@ -220,55 +227,58 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 // Phase 3: End Build - This puts telemetry to an system.diagnostics activity
                 buildManager.EndBuild();
-
-                // Verify build activity were captured by the listener and contain task and target info
-                capturedActivities.ShouldNotBeEmpty();
-                var activity = capturedActivities.FindLast(a => a.DisplayName == "VS/MSBuild/Build").ShouldNotBeNull();
-                var tags = activity.Tags.ToDictionary(t => t.Key, t => t.Value);
-                tags.ShouldNotBeNull();
-
-                tags.ShouldContainKey("VS.MSBuild.BuildTarget");
-                tags["VS.MSBuild.BuildTarget"].ShouldNotBeNullOrEmpty();
-
-                // Verify task data
-                var tasks = activity.TagObjects.FirstOrDefault(to => to.Key.Contains("VS.MSBuild.Tasks"));
-
-                var tasksData = tasks.Value as List<TaskDetailInfo>;
-                var messageTaskData = tasksData!.FirstOrDefault(t => t.Name == "Microsoft.Build.Tasks.Message");
-                messageTaskData.ShouldNotBeNull();
-
-                // Verify Message task execution metrics 
-                messageTaskData.ExecutionsCount.ShouldBe(3);
-                messageTaskData.TotalMilliseconds.ShouldBeGreaterThan(0);
-                messageTaskData.TotalMemoryBytes.ShouldBeGreaterThanOrEqualTo(0);
-                messageTaskData.IsCustom.ShouldBe(false);
-
-                // Verify CreateItem task execution metrics
-                var createItemTaskData = tasksData!.FirstOrDefault(t => t.Name == "Microsoft.Build.Tasks.CreateItem");
-                createItemTaskData.ShouldNotBeNull();
-                createItemTaskData.ExecutionsCount.ShouldBe(1);
-                createItemTaskData.TotalMilliseconds.ShouldBeGreaterThan(0);
-                createItemTaskData.TotalMemoryBytes.ShouldBeGreaterThanOrEqualTo(0);
-
-                // Verify Targets summary information
-                var targetsSummaryTagObject = activity.TagObjects.FirstOrDefault(to => to.Key.Contains("VS.MSBuild.TargetsSummary"));
-                var targetsSummary = targetsSummaryTagObject.Value as TargetsSummaryInfo;
-                targetsSummary.ShouldNotBeNull();
-                targetsSummary.Loaded.Total.ShouldBe(2);
-                targetsSummary.Executed.Total.ShouldBe(2);
-
-                // Verify Tasks summary information
-                var tasksSummaryTagObject = activity.TagObjects.FirstOrDefault(to => to.Key.Contains("VS.MSBuild.TasksSummary"));
-                var tasksSummary = tasksSummaryTagObject.Value as TasksSummaryInfo;
-                tasksSummary.ShouldNotBeNull();
-
-                tasksSummary.Microsoft.ShouldNotBeNull();
-                tasksSummary.Microsoft!.Total!.ExecutionsCount.ShouldBe(4);
-                tasksSummary.Microsoft!.Total!.TotalMilliseconds.ShouldBeGreaterThan(0);
-
-                // Allowing 0 for TotalMemoryBytes as it is possible for tasks to allocate no memory in certain scenarios.
-                tasksSummary.Microsoft.Total.TotalMemoryBytes.ShouldBeGreaterThanOrEqualTo(0);
             }
+
+            // Wait for the activity to be fully processed
+            activityStoppedEvent.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue("Timed out waiting for build activity to stop");
+
+            // Verify build activity were captured by the listener and contain task and target info
+            capturedActivities.ShouldNotBeEmpty();
+            var activity = capturedActivities.FindLast(a => a.DisplayName == "VS/MSBuild/Build").ShouldNotBeNull();
+            var tags = activity.Tags.ToDictionary(t => t.Key, t => t.Value);
+            tags.ShouldNotBeNull();
+
+            tags.ShouldContainKey("VS.MSBuild.BuildTarget");
+            tags["VS.MSBuild.BuildTarget"].ShouldNotBeNullOrEmpty();
+
+            // Verify task data
+            var tasks = activity.TagObjects.FirstOrDefault(to => to.Key.Contains("VS.MSBuild.Tasks"));
+
+            var tasksData = tasks.Value as List<TaskDetailInfo>;
+            var messageTaskData = tasksData!.FirstOrDefault(t => t.Name == "Microsoft.Build.Tasks.Message");
+            messageTaskData.ShouldNotBeNull();
+
+            // Verify Message task execution metrics 
+            messageTaskData.ExecutionsCount.ShouldBe(3);
+            messageTaskData.TotalMilliseconds.ShouldBeGreaterThan(0);
+            messageTaskData.TotalMemoryBytes.ShouldBeGreaterThanOrEqualTo(0);
+            messageTaskData.IsCustom.ShouldBe(false);
+
+            // Verify CreateItem task execution metrics
+            var createItemTaskData = tasksData!.FirstOrDefault(t => t.Name == "Microsoft.Build.Tasks.CreateItem");
+            createItemTaskData.ShouldNotBeNull();
+            createItemTaskData.ExecutionsCount.ShouldBe(1);
+            createItemTaskData.TotalMilliseconds.ShouldBeGreaterThan(0);
+            createItemTaskData.TotalMemoryBytes.ShouldBeGreaterThanOrEqualTo(0);
+
+            // Verify Targets summary information
+            var targetsSummaryTagObject = activity.TagObjects.FirstOrDefault(to => to.Key.Contains("VS.MSBuild.TargetsSummary"));
+            var targetsSummary = targetsSummaryTagObject.Value as TargetsSummaryInfo;
+            targetsSummary.ShouldNotBeNull();
+            targetsSummary.Loaded.Total.ShouldBe(2);
+            targetsSummary.Executed.Total.ShouldBe(2);
+
+            // Verify Tasks summary information
+            var tasksSummaryTagObject = activity.TagObjects.FirstOrDefault(to => to.Key.Contains("VS.MSBuild.TasksSummary"));
+            var tasksSummary = tasksSummaryTagObject.Value as TasksSummaryInfo;
+            tasksSummary.ShouldNotBeNull();
+
+            tasksSummary.Microsoft.ShouldNotBeNull();
+            tasksSummary.Microsoft!.Total!.ExecutionsCount.ShouldBe(4);
+            tasksSummary.Microsoft!.Total!.TotalMilliseconds.ShouldBeGreaterThan(0);
+
+            // Allowing 0 for TotalMemoryBytes as it is possible for tasks to allocate no memory in certain scenarios.
+            tasksSummary.Microsoft.Total.TotalMemoryBytes.ShouldBeGreaterThanOrEqualTo(0);
         }
 #endif
 
