@@ -2,11 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #if NETFRAMEWORK
-using System;
-using System.IO;
 using System.Runtime.CompilerServices;
 using Microsoft.VisualStudio.Telemetry;
 #endif
+
+using System;
+
+using System.IO;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
@@ -56,36 +59,34 @@ namespace Microsoft.Build.Framework.Telemetry
                     return;
                 }
 
+                TryInitializeTelemetry(isStandalone);
+            }
+        }
+
+        /// <summary>
+        /// Initializes MSBuild telemetry.
+        /// This method is deliberately not inlined to ensure
+        /// the Telemetry related assemblies are only loaded when this method is called,
+        /// allowing the calling code to catch assembly loading exceptions.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void TryInitializeTelemetry(bool isStandalone)
+        {
+            try
+            {
 #if NETFRAMEWORK
-                try
-                {
-                    InitializeVsTelemetry(isStandalone);
-                }
-                catch (Exception ex) when (
-                    ex is FileNotFoundException or
-                    FileLoadException or
-                    TypeLoadException)
-                {
-                    // Microsoft.VisualStudio.Telemetry is not available outside VS.
-                    // This is expected in standalone MSBuild.exe scenarios.
-                    DefaultActivitySource = null;
-                }
+                DefaultActivitySource = VsTelemetryInitializer.Initialize(isStandalone);
 #else
                 DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
 #endif
             }
+            catch (Exception ex) when (ex is FileNotFoundException or FileLoadException or TypeLoadException)
+            {
+                // Microsoft.VisualStudio.Telemetry or System.Diagnostics.DiagnosticSource might not be available outside of VS or dotnet.
+                // This is expected in standalone application scenarios.
+                DefaultActivitySource = null;
+            }
         }
-
-#if NETFRAMEWORK
-        /// <summary>
-        /// Initializes Visual Studio telemetry.
-        /// This method is deliberately not inlined to ensure
-        /// the Microsoft.VisualStudio.Telemetry assembly is only loaded when this method is called,
-        /// allowing the calling code to catch assembly loading exceptions.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private void InitializeVsTelemetry(bool isStandalone) => DefaultActivitySource = VsTelemetryInitializer.Initialize(isStandalone);
-#endif
 
         public void Dispose()
         {
