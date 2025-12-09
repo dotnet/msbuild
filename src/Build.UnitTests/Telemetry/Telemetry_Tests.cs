@@ -29,46 +29,24 @@ namespace Microsoft.Build.Engine.UnitTests
             _output = output;
         }
 
-        private sealed class ProjectFinishedCapturingLogger : ILogger
-        {
-            private readonly List<ProjectFinishedEventArgs> _projectFinishedEventArgs = [];
-            public LoggerVerbosity Verbosity { get; set; }
-            public string? Parameters { get; set; }
-
-            public IReadOnlyList<ProjectFinishedEventArgs> ProjectFinishedEventArgsReceived =>
-                _projectFinishedEventArgs;
-
-            public void Initialize(IEventSource eventSource)
-            {
-                eventSource.ProjectFinished += EventSource_ProjectFinished;
-            }
-
-            private void EventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e)
-            {
-                _projectFinishedEventArgs.Add(e);
-            }
-
-            public void Shutdown()
-            { }
-        }
-
         [Fact]
         public void WorkerNodeTelemetryCollection_BasicTarget()
         {
             WorkerNodeTelemetryData? workerNodeTelemetryData = null;
             InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeTelemetryData = dt;
 
-            var testProject = """
-                                      <Project>
-                                          <Target Name="Build">
-                                              <Message Text="Hello World"/>
-                                              <CreateItem Include="foo.bar">
-                                                  <Output TaskParameter="Include" ItemName="I" />
-                                              </CreateItem>
-                                              <Message Text="Bye World"/>
-                                          </Target>
-                                      </Project>
-                              """;
+            var testProject =
+                """
+                        <Project>
+                            <Target Name="Build">
+                                <Message Text="Hello World"/>
+                                <CreateItem Include="foo.bar">
+                                    <Output TaskParameter="Include" ItemName="I" />
+                                </CreateItem>
+                                <Message Text="Bye World"/>
+                            </Target>
+                        </Project>
+                """;
 
             MockLogger logger = new MockLogger(_output);
             Helpers.BuildProjectContentUsingBuildManager(testProject, logger,
@@ -81,9 +59,9 @@ namespace Microsoft.Build.Engine.UnitTests
             workerNodeTelemetryData.TargetsExecutionData.Keys.Count.ShouldBe(1);
 
             workerNodeTelemetryData.TasksExecutionData.Keys.Count.ShouldBeGreaterThan(2);
-            ((int)workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message"].ExecutionsCount).ShouldBe(2);
+            workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message"].ExecutionsCount.ShouldBe(2);
             workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
-            ((int)workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.CreateItem"].ExecutionsCount).ShouldBe(1);
+            workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.CreateItem"].ExecutionsCount.ShouldBe(1);
             workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.CreateItem"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
 
             workerNodeTelemetryData.TasksExecutionData.Keys.ShouldAllBe(k => !k.IsCustom && !k.IsNuget);
@@ -94,83 +72,39 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void WorkerNodeTelemetryCollection_CustomTargetsAndTasks()
         {
-            WorkerNodeTelemetryData? workerNodeTelemetryData = null;
-            InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeTelemetryData = dt;
+            WorkerNodeTelemetryData? workerNodeData = null;
+            InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeData = dt;
 
-            var testProject = """
-                                      <Project>
-                                      <UsingTask
-                                          TaskName="Task01"
-                                          TaskFactory="RoslynCodeTaskFactory"
-                                          AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
-                                          <ParameterGroup />
-                                          <Task>
-                                            <Code Type="Fragment" Language="cs">
-                                              Log.LogMessage(MessageImportance.Low, "Hello, world!");
-                                            </Code>
-                                          </Task>
-                                       </UsingTask>
-
-                                       <UsingTask
-                                         TaskName="Task02"
-                                         TaskFactory="RoslynCodeTaskFactory"
-                                         AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
-                                         <ParameterGroup />
-                                         <Task>
-                                           <Code Type="Fragment" Language="cs">
-                                             Log.LogMessage(MessageImportance.High, "Hello, world!");
-                                           </Code>
-                                         </Task>
-                                      </UsingTask>
-
-                                          <Target Name="Build" DependsOnTargets="BeforeBuild">
-                                              <Message Text="Hello World"/>
-                                              <CreateItem Include="foo.bar">
-                                                  <Output TaskParameter="Include" ItemName="I" />
-                                              </CreateItem>
-                                              <Task01 />
-                                              <Message Text="Bye World"/>
-                                          </Target>
-
-                                          <Target Name="BeforeBuild">
-                                              <Message Text="Hello World"/>
-                                              <Task01 />
-                                          </Target>
-
-                                          <Target Name="NotExecuted">
-                                              <Message Text="Hello World"/>
-                                          </Target>
-                                      </Project>
-                              """;
             MockLogger logger = new MockLogger(_output);
-            Helpers.BuildProjectContentUsingBuildManager(testProject, logger,
+            Helpers.BuildProjectContentUsingBuildManager(
+                GetTestProject(),
+                logger,
                 new BuildParameters() { IsTelemetryEnabled = true }).OverallResult.ShouldBe(BuildResultCode.Success);
 
-            workerNodeTelemetryData!.ShouldNotBeNull();
-            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("Build", true, false));
-            workerNodeTelemetryData.TargetsExecutionData[new TaskOrTargetTelemetryKey("Build", true, false)].ShouldBeTrue();
-            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("BeforeBuild", true, false));
-            workerNodeTelemetryData.TargetsExecutionData[new TaskOrTargetTelemetryKey("BeforeBuild", true, false)].ShouldBeTrue();
-            workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("NotExecuted", true, false));
-            workerNodeTelemetryData.TargetsExecutionData[new TaskOrTargetTelemetryKey("NotExecuted", true, false)].ShouldBeFalse();
-            workerNodeTelemetryData.TargetsExecutionData.Keys.Count.ShouldBe(3);
+            workerNodeData!.ShouldNotBeNull();
+            workerNodeData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("Build", true, false));
+            workerNodeData.TargetsExecutionData[new TaskOrTargetTelemetryKey("Build", true, false)].ShouldBeTrue();
+            workerNodeData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("BeforeBuild", true, false));
+            workerNodeData.TargetsExecutionData[new TaskOrTargetTelemetryKey("BeforeBuild", true, false)].ShouldBeTrue();
+            workerNodeData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("NotExecuted", true, false));
+            workerNodeData.TargetsExecutionData[new TaskOrTargetTelemetryKey("NotExecuted", true, false)].ShouldBeFalse();
+            workerNodeData.TargetsExecutionData.Keys.Count.ShouldBe(3);
 
-            workerNodeTelemetryData.TasksExecutionData.Keys.Count.ShouldBeGreaterThan(2);
-            ((int)workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message"].ExecutionsCount).ShouldBe(3);
-            workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
-            ((int)workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.CreateItem"].ExecutionsCount).ShouldBe(1);
-            workerNodeTelemetryData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.CreateItem"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
+            workerNodeData.TasksExecutionData.Keys.Count.ShouldBeGreaterThan(2);
+            workerNodeData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message"].ExecutionsCount.ShouldBe(3);
+            workerNodeData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
+            workerNodeData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.CreateItem"].ExecutionsCount.ShouldBe(1);
+            workerNodeData.TasksExecutionData[(TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.CreateItem"].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
 
-            ((int)workerNodeTelemetryData.TasksExecutionData[new TaskOrTargetTelemetryKey("Task01", true, false)].ExecutionsCount).ShouldBe(2);
-            workerNodeTelemetryData.TasksExecutionData[new TaskOrTargetTelemetryKey("Task01", true, false)].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
+            workerNodeData.TasksExecutionData[new TaskOrTargetTelemetryKey("Task01", true, false)].ExecutionsCount.ShouldBe(2);
+            workerNodeData.TasksExecutionData[new TaskOrTargetTelemetryKey("Task01", true, false)].CumulativeExecutionTime.ShouldBeGreaterThan(TimeSpan.Zero);
 
-            ((int)workerNodeTelemetryData.TasksExecutionData[new TaskOrTargetTelemetryKey("Task02", true, false)].ExecutionsCount).ShouldBe(0);
-            workerNodeTelemetryData.TasksExecutionData[new TaskOrTargetTelemetryKey("Task02", true, false)].CumulativeExecutionTime.ShouldBe(TimeSpan.Zero);
+            workerNodeData.TasksExecutionData[new TaskOrTargetTelemetryKey("Task02", true, false)].ExecutionsCount.ShouldBe(0);
+            workerNodeData.TasksExecutionData[new TaskOrTargetTelemetryKey("Task02", true, false)].CumulativeExecutionTime.ShouldBe(TimeSpan.Zero);
 
-            workerNodeTelemetryData.TasksExecutionData.Values
-                .Count(v => v.CumulativeExecutionTime > TimeSpan.Zero || v.ExecutionsCount > 0).ShouldBe(3);
+            workerNodeData.TasksExecutionData.Values.Count(v => v.CumulativeExecutionTime > TimeSpan.Zero || v.ExecutionsCount > 0).ShouldBe(3);
 
-            workerNodeTelemetryData.TasksExecutionData.Keys.ShouldAllBe(k => !k.IsNuget);
+            workerNodeData.TasksExecutionData.Keys.ShouldAllBe(k => !k.IsNuget);
         }
 
 #if NET
@@ -180,17 +114,15 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using TestEnvironment env = TestEnvironment.Create();
             env.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTIN", "1");
-            env.SetEnvironmentVariable("MSBUILD_TELEMETRY_SAMPLE_RATE", "1.0");
             env.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTOUT", null);
             env.SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", null);
 
-            // track activities through an ActivityListener
             var capturedActivities = new List<Activity>();
             using var listener = new ActivityListener
             {
                 ShouldListenTo = source => source.Name.StartsWith(TelemetryConstants.DefaultActivitySourceNamespace),
-                Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllData,
-                ActivityStarted = capturedActivities.Add,
+                Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllDataAndRecorded,
+                ActivityStarted = a => { lock (capturedActivities) { capturedActivities.Add(a); } },
                 ActivityStopped = _ => { }
             };
             ActivitySource.AddActivityListener(listener);
@@ -298,5 +230,72 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 #endif
+
+        private sealed class ProjectFinishedCapturingLogger : ILogger
+        {
+            private readonly List<ProjectFinishedEventArgs> _projectFinishedEventArgs = [];
+
+            public LoggerVerbosity Verbosity { get; set; }
+
+            public string? Parameters { get; set; }
+
+            public IReadOnlyList<ProjectFinishedEventArgs> ProjectFinishedEventArgsReceived => _projectFinishedEventArgs;
+
+            public void Initialize(IEventSource eventSource) => eventSource.ProjectFinished += EventSource_ProjectFinished;
+
+            private void EventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e) => _projectFinishedEventArgs.Add(e);
+
+            public void Shutdown() { }
+        }
+
+#region test project
+        private static string GetTestProject() =>
+            """
+           <Project>
+           <UsingTask
+               TaskName="Task01"
+               TaskFactory="RoslynCodeTaskFactory"
+               AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+               <ParameterGroup />
+               <Task>
+                 <Code Type = "Fragment" Language="cs">
+                   Log.LogMessage(MessageImportance.Low, "Hello, world!");
+                 </Code>
+               </Task>
+            </UsingTask>
+           
+            <UsingTask
+              TaskName = "Task02"
+              TaskFactory="RoslynCodeTaskFactory"
+              AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+              <ParameterGroup />
+              <Task>
+                <Code Type = "Fragment" Language="cs">
+                  Log.LogMessage(MessageImportance.High, "Hello, world!");
+                </Code>
+              </Task>
+           </UsingTask>
+           
+               <Target Name = "Build" DependsOnTargets="BeforeBuild">
+                   <Message Text = "Hello World" />
+                   < CreateItem Include="foo.bar">
+                       <Output TaskParameter = "Include" ItemName="I" />
+                   </CreateItem>
+                   <Task01 />
+                   <Message Text = "Bye World" />
+               </ Target >
+           
+               < Target Name="BeforeBuild">
+                   <Message Text = "Hello World" />
+                   < Task01 />
+               </ Target >
+           
+               < Target Name="NotExecuted">
+                   <Message Text = "Hello World" />
+               </ Target >
+           </ Project >
+           """;
+#endregion
+
     }
 }
