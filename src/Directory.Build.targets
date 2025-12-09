@@ -150,11 +150,11 @@
     <UseFrozenMaintenancePackageVersions Condition="'$(UseFrozenMaintenancePackageVersions)' == '' AND '$(IsUnitTestProject)' != 'true' AND $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net472')) AND '$(OutputType)' != 'exe'">true</UseFrozenMaintenancePackageVersions>
 
     <FrozenMicrosoftIORedistVersion>6.0.1</FrozenMicrosoftIORedistVersion>
-    <FrozenSystemMemoryVersion>4.6.3</FrozenSystemMemoryVersion>
-    <FrozenSystemRuntimeCompilerServicesUnsafeVersion>6.1.2</FrozenSystemRuntimeCompilerServicesUnsafeVersion>
-    <FrozenSystemThreadingTasksExtensionsVersion>4.6.3</FrozenSystemThreadingTasksExtensionsVersion>
-    <FrozenSystemBuffersVersion>4.6.1</FrozenSystemBuffersVersion>
-    <FrozenSystemNumericsVectorsVersion>4.6.1</FrozenSystemNumericsVectorsVersion>
+    <FrozenSystemMemoryVersion>4.5.5</FrozenSystemMemoryVersion>
+    <FrozenSystemRuntimeCompilerServicesUnsafeVersion>6.0.0</FrozenSystemRuntimeCompilerServicesUnsafeVersion>
+    <FrozenSystemThreadingTasksExtensionsVersion>4.5.4</FrozenSystemThreadingTasksExtensionsVersion>
+    <FrozenSystemBuffersVersion>4.5.1</FrozenSystemBuffersVersion>
+    <FrozenSystemNumericsVectorsVersion>4.5.0</FrozenSystemNumericsVectorsVersion>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(UseFrozenMaintenancePackageVersions)' == 'true'">
@@ -176,19 +176,19 @@
       <Reference Include="$(NuGetPackageRoot)microsoft.io.redist\$(FrozenMicrosoftIORedistVersion)\lib\net472\Microsoft.IO.Redist.dll" />
 
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Buffers' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemBuffersVersion)'))" />
-      <Reference Include="$(NuGetPackageRoot)system.buffers\$(FrozenSystemBuffersVersion)\lib\net462\System.Buffers.dll" />
+      <Reference Include="$(NuGetPackageRoot)system.buffers\$(FrozenSystemBuffersVersion)\lib\net461\System.Buffers.dll" />
 
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Memory' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemMemoryVersion)'))" />
-      <Reference Include="$(NuGetPackageRoot)system.memory\$(FrozenSystemMemoryVersion)\lib\net462\System.Memory.dll" />
+      <Reference Include="$(NuGetPackageRoot)system.memory\$(FrozenSystemMemoryVersion)\lib\net461\System.Memory.dll" />
 
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Numerics.Vectors' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemNumericsVectorsVersion)'))" />
-      <Reference Include="$(NuGetPackageRoot)system.numerics.vectors\$(FrozenSystemNumericsVectorsVersion)\lib\net462\System.Numerics.Vectors.dll" />
+      <Reference Include="$(NuGetPackageRoot)system.numerics.vectors\$(FrozenSystemNumericsVectorsVersion)\lib\net46\System.Numerics.Vectors.dll" />
 
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Runtime.CompilerServices.Unsafe' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemRuntimeCompilerServicesUnsafeVersion)'))" />
-      <Reference Include="$(NuGetPackageRoot)system.runtime.compilerservices.unsafe\$(FrozenSystemRuntimeCompilerServicesUnsafeVersion)\lib\net462\System.Runtime.CompilerServices.Unsafe.dll" />
+      <Reference Include="$(NuGetPackageRoot)system.runtime.compilerservices.unsafe\$(FrozenSystemRuntimeCompilerServicesUnsafeVersion)\lib\net461\System.Runtime.CompilerServices.Unsafe.dll" />
 
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Threading.Tasks.Extensions' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemThreadingTasksExtensionsVersion)'))" />
-      <Reference Include="$(NuGetPackageRoot)system.threading.tasks.extensions\$(FrozenSystemThreadingTasksExtensionsVersion)\lib\net462\System.Threading.Tasks.Extensions.dll" />
+      <Reference Include="$(NuGetPackageRoot)system.threading.tasks.extensions\$(FrozenSystemThreadingTasksExtensionsVersion)\lib\net461\System.Threading.Tasks.Extensions.dll" />
     </ItemGroup>
   </Target>
 
