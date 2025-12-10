@@ -135,5 +135,29 @@ namespace Microsoft.Build.Framework
         /// <param name="warnings"></param>
         /// <returns></returns>
         public abstract SdkResult IndicateFailure(IEnumerable<string> errors, IEnumerable<string> warnings = null);
+
+        /// <summary>
+        ///     Create an <see cref="SdkResolver" /> object indicating failure resolving the SDK,
+        ///     while still contributing properties and environment variables to the build.
+        /// </summary>
+        /// <param name="errors">Errors / reasons the SDK could not be resolved.</param>
+        /// <param name="warnings">Optional warnings to display during resolution.</param>
+        /// <param name="propertiesToAdd">Properties to set in the evaluation if a subsequent resolver succeeds.</param>
+        /// <param name="itemsToAdd">Items to add to the evaluation if a subsequent resolver succeeds.</param>
+        /// <param name="environmentVariablesToAdd">Environment variables to add to the project if a subsequent resolver succeeds.</param>
+        /// <returns>
+        ///     An <see cref="SdkResult"/> indicating failure, but with contributions that will be merged into the final result if a subsequent resolver succeeds.
+        /// </returns>
+        public virtual SdkResult IndicateFailure(
+            IEnumerable<string> errors,
+            IEnumerable<string> warnings,
+            IDictionary<string, string> propertiesToAdd,
+            IDictionary<string, SdkResultItem> itemsToAdd = null,
+            IDictionary<string, string> environmentVariablesToAdd = null) =>
+
+            // Default implementation for backward compatibility.
+            // Falls back to the basic IndicateFailure, losing the contributions.
+            // MSBuild versions that support this feature will override this.
+            IndicateFailure(errors, warnings);
     }
 }

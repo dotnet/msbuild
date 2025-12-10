@@ -142,6 +142,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 #if NET
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
             {
+                var resolvedSdkData = new ResolvedSdkData();
                 if (TryResolveSdkUsingSpecifiedResolvers(
                     _sdkResolverLoader.GetDefaultResolvers(),
                     BuildEventContext.InvalidSubmissionId, // disables GetResolverState/SetResolverState
@@ -152,6 +153,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     projectPath,
                     interactive,
                     isRunningInVisualStudio,
+                    ref resolvedSdkData,
                     out SdkResult sdkResult,
                     out _,
                     out _))
@@ -181,7 +183,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             List<SdkResolverManifest> matchingResolversManifests = new();
             foreach (SdkResolverManifest manifest in _specificResolversManifestsRegistry)
             {
-                WaitIfTestRequires(); 
+                WaitIfTestRequires();
                 try
                 {
                     if (manifest.ResolvableSdkRegex.IsMatch(sdk.Name))
@@ -199,6 +201,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             SdkResult sdkResult;
             List<string> errors = new List<string>(0);
             List<string> warnings = new List<string>(0);
+
+            var resolvedSdkData = new ResolvedSdkData();
             if (matchingResolversManifests.Count != 0)
             {
                 // First pass.
@@ -214,6 +218,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     projectPath,
                     interactive,
                     isRunningInVisualStudio,
+                    ref resolvedSdkData,
                     out sdkResult,
                     out IEnumerable<string> firstErrors,
                     out IEnumerable<string> firstWarnings))
@@ -241,6 +246,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 projectPath,
                 interactive,
                 isRunningInVisualStudio,
+                ref resolvedSdkData,
                 out sdkResult,
                 out IEnumerable<string> moreErrors,
                 out IEnumerable<string> moreWarnings))
@@ -305,6 +311,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             string projectPath,
             bool interactive,
             bool isRunningInVisualStudio,
+            ref ResolvedSdkData collectedSdkData,
             out SdkResult sdkResult,
             out IEnumerable<string> errors,
             out IEnumerable<string> warnings)
@@ -377,15 +384,20 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     // Associate the element location of the resolved SDK reference
                     result.ElementLocation = sdkReferenceLocation;
 
-                    sdkResult = result;
+                    sdkResult = MergeSdkData(result, in collectedSdkData);
                     return true;
                 }
-                else if (loggingContext.LoggingService.MinimumRequiredMessageImportance >= MessageImportance.Low)
+                else
                 {
-                    string resultWarnings = result.Warnings?.Any() == true ? string.Join(Environment.NewLine, result.Warnings) : "null";
-                    string resultErrors = result.Errors?.Any() == true ? string.Join(Environment.NewLine, result.Errors) : "null";
+                    CollectResolvedData(ref collectedSdkData, result);
 
-                    loggingContext.LogComment(MessageImportance.Low, "SDKResolverAttempt", sdkResolver.Name, sdk.ToString(), resultWarnings, resultErrors);
+                    if (loggingContext.LoggingService.MinimumRequiredMessageImportance >= MessageImportance.Low)
+                    {
+                        string resultWarnings = result.Warnings?.Any() == true ? string.Join(Environment.NewLine, result.Warnings) : "null";
+                        string resultErrors = result.Errors?.Any() == true ? string.Join(Environment.NewLine, result.Errors) : "null";
+
+                        loggingContext.LogComment(MessageImportance.Low, "SDKResolverAttempt", sdkResolver.Name, sdk.ToString(), resultWarnings, resultErrors);
+                    }
                 }
 
                 results.Add(result);
@@ -396,6 +408,72 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             sdkResult = new SdkResult(sdk, null, null);
             return false;
+        }
+
+        /// <summary>
+        /// Collects sdk resolver data (properties, items, environment variables) from the failed result if it's avaialble.
+        /// </summary>
+        private static void CollectResolvedData(ref ResolvedSdkData resolvedData, SdkResult result)
+        {
+            if (result == null)
+            {
+                return;
+            }
+
+            IDictionary<string, string> properties = result.PropertiesToAdd;
+            IDictionary<string, SdkResultItem> items = result.ItemsToAdd;
+            IDictionary<string, string> envVars = result.EnvironmentVariablesToAdd;
+
+            if (properties is { Count: > 0 })
+            {
+                resolvedData.Properties = MergeDictionaries(resolvedData.Properties, properties);
+            }
+
+            if (items is { Count: > 0 })
+            {
+                resolvedData.Items = MergeDictionaries(resolvedData.Items, items);
+            }
+
+            if (envVars is { Count: > 0 })
+            {
+                resolvedData.EnvironmentVariables = MergeDictionaries(resolvedData.EnvironmentVariables, envVars);
+            }
+        }
+
+        /// <summary>
+        /// Merges accumulated contributions into a successful result.
+        /// Contributions are applied first, then the successful result's values (so successful resolver wins on conflicts).
+        /// </summary>
+        private static SdkResult MergeSdkData(SdkResult successResult, in ResolvedSdkData sdkData)
+        {
+            if (!sdkData.HasAny)
+            {
+                return successResult;
+            }
+
+            Dictionary<string, string> mergedProperties = MergeDictionaries(
+                sdkData.Properties,
+                successResult.PropertiesToAdd);
+
+            Dictionary<string, SdkResultItem> mergedItems = MergeDictionaries(
+                sdkData.Items,
+                successResult.ItemsToAdd);
+
+            Dictionary<string, string> mergedEnvVars = MergeDictionaries(
+                sdkData.EnvironmentVariables,
+                successResult.EnvironmentVariablesToAdd);
+
+            return new SdkResult(
+                successResult.SdkReference,
+                successResult.Path,
+                successResult.Version,
+                successResult.Warnings,
+                mergedProperties,
+                mergedItems,
+                mergedEnvVars)
+            {
+                ElementLocation = successResult.ElementLocation,
+            };
         }
 
         internal virtual void WaitIfTestRequires() { }
@@ -549,6 +627,60 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
                 resolverState.AddOrUpdate(resolver, state, (sdkResolver, obj) => state);
             }
+        }
+
+        /// <summary>
+        /// Holds collected data from all the invoked resolvers.
+        /// During the execution a resolver can contribute properties, items or environment variables even if it fails to resolve the SDK.
+        /// </summary>
+        private struct ResolvedSdkData
+        {
+            public Dictionary<string, string> Properties;
+            public Dictionary<string, SdkResultItem> Items;
+            public Dictionary<string, string> EnvironmentVariables;
+
+            public readonly bool HasAny => Properties != null || Items != null || EnvironmentVariables != null;
+        }
+
+        /// <summary>
+        /// Merges two dictionaries, with values from <paramref name="overrideSource"/> taking precedence.
+        /// </summary>
+        private static Dictionary<string, TValue> MergeDictionaries<TValue>(
+            Dictionary<string, TValue> baseSource,
+            IDictionary<string, TValue> overrideSource)
+        {
+            bool hasBase = baseSource is { Count: > 0 };
+            bool hasOverride = overrideSource is { Count: > 0 };
+
+            if (!hasBase && !hasOverride)
+            {
+                return null;
+            }
+
+            if (!hasBase)
+            {
+                return new Dictionary<string, TValue>(overrideSource);
+            }
+
+            if (!hasOverride)
+            {
+                return new Dictionary<string, TValue>(baseSource);
+            }
+
+            // Both have values - merge with override winning on conflicts
+            var merged = new Dictionary<string, TValue>(baseSource.Count + overrideSource.Count);
+
+            foreach (KeyValuePair<string, TValue> kvp in baseSource)
+            {
+                merged[kvp.Key] = kvp.Value;
+            }
+
+            foreach (KeyValuePair<string, TValue> kvp in overrideSource)
+            {
+                merged[kvp.Key] = kvp.Value;
+            }
+
+            return merged;
         }
     }
 }
