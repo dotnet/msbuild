@@ -187,7 +187,7 @@ namespace Microsoft.Build.Tasks
         public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
-        /// Task environment for multithreaded execution
+        /// The task environment for thread-safe operations.
         /// </summary>
         public TaskEnvironment TaskEnvironment { get; set; }
 
@@ -376,11 +376,9 @@ namespace Microsoft.Build.Tasks
             if (!hardLinkCreated && !symbolicLinkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                string sourceFilePath = TaskEnvironment.GetAbsolutePath(sourceFileState.Name);
-                string destinationFilePath = TaskEnvironment.GetAbsolutePath(destinationFileState.Name);
-                Log.LogMessage(MessageImportance.Normal, FileComment, sourceFilePath, destinationFilePath);
+                Log.LogMessage(MessageImportance.Normal, FileComment, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath);
 
-                File.Copy(sourceFilePath, destinationFilePath, true);
+                File.Copy(sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath, true);
             }
 
             // If the destinationFile file exists, then make sure it's read-write.

@@ -81,7 +81,7 @@ namespace Microsoft.Build.Tasks
 
                     // Try to remove the directory, this will not log unauthorized access errors since
                     // we will attempt to remove read only attributes and try again.
-                    bool currentSuccess = RemoveDirectory(directory, false, out bool unauthorizedAccess);
+                    bool currentSuccess = RemoveDirectory(directoryPath, directory.ItemSpec, false, out bool unauthorizedAccess);
 
                     // The first attempt failed, to we will remove readonly attributes and try again..
                     if (!currentSuccess && unauthorizedAccess)
@@ -92,7 +92,7 @@ namespace Microsoft.Build.Tasks
                         if (currentSuccess)
                         {
                             // Retry the remove directory operation, this time we want to log any errors
-                            currentSuccess = RemoveDirectory(directory, true, out unauthorizedAccess);
+                            currentSuccess = RemoveDirectory(directoryPath, directory.ItemSpec, true, out unauthorizedAccess);
                         }
                     }
 
@@ -118,7 +118,7 @@ namespace Microsoft.Build.Tasks
         }
 
         // Core implementation of directory removal
-        private bool RemoveDirectory(ITaskItem directory, bool logUnauthorizedError, out bool unauthorizedAccess)
+        private bool RemoveDirectory(string directoryPath, string directoryItemSpec, bool logUnauthorizedError, out bool unauthorizedAccess)
         {
             bool success = true;
 
@@ -127,7 +127,7 @@ namespace Microsoft.Build.Tasks
             try
             {
                 // Try to delete the directory
-                Directory.Delete(TaskEnvironment.GetAbsolutePath(directory.ItemSpec), true);
+                Directory.Delete(directoryPath, true);
             }
             catch (UnauthorizedAccessException e)
             {
@@ -135,13 +135,13 @@ namespace Microsoft.Build.Tasks
                 // Log the fact that there was a problem only if we have been asked to.
                 if (logUnauthorizedError)
                 {
-                    Log.LogErrorWithCodeFromResources("RemoveDir.Error", directory, e.Message);
+                    Log.LogErrorWithCodeFromResources("RemoveDir.Error", directoryItemSpec, e.Message);
                 }
                 unauthorizedAccess = true;
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                Log.LogErrorWithCodeFromResources("RemoveDir.Error", directory.ItemSpec, e.Message);
+                Log.LogErrorWithCodeFromResources("RemoveDir.Error", directoryItemSpec, e.Message);
                 success = false;
             }
 
