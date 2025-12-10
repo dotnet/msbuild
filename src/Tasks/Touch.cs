@@ -202,7 +202,7 @@ namespace Microsoft.Build.Tasks
             SetLastAccessTime fileSetLastAccessTime,
             SetLastWriteTime fileSetLastWriteTime)
         {
-            file = TaskEnvironment?.GetAbsolutePath(file) ?? Path.GetFullPath(file);
+            file = TaskEnvironment.GetAbsolutePath(file);
             if (!fileExists(file))
             {
                 // If the file does not exist then we check if we need to create it.

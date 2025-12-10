@@ -78,9 +78,7 @@ namespace Microsoft.Build.Tasks
 
             // Use TaskEnvironment to resolve relative paths when available (multi-threaded mode),
             // otherwise fall back to standard normalization
-            string filePath = TaskEnvironment != null
-                ? TaskEnvironment.GetAbsolutePath(File.ItemSpec)
-                : FileUtilities.NormalizePath(File.ItemSpec);
+            string filePath = TaskEnvironment.GetAbsolutePath(File.ItemSpec);
 
             string contentsAsString = string.Empty;
 

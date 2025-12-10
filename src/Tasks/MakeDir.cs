@@ -62,7 +62,7 @@ namespace Microsoft.Build.Tasks
                     try
                     {
                         // Get absolute path for thread-safe operations
-                        string absolutePath = TaskEnvironment?.GetAbsolutePath(directory.ItemSpec) ?? Path.GetFullPath(directory.ItemSpec);
+                        string absolutePath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
                         
                         // For speed, eliminate duplicates caused by poor targets authoring
                         if (!directoriesSet.Contains(absolutePath))
@@ -92,7 +92,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Add even on failure to avoid reattempting (use absolute path for proper deduplication)
-                    string pathForDeduplication = TaskEnvironment?.GetAbsolutePath(directory.ItemSpec) ?? Path.GetFullPath(directory.ItemSpec);
+                    string pathForDeduplication = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
                     directoriesSet.Add(pathForDeduplication);
                 }
             }

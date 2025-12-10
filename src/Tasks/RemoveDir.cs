@@ -59,7 +59,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem directory in Directories)
             {
-                var directoryPath = TaskEnvironment?.GetAbsolutePath(directory.ItemSpec) ?? Path.GetFullPath(directory.ItemSpec);
+                var directoryPath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
                 if (string.IsNullOrEmpty(directoryPath))
                 {
                     // Skip any empty ItemSpecs, otherwise RemoveDir will wipe the root of the current drive (!).
@@ -127,7 +127,7 @@ namespace Microsoft.Build.Tasks
             try
             {
                 // Try to delete the directory
-                Directory.Delete(TaskEnvironment?.GetAbsolutePath(directory.ItemSpec) ?? Path.GetFullPath(directory.ItemSpec), true);
+                Directory.Delete(TaskEnvironment.GetAbsolutePath(directory.ItemSpec), true);
             }
             catch (UnauthorizedAccessException e)
             {

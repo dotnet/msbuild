@@ -376,8 +376,8 @@ namespace Microsoft.Build.Tasks
             if (!hardLinkCreated && !symbolicLinkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                string sourceFilePath = TaskEnvironment?.GetAbsolutePath(sourceFileState.Name) ?? sourceFileState.Name;
-                string destinationFilePath = TaskEnvironment?.GetAbsolutePath(destinationFileState.Name) ?? destinationFileState.Name;
+                string sourceFilePath = TaskEnvironment.GetAbsolutePath(sourceFileState.Name);
+                string destinationFilePath = TaskEnvironment.GetAbsolutePath(destinationFileState.Name);
                 Log.LogMessage(MessageImportance.Normal, FileComment, sourceFilePath, destinationFilePath);
 
                 File.Copy(sourceFilePath, destinationFilePath, true);
@@ -452,7 +452,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Environment variable stomps on user-requested value if it's set.
-            if (TaskEnvironment?.GetEnvironmentVariable(AlwaysOverwriteReadOnlyFilesEnvVar) != null)
+            if (TaskEnvironment.GetEnvironmentVariable(AlwaysOverwriteReadOnlyFilesEnvVar) != null)
             {
                 OverwriteReadOnlyFiles = true;
             }
@@ -1100,8 +1100,8 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            source.FileNameFullPath = TaskEnvironment?.GetAbsolutePath(source.Name) ?? Path.GetFullPath(source.Name);
-            destination.FileNameFullPath = TaskEnvironment?.GetAbsolutePath(destination.Name) ?? Path.GetFullPath(destination.Name);
+            source.FileNameFullPath = TaskEnvironment.GetAbsolutePath(source.Name);
+            destination.FileNameFullPath = TaskEnvironment.GetAbsolutePath(destination.Name);
             return string.Equals(source.FileNameFullPath, destination.FileNameFullPath, FileUtilities.PathComparison);
         }
 

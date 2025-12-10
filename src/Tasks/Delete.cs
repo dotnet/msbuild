@@ -125,7 +125,7 @@ namespace Microsoft.Build.Tasks
                 {
                     try
                     {
-                        string filePath = TaskEnvironment?.GetAbsolutePath(file.ItemSpec) ?? Path.GetFullPath(file.ItemSpec);
+                        string filePath = TaskEnvironment.GetAbsolutePath(file.ItemSpec);
                         if (FileSystems.Default.FileExists(filePath))
                         {
                             if (FailIfNotIncremental)
