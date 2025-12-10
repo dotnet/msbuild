@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
@@ -122,18 +123,18 @@ namespace Microsoft.Build.Framework.Telemetry
                 telemetryItems.Add(TelemetryConstants.InnerBuildDurationPropertyName, (FinishedAt.Value - InnerStartAt.Value).TotalMilliseconds);
             }
 
-            AddIfNotNull(nameof(BuildEngineHost), BuildEngineHost);
-            AddIfNotNull(nameof(BuildSuccess), BuildSuccess);
-            AddIfNotNull(nameof(BuildTarget), BuildTarget);
-            AddIfNotNull(nameof(BuildEngineVersion), BuildEngineVersion);
-            AddIfNotNull(nameof(BuildCheckEnabled), BuildCheckEnabled);
-            AddIfNotNull(nameof(MultiThreadedModeEnabled), MultiThreadedModeEnabled);
-            AddIfNotNull(nameof(SACEnabled), SACEnabled);
-            AddIfNotNull(nameof(IsStandaloneExecution), IsStandaloneExecution);
+            AddIfNotNull(BuildEngineHost);
+            AddIfNotNull(BuildSuccess);
+            AddIfNotNull(BuildTarget);
+            AddIfNotNull(BuildEngineVersion);
+            AddIfNotNull(BuildCheckEnabled);
+            AddIfNotNull(MultiThreadedModeEnabled);
+            AddIfNotNull(SACEnabled);
+            AddIfNotNull(IsStandaloneExecution);
 
             return telemetryItems;
 
-            void AddIfNotNull(string key, object? value)
+            void AddIfNotNull(object? value, [CallerArgumentExpression(nameof(value))] string key = "")
             {
                 if (value != null)
                 {
@@ -146,19 +147,19 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             var properties = new Dictionary<string, string>();
 
-            AddIfNotNull(nameof(BuildEngineDisplayVersion), BuildEngineDisplayVersion);
-            AddIfNotNull(nameof(BuildEngineFrameworkName), BuildEngineFrameworkName);
-            AddIfNotNull(nameof(BuildEngineHost), BuildEngineHost);
-            AddIfNotNull(nameof(InitialMSBuildServerState), InitialMSBuildServerState);
-            AddIfNotNull(nameof(ProjectPath), ProjectPath);
-            AddIfNotNull(nameof(ServerFallbackReason), ServerFallbackReason);
-            AddIfNotNull(nameof(BuildTarget), BuildTarget);
-            AddIfNotNull(nameof(BuildEngineVersion), BuildEngineVersion?.ToString());
-            AddIfNotNull(nameof(BuildSuccess), BuildSuccess?.ToString());
-            AddIfNotNull(nameof(BuildCheckEnabled), BuildCheckEnabled?.ToString());
-            AddIfNotNull(nameof(MultiThreadedModeEnabled), MultiThreadedModeEnabled?.ToString());
-            AddIfNotNull(nameof(SACEnabled), SACEnabled?.ToString());
-            AddIfNotNull(nameof(IsStandaloneExecution), IsStandaloneExecution?.ToString());
+            AddIfNotNull(BuildEngineDisplayVersion);
+            AddIfNotNull(BuildEngineFrameworkName);
+            AddIfNotNull(BuildEngineHost);
+            AddIfNotNull(InitialMSBuildServerState);
+            AddIfNotNull(ProjectPath);
+            AddIfNotNull(ServerFallbackReason);
+            AddIfNotNull(BuildTarget);
+            AddIfNotNull(BuildEngineVersion?.ToString(), nameof(BuildEngineVersion));
+            AddIfNotNull(BuildSuccess?.ToString(), nameof(BuildSuccess));
+            AddIfNotNull(BuildCheckEnabled?.ToString(), nameof(BuildCheckEnabled));
+            AddIfNotNull(MultiThreadedModeEnabled?.ToString(), nameof(MultiThreadedModeEnabled));
+            AddIfNotNull(SACEnabled?.ToString(), nameof(SACEnabled));
+            AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
 
             // Calculate durations
             if (StartAt.HasValue && FinishedAt.HasValue)
@@ -175,7 +176,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
             return properties;
 
-            void AddIfNotNull(string key, string? value)
+            void AddIfNotNull(string? value, [CallerArgumentExpression(nameof(value))] string key = "")
             {
                 if (value != null)
                 {

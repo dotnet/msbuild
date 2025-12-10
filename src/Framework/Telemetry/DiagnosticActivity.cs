@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if !NETFRAMEWORK
+
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -37,15 +39,8 @@ namespace Microsoft.Build.Framework.Telemetry
         {
             if (value != null)
             {
-                _activity.SetTag(key, value);
+                _activity.SetTag($"{TelemetryConstants.PropertyPrefix}{key}", value);
             }
-
-            return this;
-        }
-
-        public IActivity? AddEvent(ActivityEvent activityEvent)
-        {
-            _activity.AddEvent(activityEvent);
 
             return this;
         }
@@ -63,3 +58,5 @@ namespace Microsoft.Build.Framework.Telemetry
         }
     }
 }
+
+#endif

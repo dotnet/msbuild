@@ -1,7 +1,13 @@
 <Project>
+
   <!-- Import references updated by Dependabot.
        This file is for package references updated manually or by Darc/Maestro. -->
-  <Import Project="dependabot\Packages.props" />
+  <Import Project="$(RepositoryEngineeringDir)dependabot\Directory.Packages.props" />
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally Condition="'$(ManagePackageVersionsCentrally)' == ''">true</ManagePackageVersionsCentrally>
+    <CentralPackageTransitivePinningEnabled Condition="'$(CentralPackageTransitivePinningEnabled)' == ''">true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
 
   <!--
     Make sure to update the binding redirects (in src\MSBuild\app.config and src\MSBuild\app.amd64.config) for any changes to
@@ -43,4 +49,5 @@
     <PackageVersion Include="Microsoft.VisualStudio.Telemetry" Version="$(MicrosoftVisualStudioTelemetryVersion)" />
     <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Packages.props -->
   </ItemGroup>
+
 </Project>
