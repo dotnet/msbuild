@@ -77,7 +77,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Use TaskEnvironment to resolve relative paths for thread-safe operations
-            string filePath = TaskEnvironment.GetAbsolutePath(File.ItemSpec);
+            AbsolutePath filePath = TaskEnvironment.GetAbsolutePath(File.ItemSpec);
 
             string contentsAsString = string.Empty;
 

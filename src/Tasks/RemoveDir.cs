@@ -59,7 +59,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem directory in Directories)
             {
-                var directoryPath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
+                AbsolutePath directoryPath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
                 if (string.IsNullOrEmpty(directoryPath))
                 {
                     // Skip any empty ItemSpecs, otherwise RemoveDir will wipe the root of the current drive (!).
@@ -118,7 +118,7 @@ namespace Microsoft.Build.Tasks
         }
 
         // Core implementation of directory removal
-        private bool RemoveDirectory(string directoryPath, string directoryItemSpec, bool logUnauthorizedError, out bool unauthorizedAccess)
+        private bool RemoveDirectory(AbsolutePath directoryPath, string directoryItemSpec, bool logUnauthorizedError, out bool unauthorizedAccess)
         {
             bool success = true;
 
