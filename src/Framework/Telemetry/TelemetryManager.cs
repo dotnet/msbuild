@@ -165,7 +165,7 @@ namespace Microsoft.Build.Framework.Telemetry
             if (isStandalone)
             {
                 s_telemetrySession = TelemetryService.CreateAndGetDefaultSession(CollectorApiKey);
-                TelemetryService.DefaultSession.IsOptedIn = true;
+                TelemetryService.DefaultSession.IsOptedIn = Traits.Instance.TelemetryOptIn;
                 TelemetryService.DefaultSession.Start();
                 s_ownsSession = true;
             }

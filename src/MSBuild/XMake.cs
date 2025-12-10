@@ -250,12 +250,7 @@ namespace Microsoft.Build.CommandLine
             // Initialize new build telemetry and record start of this build.
             KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow, IsStandaloneExecution = true };
 
-            // Initialize Telemetry
-            // Temporarily only enable telemetry when environment variable set to "1".
-            if (Traits.Instance.TelemetryOptIn)
-            {
-                TelemetryManager.Instance?.Initialize(isStandalone: true);
-            }
+            TelemetryManager.Instance?.Initialize(isStandalone: true);
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
