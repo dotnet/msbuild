@@ -1098,9 +1098,11 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            source.FileNameFullPath = TaskEnvironment.GetAbsolutePath(source.Name);
-            destination.FileNameFullPath = TaskEnvironment.GetAbsolutePath(destination.Name);
-            return string.Equals(source.FileNameFullPath, destination.FileNameFullPath, FileUtilities.PathComparison);
+            AbsolutePath sourceFullPath = TaskEnvironment.GetAbsolutePath(source.Name);
+            AbsolutePath destinationFullPath = TaskEnvironment.GetAbsolutePath(destination.Name);
+            source.FileNameFullPath = sourceFullPath;
+            destination.FileNameFullPath = destinationFullPath;
+            return sourceFullPath == destinationFullPath;
         }
 
         private static bool GetParallelismFromEnvironment()

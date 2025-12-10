@@ -59,11 +59,11 @@ namespace Microsoft.Build.Tasks
                 // here we check for that case.
                 if (directory.ItemSpec.Length > 0)
                 {
+                    // Get absolute path for thread-safe operations (compute once, use everywhere)
+                    AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
+
                     try
                     {
-                        // Get absolute path for thread-safe operations
-                        AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
-                        
                         // For speed, eliminate duplicates caused by poor targets authoring
                         if (!directoriesSet.Contains(absolutePath))
                         {
@@ -91,9 +91,8 @@ namespace Microsoft.Build.Tasks
                         Log.LogErrorWithCodeFromResources("MakeDir.Error", directory.ItemSpec, e.Message);
                     }
 
-                    // Add even on failure to avoid reattempting (use absolute path for proper deduplication)
-                    AbsolutePath pathForDeduplication = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
-                    directoriesSet.Add(pathForDeduplication);
+                    // Add even on failure to avoid reattempting
+                    directoriesSet.Add(absolutePath);
                 }
             }
 
