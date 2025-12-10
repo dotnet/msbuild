@@ -642,20 +642,21 @@ namespace Microsoft.Build.BackEnd
                 return (currentParams, isNetRuntime: false);
             }
 
-            string dotnetHostPath = getProperty(Constants.DotnetHostPathEnvVarName)?.EvaluatedValue;
+            string dotnetRootPath = getProperty(Constants.DotnetHostPathEnvVarName)?.EvaluatedValue;
+            string dotnetSdkVersionPath = getProperty(Constants.DotnetSdkVersionPath)?.EvaluatedValue;
             string ridGraphPath = getProperty(Constants.RuntimeIdentifierGraphPath)?.EvaluatedValue;
 
-            if (string.IsNullOrEmpty(dotnetHostPath) || string.IsNullOrEmpty(ridGraphPath))
+            if (string.IsNullOrEmpty(dotnetRootPath) || (string.IsNullOrEmpty(ridGraphPath) && string.IsNullOrEmpty(dotnetSdkVersionPath)))
             {
                 return (currentParams, isNetRuntime: false);
             }
 
-            string msBuildAssemblyPath = Path.GetDirectoryName(ridGraphPath) ?? string.Empty;
+            string msBuildAssemblyPath = dotnetSdkVersionPath ?? Path.GetDirectoryName(ridGraphPath) ?? string.Empty;
 
             return (new TaskHostParameters(
                 runtime: currentParams.Runtime,
                 architecture: currentParams.Architecture,
-                dotnetHostPath: dotnetHostPath,
+                dotnetHostPath: dotnetRootPath,
                 msBuildAssemblyPath: msBuildAssemblyPath),
                 isNetRuntime: true);
         }

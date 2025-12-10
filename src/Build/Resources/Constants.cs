@@ -121,6 +121,12 @@ namespace Microsoft.Build.Internal
         internal const string RuntimeIdentifierGraphPath = nameof(RuntimeIdentifierGraphPath);
 
         /// <summary>
+        /// The project property name used to get the path to the MSBuild assembly.
+        /// It is set by the SDK resolver.
+        /// </summary>
+        internal const string DotnetSdkVersionPath = "DOTNET_SDK_VERSION_PATH";
+
+        /// <summary>
         /// Defines the name of dotnet process based on the operating system.
         /// </summary>
         internal static readonly string DotnetProcessName = NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet";

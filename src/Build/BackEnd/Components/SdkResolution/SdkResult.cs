@@ -22,16 +22,31 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             Translate(translator);
         }
 
-        public SdkResult(SdkReference sdkReference, IEnumerable<string> errors, IEnumerable<string> warnings)
+        public SdkResult(
+            SdkReference sdkReference,
+            IEnumerable<string> errors,
+            IEnumerable<string> warnings = null,
+            IDictionary<string, string> propertiesToAdd = null,
+            IDictionary<string, SdkResultItem> itemsToAdd = null,
+            IDictionary<string, string> environmentVariablesToAdd = null)
         {
             Success = false;
             SdkReference = sdkReference;
             Errors = errors;
             Warnings = warnings;
+            PropertiesToAdd = propertiesToAdd;
+            ItemsToAdd = itemsToAdd;
+            EnvironmentVariablesToAdd = environmentVariablesToAdd;
         }
 
-        public SdkResult(SdkReference sdkReference, string path, string version, IEnumerable<string> warnings,
-            IDictionary<string, string> propertiesToAdd = null, IDictionary<string, SdkResultItem> itemsToAdd = null, IDictionary<string, string> environmentVariablesToAdd = null)
+        public SdkResult(
+            SdkReference sdkReference,
+            string path,
+            string version,
+            IEnumerable<string> warnings,
+            IDictionary<string, string> propertiesToAdd = null,
+            IDictionary<string, SdkResultItem> itemsToAdd = null,
+            IDictionary<string, string> environmentVariablesToAdd = null)
         {
             Success = true;
             SdkReference = sdkReference;

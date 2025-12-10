@@ -754,9 +754,482 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.EnvironmentVariablesToAdd.Count.ShouldBe(1);
         }
 
+        [Fact]
+        public void FailedResolverPropertiesAreMergedIntoSuccessfulResult()
+        {
+            var sdk = new SdkReference("testSdk", "1.0", null);
+
+            // First resolver fails but contributes properties
+            var failingResolver = new MockSdkResolverWithContributions(
+                "FailingResolver",
+                1,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return factory.IndicateFailure(
+                        errors: new[] { "SDK not found" },
+                        warnings: null,
+                        propertiesToAdd: new Dictionary<string, string> { { "PropFromFailed", "FailedValue" } },
+                        itemsToAdd: null);
+                });
+
+            // Second resolver succeeds and contributes different properties
+            var succeedingResolver = new MockSdkResolverWithContributions(
+                "SucceedingResolver",
+                2,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return new SdkResultImpl(
+                        sdk,
+                        "successPath",
+                        "1.0",
+                        warnings: null,
+                        propertiesToAdd: new Dictionary<string, string> { { "PropFromSuccess", "SuccessValue" } },
+                        itemsToAdd: null,
+                        environmentVariablesToAdd: null);
+                });
+
+            var service = new SdkResolverService();
+            service.InitializeForTests(new MockLoaderStrategy(), new List<SdkResolver> { failingResolver, succeedingResolver });
+            var result = service.ResolveSdk(
+                BuildEventContext.InvalidSubmissionId,
+                sdk,
+                _loggingContext,
+                new MockElementLocation("file"),
+                "sln",
+                "projectPath",
+                interactive: false,
+                isRunningInVisualStudio: false,
+                failOnUnresolvedSdk: true);
+
+            result.Success.ShouldBeTrue();
+            result.Path.ShouldBe("successPath");
+
+            // Both properties should be present
+            result.PropertiesToAdd.ShouldContainKeyAndValue("PropFromFailed", "FailedValue");
+            result.PropertiesToAdd.ShouldContainKeyAndValue("PropFromSuccess", "SuccessValue");
+        }
+
+        [Fact]
+        public void FailedResolverItemsAreMergedIntoSuccessfulResult()
+        {
+            var sdk = new SdkReference("testSdk", "1.0", null);
+
+            // First resolver fails but contributes items
+            var failingResolver = new MockSdkResolverWithContributions(
+                "FailingResolver",
+                1,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return factory.IndicateFailure(
+                        errors: new[] { "SDK not found" },
+                        warnings: null,
+                        propertiesToAdd: null,
+                        itemsToAdd: new Dictionary<string, SdkResultItem>
+                        {
+                            { "ItemFromFailed", new SdkResultItem("FailedItemValue", null) }
+                        });
+                });
+
+            // Second resolver succeeds and contributes different items
+            var succeedingResolver = new MockSdkResolverWithContributions(
+                "SucceedingResolver",
+                2,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return new SdkResultImpl(
+                        sdk,
+                        "successPath",
+                        "1.0",
+                        warnings: null,
+                        propertiesToAdd: null,
+                        itemsToAdd: new Dictionary<string, SdkResultItem>
+                        {
+                            { "ItemFromSuccess", new SdkResultItem("SuccessItemValue", null) }
+                        },
+                        environmentVariablesToAdd: null);
+                });
+
+            var service = new SdkResolverService();
+            service.InitializeForTests(null, new List<SdkResolver> { failingResolver, succeedingResolver });
+
+            var result = service.ResolveSdk(
+                BuildEventContext.InvalidSubmissionId,
+                sdk,
+                _loggingContext,
+                new MockElementLocation("file"),
+                "sln",
+                "projectPath",
+                interactive: false,
+                isRunningInVisualStudio: false,
+                failOnUnresolvedSdk: true);
+
+            result.Success.ShouldBeTrue();
+            result.ItemsToAdd.ShouldContainKey("ItemFromFailed");
+            result.ItemsToAdd["ItemFromFailed"].ItemSpec.ShouldBe("FailedItemValue");
+            result.ItemsToAdd.ShouldContainKey("ItemFromSuccess");
+            result.ItemsToAdd["ItemFromSuccess"].ItemSpec.ShouldBe("SuccessItemValue");
+        }
+
+        [Fact]
+        public void FailedResolverEnvironmentVariablesAreMergedIntoSuccessfulResult()
+        {
+            var sdk = new SdkReference("testSdk", "1.0", null);
+
+            // First resolver fails but contributes environment variables
+            var failingResolver = new MockSdkResolverWithContributions(
+                "FailingResolver",
+                1,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return factory.IndicateFailure(
+                        errors: new[] { "SDK not found" },
+                        warnings: null,
+                        propertiesToAdd: null,
+                        itemsToAdd: null,
+                        environmentVariablesToAdd: new Dictionary<string, string> { { "EnvFromFailed", "FailedEnvValue" } });
+                });
+
+            // Second resolver succeeds and contributes different environment variables
+            var succeedingResolver = new MockSdkResolverWithContributions(
+                "SucceedingResolver",
+                2,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return factory.IndicateSuccess(
+                        "successPath",
+                        "1.0",
+                        warnings: null,
+                        propertiesToAdd: null,
+                        itemsToAdd: null,
+                        environmentVariablesToAdd: new Dictionary<string, string> { { "EnvFromSuccess", "SuccessEnvValue" } });
+                });
+
+            var service = new SdkResolverService();
+            service.InitializeForTests(new MockLoaderStrategy(), new List<SdkResolver> { failingResolver, succeedingResolver });
+
+            var result = service.ResolveSdk(
+                BuildEventContext.InvalidSubmissionId,
+                sdk,
+                _loggingContext,
+                new MockElementLocation("file"),
+                "sln",
+                "projectPath",
+                interactive: false,
+                isRunningInVisualStudio: false,
+                failOnUnresolvedSdk: true);
+
+            result.Success.ShouldBeTrue();
+            result.EnvironmentVariablesToAdd.ShouldContainKeyAndValue("EnvFromFailed", "FailedEnvValue");
+            result.EnvironmentVariablesToAdd.ShouldContainKeyAndValue("EnvFromSuccess", "SuccessEnvValue");
+        }
+
+        [Fact]
+        public void SuccessfulResolverOverridesFailedResolverOnConflict()
+        {
+            var sdk = new SdkReference("testSdk", "1.0", null);
+
+            // First resolver fails but contributes a property
+            var failingResolver = new MockSdkResolverWithContributions(
+                "FailingResolver",
+                1,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return factory.IndicateFailure(
+                        errors: new[] { "SDK not found" },
+                        warnings: null,
+                        propertiesToAdd: new Dictionary<string, string> { { "ConflictProp", "FailedValue" } },
+                        itemsToAdd: null);
+                });
+
+            // Second resolver succeeds and contributes the same property with different value
+            var succeedingResolver = new MockSdkResolverWithContributions(
+                "SucceedingResolver",
+                2,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return new SdkResultImpl(
+                        sdk,
+                        "successPath",
+                        "1.0",
+                        warnings: null,
+                        propertiesToAdd: new Dictionary<string, string> { { "ConflictProp", "SuccessValue" } },
+                        itemsToAdd: null,
+                        environmentVariablesToAdd: null);
+                });
+
+            var service = new SdkResolverService();
+            service.InitializeForTests(new MockLoaderStrategy(), new List<SdkResolver> { failingResolver, succeedingResolver });
+
+            var result = service.ResolveSdk(
+                BuildEventContext.InvalidSubmissionId,
+                sdk,
+                _loggingContext,
+                new MockElementLocation("file"),
+                "sln",
+                "projectPath",
+                interactive: false,
+                isRunningInVisualStudio: false,
+                failOnUnresolvedSdk: true);
+
+            result.Success.ShouldBeTrue();
+            // Successful resolver's value should win on conflict
+            result.PropertiesToAdd.ShouldContainKeyAndValue("ConflictProp", "SuccessValue");
+            result.PropertiesToAdd.Count.ShouldBe(1);
+        }
+
+        [Fact]
+        public void MultipleFailedResolversContributionsAreMerged()
+        {
+            var sdk = new SdkReference("testSdk", "1.0", null);
+
+            // First resolver fails but contributes properties
+            var failingResolver1 = new MockSdkResolverWithContributions(
+                "FailingResolver1",
+                1,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return factory.IndicateFailure(
+                        errors: new[] { "SDK not found" },
+                        warnings: null,
+                        propertiesToAdd: new Dictionary<string, string> { { "Prop1", "Value1" } },
+                        itemsToAdd: null);
+                });
+
+            // Second resolver also fails but contributes different properties
+            var failingResolver2 = new MockSdkResolverWithContributions(
+                "FailingResolver2",
+                2,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return factory.IndicateFailure(
+                        errors: new[] { "SDK not found" },
+                        warnings: null,
+                        propertiesToAdd: new Dictionary<string, string> { { "Prop2", "Value2" } },
+                        itemsToAdd: null);
+                });
+
+            // Third resolver succeeds
+            var succeedingResolver = new MockSdkResolverWithContributions(
+                "SucceedingResolver",
+                3,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return new SdkResultImpl(
+                        sdk,
+                        "successPath",
+                        "1.0",
+                        warnings: null,
+                        propertiesToAdd: new Dictionary<string, string> { { "Prop3", "Value3" } },
+                        itemsToAdd: null,
+                        environmentVariablesToAdd: null);
+                });
+
+            var service = new SdkResolverService();
+            service.InitializeForTests(new MockLoaderStrategy(), new List<SdkResolver> { failingResolver1, failingResolver2, succeedingResolver });
+
+            var result = service.ResolveSdk(
+                BuildEventContext.InvalidSubmissionId,
+                sdk,
+                _loggingContext,
+                new MockElementLocation("file"),
+                "sln",
+                "projectPath",
+                interactive: false,
+                isRunningInVisualStudio: false,
+                failOnUnresolvedSdk: true);
+
+            result.Success.ShouldBeTrue();
+            result.PropertiesToAdd.Count.ShouldBe(3);
+            result.PropertiesToAdd.ShouldContainKeyAndValue("Prop1", "Value1");
+            result.PropertiesToAdd.ShouldContainKeyAndValue("Prop2", "Value2");
+            result.PropertiesToAdd.ShouldContainKeyAndValue("Prop3", "Value3");
+        }
+
+        [Fact]
+        public void LaterFailedResolverOverridesEarlierFailedResolverOnConflict()
+        {
+            var sdk = new SdkReference("testSdk", "1.0", null);
+
+            // First resolver fails with a property
+            var failingResolver1 = new MockSdkResolverWithContributions(
+                "FailingResolver1",
+                1,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return factory.IndicateFailure(
+                        errors: new[] { "SDK not found" },
+                        warnings: null,
+                        propertiesToAdd: new Dictionary<string, string> { { "ConflictProp", "FirstValue" } },
+                        itemsToAdd: null);
+                });
+
+            // Second resolver fails with the same property, different value
+            var failingResolver2 = new MockSdkResolverWithContributions(
+                "FailingResolver2",
+                2,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return factory.IndicateFailure(
+                        errors: new[] { "SDK not found" },
+                        warnings: null,
+                        propertiesToAdd: new Dictionary<string, string> { { "ConflictProp", "SecondValue" } },
+                        itemsToAdd: null);
+                });
+
+            // Third resolver succeeds without the conflicting property
+            var succeedingResolver = new MockSdkResolverWithContributions(
+                "SucceedingResolver",
+                3,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return new SdkResultImpl(
+                        sdk,
+                        "successPath",
+                        "1.0",
+                        warnings: null,
+                        propertiesToAdd: null,
+                        itemsToAdd: null,
+                        environmentVariablesToAdd: null);
+                });
+
+            var service = new SdkResolverService();
+            service.InitializeForTests(new MockLoaderStrategy(), new List<SdkResolver> { failingResolver1, failingResolver2, succeedingResolver });
+
+            var result = service.ResolveSdk(
+                BuildEventContext.InvalidSubmissionId,
+                sdk,
+                _loggingContext,
+                new MockElementLocation("file"),
+                "sln",
+                "projectPath",
+                interactive: false,
+                isRunningInVisualStudio: false,
+                failOnUnresolvedSdk: true);
+
+            result.Success.ShouldBeTrue();
+            // Later failed resolver's value should override earlier one
+            result.PropertiesToAdd.ShouldContainKeyAndValue("ConflictProp", "SecondValue");
+        }
+
+        [Fact]
+        public void NoMergeWhenNoFailedResolversContribute()
+        {
+            var sdk = new SdkReference("testSdk", "1.0", null);
+
+            // First resolver fails without contributing anything
+            var failingResolver = new MockSdkResolverWithContributions(
+                "FailingResolver",
+                1,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return factory.IndicateFailure(
+                        errors: new[] { "SDK not found" },
+                        warnings: null);
+                });
+
+            // Second resolver succeeds with properties
+            var succeedingResolver = new MockSdkResolverWithContributions(
+                "SucceedingResolver",
+                2,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return new SdkResultImpl(
+                        sdk,
+                        "successPath",
+                        "1.0",
+                        warnings: null,
+                        propertiesToAdd: new Dictionary<string, string> { { "OnlyProp", "OnlyValue" } },
+                        itemsToAdd: null,
+                        environmentVariablesToAdd: null);
+                });
+
+            var service = new SdkResolverService();
+            service.InitializeForTests(new MockLoaderStrategy(), new List<SdkResolver> { failingResolver, succeedingResolver });
+
+            var result = service.ResolveSdk(
+                BuildEventContext.InvalidSubmissionId,
+                sdk,
+                _loggingContext,
+                new MockElementLocation("file"),
+                "sln",
+                "projectPath",
+                interactive: false,
+                isRunningInVisualStudio: false,
+                failOnUnresolvedSdk: true);
+
+            result.Success.ShouldBeTrue();
+            result.PropertiesToAdd.Count.ShouldBe(1);
+            result.PropertiesToAdd.ShouldContainKeyAndValue("OnlyProp", "OnlyValue");
+        }
+
+        [Fact]
+        public void MergeAllDataTypesFromMultipleResolvers()
+        {
+            var sdk = new SdkReference("testSdk", "1.0", null);
+
+            // First resolver fails but contributes all data types
+            var failingResolver = new MockSdkResolverWithContributions(
+                "FailingResolver",
+                1,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return factory.IndicateFailure(
+                        errors: new[] { "SDK not found" },
+                        warnings: null,
+                        propertiesToAdd: new Dictionary<string, string> { { "PropFromFailed", "PropValue" } },
+                        itemsToAdd: new Dictionary<string, SdkResultItem> { { "ItemFromFailed", new SdkResultItem("ItemValue", null) } },
+                        environmentVariablesToAdd: new Dictionary<string, string> { { "EnvFromFailed", "EnvValue" } });
+                });
+
+            // Second resolver succeeds with different data
+            var succeedingResolver = new MockSdkResolverWithContributions(
+                "SucceedingResolver",
+                2,
+                (sdkReference, resolverContext, factory) =>
+                {
+                    return factory.IndicateSuccess(
+                        "successPath",
+                        "1.0",
+                        warnings: null,
+                        propertiesToAdd: new Dictionary<string, string> { { "PropFromSuccess", "PropValue2" } },
+                        itemsToAdd: new Dictionary<string, SdkResultItem> { { "ItemFromSuccess", new SdkResultItem("ItemValue2", null) } },
+                        environmentVariablesToAdd: new Dictionary<string, string> { { "EnvFromSuccess", "EnvValue2" } });
+                });
+
+            var service = new SdkResolverService();
+            service.InitializeForTests(new MockLoaderStrategy(), new List<SdkResolver> { failingResolver, succeedingResolver });
+
+            var result = service.ResolveSdk(
+                BuildEventContext.InvalidSubmissionId,
+                sdk,
+                _loggingContext,
+                new MockElementLocation("file"),
+                "sln",
+                "projectPath",
+                interactive: false,
+                isRunningInVisualStudio: false,
+                failOnUnresolvedSdk: true);
+
+            result.Success.ShouldBeTrue();
+
+            // Verify properties merged
+            result.PropertiesToAdd.Count.ShouldBe(2);
+            result.PropertiesToAdd.ShouldContainKeyAndValue("PropFromFailed", "PropValue");
+            result.PropertiesToAdd.ShouldContainKeyAndValue("PropFromSuccess", "PropValue2");
+
+            // Verify items merged
+            result.ItemsToAdd.Count.ShouldBe(2);
+            result.ItemsToAdd.ShouldContainKey("ItemFromFailed");
+            result.ItemsToAdd.ShouldContainKey("ItemFromSuccess");
+
+            // Verify environment variables merged
+            result.EnvironmentVariablesToAdd.Count.ShouldBe(2);
+            result.EnvironmentVariablesToAdd.ShouldContainKeyAndValue("EnvFromFailed", "EnvValue");
+            result.EnvironmentVariablesToAdd.ShouldContainKeyAndValue("EnvFromSuccess", "EnvValue2");
+        }
+
         internal sealed class SdkResolverServiceTextExtension : SdkResolverService
         {
-
             internal bool _fake_initialization = false;
             internal IReadOnlyList<SdkResolverManifest> _fakeManifestRegistry;
 
@@ -979,6 +1452,32 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 }
 
                 return factory.IndicateFailure(new[] { "ERROR4" }, new[] { "WARNING4" });
+            }
+        }
+
+
+        private sealed class MockSdkResolverWithContributions : SdkResolver
+        {
+            private readonly Func<SdkReference, SdkResolverContextBase, SdkResultFactoryBase, SdkResultBase> _resolveFunc;
+            private readonly string _name;
+            private readonly int _priority;
+
+            public MockSdkResolverWithContributions(
+                string name,
+                int priority,
+                Func<SdkReference, SdkResolverContextBase, SdkResultFactoryBase, SdkResultBase> resolveFunc)
+            {
+                _name = name;
+                _priority = priority;
+                _resolveFunc = resolveFunc;
+            }
+
+            public override string Name => _name;
+            public override int Priority => _priority;
+
+            public override SdkResultBase Resolve(SdkReference sdkReference, SdkResolverContextBase resolverContext, SdkResultFactoryBase factory)
+            {
+                return _resolveFunc(sdkReference, resolverContext, factory);
             }
         }
 
