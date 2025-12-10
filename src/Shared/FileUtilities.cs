@@ -60,6 +60,9 @@ namespace Microsoft.Build.Shared
             get => s_currentThreadWorkingDirectory.Value;
             set => s_currentThreadWorkingDirectory.Value = value;
         }
+#else
+        // net35 taskhost does not support AsyncLocal, and the scenario is not relevant there.
+        internal static string CurrentThreadWorkingDirectory = null;
 #endif
 
 #if CLR2COMPATIBILITY
