@@ -62,6 +62,19 @@ namespace Microsoft.Build.Framework.Telemetry
         }
 
         /// <summary>
+        /// Resets the TelemetryManager state for TESTING purposes.
+        /// </summary>
+        internal static void ResetForTest()
+        {
+            lock (s_lock)
+            {
+                s_initialized = false;
+                s_disposed = false;
+                Instance.DefaultActivitySource = null;
+            }
+        }
+
+        /// <summary>
         /// Initializes MSBuild telemetry.
         /// This method is deliberately not inlined to ensure
         /// the Telemetry related assemblies are only loaded when this method is called,

@@ -175,6 +175,9 @@ namespace Microsoft.Build.Engine.UnitTests
             };
             ActivitySource.AddActivityListener(listener);
 
+            // Reset TelemetryManager to force re-initialization with our listener active
+            TelemetryManager.ResetForTest();
+
             var testProject = @"
             <Project>
                 <Target Name='Build'>
