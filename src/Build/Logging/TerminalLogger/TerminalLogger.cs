@@ -1114,12 +1114,10 @@ public sealed partial class TerminalLogger : INodeLogger
                                     var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
                                     var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                    var status = new TerminalNodeStatus(node.Project, node.TargetFramework, TerminalColor.Green, indicator, displayName, project.Stopwatch);
+                                    var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Green, indicator, displayName, project.Stopwatch);
                                     UpdateNodeStatus(buildEventContext, status);
                                 }
 
-                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Green, indicator, displayName, project.Stopwatch);
-                                UpdateNodeStatus(buildEventContext, status);
                                 break;
                             }
 
@@ -1130,12 +1128,10 @@ public sealed partial class TerminalLogger : INodeLogger
                                     var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
                                     var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                    var status = new TerminalNodeStatus(node.Project, node.TargetFramework, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
+                                    var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
                                     UpdateNodeStatus(buildEventContext, status);
                                 }
 
-                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
-                                UpdateNodeStatus(buildEventContext, status);
                                 break;
                             }
 
