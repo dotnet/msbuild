@@ -37,10 +37,10 @@ jobs:
       ArtifactName: MicroBuildOutputs
 
     # RAINES TODO: switch to pipeline?
-    # RAINES TODO: how to get always()?
     - output: buildArtifacts
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts\official\log\$(BuildConfiguration)'
       ArtifactName: logs
+      condition: always()
 
     # Publish test configuration for OptProf data collection
     - output: buildArtifacts
