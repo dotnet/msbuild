@@ -205,6 +205,8 @@ jobs:
         "xsd"
       )
 
+      $allpresent = $true
+
       foreach ($path in $paths) {
         $from = [System.IO.Path]::Combine($sourceRoot, $path)
 
@@ -224,7 +226,8 @@ jobs:
         }
 
         if (-not (Test-Path $from)) {
-          Write-Host "Source '$from' does not exist; skipping move for '$path'."
+          Write-Host "##vso[task.logissue type=error]Source '$from' does not exist; skipping move for '$path'."
+          $allpresent = $false
           continue
         }
 
@@ -234,6 +237,10 @@ jobs:
           $robocopyResult | Out-String | Write-Host
           throw "Robocopy failed with exit code $exitCode while moving '$path' to '$destinationSubPath'."
         }
+      }
+
+      if (-not $allpresent) {
+        throw "An expected output was not present."
       }
 
       $global:LASTEXITCODE = 0
