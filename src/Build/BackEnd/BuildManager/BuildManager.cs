@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -13,7 +13,11 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+
+#if FEATURE_REPORTFILEACCESSES
 using System.Runtime.CompilerServices;
+#endif
+
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -280,7 +284,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a new unnamed build manager.
         /// Normally there is only one build manager in a process, and it is the default build manager.
-        /// Access it with <see cref="BuildManager.DefaultBuildManager"/>
+        /// Access it with <see cref="DefaultBuildManager"/>.
         /// </summary>
         public BuildManager()
             : this("Unnamed")
@@ -290,7 +294,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Creates a new build manager with an arbitrary distinct name.
         /// Normally there is only one build manager in a process, and it is the default build manager.
-        /// Access it with <see cref="BuildManager.DefaultBuildManager"/>
+        /// Access it with <see cref="DefaultBuildManager"/>.
         /// </summary>
         public BuildManager(string hostName)
         {
@@ -336,12 +340,12 @@ namespace Microsoft.Build.Execution
 
             /// <summary>
             /// This is the state the BuildManager is in after <see cref="BeginBuild(BuildParameters)"/> has been called but before <see cref="EndBuild()"/> has been called.
-            /// <see cref="BuildManager.PendBuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.BuildRequest(Microsoft.Build.Execution.BuildRequestData)"/>, <see cref="BuildManager.PendBuildRequest(GraphBuildRequestData)"/>, <see cref="BuildManager.BuildRequest(GraphBuildRequestData)"/>, and <see cref="BuildManager.EndBuild()"/> may be called in this state.
+            /// <see cref="PendBuildRequest(BuildRequestData)"/>, <see cref="BuildRequest(BuildRequestData)"/>, <see cref="PendBuildRequest(GraphBuildRequestData)"/>, <see cref="BuildManager.BuildRequest(GraphBuildRequestData)"/>, and <see cref="BuildManager.EndBuild()"/> may be called in this state.
             /// </summary>
             Building,
 
             /// <summary>
-            /// This is the state the BuildManager is in after <see cref="BuildManager.EndBuild()"/> has been called but before all existing submissions have completed.
+            /// This is the state the BuildManager is in after <see cref="EndBuild()"/> has been called but before all existing submissions have completed.
             /// </summary>
             WaitingForBuildToComplete
         }
@@ -459,8 +463,6 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
-            InitializeTelemetry();
-
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
@@ -529,6 +531,7 @@ namespace Microsoft.Build.Execution
                 }
 
                 _buildTelemetry.InnerStartAt = now;
+                _buildTelemetry.IsStandaloneExecution ??= false;
 
                 if (BuildParameters.DumpOpportunisticInternStats)
                 {
@@ -585,7 +588,6 @@ namespace Microsoft.Build.Execution
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
-                _buildParameters.IsTelemetryEnabled |= OpenTelemetryManager.Instance.IsActive();
                 var loggingService = InitializeLoggingService();
 
                 // Log deferred messages and response files
@@ -739,25 +741,6 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private void InitializeTelemetry()
-        {
-            OpenTelemetryManager.Instance.Initialize(isStandalone: false);
-            string? failureMessage = OpenTelemetryManager.Instance.LoadFailureExceptionMessage;
-            if (_deferredBuildMessages != null &&
-                failureMessage != null &&
-                _deferredBuildMessages is ICollection<DeferredBuildMessage> deferredBuildMessagesCollection)
-            {
-                deferredBuildMessagesCollection.Add(
-                    new DeferredBuildMessage(
-                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                            "OpenTelemetryLoadFailed",
-                            failureMessage),
-                    MessageImportance.Low));
-
-                // clean up the message from OpenTelemetryManager to avoid double logging it
-                OpenTelemetryManager.Instance.LoadFailureExceptionMessage = null;
-            }
-        }
 
 #if FEATURE_REPORTFILEACCESSES
         /// <summary>
@@ -1129,10 +1112,7 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
-                            if (OpenTelemetryManager.Instance.IsActive())
-                            {
-                                EndBuildTelemetry();
-                            }
+                            EndBuildTelemetry();
 
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
@@ -1176,18 +1156,14 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)] // avoid assembly loads of System.Diagnostics.DiagnosticSource, TODO: when this is agreed to perf-wise enable instrumenting using activities anywhere...
         private void EndBuildTelemetry()
         {
-            OpenTelemetryManager.Instance.DefaultActivitySource?
-                .StartActivity("Build")?
-                .WithTags(_buildTelemetry)
-                .WithTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
-                    includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
-                    includeTargetDetails: false))
-                .WithStartTime(_buildTelemetry!.InnerStartAt)
-                .Dispose();
-            OpenTelemetryManager.Instance.ForceFlush();
+            using IActivity? activity = TelemetryManager.Instance?.DefaultActivitySource
+                ?.StartActivity(TelemetryConstants.Build)
+                ?.SetTags(_buildTelemetry)
+                ?.SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
+                        includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
+                        includeTargetDetails: false));
         }
 
         /// <summary>
@@ -1986,7 +1962,7 @@ namespace Microsoft.Build.Execution
                             projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
                         }
 
-                        return new ProjectInstance(
+                        var projectInstance = new ProjectInstance(
                             path,
                             properties,
                             null,
@@ -2003,6 +1979,11 @@ namespace Microsoft.Build.Execution
                             SdkResolverService,
                             submission.SubmissionId,
                             projectLoadSettings);
+
+                        // Enable full state transfer so out-of-proc nodes don't re-evaluate
+                        projectInstance.TranslateEntireState = true;
+
+                        return projectInstance;
                     });
             }
 
@@ -2308,9 +2289,11 @@ namespace Microsoft.Build.Execution
                 // built on another node (e.g. the project was encountered as a p2p reference and scheduled to a node).
                 // Add a dummy property to force cache invalidation in the scheduler and the nodes.
                 // TODO find a better solution than a dummy property
-                unresolvedConfiguration.CreateUniqueGlobalProperty();
+                // unresolvedConfiguration.CreateUniqueGlobalProperty();
+                Debugger.Launch();
+                resolvedConfiguration.Project = unresolvedConfiguration.Project;
 
-                resolvedConfiguration = AddNewConfiguration(unresolvedConfiguration);
+                // resolvedConfiguration = AddNewConfiguration(unresolvedConfiguration);
             }
 
             return resolvedConfiguration;
@@ -3029,8 +3012,13 @@ namespace Microsoft.Build.Execution
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }
 
+            // respect value coming from environment variable.
+            _buildParameters.IsTelemetryEnabled |= Traits.Instance.TelemetryOptIn;
+
             if (_buildParameters.IsTelemetryEnabled)
             {
+                TelemetryManager.Instance.Initialize(isStandalone: false);
+
                 // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportance.Low is used)
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
                 LoggerDescription forwardingLoggerDescription = new LoggerDescription(
@@ -3040,8 +3028,7 @@ namespace Microsoft.Build.Execution
                     loggerSwitchParameters: null,
                     verbosity: LoggerVerbosity.Quiet);
 
-                _telemetryConsumingLogger =
-                    new InternalTelemetryConsumingLogger();
+                _telemetryConsumingLogger = new InternalTelemetryConsumingLogger();
 
                 ForwardingLoggerRecord[] forwardingLogger = { new ForwardingLoggerRecord(_telemetryConsumingLogger, forwardingLoggerDescription) };
 
@@ -3052,7 +3039,6 @@ namespace Microsoft.Build.Execution
             {
                 loggingService.EnableTargetOutputLogging = true;
             }
-
 
             try
             {
@@ -3264,6 +3250,8 @@ namespace Microsoft.Build.Execution
                     {
                         s_singletonInstance = null;
                     }
+
+                    TelemetryManager.Instance?.Dispose();
 
                     _disposed = true;
                 }
