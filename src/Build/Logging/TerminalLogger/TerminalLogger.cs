@@ -1100,30 +1100,38 @@ public sealed partial class TerminalLogger : INodeLogger
 
             if (hasProject && project!.IsTestProject)
             {
-                var node = _nodes[NodeIndexForContext(buildEventContext)];
+                TerminalNodeStatus? node = _nodes[NodeIndexForContext(buildEventContext)];
 
                 // Consumes test update messages produced by VSTest and MSTest runner.
-                if (node != null && e is IExtendedBuildEventArgs extendedMessage)
+                if (e is IExtendedBuildEventArgs extendedMessage)
                 {
                     switch (extendedMessage.ExtendedType)
                     {
                         case "TLTESTPASSED":
                             {
-                                var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
-                                var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
+                                if (node != null)
+                                {
+                                    var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
+                                    var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Green, indicator, displayName, project.Stopwatch);
-                                UpdateNodeStatus(buildEventContext, status);
+                                    var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Green, indicator, displayName, project.Stopwatch);
+                                    UpdateNodeStatus(buildEventContext, status);
+                                }
+
                                 break;
                             }
 
                         case "TLTESTSKIPPED":
                             {
-                                var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
-                                var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
+                                if (node != null)
+                                {
+                                    var indicator = extendedMessage.ExtendedMetadata!["localizedResult"]!;
+                                    var displayName = extendedMessage.ExtendedMetadata!["displayName"]!;
 
-                                var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
-                                UpdateNodeStatus(buildEventContext, status);
+                                    var status = new TerminalNodeStatus(node.Project, node.TargetFramework, node.RuntimeIdentifier, TerminalColor.Yellow, indicator, displayName, project.Stopwatch);
+                                    UpdateNodeStatus(buildEventContext, status);
+                                }
+
                                 break;
                             }
 
