@@ -124,7 +124,12 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             {
                 dotIndex = visualStudioVersion.Length;
             }
+
+#if NET
+            if (Int32.TryParse(visualStudioVersion.AsSpan(0, dotIndex), out int majorVersion) && (majorVersion < 11))
+#else
             if (Int32.TryParse(visualStudioVersion.Substring(0, dotIndex), out int majorVersion) && (majorVersion < 11))
+#endif
             {
                 visualStudioVersion = BOOTSTRAPPER_REGISTRY_PATH_VERSION_VS2010;
             }

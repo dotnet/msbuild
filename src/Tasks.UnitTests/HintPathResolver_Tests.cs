@@ -8,7 +8,6 @@ using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 

@@ -13,9 +13,14 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
     /// <summary>
     /// Represents messages that occur during the BootstrapperBuilder's Build operation.
     /// </summary>
-    public class BuildMessage : IBuildMessage
+    public partial class BuildMessage : IBuildMessage
     {
-        private static readonly Regex s_msbuildMessageCodePattern = new Regex(@"(\d+)$");
+#if NET
+        [GeneratedRegex(@"\d+$")]
+        private static partial Regex MsbuildMessageCodePattern { get; }
+#else
+        private static Regex MsbuildMessageCodePattern { get; } = new Regex(@"\d+$");
+#endif
 
         private BuildMessage(BuildMessageSeverity severity, string message, string helpKeyword, string helpCode)
         {
@@ -25,7 +30,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             HelpCode = helpCode;
             if (!String.IsNullOrEmpty(HelpCode))
             {
-                Match match = s_msbuildMessageCodePattern.Match(HelpCode);
+                Match match = MsbuildMessageCodePattern.Match(HelpCode);
                 if (match.Success)
                 {
                     HelpId = int.Parse(match.Value, CultureInfo.InvariantCulture);

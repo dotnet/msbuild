@@ -9,7 +9,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
-using Xunit;
 
 #nullable disable
 
@@ -84,6 +83,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Checks if the type difference between left and right exceptions is due to a known type conversion
+        /// during serialization (e.g., experimental types being converted to non-experimental versions).
+        /// https://github.com/dotnet/msbuild/issues/12055
+        /// </summary>
+        private static bool IsKnownMovedType(Exception left, Exception right)
+        {
+            if (left == null || right == null)
+            {
+                return false;
+            }
+
+            // Experimental ProjectCacheException -> ProjectCacheException conversion
+            // This is intentional behavior defined in SerializationContractInitializer.cs
+#pragma warning disable CS0618 // Type or member is obsolete
+            if (left.GetType() == typeof(Experimental.ProjectCache.ProjectCacheException) &&
+                right.GetType() == typeof(ProjectCache.ProjectCacheException))
+#pragma warning restore CS0618 // Type or member is obsolete
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Compares two exceptions.
         /// </summary>
         internal static bool CompareExceptions(Exception left, Exception right, out string diffReason, bool detailed = false)
@@ -117,13 +141,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 diffReason = "Inner exceptions are different: " + diffReason;
                 return false;
             }
-
             if (detailed)
             {
                 if (left.GetType() != right.GetType())
                 {
-                    diffReason = $"Exception types are different ({left.GetType().FullName} vs {right.GetType().FullName}).";
-                    return false;
+                    // Handle known type conversions during serialization
+                    if (!IsKnownMovedType(left, right))
+                    {
+                        diffReason = $"Exception types are different ({left.GetType().FullName} vs {right.GetType().FullName}).";
+                        return false;
+                    }
+                    else
+                    {
+                        // For known moved types, skip detailed property comparison since types are different
+                        // but this is expected behavior - just return true since basic checks passed
+                        return true;
+                    }
                 }
 
                 foreach (var prop in left.GetType().GetProperties())

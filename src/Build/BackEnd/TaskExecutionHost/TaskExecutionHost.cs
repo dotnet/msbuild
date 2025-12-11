@@ -24,6 +24,7 @@ using Microsoft.Build.Shared;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
+using Microsoft.Build.Collections;
 
 #nullable disable
 
@@ -304,7 +305,6 @@ namespace Microsoft.Build.BackEnd
         public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, IDictionary<string, string> taskIdentityParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
-            ErrorUtilities.VerifyThrowArgumentNull(batchBucket);
 
             _taskLoggingContext = loggingContext;
             _batchBucket = batchBucket;
@@ -336,17 +336,43 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            string realTaskAssemblyLoaction = TaskInstance.GetType().Assembly.Location;
-            if (!string.IsNullOrWhiteSpace(realTaskAssemblyLoaction) &&
-                realTaskAssemblyLoaction != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
+            string realTaskAssemblyLocation = TaskInstance.GetType().Assembly.Location;
+
+            // When MSBuild loads a task assembly, it uses Assembly.LoadFrom() with a specific path,
+            // but .NET then loads based on the assembly identity with that path only as a hint.
+            // This can result in the assembly being loaded from a different location than expected:
+            //
+            // 1. Assembly loading from the Global Assembly Cache (GAC) if that assembly version is GACed
+            // 2. Assembly loading from elsewhere if someone already loaded an assembly with the same 
+            //    identity from a different path
+            //
+            // Both scenarios can result in confusing task behavior because you're not loading the 
+            // assembly you intended. MSBuild tells .NET Framework to load a specific assembly,
+            // but .NET Framework may load something else entirely.
+            //
+            // Common example: A NuGet package task that doesn't change its assembly version between 
+            // package versions. When you update the package and build while worker nodes are still 
+            // alive, the task stays loaded from the old version instead of the new one.
+            //
+            // This validation helps identify these scenarios by checking if the loaded assembly 
+            // location matches what we expected, and logging a message when there's a mismatch
+            // to help diagnose confusing task behavior issues.
+            if (!string.IsNullOrWhiteSpace(realTaskAssemblyLocation) && realTaskAssemblyLocation != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
             {
-                _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLoaction, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
+                if (!IsTaskAssemblyMatchFactoryType())
+                {
+                    _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
+                }
             }
 
             TaskInstance.BuildEngine = _buildEngine;
             TaskInstance.HostObject = _taskHost;
 
             return true;
+
+            // Function to validate that if this is a TaskHostTask, the assembly it loaded is the same one we found in the registry.
+            bool IsTaskAssemblyMatchFactoryType() => TaskInstance is not TaskHostTask tht
+                || tht.LoadedTaskAssemblyInfo.AssemblyLocation == _taskFactoryWrapper.TaskFactoryLoadedType.Path;
         }
 
         /// <summary>
@@ -948,7 +974,8 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                         AppDomainSetup,
 #endif
-                        IsOutOfProc);
+                        IsOutOfProc,
+                        ProjectInstance.GetProperty);
                 }
                 else
                 {
@@ -958,6 +985,9 @@ namespace Microsoft.Build.BackEnd
                         task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
                             taskFactory2.CreateTask(loggingHost, taskIdentityParameters) :
                             _taskFactoryWrapper.TaskFactory.CreateTask(loggingHost);
+
+                        // Track telemetry for non-AssemblyTaskFactory task factories. No task can go to the task host.
+                        _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(_taskFactoryWrapper.TaskFactory.GetType().FullName, isTaskHost: false);
                     }
                     finally
                     {
@@ -1225,8 +1255,9 @@ namespace Microsoft.Build.BackEnd
 
             parameter.Initialized = true;
 
-            string taskAndParameterName = _taskName + "_" + parameter.Name;
-            string key = "DisableLogTaskParameter_" + taskAndParameterName;
+            // PERF: Be careful to avoid unnecessary string allocations. Appending '_taskName + "_" + parameter.Name' happens in both paths,
+            // but we don't want to allocate the string if we don't need to.
+            string key = "DisableLogTaskParameter_" + _taskName + "_" + parameter.Name;
 
             if (string.Equals(lookup.GetProperty(key)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
             {
@@ -1234,7 +1265,7 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                string metadataKey = "DisableLogTaskParameterItemMetadata_" + taskAndParameterName;
+                string metadataKey = "DisableLogTaskParameterItemMetadata_" + _taskName + "_" + parameter.Name;
                 if (string.Equals(lookup.GetProperty(metadataKey)?.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
                 {
                     parameter.LogItemMetadata = false;
@@ -1410,8 +1441,19 @@ namespace Microsoft.Build.BackEnd
                                     // Probably a Microsoft.Build.Utilities.TaskItem.  Not quite as good, but we can still preserve escaping.
                                     newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsITaskItem2.EvaluatedIncludeEscaped, parameterLocationEscaped);
 
-                                    // It would be nice to be copy-on-write here, but Utilities.TaskItem doesn't know about CopyOnWritePropertyDictionary.
-                                    newItem.SetMetadataOnTaskOutput(outputAsITaskItem2.CloneCustomMetadataEscaped().Cast<KeyValuePair<string, string>>());
+                                    // If found, directly pass the backing copy-on-write dictionary.
+                                    // Otherwise, retrieve a cloned dictionary from the task item.
+                                    IMetadataContainer outputAsMetadataContainer = output as IMetadataContainer;
+                                    SerializableMetadata backingMetadata = outputAsMetadataContainer?.BackingMetadata ?? default;
+
+                                    if (backingMetadata.HasValue)
+                                    {
+                                        newItem.SetMetadataOnTaskOutput(backingMetadata.Dictionary);
+                                    }
+                                    else
+                                    {
+                                        newItem.SetMetadataOnTaskOutput(outputAsITaskItem2.CloneCustomMetadataEscaped().Cast<KeyValuePair<string, string>>());
+                                    }
                                 }
                                 else
                                 {
@@ -1423,9 +1465,26 @@ namespace Microsoft.Build.BackEnd
 
                                     static IEnumerable<KeyValuePair<string, string>> EnumerateMetadata(IDictionary customMetadata)
                                     {
-                                        foreach (DictionaryEntry de in customMetadata)
+                                        if (customMetadata is CopyOnWriteDictionary<string> copyOnWriteDictionary)
                                         {
-                                            yield return new KeyValuePair<string, string>((string)de.Key, EscapingUtilities.Escape((string)de.Value));
+                                            foreach (KeyValuePair<string, string> kvp in copyOnWriteDictionary)
+                                            {
+                                                yield return new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.Escape(kvp.Value));
+                                            }
+                                        }
+                                        else if (customMetadata is Dictionary<string, string> dictionary)
+                                        {
+                                            foreach (KeyValuePair<string, string> kvp in dictionary)
+                                            {
+                                                yield return new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.Escape(kvp.Value));
+                                            }
+                                        }
+                                        else
+                                        {
+                                            foreach (DictionaryEntry de in customMetadata)
+                                            {
+                                                yield return new KeyValuePair<string, string>((string)de.Key, EscapingUtilities.Escape((string)de.Value));
+                                            }
                                         }
                                     }
                                 }

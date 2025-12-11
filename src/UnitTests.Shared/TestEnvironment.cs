@@ -43,6 +43,22 @@ namespace Microsoft.Build.UnitTests
 
         public TransientTestFolder DefaultTestDirectory => _defaultTestDirectory.Value;
 
+        /// <summary>
+        /// Creates a new test environment with optional configuration for test output handling,
+        /// build error monitoring, and .NET environment setup.
+        /// </summary>
+        /// <param name="output">
+        /// Test output helper for capturing and displaying test output.
+        /// If null, a default output handler is used.
+        /// </param>
+        /// <param name="ignoreBuildErrorFiles">
+        /// When false (default), the test environment monitors for MSBuild error files
+        /// (MSBuild_*.txt) in the temp directory and treats their presence as test failures.
+        /// Set to true to disable this monitoring for tests that expect build failures.
+        /// </param>
+        /// <returns>
+        /// A configured TestEnvironment instance with the specified settings applied.
+        /// </returns>
         public static TestEnvironment Create(ITestOutputHelper output = null, bool ignoreBuildErrorFiles = false)
         {
             var env = new TestEnvironment(output ?? new DefaultOutput());
@@ -323,6 +339,22 @@ namespace Microsoft.Build.UnitTests
             {
                 return (id, callsite, args) => output.WriteLine(PrintLineDebuggerWriters.SimpleFormat(id, callsite, args));
             }
+        }
+
+        /// <summary>
+        /// Gets the original value of an environment variable. Can be needed to assert in a test.
+        /// </summary>
+        public string GetEnvironmentVariable(string variableName)
+        {
+            for (int i = 0; i < _variants.Count; i++)
+            {
+                if (_variants[i] is TransientTestEnvironmentVariable ttev && ttev.EnvironmentVariableName == variableName)
+                {
+                    return ttev.OriginalValue;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
@@ -677,19 +709,16 @@ namespace Microsoft.Build.UnitTests
 
     public class TransientTestFile : TransientTestState
     {
-        private readonly bool _createFile;
         private readonly bool _expectedAsOutput;
 
         public TransientTestFile(string extension, bool createFile, bool expectedAsOutput)
         {
-            _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
             Path = FileUtilities.GetTemporaryFile(null, null, extension, createFile);
         }
 
         public TransientTestFile(string rootPath, string extension, bool createFile, bool expectedAsOutput)
         {
-            _createFile = createFile;
             _expectedAsOutput = expectedAsOutput;
             Path = FileUtilities.GetTemporaryFile(rootPath, null, extension, createFile);
         }
@@ -775,10 +804,11 @@ namespace Microsoft.Build.UnitTests
             Environment.SetEnvironmentVariable(environmentVariableName, newValue);
         }
 
-        public override void Revert()
-        {
-            Environment.SetEnvironmentVariable(_environmentVariableName, _originalValue);
-        }
+        public string EnvironmentVariableName => _environmentVariableName;
+
+        public string OriginalValue => _originalValue;
+
+        public override void Revert() => Environment.SetEnvironmentVariable(_environmentVariableName, _originalValue);
     }
 
     public class TransientWorkingDirectory : TransientTestState
