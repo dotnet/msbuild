@@ -223,6 +223,11 @@ jobs:
           New-Item -Path $parent -ItemType Directory -Force | Out-Null
         }
 
+        if (-not (Test-Path $from)) {
+          Write-Host "Source '$from' does not exist; skipping move for '$path'."
+          continue
+        }
+
         $robocopyResult = & robocopy $from $to /E /MOVE /NFL /NDL /NJH /NJS /NP /MT:8
         $exitCode = $LASTEXITCODE
         if ($exitCode -ge 8) {
@@ -233,6 +238,7 @@ jobs:
 
       $global:LASTEXITCODE = 0
     displayName: 'Move build artifacts into official folder'
+    condition: always()
 
   # Tag the build at the very end when we know it's been successful.
   - task: colinsalmcorner.colinsalmcorner-buildtasks.tag-build-task.tagBuildOrRelease@0
