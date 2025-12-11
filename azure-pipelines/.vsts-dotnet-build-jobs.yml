@@ -197,9 +197,9 @@ jobs:
       }
 
       $paths = @(
+        "log/$(BuildConfiguration)",
         "OptProf/$(BuildConfiguration)/Data",
         "$(Build.StagingDirectory)/MicroBuild/Output",
-        "log/$(BuildConfiguration)",
         "VSSetup/$(BuildConfiguration)",
         "packages/$(BuildConfiguration)",
         "xsd"
