@@ -142,6 +142,7 @@ jobs:
               /p:GenerateSbom=true
               /p:SuppressFinalPackageVersion=${{ parameters.isExperimental }}
               /p:IsExperimental=${{ parameters.isExperimental }}
+              /t:FailImmediately
 
     displayName: Build
     condition: succeeded()
