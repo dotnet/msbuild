@@ -1002,11 +1002,6 @@ Errors: {3}</source>
         <target state="translated">MSB4181: "{0}" タスクから false が返されましたが、エラーがログに記録されませんでした。</target>
         <note>{StrBegin="MSB4181: "}</note>
       </trans-unit>
-      <trans-unit id="TaskRuntimeNET">
-        <source>MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, use "dotnet build" or Visual Studio 2026 or higher.</source>
-        <target state="translated">MSB4233: .NET ランタイムを使用して読み込むためにアセンブリ "{1}" からのタスク "{0}" が指定されましたが、このバージョンの MSBuild では、そのランタイムを使用したタスクの読み込みはサポートされていません。.NET タスクを実行するには、"dotnet build" または Visual Studio 2026 以上を使用してください。</target>
-        <note>{StrBegin="MSB4233: "}{Locked=".NET"}{Locked="dotnet build"}{Locked="Visual Studio 2026"}LOCALIZATION: .NET, dotnet build, and Visual Studio 2026 should not be localized.</note>
-      </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
         <target state="translated">{0}{1} テスト {2} ({3} 秒)</target>

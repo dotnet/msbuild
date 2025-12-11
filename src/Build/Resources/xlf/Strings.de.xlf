@@ -1002,11 +1002,6 @@ Fehler: {3}</target>
         <target state="translated">MSB4181: Die Aufgabe "{0}" hat FALSE zurückgegeben, jedoch keinen Fehler protokolliert.</target>
         <note>{StrBegin="MSB4181: "}</note>
       </trans-unit>
-      <trans-unit id="TaskRuntimeNET">
-        <source>MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, use "dotnet build" or Visual Studio 2026 or higher.</source>
-        <target state="translated">MSB4233: Der Task „{0}“ aus der Assembly „{1}“ wurde zum Laden mit der .NET-Laufzeit angegeben, aber diese Version von MSBuild unterstützt das Laden von Tasks mit dieser Laufzeit nicht. Verwenden Sie „dotnet build“ oder Visual Studio 2026 oder höher, um .NET-Tasks auszuführen.</target>
-        <note>{StrBegin="MSB4233: "}{Locked=".NET"}{Locked="dotnet build"}{Locked="Visual Studio 2026"}LOCALIZATION: .NET, dotnet build, and Visual Studio 2026 should not be localized.</note>
-      </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
         <target state="translated">{0}{1} Test {2} ({3}s)</target>

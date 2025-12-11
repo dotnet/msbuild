@@ -1002,11 +1002,6 @@ Errors: {3}</source>
         <target state="translated">MSB4181: “{0}”任务返回了 false，但未记录错误。</target>
         <note>{StrBegin="MSB4181: "}</note>
       </trans-unit>
-      <trans-unit id="TaskRuntimeNET">
-        <source>MSB4233: The task "{0}" from assembly "{1}" was specified to load with the .NET runtime, but this version of MSBuild does not support loading tasks with that runtime. To run .NET tasks, use "dotnet build" or Visual Studio 2026 or higher.</source>
-        <target state="translated">MSB4233: 已指定程序集 "{1}" 中的任务 "{0}" 使用 .NET 运行时加载，但此版本的 MSBuild 不支持使用该运行时加载任务。若要运行 .NET 任务，请使用 "dotnet build" 或 Visual Studio 2026 或更高版本。</target>
-        <note>{StrBegin="MSB4233: "}{Locked=".NET"}{Locked="dotnet build"}{Locked="Visual Studio 2026"}LOCALIZATION: .NET, dotnet build, and Visual Studio 2026 should not be localized.</note>
-      </trans-unit>
       <trans-unit id="TestProjectFinished_NoTF">
         <source>{0}{1} test {2} ({3}s)</source>
         <target state="translated">{0}{1} 测试 {2} ({3} 秒)</target>
