@@ -81,7 +81,7 @@ namespace Microsoft.Build.Shared
         }
 
 #if NETFRAMEWORK
-        private static readonly string[] _runtimeAssembliesCLR35_20 = FindRuntimeAssembliesWithMicrosoftBuildFrameworkCLR2CLR35();
+        private static readonly Lazy<string[]> runtimeAssembliesCLR35_20 = new Lazy<string[]>(FindRuntimeAssembliesWithMicrosoftBuildFrameworkCLR2CLR35);
 
         /// <summary>
         /// Gathers a list of runtime assemblies for the <see cref="MetadataLoadContext"/>.
@@ -103,7 +103,11 @@ namespace Microsoft.Build.Shared
                 ? Directory.GetFiles(v35Path, "*.dll")
                 : [];
 
-            return [.. clr2Assemblies, .. clr35Assemblies];
+            // Deduplicate: CLR3.5 assemblies take priority over CLR2 assemblies
+            Dictionary<string, string> assembliesDictionary = new(StringComparer.OrdinalIgnoreCase);
+            AddAssembliesToDictionary(assembliesDictionary, clr2Assemblies, clr35Assemblies);
+
+            return [.. assembliesDictionary.Values];
         }
 #endif
 
@@ -260,43 +264,38 @@ namespace Microsoft.Build.Shared
 
             // Deduplicate between MSBuild assemblies and task dependencies.
             Dictionary<string, string> assembliesDictionary = new(localAssemblies.Length + runtimeAssemblies.Length);
-            foreach (string localPath in localAssemblies)
-            {
-                assembliesDictionary[Path.GetFileName(localPath)] = localPath;
-            }
-
-            foreach (string runtimeAssembly in runtimeAssemblies)
-            {
-                assembliesDictionary[Path.GetFileName(runtimeAssembly)] = runtimeAssembly;
-            }
-
-            return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
-
+            AddAssembliesToDictionary(assembliesDictionary, localAssemblies, runtimeAssemblies);
 #else
-           // Merge all assembly tiers into one dictionary with priority:
-            // CLR2 < CLR3.5 < Local < Runtime (later entries overwrite earlier ones)
-            Dictionary<string, string> assembliesDictionary = new(StringComparer.OrdinalIgnoreCase);
+            // Merge all assembly tiers into one dictionary with priority:
+            // deduplicated CLR2 & CLR3.5 < Local < Runtime (later entries overwrite earlier ones)
+            Dictionary<string, string> assembliesDictionary = new(localAssemblies.Length + runtimeAssemblies.Length + runtimeAssembliesCLR35_20.Value.Length);
 
             // Add assemblies in priority order (later entries overwrite earlier ones)
             AddAssembliesToDictionary(
                 assembliesDictionary,
-                _runtimeAssembliesCLR35_20,
+                runtimeAssembliesCLR35_20.Value,
                 localAssemblies,
                 runtimeAssemblies);
-
+#endif
             return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
+        }
 
-            static void AddAssembliesToDictionary(Dictionary<string, string> assembliesDictionary, params string[][] assemblyPathArrays)
+        /// <summary>
+        /// Adds assembly paths to a dictionary, keyed by file name.
+        /// Later arrays in the parameter list take priority over earlier ones,
+        /// as duplicate file names will overwrite existing entries.
+        /// </summary>
+        /// <param name="assembliesDictionary">The dictionary to populate with assembly paths, keyed by file name.</param>
+        /// <param name="assemblyPathArrays">Arrays of assembly file paths to add, in order of increasing priority.</param>
+        private static void AddAssembliesToDictionary(Dictionary<string, string> assembliesDictionary, params string[][] assemblyPathArrays)
+        {
+            foreach (string[] assemblyPaths in assemblyPathArrays)
             {
-                foreach (string[] assemblyPaths in assemblyPathArrays)
+                foreach (string path in assemblyPaths)
                 {
-                    foreach (string path in assemblyPaths)
-                    {
-                        assembliesDictionary[Path.GetFileName(path)] = path;
-                    }
+                    assembliesDictionary[Path.GetFileName(path)] = path;
                 }
             }
-#endif
         }
 
         /// <summary>
