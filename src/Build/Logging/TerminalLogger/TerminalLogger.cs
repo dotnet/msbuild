@@ -845,7 +845,7 @@ public sealed partial class TerminalLogger : INodeLogger
                     _buildErrorsCount += project.ErrorCount;
                     _buildWarningsCount += project.WarningCount;
 
-                    if (_showNodesDisplay)
+                    if (_showNodesDisplay && Verbosity > LoggerVerbosity.Quiet)
                     {
                         DisplayNodes();
                     }

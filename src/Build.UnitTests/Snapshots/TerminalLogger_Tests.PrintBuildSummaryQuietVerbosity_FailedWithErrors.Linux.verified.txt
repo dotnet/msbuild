@@ -7,5 +7,3 @@
       Line
       Warning!
     directory/[1mfile[m(1,2,3,4): [31;1merror[m [31;1mAA0000[m: Error!
-[?25l[1F
-[?25h
