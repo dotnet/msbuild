@@ -109,17 +109,6 @@ namespace Microsoft.Build.Shared
 
             return [.. assembliesDictionary.Values];
         }
-
-        private static void AddAssembliesToDictionary(Dictionary<string, string> assembliesDictionary, params string[][] assemblyPathArrays)
-        {
-            foreach (string[] assemblyPaths in assemblyPathArrays)
-            {
-                foreach (string path in assemblyPaths)
-                {
-                    assembliesDictionary[Path.GetFileName(path)] = path;
-                }
-            }
-        }
 #endif
 
         /// <summary>
@@ -300,19 +289,28 @@ namespace Microsoft.Build.Shared
                 runtimeAssemblies);
 
             return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
-
-            static void AddAssembliesToDictionary(Dictionary<string, string> assembliesDictionary, params string[][] assemblyPathArrays)
-            {
-                foreach (string[] assemblyPaths in assemblyPathArrays)
-                {
-                    foreach (string path in assemblyPaths)
-                    {
-                        assembliesDictionary[Path.GetFileName(path)] = path;
-                    }
-                }
-            }
 #endif
         }
+
+#if NETFRAMEWORK
+        /// <summary>
+        /// Adds assembly paths to a dictionary, keyed by file name.
+        /// Later arrays in the parameter list take priority over earlier ones,
+        /// as duplicate file names will overwrite existing entries.
+        /// </summary>
+        /// <param name="assembliesDictionary">The dictionary to populate with assembly paths, keyed by file name.</param>
+        /// <param name="assemblyPathArrays">Arrays of assembly file paths to add, in order of increasing priority.</param>
+        private static void AddAssembliesToDictionary(Dictionary<string, string> assembliesDictionary, params string[][] assemblyPathArrays)
+        {
+            foreach (string[] assemblyPaths in assemblyPathArrays)
+            {
+                foreach (string path in assemblyPaths)
+                {
+                    assembliesDictionary[Path.GetFileName(path)] = path;
+                }
+            }
+        }
+#endif
 
         /// <summary>
         /// Loads the specified type if it exists in the given assembly. If the type name is fully qualified, then a match (if
