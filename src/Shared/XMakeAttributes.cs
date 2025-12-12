@@ -60,6 +60,7 @@ namespace Microsoft.Build.Shared
         internal const string taskFactory = "TaskFactory";
         internal const string parameterType = "ParameterType";
         internal const string required = "Required";
+        internal const string isPathLike = "IsPathLike";
         internal const string output = "Output";
         internal const string defaultValue = "DefaultValue";
         internal const string evaluate = "Evaluate";

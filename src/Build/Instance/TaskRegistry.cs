@@ -1820,7 +1820,21 @@ namespace Microsoft.Build.Execution
                                 XMakeElements.usingTaskParameter);
                         }
 
-                        UsingTaskParameters.Add(parameter.Name, new TaskPropertyInfo(parameter.Name, paramType, output, required));
+                        bool isPathLike;
+                        string expandedIsPathLike = expander.ExpandIntoStringLeaveEscaped(parameter.IsPathLike, expanderOptions, parameter.IsPathLikeLocation);
+
+                        if (!Boolean.TryParse(expandedIsPathLike, out isPathLike))
+                        {
+                            ProjectErrorUtilities.ThrowInvalidProject(
+                                parameter.IsPathLikeLocation,
+                                "InvalidEvaluatedAttributeValue",
+                                expandedIsPathLike,
+                                parameter.IsPathLike,
+                                XMakeAttributes.isPathLike,
+                                XMakeElements.usingTaskParameter);
+                        }
+
+                        UsingTaskParameters.Add(parameter.Name, new TaskPropertyInfo(parameter.Name, paramType, output, required, isPathLike));
                     }
                 }
 
@@ -1845,6 +1859,7 @@ namespace Microsoft.Build.Execution
                     string propertyTypeName = null;
                     bool output = false;
                     bool required = false;
+                    bool isPathLike = true;
 
                     var writing = translator.Mode == TranslationDirection.WriteToStream;
 
@@ -1854,17 +1869,19 @@ namespace Microsoft.Build.Execution
                         propertyTypeName = taskPropertyInfo.PropertyType.AssemblyQualifiedName;
                         output = taskPropertyInfo.Output;
                         required = taskPropertyInfo.Required;
+                        isPathLike = taskPropertyInfo.IsPathLike;
                     }
 
                     translator.Translate(ref name);
                     translator.Translate(ref output);
                     translator.Translate(ref required);
                     translator.Translate(ref propertyTypeName);
+                    translator.Translate(ref isPathLike);
 
                     if (!writing)
                     {
                         Type propertyType = Type.GetType(propertyTypeName);
-                        taskPropertyInfo = new TaskPropertyInfo(name, propertyType, output, required);
+                        taskPropertyInfo = new TaskPropertyInfo(name, propertyType, output, required, isPathLike);
                     }
                 }
             }

@@ -217,6 +217,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private string[] _stringArrayOutput;
 
         /// <summary>
+        /// The value for the StringOutputNotPath.
+        /// </summary>
+        private string _stringOutputNotPath;
+
+        /// <summary>
+        /// The value for the StringArrayOutputNotPath.
+        /// </summary>
+        private string[] _stringArrayOutputNotPath;
+
+        /// <summary>
         /// The value for the DateTimeOutput.
         /// </summary>
         private DateTime _dateTimeOutput;
@@ -578,6 +588,33 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 _stringArrayOutput = value;
                 _testTaskHost?.ParameterSet("StringArrayParam", value);
+            }
+        }
+
+        
+        /// <summary>
+        /// A string parameter.
+        /// </summary>
+        [NotPathLike]
+        public string StringParamNotPath
+        {
+            set
+            {
+                _stringOutputNotPath = value;
+                _testTaskHost?.ParameterSet("StringParamNotPath", value);
+            }
+        }
+
+        /// <summary>
+        /// A string array parameter that isn't path-like
+        /// </summary>
+        [NotPathLike]
+        public string[] StringArrayParamNotPath
+        {
+            set
+            {
+                _stringArrayOutputNotPath = value;
+                _testTaskHost?.ParameterSet("StringArrayParamNotPath", value);
             }
         }
 
@@ -1309,7 +1346,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         infos[i].Name,
                         infos[i].PropertyType,
                         infos[i].GetCustomAttributes(typeof(OutputAttribute), false).Length > 0,
-                        infos[i].GetCustomAttributes(typeof(RequiredAttribute), false).Length > 0);
+                        infos[i].GetCustomAttributes(typeof(RequiredAttribute), false).Length > 0,
+                        infos[i].GetCustomAttributes(typeof(NotPathLikeAttribute), false).Length == 0);
                 }
 
                 return propertyInfos;

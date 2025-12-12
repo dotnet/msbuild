@@ -53,6 +53,7 @@ namespace Microsoft.Build.Execution
         /// Never null.
         /// </summary>
         private string _itemType;
+        private bool _isFileLike;
 
         /// <summary>
         /// Backing task item holding the other data.
@@ -80,7 +81,7 @@ namespace Microsoft.Build.Execution
         /// Mutability follows the project.
         /// </summary>
         internal ProjectItemInstance(ProjectInstance project, string itemType, string includeEscaped, string includeBeforeWildcardExpansionEscaped, string definingFileEscaped)
-            : this(project, itemType, includeEscaped, includeBeforeWildcardExpansionEscaped, null /* no direct metadata */, null /* need to add item definition metadata */, definingFileEscaped, useItemDefinitionsWithoutModification: false)
+            : this(project, itemType, includeEscaped, includeBeforeWildcardExpansionEscaped, null /* no direct metadata */, null /* need to add item definition metadata */, definingFileEscaped, useItemDefinitionsWithoutModification: false, isFileLike: false)
         {
         }
 
@@ -105,9 +106,10 @@ namespace Microsoft.Build.Execution
             IReadOnlyDictionary<string, string> directMetadata,
             IList<ProjectItemDefinitionInstance> itemDefinitions,
             string definingFileEscaped,
-            bool useItemDefinitionsWithoutModification)
+            bool useItemDefinitionsWithoutModification,
+            bool isFileLike)
         {
-            CommonConstructor(project, itemType, includeEscaped, includeBeforeWildcardExpansionEscaped, directMetadata, itemDefinitions, definingFileEscaped, useItemDefinitionsWithoutModification);
+            CommonConstructor(project, itemType, includeEscaped, includeBeforeWildcardExpansionEscaped, directMetadata, itemDefinitions, definingFileEscaped, useItemDefinitionsWithoutModification, isFileLike: isFileLike);
         }
 
         /// <summary>
@@ -121,7 +123,7 @@ namespace Microsoft.Build.Execution
         /// <remarks>
         /// Not public since the only creation scenario is setting on a project.
         /// </remarks>
-        internal ProjectItemInstance(ProjectInstance project, string itemType, string includeEscaped, IEnumerable<KeyValuePair<string, string>> directMetadata, string definingFileEscaped)
+        internal ProjectItemInstance(ProjectInstance project, string itemType, string includeEscaped, IEnumerable<KeyValuePair<string, string>> directMetadata, string definingFileEscaped, bool isFileLike)
         {
             ImmutableDictionary<string, string> metadata = null;
 
@@ -131,7 +133,7 @@ namespace Microsoft.Build.Execution
                     .SetItems(directMetadata, ProjectMetadataInstance.VerifyThrowReservedName);
             }
 
-            CommonConstructor(project, itemType, includeEscaped, includeEscaped, metadata, null /* need to add item definition metadata */, definingFileEscaped, useItemDefinitionsWithoutModification: false);
+            CommonConstructor(project, itemType, includeEscaped, includeEscaped, metadata, null /* need to add item definition metadata */, definingFileEscaped, useItemDefinitionsWithoutModification: false, isFileLike: isFileLike);
         }
 
         /// <summary>
@@ -732,7 +734,8 @@ namespace Microsoft.Build.Execution
             IReadOnlyDictionary<string, string> directMetadata,
             IList<ProjectItemDefinitionInstance> itemDefinitions,
             string definingFileEscaped,
-            bool useItemDefinitionsWithoutModification)
+            bool useItemDefinitionsWithoutModification,
+            bool isFileLike)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectToUse, "project");
             ErrorUtilities.VerifyThrowArgumentLength(itemTypeToUse, "itemType");
@@ -763,6 +766,7 @@ namespace Microsoft.Build.Execution
 
             _project = projectToUse;
             _itemType = itemTypeToUse;
+            _isFileLike = isFileLike;
             _taskItem = new TaskItem(
                             includeEscaped,
                             includeBeforeWildcardExpansionEscaped,
@@ -770,7 +774,8 @@ namespace Microsoft.Build.Execution
                             inheritedItemDefinitions,
                             _project.Directory,
                             _project.IsImmutable,
-                            definingFileEscaped);
+                            definingFileEscaped,
+                            isFileLike: isFileLike);
         }
 
         /// <summary>
@@ -841,11 +846,13 @@ namespace Microsoft.Build.Execution
             /// </summary>
             private bool _isImmutable;
 
+            private bool _isFileLike;
+
             /// <summary>
             /// Creates an instance of this class given the item-spec.
             /// </summary>
             internal TaskItem(string includeEscaped, string definingFileEscaped)
-                : this(includeEscaped, includeEscaped, null, null, null, immutable: false, definingFileEscaped)
+                : this(includeEscaped, includeEscaped, null, null, null, immutable: false, definingFileEscaped, isFileLike: true)
             {
             }
 
@@ -860,18 +867,20 @@ namespace Microsoft.Build.Execution
                               IList<ProjectItemDefinitionInstance> itemDefinitions,
                               string projectDirectory,
                               bool immutable,
-                              string definingFileEscaped) // the actual project file (or import) that defines this item.
+                              string definingFileEscaped, // the actual project file (or import) that defines this item.
+                              bool isFileLike) 
             {
                 ErrorUtilities.VerifyThrowArgumentLength(includeEscaped);
                 ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped);
 
-                _includeEscaped = FileUtilities.FixFilePath(includeEscaped);
-                _includeBeforeWildcardExpansionEscaped = FileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped);
+                _includeEscaped = isFileLike ? FileUtilities.FixFilePath(includeEscaped) : includeEscaped;
+                _includeBeforeWildcardExpansionEscaped = isFileLike ? FileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped) : includeBeforeWildcardExpansionEscaped;
                 _directMetadata = (directMetadata == null || directMetadata.Count == 0) ? null : directMetadata; // If the metadata was all removed, toss the dictionary
                 _itemDefinitions = itemDefinitions;
                 _projectDirectory = projectDirectory;
                 _isImmutable = immutable;
                 _definingFileEscaped = definingFileEscaped;
+                _isFileLike = isFileLike;
             }
 
             /// <summary>
@@ -894,6 +903,7 @@ namespace Microsoft.Build.Execution
                 source.CopyMetadataTo(this, addOriginalItemSpec);
                 _fullPath = source._fullPath;
                 _definingFileEscaped = source._definingFileEscaped;
+                _isFileLike = source._isFileLike;
             }
 
             /// <summary>
@@ -980,7 +990,15 @@ namespace Microsoft.Build.Execution
                         names.Add(metadatum.Key);
                     }
 
-                    names.AddRange(FileUtilities.ItemSpecModifiers.All);
+                    if (_isFileLike)
+                    {
+                        names.AddRange(FileUtilities.ItemSpecModifiers.All);
+                    }
+                    else
+                    {
+                        // nonfile Items only have an Identity
+                        names.Add(FileUtilities.ItemSpecModifiers.Identity);
+                    }
 
                     return names;
                 }
@@ -2085,7 +2103,22 @@ namespace Microsoft.Build.Execution
 
                 if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name))
                 {
-                    value = BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, name, ref _fullPath);
+                    if (!_isFileLike)
+                    {
+                        if (name.Equals(FileUtilities.ItemSpecModifiers.Identity, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return _includeEscaped;
+                        } 
+                        else
+                        {
+                            // Non-file-like items have no built-in metadata except Identity
+                            return String.Empty;
+                        }
+                    }
+                    else
+                    {
+                        value = BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, name, ref _fullPath);
+                    }
                 }
 
                 return value;
@@ -2266,7 +2299,7 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 public ProjectItemInstance CreateItem(ProjectItemInstance source, string definingProject)
                 {
-                    return CreateItem(source._taskItem.IncludeEscaped, source._taskItem.IncludeBeforeWildcardExpansionEscaped, source, definingProject);
+                    return CreateItem(source._taskItem.IncludeEscaped, source._taskItem.IncludeBeforeWildcardExpansionEscaped, source, definingProject, true);
                 }
 
                 /// <summary>
@@ -2276,7 +2309,7 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 public ProjectItemInstance CreateItem(string includeEscaped, ProjectItemInstance source, string definingProject)
                 {
-                    return CreateItem(includeEscaped, includeEscaped, source, definingProject);
+                    return CreateItem(includeEscaped, includeEscaped, source, definingProject, true);
                 }
 
                 /// <summary>
@@ -2288,6 +2321,18 @@ namespace Microsoft.Build.Execution
                     ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
 
                     return new ProjectItemInstance(_project, ItemType, evaluatedInclude, evaluatedIncludeBeforeWildcardExpansion, definingProject);
+                }
+
+                public ProjectItemInstance CreateNonFileItem(string identity, string definingProject)
+                {
+                    ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
+
+                    return new ProjectItemInstance(_project, ItemType, identity, definingProject);
+                }
+
+                public ProjectItemInstance CreateNonFileItem(string identity, ProjectItemInstance source, string definingProject)
+                {
+                    return CreateItem(identity, identity, source, definingProject, false);
                 }
 
                 /// <summary>
@@ -2312,7 +2357,7 @@ namespace Microsoft.Build.Execution
                 /// <summary>
                 /// Create a ProjectItemInstance from another item, changing the item type and include.
                 /// </summary>
-                private ProjectItemInstance CreateItem(string includeEscaped, string includeBeforeWildcardExpansionEscaped, ProjectItemInstance source, string definingProject)
+                private ProjectItemInstance CreateItem(string includeEscaped, string includeBeforeWildcardExpansionEscaped, ProjectItemInstance source, string definingProject, bool isFileLike)
                 {
                     ErrorUtilities.VerifyThrowInternalLength(ItemType, "ItemType");
                     ErrorUtilities.VerifyThrowInternalNull(source);
@@ -2340,7 +2385,7 @@ namespace Microsoft.Build.Execution
                         itemDefinitionsClone.Add(sourceItemDefinition);
                     }
 
-                    return new ProjectItemInstance(_project, ItemType, includeEscaped, includeBeforeWildcardExpansionEscaped, source._taskItem.DirectMetadata, itemDefinitionsClone, definingProject, useItemDefinitionsWithoutModification: false);
+                    return new ProjectItemInstance(_project, ItemType, includeEscaped, includeBeforeWildcardExpansionEscaped, source._taskItem.DirectMetadata, itemDefinitionsClone, definingProject, useItemDefinitionsWithoutModification: false, isFileLike: isFileLike);
                 }
             }
 
@@ -2456,6 +2501,30 @@ namespace Microsoft.Build.Execution
                 public TaskItem CreateItem(string includeEscaped, string includeBeforeWildcardExpansionEscaped, string definingProject)
                 {
                     return CreateItem(includeEscaped, definingProject);
+                }
+
+                public TaskItem CreateNonFileItem(string identity, string definingProject)
+                {
+                    return new TaskItem(identity, includeBeforeWildcardExpansionEscaped: identity, directMetadata: null, itemDefinitions: null, projectDirectory: null, immutable: false, definingFileEscaped: definingProject, isFileLike: false);
+                }
+
+                public TaskItem CreateNonFileItem(string identity, ProjectItemInstance source, string definingProject)
+                {
+                    TaskItem item = new TaskItem(source);
+                    item.IncludeEscaped = identity;
+                    item._isFileLike = false;
+                    return item;
+                }
+
+                public TaskItem CreateNonFileItem(string identity, ProjectItem source, string definingProject)
+                {
+                    TaskItem item = new TaskItem(identity, identity, null, null, source.Project.DirectoryPath, false, definingProject, isFileLike: false);
+                    item.IncludeEscaped = identity;
+                    foreach (ProjectMetadata metadatum in source.Metadata)
+                    {
+                        item.SetMetadata(metadatum.Name, metadatum.EvaluatedValueEscaped);
+                    }
+                    return item;
                 }
 
                 /// <summary>

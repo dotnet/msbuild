@@ -387,6 +387,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Test that setting a string param sets the correct value.
         /// </summary>
         [Fact]
+        public void TestSetStringParamNotPath()
+        {
+            ValidateTaskParameter("StringParamNotPath", @"s/\r\n|\n|\r/\n/g", @"s/\r\n|\n|\r/\n/g");
+        }
+
+        /// <summary>
+        /// Test that setting a string param sets the correct value.
+        /// </summary>
+        [Fact]
         public void TestSetStringParamOne()
         {
             ValidateTaskParameter("StringParam", "1", "1");

@@ -67,6 +67,7 @@ namespace Microsoft.Build.Tasks
         #region Properties
 
         [Required]
+        [NotPathLike]
         public string Command
         {
             get => _command;
@@ -137,6 +138,7 @@ namespace Microsoft.Build.Tasks
         /// Project visible property specifying the encoding of the captured task standard output stream
         /// </summary>
         [Output]
+        [NotPathLike]
         public string StdOutEncoding
         {
             get => StandardOutputEncoding.EncodingName;
@@ -158,6 +160,7 @@ namespace Microsoft.Build.Tasks
         /// Project visible property specifying the encoding of the captured task standard error stream
         /// </summary>
         [Output]
+        [NotPathLike]
         public string StdErrEncoding
         {
             get => StandardErrorEncoding.EncodingName;
@@ -176,6 +179,7 @@ namespace Microsoft.Build.Tasks
         }
 
         [Output]
+        [NotPathLike]
         public ITaskItem[] Outputs
         {
             get => _outputs ?? Array.Empty<ITaskItem>();

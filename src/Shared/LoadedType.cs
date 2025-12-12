@@ -102,6 +102,7 @@ namespace Microsoft.Build.Shared
             {
                 bool outputAttribute = false;
                 bool requiredAttribute = false;
+                bool notPathLikeAttribute = false;
                 foreach (CustomAttributeData attr in CustomAttributeData.GetCustomAttributes(props[i]))
                 {
                     try
@@ -113,6 +114,10 @@ namespace Microsoft.Build.Shared
                         else if (attr.AttributeType?.Name.Equals(nameof(RequiredAttribute)) == true)
                         {
                             requiredAttribute = true;
+                        }
+                        else if (attr.AttributeType?.Name.Equals(nameof(NotPathLikeAttribute)) == true)
+                        {
+                            notPathLikeAttribute = true;
                         }
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
@@ -148,7 +153,7 @@ namespace Microsoft.Build.Shared
                     // Can't determine assignability, default to false
                 }
 
-                Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, isAssignableToITask);
+                Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, isAssignableToITask, isFileLike: !notPathLikeAttribute);
                 if (loadedViaMetadataLoadContext && PropertyAssemblyQualifiedNames != null)
                 {
                     try

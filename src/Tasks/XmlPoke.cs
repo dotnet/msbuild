@@ -32,16 +32,19 @@ namespace Microsoft.Build.Tasks
         /// The XPath Query.
         /// </summary>
         [Required]
+        [NotPathLike]
         public string Query { get; set; }
 
         /// <summary>
         /// The value to be inserted into the specified location.
         /// </summary>
-        public ITaskItem Value { get; set; }
+        [NotPathLike]
+        public string Value { get; set; }
 
         /// <summary>
         /// The namespaces for XPath query's prefixes.
         /// </summary>
+        [NotPathLike]
         public string Namespaces { get; set; }
 
         #endregion
@@ -55,7 +58,7 @@ namespace Microsoft.Build.Tasks
             if (Value == null)
             {
                 // When Value is null, it means Value is not set or empty. Here we treat them all as empty.
-                Value = new TaskItem(string.Empty);
+                Value = string.Empty;
             }
 
             // Load the XPath Document
@@ -124,12 +127,12 @@ namespace Microsoft.Build.Tasks
                 try
                 {
                     count++;
-                    iter.Current.InnerXml = Value.ItemSpec;
-                    Log.LogMessageFromResources(MessageImportance.Low, "XmlPoke.Replaced", iter.Current.Name, Value.ItemSpec);
+                    iter.Current.InnerXml = Value;
+                    Log.LogMessageFromResources(MessageImportance.Low, "XmlPoke.Replaced", iter.Current.Name, Value);
                 }
                 catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    Log.LogErrorWithCodeFromResources("XmlPoke.PokeError", Value.ItemSpec, e.Message);
+                    Log.LogErrorWithCodeFromResources("XmlPoke.PokeError", Value, e.Message);
                     return false;
                 }
             }

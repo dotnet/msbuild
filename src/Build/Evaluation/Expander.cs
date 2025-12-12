@@ -103,6 +103,11 @@ namespace Microsoft.Build.Evaluation
         LogOnItemMetadataSelfReference = 0x80,
 
         /// <summary>
+        /// When provided, the expander will not attempt to probe string/scalar values and convert/normalize if they look like file paths.
+        /// </summary>
+        DoNotNormalizePathLikeValues = 0x100,
+
+        /// <summary>
         /// Expand only properties and then item lists
         /// </summary>
         ExpandPropertiesAndItems = ExpandProperties | ExpandItems,
@@ -144,12 +149,13 @@ namespace Microsoft.Build.Evaluation
         /// A helper struct wrapping a <see cref="SpanBasedStringBuilder"/> and providing file path conversion
         /// as used in e.g. property expansion.
         /// </summary>
+        /// <param name="shouldNormalizePathLikeValues">Whether or not to expand and normalize segments that appear to be paths</param>
         /// <remarks>
         /// If exactly one value is added and no concatenation takes places, this value is returned without
         /// conversion. In other cases values are stringified and attempted to be interpreted as file paths
         /// before concatenation.
         /// </remarks>
-        private struct SpanBasedConcatenator : IDisposable
+        private struct SpanBasedConcatenator(bool shouldNormalizePathLikeValues = true) : IDisposable
         {
             /// <summary>
             /// The backing <see cref="SpanBasedStringBuilder"/>, null until the second value is added.
@@ -183,7 +189,7 @@ namespace Microsoft.Build.Evaluation
                 FlushFirstValueIfNeeded();
                 if (_builder != null)
                 {
-                    _builder.Append(FileUtilities.MaybeAdjustFilePath(obj.ToString()));
+                    AppendAndNormalizeIfNecessary(obj.ToString());
                 }
                 else
                 {
@@ -200,7 +206,7 @@ namespace Microsoft.Build.Evaluation
                 FlushFirstValueIfNeeded();
                 if (_builder != null)
                 {
-                    _builder.Append(FileUtilities.MaybeAdjustFilePath(span));
+                    AppendAndNormalizeIfNecessary(span);
                 }
                 else
                 {
@@ -215,18 +221,21 @@ namespace Microsoft.Build.Evaluation
             /// If only one value has been added and it is not a string, it is returned unchanged.
             /// In all other cases (no value, one string value, multiple values) the result is a
             /// concatenation of the string representation of the values, each additionally subjected
-            /// to file path adjustment.
+            /// to file path adjustment if the SpanBasedConcatenator was created with shouldNormalizePathLikeValues set to true.
             /// </returns>
             public readonly object GetResult()
             {
                 CheckDisposed();
                 if (_firstObject != null)
                 {
-                    return (_firstObject is string stringValue) ? FileUtilities.MaybeAdjustFilePath(stringValue) : _firstObject;
+                    return (_firstObject is string stringValue)
+                        ? (shouldNormalizePathLikeValues ? FileUtilities.MaybeAdjustFilePath(stringValue) : stringValue)
+                        : _firstObject;
                 }
+
                 return _firstSpan.IsEmpty
                     ? _builder?.ToString() ?? string.Empty
-                    : FileUtilities.MaybeAdjustFilePath(_firstSpan).ToString();
+                    : (shouldNormalizePathLikeValues ? FileUtilities.MaybeAdjustFilePath(_firstSpan).ToString() : _firstSpan.ToString());
             }
 
             /// <summary>
@@ -237,6 +246,30 @@ namespace Microsoft.Build.Evaluation
                 CheckDisposed();
                 _builder?.Dispose();
                 _disposed = true;
+            }
+
+            private void AppendAndNormalizeIfNecessary(string value)
+            {
+                if (shouldNormalizePathLikeValues)
+                {
+                    _builder.Append(FileUtilities.MaybeAdjustFilePath(value));
+                }
+                else
+                {
+                    _builder.Append(value);
+                }
+            }
+
+            private void AppendAndNormalizeIfNecessary(ReadOnlyMemory<char> value)
+            {
+                if (shouldNormalizePathLikeValues)
+                {
+                    _builder.Append(FileUtilities.MaybeAdjustFilePath(value));
+                }
+                else
+                {
+                    _builder.Append(value);
+                }
             }
 
             /// <summary>
@@ -254,16 +287,16 @@ namespace Microsoft.Build.Evaluation
                 if (_firstObject != null)
                 {
                     _builder = Strings.GetSpanBasedStringBuilder();
-                    _builder.Append(FileUtilities.MaybeAdjustFilePath(_firstObject.ToString()));
+                    AppendAndNormalizeIfNecessary(_firstObject.ToString());
                     _firstObject = null;
                 }
                 else if (!_firstSpan.IsEmpty)
                 {
                     _builder = Strings.GetSpanBasedStringBuilder();
 #if FEATURE_SPAN
-                    _builder.Append(FileUtilities.MaybeAdjustFilePath(_firstSpan));
+                    AppendAndNormalizeIfNecessary(_firstSpan);
 #else
-                    _builder.Append(FileUtilities.MaybeAdjustFilePath(_firstSpan.ToString()));
+                    AppendAndNormalizeIfNecessary(_firstSpan.ToString());
 #endif
                     _firstSpan = new ReadOnlyMemory<char>();
                 }
@@ -495,8 +528,8 @@ namespace Microsoft.Build.Evaluation
 
             string result = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation, _loggingContext);
             result = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(result, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
-            result = ItemExpander.ExpandItemVectorsIntoString<I>(this, result, _items, options, elementLocation);
-            result = FileUtilities.MaybeAdjustFilePath(result);
+            result = ItemExpander.ExpandItemVectorsIntoString(this, result, _items, options, elementLocation);
+            result = (options & ExpanderOptions.DoNotNormalizePathLikeValues) == ExpanderOptions.DoNotNormalizePathLikeValues ? result : FileUtilities.MaybeAdjustFilePath(result);
 
             return result;
         }
@@ -564,7 +597,7 @@ namespace Microsoft.Build.Evaluation
 
             expression = MetadataExpander.ExpandMetadataLeaveEscaped(expression, _metadata, options, elementLocation);
             expression = PropertyExpander<P>.ExpandPropertiesLeaveEscaped(expression, _properties, options, elementLocation, _propertiesUseTracker, _fileSystem);
-            expression = FileUtilities.MaybeAdjustFilePath(expression);
+            expression = (options & ExpanderOptions.DoNotNormalizePathLikeValues) == ExpanderOptions.DoNotNormalizePathLikeValues ? expression : FileUtilities.MaybeAdjustFilePath(expression);
 
             List<T> result = new List<T>();
 
@@ -1294,7 +1327,7 @@ namespace Microsoft.Build.Evaluation
                 // so that we can either maintain the object's type in the event
                 // that we have a single component, or convert to a string
                 // if concatenation is required.
-                using Expander<P, I>.SpanBasedConcatenator results = new Expander<P, I>.SpanBasedConcatenator();
+                using SpanBasedConcatenator results = new SpanBasedConcatenator(shouldNormalizePathLikeValues: (options & ExpanderOptions.DoNotNormalizePathLikeValues) == 0);
 
                 // The sourceIndex is the zero-based index into the expression,
                 // where we've essentially read up to and copied into the target string.
@@ -2157,7 +2190,15 @@ namespace Microsoft.Build.Evaluation
 
                     if (expandedItemVector.Length > 0)
                     {
-                        T newItem = itemFactory.CreateItem(expandedItemVector, elementLocation.File);
+                        T newItem;
+                        if ((options & ExpanderOptions.DoNotNormalizePathLikeValues) == ExpanderOptions.DoNotNormalizePathLikeValues)
+                        {
+                            newItem = itemFactory.CreateNonFileItem(expandedItemVector, elementLocation.File);
+                        }
+                        else
+                        {
+                            newItem = itemFactory.CreateItem(expandedItemVector, elementLocation.File);
+                        }
 
                         result = [newItem];
                     }

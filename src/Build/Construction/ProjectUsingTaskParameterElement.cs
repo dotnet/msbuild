@@ -133,6 +133,23 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
+        /// Gets or sets the IsPathLike attribute
+        /// </summary>
+        public string IsPathLike
+        {
+            get
+            {
+                string isPathLikeAttribute = GetAttributeValue(XMakeAttributes.isPathLike);
+                return String.IsNullOrEmpty(isPathLikeAttribute) ? bool.TrueString : isPathLikeAttribute; // we default to true for back-compat
+            }
+
+            set
+            {
+                SetOrRemoveAttribute(XMakeAttributes.isPathLike, value, "Set usingtaskparameter IsPathLike {0}", value);
+            }
+        }
+
+        /// <summary>
         /// This does not allow conditions, so it should not be called.
         /// </summary>
         public override ElementLocation ConditionLocation
@@ -164,6 +181,8 @@ namespace Microsoft.Build.Construction
         /// in lieu of the default value it uses for the attribute.
         /// </summary>
         public ElementLocation RequiredLocation => GetAttributeLocation(XMakeAttributes.required) ?? Location;
+
+        public ElementLocation IsPathLikeLocation => GetAttributeLocation(XMakeAttributes.isPathLike) ?? Location;
 
         /// <summary>
         /// Creates an unparented UsingTaskParameterElement, wrapping an unparented XmlElement.

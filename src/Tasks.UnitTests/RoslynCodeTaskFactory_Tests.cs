@@ -363,11 +363,11 @@ Log.LogError(Class1.ToPrint());
         {
             ICollection<TaskPropertyInfo> parameters = new List<TaskPropertyInfo>
             {
-                new TaskPropertyInfo("Parameter1", typeof(string), output: false, required: true),
-                new TaskPropertyInfo("Parameter2", typeof(string), output: true, required: false),
-                new TaskPropertyInfo("Parameter3", typeof(string), output: true, required: true),
-                new TaskPropertyInfo("Parameter4", typeof(ITaskItem), output: false, required: false),
-                new TaskPropertyInfo("Parameter5", typeof(ITaskItem[]), output: false, required: false),
+                new TaskPropertyInfo("Parameter1", typeof(string), output: false, required: true, isPathLike: true),
+                new TaskPropertyInfo("Parameter2", typeof(string), output: true, required: false, isPathLike: true),
+                new TaskPropertyInfo("Parameter3", typeof(string), output: true, required: true, isPathLike: true),
+                new TaskPropertyInfo("Parameter4", typeof(ITaskItem), output: false, required: false, isPathLike: true),
+                new TaskPropertyInfo("Parameter5", typeof(ITaskItem[]), output: false, required: false, isPathLike: true),
             };
 
             const string fragment = @"Dim x = 0";
@@ -472,11 +472,11 @@ Log.LogError(Class1.ToPrint());
         {
             ICollection<TaskPropertyInfo> parameters = new List<TaskPropertyInfo>
             {
-                new TaskPropertyInfo("Parameter1", typeof(string), output: false, required: true),
-                new TaskPropertyInfo("Parameter2", typeof(string), output: true, required: false),
-                new TaskPropertyInfo("Parameter3", typeof(string), output: true, required: true),
-                new TaskPropertyInfo("Parameter4", typeof(ITaskItem), output: false, required: false),
-                new TaskPropertyInfo("Parameter5", typeof(ITaskItem[]), output: false, required: false),
+                new TaskPropertyInfo("Parameter1", typeof(string), output: false, required: true, isPathLike: true),
+                new TaskPropertyInfo("Parameter2", typeof(string), output: true, required: false, isPathLike: true),
+                new TaskPropertyInfo("Parameter3", typeof(string), output: true, required: true, isPathLike: true),
+                new TaskPropertyInfo("Parameter4", typeof(ITaskItem), output: false, required: false, isPathLike: true),
+                new TaskPropertyInfo("Parameter5", typeof(ITaskItem[]), output: false, required: false, isPathLike: true),
             };
 
             const string fragment = @"int x = 0;";

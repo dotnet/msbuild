@@ -203,7 +203,8 @@ namespace Microsoft.Build.Tasks
                             i.Name,
                             i.PropertyType,
                             i.GetCustomAttribute<OutputAttribute>() != null,
-                            i.GetCustomAttribute<RequiredAttribute>() != null))
+                            i.GetCustomAttribute<RequiredAttribute>() != null,
+                            i.GetCustomAttribute<NotPathLikeAttribute>() == null))
                         .ToArray();
                 }
             }

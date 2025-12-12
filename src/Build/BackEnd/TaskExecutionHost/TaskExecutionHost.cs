@@ -1217,7 +1217,12 @@ namespace Microsoft.Build.BackEnd
                 {
                     // We don't know how many items we're going to end up with, but we'll
                     // keep adding them to this arraylist as we find them.
-                    IList<TaskItem> finalTaskItems = _batchBucket.Expander.ExpandIntoTaskItemsLeaveEscaped(parameterValue, ExpanderOptions.ExpandAll, parameterLocation);
+                    ExpanderOptions expanderOptions = ExpanderOptions.ExpandAll;
+                    if (!parameter.IsPathLike)
+                    {
+                        expanderOptions |= ExpanderOptions.DoNotNormalizePathLikeValues;
+                    }
+                    IList<TaskItem> finalTaskItems = _batchBucket.Expander.ExpandIntoTaskItemsLeaveEscaped(parameterValue, expanderOptions, parameterLocation);
 
                     if (finalTaskItems.Count == 0)
                     {
@@ -1233,7 +1238,7 @@ namespace Microsoft.Build.BackEnd
                             ProjectErrorUtilities.ThrowInvalidProject(
                                 parameterLocation,
                                 "CannotPassMultipleItemsIntoScalarParameter",
-                                _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation),
+                                _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, expanderOptions, parameterLocation),
                                 parameter.Name,
                                 parameterType.FullName,
                                 _taskName);
@@ -1249,7 +1254,13 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     // Expand out all the metadata, properties, and item vectors in the string.
-                    string expandedParameterValue = _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation);
+                    ExpanderOptions expanderOptions = ExpanderOptions.ExpandAll;
+                    if (!parameter.IsPathLike)
+                    {
+                        expanderOptions |= ExpanderOptions.DoNotNormalizePathLikeValues;
+                    }
+
+                    string expandedParameterValue = _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, expanderOptions, parameterLocation);
 
                     if (expandedParameterValue.Length == 0)
                     {

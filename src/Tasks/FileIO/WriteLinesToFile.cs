@@ -31,7 +31,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Write each item as a line in the file.
         /// </summary>
-        public ITaskItem[] Lines { get; set; }
+        [NotPathLike]
+        public string[] Lines { get; set; }
 
         /// <summary>
         /// If true, overwrite any existing file contents.
@@ -41,6 +42,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Encoding to be used.
         /// </summary>
+        [NotPathLike]
         public string Encoding { get; set; }
 
         /// <summary>
@@ -78,9 +80,9 @@ namespace Microsoft.Build.Tasks
             {
                 StringBuilder buffer = new StringBuilder(capacity: Lines.Length * 64);
 
-                foreach (ITaskItem line in Lines)
+                foreach (string line in Lines)
                 {
-                    buffer.AppendLine(line.ItemSpec);
+                    buffer.AppendLine(line);
                 }
 
                 contentsAsString = buffer.ToString();

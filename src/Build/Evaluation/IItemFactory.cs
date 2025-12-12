@@ -65,6 +65,23 @@ namespace Microsoft.Build.Evaluation
         T CreateItem(string include, string includeBeforeWildcardExpansion, string definingProject);
 
         /// <summary>
+        /// Creates a non-file item with the specified identity and defining project.
+        /// </summary>
+        /// <param name="identity"></param>
+        /// <param name="definingProject"></param>
+        /// <returns></returns>
+        T CreateNonFileItem(string identity, string definingProject);
+
+        /// <summary>
+        /// Creates a non-file item with the specified identity and defining project.
+        /// </summary>
+        /// <param name="identity"></param>
+        /// <param name="baseItem"></param>
+        /// <param name="definingProject"></param>
+        /// <returns></returns>
+        T CreateNonFileItem(string identity, S baseItem, string definingProject);
+
+        /// <summary>
         /// Applies the supplied metadata to the destination items.
         /// </summary>
         void SetMetadata(IEnumerable<KeyValuePair<ProjectMetadataElement, string>> metadata, IEnumerable<T> destinationItems);
