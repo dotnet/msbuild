@@ -52,11 +52,11 @@ namespace Microsoft.Build.Shared
                     string projectGuid = xmlElement.GetAttribute(ProjectAttribute);
                     string projectAbsolutePath = xmlElement.GetAttribute(AbsolutePathAttribute);
 
-                    // What we really want here is the normalized path, like we'd get with an item's "FullPath" metadata.  However, 
-                    // if there's some bogus full path in the solution configuration (e.g. a website with a "full path" of c:\solutiondirectory\http://localhost) 
-                    // we do NOT want to throw -- chances are extremely high that that's information that will never actually be used.  So resolve the full path 
-                    // but just swallow any IO-related exceptions that result.  If the path is bogus, the method will return null, so we'll just quietly fail 
-                    // to cache it below. 
+                    // What we really want here is the normalized path, like we'd get with an item's "FullPath" metadata.  However,
+                    // if there's some bogus full path in the solution configuration (e.g. a website with a "full path" of c:\solutiondirectory\http://localhost)
+                    // we do NOT want to throw -- chances are extremely high that that's information that will never actually be used.  So resolve the full path
+                    // but just swallow any IO-related exceptions that result.  If the path is bogus, the method will return null, so we'll just quietly fail
+                    // to cache it below.
                     projectAbsolutePath = FileUtilities.GetFullPathNoThrow(projectAbsolutePath);
 
                     if (!string.IsNullOrEmpty(projectGuid))

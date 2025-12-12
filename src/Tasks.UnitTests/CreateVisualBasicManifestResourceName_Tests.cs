@@ -41,8 +41,8 @@ namespace Microsoft.Build.UnitTests
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream(
 @"
-Namespace Nested.TestNamespace 
-    Class TestClass 
+Namespace Nested.TestNamespace
+    Class TestClass
     End Class
 End Namespace
 "),
@@ -67,8 +67,8 @@ End Namespace
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream(
 @"
-Namespace TestNamespace 
-    Class TestClass 
+Namespace TestNamespace
+    Class TestClass
     End Class
 End Namespace
 "),
@@ -93,8 +93,8 @@ End Namespace
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream(
 @"
-Namespace Nested.TestNamespace 
-    Class TestClass 
+Namespace Nested.TestNamespace
+    Class TestClass
     End Class
 End Namespace
 "),
@@ -119,8 +119,8 @@ End Namespace
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream(
 @"
-Namespace Nested.TestNamespace 
-    Class TestClass 
+Namespace Nested.TestNamespace
+    Class TestClass
     End Class
 End Namespace
 "),
@@ -146,8 +146,8 @@ End Namespace
                     culture: "en-GB",
                     binaryStream: StreamHelpers.StringToStream(
 @"
-Namespace Nested.TestNamespace 
-    Class TestClass 
+Namespace Nested.TestNamespace
+    Class TestClass
     End Class
 End Namespace
 "),
@@ -172,8 +172,8 @@ End Namespace
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream(
 @"
-Namespace Nested.TestNamespace 
-    Class TestClass 
+Namespace Nested.TestNamespace
+    Class TestClass
     End Class
 End Namespace
 "),
@@ -198,8 +198,8 @@ End Namespace
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream(
 @"
-Namespace Nested.TestNamespace 
-    Class TestClass 
+Namespace Nested.TestNamespace
+    Class TestClass
     End Class
 End Namespace
 "),
@@ -417,8 +417,8 @@ End Namespace");
             {
                 return StreamHelpers.StringToStream(
 @"
-Namespace Nested.TestNamespace 
-    Class TestClass 
+Namespace Nested.TestNamespace
+    Class TestClass
     End Class
 End Namespace
 ");
@@ -454,7 +454,7 @@ End Namespace
                     culture: null,
                     binaryStream: StreamHelpers.StringToStream(
 @"
-    Class MyForm 
+    Class MyForm
     End Class
 "),
                     log: null);
@@ -492,8 +492,8 @@ Namespace ClassLibrary1
 Namespace ClassLibrary2
 #else
 Namespace ClassLibrary3
-#end if 
-    Class MyForm 
+#end if
+    Class MyForm
     End Class
 End Namespace
 "),

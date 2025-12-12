@@ -31,8 +31,8 @@ namespace Microsoft.Build.BackEnd
         /// being actively built by the engine - i.e. it has a running task thread.  All other requests
         /// must be in one of the other states.  When in this state, the outstandingRequest and
         /// receivedResult members must be null.
-        /// 
-        /// Transitions: 
+        ///
+        /// Transitions:
         ///     Waiting:  When an msbuild callback is made the active build request needs to wait
         ///               for the results in order to continue to process.
         ///     Complete: The build request has generated all of the required results.
@@ -41,21 +41,21 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// This state means the node has received all of the results needed to continue processing this
-        /// request.  When this state is set, the receivedResult member of this entry must be non-null.  
+        /// request.  When this state is set, the receivedResult member of this entry must be non-null.
         /// The request engine can continue it at some later point when it is no longer busy.
         /// Any number of entries may be in this state.
-        /// 
+        ///
         /// Transitions:
         ///         Active: The build request engine picks this ready request to process.
         /// </summary>
         Ready,
 
         /// <summary>
-        /// This state means the node is waiting for results from outstanding build requests.  When this 
-        /// state is set, the outstandingRequest or outstandingConfiguration members of the entry 
+        /// This state means the node is waiting for results from outstanding build requests.  When this
+        /// state is set, the outstandingRequest or outstandingConfiguration members of the entry
         /// must be non-null.
-        /// 
-        /// Transitions: 
+        ///
+        /// Transitions:
         ///           Ready: All of the results which caused the build request to wait have been received
         /// </summary>
         Waiting,
@@ -63,7 +63,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// This state means the request has completed and results are available.  The engine will remove
         /// the request from the list and the results will be returned to the node for processing.
-        /// 
+        ///
         /// Transitions: None, this is the final state of the build request
         /// </summary>
         Complete
@@ -342,7 +342,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     _outstandingRequests.Remove(result.NodeRequestId);
 
-                    // If we wish to implement behavior where we stop building after the first failing request, then check for 
+                    // If we wish to implement behavior where we stop building after the first failing request, then check for
                     // overall results being failure rather than just circular dependency. Sync with BasicScheduler.ReportResult and
                     // BasicScheduler.ReportRequestBlocked.
                     if (result.CircularDependency || (_outstandingRequests.Count == 0 && (_unresolvedConfigurations == null || _unresolvedConfigurations.Count == 0)))
@@ -475,7 +475,7 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrow(Result == null, "Entry already Completed.");
 
                 // If this request is determined to be a success, then all outstanding items must have been taken care of
-                // and it must be in the correct state.  It can complete unsuccessfully for a variety of reasons in a variety 
+                // and it must be in the correct state.  It can complete unsuccessfully for a variety of reasons in a variety
                 // of states.
                 if (result.OverallResult == BuildResultCode.Success)
                 {

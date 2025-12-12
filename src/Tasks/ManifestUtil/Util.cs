@@ -599,7 +599,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return path;
         }
 
-        #region ItemComparer 
+        #region ItemComparer
         private static readonly ItemComparer s_itemComparer = new ItemComparer();
         private class ItemComparer : IComparer
         {

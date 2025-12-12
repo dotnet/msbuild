@@ -173,7 +173,7 @@ namespace Microsoft.Build.BuildEngine
         /// <remarks>
         /// Only used by ItemDefinitionLibrary -- private and nested inside it as no other class should know about this.
         /// Since at present this has no OM or editing support, and is not passed around,
-        /// there are currently no separate classes for the child tags, and no separate BuildItemDefinitionGroup class. 
+        /// there are currently no separate classes for the child tags, and no separate BuildItemDefinitionGroup class.
         /// They can be broken out in future if necessary.
         /// </remarks>
         private class BuildItemDefinitionGroupXml
@@ -211,7 +211,7 @@ namespace Microsoft.Build.BuildEngine
             #region Public Methods
 
             /// <summary>
-            /// Given the properties and dictionary of previously encountered item definitions, evaluates 
+            /// Given the properties and dictionary of previously encountered item definitions, evaluates
             /// this group of item definitions and adds to the dictionary as necessary.
             /// </summary>
             /// <exception cref="InvalidProjectFileException">If the item definitions are incorrectly defined</exception>
@@ -233,7 +233,7 @@ namespace Microsoft.Build.BuildEngine
             }
 
             /// <summary>
-            /// Given the properties and dictionary of previously encountered item definitions, evaluates 
+            /// Given the properties and dictionary of previously encountered item definitions, evaluates
             /// this specific item definition element and adds to the dictionary as necessary.
             /// </summary>
             /// <exception cref="InvalidProjectFileException">If the item definition is incorrectly defined</exception>
@@ -264,7 +264,7 @@ namespace Microsoft.Build.BuildEngine
             }
 
             /// <summary>
-            /// Given the properties and dictionary of previously encountered item definitions, evaluates 
+            /// Given the properties and dictionary of previously encountered item definitions, evaluates
             /// this specific item definition child element and adds to the dictionary as necessary.
             /// </summary>
             /// <exception cref="InvalidProjectFileException">If the item definition is incorrectly defined</exception>
@@ -303,7 +303,7 @@ namespace Microsoft.Build.BuildEngine
                     itemDefinitionsDictionary.Add(itemType, metadataDictionary);
                 }
 
-                // We only store the evaluated value; build items store the unevaluated value as well, but apparently only to 
+                // We only store the evaluated value; build items store the unevaluated value as well, but apparently only to
                 // gather recursive portions (its re-evaluation always goes back to the XML).
                 // Overwrite any existing default value for this particular metadata
                 metadataDictionary[itemDefinitionChildElement.Name] = evaluatedMetadataValue;

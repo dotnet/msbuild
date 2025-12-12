@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// If an item has a "DependentUpon" who's base name matches exactly, then just assume this
-        /// is a resource and form that happen to have an embedded culture. That is, don't assign a 
+        /// is a resource and form that happen to have an embedded culture. That is, don't assign a
         /// culture to these.
         /// </summary>
         [Fact]

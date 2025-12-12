@@ -22,7 +22,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  InnerText
-         * 
+         *
          * Get or set the InnerText for this token
          */
         internal string InnerText
@@ -33,7 +33,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  Line
-         * 
+         *
          * Get or set the Line for this token
          */
         internal int Line
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Shared.LanguageParser
 
         /*
          * Method:  EqualsIgnoreCase
-         * 
+         *
          * Return true if the given string equals the content of this token
          */
         internal bool EqualsIgnoreCase(string compareTo)

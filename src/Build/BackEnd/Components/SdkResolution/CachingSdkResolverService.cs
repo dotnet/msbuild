@@ -41,7 +41,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             bool wasResultCached = true;
 
-            MSBuildEventSource.Log.CachedSdkResolverServiceResolveSdkStart(sdk.Name, solutionPath, projectPath);
+            MSBuildEventSource.Log.CachedSdkResolverServiceResolveSdkStart(sdk.Name, solutionPath ?? string.Empty, projectPath ?? string.Empty);
 
             if (Traits.Instance.EscapeHatches.DisableSdkResolutionCache)
             {
@@ -79,7 +79,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 loggingContext.LogWarning(null, new BuildEventFileInfo(sdkReferenceLocation), "ReferencingMultipleVersionsOfTheSameSdk", sdk.Name, result.Version, result.ElementLocation, sdk.Version);
             }
 
-            MSBuildEventSource.Log.CachedSdkResolverServiceResolveSdkStop(sdk.Name, solutionPath, projectPath, result.Success, wasResultCached);
+            MSBuildEventSource.Log.CachedSdkResolverServiceResolveSdkStop(sdk.Name, solutionPath ?? string.Empty, projectPath ?? string.Empty, result.Success, wasResultCached);
 
             return result;
         }

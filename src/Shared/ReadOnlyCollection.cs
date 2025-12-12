@@ -29,9 +29,9 @@ namespace Microsoft.Build.Collections
         private IEnumerable<T> _backing;
 
         /// <summary>
-        /// Construct a read only wrapper around the current contents 
-        /// of the IEnumerable, or around the backing collection if the 
-        /// IEnumerable is in fact a collection. 
+        /// Construct a read only wrapper around the current contents
+        /// of the IEnumerable, or around the backing collection if the
+        /// IEnumerable is in fact a collection.
         /// </summary>
         internal ReadOnlyCollection(IEnumerable<T> backing)
         {
@@ -114,8 +114,8 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Contains(T item)
         {
-            // UNDONE: IEnumerable.Contains<T>() does the ICollection check, 
-            // so we could just use IEnumerable.Contains<T>() here.  
+            // UNDONE: IEnumerable.Contains<T>() does the ICollection check,
+            // so we could just use IEnumerable.Contains<T>() here.
             if (!(_backing is ICollection<T>))
             {
                 return _backing.Contains<T>(item);

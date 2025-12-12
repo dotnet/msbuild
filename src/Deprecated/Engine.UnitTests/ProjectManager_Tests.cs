@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests
     public class ProjectManager_Tests
     {
         /// <summary>
-        /// Add a project to the ProjectManager, and try to get it back out using the 
+        /// Add a project to the ProjectManager, and try to get it back out using the
         /// correct set of search criteria.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -37,7 +37,7 @@ namespace Microsoft.Build.UnitTests
             // Instantiate new project manager.
             ProjectManager projectManager = new ProjectManager();
 
-            // Set up variables that represent the information we would be getting from 
+            // Set up variables that represent the information we would be getting from
             // the "MSBuild" task.
             string fullPath = @"c:\rajeev\temp\myapp.proj";
             BuildPropertyGroup globalProperties = new BuildPropertyGroup();
@@ -56,7 +56,7 @@ namespace Microsoft.Build.UnitTests
             // and make sure we get back the same project we added.
             Assertion.AssertEquals(project1, projectManager.GetProject(fullPath, globalProperties, null));
         }
-        
+
         /// <summary>
         /// Verify project manager does not insert duplicates into project table.
         /// </summary>
@@ -128,7 +128,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Add a project to the ProjectManager, and try to get it back out using the 
+        /// Add a project to the ProjectManager, and try to get it back out using the
         /// wrong set of search criteria (different set of global properties).
         /// </summary>
         /// <owner>RGoel</owner>
@@ -141,7 +141,7 @@ namespace Microsoft.Build.UnitTests
             // Instantiate new project manager.
             ProjectManager projectManager = new ProjectManager();
 
-            // Set up variables that represent the information we would be getting from 
+            // Set up variables that represent the information we would be getting from
             // the "MSBuild" task.
             string fullPath = @"c:\rajeev\temp\myapp.proj";
             BuildPropertyGroup globalProperties = new BuildPropertyGroup();
@@ -163,7 +163,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Add a project to the ProjectManager, and try to get it back out using the 
+        /// Add a project to the ProjectManager, and try to get it back out using the
         /// wrong set of search criteria (different full path).
         /// </summary>
         /// <owner>RGoel</owner>
@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests
             // Instantiate new project manager.
             ProjectManager projectManager = new ProjectManager();
 
-            // Set up variables that represent the information we would be getting from 
+            // Set up variables that represent the information we would be getting from
             // the "MSBuild" task.
             BuildPropertyGroup globalProperties = new BuildPropertyGroup();
             globalProperties.SetProperty("Configuration", "Release");

@@ -203,7 +203,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             // <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
             //      <!--
             //          UAC Manifest Options
-            //          If you want to change the Windows User Account Control level replace the 
+            //          If you want to change the Windows User Account Control level replace the
             //          requestedExecutionLevel node with one of the following .
             //          <requestedExecutionLevel  level="asInvoker" />
             //          <requestedExecutionLevel  level="requireAdministrator" />
@@ -234,8 +234,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             //
             if (inputRequestedPrivilegeElement == null)
             {
-                // If UAC requestedPrivilege node is missing (possibly due to upgraded project) then automatically 
-                //  add a default UAC requestedPrivilege node with a default requestedExecutionLevel node set to 
+                // If UAC requestedPrivilege node is missing (possibly due to upgraded project) then automatically
+                //  add a default UAC requestedPrivilege node with a default requestedExecutionLevel node set to
                 //  the expected ClickOnce level (asInvoker) with uiAccess as false
                 //
                 executionLevelString = Constants.UACAsInvoker;

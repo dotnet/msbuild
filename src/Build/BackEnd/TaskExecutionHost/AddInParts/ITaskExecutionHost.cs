@@ -41,7 +41,7 @@ namespace Microsoft.Build.BackEnd
     /// are pass-throughs to just set some member variables and call methods directly on the task and associated objects.
     /// In the out-of-proc/AppDomain-isolated case, the object implementing these methods may break apart the information
     /// in the parameters to be consumed by the IContract representing the remote object through MAF.
-    /// 
+    ///
     /// REFACTOR - Eliminate this interface.
     /// </summary>
     internal interface ITaskExecutionHost

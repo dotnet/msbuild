@@ -601,6 +601,32 @@ namespace Microsoft.Build.Shared
         {
             throw new ObjectDisposedException(objectName);
         }
+
+        /// <summary>
+        /// A utility that verifies the parameters provided to a standard ICollection<typeparamref name="T"/>.CopyTo call.
+        /// </summary>
+        /// <exception cref="ArgumentNullException">If <paramref name="array"/> is null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">If <paramref name="arrayIndex"/> falls outside of the bounds <paramref name="array"/>.</exception>
+        /// <exception cref="ArgumentException">If there is insufficient capacity to copy the collection contents into <paramref name="array"/>
+        /// when starting at <paramref name="arrayIndex"/>.</exception>
+        internal static void VerifyCollectionCopyToArguments<T>(
+            T[] array,
+            string arrayParameterName,
+            int arrayIndex,
+            string arrayIndexParameterName,
+            int requiredCapacity)
+        {
+            VerifyThrowArgumentNull(array, arrayParameterName);
+            VerifyThrowArgumentOutOfRange(arrayIndex >= 0 && arrayIndex < array.Length, arrayIndexParameterName);
+
+            int arrayCapacity = array.Length - arrayIndex;
+            if (requiredCapacity > arrayCapacity)
+            {
+                throw new ArgumentException(
+                    ResourceUtilities.GetResourceString("Shared.CollectionCopyToFailureProvidedArrayIsTooSmall"),
+                    arrayParameterName);
+            }
+        }
 #endif
     }
 }

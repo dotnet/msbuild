@@ -119,7 +119,7 @@ namespace Microsoft.NET.StringTools
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public void EnableStatistics()
         {

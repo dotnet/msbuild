@@ -17,7 +17,7 @@ namespace Microsoft.Build.Framework
     // promise to never change the type's fields i.e. the type is
     // immutable; adding new fields in the next version of the type
     // without following certain special FX guidelines, can break both
-    // forward and backward compatibility    
+    // forward and backward compatibility
     [Serializable]
     public class TargetStartedEventArgs : BuildStatusEventArgs
     {
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Framework
         public string ParentTarget => parentTarget;
 
         /// <summary>
-        /// Project file associated with event.   
+        /// Project file associated with event.
         /// </summary>
         public string ProjectFile => projectFile;
 

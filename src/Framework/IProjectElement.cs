@@ -11,7 +11,7 @@ namespace Microsoft.Build.Framework
     public interface IProjectElement
     {
         /// <summary>
-        /// Gets the name of the associated element. 
+        /// Gets the name of the associated element.
         /// Useful for display in some circumstances.
         /// </summary>
         string ElementName { get; }

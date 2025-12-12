@@ -30,7 +30,6 @@ resources:
   - repository: DartLabTemplates
     type: git
     name: DartLab.Templates
-    ref: refs/heads/main
   - repository: DartLabOptProfTemplates
     type: git
     name: DartLab.OptProf

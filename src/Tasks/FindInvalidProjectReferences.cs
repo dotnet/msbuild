@@ -62,7 +62,7 @@ namespace Microsoft.Build.Tasks
         public string TargetPlatformIdentifier { get; set; }
 
         /// <summary>
-        /// Invalid references to be unresolved 
+        /// Invalid references to be unresolved
         /// </summary>
         [Output]
         public ITaskItem[] InvalidReferences { get; private set; }
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Tasks
                     string referenceIdentity = item.ItemSpec;
                     string referencePlatformMoniker = item.GetMetadata(ReferencePlatformMonikerMetadata);
 
-                    // For each moniker, compare version, issue localized message if the referenced project targets 
+                    // For each moniker, compare version, issue localized message if the referenced project targets
                     // a platform with version higher than the current project and make the reference invalid by adding it to
                     // an invalid reference list output
                     if (ParseMoniker(referencePlatformMoniker, out _, out Version version))

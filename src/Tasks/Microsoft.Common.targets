@@ -29,6 +29,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         management system can write out multiple files but the order of the import is alphabetic because MSBuild sorts the list.
   -->
   <PropertyGroup>
+    <!--
+        Don't import project extensions during restore because NuGet restore generates them.  Importing them during restore will embed
+        the pre-restore files in the binary log and then NuGet won't be able to embed the generated one after restore.  If some other
+        project extension mechanism wants to import project extensions during restore, they need to explicitly set ImportProjectExtensionTargets
+    -->
+    <ImportProjectExtensionTargets Condition="$([MSBuild]::AreFeaturesEnabled('17.10')) And '$(ImportProjectExtensionTargets)' == '' And '$(MSBuildIsRestoring)' == 'true'">false</ImportProjectExtensionTargets>
+    
     <ImportProjectExtensionTargets Condition="'$(ImportProjectExtensionTargets)' == ''">true</ImportProjectExtensionTargets>
   </PropertyGroup>
 

@@ -20,9 +20,9 @@ namespace Microsoft.Build.BuildEngine
     /// threads. It is also lock free for multiple readers (via use of Hashtable as
     /// the backing store).
     /// We use a ReaderWriterLock in here so that when a request comes in for multiple
-    /// cache entries we guarantee that all the entries come from a consistent view of 
+    /// cache entries we guarantee that all the entries come from a consistent view of
     /// the cache at some point in time. Without a lock we might get a write in between
-    /// the reads and half of the entries would represent the values before the write and 
+    /// the reads and half of the entries would represent the values before the write and
     /// the rest after. This is unacceptable as at no point in time the cache actually contained
     /// the entries that would be returned without the lock. This is required by the caching APIs
     /// provided to the tasks which support retrieving multiple entries at once.
@@ -36,7 +36,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal CacheScope(string scopeName, BuildPropertyGroup scopeProperties, string scopeToolsVersion)
         {
-            // Make certain we don't cache a reference to a Project object, which would defeat 
+            // Make certain we don't cache a reference to a Project object, which would defeat
             // the purpose of this cache
             scopeProperties.ClearParentProject();
 
@@ -215,7 +215,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// This method returns true if the cache entry for a given name is present in the cache. 
+        /// This method returns true if the cache entry for a given name is present in the cache.
         /// This method is thread safe.
         /// </summary>
         internal bool ContainsCacheEntry(string name)
@@ -231,7 +231,7 @@ namespace Microsoft.Build.BuildEngine
         {
             ErrorUtilities.VerifyThrow(buildResult != null, "Expect a non-null build result");
 
-            // Don't cache results if they are marked as uncacheable 
+            // Don't cache results if they are marked as uncacheable
             if (!buildResult.UseResultCache)
             {
                 return;

@@ -137,7 +137,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// An implementation of IComparer useful for comparing the keys 
+        /// An implementation of IComparer useful for comparing the keys
         /// on DictionaryEntry's
         /// </summary>
         /// <remarks>Uses CurrentCulture for display purposes</remarks>
@@ -153,7 +153,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// An implementation of IComparer useful for comparing the ItemSpecs 
+        /// An implementation of IComparer useful for comparing the ItemSpecs
         /// on ITaskItem's
         /// </summary>
         /// <remarks>Uses CurrentCulture for display purposes</remarks>
@@ -238,7 +238,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Writes to the log, using the default indentation. Does not 
+        /// Writes to the log, using the default indentation. Does not
         /// terminate with a newline.
         /// </summary>
         internal void WritePretty(string formattedString)
@@ -291,7 +291,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Writes to the log, using the specified indentation. Does not 
+        /// Writes to the log, using the specified indentation. Does not
         /// terminate with a newline.
         /// </summary>
         internal void WritePretty(int indentLevel, string formattedString)
@@ -448,7 +448,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Writes out the list of property names and their values.
         /// This could be done at any time during the build to show the latest
-        /// property values, using the cached reference to the list from the 
+        /// property values, using the cached reference to the list from the
         /// appropriate ProjectStarted event.
         /// </summary>
         /// <param name="properties">List of properties</param>
@@ -502,7 +502,7 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// Writes out the list of item specs and their metadata.
         /// This could be done at any time during the build to show the latest
-        /// items, using the cached reference to the list from the 
+        /// items, using the cached reference to the list from the
         /// appropriate ProjectStarted event.
         /// </summary>
         /// <param name="items">List of items</param>
@@ -765,7 +765,7 @@ namespace Microsoft.Build.BuildEngine
             }
 
             /// <summary>
-            /// Returns an IComparer that will put erformance counters 
+            /// Returns an IComparer that will put erformance counters
             /// in descending order by elapsed time.
             /// </summary>
             internal static IComparer DescendingByElapsedTimeComparer
@@ -774,7 +774,7 @@ namespace Microsoft.Build.BuildEngine
             }
 
             /// <summary>
-            /// Private IComparer class for sorting performance counters 
+            /// Private IComparer class for sorting performance counters
             /// in descending order by elapsed time.
             /// </summary>
             internal class DescendingByElapsedTime : IComparer

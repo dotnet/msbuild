@@ -21,13 +21,13 @@ namespace Microsoft.Build.UnitTests
     public class ProjectSchemaValidationHandlerTest
     {
         /***********************************************************************
-         * 
+         *
          * Test:        ProjectSchemaValidationHandlerTest.VerifyProjectSchema
          * Owner:       JomoF
-         *  
+         *
          * This calls VerifyProjectSchema to validate a project XML
          * specified in a string
-         * 
+         *
          **********************************************************************/
         [Test]
         [ExpectedException(typeof(InvalidProjectFileException))]
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests
 
                 try
                 {
-                    validator.VerifyProjectSchema(ObjectModelHelpers.CleanupFileContents(projectContents), 
+                    validator.VerifyProjectSchema(ObjectModelHelpers.CleanupFileContents(projectContents),
                         msbuildTempXsdFilenames[0]);
                 }
                 catch (InvalidProjectFileException e)
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests
                 invalidSchemaFile = Path.GetTempFileName();
 
                 File.WriteAllText(invalidSchemaFile, "<this_is_invalid_schema_content/>");
-                
+
                 string projectContents = @"
                     <Project xmlns=`msbuildnamespace`>
                         <Target Name=`Build` />
@@ -163,13 +163,13 @@ namespace Microsoft.Build.UnitTests
         }
 
         /***********************************************************************
-         * 
+         *
          * Test:        ProjectSchemaValidationHandlerTest.VerifyProjectSchema
          * Owner:       JomoF
-         *  
+         *
          * This calls VerifyProjectSchema to validate a project XML
          * specified in a string
-         * 
+         *
          **********************************************************************/
         [Test]
         public void VerifyValidProjectSchema
@@ -191,7 +191,7 @@ namespace Microsoft.Build.UnitTests
                 Engine e = new Engine(@"c:\");
                 ProjectSchemaValidationHandler validator = new ProjectSchemaValidationHandler(null, e.LoggingServices, @"c:\");
 
-                validator.VerifyProjectSchema(ObjectModelHelpers.CleanupFileContents(projectContents), 
+                validator.VerifyProjectSchema(ObjectModelHelpers.CleanupFileContents(projectContents),
                     msbuildTempXsdFilenames[0]);
             }
             finally

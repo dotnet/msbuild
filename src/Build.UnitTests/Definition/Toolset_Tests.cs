@@ -188,8 +188,8 @@ namespace Microsoft.Build.UnitTests.Definition
                 }
                 else
                 {
-                    // Otherwise, it's the highest one numerically.  Since by definition if Dev10 isn't 
-                    // installed and subtoolsets exists we must be at least Dev11, it should be "11.0" 
+                    // Otherwise, it's the highest one numerically.  Since by definition if Dev10 isn't
+                    // installed and subtoolsets exists we must be at least Dev11, it should be "11.0"
                     Assert.Equal("11.0", t.DefaultSubToolsetVersion);
                 }
             }
@@ -438,8 +438,8 @@ namespace Microsoft.Build.UnitTests.Definition
                 Assert.Equal("12.0", t.GenerateSubToolsetVersion(null, 13));
                 Assert.Equal("v13.0", t.GenerateSubToolsetVersion(null, 14));
 
-                // however, if there is no matching solution version, we just fall back to the 
-                // default sub-toolset. 
+                // however, if there is no matching solution version, we just fall back to the
+                // default sub-toolset.
                 Assert.Equal(t.DefaultSubToolsetVersion, t.GenerateSubToolsetVersion(null, 55));
             }
             finally
@@ -488,27 +488,27 @@ namespace Microsoft.Build.UnitTests.Definition
         }
 
         /// <summary>
-        /// Creates a standard ProjectCollection and adds a fake toolset with the following contents to it:  
-        /// 
+        /// Creates a standard ProjectCollection and adds a fake toolset with the following contents to it:
+        ///
         /// ToolsVersion = Fake
-        /// Base Properties: 
+        /// Base Properties:
         /// a = a1
         /// b = b1
-        /// 
-        /// SubToolset "12.0": 
+        ///
+        /// SubToolset "12.0":
         /// d = d4
         /// e = e5
-        /// 
-        /// SubToolset "v11.0": 
+        ///
+        /// SubToolset "v11.0":
         /// b = b2
         /// c = c2
-        /// 
+        ///
         /// SubToolset "FakeSubToolset":
         /// a = a3
         /// c = c3
-        /// 
+        ///
         /// SubToolset "v13.0":
-        /// f = f6 
+        /// f = f6
         /// g = g7
         /// </summary>
         private Toolset GetFakeToolset(IDictionary<string, string> globalPropertiesForProjectCollection)

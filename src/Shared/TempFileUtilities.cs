@@ -20,6 +20,7 @@ namespace Microsoft.Build.Shared
         // Lower order bits correspond to the same for "group" or "other" users.
         private static string tempFileDirectory = null;
         private const string msbuildTempFolderPrefix = "MSBuildTemp";
+
         internal static string TempFileDirectory
         {
             get

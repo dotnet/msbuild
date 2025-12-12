@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks
     public sealed partial class GenerateResource : TaskExtension
     {
         /// <summary>
-        /// Defines the "ResGen" MSBuild task, which enables using ResGen.exe 
+        /// Defines the "ResGen" MSBuild task, which enables using ResGen.exe
         /// to generate strongly-typed resource classes and convert resource
         /// files from one format to another.
         /// </summary>
@@ -67,34 +67,34 @@ namespace Microsoft.Build.Tasks
                         version of a type will use the one in this assembly, when set.
         /define:A[,B]   For #ifdef support in .ResText files, pass a comma-separated
                         list of symbols.  ResText files can use "#ifdef A" or "#if !B".
-        
+
         Miscellaneous:
         @<file>         Read response file for more options. At most one response file
                         may be specified, and its entries must be line-separated.
-        
+
         .restext & .txt files have this format:
-        
+
             # Use # at the beginning of a line for a comment character.
             name=value
             more elaborate name=value
-        
+
         Example response file contents:
-        
+
             # Use # at the beginning of a line for a comment character.
             /useSourcePath
             /compile
             file1.resx,file1.resources
             file2.resx,file2.resources
-        
+
 
         Language names valid for the /str:<language> option are:
         c#, cs, csharp, vb, vbs, visualbasic, vbscript, js, jscript, javascript, vj#, vjs, vjsharp, c++, mc, cpp
          */
 
             /// <summary>
-            /// Files being passed to ResGen.exe to be converted to a different resource format.  
-            /// If a strongly typed resource class is being created, only one file may be 
-            /// passed to InputFiles at a time. 
+            /// Files being passed to ResGen.exe to be converted to a different resource format.
+            /// If a strongly typed resource class is being created, only one file may be
+            /// passed to InputFiles at a time.
             /// </summary>
             public ITaskItem[] InputFiles
             {
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Tasks
 
             /// <summary>
             /// Should be the same length as InputFiles or null.  If null, the files output
-            /// by ResGen.exe will be named "inputFiles[i].resources".  Otherwise, the 
+            /// by ResGen.exe will be named "inputFiles[i].resources".  Otherwise, the
             /// extensions on the output filesnames indicate which format the corresponding
             /// input file will be translated to.
             /// </summary>
@@ -202,11 +202,11 @@ namespace Microsoft.Build.Tasks
             protected override string ToolName => "resgen.exe";
 
             /// <summary>
-            /// Tracker.exe wants Unicode response files, and ResGen.exe doesn't care, 
-            /// so make them Unicode across the board. 
+            /// Tracker.exe wants Unicode response files, and ResGen.exe doesn't care,
+            /// so make them Unicode across the board.
             /// </summary>
             /// <comment>
-            /// We no longer use Tracker.exe in ResGen, but given that as ResGen doesn't care, 
+            /// We no longer use Tracker.exe in ResGen, but given that as ResGen doesn't care,
             /// there doesn't really seem to be a particular reason to change it back, either...
             /// </comment>
             protected override Encoding ResponseFileEncoding => Encoding.Unicode;
@@ -270,7 +270,7 @@ namespace Microsoft.Build.Tasks
                 {
                     ITaskItem outputFile = OutputFiles[0];
 
-                    // if the resource generation was unsuccessful, check to see that the resource file 
+                    // if the resource generation was unsuccessful, check to see that the resource file
                     // was in fact generated
                     if (!success)
                     {
@@ -296,14 +296,14 @@ namespace Microsoft.Build.Tasks
                         }
                         catch (System.Configuration.ConfigurationException)
                         {
-                            // If the language can't be found, then ResGen.exe will already have 
-                            // logged an appropriate error.  
+                            // If the language can't be found, then ResGen.exe will already have
+                            // logged an appropriate error.
                             return false;
                         }
                         catch (System.Security.SecurityException)
                         {
-                            // If the language can't be found, then ResGen.exe will already have 
-                            // logged an appropriate error.  
+                            // If the language can't be found, then ResGen.exe will already have
+                            // logged an appropriate error.
                             return false;
                         }
 
@@ -316,7 +316,7 @@ namespace Microsoft.Build.Tasks
 
             /// <summary>
             /// Fills the provided CommandLineBuilderExtension with all the command line options used when
-            /// executing this tool that can go into a response file.  
+            /// executing this tool that can go into a response file.
             /// </summary>
             /// <comments>
             /// ResGen 3.5 and earlier doesn't support response files, but ResGen 4.0 and later does.
@@ -344,8 +344,8 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    // return nothing -- if it's not 4.0, or if we're building strongly typed resources, we assume that, 
-                    // as far as ToolTask is concerned at least, response files are not supported. 
+                    // return nothing -- if it's not 4.0, or if we're building strongly typed resources, we assume that,
+                    // as far as ToolTask is concerned at least, response files are not supported.
                 }
             }
 
@@ -355,7 +355,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             /// <comments>
             /// Has to be command line commands because ResGen 3.5 and earlier don't know about
-            /// response files. 
+            /// response files.
             /// </comments>
             /// <param name="commandLine">Gets filled with command line options</param>
             protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
@@ -372,12 +372,12 @@ namespace Microsoft.Build.Tasks
                     !pathToResGen.Equals(NativeMethodsShared.GetLongFilePath(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version35)), StringComparison.OrdinalIgnoreCase) &&
                     String.IsNullOrEmpty(StronglyTypedLanguage))
                 {
-                    // 4.0 resgen.exe does support response files (at least as long as you're not building an STR), so we can 
+                    // 4.0 resgen.exe does support response files (at least as long as you're not building an STR), so we can
                     // make use of them here by returning nothing!
                 }
                 else
                 {
-                    // otherwise, the toolname is ResGen.exe and we just need the resgen arguments in CommandLineCommands. 
+                    // otherwise, the toolname is ResGen.exe and we just need the resgen arguments in CommandLineCommands.
                     commandLine.AppendTextUnquoted(resGenArguments.ToString());
                 }
             }
@@ -412,7 +412,7 @@ namespace Microsoft.Build.Tasks
                 if (!String.IsNullOrEmpty(StronglyTypedLanguage))
                 {
                     // Only a single Sources is allowed if you are generating STR.
-                    // Otherwise, each STR class overwrites the previous one. In theory we could generate separate 
+                    // Otherwise, each STR class overwrites the previous one. In theory we could generate separate
                     // STR classes for each input, but then the class name and file name parameters would have to be vectors.
                     if (InputFiles.Length != 1)
                     {
@@ -427,14 +427,14 @@ namespace Microsoft.Build.Tasks
                         !String.IsNullOrEmpty(StronglyTypedNamespace) ||
                         !String.IsNullOrEmpty(StronglyTypedFileName))
                     {
-                        // We have no language to generate a STR, but nevertheless the user passed us a class, 
+                        // We have no language to generate a STR, but nevertheless the user passed us a class,
                         // namespace, and/or filename. Let them know that they probably wanted to pass a language too.
                         Log.LogErrorWithCodeFromResources("ResGen.STRClassNamespaceOrFilenameWithoutLanguage");
                         return false;
                     }
                 }
 
-                // Verify that the ToolPath exists -- if the tool doesn't exist in it 
+                // Verify that the ToolPath exists -- if the tool doesn't exist in it
                 // we'll worry about that later
                 if ((String.IsNullOrEmpty(ToolPath) || !FileSystems.Default.DirectoryExists(ToolPath)) &&
                     (String.IsNullOrEmpty(SdkToolsPath) || !FileSystems.Default.DirectoryExists(SdkToolsPath)))
@@ -451,7 +451,7 @@ namespace Microsoft.Build.Tasks
             #region Helper methods
 
             /// <summary>
-            /// Checks a string array for null or length zero.  Does not check if 
+            /// Checks a string array for null or length zero.  Does not check if
             /// individual members are null
             /// </summary>
             /// <param name="value">The string array to check</param>
@@ -490,7 +490,7 @@ namespace Microsoft.Build.Tasks
             }
 
             /// <summary>
-            /// Generates the full path to ResGen.exe.  
+            /// Generates the full path to ResGen.exe.
             /// </summary>
             /// <returns>The path to ResGen.exe, or null.</returns>
             private string GenerateResGenFullPath()
@@ -510,7 +510,7 @@ namespace Microsoft.Build.Tasks
                         }
                     }
 
-                    // If it still hasn't been found, try to generate the appropriate path. 
+                    // If it still hasn't been found, try to generate the appropriate path.
                     if (pathToTool == null)
                     {
                         pathToTool = SdkToolsPathUtility.GeneratePathToTool(
@@ -524,8 +524,8 @@ namespace Microsoft.Build.Tasks
                         pathToTool = NativeMethodsShared.GetLongFilePath(pathToTool);
                     }
 
-                    // And then set it for future reference.  If it's still null, there's nothing else 
-                    // we can do, and we've already logged an appropriate error. 
+                    // And then set it for future reference.  If it's still null, there's nothing else
+                    // we can do, and we've already logged an appropriate error.
                     Bag["ToolPathWithFile"] = pathToTool;
                 }
 
@@ -533,7 +533,7 @@ namespace Microsoft.Build.Tasks
             }
 
             /// <summary>
-            /// Generate the command line to be passed to resgen.exe, sans the path to the tool. 
+            /// Generate the command line to be passed to resgen.exe, sans the path to the tool.
             /// </summary>
             private void GenerateResGenCommands(CommandLineBuilderExtension resGenArguments, bool useForResponseFile)
             {
@@ -555,8 +555,8 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (ITaskItem reference in References)
                     {
-                        // ResGen.exe response files frown on quotes in filenames, even if there are 
-                        // spaces in the names of the files.  
+                        // ResGen.exe response files frown on quotes in filenames, even if there are
+                        // spaces in the names of the files.
                         if (useForResponseFile && reference != null)
                         {
                             resGenArguments.AppendTextUnquoted("/r:");
@@ -585,8 +585,8 @@ namespace Microsoft.Build.Tasks
                         {
                             if (useForResponseFile)
                             {
-                                // ResGen.exe response files frown on quotes in filenames, even if there are 
-                                // spaces in the names of the files.  
+                                // ResGen.exe response files frown on quotes in filenames, even if there are
+                                // spaces in the names of the files.
                                 if (inputFiles[i] != null && outputFiles[i] != null)
                                 {
                                     resGenArguments.AppendTextUnquoted(inputFiles[i].ItemSpec);

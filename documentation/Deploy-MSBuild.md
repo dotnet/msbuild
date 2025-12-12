@@ -22,3 +22,7 @@ If you cannot build or cannot deploy MSBuild on the same machine on which you wi
 ## .NET (Core) SDK
 
 Deploy-MSBuild can also patch a .NET (Core) SDK installation. Pass the `-runtime Core` argument to `Deploy-MSBuild.ps1` to ensure that it selects .NET Core MSBuild.
+
+### Linux
+
+There isn’t a shell script for deploying MSBuild. Instead, you’ll need to [install the PowerShell tool](https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-linux) and execute `Deploy-MSBuild.ps1` using the tool on Unix platforms with the command: `pwsh scripts\Deploy-MSBuild.ps1`.

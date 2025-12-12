@@ -1,0 +1,9 @@
+{
+    "tool": "Credential Scanner",
+    "suppressions": [
+      {
+        "file": "\\src\\Tasks.UnitTests\\TestResources\\mycert.pfx",
+        "_justification": "New certificate file with private key used only for testing"
+      }
+    ]
+ }

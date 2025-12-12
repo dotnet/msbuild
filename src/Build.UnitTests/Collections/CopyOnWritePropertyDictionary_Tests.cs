@@ -198,7 +198,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             return dic;
         }
 
-        private sealed class MockValue : IKeyed, IValued, IEquatable<MockValue>, IImmutable
+        private sealed class MockValue : IKeyed, IValued, IEquatable<MockValue>, IEquatable<object>, IImmutable
         {
             public MockValue(string s) => Key = s;
 
@@ -209,6 +209,15 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             public bool Equals(MockValue? other)
             {
                 return other != null && Key == other.Key;
+            }
+
+            public new bool Equals(object? other)
+            {
+                if (other is MockValue mv)
+                {
+                    return Equals(mv);
+                }
+                return false;
             }
         }
     }

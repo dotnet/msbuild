@@ -56,7 +56,7 @@ namespace Microsoft.Build.UnitTests.Logging
             });
         }
         /// <summary>
-        /// Verify consume properly packages up the message event into a packet and send it to the 
+        /// Verify consume properly packages up the message event into a packet and send it to the
         /// transport delegate
         /// </summary>
         [Fact]
@@ -145,7 +145,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
         /// <summary>
         /// Create a method which will be a fake method to process a packet.
-        /// This needs to be done because using an anonymous method does not work. 
+        /// This needs to be done because using an anonymous method does not work.
         /// Using an anonymous method does not work because when the delegate is created
         /// it seems that a field is created which creates a strong reference
         /// between the delegate and the class it was created in. This means the delegate is not

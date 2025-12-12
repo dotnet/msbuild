@@ -64,9 +64,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Write one line, read one line, where the line contains MSBuild-escapable characters.  
-        /// The file should contain the *unescaped* lines, but no escaping information should be 
-        /// lost when read. 
+        /// Write one line, read one line, where the line contains MSBuild-escapable characters.
+        /// The file should contain the *unescaped* lines, but no escaping information should be
+        /// lost when read.
         /// </summary>
         [Fact]
         public void Escaping()

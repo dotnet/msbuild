@@ -6,7 +6,7 @@
 namespace Microsoft.Build.Framework.XamlTypes
 {
     /// <summary>
-    /// Represents the schema of a list-of-strings property. 
+    /// Represents the schema of a list-of-strings property.
     /// </summary>
     /// <remarks>
     /// Note, this represents
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// Qualifies this string property to give it a more specific classification.
         /// </summary>
         /// <remarks>
-        /// Similar to the <see cref="StringProperty.Subtype"/> property. 
+        /// Similar to the <see cref="StringProperty.Subtype"/> property.
         /// </remarks>
         public string Subtype
         {

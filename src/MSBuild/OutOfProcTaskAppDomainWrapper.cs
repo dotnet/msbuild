@@ -15,7 +15,7 @@ namespace Microsoft.Build.CommandLine
     internal class OutOfProcTaskAppDomainWrapper : OutOfProcTaskAppDomainWrapperBase
     {
         /// <summary>
-        /// This is an extension of the OutOfProcTaskAppDomainWrapper that is responsible 
+        /// This is an extension of the OutOfProcTaskAppDomainWrapper that is responsible
         /// for activating and executing the user task.
         /// This extension provides support for ICancellable Out-Of-Proc tasks.
         /// </summary>

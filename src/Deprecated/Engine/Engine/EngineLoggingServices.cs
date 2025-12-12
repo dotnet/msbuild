@@ -16,7 +16,7 @@ using Microsoft.Build.BuildEngine.Shared;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
-    /// This abstract class defines a logging service, provided by the engine, for internal logging 
+    /// This abstract class defines a logging service, provided by the engine, for internal logging
     /// purposes. This class is very different from the IBuildEngine interface which provides logging
     /// services for tasks. This class allows for better encapsulation by making it clear when only
     /// logging services are needed and not the rest of the engine data and methods. This class allows
@@ -232,7 +232,7 @@ namespace Microsoft.Build.BuildEngine
         /// Raises ErrorEvent and AnyEvent at all registered loggers.
         /// </summary>
         /// <owner>t-jeffv, SumedhK</owner>
-        /// <param name="e"></param> 
+        /// <param name="e"></param>
         internal void LogErrorEvent(BuildErrorEventArgs e)
         {
             // We are intentionally passing in null for the "sender" object, even when
@@ -240,7 +240,7 @@ namespace Microsoft.Build.BuildEngine
             // tight coupling between loggers and tasks in this way.  It's not good
             // for a logger to be able to call back into a task.  It could be a security
             // issue, and it apparently will also cause us problems if we adopt the
-            // new Longhorn Add-In Programming Model.  
+            // new Longhorn Add-In Programming Model.
 
             ErrorUtilities.VerifyThrowArgumentNull(e, nameof(e));
             PostLoggingEvent(e);
@@ -250,7 +250,7 @@ namespace Microsoft.Build.BuildEngine
         /// Raises MessageEvent and AnyEvent at all registered loggers.
         /// </summary>
         /// <owner>t-jeffv, SumedhK</owner>
-        /// <param name="e"></param> 
+        /// <param name="e"></param>
         internal void LogMessageEvent(BuildMessageEventArgs e)
         {
             if (!OnlyLogCriticalEvents)
@@ -271,7 +271,7 @@ namespace Microsoft.Build.BuildEngine
         /// Raises WarningEvent and AnyEvent at all registered loggers.
         /// </summary>
         /// <owner>t-jeffv, SumedhK</owner>
-        /// <param name="e"></param> 
+        /// <param name="e"></param>
         internal void LogWarningEvent(BuildWarningEventArgs e)
         {
             // We are intentionally passing in null for the "sender" object, even when
@@ -289,7 +289,7 @@ namespace Microsoft.Build.BuildEngine
         /// Raises CustomEvent and AnyEvent at all registered loggers.
         /// </summary>
         /// <owner>t-jeffv, SumedhK</owner>
-        /// <param name="e"></param> 
+        /// <param name="e"></param>
         internal void LogCustomEvent(CustomBuildEventArgs e)
         {
             // We are intentionally passing in null for the "sender" object, even when
@@ -978,7 +978,7 @@ namespace Microsoft.Build.BuildEngine
         protected bool flushBuildEventsImmediatly;
 
         /// <summary>
-        /// A dual queue which allows for one reader multiple writer access (used to receive events from 
+        /// A dual queue which allows for one reader multiple writer access (used to receive events from
         /// the engine and the TEM)
         /// </summary>
         protected DualQueue<BuildEventArgs> loggingQueueOfBuildEvents;
@@ -1008,7 +1008,7 @@ namespace Microsoft.Build.BuildEngine
         protected bool requestedQueueFlush;
 
         /// <summary>
-        /// An event used to request a flush of the logging service. Typically triggered due to 
+        /// An event used to request a flush of the logging service. Typically triggered due to
         /// a spike in logging activity.
         /// </summary>
         protected ManualResetEvent flushRequestEvent;

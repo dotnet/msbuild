@@ -10,6 +10,7 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 #nullable disable
 
@@ -840,6 +841,43 @@ namespace Microsoft.Build.UnitTests.Evaluation
             {
                 FileUtilities.DeleteNoThrow(mainProjectPath);
                 FileUtilities.DeleteDirectoryNoThrow(extnDir1, true);
+            }
+        }
+        /// <summary>
+        /// Fall-back search path on a property that is not valid. https://github.com/dotnet/msbuild/issues/8762
+        /// </summary>
+        /// <param name="projectValue">imported project value expression</param>
+        [Theory]
+        [InlineData("")]
+        [InlineData("|")]
+        public void FallbackImportWithInvalidProjectValue(string projectValue)
+        {
+            string mainTargetsFileContent = $"""
+                <Project>
+                    <PropertyGroup>
+                    <VSToolsPath>{projectValue}</VSToolsPath>
+                </PropertyGroup>
+                <Import Project="$(VSToolsPath)"/>
+                </Project>
+                """;
+
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            string mainProjectPath = testEnvironment.CreateTestProjectWithFiles("main.proj", mainTargetsFileContent).ProjectFile;
+            var projectCollection = GetProjectCollection();
+            projectCollection.ResetToolsetsForTests(WriteConfigFileAndGetReader("VSToolsPath", "temp"));
+            var logger = new MockLogger();
+            projectCollection.RegisterLogger(logger);
+            Assert.Throws<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
+
+            if (string.IsNullOrEmpty(projectValue))
+            {
+                logger.AssertLogContains("MSB4102");
+            }
+            else
+            {
+#if NETFRAMEWORK
+                logger.AssertLogContains("MSB4102");
+#endif
             }
         }
 

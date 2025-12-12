@@ -51,7 +51,7 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    // Only call Path.GetFullPath if the path is not rooted to avoid 
+                    // Only call Path.GetFullPath if the path is not rooted to avoid
                     // going to disk when it is not necessary
                     if (!Path.IsPathRooted(path.ItemSpec))
                     {
