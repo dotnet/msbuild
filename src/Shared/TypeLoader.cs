@@ -264,22 +264,11 @@ namespace Microsoft.Build.Shared
 
             // Deduplicate between MSBuild assemblies and task dependencies.
             Dictionary<string, string> assembliesDictionary = new(localAssemblies.Length + runtimeAssemblies.Length);
-            foreach (string localPath in localAssemblies)
-            {
-                assembliesDictionary[Path.GetFileName(localPath)] = localPath;
-            }
-
-            foreach (string runtimeAssembly in runtimeAssemblies)
-            {
-                assembliesDictionary[Path.GetFileName(runtimeAssembly)] = runtimeAssembly;
-            }
-
-            return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
-
+            AddAssembliesToDictionary(assembliesDictionary, localAssemblies, runtimeAssemblies);
 #else
             // Merge all assembly tiers into one dictionary with priority:
             // deduplicated CLR2 & CLR3.5 < Local < Runtime (later entries overwrite earlier ones)
-            Dictionary<string, string> assembliesDictionary = new(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> assembliesDictionary = new(localAssemblies.Length + runtimeAssemblies.Length + runtimeAssembliesCLR35_20.Value.Length);
 
             // Add assemblies in priority order (later entries overwrite earlier ones)
             AddAssembliesToDictionary(
@@ -287,12 +276,10 @@ namespace Microsoft.Build.Shared
                 runtimeAssembliesCLR35_20.Value,
                 localAssemblies,
                 runtimeAssemblies);
-
-            return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
 #endif
+            return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
         }
 
-#if NETFRAMEWORK
         /// <summary>
         /// Adds assembly paths to a dictionary, keyed by file name.
         /// Later arrays in the parameter list take priority over earlier ones,
@@ -310,7 +297,6 @@ namespace Microsoft.Build.Shared
                 }
             }
         }
-#endif
 
         /// <summary>
         /// Loads the specified type if it exists in the given assembly. If the type name is fully qualified, then a match (if
