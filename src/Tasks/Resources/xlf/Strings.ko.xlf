@@ -2852,6 +2852,11 @@
         <target state="translated">MSB3715: "{0}" 형식을 찾을 수 없습니다.</target>
         <note>{StrBegin="MSB3715: "}</note>
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.ErrorDeletingTempFile">
+        <source>Could not delete temporary file "{0}". Error: {1}</source>
+        <target state="new">Could not delete temporary file "{0}". Error: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1} {2}</source>
         <target state="translated">MSB3491: "{0}" 파일에 줄을 쓸 수 없습니다. {1} {2}</target>
@@ -2882,9 +2887,24 @@
         <target state="translated">MSB3762: 참조가 작업에 전달되지 않았습니다. 적어도 mscorlib 및 Windows.Foundation에 대한 참조가 필요합니다.</target>
         <note>{StrBegin="MSB3762: "}</note>
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.ErrorReadingFileTransactional">
+        <source>MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</source>
+        <target state="new">MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</target>
+        <note>{StrBegin="MSB3494: "}</note>
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.Retry">
+        <source>Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</source>
+        <target state="new">Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
         <source>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</source>
         <target state="translated">"{0}"의 'WriteOnlyWhenDifferent' 특성은 'Overwrite="true"'인 경우에만 적용됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.UsingTransactionalMode">
+        <source>Using transactional mode to write to file "{0}".</source>
+        <target state="new">Using transactional mode to write to file "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
