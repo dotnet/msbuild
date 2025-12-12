@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -34,7 +35,7 @@ namespace Microsoft.Build.BackEnd
             IDictionary<string, string> environmentVariables)
         {
             _environmentVariables = new Dictionary<string, string>(environmentVariables, CommunicationsUtilities.EnvironmentVariableComparer);
-            _currentDirectory = new AbsolutePath(currentDirectoryFullPath, ignoreRootedCheck: true);
+            ProjectDirectory = new AbsolutePath(currentDirectoryFullPath, ignoreRootedCheck: true);
         }
 
         /// <summary>
@@ -51,14 +52,20 @@ namespace Microsoft.Build.BackEnd
                 _environmentVariables[(string)entry.Key] = (string)entry.Value!;
             }
 
-            _currentDirectory = new AbsolutePath(currentDirectoryFullPath, ignoreRootedCheck: true);
+            ProjectDirectory = new AbsolutePath(currentDirectoryFullPath, ignoreRootedCheck: true);
         }
 
         /// <inheritdoc/>
         public AbsolutePath ProjectDirectory
         {
             get => _currentDirectory;
-            set => _currentDirectory = value;
+            set
+            {
+                _currentDirectory = value;
+                // Keep the thread-static in sync for use by Expander and Modifiers during property/item expansion.
+                // This allows Path.GetFullPath and %(FullPath) to resolve relative paths correctly in multithreaded mode.
+                FileUtilities.CurrentThreadWorkingDirectory = value.Value;
+            }
         }
 
         /// <inheritdoc/>
@@ -118,6 +125,13 @@ namespace Microsoft.Build.BackEnd
             }
 
             return startInfo;
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            // Clear the thread-static to prevent pollution between builds on the same thread.
+            FileUtilities.CurrentThreadWorkingDirectory = null;
         }
     }
 }

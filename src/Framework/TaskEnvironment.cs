@@ -71,5 +71,10 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <returns>A ProcessStartInfo object configured for the current task execution environment.</returns>
         public ProcessStartInfo GetProcessStartInfo() => _driver.GetProcessStartInfo();
+
+        /// <summary>
+        /// Disposes the underlying driver, cleaning up any thread-local state.
+        /// </summary>
+        internal void Dispose() => _driver.Dispose();
     }
 }
