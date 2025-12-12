@@ -232,6 +232,11 @@ namespace Microsoft.Build.Tasks
         private readonly string _filename;
 
         /// <summary>
+        /// The task environment for thread-safe path resolution.
+        /// </summary>
+        private readonly Microsoft.Build.Framework.TaskEnvironment _taskEnvironment;
+
+        /// <summary>
         /// Holds the full path equivalent of _filename
         /// </summary>
         public string FileNameFullPath;
@@ -245,11 +250,12 @@ namespace Microsoft.Build.Tasks
         /// Constructor.
         /// Only stores file name: does not grab the file state until first request.
         /// </summary>
-        internal FileState(string filename)
+        internal FileState(string filename, Microsoft.Build.Framework.TaskEnvironment taskEnvironment)
         {
             ErrorUtilities.VerifyThrowArgumentLength(filename);
             _filename = filename;
-            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(_filename));
+            _taskEnvironment = taskEnvironment;
+            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(_taskEnvironment.GetAbsolutePath(_filename)));
         }
 
         /// <summary>
@@ -333,7 +339,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void Reset()
         {
-            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(_filename));
+            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(_taskEnvironment.GetAbsolutePath(_filename)));
         }
     }
 }

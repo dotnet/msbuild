@@ -14,7 +14,8 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// A task that creates a directory
     /// </summary>
-    public class MakeDir : TaskExtension, IIncrementalTask
+    [MSBuildMultiThreadableTask]
+    public class MakeDir : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
         [Required]
         public ITaskItem[] Directories
@@ -32,6 +33,11 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] DirectoriesCreated { get; private set; }
 
         public bool FailIfNotIncremental { get; set; }
+
+        /// <summary>
+        /// The task environment for thread-safe operations.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         private ITaskItem[] _directories;
 
@@ -53,13 +59,16 @@ namespace Microsoft.Build.Tasks
                 // here we check for that case.
                 if (directory.ItemSpec.Length > 0)
                 {
+                    // Get absolute path for thread-safe operations (compute once, use everywhere)
+                    AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
+
                     try
                     {
                         // For speed, eliminate duplicates caused by poor targets authoring
-                        if (!directoriesSet.Contains(directory.ItemSpec))
+                        if (!directoriesSet.Contains(absolutePath))
                         {
                             // Only log a message if we actually need to create the folder
-                            if (!FileUtilities.DirectoryExistsNoThrow(directory.ItemSpec))
+                            if (!FileUtilities.DirectoryExistsNoThrow(absolutePath))
                             {
                                 if (FailIfNotIncremental)
                                 {
@@ -70,7 +79,7 @@ namespace Microsoft.Build.Tasks
                                     // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                                     Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", directory.ItemSpec);
 
-                                    Directory.CreateDirectory(FileUtilities.FixFilePath(directory.ItemSpec));
+                                    Directory.CreateDirectory(FileUtilities.FixFilePath(absolutePath));
                                 }
                             }
 
@@ -83,7 +92,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     // Add even on failure to avoid reattempting
-                    directoriesSet.Add(directory.ItemSpec);
+                    directoriesSet.Add(absolutePath);
                 }
             }
 
