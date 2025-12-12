@@ -761,12 +761,9 @@ public sealed partial class TerminalLogger : INodeLogger
             project.Succeeded = e.Succeeded;
             project.Stopwatch.Stop();
 
-            // In quiet mode, only show projects with errors or warnings
-            bool shouldShowInQuietMode = Verbosity == LoggerVerbosity.Quiet && project.HasErrorsOrWarnings;
-            
-            // Continue execution and add project summary to the static part of the Console if verbosity is higher than Quiet
-            // or if in Quiet mode but the project has errors/warnings
-            if (Verbosity <= LoggerVerbosity.Quiet && !shouldShowInQuietMode)
+            // In quiet mode, only show projects with errors or warnings.
+            // In higher verbosity modes, show projects based on other criteria.
+            if (Verbosity < LoggerVerbosity.Quiet || (Verbosity == LoggerVerbosity.Quiet && !project.HasErrorsOrWarnings))
             {
                 // Still need to update counts even if not displaying
                 _buildErrorsCount += project.ErrorCount;
