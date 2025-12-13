@@ -763,7 +763,7 @@ public sealed partial class TerminalLogger : INodeLogger
 
             // In quiet mode, only show projects with errors or warnings.
             // In higher verbosity modes, show projects based on other criteria.
-            if (Verbosity < LoggerVerbosity.Quiet || (Verbosity == LoggerVerbosity.Quiet && !project.HasErrorsOrWarnings))
+            if (Verbosity == LoggerVerbosity.Quiet && !project.HasErrorsOrWarnings)
             {
                 // Still need to update counts even if not displaying
                 _buildErrorsCount += project.ErrorCount;
