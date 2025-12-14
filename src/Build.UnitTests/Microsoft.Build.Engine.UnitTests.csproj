@@ -27,6 +27,10 @@
     <PackageReference Include="FakeItEasy" />
     <PackageReference Include="Verify.Xunit" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" />
+    <PackageReference Include="Spectre.Console" />
+    <PackageReference Include="System.Memory" VersionOverride="4.6.3" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" VersionOverride="6.1.2" />
+    <PackageReference Include="Spectre.Console.Testing" />
     <PackageReference Include="NuGet.Frameworks">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>

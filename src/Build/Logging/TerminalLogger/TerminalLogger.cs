@@ -11,6 +11,7 @@ using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Shared;
+using Spectre.Console;
 
 #if NET
 using System.Buffers;
@@ -94,7 +95,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// A cancellation token to signal the rendering thread that it should exit.
     /// </summary>
-    private readonly CancellationTokenSource _cts = new();
+    private readonly CancellationTokenSource _liveUpdateCancellationTokenSource = new();
 
     /// <summary>
     /// Tracks the status of all relevant projects seen so far.
@@ -105,6 +106,8 @@ public sealed partial class TerminalLogger : INodeLogger
     private readonly Dictionary<ProjectContext, TerminalProjectInfo> _projects = [];
 
     private readonly Dictionary<EvalContext, EvalProjectInfo> _projectEvaluations = [];
+
+    private uint? _originalConsoleMode;
 
     /// <summary>
     /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
@@ -152,19 +155,16 @@ public sealed partial class TerminalLogger : INodeLogger
     private ProjectContext? _restoreContext;
 
     /// <summary>
-    /// The thread that performs periodic refresh of the console output.
+    /// The Spectre.Console logger for managing live display.
     /// </summary>
-    private Thread? _refresher;
+    private SpectreConsoleLogger SpectreLogger { get; }
+
+    internal LiveDisplay? LiveDisplay => SpectreLogger._liveDisplay;
 
     /// <summary>
-    /// What is currently displaying in Nodes section as strings representing per-node console output.
+    /// The Spectre.Console instance for output.
     /// </summary>
-    private TerminalNodesFrame _currentFrame = new(Array.Empty<TerminalNodeStatus>(), 0, 0);
-
-    /// <summary>
-    /// The <see cref="Terminal"/> to write console output to.
-    /// </summary>
-    private ITerminal Terminal { get; }
+    private IAnsiConsole Console => SpectreLogger.Console;
 
     /// <summary>
     /// Should the logger's test environment refresh the console output manually instead of using a background thread?
@@ -216,14 +216,12 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private bool _showNodesDisplay = true;
 
-    private uint? _originalConsoleMode;
-
     /// <summary>
     /// Default constructor, used by the MSBuild logger infra.
     /// </summary>
     internal TerminalLogger()
     {
-        Terminal = new Terminal();
+        SpectreLogger = new SpectreConsoleLogger();
     }
 
     internal TerminalLogger(LoggerVerbosity verbosity) : this()
@@ -232,11 +230,11 @@ public sealed partial class TerminalLogger : INodeLogger
     }
 
     /// <summary>
-    /// Internal constructor accepting a custom <see cref="ITerminal"/> for testing.
+    /// Internal constructor accepting a custom Spectre.Console instance for testing.
     /// </summary>
-    internal TerminalLogger(ITerminal terminal)
+    internal TerminalLogger(IAnsiConsole console)
     {
-        Terminal = terminal;
+        SpectreLogger = new SpectreConsoleLogger(console);
         _manualRefresh = true;
     }
 
@@ -538,10 +536,9 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode);
 
-        _cts.Cancel();
-        _refresher?.Join();
-        Terminal.Dispose();
-        _cts.Dispose();
+        _liveUpdateCancellationTokenSource.Cancel();
+        SpectreLogger.Dispose();
+        _liveUpdateCancellationTokenSource.Dispose();
     }
 
     public MessageImportance GetMinimumMessageImportance()
@@ -565,17 +562,10 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         if (!_manualRefresh && _showNodesDisplay)
         {
-            _refresher = new Thread(ThreadProc);
-            _refresher.Name = "Terminal Logger Node Display Refresher";
-            _refresher.Start();
+            SpectreLogger.StartLiveDisplay(_liveUpdateCancellationTokenSource.Token);
         }
 
         _buildStartTime = e.Timestamp;
-
-        if (Terminal.SupportsProgressReporting && Verbosity != LoggerVerbosity.Quiet)
-        {
-            Terminal.Write(AnsiCodes.SetProgressIndeterminate);
-        }
     }
 
     /// <summary>
@@ -583,70 +573,56 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void BuildFinished(object sender, BuildFinishedEventArgs e)
     {
-        _cts.Cancel();
-        _refresher?.Join();
+        _liveUpdateCancellationTokenSource.Cancel();
 
-        Terminal.BeginUpdate();
-        try
+        if (Verbosity > LoggerVerbosity.Quiet)
         {
-            if (Verbosity > LoggerVerbosity.Quiet)
+            string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
+            string buildResult = GetBuildResultString(e.Succeeded, _buildErrorsCount, _buildWarningsCount);
+
+            Console.WriteLine();
+            if (_testRunSummaries.Any())
             {
-                string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
-                string buildResult = GetBuildResultString(e.Succeeded, _buildErrorsCount, _buildWarningsCount);
+                int total = _testRunSummaries.Sum(t => t.Total);
+                int failed = _testRunSummaries.Sum(t => t.Failed);
+                int passed = _testRunSummaries.Sum(t => t.Passed);
+                int skipped = _testRunSummaries.Sum(t => t.Skipped);
+                string testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
 
-                Terminal.WriteLine("");
-                if (_testRunSummaries.Any())
-                {
-                    int total = _testRunSummaries.Sum(t => t.Total);
-                    int failed = _testRunSummaries.Sum(t => t.Failed);
-                    int passed = _testRunSummaries.Sum(t => t.Passed);
-                    int skipped = _testRunSummaries.Sum(t => t.Skipped);
-                    string testDuration = (_testStartTime != null && _testEndTime != null ? (_testEndTime - _testStartTime).Value.TotalSeconds : 0).ToString("F1");
+                bool colorizeFailed = failed > 0;
+                bool colorizePassed = passed > 0 && _buildErrorsCount == 0 && failed == 0;
+                bool colorizeSkipped = skipped > 0 && skipped == total && _buildErrorsCount == 0 && failed == 0;
 
-                    bool colorizeFailed = failed > 0;
-                    bool colorizePassed = passed > 0 && _buildErrorsCount == 0 && failed == 0;
-                    bool colorizeSkipped = skipped > 0 && skipped == total && _buildErrorsCount == 0 && failed == 0;
+                string summaryAndTotalText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_BannerAndTotal", total);
+                string failedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Failed", failed);
+                string passedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Succeeded", passed);
+                string skippedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Skipped", skipped);
+                string durationText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Duration", testDuration);
 
-                    string summaryAndTotalText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_BannerAndTotal", total);
-                    string failedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Failed", failed);
-                    string passedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Succeeded", passed);
-                    string skippedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Skipped", skipped);
-                    string durationText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Duration", testDuration);
+                failedText = colorizeFailed ? $"[red]{Markup.Escape(failedText)}[/]" : Markup.Escape(failedText);
+                passedText = colorizePassed ? $"[lime]{Markup.Escape(passedText)}[/]" : Markup.Escape(passedText);
+                skippedText = colorizeSkipped ? $"[yellow]{Markup.Escape(skippedText)}[/]" : Markup.Escape(skippedText);
 
-                    failedText = colorizeFailed ? AnsiCodes.Colorize(failedText.ToString(), TerminalColor.Red) : failedText;
-                    passedText = colorizePassed ? AnsiCodes.Colorize(passedText.ToString(), TerminalColor.Green) : passedText;
-                    skippedText = colorizeSkipped ? AnsiCodes.Colorize(skippedText.ToString(), TerminalColor.Yellow) : skippedText;
-
-                    Terminal.WriteLine(string.Join(CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ", summaryAndTotalText, failedText, passedText, skippedText, durationText));
-                }
-
-                if (_showSummary == true)
-                {
-                    RenderBuildSummary();
-                }
-
-                if (_restoreFailed)
-                {
-                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
-                        buildResult,
-                        duration));
-                }
-                else
-                {
-                    Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildFinished",
-                        buildResult,
-                        duration));
-                }
-            }
-        }
-        finally
-        {
-            if (Terminal.SupportsProgressReporting && Verbosity != LoggerVerbosity.Quiet)
-            {
-                Terminal.Write(AnsiCodes.RemoveProgress);
+                Console.MarkupLine(string.Join(CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ", Markup.Escape(summaryAndTotalText), failedText, passedText, skippedText, Markup.Escape(durationText)));
             }
 
-            Terminal.EndUpdate();
+            if (_showSummary == true)
+            {
+                RenderBuildSummary();
+            }
+
+            if (_restoreFailed)
+            {
+                Console.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
+                    buildResult,
+                    duration));
+            }
+            else
+            {
+                Console.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildFinished",
+                    buildResult,
+                    duration));
+            }
         }
 
         _projects.Clear();
@@ -666,7 +642,7 @@ public sealed partial class TerminalLogger : INodeLogger
             return;
         }
 
-        Terminal.WriteLine(ResourceUtilities.GetResourceString("BuildSummary"));
+        Console.WriteLine(ResourceUtilities.GetResourceString("BuildSummary"));
 
         foreach (TerminalProjectInfo project in _projects.Values.Where(p => p.HasErrorsOrWarnings))
         {
@@ -674,15 +650,15 @@ public sealed partial class TerminalLogger : INodeLogger
             string buildResult = GetBuildResultString(project.Succeeded, project.ErrorCount, project.WarningCount);
             string projectHeader = GetProjectFinishedHeader(project, buildResult, duration);
 
-            Terminal.WriteLine(projectHeader);
+            Console.WriteLine(projectHeader);
 
             foreach (TerminalBuildMessage buildMessage in project.GetBuildErrorAndWarningMessages())
             {
-                Terminal.WriteLine($"{DoubleIndentation}{buildMessage.Message}");
+                Console.WriteLine($"{DoubleIndentation}{buildMessage.Message}");
             }
         }
 
-        Terminal.WriteLine(string.Empty);
+        Console.WriteLine();
     }
 
     private void StatusEventRaised(object sender, BuildStatusEventArgs e)
@@ -768,86 +744,73 @@ public sealed partial class TerminalLogger : INodeLogger
             project.Stopwatch.Stop();
             lock (_lock)
             {
-                Terminal.BeginUpdate();
-                try
+                string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
+                ReadOnlyMemory<char>? outputPath = project.OutputPath;
+
+                // Build result. One of 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
+                // reported during build.
+                string buildResult = GetBuildResultString(project.Succeeded, project.ErrorCount, project.WarningCount);
+
+                // Check if we're done restoring.
+                if (c == _restoreContext)
                 {
-                    EraseNodes();
-
-                    string duration = project.Stopwatch.ElapsedSeconds.ToString("F1");
-                    ReadOnlyMemory<char>? outputPath = project.OutputPath;
-
-                    // Build result. One of 'failed', 'succeeded with warnings', or 'succeeded' depending on the build result and diagnostic messages
-                    // reported during build.
-                    string buildResult = GetBuildResultString(project.Succeeded, project.ErrorCount, project.WarningCount);
-
-                    // Check if we're done restoring.
-                    if (c == _restoreContext)
+                    if (e.Succeeded)
                     {
-                        if (e.Succeeded)
+                        if (project.HasErrorsOrWarnings)
                         {
-                            if (project.HasErrorsOrWarnings)
-                            {
-                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
-                                    buildResult,
-                                    duration));
-                            }
-                            else
-                            {
-                                Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreComplete",
-                                    duration));
-                            }
+                            Console.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreCompleteWithMessage",
+                                buildResult,
+                                duration));
                         }
                         else
                         {
-                            // It will be reported after build finishes.
-                            _restoreFailed = true;
+                            Console.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("RestoreComplete",
+                                duration));
                         }
-
-                        _restoreContext = null;
-                        _restoreFinished = true;
                     }
-                    // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
-                    // If this is a test project, print it always, so user can see either a success or failure, otherwise success is hidden
-                    // and it is hard to see if project finished, or did not run at all.
-                    else if (project.OutputPath is not null || project.BuildMessages is not null || project.IsTestProject)
+                    else
                     {
-                        // Show project build complete and its output
-                        string projectFinishedHeader = GetProjectFinishedHeader(project, buildResult, duration);
-                        Terminal.Write(projectFinishedHeader);
-
-                        // Print the output path as a link if we have it.
-                        if (outputPath is { } outputPathSpan)
-                        {
-                            (string? projectDisplayPath, var urlLink) = DetermineOutputPathToRender(outputPathSpan, _initialWorkingDirectory.AsMemory(), project.SourceRoot);
-                            Terminal.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath", CreateLink(urlLink, projectDisplayPath.ToString())));
-                        }
-                        else
-                        {
-                            Terminal.WriteLine(string.Empty);
-                        }
+                        // It will be reported after build finishes.
+                        _restoreFailed = true;
                     }
 
-                    // Print diagnostic output under the Project -> Output line.
-                    if (project.BuildMessages is not null)
-                    {
-                        foreach (TerminalBuildMessage buildMessage in project.BuildMessages)
-                        {
-                            Terminal.WriteLine($"{DoubleIndentation}{buildMessage.Message}");
-                        }
-                    }
-
-                    _buildErrorsCount += project.ErrorCount;
-                    _buildWarningsCount += project.WarningCount;
-
-                    if (_showNodesDisplay)
-                    {
-                        DisplayNodes();
-                    }
+                    _restoreContext = null;
+                    _restoreFinished = true;
                 }
-                finally
+                // If this was a notable project build, we print it as completed only if it's produced an output or warnings/error.
+                // If this is a test project, print it always, so user can see either a success or failure, otherwise success is hidden
+                // and it is hard to see if project finished, or did not run at all.
+                else if (project.OutputPath is not null || project.BuildMessages is not null || project.IsTestProject)
                 {
-                    Terminal.EndUpdate();
+                    // Show project build complete and its output
+                    string projectFinishedHeader = GetProjectFinishedHeader(project, buildResult, duration);
+                    Console.Write(projectFinishedHeader);
+
+                    // Print the output path as a link if we have it.
+                    if (outputPath is { } outputPathSpan)
+                    {
+                        (string? projectDisplayPath, var urlLink) = DetermineOutputPathToRender(outputPathSpan, _initialWorkingDirectory.AsMemory(), project.SourceRoot);
+                        Console.WriteLine(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_OutputPath", CreateLink(urlLink, projectDisplayPath.ToString())));
+                    }
+                    else
+                    {
+                        Console.WriteLine();
+                    }
                 }
+
+                // Print diagnostic output under the Project -> Output line.
+                if (project.BuildMessages is not null)
+                {
+                    foreach (TerminalBuildMessage buildMessage in project.BuildMessages)
+                    {
+                        Console.WriteLine($"{DoubleIndentation}{buildMessage.Message}");
+                    }
+                }
+
+                _buildErrorsCount += project.ErrorCount;
+                _buildWarningsCount += project.WarningCount;
+
+                SpectreLogger.UpdateNodes(_nodes);
             }
         }
     }
@@ -1402,83 +1365,6 @@ public sealed partial class TerminalLogger : INodeLogger
 
     #endregion
 
-    #region Refresher thread implementation
-
-    /// <summary>
-    /// The <see cref="_refresher"/> thread proc.
-    /// </summary>
-    private void ThreadProc()
-    {
-        // 1_000 / 30 is a poor approx of 30Hz
-        int count = 0;
-        while (!_cts.Token.WaitHandle.WaitOne(1_000 / 30))
-        {
-            count++;
-            lock (_lock)
-            {
-                // Querying the terminal for it's dimensions is expensive, so we only do it every 30 frames e.g. once a second.
-                if (count >= 30)
-                {
-                    count = 0;
-                    DisplayNodes();
-                }
-                else
-                {
-                    DisplayNodes(false);
-                }
-            }
-        }
-
-        EraseNodes();
-    }
-
-    /// <summary>
-    /// Render Nodes section.
-    /// It shows what all build nodes do.
-    /// </summary>
-    internal void DisplayNodes(bool updateSize = true)
-    {
-        int width = updateSize ? Terminal.Width : _currentFrame.Width;
-        int height = updateSize ? Terminal.Height : _currentFrame.Height;
-        TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: width, height: height);
-
-        // Do not render delta but clear everything if Terminal width or height have changed.
-        if (newFrame.Width != _currentFrame.Width || newFrame.Height != _currentFrame.Height)
-        {
-            EraseNodes();
-        }
-
-        string rendered = newFrame.Render(_currentFrame);
-
-        // Hide the cursor to prevent it from jumping around as we overwrite the live lines.
-        Terminal.Write(AnsiCodes.HideCursor);
-        try
-        {
-            Terminal.Write(rendered);
-        }
-        finally
-        {
-            Terminal.Write(AnsiCodes.ShowCursor);
-        }
-
-        _currentFrame = newFrame;
-    }
-
-    /// <summary>
-    /// Erases the previously printed live node output.
-    /// </summary>
-    private void EraseNodes()
-    {
-        if (_currentFrame.NodesCount == 0)
-        {
-            return;
-        }
-        Terminal.WriteLine($"{AnsiCodes.CSI}{_currentFrame.NodesCount + 1}{AnsiCodes.MoveUpToLineStart}");
-        Terminal.Write($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
-        _currentFrame.Clear();
-    }
-
-    #endregion
 
     #region Helpers
 
@@ -1532,10 +1418,7 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         lock (_lock)
         {
-            // Calling erase helps to clear the screen before printing the message
-            // The immediate output will not overlap with node status reporting
-            EraseNodes();
-            Terminal.WriteLine(message);
+            Console.WriteLine(message);
         }
     }
 
@@ -1575,7 +1458,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 columnNumber: e.ColumnNumber,
                 endColumnNumber: e.EndColumnNumber,
                 indent,
-                terminalWidth: Terminal.Width);
+                terminalWidth: int.MaxValue);
 
     private string FormatInformationalMessage(BuildMessageEventArgs e) => FormatEventMessage(
                 category: null,
@@ -1588,7 +1471,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 columnNumber: e.ColumnNumber,
                 endColumnNumber: e.EndColumnNumber,
                 indent: string.Empty,
-                terminalWidth: Terminal.Width,
+                terminalWidth: int.MaxValue,
                 requireFileAndLinePortion: false);
 
     /// <summary>
@@ -1608,7 +1491,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 columnNumber: 0,
                 endColumnNumber: 0,
                 indent,
-                terminalWidth: Terminal.Width,
+                terminalWidth: int.MaxValue,
                 requireFileAndLinePortion: false,
                 prependIndentation: true);
 
@@ -1623,7 +1506,7 @@ public sealed partial class TerminalLogger : INodeLogger
                 columnNumber: e.ColumnNumber,
                 endColumnNumber: e.EndColumnNumber,
                 indent,
-                terminalWidth: Terminal.Width,
+                terminalWidth: int.MaxValue,
                 requireFileAndLinePortion: requireFileAndLinePortion);
 
     private static string FormatEventMessage(

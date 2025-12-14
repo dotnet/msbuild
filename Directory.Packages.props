@@ -48,6 +48,8 @@
     <PackageVersion Include="xunit.console" Version="$(XUnitVersion)" />
     <PackageVersion Include="Microsoft.VisualStudio.OpenTelemetry.Collector" Version="$(MicrosoftVisualStudioOpenTelemetryVersion)" />
     <PackageVersion Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" Version="$(MicrosoftVisualStudioOpenTelemetryVersion)" />
+    <PackageVersion Include="Spectre.Console" Version="0.54.0" />
+    <PackageVersion Include="Spectre.Console.Testing" Version="0.54.0" />
 
     <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Directory.Packages.props -->
   </ItemGroup>
