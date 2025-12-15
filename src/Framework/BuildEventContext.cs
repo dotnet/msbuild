@@ -185,10 +185,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Returns a default invalid BuildEventContext
         /// </summary>
-        public static BuildEventContext Invalid { get; } = CreateInitial(InvalidSubmissionId, InvalidNodeId)
-            .WithProjectContextId(InvalidProjectContextId)
-            .WithTargetId(InvalidTargetId)
-            .WithTaskId(InvalidTaskId);
+        public static BuildEventContext Invalid { get; } = new(InvalidSubmissionId, InvalidNodeId, InvalidEvaluationId, InvalidProjectInstanceId, InvalidProjectContextId, InvalidTargetId, InvalidTaskId);
 
         /// <summary>
         /// Retrieves the Evaluation id.

@@ -521,11 +521,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <inheritdoc />
         public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
-            => new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
+            => BuildEventContext.CreateInitial(0, 0).WithEvaluationId(0).WithProjectInstanceId(0).WithProjectContextId(0).WithTargetId(0).WithTaskId(0);
 
         /// <inheritdoc />
         public BuildEventContext CreateProjectCacheBuildEventContext(int submissionId, int evaluationId, int projectInstanceId, string projectFile)
-            => new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
+            => BuildEventContext.CreateInitial(0, 0).WithEvaluationId(0).WithProjectInstanceId(0).WithProjectContextId(0).WithTargetId(0).WithTaskId(0);
 
         /// <inheritdoc />
         public void LogProjectEvaluationStarted(BuildEventContext eventContext, string projectFile)
@@ -560,7 +560,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             int evaluationId = BuildEventContext.InvalidEvaluationId,
             int projectContextId = BuildEventContext.InvalidProjectContextId)
         {
-            return new BuildEventContext(0, 0, 0, 0);
+            return BuildEventContext.CreateInitial(0, 0);
         }
 
         public void LogProjectStarted(ProjectStartedEventArgs args)
@@ -609,7 +609,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <returns>The build event context for the target</returns>
         public BuildEventContext LogTargetStarted(BuildEventContext projectBuildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, string parentTargetName, TargetBuiltReason buildReason)
         {
-            return new BuildEventContext(0, 0, 0, 0);
+            return BuildEventContext.CreateInitial(0, 0).WithEvaluationId(0).WithProjectInstanceId(0);
         }
 
         /// <summary>
@@ -647,7 +647,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <returns>The task logging context</returns>
         public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, string taskAssemblyLocation)
         {
-            return new BuildEventContext(0, 0, 0, 0);
+            return BuildEventContext.CreateInitial(0, 0).WithEvaluationId(0).WithProjectInstanceId(0);
         }
 
         /// <summary>

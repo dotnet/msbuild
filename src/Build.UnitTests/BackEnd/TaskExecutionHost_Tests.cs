@@ -981,7 +981,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _loggingService = new MockLoggingService();
                 Dispose();
                 _host = new TaskExecutionHost();
-                TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1));
+                TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, BuildEventContext.CreateInitial(1, 1).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithTaskId(1));
 
                 ProjectInstance project = CreateTestProject();
                 _host.InitializeForTask(
@@ -1014,7 +1014,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Dispose();
             _host = new TaskExecutionHost();
-            TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1));
+            TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, BuildEventContext.CreateInitial(1, 1).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithTaskId(1));
 
             ProjectInstance project = CreateTestProject();
             _host.InitializeForTask(
@@ -1248,7 +1248,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger = new MockLogger();
             _loggingService.RegisterLogger(_logger);
             _host = new TaskExecutionHost();
-            TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1));
+            TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, BuildEventContext.CreateInitial(1, 1).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithTaskId(1));
 
             // Set up a temporary project and add some items to it.
             ProjectInstance project = CreateTestProject();
