@@ -1547,7 +1547,7 @@ namespace Microsoft.Build.Execution
             var buildEventContext = request.BuildEventContext;
             if (buildEventContext == BuildEventContext.Invalid)
             {
-                buildEventContext = new BuildEventContext(request.SubmissionId, 0, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                buildEventContext = CreateErrorLoggingContext(request.SubmissionId, 0);
             }
 
             var instances = ProjectInstance.LoadSolutionForBuild(
@@ -1809,12 +1809,20 @@ namespace Microsoft.Build.Execution
             {
                 if (!projectException.HasBeenLogged)
                 {
-                    BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                    BuildEventContext buildEventContext = CreateErrorLoggingContext(submission.SubmissionId);
                     ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(buildEventContext, projectException);
                     projectException.HasBeenLogged = true;
                 }
             }
         }
+
+        /// <summary>
+        /// Creates a BuildEventContext suitable for error logging for the given submission.
+        /// </summary>
+        /// <param name="submissionId">The submission ID</param>
+        /// <param name="nodeId">The node ID, defaults to 1 for general error logging</param>
+        /// <returns>A BuildEventContext for logging errors</returns>
+        private static BuildEventContext CreateErrorLoggingContext(int submissionId, int nodeId = 1) => BuildEventContext.CreateInitial(submissionId, nodeId);
 
         /// <summary>
         /// Waits to drain all events of logging service.
@@ -1918,7 +1926,7 @@ namespace Microsoft.Build.Execution
                     {
                         if (!projectException.HasBeenLogged)
                         {
-                            BuildEventContext projectBuildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                            BuildEventContext projectBuildEventContext = CreateErrorLoggingContext(submission.SubmissionId);
                             ((IBuildComponentHost)this).LoggingService.LogInvalidProjectFileError(projectBuildEventContext, projectException);
                             projectException.HasBeenLogged = true;
                         }
@@ -1934,7 +1942,7 @@ namespace Microsoft.Build.Execution
 
                         if (ex is not InvalidProjectFileException)
                         {
-                            var buildEventContext = new BuildEventContext(submission.SubmissionId, 1, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                            var buildEventContext = CreateErrorLoggingContext(submission.SubmissionId);
                             ((IBuildComponentHost)this).LoggingService.LogFatalBuildError(buildEventContext, ex, new BuildEventFileInfo(submission.BuildRequestData.ProjectFullPath));
                         }
                     }
@@ -2560,7 +2568,7 @@ namespace Microsoft.Build.Execution
                     ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent<ILoggingService>(BuildComponentType.LoggingService);
                     foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
-                        BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, BuildEventContext.InvalidNodeId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                        BuildEventContext buildEventContext = CreateErrorLoggingContext(submission.SubmissionId, BuildEventContext.InvalidNodeId);
                         string exception = ExceptionHandling.ReadAnyExceptionFromFile(_instantiationTimeUtc);
                         loggingService?.LogError(buildEventContext, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, ExceptionHandling.DebugDumpPath, exception);
                     }
@@ -2716,7 +2724,7 @@ namespace Microsoft.Build.Execution
 
                         if (newNodes?.Count != response.NumberOfNodesToCreate || newNodes.Any(n => n == null))
                         {
-                            BuildEventContext buildEventContext = new BuildEventContext(0, Scheduler.VirtualNode, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                            BuildEventContext buildEventContext = CreateErrorLoggingContext(0, Scheduler.VirtualNode);
                             ((IBuildComponentHost)this).LoggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty), "UnableToCreateNode", response.RequiredNodeType.ToString("G"));
 
                             throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnableToCreateNode", response.RequiredNodeType.ToString("G")));
