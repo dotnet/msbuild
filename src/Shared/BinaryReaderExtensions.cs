@@ -88,7 +88,12 @@ namespace Microsoft.Build.Shared
             int projectInstanceId = reader.ReadInt32();
             int evaluationId = reader.ReadInt32();
 
-            var buildEventContext = new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, targetId, taskId);
+            var buildEventContext = BuildEventContext.CreateInitial(submissionId, nodeId)
+                .WithEvaluationId(evaluationId)
+                .WithProjectInstanceId(projectInstanceId)
+                .WithProjectContextId(projectContextId)
+                .WithTargetId(targetId)
+                .WithTaskId(taskId);
             return buildEventContext;
         }
 #endif

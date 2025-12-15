@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 pg,
                 itemsByType,
                 FileSystems.Default,
-                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+                new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4)));
 
             IList<TaskItem> itemsOut = expander.ExpandIntoTaskItemsLeaveEscaped("foo;bar;@(compile);@(resource)", ExpanderOptions.ExpandPropertiesAndItems, MockElementLocation.Instance);
 
@@ -847,7 +847,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 pg,
                 ig,
                 FileSystems.Default,
-                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+                new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4)));
 
             return expander;
         }
@@ -2366,7 +2366,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     Directory.GetCurrentDirectory(),
                     MockElementLocation.Instance,
                     FileSystems.Default,
-                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4))));
+                    new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4))));
             Assert.True(
                 ConditionEvaluator.EvaluateCondition(
                     @"'$(PathRoot.EndsWith(" + Path.DirectorySeparatorChar + "))' == 'false'",
@@ -2376,7 +2376,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     Directory.GetCurrentDirectory(),
                     MockElementLocation.Instance,
                     FileSystems.Default,
-                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4))));
+                    new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4))));
         }
 
         /// <summary>

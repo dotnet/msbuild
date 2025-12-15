@@ -1494,13 +1494,7 @@ namespace Microsoft.Build.Execution
             where TResultData : BuildResultBase
         {
             // For the current submission we only know the SubmissionId and that it happened on scheduler node - all other BuildEventContext dimensions are unknown now.
-            BuildEventContext buildEventContext = new BuildEventContext(
-                submission.SubmissionId,
-                nodeId: 1,
-                BuildEventContext.InvalidProjectInstanceId,
-                BuildEventContext.InvalidProjectContextId,
-                BuildEventContext.InvalidTargetId,
-                BuildEventContext.InvalidTaskId);
+            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(submission.SubmissionId, nodeId: 1);
 
             BuildSubmissionStartedEventArgs submissionStartedEvent = new(
                 submission.BuildRequestDataBase.GlobalPropertiesLookup,
@@ -2041,14 +2035,7 @@ namespace Microsoft.Build.Execution
                             null,
                             _buildParameters,
                             ((IBuildComponentHost)this).LoggingService,
-                            new BuildEventContext(
-                                submission.SubmissionId,
-                                _buildParameters.NodeId,
-                                BuildEventContext.InvalidEvaluationId,
-                                BuildEventContext.InvalidProjectInstanceId,
-                                BuildEventContext.InvalidProjectContextId,
-                                BuildEventContext.InvalidTargetId,
-                                BuildEventContext.InvalidTaskId),
+                            BuildEventContext.CreateInitial(submission.SubmissionId, _buildParameters.NodeId),
                             SdkResolverService,
                             submission.SubmissionId,
                             projectLoadSettings);
@@ -2570,7 +2557,9 @@ namespace Microsoft.Build.Execution
                 {
                     BuildEventContext buildEventContext = _projectStartedEvents.TryGetValue(result.SubmissionId, out BuildEventArgs? buildEventArgs)
                         ? buildEventArgs.BuildEventContext!
-                        : new BuildEventContext(result.SubmissionId, node, configuration.Project?.EvaluationId ?? BuildEventContext.InvalidEvaluationId, configuration.ConfigurationId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+                        : BuildEventContext.CreateInitial(result.SubmissionId, node)
+                            .WithEvaluationId(configuration.Project?.EvaluationId ?? BuildEventContext.InvalidEvaluationId)
+                            .WithProjectInstanceId(configuration.ConfigurationId);
                     try
                     {
                         _projectCacheService.HandleBuildResultAsync(configuration, result, buildEventContext, _executionCancellationTokenSource!.Token).Wait();

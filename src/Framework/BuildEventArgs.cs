@@ -241,11 +241,19 @@ namespace Microsoft.Build.Framework
                     int submissionId = reader.ReadInt32();
                     int projectInstanceId = reader.ReadInt32();
                     int evaluationId = reader.ReadInt32();
-                    buildEventContext = new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, targetId, taskId);
+                    buildEventContext = BuildEventContext.CreateInitial(submissionId, nodeId)
+                        .WithEvaluationId(evaluationId)
+                        .WithProjectInstanceId(projectInstanceId)
+                        .WithProjectContextId(projectContextId)
+                        .WithTargetId(targetId)
+                        .WithTaskId(taskId);
                 }
                 else
                 {
-                    buildEventContext = new BuildEventContext(InvalidSubmissionId, nodeId, InvalidEvaluationId, InvalidProjectInstanceId, projectContextId, targetId, taskId);
+                    buildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, nodeId)
+                        .WithProjectContextId(projectContextId)
+                        .WithTargetId(targetId)
+                        .WithTaskId(taskId);
                 }
             }
         }

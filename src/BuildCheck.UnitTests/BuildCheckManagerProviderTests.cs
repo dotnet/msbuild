@@ -42,7 +42,7 @@ public class BuildCheckManagerTests
         MockBuildCheckAcquisition(isCheckRuleExist);
         MockEnabledDataSourcesDefinition();
 
-        _testedInstance.ProcessCheckAcquisition(new CheckAcquisitionData("DummyPath", "ProjectPath"), new CheckLoggingContext(_loggingService, new BuildEventContext(1, 2, 3, 4, 5, 6, 7)));
+        _testedInstance.ProcessCheckAcquisition(new CheckAcquisitionData("DummyPath", "ProjectPath"), new CheckLoggingContext(_loggingService, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTargetId(6).WithTaskId(7)));
 
         _logger.AllBuildEvents.Where(be => be.GetType() == typeof(BuildMessageEventArgs)).Select(be => be.Message).ToArray()
             .ShouldBeEquivalentTo(expectedMessages);

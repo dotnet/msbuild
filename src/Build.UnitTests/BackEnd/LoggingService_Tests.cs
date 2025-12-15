@@ -792,7 +792,7 @@ namespace Microsoft.Build.UnitTests.Logging
             ls.WarningsAsErrors = new HashSet<string>();
             ls.WarningsAsErrors.Add("FOR123");
             BuildWarningEventArgs warningArgs = new("abc", "FOR123", "", 0, 0, 0, 0, "warning message", "keyword", "sender");
-            warningArgs.BuildEventContext = new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidProjectContextId, 5, 6);
+            warningArgs.BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(BuildEventContext.InvalidProjectContextId).WithProjectInstanceId(BuildEventContext.InvalidProjectContextId).WithProjectContextId(5).WithTaskId(6);
             ls.LogBuildEvent(warningArgs);
             ls.HasBuildSubmissionLoggedErrors(1).ShouldBeTrue();
         }
@@ -952,13 +952,11 @@ namespace Microsoft.Build.UnitTests.Logging
         {
             IBuildComponentHost host = new MockHost();
 
-            BuildEventContext buildEventContext = new BuildEventContext(
-                submissionId: 0,
-                nodeId: 1,
-                projectInstanceId: 2,
-                projectContextId: -1,
-                targetId: -1,
-                taskId: -1);
+            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(0, 1)
+                .WithProjectInstanceId(2)
+                .WithProjectContextId(-1)
+                .WithTargetId(-1)
+                .WithTaskId(-1);
 
             BuildRequestData buildRequestData = new BuildRequestData("projectFile", new Dictionary<string, string>(), "Current", new[] { "Build" }, null);
 

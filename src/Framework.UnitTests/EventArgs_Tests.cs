@@ -60,19 +60,19 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ExerciseBuildEventContext()
         {
-            BuildEventContext parentBuildEventContext = new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
+            BuildEventContext parentBuildEventContext = BuildEventContext.CreateInitial(0, 0).WithEvaluationId(0).WithProjectInstanceId(0).WithProjectContextId(0).WithTargetId(0).WithTaskId(0);
 
-            BuildEventContext currentBuildEventContext = new BuildEventContext(0, 1, 2, 3, 4, 5, 6);
+            BuildEventContext currentBuildEventContext = BuildEventContext.CreateInitial(0, 1).WithEvaluationId(2).WithProjectInstanceId(3).WithProjectContextId(4).WithTargetId(5).WithTaskId(6);
 
-            BuildEventContext currentBuildEventContextSubmission = new BuildEventContext(1, 0, 0, 0, 0, 0, 0);
-            BuildEventContext currentBuildEventContextNode = new BuildEventContext(0, 1, 0, 0, 0, 0, 0);
-            BuildEventContext currentBuildEventContextEvaluation = new BuildEventContext(0, 0, 1, 0, 0, 0, 0);
-            BuildEventContext currentBuildEventContextProjectInstance = new BuildEventContext(0, 0, 0, 1, 0, 0, 0);
-            BuildEventContext currentBuildEventProjectContext = new BuildEventContext(0, 0, 0, 0, 1, 0, 0);
-            BuildEventContext currentBuildEventContextTarget = new BuildEventContext(0, 0, 0, 0, 0, 1, 0);
-            BuildEventContext currentBuildEventContextTask = new BuildEventContext(0, 0, 0, 0, 0, 0, 1);
-            BuildEventContext allDifferent = new BuildEventContext(1, 1, 1, 1, 1, 1, 1);
-            BuildEventContext allSame = new BuildEventContext(0, 0, 0, 0, 0, 0, 0);
+            BuildEventContext currentBuildEventContextSubmission = BuildEventContext.CreateInitial(1, 0).WithEvaluationId(0).WithProjectInstanceId(0).WithProjectContextId(0).WithTargetId(0).WithTaskId(0);
+            BuildEventContext currentBuildEventContextNode = BuildEventContext.CreateInitial(0, 1).WithEvaluationId(0).WithProjectInstanceId(0).WithProjectContextId(0).WithTargetId(0).WithTaskId(0);
+            BuildEventContext currentBuildEventContextEvaluation = BuildEventContext.CreateInitial(0, 0).WithEvaluationId(1).WithProjectInstanceId(0).WithProjectContextId(0).WithTargetId(0).WithTaskId(0);
+            BuildEventContext currentBuildEventContextProjectInstance = BuildEventContext.CreateInitial(0, 0).WithEvaluationId(0).WithProjectInstanceId(1).WithProjectContextId(0).WithTargetId(0).WithTaskId(0);
+            BuildEventContext currentBuildEventProjectContext = BuildEventContext.CreateInitial(0, 0).WithEvaluationId(0).WithProjectInstanceId(0).WithProjectContextId(1).WithTargetId(0).WithTaskId(0);
+            BuildEventContext currentBuildEventContextTarget = BuildEventContext.CreateInitial(0, 0).WithEvaluationId(0).WithProjectInstanceId(0).WithProjectContextId(0).WithTargetId(1).WithTaskId(0);
+            BuildEventContext currentBuildEventContextTask = BuildEventContext.CreateInitial(0, 0).WithEvaluationId(0).WithProjectInstanceId(0).WithProjectContextId(0).WithTargetId(0).WithTaskId(1);
+            BuildEventContext allDifferent = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1).WithProjectContextId(1).WithTargetId(1).WithTaskId(1);
+            BuildEventContext allSame = BuildEventContext.CreateInitial(0, 0).WithEvaluationId(0).WithProjectInstanceId(0).WithProjectContextId(0).WithTargetId(0).WithTaskId(0);
 
             ProjectStartedEventArgs startedEvent = new ProjectStartedEventArgs(-1, "Message", "HELP", "File", "Targets", null, null, parentBuildEventContext);
             startedEvent.BuildEventContext = currentBuildEventContext;

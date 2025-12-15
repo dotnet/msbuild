@@ -49,7 +49,7 @@ namespace Microsoft.Build.UnitTests
 
         public ConfigureableForwardingLogger_Tests()
         {
-            BuildEventContext context = new BuildEventContext(1, 2, 3, 4);
+            BuildEventContext context = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4);
             _error.BuildEventContext = context;
             _warning.BuildEventContext = context;
             _targetStarted.BuildEventContext = context;

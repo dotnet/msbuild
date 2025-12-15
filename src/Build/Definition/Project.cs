@@ -67,7 +67,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Context to log messages and events in.
         /// </summary>
-        private static readonly BuildEventContext s_buildEventContext = new BuildEventContext(0 /* node ID */, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+        private static readonly BuildEventContext s_buildEventContext = BuildEventContext.CreateInitial(0 /* submission ID */, 0 /* node ID */);
 
         private ProjectLink implementation;
         private IProjectLinkInternal implementationInternal;

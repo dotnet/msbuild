@@ -313,7 +313,7 @@ namespace Microsoft.Build.Execution
                 Interactive = interactive
             };
 
-            BuildEventContext buildEventContext = new BuildEventContext(buildParameters.NodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(0 /* submission ID */, buildParameters.NodeId);
             ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, true /*Explicitly Loaded*/);
 
             Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version provided */, buildParameters, projectCollection.LoggingService, buildEventContext,
@@ -543,7 +543,7 @@ namespace Microsoft.Build.Execution
         private ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection,
             ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
         {
-            BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(0 /* submission ID */, 0 /* node ID */);
 
             BuildParameters buildParameters = new BuildParameters(projectCollection)
             {
@@ -618,7 +618,7 @@ namespace Microsoft.Build.Execution
         /// <returns>A new project instance</returns>
         internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, int visualStudioVersionFromSolution, ProjectCollection projectCollection, ISdkResolverService sdkResolverService, int submissionId)
         {
-            BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(0 /* submission ID */, 0 /* node ID */);
             Initialize(xml, globalProperties, toolsVersion, null, visualStudioVersionFromSolution, new BuildParameters(projectCollection), projectCollection.LoggingService, buildEventContext, sdkResolverService, submissionId);
         }
 

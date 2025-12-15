@@ -384,7 +384,7 @@ namespace Microsoft.Build.Evaluation
                             }
                             catch (InvalidProjectFileException ex2)
                             {
-                                BuildEventContext buildEventContext = new BuildEventContext(0 /* node ID */, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+                                BuildEventContext buildEventContext = BuildEventContext.CreateInitial(0 /* submission ID */, 0 /* node ID */);
                                 LoggingService.LogInvalidProjectFileError(buildEventContext, ex2);
                                 throw;
                             }
@@ -1261,7 +1261,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     catch (InvalidProjectFileException ex)
                     {
-                        var buildEventContext = new BuildEventContext(0 /* node ID */, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+                        var buildEventContext = BuildEventContext.CreateInitial(0 /* submission ID */, 0 /* node ID */);
                         LoggingService.LogInvalidProjectFileError(buildEventContext, ex);
                         throw;
                     }

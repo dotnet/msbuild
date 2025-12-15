@@ -756,7 +756,7 @@ namespace Microsoft.Build.UnitTests.Logging
             /// </summary>
             private static BuildWarningEventArgs s_buildWarning = new BuildWarningEventArgs("SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender")
             {
-                BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6)
+                BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTaskId(6)
             };
 
             /// <summary>

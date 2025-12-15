@@ -857,7 +857,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 using ProjectCollection projectCollection = new ProjectCollection();
                 BuildParameters buildParameters = new BuildParameters(projectCollection) { ProjectLoadSettings = projectLoadSettings };
-                BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+                BuildEventContext buildEventContext = BuildEventContext.CreateInitial(0, BuildEventContext.InvalidTargetId).WithEvaluationId(BuildEventContext.InvalidProjectContextId).WithProjectInstanceId(BuildEventContext.InvalidTaskId);
 
                 using ProjectRootElementFromString projectRootElementFromString = new(projectFileContent);
                 ProjectRootElement rootElement = projectRootElementFromString.Project;
