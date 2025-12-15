@@ -273,16 +273,6 @@ namespace Microsoft.Build.Construction
                         value,
                         true); /* only remove the element if the value is null -- setting to empty string is OK */
 
-                // if this target's Returns attribute is non-null, then there is at least one target in the
-                // parent project that has the returns attribute.
-                // NOTE: As things are currently, if a project is created that has targets with Returns, but then
-                // all of those targets are set to not have Returns anymore, the PRE will still claim that it
-                // contains targets with the Returns attribute.  Do we care?
-                if (returnsAttribute != null)
-                {
-                    ((ProjectRootElement)Parent).ContainsTargetsWithReturnsAttribute = true;
-                }
-
                 MarkDirty("Set target Returns {0}", value);
             }
         }

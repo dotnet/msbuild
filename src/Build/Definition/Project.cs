@@ -1819,7 +1819,7 @@ namespace Microsoft.Build.Evaluation
         /// Internal project evaluation implementation.
         /// </summary>
         [DebuggerDisplay("#GlobalProperties={_data.GlobalPropertiesDictionary.Count} #Properties={_data.Properties.Count} #ItemTypes={_data.ItemTypes.Count} #ItemDefinitions={_data.ItemDefinitions.Count} #Items={_data.Items.Count} #Targets={_data.Targets.Count}")]
-        private class ProjectImpl : ProjectLink, IProjectLinkInternal
+        internal class ProjectImpl : ProjectLink, IProjectLinkInternal
         {
             /// <summary>
             /// Backing data; stored in a nested class so it can be passed to the Evaluator to fill
@@ -2065,7 +2065,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (Xml.Count > 0) // don't log empty projects, evaluation is not interesting
                             {
-                                Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1}] [PC Hash {2}]", Xml.LastDirtyReason, FullPath, ProjectCollection.GetHashCode()));
+                                Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because of version mismatch [{0}] [PC Hash {1}]", FullPath, ProjectCollection.GetHashCode()));
                             }
                         }
 
@@ -2088,12 +2088,7 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (s_debugEvaluation)
                             {
-                                string reason = import.ImportedProject.LastDirtyReason;
-
-                                if (reason != null)
-                                {
-                                    Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because {0} [{1} - {2}] [PC Hash {3}]", reason, FullPath, import.ImportedProject.FullPath == FullPath ? String.Empty : import.ImportedProject.FullPath, ProjectCollection.GetHashCode()));
-                                }
+                                Trace.WriteLine(String.Format(CultureInfo.InvariantCulture, "MSBUILD: Is dirty because version numbers are mismatched [{0} - {1}] [PC Hash {2}]", FullPath, import.ImportedProject.FullPath == FullPath ? String.Empty : import.ImportedProject.FullPath, ProjectCollection.GetHashCode()));
                             }
 
                             return true;
@@ -2263,7 +2258,7 @@ namespace Microsoft.Build.Evaluation
 
                     foreach (ResolvedImport import in _data.ImportClosure)
                     {
-                        if (import.ImportingElement != null && !import.ImportedProject.IsEphemeral) // Exclude outer project itself and SDK-resolver synthesized imports
+                        if (import.ImportingElement != null && import.ImportedProject is not EphemeralProjectRootElement) // Exclude outer project itself and SDK-resolver synthesized imports
                         {
                             imports.Add(import);
                         }
@@ -2286,7 +2281,7 @@ namespace Microsoft.Build.Evaluation
 
                     foreach (var import in _data.ImportClosureWithDuplicates)
                     {
-                        if (import.ImportingElement != null && !import.ImportedProject.IsEphemeral) // Exclude outer project itself and SDK-resolver synthesized imports
+                        if (import.ImportingElement != null && import.ImportedProject is not EphemeralProjectRootElement) // Exclude outer project itself and SDK-resolver synthesized imports
                         {
                             imports.Add(import);
                         }
