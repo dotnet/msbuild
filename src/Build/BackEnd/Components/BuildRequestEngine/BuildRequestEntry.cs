@@ -501,6 +501,9 @@ namespace Microsoft.Build.BackEnd
 
                 Result = result;
                 ChangeState(BuildRequestEntryState.Complete);
+
+                // Dispose the TaskEnvironment to clean up any thread-local state (e.g., CurrentThreadWorkingDirectory).
+                TaskEnvironment?.Dispose();
             }
         }
 
