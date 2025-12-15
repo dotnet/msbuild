@@ -61,12 +61,11 @@ namespace Microsoft.Build.Shared
         private static readonly ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfReflectionOnlyLoadedTypesByFilter = new ConcurrentDictionary<Func<Type, object, bool>, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
 
         /// <summary>
-        /// Type filter for this typeloader.
+        /// Type filter for this typeloader
         /// </summary>
         private Func<Type, object, bool> _isDesiredType;
 
         private static readonly string[] runtimeAssemblies = findRuntimeAssembliesWithMicrosoftBuildFramework();
-
         private static string microsoftBuildFrameworkPath;
 
         // We need to append Microsoft.Build.Framework from next to the executing assembly first to make sure it's loaded before the runtime variant.
@@ -79,33 +78,6 @@ namespace Microsoft.Build.Shared
 
             return [.. runtimeAssemblies, .. msbuildAssemblies];
         }
-
-#if NETFRAMEWORK
-        private static readonly string[] _runtimeAssembliesCLR35_20 = FindRuntimeAssembliesWithMicrosoftBuildFrameworkCLR2CLR35();
-
-        /// <summary>
-        /// Gathers a list of runtime assemblies for the <see cref="MetadataLoadContext"/>.
-        /// This includes assemblies from the MSBuild installation directory, the current .NET runtime directory,
-        /// and on .NET Framework, assemblies from older framework versions (2.0, 3.5).
-        /// The path to the current `Microsoft.Build.Framework.dll` is also stored to ensure it's prioritized
-        /// for resolving essential types like <see cref="ITaskItem"/>.
-        /// These paths are used to create a <see cref="PathAssemblyResolver"/> for the <see cref="MetadataLoadContext"/>.
-        /// </summary>
-        private static string[] FindRuntimeAssembliesWithMicrosoftBuildFrameworkCLR2CLR35()
-        {
-            string v20Path = FrameworkLocationHelper.PathToDotNetFrameworkV20;
-            string v35Path = FrameworkLocationHelper.PathToDotNetFrameworkV35;
-
-            string[] clr2Assemblies = !string.IsNullOrEmpty(v20Path) && Directory.Exists(v20Path)
-                ? Directory.GetFiles(v20Path, "*.dll")
-                : [];
-            string[] clr35Assemblies = !string.IsNullOrEmpty(v35Path) && Directory.Exists(v35Path)
-                ? Directory.GetFiles(v35Path, "*.dll")
-                : [];
-
-            return [.. clr2Assemblies, .. clr35Assemblies];
-        }
-#endif
 
         /// <summary>
         /// Constructor.
@@ -245,24 +217,19 @@ namespace Microsoft.Build.Shared
 
         private static MetadataLoadContext CreateMetadataLoadContext(AssemblyLoadInfo assemblyLoadInfo)
         {
-            string assemblyFilePath = assemblyLoadInfo.AssemblyFile;
-            if (string.IsNullOrEmpty(assemblyFilePath) || !File.Exists(assemblyFilePath))
+            string path = assemblyLoadInfo.AssemblyFile;
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
             {
                 throw new FileNotFoundException(null, assemblyLoadInfo.AssemblyLocation);
             }
 
-            string assemblyDirectory = Path.GetDirectoryName(assemblyFilePath);
-            string[] dlls = Directory.GetFiles(assemblyDirectory, "*.dll");
-            string[] exes = Directory.GetFiles(assemblyDirectory, "*.exe");
-            string[] localAssemblies = [.. dlls, .. exes];
-
-#if !NETFRAMEWORK
+            string[] localAssemblies = Directory.GetFiles(Path.GetDirectoryName(path), "*.dll");
 
             // Deduplicate between MSBuild assemblies and task dependencies.
             Dictionary<string, string> assembliesDictionary = new(localAssemblies.Length + runtimeAssemblies.Length);
             foreach (string localPath in localAssemblies)
             {
-                assembliesDictionary[Path.GetFileName(localPath)] = localPath;
+                assembliesDictionary.Add(Path.GetFileName(localPath), localPath);
             }
 
             foreach (string runtimeAssembly in runtimeAssemblies)
@@ -271,32 +238,6 @@ namespace Microsoft.Build.Shared
             }
 
             return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
-
-#else
-           // Merge all assembly tiers into one dictionary with priority:
-            // CLR2 < CLR3.5 < Local < Runtime (later entries overwrite earlier ones)
-            Dictionary<string, string> assembliesDictionary = new(StringComparer.OrdinalIgnoreCase);
-
-            // Add assemblies in priority order (later entries overwrite earlier ones)
-            AddAssembliesToDictionary(
-                assembliesDictionary,
-                _runtimeAssembliesCLR35_20,
-                localAssemblies,
-                runtimeAssemblies);
-
-            return new MetadataLoadContext(new PathAssemblyResolver(assembliesDictionary.Values));
-
-            static void AddAssembliesToDictionary(Dictionary<string, string> assembliesDictionary, params string[][] assemblyPathArrays)
-            {
-                foreach (string[] assemblyPaths in assemblyPathArrays)
-                {
-                    foreach (string path in assemblyPaths)
-                    {
-                        assembliesDictionary[Path.GetFileName(path)] = path;
-                    }
-                }
-            }
-#endif
         }
 
         /// <summary>
@@ -579,7 +520,7 @@ namespace Microsoft.Build.Shared
                         MSBuildEventSource.Log.CreateLoadedTypeStart(loadedAssembly.FullName);
                         var taskItemType = context.LoadFromAssemblyPath(microsoftBuildFrameworkPath).GetType(typeof(ITaskItem).FullName);
                         LoadedType loadedType = new(foundType, _assemblyLoadInfo, loadedAssembly, taskItemType, _runtime, _architecture, loadedViaMetadataLoadContext: true);
-
+ 
                         MSBuildEventSource.Log.CreateLoadedTypeStop(loadedAssembly.FullName);
                         return loadedType;
                     }
