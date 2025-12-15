@@ -493,14 +493,7 @@ namespace Microsoft.Build.BackEnd
                     toolsVersionOverride,
                     componentHost.BuildParameters,
                     componentHost.LoggingService,
-                    new BuildEventContext(
-                        submissionId,
-                        nodeId,
-                        BuildEventContext.InvalidEvaluationId,
-                        BuildEventContext.InvalidProjectInstanceId,
-                        BuildEventContext.InvalidProjectContextId,
-                        BuildEventContext.InvalidTargetId,
-                        BuildEventContext.InvalidTaskId),
+                    BuildEventContext.CreateInitial(submissionId, nodeId),
                     sdkResolverService,
                     submissionId,
                     projectLoadSettings);

@@ -402,7 +402,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <inheritdoc />
         public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
-            => new BuildEventContext(submissionId, nodeId, NextEvaluationId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+            => BuildEventContext.CreateInitial(submissionId, nodeId).WithEvaluationId(NextEvaluationId);
 
         /// <inheritdoc />
         public BuildEventContext CreateProjectCacheBuildEventContext(
@@ -420,7 +420,10 @@ namespace Microsoft.Build.BackEnd.Logging
             // If a invalid node id is used the messages become deferred in the console logger and spit out at the end.
             int nodeId = Scheduler.InProcNodeId;
 
-            return new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+            return BuildEventContext.CreateInitial(submissionId, nodeId)
+                .WithEvaluationId(evaluationId)
+                .WithProjectInstanceId(projectInstanceId)
+                .WithProjectContextId(projectContextId);
         }
 
         /// <inheritdoc />
@@ -569,7 +572,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            BuildEventContext projectBuildEventContext = new BuildEventContext(submissionId, nodeBuildEventContext.NodeId, evaluationId, configurationId, projectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+            BuildEventContext projectBuildEventContext = nodeBuildEventContext
+                .WithSubmissionId(submissionId)
+                .WithEvaluationId(evaluationId)
+                .WithProjectInstanceId(configurationId)
+                .WithProjectContextId(projectContextId);
 
             ErrorUtilities.VerifyThrow(parentBuildEventContext != null, "Need a parentBuildEventContext");
 
@@ -641,13 +648,7 @@ namespace Microsoft.Build.BackEnd.Logging
         public BuildEventContext LogTargetStarted(BuildEventContext projectBuildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, string parentTargetName, TargetBuiltReason buildReason)
         {
             ErrorUtilities.VerifyThrow(projectBuildEventContext != null, "projectBuildEventContext is null");
-            BuildEventContext targetBuildEventContext = new BuildEventContext(
-                    projectBuildEventContext.SubmissionId,
-                    projectBuildEventContext.NodeId,
-                    projectBuildEventContext.ProjectInstanceId,
-                    projectBuildEventContext.ProjectContextId,
-                    NextTargetId,
-                    BuildEventContext.InvalidTaskId);
+            BuildEventContext targetBuildEventContext = projectBuildEventContext.WithTargetId(NextTargetId);
 
             if (!OnlyLogCriticalEvents)
             {
@@ -738,13 +739,7 @@ namespace Microsoft.Build.BackEnd.Logging
         public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, string taskAssemblyLocation)
         {
             ErrorUtilities.VerifyThrow(targetBuildEventContext != null, "targetBuildEventContext is null");
-            BuildEventContext taskBuildEventContext = new BuildEventContext(
-                    targetBuildEventContext.SubmissionId,
-                    targetBuildEventContext.NodeId,
-                    targetBuildEventContext.ProjectInstanceId,
-                    targetBuildEventContext.ProjectContextId,
-                    targetBuildEventContext.TargetId,
-                    NextTaskId);
+            BuildEventContext taskBuildEventContext = targetBuildEventContext.WithTaskId(NextTaskId);
 
             if (!OnlyLogCriticalEvents)
             {

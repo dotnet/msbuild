@@ -7,7 +7,11 @@ namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// Will provide location information for an event, this is especially
-    /// needed in a multi processor environment
+    /// needed in a multi processor environment.
+    /// 
+    /// BuildEventContext objects should be created using the static CreateInitial method
+    /// for the root context, then using the fluent WithXxx methods to create derived contexts
+    /// that preserve all ID properties while updating specific ones.
     /// </summary>
     [Serializable]
     public class BuildEventContext
@@ -54,49 +58,11 @@ namespace Microsoft.Build.Framework
         #region Constructor
 
         /// <summary>
-        /// This is the original constructor.  No one should ever use this except internally for backward compatibility.
+        /// Constructs a BuildEventContext with all parameters specified.
+        /// This constructor should only be used internally for serialization/deserialization
+        /// and by the fluent WithXxx methods. External code should use CreateInitial() and fluent methods.
         /// </summary>
-        public BuildEventContext(
-            int nodeId,
-            int targetId,
-            int projectContextId,
-            int taskId)
-            : this(InvalidSubmissionId, nodeId, InvalidEvaluationId, InvalidProjectInstanceId, projectContextId, targetId, taskId)
-        {
-            // UNDONE: This is obsolete.
-        }
-
-        /// <summary>
-        /// Constructs a BuildEventContext with a specified project instance id.
-        /// </summary>
-        public BuildEventContext(
-            int nodeId,
-            int projectInstanceId,
-            int projectContextId,
-            int targetId,
-            int taskId)
-            : this(InvalidSubmissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
-        {
-        }
-
-        /// <summary>
-        /// Constructs a BuildEventContext with a specific submission id
-        /// </summary>
-        public BuildEventContext(
-            int submissionId,
-            int nodeId,
-            int projectInstanceId,
-            int projectContextId,
-            int targetId,
-            int taskId)
-            : this(submissionId, nodeId, InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId)
-        {
-        }
-
-        /// <summary>
-        /// Constructs a BuildEventContext
-        /// </summary>
-        public BuildEventContext(
+        internal BuildEventContext(
             int submissionId,
             int nodeId,
             int evaluationId,
@@ -114,7 +80,25 @@ namespace Microsoft.Build.Framework
             _projectInstanceId = projectInstanceId;
         }
 
+        /// <summary>
+        /// Creates an initial BuildEventContext for the beginning of a build.
+        /// </summary>
+        /// <param name="submissionId">The submission ID</param>
+        /// <param name="nodeId">The node ID</param>
+        /// <returns>A new BuildEventContext with the specified submission and node ID</returns>
+        public static BuildEventContext CreateInitial(int submissionId, int nodeId)
+        {
+            return new BuildEventContext(
+                submissionId,
+                nodeId,
+                InvalidEvaluationId,
+                InvalidProjectInstanceId,
+                InvalidProjectContextId,
+                InvalidTargetId,
+                InvalidTaskId);
+        }
         #endregion
+
         internal BuildEventContext WithInstanceIdAndContextId(int projectInstanceId, int projectContextId)
         {
             return new BuildEventContext(_submissionId, _nodeId, _evaluationId, projectInstanceId, projectContextId,
@@ -126,12 +110,85 @@ namespace Microsoft.Build.Framework
             return WithInstanceIdAndContextId(other.ProjectInstanceId, other.ProjectContextId);
         }
 
+        /// <summary>
+        /// Creates a new BuildEventContext with the specified submission ID, preserving all other IDs.
+        /// </summary>
+        /// <param name="submissionId">The new submission ID</param>
+        /// <returns>A new BuildEventContext with the updated submission ID</returns>
+        public BuildEventContext WithSubmissionId(int submissionId)
+        {
+            return new BuildEventContext(submissionId, _nodeId, _evaluationId, _projectInstanceId, _projectContextId, _targetId, _taskId);
+        }
+
+        /// <summary>
+        /// Creates a new BuildEventContext with the specified node ID, preserving all other IDs.
+        /// </summary>
+        /// <param name="nodeId">The new node ID</param>
+        /// <returns>A new BuildEventContext with the updated node ID</returns>
+        public BuildEventContext WithNodeId(int nodeId)
+        {
+            return new BuildEventContext(_submissionId, nodeId, _evaluationId, _projectInstanceId, _projectContextId, _targetId, _taskId);
+        }
+
+        /// <summary>
+        /// Creates a new BuildEventContext with the specified evaluation ID, preserving all other IDs.
+        /// </summary>
+        /// <param name="evaluationId">The new evaluation ID</param>
+        /// <returns>A new BuildEventContext with the updated evaluation ID</returns>
+        public BuildEventContext WithEvaluationId(int evaluationId)
+        {
+            return new BuildEventContext(_submissionId, _nodeId, evaluationId, _projectInstanceId, _projectContextId, _targetId, _taskId);
+        }
+
+        /// <summary>
+        /// Creates a new BuildEventContext with the specified project instance ID, preserving all other IDs.
+        /// </summary>
+        /// <param name="projectInstanceId">The new project instance ID</param>
+        /// <returns>A new BuildEventContext with the updated project instance ID</returns>
+        public BuildEventContext WithProjectInstanceId(int projectInstanceId)
+        {
+            return new BuildEventContext(_submissionId, _nodeId, _evaluationId, projectInstanceId, _projectContextId, _targetId, _taskId);
+        }
+
+        /// <summary>
+        /// Creates a new BuildEventContext with the specified project context ID, preserving all other IDs.
+        /// </summary>
+        /// <param name="projectContextId">The new project context ID</param>
+        /// <returns>A new BuildEventContext with the updated project context ID</returns>
+        public BuildEventContext WithProjectContextId(int projectContextId)
+        {
+            return new BuildEventContext(_submissionId, _nodeId, _evaluationId, _projectInstanceId, projectContextId, _targetId, _taskId);
+        }
+
+        /// <summary>
+        /// Creates a new BuildEventContext with the specified target ID, preserving all other IDs.
+        /// </summary>
+        /// <param name="targetId">The new target ID</param>
+        /// <returns>A new BuildEventContext with the updated target ID</returns>
+        public BuildEventContext WithTargetId(int targetId)
+        {
+            return new BuildEventContext(_submissionId, _nodeId, _evaluationId, _projectInstanceId, _projectContextId, targetId, _taskId);
+        }
+
+        /// <summary>
+        /// Creates a new BuildEventContext with the specified task ID, preserving all other IDs.
+        /// </summary>
+        /// <param name="taskId">The new task ID</param>
+        /// <returns>A new BuildEventContext with the updated task ID</returns>
+        public BuildEventContext WithTaskId(int taskId)
+        {
+            return new BuildEventContext(_submissionId, _nodeId, _evaluationId, _projectInstanceId, _projectContextId, _targetId, taskId);
+        }
+
         #region Properties
 
         /// <summary>
         /// Returns a default invalid BuildEventContext
         /// </summary>
-        public static BuildEventContext Invalid { get; } = new BuildEventContext(InvalidNodeId, InvalidTargetId, InvalidProjectContextId, InvalidTaskId);
+        public static BuildEventContext Invalid { get; } = CreateInitial(InvalidSubmissionId, InvalidNodeId)
+            .WithProjectContextId(InvalidProjectContextId)
+            .WithTargetId(InvalidTargetId)
+            .WithTaskId(InvalidTaskId);
 
         /// <summary>
         /// Retrieves the Evaluation id.

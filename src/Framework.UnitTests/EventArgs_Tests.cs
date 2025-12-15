@@ -29,7 +29,10 @@ namespace Microsoft.Build.UnitTests
         public EventArgs_Tests()
         {
             s_baseGenericEvent = new GenericBuildEventArgs("Message", "HelpKeyword", "senderName");
-            s_baseGenericEvent.BuildEventContext = new BuildEventContext(9, 8, 7, 6);
+            s_baseGenericEvent.BuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 9)
+                .WithProjectContextId(7)
+                .WithTargetId(8)
+                .WithTaskId(6);
         }
 
         /// <summary>
