@@ -38,7 +38,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             _loggingContext = new MockLoggingContext(
                 loggingService,
-                new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
+                BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 0)
+                    .WithProjectInstanceId(0)
+                    .WithTargetId(0)
+                    .WithTaskId(0));
         }
 
         [Fact]

@@ -245,7 +245,7 @@ namespace Microsoft.Build.Framework
                 }
                 else
                 {
-                    buildEventContext = new BuildEventContext(nodeId, targetId, projectContextId, taskId);
+                    buildEventContext = new BuildEventContext(InvalidSubmissionId, nodeId, InvalidEvaluationId, InvalidProjectInstanceId, projectContextId, targetId, taskId);
                 }
             }
         }

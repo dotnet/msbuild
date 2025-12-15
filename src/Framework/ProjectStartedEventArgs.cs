@@ -429,11 +429,11 @@ namespace Microsoft.Build.Framework
                 {
                     int submissionId = reader.ReadInt32();
                     int projectInstanceId = reader.ReadInt32();
-                    parentProjectBuildEventContext = new BuildEventContext(submissionId, nodeId, projectInstanceId, projectContextId, targetId, taskId);
+                    parentProjectBuildEventContext = new BuildEventContext(submissionId, nodeId, BuildEventContext.InvalidEvaluationId, projectInstanceId, projectContextId, targetId, taskId);
                 }
                 else
                 {
-                    parentProjectBuildEventContext = new BuildEventContext(nodeId, targetId, projectContextId, taskId);
+                    parentProjectBuildEventContext = new BuildEventContext(BuildEventContext.InvalidSubmissionId, nodeId, BuildEventContext.InvalidEvaluationId, BuildEventContext.InvalidProjectInstanceId, projectContextId, targetId, taskId);
                 }
             }
 

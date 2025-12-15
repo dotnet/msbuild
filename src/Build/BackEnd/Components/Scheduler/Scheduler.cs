@@ -600,7 +600,7 @@ namespace Microsoft.Build.BackEnd
         public void WriteDetailedSummary(int submissionId)
         {
             ILoggingService loggingService = _componentHost.LoggingService;
-            BuildEventContext context = new BuildEventContext(submissionId, 0, 0, 0, 0, 0);
+            BuildEventContext context = BuildEventContext.CreateInitial(submissionId, 0);
             loggingService.LogComment(context, MessageImportance.Normal, "DetailedSummaryHeader");
 
             foreach (SchedulableRequest request in _schedulingData.GetRequestsByHierarchy(null))
@@ -2037,13 +2037,7 @@ namespace Microsoft.Build.BackEnd
                     string projectFullPath = _configCache[request.ConfigurationId].ProjectFullPath;
                     string parentProjectFullPath = GetParentConfigurationId(request, _configCache, _schedulingData).ProjectFullPath;
                     _componentHost.LoggingService.LogComment(
-                            new BuildEventContext(
-                                request.SubmissionId,
-                                1,
-                                BuildEventContext.InvalidProjectInstanceId,
-                                BuildEventContext.InvalidProjectContextId,
-                                BuildEventContext.InvalidTargetId,
-                                BuildEventContext.InvalidTaskId),
+                            BuildEventContext.CreateInitial(request.SubmissionId, 1),
                             MessageImportance.Normal,
                             "SkippedConstraintsOnRequest",
                             parentProjectFullPath,
@@ -2950,7 +2944,7 @@ namespace Microsoft.Build.BackEnd
         private void WriteSchedulingPlan(int submissionId)
         {
             SchedulingPlan plan = new SchedulingPlan(_configCache, _schedulingData);
-            plan.WritePlan(submissionId, _componentHost.LoggingService, new BuildEventContext(submissionId, 0, 0, 0, 0, 0));
+            plan.WritePlan(submissionId, _componentHost.LoggingService, BuildEventContext.CreateInitial(submissionId, 0));
         }
 
         /// <summary>
@@ -2959,7 +2953,7 @@ namespace Microsoft.Build.BackEnd
         private void ReadSchedulingPlan(int submissionId)
         {
             _schedulingPlan = new SchedulingPlan(_configCache, _schedulingData);
-            _schedulingPlan.ReadPlan(submissionId, _componentHost.LoggingService, new BuildEventContext(submissionId, 0, 0, 0, 0, 0));
+            _schedulingPlan.ReadPlan(submissionId, _componentHost.LoggingService, BuildEventContext.CreateInitial(submissionId, 0));
         }
 
         #endregion

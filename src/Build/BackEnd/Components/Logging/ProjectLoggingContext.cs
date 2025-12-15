@@ -58,7 +58,7 @@ namespace Microsoft.Build.BackEnd.Logging
             BuildRequest request,
             string projectFullPath,
             string toolsVersion,
-            int evaluationId = BuildEventContext.InvalidEvaluationId)
+            int evaluationId)
             : this
             (
             nodeLoggingContext,

@@ -5239,7 +5239,10 @@ $(
                 loggingService.RegisterLogger(logger);
                 var loggingContext = new MockLoggingContext(
                     loggingService,
-                    new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
+                    BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 0)
+                        .WithProjectInstanceId(0)
+                        .WithTargetId(0)
+                        .WithTaskId(0));
 
                 _ = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
                     new PropertyDictionary<ProjectPropertyInstance>(),
@@ -5276,7 +5279,10 @@ $(
                 loggingService.RegisterLogger(logger);
                 var loggingContext = new MockLoggingContext(
                     loggingService,
-                    new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
+                    BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 0)
+                        .WithProjectInstanceId(0)
+                        .WithTargetId(0)
+                        .WithTaskId(0));
                 var dummyAssemblyFile = env.CreateFile(env.CreateFolder(), "test.dll");
 
                 var result = new Expander<ProjectPropertyInstance, ProjectItemInstance>(new PropertyDictionary<ProjectPropertyInstance>(), FileSystems.Default, loggingContext)

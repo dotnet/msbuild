@@ -21,7 +21,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="nodeId">The </param>
         /// <param name="inProcNode"><code>true</code> if this is an in-process node, otherwise <code>false</code>.</param>
         internal NodeLoggingContext(ILoggingService loggingService, int nodeId, bool inProcNode)
-            : base(loggingService, new BuildEventContext(nodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId), inProcNode)
+            : base(loggingService, BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, nodeId), inProcNode)
         {
             ErrorUtilities.VerifyThrow(nodeId != BuildEventContext.InvalidNodeId, "Should not ever be given an invalid NodeId");
 
