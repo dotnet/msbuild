@@ -26,7 +26,7 @@ public class ExtendedBuildEventArgs_Tests
         {
             ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
             ExtendedMetadata = withOptionalData ? new Dictionary<string, string?> { { "m1", "v1" }, { "m2", "v2" } } : null,
-            BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+            BuildEventContext = withOptionalData ? BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTargetId(6).WithTaskId(7) : null,
         };
 
         using MemoryStream stream = new MemoryStream();
@@ -64,7 +64,7 @@ public class ExtendedBuildEventArgs_Tests
         {
             ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
             ExtendedMetadata = withOptionalData ? new Dictionary<string, string?> { { "m1", "v1" }, { "m2", "v2" } } : null,
-            BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+            BuildEventContext = withOptionalData ? BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTargetId(6).WithTaskId(7) : null,
         };
 
         using MemoryStream stream = new MemoryStream();
@@ -103,7 +103,7 @@ public class ExtendedBuildEventArgs_Tests
         {
             ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
             ExtendedMetadata = withOptionalData ? new Dictionary<string, string?> { { "m1", "v1" }, { "m2", "v2" } } : null,
-            BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+            BuildEventContext = withOptionalData ? BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTargetId(6).WithTaskId(7) : null,
         };
 
         using MemoryStream stream = new MemoryStream();
@@ -141,7 +141,7 @@ public class ExtendedBuildEventArgs_Tests
         {
             ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
             ExtendedMetadata = withOptionalData ? new Dictionary<string, string?> { { "m1", "v1" }, { "m2", "v2" } } : null,
-            BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+            BuildEventContext = withOptionalData ? BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTargetId(6).WithTaskId(7) : null,
         };
 
         using MemoryStream stream = new MemoryStream();
@@ -178,7 +178,7 @@ public class ExtendedBuildEventArgs_Tests
         {
             ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
             ExtendedMetadata = withOptionalData ? new Dictionary<string, string?> { { "m1", "v1" }, { "m2", "v2" } } : null,
-            BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+            BuildEventContext = withOptionalData ? BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTargetId(6).WithTaskId(7) : null,
         };
 
         using MemoryStream stream = new MemoryStream();

@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 parameters,
                 CreateLookup(itemsByType, properties),
                 MockElementLocation.Instance,
-                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+                new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4)));
 
             Assert.Equal(5, buckets.Count);
 
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Directory.GetCurrentDirectory(),
                     MockElementLocation.Instance,
                     FileSystems.Default,
-                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4))));
+                    new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4))));
                 Assert.Equal("a.doc;b.doc;c.doc;d.doc;e.doc", bucket.Expander.ExpandIntoStringAndUnescape("@(doc)", ExpanderOptions.ExpandItems, MockElementLocation.Instance));
                 Assert.Equal("unittests.foo", bucket.Expander.ExpandIntoStringAndUnescape("$(bogus)$(UNITTESTS)", ExpanderOptions.ExpandPropertiesAndMetadata, MockElementLocation.Instance));
             }
@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 parameters,
                 CreateLookup(itemsByType, properties),
                 null,
-                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+                new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4)));
             Assert.Equal(2, buckets.Count);
         }
 
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     parameters,
                     CreateLookup(itemsByType, properties),
                     MockElementLocation.Instance,
-                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+                    new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4)));
             });
         }
         /// <summary>
@@ -209,7 +209,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     parameters,
                     CreateLookup(itemsByType, properties),
                     MockElementLocation.Instance,
-                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+                    new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4)));
             });
         }
         /// <summary>
@@ -239,7 +239,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 parameters,
                 CreateLookup(itemsByType, properties),
                 null,
-                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+                new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4)));
 
             // If duplicate buckets have been folded correctly, then there will be exactly one bucket here
             // containing both a.foo and b.foo.

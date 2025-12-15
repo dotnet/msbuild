@@ -33,12 +33,12 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// A generic valid build event context which can be used in the tests.
         /// </summary>
-        private static BuildEventContext s_buildEventContext = new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4);
+        private static BuildEventContext s_buildEventContext = BuildEventContext.CreateInitial(1, 2).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithProjectInstanceId(4);
 
         /// <summary>
         /// buildevent context for target events, note the invalid taskId, target started and finished events have this.
         /// </summary>
-        private static BuildEventContext s_targetBuildEventContext = new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, -1);
+        private static BuildEventContext s_targetBuildEventContext = BuildEventContext.CreateInitial(1, 2).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithProjectInstanceId(-1);
         #endregion
 
         #region Event based logging method tests
@@ -871,7 +871,7 @@ namespace Microsoft.Build.UnitTests.Logging
             projectCacheBuildEventContext.NodeId.ShouldBe(Scheduler.InProcNodeId);
             projectCacheBuildEventContext.ProjectContextId.ShouldNotBe(BuildEventContext.InvalidProjectContextId);
 
-            BuildEventContext nodeBuildEventContext = new BuildEventContext(Scheduler.InProcNodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            BuildEventContext nodeBuildEventContext = BuildEventContext.CreateInitial(0, Scheduler.InProcNodeId);
             BuildEventContext projectStartedBuildEventContext = service.LogProjectStarted(
                 nodeBuildEventContext,
                 submissionId: SubmissionId,
@@ -906,7 +906,7 @@ namespace Microsoft.Build.UnitTests.Logging
             BuildRequestConfiguration config = new BuildRequestConfiguration(ConfigurationId, data, "4.0");
             cache.AddConfiguration(config);
 
-            BuildEventContext nodeBuildEventContext = new BuildEventContext(Scheduler.InProcNodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            BuildEventContext nodeBuildEventContext = BuildEventContext.CreateInitial(0, Scheduler.InProcNodeId);
             Assert.Throws<InternalErrorException>(() =>
             {
                 service.LogProjectStarted(
@@ -947,7 +947,7 @@ namespace Microsoft.Build.UnitTests.Logging
             BuildRequestConfiguration config = new BuildRequestConfiguration(ConfigurationId, data, "4.0");
             cache.AddConfiguration(config);
 
-            BuildEventContext nodeBuildEventContext = new BuildEventContext(NodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            BuildEventContext nodeBuildEventContext = BuildEventContext.CreateInitial(0, NodeId);
             BuildEventContext projectStartedBuildEventContext = service.LogProjectStarted(
                 nodeBuildEventContext,
                 submissionId: SubmissionId,
@@ -1422,7 +1422,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
             // Now do it the right way -- with a matching ProjectStarted.
             BuildEventContext projectContext = service.LogProjectStarted(
-                    new BuildEventContext(1, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId),
+                    BuildEventContext.CreateInitial(0, 1),
                     1,
                     2,
                     s_buildEventContext,

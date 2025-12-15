@@ -16,6 +16,9 @@ namespace Microsoft.Build.UnitTests
 {
     public class CustomEventArgSerialization_Tests : IDisposable
     {
+
+        private static BuildEventContext defaultContext = BuildEventContext.CreateInitial(5, 4).WithEvaluationId(3).WithProjectInstanceId(2);
+        
         // Generic build class to test custom serialization of abstract class BuildEventArgs
         internal sealed class GenericBuildEventArg : BuildEventArgs
         {
@@ -59,7 +62,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test using reasonable messages
             GenericBuildEventArg genericEvent = new GenericBuildEventArg("Message", "HelpKeyword", "SenderName");
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -76,7 +79,7 @@ namespace Microsoft.Build.UnitTests
             // Test using empty strings
             _stream.Position = 0;
             genericEvent = new GenericBuildEventArg(string.Empty, string.Empty, string.Empty);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -101,7 +104,7 @@ namespace Microsoft.Build.UnitTests
             // Deserialize and Verify
             _stream.Position = 0;
             newGenericEvent = new GenericBuildEventArg(null, null, null);
-            newGenericEvent.BuildEventContext = new BuildEventContext(1, 3, 4, 5);
+            newGenericEvent.BuildEventContext = BuildEventContext.CreateInitial(1, 3).WithEvaluationId(4).WithProjectInstanceId(5);
             newGenericEvent.CreateFromStream(_reader, _eventArgVersion);
             _stream.Position.ShouldBe(streamWriteEndPosition); // "Stream End Positions Should Match"
             VerifyGenericEventArg(genericEvent, newGenericEvent);
@@ -125,7 +128,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test using reasonable messages
             BuildErrorEventArgs genericEvent = new BuildErrorEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "SenderName");
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -142,7 +145,7 @@ namespace Microsoft.Build.UnitTests
             // Test using empty strings
             _stream.Position = 0;
             genericEvent = new BuildErrorEventArgs(string.Empty, string.Empty, string.Empty, 1, 2, 3, 4, string.Empty, string.Empty, string.Empty);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -176,7 +179,7 @@ namespace Microsoft.Build.UnitTests
             // Test using HelpLink
             _stream.Position = 0;
             genericEvent = new BuildErrorEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "SenderName", "HelpLink", DateTime.Now);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -210,7 +213,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test using reasonable messages
             BuildFinishedEventArgs genericEvent = new BuildFinishedEventArgs("Message", "HelpKeyword", true);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -225,7 +228,7 @@ namespace Microsoft.Build.UnitTests
             // Test using empty strings
             _stream.Position = 0;
             genericEvent = new BuildFinishedEventArgs(string.Empty, string.Empty, true);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -258,7 +261,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test using reasonable messages
             BuildMessageEventArgs genericEvent = new BuildMessageEventArgs("Message", "HelpKeyword", "SenderName", MessageImportance.High);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -276,7 +279,7 @@ namespace Microsoft.Build.UnitTests
             _stream.Position = 0;
             // Make sure empty strings are passed correctly
             genericEvent = new BuildMessageEventArgs(string.Empty, string.Empty, string.Empty, MessageImportance.Low);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -328,7 +331,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test using reasonable messages
             BuildMessageEventArgs messageEvent = new BuildMessageEventArgs("SubCategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "SenderName", MessageImportance.High);
-            messageEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            messageEvent.BuildEventContext = defaultContext;
 
             // Serialize
             messageEvent.WriteToStream(_writer);
@@ -345,7 +348,7 @@ namespace Microsoft.Build.UnitTests
             _stream.Position = 0;
             // Make sure empty strings are passed correctly
             messageEvent = new BuildMessageEventArgs(string.Empty, string.Empty, string.Empty, 1, 2, 3, 4, string.Empty, string.Empty, string.Empty, MessageImportance.Low);
-            messageEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            messageEvent.BuildEventContext = defaultContext;
 
             // Serialize
             messageEvent.WriteToStream(_writer);
@@ -381,7 +384,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test using reasonable messages
             CriticalBuildMessageEventArgs criticalMessageEvent = new CriticalBuildMessageEventArgs("SubCategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "SenderName");
-            criticalMessageEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            criticalMessageEvent.BuildEventContext = defaultContext;
 
             // Serialize
             criticalMessageEvent.WriteToStream(_writer);
@@ -399,7 +402,7 @@ namespace Microsoft.Build.UnitTests
             _stream.Position = 0;
             // Make sure empty strings are passed correctly
             criticalMessageEvent = new CriticalBuildMessageEventArgs(string.Empty, string.Empty, string.Empty, 1, 2, 3, 4, string.Empty, string.Empty, string.Empty);
-            criticalMessageEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            criticalMessageEvent.BuildEventContext = defaultContext;
 
             // Serialize
             criticalMessageEvent.WriteToStream(_writer);
@@ -435,7 +438,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test with reasonable messages
             BuildWarningEventArgs genericEvent = new BuildWarningEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "SenderName");
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -452,7 +455,7 @@ namespace Microsoft.Build.UnitTests
             // Test with empty strings
             _stream.Position = 0;
             genericEvent = new BuildWarningEventArgs(string.Empty, string.Empty, string.Empty, 1, 2, 3, 4, string.Empty, string.Empty, string.Empty);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -486,7 +489,7 @@ namespace Microsoft.Build.UnitTests
             // Test with help link
             _stream.Position = 0;
             genericEvent = new BuildWarningEventArgs("Subcategory", "Code", "File", 1, 2, 3, 4, "Message", "HelpKeyword", "SenderName", "HelpLink", DateTime.Now, null);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -520,7 +523,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test with reasonable values
             ProjectFinishedEventArgs genericEvent = new ProjectFinishedEventArgs("Message", "HelpKeyword", "ProjectFile", true);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -538,7 +541,7 @@ namespace Microsoft.Build.UnitTests
             // Test with empty strings
             _stream.Position = 0;
             genericEvent = new ProjectFinishedEventArgs(string.Empty, string.Empty, string.Empty, true);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -586,8 +589,8 @@ namespace Microsoft.Build.UnitTests
             propertyList.Add(new DictionaryEntry("WorkSpaceOwner", "The workspace owner"));
             propertyList.Add(new DictionaryEntry("IAmBlank", string.Empty));
 
-            ProjectStartedEventArgs genericEvent = new ProjectStartedEventArgs(8, "Message", "HelpKeyword", "ProjectFile", null, propertyList, null, new BuildEventContext(7, 8, 9, 10));
-            genericEvent.BuildEventContext = new BuildEventContext(7, 8, 9, 10);
+            ProjectStartedEventArgs genericEvent = new ProjectStartedEventArgs(8, "Message", "HelpKeyword", "ProjectFile", null, propertyList, null, BuildEventContext.CreateInitial(7, 8).WithEvaluationId(9).WithProjectInstanceId(10));
+            genericEvent.BuildEventContext = BuildEventContext.CreateInitial(7, 8).WithEvaluationId(9).WithProjectInstanceId(10);
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -650,8 +653,8 @@ namespace Microsoft.Build.UnitTests
         public void TestProjectStartedEventArgs()
         {
             // Test with reasonable values
-            ProjectStartedEventArgs genericEvent = new ProjectStartedEventArgs(8, "Message", "HelpKeyword", "ProjectFile", null, null, null, new BuildEventContext(7, 8, 9, 10));
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            ProjectStartedEventArgs genericEvent = new ProjectStartedEventArgs(8, "Message", "HelpKeyword", "ProjectFile", null, null, null, BuildEventContext.CreateInitial(7, 8).WithEvaluationId(9).WithProjectInstanceId(10));
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -668,7 +671,7 @@ namespace Microsoft.Build.UnitTests
             // Test with empty strings
             _stream.Position = 0;
             genericEvent = new ProjectStartedEventArgs(-1, string.Empty, string.Empty, string.Empty, string.Empty, null, null, null);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -718,7 +721,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test using reasonable values
             TargetStartedEventArgs genericEvent = new TargetStartedEventArgs("Message", "HelpKeyword", "TargetName", "ProjectFile", "TargetFile", "ParentTargetStartedEvent", TargetBuiltReason.AfterTargets, DateTime.UtcNow);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -736,7 +739,7 @@ namespace Microsoft.Build.UnitTests
             _stream.Position = 0;
             // Make sure empty strings are passed correctly
             genericEvent = new TargetStartedEventArgs(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, TargetBuiltReason.AfterTargets, DateTime.Now);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -784,7 +787,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test using reasonable values
             TargetFinishedEventArgs genericEvent = new TargetFinishedEventArgs("Message", "HelpKeyword", "TargetName", "ProjectFile", "TargetFile", true);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -801,7 +804,7 @@ namespace Microsoft.Build.UnitTests
             // Test using empty strings
             _stream.Position = 0;
             genericEvent = new TargetFinishedEventArgs(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, true);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -848,7 +851,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test using reasonable values
             TaskStartedEventArgs genericEvent = new TaskStartedEventArgs("Message", "HelpKeyword", "ProjectFile", "TaskFile", "TaskName");
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -865,7 +868,7 @@ namespace Microsoft.Build.UnitTests
             _stream.Position = 0;
             // Make sure empty strings are passed correctly
             genericEvent = new TaskStartedEventArgs(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -913,7 +916,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test using reasonable values
             TaskFinishedEventArgs genericEvent = new TaskFinishedEventArgs("Message", "HelpKeyword", "ProjectFile", "TaskFile", "TaskName", true);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -931,7 +934,7 @@ namespace Microsoft.Build.UnitTests
             _stream.Position = 0;
             // Make sure empty strings are passed correctly
             genericEvent = new TaskFinishedEventArgs(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, true);
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             // Serialize
             genericEvent.WriteToStream(_writer);
@@ -981,7 +984,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test using reasonable values
             TelemetryEventArgs genericEvent = new TelemetryEventArgs { EventName = "Good", Properties = new Dictionary<string, string> { { "Key", "Value" } } };
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             TelemetryEventArgs newGenericEvent = RoundTrip(genericEvent);
 
@@ -994,7 +997,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test using reasonable values
             TelemetryEventArgs genericEvent = new TelemetryEventArgs { EventName = "Good", Properties = null };
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             TelemetryEventArgs newGenericEvent = RoundTrip(genericEvent);
 
@@ -1011,7 +1014,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test using null event name
             TelemetryEventArgs genericEvent = new TelemetryEventArgs { EventName = null, Properties = new Dictionary<string, string> { { "Key", "Value" } } };
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             TelemetryEventArgs newGenericEvent = RoundTrip(genericEvent);
 
@@ -1024,7 +1027,7 @@ namespace Microsoft.Build.UnitTests
         {
             // Test using null property value name
             TelemetryEventArgs genericEvent = new TelemetryEventArgs { EventName = "Good", Properties = new Dictionary<string, string> { { "Key", null } } };
-            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+            genericEvent.BuildEventContext = defaultContext;
 
             TelemetryEventArgs newGenericEvent = RoundTrip(genericEvent);
 

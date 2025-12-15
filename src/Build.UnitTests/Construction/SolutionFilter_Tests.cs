@@ -28,7 +28,7 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
     {
         private readonly ITestOutputHelper output;
 
-        private static readonly BuildEventContext _buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
+        private static readonly BuildEventContext _buildEventContext = BuildEventContext.CreateInitial(0, 0).WithProjectContextId(BuildEventContext.InvalidProjectContextId);
 
         public SolutionFilter_Tests(ITestOutputHelper output)
         {
