@@ -30,6 +30,7 @@ jobs:
       sourcePath: '$(Build.SourcesDirectory)\artifacts\official\OptProf\$(BuildConfiguration)\Data'
       dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
       dropMetadataContainerName: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
+      condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
     # Publish bootstrapper info for OptProf data collection run to consume
     - output: buildArtifacts
@@ -46,6 +47,7 @@ jobs:
     - output: buildArtifacts
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts\official\VSSetup\$(BuildConfiguration)'
       ArtifactName: VSSetup
+      condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
     # Archive NuGet packages to DevOps.
     # Publish our NuPkgs as an artifact. The name of this artifact must be PackageArtifacts as the
@@ -197,12 +199,15 @@ jobs:
 
       $paths = @(
         "log/$(BuildConfiguration)",
-        "OptProf/$(BuildConfiguration)/Data",
         "$(Build.StagingDirectory)/MicroBuild/Output",
-        "VSSetup/$(BuildConfiguration)",
         "packages/$(BuildConfiguration)",
         "xsd"
       )
+
+      if ("${{ parameters.enableOptProf }}" -eq "true") {  
+        $paths += "OptProf/$(BuildConfiguration)/Data"  
+        $paths += "VSSetup/$(BuildConfiguration)"  
+      }
 
       $allpresent = $true
 
