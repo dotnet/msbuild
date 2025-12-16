@@ -1883,7 +1883,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- For each reference, get closest match -->
 
-    <!-- Pass the CurrentProjectTargetPlatform parameter to the task only if GetReferenceNearestTargetFrameworkTaskSupportsTargetFrameworKPropertyParameter is true.  This means
+    <!-- Pass the CurrentProjectTargetPlatform parameter to the task only if GetReferenceNearestTargetFrameworkTaskSupportsTargetFrameworkPropertyParameter is true.  This means
          that we are using a version of NuGet which supports that parameter on this task. -->
 
     <GetReferenceNearestTargetFrameworkTask AnnotatedProjectReferences="@(_ProjectReferenceTargetFrameworkPossibilities)"
@@ -1893,11 +1893,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                             CurrentProjectName="$(MSBuildProjectName)"
                                             FallbackTargetFrameworks="$(AssetTargetFallback)"
                                             Condition="'@(_ProjectReferenceTargetFrameworkPossibilities)' != '' and '$(ReferringTargetFrameworkForProjectReferences)' != ''
-                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetFrameworKPropertyParameter)' == 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' != 'true'">
+                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetFrameworkPropertyParameter)' == 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' != 'true'">
       <Output ItemName="AnnotatedProjects" TaskParameter="AssignedProjects" />
     </GetReferenceNearestTargetFrameworkTask>
 
-    <!-- Pass the CurrentProjectTargetPlatform parameter to the task only if GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter is true and GetReferenceNearestTargetFrameworkTaskSupportsTargetFrameworKPropertyParameter is not true.  This means
+    <!-- Pass the CurrentProjectTargetPlatform parameter to the task only if GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter is true and GetReferenceNearestTargetFrameworkTaskSupportsTargetFrameworkPropertyParameter is not true.  This means
          that we are using a version of NuGet which supports that parameter on this task. -->
 
     <GetReferenceNearestTargetFrameworkTask AnnotatedProjectReferences="@(_ProjectReferenceTargetFrameworkPossibilities)"
@@ -1906,7 +1906,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                             CurrentProjectName="$(MSBuildProjectName)"
                                             FallbackTargetFrameworks="$(AssetTargetFallback)"
                                             Condition="'@(_ProjectReferenceTargetFrameworkPossibilities)' != '' and '$(ReferringTargetFrameworkForProjectReferences)' != ''
-                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter)' == 'true' and '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetFrameworKPropertyParameter)' != 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' != 'true'">
+                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter)' == 'true' and '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetFrameworkPropertyParameter)' != 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' != 'true'">
       <Output ItemName="AnnotatedProjects" TaskParameter="AssignedProjects" />
     </GetReferenceNearestTargetFrameworkTask>
 
