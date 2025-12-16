@@ -230,7 +230,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// When true, enables running build in multiple in-proc nodes.
         /// </summary>
-        private bool _multiThreaded;
+        private bool _multiThreaded = true;
 
         private ProjectIsolationMode _projectIsolationMode;
 
@@ -560,7 +560,8 @@ namespace Microsoft.Build.Execution
         public bool MultiThreaded
         {
             get => _multiThreaded;
-            set => _multiThreaded = value;
+            // make set no-op
+            set => _multiThreaded = true;
         }
 
         /// <summary>
