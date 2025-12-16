@@ -1879,7 +1879,6 @@ namespace Microsoft.Build.UnitTests
                 }
                 es.Consume(new BuildStartedEventArgs("bs", null));
                 BuildEventContext context = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1);
-                BuildEventContext context2 = BuildEventContext.CreateInitial(2, 2).WithEvaluationId(2).WithProjectInstanceId(2);
 
                 ProjectStartedEventArgs project = new ProjectStartedEventArgs(1, "Hello,", "HI", "None", "Build", null, null, context);
                 project.BuildEventContext = context;

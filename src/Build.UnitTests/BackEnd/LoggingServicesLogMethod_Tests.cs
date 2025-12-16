@@ -33,12 +33,12 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// A generic valid build event context which can be used in the tests.
         /// </summary>
-        private static BuildEventContext s_buildEventContext = BuildEventContext.CreateInitial(1, 2).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithProjectInstanceId(4);
+        private static readonly BuildEventContext s_buildEventContext = BuildEventContext.CreateInitial(1, 2).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithProjectInstanceId(4);
 
         /// <summary>
         /// buildevent context for target events, note the invalid taskId, target started and finished events have this.
         /// </summary>
-        private static BuildEventContext s_targetBuildEventContext = BuildEventContext.CreateInitial(1, 2).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithProjectInstanceId(-1);
+        private static readonly BuildEventContext s_targetBuildEventContext = BuildEventContext.CreateInitial(1, 2).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithProjectInstanceId(-1);
         #endregion
 
         #region Event based logging method tests

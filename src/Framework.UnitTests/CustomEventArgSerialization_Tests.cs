@@ -17,7 +17,7 @@ namespace Microsoft.Build.UnitTests
     public class CustomEventArgSerialization_Tests : IDisposable
     {
 
-        private static BuildEventContext defaultContext = BuildEventContext.CreateInitial(5, 4).WithEvaluationId(3).WithProjectInstanceId(2);
+        private static readonly BuildEventContext defaultContext = BuildEventContext.CreateInitial(5, 4).WithEvaluationId(3).WithProjectInstanceId(2);
         
         // Generic build class to test custom serialization of abstract class BuildEventArgs
         internal sealed class GenericBuildEventArg : BuildEventArgs
