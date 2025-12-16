@@ -21,10 +21,6 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public ProjectStartedEventArgs_Tests()
         {
-            BuildEventContext parentBuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 2)
-                .WithProjectContextId(4)
-                .WithTargetId(3)
-                .WithTaskId(5);
         }
 
         /// <summary>
