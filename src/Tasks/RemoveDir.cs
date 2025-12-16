@@ -59,14 +59,15 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem directory in Directories)
             {
-                AbsolutePath directoryPath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
-                if (string.IsNullOrEmpty(directoryPath))
+                if (string.IsNullOrEmpty(directory.ItemSpec))
                 {
                     // Skip any empty ItemSpecs, otherwise RemoveDir will wipe the root of the current drive (!).
                     // https://github.com/dotnet/msbuild/issues/7563
                     Log.LogWarningWithCodeFromResources("RemoveDir.EmptyPath");
                     continue;
                 }
+
+                AbsolutePath directoryPath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
 
                 if (FileSystems.Default.DirectoryExists(directoryPath))
                 {
