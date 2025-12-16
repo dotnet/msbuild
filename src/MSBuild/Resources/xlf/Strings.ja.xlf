@@ -1512,11 +1512,6 @@
         <target state="translated">MSBuild のログとデバッグ情報は、"{0}" にあります。</target>
         <note />
       </trans-unit>
-      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
-        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
-        <target state="translated">マルチスレッド モードが有効で、MSBUILDFORCEALLTASKSOUTOFPROC=1 の場合、maxCpuCount は {0} を超えることはできません。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
         <target state="translated">MSBUILD : error MSB1067: featureAvailability スイッチの機能名を指定する必要があります。</target>

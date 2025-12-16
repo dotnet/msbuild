@@ -1518,11 +1518,6 @@ Esta marca es experimental y puede que no funcione según lo previsto.
         <target state="translated">Los registros de MSBuild y la información de depuración estarán en "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
-        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
-        <target state="translated">Con el modo multiThreaded habilitado y MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount no puede ser mayor que {0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
         <target state="translated">MSBUILD : error MSB1067: debe proporcionar un nombre de característica para el conmutador featureAvailability.</target>
