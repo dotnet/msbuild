@@ -65,7 +65,7 @@
                      Hace que MSBuild informe de los accesos a los archivos a cualquier
                      complemento de caché de proyectos.
 
-Esta marca es experimental y puede que no funcione según lo previsto.
+                     Esta marca es experimental y puede que no funcione según lo previsto.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -245,14 +245,14 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                      -maxCpuCount switch.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multiproceso
+        <target state="translated">  -multithreaded
                      Habilita el modo multiproceso EXPERIMENTAL en MSBuild.
                      Esto significa que MSBuild usará varios subprocesos
                      para compilar proyectos en paralelo,
                      en lugar de varios procesos.
                      Esta opción no se admite.
                      El número máximo de subprocesos usados viene determinado por el
-                     Modificador -maxCpuCount.
+                     modificador -maxCpuCount.
                      (Forma corta: -mt)
     </target>
         <note />
@@ -285,7 +285,7 @@ Esta marca es experimental y puede que no funcione según lo previsto.
 	</source>
         <target state="translated">  -check
                      Habilita BuildChecks durante la compilación.
-                     BuildCheck permite evaluar reglas para garantizar que las propiedades
+                     BuildCheck permite evaluar reglas para garantizar las propiedades
                      de la compilación. Para más información, consulte https://aka.ms/buildcheck
 	</target>
         <note>
@@ -761,18 +761,14 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
         <target state="translated">  -logger:&lt;registrador&gt;   Use este registrador para registrar eventos
-                     de MSBuild. Para especificar varios registradores, especifique
-                     cada uno de ellos por separado.
+                     de MSBuild. Para especificar varios registradores, especifique cada uno de ellos por separado.
                      La sintaxis de &lt;registrador&gt; es:
-                       [&lt;clase&gt;,]&lt;ensamblado&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
+                       [&lt;clase&gt;,]&lt;assembly&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
                      La sintaxis de &lt;clase del registrador&gt; es:
-                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de
-                       clase del registrador&gt;
-                     La sintaxis de &lt;ensamblado del registrador&gt; es:
-                       {&lt;nombre del ensamblado&gt;[,&lt;strong name&gt;] | &lt;archivo
-                       de ensamblado&gt;}
-                     Las opciones del registrador especifican cómo crea MSBuild
-                     el registrador.
+                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de clase del registrador&gt;
+                       La sintaxis de &lt;ensamblado del registrador&gt; es:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     Las opciones del registrador especifican cómo crea MSBuild el registrador.
                      Los &lt;parámetros del registrador&gt; son opcionales y se pasan
                      al registrador tal como se escriben. (Forma corta: -l)
                      Ejemplos:
@@ -856,23 +852,23 @@ Esta marca es experimental y puede que no funcione según lo previsto.
         <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
                      Parámetros del registrador de consola. (Forma corta: -clp)
                      Los parámetros disponibles son:
-                        PerformanceSummary: muestra el tiempo empleado en tareas, destinos
+                        PerformanceSummary-- muestra el tiempo empleado en tareas, destinos
                             y proyectos.
-                        Summary: muestra un resumen de errores y advertencias al final.
-                        NoSummary: no muestra el resumen de errores y advertencias al
+                        Summary-- muestra un resumen de errores y advertencias al final.
+                        NoSummary-- no muestra el resumen de errores y advertencias al
                             final.
-                        ErrorsOnly: muestra solo errores.
-                        WarningsOnly: muestra solo advertencias.
-                        NoItemAndPropertyList: no muestra la lista de elementos y
+                        ErrorsOnly-- muestra solo errores.
+                        WarningsOnly-- muestra solo advertencias.
+                        NoItemAndPropertyList-- no muestra la lista de elementos y
                             propiedades al principio de cada compilación del proyecto.
-                        ShowCommandLine: muestra los mensajes de TaskCommandLineEvent
-                        ShowTimestamp: muestra la marca de tiempo como un prefijo en los
+                        ShowCommandLine-- muestra los mensajes de TaskCommandLineEvent
+                        ShowTimestamp-- muestra la marca de tiempo como un prefijo en los
                             mensajes.
-                        ShowEventId: muestra el identificador de evento para los eventos iniciados, los eventos 
+                        ShowEventId-- muestra el eventId para los eventos iniciados, los eventos 
                             finalizados y los mensajes
-                        ForceNoAlign: no alinea el texto al tamaño del
+                        ForceNoAlign-- no alinea el texto al tamaño del
                             búfer de la consola
-                        DisableConsoleColor: usa los colores de consola predeterminados
+                        DisableConsoleColor-- usa los colores de consola predeterminados
                             para todos los mensajes de registro.
                         EnableMPLogging: habilita el estilo de registro de
                             multiprocesador aunque se ejecute en el modo de
@@ -1043,15 +1039,12 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                      Para especificar varios registradores, especifique cada uno
                      de ellos por separado. (Forma corta: -dl)
                      La sintaxis de &lt;registrador&gt; es:
-                       [&lt;clase&gt;,]&lt;ensamblado&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
+                       [&lt;clase&gt;,]&lt;assembly&gt;[,&lt;opciones&gt;][;&lt;parámetros&gt;]
                      La sintaxis de &lt;clase del registrador&gt; es:
-                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre
-                       de la clase del registrador&gt;
+                       [&lt;espacio de nombres parcial o completo&gt;.]&lt;nombre de la clase del registrador&gt;
                      La sintaxis de &lt;ensamblado del registrador&gt; es:
-                       {&lt;nombre del ensamblado&gt;[,&lt;strong name&gt;] | &lt;archivo
-                      de ensamblado&gt;}
-                     Las opciones del registrador especifican cómo crea MSBuild
-                     el registrador.
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
+                     Las opciones del registrador especifican cómo crea MSBuild el registrador.
                      Los &lt;parámetros del registrador&gt; son opcionales y se pasan
                      al registrador tal como se escriben. (Forma corta: -l)
                      Ejemplos:
@@ -2064,11 +2057,11 @@ Esta marca es experimental y puede que no funcione según lo previsto.
     </source>
         <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
                      Serializa todos los eventos de compilación en un archivo binario comprimido.
-                     De forma predeterminada, el archivo está en el directorio actual y se denomina
+                     De manera predeterminada, el archivo está en el directorio actual y se denomina
                      "msbuild.binlog". El registro binario es una descripción detallada
                      del proceso de compilación que se puede usar más adelante para reconstruir
                      registros de texto y ser usado por otras herramientas de análisis. Un registro binario
-                     suele ser 10-20 veces menor que el registro de nivel de diagnóstico
+                     suele ser de 10 a 20 veces menor que el registro de nivel de diagnóstico
                      de texto más detallado, pero contiene más información.
                      (Forma corta: -bl)
 
@@ -2077,32 +2070,32 @@ Esta marca es experimental y puede que no funcione según lo previsto.
                      para cada compilación, el token "{}" se puede agregar a la
                      ruta de acceso, por ejemplo: LogFile=output-{}-log.binlog. Cada 
                      "{}" en la ruta de acceso del registro se reemplaza por una cadena única
-                     mediante la marca de tiempo, el identificador de proceso en ejecución y los id.
+                     mediante la marca de tiempo, el identificador del proceso en ejecución y un valor aleatorio 
                      y sellos de cadena aleatorios.
 
-                     De forma predeterminada, el registrador binario recopila el texto de origen de
+                     De manera predeterminada, el registrador binario recopila el texto de origen de
                      archivos de proyecto, incluidos todos los proyectos importados y archivos
                      de destino encontrados durante la compilación. El conmutador opcional
                      ProjectImports controla este comportamiento:
 
-                      ProjectImports=None     - No recopilar las importaciones
+                      ProjectImports=None     :no recopilar las importaciones
                                                 del proyecto.
-                      ProjectImports=Embed    - Inserción de importaciones de proyecto en el
+                      ProjectImports=Embed    :inserción de importaciones de proyecto en el
                                                 archivo de registro.
-                      ProjectImports=ZipFile  - Guardar archivos de proyecto en
+                      ProjectImports=ZipFile  :guardar archivos de proyecto en
                                                 output.projectimports.zip
                                                 donde la salida tiene el mismo nombre
                                                 que el nombre del archivo de registro binario.
 
                      El valor predeterminado de ProjectImports es Inserción.
-                     Nota: el registrador no recopila archivos de código fuente que no son de MSBuild
+                     Nota: El registrador no recopila archivos de código fuente que no son de MSBuild
                      como .cs, .cpp, etc.
 
                      Un archivo .binlog se puede "reproducir" pasándolo a
                      msbuild.exe como argumento en lugar de como proyecto o solución.
                      Otros registradores recibirán la información contenida en el
                      archivo de registro como si se estuviera produciendo la compilación original.
-                     Puede obtener más información sobre el registro binario y sus usos en:
+                     Puede obtener más información acerca del registro binario y sus usos en:
                      https://aka.ms/msbuild/binlog
 
                      Ejemplos:
