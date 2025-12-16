@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.CommandLine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
@@ -23,12 +24,119 @@ using static VerifyXunit.Verifier;
 
 namespace Microsoft.Build.UnitTests
 {
+    internal sealed class MockBuildEventSink(int nodeNumber) : IBuildEventSink, IEventSource
+    {
+        public string Name { get; set; } = $"MockBuildEventSink{nodeNumber}";
+        public bool HaveLoggedBuildStartedEvent { get; set; }
+        public bool HaveLoggedBuildFinishedEvent { get; set; }
+
+        void IBuildEventSink.Consume(BuildEventArgs buildEvent, int sinkId) => (this as IBuildEventSink).Consume(buildEvent);
+        
+        void IBuildEventSink.Consume(BuildEventArgs buildEvent)
+        {
+            // map the incoming build event to the appropriate event handler
+            switch (buildEvent)
+            {
+                case BuildStartedEventArgs e:
+                    HaveLoggedBuildStartedEvent = true;
+                    BuildStarted?.Invoke(this, e);
+                    break;
+                case BuildFinishedEventArgs e:
+                    BuildFinished?.Invoke(this, e);
+                    break;
+                case ProjectStartedEventArgs e:
+                    ProjectStarted?.Invoke(this, e);
+                    break;
+                case ProjectFinishedEventArgs e:
+                    ProjectFinished?.Invoke(this, e);
+                    break;
+                case TargetStartedEventArgs e:
+                    TargetStarted?.Invoke(this, e);
+                    break;
+                case TargetFinishedEventArgs e:
+                    TargetFinished?.Invoke(this, e);
+                    break;
+                case TaskStartedEventArgs e:
+                    TaskStarted?.Invoke(this, e);
+                    break;
+                case TaskFinishedEventArgs e:
+                    TaskFinished?.Invoke(this, e);
+                    break;
+                case BuildMessageEventArgs e:
+                    MessageRaised?.Invoke(this, e);
+                    break;
+                case BuildWarningEventArgs e:
+                    WarningRaised?.Invoke(this, e);
+                    break;
+                case BuildErrorEventArgs e:
+                    ErrorRaised?.Invoke(this, e);
+                    break;
+                case BuildStatusEventArgs e:
+                    StatusEventRaised?.Invoke(this, e);
+                    break;
+                case CustomBuildEventArgs c:
+                    CustomEventRaised?.Invoke(this, c);
+                    break;
+            }
+        }
+
+        void IBuildEventSink.ShutDown()
+        {
+        }
+
+        private const string _eventSender = "Test";
+
+        public event BuildMessageEventHandler? MessageRaised;
+
+        public event BuildErrorEventHandler? ErrorRaised;
+
+        public event BuildWarningEventHandler? WarningRaised;
+
+        public event BuildStartedEventHandler? BuildStarted;
+
+        public event BuildFinishedEventHandler? BuildFinished;
+
+        public event ProjectStartedEventHandler? ProjectStarted;
+
+        public event ProjectFinishedEventHandler? ProjectFinished;
+
+        public event TargetStartedEventHandler? TargetStarted;
+
+        public event TargetFinishedEventHandler? TargetFinished;
+
+        public event TaskStartedEventHandler? TaskStarted;
+
+        public event TaskFinishedEventHandler? TaskFinished;
+
+        public event CustomBuildEventHandler? CustomEventRaised;
+
+        public event BuildStatusEventHandler? StatusEventRaised;
+
+#pragma warning disable CS0067 // The event is never used
+        public event AnyEventHandler? AnyEventRaised;
+#pragma warning restore CS0067 // The event is never used
+
+        // wrappers to invoke the events on this class
+        public void InvokeBuildStarted(BuildStartedEventArgs args) => BuildStarted?.Invoke(_eventSender, args);
+        public void InvokeBuildFinished(BuildFinishedEventArgs args) => BuildFinished?.Invoke(_eventSender, args);
+        public void InvokeProjectStarted(ProjectStartedEventArgs args) => ProjectStarted?.Invoke(_eventSender, args);
+        public void InvokeProjectFinished(ProjectFinishedEventArgs args) => ProjectFinished?.Invoke(_eventSender, args);
+        public void InvokeTargetStarted(TargetStartedEventArgs args) => TargetStarted?.Invoke(_eventSender, args);
+        public void InvokeTargetFinished(TargetFinishedEventArgs args) => TargetFinished?.Invoke(_eventSender, args);
+        public void InvokeTaskStarted(TaskStartedEventArgs args) => TaskStarted?.Invoke(_eventSender, args);
+        public void InvokeTaskFinished(TaskFinishedEventArgs args) => TaskFinished?.Invoke(_eventSender, args);
+        public void InvokeMessageRaised(BuildMessageEventArgs args) => MessageRaised?.Invoke(_eventSender, args);
+        public void InvokeWarningRaised(BuildWarningEventArgs args) => WarningRaised?.Invoke(_eventSender, args);
+        public void InvokeErrorRaised(BuildErrorEventArgs args) => ErrorRaised?.Invoke(_eventSender, args);
+        public void InvokeStatusEventRaised(BuildStatusEventArgs args) => StatusEventRaised?.Invoke(_eventSender, args);
+        public void InvokeCustomEventRaised(CustomBuildEventArgs args) => CustomEventRaised?.Invoke(_eventSender, args);
+    }
+
     [UsesVerify]
     [UseInvariantCulture]
-    public class TerminalLogger_Tests : IEventSource, IDisposable
+    public class TerminalLogger_Tests
     {
         private const int _nodeCount = 8;
-        private const string _eventSender = "Test";
 
         private const string _immediateMessageString =
             "The plugin credential provider could not acquire credentials." +
@@ -39,16 +147,19 @@ namespace Microsoft.Build.UnitTests
         private readonly string _projectFile2 = NativeMethods.IsUnixLike ? "/src/project2.proj" : @"C:\src\project2.proj";
         private readonly string _projectFileWithNonAnsiSymbols = NativeMethods.IsUnixLike ? "/src/проектТерминал/㐇𠁠𪨰𫠊𫦠𮚮⿕.proj" : @"C:\src\проектТерминал\㐇𠁠𪨰𫠊𫦠𮚮⿕.proj";
 
+        private readonly MockBuildEventSink _centralNodeEventSource = new MockBuildEventSink(0);
+        private readonly MockBuildEventSink _remoteNodeEventSource = new MockBuildEventSink(1);
+
         private StringWriter _outputWriter = new();
 
         private readonly Terminal _mockTerminal;
         private readonly TerminalLogger _terminallogger;
+        private readonly ForwardingTerminalLogger _remoteTerminalLogger;
 
         private readonly DateTime _buildStartTime = new DateTime(2023, 3, 30, 16, 30, 0);
         private readonly DateTime _targetStartTime = new DateTime(2023, 3, 30, 16, 30, 1);
         private readonly DateTime _messageTime = new DateTime(2023, 3, 30, 16, 30, 2);
         private readonly DateTime _buildFinishTime = new DateTime(2023, 3, 30, 16, 30, 5);
-
 
         private VerifySettings _settings = new();
 
@@ -58,11 +169,14 @@ namespace Microsoft.Build.UnitTests
         {
             _outputHelper = outputHelper;
             _mockTerminal = new Terminal(_outputWriter);
+            
             _terminallogger = new TerminalLogger(_mockTerminal);
+            _terminallogger.Initialize(_centralNodeEventSource, _nodeCount);
+            _terminallogger._createStopwatch = () => new MockStopwatch();
 
-            _terminallogger.Initialize(this, _nodeCount);
-
-            _terminallogger.CreateStopwatch = () => new MockStopwatch();
+            _remoteTerminalLogger = new ForwardingTerminalLogger();
+            _remoteTerminalLogger.BuildEventRedirector = new EventRedirectorToSink(0, _centralNodeEventSource);
+            _remoteTerminalLogger.Initialize(_remoteNodeEventSource, 1);
 
             UseProjectRelativeDirectory("Snapshots");
         }
@@ -102,7 +216,7 @@ namespace Microsoft.Build.UnitTests
             testEnvironment.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", evnVariableValue);
 
             string[]? args = argsString?.Split(' ');
-            ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(args, supportsAnsi, outputIsScreen, default);
+            (ILogger logger, _) = TerminalLogger.CreateTerminalOrConsoleLoggerWithForwarding(args, supportsAnsi, outputIsScreen, default);
 
             logger.ShouldNotBeNull();
             logger.GetType().ShouldBe(expectedType);
@@ -117,68 +231,27 @@ namespace Microsoft.Build.UnitTests
         public void CreateTerminalOrConsoleLogger_ParsesVerbosity(string? argsString, LoggerVerbosity expectedVerbosity)
         {
             string[]? args = argsString?.Split(' ');
-            ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(args, true, true, default);
+            (ILogger logger, _) = TerminalLogger.CreateTerminalOrConsoleLoggerWithForwarding(args, true, true, default);
 
             logger.ShouldNotBeNull();
             logger.Verbosity.ShouldBe(expectedVerbosity);
         }
 
-        #region IEventSource implementation
 
-#pragma warning disable CS0067
-        public event BuildMessageEventHandler? MessageRaised;
-
-        public event BuildErrorEventHandler? ErrorRaised;
-
-        public event BuildWarningEventHandler? WarningRaised;
-
-        public event BuildStartedEventHandler? BuildStarted;
-
-        public event BuildFinishedEventHandler? BuildFinished;
-
-        public event ProjectStartedEventHandler? ProjectStarted;
-
-        public event ProjectFinishedEventHandler? ProjectFinished;
-
-        public event TargetStartedEventHandler? TargetStarted;
-
-        public event TargetFinishedEventHandler? TargetFinished;
-
-        public event TaskStartedEventHandler? TaskStarted;
-
-        public event TaskFinishedEventHandler? TaskFinished;
-
-        public event CustomBuildEventHandler? CustomEventRaised;
-
-        public event BuildStatusEventHandler? StatusEventRaised;
-
-        public event AnyEventHandler? AnyEventRaised;
-#pragma warning restore CS0067
-
-        #endregion
-
-        #region IDisposable implementation
-
-        public void Dispose()
-        {
-            _terminallogger.Shutdown();
-        }
-
-        #endregion
-
-        #region Event args helpers
+        #region Helper methods to create BuildEventArgs with BuildEventContext
 
         /// <summary>
         /// Helper function to create a BuildEventContext keyed to specific scenarios.
         /// When you want to refer to the same eval properties, use the same evalId.
         /// When you want to refer to the same project, use the same projectContextId.
+        /// When you want to refer to the same node, use the same nodeId.
         /// By default, nodeId, evalId, projectContextId, and targetId are all set to 1.
         /// </summary>
-        private BuildEventContext MakeBuildEventContext(int evalId = 1, int projectContextId = 1)
+        private BuildEventContext MakeBuildEventContext(int evalId = 1, int projectContextId = 1, int nodeId = 1)
         {
             return new BuildEventContext(
             submissionId: -1,
-            nodeId: 1,
+            nodeId: nodeId,
             evaluationId: evalId,
             projectInstanceId: -1,
             projectContextId: projectContextId,
@@ -319,21 +392,21 @@ namespace Microsoft.Build.UnitTests
         {
             projectFile ??= _projectFile;
 
-            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
-            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(projectFile, properties: properties));
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(projectFile, properties: properties));
 
-            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(projectFile));
+            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(projectFile));
 
-            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(projectFile, "Build"));
-            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(projectFile, "Task"));
+            _centralNodeEventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(projectFile, "Build"));
+            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(projectFile, "Task"));
 
             additionalCallbacks?.Invoke();
 
-            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(projectFile, "Task", succeeded));
-            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(projectFile, "Build", succeeded));
+            _centralNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(projectFile, "Task", succeeded));
+            _centralNodeEventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs(projectFile, "Build", succeeded));
 
-            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(projectFile, succeeded));
-            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
+            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(projectFile, succeeded));
+            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(succeeded));
         }
 
         private ProjectEvaluationFinishedEventArgs MakeProjectEvalFinishedArgs(string projectFile, List<(string, string)>? properties = null, List<(string, string)>? items = null, BuildEventContext? buildEventContext = null)
@@ -349,51 +422,51 @@ namespace Microsoft.Build.UnitTests
 
         private void InvokeLoggerCallbacksForTestProject(bool succeeded, Action additionalCallbacks)
         {
-            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
-            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile));
-            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile));
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
+            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile));
 
-            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "_TestRunStart"));
-            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "Task"));
+            _centralNodeEventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "_TestRunStart"));
+            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "Task"));
 
             additionalCallbacks();
 
-            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "Task", succeeded));
-            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile, "_TestRunStart", succeeded));
+            _centralNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "Task", succeeded));
+            _centralNodeEventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs(_projectFile, "_TestRunStart", succeeded));
 
-            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded));
+            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, succeeded));
 
-            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
+            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(succeeded));
         }
 
         private void InvokeLoggerCallbacksForTwoProjects(bool succeeded, Action additionalCallbacks, Action additionalCallbacks2)
         {
-            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
             var p1BuildContext = MakeBuildEventContext(evalId: 1, projectContextId: 1);
-            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile, buildEventContext: p1BuildContext));
-            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile, buildEventContext: p1BuildContext));
-            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build1", buildEventContext: p1BuildContext));
-            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "Task1", buildEventContext: p1BuildContext));
+            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile, buildEventContext: p1BuildContext));
+            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, buildEventContext: p1BuildContext));
+            _centralNodeEventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build1", buildEventContext: p1BuildContext));
+            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "Task1", buildEventContext: p1BuildContext));
 
             additionalCallbacks();
 
-            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile, "Task1", succeeded, buildEventContext: p1BuildContext));
-            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile, "Build1", succeeded, buildEventContext: p1BuildContext));
-            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded, buildEventContext: p1BuildContext));
+            _centralNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "Task1", succeeded, buildEventContext: p1BuildContext));
+            _centralNodeEventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs(_projectFile, "Build1", succeeded, buildEventContext: p1BuildContext));
+            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, succeeded, buildEventContext: p1BuildContext));
 
             var p2BuildContext = MakeBuildEventContext(evalId: 2, projectContextId: 2);
-            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile2, buildEventContext: p2BuildContext));
-            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile2, buildEventContext: p2BuildContext));
-            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile2, "Build2", buildEventContext: p2BuildContext));
-            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile2, "Task2", buildEventContext: p2BuildContext));
+            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile2, buildEventContext: p2BuildContext));
+            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile2, buildEventContext: p2BuildContext));
+            _centralNodeEventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile2, "Build2", buildEventContext: p2BuildContext));
+            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile2, "Task2", buildEventContext: p2BuildContext));
 
             additionalCallbacks2();
 
-            TaskFinished?.Invoke(_eventSender, MakeTaskFinishedEventArgs(_projectFile2, "Task2", succeeded, buildEventContext: p2BuildContext));
-            TargetFinished?.Invoke(_eventSender, MakeTargetFinishedEventArgs(_projectFile2, "Build2", succeeded, buildEventContext: p2BuildContext));
-            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile2, succeeded, buildEventContext: p2BuildContext));
+            _centralNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile2, "Task2", succeeded, buildEventContext: p2BuildContext));
+            _centralNodeEventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs(_projectFile2, "Build2", succeeded, buildEventContext: p2BuildContext));
+            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile2, succeeded, buildEventContext: p2BuildContext));
 
-            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
+            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(succeeded));
         }
 
         [Fact]
@@ -409,7 +482,7 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("A\nMulti\r\nLine\nWarning!"));
+                _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("A\nMulti\r\nLine\nWarning!"));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -420,8 +493,8 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("[CredentialProvider]DeviceFlow: https://testfeed/index.json"));
-                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs(
+                _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("[CredentialProvider]DeviceFlow: https://testfeed/index.json"));
+                _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs(
                     "[CredentialProvider]ATTENTION: User interaction required." +
                     "**********************************************************************" +
                     "To sign in, use a web browser to open the page https://devicelogin and enter the code XXXXXX to authenticate." +
@@ -436,9 +509,9 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
             {
-                WarningRaised?.Invoke(_eventSender, MakeCopyRetryWarning(1));
-                WarningRaised?.Invoke(_eventSender, MakeCopyRetryWarning(2));
-                WarningRaised?.Invoke(_eventSender, MakeCopyRetryWarning(3));
+                _centralNodeEventSource.InvokeWarningRaised(MakeCopyRetryWarning(1));
+                _centralNodeEventSource.InvokeWarningRaised(MakeCopyRetryWarning(2));
+                _centralNodeEventSource.InvokeWarningRaised(MakeCopyRetryWarning(3));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -449,7 +522,7 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs(_immediateMessageString, MessageImportance.High));
+                _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs(_immediateMessageString, MessageImportance.High));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -460,7 +533,7 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("--anycustomarg", MessageImportance.High));
+                _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("--anycustomarg", MessageImportance.High));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -469,13 +542,13 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintRestore_Failed()
         {
-            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
 
             bool succeeded = false;
-            ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Restore Failed"));
+            _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("Restore Failed"));
 
-            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded));
-            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
+            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, succeeded));
+            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(succeeded));
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -483,13 +556,13 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintRestore_SuccessWithWarnings()
         {
-            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
 
             bool succeeded = true;
-            WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Restore with Warning"));
+            _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("Restore with Warning"));
 
-            ProjectFinished?.Invoke(_eventSender, MakeProjectFinishedEventArgs(_projectFile, succeeded));
-            BuildFinished?.Invoke(_eventSender, MakeBuildFinishedEventArgs(succeeded));
+            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, succeeded));
+            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(succeeded));
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -506,7 +579,7 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
             {
-                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
+                _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("Error!"));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -521,8 +594,8 @@ namespace Microsoft.Build.UnitTests
 
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
             {
-                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning!"));
-                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
+                _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("Warning!"));
+                _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("Error!"));
             });
 
             // Restore original parameters
@@ -537,10 +610,10 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
             {
-                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning1!"));
-                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning2!"));
-                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error1!"));
-                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error2!"));
+                _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("Warning1!"));
+                _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("Warning2!"));
+                _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("Error1!"));
+                _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("Error2!"));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -555,18 +628,18 @@ namespace Microsoft.Build.UnitTests
                 () =>
                 {
                     var p1Context = MakeBuildEventContext(evalId: 1, projectContextId: 1);
-                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning1!", buildEventContext: p1Context));
-                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning2!", buildEventContext: p1Context));
-                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error1!", buildEventContext: p1Context));
-                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error2!", buildEventContext: p1Context));
+                    _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("Warning1!", buildEventContext: p1Context));
+                    _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("Warning2!", buildEventContext: p1Context));
+                    _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("Error1!", buildEventContext: p1Context));
+                    _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("Error2!", buildEventContext: p1Context));
                 },
                 () =>
                 {
                     var p2Context = MakeBuildEventContext(evalId: 2, projectContextId: 2);
-                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning3!", buildEventContext: p2Context));
-                    WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning4!", buildEventContext: p2Context));
-                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error3!", buildEventContext: p2Context));
-                    ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error4!", buildEventContext: p2Context));
+                    _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("Warning3!", buildEventContext: p2Context));
+                    _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("Warning4!", buildEventContext: p2Context));
+                    _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("Error3!", buildEventContext: p2Context));
+                    _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("Error4!", buildEventContext: p2Context));
                 });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -579,7 +652,7 @@ namespace Microsoft.Build.UnitTests
             BuildMessageEventArgs e = MakeBuildOutputEventArgs(_projectFileWithNonAnsiSymbols);
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                MessageRaised?.Invoke(_eventSender, e);
+                _centralNodeEventSource.InvokeMessageRaised(e);
             }, _projectFileWithNonAnsiSymbols);
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -587,36 +660,38 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
+        #region Helper methods to call specific orders of messages
         private void CallAllTypesOfMessagesWarningAndError()
         {
-            MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs(_immediateMessageString, MessageImportance.High));
-            MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("High importance message!", MessageImportance.High));
-            MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("Normal importance message!", MessageImportance.Normal));
-            MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("Low importance message!", MessageImportance.Low));
-            WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("Warning!"));
-            WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("A\nMulti\r\nLine\nWarning!"));
-            ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("Error!"));
+            _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs(_immediateMessageString, MessageImportance.High));
+            _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("High importance message!", MessageImportance.High));
+            _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("Normal importance message!", MessageImportance.Normal));
+            _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("Low importance message!", MessageImportance.Low));
+            _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("Warning!"));
+            _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("A\nMulti\r\nLine\nWarning!"));
+            _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("Error!"));
         }
 
 
         private void CallAllTypesOfTestMessages()
         {
-            MessageRaised?.Invoke(_eventSender, MakeExtendedMessageEventArgs(
+            _centralNodeEventSource.InvokeMessageRaised(MakeExtendedMessageEventArgs(
                 "Test passed.",
                 MessageImportance.High,
                 "TLTESTPASSED",
                 new Dictionary<string, string?>() { { "displayName", "testName1" }, { "localizedResult", "passed" } }));
-            MessageRaised?.Invoke(_eventSender, MakeExtendedMessageEventArgs(
+            _centralNodeEventSource.InvokeMessageRaised(MakeExtendedMessageEventArgs(
                 "Test skipped.",
                 MessageImportance.High,
                 "TLTESTSKIPPED",
                 new Dictionary<string, string?>() { { "displayName", "testName2" }, { "localizedResult", "skipped" } }));
-            MessageRaised?.Invoke(_eventSender, MakeExtendedMessageEventArgs(
+            _centralNodeEventSource.InvokeMessageRaised(MakeExtendedMessageEventArgs(
                 "Test results.",
                 MessageImportance.High,
                 "TLTESTFINISH",
                 new Dictionary<string, string?>() { { "total", "10" }, { "passed", "7" }, { "skipped", "2" }, { "failed", "1" } }));
         }
+        #endregion
 
         [Fact]
         public Task PrintBuildSummaryQuietVerbosity_FailedWithErrors()
@@ -643,7 +718,7 @@ namespace Microsoft.Build.UnitTests
             _terminallogger.Verbosity = LoggerVerbosity.Normal;
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
             {
-                ErrorRaised?.Invoke(_eventSender, new BuildErrorEventArgs(
+                _centralNodeEventSource.InvokeErrorRaised(new BuildErrorEventArgs(
                     "MSB0001", "EvaluationError", "MSBUILD", 0, 0, 0, 0,
                     "An error occurred during evaluation.", null, null)
                 {
@@ -721,7 +796,7 @@ namespace Microsoft.Build.UnitTests
 
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                MessageRaised?.Invoke(_eventSender, MakeTaskCommandLineEventArgs("Task Command Line.", MessageImportance.High));
+                _centralNodeEventSource.InvokeMessageRaised(MakeTaskCommandLineEventArgs("Task Command Line.", MessageImportance.High));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -736,7 +811,7 @@ namespace Microsoft.Build.UnitTests
 
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                MessageRaised?.Invoke(_eventSender, MakeTaskCommandLineEventArgs("Task Command Line.", MessageImportance.High));
+                _centralNodeEventSource.InvokeMessageRaised(MakeTaskCommandLineEventArgs("Task Command Line.", MessageImportance.High));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -758,11 +833,11 @@ namespace Microsoft.Build.UnitTests
         {
             List<MockStopwatch> stopwatches = new();
 
-            Func<StopwatchAbstraction>? createStopwatch = _terminallogger.CreateStopwatch;
+            Func<StopwatchAbstraction>? createStopwatch = _terminallogger._createStopwatch;
 
             try
             {
-                _terminallogger.CreateStopwatch = () =>
+                _terminallogger._createStopwatch = () =>
                 {
                     MockStopwatch stopwatch = new();
                     stopwatches.Add(stopwatch);
@@ -785,7 +860,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                _terminallogger.CreateStopwatch = createStopwatch;
+                _terminallogger._createStopwatch = createStopwatch;
             }
         }
 
@@ -793,23 +868,23 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public async Task DisplayNodesOverwritesWithNewTargetFramework()
         {
-            BuildStarted?.Invoke(_eventSender, MakeBuildStartedEventArgs());
-            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile, properties: [("TargetFramework", "tfName")]));
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile, properties: [("TargetFramework", "tfName")]));
 
-            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile, "Build"));
-            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build"));
-            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "Task"));
+            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, "Build"));
+            _centralNodeEventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build"));
+            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "Task"));
 
             _terminallogger.DisplayNodes();
 
             // force the current node to stop building and 'yield'
-            TaskStarted?.Invoke(_eventSender, MakeTaskStartedEventArgs(_projectFile, "MSBuild"));
+            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "MSBuild"));
 
             // now create a new project with a different target framework that runs on the same node
             var buildContext2 = MakeBuildEventContext(evalId: 2, projectContextId: 2);
-            StatusEventRaised?.Invoke(_eventSender, MakeProjectEvalFinishedArgs(_projectFile, properties: [("TargetFramework", "tf2")], buildEventContext: buildContext2));
-            ProjectStarted?.Invoke(_eventSender, MakeProjectStartedEventArgs(_projectFile, "Build", buildEventContext: buildContext2));
-            TargetStarted?.Invoke(_eventSender, MakeTargetStartedEventArgs(_projectFile, "Build", buildEventContext: buildContext2));
+            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile, properties: [("TargetFramework", "tf2")], buildEventContext: buildContext2));
+            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, "Build", buildEventContext: buildContext2));
+            _centralNodeEventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build", buildEventContext: buildContext2));
 
             _terminallogger.DisplayNodes();
 
@@ -882,9 +957,9 @@ namespace Microsoft.Build.UnitTests
 
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("this message has a link because it has a code and a keyword", MessageImportance.High, code: "1234", keyword: "keyword"));
-                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("this message has no link because it only has a code", MessageImportance.High, code: "1234", keyword: null));
-                MessageRaised?.Invoke(_eventSender, MakeMessageEventArgs("this message has no link because it only has a keyword", MessageImportance.High, keyword: "keyword"));
+                _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("this message has a link because it has a code and a keyword", MessageImportance.High, code: "1234", keyword: "keyword"));
+                _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("this message has no link because it only has a code", MessageImportance.High, code: "1234", keyword: null));
+                _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("this message has no link because it only has a keyword", MessageImportance.High, keyword: "keyword"));
             });
 
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -896,10 +971,10 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("this warning has a link because it has an explicit link", link: "https://example.com"));
-                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("this warning has a link because it has a keyword", keyword: "keyword"));
-                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("this warning has a link to example.com because links take precedence over keywords", link: "https://example.com", keyword: "keyword"));
-                WarningRaised?.Invoke(_eventSender, MakeWarningEventArgs("this warning has no link because it has no link or keyword"));
+                _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("this warning has a link because it has an explicit link", link: "https://example.com"));
+                _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("this warning has a link because it has a keyword", keyword: "keyword"));
+                _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("this warning has a link to example.com because links take precedence over keywords", link: "https://example.com", keyword: "keyword"));
+                _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("this warning has no link because it has no link or keyword"));
             });
 
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -910,10 +985,10 @@ namespace Microsoft.Build.UnitTests
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("this error has a link because it has an explicit link", link: "https://example.com"));
-                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("this error has a link because it has a keyword", keyword: "keyword"));
-                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("this error has a link to example.com because links take precedence over keywords", link: "https://example.com", keyword: "keyword"));
-                ErrorRaised?.Invoke(_eventSender, MakeErrorEventArgs("this error has no link because it has no link or keyword"));
+                _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("this error has a link because it has an explicit link", link: "https://example.com"));
+                _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("this error has a link because it has a keyword", keyword: "keyword"));
+                _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("this error has a link to example.com because links take precedence over keywords", link: "https://example.com", keyword: "keyword"));
+                _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("this error has no link because it has no link or keyword"));
             });
 
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -926,7 +1001,7 @@ namespace Microsoft.Build.UnitTests
             var buildOutputEvent = MakeBuildOutputEventArgs(_projectFile);
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("RuntimeIdentifier", "win-x64")], additionalCallbacks: () =>
             {
-                MessageRaised?.Invoke(_eventSender, buildOutputEvent);
+                _centralNodeEventSource.InvokeMessageRaised(buildOutputEvent);
             });
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
@@ -938,9 +1013,62 @@ namespace Microsoft.Build.UnitTests
             var buildOutputEvent = MakeBuildOutputEventArgs(_projectFile);
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("TargetFramework", "net10.0"), ("RuntimeIdentifier", "win-x64")], additionalCallbacks: () =>
             {
-                MessageRaised?.Invoke(_eventSender, buildOutputEvent);
+                _centralNodeEventSource.InvokeMessageRaised(buildOutputEvent);
             });
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task DisplayNodesRestoresStatusAfterMSBuildTaskYields_TestProject(bool runOnCentralNode)
+        {
+            // 1. Start Build
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+
+            // the project can be evaluated and built either locally or remotely - so the actual innards should happen on either the central or remote event source
+
+            var targetNodeEventSource = runOnCentralNode ? _centralNodeEventSource : _remoteNodeEventSource;
+            // default build context is for the 'central' node
+            var buildContext = runOnCentralNode ? null : MakeBuildEventContext(nodeId: 1);
+
+            // 2. Project Eval Finished
+            targetNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile, buildEventContext: buildContext));
+
+            // 3. Project Started
+            targetNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, buildEventContext: buildContext));
+
+            // 4. Target Started (Test Target)
+            // This should set the display name to "Testing"
+            targetNodeEventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "_TestRunStart", buildEventContext: buildContext));
+
+            // 5. Task Started (The "Outer" task)
+            targetNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "OuterTask", buildEventContext: buildContext));
+
+            // Verify status shows Testing
+            _terminallogger.DisplayNodes();
+
+            // 6. MSBuild Task Started (Yield)
+            targetNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "MSBuild", buildEventContext: buildContext));
+
+            // Verify status is cleared
+            _terminallogger.DisplayNodes();
+
+            // 7. MSBuild Task Finished (Resume)
+            // This should restore the status to "Testing" (not "_TestRunStart")
+            targetNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "MSBuild", true, buildEventContext: buildContext));
+
+            // 8. Verify status shows Testing again
+            _terminallogger.DisplayNodes();
+
+            // Cleanup
+            targetNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "OuterTask", true, buildEventContext: buildContext));
+            targetNodeEventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs(_projectFile, "_TestRunStart", true, buildEventContext: buildContext));
+            targetNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, true, buildEventContext: buildContext));
+
+            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
+
+            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform().UseParameters(runOnCentralNode);
         }
     }
 }
