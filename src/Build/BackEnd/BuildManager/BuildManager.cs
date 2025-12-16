@@ -2517,7 +2517,7 @@ namespace Microsoft.Build.Execution
                     BuildEventContext buildEventContext = _projectStartedEvents.TryGetValue(result.SubmissionId, out BuildEventArgs? buildEventArgs)
                         ? buildEventArgs.BuildEventContext!
                         : BuildEventContext.CreateInitial(result.SubmissionId, node)
-                            .WithEvaluationId(configuration.Project?.EvaluationId ?? BuildEventContext.InvalidEvaluationId)
+                            .WithEvaluationId(configuration.ProjectEvaluationId)
                             .WithProjectInstanceId(configuration.ConfigurationId);
                     try
                     {
