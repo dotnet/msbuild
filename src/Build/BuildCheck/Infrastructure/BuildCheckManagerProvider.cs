@@ -649,7 +649,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
             {
                 foreach (BuildEventArgs deferredArgs in list)
                 {
-                    deferredArgs.BuildEventContext = deferredArgs.BuildEventContext!.WithInstanceIdAndContextId(buildEventContext);
+                    deferredArgs.BuildEventContext = deferredArgs.BuildEventContext!.WithProjectInstanceId(buildEventContext.ProjectInstanceId).WithProjectContextId(buildEventContext.ProjectContextId);
                     checkContext.DispatchBuildEvent(deferredArgs);
                 }
                 list.Clear();

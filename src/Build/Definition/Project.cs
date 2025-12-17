@@ -67,7 +67,11 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Context to log messages and events in.
         /// </summary>
-        private static readonly BuildEventContext s_buildEventContext = BuildEventContext.CreateInitial(0 /* submission ID */, 0 /* node ID */);
+        /// <remarks>
+        /// This should only be used on pathways that create Projects outside of the MSBuild exe workflow - users directly loading Projects, etc.
+        /// In such cases we don't have a live set of nodes (yet?), but we still need contexts for message association.
+        /// </remarks>
+        private static readonly BuildEventContext s_errorBuildEventContext = Scheduler.s_schedulerNodeBuildEventContext.WithSubmissionId(0);
 
         private ProjectLink implementation;
         private IProjectLinkInternal implementationInternal;
@@ -1922,7 +1926,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 catch (InvalidProjectFileException ex)
                 {
-                    LoggingService.LogInvalidProjectFileError(s_buildEventContext, ex);
+                    LoggingService.LogInvalidProjectFileError(s_errorBuildEventContext, ex);
                     throw;
                 }
             }
@@ -1965,7 +1969,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 catch (InvalidProjectFileException ex)
                 {
-                    LoggingService.LogInvalidProjectFileError(s_buildEventContext, ex);
+                    LoggingService.LogInvalidProjectFileError(s_errorBuildEventContext, ex);
                     throw;
                 }
             }
@@ -3350,7 +3354,7 @@ namespace Microsoft.Build.Evaluation
             {
                 if (!IsBuildEnabled)
                 {
-                    LoggingService.LogError(s_buildEventContext, new BuildEventFileInfo(FullPath), "SecurityProjectBuildDisabled");
+                    LoggingService.LogError(s_errorBuildEventContext, new BuildEventFileInfo(FullPath), "SecurityProjectBuildDisabled");
                     if (LoggingService is LoggingService defaultLoggingService)
                     {
                         defaultLoggingService.WaitForLoggingToProcessEvents();
@@ -3553,7 +3557,7 @@ namespace Microsoft.Build.Evaluation
                     _data.Expander,
                     LoggingService,
                     FullPath,
-                    s_buildEventContext);
+                    s_errorBuildEventContext);
 
                 if (items.Count != 1)
                 {
@@ -3620,7 +3624,7 @@ namespace Microsoft.Build.Evaluation
                     _data.Expander,
                     LoggingService,
                     FullPath,
-                    s_buildEventContext);
+                    s_errorBuildEventContext);
 
                 foreach (ProjectItem item in items)
                 {
@@ -3708,7 +3712,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     catch (InvalidProjectFileException ex)
                     {
-                        loggingServiceForEvaluation.LogInvalidProjectFileError(s_buildEventContext, ex);
+                        loggingServiceForEvaluation.LogInvalidProjectFileError(s_errorBuildEventContext, ex);
                         throw;
                     }
                 }
@@ -3747,7 +3751,7 @@ namespace Microsoft.Build.Evaluation
                     ProjectCollection,
                     Owner._directoryCacheFactory,
                     ProjectCollection.ProjectRootElementCache,
-                    s_buildEventContext,
+                    s_errorBuildEventContext,
                     evaluationContext.SdkResolverService,
                     BuildEventContext.InvalidSubmissionId,
                     evaluationContext,

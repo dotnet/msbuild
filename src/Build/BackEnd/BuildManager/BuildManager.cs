@@ -1453,7 +1453,7 @@ namespace Microsoft.Build.Execution
             where TResultData : BuildResultBase
         {
             // For the current submission we only know the SubmissionId and that it happened on scheduler node - all other BuildEventContext dimensions are unknown now.
-            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(submission.SubmissionId, nodeId: 1);
+            BuildEventContext buildEventContext = Scheduler.s_schedulerInProcNodeBuildEventContext.WithSubmissionId(submission.SubmissionId);
 
             BuildSubmissionStartedEventArgs submissionStartedEvent = new(
                 submission.BuildRequestDataBase.GlobalPropertiesLookup,
@@ -1541,7 +1541,7 @@ namespace Microsoft.Build.Execution
             var buildEventContext = request.BuildEventContext;
             if (buildEventContext == BuildEventContext.Invalid)
             {
-                buildEventContext = CreateErrorLoggingContext(request.SubmissionId, 0);
+                buildEventContext = Scheduler.s_schedulerNodeBuildEventContext.WithSubmissionId(request.SubmissionId);
             }
 
             var instances = ProjectInstance.LoadSolutionForBuild(
@@ -1814,9 +1814,8 @@ namespace Microsoft.Build.Execution
         /// Creates a BuildEventContext suitable for error logging for the given submission.
         /// </summary>
         /// <param name="submissionId">The submission ID</param>
-        /// <param name="nodeId">The node ID, defaults to 1 for general error logging</param>
         /// <returns>A BuildEventContext for logging errors</returns>
-        private static BuildEventContext CreateErrorLoggingContext(int submissionId, int nodeId = 1) => BuildEventContext.CreateInitial(submissionId, nodeId);
+        private static BuildEventContext CreateErrorLoggingContext(int submissionId) => Scheduler.s_schedulerInProcNodeBuildEventContext.WithSubmissionId(submissionId);
 
         /// <summary>
         /// Waits to drain all events of logging service.
@@ -2557,7 +2556,7 @@ namespace Microsoft.Build.Execution
                     ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent<ILoggingService>(BuildComponentType.LoggingService);
                     foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
-                        BuildEventContext buildEventContext = CreateErrorLoggingContext(submission.SubmissionId, BuildEventContext.InvalidNodeId);
+                        BuildEventContext buildEventContext = Scheduler.s_schedulerNodeBuildEventContext.WithSubmissionId(submission.SubmissionId);
                         string exception = ExceptionHandling.ReadAnyExceptionFromFile(_instantiationTimeUtc);
                         loggingService?.LogError(buildEventContext, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, ExceptionHandling.DebugDumpPath, exception);
                     }
@@ -2713,7 +2712,7 @@ namespace Microsoft.Build.Execution
 
                         if (newNodes?.Count != response.NumberOfNodesToCreate || newNodes.Any(n => n == null))
                         {
-                            BuildEventContext buildEventContext = CreateErrorLoggingContext(0, Scheduler.VirtualNode);
+                            BuildEventContext buildEventContext = Scheduler.s_schedulerNodeBuildEventContext.WithSubmissionId(0);
                             ((IBuildComponentHost)this).LoggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty), "UnableToCreateNode", response.RequiredNodeType.ToString("G"));
 
                             throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnableToCreateNode", response.RequiredNodeType.ToString("G")));

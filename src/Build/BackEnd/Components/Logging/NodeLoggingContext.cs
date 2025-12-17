@@ -18,10 +18,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Used to create the initial, base logging context for the node.
         /// </summary>
         /// <param name="loggingService">The logging service to use.</param>
+        /// <param name="parentContext">The parent build event context to associate this node logging context with</param>
         /// <param name="nodeId">The </param>
         /// <param name="inProcNode"><code>true</code> if this is an in-process node, otherwise <code>false</code>.</param>
-        internal NodeLoggingContext(ILoggingService loggingService, int nodeId, bool inProcNode)
-            : base(loggingService, BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, nodeId), inProcNode)
+        internal NodeLoggingContext(ILoggingService loggingService, BuildEventContext parentContext, int nodeId, bool inProcNode)
+            : base(loggingService, parentContext.WithNodeId(nodeId), inProcNode)
         {
             ErrorUtilities.VerifyThrow(nodeId != BuildEventContext.InvalidNodeId, "Should not ever be given an invalid NodeId");
 
