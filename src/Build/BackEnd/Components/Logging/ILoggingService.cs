@@ -503,20 +503,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Create an evaluation context, by generating a new evaluation id.
         /// </summary>
-        /// <param name="nodeId">The node id</param>
-        /// <param name="submissionId">The submission id</param>
+        /// <param name="parentContext">The parent context to derive the new evaluation context from</param>
         /// <returns></returns>
-        BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId);
+        BuildEventContext CreateEvaluationBuildEventContext(BuildEventContext parentContext);
 
         /// <summary>
-        /// Create a project cache context, by generating a new project context id.
+        /// Create a project-level build event context, by generating a new project context id and applying it to a parent context scope.
         /// </summary>
-        /// <param name="submissionId">The submission id</param>
-        /// <param name="evaluationId">The evaluation id</param>
-        /// <param name="projectInstanceId">The project instance id</param>
+        /// <param name="parentBuildEventContext">The parent context to derive the new project cache context from</param>
         /// <param name="projectFile">Project file being built</param>
         /// <returns></returns>
-        BuildEventContext CreateProjectCacheBuildEventContext(int submissionId, int evaluationId, int projectInstanceId, string projectFile);
+        BuildEventContext CreateProjectCacheBuildEventContext(BuildEventContext parentBuildEventContext, string projectFile);
 
         /// <summary>
         /// Logs that a project evaluation has started
@@ -581,8 +578,8 @@ namespace Microsoft.Build.BackEnd.Logging
             string targetNames,
             IEnumerable<DictionaryEntry> properties,
             IEnumerable<DictionaryEntry> items,
-            int evaluationId = BuildEventContext.InvalidEvaluationId,
-            int projectContextId = BuildEventContext.InvalidProjectContextId);
+            int evaluationId,
+            int projectContextId);
 
         /// <summary>
         /// Log that the project has finished

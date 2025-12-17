@@ -78,6 +78,16 @@ namespace Microsoft.Build.Execution
     [DebuggerDisplay(@"{FullPath} #Targets={TargetsCount} DefaultTargets={(DefaultTargets == null) ? System.String.Empty : System.String.Join("";"", DefaultTargets.ToArray())} ToolsVersion={Toolset.ToolsVersion} InitialTargets={(InitialTargets == null) ? System.String.Empty : System.String.Join("";"", InitialTargets.ToArray())} #GlobalProperties={GlobalProperties.Count} #Properties={Properties.Count} #ItemTypes={ItemTypes.Count} #Items={Items.Count}")]
     public class ProjectInstance : IPropertyProvider<ProjectPropertyInstance>, IItemProvider<ProjectItemInstance>, IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>, ITranslatable
     {
+
+        /// <summary>
+        /// Context to log messages and events in.
+        /// </summary>
+        /// <remarks>
+        /// This should only be used on pathways that create ProjectInstances outside of the MSBuild exe workflow - users directly loading Projects, etc.
+        /// In such cases we don't have a live set of nodes (yet?), but we still need contexts for message association.
+        /// </remarks>
+        private static readonly BuildEventContext s_errorBuildEventContext = Scheduler.s_schedulerNodeBuildEventContext.WithSubmissionId(0);
+
         /// <summary>
         /// Targets in the project after overrides have been resolved.
         /// This is an unordered collection keyed by target name.
@@ -313,7 +323,7 @@ namespace Microsoft.Build.Execution
                 Interactive = interactive
             };
 
-            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(0 /* submission ID */, buildParameters.NodeId);
+            BuildEventContext buildEventContext = s_errorBuildEventContext.WithNodeId(buildParameters.NodeId).WithSubmissionId(0);
             ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, true /*Explicitly Loaded*/);
 
             Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version provided */, buildParameters, projectCollection.LoggingService, buildEventContext,
@@ -543,14 +553,12 @@ namespace Microsoft.Build.Execution
         private ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection,
             ProjectLoadSettings? projectLoadSettings, EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
         {
-            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(0 /* submission ID */, 0 /* node ID */);
-
             BuildParameters buildParameters = new BuildParameters(projectCollection)
             {
                 Interactive = interactive
             };
 
-            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version specified */, buildParameters, projectCollection.LoggingService, buildEventContext,
+            Initialize(xml, globalProperties, toolsVersion, subToolsetVersion, 0 /* no solution version specified */, buildParameters, projectCollection.LoggingService, s_errorBuildEventContext,
                 projectLoadSettings: projectLoadSettings, evaluationContext: evaluationContext, directoryCacheFactory: directoryCacheFactory);
         }
 
@@ -619,7 +627,7 @@ namespace Microsoft.Build.Execution
         internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, int visualStudioVersionFromSolution, ProjectCollection projectCollection, ISdkResolverService sdkResolverService, int submissionId)
         {
             BuildEventContext buildEventContext = BuildEventContext.CreateInitial(0 /* submission ID */, 0 /* node ID */);
-            Initialize(xml, globalProperties, toolsVersion, null, visualStudioVersionFromSolution, new BuildParameters(projectCollection), projectCollection.LoggingService, buildEventContext, sdkResolverService, submissionId);
+            Initialize(xml, globalProperties, toolsVersion, null, visualStudioVersionFromSolution, new BuildParameters(projectCollection), projectCollection.LoggingService, s_errorBuildEventContext, sdkResolverService, submissionId);
         }
 
         /// <summary>
@@ -633,7 +641,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, ILoggingService loggingService, int visualStudioVersionFromSolution, ProjectCollection projectCollection, ISdkResolverService sdkResolverService, int submissionId)
         {
-            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(submissionId, 0);
+            BuildEventContext buildEventContext = s_errorBuildEventContext.WithSubmissionId(submissionId);
             Initialize(xml, globalProperties, toolsVersion, null, visualStudioVersionFromSolution, new BuildParameters(projectCollection), loggingService, buildEventContext, sdkResolverService, submissionId);
         }
 

@@ -401,14 +401,12 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <inheritdoc />
-        public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
-            => BuildEventContext.CreateInitial(submissionId, nodeId).WithEvaluationId(NextEvaluationId);
+        public BuildEventContext CreateEvaluationBuildEventContext(BuildEventContext parentContext)
+            => parentContext.WithEvaluationId(NextEvaluationId);
 
         /// <inheritdoc />
         public BuildEventContext CreateProjectCacheBuildEventContext(
-            int submissionId,
-            int evaluationId,
-            int projectInstanceId,
+            BuildEventContext parentBuildEventContext,
             string projectFile)
         {
             int projectContextId = NextProjectId;
@@ -416,13 +414,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // In the future if some LogProjectCacheStarted event is created, move this there to align with evaluation and build execution.
             _projectFileMap[projectContextId] = projectFile;
 
-            // Because the project cache runs in the BuildManager, it makes some sense to associate logging with the in-proc node.
-            // If a invalid node id is used the messages become deferred in the console logger and spit out at the end.
-            int nodeId = Scheduler.InProcNodeId;
-
-            return BuildEventContext.CreateInitial(submissionId, nodeId)
-                .WithEvaluationId(evaluationId)
-                .WithProjectInstanceId(projectInstanceId)
+            return parentBuildEventContext
                 .WithProjectContextId(projectContextId);
         }
 
@@ -498,8 +490,8 @@ namespace Microsoft.Build.BackEnd.Logging
             string targetNames,
             IEnumerable<DictionaryEntry> properties,
             IEnumerable<DictionaryEntry> items,
-            int evaluationId = BuildEventContext.InvalidEvaluationId,
-            int projectContextId = BuildEventContext.InvalidProjectContextId)
+            int evaluationId,
+            int projectContextId)
         {
             var args = CreateProjectStarted(nodeBuildEventContext,
                 submissionId,
@@ -531,8 +523,8 @@ namespace Microsoft.Build.BackEnd.Logging
             string targetNames,
             IEnumerable<DictionaryEntry> properties,
             IEnumerable<DictionaryEntry> items,
-            int evaluationId = BuildEventContext.InvalidEvaluationId,
-            int projectContextId = BuildEventContext.InvalidProjectContextId)
+            int evaluationId,
+            int projectContextId)
         {
             ErrorUtilities.VerifyThrow(nodeBuildEventContext != null, "Need a nodeBuildEventContext");
 

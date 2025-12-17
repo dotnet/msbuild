@@ -101,6 +101,15 @@ namespace Microsoft.Build.Evaluation
         private static ProjectCollection s_globalProjectCollection;
 
         /// <summary>
+        /// Context to log messages and events in.
+        /// </summary>
+        /// <remarks>
+        /// This should only be used on pathways that create ProjectCollections outside of the MSBuild exe workflow - users directly loading Projects, etc.
+        /// In such cases we don't have a live set of nodes (yet?), but we still need contexts for message association.
+        /// </remarks>
+        private static readonly BuildEventContext s_errorBuildEventContext = Scheduler.s_schedulerNodeBuildEventContext.WithSubmissionId(0);
+
+        /// <summary>
         /// Gets the file version of the file in which the Engine assembly lies.
         /// </summary>
         /// <remarks>
@@ -384,8 +393,7 @@ namespace Microsoft.Build.Evaluation
                             }
                             catch (InvalidProjectFileException ex2)
                             {
-                                BuildEventContext buildEventContext = BuildEventContext.CreateInitial(0 /* submission ID */, 0 /* node ID */);
-                                LoggingService.LogInvalidProjectFileError(buildEventContext, ex2);
+                                LoggingService.LogInvalidProjectFileError(s_errorBuildEventContext, ex2);
                                 throw;
                             }
                         }
@@ -1261,8 +1269,7 @@ namespace Microsoft.Build.Evaluation
                     }
                     catch (InvalidProjectFileException ex)
                     {
-                        var buildEventContext = BuildEventContext.CreateInitial(0 /* submission ID */, 0 /* node ID */);
-                        LoggingService.LogInvalidProjectFileError(buildEventContext, ex);
+                        LoggingService.LogInvalidProjectFileError(s_errorBuildEventContext, ex);
                         throw;
                     }
                 }

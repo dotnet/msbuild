@@ -20,7 +20,7 @@ namespace Microsoft.Build.BackEnd.Components.Logging
         public EvaluationLoggingContext(ILoggingService loggingService, BuildEventContext buildEventContext, string projectFile)
             : base(
                 loggingService,
-                loggingService.CreateEvaluationBuildEventContext(buildEventContext.NodeId, buildEventContext.SubmissionId))
+                loggingService.CreateEvaluationBuildEventContext(buildEventContext))
         {
             _projectFile = projectFile;
             IsValid = true;

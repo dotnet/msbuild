@@ -87,11 +87,7 @@ namespace Microsoft.Build.Framework
         /// <param name="submissionId">The submission ID</param>
         /// <param name="nodeId">The node ID</param>
         /// <returns>A new BuildEventContext with the specified submission and node ID</returns>
-        public static BuildEventContextBuilder CreateInitial(int submissionId, int nodeId) => Builder().AsInitial(submissionId, nodeId);
-
-        internal BuildEventContextBuilder WithInstanceIdAndContextId(int projectInstanceId, int projectContextId) => Builder(this).WithInstanceIdAndContextId(projectInstanceId, projectContextId);
-
-        internal BuildEventContextBuilder WithInstanceIdAndContextId(BuildEventContext other) => Builder(this).WithInstanceIdAndContextId(other);
+        public static BuildEventContextBuilder CreateInitial(int submissionId, int nodeId) => new BuildEventContextBuilder().WithSubmissionId(submissionId).WithNodeId(nodeId);
 
         /// <summary>
         /// Creates a new builder with the specified submission ID, preserving all other IDs.
@@ -341,13 +337,6 @@ namespace Microsoft.Build.Framework
         #region Builder Pattern
 
         /// <summary>
-        /// Creates a new builder for constructing BuildEventContext instances efficiently.
-        /// The builder uses stack allocation to avoid heap allocations during construction.
-        /// </summary>
-        /// <returns>A new BuildEventContextBuilder</returns>
-        public static BuildEventContextBuilder Builder() => new();
-
-        /// <summary>
         /// Creates a new builder initialized from an existing BuildEventContext.
         /// This allows for efficient copying and modification of existing contexts.
         /// </summary>
@@ -483,46 +472,6 @@ namespace Microsoft.Build.Framework
         public BuildEventContextBuilder WithTaskId(int taskId)
         {
             _taskId = taskId;
-            return this;
-        }
-
-        /// <summary>
-        /// Sets both the project instance ID and project context ID in a single operation.
-        /// This is a common operation when creating project-level contexts.
-        /// </summary>
-        /// <param name="projectInstanceId">The project instance ID</param>
-        /// <param name="projectContextId">The project context ID</param>
-        /// <returns>This builder instance</returns>
-        public BuildEventContextBuilder WithInstanceIdAndContextId(int projectInstanceId, int projectContextId)
-        {
-            _projectInstanceId = projectInstanceId;
-            _projectContextId = projectContextId;
-            return this;
-        }
-
-        /// <summary>
-        /// Copies the project instance ID and project context ID from another BuildEventContext.
-        /// </summary>
-        /// <param name="other">The BuildEventContext to copy IDs from</param>
-        /// <returns>This builder instance</returns>
-        public BuildEventContextBuilder WithInstanceIdAndContextId(BuildEventContext other) => WithInstanceIdAndContextId(other.ProjectInstanceId, other.ProjectContextId);
-
-        /// <summary>
-        /// Creates an initial BuildEventContext with the specified submission and node ID.
-        /// All other IDs are set to invalid values.
-        /// </summary>
-        /// <param name="submissionId">The submission ID</param>
-        /// <param name="nodeId">The node ID</param>
-        /// <returns>This builder instance configured as an initial context</returns>
-        public BuildEventContextBuilder AsInitial(int submissionId, int nodeId)
-        {
-            _submissionId = submissionId;
-            _nodeId = nodeId;
-            _evaluationId = BuildEventContext.InvalidEvaluationId;
-            _projectInstanceId = BuildEventContext.InvalidProjectInstanceId;
-            _projectContextId = BuildEventContext.InvalidProjectContextId;
-            _targetId = BuildEventContext.InvalidTargetId;
-            _taskId = BuildEventContext.InvalidTaskId;
             return this;
         }
 
