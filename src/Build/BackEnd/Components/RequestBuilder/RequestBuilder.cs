@@ -1146,7 +1146,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.Request,
                     _requestEntry.RequestConfiguration.ProjectFullPath,
                     _requestEntry.RequestConfiguration.ToolsVersion,
-                    _requestEntry.RequestConfiguration.Project.EvaluationId);
+                    _requestEntry.RequestConfiguration.ProjectEvaluationId);
 
                 throw;
             }
