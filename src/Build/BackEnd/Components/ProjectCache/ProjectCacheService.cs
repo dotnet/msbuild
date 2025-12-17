@@ -558,7 +558,7 @@ namespace Microsoft.Build.ProjectCache
                 {
                     if (!configuration.IsLoaded)
                     {
-                        BuildEventContext parentBuildContext = Scheduler.s_schedulerInProcNodeBuildEventContext.WithSubmissionId(submission.SubmissionId);
+                        BuildEventContext parentBuildContext = submission.BuildEventContext;
                         configuration.LoadProjectIntoConfiguration(
                             _buildManager,
                             submission.BuildRequestData!.Flags,
