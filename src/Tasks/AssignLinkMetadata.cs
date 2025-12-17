@@ -14,6 +14,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Task to assign a reasonable "Link" metadata to the provided items.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class AssignLinkMetadata : TaskExtension
     {
         /// <summary>

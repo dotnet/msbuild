@@ -199,7 +199,7 @@ namespace Microsoft.Build.Shared
 
                         if (currentDirectory == null)
                         {
-                            currentDirectory = String.Empty;
+                            currentDirectory = FileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
                         }
 
                         modifiedItemSpec = GetFullPath(itemSpec, currentDirectory);

@@ -1,11 +1,11 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- Copyright (c) .NET Foundation and contributors. All rights reserved. Licensed under the MIT license. See License.txt in the project root for full license information. -->
 <Project>
-  <Import Project="Version.Details.props" Condition="Exists('Version.Details.props')" />
+
+  <Import Project="Version.Details.props" />
+
   <PropertyGroup>
-    <VersionPrefix>18.1.0</VersionPrefix>
+    <VersionPrefix>18.3.0</VersionPrefix>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <PackageValidationBaselineVersion>18.0.0-preview-25480-115</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>18.0.2</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
     <!-- differentiate experimental insertions to avoid package id conflicts, 
@@ -21,13 +21,15 @@
     <SemanticVersioningV1>true</SemanticVersioningV1>
     <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
   </PropertyGroup>
-  <!-- Repo Toolset Features -->
+
+  <!-- Arcade features -->
   <PropertyGroup>
     <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
     <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
   </PropertyGroup>
+
   <!-- Production Dependencies -->
   <!-- Condition consumption of maintenance-packages dependencies based on source build.
        This is to prevent "package downgrade" errors coming from other packages that are
@@ -50,20 +52,24 @@
     <SystemRuntimeCompilerServicesUnsafeVersion>6.1.0</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemThreadingTasksExtensionsVersion>4.6.0</SystemThreadingTasksExtensionsVersion>
   </PropertyGroup>
+
   <PropertyGroup>
     <!-- dotnet/runtime packages -->
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
   </PropertyGroup>
+
   <PropertyGroup>
     <MicrosoftVisualStudioOpenTelemetryVersion>0.2.104-beta</MicrosoftVisualStudioOpenTelemetryVersion>
-    <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Packages.props -->
+    <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Directory.Packages.props -->
   </PropertyGroup>
+
   <!-- Toolset Dependencies -->
   <PropertyGroup>
     <!-- DotNetCliVersion MUST match the dotnet version in global.json.
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
   </PropertyGroup>
+
   <PropertyGroup>
     <!-- These are manually updated since they are text-only source packages and can't be
        overridden in source-build, see https://github.com/dotnet/msbuild/issues/6960.
@@ -72,9 +78,11 @@
     <MicrosoftCodeAnalysisContractsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisContractsVersion>
     <MicrosoftCodeAnalysisPooledObjectsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisPooledObjectsVersion>
   </PropertyGroup>
+
   <PropertyGroup>
-    <BootstrapSdkVersion>10.0.100-rc.1.25451.107</BootstrapSdkVersion>
+    <BootstrapSdkVersion>10.0.100</BootstrapSdkVersion>
   </PropertyGroup>
+
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
     <!-- See https://github.com/dotnet/arcade/issues/3386
 
@@ -91,4 +99,5 @@
       <FileVersion>$(VersionPrefix).$(FileVersion.Split('.')[3])</FileVersion>
     </PropertyGroup>
   </Target>
+
 </Project>

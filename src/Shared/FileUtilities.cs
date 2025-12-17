@@ -48,6 +48,23 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string cacheDirectory = null;
 
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// AsyncLocal working directory for use during property/item expansion in multithreaded mode.
+        /// Set by MultiThreadedTaskEnvironmentDriver when building projects. null in multiprocess mode.
+        /// Using AsyncLocal ensures the value flows to child threads/tasks spawned during execution of tasks.
+        /// </summary>
+        private static readonly AsyncLocal<string> s_currentThreadWorkingDirectory = new();
+        internal static string CurrentThreadWorkingDirectory
+        {
+            get => s_currentThreadWorkingDirectory.Value;
+            set => s_currentThreadWorkingDirectory.Value = value;
+        }
+#else
+        // net35 taskhost does not support AsyncLocal, and the scenario is not relevant there.
+        internal static string CurrentThreadWorkingDirectory = null;
+#endif
+
 #if CLR2COMPATIBILITY
         internal static string TempFileDirectory => Path.GetTempPath();
 #endif
@@ -564,6 +581,18 @@ namespace Microsoft.Build.Shared
         internal static string FixFilePath(string path)
         {
             return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/'); // .Replace("//", "/");
+        }
+
+        /// <summary>
+        /// Normalizes all path separators (both forward and back slashes) to forward slashes.
+        /// This is platform-independent, unlike FixFilePath which only normalizes on non-Windows platforms.
+        /// Use this when you need consistent path comparison regardless of which separator style is used.
+        /// </summary>
+        /// <param name="path">The path to normalize</param>
+        /// <returns>The path with all backslashes replaced by forward slashes, or the original path if null/empty</returns>
+        internal static string NormalizePathSeparatorsToForwardSlash(string path)
+        {
+            return string.IsNullOrEmpty(path) ? path : path.Replace('\\', '/');
         }
 
 #if !CLR2COMPATIBILITY
