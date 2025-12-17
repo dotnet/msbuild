@@ -24,10 +24,7 @@ namespace Microsoft.Build.Shared
         /// Determines whether the specified <paramref name="type"/> is decorated with an attribute of type <typeparamref name="T"/>.
         /// </summary>
         public static bool HasAttribute<T>(this Type type)
-            where T : Attribute
-        {
-            return type.HasAttribute(typeof(T).Name);
-        }
+            where T : Attribute => type.HasAttribute(typeof(T).Name);
 
         /// <summary>
         /// Determines whether the specified <paramref name="type"/> is decorated with an attribute whose simple type name
@@ -40,18 +37,9 @@ namespace Microsoft.Build.Shared
                 return false;
             }
 
-            try
-            {
-                return CustomAttributeData
+            return CustomAttributeData
                     .GetCustomAttributes(type)
                     .Any(attr => SafeGetAttributeName(attr) == attributeName);
-            }
-            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-            {
-                // Skip this attribute - it references a type that can't be loaded/found
-                // It might be available in the child node.
-                return false;
-            }
         }
 
         /// <summary>
@@ -59,18 +47,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="attr">The attribute metadata.</param>
         /// <returns>The simple attribute type name, or <c>null</c> if it cannot be resolved.</returns>
-        private static string? SafeGetAttributeName(CustomAttributeData attr)
-        {
-            try
-            {
-                return attr.AttributeType?.Name;
-            }
-            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-            {
-                // Skip this attribute - it references a type that can't be loaded/found
-                // It might be available in the child node.
-                return null;
-            }
-        }
+        private static string? SafeGetAttributeName(CustomAttributeData attr) => attr.AttributeType?.Name;
     }
 }

@@ -244,6 +244,9 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
         <target state="translated">  -multithreaded
@@ -254,6 +257,9 @@
                      不支援此選項。
                      使用的執行緒數量上限由
                      -maxCpuCount 切換開關決定。
+                     若啟用多執行緒模式
+                     且 MSBUILDFORCEALLTASKSOUTOFPROC=1，
+                     maxCpuCount 不得超過 256。
                      (簡短形式: -m)
     </target>
         <note />
@@ -1504,6 +1510,11 @@
       <trans-unit id="MSBuildDebugPath">
         <source>MSBuild logs and debug information will be at "{0}"</source>
         <target state="translated">MSBuild 記錄和偵錯工具資訊將位於 "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
+        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
+        <target state="translated">開啟多執行緒模式且 MSBUILDFORCEALLTASKSOUTOFPROC=1 時，maxCpuCount 不能大於 {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">

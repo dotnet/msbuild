@@ -244,16 +244,22 @@ futures
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
         <target state="translated">  -multithread
                      Active le mode EXPERIMENTAL multithread dans MSBuild.
                      Cela signifie que MSBuild utilisera plusieurs threads
-                     pour construire des projets en parallèle,
+                     pour générer des projets en parallèle,
                      au lieu de plusieurs processus.
-                     Cette option n'est pas prise en charge.
+                     Cette option n’est pas prise en charge.
                      Le nombre maximal de threads utilisés est déterminé par le
                      commutateur -maxCpuCount.
+                     En cas d’activation du mode multithread
+                     et de MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount ne doit pas être supérieur à 256.
                      (Forme courte : -m)
     </target>
         <note />
@@ -1504,6 +1510,11 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       <trans-unit id="MSBuildDebugPath">
         <source>MSBuild logs and debug information will be at "{0}"</source>
         <target state="translated">Les journaux MSBuild et les informations de débogage seront au "{0}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
+        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
+        <target state="translated">Avec le mode multithread activé et MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount ne peut pas être supérieur à {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">

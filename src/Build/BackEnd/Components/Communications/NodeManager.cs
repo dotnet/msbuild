@@ -328,7 +328,8 @@ namespace Microsoft.Build.BackEnd
 
             // Assign a global ID to the node we are about to create.
             int fromNodeId;
-            if (nodeProvider is NodeProviderInProc && !(_componentHost?.BuildParameters.MultiThreaded ?? false))
+            bool isMultiThreadedModeOn = _componentHost?.BuildParameters.MultiThreaded ?? false;
+            if (nodeProvider is NodeProviderInProc && !isMultiThreadedModeOn)
             {
                 fromNodeId = _inprocNodeId;
             }

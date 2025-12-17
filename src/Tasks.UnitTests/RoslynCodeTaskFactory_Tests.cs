@@ -10,10 +10,9 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
-#if NETFRAMEWORK
-using Microsoft.IO;
-#else
 using System.IO;
+#if NETFRAMEWORK
+using MicrosoftIO = Microsoft.IO;
 #endif
 using Shouldly;
 using VerifyTests;
@@ -41,11 +40,18 @@ namespace Microsoft.Build.Tasks.UnitTests
             _verifySettings.ScrubLinesContaining("Runtime Version:");
         }
 
-        [Fact]
-        public void InlineTaskWithAssemblyPlatformAgnostic()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void InlineTaskWithAssemblyPlatformAgnostic(bool forceOutOfProc)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+                }
+
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
                 string location = Assembly.GetExecutingAssembly().Location;
                 TransientTestFile inlineTask = env.CreateFile(folder, "5106.proj", @$"
@@ -81,12 +87,19 @@ Log.LogError(Alpha.GetString());
             }
         }
 
-        [Fact]
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
         [SkipOnPlatform(TestPlatforms.AnyUnix, ".NETFramework 4.0 isn't on unix machines.")]
-        public void InlineTaskWithAssembly()
+        public void InlineTaskWithAssembly(bool forceOutOfProc)
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+                }
+
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
                 TransientTestFile assemblyProj = env.CreateFile(folder, "5106.csproj", @$"
                     <Project DefaultTargets=""Build"">
@@ -143,14 +156,17 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
-        [Fact]
-        public void RoslynCodeTaskFactory_ReuseCompilation()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void RoslynCodeTaskFactory_ReuseCompilation(bool forceOutOfProc)
         {
+            int num = forceOutOfProc ? 1 : 2;
             string text1 = $@"
 <Project>
 
   <UsingTask
-    TaskName=""Custom1""
+    TaskName=""Custom{num}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -166,8 +182,8 @@ Log.LogError(Class1.ToPrint());
 
     <Target Name=""Build"">
         <MSBuild Projects=""p2.proj"" Targets=""Build"" />
-        <Custom1 SayHi=""hello1"" />
-        <Custom1 SayHi=""hello2"" />
+        <Custom{num} SayHi=""hello1"" />
+        <Custom{num} SayHi=""hello2"" />
     </Target>
 
 </Project>";
@@ -176,7 +192,7 @@ Log.LogError(Class1.ToPrint());
 <Project>
 
   <UsingTask
-    TaskName=""Custom1""
+    TaskName=""Custom{num}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -191,13 +207,17 @@ Log.LogError(Class1.ToPrint());
   </UsingTask>
 
     <Target Name=""Build"">
-        <Custom1 SayHi=""hello1"" />
-        <Custom1 SayHi=""hello2"" />
+        <Custom{num} SayHi=""hello1"" />
+        <Custom{num} SayHi=""hello2"" />
     </Target>
 
 </Project>";
 
             using var env = TestEnvironment.Create();
+            if (forceOutOfProc)
+            {
+                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+            }
 
             var p2 = env.CreateTestProjectWithFiles("p2.proj", text2);
             text1 = text1.Replace("p2.proj", p2.ProjectFile);
@@ -212,6 +232,57 @@ Log.LogError(Class1.ToPrint());
             // with broken cache we get two Compiling messages
             // as we fail to reuse the first assembly
             messages.Length.ShouldBe(1);
+        }
+
+        [Fact]
+        public void OutOfProcRoslynTaskFactoryCachesAssemblyPath()
+        {
+            try
+            {
+                const string taskBody = @"
+                            <Code Type=""Fragment"" Language=""cs"">
+                                Log.LogMessage(""inline execution"");
+                            </Code>";
+
+                var firstFactory = new RoslynCodeTaskFactory();
+                var firstEngine = new MockEngine { ForceOutOfProcessExecution = true };
+                bool initialized = firstFactory.Initialize(
+                    "CachedRoslynInlineTask",
+                    new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
+                    taskBody,
+                    firstEngine);
+                initialized.ShouldBeTrue(firstEngine.Log);
+
+                ITask firstTask = firstFactory.CreateTask(firstEngine);
+                firstTask.ShouldNotBeNull();
+
+                string firstAssemblyPath = ((IOutOfProcTaskFactory)firstFactory).GetAssemblyPath();
+                firstAssemblyPath.ShouldNotBeNullOrEmpty();
+                File.Exists(firstAssemblyPath).ShouldBeTrue();
+
+                firstFactory.CleanupTask(firstTask);
+
+                var secondFactory = new RoslynCodeTaskFactory();
+                var secondEngine = new MockEngine { ForceOutOfProcessExecution = true };
+                bool initializedAgain = secondFactory.Initialize(
+                    "CachedRoslynInlineTask",
+                    new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
+                    taskBody,
+                    secondEngine);
+                initializedAgain.ShouldBeTrue(secondEngine.Log);
+
+                ITask secondTask = secondFactory.CreateTask(secondEngine);
+                secondTask.ShouldNotBeNull();
+
+                string reusedAssemblyPath = ((IOutOfProcTaskFactory)secondFactory).GetAssemblyPath();
+                reusedAssemblyPath.ShouldBe(firstAssemblyPath);
+                File.Exists(reusedAssemblyPath).ShouldBeTrue();
+
+                secondFactory.CleanupTask(secondTask);
+            }
+            finally
+            {
+            }
         }
 
         [Fact]
@@ -666,8 +737,10 @@ Log.LogError(Class1.ToPrint());
             }
         }
 
-        [Fact]
-        public void MismatchedTaskNameAndTaskClassName()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MismatchedTaskNameAndTaskClassName(bool forceOutOfProc)
         {
             const string taskName = "SayHello";
             const string className = "HelloWorld";
@@ -701,6 +774,10 @@ namespace InlineTask
 
             using (TestEnvironment env = TestEnvironment.Create())
             {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+                }
                 TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(projectContent);
                 var logger = proj.BuildProjectExpectFailure();
                 logger.AssertLogContains(errorMessage);
@@ -783,14 +860,17 @@ namespace InlineTask
         }
 
 #if !FEATURE_RUN_EXE_IN_TESTS
-        [Fact]
-        public void RoslynCodeTaskFactory_UsingAPI()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void RoslynCodeTaskFactory_UsingAPI(bool forceOutOfProc)
         {
+            int num = forceOutOfProc ? 3 : 4;
             string text = $@"
 <Project>
 
   <UsingTask
-    TaskName=""Custom1""
+    TaskName=""Custom{num}""
     TaskFactory=""RoslynCodeTaskFactory""
     AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"" >
     <ParameterGroup>
@@ -807,12 +887,17 @@ namespace InlineTask
   </UsingTask>
 
     <Target Name=""Build"">
-        <Custom1 SayHi=""World"" />
+        <Custom{num} SayHi=""World"" />
     </Target>
 
 </Project>";
 
             using var env = TestEnvironment.Create();
+            if (forceOutOfProc)
+            {
+                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+            }
+
             RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(env);
             var dotnetPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
 
@@ -838,7 +923,7 @@ namespace InlineTask
                 TaskResources = Shared.AssemblyResources.PrimaryResources
             };
 
-            bool success = RoslynCodeTaskFactory.TryLoadTaskBody(log, TaskName, taskBody, new List<TaskPropertyInfo>(), out RoslynCodeTaskFactoryTaskInfo _);
+            bool success = RoslynCodeTaskFactory.TryLoadTaskBody(log, TaskName, taskBody, new List<TaskPropertyInfo>(), buildEngine, out RoslynCodeTaskFactoryTaskInfo _);
 
             success.ShouldBeFalse();
 
@@ -864,7 +949,7 @@ namespace InlineTask
                 TaskResources = Shared.AssemblyResources.PrimaryResources
             };
 
-            bool success = RoslynCodeTaskFactory.TryLoadTaskBody(log, TaskName, taskBody, parameters ?? new List<TaskPropertyInfo>(), out RoslynCodeTaskFactoryTaskInfo taskInfo);
+            bool success = RoslynCodeTaskFactory.TryLoadTaskBody(log, TaskName, taskBody, parameters ?? new List<TaskPropertyInfo>(), buildEngine, out RoslynCodeTaskFactoryTaskInfo taskInfo);
 
             buildEngine.Errors.ShouldBe(0, buildEngine.Log);
 
@@ -907,6 +992,531 @@ namespace InlineTask
             if (verifySource)
             {
                 Verify(taskInfo.SourceCode, _verifySettings).GetAwaiter().GetResult();
+            }
+        }
+
+        /// <summary>
+        /// Verifies that ITaskFactoryBuildParameterProvider.IsMultiThreadedBuild triggers out-of-process compilation
+        /// </summary>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MultiThreadedBuildTriggersOutOfProcCompilation(bool isMultiThreaded)
+        {
+            MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = isMultiThreaded };
+
+            RoslynCodeTaskFactory factory = new RoslynCodeTaskFactory();
+
+            // Use different task names to avoid cache collision between test cases
+            string taskName = isMultiThreaded ? "TestTaskMultiThreaded" : "TestTaskSingleThreaded";
+            
+            string taskBody = @"
+<Code Type=""Fragment"" Language=""cs"">
+    <![CDATA[
+    Log.LogMessage(""Hello from inline task"");
+    ]]>
+</Code>";
+
+            bool success = factory.Initialize(taskName, new Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+            success.ShouldBeTrue();
+
+            // Get assembly path - should be non-null when compiled for out-of-proc
+            string assemblyPath = factory.GetAssemblyPath();
+
+            if (isMultiThreaded)
+            {
+                assemblyPath.ShouldNotBeNullOrEmpty("Assembly should be compiled to disk in multi-threaded mode");
+                File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
+            }
+            else
+            {
+                // In-memory compilation should not produce a persistent assembly path
+                assemblyPath.ShouldBeNullOrEmpty("In-memory compilation should not have a persistent assembly path");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that ForceOutOfProcessExecution property triggers out-of-proc compilation
+        /// </summary>
+        [Fact]
+        public void ForceOutOfProcessExecutionTriggersOutOfProcCompilation()
+        {
+            var mockEngine = new MockEngine
+            {
+                // Set ForceOutOfProcessExecution to true, IsMultiThreadedBuild to false
+                ForceOutOfProcessExecution = true,
+                IsMultiThreadedBuild = false
+            };
+
+            var factory = new RoslynCodeTaskFactory();
+            string taskCode = @"
+<Code Type=""Fragment"" Language=""cs"">
+    <![CDATA[
+    Log.LogMessage(""Test"");
+    ]]>
+</Code>";
+
+            bool success = factory.Initialize("TestTaskForced", new Dictionary<string, TaskPropertyInfo>(), taskCode, mockEngine);
+            success.ShouldBeTrue();
+
+            // Should compile for out-of-proc due to ForceOutOfProcessExecution
+            string assemblyPath = factory.GetAssemblyPath();
+            assemblyPath.ShouldNotBeNullOrEmpty();
+            assemblyPath.ShouldContain(".inline_task.dll");
+        }
+
+        /// <summary>
+        /// Verifies that both ForceOutOfProcessExecution and multi-threaded build work together
+        /// </summary>
+        [Fact]
+        public void BothForceAndMultiThreadedWork()
+        {
+            MockEngine buildEngine = new MockEngine 
+            { 
+                ForceOutOfProcessExecution = true,
+                IsMultiThreadedBuild = true 
+            };
+
+            RoslynCodeTaskFactory factory = new RoslynCodeTaskFactory();
+
+            string taskBody = @"
+<Code Type=""Fragment"" Language=""cs"">
+    <![CDATA[
+    Log.LogMessage(""Hello"");
+    ]]>
+</Code>";
+
+            bool success = factory.Initialize("TestTaskBoth", new Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+            success.ShouldBeTrue();
+
+            string assemblyPath = factory.GetAssemblyPath();
+            assemblyPath.ShouldNotBeNullOrEmpty("Should compile for out-of-proc");
+            File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
+        }
+
+        /// <summary>
+        /// End-to-end test that verifies inline tasks execute successfully when /mt is used.
+        /// This confirms the inline task factory compiles for out-of-process execution and the task runs correctly.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedBuildExecutesInlineTasksSuccessfully()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                
+                // Create a project with an inline task
+                TransientTestFile projectFile = env.CreateFile(folder, "test.proj", @"
+<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+  
+  <!-- Define an inline task using RoslynCodeTaskFactory -->
+  <UsingTask TaskName=""MyInlineTask"" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+    <ParameterGroup>
+      <Message ParameterType=""System.String"" Required=""true"" />
+      <OutputValue ParameterType=""System.String"" Output=""true"" />
+    </ParameterGroup>
+    <Task>
+      <Code Type=""Fragment"" Language=""cs"">
+        <![CDATA[
+        Log.LogMessage(MessageImportance.High, ""Inline task executed: "" + Message);
+        OutputValue = ""Success from inline task"";
+        return true;
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name=""Build"">
+    <Message Text=""Starting inline task test..."" Importance=""High"" />
+    <MyInlineTask Message=""Hello from multi-threaded build!"">
+      <Output TaskParameter=""OutputValue"" PropertyName=""TaskResult"" />
+    </MyInlineTask>
+    <Message Text=""Task result: $(TaskResult)"" Importance=""High"" />
+    <Error Text=""Inline task did not produce expected output"" Condition=""'$(TaskResult)' != 'Success from inline task'"" />
+  </Target>
+
+</Project>");
+
+                // Build with /mt flag with detailed verbosity to see task launching details
+                // The fact that this succeeds proves:
+                // 1. The inline task factory detected multi-threaded mode
+                // 2. It compiled the task to disk (not in-memory)
+                // 3. The task executed successfully in TaskHost for out-of-proc execution
+                string output = RunnerUtilities.ExecMSBuild(
+                    projectFile.Path + " /t:Build /mt /v:detailed", 
+                    out bool success);
+
+                success.ShouldBeTrue(customMessage: "Build with /mt should succeed with inline task");
+                output.ShouldContain("Inline task executed: Hello from multi-threaded build!", 
+                    customMessage: "Inline task should execute and log its message");
+                output.ShouldContain("Task result: Success from inline task",
+                    customMessage: "Inline task should produce output parameter correctly");
+                
+                // Verify the inline task was launched from a temporary assembly (out-of-process execution)
+                output.ShouldContain(".inline_task.dll",
+                    customMessage: "Inline task should be compiled to temporary assembly for out-of-process execution");
+                output.ShouldContain("external task host",
+                    customMessage: "Inline task should be launched in external task host");
+            }
+        }
+
+        /// <summary>
+        /// Test that verifies Code Source attribute with relative path resolves correctly relative to the project file, not CWD.
+        /// This test exposes the bug where inline tasks with external code files fail in multi-threaded mode
+        /// because the file path is resolved relative to the multi-threaded process's CWD instead of the project file directory.
+        /// Creates a realistic scenario with nested directories similar to a multi-project solution structure.
+        /// </summary>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void SourceCodeFromRelativeFilePath_ResolvesRelativeToProjectFile(bool forceOutOfProc)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                if (forceOutOfProc)
+                {
+                    env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+                }
+
+                // Create multi-project solution structure
+                // Root/
+                //   ├─ solution.sln
+                //   ├─ Project1/Project1.csproj (simple project)
+                //   └─ Project2/
+                //       ├─ Project2.csproj (has inline task with external code)
+                //       └─ TaskCode.cs
+                TransientTestFolder rootFolder = env.CreateFolder(createFolder: true);
+                TransientTestFolder project1Folder = env.CreateFolder(Path.Combine(rootFolder.Path, "Project1"), createFolder: true);
+                TransientTestFolder project2Folder = env.CreateFolder(Path.Combine(rootFolder.Path, "Project2"), createFolder: true);
+                
+                // Create simple first project
+                env.CreateFile(project1Folder, "Project1.csproj", @"
+<Project>
+  <Target Name=""Build"">
+    <Message Text=""Project1 built"" Importance=""High"" />
+  </Target>
+</Project>");
+
+                // Create external code file in Project2 directory
+                const string taskCodeFile = "TaskCode.cs";
+                const string taskCode = @"
+namespace InlineTask
+{
+    using Microsoft.Build.Framework;
+    using Microsoft.Build.Utilities;
+
+    public class CustomTask : Task
+    {
+        public override bool Execute()
+        {
+            Log.LogMessage(MessageImportance.High, ""External task code executed successfully"");
+            return true;
+        }
+    }
+}";
+                env.CreateFile(project2Folder, taskCodeFile, taskCode);
+
+                // Create Project2 with inline task using RELATIVE path to external code
+                env.CreateFile(project2Folder, "Project2.csproj", $@"
+<Project>
+  <UsingTask TaskName=""CustomTask"" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+    <Task>
+      <Code Source=""{taskCodeFile}"" Language=""cs"" />
+    </Task>
+  </UsingTask>
+
+  <Target Name=""Build"">
+    <Message Text=""Project2 built from: $(MSBuildProjectDirectory)"" Importance=""High"" />
+    <CustomTask />
+  </Target>
+</Project>");
+
+                // Create solution file
+                TransientTestFile solutionFile = env.CreateFile(rootFolder, "solution.sln", @"
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""Project1"", ""Project1\Project1.csproj"", ""{11111111-1111-1111-1111-111111111111}""
+EndProject
+Project(""{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"") = ""Project2"", ""Project2\Project2.csproj"", ""{22222222-2222-2222-2222-222222222222}""
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{11111111-1111-1111-1111-111111111111}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11111111-1111-1111-1111-111111111111}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22222222-2222-2222-2222-222222222222}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22222222-2222-2222-2222-222222222222}.Debug|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+EndGlobal
+");
+
+                // Build with /m /mt to trigger multi-proc + out-of-proc task execution where worker processes have different CWD
+                // BUG: RoslynCodeTaskFactory resolves "TaskCode.cs" relative to worker CWD, not Project2 directory
+                string buildArgs = $"{solutionFile.Path} /m /mt";
+                string output = RunnerUtilities.ExecMSBuild(buildArgs, out bool success);
+
+                success.ShouldBeTrue(customMessage: $"Build should succeed with relative Code Source path. Output: {output}");
+                output.ShouldContain("External task code executed successfully",
+                    customMessage: "Task from external code file should execute");
+            }
+        }
+
+        /// <summary>
+        /// Unit test that verifies TryLoadTaskBody resolves relative file paths correctly.
+        /// This is a lower-level test that directly tests the method responsible for loading code from external files.
+        /// </summary>
+        [Fact]
+        public void TryLoadTaskBody_ResolvesRelativeSourcePath()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                // Create a test directory structure
+                TransientTestFolder testFolder = env.CreateFolder(createFolder: true);
+                string codeFileName = "TestTask.cs";
+                string codeContent = "public class TestTask : Task { }";
+                TransientTestFile codeFile = env.CreateFile(testFolder, codeFileName, codeContent);
+
+                // Create a mock project file path in the same directory
+                string projectFilePath = Path.Combine(testFolder.Path, "test.proj");
+
+                // Create a mock build engine that returns our project file path
+                MockEngine mockEngine = new MockEngine 
+                { 
+                    ProjectFileOfTaskNode = projectFilePath 
+                };
+                TaskLoggingHelper log = new TaskLoggingHelper(mockEngine, "TestTask")
+                {
+                    TaskResources = AssemblyResources.PrimaryResources,
+                    HelpKeywordPrefix = "MSBuild."
+                };
+
+                // Try loading with relative path
+                string taskBody = $"<Code Source=\"{codeFileName}\" Language=\"cs\" />";
+                
+                // Set IsMultiThreadedBuild to true to trigger the path resolution logic
+                mockEngine.IsMultiThreadedBuild = true;
+                
+                bool success = RoslynCodeTaskFactory.TryLoadTaskBody(
+                    log, 
+                    "TestTask", 
+                    taskBody, 
+                    Array.Empty<TaskPropertyInfo>(),
+                    mockEngine,
+                    out RoslynCodeTaskFactoryTaskInfo taskInfo);
+
+                success.ShouldBeTrue(customMessage: "TryLoadTaskBody should succeed");
+                taskInfo.SourceCode.ShouldContain("TestTask", customMessage: "Should have loaded code from file");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that absolute paths in multi-threaded mode are passed through unchanged.
+        /// </summary>
+        [Fact]
+        public void TryLoadTaskBody_AbsolutePathPassesThrough()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder testFolder = env.CreateFolder(createFolder: true);
+                string codeFileName = "AbsolutePathTask.cs";
+                string codeContent = "public class AbsolutePathTask : Task { }";
+                TransientTestFile codeFile = env.CreateFile(testFolder, codeFileName, codeContent);
+
+                // Use absolute path
+                string absolutePath = codeFile.Path;
+
+                // Project file in a different directory
+                TransientTestFolder projectFolder = env.CreateFolder(createFolder: true);
+                string projectFilePath = Path.Combine(projectFolder.Path, "test.proj");
+
+                MockEngine mockEngine = new MockEngine 
+                { 
+                    ProjectFileOfTaskNode = projectFilePath,
+                    IsMultiThreadedBuild = true
+                };
+                
+                TaskLoggingHelper log = new TaskLoggingHelper(mockEngine, "AbsolutePathTask")
+                {
+                    TaskResources = AssemblyResources.PrimaryResources,
+                    HelpKeywordPrefix = "MSBuild."
+                };
+
+                string taskBody = $"<Code Source=\"{absolutePath}\" Language=\"cs\" />";
+                
+                bool success = RoslynCodeTaskFactory.TryLoadTaskBody(
+                    log, 
+                    "AbsolutePathTask", 
+                    taskBody, 
+                    Array.Empty<TaskPropertyInfo>(),
+                    mockEngine,
+                    out RoslynCodeTaskFactoryTaskInfo taskInfo);
+
+                success.ShouldBeTrue(customMessage: "Absolute path should work in multi-threaded mode");
+                taskInfo.SourceCode.ShouldContain("AbsolutePathTask");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that relative paths with parent directory navigation (..) work correctly.
+        /// This is a legitimate use case for shared code files in parent directories.
+        /// </summary>
+        [Fact]
+        public void TryLoadTaskBody_RelativePathWithParentNavigation()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder rootFolder = env.CreateFolder(createFolder: true);
+                
+                // Create shared code in root
+                string sharedCodeContent = "public class SharedTask : Task { }";
+                TransientTestFile sharedCodeFile = env.CreateFile(rootFolder, "SharedTask.cs", sharedCodeContent);
+
+                // Create project in subdirectory
+                TransientTestFolder projectFolder = env.CreateFolder(Path.Combine(rootFolder.Path, "Project"), createFolder: true);
+                string projectFilePath = Path.Combine(projectFolder.Path, "test.proj");
+
+                MockEngine mockEngine = new MockEngine 
+                { 
+                    ProjectFileOfTaskNode = projectFilePath,
+                    IsMultiThreadedBuild = true
+                };
+                
+                TaskLoggingHelper log = new TaskLoggingHelper(mockEngine, "SharedTask")
+                {
+                    TaskResources = AssemblyResources.PrimaryResources,
+                    HelpKeywordPrefix = "MSBuild."
+                };
+
+                // Use relative path with parent directory navigation (cross-platform)
+                string relativePath = Path.Combine("..", "SharedTask.cs");
+                string taskBody = $"<Code Source=\"{relativePath}\" Language=\"cs\" />";
+                
+                bool success = RoslynCodeTaskFactory.TryLoadTaskBody(
+                    log, 
+                    "SharedTask", 
+                    taskBody, 
+                    Array.Empty<TaskPropertyInfo>(),
+                    mockEngine,
+                    out RoslynCodeTaskFactoryTaskInfo taskInfo);
+
+                success.ShouldBeTrue(customMessage: "Relative path with .. should work");
+                taskInfo.SourceCode.ShouldContain("SharedTask");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that empty or whitespace source paths are handled with clear error messages.
+        /// </summary>
+        [Theory]
+        [InlineData("")]
+        [InlineData(" ")]
+        [InlineData("  ")]
+        public void TryLoadTaskBody_EmptySourcePathFails(string emptyPath)
+        {
+            MockEngine mockEngine = new MockEngine 
+            { 
+                ProjectFileOfTaskNode = "C:\\test\\test.proj",
+                IsMultiThreadedBuild = true
+            };
+            
+            TaskLoggingHelper log = new TaskLoggingHelper(mockEngine, "EmptyPathTask")
+            {
+                TaskResources = AssemblyResources.PrimaryResources,
+                HelpKeywordPrefix = "MSBuild."
+            };
+
+            string taskBody = $"<Code Source=\"{emptyPath}\" Language=\"cs\" />";
+            
+            bool success = RoslynCodeTaskFactory.TryLoadTaskBody(
+                log, 
+                "EmptyPathTask", 
+                taskBody, 
+                Array.Empty<TaskPropertyInfo>(),
+                mockEngine,
+                out RoslynCodeTaskFactoryTaskInfo _);
+
+            // Empty source attribute is already validated by XML parsing
+            success.ShouldBeFalse();
+            mockEngine.Errors.ShouldBeGreaterThan(0);
+        }
+
+        /// <summary>
+        /// Verifies behavior when ProjectFileOfTaskNode is null in multi-threaded mode.
+        /// This should fail with a clear error rather than silently producing incorrect results.
+        /// </summary>
+        [Fact]
+        public void TryLoadTaskBody_NullProjectFileInMultiThreadedMode()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder testFolder = env.CreateFolder(createFolder: true);
+                TransientTestFile codeFile = env.CreateFile(testFolder, "Task.cs", "public class Task { }");
+
+                MockEngine mockEngine = new MockEngine 
+                { 
+                    ProjectFileOfTaskNode = null,
+                    IsMultiThreadedBuild = true
+                };
+                
+                TaskLoggingHelper log = new TaskLoggingHelper(mockEngine, "Task")
+                {
+                    TaskResources = AssemblyResources.PrimaryResources,
+                    HelpKeywordPrefix = "MSBuild."
+                };
+
+                string taskBody = "<Code Source=\"Task.cs\" Language=\"cs\" />";
+                
+                // This should fail - we can't resolve relative paths without a project file
+                Should.Throw<ArgumentNullException>(() =>
+                {
+                    RoslynCodeTaskFactory.TryLoadTaskBody(
+                        log, 
+                        "Task", 
+                        taskBody, 
+                        Array.Empty<TaskPropertyInfo>(),
+                        mockEngine,
+                        out RoslynCodeTaskFactoryTaskInfo _);
+                });
+            }
+        }
+
+        /// <summary>
+        /// Verifies that non-existent source files produce appropriate file not found errors.
+        /// </summary>
+        [Fact]
+        public void TryLoadTaskBody_NonExistentSourceFile()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder testFolder = env.CreateFolder(createFolder: true);
+                string projectFilePath = Path.Combine(testFolder.Path, "test.proj");
+
+                MockEngine mockEngine = new MockEngine 
+                { 
+                    ProjectFileOfTaskNode = projectFilePath,
+                    IsMultiThreadedBuild = true
+                };
+                
+                TaskLoggingHelper log = new TaskLoggingHelper(mockEngine, "NonExistentTask")
+                {
+                    TaskResources = AssemblyResources.PrimaryResources,
+                    HelpKeywordPrefix = "MSBuild."
+                };
+
+                string taskBody = "<Code Source=\"DoesNotExist.cs\" Language=\"cs\" />";
+                
+                // Should throw FileNotFoundException
+                Should.Throw<FileNotFoundException>(() =>
+                {
+                    RoslynCodeTaskFactory.TryLoadTaskBody(
+                        log, 
+                        "NonExistentTask", 
+                        taskBody, 
+                        Array.Empty<TaskPropertyInfo>(),
+                        mockEngine,
+                        out RoslynCodeTaskFactoryTaskInfo _);
+                });
             }
         }
     }

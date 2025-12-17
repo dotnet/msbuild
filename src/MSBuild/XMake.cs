@@ -597,6 +597,13 @@ namespace Microsoft.Build.CommandLine
                 case "1":
                     Debugger.Launch();
                     break;
+                case "3":
+                    // Value "3" debugs the main MSBuild process but skips debugging child TaskHost processes
+                    if (!DebugUtils.IsInTaskHostNode())
+                    {
+                        Debugger.Launch();
+                    }
+                    break;
 #endif
                 case "2":
                     // Sometimes easier to attach rather than deal with JIT prompt
@@ -716,8 +723,6 @@ namespace Microsoft.Build.CommandLine
 #endif
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
-
-                CommunicationsUtilities.Trace($"Command line parameters: {commandLine}");
 
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,
@@ -1254,6 +1259,8 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static uint? s_originalConsoleMode = null;
 
+        private const int MAX_MULTITHREADED_CPU_COUNT_FOR_TASK_HOST = 256;
+
         /// <summary>
         /// Initializes the build engine, and starts the project building.
         /// </summary>
@@ -1304,6 +1311,12 @@ namespace Microsoft.Build.CommandLine
             string[] commandLine)
 #endif
         {
+            // Set limitation for multithreaded and MSBUILDFORCEALLTASKSOUTOFPROC=1. Max is 256 because of unique task host id generation.
+            if (multiThreaded && Traits.Instance.ForceAllTasksOutOfProcToTaskHost)
+            {
+                ErrorUtilities.VerifyThrowArgument(cpuCount <= MAX_MULTITHREADED_CPU_COUNT_FOR_TASK_HOST, "MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc", MAX_MULTITHREADED_CPU_COUNT_FOR_TASK_HOST);
+            }
+
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
             {
                 InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XMake.ProjectUpgradeNeededToVcxProj", projectFile), null);
@@ -1393,7 +1406,8 @@ namespace Microsoft.Build.CommandLine
 
                 projectCollection = new ProjectCollection(
                     globalProperties,
-                    evaluationLoggers,
+                    // When using the switch -preprocess, the project isn't built. No logger is needed to pass to avoid the crash when loading project.
+                    isPreprocess ? null : evaluationLoggers,
                     null,
                     toolsetDefinitionLocations,
                     cpuCount,

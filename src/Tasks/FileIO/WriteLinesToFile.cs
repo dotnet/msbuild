@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -59,100 +60,99 @@ namespace Microsoft.Build.Tasks
         [Obsolete]
         public bool CanBeIncremental => WriteOnlyWhenDifferent;
 
-        /// <summary>
-        /// Execute the task.
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc cref="ITask.Execute" />
         public override bool Execute()
         {
             bool success = true;
 
-            if (File != null)
+            if (File == null)
             {
-                // do not return if Lines is null, because we may
-                // want to delete the file in that case
-                StringBuilder buffer = new StringBuilder();
-                if (Lines != null)
+                return success;
+            }
+
+            string filePath = FileUtilities.NormalizePath(File.ItemSpec);
+
+            string contentsAsString = string.Empty;
+
+            if (Lines != null && Lines.Length > 0)
+            {
+                StringBuilder buffer = new StringBuilder(capacity: Lines.Length * 64);
+
+                foreach (ITaskItem line in Lines)
                 {
-                    foreach (ITaskItem line in Lines)
-                    {
-                        buffer.AppendLine(line.ItemSpec);
-                    }
+                    buffer.AppendLine(line.ItemSpec);
                 }
 
-                Encoding encoding = s_defaultEncoding;
-                if (Encoding != null)
-                {
-                    try
-                    {
-                        encoding = System.Text.Encoding.GetEncoding(Encoding);
-                    }
-                    catch (ArgumentException)
-                    {
-                        Log.LogErrorWithCodeFromResources("General.InvalidValue", "Encoding", "WriteLinesToFile");
-                        return false;
-                    }
-                }
+                contentsAsString = buffer.ToString();
+            }
 
+            Encoding encoding = s_defaultEncoding;
+            if (Encoding != null)
+            {
                 try
                 {
-                    var directoryPath = Path.GetDirectoryName(FileUtilities.NormalizePath(File.ItemSpec));
-                    if (Overwrite)
-                    {
-                        Directory.CreateDirectory(directoryPath);
-                        string contentsAsString = buffer.ToString();
+                    encoding = System.Text.Encoding.GetEncoding(Encoding);
+                }
+                catch (ArgumentException)
+                {
+                    Log.LogErrorWithCodeFromResources("General.InvalidValue", "Encoding", "WriteLinesToFile");
+                    return false;
+                }
+            }
 
-                        // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
-                        if (WriteOnlyWhenDifferent)
+            try
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+
+                if (Overwrite)
+                {
+                    // When WriteOnlyWhenDifferent is set, read the file and if they're the same return.
+                    if (WriteOnlyWhenDifferent)
+                    {
+                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
+                        try
                         {
-                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStart();
-                            try
+                            if (FileUtilities.FileExistsNoThrow(filePath))
                             {
-                                if (FileUtilities.FileExistsNoThrow(File.ItemSpec))
+                                string existingContents = FileSystems.Default.ReadFileAllText(filePath);
+
+                                if (existingContents.Equals(contentsAsString))
                                 {
-                                    string existingContents = System.IO.File.ReadAllText(File.ItemSpec);
-                                    if (existingContents.Length == buffer.Length)
-                                    {
-                                        if (existingContents.Equals(contentsAsString))
-                                        {
-                                            Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", File.ItemSpec);
-                                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, true);
-                                            return true;
-                                        }
-                                        else if (FailIfNotIncremental)
-                                        {
-                                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
-                                            return false;
-                                        }
-                                    }
+                                    Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", filePath);
+                                    MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, true);
+                                    return true;
+                                }
+                                else if (FailIfNotIncremental)
+                                {
+                                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", filePath);
+                                    return false;
                                 }
                             }
-                            catch (IOException)
-                            {
-                                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
-                            }
-                            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, false);
                         }
-
-                        System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
-                    }
-                    else
-                    {
-                        if (WriteOnlyWhenDifferent)
+                        catch (IOException)
                         {
-                            Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", File.ItemSpec);
+                            Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", filePath);
                         }
-
-                        Directory.CreateDirectory(directoryPath);
-                        System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);
+                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, false);
                     }
+
+                    System.IO.File.WriteAllText(filePath, contentsAsString, encoding);
                 }
-                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                else
                 {
-                    string lockedFileMessage = LockCheck.GetLockedFileMessage(File.ItemSpec);
-                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", File.ItemSpec, e.Message, lockedFileMessage);
-                    success = false;
+                    if (WriteOnlyWhenDifferent)
+                    {
+                        Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", filePath);
+                    }
+
+                    System.IO.File.AppendAllText(filePath, contentsAsString, encoding);
                 }
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
+                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, e.Message, lockedFileMessage);
+                success = false;
             }
 
             return success;

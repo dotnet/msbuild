@@ -2879,6 +2879,35 @@ EndGlobal
             success.ShouldBeTrue();
         }
 
+        [Theory]
+        [InlineData("-v:diag -m:1 -tl:off")]
+        [InlineData("-v:diag -m -tl:off")]
+        [InlineData("-v:m -m:1 -tl:off")]
+        [InlineData("-v:m -m -tl:off")]
+        [InlineData("-v:diag -m:1 -tl:on")]
+        [InlineData("-v:diag -m -tl:on")]
+        [InlineData("-v:m -m:1 -tl:on")]
+        [InlineData("-v:m -m -tl:on")]
+        public void PreprocessProjectWell(string arguments)
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(
+                $"""
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup>
+                    <TargetFramework>netstandard2.0</TargetFramework>
+                  </PropertyGroup>
+                </Project>
+                """);
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
+            var preprocessFile = Path.Combine(testProject.TestRoot, "Preprocess.xml");
+            arguments += $" -pp:{preprocessFile}";
+
+            string output = RunnerUtilities.ExecBootstrapedMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, outputHelper: _output, attachProcessId: false);
+            success.ShouldBeTrue();
+            File.Exists(preprocessFile).ShouldBeTrue();
+        }
+
 #if FEATURE_ASSEMBLYLOADCONTEXT
         /// <summary>
         /// Ensure that tasks get loaded into their own <see cref="System.Runtime.Loader.AssemblyLoadContext"/>.
@@ -2905,6 +2934,24 @@ EndGlobal
         }
 
 #endif
+
+        [Fact]
+        public void ThrowsWhenMaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc()
+        {
+            string projectContent = """
+                <Project>
+                </Project>
+                """;
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
+            string project = testEnvironment.CreateTestProjectWithFiles("project.proj", projectContent).ProjectFile;
+
+#if FEATURE_GET_COMMANDLINE
+            MSBuildApp.Execute(@"c:\bin\msbuild.exe " + project + " / m:257 /mt").ShouldBe(MSBuildApp.ExitType.SwitchError);
+#else
+            MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", project, "/m:257 /mt" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
+#endif
+        }
 
         private string CopyMSBuild()
         {

@@ -29,6 +29,7 @@ namespace Microsoft.Build.Framework.Telemetry
                 ? _source.StartActivity($"{TelemetryConstants.EventPrefix}{name}", ActivityKind.Internal, parentId: Activity.Current.ParentId)
                 : _source.StartActivity($"{TelemetryConstants.EventPrefix}{name}");
             activity?.WithTag(new("SampleRate", _sampleRate, false));
+
             return activity;
         }
     }

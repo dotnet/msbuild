@@ -278,7 +278,7 @@ namespace Microsoft.Build.Construction
 
         internal bool ProjectShouldBuild(string projectFile)
         {
-            return _solutionFilter?.Contains(FileUtilities.FixFilePath(projectFile)) != false;
+            return _solutionFilter?.Contains(FileUtilities.NormalizePathSeparatorsToForwardSlash(projectFile)) != false;
         }
 
         /// <summary>
@@ -648,7 +648,7 @@ namespace Microsoft.Build.Construction
                 _solutionFilter = new HashSet<string>(_pathComparer);
                 foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
                 {
-                    _solutionFilter.Add(FileUtilities.FixFilePath(project.GetString()));
+                    _solutionFilter.Add(FileUtilities.NormalizePathSeparatorsToForwardSlash(project.GetString()));
                 }
             }
             catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
@@ -669,7 +669,7 @@ namespace Microsoft.Build.Construction
             {
                 // This is to align MSBuild with what VS permits in loading solution filter files. These are not in them by default but can be added manually.
                 JsonDocumentOptions options = new JsonDocumentOptions() { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip };
-                JsonDocument text = JsonDocument.Parse(File.ReadAllText(solutionFilterFile), options);
+                JsonDocument text = JsonDocument.Parse(FileSystems.Default.ReadFileAllText(solutionFilterFile), options);
                 solution = text.RootElement.GetProperty("solution");
                 // We do NOT want to escape in order to preserve symbols like @, %, $ etc.
                 return FileUtilities.GetFullPath(solution.GetProperty("path").GetString(), Path.GetDirectoryName(solutionFilterFile), escape: false);
@@ -908,7 +908,7 @@ namespace Microsoft.Build.Construction
 
             foreach (ProjectInSolution project in _projectsInOrder)
             {
-                projectPaths.Add(FileUtilities.FixFilePath(project.RelativePath));
+                projectPaths.Add(FileUtilities.NormalizePathSeparatorsToForwardSlash(project.RelativePath));
             }
 
             foreach (string project in _solutionFilter)
