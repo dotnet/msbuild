@@ -600,7 +600,7 @@ namespace Microsoft.Build.UnitTests
 
             BuildMessageEventArgs be = new BuildMessageEventArgs(message, "help", "sender", messageImportance)
             {
-                BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4)
+                BuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 1).WithTargetId(2).WithProjectContextId(3).WithTaskId(4)
             };
 
             eventSourceSink.Consume(be);
@@ -656,7 +656,7 @@ namespace Microsoft.Build.UnitTests
                 throw new InvalidOperationException($"Invalid expectedMessageType '{expectedMessageType}'");
             }
 
-            buildEventArgs.BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4);
+            buildEventArgs.BuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 1).WithTargetId(2).WithProjectContextId(3).WithTaskId(4);
 
             EventSourceSink eventSourceSink = new EventSourceSink();
             SimulatedConsole console = new SimulatedConsole();
@@ -1818,7 +1818,7 @@ namespace Microsoft.Build.UnitTests
             L.Initialize(es, 2);
             es.Consume(new BuildStartedEventArgs("bs", null));
             TaskCommandLineEventArgs messsage1 = new TaskCommandLineEventArgs("Message", null, MessageImportance.High);
-            messsage1.BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1);
+            messsage1.BuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 1).WithTargetId(1).WithProjectContextId(1).WithTaskId(1);
             // Message Event
             es.Consume(messsage1);
             es.Consume(new BuildFinishedEventArgs("bf", null, true));
@@ -1832,7 +1832,7 @@ namespace Microsoft.Build.UnitTests
             L.Initialize(es, 2);
             es.Consume(new BuildStartedEventArgs("bs", null));
             BuildMessageEventArgs messsage2 = new BuildMessageEventArgs("Message", null, null, MessageImportance.High);
-            messsage2.BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1);
+            messsage2.BuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 1).WithTargetId(2).WithProjectContextId(3).WithTaskId(4);
             // Message Event
             es.Consume(messsage2);
             es.Consume(new BuildFinishedEventArgs("bf", null, true));
@@ -1846,7 +1846,7 @@ namespace Microsoft.Build.UnitTests
             L.Initialize(es, 2);
             es.Consume(new BuildStartedEventArgs("bs", null));
             messsage2 = new BuildMessageEventArgs("Message", null, null, MessageImportance.High);
-            messsage2.BuildEventContext = BuildEventContext.CreateInitial(1, 1).WithEvaluationId(1).WithProjectInstanceId(1);
+            messsage2.BuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 1).WithTargetId(2).WithProjectContextId(3).WithTaskId(4);
             // Message Event
             es.Consume(messsage2);
             ProjectStartedEventArgs project = new ProjectStartedEventArgs(1, "Hello,", "HI", "None", "Build", null, null, messsage1.BuildEventContext);
