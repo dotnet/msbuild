@@ -34,8 +34,8 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public AbsolutePath ProjectDirectory
         {
-            get => new AbsolutePath(Directory.GetCurrentDirectory(), ignoreRootedCheck: true);
-            set => Directory.SetCurrentDirectory(value.Value);
+            get => new AbsolutePath(NativeMethodsShared.GetCurrentDirectory(), ignoreRootedCheck: true);
+            set => NativeMethodsShared.SetCurrentDirectory(value.Value);
         }
 
         /// <inheritdoc/>
@@ -72,6 +72,12 @@ namespace Microsoft.Build.BackEnd
         public ProcessStartInfo GetProcessStartInfo()
         {
             return new ProcessStartInfo();
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            // Singleton instance, no cleanup needed.
         }
     }
 }

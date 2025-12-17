@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests
             
             _terminallogger = new TerminalLogger(_mockTerminal);
             _terminallogger.Initialize(_centralNodeEventSource, _nodeCount);
-            _terminallogger.CreateStopwatch = () => new MockStopwatch();
+            _terminallogger._createStopwatch = () => new MockStopwatch();
 
             _remoteTerminalLogger = new ForwardingTerminalLogger();
             _remoteTerminalLogger.BuildEventRedirector = new EventRedirectorToSink(0, _centralNodeEventSource);
@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests
             testEnvironment.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", evnVariableValue);
 
             string[]? args = argsString?.Split(' ');
-            ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(args, supportsAnsi, outputIsScreen, default);
+            (ILogger logger, _) = TerminalLogger.CreateTerminalOrConsoleLoggerWithForwarding(args, supportsAnsi, outputIsScreen, default);
 
             logger.ShouldNotBeNull();
             logger.GetType().ShouldBe(expectedType);
@@ -231,7 +231,7 @@ namespace Microsoft.Build.UnitTests
         public void CreateTerminalOrConsoleLogger_ParsesVerbosity(string? argsString, LoggerVerbosity expectedVerbosity)
         {
             string[]? args = argsString?.Split(' ');
-            ILogger logger = TerminalLogger.CreateTerminalOrConsoleLogger(args, true, true, default);
+            (ILogger logger, _) = TerminalLogger.CreateTerminalOrConsoleLoggerWithForwarding(args, true, true, default);
 
             logger.ShouldNotBeNull();
             logger.Verbosity.ShouldBe(expectedVerbosity);
@@ -833,11 +833,11 @@ namespace Microsoft.Build.UnitTests
         {
             List<MockStopwatch> stopwatches = new();
 
-            Func<StopwatchAbstraction>? createStopwatch = _terminallogger.CreateStopwatch;
+            Func<StopwatchAbstraction>? createStopwatch = _terminallogger._createStopwatch;
 
             try
             {
-                _terminallogger.CreateStopwatch = () =>
+                _terminallogger._createStopwatch = () =>
                 {
                     MockStopwatch stopwatch = new();
                     stopwatches.Add(stopwatch);
@@ -860,7 +860,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                _terminallogger.CreateStopwatch = createStopwatch;
+                _terminallogger._createStopwatch = createStopwatch;
             }
         }
 

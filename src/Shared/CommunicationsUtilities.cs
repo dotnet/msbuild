@@ -374,11 +374,11 @@ namespace Microsoft.Build.Internal
         internal delegate void LogDebugCommunications(string format, params object[] stuff);
 
         /// <summary>
-        /// Gets the string comparer for environment variable names based on the current platform.
-        /// On Windows, environment variables are case-insensitive; on Unix-like systems, they are case-sensitive.
+        /// On Windows, environment variables should be case-insensitive;
+        /// on Unix-like systems, they should be case-sensitive, but this might be a breaking change in an edge case.
+        /// https://github.com/dotnet/msbuild/issues/12858
         /// </summary>
-        internal static StringComparer EnvironmentVariableComparer =>
-            NativeMethodsShared.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+        internal static StringComparer EnvironmentVariableComparer => StringComparer.OrdinalIgnoreCase;
 
         /// <summary>
         /// Gets or sets the node connection timeout.

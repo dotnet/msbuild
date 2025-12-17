@@ -24,14 +24,22 @@ namespace Microsoft.Build.UnitTests
                 MultithreadedEnvironmentName
             };
 
+        // CA2000 is suppressed because the caller is responsible for disposal via DisposeTaskEnvironment
+#pragma warning disable CA2000
         private static TaskEnvironment CreateTaskEnvironment(string environmentType)
         {
             return environmentType switch
             {
-                StubEnvironmentName => new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance),
+                StubEnvironmentName => TaskEnvironmentHelper.CreateForTest(),
                 MultithreadedEnvironmentName => new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(GetResolvedTempPath())),
                 _ => throw new ArgumentException($"Unknown environment type: {environmentType}")
             };
+        }
+#pragma warning restore CA2000
+
+        private static void DisposeTaskEnvironment(TaskEnvironment taskEnvironment)
+        {
+            taskEnvironment?.Dispose();
         }
 
         /// <summary>
@@ -93,6 +101,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
+                DisposeTaskEnvironment(taskEnvironment);
                 Environment.SetEnvironmentVariable(testVarName, null);
             }
         }
@@ -118,6 +127,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
+                DisposeTaskEnvironment(taskEnvironment);
                 Environment.SetEnvironmentVariable(testVarName, null);
             }
         }
@@ -155,6 +165,7 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 taskEnvironment.SetEnvironment(originalEnvironment);
+                DisposeTaskEnvironment(taskEnvironment);
                 Environment.SetEnvironmentVariable(var1Name, null);
                 Environment.SetEnvironmentVariable(var2Name, null);
                 Environment.SetEnvironmentVariable(var3Name, null);
@@ -198,6 +209,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
+                DisposeTaskEnvironment(taskEnvironment);
                 Directory.SetCurrentDirectory(originalDirectory);
             }
         }
@@ -223,6 +235,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
+                DisposeTaskEnvironment(taskEnvironment);
                 Directory.SetCurrentDirectory(originalDirectory);
             }
         }
@@ -234,9 +247,15 @@ namespace Microsoft.Build.UnitTests
             var taskEnvironment = CreateTaskEnvironment(environmentType);
             string absoluteInputPath = Path.Combine(GetResolvedTempPath(), "already", "absolute", "path.txt");
 
-            var resultPath = taskEnvironment.GetAbsolutePath(absoluteInputPath);
-
-            resultPath.Value.ShouldBe(absoluteInputPath);
+            try
+            {
+                var resultPath = taskEnvironment.GetAbsolutePath(absoluteInputPath);
+                resultPath.Value.ShouldBe(absoluteInputPath);
+            }
+            finally
+            {
+                DisposeTaskEnvironment(taskEnvironment);
+            }
         }
 
         [Theory]
@@ -274,6 +293,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
+                DisposeTaskEnvironment(taskEnvironment);
                 Environment.SetEnvironmentVariable(testVarName, null);
                 Directory.SetCurrentDirectory(originalDirectory);
             }
@@ -285,7 +305,7 @@ namespace Microsoft.Build.UnitTests
             string testVarName = $"MSBUILD_STUB_ISOLATION_TEST_{Guid.NewGuid():N}";
             string testVarValue = "stub_test_value";
 
-            var stubEnvironment = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+            var stubEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             try
             {
@@ -309,84 +329,16 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(EnvironmentTypes))]
-        public void TaskEnvironment_EnvironmentVariableCaseSensitivity_ShouldMatchPlatform(string environmentType)
-        {
-            var taskEnvironment = CreateTaskEnvironment(environmentType);
-            string testVarName = $"MSBUILD_case_TEST_{environmentType}_{Guid.NewGuid():N}";
-            string testVarValue = "case_test_value";
-
-            try
-            {
-                taskEnvironment.SetEnvironmentVariable(testVarName, testVarValue);
-                
-                // Test GetEnvironmentVariables()
-                var envVars = taskEnvironment.GetEnvironmentVariables();
-                
-                // Test GetEnvironmentVariable()
-                string upperVarName = testVarName.ToUpperInvariant();
-                string lowerVarName = testVarName.ToLowerInvariant();
-                
-                if (Microsoft.Build.Framework.NativeMethods.IsWindows)
-                {
-                    // On Windows, environment variables should be case-insensitive
-                    
-                    // Test GetEnvironmentVariables()
-                    envVars.TryGetValue(testVarName, out string? exactValue).ShouldBeTrue();
-                    exactValue.ShouldBe(testVarValue);
-                    
-                    envVars.TryGetValue(upperVarName, out string? upperValue).ShouldBeTrue();
-                    upperValue.ShouldBe(testVarValue);
-                    
-                    envVars.TryGetValue(lowerVarName, out string? lowerValue).ShouldBeTrue();
-                    lowerValue.ShouldBe(testVarValue);
-                    
-                    // Test GetEnvironmentVariable()
-                    taskEnvironment.GetEnvironmentVariable(testVarName).ShouldBe(testVarValue);
-                    taskEnvironment.GetEnvironmentVariable(upperVarName).ShouldBe(testVarValue);
-                    taskEnvironment.GetEnvironmentVariable(lowerVarName).ShouldBe(testVarValue);
-                }
-                else
-                {
-                    // On Unix-like systems, environment variables should be case-sensitive
-                    
-                    // Test GetEnvironmentVariables()
-                    envVars.TryGetValue(testVarName, out string? exactValue).ShouldBeTrue();
-                    exactValue.ShouldBe(testVarValue);
-                    
-                    // Different case should not match on Unix-like systems
-                    envVars.TryGetValue(upperVarName, out string? upperValue).ShouldBe(upperVarName == testVarName);
-                    envVars.TryGetValue(lowerVarName, out string? lowerValue).ShouldBe(lowerVarName == testVarName);
-                    
-                    // Test GetEnvironmentVariable()
-                    taskEnvironment.GetEnvironmentVariable(testVarName).ShouldBe(testVarValue);
-                    
-                    // Different case should only work if they're actually the same string
-                    var expectedUpperValue = upperVarName == testVarName ? testVarValue : null;
-                    var expectedLowerValue = lowerVarName == testVarName ? testVarValue : null;
-                    
-                    taskEnvironment.GetEnvironmentVariable(upperVarName).ShouldBe(expectedUpperValue);
-                    taskEnvironment.GetEnvironmentVariable(lowerVarName).ShouldBe(expectedLowerValue);
-                }
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(testVarName, null);
-            }
-        }
-
         [Fact]
         public void TaskEnvironment_MultithreadedEnvironment_ShouldBeIsolatedFromSystem()
         {
             string testVarName = $"MSBUILD_MULTITHREADED_ISOLATION_TEST_{Guid.NewGuid():N}";
             string testVarValue = "multithreaded_test_value";
 
-            // On Windows, environment variables are case-insensitive; on Unix-like systems, they are case-sensitive
-            var comparer = Microsoft.Build.Framework.NativeMethods.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
-            var multithreadedEnvironment = new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(
+            using var driver = new MultiThreadedTaskEnvironmentDriver(
                 GetResolvedTempPath(),
-                new Dictionary<string, string>(comparer)));
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+            var multithreadedEnvironment = new TaskEnvironment(driver);
 
             try
             {

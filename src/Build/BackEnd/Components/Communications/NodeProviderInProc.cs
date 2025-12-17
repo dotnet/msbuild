@@ -370,7 +370,7 @@ namespace Microsoft.Build.BackEnd
                 InProcNodeThreadProc(nodeContext._inProcNode);
             });
 #endif
-            nodeContext._inProcNodeThread.Name = $"In-proc Node ({_componentHost.Name})";
+            nodeContext._inProcNodeThread.Name = $"In-proc Node {nodeId} ({_componentHost.Name})";
             nodeContext._inProcNodeThread.IsBackground = true;
 #if FEATURE_THREAD_CULTURE
             nodeContext._inProcNodeThread.CurrentCulture = _componentHost.BuildParameters.Culture;
