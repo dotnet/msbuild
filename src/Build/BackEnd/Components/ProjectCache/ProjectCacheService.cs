@@ -533,11 +533,7 @@ namespace Microsoft.Build.ProjectCache
                 BuildRequestData buildRequest = new BuildRequestData(
                     cacheRequest.Configuration.Project,
                     cacheRequest.Submission.BuildRequestData?.TargetNames.ToArray() ?? []);
-                BuildEventContext buildEventContext = _loggingService.CreateProjectCacheBuildEventContext(
-                    cacheRequest.Submission.SubmissionId,
-                    evaluationId: cacheRequest.Configuration.ProjectEvaluationId,
-                    projectInstanceId: cacheRequest.Configuration.ConfigurationId,
-                    projectFile: cacheRequest.Configuration.Project.FullPath);
+                BuildEventContext buildEventContext = _loggingService.CreateProjectCacheBuildEventContext(GetCacheRequestBuildEventContext(cacheRequest), projectFile: cacheRequest.Configuration.Project.FullPath);
 
                 CacheResult cacheResult;
                 try
@@ -562,11 +558,11 @@ namespace Microsoft.Build.ProjectCache
                 {
                     if (!configuration.IsLoaded)
                     {
+                        BuildEventContext parentBuildContext = Scheduler.s_schedulerInProcNodeBuildEventContext.WithSubmissionId(submission.SubmissionId);
                         configuration.LoadProjectIntoConfiguration(
                             _buildManager,
                             submission.BuildRequestData!.Flags,
-                            submission.SubmissionId,
-                            Scheduler.InProcNodeId);
+                            parentBuildContext);
 
                         // If we're taking the time to evaluate, avoid having other nodes to repeat the same evaluation.
                         // Based on the assumption that ProjectInstance serialization is faster than evaluating from scratch.
@@ -575,6 +571,8 @@ namespace Microsoft.Build.ProjectCache
                 }
             }
         }
+
+        private BuildEventContext GetCacheRequestBuildEventContext(CacheRequest cacheRequest) => Scheduler.s_schedulerNodeBuildEventContext.WithEvaluationId(cacheRequest.Configuration.ProjectEvaluationId).WithProjectInstanceId(cacheRequest.Configuration.ConfigurationId);
 
         private async ValueTask<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, BuildRequestConfiguration buildRequestConfiguration, BuildEventContext buildEventContext, CancellationToken cancellationToken)
         {
