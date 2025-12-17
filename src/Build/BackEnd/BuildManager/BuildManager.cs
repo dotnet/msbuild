@@ -1453,7 +1453,7 @@ namespace Microsoft.Build.Execution
             where TResultData : BuildResultBase
         {
             // For the current submission we only know the SubmissionId and that it happened on scheduler node - all other BuildEventContext dimensions are unknown now.
-            BuildEventContext buildEventContext = Scheduler.s_schedulerInProcNodeBuildEventContext.WithSubmissionId(submission.SubmissionId);
+            BuildEventContext buildEventContext = submission.BuildEventContext;
 
             BuildSubmissionStartedEventArgs submissionStartedEvent = new(
                 submission.BuildRequestDataBase.GlobalPropertiesLookup,
@@ -2556,9 +2556,8 @@ namespace Microsoft.Build.Execution
                     ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent<ILoggingService>(BuildComponentType.LoggingService);
                     foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
-                        BuildEventContext buildEventContext = Scheduler.s_schedulerNodeBuildEventContext.WithSubmissionId(submission.SubmissionId);
                         string exception = ExceptionHandling.ReadAnyExceptionFromFile(_instantiationTimeUtc);
-                        loggingService?.LogError(buildEventContext, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, ExceptionHandling.DebugDumpPath, exception);
+                        loggingService?.LogError(submission.BuildEventContext, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, ExceptionHandling.DebugDumpPath, exception);
                     }
                 }
                 else if (shutdownPacket.Reason == NodeShutdownReason.Error && _buildSubmissions.Values.Count == 0)
