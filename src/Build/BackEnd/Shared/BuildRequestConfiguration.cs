@@ -300,7 +300,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A short
         /// </summary>
-        public int ProjectEvaluationId => IsCached ? _projectEvaluationId : _project.EvaluationId;
+        public int ProjectEvaluationId => _projectEvaluationId;
 
         /// <summary>
         /// Flag indicating if this configuration represents a traversal project.  Traversal projects
