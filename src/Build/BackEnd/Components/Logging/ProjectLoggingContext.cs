@@ -45,7 +45,7 @@ namespace Microsoft.Build.BackEnd.Logging
             requestEntry.RequestConfiguration.Project.PropertiesToBuildWith,
             requestEntry.RequestConfiguration.Project.ItemsToBuildWith,
             requestEntry.Request.ParentBuildEventContext,
-            requestEntry.RequestConfiguration.Project.EvaluationId,
+            requestEntry.RequestConfiguration.ProjectEvaluationId,
             requestEntry.Request.ProjectContextId)
         {
         }
@@ -92,7 +92,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 requestEntry.RequestConfiguration.Project.PropertiesToBuildWith,
                 requestEntry.RequestConfiguration.Project.ItemsToBuildWith,
                 requestEntry.Request.ParentBuildEventContext,
-                requestEntry.RequestConfiguration.Project.EvaluationId,
+                requestEntry.RequestConfiguration.ProjectEvaluationId,
                 requestEntry.Request.ProjectContextId);
 
             return (args, new ProjectLoggingContext(nodeLoggingContext, args));
