@@ -179,7 +179,7 @@ extends:
             DefaultConfigValues: $(InsertConfigValues)
             InsertionReviewers: MSBuild
             CustomScriptExecutionCommand: $(InsertCustomScriptExecutionCommand)
-            InsertionBuildPolicy: Request Perf DDRITs
+            InsertionBuildPolicies: 'Request Perf DDRITs'
             ConnectedVSDropServiceName: 'VSEng-VSDrop-MI'
           env:
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
