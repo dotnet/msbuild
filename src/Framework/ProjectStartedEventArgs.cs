@@ -364,8 +364,11 @@ namespace Microsoft.Build.Framework
                 writer.Write((Int32)parentProjectBuildEventContext.ProjectContextId);
                 writer.Write((Int32)parentProjectBuildEventContext.TargetId);
                 writer.Write((Int32)parentProjectBuildEventContext.TaskId);
+                // added these in version 20
                 writer.Write((Int32)parentProjectBuildEventContext.SubmissionId);
                 writer.Write((Int32)parentProjectBuildEventContext.ProjectInstanceId);
+                // added this in version 36
+                writer.Write((Int32)parentProjectBuildEventContext.EvaluationId);
             }
 
             writer.WriteOptionalString(projectFile);
@@ -425,23 +428,28 @@ namespace Microsoft.Build.Framework
                 int targetId = reader.ReadInt32();
                 int taskId = reader.ReadInt32();
 
+                var builder =
+                    BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, nodeId)
+                        .WithProjectContextId(projectContextId)
+                        .WithTargetId(targetId)
+                        .WithTaskId(taskId);
+
                 if (version > 20)
                 {
                     int submissionId = reader.ReadInt32();
                     int projectInstanceId = reader.ReadInt32();
-                    parentProjectBuildEventContext = BuildEventContext.CreateInitial(submissionId, nodeId)
-                        .WithProjectInstanceId(projectInstanceId)
-                        .WithProjectContextId(projectContextId)
-                        .WithTargetId(targetId)
-                        .WithTaskId(taskId);
+
+                    builder = builder.WithSubmissionId(submissionId)
+                        .WithProjectInstanceId(projectInstanceId);
+
+                    if (version >= 36)
+                    {
+                        int evaluationId = reader.ReadInt32();
+                        builder = builder.WithEvaluationId(evaluationId);
+                    }
                 }
-                else
-                {
-                    parentProjectBuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, nodeId)
-                        .WithProjectContextId(projectContextId)
-                        .WithTargetId(targetId)
-                        .WithTaskId(taskId);
-                }
+
+                parentProjectBuildEventContext = builder.Build();
             }
 
             projectFile = reader.ReadByte() == 0 ? null : reader.ReadString();
