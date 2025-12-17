@@ -535,7 +535,7 @@ namespace Microsoft.Build.ProjectCache
                     cacheRequest.Submission.BuildRequestData?.TargetNames.ToArray() ?? []);
                 BuildEventContext buildEventContext = _loggingService.CreateProjectCacheBuildEventContext(
                     cacheRequest.Submission.SubmissionId,
-                    evaluationId: cacheRequest.Configuration.Project.EvaluationId,
+                    evaluationId: cacheRequest.Configuration.ProjectEvaluationId,
                     projectInstanceId: cacheRequest.Configuration.ConfigurationId,
                     projectFile: cacheRequest.Configuration.Project.FullPath);
 
