@@ -336,10 +336,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        private NodeLoggingContext GetNodeLoggingContext()
-        {
-            return new NodeLoggingContext(_host, 1, false);
-        }
+        private NodeLoggingContext GetNodeLoggingContext() => new NodeLoggingContext(_host, BuildEventContext.Invalid.WithNodeId(1), 1, false);
     }
 
     internal sealed class TestTargetBuilder : ITargetBuilder, IBuildComponent
