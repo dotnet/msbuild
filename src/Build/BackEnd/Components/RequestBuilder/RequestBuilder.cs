@@ -1119,8 +1119,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.RequestConfiguration.LoadProjectIntoConfiguration(
                         _componentHost,
                         RequestEntry.Request.BuildRequestDataFlags,
-                        RequestEntry.Request.SubmissionId,
-                        _nodeLoggingContext.BuildEventContext.NodeId);
+                        _nodeLoggingContext.BuildEventContext.WithSubmissionId(RequestEntry.Request.SubmissionId));
                 }
 
                 // Set SDK-resolved environment variables if they haven't been set yet for this configuration

@@ -788,13 +788,15 @@ namespace Microsoft.Build.UnitTests.Logging
         [Fact]
         public void VerifyWarningsPromotedToErrorsAreCounted()
         {
-            ILoggingService ls = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            var submissionId = 1;
+            var nodeId = 1;
+            ILoggingService ls = LoggingService.CreateLoggingService(LoggerMode.Synchronous, nodeId);
             ls.WarningsAsErrors = new HashSet<string>();
             ls.WarningsAsErrors.Add("FOR123");
             BuildWarningEventArgs warningArgs = new("abc", "FOR123", "", 0, 0, 0, 0, "warning message", "keyword", "sender");
-            warningArgs.BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(BuildEventContext.InvalidProjectContextId).WithProjectInstanceId(BuildEventContext.InvalidProjectContextId).WithProjectContextId(5).WithTaskId(6);
+            warningArgs.BuildEventContext = BuildEventContext.Invalid.WithSubmissionId(submissionId).WithNodeId(nodeId);
             ls.LogBuildEvent(warningArgs);
-            ls.HasBuildSubmissionLoggedErrors(1).ShouldBeTrue();
+            ls.HasBuildSubmissionLoggedErrors(submissionId).ShouldBeTrue();
         }
 
         /// <summary>
