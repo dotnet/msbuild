@@ -141,6 +141,8 @@ This means TaskHost must support **concurrent task execution** within a single p
 
 **Location:** `src/MSBuild/` (linked into Microsoft.Build.csproj). NOT in `src/Shared/` since MSBuildTaskHost (CLR2) is out of scope.
 
+**ITaskItem Serialization:** `TaskHostBuildResponse` will contain `IDictionary<string, ITaskItem[]>` - reuse existing `TaskParameter` class pattern from `src/Shared/TaskParameter.cs`.
+
 ### 4.3 INodePacket.cs Changes
 
 ```csharp
@@ -177,17 +179,7 @@ public enum NodePacketType : byte
 
 ---
 
-## 5. ITaskItem Serialization
-
-`TaskHostBuildResponse.TargetOutputsPerProject` contains `IDictionary<string, ITaskItem[]>` per project.
-
-**Existing pattern:** `TaskParameter` class handles `ITaskItem` serialization for `TaskHostTaskComplete`. Use same approach.
-
-**Reference:** src/Shared/TaskParameter.cs
-
----
-
-## 5.1 Environment and Working Directory State Management
+## 5. Environment and Working Directory State Management
 
 When TaskHost manages multiple concurrent tasks (due to yields or BuildProjectFile calls), each task context must maintain its own environment state.
 
@@ -244,25 +236,9 @@ When TaskHost manages multiple concurrent tasks (due to yields or BuildProjectFi
 
 ---
 
-## 7. Open Questions for Review
+## 7. Open Questions
 
-### Q1: Yield semantics in TaskHost
-
-~~Current no-op may be intentional - TaskHost is single-threaded per process.~~
-
-**Decision (2024-12 review):** Implement full Yield/Reacquire forwarding.
-
-**Rationale:**
-- Yield significantly improved VMR build times - it's an important performance optimization
-- Yield implementation comes "almost for free" once `BuildProjectFile*` is implemented (similar approach)
-- Any long-running task (especially `ToolTask` derivatives like C++ compilation) benefits from yielding
-- Without Yield, builds are subject to MSBuild node scheduling inefficiencies
-
-**Note on future scheduler changes:** In a hypothetical "thread-per-project" scheduler model, Yield would become less important since no additional work would be assigned to a yielded node. However, we're not ready to bet on that model yet.
-
-**Environment behavior:** When a task yields, the environment may change (working directory, env vars). On `Reacquire`, the original environment is restored. This is existing documented behavior, not a new breaking change.
-
-### Q2: Error handling for parent crash during callback
+### Q1: Error handling for parent crash during callback
 
 If parent dies while TaskHost awaits response:
 
@@ -272,17 +248,7 @@ If parent dies while TaskHost awaits response:
 
 **Recommendation:** (C) - `_nodeEndpoint.LinkStatus` check + timeout
 
-### Q3: TaskHost pooling strategy
-
-**Current state:** 1:1 association between worker node and TaskHost.
-
-**Future consideration:** Pool of TaskHost nodes that workers can "rent" from.
-
-**Constraint discovered in review:** Pooling requires opt-in mechanism because of static state guarantees. Tasks must explicitly declare they are stateless to participate in pooling.
-
-**Decision:** Defer pooling to future work. Current implementation maintains 1:1 association.
-
-### Q4: Reuse of existing worker node yield/state-save logic
+### Q2: Reuse of existing worker node yield/state-save logic
 
 Normal multiprocess MSBuild worker nodes already implement yielding and environment/CWD state saving logic. Can this be reused for TaskHost?
 
@@ -319,107 +285,53 @@ private void RestoreOperatingEnvironment()
 
 ---
 
-## Resolved Questions (from 2024-12 Review)
+## 8. Key Decisions (from 2024-12 Review)
 
-| Question | Resolution |
+| Decision | Rationale |
 |----------|------------|
-| Should we implement callbacks or migrate first-party tasks? | Implement callbacks - we'd "own" any tasks we touch |
-| Is Yield important? | Yes - significantly improved VMR build times |
-| Can we spawn new TaskHost on yield? | No - breaks static state sharing guarantees |
-| Can we use TaskHost pooling? | Not without opt-in mechanism for stateless tasks |
+| Implement callbacks (not migrate tasks) | We'd "own" any tasks we touch; doesn't help 3rd party |
+| Implement Yield/Reacquire | Significantly improved VMR build times; comes free with BuildProjectFile |
+| Single TaskHost process (not spawn on yield) | Breaks static state sharing and `GetRegisteredTaskObject` guarantees |
+| Defer TaskHost pooling | Requires opt-in mechanism for stateless tasks |
 
 ---
 
-## 8. Alternatives Considered
+## 9. Alternatives Considered
 
-### 8.1 Spawn New TaskHost Process on Yield (Rejected)
-
-**Proposal:** Instead of managing concurrent tasks in a single TaskHost, spawn a new TaskHost process when a task yields, keeping the original process sleeping.
-
-**Why rejected:** This would break static state sharing guarantees. Consider this sequence:
-
-```
-1. Project A: Task TA populates static cache
-2. Project A: MSBuild task calls Project B (enlightened call)
-3. Project B: Task TB yields
-4. Project B: Scheduler runs Project A's next task TA1
-5. TA1 gets NEW TaskHost → static cache is empty → broken!
-```
-
-Even with a TaskHost pool, this problem persists. Tasks using `GetRegisteredTaskObject` or static fields rely on process affinity within a project.
-
-### 8.2 Require Task Authors to Opt-In (Deferred)
-
-**Proposal:** Add isolation mode metadata to `<UsingTask>` declarations. Tasks could declare:
-- "Same process" (default, conservative) - maintains all guarantees
-- "Stateless" - can run in any TaskHost, enables pooling
-
-**Status:** Good idea for future optimization, but doesn't help existing tasks. May revisit post-implementation.
-
-### 8.3 Migrate First-Party Tasks Instead (Rejected)
-
-**Proposal:** Instead of implementing callbacks, migrate all first-party tasks (WPF XAML, etc.) to be thread-safe.
-
-**Why rejected:** 
-- "As soon as we change something, we own them" - team would become de facto owners
-- Doesn't help third-party tasks using callbacks
-- WPF has both modern (.NET) and legacy (.NET Framework) XAML toolchains; we can influence modern but not legacy
+| Alternative | Why Rejected |
+|-------------|--------------|
+| **Spawn new TaskHost on yield** | Breaks static state sharing - tasks using `GetRegisteredTaskObject` or static fields rely on process affinity |
+| **Task author opt-in isolation modes** | Good for future, but doesn't help existing tasks. Deferred. |
+| **Migrate first-party tasks to thread-safe** | "As soon as we change something, we own them"; doesn't help 3rd party; legacy WPF toolchain can't be changed |
 
 ---
 
-## 9. Risks
+## 10. Risks
 
-| Risk | Likelihood | Impact | Mitigation |
-|------|------------|--------|------------|
-| Deadlock in callback wait | Low | High | Timeouts, no lock held during wait, main thread never waits on task thread |
-| IPC serialization bugs | Medium | Medium | Packet round-trip unit tests |
-| TaskHost complexity increase | High | Medium | Document state machine clearly; think of TaskHost as managing sub-state-machines |
-| Concurrent task state management | Medium | High | Save/restore environment per task; track pending requests per task ID |
+| Risk | Mitigation |
+|------|------------|
+| Deadlock in callback wait | Timeouts, no lock held during wait, main thread never waits on task thread |
+| IPC serialization bugs | Packet round-trip unit tests |
+| TaskHost complexity increase | Document as state machine managing sub-state-machines |
+| Concurrent task state management | Save/restore environment per task; track pending requests per task ID |
 
 **Note:** No "breaking existing behavior" risk - callbacks currently fail/throw, so any implementation is an improvement.
 
-**Architectural note (from review):** Think of MSBuild as an actor system - entities passing messages to other entities. The shapes of messages and protocols are the critical design elements. TaskHost should be viewed as a state machine managing sub-state-machines (one per concurrent task).
+---
+
+## 11. Testing Strategy
+
+- **Unit:** Packet serialization round-trip, request-response correlation, timeout/cancellation
+- **Integration:** End-to-end `-mt` build with callback-using task, recursive `BuildProjectFile`
+- **Stress:** Many concurrent callbacks, large `ITaskItem[]` outputs
 
 ---
 
-## 10. Testing Strategy
+## 12. File Changes
 
-### Unit Tests
+**Modified:** `INodePacket.cs`, `NodePacketFactory.cs`, `OutOfProcTaskHostNode.cs`, `TaskHostTask.cs`
 
-- Packet serialization round-trip
-- Request-response correlation
-- Timeout handling
-- Cancellation during callback
-
-### Integration Tests
-
-- End-to-end `-mt` build with callback-using task
-- TaskHost reuse across multiple tasks
-- Recursive `BuildProjectFile` scenarios
-
-### Stress Tests
-
-- Many concurrent callbacks
-- Large `ITaskItem[]` outputs
-
----
-
-## 11. File Change Summary
-
-| File | Change |
-|------|--------|
-| `src/Shared/INodePacket.cs` | Add new `NodePacketType` enum values (0x20-0x27) |
-| `src/Shared/NodePacketFactory.cs` | Register new packet types in factory |
-| `src/MSBuild/OutOfProcTaskHostNode.cs` | Implement callback forwarding, add concurrent task management |
-| `src/Build/Instance/TaskFactories/TaskHostTask.cs` | Handle new request packet types, forward to real IBuildEngine |
-
-**New packet files** (location TBD - either `src/MSBuild/` or `src/Shared/`):
-- `TaskHostBuildRequest.cs` / `TaskHostBuildResponse.cs`
-- `TaskHostYieldRequest.cs` / `TaskHostYieldResponse.cs`
-- `TaskHostQueryRequest.cs` / `TaskHostQueryResponse.cs` (if not using trivial return)
-- `TaskHostResourceRequest.cs` / `TaskHostResourceResponse.cs` (if not using no-op)
-
-**Note:** Since Phase 1 callbacks (`IsRunningMultipleNodes`, `RequestCores`/`ReleaseCores`) can be trivial implementations, they may not require new packet types at all.
+**New packets:** `TaskHostBuildRequest/Response.cs`, `TaskHostYieldRequest/Response.cs` (Phase 1 may not need packets - trivial returns)
 
 ---
 
