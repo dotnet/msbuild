@@ -1234,7 +1234,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// The location of the application executable.
         /// </summary>
-        /// <remarks>
+        /// <remarks> 
         /// Initialized in the static constructor. See comment there.
         /// </remarks>
         private static readonly string s_exePath; // Do not initialize
