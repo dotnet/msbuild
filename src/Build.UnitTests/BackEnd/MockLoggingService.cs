@@ -520,12 +520,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <inheritdoc />
-        public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
-            => BuildEventContext.CreateInitial(0, 0).WithEvaluationId(0).WithProjectInstanceId(0).WithProjectContextId(0).WithTargetId(0).WithTaskId(0);
+        public BuildEventContext CreateEvaluationBuildEventContext(BuildEventContext parentBuildEventContext)
+            => parentBuildEventContext.WithEvaluationId(0);
 
         /// <inheritdoc />
-        public BuildEventContext CreateProjectCacheBuildEventContext(int submissionId, int evaluationId, int projectInstanceId, string projectFile)
-            => BuildEventContext.CreateInitial(0, 0).WithEvaluationId(0).WithProjectInstanceId(0).WithProjectContextId(0).WithTargetId(0).WithTaskId(0);
+        public BuildEventContext CreateProjectCacheBuildEventContext(BuildEventContext parentBuildEventContext, string projectFile)
+            => parentBuildEventContext.WithProjectContextId(0);
 
         /// <inheritdoc />
         public void LogProjectEvaluationStarted(BuildEventContext eventContext, string projectFile)

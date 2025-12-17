@@ -39,6 +39,11 @@ namespace Microsoft.Build.BackEnd
         private string _savedCurrentDirectory;
 
         /// <summary>
+        /// The build event context for this node - will usually only have the node id set.
+        /// </summary>
+        private BuildEventContext _buildEventContext;
+
+        /// <summary>
         /// The node logging context.
         /// </summary>
         private NodeLoggingContext _loggingContext;
@@ -502,8 +507,10 @@ namespace Microsoft.Build.BackEnd
             ILoggingService loggingService = _componentHost.LoggingService;
             loggingService.OnLoggingThreadException += OnLoggingThreadException;
 
+            _buildEventContext = Scheduler.s_schedulerNodeBuildEventContext.WithNodeId(configuration.NodeId);
+
             // Now prep the buildRequestEngine for the build.
-            _loggingContext = new NodeLoggingContext(loggingService, configuration.NodeId, true /* inProcNode */);
+            _loggingContext = new NodeLoggingContext(loggingService, _buildEventContext, configuration.NodeId, true /* inProcNode */);
 
             _buildRequestEngine.OnEngineException += _engineExceptionEventHandler;
             _buildRequestEngine.OnNewConfigurationRequest += _newConfigurationRequestEventHandler;

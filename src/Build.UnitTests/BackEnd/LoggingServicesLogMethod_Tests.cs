@@ -792,7 +792,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.LogProjectStarted(null, 1, 2, s_taskBuildEventContext, "ProjectFile", "TargetNames", null, null);
+                service.LogProjectStarted(null, 1, 2, s_taskBuildEventContext, "ProjectFile", "TargetNames", null, null, s_targetBuildEventContext.EvaluationId, s_taskBuildEventContext.ProjectContextId);
             });
         }
 
@@ -806,7 +806,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.LogProjectStarted(s_taskBuildEventContext, 1, 2, null, "ProjectFile", "TargetNames", null, null);
+                service.LogProjectStarted(s_taskBuildEventContext, 1, 2, null, "ProjectFile", "TargetNames", null, null, s_targetBuildEventContext.EvaluationId, s_taskBuildEventContext.ProjectContextId);
             });
         }
 
@@ -841,7 +841,7 @@ namespace Microsoft.Build.UnitTests.Logging
             BuildRequestConfiguration config = new BuildRequestConfiguration(2, data, "4.0");
             cache.AddConfiguration(config);
 
-            BuildEventContext context = service.LogProjectStarted(s_taskBuildEventContext, 1, 2, s_taskBuildEventContext, projectFile, targetNames, null, null);
+            BuildEventContext context = service.LogProjectStarted(s_taskBuildEventContext, 1, 2, s_taskBuildEventContext, projectFile, targetNames, null, null, s_targetBuildEventContext.EvaluationId, s_taskBuildEventContext.ProjectContextId);
             BuildEventContext parentBuildEventContext = s_taskBuildEventContext;
             VerifyProjectStartedEventArgs(service, context.ProjectContextId, message, projectFile, targetNames, parentBuildEventContext, context);
 
@@ -857,6 +857,7 @@ namespace Microsoft.Build.UnitTests.Logging
             const int SubmissionId = 1;
             const int EvaluationId = 2;
             const int ConfigurationId = 3;
+            BuildEventContext context = BuildEventContext.CreateInitial(SubmissionId, Scheduler.InProcNodeId).WithEvaluationId(EvaluationId).WithProjectInstanceId(ConfigurationId);
             const string ProjectFile = "SomeProjectFile";
 
             MockHost componentHost = new MockHost();
@@ -867,7 +868,7 @@ namespace Microsoft.Build.UnitTests.Logging
             BuildRequestConfiguration config = new BuildRequestConfiguration(ConfigurationId, data, "4.0");
             cache.AddConfiguration(config);
 
-            BuildEventContext projectCacheBuildEventContext = service.CreateProjectCacheBuildEventContext(SubmissionId, EvaluationId, ConfigurationId, ProjectFile);
+            BuildEventContext projectCacheBuildEventContext = service.CreateProjectCacheBuildEventContext(context, ProjectFile);
             projectCacheBuildEventContext.NodeId.ShouldBe(Scheduler.InProcNodeId);
             projectCacheBuildEventContext.ProjectContextId.ShouldNotBe(BuildEventContext.InvalidProjectContextId);
 
@@ -1429,7 +1430,9 @@ namespace Microsoft.Build.UnitTests.Logging
                     projectFile,
                     null,
                     null,
-                    null);
+                    null,
+                    s_taskBuildEventContext.EvaluationId,
+                    s_taskBuildEventContext.ProjectContextId);
 
             service.LogProjectFinished(projectContext, projectFile, success);
 

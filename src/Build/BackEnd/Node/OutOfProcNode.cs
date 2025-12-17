@@ -65,6 +65,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private BuildParameters _buildParameters;
 
+
         /// <summary>
         /// The logging service.
         /// </summary>
@@ -99,6 +100,11 @@ namespace Microsoft.Build.Execution
         /// The current node configuration
         /// </summary>
         private NodeConfiguration _currentConfiguration;
+
+        /// <summary>
+        /// The build event context for this node, will usually only have the node ID set.
+        /// </summary>
+        private BuildEventContext _buildEventContext;
 
         /// <summary>
         /// The queue of packets we have received but which have not yet been processed.
@@ -845,8 +851,9 @@ namespace Microsoft.Build.Execution
                 _loggingService.SerializeAllProperties = false;
             }
 
+            _buildEventContext = Scheduler.s_schedulerNodeBuildEventContext.WithNodeId(configuration.NodeId);
             // Now prep the buildRequestEngine for the build.
-            _loggingContext = new NodeLoggingContext(_loggingService, configuration.NodeId, false /* inProcNode */);
+            _loggingContext = new NodeLoggingContext(_loggingService, _buildEventContext,  configuration.NodeId, false /* inProcNode */);
 
             if (_shutdownException != null)
             {
