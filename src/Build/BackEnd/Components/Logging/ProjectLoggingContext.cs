@@ -46,7 +46,8 @@ namespace Microsoft.Build.BackEnd.Logging
             requestEntry.RequestConfiguration.Project.ItemsToBuildWith,
             requestEntry.Request.ParentBuildEventContext,
             requestEntry.RequestConfiguration.ProjectEvaluationId,
-            requestEntry.Request.ProjectContextId)
+            requestEntry.Request.ProjectContextId,
+            requestEntry.Request.ScheduledNodeId)
         {
         }
 
@@ -56,22 +57,22 @@ namespace Microsoft.Build.BackEnd.Logging
         internal ProjectLoggingContext(
             NodeLoggingContext nodeLoggingContext,
             BuildRequest request,
-            string projectFullPath,
-            string toolsVersion,
-            int evaluationId)
+            BuildRequestConfiguration configuration)
             : this
             (
             nodeLoggingContext,
             request.SubmissionId,
             request.ConfigurationId,
-            projectFullPath,
+            configuration.ProjectFullPath,
             request.Targets,
-            toolsVersion,
+            configuration.ToolsVersion,
             projectProperties: null,
             projectItems: null,
             request.ParentBuildEventContext,
-            evaluationId,
-            request.ProjectContextId)
+            // if the project was built on a different node, the evaluation id will be a lie anyway, make that super clear
+            configuration.ResultsNodeId != nodeLoggingContext.BuildEventContext.NodeId ? int.MaxValue : configuration.ProjectEvaluationId,
+            request.ProjectContextId,
+            configuration.ResultsNodeId)
         {
         }
 
@@ -93,7 +94,9 @@ namespace Microsoft.Build.BackEnd.Logging
                 requestEntry.RequestConfiguration.Project.ItemsToBuildWith,
                 requestEntry.Request.ParentBuildEventContext,
                 requestEntry.RequestConfiguration.ProjectEvaluationId,
-                requestEntry.Request.ProjectContextId);
+                requestEntry.Request.ProjectContextId,
+                // in this scenario we are on the same node, so just use the current node id
+                nodeLoggingContext.BuildEventContext.NodeId);
 
             return (args, new ProjectLoggingContext(nodeLoggingContext, args));
         }
@@ -117,6 +120,18 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Constructs a project logging contexts.
         /// </summary>
+        /// <param name="nodeLoggingContext">The node logging context for the currently executing node.</param>
+        /// <param name="submissionId">The submission id for this project.</param>
+        /// <param name="configurationId">The configuration id for this project.</param>
+        /// <param name="projectFullPath">The full path to the project file.</param>
+        /// <param name="targets">The targets being built in this project.</param>
+        /// <param name="toolsVersion">The tools version for this project.</param>
+        /// <param name="projectProperties">The properties in the project.</param>
+        /// <param name="projectItems">The items in the project.</param>
+        /// <param name="parentBuildEventContext">The parent build event context.</param>
+        /// <param name="evaluationId">The evaluation id for this project.</param>
+        /// <param name="projectContextId">The project context id for this project.</param>
+        /// <param name="hostNodeId">The node id hosting this project - may be different from that of the nodeLoggingContext if this project was actually started/built on another node</param>
         private ProjectLoggingContext(
             NodeLoggingContext nodeLoggingContext,
             int submissionId,
@@ -128,7 +143,8 @@ namespace Microsoft.Build.BackEnd.Logging
             IItemDictionary<ProjectItemInstance> projectItems,
             BuildEventContext parentBuildEventContext,
             int evaluationId,
-            int projectContextId)
+            int projectContextId,
+            int hostNodeId)
             : base(nodeLoggingContext,
                 CreateInitialContext(nodeLoggingContext,
                     submissionId,
@@ -140,7 +156,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     projectItems,
                     parentBuildEventContext,
                     evaluationId,
-                    projectContextId))
+                    projectContextId,
+                    hostNodeId))
         {
             _projectFullPath = projectFullPath;
 
@@ -164,7 +181,8 @@ namespace Microsoft.Build.BackEnd.Logging
             IItemDictionary<ProjectItemInstance> projectItems,
             BuildEventContext parentBuildEventContext,
             int evaluationId,
-            int projectContextId)
+            int projectContextId,
+            int hostNodeId)
         {
             ProjectStartedEventArgs args = CreateProjectStarted(
                 nodeLoggingContext,
@@ -177,7 +195,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 projectItems,
                 parentBuildEventContext,
                 evaluationId,
-                projectContextId);
+                projectContextId,
+                hostNodeId);
 
             nodeLoggingContext.LoggingService.LogProjectStarted(args);
 
@@ -195,7 +214,8 @@ namespace Microsoft.Build.BackEnd.Logging
             IItemDictionary<ProjectItemInstance> projectItems,
             BuildEventContext parentBuildEventContext,
             int evaluationId,
-            int projectContextId)
+            int projectContextId,
+            int hostNodeId)
         {
             IEnumerable<DictionaryEntry> properties = null;
             IEnumerable<DictionaryEntry> items = null;
@@ -246,7 +266,8 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             return loggingService.CreateProjectStarted(
-                nodeLoggingContext.BuildEventContext,
+                // adjust the message to come from the node that actually built the project
+                nodeLoggingContext.BuildEventContext.WithNodeId(hostNodeId),
                 submissionId,
                 configurationId,
                 parentBuildEventContext,

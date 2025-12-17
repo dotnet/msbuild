@@ -1143,9 +1143,7 @@ namespace Microsoft.Build.BackEnd
                 _projectLoggingContext = new ProjectLoggingContext(
                     _nodeLoggingContext,
                     _requestEntry.Request,
-                    _requestEntry.RequestConfiguration.ProjectFullPath,
-                    _requestEntry.RequestConfiguration.ToolsVersion,
-                    _requestEntry.RequestConfiguration.ProjectEvaluationId);
+                    _requestEntry.RequestConfiguration);
 
                 throw;
             }

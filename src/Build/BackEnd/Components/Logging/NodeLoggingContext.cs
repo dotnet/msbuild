@@ -79,7 +79,7 @@ namespace Microsoft.Build.BackEnd.Logging
         internal ProjectLoggingContext LogProjectStarted(BuildRequest request, BuildRequestConfiguration configuration)
         {
             ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
-            return new ProjectLoggingContext(this, request, configuration.ProjectFullPath, configuration.ToolsVersion, configuration.ProjectEvaluationId);
+            return new ProjectLoggingContext(this, request, configuration);
         }
 
         /// <summary>
