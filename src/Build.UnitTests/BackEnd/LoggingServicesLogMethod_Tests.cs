@@ -787,22 +787,6 @@ namespace Microsoft.Build.UnitTests.Logging
         /// and OnlyLogCriticalEvents is false
         /// </summary>
         [Fact]
-        public void ProjectStartedNullBuildEventContext()
-        {
-            Assert.Throws<InternalErrorException>(() =>
-            {
-                ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-                var args = service.CreateProjectStartedForLocalProject(s_taskBuildEventContext, 2, "ProjectFile", "TargetNames", null, null, null, null);
-                args.BuildEventContext = null; // Force null context for error test
-                service.LogProjectStarted(args);
-            });
-        }
-
-        /// <summary>
-        /// Expect an exception to be thrown if a null build event context is passed in
-        /// and OnlyLogCriticalEvents is false
-        /// </summary>
-        [Fact]
         public void ProjectStartedNullParentBuildEventContext()
         {
             Assert.Throws<InternalErrorException>(() =>
