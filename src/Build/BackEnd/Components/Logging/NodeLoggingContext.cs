@@ -76,7 +76,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="request">The build request.</param>
         /// <param name="configuration">The configuration used to build the request.</param>
         /// <returns>The BuildEventContext to use for this project.</returns>
-        internal ProjectLoggingContext LogProjectStarted(BuildRequest request, BuildRequestConfiguration configuration)
+        internal ProjectLoggingContext LogProjectStartedFromCache(BuildRequest request, BuildRequestConfiguration configuration)
         {
             ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
             return new ProjectLoggingContext(this, request, configuration);
@@ -88,7 +88,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void LogRequestHandledFromCache(BuildRequest request, BuildRequestConfiguration configuration, BuildResult result)
         {
-            ProjectLoggingContext projectLoggingContext = LogProjectStarted(request, configuration);
+            ProjectLoggingContext projectLoggingContext = LogProjectStartedFromCache(request, configuration);
 
             // When pulling a request from the cache, we want to make sure we log a target skipped event for any targets which
             // were used to build the request including default and initial targets.
