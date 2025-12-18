@@ -67,19 +67,20 @@ namespace Microsoft.Build.BackEnd.Logging
         internal (ProjectStartedEventArgs, ProjectLoggingContext) CreateProjectLoggingContext(BuildRequestEntry requestEntry)
         {
             ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
-            return ProjectLoggingContext.CreateLoggingContext(this, requestEntry);
+            return ProjectLoggingContext.CreateForLocalBuild(this, requestEntry);
         }
 
         /// <summary>
-        /// Log that a project has started if it is serviced from the cache
+        /// Log that a project has started if it is serviced from the cache.
+        /// Uses cache-specific pathway that immediately logs ProjectStarted with minimal data.
         /// </summary>
         /// <param name="request">The build request.</param>
         /// <param name="configuration">The configuration used to build the request.</param>
-        /// <returns>The BuildEventContext to use for this project.</returns>
+        /// <returns>The ProjectLoggingContext for this cached project.</returns>
         internal ProjectLoggingContext LogProjectStartedFromCache(BuildRequest request, BuildRequestConfiguration configuration)
         {
             ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
-            return new ProjectLoggingContext(this, request, configuration);
+            return ProjectLoggingContext.CreateForCacheBuild(this, request, configuration);
         }
 
         /// <summary>
