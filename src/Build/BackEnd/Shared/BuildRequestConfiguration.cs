@@ -300,7 +300,11 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A short
         /// </summary>
-        public int ProjectEvaluationId => _projectEvaluationId;
+        public int ProjectEvaluationId
+        {
+            get => _projectEvaluationId;
+            internal set => _projectEvaluationId = value;
+        }
 
         /// <summary>
         /// Flag indicating if this configuration represents a traversal project.  Traversal projects

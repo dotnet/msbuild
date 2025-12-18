@@ -70,7 +70,7 @@ namespace Microsoft.Build.BackEnd.Logging
             projectItems: null,
             request.ParentBuildEventContext,
             // if the project was built on a different node, the evaluation id will be a lie anyway, make that super clear
-            configuration.ResultsNodeId != nodeLoggingContext.BuildEventContext.NodeId ? int.MaxValue : configuration.ProjectEvaluationId,
+            configuration.ProjectEvaluationId,
             request.ProjectContextId,
             configuration.ResultsNodeId)
         {
