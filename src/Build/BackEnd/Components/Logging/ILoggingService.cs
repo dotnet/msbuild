@@ -541,45 +541,47 @@ namespace Microsoft.Build.BackEnd.Logging
             IEnumerable items,
             ProfilerResult? profilerResult);
 
-        /// <summary>
-        /// Log that a project has started
-        /// </summary>
-        /// <param name="nodeBuildEventContext">The logging context of the node which is building this project.</param>
-        /// <param name="submissionId">The id of the build submission.</param>
-        /// <param name="configurationId">The id of the project configuration which is about to start</param>
-        /// <param name="parentBuildEventContext">The build context of the parent project which asked this project to build</param>
-        /// <param name="projectFile">The project file path of the project about to be built</param>
-        /// <param name="targetNames">The entrypoint target names for this project</param>
-        /// <param name="properties">The initial properties of the project</param>
-        /// <param name="items">The initial items of the project</param>
-        /// <param name="evaluationId">EvaluationId of the project instance</param>
-        /// <param name="projectContextId">The project context id</param>
-        /// <returns>The BuildEventContext to use for this project.</returns>
-        BuildEventContext LogProjectStarted(
-            BuildEventContext nodeBuildEventContext,
-            int submissionId,
-            int configurationId,
-            BuildEventContext parentBuildEventContext,
-            string projectFile,
-            string targetNames,
-            IEnumerable<DictionaryEntry> properties,
-            IEnumerable<DictionaryEntry> items,
-            int evaluationId = BuildEventContext.InvalidEvaluationId,
-            int projectContextId = BuildEventContext.InvalidProjectContextId);
-
         void LogProjectStarted(ProjectStartedEventArgs args);
 
-        ProjectStartedEventArgs CreateProjectStarted(
-            BuildEventContext nodeBuildEventContext,
-            int submissionId,
-            int configurationId,
+        /// <summary>
+        /// Creates a ProjectStartedEventArgs for a locally-building project - 
+        /// meaning one that is not served from cache and is building on the current node.
+        /// </summary>
+        /// <param name="parentBuildEventContext">The parent build event context for the project that is about to be built.</param>
+        /// <param name="projectConfiguration">The project configuration of the project that is about to be built.</param>
+        /// <param name="projectFile">The project file path of the project that is about to be built.</param>
+        /// <param name="targetNames">The target names to be built.</param>
+        /// <param name="properties">The initial properties for the project instance, if any.</param>
+        /// <param name="items">The initial items for the project instance, if any.</param>
+        ProjectStartedEventArgs CreateProjectStartedForLocalProject(
             BuildEventContext parentBuildEventContext,
+            BuildRequestConfiguration projectConfiguration,
             string projectFile,
             string targetNames,
             IEnumerable<DictionaryEntry> properties,
-            IEnumerable<DictionaryEntry> items,
-            int evaluationId,
-            int projectContextId);
+            IEnumerable<DictionaryEntry> items);
+
+        /// <summary>
+        /// Creates a ProjectStartedEventArgs for a project that was already built on another node, so
+        /// is being served from cache.
+        /// </summary>
+        /// <param name="currentNodeBuildEventContext">The build event context on the current node.</param>
+        /// <param name="remoteNodeEvaluationBuildEventContext">The complete evaluation build event context on the remote node.</param>
+        /// <param name="parentBuildEventContext">The parent build event context for the project that is already built.</param>
+        /// <param name="projectConfiguration">The (cached) project configuration of the project that is already built.</param>
+        /// <param name="projectFile">The project file path of the project that is already built.</param>
+        /// <param name="targetNames">The target names that were built.</param>
+        /// <param name="properties">The initial properties for the project instance, if any.</param>
+        /// <param name="items">The initial items for the project instance, if any.</param>
+        ProjectStartedEventArgs CreateProjectStartedForCachedProject(
+            BuildEventContext currentNodeBuildEventContext,
+            BuildEventContext remoteNodeEvaluationBuildEventContext,
+            BuildEventContext parentBuildEventContext,
+            BuildRequestConfiguration projectConfiguration,
+            string projectFile,
+            string targetNames,
+            IEnumerable<DictionaryEntry> properties,
+            IEnumerable<DictionaryEntry> items);
 
         /// <summary>
         /// Log that the project has finished

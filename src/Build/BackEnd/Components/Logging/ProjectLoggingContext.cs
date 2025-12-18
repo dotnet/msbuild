@@ -69,7 +69,6 @@ namespace Microsoft.Build.BackEnd.Logging
             projectProperties: null,
             projectItems: null,
             request.ParentBuildEventContext,
-            // if the project was built on a different node, the evaluation id will be a lie anyway, make that super clear
             configuration.ProjectEvaluationId,
             request.ProjectContextId,
             configuration.ResultsNodeId)
@@ -265,9 +264,9 @@ namespace Microsoft.Build.BackEnd.Logging
                 properties = projectPropertiesToSerialize.Select((ProjectPropertyInstance property) => new DictionaryEntry(property.Name, property.EvaluatedValue));
             }
 
-            return loggingService.CreateProjectStarted(
+            return loggingService.CreateProjectStartedForLocalProject(
                 // adjust the message to come from the node that actually built the project
-                nodeLoggingContext.BuildEventContext.WithNodeId(hostNodeId),
+                nodeLoggingContext.BuildEventContext,
                 submissionId,
                 configurationId,
                 parentBuildEventContext,
