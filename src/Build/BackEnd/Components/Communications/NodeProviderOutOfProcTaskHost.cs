@@ -634,7 +634,16 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal void DisconnectFromHost(TaskHostNodeKey nodeKey)
         {
-            ErrorUtilities.VerifyThrow(_nodeContexts.TryGetValue(nodeKey, out NodeContext context), "Node context not found for key: {0}. Was the node created?", nodeKey);
+            // The node context might already have been removed by NodeContextTerminated if the task host
+            // process terminated before we got here. This is a valid race condition - just return early.
+            // Note: NodeContextTerminated does NOT remove handlers, so they'll be orphaned in this case,
+            // but that's acceptable since the task host is dead and the handlers will be cleaned up
+            // when the provider is shut down.
+            if (!_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
+            {
+                CommunicationsUtilities.Trace("DisconnectFromHost: Node context already removed for key: {0}", nodeKey);
+                return;
+            }
 
             bool successRemoveFactory = _nodeIdToPacketFactory.TryRemove(context.NodeId, out _);
             bool successRemoveHandler = _nodeIdToPacketHandler.TryRemove(context.NodeId, out _);
@@ -730,14 +739,14 @@ namespace Microsoft.Build.BackEnd
             _nodeContexts[nodeKey] = context;
             _nodeIdToNodeKey[context.NodeId] = nodeKey;
 
-            // Start the asynchronous read.
-            context.BeginAsyncPacketRead();
-
             lock (_activeNodes)
             {
                 _activeNodes.Add(context.NodeId);
+                _noNodesActiveEvent.Reset();
             }
-            _noNodesActiveEvent.Reset();
+
+            // Start the asynchronous read.
+            context.BeginAsyncPacketRead();
         }
 
         /// <summary>
