@@ -527,18 +527,27 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Validates that a preexisting projectContextId is valid and updates the project file map to track which contexts apply to which project files.
         /// </summary>
-        /// <param name="projectContextId">The preexisting project context ID to validate.</param>
+        /// <param name="remoteNodeEvaluationContext">The remote node evaluation context containing the project context ID to validate.</param>
         /// <param name="projectFile">The project file path to be associated with this project context ID.</param>
         /// <param name="currentNodeId">The node ID of the current node - used to validate that only the in-proc scheduler node is re-using cached project context IDs.</param>
-        private void ValidatePreexistingProjectContextId(int projectContextId, string projectFile, int currentNodeId)
+        /// <returns>Either the same context, if the projectContextId exists in the map already, or a new context with a generated projectContextId if it did not.</returns>
+        private BuildEventContext ValidatePreexistingProjectContextId(BuildEventContext remoteNodeEvaluationContext, string projectFile, int currentNodeId)
         {
+            if (remoteNodeEvaluationContext.ProjectContextId == BuildEventContext.InvalidProjectContextId)
+            {
+                // No projectContextId was provided, so generate a new one to represent this invocation of the project
+                int newProjectContextId = GenerateNewProjectContextId(projectFile);
+                return remoteNodeEvaluationContext.WithProjectContextId(newProjectContextId);
+            }
+
             // A projectContextId was provided, so use it with some sanity checks
-            if (_projectFileMap.TryGetValue(projectContextId, out string existingProjectFile))
+            else if (_projectFileMap.TryGetValue(remoteNodeEvaluationContext.ProjectContextId, out string existingProjectFile))
             {
                 if (!projectFile.Equals(existingProjectFile, StringComparison.OrdinalIgnoreCase))
                 {
-                    ErrorUtilities.ThrowInternalError("ContextID {0} was already in the ID-to-project file mapping but the project file {1} did not match the provided one {2}!", projectContextId, existingProjectFile, projectFile);
+                    ErrorUtilities.ThrowInternalError("ContextID {0} was already in the ID-to-project file mapping but the project file {1} did not match the provided one {2}!", remoteNodeEvaluationContext.ProjectContextId, existingProjectFile, projectFile);
                 }
+                return remoteNodeEvaluationContext;
             }
             else
             {
@@ -547,10 +556,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 // So we only need this sanity check for the in-proc node.
                 if (currentNodeId == Scheduler.InProcNodeId)
                 {
-                    ErrorUtilities.ThrowInternalError("ContextID {0} should have been in the ID-to-project file mapping but wasn't!", projectContextId);
+                    ErrorUtilities.ThrowInternalError("ContextID {0} should have been in the ID-to-project file mapping but wasn't!", remoteNodeEvaluationContext.ProjectContextId);
                 }
 
-                _projectFileMap[projectContextId] = projectFile;
+                _projectFileMap[remoteNodeEvaluationContext.ProjectContextId] = projectFile;
+                return remoteNodeEvaluationContext;
             }
         }
 
@@ -566,16 +576,18 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             Debug.Assert(currentNodeBuildEventContext.NodeId == Scheduler.InProcNodeId, "Cached project build events should only be logged on the in-proc scheduler node.");
 
-            ValidatePreexistingProjectContextId(
-                remoteNodeEvaluationBuildEventContext.ProjectContextId,
+            BuildEventContext validatedRemoteNodeEvaluationBuildContext = ValidatePreexistingProjectContextId(
+                remoteNodeEvaluationBuildEventContext,
                 projectFile,
                 currentNodeBuildEventContext.NodeId);
 
             int configurationId = remoteNodeEvaluationBuildEventContext.ProjectInstanceId;
 
+            // we need to be a valid BuildEventContext for a ProjectLoggingContext out of this, so we need to make sure
+            // we have ProjectContextId set.
             BuildEventContextBuilder thisEventBuildEventContext = parentBuildEventContext
                 .WithProjectInstanceId(configurationId)
-                .WithProjectContextId(remoteNodeEvaluationBuildEventContext.ProjectContextId);
+                .WithProjectContextId(validatedRemoteNodeEvaluationBuildContext.ProjectContextId);
 
             ProjectStartedEventArgs buildEvent = new(
                 projectId: configurationId,
@@ -588,7 +600,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 parentBuildEventContext: parentBuildEventContext,
                 globalProperties: globalProperties,
                 toolsVersion: toolsVersion,
-                originalBuildEventContext: remoteNodeEvaluationBuildEventContext)
+                originalBuildEventContext: validatedRemoteNodeEvaluationBuildContext)
             {
                 BuildEventContext = thisEventBuildEventContext,
             };
