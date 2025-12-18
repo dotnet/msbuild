@@ -119,6 +119,38 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        /// This constructor allows event data to be initialized including the original build event context.
+        /// Sender is assumed to be "MSBuild".
+        /// </summary>
+        /// <param name="projectId">project id</param>
+        /// <param name="message">text message</param>
+        /// <param name="helpKeyword">help keyword </param>
+        /// <param name="projectFile">project name</param>
+        /// <param name="targetNames">targets we are going to build (empty indicates default targets)</param>
+        /// <param name="properties">list of properties</param>
+        /// <param name="items">list of items</param>
+        /// <param name="parentBuildEventContext">event context info for the parent project</param>
+        /// <param name="globalProperties">An <see cref="IDictionary{String, String}"/> containing global properties.</param>
+        /// <param name="toolsVersion">The tools version.</param>
+        /// <param name="originalBuildEventContext">original build event context from the remote node. This should contain node, submission, evaluation and projectInstance Ids at minimum.</param>
+        public ProjectStartedEventArgs(
+            int projectId,
+            string message,
+            string helpKeyword,
+            string? projectFile,
+            string? targetNames,
+            IEnumerable? properties,
+            IEnumerable? items,
+            BuildEventContext? parentBuildEventContext,
+            IDictionary<string, string>? globalProperties,
+            string? toolsVersion,
+            BuildEventContext? originalBuildEventContext)
+            : this(projectId, message, helpKeyword, projectFile, targetNames, properties, items, parentBuildEventContext, globalProperties, toolsVersion)
+        {
+            this.originalBuildEventContext = originalBuildEventContext;
+        }
+
+        /// <summary>
         /// This constructor allows event data to be initialized. Also the timestamp can be set
         /// Sender is assumed to be "MSBuild".
         /// </summary>
@@ -140,7 +172,7 @@ namespace Microsoft.Build.Framework
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
             this.projectFile = projectFile;
-            this.targetNames = targetNames ?? String.Empty;
+            this.targetNames = targetNames ?? string.Empty;
             this.properties = properties;
             this.items = items;
         }
@@ -174,6 +206,36 @@ namespace Microsoft.Build.Framework
             this.projectId = projectId;
         }
 
+        /// <summary>
+        /// This constructor allows event data to be initialized including the original build event context.
+        /// Sender is assumed to be "MSBuild".
+        /// </summary>
+        /// <param name="projectId">project id</param>
+        /// <param name="message">text message</param>
+        /// <param name="helpKeyword">help keyword </param>
+        /// <param name="projectFile">project name</param>
+        /// <param name="targetNames">targets we are going to build (empty indicates default targets)</param>
+        /// <param name="properties">list of properties</param>
+        /// <param name="items">list of items</param>
+        /// <param name="parentBuildEventContext">event context info for the parent project</param>
+        /// <param name="originalBuildEventContext">original build event context from the remote node</param>
+        /// <param name="eventTimestamp">The <see cref="DateTime"/> of the event.</param>
+        public ProjectStartedEventArgs(
+            int projectId,
+            string message,
+            string helpKeyword,
+            string? projectFile,
+            string? targetNames,
+            IEnumerable? properties,
+            IEnumerable? items,
+            BuildEventContext? parentBuildEventContext,
+            BuildEventContext? originalBuildEventContext,
+            DateTime eventTimestamp)
+            : this(projectId, message, helpKeyword, projectFile, targetNames, properties, items, parentBuildEventContext, eventTimestamp)
+        {
+            this.originalBuildEventContext = originalBuildEventContext;
+        }
+
         // ProjectId is only contained in the project started event.
         // This number indicated the instance id of the project and can be
         // used when debugging to determine if two projects with the same name
@@ -203,6 +265,22 @@ namespace Microsoft.Build.Framework
             get
             {
                 return parentProjectBuildEventContext;
+            }
+        }
+
+        [OptionalField(VersionAdded = 3)]
+        private BuildEventContext? originalBuildEventContext;
+
+        /// <summary>
+        /// The (possibly null) <see cref="BuildEventContext"/> from the original project build.
+        /// This contains the full context data from when the project was first built on the original node,
+        /// and should be used for evaluation ID tracking and build correlation in distributed scenarios.
+        /// </summary>
+        public BuildEventContext? OriginalBuildEventContext
+        {
+            get
+            {
+                return originalBuildEventContext;
             }
         }
 
@@ -351,7 +429,7 @@ namespace Microsoft.Build.Framework
         internal override void WriteToStream(BinaryWriter writer)
         {
             base.WriteToStream(writer);
-            writer.Write((Int32)projectId);
+            writer.Write(projectId);
 
             if (parentProjectBuildEventContext == null)
             {
@@ -360,15 +438,15 @@ namespace Microsoft.Build.Framework
             else
             {
                 writer.Write((byte)1);
-                writer.Write((Int32)parentProjectBuildEventContext.NodeId);
-                writer.Write((Int32)parentProjectBuildEventContext.ProjectContextId);
-                writer.Write((Int32)parentProjectBuildEventContext.TargetId);
-                writer.Write((Int32)parentProjectBuildEventContext.TaskId);
+                writer.Write(parentProjectBuildEventContext.NodeId);
+                writer.Write(parentProjectBuildEventContext.ProjectContextId);
+                writer.Write(parentProjectBuildEventContext.TargetId);
+                writer.Write(parentProjectBuildEventContext.TaskId);
                 // added these in version 20
-                writer.Write((Int32)parentProjectBuildEventContext.SubmissionId);
-                writer.Write((Int32)parentProjectBuildEventContext.ProjectInstanceId);
+                writer.Write(parentProjectBuildEventContext.SubmissionId);
+                writer.Write(parentProjectBuildEventContext.ProjectInstanceId);
                 // added this in version 36
-                writer.Write((Int32)parentProjectBuildEventContext.EvaluationId);
+                writer.Write(parentProjectBuildEventContext.EvaluationId);
             }
 
             writer.WriteOptionalString(projectFile);
@@ -405,6 +483,23 @@ namespace Microsoft.Build.Framework
             WriteCollection(writer, WarningsAsErrors);
             WriteCollection(writer, WarningsNotAsErrors);
             WriteCollection(writer, WarningsAsMessages);
+
+            // Write OriginalBuildEventContext (version 3+ field)
+            if (originalBuildEventContext == null)
+            {
+                writer.Write((byte)0);
+            }
+            else
+            {
+                writer.Write((byte)1);
+                writer.Write(originalBuildEventContext.SubmissionId);
+                writer.Write(originalBuildEventContext.NodeId);
+                writer.Write(originalBuildEventContext.EvaluationId);
+                writer.Write(originalBuildEventContext.ProjectInstanceId);
+                writer.Write(originalBuildEventContext.ProjectContextId);
+                writer.Write(originalBuildEventContext.TargetId);
+                writer.Write(originalBuildEventContext.TaskId);
+            }
         }
 
         /// <summary>
@@ -489,6 +584,32 @@ namespace Microsoft.Build.Framework
             WarningsAsErrors = ReadStringSet(reader);
             WarningsNotAsErrors = ReadStringSet(reader);
             WarningsAsMessages = ReadStringSet(reader);
+
+            // Read OriginalBuildEventContext (version 3+ field)
+            if (version >= 3)
+            {
+                if (reader.ReadByte() == 0)
+                {
+                    originalBuildEventContext = null;
+                }
+                else
+                {
+                    int submissionId = reader.ReadInt32();
+                    int nodeId = reader.ReadInt32();
+                    int evaluationId = reader.ReadInt32();
+                    int projectInstanceId = reader.ReadInt32();
+                    int projectContextId = reader.ReadInt32();
+                    int targetId = reader.ReadInt32();
+                    int taskId = reader.ReadInt32();
+
+                    originalBuildEventContext = BuildEventContext.CreateInitial(submissionId, nodeId)
+                        .WithEvaluationId(evaluationId)
+                        .WithProjectInstanceId(projectInstanceId)
+                        .WithProjectContextId(projectContextId)
+                        .WithTargetId(targetId)
+                        .WithTaskId(taskId);
+                }
+            }
         }
 
         private static void WriteCollection(BinaryWriter writer, ICollection<string>? collection)
@@ -537,6 +658,7 @@ namespace Microsoft.Build.Framework
             // Don't want to set the default before deserialization is completed to a new event context because
             // that would most likely be a lot of wasted allocations
             parentProjectBuildEventContext = null;
+            originalBuildEventContext = null;
         }
 
         [OnDeserialized]
@@ -545,6 +667,11 @@ namespace Microsoft.Build.Framework
             if (parentProjectBuildEventContext == null)
             {
                 parentProjectBuildEventContext = BuildEventContext.Invalid;
+            }
+            
+            if (originalBuildEventContext == null)
+            {
+                originalBuildEventContext = BuildEventContext.Invalid;
             }
         }
         #endregion

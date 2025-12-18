@@ -566,7 +566,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void LogProjectStarted(ProjectStartedEventArgs args)
         { }
 
-        public ProjectStartedEventArgs CreateProjectStarted(
+        public ProjectStartedEventArgs CreateProjectStartedForLocalProject(
             BuildEventContext nodeBuildEventContext,
             int submissionId,
             int configurationId,

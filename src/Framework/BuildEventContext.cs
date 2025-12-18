@@ -186,7 +186,7 @@ namespace Microsoft.Build.Framework
         public int TaskId => _taskId;
 
         /// <summary>
-        /// Retrieves the project instance id.
+        /// Retrieves the project instance id, AKA the Configuration Id (AKA BuildRequestConfiguration.Id)
         /// </summary>
         public int ProjectInstanceId => _projectInstanceId;
 
