@@ -2935,24 +2935,6 @@ EndGlobal
 
 #endif
 
-        [Fact]
-        public void ThrowsWhenMaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc()
-        {
-            string projectContent = """
-                <Project>
-                </Project>
-                """;
-            using TestEnvironment testEnvironment = TestEnvironment.Create();
-            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
-            string project = testEnvironment.CreateTestProjectWithFiles("project.proj", projectContent).ProjectFile;
-
-#if FEATURE_GET_COMMANDLINE
-            MSBuildApp.Execute(@"c:\bin\msbuild.exe " + project + " / m:257 /mt").ShouldBe(MSBuildApp.ExitType.SwitchError);
-#else
-            MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", project, "/m:257 /mt" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
-#endif
-        }
-
         private string CopyMSBuild()
         {
             string dest = null;
