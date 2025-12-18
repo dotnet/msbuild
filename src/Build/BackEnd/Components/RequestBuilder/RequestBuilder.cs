@@ -865,6 +865,8 @@ namespace Microsoft.Build.BackEnd
                 {
                     ErrorUtilities.VerifyThrow(result == null, "Result already set when exception was thrown.");
                     result = new BuildResult(_requestEntry.Request, thrownException);
+                    // Populate the evaluation ID from the configuration for sending to the central node
+                    result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
                 }
 
                 ReportResultAndCleanUp(result);
@@ -1019,7 +1021,10 @@ namespace Microsoft.Build.BackEnd
                 results = new Dictionary<int, BuildResult>();
                 for (int i = 0; i < requests.Length; i++)
                 {
-                    results[i] = new BuildResult(new BuildRequest(), new BuildAbortedException());
+                    var result = new BuildResult(new BuildRequest(), new BuildAbortedException());
+                    // Populate the evaluation ID from the configuration for sending to the central node
+                    result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
+                    results[i] = result;
                 }
             }
 
@@ -1209,6 +1214,9 @@ namespace Microsoft.Build.BackEnd
                 // Build the targets
                 BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this,
                     allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
+
+                // Populate the evaluation ID from the configuration for sending to the central node
+                result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
 
                 UpdateStatisticsPostBuild();
 

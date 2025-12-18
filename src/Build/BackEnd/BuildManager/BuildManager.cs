@@ -2496,6 +2496,11 @@ namespace Microsoft.Build.Execution
                 configuration.ProjectDefaultTargets ??= result.DefaultTargets;
                 configuration.ProjectInitialTargets ??= result.InitialTargets;
                 configuration.ProjectTargets ??= result.ProjectTargets;
+                // Update the evaluation ID if it's valid (not InvalidEvaluationId)
+                if (result.EvaluationId != BuildEventContext.InvalidEvaluationId)
+                {
+                    configuration.ProjectEvaluationId = result.EvaluationId;
+                }
             }
 
             // Only report results to the project cache services if it's the result for a build submission.
