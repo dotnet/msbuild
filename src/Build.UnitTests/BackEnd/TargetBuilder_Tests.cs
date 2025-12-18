@@ -1694,7 +1694,9 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <returns>The context</returns>
         private ProjectLoggingContext GetProjectLoggingContext(BuildRequestEntry entry)
         {
-            return new ProjectLoggingContext(new NodeLoggingContext(_host, BuildEventContext.Invalid.WithNodeId(1), 1, false), entry);
+            var nodeContext = new NodeLoggingContext(_host, BuildEventContext.Invalid.WithNodeId(1), 1, false);
+            var (_, context) = ProjectLoggingContext.CreateForLocalBuild(nodeContext, entry);
+            return context;
         }
 
         /// <summary>

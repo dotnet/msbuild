@@ -792,7 +792,9 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.LogProjectStarted(null, 1, 2, s_taskBuildEventContext, "ProjectFile", "TargetNames", null, null, s_targetBuildEventContext.EvaluationId, s_taskBuildEventContext.ProjectContextId);
+                var args = service.CreateProjectStartedForLocalProject(s_taskBuildEventContext, 2, "ProjectFile", "TargetNames", null, null, null, null);
+                args.BuildEventContext = null; // Force null context for error test
+                service.LogProjectStarted(args);
             });
         }
 
@@ -806,7 +808,8 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1);
-                service.LogProjectStarted(s_taskBuildEventContext, 1, 2, null, "ProjectFile", "TargetNames", null, null, s_targetBuildEventContext.EvaluationId, s_taskBuildEventContext.ProjectContextId);
+                var args = service.CreateProjectStartedForLocalProject(null, 2, "ProjectFile", "TargetNames", null, null, null, null);
+                service.LogProjectStarted(args);
             });
         }
 
@@ -841,7 +844,9 @@ namespace Microsoft.Build.UnitTests.Logging
             BuildRequestConfiguration config = new BuildRequestConfiguration(2, data, "4.0");
             cache.AddConfiguration(config);
 
-            BuildEventContext context = service.LogProjectStarted(s_taskBuildEventContext, 1, 2, s_taskBuildEventContext, projectFile, targetNames, null, null, s_targetBuildEventContext.EvaluationId, s_taskBuildEventContext.ProjectContextId);
+            var args = service.CreateProjectStartedForLocalProject(s_taskBuildEventContext, 2, projectFile, targetNames, null, null, null, null);
+            service.LogProjectStarted(args);
+            BuildEventContext context = args.BuildEventContext;
             BuildEventContext parentBuildEventContext = s_taskBuildEventContext;
             VerifyProjectStartedEventArgs(service, context.ProjectContextId, message, projectFile, targetNames, parentBuildEventContext, context);
 
@@ -873,17 +878,10 @@ namespace Microsoft.Build.UnitTests.Logging
             projectCacheBuildEventContext.ProjectContextId.ShouldNotBe(BuildEventContext.InvalidProjectContextId);
 
             BuildEventContext nodeBuildEventContext = BuildEventContext.CreateInitial(0, Scheduler.InProcNodeId);
-            BuildEventContext projectStartedBuildEventContext = service.LogProjectStarted(
-                nodeBuildEventContext,
-                submissionId: SubmissionId,
-                configurationId: ConfigurationId,
-                parentBuildEventContext: BuildEventContext.Invalid,
-                projectFile: ProjectFile,
-                targetNames: "TargetNames",
-                properties: null,
-                items: null,
-                evaluationId: EvaluationId,
-                projectContextId: projectCacheBuildEventContext.ProjectContextId);
+            var args = service.CreateProjectStartedForLocalProject(BuildEventContext.Invalid, ConfigurationId, ProjectFile, "TargetNames", null, null, null, null);
+            args.BuildEventContext = args.BuildEventContext.WithProjectContextId(projectCacheBuildEventContext.ProjectContextId); // Use provided project context ID
+            service.LogProjectStarted(args);
+            BuildEventContext projectStartedBuildEventContext = args.BuildEventContext;
             projectStartedBuildEventContext.ProjectContextId.ShouldBe(projectCacheBuildEventContext.ProjectContextId);
         }
 
@@ -907,60 +905,13 @@ namespace Microsoft.Build.UnitTests.Logging
             BuildRequestConfiguration config = new BuildRequestConfiguration(ConfigurationId, data, "4.0");
             cache.AddConfiguration(config);
 
-            BuildEventContext nodeBuildEventContext = BuildEventContext.CreateInitial(0, Scheduler.InProcNodeId);
+            BuildEventContext parentBuildEventContext = BuildEventContext.CreateInitial(SubmissionId, Scheduler.InProcNodeId).WithEvaluationId(EvaluationId);
+            BuildEventContext remoteBuildEventContextWithKnownBadContextOnCurrentNode = parentBuildEventContext.WithProjectContextId(ProjectContextId);
             Assert.Throws<InternalErrorException>(() =>
             {
-                service.LogProjectStarted(
-                    nodeBuildEventContext,
-                    submissionId: SubmissionId,
-                    configurationId: ConfigurationId,
-                    parentBuildEventContext: BuildEventContext.Invalid,
-                    projectFile: ProjectFile,
-                    targetNames: "TargetNames",
-                    properties: null,
-                    items: null,
-                    evaluationId: EvaluationId,
-                    projectContextId: ProjectContextId);
+                var args = service.CreateProjectStartedForCachedProject(parentBuildEventContext,  remoteBuildEventContextWithKnownBadContextOnCurrentNode, BuildEventContext.Invalid, null, ProjectFile, "TargetNames", null);
+                service.LogProjectStarted(args);
             });
-        }
-
-        /// <summary>
-        /// Expect an unknown project context id to be accepted on an out-of-proc node.
-        /// </summary>
-        [Fact]
-        public void ProjectStartedProvidedUnknownProjectContextIdOutOfProcNode()
-        {
-            const int SubmissionId = 1;
-            const int EvaluationId = 2;
-            const int ConfigurationId = 3;
-            const string ProjectFile = "SomeProjectFile";
-            const int NodeId = 2;
-            const int ProjectContextId = 123;
-
-            // Ensure we didn't pick the one bad const value
-            NodeId.ShouldNotBe(Scheduler.InProcNodeId);
-
-            MockHost componentHost = new MockHost();
-            ProcessBuildEventHelper service = (ProcessBuildEventHelper)ProcessBuildEventHelper.CreateLoggingService(LoggerMode.Synchronous, 1, componentHost);
-            ConfigCache cache = (ConfigCache)componentHost.GetComponent(BuildComponentType.ConfigCache);
-
-            BuildRequestData data = new BuildRequestData(ProjectFile, new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase), "toolsVersion", Array.Empty<string>(), null);
-            BuildRequestConfiguration config = new BuildRequestConfiguration(ConfigurationId, data, "4.0");
-            cache.AddConfiguration(config);
-
-            BuildEventContext nodeBuildEventContext = BuildEventContext.CreateInitial(0, NodeId);
-            BuildEventContext projectStartedBuildEventContext = service.LogProjectStarted(
-                nodeBuildEventContext,
-                submissionId: SubmissionId,
-                configurationId: ConfigurationId,
-                parentBuildEventContext: BuildEventContext.Invalid,
-                projectFile: ProjectFile,
-                targetNames: "TargetNames",
-                properties: null,
-                items: null,
-                evaluationId: EvaluationId,
-                projectContextId: ProjectContextId);
-            projectStartedBuildEventContext.ProjectContextId.ShouldBe(ProjectContextId);
         }
 
         #endregion
@@ -1422,17 +1373,9 @@ namespace Microsoft.Build.UnitTests.Logging
             cache.AddConfiguration(config);
 
             // Now do it the right way -- with a matching ProjectStarted.
-            BuildEventContext projectContext = service.LogProjectStarted(
-                    BuildEventContext.CreateInitial(0, 1),
-                    1,
-                    2,
-                    s_taskBuildEventContext,
-                    projectFile,
-                    null,
-                    null,
-                    null,
-                    s_taskBuildEventContext.EvaluationId,
-                    s_taskBuildEventContext.ProjectContextId);
+            var projectStartedArgs = service.CreateProjectStartedForLocalProject(s_taskBuildEventContext, 2, projectFile, null, null, null, null, null);
+            service.LogProjectStarted(projectStartedArgs);
+            BuildEventContext projectContext = projectStartedArgs.BuildEventContext;
 
             service.LogProjectFinished(projectContext, projectFile, success);
 

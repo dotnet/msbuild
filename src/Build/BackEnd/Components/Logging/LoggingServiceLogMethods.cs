@@ -474,25 +474,23 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <inheritdoc />
         public ProjectStartedEventArgs CreateProjectStartedForLocalProject(
             BuildEventContext parentBuildEventContext,
-            BuildRequestConfiguration projectConfiguration,
+            int configurationId,
             string projectFile,
             string targetNames,
+            IDictionary<string, string> globalProperties,
             IEnumerable<DictionaryEntry> properties,
-            IEnumerable<DictionaryEntry> items)
+            IEnumerable<DictionaryEntry> items,
+            string toolsVersion)
         {
             var projectContextId = GenerateNewProjectContextId(projectFile);
 
             ErrorUtilities.VerifyThrow(parentBuildEventContext != null, "Need a parentBuildEventContext");
             BuildEventContext projectBuildEventContext = parentBuildEventContext
-                .WithProjectInstanceId(projectConfiguration.ConfigurationId)
+                .WithProjectInstanceId(configurationId)
                 .WithProjectContextId(projectContextId);
 
-            // Always log GlobalProperties on ProjectStarted
-            // See https://github.com/dotnet/msbuild/issues/6341 for details
-            IDictionary<string, string> globalProperties = projectConfiguration.GlobalProperties.ToDictionary();
-
             var buildEvent = new ProjectStartedEventArgs(
-                    projectConfiguration.ConfigurationId,
+                    configurationId,
                     message: null,
                     helpKeyword: null,
                     projectFile,
@@ -501,7 +499,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     items,
                     parentBuildEventContext,
                     globalProperties,
-                    projectConfiguration.ToolsVersion);
+                    toolsVersion);
             buildEvent.BuildEventContext = projectBuildEventContext;
 
             return buildEvent;
@@ -561,14 +559,13 @@ namespace Microsoft.Build.BackEnd.Logging
             BuildEventContext currentNodeBuildEventContext,
             BuildEventContext remoteNodeEvaluationBuildEventContext,
             BuildEventContext parentBuildEventContext,
-            BuildRequestConfiguration projectConfiguration,
+            IDictionary<string, string> globalProperties,
             string projectFile,
             string targetNames,
-            IEnumerable<DictionaryEntry> properties,
-            IEnumerable<DictionaryEntry> items)
+            string toolsVersion)
         {
             Debug.Assert(currentNodeBuildEventContext.NodeId == Scheduler.InProcNodeId, "Cached project build events should only be logged on the in-proc scheduler node.");
-            
+
             ValidatePreexistingProjectContextId(
                 remoteNodeEvaluationBuildEventContext.ProjectContextId,
                 projectFile,
@@ -576,25 +573,21 @@ namespace Microsoft.Build.BackEnd.Logging
 
             int configurationId = remoteNodeEvaluationBuildEventContext.ProjectInstanceId;
 
-            // Always log GlobalProperties on ProjectStarted
-            // See https://github.com/dotnet/msbuild/issues/6341 for details
-            IDictionary<string, string> globalProperties = projectConfiguration.GlobalProperties.ToDictionary();
-
             BuildEventContextBuilder thisEventBuildEventContext = parentBuildEventContext
                 .WithProjectInstanceId(configurationId)
                 .WithProjectContextId(remoteNodeEvaluationBuildEventContext.ProjectContextId);
 
             ProjectStartedEventArgs buildEvent = new(
-                projectId: projectConfiguration.ConfigurationId,
+                projectId: configurationId,
                 message: null,
                 helpKeyword: null,
                 projectFile: projectFile,
                 targetNames: targetNames,
-                properties: properties,
-                items: items,
+                properties: null, // Do not log properties on cached project builds - callers must look up from the 'real' ProjectStartedEventArgs if needed
+                items: null,     // Do not log items on cached project builds - callers must look up from the 'real' ProjectStartedEventArgs if needed
                 parentBuildEventContext: parentBuildEventContext,
                 globalProperties: globalProperties,
-                toolsVersion: projectConfiguration.ToolsVersion,
+                toolsVersion: toolsVersion,
                 originalBuildEventContext: remoteNodeEvaluationBuildEventContext)
             {
                 BuildEventContext = thisEventBuildEventContext,

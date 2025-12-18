@@ -3,7 +3,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -31,251 +30,159 @@ namespace Microsoft.Build.BackEnd.Logging
         private readonly ProjectTelemetry _projectTelemetry = new ProjectTelemetry();
 
         /// <summary>
-        /// Constructs a project logging context.
+        /// Private constructor - use factory methods instead.
         /// </summary>
-        internal ProjectLoggingContext(NodeLoggingContext nodeLoggingContext, BuildRequestEntry requestEntry)
-            : this
-            (
-            nodeLoggingContext,
-            requestEntry.Request.SubmissionId,
-            requestEntry.Request.ConfigurationId,
-            requestEntry.RequestConfiguration.ProjectFullPath,
-            requestEntry.Request.Targets,
-            requestEntry.RequestConfiguration.ToolsVersion,
-            requestEntry.RequestConfiguration.Project.PropertiesToBuildWith,
-            requestEntry.RequestConfiguration.Project.ItemsToBuildWith,
-            requestEntry.Request.ParentBuildEventContext,
-            requestEntry.RequestConfiguration.ProjectEvaluationId,
-            requestEntry.Request.ProjectContextId,
-            requestEntry.Request.ScheduledNodeId)
-        {
-        }
-
-        /// <summary>
-        /// Constructs a project logging context.
-        /// </summary>
-        internal ProjectLoggingContext(
-            NodeLoggingContext nodeLoggingContext,
-            BuildRequest request,
-            BuildRequestConfiguration configuration)
-            : this
-            (
-            nodeLoggingContext,
-            request.SubmissionId,
-            request.ConfigurationId,
-            configuration.ProjectFullPath,
-            request.Targets,
-            configuration.ToolsVersion,
-            projectProperties: null,
-            projectItems: null,
-            request.ParentBuildEventContext,
-            configuration.ProjectEvaluationId,
-            request.ProjectContextId,
-            configuration.ResultsNodeId)
-        {
-        }
-
-        /// <summary>
-        /// Creates ProjectLoggingContext, without logging ProjectStartedEventArgs as a side effect.
-        /// The ProjectStartedEventArgs is returned as well - so that it can be later logged explicitly
-        /// </summary>
-        public static (ProjectStartedEventArgs, ProjectLoggingContext) CreateLoggingContext(
-            NodeLoggingContext nodeLoggingContext, BuildRequestEntry requestEntry)
-        {
-            ProjectStartedEventArgs args = CreateProjectStarted(
-                nodeLoggingContext,
-                requestEntry.Request.SubmissionId,
-                requestEntry.Request.ConfigurationId,
-                requestEntry.RequestConfiguration.ProjectFullPath,
-                requestEntry.Request.Targets,
-                requestEntry.RequestConfiguration.ToolsVersion,
-                requestEntry.RequestConfiguration.Project.PropertiesToBuildWith,
-                requestEntry.RequestConfiguration.Project.ItemsToBuildWith,
-                requestEntry.Request.ParentBuildEventContext,
-                requestEntry.RequestConfiguration.ProjectEvaluationId,
-                requestEntry.Request.ProjectContextId,
-                // in this scenario we are on the same node, so just use the current node id
-                nodeLoggingContext.BuildEventContext.NodeId);
-
-            return (args, new ProjectLoggingContext(nodeLoggingContext, args));
-        }
-
         private ProjectLoggingContext(
             NodeLoggingContext nodeLoggingContext,
-            ProjectStartedEventArgs projectStarted)
-        : base(nodeLoggingContext, projectStarted.BuildEventContext)
-        {
-            _projectFullPath = projectStarted.ProjectFile;
-
-            // No need to log a redundant message in the common case
-            if (projectStarted.ToolsVersion != "Current")
-            {
-                LoggingService.LogComment(this.BuildEventContext, MessageImportance.Low, "ToolsVersionInEffectForBuild", projectStarted.ToolsVersion);
-            }
-
-            this.IsValid = true;
-        }
-
-        /// <summary>
-        /// Constructs a project logging contexts.
-        /// </summary>
-        /// <param name="nodeLoggingContext">The node logging context for the currently executing node.</param>
-        /// <param name="submissionId">The submission id for this project.</param>
-        /// <param name="configurationId">The configuration id for this project.</param>
-        /// <param name="projectFullPath">The full path to the project file.</param>
-        /// <param name="targets">The targets being built in this project.</param>
-        /// <param name="toolsVersion">The tools version for this project.</param>
-        /// <param name="projectProperties">The properties in the project.</param>
-        /// <param name="projectItems">The items in the project.</param>
-        /// <param name="parentBuildEventContext">The parent build event context.</param>
-        /// <param name="evaluationId">The evaluation id for this project.</param>
-        /// <param name="projectContextId">The project context id for this project.</param>
-        /// <param name="hostNodeId">The node id hosting this project - may be different from that of the nodeLoggingContext if this project was actually started/built on another node</param>
-        private ProjectLoggingContext(
-            NodeLoggingContext nodeLoggingContext,
-            int submissionId,
-            int configurationId,
+            BuildEventContext buildEventContext,
             string projectFullPath,
-            List<string> targets,
-            string toolsVersion,
-            PropertyDictionary<ProjectPropertyInstance> projectProperties,
-            IItemDictionary<ProjectItemInstance> projectItems,
-            BuildEventContext parentBuildEventContext,
-            int evaluationId,
-            int projectContextId,
-            int hostNodeId)
-            : base(nodeLoggingContext,
-                CreateInitialContext(nodeLoggingContext,
-                    submissionId,
-                     configurationId,
-                    projectFullPath,
-                    targets,
-                    toolsVersion,
-                    projectProperties,
-                    projectItems,
-                    parentBuildEventContext,
-                    evaluationId,
-                    projectContextId,
-                    hostNodeId))
+            string toolsVersion)
+            : base(nodeLoggingContext, buildEventContext)
         {
             _projectFullPath = projectFullPath;
 
             // No need to log a redundant message in the common case
             if (toolsVersion != "Current")
             {
-                LoggingService.LogComment(this.BuildEventContext, MessageImportance.Low, "ToolsVersionInEffectForBuild", toolsVersion);
+                LoggingService.LogComment(BuildEventContext, MessageImportance.Low, "ToolsVersionInEffectForBuild", toolsVersion);
             }
 
-            this.IsValid = true;
+            IsValid = true;
         }
 
-        private static BuildEventContext CreateInitialContext(
-            NodeLoggingContext nodeLoggingContext,
-            int submissionId,
-            int configurationId,
-            string projectFullPath,
-            List<string> targets,
-            string toolsVersion,
-            PropertyDictionary<ProjectPropertyInstance> projectProperties,
-            IItemDictionary<ProjectItemInstance> projectItems,
-            BuildEventContext parentBuildEventContext,
-            int evaluationId,
-            int projectContextId,
-            int hostNodeId)
+        /// <summary>
+        /// Creates ProjectLoggingContext for real local project builds.
+        /// Returns both ProjectStartedEventArgs (for caller to configure) and ProjectLoggingContext.
+        /// Does NOT log ProjectStarted immediately.
+        /// </summary>
+        public static (ProjectStartedEventArgs, ProjectLoggingContext) CreateForLocalBuild(
+            NodeLoggingContext nodeLoggingContext, BuildRequestEntry requestEntry)
         {
-            ProjectStartedEventArgs args = CreateProjectStarted(
+            IEnumerable<DictionaryEntry> properties = GetProjectProperties(
+                nodeLoggingContext.LoggingService,
+                requestEntry.RequestConfiguration.Project?.PropertiesToBuildWith);
+            IEnumerable<DictionaryEntry> items = GetProjectItems(
+                nodeLoggingContext.LoggingService,
+                requestEntry.RequestConfiguration.Project?.ItemsToBuildWith);
+
+            IDictionary<string, string> globalProperties = requestEntry.RequestConfiguration.GlobalProperties.ToDictionary();
+
+            ProjectStartedEventArgs args = nodeLoggingContext.LoggingService.CreateProjectStartedForLocalProject(
+                requestEntry.Request.ParentBuildEventContext,
+                requestEntry.RequestConfiguration.ConfigurationId,
+                requestEntry.RequestConfiguration.ProjectFullPath,
+                string.Join(";", requestEntry.Request.Targets),
+                globalProperties,
+                properties,
+                items,
+                requestEntry.RequestConfiguration.ToolsVersion);
+
+            var context = new ProjectLoggingContext(
                 nodeLoggingContext,
-                submissionId,
-                configurationId,
-                projectFullPath,
-                targets,
-                toolsVersion,
-                projectProperties,
-                projectItems,
-                parentBuildEventContext,
-                evaluationId,
-                projectContextId,
-                hostNodeId);
+                args.BuildEventContext,
+                args.ProjectFile,
+                args.ToolsVersion);
+
+            return (args, context);
+        }
+
+        /// <summary>
+        /// Creates ProjectLoggingContext for cached project builds.
+        /// Immediately logs ProjectStarted event with minimal data.
+        /// </summary>
+        public static ProjectLoggingContext CreateForCacheBuild(
+            NodeLoggingContext nodeLoggingContext,
+            BuildRequest request,
+            BuildRequestConfiguration configuration)
+        {
+            BuildEventContext buildEventContext = CreateAndLogProjectStartedForCache(
+                nodeLoggingContext,
+                request,
+                configuration);
+
+            return new ProjectLoggingContext(
+                nodeLoggingContext,
+                buildEventContext,
+                configuration.ProjectFullPath,
+                configuration.ToolsVersion);
+        }
+
+        /// <summary>
+        /// Creates BuildEventContext and logs ProjectStarted for cache scenarios.
+        /// </summary>
+        private static BuildEventContext CreateAndLogProjectStartedForCache(
+            NodeLoggingContext nodeLoggingContext,
+            BuildRequest request,
+            BuildRequestConfiguration configuration)
+        {
+            // Create a remote node evaluation context with the original evaluation ID
+            BuildEventContext remoteNodeEvaluationBuildEventContext = BuildEventContext.CreateInitial(
+                configuration.ResultsNodeId, // Use the node that originally built this project configuration
+                request.SubmissionId)
+                .WithEvaluationId(configuration.ProjectEvaluationId)
+                .WithProjectInstanceId(configuration.ConfigurationId)
+                // TODO: should we keep this data on the 'original' context - it is _very likely_ not the project
+                // context Id of the request that created the cached result, but it is the only data we have at this point (so far)
+                .WithProjectContextId(request.ProjectContextId);
+            
+            IDictionary<string, string> globalProperties = configuration.GlobalProperties.ToDictionary();
+
+            ProjectStartedEventArgs args = nodeLoggingContext.LoggingService.CreateProjectStartedForCachedProject(
+                nodeLoggingContext.BuildEventContext, // Current node context
+                remoteNodeEvaluationBuildEventContext, // Original remote node context
+                request.ParentBuildEventContext,
+                globalProperties,
+                configuration.ProjectFullPath,
+                string.Join(";", request.Targets),
+                configuration.ToolsVersion);
 
             nodeLoggingContext.LoggingService.LogProjectStarted(args);
-
             return args.BuildEventContext;
         }
 
-        private static ProjectStartedEventArgs CreateProjectStarted(
-            NodeLoggingContext nodeLoggingContext,
-            int submissionId,
-            int configurationId,
-            string projectFullPath,
-            List<string> targets,
-            string toolsVersion,
-            PropertyDictionary<ProjectPropertyInstance> projectProperties,
-            IItemDictionary<ProjectItemInstance> projectItems,
-            BuildEventContext parentBuildEventContext,
-            int evaluationId,
-            int projectContextId,
-            int hostNodeId)
+        /// <summary>
+        /// Gets project properties for logging if appropriate - as determined by the logging service.
+        /// </summary>
+        private static IEnumerable<DictionaryEntry> GetProjectProperties(
+            ILoggingService loggingService,
+            PropertyDictionary<ProjectPropertyInstance> projectProperties)
         {
-            IEnumerable<DictionaryEntry> properties = null;
-            IEnumerable<DictionaryEntry> items = null;
-
-            ILoggingService loggingService = nodeLoggingContext.LoggingService;
-
-            string[] propertiesToSerialize = loggingService.PropertiesToSerialize;
-
-            // If we are only logging critical events lets not pass back the items or properties
-            if (!loggingService.OnlyLogCriticalEvents &&
-                loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent &&
-                (!loggingService.RunningOnRemoteNode || loggingService.SerializeAllProperties))
+            if (projectProperties == null ||
+                loggingService.OnlyLogCriticalEvents ||
+                !loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent ||
+                (loggingService.RunningOnRemoteNode && !loggingService.SerializeAllProperties))
             {
-                if (projectProperties is null)
-                {
-                    properties = [];
-                }
-                else if (Traits.LogAllEnvironmentVariables)
-                {
-                    properties = projectProperties.GetCopyOnReadEnumerable(property => new DictionaryEntry(property.Name, property.EvaluatedValue));
-                }
-                else
-                {
-                    properties = projectProperties.Filter(p => p is not EnvironmentDerivedProjectPropertyInstance || EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(p.Name), p => new DictionaryEntry(p.Name, p.EvaluatedValue));
-                }
-
-                items = projectItems?.GetCopyOnReadEnumerable(item => new DictionaryEntry(item.ItemType, new TaskItem(item))) ?? [];
+                return null;
             }
 
-            if (projectProperties != null &&
-                loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent &&
-                propertiesToSerialize?.Length > 0 &&
-                !loggingService.SerializeAllProperties)
+            if (Traits.LogAllEnvironmentVariables)
             {
-                PropertyDictionary<ProjectPropertyInstance> projectPropertiesToSerialize = new PropertyDictionary<ProjectPropertyInstance>();
-                foreach (string propertyToGet in propertiesToSerialize)
-                {
-                    ProjectPropertyInstance instance = projectProperties[propertyToGet];
-                    {
-                        if (instance != null)
-                        {
-                            projectPropertiesToSerialize.Set(instance);
-                        }
-                    }
-                }
+                return projectProperties.GetCopyOnReadEnumerable(property => new DictionaryEntry(property.Name, property.EvaluatedValue));
+            }
+            else
+            {
+                return projectProperties.Filter(
+                    p => p is not EnvironmentDerivedProjectPropertyInstance || EnvironmentUtilities.IsWellKnownEnvironmentDerivedProperty(p.Name),
+                    p => new DictionaryEntry(p.Name, p.EvaluatedValue));
+            }
+        }
 
-                properties = projectPropertiesToSerialize.Select((ProjectPropertyInstance property) => new DictionaryEntry(property.Name, property.EvaluatedValue));
+        /// <summary>
+        /// Gets project items for logging if appropriate - as determined by the logging service.
+        /// </summary>
+        private static IEnumerable<DictionaryEntry> GetProjectItems(
+            ILoggingService loggingService,
+            IItemDictionary<ProjectItemInstance> projectItems)
+        {
+            if (projectItems == null ||
+                loggingService.OnlyLogCriticalEvents ||
+                !loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent ||
+                (loggingService.RunningOnRemoteNode && !loggingService.SerializeAllProperties))
+            {
+                return null;
             }
 
-            return loggingService.CreateProjectStartedForLocalProject(
-                // adjust the message to come from the node that actually built the project
-                nodeLoggingContext.BuildEventContext,
-                submissionId,
-                configurationId,
-                parentBuildEventContext,
-                projectFullPath,
-                string.Join(";", targets),
-                properties,
-                items,
-                evaluationId,
-                projectContextId);
+            return projectItems.GetCopyOnReadEnumerable(item => new DictionaryEntry(item.ItemType, new TaskItem(item)));
         }
 
         /// <summary>
@@ -289,9 +196,9 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="success">Did the build succeede or not</param>
         internal void LogProjectFinished(bool success)
         {
-            ErrorUtilities.VerifyThrow(this.IsValid, "invalid");
+            ErrorUtilities.VerifyThrow(IsValid, "invalid");
             LoggingService.LogProjectFinished(BuildEventContext, _projectFullPath, success);
-            this.IsValid = false;
+            IsValid = false;
         }
 
         /// <summary>
@@ -299,7 +206,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal TargetLoggingContext LogTargetBatchStarted(string projectFullPath, ProjectTargetInstance target, string parentTargetName, TargetBuiltReason buildReason)
         {
-            ErrorUtilities.VerifyThrow(this.IsValid, "invalid");
+            ErrorUtilities.VerifyThrow(IsValid, "invalid");
             return new TargetLoggingContext(this, projectFullPath, target, parentTargetName, buildReason);
         }
     }

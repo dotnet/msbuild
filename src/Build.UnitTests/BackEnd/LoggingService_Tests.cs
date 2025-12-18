@@ -974,7 +974,9 @@ namespace Microsoft.Build.UnitTests.Logging
 
             loggingService.RegisterLogger(logger);
 
-            BuildEventContext projectStarted = loggingService.LogProjectStarted(buildEventContext, 0, buildEventContext.ProjectInstanceId, BuildEventContext.Invalid, "projectFile", "Build", Enumerable.Empty<DictionaryEntry>(), Enumerable.Empty<DictionaryEntry>());
+            var projectStartedArgs = loggingService.CreateProjectStartedForLocalProject(BuildEventContext.Invalid, buildEventContext.ProjectInstanceId, "projectFile", "Build", null, Enumerable.Empty<DictionaryEntry>(), Enumerable.Empty<DictionaryEntry>(), null);
+            loggingService.LogProjectStarted(projectStartedArgs);
+            BuildEventContext projectStarted = projectStartedArgs.BuildEventContext;
 
             if (warningsAsErrorsForProject != null)
             {
