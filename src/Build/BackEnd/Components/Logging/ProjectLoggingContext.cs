@@ -66,9 +66,13 @@ namespace Microsoft.Build.BackEnd.Logging
                 requestEntry.RequestConfiguration.Project?.ItemsToBuildWith);
 
             IDictionary<string, string> globalProperties = requestEntry.RequestConfiguration.GlobalProperties.ToDictionary();
-
+            
+            BuildEventContext parentBuildEventContext = requestEntry.Request.ParentBuildEventContext == BuildEventContext.Invalid
+                ? nodeLoggingContext.BuildEventContext.WithEvaluationId(requestEntry.RequestConfiguration.ProjectEvaluationId).WithSubmissionId(requestEntry.Request.SubmissionId)
+                : requestEntry.Request.ParentBuildEventContext;
+            
             ProjectStartedEventArgs args = nodeLoggingContext.LoggingService.CreateProjectStartedForLocalProject(
-                requestEntry.Request.ParentBuildEventContext,
+                parentBuildEventContext,
                 requestEntry.RequestConfiguration.ConfigurationId,
                 requestEntry.RequestConfiguration.ProjectFullPath,
                 string.Join(";", requestEntry.Request.Targets),
@@ -112,28 +116,27 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private static BuildEventContext CreateAndLogProjectStartedForCache(
             NodeLoggingContext nodeLoggingContext,
-            BuildRequest request,
+            BuildRequest newRequestThatWasServedFromCache,
             BuildRequestConfiguration configuration)
         {
             // Create a remote node evaluation context with the original evaluation ID
             BuildEventContext remoteNodeEvaluationBuildEventContext = BuildEventContext.CreateInitial(
                 configuration.ResultsNodeId, // Use the node that originally built this project configuration
-                request.SubmissionId)
+                newRequestThatWasServedFromCache.SubmissionId)
                 .WithEvaluationId(configuration.ProjectEvaluationId)
-                .WithProjectInstanceId(configuration.ConfigurationId)
-                // TODO: should we keep this data on the 'original' context - it is _very likely_ not the project
-                // context Id of the request that created the cached result, but it is the only data we have at this point (so far)
-                .WithProjectContextId(request.ProjectContextId);
+                .WithProjectInstanceId(configuration.ConfigurationId);
+                // we don't know the projectContextId of the remote eval, so we don't set it at all.
+                // the new request _does not have_ a valid projectContextId to go off of.
             
             IDictionary<string, string> globalProperties = configuration.GlobalProperties.ToDictionary();
 
             ProjectStartedEventArgs args = nodeLoggingContext.LoggingService.CreateProjectStartedForCachedProject(
                 nodeLoggingContext.BuildEventContext, // Current node context
                 remoteNodeEvaluationBuildEventContext, // Original remote node context
-                request.ParentBuildEventContext,
+                newRequestThatWasServedFromCache.ParentBuildEventContext,
                 globalProperties,
                 configuration.ProjectFullPath,
-                string.Join(";", request.Targets),
+                string.Join(";", newRequestThatWasServedFromCache.Targets),
                 configuration.ToolsVersion);
 
             nodeLoggingContext.LoggingService.LogProjectStarted(args);
