@@ -1144,12 +1144,8 @@ namespace Microsoft.Build.BackEnd
             }
             catch
             {
-                // make sure that any errors thrown by a child project are logged in the context of their parent project: create a temporary projectLoggingContext
-                _projectLoggingContext = new ProjectLoggingContext(
-                    _nodeLoggingContext,
-                    _requestEntry.Request,
-                    _requestEntry.RequestConfiguration);
-
+                // make sure that any errors thrown by a child project are logged in the context of their parent project
+                _projectLoggingContext = _nodeLoggingContext.LogProjectStarted(_requestEntry);
                 throw;
             }
             finally

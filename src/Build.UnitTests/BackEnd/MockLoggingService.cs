@@ -545,40 +545,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
-        /// <summary>
-        /// Logs a project started event
-        /// </summary>
-        public BuildEventContext LogProjectStarted(
-            BuildEventContext nodeBuildEventContext,
-            int submissionId,
-            int configurationId,
-            BuildEventContext parentBuildEventContext,
-            string projectFile,
-            string targetNames,
-            IEnumerable<DictionaryEntry> properties,
-            IEnumerable<DictionaryEntry> items,
-            int evaluationId = BuildEventContext.InvalidEvaluationId,
-            int projectContextId = BuildEventContext.InvalidProjectContextId)
-        {
-            return BuildEventContext.CreateInitial(0, 0);
-        }
-
         public void LogProjectStarted(ProjectStartedEventArgs args)
         { }
 
         public ProjectStartedEventArgs CreateProjectStartedForLocalProject(
-            BuildEventContext nodeBuildEventContext,
-            int submissionId,
-            int configurationId,
             BuildEventContext parentBuildEventContext,
+            int configurationId,
             string projectFile,
             string targetNames,
+            IDictionary<string, string> globalProperties,
             IEnumerable<DictionaryEntry> properties,
             IEnumerable<DictionaryEntry> items,
-            int evaluationId = BuildEventContext.InvalidEvaluationId,
-            int projectContextId = BuildEventContext.InvalidProjectContextId)
+            string toolsVersion)
         {
-            return new ProjectStartedEventArgs(
+            // Create a mock project context ID for testing
+            int projectContextId = configurationId;
+            
+            BuildEventContext projectBuildEventContext = parentBuildEventContext
+                .WithProjectInstanceId(configurationId)
+                .WithProjectContextId(projectContextId);
+
+            var buildEvent = new ProjectStartedEventArgs(
                 configurationId,
                 message: null,
                 helpKeyword: null,
@@ -586,7 +573,42 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 targetNames,
                 properties,
                 items,
-                parentBuildEventContext);
+                parentBuildEventContext,
+                globalProperties,
+                toolsVersion);
+            
+            buildEvent.BuildEventContext = projectBuildEventContext;
+            return buildEvent;
+        }
+
+        public ProjectStartedEventArgs CreateProjectStartedForCachedProject(
+            BuildEventContext currentNodeBuildEventContext,
+            BuildEventContext remoteNodeEvaluationBuildEventContext,
+            BuildEventContext parentBuildEventContext,
+            IDictionary<string, string> globalProperties,
+            string projectFile,
+            string targetNames,
+            string toolsVersion)
+        {
+            BuildEventContext projectBuildEventContext = parentBuildEventContext
+                .WithProjectInstanceId(remoteNodeEvaluationBuildEventContext.ProjectInstanceId)
+                .WithProjectContextId(remoteNodeEvaluationBuildEventContext.ProjectContextId);
+
+            var buildEvent = new ProjectStartedEventArgs(
+                remoteNodeEvaluationBuildEventContext.ProjectInstanceId,
+                message: null,
+                helpKeyword: null,
+                projectFile,
+                targetNames,
+                null, // No properties for cache scenarios in mock
+                null, // No items for cache scenarios in mock
+                parentBuildEventContext,
+                globalProperties,
+                toolsVersion,
+                remoteNodeEvaluationBuildEventContext); // Pass original context
+            
+            buildEvent.BuildEventContext = projectBuildEventContext;
+            return buildEvent;
         }
 
         /// <summary>
