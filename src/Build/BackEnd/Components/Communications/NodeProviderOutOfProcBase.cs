@@ -291,7 +291,7 @@ namespace Microsoft.Build.BackEnd
                         string msg = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("NodeReused", nodeId, nodeToReuse.Id);
                         _componentHost.LoggingService.LogBuildEvent(new BuildMessageEventArgs(msg, null, null, MessageImportance.Low)
                         {
-                            BuildEventContext = new BuildEventContext(nodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId)
+                            BuildEventContext = BuildEventContext.CreateInitial(0 /* submission ID */, nodeId)
                         });
 
                         CreateNodeContext(nodeId, nodeToReuse, nodeStream);

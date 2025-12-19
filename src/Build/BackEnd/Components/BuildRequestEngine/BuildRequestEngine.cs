@@ -852,6 +852,7 @@ namespace Microsoft.Build.BackEnd
                     completedEntry.Result.DefaultTargets = configuration.ProjectDefaultTargets;
                     completedEntry.Result.InitialTargets = configuration.ProjectInitialTargets;
                     completedEntry.Result.ProjectTargets = configuration.ProjectTargets;
+                    completedEntry.Result.EvaluationId = configuration.ProjectEvaluationId;
                 }
 
                 TraceEngine("ERS: Request is now {0}({1}) (nr {2}) has had its builder cleaned up.", completedEntry.Request.GlobalRequestId, completedEntry.Request.ConfigurationId, completedEntry.Request.NodeRequestId);
