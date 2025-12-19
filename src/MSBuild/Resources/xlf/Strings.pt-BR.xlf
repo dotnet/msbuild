@@ -1512,11 +1512,6 @@ arquivo de resposta.
         <target state="translated">Os logs e as informações de depuração do MSBuild estarão no "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
-        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
-        <target state="translated">Com o modo multiThreaded ativado e MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount não poderá ser maior que {0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
         <target state="translated">MSBUILD : error MSB1067: É necessário fornecer um nome de recurso para a chave featureAvailability.</target>
