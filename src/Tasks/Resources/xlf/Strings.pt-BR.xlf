@@ -2854,7 +2854,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorDeletingTempFile">
         <source>Could not delete temporary file "{0}". Error: {1}</source>
-        <target state="new">Could not delete temporary file "{0}". Error: {1}</target>
+        <target state="translated">Não foi possível excluir o arquivo temporário "{0}". Erro: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
@@ -2889,12 +2889,12 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFileTransactional">
         <source>MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</source>
-        <target state="new">MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</target>
+        <target state="translated">MSB3494: não foi possível ler o arquivo existente "{0}" para adicionar conteúdo. Erro: {1}</target>
         <note>{StrBegin="MSB3494: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.Retry">
         <source>Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</source>
-        <target state="new">Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</target>
+        <target state="translated">Tentando novamente a operação no arquivo "{0}" (tentativa {1} de {2}). Motivo: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
@@ -2904,7 +2904,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.UsingTransactionalMode">
         <source>Using transactional mode to write to file "{0}".</source>
-        <target state="new">Using transactional mode to write to file "{0}".</target>
+        <target state="translated">Usando o modo transacional para gravar no arquivo "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
