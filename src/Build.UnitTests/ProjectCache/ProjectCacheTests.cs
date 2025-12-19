@@ -1749,5 +1749,80 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             output.ShouldNotContain("A=1");
             output.ShouldContain("B=1");
         }
+
+        [DotNetOnlyFact("The netfx bootstrap layout created with 'dotnet build' is incomplete")]
+        /// <summary>
+        /// Test for https://github.com/dotnet/msbuild/issues/12712
+        /// Verifies that embedded resources are correctly included when using NoBuild during publish.
+        /// This was regressed by PR #10928 when _GenerateCompileInputs was made a dependency of _GenerateCompileDependencyCache.
+        /// </summary>
+        public void EmbeddedResourcesWithNoBuildPublish()
+        {
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents(
+            $"""
+            <Project Sdk="Microsoft.NET.Sdk">
+                <PropertyGroup>
+                    <TargetFramework>{s_currentTargetNETFramework}</TargetFramework>
+                    <OutputType>Exe</OutputType>
+                    <OutputPath>bin/</OutputPath>
+                </PropertyGroup>
+                <ItemGroup>
+                    <EmbeddedResource Include="Resource.txt"/>
+                </ItemGroup>
+            </Project>
+            """);
+            var projectPath = directory.CreateFile("app.csproj", content).Path;
+            directory.CreateFile(
+                "Program.cs",
+            """
+            using System;
+            using System.IO;
+            using System.Reflection;
+
+            class Program
+            {
+                static void Main()
+                {
+                    var assembly = Assembly.GetExecutingAssembly();
+                    var resourceNames = assembly.GetManifestResourceNames();
+
+                    if (resourceNames.Length == 0)
+                    {
+                        Console.WriteLine("ERROR: No resources found");
+                        Environment.Exit(1);
+                    }
+
+                    foreach (var resourceName in resourceNames)
+                    {
+                        using (var stream = assembly.GetManifestResourceStream(resourceName))
+                        using (var reader = new StreamReader(stream))
+                        {
+                            var content = reader.ReadToEnd();
+                            Console.WriteLine($"SUCCESS:{content}");
+                        }
+                    }
+                }
+            }
+            """);
+
+            // Create EmbeddedResource file
+            directory.CreateFile("Resource.txt", "ResourceContent");
+
+            // Build the project first
+            string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath} -restore", out bool success);
+            success.ShouldBeTrue(output);
+
+            // Publish with NoBuild=true - this should still include embedded resources
+            output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath} -t:Publish -p:NoBuild=true", out success);
+            success.ShouldBeTrue(output);
+
+            string bootstrapCorePath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core", Constants.DotnetProcessName);
+            string appDllPath = Path.Combine(directory.Path, $"bin/{s_currentTargetNETFramework}/publish/app.dll");
+            
+            // Verify that the published app contains the embedded resource
+            output = RunnerUtilities.RunProcessAndGetOutput(bootstrapCorePath, $"exec \"{appDllPath}\"", out success, false, _output);
+            output.ShouldContain("SUCCESS:ResourceContent");
+        }
     }
 }
