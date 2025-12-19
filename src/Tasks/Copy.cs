@@ -386,7 +386,7 @@ namespace Microsoft.Build.Tasks
             // leave the file writeable.
             if (sourceFileState.IsReadOnly)
             {
-                destinationFileState.Reset();
+                destinationFileState.Reset(TaskEnvironment);
                 MakeFileWriteable(destinationFileState, false);
             }
 
@@ -420,7 +420,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     File.SetAttributes(file.Name, FileAttributes.Normal);
-                    file.Reset();
+                    file.Reset(TaskEnvironment);
                 }
             }
         }
@@ -1030,7 +1030,7 @@ namespace Microsoft.Build.Tasks
                             LockCheck.GetLockedFileMessage(destinationFileState.Name));
 
                         // if we have to retry for some reason, wipe the state -- it may not be correct anymore.
-                        destinationFileState.Reset();
+                        destinationFileState.Reset(TaskEnvironment);
 
                         Thread.Sleep(RetryDelayMilliseconds);
                         continue;
@@ -1056,7 +1056,7 @@ namespace Microsoft.Build.Tasks
                         LockCheck.GetLockedFileMessage(destinationFileState.Name));
 
                     // if we have to retry for some reason, wipe the state -- it may not be correct anymore.
-                    destinationFileState.Reset();
+                    destinationFileState.Reset(TaskEnvironment);
 
                     Thread.Sleep(RetryDelayMilliseconds);
                 }
