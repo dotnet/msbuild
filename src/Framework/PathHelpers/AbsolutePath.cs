@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using Microsoft.Build.Shared;
 #if NETFRAMEWORK
 using Microsoft.IO;
 #else
@@ -23,11 +24,6 @@ namespace Microsoft.Build.Framework
     /// </remarks>
     public readonly struct AbsolutePath : IEquatable<AbsolutePath>
     {
-        /// <summary>
-        /// The string comparer to use for path comparisons, based on OS file system case sensitivity.
-        /// </summary>
-        private static readonly StringComparer s_pathComparer = NativeMethods.IsFileSystemCaseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
-
         /// <summary>
         /// The normalized string representation of this path.
         /// </summary>
@@ -121,13 +117,13 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="other">The <see cref="AbsolutePath"/> to compare with the current instance.</param>
         /// <returns><c>true</c> if the paths are equal according to the operating system's file system case sensitivity rules; otherwise, <c>false</c>.</returns>
-        public bool Equals(AbsolutePath other) => s_pathComparer.Equals(Value, other.Value);
+        public bool Equals(AbsolutePath other) => FileUtilities.PathComparer.Equals(Value, other.Value);
 
         /// <summary>
         /// Returns a hash code for this <see cref="AbsolutePath"/>.
         /// </summary>
         /// <returns>A hash code that is consistent with the equality comparison.</returns>
-        public override int GetHashCode() => Value is null ? 0 : s_pathComparer.GetHashCode(Value);
+        public override int GetHashCode() => Value is null ? 0 : FileUtilities.PathComparer.GetHashCode(Value);
 
         /// <summary>
         /// Returns the string representation of this path.
