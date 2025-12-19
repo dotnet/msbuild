@@ -61,11 +61,10 @@ namespace Microsoft.Build.Tasks
                 {
                     try
                     {
-                        AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
                         // For speed, eliminate duplicates caused by poor targets authoring
-                        if (!directoriesSet.Contains(absolutePath))
+                        if (!directoriesSet.Contains(directory.ItemSpec))
                         {
-                            directoriesSet.Add(absolutePath);
+                            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
                             // Only log a message if we actually need to create the folder
                             if (!FileUtilities.DirectoryExistsNoThrow(absolutePath))
                             {
@@ -89,6 +88,9 @@ namespace Microsoft.Build.Tasks
                     {
                         Log.LogErrorWithCodeFromResources("MakeDir.Error", directory.ItemSpec, e.Message);
                     }
+
+                    // Add even on failure to avoid reattempting
+                    directoriesSet.Add(directory.ItemSpec);
                 }
             }
 
