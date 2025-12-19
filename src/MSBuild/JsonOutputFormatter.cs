@@ -67,7 +67,7 @@ namespace Microsoft.Build.CommandLine
                             continue;
                         }
 
-                        jsonItem[metadatumName] = item.GetMetadataValue(metadatumName);
+                        jsonItem[metadatumName] = TryGetMetadataValue(item, metadatumName);
                     }
 
                     itemArray.Add(jsonItem);
@@ -108,7 +108,7 @@ namespace Microsoft.Build.CommandLine
                             continue;
                         }
 
-                        jsonItem[metadatumName] = item.GetMetadataValue(metadatumName);
+                        jsonItem[metadatumName] = TryGetMetadataValue(item, metadatumName);
                     }
 
                     itemArray.Add(jsonItem);
@@ -147,7 +147,7 @@ namespace Microsoft.Build.CommandLine
                             continue;
                         }
 
-                        jsonItem[metadatumName] = item.GetMetadata(metadatumName);
+                        jsonItem[metadatumName] = TryGetMetadata(item, metadatumName);
                     }
 
                     outputArray.Add(jsonItem);
@@ -158,6 +158,63 @@ namespace Microsoft.Build.CommandLine
             }
 
             _topLevelNode["TargetResults"] = targetResultsNode;
+        }
+
+        /// <summary>
+        /// Attempts to get metadata from an ITaskItem. If the metadata is a built-in metadata
+        /// (like FullPath, Directory, etc.) and the item spec contains illegal path characters,
+        /// this will catch the InvalidOperationException and return an empty string.
+        /// </summary>
+        private static string TryGetMetadata(ITaskItem item, string metadataName)
+        {
+            try
+            {
+                return item.GetMetadata(metadataName);
+            }
+            catch (InvalidOperationException)
+            {
+                // Built-in metadata like FullPath, Directory, etc. require path computation.
+                // If the item spec contains illegal path characters, return empty string.
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Attempts to get metadata value from a ProjectItemInstance. If the metadata is a built-in metadata
+        /// (like FullPath, Directory, etc.) and the item spec contains illegal path characters,
+        /// this will catch the InvalidOperationException and return an empty string.
+        /// </summary>
+        private static string TryGetMetadataValue(ProjectItemInstance item, string metadataName)
+        {
+            try
+            {
+                return item.GetMetadataValue(metadataName);
+            }
+            catch (InvalidOperationException)
+            {
+                // Built-in metadata like FullPath, Directory, etc. require path computation.
+                // If the item spec contains illegal path characters, return empty string.
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Attempts to get metadata value from a ProjectItem. If the metadata is a built-in metadata
+        /// (like FullPath, Directory, etc.) and the item spec contains illegal path characters,
+        /// this will catch the InvalidOperationException and return an empty string.
+        /// </summary>
+        private static string TryGetMetadataValue(ProjectItem item, string metadataName)
+        {
+            try
+            {
+                return item.GetMetadataValue(metadataName);
+            }
+            catch (InvalidOperationException)
+            {
+                // Built-in metadata like FullPath, Directory, etc. require path computation.
+                // If the item spec contains illegal path characters, return empty string.
+                return string.Empty;
+            }
         }
     }
 }
