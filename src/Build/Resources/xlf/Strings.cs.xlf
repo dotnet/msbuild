@@ -489,6 +489,11 @@
         <target state="translated">Číst proměnnou prostředí {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="ErrorCopyingBinaryLog">
+        <source>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</source>
+        <target state="new">MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</target>
+        <note>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</note>
+      </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4256: Při čtení vstupních souborů mezipaměti pro výsledky z cesty {0} byla zjištěna chyba: {1}</target>
