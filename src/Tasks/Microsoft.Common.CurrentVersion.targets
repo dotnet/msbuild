@@ -3663,7 +3663,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     Create the _CoreCompileResourceInputs list of inputs to the CoreCompile target.
     ============================================================
     -->
-  <Target Name="_GenerateCompileInputs">
+  <Target Name="_GenerateCompileInputs" Outputs="">
 
     <MSBuildInternalMessage
       Condition="'@(ManifestResourceWithNoCulture)'!='' and '%(ManifestResourceWithNoCulture.EmittedForCompatibilityOnly)'==''"
@@ -3677,6 +3677,8 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       FormatArguments="MSB9005;ManifestNonResxWithNoCultureOnDisk;false;Non-Resx" />
 
     <ItemGroup>
+      <!-- Clear any existing items to avoid duplicates when target runs multiple times -->
+      <_CoreCompileResourceInputs Remove="@(_CoreCompileResourceInputs)" />
 
       <!-- _CoreCompileResourceInputs is the list of TLDA inputs that should trigger CoreCompile, and are listed as inputs to that target -->
       <_CoreCompileResourceInputs Include="@(EmbeddedResource->'%(OutputResource)')" Condition="'%(EmbeddedResource.WithCulture)' == 'false' and '%(EmbeddedResource.Type)' == 'Resx'" />
@@ -3847,24 +3849,6 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     ============================================================
     -->
   <Target Name="_GenerateCompileDependencyCache" Condition="'$(DesignTimeBuild)' != 'true' and '$(BuildingProject)' == 'true'" DependsOnTargets="ResolveAssemblyReferences;PrepareResources;_GenerateCompileInputs">
-    
-    <!-- If _GenerateCompileInputs was skipped and _CoreCompileResourceInputs is empty, populate it here.
-         This handles the NoBuild publish scenario where _GenerateCompileInputs runs once but its items
-         are not available when CoreCompile needs them later. PrepareResources dependency ensures that
-         resource metadata (OutputResource) is set before we populate the items. -->
-    <ItemGroup Condition="'@(_CoreCompileResourceInputs)' == ''">
-      <_CoreCompileResourceInputs Include="@(EmbeddedResource->'%(OutputResource)')" Condition="'%(EmbeddedResource.WithCulture)' == 'false' and '%(EmbeddedResource.Type)' == 'Resx'" />
-      <_CoreCompileResourceInputs Include="@(EmbeddedResource)" Condition="'%(EmbeddedResource.WithCulture)' == 'false' and '%(EmbeddedResource.Type)' == 'Non-Resx' " />
-      <_CoreCompileResourceInputs Include="@(ManifestResourceWithNoCulture)" Condition="'%(ManifestResourceWithNoCulture.EmittedForCompatibilityOnly)'==''">
-        <Type>Resx</Type>
-        <WithCulture>false</WithCulture>
-      </_CoreCompileResourceInputs>
-      <_CoreCompileResourceInputs Include="@(ManifestNonResxWithNoCultureOnDisk)" Condition="'%(ManifestNonResxWithNoCultureOnDisk.EmittedForCompatibilityOnly)'==''">
-        <Type>Non-Resx</Type>
-        <WithCulture>false</WithCulture>
-      </_CoreCompileResourceInputs>
-    </ItemGroup>
-    
     <ItemGroup>
       <CustomAdditionalCompileInputs Include="$(IntermediateOutputPath)$(MSBuildProjectFile).CoreCompileInputs.cache" />
       <CoreCompileCache Include="@(Compile)" />
