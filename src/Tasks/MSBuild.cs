@@ -58,19 +58,16 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// A list of property name/value pairs to apply as global properties to
         /// the child project.
-        /// A typical input: "propname1=propvalue1", "propname2=propvalue2", "propname3=propvalue3".
+        /// A typical input would look like this:
+        /// <code>Properties="propname1=propvalue1;propname2=propvalue2;propname3=propvalue3"</code>
         /// </summary>
         /// <remarks>
-        ///   <format type="text/markdown"><![CDATA[
-        ///     ## Remarks
-        ///     The fact that this is a `string[]` makes the following illegal:
-        ///         `<MSBuild Properties="TargetPath=@(OutputPathItem)" />`
-        ///     The engine fails on this because it doesn't like item lists being concatenated with string
-        ///     constants when the data is being passed into an array parameter.  So the workaround is to
-        ///     write this in the project file:
-        ///         `<MSBuild Properties="@(OutputPathItem-&gt;'TargetPath=%(Identity)')" />`
-        ///     ]]>
-        ///   </format>
+        ///  The fact that this is a <c>string[]</c> makes the following illegal:
+        ///   <code><![CDATA[<MSBuild Properties="TargetPath=@(OutputPathItem)" />]]></code>
+        /// The engine fails on this because it doesn't like item lists being concatenated with string
+        /// constants when the data is being passed into an array parameter.  So the workaround is to
+        /// write this in the project file:
+        /// <code><![CDATA[<MSBuild Properties="@(OutputPathItem-&gt;'TargetPath=%(Identity)')" />]]></code>
         /// </remarks>
         public string[] Properties { get; set; }
 
