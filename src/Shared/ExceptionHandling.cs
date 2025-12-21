@@ -125,7 +125,7 @@ namespace Microsoft.Build.Shared
              || e is ThreadAbortException
              || e is ThreadInterruptedException
              || e is AccessViolationException
-#if !TASKHOST
+#if !TASKHOST && !AOT_LIBRARY
              || e is CriticalTaskException
 #endif
 #if !BUILDINGAPPXTASKS

@@ -20,7 +20,7 @@ namespace Microsoft.Build.Experimental
     /// <summary>
     /// This class represents an implementation of INode for out-of-proc server nodes aka MSBuild server
     /// </summary>
-    public sealed class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
+    public sealed partial class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
     {
         /// <summary>
         /// A callback used to execute command line build.
@@ -168,14 +168,6 @@ namespace Microsoft.Build.Experimental
 
         #endregion
 
-        internal static string GetPipeName(ServerNodeHandshake handshake)
-            => NamedPipeUtil.GetPlatformSpecificPipeName($"MSBuildServer-{handshake.ComputeHash()}");
-
-        internal static string GetRunningServerMutexName(ServerNodeHandshake handshake)
-            => $@"Global\msbuild-server-running-{handshake.ComputeHash()}";
-
-        internal static string GetBusyServerMutexName(ServerNodeHandshake handshake)
-            => $@"Global\msbuild-server-busy-{handshake.ComputeHash()}";
 
         #region INodePacketFactory Members
 

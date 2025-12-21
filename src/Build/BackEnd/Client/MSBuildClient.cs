@@ -15,7 +15,6 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
@@ -171,13 +170,11 @@ namespace Microsoft.Build.Experimental
 
             CommunicationsUtilities.Trace("Executing build with command line '{0}'", descriptiveCommandLine);
 
+            bool serverIsAlreadyRunning = false;
             try
             {
-                bool serverIsAlreadyRunning = ServerIsRunning();
-                if (KnownTelemetry.PartialBuildTelemetry != null)
-                {
-                    KnownTelemetry.PartialBuildTelemetry.InitialMSBuildServerState = serverIsAlreadyRunning ? "hot" : "cold";
-                }
+                serverIsAlreadyRunning = ServerIsRunning();
+                
                 if (!serverIsAlreadyRunning)
                 {
                     CommunicationsUtilities.Trace("Server was not running. Starting server now.");
@@ -218,7 +215,7 @@ namespace Microsoft.Build.Experimental
             // Send build command.
             // Let's send it outside the packet pump so that we easier and quicker deal with possible issues with connection to server.
             MSBuildEventSource.Log.MSBuildServerBuildStart(descriptiveCommandLine);
-            if (TrySendBuildCommand())
+            if (TrySendBuildCommand(serverIsAlreadyRunning))
             {
                 _numConsoleWritePackets = 0;
                 _sizeOfConsoleWritePackets = 0;
@@ -323,7 +320,7 @@ namespace Microsoft.Build.Experimental
                 // Start packet pump
                 using MSBuildClientPacketPump packetPump = _packetPump;
 
-                packetPump.RegisterPacketHandler(NodePacketType.ServerNodeConsoleWrite, ServerNodeConsoleWrite.FactoryForDeserialization, packetPump);
+            packetPump.RegisterPacketHandler(NodePacketType.ServerNodeConsoleWrite, ServerNodeConsoleWrite.FactoryForDeserialization, packetPump);
                 packetPump.RegisterPacketHandler(NodePacketType.ServerNodeBuildResult, ServerNodeBuildResult.FactoryForDeserialization, packetPump);
                 packetPump.Start();
 
@@ -487,7 +484,7 @@ namespace Microsoft.Build.Experimental
             return true;
         }
 
-        private bool TrySendBuildCommand() => TrySendPacket(() => GetServerNodeBuildCommand());
+        private bool TrySendBuildCommand(bool serverIsAlreadyRunning) => TrySendPacket(() => GetServerNodeBuildCommand(serverIsAlreadyRunning));
 
         private bool TrySendCancelCommand() => TrySendPacket(() => new ServerNodeBuildCancel());
 
@@ -498,7 +495,7 @@ namespace Microsoft.Build.Experimental
             return TrySendPacket(() => new NodeBuildComplete(false /* no node reuse */));
         }
 
-        private ServerNodeBuildCommand GetServerNodeBuildCommand()
+        private ServerNodeBuildCommand GetServerNodeBuildCommand(bool serverIsAlreadyRunning)
         {
             Dictionary<string, string> envVars = new();
 
@@ -515,14 +512,10 @@ namespace Microsoft.Build.Experimental
             // We remove env variable used to invoke MSBuild server as that might be equal to 1, so we do not get an infinite recursion here.
             envVars.Remove(Traits.UseMSBuildServerEnvVarName);
 
-            Debug.Assert(KnownTelemetry.PartialBuildTelemetry == null || KnownTelemetry.PartialBuildTelemetry.StartAt.HasValue, "BuildTelemetry.StartAt was not initialized!");
-
-            PartialBuildTelemetry? partialBuildTelemetry = KnownTelemetry.PartialBuildTelemetry == null
-                ? null
-                : new PartialBuildTelemetry(
-                    startedAt: KnownTelemetry.PartialBuildTelemetry.StartAt.GetValueOrDefault(),
-                    initialServerState: KnownTelemetry.PartialBuildTelemetry.InitialMSBuildServerState,
-                    serverFallbackReason: KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason);
+            PartialBuildTelemetry partialBuildTelemetry = new(
+                    startedAt: DateTime.UtcNow,
+                    initialServerState: serverIsAlreadyRunning ? "hot" : "cold",
+                    serverFallbackReason: null);
 
             return new ServerNodeBuildCommand(
                         _commandLine,
@@ -653,7 +646,7 @@ namespace Microsoft.Build.Experimental
             MemoryStream memoryStream = _packetMemoryStream;
             memoryStream.SetLength(0);
 
-            ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(memoryStream);
+            using ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(memoryStream);
 
             // Write header
             memoryStream.WriteByte((byte)packet.Type);

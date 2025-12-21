@@ -7,6 +7,7 @@
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <PackageId>Microsoft.NET.StringTools</PackageId>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net7.0'))">true</IsAotCompatible>
 
     <AssemblyVersion>1.0.0.0</AssemblyVersion>
     <SemanticVersioningV1>true</SemanticVersioningV1>

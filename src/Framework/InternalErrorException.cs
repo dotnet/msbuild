@@ -149,7 +149,12 @@ namespace Microsoft.Build.Framework
         #endregion
 
 #if DEBUG
+
+#if AOT_LIBRARY
+        private static bool RunningTests() => false;
+#else
         private static bool RunningTests() => BuildEnvironmentState.s_runningTests;
+#endif
 #endif
     }
 }

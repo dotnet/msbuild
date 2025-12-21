@@ -3,13 +3,18 @@
 
 using System;
 using System.Threading;
+using Microsoft.Build.App;
 using Microsoft.Build.Experimental;
-using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
+
+#if !AOT_LIBRARY
+using Microsoft.Build.Framework.Telemetry;
+#endif
 
 #if RUNTIME_TYPE_NETCORE
 using System.IO;
 using System.Diagnostics;
+using Microsoft.Build.Framework;
 #endif
 
 namespace Microsoft.Build.CommandLine
@@ -34,7 +39,7 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// The locations of msbuild exe/dll and dotnet.exe would be automatically detected if called from dotnet or msbuild cli. Calling this function from other executables might not work.
         /// </remarks>
-        public static MSBuildApp.ExitType Execute(
+        public static ExitType Execute(
 #if FEATURE_GET_COMMANDLINE
             string commandLine,
 #else
@@ -61,7 +66,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A value of type <see cref="MSBuildApp.ExitType"/> that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
-        public static MSBuildApp.ExitType Execute(
+        public static ExitType Execute(
 #if FEATURE_GET_COMMANDLINE
             string commandLine,
 #else
@@ -73,29 +78,15 @@ namespace Microsoft.Build.CommandLine
             MSBuildClient msbuildClient = new MSBuildClient(commandLine, msbuildLocation);
             MSBuildClientExitResult exitResult = msbuildClient.Execute(cancellationToken);
 
-            if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy ||
-                exitResult.MSBuildClientExitType == MSBuildClientExitType.UnableToConnect ||
-                exitResult.MSBuildClientExitType == MSBuildClientExitType.UnknownServerState ||
-                exitResult.MSBuildClientExitType == MSBuildClientExitType.LaunchError)
-            {
-                if (KnownTelemetry.PartialBuildTelemetry != null)
-                {
-                    KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = exitResult.MSBuildClientExitType.ToString();
-                }
-
-                // Server is busy, fallback to old behavior.
-                return MSBuildApp.Execute(commandLine);
-            }
-
             if (exitResult.MSBuildClientExitType == MSBuildClientExitType.Success &&
-                Enum.TryParse(exitResult.MSBuildAppExitTypeString, out MSBuildApp.ExitType MSBuildAppExitType))
+                Enum.TryParse(exitResult.MSBuildAppExitTypeString, out ExitType MSBuildAppExitType))
             {
                 // The client successfully set up a build task for MSBuild server and received the result.
                 // (Which could be a failure as well). Return the received exit type.
                 return MSBuildAppExitType;
             }
 
-            return MSBuildApp.ExitType.MSBuildClientFailure;
+            return ExitType.MSBuildClientFailure;
         }
     }
 }

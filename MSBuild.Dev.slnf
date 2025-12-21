@@ -10,6 +10,7 @@
       "src\\Framework\\Microsoft.Build.Framework.csproj",
       "src\\MSBuild.UnitTests\\Microsoft.Build.CommandLine.UnitTests.csproj",
       "src\\MSBuild\\MSBuild.csproj",
+      "src\\Microsoft.Build.ClientAPI\\Microsoft.Build.ClientAPI.csproj",
       "src\\StringTools\\StringTools.csproj",
       "src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj",
       "src\\Tasks\\Microsoft.Build.Tasks.csproj",

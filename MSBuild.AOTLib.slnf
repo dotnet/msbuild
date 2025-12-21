@@ -1,0 +1,8 @@
+{
+  "solution": {
+    "path": "MSBuild.sln",
+    "projects": [
+      "src\\Microsoft.Build.ClientAPI\\Microsoft.Build.ClientAPI.csproj"
+    ]
+  }
+}

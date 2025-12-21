@@ -16,8 +16,13 @@ using BackendNativeMethods = Microsoft.Build.BackEnd.NativeMethods;
 
 namespace Microsoft.Build.BackEnd
 {
-    internal sealed class NodeLauncher : INodeLauncher, IBuildComponent
+    internal sealed class NodeLauncher : INodeLauncher
+#if !AOT_LIBRARY
+        , IBuildComponent
+#endif
     {
+
+#if !AOT_LIBRARY
         public static IBuildComponent CreateComponent(BuildComponentType type)
         {
             ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.NodeLauncher, nameof(type));
@@ -31,6 +36,7 @@ namespace Microsoft.Build.BackEnd
         public void ShutdownComponent()
         {
         }
+#endif
 
         /// <summary>
         /// Creates a new MSBuild process
@@ -93,7 +99,7 @@ namespace Microsoft.Build.BackEnd
 
             string exeName = msbuildLocation;
 
-#if RUNTIME_TYPE_NETCORE
+#if RUNTIME_TYPE_NETCORE && !AOT_LIBRARY
             // Run the child process with the same host as the currently-running process.
             exeName = CurrentHost.GetCurrentHost();
 #endif

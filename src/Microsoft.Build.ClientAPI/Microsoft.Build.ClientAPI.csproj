@@ -1,0 +1,93 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <VerifyReferenceAotCompatibility>true</VerifyReferenceAotCompatibility>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <DefineConstants>$(DefineConstants);AOT_LIBRARY</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);CA1852</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Framework\NativeMethods.cs" />
+    <Compile Include="..\Framework\Traits.cs" />
+    <Compile Include="..\Framework\BuildException\*.cs" />
+    <Compile Include="..\Framework\InternalErrorException.cs" />
+    <Compile Include="..\Framework\ChangeWaves.cs" />
+    <Compile Include="..\Framework\Logging\AnsiDetector.cs" />
+    <Compile Include="..\Framework\ErrorUtilities.cs" />
+    <Compile Include="..\Framework\AssemblyUtilities.cs" />
+
+    <Compile Include="..\Framework\ITranslator.cs" />
+    <Compile Include="..\Shared\TranslatorHelpers.cs" />
+    <Compile Include="..\Framework\ITranslatable.cs" />
+    <Compile Include="..\Framework\IExtendedBuildEventArgs.cs" />
+    <Compile Include="..\Framework\BuildEventContext.cs" />
+    <Compile Include="..\Shared\BinaryWriterExtensions.cs" />
+    <Compile Include="..\Shared\BinaryReaderExtensions.cs" />
+    <Compile Include="..\Framework\BinaryReaderFactory.cs" />
+    <Compile Include="..\Shared\InterningBinaryReader.cs" />
+    <Compile Include="..\Framework\InternPathIds.cs" />
+    <Compile Include="..\Framework\InterningReadTranslator.cs" />
+    <Compile Include="..\Framework\InterningWriteTranslator.cs" />
+    <Compile Include="..\Framework\BinaryTranslator.cs" />
+
+    <Compile Include="..\GlobalUsings.cs" />
+    <Compile Include="..\Framework\TaskHostParameters.cs" />
+    <Compile Include="..\Framework\MSBuildEventSource.cs" />
+    <Compile Include="..\Framework\BuildEnvironmentState.cs" />
+    <Compile Include="..\Framework\StringBuilderCache.cs" />
+    <Compile Include="..\Framework\FileClassifier.cs" />
+    <Compile Include="..\Framework\ImmutableFilesTimestampCache.cs" />
+    <Compile Include="..\Shared\XMakeAttributes.cs" />
+    <Compile Include="..\Shared\NamedPipeUtil.cs" />
+    <Compile Include="..\Shared\Constants.cs" />
+    <Compile Include="..\Shared\Debugging\DebugUtils.cs" />
+    <Compile Include="..\Shared\ErrorUtilities.cs" />
+    <Compile Include="..\Utilities\AssemblyResources.cs" />
+    <Compile Include="..\Shared\EnvironmentUtilities.cs" />
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs" />
+    <Compile Include="..\Shared\ExceptionHandling.cs" />
+    <Compile Include="..\Shared\FileUtilities.cs" />
+    <Compile Include="..\Shared\TempFileUtilities.cs" />
+    <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
+    <Compile Include="..\Shared\EscapingUtilities.cs" />
+    <Compile Include="..\Shared\ResourceUtilities.cs" />
+    <Compile Include="..\Shared\FileSystem\*.cs" />
+    <Compile Include="..\Shared\INodePacket.cs" />
+    <Compile Include="..\Shared\INodePacketHandler.cs" />
+    <Compile Include="..\Shared\INodePacketFactory.cs" />
+    <Compile Include="..\Shared\NodePacketFactory.cs" />
+
+    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
+    <Compile Include="..\Shared\MSBuildClientApp.cs" />
+    <Compile Include="..\Shared\MSBuildAppExitType.cs" />
+    <Compile Include="..\Build\Logging\IConsoleConfiguration.cs" />
+    <Compile Include="..\Build\Logging\TargetConsoleConfiguration.cs" />
+    <Compile Include="..\Build\BackEnd\Client\*.cs" />
+    <Compile Include="..\Build\BackEnd\Components\Communications\INodeLauncher.cs" />
+    <Compile Include="..\Build\BackEnd\Components\Communications\NodeFailedToLaunchException.cs" />
+    <Compile Include="..\Build\BackEnd\Components\Communications\NodeProviderOutOfProcBase.ClientSurfaceArea.cs" />
+    <Compile Include="..\Build\BackEnd\Components\Communications\NodeLauncher.cs" />
+    <Compile Include="..\Build\BackEnd\Shared\BuildAbortedException.cs" />
+    <Compile Include="..\Build\BackEnd\Node\OutOfProcServerNode.ClientSurfaceArea.cs" />
+    <Compile Include="..\Build\BackEnd\Node\PartialBuildTelemetry.cs" />
+    <Compile Include="..\Build\BackEnd\Node\ServerNamedMutex.cs" />
+    <Compile Include="..\Build\BackEnd\Node\NativeMethods.cs" />
+    <Compile Include="..\Build\BackEnd\Node\ConsoleOutput.cs" />
+    <Compile Include="..\Build\BackEnd\Node\ServerNodeConsoleWrite.cs" />
+    <Compile Include="..\Build\BackEnd\Node\ServerNodeBuildResult.cs" />
+    <Compile Include="..\Build\BackEnd\Node\ServerNodeBuildCancel.cs" />
+    <Compile Include="..\Build\BackEnd\Node\ServerNodeBuildCommand.cs" />
+    <Compile Include="..\Shared\NodeBuildComplete.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\StringTools\StringTools.csproj" />
+  </ItemGroup>
+
+</Project>

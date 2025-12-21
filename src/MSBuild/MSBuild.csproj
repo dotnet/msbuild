@@ -136,7 +136,8 @@
     <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
     <Compile Include="DistributedLoggerRecord.cs" />
     <Compile Include="InitializationException.cs" />
-    <Compile Include="MSBuildClientApp.cs" />
+    <Compile Include="..\Shared\MSBuildClientApp.cs" />
+    <Compile Include="..\Shared\MSBuildAppExitType.cs" />
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
     <Compile Include="ProjectSchemaValidationHandler.cs" />
     <Compile Include="OutOfProcTaskHostNode.cs" />

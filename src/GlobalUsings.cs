@@ -6,3 +6,5 @@ global using LockType = System.Threading.Lock;
 #else
 global using LockType = System.Object;
 #endif
+
+global using NativeMethodsShared = Microsoft.Build.Framework.NativeMethods;

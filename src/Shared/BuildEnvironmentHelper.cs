@@ -83,7 +83,9 @@ namespace Microsoft.Build.Shared
                 TryFromMSBuildProcess,
                 TryFromMSBuildAssembly,
                 TryFromDevConsole,
+#if !AOT_LIBRARY
                 TryFromSetupApi,
+#endif
                 TryFromAppContextBaseDirectory
             };
 
@@ -284,6 +286,7 @@ namespace Microsoft.Build.Shared
                 visualStudioPath: vsInstallDir);
         }
 
+#if !AOT_LIBRARY
         private static BuildEnvironment TryFromSetupApi()
         {
             if (s_runningTests())
@@ -316,7 +319,7 @@ namespace Microsoft.Build.Shared
                 runningInVisualStudio: false,
                 visualStudioPath: instances[0].Path);
         }
-
+#endif
         private static BuildEnvironment TryFromAppContextBaseDirectory()
         {
             // Assemblies compiled against anything older than .NET 4.0 won't have a System.AppContext
@@ -375,6 +378,7 @@ namespace Microsoft.Build.Shared
                 "MSBuild.exe");
         }
 
+#if !AOT_LIBRARY
         private static bool? _runningTests;
         private static readonly LockType _runningTestsLock = new LockType();
 
@@ -403,7 +407,7 @@ namespace Microsoft.Build.Shared
                 return _runningTests.Value;
             }
         }
-
+#endif
         /// <summary>
         /// Returns true if processName appears in the processList
         /// </summary>
@@ -459,6 +463,7 @@ namespace Microsoft.Build.Shared
             return Environment.GetEnvironmentVariable(variable);
         }
 
+#if !AOT_LIBRARY
         /// <summary>
         /// Resets the current singleton instance (for testing).
         /// </summary>
@@ -489,13 +494,24 @@ namespace Microsoft.Build.Shared
             BuildEnvironmentHelperSingleton.s_instance = buildEnvironment;
             _runningTests = buildEnvironment.RunningTests;
         }
+#endif
 
         private static Func<string> s_getProcessFromRunningProcess = GetProcessFromRunningProcess;
         private static Func<string> s_getExecutingAssemblyPath = GetExecutingAssemblyPath;
         private static Func<string> s_getAppContextBaseDirectory = GetAppContextBaseDirectory;
+
+#if !AOT_LIBRARY
         private static Func<IEnumerable<VisualStudioInstance>> s_getVisualStudioInstances = VisualStudioLocationHelper.GetInstances;
+#endif
+
         private static Func<string, string> s_getEnvironmentVariable = GetEnvironmentVariable;
-        private static Func<bool> s_runningTests = CheckIfRunningTests;
+
+        private static Func<bool> s_runningTests =
+#if AOT_LIBRARY
+            () => false;
+#else
+            CheckIfRunningTests;
+#endif
 
         private static class BuildEnvironmentHelperSingleton
         {
