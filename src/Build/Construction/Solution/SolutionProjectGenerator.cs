@@ -416,6 +416,8 @@ namespace Microsoft.Build.Construction
             string conditionDescribingValidConfigurations)
         {
             string copyLocalFilesItemName = referenceItemName + "_CopyLocalFiles";
+            string resolvedDependenciesFilesItemName = referenceItemName + "_ResolvedDependencyFiles";
+            string allDependentFilesItemName = referenceItemName + "_AllDependentFiles";
             string targetFrameworkDirectoriesName = GenerateSafePropertyName(project, "_TargetFrameworkDirectories");
             string fullFrameworkRefAssyPathName = GenerateSafePropertyName(project, "_FullFrameworkReferenceAssemblyPaths");
             string destinationFolder = String.Format(CultureInfo.InvariantCulture, @"$({0})\Bin\", GenerateSafePropertyName(project, "AspNetPhysicalPath"));
@@ -452,14 +454,24 @@ namespace Microsoft.Build.Construction
             rarTask.SetParameter("FindRelatedFiles", "true");
             rarTask.SetParameter("TargetFrameworkMoniker", project.TargetFrameworkMoniker);
             rarTask.AddOutputItem("CopyLocalFiles", copyLocalFilesItemName, null);
+            rarTask.AddOutputItem("ResolvedDependencyFiles", resolvedDependenciesFilesItemName, null);
 
-            // Copy all the copy-local files (reported by RAR) to the web project's "bin"
+            // Merge copy-local files and resolved dependency files (reported by RAR) together
+            ProjectTaskInstance mergeCopyLocalToAllDependenciesTask = target.AddTask("CreateItem", null, null);
+            mergeCopyLocalToAllDependenciesTask.SetParameter("Include", "@(" + copyLocalFilesItemName + ")");
+            mergeCopyLocalToAllDependenciesTask.AddOutputItem("Include", allDependentFilesItemName, null);
+
+            ProjectTaskInstance mergeResolvedDependencyFileslToAllDependenciesTask = target.AddTask("CreateItem", null, null);
+            mergeResolvedDependencyFileslToAllDependenciesTask.SetParameter("Include", "@(" + resolvedDependenciesFilesItemName + ")");
+            mergeResolvedDependencyFileslToAllDependenciesTask.AddOutputItem("Include", allDependentFilesItemName, null);
+
+            // Copy dependencies to the web project's "bin"
             // directory.
             ProjectTaskInstance copyTask = target.AddTask("Copy", conditionDescribingValidConfigurations, null);
-            copyTask.SetParameter("SourceFiles", "@(" + copyLocalFilesItemName + ")");
+            copyTask.SetParameter("SourceFiles", "@(" + allDependentFilesItemName + ")");
             copyTask.SetParameter(
                 "DestinationFiles",
-                String.Format(CultureInfo.InvariantCulture, @"@({0}->'{1}%(DestinationSubDirectory)%(Filename)%(Extension)')", copyLocalFilesItemName, destinationFolder));
+                String.Format(CultureInfo.InvariantCulture, @"@({0}->'{1}%(DestinationSubDirectory)%(Filename)%(Extension)')", allDependentFilesItemName, destinationFolder));
         }
 
         /// <summary>
