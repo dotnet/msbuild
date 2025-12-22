@@ -25,7 +25,7 @@ namespace Microsoft.Build.CommandLine
     /// 2. establishes a connection with MSBuild server and sends a build request.
     /// 3. if server is busy, it falls back to old build behavior.
     /// </summary>
-    internal static class MSBuildClientApp
+    public static class MSBuildClientApp
     {
         /// <summary>
         /// This is the entry point for the MSBuild client.
