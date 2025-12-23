@@ -418,6 +418,7 @@ namespace Microsoft.Build.Construction
             string copyLocalFilesItemName = referenceItemName + "_CopyLocalFiles";
             string resolvedDependenciesFilesItemName = referenceItemName + "_ResolvedDependencyFiles";
             string allDependentFilesItemName = referenceItemName + "_AllDependentFiles";
+            string dependsOnNetstandardParameterName = referenceItemName + "_DependsOnNETStandard";
             string targetFrameworkDirectoriesName = GenerateSafePropertyName(project, "_TargetFrameworkDirectories");
             string fullFrameworkRefAssyPathName = GenerateSafePropertyName(project, "_FullFrameworkReferenceAssemblyPaths");
             string destinationFolder = String.Format(CultureInfo.InvariantCulture, @"$({0})\Bin\", GenerateSafePropertyName(project, "AspNetPhysicalPath"));
@@ -455,15 +456,16 @@ namespace Microsoft.Build.Construction
             rarTask.SetParameter("TargetFrameworkMoniker", project.TargetFrameworkMoniker);
             rarTask.AddOutputItem("CopyLocalFiles", copyLocalFilesItemName, null);
             rarTask.AddOutputItem("ResolvedDependencyFiles", resolvedDependenciesFilesItemName, null);
+            rarTask.AddOutputItem("DependsOnNETStandard", dependsOnNetstandardParameterName, null);
 
             // Merge copy-local files and resolved dependency files (reported by RAR) together
             ProjectTaskInstance mergeCopyLocalToAllDependenciesTask = target.AddTask("CreateItem", null, null);
             mergeCopyLocalToAllDependenciesTask.SetParameter("Include", "@(" + copyLocalFilesItemName + ")");
             mergeCopyLocalToAllDependenciesTask.AddOutputItem("Include", allDependentFilesItemName, null);
 
-            ProjectTaskInstance mergeResolvedDependencyFileslToAllDependenciesTask = target.AddTask("CreateItem", null, null);
-            mergeResolvedDependencyFileslToAllDependenciesTask.SetParameter("Include", "@(" + resolvedDependenciesFilesItemName + ")");
-            mergeResolvedDependencyFileslToAllDependenciesTask.AddOutputItem("Include", allDependentFilesItemName, null);
+            ProjectTaskInstance mergeResolvedDependencyFilesToAllDependenciesTask = target.AddTask("CreateItem", "'$("+ dependsOnNetstandardParameterName+")' == 'True'", null);
+            mergeResolvedDependencyFilesToAllDependenciesTask.SetParameter("Include", "@(" + resolvedDependenciesFilesItemName + ")");
+            mergeResolvedDependencyFilesToAllDependenciesTask.AddOutputItem("Include", allDependentFilesItemName, null);
 
             // Copy dependencies to the web project's "bin"
             // directory.
