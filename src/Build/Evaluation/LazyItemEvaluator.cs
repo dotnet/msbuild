@@ -629,8 +629,6 @@ namespace Microsoft.Build.Evaluation
         {
             if (itemElement.HasMetadata)
             {
-                operationBuilder.Metadata.AddRange(itemElement.Metadata);
-
                 ItemsAndMetadataPair itemsAndMetadataFound = new ItemsAndMetadataPair(null, null);
 
                 // Since we're just attempting to expand properties in order to find referenced items and not expanding metadata,
@@ -639,6 +637,8 @@ namespace Microsoft.Build.Evaluation
                 const ExpanderOptions expanderOptions = ExpanderOptions.ExpandProperties | ExpanderOptions.LeavePropertiesUnexpandedOnError;
                 foreach (var metadatumElement in itemElement.Metadata)
                 {
+                    operationBuilder.Metadata.Add(metadatumElement);
+
                     string expression = _expander.ExpandIntoStringLeaveEscaped(
                         metadatumElement.Value,
                         expanderOptions,

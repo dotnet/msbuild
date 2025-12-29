@@ -1523,11 +1523,6 @@ Nota: livello di dettaglio dei logger di file
         <target state="translated">I log e le informazioni di debug di MSBuild sono contenuti in "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
-        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
-        <target state="translated">Con la modalità multithread attivata e MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount non può essere maggiore di {0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
         <target state="translated">MSBUILD : error MSB1067: È necessario fornire un nome funzionalità per l’opzione featureAvailability.</target>

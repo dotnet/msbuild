@@ -1513,11 +1513,6 @@
         <target state="translated">MSBuild 로그 및 디버그 정보는 "{0}"에 있습니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
-        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
-        <target state="translated">다중 스레드 모드가 켜져 있고 MSBUILDFORCEALLTASKSOUTOFPROC=1인 경우, maxCpuCount는 {0}보다 클 수 없습니다..</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
         <target state="translated">MSBUILD : error MSB1067: featureAvailability 스위치에 대한 기능 이름을 제공해야 합니다.</target>
