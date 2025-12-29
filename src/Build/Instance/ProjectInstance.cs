@@ -1390,11 +1390,23 @@ namespace Microsoft.Build.Execution
             // If the property has already been set as an environment variable, we do not overwrite it.
             if (_environmentVariableProperties.Contains(name))
             {
+                // Only log if the value differs from what's already set
+                ProjectPropertyInstance existingProperty = _environmentVariableProperties.GetProperty(name);
+                if (existingProperty != null && !string.Equals(existingProperty.EvaluatedValue, value, StringComparison.Ordinal))
+                {
+                    _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySet", name, value, existingProperty.EvaluatedValue);
+                }
                 return;
             }
             // If another SDK already set it, we do not overwrite it.
             else if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
             {
+                // Only log if the value differs from what's already set
+                ProjectPropertyInstance existingProperty = _sdkResolvedEnvironmentVariableProperties.GetProperty(name);
+                if (existingProperty != null && !string.Equals(existingProperty.EvaluatedValue, value, StringComparison.Ordinal))
+                {
+                    _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySetBySdk", name, value, existingProperty.EvaluatedValue);
+                }
                 return;
             }
 
