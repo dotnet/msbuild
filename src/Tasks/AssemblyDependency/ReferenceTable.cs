@@ -341,7 +341,7 @@ namespace Microsoft.Build.Tasks
             _enableCustomCulture = enableCustomCulture;
 
             // Set condition for when to check assembly version against the target framework version
-            _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? ReferenceTable.s_targetFrameworkVersion_40) <= ReferenceTable.s_targetFrameworkVersion_40);
+            _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || (_projectTargetFramework != null && (_projectTargetFramework <= s_targetFrameworkVersion_40));
 
             // Convert the list of installed SDK's to a dictionary for faster lookup
             _resolvedSDKReferences = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
