@@ -41,7 +41,19 @@ namespace Microsoft.Build.Framework.Telemetry
 
         public static TelemetryManager Instance { get; } = new TelemetryManager();
 
-        public void Initialize(bool isStandalone)
+        /// <summary>
+        /// Initializes the telemetry manager with the specified configuration.
+        /// </summary>
+        /// <param name="isStandalone">
+        /// Indicates whether MSBuild is running in standalone mode (e.g., MSBuild.exe directly invoked)
+        /// versus integrated mode (e.g., running within Visual Studio or dotnet CLI).
+        /// When <c>true</c>, creates and manages its own telemetry session on .NET Framework.
+        /// </param>
+        /// <param name="isExplicitlyRequested">
+        /// Indicates whether telemetry was explicitly requested through command line arguments.
+        /// On .NET, telemetry is only enabled when this is <c>true</c>.
+        /// </param>
+        public void Initialize(bool isStandalone, bool isExplicitlyRequested)
         {
             lock (s_lock)
             {
@@ -57,7 +69,7 @@ namespace Microsoft.Build.Framework.Telemetry
                     return;
                 }
 
-                TryInitializeTelemetry(isStandalone);
+                TryInitializeTelemetry(isStandalone, isExplicitlyRequested);
             }
         }
 
@@ -81,20 +93,22 @@ namespace Microsoft.Build.Framework.Telemetry
         /// allowing the calling code to catch assembly loading exceptions.
         /// </summary>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void TryInitializeTelemetry(bool isStandalone)
+        private void TryInitializeTelemetry(bool isStandalone, bool isExplicitlyRequested)
         {
             try
             {
 #if NETFRAMEWORK
                 DefaultActivitySource = VsTelemetryInitializer.Initialize(isStandalone);
 #else
-                DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
+                DefaultActivitySource = isExplicitlyRequested
+                    ? new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace)
+                    : null;
 #endif
             }
             catch (Exception ex) when (ex is FileNotFoundException or FileLoadException or TypeLoadException)
             {
                 // Microsoft.VisualStudio.Telemetry or System.Diagnostics.DiagnosticSource might not be available outside of VS or dotnet.
-                // This is expected in standalone application scenarios.
+                // This is expected in standalone application scenarios (when MSBuild.exe is invoked directly).
                 DefaultActivitySource = null;
             }
         }
@@ -165,7 +179,7 @@ namespace Microsoft.Build.Framework.Telemetry
             if (isStandalone)
             {
                 s_telemetrySession = TelemetryService.CreateAndGetDefaultSession(CollectorApiKey);
-                TelemetryService.DefaultSession.IsOptedIn = Traits.Instance.TelemetryOptIn;
+                TelemetryService.DefaultSession.UseVsIsOptedIn();
                 TelemetryService.DefaultSession.Start();
                 s_ownsSession = true;
             }
