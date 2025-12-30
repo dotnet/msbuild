@@ -49,11 +49,10 @@ namespace Microsoft.Build.Framework.Telemetry
         /// versus integrated mode (e.g., running within Visual Studio or dotnet CLI).
         /// When <c>true</c>, creates and manages its own telemetry session on .NET Framework.
         /// </param>
-        /// <param name="isExplicitlyRequested">
+        /// <param name="isTelemetryExplicitlyRequested">
         /// Indicates whether telemetry was explicitly requested through command line arguments.
-        /// On .NET, telemetry is only enabled when this is <c>true</c>.
         /// </param>
-        public void Initialize(bool isStandalone, bool isExplicitlyRequested)
+        public void Initialize(bool isStandalone, bool isTelemetryExplicitlyRequested)
         {
             lock (s_lock)
             {
@@ -69,7 +68,7 @@ namespace Microsoft.Build.Framework.Telemetry
                     return;
                 }
 
-                TryInitializeTelemetry(isStandalone, isExplicitlyRequested);
+                TryInitializeTelemetry(isStandalone, isTelemetryExplicitlyRequested);
             }
         }
 
@@ -93,16 +92,14 @@ namespace Microsoft.Build.Framework.Telemetry
         /// allowing the calling code to catch assembly loading exceptions.
         /// </summary>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void TryInitializeTelemetry(bool isStandalone, bool isExplicitlyRequested)
+        private void TryInitializeTelemetry(bool isStandalone, bool isTelemetryExplicitlyRequested)
         {
             try
             {
 #if NETFRAMEWORK
                 DefaultActivitySource = VsTelemetryInitializer.Initialize(isStandalone);
 #else
-                DefaultActivitySource = isExplicitlyRequested
-                    ? new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace)
-                    : null;
+                DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace, isTelemetryExplicitlyRequested);
 #endif
             }
             catch (Exception ex) when (ex is FileNotFoundException or FileLoadException or TypeLoadException)
@@ -172,7 +169,7 @@ namespace Microsoft.Build.Framework.Telemetry
         private const string CollectorApiKey = "f3e86b4023cc43f0be495508d51f588a-f70d0e59-0fb0-4473-9f19-b4024cc340be-7296";
 
         private static TelemetrySession? s_telemetrySession;
-        private static bool s_ownsSession;
+        private static bool s_ownsSession = false;
 
         public static MSBuildActivitySource Initialize(bool isStandalone)
         {
@@ -186,7 +183,6 @@ namespace Microsoft.Build.Framework.Telemetry
             else
             {
                 s_telemetrySession = TelemetryService.DefaultSession;
-                s_ownsSession = false;
             }
 
             return new MSBuildActivitySource(s_telemetrySession);

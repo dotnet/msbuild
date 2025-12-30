@@ -1159,7 +1159,8 @@ namespace Microsoft.Build.Execution
 
         private void EndBuildTelemetry()
         {
-            using IActivity? activity = TelemetryManager.Instance?.DefaultActivitySource
+            using IActivity? activity = TelemetryManager.Instance
+                ?.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Build)
                 ?.SetTags(_buildTelemetry)
                 ?.SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
@@ -3006,10 +3007,11 @@ namespace Microsoft.Build.Execution
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }
 
-            TelemetryManager.Instance.Initialize(isStandalone: false, isExplicitlyRequested: _buildParameters.IsTelemetryEnabled);
+            TelemetryManager.Instance.Initialize(isStandalone: false, _buildParameters.IsTelemetryEnabled);
 
-            // The telemetry is enabled - we need to add our consuming logger
-            if (TelemetryManager.Instance.DefaultActivitySource != null)
+            _buildParameters.IsTelemetryEnabled |= TelemetryManager.Instance?.DefaultActivitySource?.IsTelemetryEnabled ?? false;
+
+            if (_buildParameters.IsTelemetryEnabled)
             {
                 // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportance.Low is used)
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
