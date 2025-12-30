@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Xunit;
@@ -21,25 +22,25 @@ namespace Microsoft.Build.UnitTests
         {
             Assert.Throws<ArgumentException>(() =>
             {
-                new FileState("");
+                new FileState("", TaskEnvironmentHelper.CreateForTest());
             });
         }
         [Fact]
         public void BadCharsCtorOK()
         {
-            new FileState("|");
+            new FileState("|", TaskEnvironmentHelper.CreateForTest());
         }
 
         [Fact]
         public void BadTooLongCtorOK()
         {
-            new FileState(new String('x', 5000));
+            new FileState(new String('x', 5000), TaskEnvironmentHelper.CreateForTest());
         }
 
         [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. On Unix there is no invalid file name characters.")]
         public void BadChars()
         {
-            var state = new FileState("|");
+            var state = new FileState("|", TaskEnvironmentHelper.CreateForTest());
             Assert.Throws<ArgumentException>(() => { var time = state.LastWriteTime; });
         }
 
@@ -48,7 +49,7 @@ namespace Microsoft.Build.UnitTests
         {
             Helpers.VerifyAssertThrowsSameWay(
                 delegate () { var x = new FileInfo(new String('x', 5000)).LastWriteTime; },
-                delegate () { var x = new FileState(new String('x', 5000)).LastWriteTime; });
+                delegate () { var x = new FileState(new String('x', 5000), TaskEnvironmentHelper.CreateForTest()).LastWriteTime; });
         }
 
         [Fact]
@@ -60,7 +61,7 @@ namespace Microsoft.Build.UnitTests
             {
                 file = FileUtilities.GetTemporaryFile();
                 FileInfo info = new FileInfo(file);
-                FileState state = new FileState(file);
+                FileState state = new FileState(file, TaskEnvironmentHelper.CreateForTest());
 
                 Assert.Equal(info.Exists, state.FileExists);
             }
@@ -79,7 +80,7 @@ namespace Microsoft.Build.UnitTests
             {
                 file = FileUtilities.GetTemporaryFile();
                 FileInfo info = new FileInfo(file);
-                FileState state = new FileState(file);
+                FileState state = new FileState(file, TaskEnvironmentHelper.CreateForTest());
 
                 Assert.Equal(info.FullName, state.Name);
             }
@@ -92,7 +93,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void IsDirectoryTrue()
         {
-            var state = new FileState(Path.GetTempPath());
+            var state = new FileState(Path.GetTempPath(), TaskEnvironmentHelper.CreateForTest());
 
             Assert.True(state.IsDirectory);
         }
@@ -106,7 +107,7 @@ namespace Microsoft.Build.UnitTests
             {
                 file = FileUtilities.GetTemporaryFile();
                 FileInfo info = new FileInfo(file);
-                FileState state = new FileState(file);
+                FileState state = new FileState(file, TaskEnvironmentHelper.CreateForTest());
 
                 Assert.Equal(info.LastWriteTime, state.LastWriteTime);
             }
@@ -125,7 +126,7 @@ namespace Microsoft.Build.UnitTests
             {
                 file = FileUtilities.GetTemporaryFile();
                 FileInfo info = new FileInfo(file);
-                FileState state = new FileState(file);
+                FileState state = new FileState(file, TaskEnvironmentHelper.CreateForTest());
 
                 Assert.Equal(info.LastWriteTimeUtc, state.LastWriteTimeUtcFast);
             }
@@ -144,7 +145,7 @@ namespace Microsoft.Build.UnitTests
             {
                 file = FileUtilities.GetTemporaryFile();
                 FileInfo info = new FileInfo(file);
-                FileState state = new FileState(file);
+                FileState state = new FileState(file, TaskEnvironmentHelper.CreateForTest());
 
                 Assert.Equal(info.Length, state.Length);
             }
@@ -163,7 +164,7 @@ namespace Microsoft.Build.UnitTests
             {
                 file = FileUtilities.GetTemporaryFile();
                 FileInfo info = new FileInfo(file);
-                FileState state = new FileState(file);
+                FileState state = new FileState(file, TaskEnvironmentHelper.CreateForTest());
 
                 Assert.Equal(info.IsReadOnly, state.IsReadOnly);
             }
@@ -182,12 +183,13 @@ namespace Microsoft.Build.UnitTests
             {
                 file = FileUtilities.GetTemporaryFile();
                 FileInfo info = new FileInfo(file);
-                FileState state = new FileState(file);
+                TaskEnvironment taskEnvironment = TaskEnvironmentHelper.CreateForTest();
+                FileState state = new FileState(file, taskEnvironment);
 
                 Assert.Equal(info.Exists, state.FileExists);
                 File.Delete(file);
                 Assert.True(state.FileExists);
-                state.Reset();
+                state.Reset(taskEnvironment);
                 Assert.False(state.FileExists);
             }
             finally
@@ -208,7 +210,8 @@ namespace Microsoft.Build.UnitTests
             {
                 file = FileUtilities.GetTemporaryFile();
                 FileInfo info = new FileInfo(file);
-                FileState state = new FileState(file);
+                TaskEnvironment taskEnvironment = TaskEnvironmentHelper.CreateForTest();
+                FileState state = new FileState(file, taskEnvironment);
 
                 Assert.Equal(info.FullName, state.Name);
                 string originalName = info.FullName;
@@ -216,7 +219,7 @@ namespace Microsoft.Build.UnitTests
                 file = oldFile + "2";
                 File.Move(oldFile, file);
                 Assert.Equal(originalName, state.Name);
-                state.Reset();
+                state.Reset(taskEnvironment);
                 Assert.Equal(originalName, state.Name); // Name is from the constructor, didn't change
             }
             finally
@@ -234,7 +237,8 @@ namespace Microsoft.Build.UnitTests
             {
                 file = FileUtilities.GetTemporaryFile();
                 FileInfo info = new FileInfo(file);
-                FileState state = new FileState(file);
+                TaskEnvironment taskEnvironment = TaskEnvironmentHelper.CreateForTest();
+                FileState state = new FileState(file, taskEnvironment);
 
                 Assert.Equal(info.LastWriteTime, state.LastWriteTime);
 
@@ -242,7 +246,7 @@ namespace Microsoft.Build.UnitTests
                 info.LastWriteTime = time;
 
                 Assert.NotEqual(time, state.LastWriteTime);
-                state.Reset();
+                state.Reset(taskEnvironment);
                 Assert.Equal(time, state.LastWriteTime);
             }
             finally
@@ -260,7 +264,8 @@ namespace Microsoft.Build.UnitTests
             {
                 file = FileUtilities.GetTemporaryFile();
                 FileInfo info = new FileInfo(file);
-                FileState state = new FileState(file);
+                TaskEnvironment taskEnvironment = TaskEnvironmentHelper.CreateForTest();
+                FileState state = new FileState(file, taskEnvironment);
 
                 Assert.Equal(info.LastWriteTimeUtc, state.LastWriteTimeUtcFast);
 
@@ -268,7 +273,7 @@ namespace Microsoft.Build.UnitTests
                 info.LastWriteTime = time;
 
                 Assert.NotEqual(time.ToUniversalTime(), state.LastWriteTimeUtcFast);
-                state.Reset();
+                state.Reset(taskEnvironment);
                 Assert.Equal(time.ToUniversalTime(), state.LastWriteTimeUtcFast);
             }
             finally
@@ -288,13 +293,14 @@ namespace Microsoft.Build.UnitTests
             {
                 file = FileUtilities.GetTemporaryFile();
                 FileInfo info = new FileInfo(file);
-                FileState state = new FileState(file);
+                TaskEnvironment taskEnvironment = TaskEnvironmentHelper.CreateForTest();
+                FileState state = new FileState(file, taskEnvironment);
 
                 Assert.Equal(info.Length, state.Length);
                 File.WriteAllText(file, "x");
 
                 Assert.Equal(info.Length, state.Length);
-                state.Reset();
+                state.Reset(taskEnvironment);
                 info.Refresh();
                 Assert.Equal(info.Length, state.Length);
             }
@@ -313,11 +319,12 @@ namespace Microsoft.Build.UnitTests
             {
                 file = FileUtilities.GetTemporaryFile();
                 FileInfo info = new FileInfo(file);
-                FileState state = new FileState(file);
+                TaskEnvironment taskEnvironment = TaskEnvironmentHelper.CreateForTest();
+                FileState state = new FileState(file, taskEnvironment);
 
                 Assert.Equal(info.IsReadOnly, state.IsReadOnly);
                 info.IsReadOnly = !info.IsReadOnly;
-                state.Reset();
+                state.Reset(taskEnvironment);
                 Assert.True(state.IsReadOnly);
             }
             finally
@@ -330,32 +337,32 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ExistsButDirectory()
         {
-            Assert.Equal(new FileInfo(Path.GetTempPath()).Exists, new FileState(Path.GetTempPath()).FileExists);
-            Assert.True(new FileState(Path.GetTempPath()).IsDirectory);
+            Assert.Equal(new FileInfo(Path.GetTempPath()).Exists, new FileState(Path.GetTempPath(), TaskEnvironmentHelper.CreateForTest()).FileExists);
+            Assert.True(new FileState(Path.GetTempPath(), TaskEnvironmentHelper.CreateForTest()).IsDirectory);
         }
 
         [Fact]
         public void ReadOnlyOnDirectory()
         {
-            Assert.Equal(new FileInfo(Path.GetTempPath()).IsReadOnly, new FileState(Path.GetTempPath()).IsReadOnly);
+            Assert.Equal(new FileInfo(Path.GetTempPath()).IsReadOnly, new FileState(Path.GetTempPath(), TaskEnvironmentHelper.CreateForTest()).IsReadOnly);
         }
 
         [Fact]
         public void LastWriteTimeOnDirectory()
         {
-            Assert.Equal(new FileInfo(Path.GetTempPath()).LastWriteTime, new FileState(Path.GetTempPath()).LastWriteTime);
+            Assert.Equal(new FileInfo(Path.GetTempPath()).LastWriteTime, new FileState(Path.GetTempPath(), TaskEnvironmentHelper.CreateForTest()).LastWriteTime);
         }
 
         [Fact]
         public void LastWriteTimeUtcOnDirectory()
         {
-            Assert.Equal(new FileInfo(Path.GetTempPath()).LastWriteTimeUtc, new FileState(Path.GetTempPath()).LastWriteTimeUtcFast);
+            Assert.Equal(new FileInfo(Path.GetTempPath()).LastWriteTimeUtc, new FileState(Path.GetTempPath(), TaskEnvironmentHelper.CreateForTest()).LastWriteTimeUtcFast);
         }
 
         [Fact]
         public void LengthOnDirectory()
         {
-            Helpers.VerifyAssertThrowsSameWay(delegate () { var x = new FileInfo(Path.GetTempPath()).Length; }, delegate () { var x = new FileState(Path.GetTempPath()).Length; });
+            Helpers.VerifyAssertThrowsSameWay(delegate () { var x = new FileInfo(Path.GetTempPath()).Length; }, delegate () { var x = new FileState(Path.GetTempPath(), TaskEnvironmentHelper.CreateForTest()).Length; });
         }
 
         [Fact]
@@ -365,7 +372,7 @@ namespace Microsoft.Build.UnitTests
         {
             string file = Guid.NewGuid().ToString("N");
 
-            Assert.Equal(new FileInfo(file).LastWriteTime, new FileState(file).LastWriteTime);
+            Assert.Equal(new FileInfo(file).LastWriteTime, new FileState(file, TaskEnvironmentHelper.CreateForTest()).LastWriteTime);
         }
 
         [Fact]
@@ -375,7 +382,7 @@ namespace Microsoft.Build.UnitTests
         {
             string file = Guid.NewGuid().ToString("N");
 
-            Assert.Equal(new FileInfo(file).LastWriteTimeUtc, new FileState(file).LastWriteTimeUtcFast);
+            Assert.Equal(new FileInfo(file).LastWriteTimeUtc, new FileState(file, TaskEnvironmentHelper.CreateForTest()).LastWriteTimeUtcFast);
         }
 
         [Fact]
@@ -383,7 +390,7 @@ namespace Microsoft.Build.UnitTests
         {
             string file = Guid.NewGuid().ToString("N"); // presumably doesn't exist
 
-            Helpers.VerifyAssertThrowsSameWay(delegate () { var x = new FileInfo(file).Length; }, delegate () { var x = new FileState(file).Length; });
+            Helpers.VerifyAssertThrowsSameWay(delegate () { var x = new FileInfo(file).Length; }, delegate () { var x = new FileState(file, TaskEnvironmentHelper.CreateForTest()).Length; });
         }
 
         [Fact]
@@ -393,7 +400,7 @@ namespace Microsoft.Build.UnitTests
             {
                 string file = Guid.NewGuid().ToString("N"); // presumably doesn't exist
 
-                var x = new FileState(file).IsDirectory;
+                var x = new FileState(file, TaskEnvironmentHelper.CreateForTest()).IsDirectory;
             });
         }
         [Fact]
@@ -401,7 +408,7 @@ namespace Microsoft.Build.UnitTests
         {
             string file = Guid.NewGuid().ToString("N"); // presumably doesn't exist
 
-            Assert.Equal(Directory.Exists(file), new FileState(file).DirectoryExists);
+            Assert.Equal(Directory.Exists(file), new FileState(file, TaskEnvironmentHelper.CreateForTest()).DirectoryExists);
         }
 
         [Fact]
@@ -409,8 +416,8 @@ namespace Microsoft.Build.UnitTests
         {
             string file = Guid.NewGuid().ToString("N") + "\\x"; // presumably doesn't exist
 
-            Assert.False(new FileState(file).FileExists);
-            Assert.False(new FileState(file).DirectoryExists);
+            Assert.False(new FileState(file, TaskEnvironmentHelper.CreateForTest()).FileExists);
+            Assert.False(new FileState(file, TaskEnvironmentHelper.CreateForTest()).DirectoryExists);
         }
     }
 }

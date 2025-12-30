@@ -245,11 +245,11 @@ namespace Microsoft.Build.Tasks
         /// Constructor.
         /// Only stores file name: does not grab the file state until first request.
         /// </summary>
-        internal FileState(string filename)
+        internal FileState(string filename, Microsoft.Build.Framework.TaskEnvironment taskEnvironment)
         {
             ErrorUtilities.VerifyThrowArgumentLength(filename);
             _filename = filename;
-            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(_filename));
+            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(taskEnvironment.GetAbsolutePath(_filename)));
         }
 
         /// <summary>
@@ -331,9 +331,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Use in case the state is known to have changed exogenously.
         /// </summary>
-        internal void Reset()
+        internal void Reset(Microsoft.Build.Framework.TaskEnvironment taskEnvironment)
         {
-            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(_filename));
+            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(taskEnvironment.GetAbsolutePath(_filename)));
         }
     }
 }

@@ -16,10 +16,16 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Appends a list of items to a file. One item per line with carriage returns in-between.
     /// </summary>
-    public class WriteLinesToFile : TaskExtension, IIncrementalTask
+    [MSBuildMultiThreadableTask]
+    public class WriteLinesToFile : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
         // Default encoding taken from System.IO.WriteAllText()
         private static readonly Encoding s_defaultEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+
+        /// <summary>
+        /// The task environment for thread-safe operations.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// File to write lines to.
@@ -69,7 +75,8 @@ namespace Microsoft.Build.Tasks
                 return success;
             }
 
-            string filePath = FileUtilities.NormalizePath(File.ItemSpec);
+            // Use TaskEnvironment to resolve relative paths for thread-safe operations
+            AbsolutePath filePath = TaskEnvironment.GetAbsolutePath(File.ItemSpec);
 
             string contentsAsString = string.Empty;
 
