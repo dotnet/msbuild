@@ -31,8 +31,8 @@ namespace Microsoft.Build.Framework.Telemetry
             tasksSummary.Process(telemetryData.TasksExecutionData);
 
             var buildInsights = new BuildInsights(
-                GetTasksDetails(telemetryData.TasksExecutionData),
-                GetTargetsDetails(telemetryData.TargetsExecutionData),
+                includeTasksDetails ? GetTasksDetails(telemetryData.TasksExecutionData) : [],
+                includeTargetDetails ? GetTargetsDetails(telemetryData.TargetsExecutionData) : [],
                 GetTargetsSummary(targetsSummary),
                 GetTasksSummary(tasksSummary));
 
@@ -128,8 +128,6 @@ namespace Microsoft.Build.Framework.Telemetry
                 }
 #endif
             }
-
-            public static string HashWithNormalizedCasing(string text) => Hash(text.ToUpperInvariant());
         }
 
         internal record TaskDetailInfo(string Name, double TotalMilliseconds, int ExecutionsCount, long TotalMemoryBytes, bool IsCustom, bool IsNuget);
@@ -230,7 +228,7 @@ namespace Microsoft.Build.Framework.Telemetry
                     (true, true) => ExecutedCustomTargetInfo,
                     (true, false) => LoadedCustomTargetInfo,
                     (false, true) => ExecutedBuiltinTargetInfo,
-                    (false, false) => LoadedBuiltinTargetInfo
+                    (false, false) => LoadedBuiltinTargetInfo,
                 };
 
             internal class TargetInfo
@@ -294,11 +292,19 @@ namespace Microsoft.Build.Framework.Telemetry
             {
                 Dictionary<string, object> properties = new()
                 {
-                    [nameof(BuildInsights.Tasks)] = insights.Tasks,
-                    [nameof(BuildInsights.Targets)] = insights.Targets,
                     [nameof(BuildInsights.TargetsSummary)] = insights.TargetsSummary,
                     [nameof(BuildInsights.TasksSummary)] = insights.TasksSummary,
                 };
+
+                if (insights.Targets.Count > 0)
+                {
+                    properties[nameof(BuildInsights.Targets)] = insights.Targets;
+                }
+
+                if (insights.Tasks.Count > 0)
+                {
+                    properties[nameof(BuildInsights.Tasks)] = insights.Tasks;
+                }
 
                 return properties;
             }

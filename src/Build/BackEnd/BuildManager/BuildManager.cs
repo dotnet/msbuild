@@ -1103,6 +1103,7 @@ namespace Microsoft.Build.Execution
                             {
                                 host = "VSCode";
                             }
+
                             _buildTelemetry.BuildEngineHost = host;
 
                             _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
