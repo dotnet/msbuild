@@ -1267,9 +1267,9 @@ namespace Microsoft.Build.BackEnd
         {
             ITelemetryForwarder telemetryForwarder =
                 ((TelemetryForwarderProvider)_componentHost.GetComponent(BuildComponentType.TelemetryForwarder))
-                .Instance;
+                ?.Instance;
 
-            if (!telemetryForwarder.IsTelemetryCollected)
+            if (telemetryForwarder == null || !telemetryForwarder.IsTelemetryCollected)
             {
                 return;
             }
