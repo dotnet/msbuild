@@ -13,11 +13,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-
-#if FEATURE_REPORTFILEACCESSES
 using System.Runtime.CompilerServices;
-#endif
-
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,13 +26,13 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
-using Microsoft.Build.ProjectCache;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
@@ -463,6 +459,8 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
+            TelemetryManager.Instance.Initialize(isStandalone: false, parameters.IsTelemetryEnabled);
+
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
@@ -588,6 +586,7 @@ namespace Microsoft.Build.Execution
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
+                _buildParameters.IsTelemetryEnabled |= TelemetryManager.Instance?.DefaultActivitySource?.IsTelemetryEnabled ?? false;
                 var loggingService = InitializeLoggingService();
 
                 // Log deferred messages and response files
@@ -1113,7 +1112,11 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
-                            EndBuildTelemetry();
+
+                            if (_buildParameters.IsTelemetryEnabled)
+                            {
+                                EndBuildTelemetry();
+                            }
 
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
@@ -1157,6 +1160,7 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)] // avoid early assembly load of Microsoft.VisualStudio.Telemetry
         private void EndBuildTelemetry()
         {
             using IActivity? activity = TelemetryManager.Instance
@@ -3006,10 +3010,6 @@ namespace Microsoft.Build.Execution
 
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }
-
-            TelemetryManager.Instance.Initialize(isStandalone: false, _buildParameters.IsTelemetryEnabled);
-
-            _buildParameters.IsTelemetryEnabled |= TelemetryManager.Instance?.DefaultActivitySource?.IsTelemetryEnabled ?? false;
 
             if (_buildParameters.IsTelemetryEnabled)
             {
