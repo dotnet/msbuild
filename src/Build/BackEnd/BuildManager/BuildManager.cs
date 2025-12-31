@@ -460,8 +460,9 @@ namespace Microsoft.Build.Execution
         public void BeginBuild(BuildParameters parameters)
         {
 #if NETFRAMEWORK
-            // In VS, always collect - we'll decide whether to send at EndBuild to avoid eager loading of telemetry assemblies.
-            parameters.IsTelemetryEnabled = true;
+            // In VS, always collect - we'll decide whether to send at EndBuild to avoid eager loading of telemetry assemblies
+            // unless explicitly opted out.
+            parameters.IsTelemetryEnabled = !Traits.Instance.FrameworkTelemetryOptOut;
 #endif
             if (_previousLowPriority != null)
             {
