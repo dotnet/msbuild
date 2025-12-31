@@ -295,6 +295,9 @@ namespace Microsoft.Build.Execution
         public BuildManager(string hostName)
         {
             ErrorUtilities.VerifyThrowArgumentNull(hostName);
+
+            // TEST
+            Environment.SetEnvironmentVariable("REPORT_REAL_VC_PROJECT_LOAD", "1");
             _hostName = hostName;
             _buildManagerState = BuildManagerState.Idle;
             _buildSubmissions = new Dictionary<int, BuildSubmissionBase>();
