@@ -49,10 +49,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// versus integrated mode (e.g., running within Visual Studio or dotnet CLI).
         /// When <c>true</c>, creates and manages its own telemetry session on .NET Framework.
         /// </param>
-        /// <param name="isTelemetryExplicitlyRequested">
-        /// Indicates whether telemetry was explicitly requested through command line arguments.
-        /// </param>
-        public void Initialize(bool isStandalone, bool isTelemetryExplicitlyRequested)
+        public void Initialize(bool isStandalone)
         {
             lock (s_lock)
             {
@@ -68,7 +65,7 @@ namespace Microsoft.Build.Framework.Telemetry
                     return;
                 }
 
-                TryInitializeTelemetry(isStandalone, isTelemetryExplicitlyRequested);
+                TryInitializeTelemetry(isStandalone);
             }
         }
 
@@ -92,14 +89,14 @@ namespace Microsoft.Build.Framework.Telemetry
         /// allowing the calling code to catch assembly loading exceptions.
         /// </summary>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void TryInitializeTelemetry(bool isStandalone, bool isTelemetryExplicitlyRequested)
+        private void TryInitializeTelemetry(bool isStandalone)
         {
             try
             {
 #if NETFRAMEWORK
                 DefaultActivitySource = VsTelemetryInitializer.Initialize(isStandalone);
 #else
-                DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace, isTelemetryExplicitlyRequested);
+                DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
 #endif
             }
             catch (Exception ex) when (ex is FileNotFoundException or FileLoadException or TypeLoadException)

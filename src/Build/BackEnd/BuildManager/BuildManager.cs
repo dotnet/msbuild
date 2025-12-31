@@ -459,7 +459,7 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
-            TelemetryManager.Instance.Initialize(isStandalone: false, parameters.IsTelemetryEnabled);
+            TelemetryManager.Instance.Initialize(isStandalone: false);
 
             if (_previousLowPriority != null)
             {
@@ -586,7 +586,10 @@ namespace Microsoft.Build.Execution
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
+#if NETFRAMEWORK
+                // In VS the if the telemetry is enabled is defined based on VS-wide setting. We adhere from it.
                 _buildParameters.IsTelemetryEnabled |= TelemetryManager.Instance?.DefaultActivitySource?.IsTelemetryEnabled ?? false;
+#endif
                 var loggingService = InitializeLoggingService();
 
                 // Log deferred messages and response files
