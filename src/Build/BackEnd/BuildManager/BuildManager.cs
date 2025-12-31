@@ -459,8 +459,10 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
-            TelemetryManager.Instance.Initialize(isStandalone: false);
-
+#if NETFRAMEWORK
+            // In VS, always collect - we'll decide whether to send at EndBuild to avoid eager loading of telemetry assemblies.
+            parameters.IsTelemetryEnabled = true;
+#endif
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
@@ -586,10 +588,6 @@ namespace Microsoft.Build.Execution
                 // Initialize components.
                 _nodeManager = ((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager) as INodeManager;
 
-#if NETFRAMEWORK
-                // In VS the if the telemetry is enabled is defined based on VS-wide setting. We adhere from it.
-                _buildParameters.IsTelemetryEnabled |= TelemetryManager.Instance?.DefaultActivitySource?.IsTelemetryEnabled ?? false;
-#endif
                 var loggingService = InitializeLoggingService();
 
                 // Log deferred messages and response files
@@ -1116,10 +1114,7 @@ namespace Microsoft.Build.Execution
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
 
-                            if (_buildParameters.IsTelemetryEnabled)
-                            {
-                                EndBuildTelemetry();
-                            }
+                            EndBuildTelemetry();
 
                             // Clean telemetry to make it ready for next build submission.
                             _buildTelemetry = null;
@@ -1163,9 +1158,11 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)] // avoid early assembly load of Microsoft.VisualStudio.Telemetry
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private void EndBuildTelemetry()
         {
+            TelemetryManager.Instance.Initialize(isStandalone: false);
+
             using IActivity? activity = TelemetryManager.Instance
                 ?.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Build)

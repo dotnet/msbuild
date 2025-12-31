@@ -21,14 +21,7 @@ namespace Microsoft.Build.Framework.Telemetry
         public MSBuildActivitySource(TelemetrySession? telemetrySession)
         {
             _telemetrySession = telemetrySession;
-            IsTelemetryEnabled = _telemetrySession?.IsOptedIn ?? false;
         }
-
-        /// <summary>
-        /// Gets a value indicating whether telemetry is enabled for this activity source.
-        /// On .NET Framework, this reflects whether the VS Telemetry session is opted in.
-        /// </summary>
-        public bool IsTelemetryEnabled { get; }
 #else
         private readonly ActivitySource _source;
 
