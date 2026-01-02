@@ -134,19 +134,19 @@ namespace Microsoft.Build.Framework.Telemetry
             }
         }
 
-#if NETFRAMEWORK
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void DisposeVsTelemetry() => VsTelemetryInitializer.Dispose();
-#endif
-
         /// <summary>
         /// Determines if the user has explicitly opted out of telemetry.
         /// </summary>
-        private static bool IsOptOut() =>
+        internal static bool IsOptOut() =>
 #if NETFRAMEWORK
             Traits.Instance.FrameworkTelemetryOptOut;
 #else
             Traits.Instance.SdkTelemetryOptOut;
+#endif
+
+#if NETFRAMEWORK
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void DisposeVsTelemetry() => VsTelemetryInitializer.Dispose();
 #endif
     }
 

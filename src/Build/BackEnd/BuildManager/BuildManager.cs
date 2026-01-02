@@ -460,11 +460,10 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
-#if NETFRAMEWORK
-            // For .NET Framework builds, collect telemetry unless explicitly opted out via environment variable.
+            // Collect telemetry unless explicitly opted out via environment variable.
             // The decision to send telemetry is made at EndBuild to avoid eager loading of telemetry assemblies.
-            parameters.IsTelemetryEnabled = !Traits.Instance.FrameworkTelemetryOptOut;
-#endif
+            parameters.IsTelemetryEnabled |= !TelemetryManager.IsOptOut();
+
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
