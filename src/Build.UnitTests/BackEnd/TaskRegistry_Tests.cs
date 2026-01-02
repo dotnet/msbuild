@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Build event context to use when logging
         /// </summary>
-        private readonly BuildEventContext _loggerContext = new BuildEventContext(2, 2, 2, 2);
+        private readonly BuildEventContext _loggerContext = BuildEventContext.CreateInitial(2, 2).WithEvaluationId(2).WithProjectInstanceId(2);
 
         /// <summary>
         /// Element location to use when logging
@@ -1135,7 +1135,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskRegistry registry = CreateTaskRegistryAndRegisterTasks(elementList);
 
-            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => registry.GetRegisteredTask("Task1", "none", TaskHostParameters.Empty, false, new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1)), ElementLocation.Create("none", 1, 2), false));
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => registry.GetRegisteredTask("Task1", "none", TaskHostParameters.Empty, false, new TargetLoggingContext(_loggingService, BuildEventContext.CreateInitial(1, 1).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithTaskId(1)), ElementLocation.Create("none", 1, 2), false));
 
             exception.ErrorCode.ShouldBe("MSB4175");
 
@@ -2118,7 +2118,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 pg,
                 secondaryItemsByName,
                 FileSystems.Default,
-                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+                new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4)));
             return expander;
         }
 

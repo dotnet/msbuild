@@ -335,7 +335,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request = CreateNewBuildRequest(1, targets);
 
             VerifyEngineStatus(BuildRequestEngineStatus.Uninitialized, true);
-            _engine.InitializeForBuild(new NodeLoggingContext(_host.LoggingService, 0, false));
+            _engine.InitializeForBuild(CreateForTesting(_host));
             // We neeed to get the status changed AutoResetEvent returned to the non-signaled state correctly after each status change for verifying the engine status via waiting for a signal next time.
             // Make sure it returns back to the non-signaled state.
             VerifyEngineStatus(BuildRequestEngineStatus.Idle);
@@ -366,7 +366,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request = CreateNewBuildRequest(1, targets);
 
             VerifyEngineStatus(BuildRequestEngineStatus.Uninitialized, true);
-            _engine.InitializeForBuild(new NodeLoggingContext(_host.LoggingService, 0, false));
+            _engine.InitializeForBuild(CreateForTesting(_host));
             VerifyEngineStatus(BuildRequestEngineStatus.Idle);
 
             _engine.SubmitBuildRequest(request);
@@ -400,7 +400,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Kick it off
             VerifyEngineStatus(BuildRequestEngineStatus.Uninitialized, true);
-            _engine.InitializeForBuild(new NodeLoggingContext(_host.LoggingService, 0, false));
+            _engine.InitializeForBuild(CreateForTesting(_host));
             VerifyEngineStatus(BuildRequestEngineStatus.Idle);
 
             _engine.SubmitBuildRequest(request);
@@ -455,7 +455,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Kick it off
             VerifyEngineStatus(BuildRequestEngineStatus.Uninitialized, true);
-            _engine.InitializeForBuild(new NodeLoggingContext(_host.LoggingService, 0, false));
+            _engine.InitializeForBuild(CreateForTesting(_host));
             VerifyEngineStatus(BuildRequestEngineStatus.Idle);
 
             _engine.SubmitBuildRequest(request);
@@ -500,6 +500,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestShutdown()
         {
         }
+
+        private NodeLoggingContext CreateForTesting(MockHost host) => new NodeLoggingContext(host.LoggingService, BuildEventContext.Invalid.WithNodeId(0), 0, false);
 
         private BuildRequest CreateNewBuildRequest(int configurationId, string[] targets)
         {

@@ -18,10 +18,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Used to create the initial, base logging context for the node.
         /// </summary>
         /// <param name="loggingService">The logging service to use.</param>
+        /// <param name="parentContext">The parent build event context to associate this node logging context with</param>
         /// <param name="nodeId">The </param>
         /// <param name="inProcNode"><code>true</code> if this is an in-process node, otherwise <code>false</code>.</param>
-        internal NodeLoggingContext(ILoggingService loggingService, int nodeId, bool inProcNode)
-            : base(loggingService, new BuildEventContext(nodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId), inProcNode)
+        internal NodeLoggingContext(ILoggingService loggingService, BuildEventContext parentContext, int nodeId, bool inProcNode)
+            : base(loggingService, parentContext.WithNodeId(nodeId), inProcNode)
         {
             ErrorUtilities.VerifyThrow(nodeId != BuildEventContext.InvalidNodeId, "Should not ever be given an invalid NodeId");
 
@@ -66,25 +67,20 @@ namespace Microsoft.Build.BackEnd.Logging
         internal (ProjectStartedEventArgs, ProjectLoggingContext) CreateProjectLoggingContext(BuildRequestEntry requestEntry)
         {
             ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
-            return ProjectLoggingContext.CreateLoggingContext(this, requestEntry);
+            return ProjectLoggingContext.CreateForLocalBuild(this, requestEntry);
         }
 
         /// <summary>
-        /// Log that a project has started if it is serviced from the cache
+        /// Log that a project has started if it is serviced from the cache.
+        /// Uses cache-specific pathway that immediately logs ProjectStarted with minimal data.
         /// </summary>
         /// <param name="request">The build request.</param>
         /// <param name="configuration">The configuration used to build the request.</param>
-        /// <returns>The BuildEventContext to use for this project.</returns>
-        internal ProjectLoggingContext LogProjectStarted(BuildRequest request, BuildRequestConfiguration configuration)
+        /// <returns>The ProjectLoggingContext for this cached project.</returns>
+        internal ProjectLoggingContext LogProjectStartedFromCache(BuildRequest request, BuildRequestConfiguration configuration)
         {
             ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
-
-            // If we can retrieve the evaluationId from the project, do so. Don't if it's not available or
-            // if we'd have to retrieve it from the cache in order to access it.
-            // Order is important here because the Project getter will throw if IsCached.
-            int evaluationId = (configuration != null && !configuration.IsCached && configuration.Project != null) ? configuration.Project.EvaluationId : BuildEventContext.InvalidEvaluationId;
-
-            return new ProjectLoggingContext(this, request, configuration.ProjectFullPath, configuration.ToolsVersion, evaluationId);
+            return ProjectLoggingContext.CreateForCacheBuild(this, request, configuration);
         }
 
         /// <summary>
@@ -93,7 +89,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         internal void LogRequestHandledFromCache(BuildRequest request, BuildRequestConfiguration configuration, BuildResult result)
         {
-            ProjectLoggingContext projectLoggingContext = LogProjectStarted(request, configuration);
+            ProjectLoggingContext projectLoggingContext = LogProjectStartedFromCache(request, configuration);
 
             // When pulling a request from the cache, we want to make sure we log a target skipped event for any targets which
             // were used to build the request including default and initial targets.
