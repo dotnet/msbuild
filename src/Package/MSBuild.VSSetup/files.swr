@@ -89,6 +89,7 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)Microsoft.WinFx.targets
   file source=$(X86BinPath)Microsoft.WorkflowBuildExtensions.targets
   file source=$(X86BinPath)Microsoft.VisualStudio.Utilities.Internal.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
+  file source=$(X86BinPath)Newtonsoft.Json.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=2
 
 folder InstallDir:\MSBuild\Current\Bin\MSBuild
   file source=$(X86BinPath)\MSBuild\Microsoft.Build.Core.xsd
