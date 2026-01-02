@@ -24,21 +24,19 @@
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
     <Reference Include="System.Xaml" />
     <PackageReference Include="System.Text.Json" />
-    <!-- Telemetry in Framework-->
-    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" PrivateAssets="all" />
+    <!-- Telemetry in Visual Studio scenarios -->
+    <PackageReference Include="Microsoft.VisualStudio.Telemetry" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- Framework and standard don't have these. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' OR '$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Include="System.Collections.Immutable" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
   </ItemGroup>
 
   <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" PrivateAssets="all" />
     <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
-    <PackageReference Update="System.Diagnostics.DiagnosticSource" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

@@ -2831,6 +2831,7 @@ EndGlobal
         public void EndToEndMinimumMessageImportance_InProc(string arguments, MessageImportance expectedMinimumMessageImportance)
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTOUT", "1");
 
             string projectContents = GenerateMessageImportanceProjectFile(expectedMinimumMessageImportance);
 
