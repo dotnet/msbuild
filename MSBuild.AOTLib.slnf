@@ -2,8 +2,8 @@
   "solution": {
     "path": "MSBuild.sln",
     "projects": [
-      "src\\Microsoft.Build.ClientAPI\\Microsoft.Build.ClientAPI.csproj",
-      "src\\Microsoft.Build.ClientAPI.Test\\Microsoft.Build.ClientAPI.Test.csproj"
+      "aot\\Microsoft.Build.ClientAPI\\Microsoft.Build.ClientAPI.csproj",
+      "aot\\Microsoft.Build.ClientAPI.Test\\Microsoft.Build.ClientAPI.Test.csproj",
     ]
   }
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
+// using CommunicationsUtilities = Microsoft.Build.Internal.CommunicationsUtilities;
 
 #nullable disable
 
@@ -108,6 +109,7 @@ namespace Microsoft.Build.Shared
             // will be in the output path of the test project, which is what we want.
 
             string msbuildExePath;
+#if !AOT_LIBRARY
             if (s_runningTests())
             {
                 msbuildExePath = typeof(BuildEnvironmentHelper).Assembly.Location;
@@ -116,6 +118,9 @@ namespace Microsoft.Build.Shared
             {
                 msbuildExePath = s_getProcessFromRunningProcess();
             }
+#else
+            msbuildExePath = s_getProcessFromRunningProcess();
+#endif
 
             return new BuildEnvironment(
                 BuildEnvironmentMode.None,
@@ -129,7 +134,10 @@ namespace Microsoft.Build.Shared
         private static BuildEnvironment TryFromEnvironmentVariable()
         {
             var msBuildExePath = s_getEnvironmentVariable("MSBUILD_EXE_PATH");
-
+            if (string.IsNullOrEmpty(msBuildExePath))
+            {
+                // CommunicationsUtilities.Trace("BuildEnvironment: MSBuild not located from MSBUILD_EXE_PATH environment variable.");
+            }
             return msBuildExePath == null
                 ? null
                 : TryFromMSBuildExeUnderVisualStudio(msBuildExePath, allowLegacyToolsVersion: true) ?? TryFromStandaloneMSBuildExe(msBuildExePath);
@@ -139,17 +147,21 @@ namespace Microsoft.Build.Shared
         {
             if (!NativeMethodsShared.IsWindows)
             {
+                // CommunicationsUtilities.Trace("BuildEnvironment: MSBuild not located from Visual Studio process on non-Windows OS.");
                 return null;
             }
 
             var vsProcess = s_getProcessFromRunningProcess();
             if (!IsProcessInList(vsProcess, s_visualStudioProcess))
             {
+                // CommunicationsUtilities.Trace("BuildEnvironment: MSBuild not located from Visual Studio process because the current process {0} is not a Visual Studio process.", vsProcess);
                 return null;
             }
 
             var vsRoot = FileUtilities.GetFolderAbove(vsProcess, 3);
+            // CommunicationsUtilities.Trace("BuildEnvironment: Located Visual Studio installation at {0}", vsRoot);
             string msBuildExe = GetMSBuildExeFromVsRoot(vsRoot);
+            // CommunicationsUtilities.Trace("BuildEnvironment: Using MSBuild.exe at {0}", msBuildExe);
 
             return new BuildEnvironment(
                 BuildEnvironmentMode.VisualStudio,
@@ -165,6 +177,7 @@ namespace Microsoft.Build.Shared
             var msBuildExe = s_getProcessFromRunningProcess();
             if (!IsProcessInList(msBuildExe, s_msBuildProcess))
             {
+                // CommunicationsUtilities.Trace("BuildEnvironment: MSBuild not located from MSBuild process because the current process {0} is not an MSBuild process.", msBuildExe);
                 return null;
             }
 
@@ -172,6 +185,7 @@ namespace Microsoft.Build.Shared
             if (NativeMethodsShared.IsWindows &&
                 Regex.IsMatch(msBuildExe, $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*MSBuild(?:TaskHost)?\.exe", RegexOptions.IgnoreCase))
             {
+                // CommunicationsUtilities.Trace("BuildEnvironment: Located MSBuild process at {0}, which is a Visual Studio installation.", msBuildExe);
                 return new BuildEnvironment(
                     BuildEnvironmentMode.VisualStudio,
                     msBuildExe,
@@ -181,6 +195,7 @@ namespace Microsoft.Build.Shared
                     visualStudioPath: GetVsRootFromMSBuildAssembly(msBuildExe));
             }
 
+            // CommunicationsUtilities.Trace("BuildEnvironment: Located MSBuild process at {0}, assuming standalone MSBuild.exe.", msBuildExe);
             // Standalone mode running in MSBuild.exe
             return new BuildEnvironment(
                 BuildEnvironmentMode.Standalone,
@@ -196,9 +211,11 @@ namespace Microsoft.Build.Shared
             var buildAssembly = s_getExecutingAssemblyPath();
             if (buildAssembly == null)
             {
+                // CommunicationsUtilities.Trace("BuildEnvironment: Executing assembly path is null, cannot locate MSBuild.");
                 return null;
             }
-
+            
+            // CommunicationsUtilities.Trace("BuildEnvironment: Probing for MSBuild location based on executing assembly at {0}", buildAssembly);
             // Check for MSBuild.[exe|dll] next to the current assembly
             var msBuildExe = Path.Combine(FileUtilities.GetFolderAbove(buildAssembly), "MSBuild.exe");
             var msBuildDll = Path.Combine(FileUtilities.GetFolderAbove(buildAssembly), "MSBuild.dll");
@@ -207,6 +224,7 @@ namespace Microsoft.Build.Shared
             var environment = TryFromMSBuildExeUnderVisualStudio(msBuildExe);
             if (environment != null)
             {
+                // CommunicationsUtilities.Trace("BuildEnvironment: Located Visual Studio MSBuild at {0}", msBuildExe);
                 return environment;
             }
 
@@ -221,8 +239,10 @@ namespace Microsoft.Build.Shared
                 msBuildPath = msBuildDll;
             }
 
+
             if (!string.IsNullOrEmpty(msBuildPath))
             {
+                // CommunicationsUtilities.Trace("BuildEnvironment: Located standalone MSBuild at {0}", msBuildPath);
                 // Standalone mode with toolset
                 return new BuildEnvironment(
                     BuildEnvironmentMode.Standalone,
@@ -233,6 +253,7 @@ namespace Microsoft.Build.Shared
                     visualStudioPath: null);
             }
 
+            // CommunicationsUtilities.Trace("BuildEnvironment: MSBuild not located from executing assembly.");
             return null;
         }
 
@@ -246,6 +267,7 @@ namespace Microsoft.Build.Shared
                 Regex.IsMatch(msbuildExe, msBuildPathPattern, RegexOptions.IgnoreCase))
             {
                 string visualStudioRoot = GetVsRootFromMSBuildAssembly(msbuildExe);
+                // CommunicationsUtilities.Trace("Located Visual Studio MSBuild at {0}", msbuildExe);
                 return new BuildEnvironment(
                         BuildEnvironmentMode.VisualStudio,
                         GetMSBuildExeFromVsRoot(visualStudioRoot),
@@ -262,6 +284,7 @@ namespace Microsoft.Build.Shared
         {
             if (s_runningTests())
             {
+                // CommunicationsUtilities.Trace("BuildEnvironment: Running unit tests, skipping DevConsole environment detection.");
                 // If running unit tests, then don't try to get the build environment from MSBuild installed on the machine
                 //  (we should be using the locally built MSBuild instead)
                 return null;
@@ -274,9 +297,11 @@ namespace Microsoft.Build.Shared
             if (string.IsNullOrEmpty(vsInstallDir) || string.IsNullOrEmpty(vsVersion) ||
                 vsVersion != CurrentVisualStudioVersion || !FileSystems.Default.DirectoryExists(vsInstallDir))
             {
+                // CommunicationsUtilities.Trace("BuildEnvironment: MSBuild not located from DevConsole environment variables.");
                 return null;
             }
 
+            // CommunicationsUtilities.Trace("BuildEnvironment: Located Visual Studio installation at {0} from DevConsole environment variables.", vsInstallDir);
             return new BuildEnvironment(
                 BuildEnvironmentMode.VisualStudio,
                 GetMSBuildExeFromVsRoot(vsInstallDir),
@@ -330,9 +355,11 @@ namespace Microsoft.Build.Shared
             var appContextBaseDirectory = s_getAppContextBaseDirectory();
             if (string.IsNullOrEmpty(appContextBaseDirectory))
             {
+                // CommunicationsUtilities.Trace("BuildEnvironment: AppContext.BaseDirectory is null or empty, cannot locate MSBuild.");
                 return null;
             }
 
+            // CommunicationsUtilities.Trace("BuildEnvironment: Probing for MSBuild location based on AppContext.BaseDirectory at {0}", appContextBaseDirectory);
             // Look for possible MSBuild exe names in the AppContextBaseDirectory
             return s_msBuildExeNames
                 .Select((name) => TryFromStandaloneMSBuildExe(Path.Combine(appContextBaseDirectory, name)))
@@ -343,6 +370,7 @@ namespace Microsoft.Build.Shared
         {
             if (!string.IsNullOrEmpty(msBuildExePath) && FileSystems.Default.FileExists(msBuildExePath))
             {
+                // CommunicationsUtilities.Trace("BuildEnvironment: Located standalone MSBuild at {0}", msBuildExePath);
                 // MSBuild.exe was found outside of Visual Studio. Assume Standalone mode.
                 return new BuildEnvironment(
                     BuildEnvironmentMode.Standalone,
@@ -429,29 +457,38 @@ namespace Microsoft.Build.Shared
 
         private static string GetProcessFromRunningProcess()
         {
-#if RUNTIME_TYPE_NETCORE
+#if AOT_LIBRARY
+            // CommunicationsUtilities.Trace("GetProcessFromRunningProcess(AOT): Using Environment.ProcessPath of {0}", Environment.ProcessPath);
+            return Environment.ProcessPath;
+#elif RUNTIME_TYPE_NETCORE
             // The EntryAssembly property can return null when a managed assembly has been loaded from
             // an unmanaged application (for example, using custom CLR hosting).
             if (AssemblyUtilities.EntryAssembly == null)
             {
+                // CommunicationsUtilities.Trace("GetProcessFromRunningProcess(.NET): EntryAssembly is null, using EnvironmentUtilities.ProcessPath of {0}", EnvironmentUtilities.ProcessPath);
                 return EnvironmentUtilities.ProcessPath;
             }
 
-            return AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
+            var assemblyLocation = AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
+            // CommunicationsUtilities.Trace("GetProcessFromRunningProcess(.NET): EntryAssembly is present, using location of {0}", assemblyLocation);
+            return assemblyLocation;
 #else
-
-            return EnvironmentUtilities.ProcessPath;
+            var processPath = EnvironmentUtilities.ProcessPath;
+            // CommunicationsUtilities.Trace("GetProcessFromRunningProcess(Framework): Using EnvironmentUtilities.ProcessPath of {0}", processPath);
+            return processPath;
 #endif
         }
 
         private static string GetExecutingAssemblyPath()
         {
+            // CommunicationsUtilities.Trace("GetExecutingAssemblyPath: Using FileUtilities.ExecutingAssemblyPath of {0}", FileUtilities.ExecutingAssemblyPath);
             return FileUtilities.ExecutingAssemblyPath;
         }
 
         private static string GetAppContextBaseDirectory()
         {
 #if !CLR2COMPATIBILITY // Assemblies compiled against anything older than .NET 4.0 won't have a System.AppContext
+            // CommunicationsUtilities.Trace("GetAppContextBaseDirectory: Using AppContext.BaseDirectory of {0}", AppContext.BaseDirectory);
             return AppContext.BaseDirectory;
 #else
             return null;

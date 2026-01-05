@@ -7,11 +7,16 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
+    <PublishSelfContained>true</PublishSelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
     <PublishAOT>true</PublishAOT>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <DefineConstants>$(DefineConstants);AOT_LIBRARY</DefineConstants> 
     <RuntimeIdentifiers>win-x64;win-arm64;osx-arm64;linux-x64;linux-arm64;linux-musl-x64;linux-musl-arm64</RuntimeIdentifiers>
+    <!-- Something is super wrong with nuget global packages dir resolution in this repo, manually setting this because the ILCompiler props aren't being imported from the correct locations -->
+    <NugetPackageRoot>D:\Code\nuget-packages</NugetPackageRoot>
+    <ILCompilerTargetsPath>$(NugetPackageRoot)\microsoft.dotnet.ilcompiler\10.0.1\build\Microsoft.DotNet.ILCompiler.SingleEntry.targets</ILCompilerTargetsPath>
   </PropertyGroup>
 
 </Project>

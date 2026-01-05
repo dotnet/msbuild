@@ -16,7 +16,6 @@ using Microsoft.Build.BackEnd.Logging;
 
 #if NETFRAMEWORK
 using Microsoft.Build.Eventing;
-using System.Security.Principal;
 #endif
 
 using Microsoft.Build.Framework;
@@ -31,7 +30,7 @@ namespace Microsoft.Build.BackEnd
     /// Contains the shared pieces of code from NodeProviderOutOfProc
     /// and NodeProviderOutOfProcTaskHost.
     /// </summary>
-    internal abstract class NodeProviderOutOfProcBase
+    internal abstract partial class NodeProviderOutOfProcBase
     {
         /// <summary>
         /// The maximum number of bytes to write
@@ -46,16 +45,13 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The amount of time to wait for an out-of-proc node to spool up before we give up.
         /// </summary>
-        private const int TimeoutForNewNodeCreation = 30000;
+        private const int TimeoutForNewNodeCreation = 5000;
 
         /// <summary>
         /// The amount of time to wait for an out-of-proc node to exit.
         /// </summary>
-        private const int TimeoutForWaitForExit = 30000;
+        private const int TimeoutForWaitForExit = 5000;
 
-#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-        private static readonly WindowsIdentity s_currentWindowsIdentity = WindowsIdentity.GetCurrent();
-#endif
         /// <summary>
         /// The build component host.
         /// </summary>
@@ -422,27 +418,6 @@ namespace Microsoft.Build.BackEnd
             return $"{hostHandshake}|{nodeProcessId.ToString(CultureInfo.InvariantCulture)}";
 #endif
         }
-
-#if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-        // This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
-        //  on non-Windows operating systems
-        private static void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
-        {
-            SecurityIdentifier identifier = s_currentWindowsIdentity.Owner;
-#if FEATURE_PIPE_SECURITY
-            PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
-#else
-            var remoteSecurity = new PipeSecurity(nodeStream.SafePipeHandle, System.Security.AccessControl.AccessControlSections.Access |
-                System.Security.AccessControl.AccessControlSections.Owner | System.Security.AccessControl.AccessControlSections.Group);
-#endif
-            IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
-            if (remoteOwner != identifier)
-            {
-                CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
-                throw new UnauthorizedAccessException();
-            }
-        }
-#endif
 
         /// <summary>
         /// Attempts to connect to the specified process.

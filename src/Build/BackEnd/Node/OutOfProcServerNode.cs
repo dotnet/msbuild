@@ -105,7 +105,7 @@ namespace Microsoft.Build.Experimental
 
             // Handled race condition. If two processes spawn to start build Server one will die while
             // one Server client connects to the other one and run build on it.
-            CommunicationsUtilities.Trace("Starting new server node with handshake {0}", handshake);
+            CommunicationsUtilities.Trace("Starting new server node with handshake {0}", handshake.RetrieveHandshakeComponents());
             using var serverRunningMutex = ServerNamedMutex.OpenOrCreateMutex(GetRunningServerMutexName(handshake), out bool mutexCreatedNew);
             if (!mutexCreatedNew)
             {
@@ -346,7 +346,7 @@ namespace Microsoft.Build.Experimental
 
         private void HandleServerNodeBuildCommand(ServerNodeBuildCommand command)
         {
-            CommunicationsUtilities.Trace("Building with MSBuild server with command line {0}", command.CommandLine);
+            CommunicationsUtilities.Trace("[Server] Building with command line {0}", string.Join(" ", command.CommandLine));
             using var serverBusyMutex = ServerNamedMutex.OpenOrCreateMutex(name: _serverBusyMutexName, createdNew: out var holdsMutex);
             if (!holdsMutex)
             {
@@ -359,12 +359,19 @@ namespace Microsoft.Build.Experimental
                 return;
             }
 
+            CommunicationsUtilities.Trace("[Server] Changing directory to {0}", command.StartupDirectory);
             // Set build process context
             Directory.SetCurrentDirectory(command.StartupDirectory);
 
+            CommunicationsUtilities.Trace("[Server] Setting environment variables for build process");
+            foreach (var kvp in command.BuildProcessEnvironment)
+            {
+                CommunicationsUtilities.Trace("[Server]     {0}={1}", kvp.Key, kvp.Value);
+            }
             CommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
             Traits.UpdateFromEnvironment();
 
+            CommunicationsUtilities.Trace("[Server] Setting current culture to {0} and UI culture to {1}", command.Culture, command.UICulture);
             Thread.CurrentThread.CurrentCulture = command.Culture;
             Thread.CurrentThread.CurrentUICulture = command.UICulture;
 

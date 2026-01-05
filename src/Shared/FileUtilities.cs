@@ -823,7 +823,12 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Get the currently executing assembly path
         /// </summary>
-        internal static string ExecutingAssemblyPath => Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(typeof(FileUtilities).GetTypeInfo().Assembly));
+        internal static string ExecutingAssemblyPath => 
+#if AOT_LIBRARY
+        System.Environment.ProcessPath;
+#else
+        Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(typeof(FileUtilities).GetTypeInfo().Assembly));
+#endif
 
         /// <summary>
         /// Determines the full path for the given file-spec.

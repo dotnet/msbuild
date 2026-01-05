@@ -13,6 +13,7 @@ using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
+using Microsoft.Build.App;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
@@ -568,7 +569,7 @@ namespace Microsoft.Build.UnitTests
 #else
                 new[] { @"c:\bin\msbuild.exe", indicator })
 #endif
-            .ShouldBe(MSBuildApp.ExitType.Success);
+            .ShouldBe(ExitType.Success);
         }
 
         [Fact]
@@ -661,17 +662,17 @@ namespace Microsoft.Build.UnitTests
         {
             string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
 #if FEATURE_GET_COMMANDLINE
-            MSBuildApp.Execute(@"c:\bin\msbuild.exe -junk").ShouldBe(MSBuildApp.ExitType.SwitchError);
+            MSBuildApp.Execute(@"c:\bin\msbuild.exe -junk").ShouldBe(ExitType.SwitchError);
 
-            MSBuildApp.Execute(@"msbuild.exe -t").ShouldBe(MSBuildApp.ExitType.SwitchError);
+            MSBuildApp.Execute(@"msbuild.exe -t").ShouldBe(ExitType.SwitchError);
 
-            MSBuildApp.Execute(@"msbuild.exe @bogus.rsp").ShouldBe(MSBuildApp.ExitType.InitializationError);
+            MSBuildApp.Execute(@"msbuild.exe @bogus.rsp").ShouldBe(ExitType.InitializationError);
 #else
-            MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", "-junk" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
+            MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", "-junk" }).ShouldBe(ExitType.SwitchError);
 
-            MSBuildApp.Execute(new[] { @"msbuild.exe", "-t" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
+            MSBuildApp.Execute(new[] { @"msbuild.exe", "-t" }).ShouldBe(ExitType.SwitchError);
 
-            MSBuildApp.Execute(new[] { @"msbuild.exe", "@bogus.rsp" }).ShouldBe(MSBuildApp.ExitType.InitializationError);
+            MSBuildApp.Execute(new[] { @"msbuild.exe", "@bogus.rsp" }).ShouldBe(ExitType.InitializationError);
 #endif
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
         }
@@ -1154,9 +1155,9 @@ namespace Microsoft.Build.UnitTests
                 }
                 // Should pass
 #if FEATURE_GET_COMMANDLINE
-                MSBuildApp.Execute(@"c:\bin\msbuild.exe " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
+                MSBuildApp.Execute(@"c:\bin\msbuild.exe " + quotedProjectFileName).ShouldBe(ExitType.Success);
 #else
-                MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", quotedProjectFileName }).ShouldBe(MSBuildApp.ExitType.Success);
+                MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", quotedProjectFileName }).ShouldBe(ExitType.Success);
 #endif
             }
             finally
@@ -1192,7 +1193,7 @@ namespace Microsoft.Build.UnitTests
                 }
 #if FEATURE_GET_COMMANDLINE
                 // Should pass
-                MSBuildApp.Execute(@$"c:\bin\msbuild.exe /logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"";""LogFile={logFile}"" /verbosity:detailed " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
+                MSBuildApp.Execute(@$"c:\bin\msbuild.exe /logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"";""LogFile={logFile}"" /verbosity:detailed " + quotedProjectFileName).ShouldBe(ExitType.Success);
 
 #else
                 // Should pass
@@ -1203,7 +1204,7 @@ namespace Microsoft.Build.UnitTests
                             @$"/logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"";""LogFile={logFile}""",
                             "/verbosity:detailed",
                             quotedProjectFileName
-                        }).ShouldBe(MSBuildApp.ExitType.Success);
+                        }).ShouldBe(ExitType.Success);
 #endif
                 File.Exists(logFile).ShouldBeTrue();
 

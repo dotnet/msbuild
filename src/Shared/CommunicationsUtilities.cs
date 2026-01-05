@@ -204,6 +204,28 @@ namespace Microsoft.Build.Internal
         // Source options of the handshake.
         internal HandshakeOptions HandshakeOptions { get; }
 
+        /// <summary>
+        /// Gets the names of the individual flags set in a Flags enum instance.
+        /// </summary>
+        public static string GetIndividualFlagNames(HandshakeOptions flagsEnumValue)
+        {
+            List<string> names = [];
+            
+            // Iterate over all possible single values defined in the enum
+#if NET
+            foreach (HandshakeOptions flag in Enum.GetValues<HandshakeOptions>())
+            {
+                if (flagsEnumValue.HasFlag(flag))
+                {
+                    names.Add(flag.ToString());
+                }
+            }
+            return string.Join(",", names);
+#else
+            return flagsEnumValue.ToString();
+#endif
+        }
+
         protected Handshake(HandshakeOptions nodeType, bool includeSessionId, string predefinedToolsDirectory)
         {
             HandshakeOptions = nodeType;
@@ -211,7 +233,7 @@ namespace Microsoft.Build.Internal
             // Build handshake options with version in upper bits
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
             var options = (int)nodeType | (handshakeVersion << 24);
-            CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
+            CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, GetIndividualFlagNames(HandshakeOptions));
 
             // Calculate salt from environment and tools directory
             bool isNetTaskHost = IsHandshakeOptionEnabled(nodeType, NetTaskHostFlags);
@@ -233,6 +255,7 @@ namespace Microsoft.Build.Internal
             _handshakeComponents = isNetTaskHost
                 ? CreateNetTaskHostComponents(options, salt, sessionId)
                 : CreateStandardComponents(options, salt, sessionId);
+            CommunicationsUtilities.Trace("Handshake components for this interaction are {0}", _handshakeComponents);
         }
 
         private string GetToolsDirectory(bool isNetTaskHost, string predefinedToolsDirectory) =>
@@ -257,7 +280,11 @@ namespace Microsoft.Build.Internal
 
         private static HandshakeComponents CreateStandardComponents(int options, int salt, int sessionId)
         {
+#if AOT_LIBRARY
+            var fileVersion = new Version(FileVersionInfo.GetVersionInfo(Environment.ProcessPath).FileVersion);
+#else
             var fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
+#endif
 
             return new(
                 options,

@@ -1,0 +1,4 @@
+﻿<Project DefaultTargets="Build">
+  <!-- Import the repo root props -->
+  <Import Project="..\Directory.Build.props"/>
+</Project>

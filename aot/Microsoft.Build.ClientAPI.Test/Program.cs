@@ -4,8 +4,30 @@
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.App;
 
-string[] msbuildArgs= [@"D:\code\scratch\cs\cs.csproj"];
 var msbuildLocation = @"D:\code\msbuild\artifacts\bin\bootstrap\core\sdk\10.0.100\MSBuild.dll";
+string[] msbuildArgs = [
+    // MSbuild command line parsing is really basic and expecting a usage like `dotnet msbuild.dll ...stuff`
+    // and so when submitting even _normal_ jobs you need to adhere to this
+    msbuildLocation,
+    // this is the project we actually want to work with
+    @"D:\code\scratch\cs\cs.csproj",
+    "/bl:server-build.binlog", 
+    "/m"];
+// need this to be set so that the buildenvironmenthelper can find the right MSBuild location,
+// because the inferred tools path is used in the salts for the server node handshake.
+System.Environment.SetEnvironmentVariable("MSBUILD_EXE_PATH", msbuildLocation);
+
+// other implicit state:
+// * the fileversion data in the ServerNodeHandshake. this works in my example here because 
+//   we're picking up the versioning info from the resolved msbuild dll, but 
+//   it would be really great to have the be less _explicit_
+// * using MSBuildClientApp.Execute today means that we need to have implicitly set things up
+//   so that BuildEnvironmentHelper resolves the right stuff. This should be more explicit.
+// * the arg parsing overall sucks here. you have to preload the msbuild dll on that command line.
+//   this is because msbuild's arg parsing gets the whole environment command line and has to be
+//   able to handle both `msbuild.exe stuff` and `dotnet msbuild.dll stuff` usages.
+//   if we move to apphosts all the time, this goes away and we get more consistent.
+
 using var cts = new CancellationTokenSource();
 var result = MSBuildClientApp.Execute(msbuildArgs, msbuildLocation, cts.Token);
 

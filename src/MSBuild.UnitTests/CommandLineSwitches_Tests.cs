@@ -8,6 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Resources;
+using Microsoft.Build.App;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
@@ -1549,9 +1550,9 @@ namespace Microsoft.Build.UnitTests
             string project = testEnvironment.CreateTestProjectWithFiles("project.proj", projectContent).ProjectFile;
 
 #if FEATURE_GET_COMMANDLINE
-            MSBuildApp.Execute(@"msbuild.exe " + project + " /t:foo.bar").ShouldBe(MSBuildApp.ExitType.SwitchError);
+            MSBuildApp.Execute(@"msbuild.exe " + project + " /t:foo.bar").ShouldBe(ExitType.SwitchError);
 #else
-            MSBuildApp.Execute(new[] { @"msbuild.exe", project, "/t:foo.bar" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
+            MSBuildApp.Execute(new[] { @"msbuild.exe", project, "/t:foo.bar" }).ShouldBe(ExitType.SwitchError);
 #endif
         }
 

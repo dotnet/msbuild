@@ -61,9 +61,9 @@ namespace Microsoft.Build.BackEnd
                 throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", msbuildLocation));
             }
 
-            // Repeat the executable name as the first token of the command line because the command line
-            // parser logic expects it and will otherwise skip the first argument
-            commandLineArgs = $"\"{msbuildLocation}\" {commandLineArgs}";
+            // // Repeat the executable name as the first token of the command line because the command line
+            // // parser logic expects it and will otherwise skip the first argument
+            // commandLineArgs = $"\"{msbuildLocation}\" {commandLineArgs}";
 
             BackendNativeMethods.STARTUP_INFO startInfo = new();
             startInfo.cb = Marshal.SizeOf<BackendNativeMethods.STARTUP_INFO>();
@@ -95,7 +95,6 @@ namespace Microsoft.Build.BackEnd
                 creationFlags |= BackendNativeMethods.CREATE_NEW_CONSOLE;
             }
 
-            CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
 
             string exeName = msbuildLocation;
 
@@ -103,6 +102,7 @@ namespace Microsoft.Build.BackEnd
             // Run the child process with the same host as the currently-running process.
             exeName = CurrentHost.GetCurrentHost();
 #endif
+            CommunicationsUtilities.Trace("Launching node from {0} with args \"{1}\"", exeName, commandLineArgs );
 
             if (!NativeMethodsShared.IsWindows)
             {
@@ -160,7 +160,7 @@ namespace Microsoft.Build.BackEnd
                         ref threadSecurityAttributes,
                         false,
                         creationFlags,
-                        BackendNativeMethods.NullPtr,
+                        BackendNativeMethods.NullPtr, // todo: pass native env?
                         null,
                         ref startInfo,
                         out processInfo);

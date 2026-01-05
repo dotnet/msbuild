@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Resources;
 using System.Threading;
 using System.Xml;
+using Microsoft.Build.App;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -52,7 +53,7 @@ namespace Microsoft.Build.UnitTests
                     ");
                 string quotedProjectFilename = "\"" + projectFilename + "\"";
 
-                Assert.Equal(MSBuildApp.ExitType.InitializationError, MSBuildApp.Execute(@"c:\foo\msbuild.exe " + quotedProjectFilename + " /validate:\"" + msbuildTempXsdFilenames[0] + "\""));
+                Assert.Equal(ExitType.InitializationError, MSBuildApp.Execute(@"c:\foo\msbuild.exe " + quotedProjectFilename + " /validate:\"" + msbuildTempXsdFilenames[0] + "\""));
             }
             finally
             {
@@ -95,7 +96,7 @@ namespace Microsoft.Build.UnitTests
                     ");
                 string quotedProjectFile = "\"" + projectFilename + "\"";
 
-                Assert.Equal(MSBuildApp.ExitType.InitializationError, MSBuildApp.Execute(@"c:\foo\msbuild.exe " + quotedProjectFile + " /validate:\"" + invalidSchemaFile + "\""));
+                Assert.Equal(ExitType.InitializationError, MSBuildApp.Execute(@"c:\foo\msbuild.exe " + quotedProjectFile + " /validate:\"" + invalidSchemaFile + "\""));
             }
             finally
             {
@@ -155,7 +156,7 @@ namespace Microsoft.Build.UnitTests
 
                 string quotedProjectFile = "\"" + projectFilename + "\"";
 
-                Assert.Equal(MSBuildApp.ExitType.InitializationError, MSBuildApp.Execute(@"c:\foo\msbuild.exe " + quotedProjectFile + " /validate:\"" + invalidSchemaFile + "\""));
+                Assert.Equal(ExitType.InitializationError, MSBuildApp.Execute(@"c:\foo\msbuild.exe " + quotedProjectFile + " /validate:\"" + invalidSchemaFile + "\""));
             }
             finally
             {
@@ -203,7 +204,7 @@ namespace Microsoft.Build.UnitTests
                 msbuildTempXsdFilenames = PrepareSchemaFiles();
                 string quotedProjectFile = "\"" + projectFilename + "\"";
 
-                Assert.Equal(MSBuildApp.ExitType.Success, MSBuildApp.Execute(@"c:\foo\msbuild.exe " + quotedProjectFile + " /validate:\"" + msbuildTempXsdFilenames[0] + "\""));
+                Assert.Equal(ExitType.Success, MSBuildApp.Execute(@"c:\foo\msbuild.exe " + quotedProjectFile + " /validate:\"" + msbuildTempXsdFilenames[0] + "\""));
 
                 // ProjectSchemaValidationHandler.VerifyProjectSchema
                 //    (
@@ -256,7 +257,7 @@ namespace Microsoft.Build.UnitTests
                 msbuildTempXsdFilenames = PrepareSchemaFiles();
                 string quotedProjectFile = "\"" + projectFilename + "\"";
 
-                Assert.Equal(MSBuildApp.ExitType.Success, MSBuildApp.Execute(@"c:\foo\msbuild.exe " + quotedProjectFile + " /validate:\"" + msbuildTempXsdFilenames[0] + "\""));
+                Assert.Equal(ExitType.Success, MSBuildApp.Execute(@"c:\foo\msbuild.exe " + quotedProjectFile + " /validate:\"" + msbuildTempXsdFilenames[0] + "\""));
 
                 // ProjectSchemaValidationHandler.VerifyProjectSchema
                 //    (

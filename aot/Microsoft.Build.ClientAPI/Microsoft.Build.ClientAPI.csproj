@@ -1,0 +1,103 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <VerifyReferenceAotCompatibility>true</VerifyReferenceAotCompatibility>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <DefineConstants>$(DefineConstants);AOT_LIBRARY</DefineConstants>
+    <DefineConstants>$(DefineConstants);RUNTIME_TYPE_NETCORE</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_PIPEOPTIONS_CURRENTUSERONLY</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_FASTSPAN</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_ASSEMBLYLOADCONTEXT</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_RUNTIMEINFORMATION</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_GUIDE_TO_VS_ON_UNSUPPORTED_PROJECTS</DefineConstants>
+    <DefineConstants>$(DefineConstants);USE_MSBUILD_DLL_EXTN</DefineConstants>
+    <DefineConstants>$(DefineConstants);WORKAROUND_COREFX_19110</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_SYMLINK_TARGET</DefineConstants>
+    <DefineConstants>$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NoWarn>$(NoWarn);CA1852</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\src\Framework\NativeMethods.cs" />
+    <Compile Include="..\..\src\Framework\Traits.cs" />
+    <Compile Include="..\..\src\Framework\BuildException\*.cs" />
+    <Compile Include="..\..\src\Framework\InternalErrorException.cs" />
+    <Compile Include="..\..\src\Framework\ChangeWaves.cs" />
+    <Compile Include="..\..\src\Framework\Logging\AnsiDetector.cs" />
+    <Compile Include="..\..\src\Framework\ErrorUtilities.cs" />
+    <Compile Include="..\..\src\Framework\AssemblyUtilities.cs" />
+
+    <Compile Include="..\..\src\Framework\ITranslator.cs" />
+    <Compile Include="..\..\src\Shared\TranslatorHelpers.cs" />
+    <Compile Include="..\..\src\Framework\ITranslatable.cs" />
+    <Compile Include="..\..\src\Framework\IExtendedBuildEventArgs.cs" />
+    <Compile Include="..\..\src\Framework\BuildEventContext.cs" />
+    <Compile Include="..\..\src\Shared\BinaryWriterExtensions.cs" />
+    <Compile Include="..\..\src\Shared\BinaryReaderExtensions.cs" />
+    <Compile Include="..\..\src\Framework\BinaryReaderFactory.cs" />
+    <Compile Include="..\..\src\Shared\InterningBinaryReader.cs" />
+    <Compile Include="..\..\src\Framework\InternPathIds.cs" />
+    <Compile Include="..\..\src\Framework\InterningReadTranslator.cs" />
+    <Compile Include="..\..\src\Framework\InterningWriteTranslator.cs" />
+    <Compile Include="..\..\src\Framework\BinaryTranslator.cs" />
+
+    <Compile Include="..\..\src\GlobalUsings.cs" />
+    <Compile Include="..\..\src\Framework\TaskHostParameters.cs" />
+    <Compile Include="..\..\src\Framework\MSBuildEventSource.cs" />
+    <Compile Include="..\..\src\Framework\BuildEnvironmentState.cs" />
+    <Compile Include="..\..\src\Framework\StringBuilderCache.cs" />
+    <Compile Include="..\..\src\Framework\FileClassifier.cs" />
+    <Compile Include="..\..\src\Framework\ImmutableFilesTimestampCache.cs" />
+    <Compile Include="..\..\src\Shared\XMakeAttributes.cs" />
+    <Compile Include="..\..\src\Shared\NamedPipeUtil.cs" />
+    <Compile Include="..\..\src\Shared\Constants.cs" />
+    <Compile Include="..\..\src\Shared\Debugging\DebugUtils.cs" />
+    <Compile Include="..\..\src\Shared\ErrorUtilities.cs" />
+    <Compile Include="..\..\src\Utilities\AssemblyResources.cs" />
+    <Compile Include="..\..\src\Shared\EnvironmentUtilities.cs" />
+    <Compile Include="..\..\src\Shared\BuildEnvironmentHelper.cs" />
+    <Compile Include="..\..\src\Shared\ExceptionHandling.cs" />
+    <Compile Include="..\..\src\Shared\FileUtilities.cs" />
+    <Compile Include="..\..\src\Shared\TempFileUtilities.cs" />
+    <Compile Include="..\..\src\Shared\FileUtilitiesRegex.cs" />
+    <Compile Include="..\..\src\Shared\EscapingUtilities.cs" />
+    <Compile Include="..\..\src\Shared\ResourceUtilities.cs" />
+    <Compile Include="..\..\src\Shared\FileSystem\*.cs" />
+    <Compile Include="..\..\src\Shared\INodePacket.cs" />
+    <Compile Include="..\..\src\Shared\INodePacketHandler.cs" />
+    <Compile Include="..\..\src\Shared\INodePacketFactory.cs" />
+    <Compile Include="..\..\src\Shared\NodePacketFactory.cs" />
+
+    <Compile Include="..\..\src\Shared\CommunicationsUtilities.cs" />
+    <Compile Include="..\..\src\Shared\MSBuildClientApp.cs" />
+    <Compile Include="..\..\src\Shared\MSBuildAppExitType.cs" />
+    <Compile Include="..\..\src\Build\Logging\IConsoleConfiguration.cs" />
+    <Compile Include="..\..\src\Build\Logging\TargetConsoleConfiguration.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Client\*.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Components\Communications\INodeLauncher.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Components\Communications\NodeFailedToLaunchException.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Components\Communications\NodeProviderOutOfProcBase.ClientSurfaceArea.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Components\Communications\NodeLauncher.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Shared\BuildAbortedException.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Node\OutOfProcServerNode.ClientSurfaceArea.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Node\PartialBuildTelemetry.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Node\ServerNamedMutex.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Node\NativeMethods.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Node\ConsoleOutput.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Node\ServerNodeConsoleWrite.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Node\ServerNodeBuildResult.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Node\ServerNodeBuildCancel.cs" />
+    <Compile Include="..\..\src\Build\BackEnd\Node\ServerNodeBuildCommand.cs" />
+    <Compile Include="..\..\src\Shared\NodeBuildComplete.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\StringTools\StringTools.csproj" />
+  </ItemGroup>
+
+</Project>

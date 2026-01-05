@@ -193,6 +193,7 @@
     <Compile Include="BackEnd\Node\ServerNodeConsoleWrite.cs" />
     <Compile Include="BackEnd\Node\ServerNodeBuildResult.cs" />
     <Compile Include="BackEnd\Node\OutOfProcServerNode.cs" />
+    <Compile Include="BackEnd\Node\OutOfProcServerNode.ClientSurfaceArea.cs" />
     <Compile Include="Logging\ConsoleConfiguration.cs" />
     <Compile Include="Logging\IConsoleConfiguration.cs" />
     <Compile Include="Logging\InProcessConsoleConfiguration.cs" />
@@ -320,6 +321,7 @@
     <Compile Include="BackEnd\Components\Communications\TranslatorExtensions.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProc.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcBase.cs" />
+    <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcBase.ClientSurfaceArea.cs" />
     <Compile Include="BackEnd\Components\Communications\NodeProviderOutOfProcTaskHost.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\BatchingEngine.cs" />
     <Compile Include="BackEnd\BuildManager\BuildRequestData.cs" />

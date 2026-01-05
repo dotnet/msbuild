@@ -464,14 +464,17 @@ namespace Microsoft.Build.Experimental
 
             try
             {
+                // to launch the server as an AOT client mode we actually have to locate a dotnet muxer
+                string dotnetMuxer = @"D:\code\msbuild\.dotnet\dotnet.exe";
                 string[] msBuildServerOptions =
                 [
+                    _msbuildLocation,
                     "/nologo",
                     "/nodemode:8"
                 ];
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
-                using Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions), nodeId: 0);
+                using Process msbuildProcess = nodeLauncher.Start(dotnetMuxer, string.Join(" ", msBuildServerOptions), nodeId: 0);
                 CommunicationsUtilities.Trace("Server started with PID: {0}", msbuildProcess?.Id);
             }
             catch (Exception ex)
