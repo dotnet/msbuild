@@ -150,7 +150,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Make Console use default encoding in the system. It opts out automatic console encoding UTF-8.
         /// </summary>
-        public readonly bool ConsoleUseDefaultEncoding = Environment.GetEnvironmentVariable("CONSOLE_USE_DEFAULT_ENCODING") == "1";
+        public readonly bool ConsoleUseDefaultEncoding = Environment.GetEnvironmentVariable("MSBUILD_CONSOLE_USE_DEFAULT_ENCODING") == "1" || Environment.GetEnvironmentVariable("DOTNET_CLI_CONSOLE_USE_DEFAULT_ENCODING") == "1";
 
         /// <summary>
         /// Variables controlling opt out at the level of not initializing telemetry infrastructure. Set to "1" or "true" to opt out.
