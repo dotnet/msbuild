@@ -743,7 +743,16 @@ namespace Microsoft.Build.Execution
             if (itemDefinitions == null || !useItemDefinitionsWithoutModification)
             {
                 // TaskItems don't have an item type. So for their benefit, we have to lookup and add the regular item definition.
-                inheritedItemDefinitions = (itemDefinitions == null) ? null : new List<ProjectItemDefinitionInstance>(itemDefinitions);
+                if (itemDefinitions == null)
+                {
+                    inheritedItemDefinitions = null;
+                }
+                else
+                {
+                    List<ProjectItemDefinitionInstance> list = new List<ProjectItemDefinitionInstance>(itemDefinitions.Count + 1);  // account for possible addition below to avoid resizing
+                    list.AddRange(itemDefinitions);
+                    inheritedItemDefinitions = list;
+                }
 
                 ProjectItemDefinitionInstance itemDefinition;
                 if (projectToUse.ItemDefinitions.TryGetValue(itemTypeToUse, out itemDefinition))
