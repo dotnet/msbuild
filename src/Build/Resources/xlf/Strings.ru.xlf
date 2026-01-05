@@ -916,7 +916,6 @@ Errors: {3}</source>
         <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</target>
         <note />
       </trans-unit>
-
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
         <target state="translated">Не удалось разрешить SDK "{0}" с помощью сопоставителя SDK "{1}". {2}</target>
