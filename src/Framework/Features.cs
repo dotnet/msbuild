@@ -36,14 +36,19 @@ namespace Microsoft.Build.Framework
     /// </summary>
     public static class Features
     {
-        private static Dictionary<string, FeatureStatus> _featureStatusMap = new Dictionary<string, FeatureStatus>
+        private static readonly Dictionary<string, FeatureStatus> _featureStatusMap = CreateDefaultFeatureStatusMap();
+
+        private static Dictionary<string, FeatureStatus> CreateDefaultFeatureStatusMap()
         {
-            { "BuildCheck.Beta", FeatureStatus.Preview },
-            { "CachePlugins", FeatureStatus.Available }, // Project cache plugins (e.g., Quickbuild) are enabled by default but can be remotely disabled.
-            { "EvaluationContext_SharedSDKCachePolicy", FeatureStatus.Available }, // EvaluationContext supports the SharingPolicy.SharedSDKCache flag.
-            { "TerminalLogger_MultiLineHandler", FeatureStatus.Available }, // TerminalLogger has better explicit support for rendering multi-line messages
-            // Add more features here.
-        };
+            return new Dictionary<string, FeatureStatus>
+            {
+                { "BuildCheck.Beta", FeatureStatus.Preview },
+                { "CachePlugins", FeatureStatus.Available }, // Project cache plugins (e.g., Quickbuild) are enabled by default but can be remotely disabled.
+                { "EvaluationContext_SharedSDKCachePolicy", FeatureStatus.Available }, // EvaluationContext supports the SharingPolicy.SharedSDKCache flag.
+                { "TerminalLogger_MultiLineHandler", FeatureStatus.Available }, // TerminalLogger has better explicit support for rendering multi-line messages
+                // Add more features here.
+            };
+        }
 
         /// <summary>
         /// Checks if a feature is available or not.
@@ -72,13 +77,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         internal static void ResetFeatureStatusForTests()
         {
-            _featureStatusMap = new Dictionary<string, FeatureStatus>
+            _featureStatusMap.Clear();
+            foreach (var kvp in CreateDefaultFeatureStatusMap())
             {
-                { "BuildCheck.Beta", FeatureStatus.Preview },
-                { "CachePlugins", FeatureStatus.Available },
-                { "EvaluationContext_SharedSDKCachePolicy", FeatureStatus.Available },
-                { "TerminalLogger_MultiLineHandler", FeatureStatus.Available },
-            };
+                _featureStatusMap[kvp.Key] = kvp.Value;
+            }
         }
 #endif
     }
