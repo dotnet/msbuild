@@ -84,7 +84,7 @@ The app host creation happens in the installer/layout targets, similar to how Ro
 ### 3. Node Launching Logic
 
 Update node provider to launch `MSBuild.exe` instead of `dotnet MSBuild.dll`:
-The path resolution logic remains the same, since MSBuild.exe will be shipped in every SDK version. 
+The path resolution logic remains the same, since MSBuild.exe will be shipped in every SDK version.
 
 ### 4. Backward Compatibility (Critical)
 
@@ -147,6 +147,45 @@ startInfo.Environment.Remove("DOTNET_ROOT_ARM64");
 ```
 
 **Note**: Using `ProcessStartInfo.Environment` is thread-safe and scoped to the child process only, avoiding any need for locking or save/restore patterns on the parent process environment.
+
+### DOTNET_ROOT Propagation to Child Processes
+
+**Concern**: When MSBuild sets `DOTNET_ROOT` to launch a worker node, that environment variable propagates to any tools the worker node executes. This could change tool behavior if the tool relies on `DOTNET_ROOT` to find its runtime.
+
+**Solution**: The worker node should explicitly clear `DOTNET_ROOT` (and architecture-specific variants) after startup, restoring the original entry-point environment:
+
+```csharp
+// In OutOfProcNode.HandleNodeConfiguration, after setting BuildProcessEnvironment:
+
+// Clear DOTNET_ROOT variants that were set only for app host bootstrap.
+// These should not leak to tools executed by this worker node.
+// Only clear if NOT present in the original build process environment.
+string[] dotnetRootVars = ["DOTNET_ROOT", "DOTNET_ROOT_X64", "DOTNET_ROOT_X86", "DOTNET_ROOT_ARM64"];
+foreach (string varName in dotnetRootVars)
+{
+    if (!_buildParameters.BuildProcessEnvironment.ContainsKey(varName))
+    {
+        Environment.SetEnvironmentVariable(varName, null);
+    }
+}
+```
+
+**Why this works**:
+
+1. `BuildProcessEnvironment` captures the environment from the **entry-point process** (e.g. VS).
+2. If the entry-point had `DOTNET_ROOT` set, the worker should also have it (passed via `BuildProcessEnvironment`).
+3. If the entry-point did NOT have `DOTNET_ROOT`, it was only added for app host bootstrap and should be cleared.
+
+**Alternative considered**: We could modify `NodeLauncher` to not inherit the parent environment and explicitly pass only `BuildProcessEnvironment` + `DOTNET_ROOT`. However, this is a larger change and may break other scenarios where environment inheritance is expected.
+
+**Implementation note**: Add a comment in the node-launching code explaining why `DOTNET_ROOT` is set and that the worker will clear it:
+
+```csharp
+// Set DOTNET_ROOT for app host bootstrap only.
+// The worker node will clear this after startup if it wasn't in the original BuildProcessEnvironment.
+// See OutOfProcNode.HandleNodeConfiguration.
+startInfo.Environment["DOTNET_ROOT"] = dotnetRoot;
+```
 
 ### Edge Cases
 
