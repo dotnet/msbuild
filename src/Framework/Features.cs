@@ -43,7 +43,6 @@ namespace Microsoft.Build.Framework
             return new Dictionary<string, FeatureStatus>
             {
                 { "BuildCheck.Beta", FeatureStatus.Preview },
-                { "CachePlugins", FeatureStatus.Available }, // Project cache plugins (e.g., Quickbuild) are enabled by default but can be remotely disabled.
                 { "EvaluationContext_SharedSDKCachePolicy", FeatureStatus.Available }, // EvaluationContext supports the SharingPolicy.SharedSDKCache flag.
                 { "TerminalLogger_MultiLineHandler", FeatureStatus.Available }, // TerminalLogger has better explicit support for rendering multi-line messages
                 // Add more features here.
@@ -57,6 +56,20 @@ namespace Microsoft.Build.Framework
         /// <returns>A feature status <see cref="FeatureStatus"/>.</returns>
         public static FeatureStatus CheckFeatureAvailability(string featureName)
         {
+            // Special handling for CachePlugins feature - controlled via environment variable
+            // This allows remote feature flags in VS to disable cache plugins by setting the environment variable
+            if (featureName == "CachePlugins")
+            {
+                string? envValue = System.Environment.GetEnvironmentVariable("MSBUILD_CACHEPLUGINS_DISABLED");
+                if (!string.IsNullOrEmpty(envValue) && 
+                    (envValue.Equals("1", System.StringComparison.OrdinalIgnoreCase) || 
+                     envValue.Equals("true", System.StringComparison.OrdinalIgnoreCase)))
+                {
+                    return FeatureStatus.NotAvailable;
+                }
+                return FeatureStatus.Available;
+            }
+
             return _featureStatusMap.TryGetValue(featureName, out FeatureStatus status) ?
                  status : FeatureStatus.Undefined;
         }
