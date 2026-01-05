@@ -3808,7 +3808,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
                 MockLogger logger = new MockLogger();
 
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 ProjectInstance project = pc.LoadProject(testProjectFile).CreateProjectInstance();
                 project.SetProperty("SDKReferenceDirectoryRoot", testDirectoryRoot);
                 project.SetProperty("SDKReferenceRegistryRoot", "");
@@ -3951,7 +3951,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
                 MockLogger logger = new MockLogger();
 
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 ProjectInstance project = pc.LoadProject(testProjectFile).CreateProjectInstance();
                 project.SetProperty("SDKReferenceDirectoryRoot", testDirectoryRoot);
                 project.SetProperty("SDKReferenceRegistryRoot", "");
@@ -4060,7 +4060,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
                 MockLogger logger = new MockLogger();
 
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 ProjectInstance project = pc.LoadProject(testProjectFile).CreateProjectInstance();
                 project.SetProperty("SDKReferenceDirectoryRoot", testDirectoryRoot);
                 project.SetProperty("SDKReferenceRegistryRoot", "");
@@ -4157,7 +4157,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
                 MockLogger logger = new MockLogger();
 
-                ProjectCollection pc = new ProjectCollection();
+                using ProjectCollection pc = new ProjectCollection();
                 ProjectInstance project = pc.LoadProject(testProjectFile).CreateProjectInstance();
                 project.SetProperty("SDKReferenceDirectoryRoot", testDirectoryRoot);
                 project.SetProperty("SDKReferenceRegistryRoot", "");
@@ -4326,7 +4326,7 @@ namespace Microsoft.Build.UnitTests.ResolveSDKReference_Tests
 
         private ITaskItem[] RunBuildAndReturnResolvedSDKReferences(ILogger logger, string testProjectFile, string testDirectoryRoot)
         {
-            ProjectCollection pc = new ProjectCollection();
+            using ProjectCollection pc = new ProjectCollection();
             ProjectInstance project = pc.LoadProject(testProjectFile).CreateProjectInstance();
             project.SetProperty("SDKReferenceDirectoryRoot", testDirectoryRoot);
             project.SetProperty("SDKReferenceRegistryRoot", "");

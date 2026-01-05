@@ -27,6 +27,11 @@
         <target state="translated">コマンドはコード {0} で終了しました。</target>
         <note />
       </trans-unit>
+      <trans-unit id="LockCheck.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">このファイルは "{0}" によってロックされています。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: "{0}" にプラットフォームのマニフェスト ファイルが見つかりませんでした。</target>

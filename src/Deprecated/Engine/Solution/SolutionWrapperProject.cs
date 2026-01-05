@@ -19,8 +19,23 @@ using Microsoft.Build.Framework;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+    /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+    /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+    /// 
     /// This class is used to generate an MSBuild wrapper project for a solution file or standalone VC project.
     /// </summary>
+    /// <remarks>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
+    /// </remarks>
     /// <owner>LukaszG, RGoel</owner>
     public static class SolutionWrapperProject
     {
@@ -31,6 +46,11 @@ namespace Microsoft.Build.BuildEngine
         private const string cacheVersionNumber = "_SolutionProjectCacheVersion";
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Given the full path to a solution, returns a string containing the v3.5 MSBuild-format
         /// wrapper project for that solution.
         /// </summary>
@@ -38,6 +58,16 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="toolsVersionOverride">May be null.  If non-null, contains the ToolsVersion passed in on the command line</param>\
         /// <param name="projectBuildEventContext">An event context for logging purposes.</param>
         /// <returns></returns>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public static string Generate(string solutionPath, string toolsVersionOverride, BuildEventContext projectBuildEventContext)
         {
             Project msbuildProject = new Project();

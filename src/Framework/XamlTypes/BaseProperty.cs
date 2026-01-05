@@ -153,7 +153,7 @@ namespace Microsoft.Build.Framework.XamlTypes
         /// The help file to use when the user hits F1. Must specify <see cref="HelpContext"/> along with this.
         /// </summary>
         /// <remarks>
-        /// This property goes along with <see cref="HelpContext"/>. <seealso cref="HelpContext"/>. This
+        /// This property goes along with <see cref="HelpContext"/>. This
         /// form of specifying the help page for a property takes lower precedence than both <see cref="F1Keyword"/>
         /// and <see cref="HelpUrl"/>.
         /// This field is optional and is culture insensitive.

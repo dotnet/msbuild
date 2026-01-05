@@ -10,6 +10,7 @@ using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Engine.UnitTests;
 using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -2184,8 +2185,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             string currentDir = Directory.GetCurrentDirectory();
             TaskRegistry.InitializeTaskRegistryFromUsingTaskElements(
-                _loggingService,
-                _loggerContext,
+                _targetLoggingContext,
                 usingTaskElements.Select(el => (el, currentDir)),
                 registry,
                 RegistryExpander,
@@ -2249,7 +2249,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             secondaryItemsByName.ImportItems(thirdItemGroup);
             secondaryItemsByName.ImportItems(trueItemGroup);
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, secondaryItemsByName, FileSystems.Default);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(
+                pg,
+                secondaryItemsByName,
+                FileSystems.Default,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
             return expander;
         }
 

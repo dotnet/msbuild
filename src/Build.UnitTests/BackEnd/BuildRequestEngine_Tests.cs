@@ -243,7 +243,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             </Target>
             </Project>");
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
                 return project.CreateProjectInstance();
             }
         }

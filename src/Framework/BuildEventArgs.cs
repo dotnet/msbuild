@@ -113,7 +113,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Exposes the private <see cref="timestamp"/> field to derived types.
+        /// Exposes the private timestamp field to derived types.
         /// Used for serialization. Avoids the side effects of calling the
         /// <see cref="Timestamp"/> getter.
         /// </summary>
