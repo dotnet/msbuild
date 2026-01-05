@@ -3,13 +3,22 @@
 
 using System;
 using System.Collections;
+#if !CLR2COMPATIBILITY
+using System.Collections.Concurrent;
+#endif
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+#if !CLR2COMPATIBILITY
+using System.Threading.Tasks;
+#endif
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
+#if !CLR2COMPATIBILITY
+using Microsoft.Build.Exceptions;
+#endif
 using Microsoft.Build.Framework;
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Experimental.FileAccess;
@@ -176,6 +185,19 @@ namespace Microsoft.Build.CommandLine
         /// The file accesses reported by the most recently completed task.
         /// </summary>
         private List<FileAccessData> _fileAccessData = new List<FileAccessData>();
+#endif
+
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// Counter for generating unique request IDs for callback correlation.
+        /// </summary>
+        private int _nextCallbackRequestId;
+
+        /// <summary>
+        /// Pending callback requests awaiting responses from the parent.
+        /// Key is the request ID, value is the TaskCompletionSource to signal when response arrives.
+        /// </summary>
+        private readonly ConcurrentDictionary<int, TaskCompletionSource<INodePacket>> _pendingCallbackRequests = new();
 #endif
 
         /// <summary>
@@ -725,8 +747,112 @@ namespace Microsoft.Build.CommandLine
                 case NodePacketType.NodeBuildComplete:
                     HandleNodeBuildComplete(packet as NodeBuildComplete);
                     break;
+
+#if !CLR2COMPATIBILITY
+                // Callback response packets - route to pending requests
+                // NOTE: These packet types require corresponding packet classes and factory registration
+                // in the constructor. Registration will be added when packet classes are implemented.
+                case NodePacketType.TaskHostBuildResponse:
+                case NodePacketType.TaskHostResourceResponse:
+                case NodePacketType.TaskHostQueryResponse:
+                case NodePacketType.TaskHostYieldResponse:
+                    HandleCallbackResponse(packet);
+                    break;
+#endif
             }
         }
+
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// Handles a callback response packet by completing the pending request's TaskCompletionSource.
+        /// This is called on the main thread and unblocks the task thread waiting for the response.
+        /// </summary>
+        private void HandleCallbackResponse(INodePacket packet)
+        {
+            // Silent no-op if packet doesn't implement ITaskHostCallbackPacket or request ID unknown.
+            // Unknown ID can occur if request was cancelled/abandoned before response arrived.
+            if (packet is ITaskHostCallbackPacket callbackPacket
+                && _pendingCallbackRequests.TryRemove(callbackPacket.RequestId, out TaskCompletionSource<INodePacket> tcs))
+            {
+                tcs.TrySetResult(packet);
+            }
+        }
+
+        /// <summary>
+        /// Sends a callback request packet to the parent and waits for the corresponding response.
+        /// This is called from task threads and blocks until the response arrives on the main thread.
+        /// </summary>
+        /// <typeparam name="TResponse">The expected response packet type.</typeparam>
+        /// <param name="request">The request packet to send (must implement ITaskHostCallbackPacket).</param>
+        /// <returns>The response packet.</returns>
+        /// <exception cref="InvalidOperationException">If the connection is lost.</exception>
+        /// <exception cref="BuildAbortedException">If the task is cancelled during the callback.</exception>
+        /// <remarks>
+        /// This method is infrastructure for callback support. It will be used by subsequent implementations
+        /// of IsRunningMultipleNodes, RequestCores/ReleaseCores, BuildProjectFile, etc.
+        /// </remarks>
+#pragma warning disable IDE0051 // Remove unused private members - infrastructure method used by subsequent implementations
+        private TResponse SendCallbackRequestAndWaitForResponse<TResponse>(ITaskHostCallbackPacket request)
+#pragma warning restore IDE0051
+            where TResponse : class, INodePacket
+        {
+            int requestId = Interlocked.Increment(ref _nextCallbackRequestId);
+            request.RequestId = requestId;
+
+            // Use ManualResetEvent to bridge TaskCompletionSource to WaitHandle
+            using var responseEvent = new ManualResetEvent(false);
+            var tcs = new TaskCompletionSource<INodePacket>(TaskCreationOptions.RunContinuationsAsynchronously);
+            tcs.Task.ContinueWith(_ => responseEvent.Set(), TaskContinuationOptions.ExecuteSynchronously);
+            _pendingCallbackRequests[requestId] = tcs;
+
+            try
+            {
+                // Send the request packet to the parent
+                _nodeEndpoint.SendData((INodePacket)request);
+
+                // Wait for either: response arrives, task cancelled, or connection lost
+                // No timeout - callbacks like BuildProjectFile can legitimately take hours
+                WaitHandle[] waitHandles = [responseEvent, _taskCancelledEvent];
+
+                while (true)
+                {
+                    int signaledIndex = WaitHandle.WaitAny(waitHandles, millisecondsTimeout: 1000);
+
+                    if (signaledIndex == 0)
+                    {
+                        // Response received
+                        break;
+                    }
+                    else if (signaledIndex == 1)
+                    {
+                        // Task cancelled
+                        throw new BuildAbortedException();
+                    }
+
+                    // Timeout - check connection status (no WaitHandle available for this)
+                    if (_nodeEndpoint.LinkStatus != LinkStatus.Active)
+                    {
+                        throw new InvalidOperationException(
+                            ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskHostCallbackConnectionLost"));
+                    }
+                }
+
+                INodePacket response = tcs.Task.Result;
+
+                if (response is TResponse typedResponse)
+                {
+                    return typedResponse;
+                }
+
+                throw new InvalidOperationException(
+                    $"Unexpected callback response type: expected {typeof(TResponse).Name}, got {response?.GetType().Name ?? "null"}");
+            }
+            finally
+            {
+                _pendingCallbackRequests.TryRemove(requestId, out _);
+            }
+        }
+#endif
 
         /// <summary>
         /// Configure the task host according to the information received in the

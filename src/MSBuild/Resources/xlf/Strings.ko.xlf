@@ -1813,6 +1813,11 @@
         <target state="translated">MSBUILD : error MSB1059: 대상을 출력할 수 없습니다. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TaskHostCallbackConnectionLost">
+        <source>MSB5025: TaskHost lost connection to parent process during callback. The build may have been cancelled.</source>
+        <target state="new">MSB5025: TaskHost lost connection to parent process during callback. The build may have been cancelled.</target>
+        <note>{StrBegin="MSB5025: "}</note>
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
         <target state="translated">자동화된 환경에서 빌드가 실행 중임을 감지하여 터미널 로거를 사용하지 않았습니다.</target>

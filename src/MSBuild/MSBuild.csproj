@@ -143,6 +143,7 @@
     <Compile Include="OutOfProcTaskHostNode.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
+    <Compile Include="ITaskHostCallbackPacket.cs" />
     <Compile Include="PerformanceLogEventListener.cs" />
     <Compile Include="JsonOutputFormatter.cs" />
     <Compile Include="XMake.cs" />

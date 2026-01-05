@@ -1824,6 +1824,11 @@ Nota: livello di dettaglio dei logger di file
         <target state="translated">MSBUILD : error MSB1059: non è stato possibile stampare le destinazioni. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TaskHostCallbackConnectionLost">
+        <source>MSB5025: TaskHost lost connection to parent process during callback. The build may have been cancelled.</source>
+        <target state="new">MSB5025: TaskHost lost connection to parent process during callback. The build may have been cancelled.</target>
+        <note>{StrBegin="MSB5025: "}</note>
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
         <target state="translated">Il logger del terminale non è stato utilizzato perché è stato rilevato che la compilazione è in esecuzione in un ambiente automatizzato.</target>

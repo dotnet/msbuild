@@ -1819,6 +1819,11 @@ Esta marca es experimental y puede que no funcione según lo previsto.
         <target state="translated">MSBUILD : error MSB1059: No se pudieron imprimir los destinos. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TaskHostCallbackConnectionLost">
+        <source>MSB5025: TaskHost lost connection to parent process during callback. The build may have been cancelled.</source>
+        <target state="new">MSB5025: TaskHost lost connection to parent process during callback. The build may have been cancelled.</target>
+        <note>{StrBegin="MSB5025: "}</note>
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
         <target state="translated">No se usó el registrador de terminal porque se detectó que la compilación se está ejecutando en un entorno automatizado.</target>

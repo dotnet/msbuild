@@ -1710,4 +1710,8 @@
   <data name="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc" xml:space="preserve">
     <value>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</value>
   </data>
+  <data name="TaskHostCallbackConnectionLost" xml:space="preserve">
+    <value>MSB5025: TaskHost lost connection to parent process during callback. The build may have been cancelled.</value>
+    <comment>{StrBegin="MSB5025: "}</comment>
+  </data>
 </root>
