@@ -36,9 +36,10 @@ namespace Microsoft.Build.Framework
     /// </summary>
     public static class Features
     {
-        private static readonly Dictionary<string, FeatureStatus> _featureStatusMap = new Dictionary<string, FeatureStatus>
+        private static Dictionary<string, FeatureStatus> _featureStatusMap = new Dictionary<string, FeatureStatus>
         {
             { "BuildCheck.Beta", FeatureStatus.Preview },
+            { "CachePlugins", FeatureStatus.Available }, // Project cache plugins (e.g., Quickbuild) are enabled by default but can be remotely disabled.
             { "EvaluationContext_SharedSDKCachePolicy", FeatureStatus.Available }, // EvaluationContext supports the SharingPolicy.SharedSDKCache flag.
             { "TerminalLogger_MultiLineHandler", FeatureStatus.Available }, // TerminalLogger has better explicit support for rendering multi-line messages
             // Add more features here.
@@ -54,5 +55,31 @@ namespace Microsoft.Build.Framework
             return _featureStatusMap.TryGetValue(featureName, out FeatureStatus status) ?
                  status : FeatureStatus.Undefined;
         }
+
+#if DEBUG
+        /// <summary>
+        /// Sets the status of a feature. Used for testing only.
+        /// </summary>
+        /// <param name="featureName">The name of the feature.</param>
+        /// <param name="status">The status to set.</param>
+        internal static void SetFeatureAvailability(string featureName, FeatureStatus status)
+        {
+            _featureStatusMap[featureName] = status;
+        }
+
+        /// <summary>
+        /// Resets the feature status map to its default state. Used for testing only.
+        /// </summary>
+        internal static void ResetFeatureStatusForTests()
+        {
+            _featureStatusMap = new Dictionary<string, FeatureStatus>
+            {
+                { "BuildCheck.Beta", FeatureStatus.Preview },
+                { "CachePlugins", FeatureStatus.Available },
+                { "EvaluationContext_SharedSDKCachePolicy", FeatureStatus.Available },
+                { "TerminalLogger_MultiLineHandler", FeatureStatus.Available },
+            };
+        }
+#endif
     }
 }

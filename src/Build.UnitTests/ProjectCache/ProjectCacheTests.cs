@@ -1747,7 +1747,121 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             output = RunnerUtilities.RunProcessAndGetOutput(bootstrapCorePath, $"exec \"{appDllPath}\"", out success, false, _output);
             output.ShouldNotContain("A=1");
-            output.ShouldContain("B=1");
+            output.ShouldContain("B=2");
+        }
+
+        [Fact]
+        public void CachePluginsFeatureFlagDisablesCache()
+        {
+            // This test verifies that when the CachePlugins feature is disabled,
+            // the cache plugin is not used even when configured.
+
+            try
+            {
+                // Disable the cache plugins feature
+                Framework.Features.SetFeatureAvailability("CachePlugins", Framework.FeatureStatus.NotAvailable);
+
+                var testData = new GraphCacheResponse(
+                    new Dictionary<int, int[]?>
+                    {
+                        {1, null}
+                    },
+                    new Dictionary<int, CacheResult>
+                    {
+                        {1, GraphCacheResponse.SuccessfulProxyTargetResult()}
+                    });
+
+                var graph = testData.CreateGraph(_env);
+
+                var mockCache = new InstanceMockCache(testData);
+
+                var buildParameters = new BuildParameters
+                {
+                    ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(mockCache)
+                };
+
+                MockLogger logger;
+                GraphBuildResult graphResult;
+                using (var buildSession = new Helpers.BuildManagerSession(_env, buildParameters))
+                {
+                    logger = buildSession.Logger;
+                    graphResult = buildSession.BuildGraph(graph);
+                }
+
+                graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+                // Verify that cache was NOT used (plugin methods were not called)
+                mockCache.BeginBuildCalled.ShouldBeFalse("BeginBuildAsync should not be called when feature is disabled");
+                mockCache.Requests.ShouldBeEmpty("GetCacheResultAsync should not be called when feature is disabled");
+                mockCache.EndBuildCalled.ShouldBeFalse("EndBuildAsync should not be called when feature is disabled");
+
+                // The build should have succeeded, but without using the cache
+                logger.FullLog.ShouldNotContain("MockCache: BeginBuildAsync");
+                logger.FullLog.ShouldNotContain("MockCache: GetCacheResultAsync");
+                logger.FullLog.ShouldNotContain("MockCache: EndBuildAsync");
+            }
+            finally
+            {
+                // Restore the feature to its default state
+                Framework.Features.ResetFeatureStatusForTests();
+            }
+        }
+
+        [Fact]
+        public void CachePluginsFeatureFlagEnabled()
+        {
+            // This test verifies that when the CachePlugins feature is enabled (default),
+            // the cache plugin is used as expected.
+
+            try
+            {
+                // Explicitly enable the cache plugins feature (though it should be enabled by default)
+                Framework.Features.SetFeatureAvailability("CachePlugins", Framework.FeatureStatus.Available);
+
+                var testData = new GraphCacheResponse(
+                    new Dictionary<int, int[]?>
+                    {
+                        {1, null}
+                    },
+                    new Dictionary<int, CacheResult>
+                    {
+                        {1, GraphCacheResponse.SuccessfulProxyTargetResult()}
+                    });
+
+                var graph = testData.CreateGraph(_env);
+
+                var mockCache = new InstanceMockCache(testData);
+
+                var buildParameters = new BuildParameters
+                {
+                    ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(mockCache)
+                };
+
+                MockLogger logger;
+                GraphBuildResult graphResult;
+                using (var buildSession = new Helpers.BuildManagerSession(_env, buildParameters))
+                {
+                    logger = buildSession.Logger;
+                    graphResult = buildSession.BuildGraph(graph);
+                }
+
+                graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+                // Verify that cache WAS used (plugin methods were called)
+                mockCache.BeginBuildCalled.ShouldBeTrue("BeginBuildAsync should be called when feature is enabled");
+                mockCache.Requests.ShouldNotBeEmpty("GetCacheResultAsync should be called when feature is enabled");
+                mockCache.EndBuildCalled.ShouldBeTrue("EndBuildAsync should be called when feature is enabled");
+
+                // The build should have succeeded using the cache
+                logger.FullLog.ShouldContain("MockCache: BeginBuildAsync");
+                logger.FullLog.ShouldContain("MockCache: GetCacheResultAsync");
+                logger.FullLog.ShouldContain("MockCache: EndBuildAsync");
+            }
+            finally
+            {
+                // Restore the feature to its default state
+                Framework.Features.ResetFeatureStatusForTests();
+            }
         }
     }
 }

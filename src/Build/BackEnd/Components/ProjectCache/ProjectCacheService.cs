@@ -467,6 +467,12 @@ namespace Microsoft.Build.ProjectCache
 
         public bool ShouldUseCache(BuildRequestConfiguration buildRequestConfiguration)
         {
+            // Check if cache plugins feature is enabled via remote feature flag
+            if (Framework.Features.CheckFeatureAvailability("CachePlugins") == Framework.FeatureStatus.NotAvailable)
+            {
+                return false;
+            }
+
             if (IsDesignTimeBuild(buildRequestConfiguration))
             {
                 return false;
