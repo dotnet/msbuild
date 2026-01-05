@@ -106,6 +106,12 @@ namespace Microsoft.Build.ProjectCache
         {
             EnsureNotDisposed();
 
+            // Check if cache plugins feature is enabled
+            if (Framework.Features.CheckFeatureAvailability("CachePlugins") == Framework.FeatureStatus.NotAvailable)
+            {
+                return;
+            }
+
             // Performing this in a Task.Run to break away from the main thread and prevent hangs
             Task.Run(
                 () =>
@@ -132,6 +138,12 @@ namespace Microsoft.Build.ProjectCache
             CancellationToken cancellationToken)
         {
             EnsureNotDisposed();
+
+            // Check if cache plugins feature is enabled
+            if (Framework.Features.CheckFeatureAvailability("CachePlugins") == Framework.FeatureStatus.NotAvailable)
+            {
+                return;
+            }
 
             _isVsScenario = true;
 

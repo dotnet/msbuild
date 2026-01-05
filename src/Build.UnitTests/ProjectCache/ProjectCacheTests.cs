@@ -1747,7 +1747,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             output = RunnerUtilities.RunProcessAndGetOutput(bootstrapCorePath, $"exec \"{appDllPath}\"", out success, false, _output);
             output.ShouldNotContain("A=1");
-            output.ShouldContain("B=2");
+            output.ShouldContain("B=1");
         }
 
         [Fact]
