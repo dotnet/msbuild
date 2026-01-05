@@ -16,6 +16,14 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.Contracts" PrivateAssets="all" />
+
+    <!-- Display files included by the Microsoft.CodeAnalysis.Contracts source package in a 'SourcePackages\Contracts' folder -->
+    <Content Update="@(Content)">
+      <Link Condition="'%(NuGetPackageId)' == 'Microsoft.CodeAnalysis.Contracts'">SourcePackages\Contracts\%(Link)</Link>
+    </Content>
+    <Compile Update="@(Compile)">
+      <Link Condition="'%(NuGetPackageId)' == 'Microsoft.CodeAnalysis.Contracts'">SourcePackages\Contracts\%(Link)</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
