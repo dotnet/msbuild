@@ -171,7 +171,7 @@ namespace Microsoft.Build.CommandLine
             {
                 return item.GetMetadata(metadataName);
             }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("cannot be applied to the path"))
+            catch (InvalidOperationException)
             {
                 // Built-in metadata like FullPath, Directory, etc. require path computation.
                 // If the item spec contains illegal path characters, return empty string.
@@ -190,7 +190,7 @@ namespace Microsoft.Build.CommandLine
             {
                 return item.GetMetadataValue(metadataName);
             }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("cannot be applied to the path"))
+            catch (InvalidOperationException)
             {
                 // Built-in metadata like FullPath, Directory, etc. require path computation.
                 // If the item spec contains illegal path characters, return empty string.
@@ -209,7 +209,7 @@ namespace Microsoft.Build.CommandLine
             {
                 return item.GetMetadataValue(metadataName);
             }
-            catch (InvalidOperationException ex) when (ex.Message.Contains("cannot be applied to the path"))
+            catch (InvalidOperationException)
             {
                 // Built-in metadata like FullPath, Directory, etc. require path computation.
                 // If the item spec contains illegal path characters, return empty string.
