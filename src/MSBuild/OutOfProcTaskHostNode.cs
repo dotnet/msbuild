@@ -227,6 +227,10 @@ namespace Microsoft.Build.CommandLine
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
 
 #if !CLR2COMPATIBILITY
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostQueryResponse, TaskHostQueryResponse.FactoryForDeserialization, this);
+#endif
+
+#if !CLR2COMPATIBILITY
             EngineServices = new EngineServicesImpl(this);
 #endif
         }
@@ -286,15 +290,21 @@ namespace Microsoft.Build.CommandLine
         #region IBuildEngine2 Implementation (Properties)
 
         /// <summary>
-        /// Stub implementation of IBuildEngine2.IsRunningMultipleNodes.  The task host does not support this sort of
-        /// IBuildEngine callback, so error.
+        /// Implementation of IBuildEngine2.IsRunningMultipleNodes.
+        /// Queries the parent process and returns the actual value.
         /// </summary>
         public bool IsRunningMultipleNodes
         {
             get
             {
+#if CLR2COMPATIBILITY
                 LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
                 return false;
+#else
+                var request = new TaskHostQueryRequest(TaskHostQueryRequest.QueryType.IsRunningMultipleNodes);
+                var response = SendCallbackRequestAndWaitForResponse<TaskHostQueryResponse>(request);
+                return response.BoolResult;
+#endif
             }
         }
 
@@ -749,13 +759,8 @@ namespace Microsoft.Build.CommandLine
                     break;
 
 #if !CLR2COMPATIBILITY
-                // Callback response packets - route to pending requests
-                // NOTE: These packet types require corresponding packet classes and factory registration
-                // in the constructor. Registration will be added when packet classes are implemented.
-                case NodePacketType.TaskHostBuildResponse:
-                case NodePacketType.TaskHostResourceResponse:
+                // Callback response packet - route to pending request
                 case NodePacketType.TaskHostQueryResponse:
-                case NodePacketType.TaskHostYieldResponse:
                     HandleCallbackResponse(packet);
                     break;
 #endif
@@ -788,12 +793,10 @@ namespace Microsoft.Build.CommandLine
         /// <exception cref="InvalidOperationException">If the connection is lost.</exception>
         /// <exception cref="BuildAbortedException">If the task is cancelled during the callback.</exception>
         /// <remarks>
-        /// This method is infrastructure for callback support. It will be used by subsequent implementations
-        /// of IsRunningMultipleNodes, RequestCores/ReleaseCores, BuildProjectFile, etc.
+        /// This method is infrastructure for callback support. Used by IsRunningMultipleNodes,
+        /// RequestCores/ReleaseCores, BuildProjectFile, etc.
         /// </remarks>
-#pragma warning disable IDE0051 // Remove unused private members - infrastructure method used by subsequent implementations
         private TResponse SendCallbackRequestAndWaitForResponse<TResponse>(ITaskHostCallbackPacket request)
-#pragma warning restore IDE0051
             where TResponse : class, INodePacket
         {
             int requestId = Interlocked.Increment(ref _nextCallbackRequestId);
@@ -808,7 +811,7 @@ namespace Microsoft.Build.CommandLine
             try
             {
                 // Send the request packet to the parent
-                _nodeEndpoint.SendData((INodePacket)request);
+                _nodeEndpoint.SendData(request);
 
                 // Wait for either: response arrives, task cancelled, or connection lost
                 // No timeout - callbacks like BuildProjectFile can legitimately take hours

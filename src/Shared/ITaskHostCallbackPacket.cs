@@ -1,9 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.BackEnd;
+#if !CLR2COMPATIBILITY
 
-namespace Microsoft.Build.CommandLine
+namespace Microsoft.Build.BackEnd
 {
     /// <summary>
     /// Interface for TaskHost callback packets that require request/response correlation.
@@ -24,3 +24,5 @@ namespace Microsoft.Build.CommandLine
         int RequestId { get; set; }
     }
 }
+
+#endif
