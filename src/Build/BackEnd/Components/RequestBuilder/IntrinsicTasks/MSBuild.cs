@@ -206,6 +206,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public string[] TargetAndPropertyListSeparators { get; set; } = null;
 
+        private static string[] SemicolonSeparatorArray = [";"];
+
         /// <summary>
         /// If set, MSBuild will skip the targets specified in this build request if they are not defined in the
         /// <see cref="Projects"/> to build. This only applies to this build request (if another target calls the
@@ -257,7 +259,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Parse out the properties to undefine, if any.
-            string[] undefinePropertiesArray = ExpandItemList(RemoveProperties);
+            string[] undefinePropertiesArray = ExpandItemList(TargetAndPropertyListSeparators ?? SemicolonSeparatorArray, RemoveProperties);
             if (undefinePropertiesArray.Length > 0)
             {
                 Log.LogMessageFromResources(MessageImportance.Low, "General.UndefineProperties");
@@ -373,7 +375,8 @@ namespace Microsoft.Build.BackEnd
                                                 _targetOutputs,
                                                 UnloadProjectsOnCompletion,
                                                 ToolsVersion,
-                                                SkipNonexistentTargets);
+                                                SkipNonexistentTargets,
+                                                TargetAndPropertyListSeparators);
 
                         if (!executeResult)
                         {
@@ -444,7 +447,8 @@ namespace Microsoft.Build.BackEnd
                 _targetOutputs,
                 UnloadProjectsOnCompletion,
                 ToolsVersion,
-                SkipNonexistentTargets);
+                SkipNonexistentTargets,
+                TargetAndPropertyListSeparators);
 
             if (!executeResult)
             {
@@ -457,14 +461,14 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Expand a single item list into an array of strings - intended for use on scalar values that represent lists of items (e.g. Properties lists on an ITaskItem metadata)
         /// </summary>
-        private static string[] ExpandItemList(string itemList)
+        private static string[] ExpandItemList(string[] separators, string itemList)
         {
             if (string.IsNullOrEmpty(itemList))
             {
                 return Array.Empty<string>();
             }
 
-            return itemList.Split(TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
+            return itemList.Split(separators, StringSplitOptions.RemoveEmptyEntries);
         }
 
         /// <summary>
@@ -481,7 +485,7 @@ namespace Microsoft.Build.BackEnd
                 foreach (string p in Properties)
                 {
                     // Split each property according to the separators
-                    string[] expandedPropertyValues = ExpandItemList(p);
+                    string[] expandedPropertyValues = ExpandItemList(TargetAndPropertyListSeparators ?? SemicolonSeparatorArray, p);
                     // Add the resultant properties to the final list
                     foreach (string property in expandedPropertyValues)
                     {
@@ -498,7 +502,7 @@ namespace Microsoft.Build.BackEnd
                 foreach (string t in Targets)
                 {
                     // Split each target according to the separators
-                    string[] expandedTargetValues = ExpandItemList(t);
+                    string[] expandedTargetValues = ExpandItemList(TargetAndPropertyListSeparators ?? SemicolonSeparatorArray, t);
                     // Add the resultant targets to the final list
                     foreach (string target in expandedTargetValues)
                     {
@@ -549,7 +553,8 @@ namespace Microsoft.Build.BackEnd
             List<ITaskItem> targetOutputs,
             bool unloadProjectsOnCompletion,
             string toolsVersion,
-            bool skipNonexistentTargets)
+            bool skipNonexistentTargets,
+            string[] targetAndPropertyListSeparators)
         {
             bool success = true;
 
@@ -575,7 +580,7 @@ namespace Microsoft.Build.BackEnd
                     projectNames[i] = projects[i].ItemSpec;
                     toolsVersions[i] = toolsVersion;
 
-                    string[] projectSpecificPropertiesMetadata = ExpandItemList(projects[i].GetMetadata(ItemMetadataNames.PropertiesMetadataName));
+                    string[] projectSpecificPropertiesMetadata = ExpandItemList(targetAndPropertyListSeparators ?? SemicolonSeparatorArray, projects[i].GetMetadata(ItemMetadataNames.PropertiesMetadataName));
                     // If the user specified a different set of global properties for this project, then
                     // parse the string containing the properties
                     if (projectSpecificPropertiesMetadata.Length > 0)
@@ -600,10 +605,17 @@ namespace Microsoft.Build.BackEnd
 
                     // If the user wanted to undefine specific global properties for this project, parse
                     // that string and remove them now.
-                    string[] projectSpecificUndefinePropertiesMetadata = ExpandItemList(projects[i].GetMetadata(ItemMetadataNames.UndefinePropertiesMetadataName));
+                    string[] projectSpecificUndefinePropertiesMetadata = ExpandItemList(targetAndPropertyListSeparators ?? SemicolonSeparatorArray, projects[i].GetMetadata(ItemMetadataNames.UndefinePropertiesMetadataName));
                     if (projectSpecificUndefinePropertiesMetadata.Length > 0)
                     {
-                        undefinePropertiesPerProject[i] ??= projectSpecificUndefinePropertiesMetadata;
+                        if (undefinePropertiesPerProject[i] is null)
+                        {
+                            undefinePropertiesPerProject[i] = [.. projectSpecificUndefinePropertiesMetadata];
+                        }
+                        else
+                        {
+                            undefinePropertiesPerProject[i].AddRange(projectSpecificUndefinePropertiesMetadata);
+                        }
 
                         if (log != null)
                         {
@@ -615,7 +627,7 @@ namespace Microsoft.Build.BackEnd
                         }
                     }
 
-                    string[] projectSpecificAdditionalPropertiesMetadata = ExpandItemList(projects[i].GetMetadata(ItemMetadataNames.AdditionalPropertiesMetadataName));
+                    string[] projectSpecificAdditionalPropertiesMetadata = ExpandItemList(targetAndPropertyListSeparators ?? SemicolonSeparatorArray, projects[i].GetMetadata(ItemMetadataNames.AdditionalPropertiesMetadataName));
                     // If the user specified a different set of global properties for this project, then
                     // parse the string containing the properties
                     if (projectSpecificAdditionalPropertiesMetadata.Length > 0)
@@ -631,7 +643,7 @@ namespace Microsoft.Build.BackEnd
                         }
 
                         // attempt to pre-size dictionaries - worst case we need to hold all entries from both, so assume that since huge amounts of properties are uncommon.
-                        var combinedTable = new Dictionary<string, string>(projectProperties[i]?.Count ?? 0 + additionalProjectPropertiesTable.Count, StringComparer.OrdinalIgnoreCase);
+                        var combinedTable = new Dictionary<string, string>((projectProperties[i]?.Count ?? 0) + additionalProjectPropertiesTable.Count, StringComparer.OrdinalIgnoreCase);
                         // todo(chusk): would it be faster to just clone the projectProperties[i] dictionary as a base, and add additionalProjectPropertiesTable on top of it?
                         // First copy in the properties from the global table that not in the additional properties table
                         if (projectProperties[i] != null)

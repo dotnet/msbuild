@@ -77,17 +77,18 @@ namespace Microsoft.Build.Tasks
 
             // Build the specified targets in the current project.
             return MSBuild.ExecuteTargets(
-                singleProject,  // project = null (current project)
-                null,           // propertiesTable = null
-                null,           // undefineProperties
-                targetLists,    // list of targets to build
-                false,          // stopOnFirstFailure = false
-                false,          // rebaseOutputs = false
-                BuildEngine3,
-                Log,
-                _targetOutputs,
-                false,
-                null);            // toolsVersion = null
+                projects: singleProject,
+                propertiesTable: null,
+                undefineProperties: null,
+                targetLists: targetLists,
+                stopOnFirstFailure: false,
+                rebaseOutputs: false,
+                buildEngine: BuildEngine3,
+                log: Log,
+                targetOutputs: _targetOutputs,
+                unloadProjectsOnCompletion: false,
+                toolsVersion: null,
+                targetAndPropertyListSeparators: null);
         }
 
         #endregion
