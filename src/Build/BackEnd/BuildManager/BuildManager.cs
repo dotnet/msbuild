@@ -845,6 +845,9 @@ namespace Microsoft.Build.Execution
 
                     _overallBuildSuccess = false;
 
+                    // Signal the project cache service to shutdown to cancel pending cache requests.
+                    ((IBuildComponent?)_projectCacheService)?.ShutdownComponent();
+
                     foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
                         if (submission.IsStarted)
@@ -2160,6 +2163,10 @@ namespace Microsoft.Build.Execution
             {
                 _shuttingDown = true;
                 _executionCancellationTokenSource?.Cancel();
+
+                // Signal the project cache service to shutdown first to cancel pending cache requests.
+                // This prevents hangs when plugin host processes die unexpectedly.
+                ((IBuildComponent?)_projectCacheService)?.ShutdownComponent();
 
                 // If we are aborting, we will NOT reuse the nodes because their state may be compromised by attempts to shut down while the build is in-progress.
                 _nodeManager?.ShutdownConnectedNodes(!abort && _buildParameters!.EnableNodeReuse);

@@ -707,6 +707,12 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(98);
         }
+
+        [Event(99, Keywords = Keywords.All)]
+        public void ProjectCacheServiceNodeShutDownSet()
+        {
+            WriteEvent(99);
+        }
         #endregion
     }
 }

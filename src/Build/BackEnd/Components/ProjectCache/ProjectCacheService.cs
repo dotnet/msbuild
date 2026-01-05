@@ -31,12 +31,13 @@ namespace Microsoft.Build.ProjectCache
 {
     internal record CacheRequest(BuildSubmission Submission, BuildRequestConfiguration Configuration);
 
-    internal sealed class ProjectCacheService : IAsyncDisposable
+    internal sealed class ProjectCacheService : IBuildComponent, IAsyncDisposable
     {
         private static readonly ParallelOptions s_parallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount };
 
         private static readonly HashSet<string> s_projectSpecificPropertyNames = new(StringComparer.OrdinalIgnoreCase) { "TargetFramework", "Configuration", "Platform", "TargetPlatform", "OutputType" };
 
+        private volatile bool _isNodeShutDown;
         private readonly BuildManager _buildManager;
         private readonly IBuildComponentHost _componentHost;
         private readonly ILoggingService _loggingService;
@@ -95,6 +96,21 @@ namespace Microsoft.Build.ProjectCache
             _configCache = configCache;
             _globalProjectCacheDescriptor = globalProjectCacheDescriptor;
         }
+
+        #region IBuildComponent Members
+
+        public void InitializeComponent(IBuildComponentHost host)
+        {
+            // Already initialized via constructor
+        }
+
+        public void ShutdownComponent()
+        {
+            _isNodeShutDown = true;
+            MSBuildEventSource.Log.ProjectCacheServiceNodeShutDownSet();
+        }
+
+        #endregion
 
         /// <summary>
         /// Optimization which frontloads plugin initialization since we have an entire graph.
@@ -511,11 +527,25 @@ namespace Microsoft.Build.ProjectCache
         {
             EnsureNotDisposed();
 
+            if (_isNodeShutDown)
+            {
+                _buildManager.PostCacheResult(
+                    cacheRequest,
+                    CacheResult.IndicateException(new Exception("Project cache request cancelled due to shutdown.")),
+                    BuildEventContext.InvalidProjectContextId);
+
+                return;
+            }
+
             Task.Run(
                 async () =>
                 {
                     try
                     {
+                        if (_isNodeShutDown)
+                        {
+                            throw new Exception("Project cache request cancelled due to shutdown.");
+                        }
                         (CacheResult cacheResult, int projectContextId) = await ProcessCacheRequestAsync();
                         _buildManager.PostCacheResult(cacheRequest, cacheResult, projectContextId);
                     }
@@ -580,6 +610,11 @@ namespace Microsoft.Build.ProjectCache
         {
             ErrorUtilities.VerifyThrowInternalNull(buildRequest.ProjectInstance, nameof(buildRequest.ProjectInstance));
 
+            if (_isNodeShutDown)
+            {
+                throw new Exception("Project cache query cancelled due to shutdown.");
+            }
+
             var buildEventFileInfo = new BuildEventFileInfo(buildRequest.ProjectFullPath);
             var pluginLogger = new LoggingServiceToPluginLoggerAdapter(
                 _loggingService,
@@ -606,6 +641,11 @@ namespace Microsoft.Build.ProjectCache
             CacheResult? cacheResult = null;
             foreach (ProjectCacheDescriptor projectCacheDescriptor in GetProjectCacheDescriptors(buildRequest.ProjectInstance!))
             {
+                // Check before each plugin call
+                if (_isNodeShutDown)
+                {
+                    throw new Exception("Project cache query cancelled due to shutdown.");
+                }
                 // Ensure each unique plugin is only queried once
                 if (!queriedCaches.Add(projectCacheDescriptor))
                 {
