@@ -214,11 +214,10 @@ namespace Microsoft.Build.Tasks
             }
 
             // Parse out the properties to undefine, if any.
-            string[] undefinePropertiesArray = null;
-            if (!String.IsNullOrEmpty(RemoveProperties))
+            string[] undefinePropertiesArray = ExpandItemList(RemoveProperties);
+            if (undefinePropertiesArray.Length > 0)
             {
                 Log.LogMessageFromResources(MessageImportance.Low, "General.UndefineProperties");
-                undefinePropertiesArray = RemoveProperties.Split(MSBuildConstants.SemicolonChar);
                 foreach (string property in undefinePropertiesArray)
                 {
                     Log.LogMessageFromText($"  {property}", MessageImportance.Low);
@@ -404,6 +403,19 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Expand a single item list into an array of strings - intended for use on scalar values that represent lists of items (e.g. Properties lists on an ITaskItem metadata)
+        /// </summary>
+        private static string[] ExpandItemList(string itemList)
+        {
+            if (string.IsNullOrEmpty(itemList))
+            {
+                return Array.Empty<string>();
+            }
+
+            return itemList.Split(TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        /// <summary>
         /// Expand and re-construct arrays of all targets and properties
         /// </summary>
         private void ExpandAllTargetsAndProperties()
@@ -417,7 +429,7 @@ namespace Microsoft.Build.Tasks
                 foreach (string t in Properties)
                 {
                     // Split each property according to the separators
-                    string[] expandedPropertyValues = t.Split(TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
+                    string[] expandedPropertyValues = ExpandItemList(t);
 
                     // Add the resultant properties to the final list
                     foreach (string property in expandedPropertyValues)
@@ -435,7 +447,7 @@ namespace Microsoft.Build.Tasks
                 foreach (string t in Targets)
                 {
                     // Split each target according to the separators
-                    string[] expandedTargetValues = t.Split(TargetAndPropertyListSeparators, StringSplitOptions.RemoveEmptyEntries);
+                    string[] expandedTargetValues = ExpandItemList(t);
 
                     // Add the resultant targets to the final list
                     foreach (string target in expandedTargetValues)
@@ -513,11 +525,15 @@ namespace Microsoft.Build.Tasks
 
                     // If the user specified a different set of global properties for this project, then
                     // parse the string containing the properties
-                    if (!String.IsNullOrEmpty(projects[i].GetMetadata("Properties")))
+                    string[] projectSpecificPropertiesMetadata = ExpandItemList(projects[i].GetMetadata("Properties"));
+                    if (projectSpecificPropertiesMetadata.Length > 0)
                     {
                         if (!PropertyParser.GetTableWithEscaping(
-                             log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]), "Properties", projects[i].GetMetadata("Properties").Split(MSBuildConstants.SemicolonChar),
-                              out Dictionary<string, string> preProjectPropertiesTable))
+                             log,
+                             ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]), 
+                             "Properties",
+                             projectSpecificPropertiesMetadata,
+                             out Dictionary<string, string> preProjectPropertiesTable))
                         {
                             return false;
                         }
@@ -526,26 +542,21 @@ namespace Microsoft.Build.Tasks
 
                     if (undefineProperties != null)
                     {
-                        undefinePropertiesPerProject[i] = new List<string>(undefineProperties);
+                        undefinePropertiesPerProject[i] = [.. undefineProperties];
                     }
 
                     // If the user wanted to undefine specific global properties for this project, parse
                     // that string and remove them now.
-                    string projectUndefineProperties = projects[i].GetMetadata("UndefineProperties");
-                    if (!String.IsNullOrEmpty(projectUndefineProperties))
+                    string[] projectSpecificUndefinePropertiesMetadata = ExpandItemList(projects[i].GetMetadata("UndefineProperties"));
+                    if (projectSpecificUndefinePropertiesMetadata.Length > 0)
                     {
-                        string[] propertiesToUndefine = projectUndefineProperties.Split(MSBuildConstants.SemicolonChar);
-                        if (undefinePropertiesPerProject[i] == null)
-                        {
-                            undefinePropertiesPerProject[i] = new List<string>(propertiesToUndefine.Length);
-                        }
+                        undefinePropertiesPerProject[i] ??= projectSpecificUndefinePropertiesMetadata;
 
-                        if (log != null && propertiesToUndefine.Length > 0)
+                        if (log != null)
                         {
                             log.LogMessageFromResources(MessageImportance.Low, "General.ProjectUndefineProperties", projectNames[i]);
-                            foreach (string property in propertiesToUndefine)
+                            foreach (string property in projectSpecificUndefinePropertiesMetadata)
                             {
-                                undefinePropertiesPerProject[i].Add(property);
                                 log.LogMessageFromText($"  {property}", MessageImportance.Low);
                             }
                         }
@@ -553,15 +564,22 @@ namespace Microsoft.Build.Tasks
 
                     // If the user specified a different set of global properties for this project, then
                     // parse the string containing the properties
-                    if (!String.IsNullOrEmpty(projects[i].GetMetadata("AdditionalProperties")))
+                    string[] projectSpecificAdditionalPropertiesMetadata = ExpandItemList(projects[i].GetMetadata("AdditionalProperties"));
+                    if (projectSpecificAdditionalPropertiesMetadata.Length > 0)
                     {
                         if (!PropertyParser.GetTableWithEscaping(
-                             log, ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]), "AdditionalProperties", projects[i].GetMetadata("AdditionalProperties").Split(MSBuildConstants.SemicolonChar),
-                              out Dictionary<string, string> additionalProjectPropertiesTable))
+                             log, 
+                             ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]), 
+                             "AdditionalProperties",
+                             projectSpecificAdditionalPropertiesMetadata,
+                             out Dictionary<string, string> additionalProjectPropertiesTable))
                         {
                             return false;
                         }
-                        var combinedTable = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+                        // attempt to pre-size dictionaries - worst case we need to hold all entries from both, so assume that since huge amounts of properties are uncommon.
+                        var combinedTable = new Dictionary<string, string>(projectProperties[i]?.Count ?? 0 + additionalProjectPropertiesTable.Count, StringComparer.OrdinalIgnoreCase);
+                        // todo(chusk): would it be faster to just clone the projectProperties[i] dictionary as a base, and add additionalProjectPropertiesTable on top of it?
                         // First copy in the properties from the global table that not in the additional properties table
                         if (projectProperties[i] != null)
                         {
