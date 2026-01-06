@@ -25,7 +25,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Lock object for thread-safe initialization and disposal.
         /// </summary>
-        private static readonly object s_lock = new object();
+        private static readonly LockType s_lock = new();
 
         private static bool s_initialized;
         private static bool s_disposed;
@@ -49,11 +49,8 @@ namespace Microsoft.Build.Framework.Telemetry
         /// versus integrated mode (e.g., running within Visual Studio or dotnet CLI).
         /// When <c>true</c>, creates and manages its own telemetry session on .NET Framework.
         /// </param>
-        /// <param name="isExplicitlyRequested">
-        /// Indicates whether telemetry was explicitly requested through command line arguments.
-        /// On .NET, telemetry is only enabled when this is <c>true</c>.
-        /// </param>
-        public void Initialize(bool isStandalone, bool isExplicitlyRequested)
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public void Initialize(bool isStandalone)
         {
             lock (s_lock)
             {
@@ -69,7 +66,7 @@ namespace Microsoft.Build.Framework.Telemetry
                     return;
                 }
 
-                TryInitializeTelemetry(isStandalone, isExplicitlyRequested);
+                TryInitializeTelemetry(isStandalone);
             }
         }
 
@@ -93,16 +90,14 @@ namespace Microsoft.Build.Framework.Telemetry
         /// allowing the calling code to catch assembly loading exceptions.
         /// </summary>
         [MethodImpl(MethodImplOptions.NoInlining)]
-        private void TryInitializeTelemetry(bool isStandalone, bool isExplicitlyRequested)
+        private void TryInitializeTelemetry(bool isStandalone)
         {
             try
             {
 #if NETFRAMEWORK
                 DefaultActivitySource = VsTelemetryInitializer.Initialize(isStandalone);
 #else
-                DefaultActivitySource = isExplicitlyRequested
-                    ? new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace)
-                    : null;
+                DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
 #endif
             }
             catch (Exception ex) when (ex is FileNotFoundException or FileLoadException or TypeLoadException)
@@ -139,66 +134,58 @@ namespace Microsoft.Build.Framework.Telemetry
             }
         }
 
-#if NETFRAMEWORK
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        private static void DisposeVsTelemetry() => VsTelemetryInitializer.Dispose();
-#endif
-
         /// <summary>
         /// Determines if the user has explicitly opted out of telemetry.
         /// </summary>
-        private static bool IsOptOut() =>
+        internal static bool IsOptOut() =>
 #if NETFRAMEWORK
             Traits.Instance.FrameworkTelemetryOptOut;
 #else
             Traits.Instance.SdkTelemetryOptOut;
 #endif
+
+#if NETFRAMEWORK
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void DisposeVsTelemetry() => VsTelemetryInitializer.Dispose();
+#endif
     }
 
 #if NETFRAMEWORK
-    /// <summary>
-    /// Isolated class that references Microsoft.VisualStudio.Telemetry types.
-    /// This separation ensures the VS Telemetry assembly is only loaded when methods
-    /// on this class are actually invoked.
-    /// </summary>
-    /// <remarks>
-    /// Thread-safety: All public methods on this class must be called under the
-    /// <see cref="TelemetryManager"/> lock to ensure thread-safe access to static state.
-    /// Callers must not invoke <see cref="Initialize"/> or <see cref="Dispose"/> concurrently.
-    /// </remarks>
     internal static class VsTelemetryInitializer
     {
         // Telemetry API key for Visual Studio telemetry service.
         private const string CollectorApiKey = "f3e86b4023cc43f0be495508d51f588a-f70d0e59-0fb0-4473-9f19-b4024cc340be-7296";
 
-        private static TelemetrySession? s_telemetrySession;
-        private static bool s_ownsSession;
+        // Store as object to avoid type reference at class load time
+        private static object? s_telemetrySession;
+        private static bool s_ownsSession = false;
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static MSBuildActivitySource Initialize(bool isStandalone)
         {
+            TelemetrySession session;
             if (isStandalone)
             {
-                s_telemetrySession = TelemetryService.CreateAndGetDefaultSession(CollectorApiKey);
+                session = TelemetryService.CreateAndGetDefaultSession(CollectorApiKey);
                 TelemetryService.DefaultSession.UseVsIsOptedIn();
                 TelemetryService.DefaultSession.Start();
                 s_ownsSession = true;
             }
             else
             {
-                s_telemetrySession = TelemetryService.DefaultSession;
-                s_ownsSession = false;
+                session = TelemetryService.DefaultSession;
             }
 
-            return new MSBuildActivitySource(s_telemetrySession);
+            s_telemetrySession = session;
+            return new MSBuildActivitySource(session);
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         public static void Dispose()
         {
-            // Only dispose the session if we created it (standalone scenario).
-            // In VS, the session is owned by VS and should not be disposed by MSBuild.
-            if (s_ownsSession)
+            if (s_ownsSession && s_telemetrySession is TelemetrySession session)
             {
-                s_telemetrySession?.Dispose();
+                session.Dispose();
             }
 
             s_telemetrySession = null;

@@ -13,11 +13,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-
-#if FEATURE_REPORTFILEACCESSES
 using System.Runtime.CompilerServices;
-#endif
-
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -30,13 +26,13 @@ using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
-using Microsoft.Build.ProjectCache;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
@@ -299,6 +295,7 @@ namespace Microsoft.Build.Execution
         public BuildManager(string hostName)
         {
             ErrorUtilities.VerifyThrowArgumentNull(hostName);
+
             _hostName = hostName;
             _buildManagerState = BuildManagerState.Idle;
             _buildSubmissions = new Dictionary<int, BuildSubmissionBase>();
@@ -463,6 +460,11 @@ namespace Microsoft.Build.Execution
         /// <exception cref="InvalidOperationException">Thrown if a build is already in progress.</exception>
         public void BeginBuild(BuildParameters parameters)
         {
+#if NETFRAMEWORK
+            // Collect telemetry unless explicitly opted out via environment variable.
+            // The decision to send telemetry is made at EndBuild to avoid eager loading of telemetry assemblies.
+            parameters.IsTelemetryEnabled |= !TelemetryManager.IsOptOut();
+#endif
             if (_previousLowPriority != null)
             {
                 if (parameters.LowPriority != _previousLowPriority)
@@ -1103,6 +1105,7 @@ namespace Microsoft.Build.Execution
                             {
                                 host = "VSCode";
                             }
+
                             _buildTelemetry.BuildEngineHost = host;
 
                             _buildTelemetry.BuildCheckEnabled = _buildParameters!.IsBuildCheckEnabled;
@@ -1112,6 +1115,7 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.SACEnabled = sacState == NativeMethodsShared.SAC_State.Evaluation || sacState == NativeMethodsShared.SAC_State.Enforcement;
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
+
                             EndBuildTelemetry();
 
                             // Clean telemetry to make it ready for next build submission.
@@ -1156,9 +1160,13 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
         private void EndBuildTelemetry()
         {
-            using IActivity? activity = TelemetryManager.Instance?.DefaultActivitySource
+            TelemetryManager.Instance.Initialize(isStandalone: false);
+
+            using IActivity? activity = TelemetryManager.Instance
+                ?.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Build)
                 ?.SetTags(_buildTelemetry)
                 ?.SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
@@ -3005,10 +3013,7 @@ namespace Microsoft.Build.Execution
                 forwardingLoggers = forwardingLoggers?.Concat(forwardingLogger) ?? forwardingLogger;
             }
 
-            TelemetryManager.Instance.Initialize(isStandalone: false, isExplicitlyRequested: _buildParameters.IsTelemetryEnabled);
-
-            // The telemetry is enabled - we need to add our consuming logger
-            if (TelemetryManager.Instance.DefaultActivitySource != null)
+            if (_buildParameters.IsTelemetryEnabled)
             {
                 // We do want to dictate our own forwarding logger (otherwise CentralForwardingLogger with minimum transferred importance MessageImportance.Low is used)
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)

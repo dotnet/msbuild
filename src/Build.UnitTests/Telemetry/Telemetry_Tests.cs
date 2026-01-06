@@ -154,7 +154,6 @@ namespace Microsoft.Build.Engine.UnitTests
         public void NodeTelemetryE2E()
         {
             using TestEnvironment env = TestEnvironment.Create();
-            env.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTIN", "1");
             env.SetEnvironmentVariable("MSBUILD_TELEMETRY_OPTOUT", null);
             env.SetEnvironmentVariable("DOTNET_CLI_TELEMETRY_OPTOUT", null);
 
@@ -245,7 +244,7 @@ namespace Microsoft.Build.Engine.UnitTests
             tags["VS.MSBuild.BuildTarget"].ShouldNotBeNullOrEmpty();
 
             // Verify task data
-            var tasks = activity.TagObjects.FirstOrDefault(to => to.Key.Contains("VS.MSBuild.Tasks"));
+            var tasks = activity.TagObjects.FirstOrDefault(to => to.Key == "VS.MSBuild.Tasks");
 
             var tasksData = tasks.Value as List<TaskDetailInfo>;
             var messageTaskData = tasksData!.FirstOrDefault(t => t.Name == "Microsoft.Build.Tasks.Message");
