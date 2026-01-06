@@ -35,6 +35,12 @@ namespace Microsoft.Build.BackEnd
         private const int NODE_ID_MAX_VALUE_FOR_MULTITHREADED = 255;
 
         /// <summary>
+        /// Counter for generating unique task IDs across all TaskHostTask instances.
+        /// Used for callback correlation when multiple tasks execute concurrently.
+        /// </summary>
+        private static int s_nextTaskId;
+
+        /// <summary>
         /// The IBuildEngine callback object.
         /// </summary>
         private IBuildEngine _buildEngine;
@@ -182,6 +188,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostQueryRequest, TaskHostQueryRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostResourceRequest, TaskHostResourceRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
 
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
@@ -324,6 +331,9 @@ namespace Microsoft.Build.BackEnd
                         _taskLoggingContext.GetWarningsAsErrors(),
                         _taskLoggingContext.GetWarningsNotAsErrors(),
                         _taskLoggingContext.GetWarningsAsMessages());
+
+            // Assign unique task ID for callback correlation
+            hostConfiguration.TaskId = Interlocked.Increment(ref s_nextTaskId);
 
             try
             {

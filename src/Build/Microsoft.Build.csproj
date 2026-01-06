@@ -105,6 +105,8 @@
     <Compile Include="..\Shared\TaskHostQueryResponse.cs" />
     <Compile Include="..\Shared\TaskHostResourceRequest.cs" />
     <Compile Include="..\Shared\TaskHostResourceResponse.cs" />
+    <Compile Include="..\Shared\TaskHostBuildRequest.cs" />
+    <Compile Include="..\Shared\TaskHostBuildResponse.cs" />
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\NodeEngineShutdownReason.cs" />

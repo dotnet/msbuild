@@ -118,6 +118,8 @@
     <Compile Include="..\Shared\TaskHostQueryResponse.cs" />
     <Compile Include="..\Shared\TaskHostResourceRequest.cs" />
     <Compile Include="..\Shared\TaskHostResourceResponse.cs" />
+    <Compile Include="..\Shared\TaskHostBuildRequest.cs" />
+    <Compile Include="..\Shared\TaskHostBuildResponse.cs" />
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\MSBuildLoadContext.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
     <Compile Include="..\Shared\TypeLoader.cs" />
@@ -146,6 +148,7 @@
     <Compile Include="LogMessagePacket.cs" />
     <Compile Include="ProjectSchemaValidationHandler.cs" />
     <Compile Include="OutOfProcTaskHostNode.cs" />
+    <Compile Include="TaskExecutionContext.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
     <Compile Include="PerformanceLogEventListener.cs" />

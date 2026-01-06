@@ -196,8 +196,29 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Pending callback requests awaiting responses from the parent.
         /// Key is the request ID, value is the TaskCompletionSource to signal when response arrives.
+        /// This is the fallback for backward compatibility when task context is not available.
         /// </summary>
         private readonly ConcurrentDictionary<int, TaskCompletionSource<INodePacket>> _pendingCallbackRequests = new();
+
+        /// <summary>
+        /// All active task execution contexts, keyed by task ID.
+        /// Supports concurrent task execution when tasks yield or await callbacks.
+        /// </summary>
+        private readonly ConcurrentDictionary<int, TaskExecutionContext> _taskContexts
+            = new ConcurrentDictionary<int, TaskExecutionContext>();
+
+        /// <summary>
+        /// The currently active task context for the calling thread.
+        /// Uses AsyncLocal to support concurrent task threads with proper context isolation.
+        /// </summary>
+        private readonly AsyncLocal<TaskExecutionContext> _currentTaskContext
+            = new AsyncLocal<TaskExecutionContext>();
+
+        /// <summary>
+        /// Counter for generating task IDs when configuration doesn't provide one.
+        /// This is a fallback for backward compatibility with older parent nodes.
+        /// </summary>
+        private int _nextLocalTaskId;
 #endif
 
         /// <summary>
@@ -229,6 +250,7 @@ namespace Microsoft.Build.CommandLine
 #if !CLR2COMPATIBILITY
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostQueryResponse, TaskHostQueryResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostResourceResponse, TaskHostResourceResponse.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostBuildResponse, TaskHostBuildResponse.FactoryForDeserialization, this);
 #endif
 
 #if !CLR2COMPATIBILITY
@@ -779,6 +801,7 @@ namespace Microsoft.Build.CommandLine
                 // Callback response packets - route to pending request
                 case NodePacketType.TaskHostQueryResponse:
                 case NodePacketType.TaskHostResourceResponse:
+                case NodePacketType.TaskHostBuildResponse:
                     HandleCallbackResponse(packet);
                     break;
 #endif
@@ -792,12 +815,27 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void HandleCallbackResponse(INodePacket packet)
         {
-            // Silent no-op if packet doesn't implement ITaskHostCallbackPacket or request ID unknown.
-            // Unknown ID can occur if request was cancelled/abandoned before response arrived.
-            if (packet is ITaskHostCallbackPacket callbackPacket
-                && _pendingCallbackRequests.TryRemove(callbackPacket.RequestId, out TaskCompletionSource<INodePacket> tcs))
+            if (packet is ITaskHostCallbackPacket callbackPacket)
             {
-                tcs.TrySetResult(packet);
+                int requestId = callbackPacket.RequestId;
+
+                // First, try to find in per-task contexts (Phase 2 support)
+                foreach (var context in _taskContexts.Values)
+                {
+                    if (context.PendingCallbackRequests.TryRemove(requestId, out var tcs))
+                    {
+                        tcs.TrySetResult(packet);
+                        return;
+                    }
+                }
+
+                // Fallback to global pending requests (backward compatibility / Phase 1)
+                if (_pendingCallbackRequests.TryRemove(requestId, out var globalTcs))
+                {
+                    globalTcs.TrySetResult(packet);
+                }
+
+                // Silently ignore unknown request IDs - could be stale responses from cancelled requests
             }
         }
 
@@ -817,6 +855,13 @@ namespace Microsoft.Build.CommandLine
         private TResponse SendCallbackRequestAndWaitForResponse<TResponse>(ITaskHostCallbackPacket request)
             where TResponse : class, INodePacket
         {
+            // Get context - use per-task pending requests if available
+            var context = GetCurrentTaskContext();
+            var pendingRequests = context?.PendingCallbackRequests ?? _pendingCallbackRequests;
+
+            // IMPORTANT: Request IDs must be globally unique across all task contexts
+            // to prevent collisions when multiple tasks are blocked simultaneously.
+            // We always use the global counter, even when storing in per-task dictionaries.
             int requestId = Interlocked.Increment(ref _nextCallbackRequestId);
             request.RequestId = requestId;
 
@@ -824,16 +869,24 @@ namespace Microsoft.Build.CommandLine
             using var responseEvent = new ManualResetEvent(false);
             var tcs = new TaskCompletionSource<INodePacket>(TaskCreationOptions.RunContinuationsAsynchronously);
             tcs.Task.ContinueWith(_ => responseEvent.Set(), TaskContinuationOptions.ExecuteSynchronously);
-            _pendingCallbackRequests[requestId] = tcs;
+            pendingRequests[requestId] = tcs;
 
             try
             {
+                // Update state to blocked (for debugging/monitoring)
+                if (context != null)
+                {
+                    context.State = TaskExecutionState.BlockedOnCallback;
+                }
+
                 // Send the request packet to the parent
                 _nodeEndpoint.SendData(request);
 
                 // Wait for either: response arrives, task cancelled, or connection lost
                 // No timeout - callbacks like BuildProjectFile can legitimately take hours
-                WaitHandle[] waitHandles = [responseEvent, _taskCancelledEvent];
+                WaitHandle[] waitHandles = context != null
+                    ? [responseEvent, context.CancelledEvent]
+                    : [responseEvent, _taskCancelledEvent];
 
                 while (true)
                 {
@@ -870,8 +923,134 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
-                _pendingCallbackRequests.TryRemove(requestId, out _);
+                pendingRequests.TryRemove(requestId, out _);
+
+                // Restore state to executing
+                if (context != null)
+                {
+                    context.State = TaskExecutionState.Executing;
+                }
             }
+        }
+
+        /// <summary>
+        /// Gets the task execution context for the current thread.
+        /// </summary>
+        /// <returns>The current task's execution context, or null if not available.</returns>
+        private TaskExecutionContext GetCurrentTaskContext()
+        {
+            return _currentTaskContext.Value;
+        }
+
+        /// <summary>
+        /// Creates a new task execution context for the given configuration.
+        /// </summary>
+        /// <param name="configuration">The task configuration.</param>
+        /// <returns>The newly created context.</returns>
+        private TaskExecutionContext CreateTaskContext(TaskHostConfiguration configuration)
+        {
+            int taskId = configuration.TaskId > 0
+                ? configuration.TaskId
+                : Interlocked.Increment(ref _nextLocalTaskId);
+
+            var context = new TaskExecutionContext(taskId, configuration);
+
+            if (!_taskContexts.TryAdd(taskId, context))
+            {
+                context.Dispose();
+                throw new InvalidOperationException(
+                    $"Task ID {taskId} already exists in TaskHost. This indicates a protocol error.");
+            }
+
+            return context;
+        }
+
+        /// <summary>
+        /// Removes and disposes a task execution context.
+        /// </summary>
+        /// <param name="taskId">The task ID to remove.</param>
+        private void RemoveTaskContext(int taskId)
+        {
+            if (_taskContexts.TryRemove(taskId, out var context))
+            {
+                context.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Gets a task context by ID.
+        /// </summary>
+        /// <param name="taskId">The task ID to look up.</param>
+        /// <returns>The context, or null if not found.</returns>
+        private TaskExecutionContext GetTaskContext(int taskId)
+        {
+            _taskContexts.TryGetValue(taskId, out var context);
+            return context;
+        }
+
+        /// <summary>
+        /// Saves the current operating environment to the task context.
+        /// Called before yielding or blocking on a callback that allows other tasks to run
+        /// (e.g., BuildProjectFile, Yield).
+        /// </summary>
+        /// <param name="context">The task context to save environment into.</param>
+        /// <remarks>
+        /// This captures:
+        /// - Current working directory
+        /// - All environment variables (as a defensive copy)
+        ///
+        /// The saved state can be restored later with <see cref="RestoreOperatingEnvironment"/>.
+        /// This is NOT needed for quick callbacks like IsRunningMultipleNodes or RequestCores
+        /// where no other task can run.
+        /// </remarks>
+        internal void SaveOperatingEnvironment(TaskExecutionContext context)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(context, nameof(context));
+
+            context.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
+
+            // Create a mutable copy of environment variables.
+            // CommunicationsUtilities.GetEnvironmentVariables() returns FrozenDictionary which
+            // may be cached/shared, so we need our own snapshot.
+            context.SavedEnvironment = new Dictionary<string, string>(
+                CommunicationsUtilities.GetEnvironmentVariables(),
+                StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Restores the previously saved operating environment from the task context.
+        /// Called when resuming after yield or callback completion.
+        /// </summary>
+        /// <param name="context">The task context to restore environment from.</param>
+        /// <remarks>
+        /// This method:
+        /// - Restores environment variables (clearing any that were added, updating changed ones)
+        /// - Restores current working directory
+        /// - Clears the saved state from the context (prevents double-restore)
+        ///
+        /// Throws if <see cref="SaveOperatingEnvironment"/> was not called first.
+        /// </remarks>
+        internal void RestoreOperatingEnvironment(TaskExecutionContext context)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(context, nameof(context));
+            ErrorUtilities.VerifyThrow(
+                context.SavedCurrentDirectory != null,
+                "Current directory not previously saved for task {0}",
+                context.TaskId);
+            ErrorUtilities.VerifyThrow(
+                context.SavedEnvironment != null,
+                "Environment variables not previously saved for task {0}",
+                context.TaskId);
+
+            // Restore environment variables first (SetEnvironment handles clearing extras and updating changes)
+            CommunicationsUtilities.SetEnvironment(context.SavedEnvironment);
+
+            // Restore current directory
+            NativeMethodsShared.SetCurrentDirectory(context.SavedCurrentDirectory);
+
+            // Clear saved state - prevents accidental double-restore and allows GC
+            context.SavedCurrentDirectory = null;
+            context.SavedEnvironment = null;
         }
 #endif
 
@@ -884,9 +1063,20 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(!_isTaskExecuting, "Why are we getting a TaskHostConfiguration packet while we're still executing a task?");
             _currentConfiguration = taskHostConfiguration;
 
+#if !CLR2COMPATIBILITY
+            // Create task execution context for this task
+            var context = CreateTaskContext(taskHostConfiguration);
+            context.State = TaskExecutionState.Executing;
+#endif
+
             // Kick off the task running thread.
             _taskRunnerThread = new Thread(new ParameterizedThreadStart(RunTask));
             _taskRunnerThread.Name = "Task runner for task " + taskHostConfiguration.TaskName;
+
+#if !CLR2COMPATIBILITY
+            context.ExecutingThread = _taskRunnerThread;
+#endif
+
             _taskRunnerThread.Start(taskHostConfiguration);
         }
 
@@ -909,6 +1099,14 @@ namespace Microsoft.Build.CommandLine
 
                 _nodeEndpoint.SendData(taskCompletePacketToSend);
             }
+
+#if !CLR2COMPATIBILITY
+            // Clean up task context after result has been sent
+            if (_currentConfiguration != null)
+            {
+                RemoveTaskContext(_currentConfiguration.TaskId);
+            }
+#endif
 
             _currentConfiguration = null;
 
@@ -1061,6 +1259,16 @@ namespace Microsoft.Build.CommandLine
             _isTaskExecuting = true;
             OutOfProcTaskHostTaskResult taskResult = null;
             TaskHostConfiguration taskConfiguration = state as TaskHostConfiguration;
+
+#if !CLR2COMPATIBILITY
+            // Set the current task context for this thread
+            TaskExecutionContext taskContext = GetTaskContext(taskConfiguration.TaskId);
+            if (taskContext != null)
+            {
+                _currentTaskContext.Value = taskContext;
+            }
+#endif
+
             IDictionary<string, TaskParameter> taskParams = taskConfiguration.TaskParameters;
 
             // We only really know the values of these variables for sure once we see what we received from our parent
@@ -1172,6 +1380,16 @@ namespace Microsoft.Build.CommandLine
 
                     // Call CleanupTask to unload any domains and other necessary cleanup in the taskWrapper
                     _taskWrapper.CleanupTask();
+
+#if !CLR2COMPATIBILITY
+                    // Mark context as completed
+                    if (taskContext != null)
+                    {
+                        taskContext.State = TaskExecutionState.Completed;
+                        taskContext.CompletedEvent.Set();
+                        // Note: Context is removed after CompleteTask sends the result to parent
+                    }
+#endif
 
                     // The task has now fully completed executing
                     _taskCompleteEvent.Set();

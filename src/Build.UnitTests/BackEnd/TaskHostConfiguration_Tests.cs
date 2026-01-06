@@ -721,6 +721,52 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Test serialization / deserialization of the TaskId property.
+        /// </summary>
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(42)]
+        [InlineData(int.MaxValue)]
+        public void TestTranslationWithTaskId(int taskId)
+        {
+            TaskHostConfiguration config = new TaskHostConfiguration(
+                nodeId: 1,
+                startupDirectory: Directory.GetCurrentDirectory(),
+                buildProcessEnvironment: null,
+                culture: Thread.CurrentThread.CurrentCulture,
+                uiCulture: Thread.CurrentThread.CurrentUICulture,
+#if FEATURE_APPDOMAIN
+                appDomainSetup:
+#if FEATURE_APPDOMAIN
+                null,
+#endif
+                lineNumberOfTask:
+#endif
+                1,
+                columnNumberOfTask: 1,
+                projectFileOfTask: @"c:\my project\myproj.proj",
+                continueOnError: _continueOnErrorDefault,
+                taskName: "TaskName",
+                taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
+                taskParameters: null,
+                globalParameters: null,
+                warningsAsErrors: null,
+                warningsNotAsErrors: null,
+                warningsAsMessages: null);
+
+            config.TaskId = taskId;
+
+            ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
+
+            deserializedConfig.TaskId.ShouldBe(taskId);
+        }
+
+        /// <summary>
         /// Helper methods for testing the task host-related packets.
         /// </summary>
         internal static class TaskHostPacketHelpers
