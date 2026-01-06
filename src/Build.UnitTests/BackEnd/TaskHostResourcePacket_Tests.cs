@@ -112,5 +112,63 @@ namespace Microsoft.Build.UnitTests.BackEnd
             response.RequestId = 888;
             response.RequestId.ShouldBe(888);
         }
+
+        /// <summary>
+        /// Tests that zero core count serializes correctly (edge case).
+        /// </summary>
+        [Fact]
+        public void TaskHostResourceRequest_ZeroCores_RoundTrip()
+        {
+            var request = new TaskHostResourceRequest(
+                TaskHostResourceRequest.ResourceOperation.RequestCores, 0);
+            request.RequestId = 1;
+
+            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+            request.Translate(writeTranslator);
+
+            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+            var deserialized = (TaskHostResourceRequest)TaskHostResourceRequest.FactoryForDeserialization(readTranslator);
+
+            deserialized.CoreCount.ShouldBe(0);
+        }
+
+        /// <summary>
+        /// Tests that large core count serializes correctly (edge case).
+        /// </summary>
+        [Fact]
+        public void TaskHostResourceRequest_LargeCoreCount_RoundTrip()
+        {
+            var request = new TaskHostResourceRequest(
+                TaskHostResourceRequest.ResourceOperation.RequestCores, int.MaxValue);
+            request.RequestId = int.MaxValue;
+
+            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+            request.Translate(writeTranslator);
+
+            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+            var deserialized = (TaskHostResourceRequest)TaskHostResourceRequest.FactoryForDeserialization(readTranslator);
+
+            deserialized.CoreCount.ShouldBe(int.MaxValue);
+            deserialized.RequestId.ShouldBe(int.MaxValue);
+        }
+
+        /// <summary>
+        /// Tests that negative response values serialize correctly (edge case).
+        /// While negative cores doesn't make semantic sense, the packet should handle it for robustness.
+        /// </summary>
+        [Fact]
+        public void TaskHostResourceResponse_NegativeValue_RoundTrip()
+        {
+            var response = new TaskHostResourceResponse(-1, -1);
+
+            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+            response.Translate(writeTranslator);
+
+            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+            var deserialized = (TaskHostResourceResponse)TaskHostResourceResponse.FactoryForDeserialization(readTranslator);
+
+            deserialized.RequestId.ShouldBe(-1);
+            deserialized.CoresGranted.ShouldBe(-1);
+        }
     }
 }

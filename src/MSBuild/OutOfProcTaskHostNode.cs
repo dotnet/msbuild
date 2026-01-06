@@ -776,8 +776,9 @@ namespace Microsoft.Build.CommandLine
                     break;
 
 #if !CLR2COMPATIBILITY
-                // Callback response packet - route to pending request
+                // Callback response packets - route to pending request
                 case NodePacketType.TaskHostQueryResponse:
+                case NodePacketType.TaskHostResourceResponse:
                     HandleCallbackResponse(packet);
                     break;
 #endif

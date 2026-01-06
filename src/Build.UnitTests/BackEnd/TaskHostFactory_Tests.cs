@@ -369,5 +369,182 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.ShouldNotBeNullOrEmpty();
             bool.Parse(result).ShouldBe(expectedResult);
         }
+
+        /// <summary>
+        /// Verifies that IBuildEngine9.RequestCores can be called from a task running in the task host.
+        /// This tests the resource management callback infrastructure.
+        /// </summary>
+        [Fact]
+        public void RequestCoresCallbackWorksInTaskHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(ResourceManagementTask)}"" AssemblyFile=""{typeof(ResourceManagementTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""TestRequestCores"">
+        <{nameof(ResourceManagementTask)} RequestedCores=""4"" ReleaseCoresAfterRequest=""true"">
+            <Output PropertyName=""CoresGranted"" TaskParameter=""CoresGranted"" />
+            <Output PropertyName=""CompletedSuccessfully"" TaskParameter=""CompletedSuccessfully"" />
+            <Output PropertyName=""ErrorMessage"" TaskParameter=""ErrorMessage"" />
+        </{nameof(ResourceManagementTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+
+            BuildParameters buildParameters = new()
+            {
+                MaxNodeCount = 4,
+                EnableNodeReuse = false
+            };
+
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult buildResult = buildManager.Build(
+                buildParameters,
+                new BuildRequestData(projectInstance, targetsToBuild: ["TestRequestCores"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Verify the task completed successfully (no NotImplementedException)
+            string completedSuccessfully = projectInstance.GetPropertyValue("CompletedSuccessfully");
+            completedSuccessfully.ShouldBe("True",
+                $"Task failed with error: {projectInstance.GetPropertyValue("ErrorMessage")}");
+
+            // Verify we got at least 1 core (implicit core guarantee)
+            string coresGranted = projectInstance.GetPropertyValue("CoresGranted");
+            coresGranted.ShouldNotBeNullOrEmpty();
+            int.Parse(coresGranted).ShouldBeGreaterThanOrEqualTo(1);
+        }
+
+        /// <summary>
+        /// Verifies that IBuildEngine9.ReleaseCores can be called from a task running in the task host
+        /// without throwing exceptions.
+        /// </summary>
+        [Fact]
+        public void ReleaseCoresCallbackWorksInTaskHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(ResourceManagementTask)}"" AssemblyFile=""{typeof(ResourceManagementTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""TestReleaseCores"">
+        <{nameof(ResourceManagementTask)} RequestedCores=""2"" ReleaseCoresAfterRequest=""true"">
+            <Output PropertyName=""CompletedSuccessfully"" TaskParameter=""CompletedSuccessfully"" />
+            <Output PropertyName=""ErrorMessage"" TaskParameter=""ErrorMessage"" />
+        </{nameof(ResourceManagementTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+
+            BuildParameters buildParameters = new()
+            {
+                EnableNodeReuse = false
+            };
+
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult buildResult = buildManager.Build(
+                buildParameters,
+                new BuildRequestData(projectInstance, targetsToBuild: ["TestReleaseCores"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            string completedSuccessfully = projectInstance.GetPropertyValue("CompletedSuccessfully");
+            completedSuccessfully.ShouldBe("True",
+                $"Task failed with error: {projectInstance.GetPropertyValue("ErrorMessage")}");
+        }
+
+        /// <summary>
+        /// Verifies that multiple callbacks can be made from a single task execution
+        /// and that request/response correlation works correctly.
+        /// </summary>
+        [Fact]
+        public void MultipleCallbacksWorkInTaskHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(MultipleCallbackTask)}"" AssemblyFile=""{typeof(MultipleCallbackTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""TestMultipleCallbacks"">
+        <{nameof(MultipleCallbackTask)} Iterations=""10"">
+            <Output PropertyName=""SuccessfulCallbacks"" TaskParameter=""SuccessfulCallbacks"" />
+            <Output PropertyName=""TotalCoresGranted"" TaskParameter=""TotalCoresGranted"" />
+        </{nameof(MultipleCallbackTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+
+            BuildParameters buildParameters = new()
+            {
+                MaxNodeCount = 4,
+                EnableNodeReuse = false
+            };
+
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult buildResult = buildManager.Build(
+                buildParameters,
+                new BuildRequestData(projectInstance, targetsToBuild: ["TestMultipleCallbacks"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // 1 IsRunningMultipleNodes + 10 RequestCores + 10 ReleaseCores = 21 callbacks
+            string successfulCallbacks = projectInstance.GetPropertyValue("SuccessfulCallbacks");
+            successfulCallbacks.ShouldNotBeNullOrEmpty();
+            int.Parse(successfulCallbacks).ShouldBeGreaterThanOrEqualTo(11); // At minimum: 1 + 10 requests
+        }
+
+        /// <summary>
+        /// Verifies that callbacks work with the MSBUILDFORCEALLTASKSOUTOFPROC environment variable
+        /// which forces all tasks to run in the task host.
+        /// </summary>
+        [Fact]
+        public void CallbacksWorkWithForceTaskHostEnvVar()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            // Force all tasks out of proc
+            env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(MultipleCallbackTask)}"" AssemblyFile=""{typeof(MultipleCallbackTask).Assembly.Location}"" />
+    <Target Name=""TestCallbacksWithEnvVar"">
+        <{nameof(MultipleCallbackTask)} Iterations=""3"">
+            <Output PropertyName=""SuccessfulCallbacks"" TaskParameter=""SuccessfulCallbacks"" />
+            <Output PropertyName=""IsRunningMultipleNodes"" TaskParameter=""IsRunningMultipleNodes"" />
+        </{nameof(MultipleCallbackTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+
+            BuildParameters buildParameters = new()
+            {
+                MaxNodeCount = 2,
+                EnableNodeReuse = true  // Sidecar mode with env var
+            };
+
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult buildResult = buildManager.Build(
+                buildParameters,
+                new BuildRequestData(projectInstance, targetsToBuild: ["TestCallbacksWithEnvVar"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            string successfulCallbacks = projectInstance.GetPropertyValue("SuccessfulCallbacks");
+            int.Parse(successfulCallbacks).ShouldBeGreaterThan(0);
+        }
     }
 }
