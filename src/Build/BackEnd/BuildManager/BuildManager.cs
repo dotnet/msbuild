@@ -163,7 +163,7 @@ namespace Microsoft.Build.Execution
         /// <remarks>
         /// { submissionId, BuildSubmission }
         /// </remarks>
-        private readonly Dictionary<int, BuildSubmissionBase> _buildSubmissions;
+        private readonly ConcurrentDictionary<int, BuildSubmissionBase> _buildSubmissions;
 
         /// <summary>
         /// Event signalled when all build submissions are complete.
@@ -297,7 +297,7 @@ namespace Microsoft.Build.Execution
             ErrorUtilities.VerifyThrowArgumentNull(hostName);
             _hostName = hostName;
             _buildManagerState = BuildManagerState.Idle;
-            _buildSubmissions = new Dictionary<int, BuildSubmissionBase>();
+            _buildSubmissions = new ConcurrentDictionary<int, BuildSubmissionBase>();
             _noActiveSubmissionsEvent = new AutoResetEvent(true);
             _activeNodes = new HashSet<int>();
             _noNodesActiveEvent = new AutoResetEvent(true);
@@ -314,6 +314,10 @@ namespace Microsoft.Build.Execution
             _loggingThreadExceptionEventHandler = OnLoggingThreadException;
             _legacyThreadingData = new LegacyThreadingData();
             _instantiationTimeUtc = DateTime.UtcNow;
+
+            // Interlocked.Increment will pre-increment this value before returning, so starting at -1
+            // means the first build will have an ID of 0.
+            _nextBuildSubmissionId = -1;
         }
 
         /// <summary>
@@ -941,28 +945,29 @@ namespace Microsoft.Build.Execution
             where TRequestData : BuildRequestData<TRequestData, TResultData>
             where TResultData : BuildResultBase
         {
-            lock (_syncLock)
-            {
-                ErrorUtilities.VerifyThrowArgumentNull(requestData);
-                ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
-                ErrorIfState(BuildManagerState.Idle, "NoBuildInProgress");
-                VerifyStateInternal(BuildManagerState.Building);
+            ErrorUtilities.VerifyThrowArgumentNull(requestData);
+            ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
+            ErrorIfState(BuildManagerState.Idle, "NoBuildInProgress");
+            VerifyStateInternal(BuildManagerState.Building);
 
-                var newSubmission = requestData.CreateSubmission(this, GetNextSubmissionId(), requestData,
-                    _buildParameters!.LegacyThreadingSemantics);
+            var newSubmission = requestData.CreateSubmission(this, GetNextSubmissionId(), requestData,
+                _buildParameters!.LegacyThreadingSemantics);
 
-                if (_buildTelemetry != null)
-                {
-                    // Project graph can have multiple entry points, for purposes of identifying event for same build project,
-                    // we believe that including only one entry point will provide enough precision.
-                    _buildTelemetry.ProjectPath ??= requestData.EntryProjectsFullPath.FirstOrDefault();
-                    _buildTelemetry.BuildTarget ??= string.Join(",", requestData.TargetNames);
-                }
+            // Project graph can have multiple entry points, for purposes of identifying event for same build project,
+            // we believe that including only one entry point will provide enough precision.
 
-                _buildSubmissions.Add(newSubmission.SubmissionId, newSubmission);
-                _noActiveSubmissionsEvent!.Reset();
-                return newSubmission;
-            }
+            // _buildTelemetry is set at the beginning and end of the build. The MemoryBarrier helps ensure that we read the updated value.
+            Thread.MemoryBarrier();
+            _buildTelemetry?.SetProjectEntryPoint(requestData.EntryProjectsFullPath, requestData.TargetNames);
+
+            // SubmissionId should always be unique since GetNextSubmissionId() uses Interlocked.Increment.
+            bool added = _buildSubmissions.TryAdd(newSubmission.SubmissionId, newSubmission);
+
+            Debug.Assert(added, "We expect adding a new submission to always succeed since it should have received a unique ID");
+
+            _noActiveSubmissionsEvent!.Reset();
+
+            return newSubmission;
         }
 
         private TResultData BuildRequest<TRequestData, TResultData>(TRequestData requestData)
@@ -1009,8 +1014,9 @@ namespace Microsoft.Build.Execution
                 lock (_syncLock)
                 {
                     // If there are any submissions which never started, remove them now.
-                    var submissionsToCheck = new List<BuildSubmissionBase>(_buildSubmissions.Values);
-                    foreach (BuildSubmissionBase submission in submissionsToCheck)
+                    // The "Values" property on ConcurrentDictionary creates a copy, so we can safely iterate over it
+                    // even though CheckSubmissionCompletenessAndRemove() removes items from the dictionary.
+                    foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
                         CheckSubmissionCompletenessAndRemove(submission);
                     }
@@ -1029,7 +1035,7 @@ namespace Microsoft.Build.Execution
 
                 Task projectCacheDispose = _projectCacheService!.DisposeAsync().AsTask();
 
-                ErrorUtilities.VerifyThrow(_buildSubmissions.Count == 0, "All submissions not yet complete.");
+                ErrorUtilities.VerifyThrow(_buildSubmissions.IsEmpty, "All submissions not yet complete.");
                 ErrorUtilities.VerifyThrow(_activeNodes.Count == 0, "All nodes not yet shut down.");
 
                 if (_buildParameters!.UsesOutputCache())
@@ -2179,7 +2185,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private int GetNextSubmissionId()
         {
-            return _nextBuildSubmissionId++;
+            return Interlocked.Increment(ref _nextBuildSubmissionId);
         }
 
         /// <summary>
@@ -2558,14 +2564,15 @@ namespace Microsoft.Build.Execution
                 if (shutdownPacket.Reason == NodeShutdownReason.ConnectionFailed)
                 {
                     ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent<ILoggingService>(BuildComponentType.LoggingService);
-                    foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
+                    foreach (KeyValuePair<int, BuildSubmissionBase> kvp in _buildSubmissions)
                     {
+                        BuildSubmissionBase submission = kvp.Value;
                         BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, BuildEventContext.InvalidNodeId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
                         string exception = ExceptionHandling.ReadAnyExceptionFromFile(_instantiationTimeUtc);
                         loggingService?.LogError(buildEventContext, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, ExceptionHandling.DebugDumpPath, exception);
                     }
                 }
-                else if (shutdownPacket.Reason == NodeShutdownReason.Error && _buildSubmissions.Values.Count == 0)
+                else if (shutdownPacket.Reason == NodeShutdownReason.Error && _buildSubmissions.IsEmpty)
                 {
                     // We have no submissions to attach any exceptions to, lets just log it here.
                     if (shutdownPacket.Exception != null)
@@ -2579,8 +2586,9 @@ namespace Microsoft.Build.Execution
                 _nodeManager!.ShutdownConnectedNodes(_buildParameters!.EnableNodeReuse);
                 _taskHostNodeManager!.ShutdownConnectedNodes(_buildParameters.EnableNodeReuse);
 
-                foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
+                foreach (KeyValuePair<int, BuildSubmissionBase> kvp in _buildSubmissions)
                 {
+                    BuildSubmissionBase submission = kvp.Value;
                     // The submission has not started
                     if (!submission.IsStarted)
                     {
@@ -2642,8 +2650,7 @@ namespace Microsoft.Build.Execution
 
             if (_activeNodes.Count == 0)
             {
-                var submissions = new List<BuildSubmissionBase>(_buildSubmissions.Values);
-                foreach (BuildSubmissionBase submission in submissions)
+                foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                 {
                     // The submission has not started do not add it to the results cache
                     if (!submission.IsStarted)
@@ -2801,7 +2808,7 @@ namespace Microsoft.Build.Execution
                 if (submission.IsCompleted || !submission.IsStarted)
                 {
                     _overallBuildSuccess &= (submission.BuildResultBase?.OverallResult == BuildResultCode.Success);
-                    _buildSubmissions.Remove(submission.SubmissionId);
+                    _buildSubmissions.TryRemove(submission.SubmissionId, out _);
 
                     // Clear all cached SDKs for the submission
                     SdkResolverService.ClearCache(submission.SubmissionId);
@@ -2815,7 +2822,7 @@ namespace Microsoft.Build.Execution
         {
             Debug.Assert(Monitor.IsEntered(_syncLock));
 
-            if (_buildSubmissions.Count == 0)
+            if (_buildSubmissions.IsEmpty)
             {
                 if (flags.HasValue && flags.Value.HasFlag(BuildRequestDataFlags.ClearCachesAfterBuild))
                 {
@@ -2882,8 +2889,8 @@ namespace Microsoft.Build.Execution
                     }
 
                     _threadException = ExceptionDispatchInfo.Capture(e);
-                    var submissions = new List<BuildSubmissionBase>(_buildSubmissions.Values);
-                    foreach (BuildSubmissionBase submission in submissions)
+
+                    foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
                         // Submission has not started
                         if (!submission.IsStarted)
