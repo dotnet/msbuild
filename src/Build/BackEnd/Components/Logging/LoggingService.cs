@@ -1848,6 +1848,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 // The null logger has no effect on minimum verbosity.
                 Execution.BuildManager.NullLogger => null,
 
+                // Telemetry loggers only consume WorkerNodeTelemetryLogged events, not message events.
+                // They have no effect on minimum message verbosity.
+                TelemetryInfra.InternalTelemetryConsumingLogger => null,
+                Framework.Telemetry.InternalTelemetryForwardingLogger => null,
+
                 TerminalLogger terminalLogger => terminalLogger.GetMinimumMessageImportance(),
                 _ =>
                     innerLogger.GetType().FullName == "Microsoft.Build.Logging.TerminalLogger"
