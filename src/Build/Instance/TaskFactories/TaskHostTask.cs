@@ -181,6 +181,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostQueryRequest, TaskHostQueryRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostResourceRequest, TaskHostResourceRequest.FactoryForDeserialization, this);
 
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
@@ -500,6 +501,9 @@ namespace Microsoft.Build.BackEnd
                 case NodePacketType.TaskHostQueryRequest:
                     HandleQueryRequest(packet as TaskHostQueryRequest);
                     break;
+                case NodePacketType.TaskHostResourceRequest:
+                    HandleResourceRequest(packet as TaskHostResourceRequest);
+                    break;
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     break;
@@ -652,6 +656,34 @@ namespace Microsoft.Build.BackEnd
             };
 
             var response = new TaskHostQueryResponse(request.RequestId, result);
+            _taskHostProvider.SendData(_taskHostNodeId, response);
+        }
+
+        /// <summary>
+        /// Handles resource requests (RequestCores/ReleaseCores) from the TaskHost.
+        /// </summary>
+        private void HandleResourceRequest(TaskHostResourceRequest request)
+        {
+            int result = 0;
+
+            switch (request.Operation)
+            {
+                case TaskHostResourceRequest.ResourceOperation.RequestCores:
+                    result = _buildEngine is IBuildEngine9 engine9
+                        ? engine9.RequestCores(request.CoreCount)
+                        : request.CoreCount; // Fallback: grant all if old engine
+                    break;
+
+                case TaskHostResourceRequest.ResourceOperation.ReleaseCores:
+                    if (_buildEngine is IBuildEngine9 releaseEngine9)
+                    {
+                        releaseEngine9.ReleaseCores(request.CoreCount);
+                    }
+                    result = request.CoreCount; // Acknowledgment
+                    break;
+            }
+
+            var response = new TaskHostResourceResponse(request.RequestId, result);
             _taskHostProvider.SendData(_taskHostNodeId, response);
         }
 

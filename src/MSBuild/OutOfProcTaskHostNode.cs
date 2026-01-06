@@ -228,6 +228,7 @@ namespace Microsoft.Build.CommandLine
 
 #if !CLR2COMPATIBILITY
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostQueryResponse, TaskHostQueryResponse.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostResourceResponse, TaskHostResourceResponse.FactoryForDeserialization, this);
 #endif
 
 #if !CLR2COMPATIBILITY
@@ -538,14 +539,30 @@ namespace Microsoft.Build.CommandLine
 
         public int RequestCores(int requestedCores)
         {
-            // No resource management in OOP nodes
+#if CLR2COMPATIBILITY
+            // No resource management in CLR2 task host
             throw new NotImplementedException();
+#else
+            var request = new TaskHostResourceRequest(
+                TaskHostResourceRequest.ResourceOperation.RequestCores,
+                requestedCores);
+            var response = SendCallbackRequestAndWaitForResponse<TaskHostResourceResponse>(request);
+            return response.CoresGranted;
+#endif
         }
 
         public void ReleaseCores(int coresToRelease)
         {
-            // No resource management in OOP nodes
+#if CLR2COMPATIBILITY
+            // No resource management in CLR2 task host
             throw new NotImplementedException();
+#else
+            var request = new TaskHostResourceRequest(
+                TaskHostResourceRequest.ResourceOperation.ReleaseCores,
+                coresToRelease);
+            // Wait for response to ensure proper sequencing - parent must process release before we continue
+            SendCallbackRequestAndWaitForResponse<TaskHostResourceResponse>(request);
+#endif
         }
 
         #endregion
