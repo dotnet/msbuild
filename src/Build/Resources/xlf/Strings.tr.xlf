@@ -908,12 +908,12 @@ Hatalar: {3}</target>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
-        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</target>
+        <target state="translated">Bir SDK "{0}" ortam değişkenini "{1}" olarak ayarlamaya çalıştı ancak bu değişken zaten bir ortam değişkeni olarak "{2}" değerine ayarlanmıştı.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
-        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</target>
+        <target state="translated">Bir SDK "{0}" ortam değişkenini "{1}" olarak ayarlamaya çalıştı ancak bu değişken zaten başka bir SDK tarafından "{2}" olarak ayarlanmıştı.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
