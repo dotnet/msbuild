@@ -4,14 +4,16 @@
 
 Enable binary logging in CI/CD pipelines without modifying artifacts on disk.
 
+**Proposed solution:** An environment variable that enables diagnostic logging without touching any files on disk-no response file creation, no project file modifications, no build script changes.
+
+**Important for company-wide deployment:** When enabling this feature organization-wide (e.g., via CI/CD pipeline configuration), the team setting the environment variable may not be the team that owns individual codebases. Ensure stakeholders understand that builds with `/warnaserror` may be affected.
+
 **Problem scenarios addressed:**
 
 - `-noAutoResponse` blocks response files entirely
 - Creating `Directory.Build.rsp` requires writing new files to the source tree
 - Modifying existing RSP files risks merge conflicts or unintended side effects
 - Some build environments restrict write access to source directories
-
-**Proposed solution:** An environment variable that enables diagnostic logging without touching any files on disk-no response file creation, no project file modifications, no build script changes.
 
 ## Supported Arguments
 
@@ -20,7 +22,7 @@ Enable binary logging in CI/CD pipelines without modifying artifacts on disk.
 
 > **Note:** The `deferred` mode for `-check` is not currently supported. Enabling this feature requires changes to the MSBuild codebase. See section "Build Check (-check) Handling" below.
 
-> **Recommendation:** For CI/CD use, specify a path with the `{}` placeholder (e.g., `-bl:logs/build{}.binlog`) to generate unique filenames and avoid overwriting logs across multiple build invocations.
+> **Recommendation:** For CI/CD use, specify an **absolute path** with the `{}` placeholder (e.g., `-bl:C:\BuildLogs\build{}.binlog` or `-bl:/var/log/builds/build{}.binlog`) to generate unique filenames in a known location, avoiding CWD-relative paths that vary by build.
 
 **All other switches are blocked** to maintain diagnosability.
 
@@ -100,7 +102,7 @@ Issues are logged as **warnings**. Note that users with `/warnaserror` enabled w
 - **During build:** Flag recorded in binlog along with additional data needed for checks; BuildCheck NOT activated
 - **During replay:** Binlog reader activates BuildCheck for analysis
 
-**Rationale:** BuildCheck analysis can be expensive. Environment variable is for diagnostics that can be analyzed later, allowing teams to record data with reduced performance impact compared to running checks during the build.
+**Rationale:** BuildCheck analysis can be expensive and checks can fail the build. The environment variable is for diagnostics that can be analyzed later, allowing teams to record data with minimal impact to the build itself.
 
 ### Example Workflow
 ```bash
@@ -116,15 +118,10 @@ msbuild build{}.binlog
 
 ## CI/CD Integration
 
-### Approach A: Response File (Traditional)
 
-- Create `Directory.Build.rsp` with binlog argument
-- Might be blocked by `-noAutoResponse`
-
-### Approach B: Environment Variable (New)
+### Environment Variable
 
 - Set `MSBUILD_LOGGING_ARGS=-bl:build{}.binlog`
-- Works with `-noAutoResponse`
 - No file creation needed
 - The `{}` placeholder generates unique filenames for each build invocation
 
