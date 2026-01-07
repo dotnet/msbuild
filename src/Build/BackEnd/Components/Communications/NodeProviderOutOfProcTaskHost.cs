@@ -662,7 +662,7 @@ namespace Microsoft.Build.BackEnd
             HandshakeOptions hostContext = nodeKey.HandshakeOptions;
 
             // If runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
-            string commandLineArgsPlaceholder = "\"{0}\" /nologo /nodemode:2 /nodereuse:{1} /low:{2} /parentpktversion:{3} ";
+            string commandLineArgsPlaceholder = "\"{0}\" /nologo /nodemode:2 /nodereuse:{1} /low:{2} /parentpacketversion:{3} ";
 
             // Generate a unique node ID for communication purposes using atomic increment.
             int communicationNodeId = Interlocked.Increment(ref _nextNodeId);

@@ -26,7 +26,7 @@ namespace Microsoft.Build.CommandLine
         internal NodeEndpointOutOfProcTaskHost(bool nodeReuse, byte parentPacketVersion)
         {
             _nodeReuse = nodeReuse;
-            InternalConstruct(parentPacketVersion: parentPacketVersion);
+            InternalConstruct(pipeName: null, parentPacketVersion);
         }
 
         #endregion // Constructors and Factories

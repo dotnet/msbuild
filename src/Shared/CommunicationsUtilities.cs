@@ -780,6 +780,8 @@ namespace Microsoft.Build.Internal
 
                 if (innerResult.Value != EndOfHandshakeSignal)
                 {
+                    // If the received handshake part is not PacketVersionFromChildMarker it means we communicate with the host that does not support packet version negotiation.
+                    // Fallback to the old communication validation pattern.
                     if (innerResult.Value != Handshake.PacketVersionFromChildMarker)
                     {
                         result = CreateVersionMismatchResult(isProvider, innerResult.Value);
