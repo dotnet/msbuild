@@ -503,11 +503,15 @@ namespace Microsoft.Build.Tasks
             for (int i = 0; i < SourceFiles.Length && !_cancellationTokenSource.IsCancellationRequested; ++i)
             {
                 bool copyComplete = false;
-                string destPath = DestinationFiles[i].ItemSpec;
-                MSBuildEventSource.Log.CopyUpToDateStart(destPath);
-                if (filesActuallyCopied.TryGetValue(destPath, out string originalSource))
+
+                // Compute absolute paths once - reused for ETW, deduplication dictionary, and FileState
+                AbsolutePath sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(SourceFiles[i].ItemSpec);
+                AbsolutePath destAbsolutePath = TaskEnvironment.GetAbsolutePath(DestinationFiles[i].ItemSpec);
+
+                MSBuildEventSource.Log.CopyUpToDateStart(destAbsolutePath);
+                if (filesActuallyCopied.TryGetValue(destAbsolutePath, out string originalSource))
                 {
-                    if (String.Equals(originalSource, SourceFiles[i].ItemSpec, FileUtilities.PathComparison))
+                    if (String.Equals(originalSource, sourceAbsolutePath, FileUtilities.PathComparison))
                     {
                         // Already copied from this location, don't copy again.
                         copyComplete = true;
@@ -516,9 +520,9 @@ namespace Microsoft.Build.Tasks
 
                 if (!copyComplete)
                 {
-                    if (DoCopyIfNecessary(new FileState(TaskEnvironment.GetAbsolutePath(SourceFiles[i].ItemSpec)), new FileState(TaskEnvironment.GetAbsolutePath(DestinationFiles[i].ItemSpec)), copyFile))
+                    if (DoCopyIfNecessary(new FileState(sourceAbsolutePath), new FileState(destAbsolutePath), copyFile))
                     {
-                        filesActuallyCopied[destPath] = SourceFiles[i].ItemSpec;
+                        filesActuallyCopied[destAbsolutePath] = sourceAbsolutePath;
                         copyComplete = true;
                     }
                     else
@@ -528,7 +532,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    MSBuildEventSource.Log.CopyUpToDateStop(destPath, true);
+                    MSBuildEventSource.Log.CopyUpToDateStop(destAbsolutePath, true);
                 }
 
                 if (copyComplete)
@@ -649,21 +653,24 @@ namespace Microsoft.Build.Tasks
                             int fileIndex = partition[partitionIndex];
                             ITaskItem sourceItem = SourceFiles[fileIndex];
                             ITaskItem destItem = DestinationFiles[fileIndex];
-                            string sourcePath = sourceItem.ItemSpec;
+
+                            // Compute absolute paths once - reused for ETW, deduplication check, and FileState
+                            string sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceItem.ItemSpec);
+                            string destAbsolutePath = TaskEnvironment.GetAbsolutePath(destItem.ItemSpec);
 
                             // Check if we just copied from this location to the destination, don't copy again.
-                            MSBuildEventSource.Log.CopyUpToDateStart(destItem.ItemSpec);
+                            MSBuildEventSource.Log.CopyUpToDateStart(destAbsolutePath);
                             bool copyComplete = partitionIndex > 0 &&
                                                 String.Equals(
-                                                    sourcePath,
-                                                    SourceFiles[partition[partitionIndex - 1]].ItemSpec,
+                                                    sourceAbsolutePath,
+                                                    TaskEnvironment.GetAbsolutePath(SourceFiles[partition[partitionIndex - 1]].ItemSpec),
                                                     FileUtilities.PathComparison);
 
                             if (!copyComplete)
                             {
                                 if (DoCopyIfNecessary(
-                                    new FileState(TaskEnvironment.GetAbsolutePath(sourceItem.ItemSpec)),
-                                    new FileState(TaskEnvironment.GetAbsolutePath(destItem.ItemSpec)),
+                                    new FileState(sourceAbsolutePath),
+                                    new FileState(destAbsolutePath),
                                     copyFile))
                                 {
                                     copyComplete = true;
@@ -676,7 +683,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                MSBuildEventSource.Log.CopyUpToDateStop(destItem.ItemSpec, true);
+                                MSBuildEventSource.Log.CopyUpToDateStop(destAbsolutePath, true);
                             }
 
                             if (copyComplete)
@@ -805,7 +812,7 @@ namespace Microsoft.Build.Tasks
 
                     foreach (ITaskItem sourceFolder in SourceFolders)
                     {
-                        string src = FileUtilities.NormalizePath(sourceFolder.ItemSpec);
+                        string src = FileUtilities.NormalizePath(TaskEnvironment.GetAbsolutePath(sourceFolder.ItemSpec));
                         string srcName = Path.GetFileName(src);
 
                         (string[] filesInFolder, _, _, string globFailure) = FileMatcher.Default.GetFiles(src, "**");
