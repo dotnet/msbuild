@@ -6,7 +6,20 @@ Enable binary logging in CI/CD pipelines without modifying artifacts on disk.
 
 **Proposed solution:** An environment variable that enables diagnostic logging without touching any files on disk-no response file creation, no project file modifications, no build script changes.
 
-**Important for company-wide deployment:** When enabling this feature organization-wide (e.g., via CI/CD pipeline configuration), the team setting the environment variable may not be the team that owns individual codebases. Ensure stakeholders understand that builds with `/warnaserror` may be affected.
+**Important for company-wide deployment:** When enabling this feature organization-wide (e.g., via CI/CD pipeline configuration), the team setting the environment variable may not be the team that owns individual codebases. Ensure stakeholders understand that builds with `/warnaserror` may be affected and be ready to mitigate this.
+
+### Demoting Warnings to Messages
+
+For scenarios where warnings would break builds (e.g., `/warnaserror` is enabled), set:
+
+```bash
+set MSBUILD_LOGGING_ARGS_LEVEL=message
+```
+
+| Value | Behavior |
+|-------|----------|
+| `warning` (default) | Issues logged as warnings; may fail `/warnaserror` builds |
+| `message` | Issues logged as low-importance messages; never fails builds |
 
 **Problem scenarios addressed:**
 
@@ -14,6 +27,14 @@ Enable binary logging in CI/CD pipelines without modifying artifacts on disk.
 - Creating `Directory.Build.rsp` requires writing new files to the source tree
 - Modifying existing RSP files risks merge conflicts or unintended side effects
 - Some build environments restrict write access to source directories
+
+### Why Not MSBUILDDEBUGENGINE?
+
+The existing `MSBUILDDEBUGENGINE=1` + `MSBUILDDEBUGPATH` mechanism works but has limitations for the desired CI/CD scenarios:
+
+- **Excessive logging:** Captures *all* MSBuild invocations including design-time builds, generating many files
+- **No filename control:** Auto-generates filenames; cannot specify output path with `{}` placeholder for unique names
+- **Debug overhead:** Enables additional debugging infrastructure beyond just binary logging
 
 ## Supported Arguments
 
@@ -85,7 +106,7 @@ set MSBUILD_LOGGING_ARGS=-bl:build{}.binlog
 
 ## Warning Messages
 
-Issues are logged as **warnings**. Note that users with `/warnaserror` enabled will see these as errors-by opting into this environment variable, users also opt into these diagnostics.
+Issues are logged as **warnings** by default. Note that users with `/warnaserror` enabled will see these as errors-by opting into this environment variable, users also opt into these diagnostics.
 
 ### Messages
 
