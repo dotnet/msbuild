@@ -1512,11 +1512,6 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <target state="translated">Les journaux MSBuild et les informations de débogage seront au "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
-        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
-        <target state="translated">Avec le mode multithread activé et MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount ne peut pas être supérieur à {0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
         <target state="translated">MSBUILD : error MSB1067: doit fournir un nom de fonctionnalité pour le commutateur featureAvailability.</target>

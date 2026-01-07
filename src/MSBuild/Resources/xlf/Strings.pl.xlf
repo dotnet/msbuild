@@ -1521,11 +1521,6 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
         <target state="translated">Dzienniki i informacje debugowania programu MSBuild będą znajdować się w lokalizacji „{0}”</target>
         <note />
       </trans-unit>
-      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
-        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
-        <target state="translated">Przy włączonym trybie wielowątkowym i MSBUILDFORCEALLTASKSOUTOFPROC=1 wartość maxCpuCount nie może być większa niż {0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
         <target state="translated">MSBUILD : error MSB1067: należy podać nazwę funkcji dla przełącznika dostępności funkcji.</target>
