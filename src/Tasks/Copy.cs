@@ -312,7 +312,7 @@ namespace Microsoft.Build.Tasks
 
             if (FailIfNotIncremental)
             {
-                Log.LogError(FileComment, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath);
+                Log.LogError(FileComment, sourceFileState.Name, destinationFileState.Name);
                 return false;
             }
 
@@ -341,11 +341,11 @@ namespace Microsoft.Build.Tasks
                     if (UseSymboliclinksIfPossible)
                     {
                         // This is a message for fallback to SymbolicLinks if HardLinks fail when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true
-                        Log.LogMessage(MessageImportance.Normal, RetryingAsSymbolicLink, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath, errorMessage);
+                        Log.LogMessage(MessageImportance.Normal, RetryingAsSymbolicLink, sourceFileState.Name, destinationFileState.Name, errorMessage);
                     }
                     else
                     {
-                        Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath, errorMessage);
+                        Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.Name, destinationFileState.Name, errorMessage);
                     }
                 }
             }
@@ -361,13 +361,13 @@ namespace Microsoft.Build.Tasks
                         errorMessage = Log.FormatResourceString("Copy.NonWindowsLinkErrorMessage", "symlink()", errorMessage);
                     }
 
-                    Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath, errorMessage);
+                    Log.LogMessage(MessageImportance.Normal, RetryingAsFileCopy, sourceFileState.Name, destinationFileState.Name, errorMessage);
                 }
             }
 
             if (ErrorIfLinkFails && !hardLinkCreated && !symbolicLinkCreated)
             {
-                Log.LogErrorWithCodeFromResources("Copy.LinkFailed", sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath);
+                Log.LogErrorWithCodeFromResources("Copy.LinkFailed", sourceFileState.Name, destinationFileState.Name);
                 return false;
             }
 
@@ -376,7 +376,7 @@ namespace Microsoft.Build.Tasks
             if (!hardLinkCreated && !symbolicLinkCreated)
             {
                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                Log.LogMessage(MessageImportance.Normal, FileComment, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath);
+                Log.LogMessage(MessageImportance.Normal, FileComment, sourceFileState.Name, destinationFileState.Name);
 
                 File.Copy(sourceFileState.Name, destinationFileState.Name, true);
             }
@@ -399,7 +399,7 @@ namespace Microsoft.Build.Tasks
         private void TryCopyViaLink(string linkComment, MessageImportance messageImportance, FileState sourceFileState, FileState destinationFileState, out bool linkCreated, ref string errorMessage, Func<string, string, string, bool> createLink)
         {
             // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-            Log.LogMessage(MessageImportance.Normal, linkComment, sourceFileState.FileNameFullPath, destinationFileState.FileNameFullPath);
+            Log.LogMessage(MessageImportance.Normal, linkComment, sourceFileState.Name, destinationFileState.Name);
 
             linkCreated = createLink(sourceFileState.Name, destinationFileState.Name, errorMessage);
         }
@@ -1091,16 +1091,8 @@ namespace Microsoft.Build.Tasks
         /// Compares two paths to see if they refer to the same file. We can't solve the general
         /// canonicalization problem, so we just compare strings on the full paths.
         /// </summary>
-        private bool PathsAreIdentical(FileState source, FileState destination)
+        private static bool PathsAreIdentical(FileState source, FileState destination)
         {
-            if (string.Equals(source.Name, destination.Name, FileUtilities.PathComparison))
-            {
-                return true;
-            }
-
-            // FileState is constructed with normalized paths, so Name already contains the full path
-            source.FileNameFullPath = source.Name;
-            destination.FileNameFullPath = destination.Name;
             return string.Equals(source.Name, destination.Name, FileUtilities.PathComparison);
         }
 
