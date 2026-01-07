@@ -3,6 +3,7 @@
 
 using System;
 using System.Buffers;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Globalization;
@@ -115,7 +116,21 @@ namespace Microsoft.Build.BackEnd
 
 #pragma warning disable IDE0052 // Remove unread private members
         private readonly ObservableGauge<int> _schedulerNodeCountGauge;
+        private readonly ObservableCounter<long> _requestBlockerCounter;
+        private readonly ObservableCounter<long> _circularDependencyCounter;
+        private readonly ObservableGauge<int> _coresInUseGauge;
+        private readonly ObservableGauge<int> _pendingCoreRequestsGauge;
 #pragma warning restore IDE0052 // Remove unread private members
+
+        /// <summary>
+        /// Tracks counts of request blocking events by blocker type.
+        /// </summary>
+        private readonly ConcurrentDictionary<string, long> _requestBlockerCounts;
+
+        /// <summary>
+        /// Tracks counts of circular dependency detections by type.
+        /// </summary>
+        private readonly ConcurrentDictionary<string, long> _circularDependencyCounts;
 
         /// <summary>
         /// The collection of all requests currently known to the system.
@@ -265,12 +280,41 @@ namespace Microsoft.Build.BackEnd
                 _debugDumpPath = FileUtilities.TempFileDirectory;
             }
 
+            // Initialize metric tracking dictionaries
+            _requestBlockerCounts = new ConcurrentDictionary<string, long>(4);
+            _circularDependencyCounts = new ConcurrentDictionary<string, long>(2);
+
+            // Initialize metrics
             _schedulerNodeCountGauge = _schedulerMetrics.CreateObservableGauge(
                 "msbuild_scheduler_node_count",
                 ComputeNodeCounts,
                 description: "The current count of nodes in the scheduler",
                 unit: "nodes",
                 tags: [new("node.type", "outofproc")]);
+
+            _requestBlockerCounter = _schedulerMetrics.CreateObservableCounter(
+                "msbuild_request_blocked_events",
+                CollectRequestBlockerCounts,
+                unit: "events",
+                description: "Count of request blocking events by blocker type");
+
+            _circularDependencyCounter = _schedulerMetrics.CreateObservableCounter(
+                "msbuild_circular_dependency_errors",
+                CollectCircularDependencyCounts,
+                unit: "errors",
+                description: "Count of circular dependency detections");
+
+            _coresInUseGauge = _schedulerMetrics.CreateObservableGauge(
+                "msbuild_cores_in_use",
+                () => _schedulingData?.ExplicitlyGrantedCores ?? 0,
+                unit: "cores",
+                description: "Number of cores currently allocated to requests");
+
+            _pendingCoreRequestsGauge = _schedulerMetrics.CreateObservableGauge(
+                "msbuild_pending_core_requests",
+                () => _pendingRequestCoresCallbacks?.Count ?? 0,
+                unit: "requests",
+                description: "Number of requests waiting for core allocation");
 
             Reset();
         }
@@ -279,6 +323,22 @@ namespace Microsoft.Build.BackEnd
         {
             yield return new Measurement<int>(_currentOutOfProcNodeCount, new KeyValuePair<string, object?>("node.type", "outofproc"));
             yield return new Measurement<int>(_currentInProcNodeCount, new KeyValuePair<string, object?>("node.type", "inproc"));
+        }
+
+        private IEnumerable<Measurement<long>> CollectRequestBlockerCounts()
+        {
+            foreach (var kvp in _requestBlockerCounts)
+            {
+                yield return new Measurement<long>(kvp.Value, new KeyValuePair<string, object?>("blocker_type", kvp.Key));
+            }
+        }
+
+        private IEnumerable<Measurement<long>> CollectCircularDependencyCounts()
+        {
+            foreach (var kvp in _circularDependencyCounts)
+            {
+                yield return new Measurement<long>(kvp.Value, new KeyValuePair<string, object?>("error_type", kvp.Key));
+            }
         }
 
         #region Delegates
@@ -378,12 +438,14 @@ namespace Microsoft.Build.BackEnd
                 {
                     TraceScheduler("Request {0} on node {1} is performing yield action {2}.", blocker.BlockedRequestId, nodeId, blocker.YieldAction);
                     ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
+                    _requestBlockerCounts.AddOrUpdate("yield", 1, (key, oldValue) => oldValue + 1);
                     HandleYieldAction(parentRequest, blocker);
                 }
                 else if ((blocker.BlockingRequestId == blocker.BlockedRequestId) && blocker.BlockingRequestId != BuildRequest.InvalidGlobalRequestId)
                 {
                     ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
                     // We are blocked waiting for a transfer of results.
+                    _requestBlockerCounts.AddOrUpdate("results_transfer", 1, (key, oldValue) => oldValue + 1);
                     HandleRequestBlockedOnResultsTransfer(parentRequest, responses);
                 }
                 else if (blocker.BlockingRequestId != BuildRequest.InvalidGlobalRequestId)
@@ -393,11 +455,13 @@ namespace Microsoft.Build.BackEnd
                     {
                         ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should exist");
 
+                        _requestBlockerCounts.AddOrUpdate("in_progress_target", 1, (key, oldValue) => oldValue + 1);
                         HandleRequestBlockedOnInProgressTarget(parentRequest, blocker);
                     }
                     catch (SchedulerCircularDependencyException ex)
                     {
                         TraceScheduler("Circular dependency caused by request {0}({1}) (nr {2}), parent {3}({4}) (nr {5})", ex.Request.GlobalRequestId, ex.Request.ConfigurationId, ex.Request.NodeRequestId, parentRequest.BuildRequest.GlobalRequestId, parentRequest.BuildRequest.ConfigurationId, parentRequest.BuildRequest.NodeRequestId);
+                        _circularDependencyCounts.AddOrUpdate("in_progress_target", 1, (key, oldValue) => oldValue + 1);
                         responses.Add(ScheduleResponse.CreateCircularDependencyResponse(nodeId, parentRequest.BuildRequest, ex.Request));
                     }
                 }
@@ -405,12 +469,14 @@ namespace Microsoft.Build.BackEnd
                 {
                     ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
                     // We are blocked by new requests, either top-level or MSBuild task.
+                    _requestBlockerCounts.AddOrUpdate("new_requests", 1, (key, oldValue) => oldValue + 1);
                     HandleRequestBlockedByNewRequests(parentRequest, blocker, responses);
                 }
             }
             catch (SchedulerCircularDependencyException ex)
             {
                 TraceScheduler("Circular dependency caused by request {0}({1}) (nr {2}), parent {3}({4}) (nr {5})", ex.Request.GlobalRequestId, ex.Request.ConfigurationId, ex.Request.NodeRequestId, parentRequest.BuildRequest.GlobalRequestId, parentRequest.BuildRequest.ConfigurationId, parentRequest.BuildRequest.NodeRequestId);
+                _circularDependencyCounts.AddOrUpdate("new_requests", 1, (key, oldValue) => oldValue + 1);
                 responses.Add(ScheduleResponse.CreateCircularDependencyResponse(nodeId, parentRequest.BuildRequest, ex.Request));
             }
 
