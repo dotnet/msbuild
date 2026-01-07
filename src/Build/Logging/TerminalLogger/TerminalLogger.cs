@@ -1061,8 +1061,14 @@ public sealed partial class TerminalLogger : INodeLogger
         if (nodeIndex >= _nodes.Length)
         {
             // Resize to accommodate the new index plus some extra capacity
-            int newSize = Math.Max(nodeIndex + 1, _nodes.Length * 2);
-            Array.Resize(ref _nodes, newSize);
+            lock (_lock)
+            {
+                if (nodeIndex >= _nodes.Length)
+                {
+                    int newSize = Math.Max(nodeIndex + 1, _nodes.Length * 2);
+                    Array.Resize(ref _nodes, newSize);
+                }
+            }
         }
     }
 
