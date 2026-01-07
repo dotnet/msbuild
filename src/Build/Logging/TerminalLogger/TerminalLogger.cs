@@ -152,6 +152,11 @@ public sealed partial class TerminalLogger : INodeLogger
     private ProjectContext? _restoreContext;
 
     /// <summary>
+    /// True if we're replaying a binary log. In this mode, we may encounter NodeIds higher than the initial node count.
+    /// </summary>
+    private bool _isReplayMode = false;
+
+    /// <summary>
     /// The thread that performs periodic refresh of the console output.
     /// </summary>
     private Thread? _refresher;
@@ -431,6 +436,9 @@ public sealed partial class TerminalLogger : INodeLogger
     public void Initialize(IEventSource eventSource)
     {
         ParseParameters();
+
+        // Detect if we're in replay mode
+        _isReplayMode = eventSource is IBinaryLogReplaySource;
 
         eventSource.BuildStarted += BuildStarted;
         eventSource.BuildFinished += BuildFinished;
@@ -1058,7 +1066,8 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void EnsureNodeCapacity(int nodeIndex)
     {
-        if (nodeIndex >= _nodes.Length)
+        // Only resize in replay mode - during normal builds, the node count is fixed
+        if (_isReplayMode && nodeIndex >= _nodes.Length)
         {
             // Resize to accommodate the new index plus some extra capacity
             lock (_lock)

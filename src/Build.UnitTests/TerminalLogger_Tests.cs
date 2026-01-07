@@ -1027,20 +1027,44 @@ namespace Microsoft.Build.UnitTests
 
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                // Create a simple project
-                string contents = @"
+                // Create multiple projects that will build in parallel
+                TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
+                
+                // Create three simple projects
+                TransientTestFile project1 = env.CreateFile(logFolder, "project1.proj", @"
 <Project>
     <Target Name='Build'>
-        <Message Text='Building project' Importance='High' />
+        <Message Text='Building project1' Importance='High' />
+    </Target>
+</Project>");
+                
+                TransientTestFile project2 = env.CreateFile(logFolder, "project2.proj", @"
+<Project>
+    <Target Name='Build'>
+        <Message Text='Building project2' Importance='High' />
+    </Target>
+</Project>");
+                
+                TransientTestFile project3 = env.CreateFile(logFolder, "project3.proj", @"
+<Project>
+    <Target Name='Build'>
+        <Message Text='Building project3' Importance='High' />
+    </Target>
+</Project>");
+                
+                // Create a solution file that builds all projects in parallel
+                string solutionContents = $@"
+<Project>
+    <Target Name='Build'>
+        <MSBuild Projects='{project1.Path};{project2.Path};{project3.Path}' BuildInParallel='true' />
     </Target>
 </Project>";
-                TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
-                TransientTestFile projectFile = env.CreateFile(logFolder, "test.proj", contents);
+                TransientTestFile solutionFile = env.CreateFile(logFolder, "solution.proj", solutionContents);
 
                 string binlogPath = env.ExpectFile(".binlog").Path;
 
                 // Build with multiple nodes to create a binlog with higher node IDs
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m:4 /bl:{binlogPath}", out bool success, outputHelper: _outputHelper);
+                RunnerUtilities.ExecMSBuild($"{solutionFile.Path} /m:4 /bl:{binlogPath}", out bool success, outputHelper: _outputHelper);
                 success.ShouldBeTrue();
 
                 // Replay the binlog with TerminalLogger using only 1 node
