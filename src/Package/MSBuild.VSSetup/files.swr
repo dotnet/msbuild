@@ -41,7 +41,6 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)Microsoft.VisualStudio.SolutionPersistence.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
   file source=$(X86BinPath)RuntimeContracts.dll
   file source=$(X86BinPath)System.Buffers.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=2
-  file source=$(X86BinPath)System.Diagnostics.DiagnosticSource.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
   file source=$(X86BinPath)System.Formats.Nrbf.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=2
   file source=$(X86BinPath)System.IO.Pipelines.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=2
   file source=$(X86BinPath)System.Memory.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=2
@@ -89,24 +88,7 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)Microsoft.ServiceModel.targets
   file source=$(X86BinPath)Microsoft.WinFx.targets
   file source=$(X86BinPath)Microsoft.WorkflowBuildExtensions.targets
-  file source=$(X86BinPath)Microsoft.VisualStudio.OpenTelemetry.ClientExtensions.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)Microsoft.VisualStudio.OpenTelemetry.Collector.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
   file source=$(X86BinPath)Microsoft.VisualStudio.Utilities.Internal.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)OpenTelemetry.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)OpenTelemetry.Api.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)OpenTelemetry.Api.ProviderBuilderExtensions.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)Microsoft.Extensions.Configuration.Abstractions.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)Microsoft.Extensions.Configuration.Binder.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)Microsoft.Extensions.Configuration.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)Microsoft.Extensions.DependencyInjection.Abstractions.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)Microsoft.Extensions.DependencyInjection.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)Microsoft.Extensions.Logging.Abstractions.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)Microsoft.Extensions.Logging.Configuration.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)Microsoft.Extensions.Logging.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)Microsoft.Extensions.Options.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)Microsoft.Extensions.Options.ConfigurationExtensions.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)Microsoft.Extensions.Primitives.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
-  file source=$(X86BinPath)Microsoft.Extensions.Diagnostics.Abstractions.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
   file source=$(X86BinPath)Newtonsoft.Json.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=2
 
 folder InstallDir:\MSBuild\Current\Bin\MSBuild
