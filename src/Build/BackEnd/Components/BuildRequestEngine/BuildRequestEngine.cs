@@ -81,7 +81,8 @@ namespace Microsoft.Build.BackEnd
         private ObservableGauge<int> _workQueueGauge;
         private ObservableGauge<int> _engineStatusGauge;
         private Histogram<double> _configurationResolutionHistogram;
-        private readonly ObservableCounter<long> _stateTransitionsCounter;
+        private ObservableCounter<long> _stateTransitionsCounter;
+        private Histogram<double> _requestWaitTimeHistogram;
 #pragma warning restore IDE0052 // Remove unread private members
 
         /// <summary>
@@ -134,6 +135,11 @@ namespace Microsoft.Build.BackEnd
         private readonly Dictionary<int, BuildRequestEntryState> _previousStates;
 
         /// <summary>
+        /// Tracks when requests started waiting and the reason for waiting. Key is GlobalRequestId, value is (timestamp, reason).
+        /// </summary>
+        private readonly Dictionary<int, (long timestamp, string reason)> _requestWaitStartTimes;
+
+        /// <summary>
         /// The logging context for the node
         /// </summary>
         private NodeLoggingContext _nodeLoggingContext;
@@ -175,6 +181,7 @@ namespace Microsoft.Build.BackEnd
             _requestsByGlobalRequestId = new Dictionary<int, BuildRequestEntry>();
             _stateTransitionCounts = new ConcurrentDictionary<string, long>();
             _previousStates = new Dictionary<int, BuildRequestEntryState>();
+            _requestWaitStartTimes = new Dictionary<int, (long timestamp, string reason)>();
         }
 
         #region IBuildRequestEngine Members
@@ -241,6 +248,7 @@ namespace Microsoft.Build.BackEnd
                 CollectStateTransitionCounts,
                 unit: "transitions",
                 description: "Count of build request state transitions");
+            _requestWaitTimeHistogram = s_meter.CreateHistogram<double>("msbuild_request_wait_time", unit: "ms", description: "Time requests spend waiting, categorized by blocking reason");
 
             // Create a work queue that will take an action and invoke it.  The generic parameter is the type which ActionBlock.Post() will
             // take (an Action in this case) and the parameter to this constructor is a function which takes that parameter of type Action
@@ -266,7 +274,7 @@ namespace Microsoft.Build.BackEnd
         {
             foreach (var kvp in _stateTransitionCounts)
             {
-                yield return new Measurement<long>(kvp.Value, new KeyValuePair<string, object?>("transition", kvp.Key));
+                yield return new Measurement<long>(kvp.Value, new KeyValuePair<string, object>("transition", kvp.Key));
             }
         }
 
@@ -610,8 +618,8 @@ namespace Microsoft.Build.BackEnd
                     // Record configuration resolution duration
                     if (_configurationRequestTimestamps.TryGetValue(response.NodeConfigurationId, out long startTimestamp))
                     {
-                        long endTimestamp = Stopwatch.GetTimestamp();
-                        double durationMs = (endTimestamp - startTimestamp) * 1000.0 / Stopwatch.Frequency;
+                        long endTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
+                        double durationMs = (endTimestamp - startTimestamp) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
                         _configurationResolutionHistogram.Record(durationMs);
                         _configurationRequestTimestamps.Remove(response.NodeConfigurationId);
                     }
@@ -742,15 +750,34 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newState">The event's new state.</param>
         private void BuildRequestEntry_StateChanged(BuildRequestEntry entry, BuildRequestEntryState newState)
         {
+            int globalRequestId = entry.Request.GlobalRequestId;
+
             // Track the state transition for metrics
-            if (_previousStates.TryGetValue(entry.Request.GlobalRequestId, out BuildRequestEntryState oldState))
+            if (_previousStates.TryGetValue(globalRequestId, out BuildRequestEntryState oldState))
             {
                 string transition = $"{oldState}->{newState}";
                 _stateTransitionCounts.AddOrUpdate(transition, 1, (key, oldValue) => oldValue + 1);
+
+                // Track wait time when transitioning out of Waiting state
+                if (oldState == BuildRequestEntryState.Waiting &&
+                    _requestWaitStartTimes.TryGetValue(globalRequestId, out var waitInfo))
+                {
+                    long endTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
+                    double durationMs = (endTimestamp - waitInfo.timestamp) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+                    _requestWaitTimeHistogram.Record(durationMs, new KeyValuePair<string, object>("reason", waitInfo.reason));
+                    _requestWaitStartTimes.Remove(globalRequestId);
+                }
+
+                // Record wait start time when transitioning to Waiting state
+                if (newState == BuildRequestEntryState.Waiting)
+                {
+                    string reason = entry.WaitReason ?? "unknown";
+                    _requestWaitStartTimes[globalRequestId] = (System.Diagnostics.Stopwatch.GetTimestamp(), reason);
+                }
             }
 
             // Update the previous state for next transition
-            _previousStates[entry.Request.GlobalRequestId] = newState;
+            _previousStates[globalRequestId] = newState;
 
             QueueAction(() => { EvaluateRequestStates(); }, isLastTask: false);
         }
@@ -888,6 +915,7 @@ namespace Microsoft.Build.BackEnd
                 _requests.Remove(completedEntry);
                 _requestsByGlobalRequestId.Remove(completedEntry.Request.GlobalRequestId);
                 _previousStates.Remove(completedEntry.Request.GlobalRequestId);
+                _requestWaitStartTimes.Remove(completedEntry.Request.GlobalRequestId);
             }
 
             // If we completed a request, that means we may be able to unload the configuration if there is memory pressure.  Further we
@@ -1275,7 +1303,7 @@ namespace Microsoft.Build.BackEnd
                             request.Config.ConfigurationId = GetNextUnresolvedConfigurationId();
                             _unresolvedConfigurationsById.Add(request.Config.ConfigurationId, request.Config);
                             _unresolvedConfigurationsByMetadata.Add(configMetadata, request.Config);
-                            _configurationRequestTimestamps[request.Config.ConfigurationId] = Stopwatch.GetTimestamp();
+                            _configurationRequestTimestamps[request.Config.ConfigurationId] = System.Diagnostics.Stopwatch.GetTimestamp();
                             unresolvedConfigurationsAdded ??= new HashSet<int>();
                             unresolvedConfigurationsAdded.Add(request.Config.ConfigurationId);
                         }

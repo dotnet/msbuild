@@ -281,8 +281,8 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Initialize metric tracking dictionaries
-            _requestBlockerCounts = new ConcurrentDictionary<string, long>(4);
-            _circularDependencyCounts = new ConcurrentDictionary<string, long>(2);
+            _requestBlockerCounts = new ConcurrentDictionary<string, long>(Environment.ProcessorCount, 4);
+            _circularDependencyCounts = new ConcurrentDictionary<string, long>(Environment.ProcessorCount, 2);
 
             // Initialize metrics
             _schedulerNodeCountGauge = _schedulerMetrics.CreateObservableGauge(
