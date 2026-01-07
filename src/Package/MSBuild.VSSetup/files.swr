@@ -26,7 +26,7 @@ folder InstallDir:\MSBuild\Current
 
 folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)Microsoft.Build.dll vs.file.ngenApplications="[installDir]\Common7\IDE\vsn.exe" vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=2
-  file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngenApplications="[installDir]\Common7\IDE\vsn.exe" vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all
+  file source=$(X86BinPath)Microsoft.Build.Framework.dll vs.file.ngenApplications="[installDir]\Common7\IDE\vsn.exe" vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenApplications="[installDir]\Common7\IDE\VcxprojReader.exe" vs.file.ngenArchitecture=all
   file source=$(X86BinPath)Microsoft.Build.Framework.tlb
   file source=$(X86BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenApplications="[installDir]\Common7\IDE\vsn.exe" vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=2
   file source=$(X86BinPath)Microsoft.Build.Utilities.Core.dll vs.file.ngenApplications="[installDir]\Common7\IDE\vsn.exe" vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=2
