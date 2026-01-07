@@ -239,9 +239,14 @@ namespace Microsoft.Build.CommandLine
         public static int Main(string[] args)
         {
             // When running on CoreCLR(.NET), insert the command executable path as the first element of the args array.
-            args = BuildEnvironmentHelper.IsRunningOnCoreClr ?
-                [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, .. args] :
-                QuotingUtilities.SplitUnquoted(Environment.CommandLine).ToArray();
+            // This is needed because on .NET the first element of Environment.CommandLine is the dotnet executable path
+            // and not the msbuild executable path. CoreCLR version didn't support Environment.CommandLine initially, so
+            // workaround was needed.
+#if NET
+            args = [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, .. args];
+#else
+            args = QuotingUtilities.SplitUnquoted(Environment.CommandLine).ToArray();
+#endif
 
             // Setup the console UI.
             using AutomaticEncodingRestorer _ = new();
