@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks
         {
             var items = new List<ITaskItem>();
             var directoriesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
+            
             foreach (ITaskItem directory in Directories)
             {
                 // Sometimes people pass in an item transform like @(myitem->'%(RelativeDir)') in order
@@ -59,9 +59,10 @@ namespace Microsoft.Build.Tasks
                 // here we check for that case.
                 if (directory.ItemSpec.Length > 0)
                 {
+                    AbsolutePath absolutePath = null;
                     try
                     {
-                        // For speed, eliminate duplicates caused by poor targets authoring
+                        // For speed, eliminate duplicates caused by poor targets authoring, don't absolutize yet to save allocation
                         if (!directoriesSet.Contains(directory.ItemSpec))
                         {
                             AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
@@ -70,12 +71,12 @@ namespace Microsoft.Build.Tasks
                             {
                                 if (FailIfNotIncremental)
                                 {
-                                    Log.LogErrorFromResources("MakeDir.Comment", directory.ItemSpec);
+                                    Log.LogErrorFromResources("MakeDir.Comment", absolutePath);
                                 }
                                 else
                                 {
                                     // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                                    Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", directory.ItemSpec);
+                                    Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", absolutePath);
 
                                     Directory.CreateDirectory(FileUtilities.FixFilePath(absolutePath));
                                 }
@@ -86,7 +87,7 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        Log.LogErrorWithCodeFromResources("MakeDir.Error", directory.ItemSpec, e.Message);
+                        Log.LogErrorWithCodeFromResources("MakeDir.Error", absolutePath ?? directory.ItemSpec, e.Message);
                     }
 
                     // Add even on failure to avoid reattempting

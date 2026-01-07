@@ -44,10 +44,11 @@ namespace Microsoft.Build.Tasks
             bool success = true;
             if (File != null)
             {
-                AbsolutePath filePath = TaskEnvironment.GetAbsolutePath(File.ItemSpec);
-                if (FileSystems.Default.FileExists(filePath))
+                AbsolutePath filePath = null;
+                try
                 {
-                    try
+                    filePath = TaskEnvironment.GetAbsolutePath(File.ItemSpec);
+                    if (FileSystems.Default.FileExists(filePath))
                     {
                         string[] textLines = System.IO.File.ReadAllLines(filePath);
 
@@ -71,11 +72,11 @@ namespace Microsoft.Build.Tasks
 
                         Lines = nonEmptyLines.ToArray();
                     }
-                    catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-                    {
-                        Log.LogErrorWithCodeFromResources("ReadLinesFromFile.ErrorOrWarning", File.ItemSpec, e.Message);
-                        success = false;
-                    }
+                }
+                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                {
+                    Log.LogErrorWithCodeFromResources("ReadLinesFromFile.ErrorOrWarning", filePath ?? File.ItemSpec, e.Message);
+                    success = false;
                 }
             }
 

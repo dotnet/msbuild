@@ -97,7 +97,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem file in Files)
             {
-                string path = FileUtilities.FixFilePath(file.ItemSpec);
+                AbsolutePath path = FileUtilities.FixFilePath(TaskEnvironment.GetAbsolutePath(file.ItemSpec));
                 // For speed, eliminate duplicates caused by poor targets authoring
                 if (touchedFilesSet.Contains(path))
                 {
@@ -193,7 +193,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <returns>"True" if the file was touched.</returns>
         private bool TouchFile(
-            string file,
+            AbsolutePath file,
             DateTime dt,
             FileExists fileExists,
             FileCreate fileCreate,
@@ -202,8 +202,7 @@ namespace Microsoft.Build.Tasks
             SetLastAccessTime fileSetLastAccessTime,
             SetLastWriteTime fileSetLastWriteTime)
         {
-            AbsolutePath absoluteFile = TaskEnvironment.GetAbsolutePath(file);
-            if (!fileExists(absoluteFile))
+            if (!fileExists(file))
             {
                 // If the file does not exist then we check if we need to create it.
                 if (AlwaysCreate)
@@ -217,7 +216,7 @@ namespace Microsoft.Build.Tasks
                         Log.LogMessageFromResources(messageImportance, "Touch.CreatingFile", file, "AlwaysCreate");
                     }
 
-                    if (!CreateFile(absoluteFile, fileCreate))
+                    if (!CreateFile(file, fileCreate))
                     {
                         return false;
                     }
@@ -241,7 +240,7 @@ namespace Microsoft.Build.Tasks
             // If the file is read only then we must either issue an error, or, if the user so
             // specified, make the file temporarily not read only.
             bool needToRestoreAttributes = false;
-            FileAttributes faOriginal = fileGetAttributes(absoluteFile);
+            FileAttributes faOriginal = fileGetAttributes(file);
             if ((faOriginal & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
             {
                 if (ForceTouch)
@@ -249,12 +248,12 @@ namespace Microsoft.Build.Tasks
                     try
                     {
                         FileAttributes faNew = (faOriginal & ~FileAttributes.ReadOnly);
-                        fileSetAttributes(absoluteFile, faNew);
+                        fileSetAttributes(file, faNew);
                         needToRestoreAttributes = true;
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(absoluteFile);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(file);
                         Log.LogErrorWithCodeFromResources("Touch.CannotMakeFileWritable", file, e.Message, lockedFileMessage);
                         return false;
                     }
@@ -265,12 +264,12 @@ namespace Microsoft.Build.Tasks
             bool retVal = true;
             try
             {
-                fileSetLastAccessTime(absoluteFile, dt);
-                fileSetLastWriteTime(absoluteFile, dt);
+                fileSetLastAccessTime(file, dt);
+                fileSetLastWriteTime(file, dt);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(absoluteFile);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(file);
                 Log.LogErrorWithCodeFromResources("Touch.CannotTouch", file, e.Message, lockedFileMessage);
                 return false;
             }
@@ -282,7 +281,7 @@ namespace Microsoft.Build.Tasks
                     // not much we can do.
                     try
                     {
-                        fileSetAttributes(absoluteFile, faOriginal);
+                        fileSetAttributes(file, faOriginal);
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {

@@ -125,9 +125,10 @@ namespace Microsoft.Build.Tasks
                 // we want that in the try block that is after this check.
                 while (!deletedFilesSet.Contains(file.ItemSpec))
                 {
+                    AbsolutePath filePath;
                     try
                     {
-                        AbsolutePath filePath = TaskEnvironment.GetAbsolutePath(file.ItemSpec);
+                        filePath = TaskEnvironment.GetAbsolutePath(file.ItemSpec);
                         if (FileSystems.Default.FileExists(filePath))
                         {
                             if (FailIfNotIncremental)
@@ -155,18 +156,25 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(file?.ItemSpec ?? string.Empty);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath ?? file.ItemSpec ?? string.Empty);
                         if (retries < Retries)
                         {
                             retries++;
-                            Log.LogWarningWithCodeFromResources("Delete.Retrying", file.ToString(), retries, RetryDelayMilliseconds, e.Message, lockedFileMessage);
+                            Log.LogWarningWithCodeFromResources("Delete.Retrying", filePath ?? file.ItemSpec, retries, RetryDelayMilliseconds, e.Message, lockedFileMessage);
 
                             Thread.Sleep(RetryDelayMilliseconds);
                             continue;
                         }
                         else
                         {
-                            LogError(file, e, lockedFileMessage);
+                            if (TreatErrorsAsWarnings)
+                            {
+                                Log.LogWarningWithCodeFromResources("Delete.Error", filePath ?? file.ItemSpec, e.Message, lockedFileMessage);
+                            }
+                            else
+                            {
+                                Log.LogErrorWithCodeFromResources("Delete.Error", filePath ?? file.ItemSpec, e.Message, lockedFileMessage);
+                            }
                             // Add on failure to avoid reattempting
                             deletedFilesSet.Add(file.ItemSpec);
                         }
@@ -178,22 +186,8 @@ namespace Microsoft.Build.Tasks
             return !Log.HasLoggedErrors;
         }
 
-        /// <summary>
-        /// Log an error.
-        /// </summary>
-        /// <param name="file">The file that wasn't deleted.</param>
-        /// <param name="e">The exception.</param>
-        /// <param name="lockedFileMessage">Message from <see cref="LockCheck"/>.</param>
         private void LogError(ITaskItem file, Exception e, string lockedFileMessage)
         {
-            if (TreatErrorsAsWarnings)
-            {
-                Log.LogWarningWithCodeFromResources("Delete.Error", file.ItemSpec, e.Message, lockedFileMessage);
-            }
-            else
-            {
-                Log.LogErrorWithCodeFromResources("Delete.Error", file.ItemSpec, e.Message, lockedFileMessage);
-            }
         }
 
         #endregion
