@@ -121,6 +121,8 @@ namespace Microsoft.Build.Tasks
                 }
 
                 int retries = 0;
+                // deletedFilesSet is not normalized because normalization may throw on Windows for invalid paths
+                // we want that in the try block that is after this check.
                 while (!deletedFilesSet.Contains(file.ItemSpec))
                 {
                     try

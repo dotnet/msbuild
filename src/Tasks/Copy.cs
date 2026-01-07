@@ -386,7 +386,7 @@ namespace Microsoft.Build.Tasks
             // leave the file writeable.
             if (sourceFileState.IsReadOnly)
             {
-                destinationFileState.Reset(TaskEnvironment);
+                destinationFileState.Reset();
                 MakeFileWriteable(destinationFileState, false);
             }
 
@@ -420,7 +420,7 @@ namespace Microsoft.Build.Tasks
                     }
 
                     File.SetAttributes(file.Name, FileAttributes.Normal);
-                    file.Reset(TaskEnvironment);
+                    file.Reset();
                 }
             }
         }
@@ -516,7 +516,7 @@ namespace Microsoft.Build.Tasks
 
                 if (!copyComplete)
                 {
-                    if (DoCopyIfNecessary(new FileState(SourceFiles[i].ItemSpec, TaskEnvironment), new FileState(DestinationFiles[i].ItemSpec, TaskEnvironment), copyFile))
+                    if (DoCopyIfNecessary(new FileState(TaskEnvironment.GetAbsolutePath(SourceFiles[i].ItemSpec)), new FileState(TaskEnvironment.GetAbsolutePath(DestinationFiles[i].ItemSpec)), copyFile))
                     {
                         filesActuallyCopied[destPath] = SourceFiles[i].ItemSpec;
                         copyComplete = true;
@@ -662,8 +662,8 @@ namespace Microsoft.Build.Tasks
                             if (!copyComplete)
                             {
                                 if (DoCopyIfNecessary(
-                                    new FileState(sourceItem.ItemSpec, TaskEnvironment),
-                                    new FileState(destItem.ItemSpec, TaskEnvironment),
+                                    new FileState(TaskEnvironment.GetAbsolutePath(sourceItem.ItemSpec)),
+                                    new FileState(TaskEnvironment.GetAbsolutePath(destItem.ItemSpec)),
                                     copyFile))
                                 {
                                     copyComplete = true;
@@ -1030,7 +1030,7 @@ namespace Microsoft.Build.Tasks
                             LockCheck.GetLockedFileMessage(destinationFileState.Name));
 
                         // if we have to retry for some reason, wipe the state -- it may not be correct anymore.
-                        destinationFileState.Reset(TaskEnvironment);
+                        destinationFileState.Reset();
 
                         Thread.Sleep(RetryDelayMilliseconds);
                         continue;
@@ -1056,7 +1056,7 @@ namespace Microsoft.Build.Tasks
                         LockCheck.GetLockedFileMessage(destinationFileState.Name));
 
                     // if we have to retry for some reason, wipe the state -- it may not be correct anymore.
-                    destinationFileState.Reset(TaskEnvironment);
+                    destinationFileState.Reset();
 
                     Thread.Sleep(RetryDelayMilliseconds);
                 }
@@ -1098,11 +1098,10 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            AbsolutePath sourceFullPath = TaskEnvironment.GetAbsolutePath(source.Name);
-            AbsolutePath destinationFullPath = TaskEnvironment.GetAbsolutePath(destination.Name);
-            source.FileNameFullPath = sourceFullPath;
-            destination.FileNameFullPath = destinationFullPath;
-            return sourceFullPath == destinationFullPath;
+            // FileState is constructed with normalized paths, so Name already contains the full path
+            source.FileNameFullPath = source.Name;
+            destination.FileNameFullPath = destination.Name;
+            return string.Equals(source.Name, destination.Name, FileUtilities.PathComparison);
         }
 
         private static bool GetParallelismFromEnvironment()
