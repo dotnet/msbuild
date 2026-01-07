@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
@@ -112,12 +113,23 @@ namespace Microsoft.Build.BackEnd
         private readonly ObservableGauge<int> _buildEventGauge;
         private readonly ObservableGauge<int> _schedulerRequestGauge;
         private readonly ObservableGauge<int> _nodeConfigurationGauge;
+        private readonly ObservableCounter<long> _nodeIdleTimeCounter;
 #pragma warning restore IDE0052 // Remove unread private members
 
         /// <summary>
         /// The current time for events.  This is set by the scheduler when it does a scheduling cycle in response to an event.
         /// </summary>
         private DateTime _currentEventTime;
+
+        /// <summary>
+        /// Tracks when each node last became idle (timestamp in ticks). Key is node ID.
+        /// </summary>
+        private readonly Dictionary<int, long> _nodeIdleStartTimes = new Dictionary<int, long>();
+
+        /// <summary>
+        /// Accumulates total idle time for each node in milliseconds.
+        /// </summary>
+        private readonly Dictionary<int, double> _nodeIdleTimeMs = new Dictionary<int, double>();
         #endregion
 
         /// <summary>
@@ -144,6 +156,12 @@ namespace Microsoft.Build.BackEnd
                 () => _buildEvents.Count,
                 description: "The total count of build events which have occurred during this build",
                 unit: "events");
+
+            _nodeIdleTimeCounter = parentMeter.CreateObservableCounter(
+                "msbuild_node_idle_time",
+                CollectNodeIdleTime,
+                unit: "ms",
+                description: "Total time each node has spent idle");
         }
 
         private IEnumerable<Measurement<int>> ComputeSchedulerRequestsMetrics()
@@ -160,6 +178,14 @@ namespace Microsoft.Build.BackEnd
             foreach (var kvp in _configurationsByNode)
             {
                 yield return new Measurement<int>(kvp.Value.Count, new KeyValuePair<string, object?>("node.id", kvp.Key));
+            }
+        }
+
+        private IEnumerable<Measurement<long>> CollectNodeIdleTime()
+        {
+            foreach (var kvp in _nodeIdleTimeMs)
+            {
+                yield return new Measurement<long>((long)kvp.Value, new KeyValuePair<string, object?>("node_id", kvp.Key));
             }
         }
 
@@ -348,6 +374,9 @@ namespace Microsoft.Build.BackEnd
                 case SchedulableRequestState.Executing:
                     _executingRequests.Remove(request.BuildRequest.GlobalRequestId);
                     _executingRequestByNode[request.AssignedNode] = null;
+
+                    // Node is becoming idle, start tracking idle time
+                    _nodeIdleStartTimes[request.AssignedNode] = Stopwatch.GetTimestamp();
                     break;
 
                 case SchedulableRequestState.Ready:
@@ -418,6 +447,21 @@ namespace Microsoft.Build.BackEnd
                 case SchedulableRequestState.Executing:
                     ErrorUtilities.VerifyThrow(!_executingRequests.ContainsKey(request.BuildRequest.GlobalRequestId), "Request with global id {0} is already executing!");
                     ErrorUtilities.VerifyThrow(!_executingRequestByNode.ContainsKey(request.AssignedNode) || _executingRequestByNode[request.AssignedNode] == null, "Node {0} is currently executing a request.", request.AssignedNode);
+
+                    // Node is becoming busy, record idle time if it was idle
+                    if (_nodeIdleStartTimes.TryGetValue(request.AssignedNode, out long idleStartTime))
+                    {
+                        long endTime = Stopwatch.GetTimestamp();
+                        double idleDurationMs = (endTime - idleStartTime) * 1000.0 / Stopwatch.Frequency;
+
+                        if (!_nodeIdleTimeMs.ContainsKey(request.AssignedNode))
+                        {
+                            _nodeIdleTimeMs[request.AssignedNode] = 0;
+                        }
+                        _nodeIdleTimeMs[request.AssignedNode] += idleDurationMs;
+
+                        _nodeIdleStartTimes.Remove(request.AssignedNode);
+                    }
 
                     _executingRequests[request.BuildRequest.GlobalRequestId] = request;
                     _executingRequestByNode[request.AssignedNode] = request;
