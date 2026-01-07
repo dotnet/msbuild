@@ -555,14 +555,14 @@ namespace Microsoft.Build.Logging
                         // Log the error but don't fail the build
                         // Note: We can't use LogMessage here since the stream is already closed
                         string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
-                            out string errorCode,
-                            out string helpKeyword,
+                            out _,
+                            out _,
                             "ErrorCopyingBinaryLog",
                             FilePath,
                             additionalPath,
                             ex.Message);
-                        
-                        throw new LoggerException(message, ex, errorCode, helpKeyword);
+
+                        Console.Error.WriteLine(message);
                     }
                 }
             }
