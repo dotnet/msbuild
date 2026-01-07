@@ -306,7 +306,7 @@ namespace Microsoft.Build.Logging
         /// It should not be set by external code or logger implementations.
         /// Use multiple logger instances with different Parameters instead.
         /// </remarks>
-        public IReadOnlyList<string> AdditionalFilePaths { get; set; }
+        public IReadOnlyList<string> AdditionalFilePaths { get; init; }
 
         /// <summary> Gets or sets the verbosity level.</summary>
         /// <remarks>
