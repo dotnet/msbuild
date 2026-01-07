@@ -709,7 +709,7 @@ namespace Microsoft.Build.BackEnd
 
             nodeContexts = GetNodes(
                 msbuildLocation,
-                string.Format(commandLineArgsPlaceholder, string.Empty, NodeReuseIsEnabled(hostContext), NodePacketTypeExtensions.PacketVersion),
+                string.Format(commandLineArgsPlaceholder, string.Empty, NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority, NodePacketTypeExtensions.PacketVersion),
                 communicationNodeId,
                 this,
                 new Handshake(hostContext),
