@@ -652,11 +652,6 @@
         <target state="translated">Null または空のターゲット名を含むコレクションを指定してメソッド {0} を呼び出すことはできません。</target>
         <note />
       </trans-unit>
-      <trans-unit id="OpenTelemetryLoadFailed">
-        <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="translated">テレメトリ ライブラリの読み込みが次の例外で失敗しました: {0}。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
         <target state="translated">プロパティの出力: </target>

@@ -3,20 +3,10 @@
 namespace Microsoft.Build.Framework.Telemetry;
 
 /// <summary>
-/// Constants for VS OpenTelemetry for basic configuration and appropriate naming for VS exporting/collection.
+/// Constants for VS Telemetry for basic configuration and appropriate naming for VS exporting/collection.
 /// </summary>
 internal static class TelemetryConstants
 {
-    /// <summary>
-    /// "Microsoft.VisualStudio.OpenTelemetry.*" namespace is required by VS exporting/collection.
-    /// </summary>
-    public const string ActivitySourceNamespacePrefix = "Microsoft.VisualStudio.OpenTelemetry.MSBuild.";
-
-    /// <summary>
-    /// Namespace of the default ActivitySource handling e.g. End of build telemetry.
-    /// </summary>
-    public const string DefaultActivitySourceNamespace = $"{ActivitySourceNamespacePrefix}Default";
-
     /// <summary>
     /// Prefix required by VS exporting/collection.
     /// </summary>
@@ -28,9 +18,14 @@ internal static class TelemetryConstants
     public const string PropertyPrefix = "VS.MSBuild.";
 
     /// <summary>
-    /// For VS OpenTelemetry Collector to apply the correct privacy policy.
+    /// "Microsoft.Build.Telemetry.*" namespace is required by VS exporting/collection.
     /// </summary>
-    public const string VSMajorVersion = "18.0";
+    public const string ActivitySourceNamespacePrefix = "Microsoft.Build.Telemetry";
+
+    /// <summary>
+    /// Namespace of the default ActivitySource handling e.g. End of build telemetry.
+    /// </summary>
+    public const string DefaultActivitySourceNamespace = $"{ActivitySourceNamespacePrefix}Default";
 
     /// <summary>
     /// Sample rate for the default namespace.
@@ -47,13 +42,9 @@ internal static class TelemetryConstants
     /// Name of the property for inner build duration.
     /// </summary>
     public const string InnerBuildDurationPropertyName = "InnerBuildDurationInMilliseconds";
-}
 
-internal static class NodeTelemetryTags
-{
-    // These properties can't use nameof since they're not tied to a specific class property
-    public const string Tasks = "Tasks";
-    public const string Targets = "Targets";
-    public const string TargetsSummary = "TargetsSummary";
-    public const string TasksSummary = "TasksSummary";
+    /// <summary>
+    /// Name of the property for build activity.
+    /// </summary>
+    public const string Build = "Build";
 }
