@@ -182,7 +182,6 @@
     <Compile Include="Logging\ReusableLogger.cs" />
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
     <Compile Include="TelemetryInfra\ITelemetryForwarder.cs" />
-    <Compile Include="TelemetryInfra\TelemetryDataUtils.cs" />
     <Compile Include="TelemetryInfra\TelemetryForwarderProvider.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
@@ -345,6 +344,7 @@
     <Compile Include="BackEnd\Components\RequestBuilder\TargetUpToDateChecker.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\TaskBuilder.cs" />
     <Compile Include="BackEnd\Components\RequestBuilder\TaskHost.cs" />
+    <Compile Include="BackEnd\Components\RequestBuilder\TaskRouter.cs" />
     <Compile Include="BackEnd\Shared\BuildRequest.cs" />
     <Compile Include="BackEnd\Shared\BuildRequestBlocker.cs" />
     <Compile Include="BackEnd\Shared\BuildRequestConfiguration.cs" />
@@ -373,6 +373,8 @@
     <Compile Include="BackEnd\Node\INode.cs" />
     <!-- ########################## -->
     <Compile Include="BackEnd\TaskExecutionHost\TaskExecutionHost.cs" />
+    <Compile Include="BackEnd\TaskExecutionHost\MultiProcessTaskEnvironmentDriver.cs" />
+    <Compile Include="BackEnd\TaskExecutionHost\MultiThreadedTaskEnvironmentDriver.cs" />
     <!-- #### COLLECTIONS ### -->
     <Compile Include="..\Shared\CollectionHelpers.cs" />
     <Compile Include="Collections\ArrayDictionary.cs" />
@@ -549,7 +551,7 @@
     <Compile Include="Instance\ProjectTaskOutputPropertyInstance.cs" />
     <Compile Include="Instance\TaskFactories\AssemblyTaskFactory.cs" />
     <Compile Include="Instance\TaskFactories\TaskHostTask.cs" />
-    <Compile Include="Instance\TaskFactoryLoggingHost.cs" />
+    <Compile Include="Instance\TaskFactoryEngineContext.cs" />
     <Compile Include="Instance\TaskFactoryWrapper.cs" />
     <Compile Include="Instance\TaskRegistry.cs" />
     <!-- ######################## -->

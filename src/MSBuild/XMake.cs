@@ -248,9 +248,9 @@ namespace Microsoft.Build.CommandLine
             DebuggerLaunchCheck();
 
             // Initialize new build telemetry and record start of this build.
-            KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
-            // Initialize OpenTelemetry infrastructure
-            OpenTelemetryManager.Instance.Initialize(isStandalone: true);
+            KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow, IsStandaloneExecution = true };
+
+            TelemetryManager.Instance?.Initialize(isStandalone: true);
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
@@ -298,11 +298,11 @@ namespace Microsoft.Build.CommandLine
             {
                 DumpCounters(false /* log to console */);
             }
-            OpenTelemetryManager.Instance.Shutdown();
+
+            TelemetryManager.Instance?.Dispose();
 
             return exitCode;
         }
-
 
         /// <summary>
         /// Returns true if arguments allows or make sense to leverage msbuild server.
@@ -597,6 +597,13 @@ namespace Microsoft.Build.CommandLine
                 case "1":
                     Debugger.Launch();
                     break;
+                case "3":
+                    // Value "3" debugs the main MSBuild process but skips debugging child TaskHost processes
+                    if (!DebugUtils.IsInTaskHostNode())
+                    {
+                        Debugger.Launch();
+                    }
+                    break;
 #endif
                 case "2":
                     // Sometimes easier to attach rather than deal with JIT prompt
@@ -716,8 +723,6 @@ namespace Microsoft.Build.CommandLine
 #endif
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
-
-                CommunicationsUtilities.Trace($"Command line parameters: {commandLine}");
 
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,
@@ -1254,8 +1259,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static uint? s_originalConsoleMode = null;
 
-        private const int MAX_MULTITHREADED_CPU_COUNT_FOR_TASK_HOST = 256;
-
         /// <summary>
         /// Initializes the build engine, and starts the project building.
         /// </summary>
@@ -1306,12 +1309,6 @@ namespace Microsoft.Build.CommandLine
             string[] commandLine)
 #endif
         {
-            // Set limitation for multithreaded and MSBUILDFORCEALLTASKSOUTOFPROC=1. Max is 256 because of unique task host id generation.
-            if (multiThreaded && Traits.Instance.ForceAllTasksOutOfProcToTaskHost)
-            {
-                ErrorUtilities.VerifyThrowArgument(cpuCount <= MAX_MULTITHREADED_CPU_COUNT_FOR_TASK_HOST, "MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc", MAX_MULTITHREADED_CPU_COUNT_FOR_TASK_HOST);
-            }
-
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
             {
                 InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XMake.ProjectUpgradeNeededToVcxProj", projectFile), null);

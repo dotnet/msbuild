@@ -1512,11 +1512,6 @@
         <target state="translated">MSBuild 記錄和偵錯工具資訊將位於 "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
-        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
-        <target state="translated">開啟多執行緒模式且 MSBUILDFORCEALLTASKSOUTOFPROC=1 時，maxCpuCount 不能大於 {0}。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
         <target state="translated">MSBUILD : error MSB1067: 必須提供 featureAvailability 切換的功能名稱。</target>

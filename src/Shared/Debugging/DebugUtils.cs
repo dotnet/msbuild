@@ -27,25 +27,25 @@ namespace Microsoft.Build.Shared.Debugging
         }
 
         // DebugUtils are initialized early on by the test runner - during preparing data for DataMemeberAttribute of some test,
-        //  for that reason it is not easily possible to inject the DebugPath in tests via env var (unless we want to run expensive exec style test).
+        // for that reason it is not easily possible to inject the DebugPath in tests via env var (unless we want to run expensive exec style test).
         internal static void SetDebugPath()
         {
             string environmentDebugPath = FileUtilities.TrimAndStripAnyQuotes(Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH"));
             string debugDirectory = environmentDebugPath;
-
             if (Traits.Instance.DebugEngine)
             {
                 if (!string.IsNullOrWhiteSpace(debugDirectory) && FileUtilities.CanWriteToDirectory(debugDirectory))
                 {
-                    // Debug directory is writable; no need for fallbacks
+                    // Add a dedicated ".MSBuild_Logs" folder inside the user-specified path, either always or when in solution directory.
+                    debugDirectory = Path.Combine(debugDirectory, ".MSBuild_Logs");
                 }
                 else if (FileUtilities.CanWriteToDirectory(Directory.GetCurrentDirectory()))
                 {
-                    debugDirectory = Path.Combine(Directory.GetCurrentDirectory(), "MSBuild_Logs");
+                    debugDirectory = Path.Combine(Directory.GetCurrentDirectory(), ".MSBuild_Logs");
                 }
                 else
                 {
-                    debugDirectory = Path.Combine(FileUtilities.TempFileDirectory, "MSBuild_Logs");
+                    debugDirectory = Path.Combine(FileUtilities.TempFileDirectory, ".MSBuild_Logs");
                 }
 
                 // Out of proc nodes do not know the startup directory so set the environment variable for them.
@@ -104,6 +104,16 @@ namespace Microsoft.Build.Shared.Debugging
         public static readonly bool ShouldDebugCurrentProcess = CurrentProcessMatchesDebugName();
 
         public static string DebugPath { get; private set; }
+
+        /// <summary>
+        /// Returns true if the current process is an out-of-proc TaskHost node.
+        /// </summary>
+        /// <returns>
+        /// True if this process was launched with /nodemode:2 (indicating it's a TaskHost process),
+        /// false otherwise. This is useful for conditionally enabling debugging or other behaviors
+        /// based on whether the code is running in the main MSBuild process or a child TaskHost process.
+        /// </returns>
+        public static bool IsInTaskHostNode() => ProcessNodeMode.Value == NodeMode.OutOfProcTaskHostNode;
 
         public static string FindNextAvailableDebugFilePath(string fileName)
         {

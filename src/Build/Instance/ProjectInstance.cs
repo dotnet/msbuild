@@ -1390,13 +1390,13 @@ namespace Microsoft.Build.Execution
             // If the property has already been set as an environment variable, we do not overwrite it.
             if (_environmentVariableProperties.Contains(name))
             {
-                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySet", name, value);
+                LogIfValueDiffers(_environmentVariableProperties, name, value, "SdkEnvironmentVariableAlreadySet");
                 return;
             }
             // If another SDK already set it, we do not overwrite it.
             else if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
             {
-                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySetBySdk", name, value);
+                LogIfValueDiffers(_sdkResolvedEnvironmentVariableProperties, name, value, "SdkEnvironmentVariableAlreadySetBySdk");
                 return;
             }
 
@@ -1412,8 +1412,18 @@ namespace Microsoft.Build.Execution
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this)
                    .SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: _loggingContext, isEnvironmentVariable: true, isCommandLineProperty: false);
             }
+        }
 
-            _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableSet", name, value);
+        /// <summary>
+        /// Helper method to log a message if the attempted value differs from the existing value.
+        /// </summary>
+        private void LogIfValueDiffers(PropertyDictionary<ProjectPropertyInstance> propertyDictionary, string name, string attemptedValue, string messageResourceName)
+        {
+            ProjectPropertyInstance existingProperty = propertyDictionary.GetProperty(name);
+            if (existingProperty != null && !string.Equals(existingProperty.EvaluatedValue, attemptedValue, StringComparison.Ordinal))
+            {
+                _loggingContext.LogComment(MessageImportance.Low, messageResourceName, name, attemptedValue, existingProperty.EvaluatedValue);
+            }
         }
 
         /// <summary>

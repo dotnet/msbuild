@@ -59,6 +59,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\FrameworkLocationHelper.cs">
+      <Link>Shared\FrameworkLocationHelper.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
@@ -138,7 +141,6 @@
     <Compile Include="InitializationException.cs" />
     <Compile Include="MSBuildClientApp.cs" />
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
-    <Compile Include="LogMessagePacket.cs" />
     <Compile Include="ProjectSchemaValidationHandler.cs" />
     <Compile Include="OutOfProcTaskHostNode.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
