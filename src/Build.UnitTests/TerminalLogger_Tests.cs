@@ -1058,6 +1058,7 @@ namespace Microsoft.Build.UnitTests
 
                 terminalLogger.Shutdown();
             }
+        }
 
         [Theory]
         [InlineData(true)]
