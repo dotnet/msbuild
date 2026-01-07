@@ -4070,8 +4070,7 @@ namespace Microsoft.Build.CommandLine
             if (processedParams.AllConfigurationsIdentical && processedParams.AdditionalFilePaths.Count > 0)
             {
                 // Optimized approach: single logger writing to one file, then copy to additional locations
-                BinaryLogger logger = new BinaryLogger { Parameters = processedParams.DistinctParameterSets[0] };
-                logger.AdditionalFilePaths = processedParams.AdditionalFilePaths;
+                BinaryLogger logger = new() { Parameters = processedParams.DistinctParameterSets[0], AdditionalFilePaths = processedParams.AdditionalFilePaths };
                 loggers.Add(logger);
             }
             else
