@@ -888,6 +888,38 @@ namespace Microsoft.Build.UnitTests
             result.ShouldContain("MSB1068");
         }
 
+        /// <summary>
+        /// Regression test for issue where getTargetResult/getItem would throw an unhandled exception
+        /// when the item spec contained illegal path characters (e.g. compiler command line flags).
+        /// </summary>
+        [Theory]
+        [InlineData("-getTargetResult:GetCompileCommands", "\"Result\": \"Success\"")]
+        [InlineData("-getItem:CompileCommands", "\"Identity\":")]
+        public void GetTargetResultWithIllegalPathCharacters(string extraSwitch, string expectedContent)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            // Create a project that mimics the ClangTidy target - it outputs items with illegal path characters
+            // (compiler command line flags) as the item spec.
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <ItemGroup>
+    <CompileCommands Include=""/c /nologo /W3 /WX- /diagnostics:column /Od /D _DEBUG"" />
+  </ItemGroup>
+
+  <Target Name=""GetCompileCommands"" Returns=""@(CompileCommands)"">
+    <ItemGroup>
+      <CompileCommands Include=""/c /fp:precise /permissive- /Fa&quot;Debug\\&quot; /Fo&quot;Debug\\&quot; /Gd --target=amd64-pc-windows-msvc /TP"" />
+    </ItemGroup>
+  </Target>
+</Project>
+");
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} /t:GetCompileCommands {extraSwitch}", out bool success);
+            // The build should succeed instead of throwing an unhandled exception
+            success.ShouldBeTrue(results);
+            // The output should contain the expected content
+            results.ShouldContain(expectedContent);
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -2934,24 +2966,6 @@ EndGlobal
         }
 
 #endif
-
-        [Fact]
-        public void ThrowsWhenMaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc()
-        {
-            string projectContent = """
-                <Project>
-                </Project>
-                """;
-            using TestEnvironment testEnvironment = TestEnvironment.Create();
-            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
-            string project = testEnvironment.CreateTestProjectWithFiles("project.proj", projectContent).ProjectFile;
-
-#if FEATURE_GET_COMMANDLINE
-            MSBuildApp.Execute(@"c:\bin\msbuild.exe " + project + " / m:257 /mt").ShouldBe(MSBuildApp.ExitType.SwitchError);
-#else
-            MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", project, "/m:257 /mt" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
-#endif
-        }
 
         private string CopyMSBuild()
         {

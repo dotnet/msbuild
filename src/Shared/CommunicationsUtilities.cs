@@ -37,7 +37,6 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// Enumeration of all possible (currently supported) options for handshakes.
     /// </summary>
-    /// <remarks> In case of adding new options, please remember to update the generation of unique task host node id in NodeProviderOutOfProcTaskHost. </remarks>
     [Flags]
     internal enum HandshakeOptions
     {
@@ -88,6 +87,19 @@ namespace Microsoft.Build.Internal
         /// </summary>
         SidecarTaskHost = 256,
     }
+
+    /// <summary>
+    /// Represents a unique key for identifying task host nodes.
+    /// Combines HandshakeOptions (which specify runtime/architecture configuration) with
+    /// the scheduled node ID to uniquely identify task hosts in multi-threaded mode.
+    /// </summary>
+    /// <param name="HandshakeOptions">The handshake options specifying runtime and architecture configuration.</param>
+    /// <param name="NodeId">
+    /// The scheduled node ID. In traditional multi-proc builds, this is -1 (meaning the task host
+    /// is identified by HandshakeOptions alone). In multi-threaded mode, each in-proc node has
+    /// its own task host, so the node ID is used to distinguish them.
+    /// </param>
+    internal readonly record struct TaskHostNodeKey(HandshakeOptions HandshakeOptions, int NodeId);
 
     /// <summary>
     /// Status codes for the handshake process.

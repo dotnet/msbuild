@@ -652,11 +652,6 @@
         <target state="translated">Метод {0} не может быть вызван с коллекцией, содержащей целевые имена, которые пусты или равны NULL.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OpenTelemetryLoadFailed">
-        <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="translated">Не удалось загрузить библиотеки телеметрии с исключением: {0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
         <target state="translated">Выходное свойство: </target>
@@ -907,18 +902,13 @@ Errors: {3}</source>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="translated">Пакет SDK попытался настроить для переменной среды "{0}" значение "{1}", но она уже была настроена в качестве переменной среды.</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
+        <target state="translated">Пакет SDK попытался настроить для переменной среды "{0}" значение "{1}", но для нее уже было настроено значение "{2}" в качестве переменной среды.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="translated">Пакет SDK попытался настроить для переменной среды "{0}" значение "{1}", но она уже была настроена другим пакетом SDK.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SdkEnvironmentVariableSet">
-        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="translated">Пакет SDK попытался настроить для переменной среды "{0}" значение "{1}".</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
+        <target state="translated">Пакет SDK попытался настроить для переменной среды "{0}" значение "{1}", но для нее уже было настроено значение "{2}" другим пакетом SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">

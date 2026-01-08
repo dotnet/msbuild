@@ -652,11 +652,6 @@
         <target state="translated">Die Methode "{0}" kann nicht mit einer Sammlung aufgerufen werden, die NULL oder leere Zielnamen enthält.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OpenTelemetryLoadFailed">
-        <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="translated">Fehler beim Laden von Telemetriebibliotheken. Ausnahme:{0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
         <source>Output Property: </source>
         <target state="translated">Ausgabeeigenschaft: </target>
@@ -907,18 +902,13 @@ Fehler: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen, sie wurde aber bereits als Umgebungsvariable festgelegt.</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
+        <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen, sie wurde aber bereits als Umgebungsvariable auf „{2}“ festgelegt.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen, sie wurde aber bereits von einem anderen SDK festgelegt.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SdkEnvironmentVariableSet">
-        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen.</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
+        <target state="translated">Ein SDK hat versucht, die Umgebungsvariable „{0}“ auf „{1}“ festzulegen, sie wurde aber bereits von einem anderen SDK auf „{2}“ festgelegt.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">

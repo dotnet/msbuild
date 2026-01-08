@@ -1510,11 +1510,6 @@
         <target state="translated">Журналы MSBuild и отладочные сведения будут доступны по адресу "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
-        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
-        <target state="translated">Если включён многопоточный режим и MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount не может быть больше {0}.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
         <target state="translated">MSBUILD : error MSB1067: необходимо указать имя функции для переключателя FeatureAvailability.</target>

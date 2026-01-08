@@ -1512,11 +1512,6 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
         <target state="translated">MSBuild-Protokolle und Debuginformationen befinden sich auf "{0}"</target>
         <note />
       </trans-unit>
-      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
-        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
-        <target state="translated">Bei aktiviertem MultiThreaded-Modus und MSBUILDFORCEALLTASKSOUTOFPROC=1 darf maxCpuCount nicht größer als {0} sein.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">
         <source>MSBUILD : error MSB1067: Must provide a feature name for the featureAvailability switch.</source>
         <target state="translated">MSBUILD : error MSB1067: Es muss ein Featurename für den featureAvailability-Schalter angegeben werden.</target>

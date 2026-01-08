@@ -1384,14 +1384,12 @@ Errors: {3}</value>
     <comment>{StrBegin="MSB4238: "}</comment>
   </data>
   <data name="SdkEnvironmentVariableAlreadySet" xml:space="preserve">
-    <value>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</value>
+    <value>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</value>
   </data>
   <data name="SdkEnvironmentVariableAlreadySetBySdk" xml:space="preserve">
-    <value>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</value>
+    <value>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</value>
   </data>
-  <data name="SdkEnvironmentVariableSet" xml:space="preserve">
-    <value>An SDK attempted set the environment variable "{0}" to "{1}".</value>
-  </data>
+
   <data name="UnrecognizedParentElement" xml:space="preserve">
     <value>MSB4189: &lt;{1}&gt; is not a valid child of the &lt;{0}&gt; element.</value>
     <comment>{StrBegin="MSB4189: "}</comment>
@@ -2429,9 +2427,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="TestSummary_Succeeded" xml:space="preserve">
     <value>succeeded: {0}</value>
     <comment>{0} whole number</comment>
-  </data>
-  <data name="OpenTelemetryLoadFailed" xml:space="preserve">
-    <value>Loading telemetry libraries failed with exception: {0}.</value>
   </data>
   <data name="CustomTaskFactoryOutOfProcNotSupported" xml:space="preserve">
     <value>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</value>
