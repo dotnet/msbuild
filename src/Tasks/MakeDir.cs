@@ -59,13 +59,13 @@ namespace Microsoft.Build.Tasks
                 // here we check for that case.
                 if (directory.ItemSpec.Length > 0)
                 {
-                    AbsolutePath absolutePath = null;
+                    AbsolutePath? absolutePath = null;
                     try
                     {
                         // For speed, eliminate duplicates caused by poor targets authoring, don't absolutize yet to save allocation
                         if (!directoriesSet.Contains(directory.ItemSpec))
                         {
-                            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
+                            absolutePath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
                             // Only log a message if we actually need to create the folder
                             if (!FileUtilities.DirectoryExistsNoThrow(absolutePath))
                             {

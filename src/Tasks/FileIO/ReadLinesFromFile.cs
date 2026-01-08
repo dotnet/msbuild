@@ -44,7 +44,7 @@ namespace Microsoft.Build.Tasks
             bool success = true;
             if (File != null)
             {
-                AbsolutePath filePath = null;
+                AbsolutePath? filePath = null;
                 try
                 {
                     filePath = TaskEnvironment.GetAbsolutePath(File.ItemSpec);

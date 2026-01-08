@@ -125,7 +125,7 @@ namespace Microsoft.Build.Tasks
                 // we want that in the try block that is after this check.
                 while (!deletedFilesSet.Contains(file.ItemSpec))
                 {
-                    AbsolutePath filePath;
+                    AbsolutePath? filePath = null;
                     try
                     {
                         filePath = TaskEnvironment.GetAbsolutePath(file.ItemSpec);
@@ -185,11 +185,6 @@ namespace Microsoft.Build.Tasks
             DeletedFiles = deletedFilesList.ToArray();
             return !Log.HasLoggedErrors;
         }
-
-        private void LogError(ITaskItem file, Exception e, string lockedFileMessage)
-        {
-        }
-
         #endregion
     }
 }

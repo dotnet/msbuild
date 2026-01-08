@@ -97,7 +97,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem file in Files)
             {
-                AbsolutePath path = FileUtilities.FixFilePath(TaskEnvironment.GetAbsolutePath(file.ItemSpec));
+                AbsolutePath path = new AbsolutePath(FileUtilities.FixFilePath(TaskEnvironment.GetAbsolutePath(file.ItemSpec)));
                 // For speed, eliminate duplicates caused by poor targets authoring
                 if (touchedFilesSet.Contains(path))
                 {
