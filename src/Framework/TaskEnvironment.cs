@@ -37,6 +37,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="path">The path to convert.</param>
         /// <returns>An absolute path representation.</returns>
+        /// <remarks>Path normalization may cause exceptions on some platforms if the path contains illegal characters.</remarks>
         public AbsolutePath GetAbsolutePath(string path) => _driver.GetAbsolutePath(path);
 
         /// <summary>

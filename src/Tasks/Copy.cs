@@ -503,10 +503,16 @@ namespace Microsoft.Build.Tasks
             for (int i = 0; i < SourceFiles.Length && !_cancellationTokenSource.IsCancellationRequested; ++i)
             {
                 bool copyComplete = false;
+                string sourceSpec = SourceFiles[i].ItemSpec;
+                string destSpec = DestinationFiles[i].ItemSpec;
 
                 // Compute absolute paths once - reused for ETW, deduplication dictionary, and FileState
-                AbsolutePath sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(SourceFiles[i].ItemSpec);
-                AbsolutePath destAbsolutePath = TaskEnvironment.GetAbsolutePath(DestinationFiles[i].ItemSpec);
+                if (!TryGetAbsolutePath(sourceSpec, destSpec, sourceSpec, out AbsolutePath sourceAbsolutePath) ||
+                    !TryGetAbsolutePath(sourceSpec, destSpec, destSpec, out AbsolutePath destAbsolutePath))
+                {
+                    success = false;
+                    continue;
+                }
 
                 MSBuildEventSource.Log.CopyUpToDateStart(destAbsolutePath);
                 if (filesActuallyCopied.TryGetValue(destAbsolutePath, out string originalSource))
@@ -552,7 +558,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (_copyActionQueue.TryDequeue(out Action copyAction))
                 {
-                    copyAction();
+                        copyAction();
                 }
                 else
                 {
@@ -653,18 +659,22 @@ namespace Microsoft.Build.Tasks
                             int fileIndex = partition[partitionIndex];
                             ITaskItem sourceItem = SourceFiles[fileIndex];
                             ITaskItem destItem = DestinationFiles[fileIndex];
+                            string sourceSpec = sourceItem.ItemSpec;
+                            string destSpec = destItem.ItemSpec;
 
                             // Compute absolute paths once - reused for ETW, deduplication check, and FileState
-                            AbsolutePath sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceItem.ItemSpec);
-                            AbsolutePath destAbsolutePath = TaskEnvironment.GetAbsolutePath(destItem.ItemSpec);
+                            if (!TryGetAbsolutePath(sourceSpec, destSpec, sourceSpec, out AbsolutePath sourceAbsolutePath) ||
+                                !TryGetAbsolutePath(sourceSpec, destSpec, destSpec, out AbsolutePath destAbsolutePath))
+                            {
+                                success = false;
+                                continue;
+                            }
 
                             // Check if we just copied from this location to the destination, don't copy again.
                             MSBuildEventSource.Log.CopyUpToDateStart(destAbsolutePath);
                             bool copyComplete = partitionIndex > 0 &&
-                                                String.Equals(
-                                                    sourceAbsolutePath,
-                                                    TaskEnvironment.GetAbsolutePath(SourceFiles[partition[partitionIndex - 1]].ItemSpec),
-                                                    FileUtilities.PathComparison);
+                                                TryGetAbsolutePath(sourceSpec, destSpec, SourceFiles[partition[partitionIndex - 1]].ItemSpec, out AbsolutePath prevSourcePath) &&
+                                                String.Equals(sourceAbsolutePath, prevSourcePath, FileUtilities.PathComparison);
 
                             if (!copyComplete)
                             {
@@ -893,6 +903,29 @@ namespace Microsoft.Build.Tasks
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Attempts to get the absolute path for a file, logging an error if it fails.
+        /// </summary>
+        /// <param name="sourcePath">The source path (for error reporting).</param>
+        /// <param name="destPath">The destination path (for error reporting).</param>
+        /// <param name="pathToResolve">The path to resolve to an absolute path.</param>
+        /// <param name="absolutePath">The resolved absolute path, if successful.</param>
+        /// <returns>True if the path was resolved successfully; false if an error occurred.</returns>
+        private bool TryGetAbsolutePath(string sourcePath, string destPath, string pathToResolve, out AbsolutePath absolutePath)
+        {
+            try
+            {
+                absolutePath = TaskEnvironment.GetAbsolutePath(pathToResolve);
+                return true;
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                Log.LogErrorWithCodeFromResources("Copy.Error", sourcePath, destPath, e.Message);
+                absolutePath = default;
+                return false;
+            }
         }
 
         /// <summary>

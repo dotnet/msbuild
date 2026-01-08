@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks
         {
             var items = new List<ITaskItem>();
             var directoriesSet = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            
+
             foreach (ITaskItem directory in Directories)
             {
                 // Sometimes people pass in an item transform like @(myitem->'%(RelativeDir)') in order
@@ -71,12 +71,12 @@ namespace Microsoft.Build.Tasks
                             {
                                 if (FailIfNotIncremental)
                                 {
-                                    Log.LogErrorFromResources("MakeDir.Comment", absolutePath.Value.Original);
+                                    Log.LogErrorFromResources("MakeDir.Comment", absolutePath!.Original);
                                 }
                                 else
                                 {
                                     // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                                    Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", absolutePath.Value.Original);
+                                    Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", absolutePath!.Original);
 
                                     Directory.CreateDirectory(FileUtilities.FixFilePath(absolutePath));
                                 }
