@@ -546,5 +546,80 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             string successfulCallbacks = projectInstance.GetPropertyValue("SuccessfulCallbacks");
             int.Parse(successfulCallbacks).ShouldBeGreaterThan(0);
         }
+
+        /// <summary>
+        /// Verifies that BuildProjectFile callback works correctly when a task runs in TaskHost.
+        /// The task calls BuildEngine.BuildProjectFile to build another project, and the callback
+        /// should be forwarded to the parent process and executed there.
+        /// </summary>
+        [Fact]
+        public void BuildProjectFileCallbackWorksInTaskHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            // Force tasks to run out of process
+            env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
+
+            // Enable debug communication
+            // env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
+
+            // Child project that will be built via BuildProjectFile callback
+            // The Message task will run in the TaskHost as a nested task while
+            // the parent task (BuildProjectFileTask) is yielded waiting for the callback.
+            string childProject = @"
+<Project>
+    <Target Name=""Build"">
+        <Message Text=""Child project is building!"" Importance=""high"" />
+    </Target>
+</Project>";
+
+            // Parent project that uses BuildProjectFileTask to build the child
+            // NOTE: Don't use any other tasks (like Message) here because they would also go to TaskHost
+            string parentProject = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(BuildProjectFileTask)}"" AssemblyFile=""{typeof(BuildProjectFileTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""Build"">
+        <{nameof(BuildProjectFileTask)} ProjectToBuild=""child.proj"" Targets=""Build"">
+            <Output PropertyName=""ChildBuildResult"" TaskParameter=""BuildSucceeded"" />
+        </{nameof(BuildProjectFileTask)}>
+    </Target>
+</Project>";
+
+            TransientTestFile childFile = env.CreateFile("child.proj", childProject);
+            TransientTestFile parentFile = env.CreateFile("parent.proj", parentProject);
+
+            _output.WriteLine($"Parent project: {parentFile.Path}");
+            _output.WriteLine($"Child project: {childFile.Path}");
+
+            ProjectInstance projectInstance = new(parentFile.Path);
+
+            BuildParameters buildParameters = new()
+            {
+                EnableNodeReuse = false,
+                MaxNodeCount = 1  // Single node to reduce complexity for debugging
+            };
+
+            using (BuildManager buildManager = new BuildManager())
+            {
+                buildManager.BeginBuild(buildParameters);
+                try
+                {
+                    _output.WriteLine("Starting build request...");
+                    BuildResult buildResult = buildManager.BuildRequest(
+                        new BuildRequestData(projectInstance, targetsToBuild: ["Build"]));
+
+                    _output.WriteLine($"Build completed with result: {buildResult.OverallResult}");
+                    buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+                    string childBuildResult = projectInstance.GetPropertyValue("ChildBuildResult");
+                    _output.WriteLine($"ChildBuildResult property: {childBuildResult}");
+                    childBuildResult.ShouldBe("True", "BuildProjectFile callback should have succeeded");
+                }
+                finally
+                {
+                    buildManager.EndBuild();
+                }
+            }
+        }
     }
 }

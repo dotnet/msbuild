@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -109,6 +110,12 @@ namespace Microsoft.Build.BackEnd
         /// The task host node ID of the task host we're launching.
         /// </summary>
         private int _taskHostNodeId;
+
+        /// <summary>
+        /// The unique ID of this task, used for correlating TaskHostTaskComplete packets
+        /// in nested build scenarios where multiple tasks may run in the same TaskHost.
+        /// </summary>
+        private int _taskId;
 
         /// <summary>
         /// The ID of the node on which this task is scheduled to run.
@@ -333,7 +340,8 @@ namespace Microsoft.Build.BackEnd
                         _taskLoggingContext.GetWarningsAsMessages());
 
             // Assign unique task ID for callback correlation
-            hostConfiguration.TaskId = Interlocked.Increment(ref s_nextTaskId);
+            _taskId = Interlocked.Increment(ref s_nextTaskId);
+            hostConfiguration.TaskId = _taskId;
 
             try
             {
@@ -369,16 +377,33 @@ namespace Microsoft.Build.BackEnd
                                 if (packet != null)
                                 {
                                     HandlePacket(packet, out taskFinished);
+                                    // When our task completes, immediately disconnect from host
+                                    // to remove us from the handler stack. This prevents packets
+                                    // meant for other handlers from being routed to us in nested scenarios.
+                                    if (taskFinished)
+                                    {
+                                        lock (_taskHostLock)
+                                        {
+                                            Console.WriteLine($"[TaskHostTask:{DateTime.Now:HH:mm:ss.fff}] Disconnecting from host in packet loop, myTaskId={_taskId}");
+                                            _taskHostProvider.DisconnectFromHost(_taskHostNodeId);
+                                            _connectedToTaskHost = false;
+                                        }
+                                        break;
+                                    }
                                 }
                             }
                         }
                     }
                     finally
                     {
+                        // DisconnectFromHost may have already been called above
                         lock (_taskHostLock)
                         {
-                            _taskHostProvider.DisconnectFromHost(_taskHostNodeId);
-                            _connectedToTaskHost = false;
+                            if (_connectedToTaskHost)
+                            {
+                                _taskHostProvider.DisconnectFromHost(_taskHostNodeId);
+                                _connectedToTaskHost = false;
+                            }
                         }
                     }
                 }
@@ -474,6 +499,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
+            Console.WriteLine($"[TaskHostTask:{DateTime.Now:HH:mm:ss.fff}] PacketReceived node={node}, packet.Type={packet.Type}, myTaskId={_taskId}");
             _receivedPackets.Enqueue(packet);
             _packetReceivedEvent.Set();
         }
@@ -498,8 +524,7 @@ namespace Microsoft.Build.BackEnd
             switch (packet.Type)
             {
                 case NodePacketType.TaskHostTaskComplete:
-                    HandleTaskHostTaskComplete(packet as TaskHostTaskComplete);
-                    taskFinished = true;
+                    HandleTaskHostTaskComplete(packet as TaskHostTaskComplete, out taskFinished);
                     break;
                 case NodePacketType.NodeShutdown:
                     HandleNodeShutdown(packet as NodeShutdown);
@@ -514,6 +539,11 @@ namespace Microsoft.Build.BackEnd
                 case NodePacketType.TaskHostResourceRequest:
                     HandleResourceRequest(packet as TaskHostResourceRequest);
                     break;
+                case NodePacketType.TaskHostBuildRequest:
+                    Console.WriteLine($"[TaskHostTask] HandlePacket: TaskHostBuildRequest received");
+                    HandleBuildRequest(packet as TaskHostBuildRequest);
+                    Console.WriteLine($"[TaskHostTask] HandlePacket: HandleBuildRequest returned");
+                    break;
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     break;
@@ -523,8 +553,23 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Task completed executing in the task host
         /// </summary>
-        private void HandleTaskHostTaskComplete(TaskHostTaskComplete taskHostTaskComplete)
+        private void HandleTaskHostTaskComplete(TaskHostTaskComplete taskHostTaskComplete, out bool taskFinished)
         {
+            Console.WriteLine($"[TaskHostTask:{DateTime.Now:HH:mm:ss.fff}] HandleTaskHostTaskComplete called, result={taskHostTaskComplete.TaskResult}, packetTaskId={taskHostTaskComplete.TaskId}, myTaskId={_taskId}");
+
+            // Check if this completion is for our task or a nested task.
+            // In nested BuildProjectFile scenarios, multiple tasks can run in the same TaskHost,
+            // and we only want to process completions for our specific task.
+            if (taskHostTaskComplete.TaskId != 0 && taskHostTaskComplete.TaskId != _taskId)
+            {
+                // This completion is for a different task (likely a nested task from BuildProjectFile).
+                // Don't mark our task as finished - just return.
+                Console.WriteLine($"[TaskHostTask] Ignoring TaskHostTaskComplete for different task (expected={_taskId}, got={taskHostTaskComplete.TaskId})");
+                taskFinished = false;
+                return;
+            }
+
+            taskFinished = true;
 #if FEATURE_REPORTFILEACCESSES
             if (taskHostTaskComplete.FileAccessData?.Count > 0)
             {
@@ -695,6 +740,200 @@ namespace Microsoft.Build.BackEnd
 
             var response = new TaskHostResourceResponse(request.RequestId, result);
             _taskHostProvider.SendData(_taskHostNodeId, response);
+        }
+
+        /// <summary>
+        /// Handles BuildProjectFile* requests from the TaskHost.
+        /// Forwards the request to the real build engine and sends back the response.
+        /// This method runs the build on a separate thread to avoid blocking the packet
+        /// handling loop, which is necessary when nested builds need to communicate
+        /// with the same TaskHost (e.g., send logs or new task configurations).
+        /// </summary>
+        private void HandleBuildRequest(TaskHostBuildRequest request)
+        {
+            // Run the build synchronously for now to diagnose the crash.
+            // TODO: Restore ThreadPool.QueueUserWorkItem after fixing the issue.
+            Console.WriteLine($"[TaskHostTask] HandleBuildRequest received, RequestId={request.RequestId}, Variant={request.Variant}, ProjectFileName={request.ProjectFileName}");
+
+            bool result = false;
+            IDictionary targetOutputs = null;
+            IDictionary[] targetOutputsPerProject = null;
+            IList<IDictionary<string, ITaskItem[]>> buildEngineResultOutputs = null;
+
+            try
+            {
+                Console.WriteLine($"[TaskHostTask] About to call BuildProjectFile for RequestId={request.RequestId}");
+                switch (request.Variant)
+                {
+                    case TaskHostBuildRequest.BuildRequestVariant.BuildEngine1:
+                        targetOutputs = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                        result = _buildEngine.BuildProjectFile(
+                            request.ProjectFileName,
+                            request.TargetNames,
+                            ConvertToIDictionary(request.GlobalProperties),
+                            targetOutputs);
+                        break;
+
+                    case TaskHostBuildRequest.BuildRequestVariant.BuildEngine2Single:
+                        targetOutputs = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                        if (_buildEngine is IBuildEngine2 engine2Single)
+                        {
+                            result = engine2Single.BuildProjectFile(
+                                request.ProjectFileName,
+                                request.TargetNames,
+                                ConvertToIDictionary(request.GlobalProperties),
+                                targetOutputs,
+                                request.ToolsVersion);
+                        }
+                        else
+                        {
+                            // Fallback: ignore toolsVersion
+                            result = _buildEngine.BuildProjectFile(
+                                request.ProjectFileName,
+                                request.TargetNames,
+                                ConvertToIDictionary(request.GlobalProperties),
+                                targetOutputs);
+                        }
+                        break;
+
+                    case TaskHostBuildRequest.BuildRequestVariant.BuildEngine2Parallel:
+                        if (_buildEngine is IBuildEngine2 engine2Parallel)
+                        {
+                            int projectCount = request.ProjectFileNames?.Length ?? 0;
+                            targetOutputsPerProject = new IDictionary[projectCount];
+                            for (int i = 0; i < projectCount; i++)
+                            {
+                                targetOutputsPerProject[i] = new Hashtable(StringComparer.OrdinalIgnoreCase);
+                            }
+
+                            result = engine2Parallel.BuildProjectFilesInParallel(
+                                request.ProjectFileNames,
+                                request.TargetNames,
+                                ConvertToIDictionaryArray(request.GlobalPropertiesArray),
+                                targetOutputsPerProject,
+                                request.ToolsVersions,
+                                request.UseResultsCache,
+                                request.UnloadProjectsOnCompletion);
+                        }
+                        else
+                        {
+                            // No IBuildEngine2 - return failure
+                            result = false;
+                        }
+                        break;
+
+                    case TaskHostBuildRequest.BuildRequestVariant.BuildEngine3Parallel:
+                        if (_buildEngine is IBuildEngine3 engine3)
+                        {
+                            BuildEngineResult engineResult = engine3.BuildProjectFilesInParallel(
+                                request.ProjectFileNames,
+                                request.TargetNames,
+                                ConvertToIDictionaryArray(request.GlobalPropertiesArray),
+                                ConvertToIListArray(request.RemoveGlobalProperties),
+                                request.ToolsVersions,
+                                request.ReturnTargetOutputs);
+                            result = engineResult.Result;
+                            buildEngineResultOutputs = engineResult.TargetOutputsPerProject;
+                        }
+                        else
+                        {
+                            // No IBuildEngine3 - return failure
+                            result = false;
+                        }
+                        break;
+
+                    default:
+                        ErrorUtilities.ThrowInternalErrorUnreachable();
+                        break;
+                }
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                // Don't crash on exceptions - just return failure to the TaskHost.
+                // The task will receive result=false and can decide how to handle it.
+                // Any actual error messages would have been logged by the build engine itself.
+                Console.WriteLine($"[TaskHostTask] BuildProjectFile callback exception: {ex}");
+                result = false;
+            }
+
+            Console.WriteLine($"[TaskHostTask] BuildProjectFile completed for RequestId={request.RequestId}, result={result}");
+
+            // Send response - use the appropriate constructor based on output type
+            TaskHostBuildResponse response;
+            if (buildEngineResultOutputs != null)
+            {
+                // IBuildEngine3 result
+                response = new TaskHostBuildResponse(request.RequestId, result, buildEngineResultOutputs);
+            }
+            else if (targetOutputsPerProject != null)
+            {
+                // IBuildEngine2 parallel result
+                response = new TaskHostBuildResponse(request.RequestId, result, targetOutputsPerProject);
+            }
+            else
+            {
+                // Single project result
+                response = new TaskHostBuildResponse(request.RequestId, result, targetOutputs);
+            }
+
+            Console.WriteLine($"[TaskHostTask] Sending response for RequestId={request.RequestId}");
+            _taskHostProvider.SendData(_taskHostNodeId, response);
+            Console.WriteLine($"[TaskHostTask] Response sent for RequestId={request.RequestId}");
+        }
+
+        /// <summary>
+        /// Converts Dictionary&lt;string, string&gt; to IDictionary (Hashtable) for IBuildEngine calls.
+        /// </summary>
+        private static IDictionary ConvertToIDictionary(Dictionary<string, string> source)
+        {
+            if (source == null)
+            {
+                return null;
+            }
+
+            var result = new Hashtable(source.Count, StringComparer.OrdinalIgnoreCase);
+            foreach (KeyValuePair<string, string> kvp in source)
+            {
+                result[kvp.Key] = kvp.Value;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Converts array of Dictionary&lt;string, string&gt; to array of IDictionary.
+        /// </summary>
+        private static IDictionary[] ConvertToIDictionaryArray(Dictionary<string, string>[] source)
+        {
+            if (source == null)
+            {
+                return null;
+            }
+
+            var result = new IDictionary[source.Length];
+            for (int i = 0; i < source.Length; i++)
+            {
+                result[i] = ConvertToIDictionary(source[i]);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Converts array of List&lt;string&gt; to array of IList&lt;string&gt;.
+        /// </summary>
+        private static IList<string>[] ConvertToIListArray(List<string>[] source)
+        {
+            if (source == null)
+            {
+                return null;
+            }
+
+            // List<string> implements IList<string>, so we can just cast
+            var result = new IList<string>[source.Length];
+            for (int i = 0; i < source.Length; i++)
+            {
+                result[i] = source[i];
+            }
+            return result;
         }
 
         /// <summary>

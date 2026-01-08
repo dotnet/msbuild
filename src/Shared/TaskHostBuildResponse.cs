@@ -142,7 +142,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets target outputs per project for IBuildEngine3 parallel builds (BuildEngineResult).
         /// </summary>
-        public IList<IDictionary<string, ITaskItem[]>> GetTargetOutputsForBuildEngineResult()
+        public List<IDictionary<string, ITaskItem[]>> GetTargetOutputsForBuildEngineResult()
         {
             if (_targetOutputsPerProject == null)
             {
