@@ -278,5 +278,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Should handle null/empty gracefully without adding entries
             properties.Count.ShouldBe(0);
         }
+
+        /// <summary>
+        /// Test that custom task factory names with special characters are properly sanitized
+        /// </summary>
+        [Fact]
+        public void AddTaskExecution_SanitizesCustomTaskFactoryNames()
+        {
+            var telemetry = new ProjectTelemetry();
+            
+            // Add executions from custom task factories with special characters
+            telemetry.AddTaskExecution("My.Custom-Factory Task", isTaskHost: false);
+            telemetry.AddTaskExecution("Another.Factory", isTaskHost: false);
+            
+            var properties = GetCustomTaskFactoryProperties(telemetry);
+            
+            // Should sanitize special characters to underscores
+            properties.Count.ShouldBe(2);
+            properties.ShouldContainKey("My_Custom_Factory_Task");
+            properties["My_Custom_Factory_Task"].ShouldBe("1");
+            properties.ShouldContainKey("Another_Factory");
+            properties["Another_Factory"].ShouldBe("1");
+        }
     }
 }

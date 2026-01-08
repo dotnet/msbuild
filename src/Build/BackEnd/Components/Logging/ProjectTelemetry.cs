@@ -83,11 +83,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     _customTaskFactoryTasksExecutedCount++;
                     if (!string.IsNullOrEmpty(taskFactoryTypeName))
                     {
-                        if (!_customTaskFactoryUsage.ContainsKey(taskFactoryTypeName))
-                        {
-                            _customTaskFactoryUsage[taskFactoryTypeName] = 0;
-                        }
-                        _customTaskFactoryUsage[taskFactoryTypeName]++;
+                        _customTaskFactoryUsage.TryGetValue(taskFactoryTypeName, out int count);
+                        _customTaskFactoryUsage[taskFactoryTypeName] = count + 1;
                     }
                     break;
             }
@@ -281,12 +278,37 @@ namespace Microsoft.Build.BackEnd.Logging
             // Add each custom task factory type name with its usage count
             foreach (var kvp in _customTaskFactoryUsage)
             {
-                // Use a sanitized property name (replace dots with underscores for telemetry)
-                string propertyName = kvp.Key.Replace(".", "_");
+                // Sanitize property name for telemetry: replace dots with underscores
+                // and remove any other characters that might be problematic
+                string propertyName = SanitizePropertyName(kvp.Key);
                 properties[propertyName] = kvp.Value.ToString(CultureInfo.InvariantCulture);
             }
 
             return properties;
+        }
+
+        /// <summary>
+        /// Sanitizes a string to make it suitable for use as a telemetry property name.
+        /// Replaces dots with underscores and removes other potentially problematic characters.
+        /// </summary>
+        private static string SanitizePropertyName(string name)
+        {
+            // Replace dots with underscores and remove other special characters
+            // Keep alphanumeric characters and underscores only
+            var sanitized = new System.Text.StringBuilder(name.Length);
+            foreach (char c in name)
+            {
+                if (char.IsLetterOrDigit(c))
+                {
+                    sanitized.Append(c);
+                }
+                else if (c == '.' || c == '-' || c == ' ')
+                {
+                    sanitized.Append('_');
+                }
+                // Skip other special characters
+            }
+            return sanitized.ToString();
         }
     }
 }
