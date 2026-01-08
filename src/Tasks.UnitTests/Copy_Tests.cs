@@ -2505,8 +2505,9 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogDoesntContain("MSB3027");
 
             // Copy calls to different destinations can come in any order when running in parallel.
-            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Name == FileUtilities.FixFilePath("c:\\source"));
-            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Name == FileUtilities.FixFilePath("c:\\source2"));
+            // Use .Original to compare against the original input path (before Path.GetFullPath resolution)
+            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Name.Original == FileUtilities.FixFilePath("c:\\source"));
+            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Name.Original == FileUtilities.FixFilePath("c:\\source2"));
         }
 
         /// <summary>
