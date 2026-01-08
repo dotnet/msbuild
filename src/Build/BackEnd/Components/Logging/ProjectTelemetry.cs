@@ -27,6 +27,7 @@ namespace Microsoft.Build.BackEnd.Logging
         private const string TaskFactoryEventName = "build/tasks/taskfactory";
         private const string TasksEventName = "build/tasks";
         private const string MSBuildTaskSubclassedEventName = "build/tasks/msbuild-subclassed";
+        private const string CustomTaskFactoryEventName = "build/tasks/custom-taskfactory";
 
         private int _assemblyTaskFactoryTasksExecutedCount = 0;
         private int _intrinsicTaskFactoryTasksExecutedCount = 0;
@@ -40,6 +41,10 @@ namespace Microsoft.Build.BackEnd.Logging
         // Telemetry for non-sealed subclasses of Microsoft-owned MSBuild tasks
         // Maps Microsoft task names to counts of their non-sealed usage
         private readonly Dictionary<string, int> _msbuildTaskSubclassUsage = new();
+
+        // Telemetry for custom (non-MSBuild) task factory usage
+        // Maps custom task factory type names to execution counts
+        private readonly Dictionary<string, int> _customTaskFactoryUsage = new();
 
         /// <summary>
         /// Adds a task execution to the telemetry data.
@@ -74,7 +79,16 @@ namespace Microsoft.Build.BackEnd.Logging
                     break;
 
                 default:
+                    // Track custom (non-MSBuild) task factories individually
                     _customTaskFactoryTasksExecutedCount++;
+                    if (!string.IsNullOrEmpty(taskFactoryTypeName))
+                    {
+                        if (!_customTaskFactoryUsage.ContainsKey(taskFactoryTypeName))
+                        {
+                            _customTaskFactoryUsage[taskFactoryTypeName] = 0;
+                        }
+                        _customTaskFactoryUsage[taskFactoryTypeName]++;
+                    }
                     break;
             }
         }
@@ -149,6 +163,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     loggingService.LogTelemetry(buildEventContext, MSBuildTaskSubclassedEventName, msbuildTaskSubclassProperties);
                 }
+
+                Dictionary<string, string> customTaskFactoryProperties = GetCustomTaskFactoryProperties();
+                if (customTaskFactoryProperties.Count > 0)
+                {
+                    loggingService.LogTelemetry(buildEventContext, CustomTaskFactoryEventName, customTaskFactoryProperties);
+                }
             }
             catch
             {
@@ -175,6 +195,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _taskHostTasksExecutedCount = 0;
 
             _msbuildTaskSubclassUsage.Clear();
+            _customTaskFactoryUsage.Clear();
         }
 
         private Dictionary<string, string> GetTaskFactoryProperties()
@@ -244,6 +265,21 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Add each Microsoft task name with its non-sealed subclass usage count
             foreach (var kvp in _msbuildTaskSubclassUsage)
+            {
+                // Use a sanitized property name (replace dots with underscores for telemetry)
+                string propertyName = kvp.Key.Replace(".", "_");
+                properties[propertyName] = kvp.Value.ToString(CultureInfo.InvariantCulture);
+            }
+
+            return properties;
+        }
+
+        private Dictionary<string, string> GetCustomTaskFactoryProperties()
+        {
+            Dictionary<string, string> properties = new();
+
+            // Add each custom task factory type name with its usage count
+            foreach (var kvp in _customTaskFactoryUsage)
             {
                 // Use a sanitized property name (replace dots with underscores for telemetry)
                 string propertyName = kvp.Key.Replace(".", "_");

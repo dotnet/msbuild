@@ -118,6 +118,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Helper method to get custom task factory properties from telemetry using reflection
+        /// </summary>
+        private System.Collections.Generic.Dictionary<string, string> GetCustomTaskFactoryProperties(ProjectTelemetry telemetry)
+        {
+            var method = typeof(ProjectTelemetry).GetMethod("GetCustomTaskFactoryProperties", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            return (System.Collections.Generic.Dictionary<string, string>)method!.Invoke(telemetry, null)!;
+        }
+
+        /// <summary>
         /// Non-sealed user task that inherits from Microsoft.Build.Utilities.Task
         /// </summary>
 #pragma warning disable CA1852 // Type can be sealed
@@ -179,6 +189,94 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var result = project.Build();
             
             result.ShouldBeTrue();
+        }
+
+        /// <summary>
+        /// Test that AddTaskExecution tracks custom task factory usage individually
+        /// </summary>
+        [Fact]
+        public void AddTaskExecution_TracksCustomTaskFactoryIndividually()
+        {
+            var telemetry = new ProjectTelemetry();
+            
+            // Add executions from custom task factories
+            telemetry.AddTaskExecution("CustomFactory.MyTaskFactory", isTaskHost: false);
+            telemetry.AddTaskExecution("AnotherCustomFactory", isTaskHost: false);
+            telemetry.AddTaskExecution("CustomFactory.MyTaskFactory", isTaskHost: false);
+            
+            var properties = GetCustomTaskFactoryProperties(telemetry);
+            
+            // Should track each custom factory separately
+            properties.Count.ShouldBe(2);
+            properties.ShouldContainKey("CustomFactory_MyTaskFactory");
+            properties["CustomFactory_MyTaskFactory"].ShouldBe("2");
+            properties.ShouldContainKey("AnotherCustomFactory");
+            properties["AnotherCustomFactory"].ShouldBe("1");
+        }
+
+        /// <summary>
+        /// Test that AddTaskExecution does not track built-in factories as custom
+        /// </summary>
+        [Fact]
+        public void AddTaskExecution_DoesNotTrackBuiltInFactoriesAsCustom()
+        {
+            var telemetry = new ProjectTelemetry();
+            
+            // Add executions from built-in task factories
+            telemetry.AddTaskExecution("Microsoft.Build.BackEnd.AssemblyTaskFactory", isTaskHost: false);
+            telemetry.AddTaskExecution("Microsoft.Build.Tasks.CodeTaskFactory", isTaskHost: false);
+            telemetry.AddTaskExecution("Microsoft.Build.Tasks.RoslynCodeTaskFactory", isTaskHost: false);
+            
+            var properties = GetCustomTaskFactoryProperties(telemetry);
+            
+            // Should not track any custom factories
+            properties.Count.ShouldBe(0);
+        }
+
+        /// <summary>
+        /// Test that AddTaskExecution tracks CodeTaskFactory separately
+        /// </summary>
+        [Fact]
+        public void AddTaskExecution_TracksCodeTaskFactorySeparately()
+        {
+            var telemetry = new ProjectTelemetry();
+            
+            // Add execution from CodeTaskFactory
+            telemetry.AddTaskExecution("Microsoft.Build.Tasks.CodeTaskFactory", isTaskHost: false);
+            telemetry.AddTaskExecution("Microsoft.Build.Tasks.CodeTaskFactory", isTaskHost: false);
+            
+            // Use reflection to get task factory properties
+            var method = typeof(ProjectTelemetry).GetMethod("GetTaskFactoryProperties", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var properties = (System.Collections.Generic.Dictionary<string, string>)method!.Invoke(telemetry, null)!;
+            
+            // Should track CodeTaskFactory separately from custom factories
+            properties.ShouldContainKey("CodeTaskFactoryTasksExecutedCount");
+            properties["CodeTaskFactoryTasksExecutedCount"].ShouldBe("2");
+            
+            // Should not be in custom factory properties
+            var customProperties = GetCustomTaskFactoryProperties(telemetry);
+            customProperties.Count.ShouldBe(0);
+        }
+
+        /// <summary>
+        /// Test that AddTaskExecution handles null or empty factory names gracefully
+        /// </summary>
+        [Fact]
+        public void AddTaskExecution_HandlesNullFactoryNameGracefully()
+        {
+            var telemetry = new ProjectTelemetry();
+            
+            // Add execution with null or empty factory name
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type
+            telemetry.AddTaskExecution(null, isTaskHost: false);
+#pragma warning restore CS8625
+            telemetry.AddTaskExecution(string.Empty, isTaskHost: false);
+            
+            var properties = GetCustomTaskFactoryProperties(telemetry);
+            
+            // Should handle null/empty gracefully without adding entries
+            properties.Count.ShouldBe(0);
         }
     }
 }
