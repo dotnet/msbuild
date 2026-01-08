@@ -574,7 +574,7 @@ namespace Microsoft.Build.BackEnd.Logging
             string targetNames,
             string toolsVersion)
         {
-            Debug.Assert(remoteNodeEvaluationBuildEventContext.NodeId == Scheduler.InProcNodeId, "Cached project build events should only be logged from the in-proc scheduler node.");
+            Debug.Assert(currentNodeBuildEventContext.NodeId == Scheduler.VirtualNode, "Cached project build events should only be logged from the scheduler virtual node.");
 
             BuildEventContext validatedRemoteNodeEvaluationBuildContext = ValidatePreexistingProjectContextId(
                 remoteNodeEvaluationBuildEventContext,

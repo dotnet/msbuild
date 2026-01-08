@@ -2202,8 +2202,7 @@ namespace Microsoft.Build.BackEnd
         private void LogRequestHandledFromCache(BuildRequest request, BuildResult result)
         {
             BuildRequestConfiguration configuration = _configCache[request.ConfigurationId];
-            int nodeId = _schedulingData.GetAssignedNodeForRequestConfiguration(request.ConfigurationId);
-            NodeLoggingContext nodeContext = new NodeLoggingContext(_componentHost.LoggingService, s_schedulerNodeBuildEventContext, nodeId, true);
+            NodeLoggingContext nodeContext = new NodeLoggingContext(_componentHost.LoggingService, s_schedulerNodeBuildEventContext, VirtualNode, true);
             nodeContext.LogRequestHandledFromCache(request, configuration, result);
 
             TraceScheduler(
