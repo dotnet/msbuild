@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Text;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd.Logging
@@ -295,7 +296,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             // Replace dots with underscores and remove other special characters
             // Keep alphanumeric characters and underscores only
-            var sanitized = new System.Text.StringBuilder(name.Length);
+            var sanitized = new StringBuilder(name.Length);
             foreach (char c in name)
             {
                 if (char.IsLetterOrDigit(c))
