@@ -298,6 +298,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Replace dots with underscores and remove other special characters
             // Keep alphanumeric characters and underscores only
+            // Use same length as input since we're not adding characters, only replacing or skipping
             var sanitized = new StringBuilder(name.Length);
             foreach (char c in name)
             {
@@ -309,7 +310,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     sanitized.Append('_');
                 }
-                // Skip other special characters
+                // Skip other special characters (reduces length)
             }
             return sanitized.ToString();
         }

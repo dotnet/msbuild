@@ -313,16 +313,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             
             // Test null input
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type
-            var resultNull = (string)method!.Invoke(null, [null])!;
+            var resultNull = (string)method!.Invoke(null, new object[] { null })!;
 #pragma warning restore CS8625
             resultNull.ShouldBe(string.Empty);
             
             // Test empty string
-            var resultEmpty = (string)method.Invoke(null, [string.Empty])!;
+            var resultEmpty = (string)method.Invoke(null, new object[] { string.Empty })!;
             resultEmpty.ShouldBe(string.Empty);
             
             // Test string with only special characters
-            var resultSpecial = (string)method.Invoke(null, ["...---   "])!;
+            var resultSpecial = (string)method.Invoke(null, new object[] { "...---   " })!;
             resultSpecial.ShouldBe("_________");
         }
     }
