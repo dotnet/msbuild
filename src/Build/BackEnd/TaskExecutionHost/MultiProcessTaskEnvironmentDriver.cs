@@ -41,7 +41,7 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public AbsolutePath GetAbsolutePath(string path)
         {
-            return new AbsolutePath(Path.GetFullPath(path), ignoreRootedCheck: true);
+            return new AbsolutePath(Path.GetFullPath(path), path, ignoreRootedCheck: true);
         }
 
         /// <inheritdoc/>

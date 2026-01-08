@@ -32,6 +32,11 @@ namespace Microsoft.Build.Framework
         /// The normalized string representation of this path.
         /// </summary>
         public string Value { get; }
+        
+        /// <summary>
+        /// The original string used to create this path.
+        /// </summary>
+        public string Original {get;}
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbsolutePath"/> struct.
@@ -41,6 +46,7 @@ namespace Microsoft.Build.Framework
         {
             ValidatePath(path);
             Value = path;
+            Original = path;
         }
 
         /// <summary>
@@ -50,12 +56,22 @@ namespace Microsoft.Build.Framework
         /// <param name="ignoreRootedCheck">If true, skips checking whether the path is rooted.</param>
         /// <remarks>For internal and testing use, when we want to force bypassing the rooted check.</remarks>
         internal AbsolutePath(string path, bool ignoreRootedCheck)
+            => AbsolutePath(path, path, ignoreRootedCheck);
+        
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AbsolutePath"/> struct.
+        /// </summary>
+        /// <param name="path">The absolute path string.</param>
+        /// <param name="original">The original string used to create this path.</param>
+        /// <param name="ignoreRootedCheck">If true, skips checking whether the path is rooted.</param>
+        internal AbsolutePath(string path, string original, bool ignoreRootedCheck)
         {
-            if (!ignoreRootedCheck) 
+            if (!ignoreRootedCheck)
             {
                 ValidatePath(path);
             }
             Value = path;
+            Original = original;
         }
 
         /// <summary>
@@ -85,7 +101,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="path">The path to combine with the base path.</param>
         /// <param name="basePath">The base path to combine with.</param>
-        public AbsolutePath(string path, AbsolutePath basePath) => Value = Path.Combine(basePath.Value, path);
+        public AbsolutePath(string path, AbsolutePath basePath)
+        {
+            Value = Path.Combine(basePath.Value, path);
+            Original = path;
+        } 
 
         /// <summary>
         /// Implicitly converts an AbsolutePath to a string.
