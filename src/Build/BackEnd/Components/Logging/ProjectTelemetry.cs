@@ -291,6 +291,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         private static string SanitizePropertyName(string name)
         {
+            if (string.IsNullOrEmpty(name))
+            {
+                return string.Empty;
+            }
+
             // Replace dots with underscores and remove other special characters
             // Keep alphanumeric characters and underscores only
             var sanitized = new StringBuilder(name.Length);

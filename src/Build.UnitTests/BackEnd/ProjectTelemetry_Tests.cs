@@ -300,5 +300,30 @@ namespace Microsoft.Build.UnitTests.BackEnd
             properties.ShouldContainKey("Another_Factory");
             properties["Another_Factory"].ShouldBe("1");
         }
+
+        /// <summary>
+        /// Test that sanitization handles edge cases correctly
+        /// </summary>
+        [Fact]
+        public void SanitizePropertyName_HandlesEdgeCases()
+        {
+            // Use reflection to access the private SanitizePropertyName method
+            var method = typeof(ProjectTelemetry).GetMethod("SanitizePropertyName", 
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static);
+            
+            // Test null input
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type
+            var resultNull = (string)method!.Invoke(null, [null])!;
+#pragma warning restore CS8625
+            resultNull.ShouldBe(string.Empty);
+            
+            // Test empty string
+            var resultEmpty = (string)method.Invoke(null, [string.Empty])!;
+            resultEmpty.ShouldBe(string.Empty);
+            
+            // Test string with only special characters
+            var resultSpecial = (string)method.Invoke(null, ["...---   "])!;
+            resultSpecial.ShouldBe("_________");
+        }
     }
 }
