@@ -133,19 +133,19 @@ namespace Microsoft.Build.Tasks
                         {
                             if (FailIfNotIncremental)
                             {
-                                Log.LogWarningFromResources("Delete.DeletingFile", filePath!.Original);
+                                Log.LogWarningFromResources("Delete.DeletingFile", filePath.Value.Original);
                             }
                             else
                             {
                                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                                Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", filePath!.Original);
+                                Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", filePath.Value.Original);
                             }
 
                             File.Delete(filePath);
                         }
                         else
                         {
-                            Log.LogMessageFromResources(MessageImportance.Low, "Delete.SkippingNonexistentFile", filePath!.Original);
+                            Log.LogMessageFromResources(MessageImportance.Low, "Delete.SkippingNonexistentFile", filePath.Value.Original);
                         }
                         // keep a running list of the files that were actually deleted
                         // note that we include in this list files that did not exist

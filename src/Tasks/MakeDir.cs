@@ -71,12 +71,12 @@ namespace Microsoft.Build.Tasks
                             {
                                 if (FailIfNotIncremental)
                                 {
-                                    Log.LogErrorFromResources("MakeDir.Comment", absolutePath!.Original);
+                                    Log.LogErrorFromResources("MakeDir.Comment", absolutePath.Value.Original);
                                 }
                                 else
                                 {
                                     // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                                    Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", absolutePath!.Original);
+                                    Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", absolutePath.Value.Original);
 
                                     Directory.CreateDirectory(FileUtilities.FixFilePath(absolutePath));
                                 }
