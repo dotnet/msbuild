@@ -119,11 +119,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     // Track it only if it's NOT itself Microsoft-owned (i.e., user-authored subclass)
                     if (!isMicrosoftOwned)
                     {
-                        if (!_msbuildTaskSubclassUsage.ContainsKey(baseTypeName))
-                        {
-                            _msbuildTaskSubclassUsage[baseTypeName] = 0;
-                        }
-                        _msbuildTaskSubclassUsage[baseTypeName]++;
+                        _msbuildTaskSubclassUsage.TryGetValue(baseTypeName, out int count);
+                        _msbuildTaskSubclassUsage[baseTypeName] = count + 1;
                     }
                     // Stop at the first Microsoft-owned base class we find
                     break;
@@ -264,8 +261,8 @@ namespace Microsoft.Build.BackEnd.Logging
             // Add each Microsoft task name with its non-sealed subclass usage count
             foreach (var kvp in _msbuildTaskSubclassUsage)
             {
-                // Use a sanitized property name (replace dots with underscores for telemetry)
-                string propertyName = kvp.Key.Replace(".", "_");
+                // Use the same sanitization logic as custom task factories for consistency
+                string propertyName = SanitizePropertyName(kvp.Key);
                 properties[propertyName] = kvp.Value.ToString(CultureInfo.InvariantCulture);
             }
 
