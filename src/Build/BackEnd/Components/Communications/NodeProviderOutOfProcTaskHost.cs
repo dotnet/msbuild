@@ -224,6 +224,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostQueryRequest, TaskHostQueryRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostResourceRequest, TaskHostResourceRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostYieldRequest, TaskHostYieldRequest.FactoryForDeserialization, this);
         }
 
         /// <summary>
@@ -304,9 +305,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
-            Console.WriteLine($"[NodeProviderOutOfProcTaskHost:{DateTime.Now:HH:mm:ss.fff}] PacketReceived node={node}, packet.Type={packet.Type}");
-            INodePacketHandler packetHandler = null;
-
             // Lock to synchronize with DisconnectFromHost to prevent race conditions
             // where we get the handler right before it's popped from the stack.
             // Note: We call packetHandler.PacketReceived() INSIDE the lock to ensure
@@ -315,16 +313,11 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_nodeIdToPacketHandlerStack.TryGetValue(node, out Stack<INodePacketHandler> handlerStack) && handlerStack.Count > 0)
                 {
-                    packetHandler = handlerStack.Peek();
-                    Console.WriteLine($"[NodeProviderOutOfProcTaskHost] Found handler, stack depth={handlerStack.Count}");
+                    INodePacketHandler packetHandler = handlerStack.Peek();
 
                     // Forward packet to handler while still holding lock
                     packetHandler.PacketReceived(node, packet);
                     return;
-                }
-                else
-                {
-                    Console.WriteLine($"[NodeProviderOutOfProcTaskHost] No handler stack found or empty");
                 }
             }
 
@@ -343,8 +336,8 @@ namespace Microsoft.Build.BackEnd
                 case NodePacketType.TaskHostQueryRequest:
                 case NodePacketType.TaskHostResourceRequest:
                 case NodePacketType.TaskHostBuildRequest:
+                case NodePacketType.TaskHostYieldRequest:
                     // Late-arriving packets from already-completed tasks - safe to ignore
-                    Console.WriteLine($"[NodeProviderOutOfProcTaskHost] Ignoring late-arriving packet of type {packet.Type}");
                     break;
 
                 default:

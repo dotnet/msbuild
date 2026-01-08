@@ -261,6 +261,7 @@ namespace Microsoft.Build.CommandLine
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostQueryResponse, TaskHostQueryResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostResourceResponse, TaskHostResourceResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostBuildResponse, TaskHostBuildResponse.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostYieldResponse, TaskHostYieldResponse.FactoryForDeserialization, this);
 #endif
 
 #if !CLR2COMPATIBILITY
@@ -444,9 +445,7 @@ namespace Microsoft.Build.CommandLine
             YieldForBuildProjectFile();
             try
             {
-                Console.WriteLine($"[OutOfProcTaskHostNode] Waiting for response in BuildProjectFile");
                 var response = SendCallbackRequestAndWaitForResponse<TaskHostBuildResponse>(request);
-                Console.WriteLine($"[OutOfProcTaskHostNode] Got response in BuildProjectFile, result={response.OverallResult}");
 
                 // Copy outputs back to the caller's dictionary
                 if (targetOutputs != null && response.OverallResult)
@@ -454,12 +453,10 @@ namespace Microsoft.Build.CommandLine
                     CopyTargetOutputs(response.GetTargetOutputsForSingleProject(), targetOutputs);
                 }
 
-                Console.WriteLine($"[OutOfProcTaskHostNode] Returning from BuildProjectFile with result={response.OverallResult}");
                 return response.OverallResult;
             }
             finally
             {
-                Console.WriteLine($"[OutOfProcTaskHostNode] ReacquireAfterBuildProjectFile");
                 ReacquireAfterBuildProjectFile();
             }
 #endif
@@ -601,21 +598,75 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Stub implementation of IBuildEngine3.Yield.  The task host does not support yielding, so just go ahead and silently
-        /// return, letting the task continue.
+        /// Yields execution, allowing the parent to schedule other work.
+        /// This is non-blocking - the task thread continues after sending the yield request.
+        /// The task must call Reacquire() before doing any more build operations.
         /// </summary>
         public void Yield()
         {
-            return;
+#if !CLR2COMPATIBILITY
+            var context = GetCurrentTaskContext();
+            if (context == null)
+            {
+                // No context - silently return (legacy behavior)
+                return;
+            }
+
+            // Verify we're not already yielded
+            if (context.State == TaskExecutionState.Yielded)
+            {
+                throw new InvalidOperationException("Cannot call Yield() while already yielded.");
+            }
+
+            // Save environment state before yielding
+            SaveOperatingEnvironment(context);
+            context.State = TaskExecutionState.Yielded;
+
+            // Decrement active count to allow the parent to send a new TaskHostConfiguration
+            Interlocked.Decrement(ref _activeTaskCount);
+            Interlocked.Increment(ref _yieldedTaskCount);
+
+            // Send yield notification to parent (fire-and-forget, no response expected)
+            var request = new TaskHostYieldRequest(context.TaskId, YieldOperation.Yield);
+            _nodeEndpoint.SendData(request);
+#endif
         }
 
         /// <summary>
-        /// Stub implementation of IBuildEngine3.Reacquire. The task host does not support yielding, so just go ahead and silently
-        /// return, letting the task continue.
+        /// Reacquires execution after a Yield().
+        /// This blocks until the parent acknowledges that the task can continue.
+        /// After this returns, the task can resume build operations.
         /// </summary>
         public void Reacquire()
         {
-            return;
+#if !CLR2COMPATIBILITY
+            var context = GetCurrentTaskContext();
+            if (context == null)
+            {
+                // No context - silently return (legacy behavior)
+                return;
+            }
+
+            // Verify we're actually yielded
+            if (context.State != TaskExecutionState.Yielded)
+            {
+                // Not yielded - nothing to do (matches in-process behavior)
+                return;
+            }
+
+            // Send reacquire request and wait for response
+            // This blocks until the parent's Reacquire() call completes
+            var request = new TaskHostYieldRequest(context.TaskId, YieldOperation.Reacquire);
+            var response = SendCallbackRequestAndWaitForResponse<TaskHostYieldResponse>(request);
+
+            // Restore state
+            Interlocked.Decrement(ref _yieldedTaskCount);
+            Interlocked.Increment(ref _activeTaskCount);
+
+            // Restore environment state after reacquiring
+            RestoreOperatingEnvironment(context);
+            context.State = TaskExecutionState.Executing;
+#endif
         }
 
         #endregion // IBuildEngine3 Implementation
@@ -944,6 +995,7 @@ namespace Microsoft.Build.CommandLine
                 case NodePacketType.TaskHostQueryResponse:
                 case NodePacketType.TaskHostResourceResponse:
                 case NodePacketType.TaskHostBuildResponse:
+                case NodePacketType.TaskHostYieldResponse:
                     HandleCallbackResponse(packet);
                     break;
 #endif
@@ -957,18 +1009,15 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void HandleCallbackResponse(INodePacket packet)
         {
-            Console.WriteLine($"[OutOfProcTaskHostNode] HandleCallbackResponse called for packet type {packet.Type}");
             if (packet is ITaskHostCallbackPacket callbackPacket)
             {
                 int requestId = callbackPacket.RequestId;
-                Console.WriteLine($"[OutOfProcTaskHostNode] Processing callback response for RequestId={requestId}");
 
                 // First, try to find in per-task contexts (Phase 2 support)
                 foreach (var context in _taskContexts.Values)
                 {
                     if (context.PendingCallbackRequests.TryRemove(requestId, out var tcs))
                     {
-                        Console.WriteLine($"[OutOfProcTaskHostNode] Found pending request, completing TCS for RequestId={requestId}");
                         tcs.TrySetResult(packet);
                         return;
                     }
@@ -977,15 +1026,8 @@ namespace Microsoft.Build.CommandLine
                 // Fallback to global pending requests (backward compatibility / Phase 1)
                 if (_pendingCallbackRequests.TryRemove(requestId, out var globalTcs))
                 {
-                    Console.WriteLine($"[OutOfProcTaskHostNode] Found global pending request, completing TCS for RequestId={requestId}");
                     globalTcs.TrySetResult(packet);
                 }
-                else
-                {
-                    Console.WriteLine($"[OutOfProcTaskHostNode] WARNING: No pending request found for RequestId={requestId}");
-                }
-
-                // Silently ignore unknown request IDs - could be stale responses from cancelled requests
             }
         }
 
@@ -1225,7 +1267,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void YieldForBuildProjectFile()
         {
-            Console.WriteLine($"[OutOfProcTaskHostNode:{DateTime.Now:HH:mm:ss.fff}] YieldForBuildProjectFile starting, _activeTaskCount={_activeTaskCount}");
             // Save environment state before yielding
             var context = GetCurrentTaskContext();
             if (context != null)
@@ -1238,7 +1279,6 @@ namespace Microsoft.Build.CommandLine
             // for the callback response.
             Interlocked.Decrement(ref _activeTaskCount);
             Interlocked.Increment(ref _yieldedTaskCount);
-            Console.WriteLine($"[OutOfProcTaskHostNode:{DateTime.Now:HH:mm:ss.fff}] YieldForBuildProjectFile done, _activeTaskCount={_activeTaskCount}, _yieldedTaskCount={_yieldedTaskCount}");
         }
 
         /// <summary>
@@ -1247,7 +1287,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void ReacquireAfterBuildProjectFile()
         {
-            Console.WriteLine($"[OutOfProcTaskHostNode:{DateTime.Now:HH:mm:ss.fff}] ReacquireAfterBuildProjectFile starting, _activeTaskCount={_activeTaskCount}, _yieldedTaskCount={_yieldedTaskCount}");
             Interlocked.Decrement(ref _yieldedTaskCount);
             Interlocked.Increment(ref _activeTaskCount);
 
@@ -1257,7 +1296,6 @@ namespace Microsoft.Build.CommandLine
             {
                 RestoreOperatingEnvironment(context);
             }
-            Console.WriteLine($"[OutOfProcTaskHostNode:{DateTime.Now:HH:mm:ss.fff}] ReacquireAfterBuildProjectFile done, _activeTaskCount={_activeTaskCount}, _yieldedTaskCount={_yieldedTaskCount}");
         }
 
         /// <summary>
@@ -1315,7 +1353,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void CompleteTask()
         {
-            Console.WriteLine($"[OutOfProcTaskHostNode:{DateTime.Now:HH:mm:ss.fff}] CompleteTask starting");
             // With multiple concurrent tasks (nested BuildProjectFile), we cannot assert
             // that no task is executing here. The task that completed set _taskCompletePacket
             // and signaled _taskCompleteEvent, but another task may have reacquired from yield
@@ -1331,9 +1368,7 @@ namespace Microsoft.Build.CommandLine
                     _taskCompletePacket = null;
                 }
 
-                Console.WriteLine($"[OutOfProcTaskHostNode:{DateTime.Now:HH:mm:ss.fff}] CompleteTask sending TaskHostTaskComplete with TaskId={taskCompletePacketToSend.TaskId}");
                 _nodeEndpoint.SendData(taskCompletePacketToSend);
-                Console.WriteLine($"[OutOfProcTaskHostNode:{DateTime.Now:HH:mm:ss.fff}] CompleteTask sent TaskHostTaskComplete");
             }
 
 #if !CLR2COMPATIBILITY
@@ -1492,7 +1527,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void RunTask(object state)
         {
-            Console.WriteLine($"[OutOfProcTaskHostNode:{DateTime.Now:HH:mm:ss.fff}] RunTask starting");
             Interlocked.Increment(ref _activeTaskCount);
             OutOfProcTaskHostTaskResult taskResult = null;
             TaskHostConfiguration taskConfiguration = state as TaskHostConfiguration;
@@ -1554,22 +1588,18 @@ namespace Microsoft.Build.CommandLine
                     taskConfiguration.AppDomainSetup,
 #endif
                     taskParams);
-                Console.WriteLine($"[OutOfProcTaskHostNode:{DateTime.Now:HH:mm:ss.fff}] ExecuteTask returned");
             }
             catch (ThreadAbortException)
             {
-                Console.WriteLine($"[OutOfProcTaskHostNode:{DateTime.Now:HH:mm:ss.fff}] ThreadAbortException caught");
                 // This thread was aborted as part of Cancellation, we will return a failure task result
                 taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                Console.WriteLine($"[OutOfProcTaskHostNode:{DateTime.Now:HH:mm:ss.fff}] Exception caught: {e.GetType().Name}: {e.Message}");
                 taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
             }
             finally
             {
-                Console.WriteLine($"[OutOfProcTaskHostNode:{DateTime.Now:HH:mm:ss.fff}] RunTask finally block starting");
                 try
                 {
                     Interlocked.Decrement(ref _activeTaskCount);
@@ -1634,7 +1664,6 @@ namespace Microsoft.Build.CommandLine
                     }
 #endif
 
-                    Console.WriteLine($"[OutOfProcTaskHostNode:{DateTime.Now:HH:mm:ss.fff}] RunTask about to set _taskCompleteEvent");
                     // The task has now fully completed executing
                     _taskCompleteEvent.Set();
                 }

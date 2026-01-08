@@ -120,6 +120,8 @@
     <Compile Include="..\Shared\TaskHostResourceResponse.cs" />
     <Compile Include="..\Shared\TaskHostBuildRequest.cs" />
     <Compile Include="..\Shared\TaskHostBuildResponse.cs" />
+    <Compile Include="..\Shared\TaskHostYieldRequest.cs" />
+    <Compile Include="..\Shared\TaskHostYieldResponse.cs" />
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\MSBuildLoadContext.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
     <Compile Include="..\Shared\TypeLoader.cs" />

@@ -548,6 +548,59 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Verifies that IBuildEngine3.Yield() and IBuildEngine3.Reacquire() callbacks work correctly
+        /// when a task runs in TaskHost.
+        /// </summary>
+        [Fact]
+        public void YieldReacquireCallbackWorksInTaskHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(YieldReacquireTask)}"" AssemblyFile=""{typeof(YieldReacquireTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""TestYieldReacquire"">
+        <{nameof(YieldReacquireTask)} PerformYieldReacquire=""true"">
+            <Output PropertyName=""CompletedSuccessfully"" TaskParameter=""CompletedSuccessfully"" />
+            <Output PropertyName=""YieldCalled"" TaskParameter=""YieldCalled"" />
+            <Output PropertyName=""ReacquireCalled"" TaskParameter=""ReacquireCalled"" />
+            <Output PropertyName=""ErrorMessage"" TaskParameter=""ErrorMessage"" />
+        </{nameof(YieldReacquireTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+
+            BuildParameters buildParameters = new()
+            {
+                MaxNodeCount = 2,
+                EnableNodeReuse = false
+            };
+
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult buildResult = buildManager.Build(
+                buildParameters,
+                new BuildRequestData(projectInstance, targetsToBuild: ["TestYieldReacquire"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Verify the task completed successfully (no exceptions)
+            string completedSuccessfully = projectInstance.GetPropertyValue("CompletedSuccessfully");
+            completedSuccessfully.ShouldBe("True",
+                $"Task failed with error: {projectInstance.GetPropertyValue("ErrorMessage")}");
+
+            // Verify Yield was called
+            string yieldCalled = projectInstance.GetPropertyValue("YieldCalled");
+            yieldCalled.ShouldBe("True");
+
+            // Verify Reacquire was called
+            string reacquireCalled = projectInstance.GetPropertyValue("ReacquireCalled");
+            reacquireCalled.ShouldBe("True");
+        }
+
+        /// <summary>
         /// Verifies that BuildProjectFile callback works correctly when a task runs in TaskHost.
         /// The task calls BuildEngine.BuildProjectFile to build another project, and the callback
         /// should be forwarded to the parent process and executed there.

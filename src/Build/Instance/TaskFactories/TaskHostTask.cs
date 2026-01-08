@@ -196,6 +196,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostQueryRequest, TaskHostQueryRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostResourceRequest, TaskHostResourceRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostYieldRequest, TaskHostYieldRequest.FactoryForDeserialization, this);
 
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
@@ -384,7 +385,6 @@ namespace Microsoft.Build.BackEnd
                                     {
                                         lock (_taskHostLock)
                                         {
-                                            Console.WriteLine($"[TaskHostTask:{DateTime.Now:HH:mm:ss.fff}] Disconnecting from host in packet loop, myTaskId={_taskId}");
                                             _taskHostProvider.DisconnectFromHost(_taskHostNodeId);
                                             _connectedToTaskHost = false;
                                         }
@@ -499,7 +499,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
-            Console.WriteLine($"[TaskHostTask:{DateTime.Now:HH:mm:ss.fff}] PacketReceived node={node}, packet.Type={packet.Type}, myTaskId={_taskId}");
             _receivedPackets.Enqueue(packet);
             _packetReceivedEvent.Set();
         }
@@ -540,9 +539,10 @@ namespace Microsoft.Build.BackEnd
                     HandleResourceRequest(packet as TaskHostResourceRequest);
                     break;
                 case NodePacketType.TaskHostBuildRequest:
-                    Console.WriteLine($"[TaskHostTask] HandlePacket: TaskHostBuildRequest received");
                     HandleBuildRequest(packet as TaskHostBuildRequest);
-                    Console.WriteLine($"[TaskHostTask] HandlePacket: HandleBuildRequest returned");
+                    break;
+                case NodePacketType.TaskHostYieldRequest:
+                    HandleYieldRequest(packet as TaskHostYieldRequest);
                     break;
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
@@ -555,8 +555,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleTaskHostTaskComplete(TaskHostTaskComplete taskHostTaskComplete, out bool taskFinished)
         {
-            Console.WriteLine($"[TaskHostTask:{DateTime.Now:HH:mm:ss.fff}] HandleTaskHostTaskComplete called, result={taskHostTaskComplete.TaskResult}, packetTaskId={taskHostTaskComplete.TaskId}, myTaskId={_taskId}");
-
             // Check if this completion is for our task or a nested task.
             // In nested BuildProjectFile scenarios, multiple tasks can run in the same TaskHost,
             // and we only want to process completions for our specific task.
@@ -564,7 +562,6 @@ namespace Microsoft.Build.BackEnd
             {
                 // This completion is for a different task (likely a nested task from BuildProjectFile).
                 // Don't mark our task as finished - just return.
-                Console.WriteLine($"[TaskHostTask] Ignoring TaskHostTaskComplete for different task (expected={_taskId}, got={taskHostTaskComplete.TaskId})");
                 taskFinished = false;
                 return;
             }
@@ -751,10 +748,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleBuildRequest(TaskHostBuildRequest request)
         {
-            // Run the build synchronously for now to diagnose the crash.
-            // TODO: Restore ThreadPool.QueueUserWorkItem after fixing the issue.
-            Console.WriteLine($"[TaskHostTask] HandleBuildRequest received, RequestId={request.RequestId}, Variant={request.Variant}, ProjectFileName={request.ProjectFileName}");
-
             bool result = false;
             IDictionary targetOutputs = null;
             IDictionary[] targetOutputsPerProject = null;
@@ -762,7 +755,6 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                Console.WriteLine($"[TaskHostTask] About to call BuildProjectFile for RequestId={request.RequestId}");
                 switch (request.Variant)
                 {
                     case TaskHostBuildRequest.BuildRequestVariant.BuildEngine1:
@@ -852,11 +844,8 @@ namespace Microsoft.Build.BackEnd
                 // Don't crash on exceptions - just return failure to the TaskHost.
                 // The task will receive result=false and can decide how to handle it.
                 // Any actual error messages would have been logged by the build engine itself.
-                Console.WriteLine($"[TaskHostTask] BuildProjectFile callback exception: {ex}");
                 result = false;
             }
-
-            Console.WriteLine($"[TaskHostTask] BuildProjectFile completed for RequestId={request.RequestId}, result={result}");
 
             // Send response - use the appropriate constructor based on output type
             TaskHostBuildResponse response;
@@ -876,9 +865,45 @@ namespace Microsoft.Build.BackEnd
                 response = new TaskHostBuildResponse(request.RequestId, result, targetOutputs);
             }
 
-            Console.WriteLine($"[TaskHostTask] Sending response for RequestId={request.RequestId}");
             _taskHostProvider.SendData(_taskHostNodeId, response);
-            Console.WriteLine($"[TaskHostTask] Response sent for RequestId={request.RequestId}");
+        }
+
+        /// <summary>
+        /// Handles Yield/Reacquire requests from the TaskHost.
+        ///
+        /// Yield/Reacquire flow:
+        /// 1. TaskHost task calls Yield() → sends YieldRequest(Yield) → returns immediately
+        /// 2. Parent (this) receives YieldRequest(Yield) → calls _buildEngine.Yield() → no response sent
+        /// 3. TaskHost task does non-build work...
+        /// 4. TaskHost task calls Reacquire() → sends YieldRequest(Reacquire) → blocks waiting
+        /// 5. Parent (this) receives YieldRequest(Reacquire) → calls _buildEngine.Reacquire() (may block)
+        /// 6. When _buildEngine.Reacquire() returns → sends YieldResponse → TaskHost unblocks
+        /// </summary>
+        private void HandleYieldRequest(TaskHostYieldRequest request)
+        {
+            switch (request.Operation)
+            {
+                case YieldOperation.Yield:
+                    // Forward yield to the real build engine - fire and forget
+                    if (_buildEngine is IBuildEngine3 engine3)
+                    {
+                        engine3.Yield();
+                    }
+                    // No response - Yield is fire-and-forget
+                    break;
+
+                case YieldOperation.Reacquire:
+                    // Forward reacquire to the real build engine
+                    // This may block until the scheduler allows the task to continue
+                    if (_buildEngine is IBuildEngine3 engine3Reacquire)
+                    {
+                        engine3Reacquire.Reacquire();
+                    }
+                    // Send acknowledgment to TaskHost to unblock the yielded task
+                    var response = new TaskHostYieldResponse(request.RequestId, success: true);
+                    _taskHostProvider.SendData(_taskHostNodeId, response);
+                    break;
+            }
         }
 
         /// <summary>
