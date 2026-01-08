@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -229,7 +230,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// The name of the file.
         /// </summary>
-        private readonly string _filename;
+        private readonly AbsolutePath _filename;
 
         /// <summary>
         /// Actual file or directory information
@@ -241,7 +242,7 @@ namespace Microsoft.Build.Tasks
         /// Only stores file name: does not grab the file state until first request.
         /// </summary>
         /// <param name="filename">The normalized (absolute) path to the file.</param>
-        internal FileState(string filename)
+        internal FileState(AbsolutePath filename)
         {
             ErrorUtilities.VerifyThrowArgumentLength(filename);
             _filename = filename;
@@ -306,9 +307,8 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Name of the file as it was passed in.
-        /// Not normalized.
         /// </summary>
-        internal string Name => _filename;
+        internal AbsolutePath Name => _filename;
 
         /// <summary>
         /// Whether this is a directory.

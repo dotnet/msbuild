@@ -133,19 +133,19 @@ namespace Microsoft.Build.Tasks
                         {
                             if (FailIfNotIncremental)
                             {
-                                Log.LogWarningFromResources("Delete.DeletingFile", file.ItemSpec);
+                                Log.LogWarningFromResources("Delete.DeletingFile", filePath.Value.Original);
                             }
                             else
                             {
                                 // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                                Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", file.ItemSpec);
+                                Log.LogMessageFromResources(MessageImportance.Normal, "Delete.DeletingFile", filePath.Value.Original);
                             }
 
                             File.Delete(filePath);
                         }
                         else
                         {
-                            Log.LogMessageFromResources(MessageImportance.Low, "Delete.SkippingNonexistentFile", file.ItemSpec);
+                            Log.LogMessageFromResources(MessageImportance.Low, "Delete.SkippingNonexistentFile", filePath.Value.Original);
                         }
                         // keep a running list of the files that were actually deleted
                         // note that we include in this list files that did not exist
@@ -156,11 +156,11 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath ?? file.ItemSpec ?? string.Empty);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath?.Original ?? file.ItemSpec ?? string.Empty);
                         if (retries < Retries)
                         {
                             retries++;
-                            Log.LogWarningWithCodeFromResources("Delete.Retrying", filePath ?? file.ItemSpec, retries, RetryDelayMilliseconds, e.Message, lockedFileMessage);
+                            Log.LogWarningWithCodeFromResources("Delete.Retrying", filePath?.Original ?? file.ItemSpec, retries, RetryDelayMilliseconds, e.Message, lockedFileMessage);
 
                             Thread.Sleep(RetryDelayMilliseconds);
                             continue;
@@ -169,11 +169,11 @@ namespace Microsoft.Build.Tasks
                         {
                             if (TreatErrorsAsWarnings)
                             {
-                                Log.LogWarningWithCodeFromResources("Delete.Error", filePath ?? file.ItemSpec, e.Message, lockedFileMessage);
+                                Log.LogWarningWithCodeFromResources("Delete.Error", filePath?.Original ?? file.ItemSpec, e.Message, lockedFileMessage);
                             }
                             else
                             {
-                                Log.LogErrorWithCodeFromResources("Delete.Error", filePath ?? file.ItemSpec, e.Message, lockedFileMessage);
+                                Log.LogErrorWithCodeFromResources("Delete.Error", filePath?.Original ?? file.ItemSpec, e.Message, lockedFileMessage);
                             }
                             // Add on failure to avoid reattempting
                             deletedFilesSet.Add(file.ItemSpec);

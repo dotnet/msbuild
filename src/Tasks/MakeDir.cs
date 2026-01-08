@@ -71,12 +71,12 @@ namespace Microsoft.Build.Tasks
                             {
                                 if (FailIfNotIncremental)
                                 {
-                                    Log.LogErrorFromResources("MakeDir.Comment", absolutePath);
+                                    Log.LogErrorFromResources("MakeDir.Comment", absolutePath.Value.Original);
                                 }
                                 else
                                 {
                                     // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                                    Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", absolutePath);
+                                    Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", absolutePath.Value.Original);
 
                                     Directory.CreateDirectory(FileUtilities.FixFilePath(absolutePath));
                                 }
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        Log.LogErrorWithCodeFromResources("MakeDir.Error", absolutePath ?? directory.ItemSpec, e.Message);
+                        Log.LogErrorWithCodeFromResources("MakeDir.Error", absolutePath?.Original ?? directory.ItemSpec, e.Message);
                     }
 
                     // Add even on failure to avoid reattempting

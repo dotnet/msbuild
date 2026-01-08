@@ -266,7 +266,7 @@ namespace Microsoft.Build.Tasks
         {
             if (destinationFileState.DirectoryExists)
             {
-                Log.LogErrorWithCodeFromResources("Copy.DestinationIsDirectory", sourceFileState.Name, destinationFileState.Name);
+                Log.LogErrorWithCodeFromResources("Copy.DestinationIsDirectory", sourceFileState.Name.Original, destinationFileState.Name);
                 return false;
             }
 
@@ -276,13 +276,13 @@ namespace Microsoft.Build.Tasks
                 // error telling the user so.  Otherwise, .NET Framework's File.Copy method will throw
                 // an UnauthorizedAccessException saying "access is denied", which is not very useful
                 // to the user.
-                Log.LogErrorWithCodeFromResources("Copy.SourceIsDirectory", sourceFileState.Name);
+                Log.LogErrorWithCodeFromResources("Copy.SourceIsDirectory", sourceFileState.Name.Original);
                 return false;
             }
 
             if (!sourceFileState.FileExists)
             {
-                Log.LogErrorWithCodeFromResources("Copy.SourceFileNotFound", sourceFileState.Name);
+                Log.LogErrorWithCodeFromResources("Copy.SourceFileNotFound", sourceFileState.Name.Original);
                 return false;
             }
 
@@ -416,7 +416,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if (logActivity)
                     {
-                        Log.LogMessage(MessageImportance.Low, RemovingReadOnlyAttribute, file.Name);
+                        Log.LogMessage(MessageImportance.Low, RemovingReadOnlyAttribute, file.Name.Original);
                     }
 
                     File.SetAttributes(file.Name, FileAttributes.Normal);
@@ -655,8 +655,8 @@ namespace Microsoft.Build.Tasks
                             ITaskItem destItem = DestinationFiles[fileIndex];
 
                             // Compute absolute paths once - reused for ETW, deduplication check, and FileState
-                            string sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceItem.ItemSpec);
-                            string destAbsolutePath = TaskEnvironment.GetAbsolutePath(destItem.ItemSpec);
+                            AbsolutePath sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceItem.ItemSpec);
+                            AbsolutePath destAbsolutePath = TaskEnvironment.GetAbsolutePath(destItem.ItemSpec);
 
                             // Check if we just copied from this location to the destination, don't copy again.
                             MSBuildEventSource.Log.CopyUpToDateStart(destAbsolutePath);

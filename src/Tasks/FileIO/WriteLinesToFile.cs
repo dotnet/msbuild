@@ -75,7 +75,6 @@ namespace Microsoft.Build.Tasks
                 return success;
             }
 
-            // Use TaskEnvironment to resolve relative paths for thread-safe operations
             AbsolutePath filePath = TaskEnvironment.GetAbsolutePath(File.ItemSpec);
 
             string contentsAsString = string.Empty;
@@ -129,7 +128,7 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        private bool ExecuteNonTransactional(string filePath, string directoryPath, string contentsAsString, Encoding encoding)
+        private bool ExecuteNonTransactional(AbsolutePath filePath, string directoryPath, string contentsAsString, Encoding encoding)
         {
             try
             {
@@ -141,7 +140,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if (WriteOnlyWhenDifferent)
                     {
-                        Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", filePath);
+                        Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", filePath.Original);
                     }
 
                     System.IO.File.AppendAllText(filePath, contentsAsString, encoding);
@@ -151,13 +150,13 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
-                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, e.Message, lockedFileMessage);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath.Original);
+                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.Original, e.Message, lockedFileMessage);
                 return !Log.HasLoggedErrors;
             }
         }
 
-        private bool ExecuteTransactional(string filePath, string directoryPath, string contentsAsString, Encoding encoding)
+        private bool ExecuteTransactional(AbsolutePath filePath, string directoryPath, string contentsAsString, Encoding encoding)
         {
             try
             {
@@ -169,7 +168,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if (WriteOnlyWhenDifferent)
                     {
-                        Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", filePath);
+                        Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", filePath.Original);
                     }
 
                     // For append mode, use atomic write to append only the new content
@@ -179,8 +178,8 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
-                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, e.Message, lockedFileMessage);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath.Original);
+                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.Original, e.Message, lockedFileMessage);
                 return !Log.HasLoggedErrors;
             }
         }
@@ -189,7 +188,7 @@ namespace Microsoft.Build.Tasks
         /// Saves content to file atomically using a temporary file, following the Visual Studio editor pattern.
         /// This is for overwrite mode where we write the entire content.
         /// </summary>
-        private bool SaveAtomically(string filePath, string contentsAsString, Encoding encoding)
+        private bool SaveAtomically(AbsolutePath filePath, string contentsAsString, Encoding encoding)
         {
             string temporaryFilePath = null;
             try
@@ -223,8 +222,8 @@ namespace Microsoft.Build.Tasks
                     catch (IOException moveEx)
                     {
                         // Move failed, log and return
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
-                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, moveEx.Message, lockedFileMessage);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath.Original);
+                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.Original, moveEx.Message, lockedFileMessage);
                         return !Log.HasLoggedErrors;
                     }
                 }
@@ -255,8 +254,8 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception fallbackEx) when (ExceptionHandling.IsIoRelatedException(fallbackEx))
                     {
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
-                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, fallbackEx.Message, lockedFileMessage);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath.Original);
+                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.Original, fallbackEx.Message, lockedFileMessage);
                         return !Log.HasLoggedErrors;
                     }
                 }
@@ -264,7 +263,7 @@ namespace Microsoft.Build.Tasks
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
                 string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
-                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, e.Message, lockedFileMessage);
+                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.Original, e.Message, lockedFileMessage);
                 return !Log.HasLoggedErrors;
             }
             finally
@@ -291,7 +290,7 @@ namespace Microsoft.Build.Tasks
         /// Appends content to file atomically. For append mode, we simply append the new content
         /// directly without reading the entire file, avoiding race conditions.
         /// </summary>
-        private bool SaveAtomicallyAppend(string filePath, string directoryPath, string contentsAsString, Encoding encoding)
+        private bool SaveAtomicallyAppend(AbsolutePath filePath, string directoryPath, string contentsAsString, Encoding encoding)
         {
             try
             {
@@ -303,8 +302,8 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
-                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath, e.Message, lockedFileMessage);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath.Original);
+                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.Original, e.Message, lockedFileMessage);
                 return !Log.HasLoggedErrors;
             }
         }
@@ -313,7 +312,7 @@ namespace Microsoft.Build.Tasks
         /// Checks if file should be written for Overwrite mode, considering WriteOnlyWhenDifferent option.
         /// </summary>
         /// <returns>True if file should be written, false if write should be skipped.</returns>
-        private bool ShouldWriteFileForOverwrite(string filePath, string contentsAsString)
+        private bool ShouldWriteFileForOverwrite(AbsolutePath filePath, string contentsAsString)
         {
             if (!WriteOnlyWhenDifferent)
             {
@@ -328,24 +327,24 @@ namespace Microsoft.Build.Tasks
                     // Use stream-based comparison to avoid loading entire file into memory
                     if (FilesAreIdentical(filePath, contentsAsString))
                     {
-                        Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", filePath);
-                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, true);
+                        Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.SkippingUnchangedFile", filePath.Original);
+                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath.Original, true);
                         return false; // Skip write - content is identical
                     }
                     else if (FailIfNotIncremental)
                     {
-                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", filePath);
-                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, false);
+                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", filePath.Original);
+                        MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath.Original, false);
                         return false; // Skip write - file differs and FailIfNotIncremental is set
                     }
                 }
             }
             catch (IOException)
             {
-                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", filePath);
+                Log.LogMessageFromResources(MessageImportance.Low, "WriteLinesToFile.ErrorReadingFile", filePath.Original);
             }
 
-            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath, false);
+            MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(filePath.Original, false);
             return true; // Proceed with write
         }
 
@@ -354,7 +353,7 @@ namespace Microsoft.Build.Tasks
         /// Uses the default encoding for the comparison.
         /// </summary>
         /// <returns>True if file contents are identical to the provided string, false otherwise.</returns>
-        private bool FilesAreIdentical(string filePath, string contentsAsString)
+        private bool FilesAreIdentical(AbsolutePath filePath, string contentsAsString)
         {
             try
             {

@@ -36,7 +36,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The original string used to create this path.
         /// </summary>
-        public string Original {get;}
+        public string Original {get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbsolutePath"/> struct.
@@ -56,8 +56,10 @@ namespace Microsoft.Build.Framework
         /// <param name="ignoreRootedCheck">If true, skips checking whether the path is rooted.</param>
         /// <remarks>For internal and testing use, when we want to force bypassing the rooted check.</remarks>
         internal AbsolutePath(string path, bool ignoreRootedCheck)
-            => AbsolutePath(path, path, ignoreRootedCheck);
-        
+            : this(path, path, ignoreRootedCheck)
+        {
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AbsolutePath"/> struct.
         /// </summary>
