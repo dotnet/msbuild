@@ -538,7 +538,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    MSBuildEventSource.Log.CopyUpToDateStop(destAbsolutePath, true);
+                    MSBuildEventSource.Log.CopyUpToDateStop(destAbsolutePath.OriginalValue, true);
                 }
 
                 if (copyComplete)
@@ -693,7 +693,7 @@ namespace Microsoft.Build.Tasks
                             }
                             else
                             {
-                                MSBuildEventSource.Log.CopyUpToDateStop(destAbsolutePath, true);
+                                MSBuildEventSource.Log.CopyUpToDateStop(destAbsolutePath.OriginalValue, true);
                             }
 
                             if (copyComplete)
@@ -950,12 +950,11 @@ namespace Microsoft.Build.Tasks
                         destinationFileState.Path,
                         "SkipUnchangedFiles",
                         "true");
-                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Path, true);
+                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Path.OriginalValue, true);
                 }
                 else if (!PathsAreIdentical(sourceFileState, destinationFileState))
                 {
-                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Path, false);
-
+                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Path.OriginalValue, false);
                     if (FailIfNotIncremental)
                     {
                         Log.LogError(FileComment, sourceFileState.Path, destinationFileState.Path);
@@ -968,7 +967,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Path, true);
+                    MSBuildEventSource.Log.CopyUpToDateStop(destinationFileState.Path.OriginalValue, true);
                 }
             }
             catch (OperationCanceledException)
