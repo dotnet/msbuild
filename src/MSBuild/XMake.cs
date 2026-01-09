@@ -4043,16 +4043,40 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            string arguments = binaryLoggerParameters[binaryLoggerParameters.Length - 1];
-
-            BinaryLogger logger = new BinaryLogger { Parameters = arguments };
-
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.
             // Since we always want task inputs for a binary logger, set it to diagnostic.
             verbosity = LoggerVerbosity.Diagnostic;
 
-            loggers.Add(logger);
+            // Process the parameters to get distinct paths and configuration info
+            var processedParams = BinaryLogger.ProcessParameters(binaryLoggerParameters);
+
+            if (processedParams.DistinctParameterSets.Count == 0)
+            {
+                return;
+            }
+
+            // Log a message if duplicate paths were filtered out
+            if (processedParams.DuplicateFilePaths.Count > 0)
+            {
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("DuplicateBinaryLoggerPathsIgnored", string.Join(", ", processedParams.DuplicateFilePaths)));
+            }
+
+            if (processedParams.AllConfigurationsIdentical && processedParams.AdditionalFilePaths.Count > 0)
+            {
+                // Optimized approach: single logger writing to one file, then copy to additional locations
+                BinaryLogger logger = new() { Parameters = processedParams.DistinctParameterSets[0], AdditionalFilePaths = processedParams.AdditionalFilePaths };
+                loggers.Add(logger);
+            }
+            else
+            {
+                // Create separate logger instances for each distinct configuration
+                foreach (string paramSet in processedParams.DistinctParameterSets)
+                {
+                    BinaryLogger logger = new BinaryLogger { Parameters = paramSet };
+                    loggers.Add(logger);
+                }
+            }
         }
 
         /// <summary>
