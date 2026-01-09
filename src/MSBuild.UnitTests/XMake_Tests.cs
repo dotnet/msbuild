@@ -2714,6 +2714,116 @@ $@"<Project>
             archive.Entries.ShouldContain(e => e.FullName.EndsWith(".proj", StringComparison.OrdinalIgnoreCase), 2);
         }
 
+        [Fact]
+        public void MultipleBinaryLogsCreatesMultipleFiles()
+        {
+            var testProject = _env.CreateFile("TestProject.proj", @"
+            <Project>
+              <Target Name=""Build"">
+                <Message Text=""Hello World!"" />
+              </Target>
+            </Project>
+            ");
+
+            string binLogLocation = _env.DefaultTestDirectory.Path;
+            string binLog1 = Path.Combine(binLogLocation, "1.binlog");
+            string binLog2 = Path.Combine(binLogLocation, "2.binlog");
+            string binLog3 = Path.Combine(binLogLocation, "3.binlog");
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.Path}\" \"/bl:{binLog1}\" \"/bl:{binLog2}\" \"/bl:{binLog3}\"", out var success, _output);
+
+            success.ShouldBeTrue(output);
+
+            // Verify all three binlog files exist
+            File.Exists(binLog1).ShouldBeTrue("First binlog file should exist");
+            File.Exists(binLog2).ShouldBeTrue("Second binlog file should exist");
+            File.Exists(binLog3).ShouldBeTrue("Third binlog file should exist");
+
+            // Verify all files have content (are not empty)
+            new FileInfo(binLog1).Length.ShouldBeGreaterThan(0, "First binlog should not be empty");
+            new FileInfo(binLog2).Length.ShouldBeGreaterThan(0, "Second binlog should not be empty");
+            new FileInfo(binLog3).Length.ShouldBeGreaterThan(0, "Third binlog should not be empty");
+
+            // Verify all files are identical (have the same content)
+            byte[] file1Bytes = File.ReadAllBytes(binLog1);
+            byte[] file2Bytes = File.ReadAllBytes(binLog2);
+            byte[] file3Bytes = File.ReadAllBytes(binLog3);
+
+            file1Bytes.SequenceEqual(file2Bytes).ShouldBeTrue("First and second binlog should be identical");
+            file1Bytes.SequenceEqual(file3Bytes).ShouldBeTrue("First and third binlog should be identical");
+        }
+
+        [Fact]
+        public void MultipleBinaryLogsWithDuplicatesCreateDistinctFiles()
+        {
+            var testProject = _env.CreateFile("TestProject.proj", @"
+            <Project>
+              <Target Name=""Build"">
+                <Message Text=""Hello World!"" />
+              </Target>
+            </Project>
+            ");
+
+            string binLogLocation = _env.DefaultTestDirectory.Path;
+            string binLog1 = Path.Combine(binLogLocation, "1.binlog");
+            string binLog2 = Path.Combine(binLogLocation, "2.binlog");
+
+            // Specify binLog1 twice - should only create two distinct files
+            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.Path}\" \"/bl:{binLog1}\" \"/bl:{binLog2}\" \"/bl:{binLog1}\"", out var success, _output);
+
+            success.ShouldBeTrue(output);
+
+            // Verify both binlog files exist
+            File.Exists(binLog1).ShouldBeTrue("First binlog file should exist");
+            File.Exists(binLog2).ShouldBeTrue("Second binlog file should exist");
+
+            // Verify both files are identical
+            byte[] file1Bytes = File.ReadAllBytes(binLog1);
+            byte[] file2Bytes = File.ReadAllBytes(binLog2);
+
+            file1Bytes.SequenceEqual(file2Bytes).ShouldBeTrue("Binlog files should be identical");
+        }
+
+        [Fact]
+        public void MultipleBinaryLogsWithDifferentConfigurationsCreatesSeparateLoggers()
+        {
+            var testProject = _env.CreateFile("TestProject.proj", @"
+            <Project>
+              <Import Project=""Imported.proj"" />
+              <Target Name=""Build"">
+                <Message Text=""Hello World!"" />
+              </Target>
+            </Project>
+            ");
+
+            _env.CreateFile("Imported.proj", @"
+            <Project>
+              <PropertyGroup>
+                <TestProp>Value</TestProp>
+              </PropertyGroup>
+            </Project>
+            ");
+
+            string binLogLocation = _env.DefaultTestDirectory.Path;
+            string binLog1 = Path.Combine(binLogLocation, "with-imports.binlog");
+            string binLog2 = Path.Combine(binLogLocation, "no-imports.binlog");
+
+            // One with default imports, one with ProjectImports=None
+            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.Path}\" \"/bl:{binLog1}\" \"/bl:{binLog2};ProjectImports=None\"", out var success, _output);
+
+            success.ShouldBeTrue(output);
+
+            // Verify both binlog files exist
+            File.Exists(binLog1).ShouldBeTrue("First binlog file should exist");
+            File.Exists(binLog2).ShouldBeTrue("Second binlog file should exist");
+
+            // Verify files are different sizes (one has imports embedded, one doesn't)
+            long size1 = new FileInfo(binLog1).Length;
+            long size2 = new FileInfo(binLog2).Length;
+
+            size1.ShouldBeGreaterThan(size2, "Binlog with imports should be larger than one without");
+        }
+
         [Theory]
         [InlineData("-warnaserror", "", "", false)]
         [InlineData("-warnaserror -warnnotaserror:FOR123", "", "", true)]

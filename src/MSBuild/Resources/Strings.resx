@@ -1700,7 +1700,11 @@
     <value>0: turned off</value>
   </data>
   <!-- **** TerminalLogger strings end **** -->
-  <!-- **** MSBUILD_LOGGING_ARGS strings **** -->
+  <data name="DuplicateBinaryLoggerPathsIgnored" xml:space="preserve">
+    <value>Duplicate binary log path(s) specified and ignored: {0}</value>
+    <comment>{0} is the list of duplicate paths that were filtered out</comment>
+  </data>
+    <!-- **** MSBUILD_LOGGING_ARGS strings **** -->
   <data name="LoggingArgsEnvVarUsing" xml:space="preserve">
     <value>Using arguments from MSBUILD_LOGGING_ARGS environment variable: {0}</value>
     <comment>LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the arguments from the environment variable.</comment>
@@ -1714,6 +1718,7 @@
     <comment>{StrBegin="MSBUILD : error MSB1071: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the error message.</comment>
   </data>
   <!-- **** MSBUILD_LOGGING_ARGS strings end **** -->
+
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
