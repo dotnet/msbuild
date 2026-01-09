@@ -18,7 +18,7 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
     {
         foreach (var task in other.TasksExecutionData)
         {
-            AddTask(task.Key, task.Value.CumulativeExecutionTime, task.Value.ExecutionsCount, task.Value.TotalMemoryBytes);
+            AddTask(task.Key, task.Value.CumulativeExecutionTime, task.Value.ExecutionsCount, task.Value.TotalMemoryBytes, task.Value.TaskFactoryName, task.Value.TaskHostRuntime);
         }
 
         foreach (var target in other.TargetsExecutionData)
@@ -27,12 +27,12 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         }
     }
 
-    public void AddTask(TaskOrTargetTelemetryKey task, TimeSpan cumulativeExectionTime, int executionsCount, long totalMemoryConsumption)
+    public void AddTask(TaskOrTargetTelemetryKey task, TimeSpan cumulativeExectionTime, int executionsCount, long totalMemoryConsumption, string? factoryName, string? taskHostRuntime)
     {
         TaskExecutionStats? taskExecutionStats;
         if (!TasksExecutionData.TryGetValue(task, out taskExecutionStats))
         {
-            taskExecutionStats = new(cumulativeExectionTime, executionsCount, totalMemoryConsumption);
+            taskExecutionStats = new(cumulativeExectionTime, executionsCount, totalMemoryConsumption, factoryName, taskHostRuntime);
             TasksExecutionData[task] = taskExecutionStats;
         }
         else
@@ -40,6 +40,8 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
             taskExecutionStats.CumulativeExecutionTime += cumulativeExectionTime;
             taskExecutionStats.ExecutionsCount += executionsCount;
             taskExecutionStats.TotalMemoryBytes += totalMemoryConsumption;
+            taskExecutionStats.TaskFactoryName ??= factoryName;
+            taskExecutionStats.TaskHostRuntime ??= taskHostRuntime;
         }
     }
 
@@ -50,10 +52,9 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
             wasExecuted || (TargetsExecutionData.TryGetValue(target, out bool wasAlreadyExecuted) && wasAlreadyExecuted);
     }
 
-    public WorkerNodeTelemetryData()
-        : this(new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>(), new Dictionary<TaskOrTargetTelemetryKey, bool>())
-    { }
+    public WorkerNodeTelemetryData() : this([], new Dictionary<TaskOrTargetTelemetryKey, bool>()) { }
 
     public Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> TasksExecutionData { get; }
+
     public Dictionary<TaskOrTargetTelemetryKey, bool> TargetsExecutionData { get; }
 }

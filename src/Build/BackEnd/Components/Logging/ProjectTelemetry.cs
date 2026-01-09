@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.BackEnd.Logging
@@ -28,7 +27,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private const string TaskFactoryEventName = "build/tasks/taskfactory";
         private const string TasksEventName = "build/tasks";
         private const string MSBuildTaskSubclassedEventName = "build/tasks/msbuild-subclassed";
-        private const string CustomTaskFactoryEventName = "build/tasks/custom-taskfactory";
 
         private int _assemblyTaskFactoryTasksExecutedCount = 0;
         private int _intrinsicTaskFactoryTasksExecutedCount = 0;
@@ -42,10 +40,6 @@ namespace Microsoft.Build.BackEnd.Logging
         // Telemetry for non-sealed subclasses of Microsoft-owned MSBuild tasks
         // Maps Microsoft task names to counts of their non-sealed usage
         private readonly Dictionary<string, int> _msbuildTaskSubclassUsage = new();
-
-        // Telemetry for custom (non-MSBuild) task factory usage
-        // Maps custom task factory type names to execution counts
-        private readonly Dictionary<string, int> _customTaskFactoryUsage = new();
 
         /// <summary>
         /// Adds a task execution to the telemetry data.
@@ -80,13 +74,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     break;
 
                 default:
-                    // Track custom (non-MSBuild) task factories individually
                     _customTaskFactoryTasksExecutedCount++;
-                    if (!string.IsNullOrEmpty(taskFactoryTypeName))
-                    {
-                        _customTaskFactoryUsage.TryGetValue(taskFactoryTypeName, out int count);
-                        _customTaskFactoryUsage[taskFactoryTypeName] = count + 1;
-                    }
                     break;
             }
         }
@@ -111,8 +99,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Check if this base type is a Microsoft-owned task
                 // We identify Microsoft tasks by checking if they're in the Microsoft.Build namespace
                 string? baseTypeName = baseType.FullName;
-                if (!string.IsNullOrEmpty(baseTypeName) && 
-                    (baseTypeName.StartsWith("Microsoft.Build.Tasks.") || 
+                if (!string.IsNullOrEmpty(baseTypeName) &&
+                    (baseTypeName.StartsWith("Microsoft.Build.Tasks.") ||
                      baseTypeName.StartsWith("Microsoft.Build.Utilities.")))
                 {
                     // This is a subclass of a Microsoft-owned task
@@ -158,12 +146,6 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     loggingService.LogTelemetry(buildEventContext, MSBuildTaskSubclassedEventName, msbuildTaskSubclassProperties);
                 }
-
-                Dictionary<string, string> customTaskFactoryProperties = GetCustomTaskFactoryProperties();
-                if (customTaskFactoryProperties.Count > 0)
-                {
-                    loggingService.LogTelemetry(buildEventContext, CustomTaskFactoryEventName, customTaskFactoryProperties);
-                }
             }
             catch
             {
@@ -177,7 +159,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 Clean();
             }
         }
-        
+
         private void Clean()
         {
             _assemblyTaskFactoryTasksExecutedCount = 0;
@@ -190,42 +172,26 @@ namespace Microsoft.Build.BackEnd.Logging
             _taskHostTasksExecutedCount = 0;
 
             _msbuildTaskSubclassUsage.Clear();
-            _customTaskFactoryUsage.Clear();
+        }
+
+        private static void AddIfNotEmpty(Dictionary<string, string> properties, string propertyName, int count)
+        {
+            if (count > 0)
+            {
+                properties[propertyName] = count.ToString(CultureInfo.InvariantCulture);
+            }
         }
 
         private Dictionary<string, string> GetTaskFactoryProperties()
         {
             Dictionary<string, string> properties = new();
 
-            if (_assemblyTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["AssemblyTaskFactoryTasksExecutedCount"] = _assemblyTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_intrinsicTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["IntrinsicTaskFactoryTasksExecutedCount"] = _intrinsicTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_codeTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["CodeTaskFactoryTasksExecutedCount"] = _codeTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_roslynCodeTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["RoslynCodeTaskFactoryTasksExecutedCount"] = _roslynCodeTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_xamlTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["XamlTaskFactoryTasksExecutedCount"] = _xamlTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_customTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["CustomTaskFactoryTasksExecutedCount"] = _customTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
+            AddIfNotEmpty(properties, "AssemblyTaskFactoryTasksExecutedCount", _assemblyTaskFactoryTasksExecutedCount);
+            AddIfNotEmpty(properties, "IntrinsicTaskFactoryTasksExecutedCount", _intrinsicTaskFactoryTasksExecutedCount);
+            AddIfNotEmpty(properties, "CodeTaskFactoryTasksExecutedCount", _codeTaskFactoryTasksExecutedCount);
+            AddIfNotEmpty(properties, "RoslynCodeTaskFactoryTasksExecutedCount", _roslynCodeTaskFactoryTasksExecutedCount);
+            AddIfNotEmpty(properties, "XamlTaskFactoryTasksExecutedCount", _xamlTaskFactoryTasksExecutedCount);
+            AddIfNotEmpty(properties, "CustomTaskFactoryTasksExecutedCount", _customTaskFactoryTasksExecutedCount);
 
             return properties;
         }
@@ -233,23 +199,16 @@ namespace Microsoft.Build.BackEnd.Logging
         private Dictionary<string, string> GetTaskProperties()
         {
             Dictionary<string, string> properties = new();
-            
-            var totalTasksExecuted = _assemblyTaskFactoryTasksExecutedCount + 
+
+            var totalTasksExecuted = _assemblyTaskFactoryTasksExecutedCount +
                                     _intrinsicTaskFactoryTasksExecutedCount +
-                                    _codeTaskFactoryTasksExecutedCount + 
+                                    _codeTaskFactoryTasksExecutedCount +
                                     _roslynCodeTaskFactoryTasksExecutedCount +
-                                    _xamlTaskFactoryTasksExecutedCount + 
+                                    _xamlTaskFactoryTasksExecutedCount +
                                     _customTaskFactoryTasksExecutedCount;
-            
-            if (totalTasksExecuted > 0)
-            {
-                properties["TasksExecutedCount"] = totalTasksExecuted.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_taskHostTasksExecutedCount > 0)
-            {
-                properties["TaskHostTasksExecutedCount"] = _taskHostTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
+
+            AddIfNotEmpty(properties, "TasksExecutedCount", totalTasksExecuted);
+            AddIfNotEmpty(properties, "TaskHostTasksExecutedCount", _taskHostTasksExecutedCount);
 
             return properties;
         }
@@ -261,58 +220,12 @@ namespace Microsoft.Build.BackEnd.Logging
             // Add each Microsoft task name with its non-sealed subclass usage count
             foreach (var kvp in _msbuildTaskSubclassUsage)
             {
-                // Use the same sanitization logic as custom task factories for consistency
-                string propertyName = SanitizePropertyName(kvp.Key);
+                // Use a sanitized property name (replace dots with underscores for telemetry)
+                string propertyName = kvp.Key.Replace(".", "_");
                 properties[propertyName] = kvp.Value.ToString(CultureInfo.InvariantCulture);
             }
 
             return properties;
-        }
-
-        private Dictionary<string, string> GetCustomTaskFactoryProperties()
-        {
-            Dictionary<string, string> properties = new();
-
-            // Add each custom task factory type name with its usage count
-            foreach (var kvp in _customTaskFactoryUsage)
-            {
-                // Sanitize property name for telemetry: replace dots with underscores
-                // and remove any other characters that might be problematic
-                string propertyName = SanitizePropertyName(kvp.Key);
-                properties[propertyName] = kvp.Value.ToString(CultureInfo.InvariantCulture);
-            }
-
-            return properties;
-        }
-
-        /// <summary>
-        /// Sanitizes a string to make it suitable for use as a telemetry property name.
-        /// Replaces dots with underscores and removes other potentially problematic characters.
-        /// </summary>
-        private static string SanitizePropertyName(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                return string.Empty;
-            }
-
-            // Replace dots with underscores and remove other special characters
-            // Keep alphanumeric characters and underscores only
-            // Use same length as input since we're not adding characters, only replacing or skipping
-            var sanitized = new StringBuilder(name.Length);
-            foreach (char c in name)
-            {
-                if (char.IsLetterOrDigit(c))
-                {
-                    sanitized.Append(c);
-                }
-                else if (c == '.' || c == '-' || c == ' ')
-                {
-                    sanitized.Append('_');
-                }
-                // Skip other special characters (reduces length)
-            }
-            return sanitized.ToString();
         }
     }
 }

@@ -20,7 +20,9 @@ internal interface ITelemetryForwarder
         short executionsCount,
         long totalMemoryConsumed,
         bool isCustom,
-        bool isFromNugetCache);
+        bool isFromNugetCache,
+        string? taskFactoryName,
+        string? taskHostRuntime);
 
     /// <summary>
     /// Add info about target execution to the telemetry.
