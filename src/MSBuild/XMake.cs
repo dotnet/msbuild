@@ -3235,6 +3235,37 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Processes the parent packet version switch, which indicates the packet version supported by the parent node.
+        /// This is used for backward-compatible packet version negotiation between parent and child nodes.
+        /// If not specified, returns 1 indicating the parent doesn't support version negotiation (old parent).
+        /// </summary>
+        /// <param name="parameters">The command line parameters for the switch.</param>
+        /// <returns>The packet version supported by the parent, or 1 if not specified or invalid.</returns>
+        internal static byte ProcessParentPacketVersionSwitch(string[] parameters)
+        {
+            byte parentPacketVersion = 1;
+
+            if (parameters.Length > 0)
+            {
+                try
+                {
+                    parentPacketVersion = byte.Parse(parameters[parameters.Length - 1], CultureInfo.InvariantCulture);
+                }
+                catch (FormatException ex)
+                {
+                    CommunicationsUtilities.Trace("Invalid node packet version value '{0}': {1}", parameters[parameters.Length - 1], ex.Message);
+                }
+                catch (OverflowException ex)
+                {
+                    // Value too large for byte - log and continue with default
+                    CommunicationsUtilities.Trace("Node packet version value '{0}' out of range: {1}", parameters[parameters.Length - 1], ex.Message);
+                }
+            }
+
+            return parentPacketVersion;
+        }
+
+        /// <summary>
         /// Processes the node reuse switch, the user can set node reuse to true, false or not set the switch. If the switch is
         /// not set the system will check to see if the process is being run as an administrator. This check in localnode provider
         /// will determine the node reuse setting for that case.
@@ -3486,8 +3517,9 @@ namespace Microsoft.Build.CommandLine
                 {
                     // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
                     bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                    OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
-                    shutdownReason = node.Run(out nodeException, nodeReuse);
+                    byte parentPacketVersion = ProcessParentPacketVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ParentPacketVersion]);
+                    OutOfProcTaskHostNode node = new();
+                    shutdownReason = node.Run(out nodeException, nodeReuse, parentPacketVersion);
                 }
                 else if (nodeModeNumber == 3)
                 {
@@ -4043,16 +4075,40 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            string arguments = binaryLoggerParameters[binaryLoggerParameters.Length - 1];
-
-            BinaryLogger logger = new BinaryLogger { Parameters = arguments };
-
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.
             // Since we always want task inputs for a binary logger, set it to diagnostic.
             verbosity = LoggerVerbosity.Diagnostic;
 
-            loggers.Add(logger);
+            // Process the parameters to get distinct paths and configuration info
+            var processedParams = BinaryLogger.ProcessParameters(binaryLoggerParameters);
+
+            if (processedParams.DistinctParameterSets.Count == 0)
+            {
+                return;
+            }
+
+            // Log a message if duplicate paths were filtered out
+            if (processedParams.DuplicateFilePaths.Count > 0)
+            {
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("DuplicateBinaryLoggerPathsIgnored", string.Join(", ", processedParams.DuplicateFilePaths)));
+            }
+
+            if (processedParams.AllConfigurationsIdentical && processedParams.AdditionalFilePaths.Count > 0)
+            {
+                // Optimized approach: single logger writing to one file, then copy to additional locations
+                BinaryLogger logger = new() { Parameters = processedParams.DistinctParameterSets[0], AdditionalFilePaths = processedParams.AdditionalFilePaths };
+                loggers.Add(logger);
+            }
+            else
+            {
+                // Create separate logger instances for each distinct configuration
+                foreach (string paramSet in processedParams.DistinctParameterSets)
+                {
+                    BinaryLogger logger = new BinaryLogger { Parameters = paramSet };
+                    loggers.Add(logger);
+                }
+            }
         }
 
         /// <summary>
