@@ -50,6 +50,80 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Test that MSBUILD_LOGGING_ARGS with multiple -bl switches creates multiple binary logs.
+        /// </summary>
+        [Fact]
+        public void LoggingArgsEnvVarWithMultipleBinaryLoggers()
+        {
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Hello'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+            string binlogPath1 = Path.Combine(directory.Path, "test1.binlog");
+            string binlogPath2 = Path.Combine(directory.Path, "test2.binlog");
+
+            _env.SetEnvironmentVariable("MSBUILD_LOGGING_ARGS", $"-bl:{binlogPath1} -bl:{binlogPath2}");
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{projectPath}\"", out var successfulExit, _output);
+            successfulExit.ShouldBeTrue(output);
+
+            File.Exists(binlogPath1).ShouldBeTrue($"First binary log should have been created at {binlogPath1}");
+            File.Exists(binlogPath2).ShouldBeTrue($"Second binary log should have been created at {binlogPath2}");
+        }
+
+        /// <summary>
+        /// Test that MSBUILD_LOGGING_ARGS with {} placeholder generates unique filenames.
+        /// </summary>
+        [Fact]
+        public void LoggingArgsEnvVarWithWildcardPlaceholder()
+        {
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Hello'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+
+            // Use {} placeholder for unique filename generation
+            string binlogPattern = Path.Combine(directory.Path, "build-{}.binlog");
+            _env.SetEnvironmentVariable("MSBUILD_LOGGING_ARGS", $"-bl:{binlogPattern}");
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{projectPath}\"", out var successfulExit, _output);
+            successfulExit.ShouldBeTrue(output);
+
+            // Find the generated binlog file (should have unique characters instead of {})
+            string[] binlogFiles = Directory.GetFiles(directory.Path, "build-*.binlog");
+            binlogFiles.Length.ShouldBe(1, $"Expected exactly one binlog file to be created in {directory.Path}");
+
+            // The filename should not contain {} - it should have been replaced with unique characters
+            binlogFiles[0].ShouldNotContain("{}");
+            binlogFiles[0].ShouldContain("build-");
+        }
+
+        /// <summary>
+        /// Test that MSBUILD_LOGGING_ARGS with multiple {} placeholders generates unique filenames with each placeholder replaced.
+        /// </summary>
+        [Fact]
+        public void LoggingArgsEnvVarWithMultipleWildcardPlaceholders()
+        {
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t'><Message Text='Hello'/></Target></Project>");
+            var projectPath = directory.CreateFile("my.proj", content).Path;
+
+            // Use multiple {} placeholders for unique filename generation
+            string binlogPattern = Path.Combine(directory.Path, "build-{}-test-{}.binlog");
+            _env.SetEnvironmentVariable("MSBUILD_LOGGING_ARGS", $"-bl:{binlogPattern}");
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{projectPath}\"", out var successfulExit, _output);
+            successfulExit.ShouldBeTrue(output);
+
+            // Find the generated binlog file (should have unique characters instead of {})
+            string[] binlogFiles = Directory.GetFiles(directory.Path, "build-*-test-*.binlog");
+            binlogFiles.Length.ShouldBe(1, $"Expected exactly one binlog file to be created in {directory.Path}");
+
+            // The filename should not contain {} - both placeholders should have been replaced
+            binlogFiles[0].ShouldNotContain("{}");
+            binlogFiles[0].ShouldContain("build-");
+            binlogFiles[0].ShouldContain("-test-");
+        }
+
+        /// <summary>
         /// Test that MSBUILD_LOGGING_ARGS ignores unsupported arguments and continues with valid ones.
         /// </summary>
         [Fact]
