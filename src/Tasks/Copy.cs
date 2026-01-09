@@ -266,7 +266,7 @@ namespace Microsoft.Build.Tasks
         {
             if (destinationFileState.DirectoryExists)
             {
-                Log.LogErrorWithCodeFromResources("Copy.DestinationIsDirectory", sourceFileState.Name.Original, destinationFileState.Name);
+                Log.LogErrorWithCodeFromResources("Copy.DestinationIsDirectory", sourceFileState.Name.OriginalValue, destinationFileState.Name);
                 return false;
             }
 
@@ -276,13 +276,13 @@ namespace Microsoft.Build.Tasks
                 // error telling the user so.  Otherwise, .NET Framework's File.Copy method will throw
                 // an UnauthorizedAccessException saying "access is denied", which is not very useful
                 // to the user.
-                Log.LogErrorWithCodeFromResources("Copy.SourceIsDirectory", sourceFileState.Name.Original);
+                Log.LogErrorWithCodeFromResources("Copy.SourceIsDirectory", sourceFileState.Name.OriginalValue);
                 return false;
             }
 
             if (!sourceFileState.FileExists)
             {
-                Log.LogErrorWithCodeFromResources("Copy.SourceFileNotFound", sourceFileState.Name.Original);
+                Log.LogErrorWithCodeFromResources("Copy.SourceFileNotFound", sourceFileState.Name.OriginalValue);
                 return false;
             }
 
@@ -416,7 +416,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if (logActivity)
                     {
-                        Log.LogMessage(MessageImportance.Low, RemovingReadOnlyAttribute, file.Name.Original);
+                        Log.LogMessage(MessageImportance.Low, RemovingReadOnlyAttribute, file.Name.OriginalValue);
                     }
 
                     File.SetAttributes(file.Name, FileAttributes.Normal);

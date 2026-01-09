@@ -2506,8 +2506,8 @@ namespace Microsoft.Build.UnitTests
 
             // Copy calls to different destinations can come in any order when running in parallel.
             // Use .Original to compare against the original input path (before Path.GetFullPath resolution)
-            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Name.Original == FileUtilities.FixFilePath("c:\\source"));
-            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Name.Original == FileUtilities.FixFilePath("c:\\source2"));
+            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Name.OriginalValue == FileUtilities.FixFilePath("c:\\source"));
+            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Name.OriginalValue == FileUtilities.FixFilePath("c:\\source2"));
         }
 
         /// <summary>

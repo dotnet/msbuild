@@ -75,7 +75,7 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    Log.LogErrorWithCodeFromResources("ReadLinesFromFile.ErrorOrWarning", filePath?.Original ?? File.ItemSpec, e.Message);
+                    Log.LogErrorWithCodeFromResources("ReadLinesFromFile.ErrorOrWarning", filePath?.OriginalValue ?? File.ItemSpec, e.Message);
                     success = false;
                 }
             }

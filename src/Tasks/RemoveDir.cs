@@ -76,12 +76,12 @@ namespace Microsoft.Build.Tasks
                 {
                     if (FailIfNotIncremental)
                     {
-                        Log.LogErrorFromResources("RemoveDir.Removing", directoryPath.Original);
+                        Log.LogErrorFromResources("RemoveDir.Removing", directoryPath.OriginalValue);
                         continue;
                     }
 
                     // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-                    Log.LogMessageFromResources(MessageImportance.Normal, "RemoveDir.Removing", directoryPath.Original);
+                    Log.LogMessageFromResources(MessageImportance.Normal, "RemoveDir.Removing", directoryPath.OriginalValue);
                     // Try to remove the directory, this will not log unauthorized access errors since
                     // we will attempt to remove read only attributes and try again.
                     bool currentSuccess = RemoveDirectory(directoryPath, false, out bool unauthorizedAccess);
@@ -109,7 +109,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    Log.LogMessageFromResources(MessageImportance.Normal, "RemoveDir.SkippingNonexistentDirectory", directoryPath.Original);
+                    Log.LogMessageFromResources(MessageImportance.Normal, "RemoveDir.SkippingNonexistentDirectory", directoryPath.OriginalValue);
                     // keep a running list of the directories that were actually removed
                     // note that we include in this list directories that did not exist
                     removedDirectoriesList.Add(new TaskItem(directory));
@@ -159,13 +159,13 @@ namespace Microsoft.Build.Tasks
                 // Log the fact that there was a problem only if we have been asked to.
                 if (logUnauthorizedError)
                 {
-                    Log.LogErrorWithCodeFromResources("RemoveDir.Error", directoryPath.Original, e.Message);
+                    Log.LogErrorWithCodeFromResources("RemoveDir.Error", directoryPath.OriginalValue, e.Message);
                 }
                 unauthorizedAccess = true;
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                Log.LogErrorWithCodeFromResources("RemoveDir.Error", directoryPath.Original, e.Message);
+                Log.LogErrorWithCodeFromResources("RemoveDir.Error", directoryPath.OriginalValue, e.Message);
                 success = false;
             }
 

@@ -36,7 +36,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The original string used to create this path.
         /// </summary>
-        public string Original {get; }
+        public string OriginalValue {get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbsolutePath"/> struct.
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Framework
         {
             ValidatePath(path);
             Value = path;
-            Original = path;
+            OriginalValue = path;
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Framework
                 ValidatePath(path);
             }
             Value = path;
-            Original = original;
+            OriginalValue = original;
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace Microsoft.Build.Framework
         public AbsolutePath(string path, AbsolutePath basePath)
         {
             Value = Path.Combine(basePath.Value, path);
-            Original = path;
+            OriginalValue = path;
         } 
 
         /// <summary>
