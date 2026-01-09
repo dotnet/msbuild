@@ -53,6 +53,7 @@ using Directory = Microsoft.IO.Directory;
 using File = Microsoft.IO.File;
 using FileInfo = Microsoft.IO.FileInfo;
 using Path = Microsoft.IO.Path;
+using System.Linq.Expressions;
 #endif
 
 #nullable disable
@@ -1916,6 +1917,66 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Gathers and validates logging switches from the MSBUILD_LOGGING_ARGS environment variable.
+        /// Only -bl and -check switches are allowed. All other switches are logged as warnings and ignored.
+        /// </summary>
+        internal static void GatherLoggingArgsEnvironmentVariableSwitches(ref CommandLineSwitches switches, string commandLine)
+        {
+            if (string.IsNullOrWhiteSpace(Traits.MSBuildLoggingArgs))
+            {
+                return;
+            }
+
+            // Determine if warnings should be emitted as messages (for builds with /warnaserror)
+            bool emitAsMessage = string.Equals(Traits.MSBuildLoggingArgsLevel, BinaryLogRecordKind.Message.ToString(), StringComparison.OrdinalIgnoreCase);
+
+            try
+            {
+                List<string> envVarArgs = QuotingUtilities.SplitUnquoted(Traits.MSBuildLoggingArgs);
+
+                List<string> validArgs = new(envVarArgs.Count);
+                List<string> invalidArgs = null;
+
+                foreach (string arg in envVarArgs)
+                {
+                    string unquotedArg = QuotingUtilities.Unquote(arg);
+                    if (string.IsNullOrWhiteSpace(unquotedArg))
+                    {
+                        continue;
+                    }
+
+                    if (IsAllowedLoggingArg(unquotedArg))
+                    {
+                        validArgs.Add(arg);
+                    }
+                    else
+                    {
+                        invalidArgs ??= [];
+                        invalidArgs.Add(unquotedArg);
+                    }
+                }
+
+                if (invalidArgs != null)
+                {
+                    foreach (string invalidArg in invalidArgs)
+                    {
+                        LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggingArgsEnvVarUnsupportedArgument", invalidArg), emitAsMessage);
+                    }
+                }
+
+                if (validArgs.Count > 0)
+                {
+                    LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LoggingArgsEnvVarUsing", string.Join(" ", validArgs)), emitAsMessage: true);
+                    GatherCommandLineSwitches(validArgs, switches, commandLine);
+                }
+            }
+            catch (Exception ex)
+            {
+                LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggingArgsEnvVarError", ex.Message), emitAsMessage);
+            }
+        }
+
+        /// <summary>
         /// MSBuild.exe need to fallback to English if it cannot print Japanese (or other language) characters
         /// </summary>
         internal static void SetConsoleUI()
@@ -1999,7 +2060,9 @@ namespace Microsoft.Build.CommandLine
 #else
             string[] commandLine,
 #endif
-            out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile, out string fullCommandLine)
+            out CommandLineSwitches switchesFromAutoResponseFile,
+            out CommandLineSwitches switchesNotFromAutoResponseFile,
+            out string fullCommandLine)
         {
             ResetGatheringSwitchesState();
 
@@ -2043,6 +2106,53 @@ namespace Microsoft.Build.CommandLine
             if (!switchesNotFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
             {
                 GatherAutoResponseFileSwitches(s_exePath, switchesFromAutoResponseFile, fullCommandLine);
+            }
+
+            CommandLineSwitches switchesFromEnvironmentVariable = new();
+            GatherLoggingArgsEnvironmentVariableSwitches(ref switchesFromEnvironmentVariable, fullCommandLine);
+            switchesNotFromAutoResponseFile.Append(switchesFromEnvironmentVariable, fullCommandLine);
+        }
+
+        /// <summary>
+        /// Checks if the argument is an allowed logging argument (-bl or -check).
+        /// </summary>
+        /// <param name="arg">The unquoted argument to check.</param>
+        /// <returns>True if the argument is allowed, false otherwise.</returns>
+        private static bool IsAllowedLoggingArg(string arg)
+        {
+            if (!ValidateSwitchIndicatorInUnquotedArgument(arg))
+            {
+                return false;
+            }
+
+            string switchPart = arg.Substring(GetLengthOfSwitchIndicator(arg));
+
+            // Extract switch name (before any ':' parameter indicator)
+            int colonIndex = switchPart.IndexOf(':');
+            string switchName = colonIndex >= 0 ? switchPart.Substring(0, colonIndex) : switchPart;
+
+            return IsBinaryLoggerSwitch(switchName) || string.Equals(switchName, "check", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool IsBinaryLoggerSwitch(string switchName) => string.Equals(switchName, "bl", StringComparison.OrdinalIgnoreCase) || string.Equals(switchName, "binarylogger", StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Logs a message from MSBUILD_LOGGING_ARGS processing. Messages are either emitted as warnings
+        /// to the console or queued as low-importance build messages.
+        /// </summary>
+        /// <param name="message">The message to log.</param>
+        /// <param name="emitAsMessage">If true, emit as low-importance message; if false, emit as warning to console.</param>
+        private static void LogLoggingArgsMessage(string message, bool emitAsMessage)
+        {
+            if (emitAsMessage)
+            {
+                // Queue as a low-importance message to be logged when the build starts
+                s_globalMessagesToLogInBuildLoggers.Add(new BuildManager.DeferredBuildMessage(message, MessageImportance.Low));
+            }
+            else
+            {
+                // Emit as warning to console immediately
+                Console.WriteLine(message);
             }
         }
 

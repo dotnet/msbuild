@@ -135,6 +135,26 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
 
+        /// <summary>
+        /// Name of environment variable for logging arguments (e.g., -bl, -check).
+        /// </summary>
+        public const string MSBuildLoggingArgsEnvVarName = "MSBUILD_LOGGING_ARGS";
+
+        /// <summary>
+        /// Name of environment variable for logging level (warning or message).
+        /// </summary>
+        public const string MSBuildLoggingArgsLevelEnvVarName = "MSBUILD_LOGGING_ARGS_LEVEL";
+
+        /// <summary>
+        /// Value of the MSBUILD_LOGGING_ARGS environment variable.
+        /// </summary>
+        public static string? MSBuildLoggingArgs => Environment.GetEnvironmentVariable(MSBuildLoggingArgsEnvVarName);
+
+        /// <summary>
+        /// Value of the MSBUILD_LOGGING_ARGS_LEVEL environment variable.
+        /// </summary>
+        public static string? MSBuildLoggingArgsLevel => Environment.GetEnvironmentVariable(MSBuildLoggingArgsLevelEnvVarName);
+
         public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
         public readonly bool DebugScheduler;
         public readonly bool DebugNodeCommunication;
