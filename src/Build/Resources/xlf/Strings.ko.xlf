@@ -489,6 +489,11 @@
         <target state="translated">환경 변수 "{0}" 읽기</target>
         <note />
       </trans-unit>
+      <trans-unit id="ErrorCopyingBinaryLog">
+        <source>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</source>
+        <target state="new">MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</target>
+        <note>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</note>
+      </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4256: "{0}" 경로에서 입력 결과 캐시 파일을 읽는 중 오류가 발생했습니다. {1}</target>
