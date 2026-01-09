@@ -266,7 +266,7 @@ namespace Microsoft.Build.Tasks
         {
             if (destinationFileState.DirectoryExists)
             {
-                Log.LogErrorWithCodeFromResources("Copy.DestinationIsDirectory", sourceFileState.Path.OriginalValue, destinationFileState.Path);
+                Log.LogErrorWithCodeFromResources("Copy.DestinationIsDirectory", sourceFileState.Path.OriginalValue, destinationFileState.Path.OriginalValue);
                 return false;
             }
 
@@ -519,7 +519,7 @@ namespace Microsoft.Build.Tasks
                 MSBuildEventSource.Log.CopyUpToDateStart(destAbsolutePath);
                 if (filesActuallyCopied.TryGetValue(destAbsolutePath, out string originalSource))
                 {
-                    if (String.Equals(originalSource, sourceAbsolutePath, FileUtilities.PathComparison))
+                    if (originalSource == sourceAbsolutePath)
                     {
                         // Already copied from this location, don't copy again.
                         copyComplete = true;
@@ -676,7 +676,7 @@ namespace Microsoft.Build.Tasks
                             MSBuildEventSource.Log.CopyUpToDateStart(destAbsolutePath);
                             bool copyComplete = partitionIndex > 0 &&
                                                 TryGetAbsolutePath(sourceSpec, destSpec, SourceFiles[partition[partitionIndex - 1]].ItemSpec, out AbsolutePath prevSourcePath) &&
-                                                String.Equals(sourceAbsolutePath, prevSourcePath, FileUtilities.PathComparison);
+                                                sourceAbsolutePath == prevSourcePath;
 
                             if (!copyComplete)
                             {
