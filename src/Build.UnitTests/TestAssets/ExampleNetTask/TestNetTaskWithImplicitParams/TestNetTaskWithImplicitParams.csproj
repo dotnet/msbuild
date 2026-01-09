@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TestProjectFolder>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine('$(AssemblyLocation)', '..'))'))</TestProjectFolder>
+    <ExampleTaskPath>$([System.IO.Path]::Combine('$(TestProjectFolder)', '$(TargetFramework)', 'ExampleTask.dll'))</ExampleTaskPath>
+  </PropertyGroup>
+
+  <UsingTask TaskName="ExampleTask"
+             AssemblyFile="$(ExampleTaskPath)"
+             Runtime="NET"/>
+  
+  <UsingTask TaskName="Microsoft.Build.Tasks.Message"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"
+             TaskFactory="TaskHostFactory" />
+
+  <UsingTask TaskName="Microsoft.Build.Tasks.FindInList"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" />
+
+  <ItemGroup>
+    <MyItems Include="Apple" />
+    <MyItems Include="Banana" />
+    <MyItems Include="Cherry" />
+    <MyItems Include="Date" />
+  </ItemGroup>
+
+  <Target Name="TestTask" BeforeTargets="Build">
+    <ExampleTask />
+    
+    <Message Text="Hello TEST FROM MESSAGE" Importance="high" />
+
+    <FindInList List="@(MyItems)"
+                ItemSpecToFind="Banana"
+                CaseSensitive="false">
+      <Output TaskParameter="ItemFound" PropertyName="FoundItem"/>
+    </FindInList>
+    <Message Text="Found item: $(FoundItem)" Importance="high" Condition="'$(FoundItem)' != ''" />
+  </Target>
+
+</Project>

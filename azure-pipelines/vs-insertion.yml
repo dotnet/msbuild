@@ -44,6 +44,7 @@ parameters:
     values:
       - auto
       - main
+      - rel/d18.3
       - rel/d18.0
       - rel/d17.14
       - rel/d17.13
@@ -66,7 +67,9 @@ parameters:
 variables:
   # `auto` should work every time and selecting a branch in parameters is likely to fail due to incompatible versions in MSBuild and VS
   - name: AutoInsertTargetBranch
-    ${{ if eq(variables['Build.SourceBranchName'], 'vs18.0') }}:
+    ${{ if eq(variables['Build.SourceBranchName'], 'vs18.3') }}:
+      value: 'rel/d18.3'
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs18.0') }}:
       value: 'rel/d18.0'
     ${{ elseif eq(variables['Build.SourceBranchName'], 'vs17.14') }}:
       value: 'rel/d17.14'
@@ -118,6 +121,8 @@ variables:
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
+    settings:
+      networkIsolationPolicy: Permissive,CFSClean
     pool:
       name: VSEngSS-MicroBuild2022-1ES
     customBuildTags:
@@ -233,8 +238,19 @@ extends:
                   )
               }
               $propsValue = $props -join ";"
-              Write-Host "Setting InsertPackagePropsValues to '$propsValue'"
-              Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($propsValue)"
+
+              # For 18.0+, don't update PackageReferences so that VS packages like VSSDK
+              # can choose their own versioning and don't always depend on a super fresh MSBuild
+              if ("$(InsertTargetBranch)" -in @("rel/d17.10", "rel/d17.12", "rel/d17.14"))
+              {
+                  Write-Host "Setting InsertPackagePropsValues to '$propsValue'"
+                  Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]$($propsValue)"
+              }
+              else
+              {
+                  Write-Host "Unsetting InsertPackagePropsValues"
+                  Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]"
+              }
 
               # autocomplete main
               $autocomplete = "false"
@@ -254,27 +270,14 @@ extends:
             nuGetFeedType: internal
             publishVstsFeed: VS
             allowPackageConflicts: false
-        - template: /azure-pipelines/WIFtoPATauth.yml@self
-          parameters:
-            wifServiceConnectionName: azure-public/vside package push
-            deadPATServiceConnectionId: 42175e93-c771-4a4f-a132-3cca78f44b3b
-        - task: 1ES.PublishNuGet@1
-          condition: ${{ eq(parameters.SkipUploadingPackages, false) }}
-          displayName: 'Push MSBuild packages to VSSDK'
-          inputs:
-            packageParentPath: '$(Build.ArtifactStagingDirectory)'
-            packagesToPush: $(MSBuildPackagePattern);$(StringToolsPackagePattern)
-            nuGetFeedType: external
-            publishFeedCredentials: azure-public/vssdk
-            allowPackageConflicts: false
         - task: PowerShell@2
           name: PrintTargetBranch
           inputs:
             targetType: inline
             script: |
               Write-Host "InsertTargetBranch: $(InsertTargetBranch)"
-        - task: MicroBuildInsertVsPayload@4
-          name: MicroBuildInsertVsPayload_4
+        - task: MicroBuildInsertVsPayload@5
+          name: MicroBuildInsertVsPayload_5
           displayName: Insert VS Payload
           inputs:
             LinkWorkItemsToPR: true
@@ -290,4 +293,7 @@ extends:
             CustomScriptExecutionCommand: $(InsertCustomScriptExecutionCommand)
             AutoCompletePR: $(AutoCompleteEnabled)
             AutoCompleteMergeStrategy: Squash
-            InsertionBuildPolicy: Request Perf DDRITs
+            InsertionBuildPolicies: 'Request Perf DDRITs'
+            ConnectedVSDropServiceName: 'VSEng-VSDrop-MI'
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)

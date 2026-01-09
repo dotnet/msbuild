@@ -10,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -652,7 +653,7 @@ namespace Microsoft.Build.Execution
             if (_version == 0)
             {
                 // Escape hatch: serialize/deserialize without version field.
-                translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
+                translator.TranslateDictionary(ref _savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer);
             }
             else
             {
@@ -665,7 +666,7 @@ namespace Microsoft.Build.Execution
                     additionalEntries.Add(SpecialKeyForVersion, String.Empty);
 
                     // Serialize the special key together with _savedEnvironmentVariables dictionary using the workaround overload of TranslateDictionary:
-                    translator.TranslateDictionary(ref savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, s_additionalEntriesKeys);
+                    translator.TranslateDictionary(ref savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer, ref additionalEntries, s_additionalEntriesKeys);
 
                     // Serialize version
                     translator.Translate(ref _version);
@@ -673,8 +674,9 @@ namespace Microsoft.Build.Execution
                 else if (translator.Mode == TranslationDirection.ReadFromStream)
                 {
                     // Read the dictionary using the workaround overload of TranslateDictionary: special keys (additionalEntriesKeys) would be read to additionalEntries instead of the _savedEnvironmentVariables dictionary.
-                    translator.TranslateDictionary(ref savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase, ref additionalEntries, s_additionalEntriesKeys);
-                    _savedEnvironmentVariables = savedEnvironmentVariables?.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase);
+                    translator.TranslateDictionary(ref savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer, ref additionalEntries, s_additionalEntriesKeys);
+                    _savedEnvironmentVariables = savedEnvironmentVariables?
+                        .ToFrozenDictionary(CommunicationsUtilities.EnvironmentVariableComparer); // no-op if already frozen
 
                     // If the special key SpecialKeyForVersion present in additionalEntries, also read a version, otherwise set it to 0.
                     if (additionalEntries is not null && additionalEntries.ContainsKey(SpecialKeyForVersion))

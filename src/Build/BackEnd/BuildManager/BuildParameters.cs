@@ -227,6 +227,11 @@ namespace Microsoft.Build.Execution
 
         private bool _interactive;
 
+        /// <summary>
+        /// When true, enables running build in multiple in-proc nodes.
+        /// </summary>
+        private bool _multiThreaded;
+
         private ProjectIsolationMode _projectIsolationMode;
 
         private string[] _inputResultsCacheFiles;
@@ -552,7 +557,11 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Enables running build in multiple in-proc nodes.
         /// </summary>
-        public bool MultiThreaded { get; set; }
+        public bool MultiThreaded
+        {
+            get => _multiThreaded;
+            set => _multiThreaded = value;
+        }
 
         /// <summary>
         /// The amount of memory the build should limit itself to using, in megabytes.
@@ -974,6 +983,7 @@ namespace Microsoft.Build.Execution
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
             translator.Translate(ref _reportFileAccesses);
             translator.Translate(ref _enableTargetOutputLogging);
+            translator.Translate(ref _multiThreaded);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

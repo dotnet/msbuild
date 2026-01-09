@@ -29,12 +29,6 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class TaskHostTask : IGeneratedTask, ICancelableTask, INodePacketFactory, INodePacketHandler
     {
-        private const int HANDSHAKE_OPTIONS_BITS = 9;
-
-        private const int HANDSHAKE_OPTIONS_MASK = 0x1FF;
-
-        private const int NODE_ID_MAX_VALUE_FOR_MULTITHREADED = 255;
-
         /// <summary>
         /// Counter for generating unique task IDs across all TaskHostTask instances.
         /// Used for callback correlation when multiple tasks execute concurrently.
@@ -85,7 +79,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The set of parameters used to decide which host to launch.
         /// </summary>
-        private Dictionary<string, string> _taskHostParameters;
+        private TaskHostParameters _taskHostParameters;
 
         /// <summary>
         /// The type of the task that we are wrapping.
@@ -107,9 +101,9 @@ namespace Microsoft.Build.BackEnd
         private HandshakeOptions _requiredContext = HandshakeOptions.None;
 
         /// <summary>
-        /// The task host node ID of the task host we're launching.
+        /// The task host node key identifying the task host we're launching.
         /// </summary>
-        private int _taskHostNodeId;
+        private TaskHostNodeKey _taskHostNodeKey;
 
         /// <summary>
         /// The unique ID of this task, used for correlating TaskHostTaskComplete packets
@@ -154,10 +148,18 @@ namespace Microsoft.Build.BackEnd
         private bool _taskExecutionSucceeded = false;
 
         /// <summary>
-        /// This separates the cause where we force all tasks to run in a task host via environment variables and TaskHostFactory
-        /// The difference is that TaskHostFactory requires the TaskHost to be transient i.e. to expire after build.
+        /// If true TaskHostFactory expects the TaskHost not will NOT expire after build (until it timeouts or is killed).
+        /// This is relevant for the next cases:
+        /// 1) TaskHostFactory is NOT explicitly requested (we always disable node reuse due to the transient nature of task host factory hosts).
+        /// 2) Runtime="NET" is specified in UsingTask.
+        /// 3) Environment variable MSBUILDFORCEALLTASKSOUTOFPROC is set.
         /// </summary>
-        private bool _taskHostFactoryExplicitlyRequested = false;
+        private bool _useSidecarTaskHost = false;
+
+        /// <summary>
+        /// The task environment for virtualized environment operations.
+        /// </summary>
+        private readonly TaskEnvironment _taskEnvironment;
 
         /// <summary>
         /// Constructor.
@@ -166,15 +168,17 @@ namespace Microsoft.Build.BackEnd
             IElementLocation taskLocation,
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
-            Dictionary<string, string> taskHostParameters,
+            TaskHostParameters taskHostParameters,
             LoadedType taskType,
-            bool taskHostFactoryExplicitlyRequested,
+            bool useSidecarTaskHost,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            int scheduledNodeId = -1)
+            int scheduledNodeId,
+            TaskEnvironment taskEnvironment)
         {
             ErrorUtilities.VerifyThrowInternalNull(taskType);
+            ErrorUtilities.VerifyThrowInternalNull(taskEnvironment);
 
             _scheduledNodeId = scheduledNodeId;
 
@@ -186,7 +190,8 @@ namespace Microsoft.Build.BackEnd
             _appDomainSetup = appDomainSetup;
 #endif
             _taskHostParameters = taskHostParameters;
-            _taskHostFactoryExplicitlyRequested = taskHostFactoryExplicitlyRequested;
+            _useSidecarTaskHost = useSidecarTaskHost;
+            _taskEnvironment = taskEnvironment;
 
             _packetFactory = new NodePacketFactory();
 
@@ -284,7 +289,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (_taskHostProvider != null && _connectedToTaskHost)
                     {
-                        _taskHostProvider.SendData(_taskHostNodeId, new TaskHostTaskCancelled());
+                        _taskHostProvider.SendData(_taskHostNodeKey, new TaskHostTaskCancelled());
                     }
                 }
 
@@ -297,11 +302,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool Execute()
         {
-            // log that we are about to spawn the task host
-            string runtime = _taskHostParameters[XMakeAttributes.runtime];
-            string architecture = _taskHostParameters[XMakeAttributes.architecture];
-        
-            _taskLoggingContext.LogComment(MessageImportance.Low, "ExecutingTaskInTaskHost", _taskType.Type.Name, _taskType.Assembly.AssemblyLocation, runtime, architecture);
+            _taskLoggingContext.LogComment(
+                MessageImportance.Low,
+                "ExecutingTaskInTaskHost",
+                _taskType.Type.Name,
+                _taskType.Assembly.AssemblyLocation,
+                _taskHostParameters.Runtime,
+                _taskHostParameters.Architecture);
 
             // set up the node
             lock (_taskHostLock)
@@ -320,8 +327,8 @@ namespace Microsoft.Build.BackEnd
             TaskHostConfiguration hostConfiguration =
                 new TaskHostConfiguration(
                         _buildComponentHost.BuildParameters.NodeId,
-                        NativeMethodsShared.GetCurrentDirectory(),
-                        CommunicationsUtilities.GetEnvironmentVariables(),
+                        _taskEnvironment.ProjectDirectory,
+                        (IDictionary<string, string>)_taskEnvironment.GetEnvironmentVariables(),
                         _buildComponentHost.BuildParameters.Culture,
                         _buildComponentHost.BuildParameters.UICulture,
 #if FEATURE_APPDOMAIN
@@ -352,12 +359,11 @@ namespace Microsoft.Build.BackEnd
                         taskHost: true,
 
                         // Determine if we should use node reuse based on build parameters or user preferences (comes from UsingTask element).
-                        // If the user explicitly requested the task host factory, then we always disable node reuse due to the transient nature of task host factory hosts.
-                        nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && !_taskHostFactoryExplicitlyRequested,
+                        nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && _useSidecarTaskHost,
                         taskHostParameters: _taskHostParameters);
 
-                    _taskHostNodeId = GenerateTaskHostNodeId(_scheduledNodeId, _requiredContext);
-                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, _taskHostNodeId, this, this, hostConfiguration, _taskHostParameters);
+                    _taskHostNodeKey = new TaskHostNodeKey(_requiredContext, _scheduledNodeId);
+                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_taskHostNodeKey, this, this, hostConfiguration, _taskHostParameters);
                 }
 
                 if (_connectedToTaskHost)
@@ -385,7 +391,7 @@ namespace Microsoft.Build.BackEnd
                                     {
                                         lock (_taskHostLock)
                                         {
-                                            _taskHostProvider.DisconnectFromHost(_taskHostNodeId);
+                                            _taskHostProvider.DisconnectFromHost(_taskHostNodeKey);
                                             _connectedToTaskHost = false;
                                         }
                                         break;
@@ -401,7 +407,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             if (_connectedToTaskHost)
                             {
-                                _taskHostProvider.DisconnectFromHost(_taskHostNodeId);
+                                _taskHostProvider.DisconnectFromHost(_taskHostNodeKey);
                                 _connectedToTaskHost = false;
                             }
                         }
@@ -409,35 +415,19 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    LogErrorUnableToCreateTaskHost(_requiredContext, runtime, architecture, null);
+                    LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null);
                 }
             }
             catch (BuildAbortedException)
             {
-                LogErrorUnableToCreateTaskHost(_requiredContext, runtime, architecture, null);
+                LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null);
             }
             catch (NodeFailedToLaunchException e)
             {
-                LogErrorUnableToCreateTaskHost(_requiredContext, runtime, architecture, e);
+                LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, e);
             }
 
             return _taskExecutionSucceeded;
-        }
-
-        private static int GenerateTaskHostNodeId(int scheduledNodeId, HandshakeOptions handshakeOptions)
-        {
-            // For traditional multi-proc builds, the task host id is just (int)HandshakeOptions that represents the runtime / architecture.
-            // For new multi-threaded mode, NodeProviderOutOfProcTaskHost needs to distinguish task hosts not only by HandshakeOptions (runtime / architecture),
-            // but also by which node they were requested. This is because NodeProviderOutOfProcTaskHost runs on the same process as multiple in-proc nodes,
-            // as opposed to the traditional multi-proc case where each node and single NodeProviderOutOfProcTaskHost runs on its own process.
-            // nodeId: [1, 255] (8 bits more than enough) (max is number of processors, usually 8. Let's assume max is 256 processors)
-            // HandshakeOptions: [0, 511] (9 bits)
-            // Pack nodeId into upper bits, handshakeOptions into lower bits
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(scheduledNodeId == -1 || (scheduledNodeId >= 1 && scheduledNodeId <= NODE_ID_MAX_VALUE_FOR_MULTITHREADED), nameof(scheduledNodeId));
-
-            return scheduledNodeId == -1 ?
-                        (int)handshakeOptions :
-                        (scheduledNodeId << HANDSHAKE_OPTIONS_BITS) | ((int)handshakeOptions & HANDSHAKE_OPTIONS_MASK);
         }
 
         /// <summary>
@@ -581,8 +571,8 @@ namespace Microsoft.Build.BackEnd
             // If it crashed, or if it failed, it didn't succeed.
             _taskExecutionSucceeded = taskHostTaskComplete.TaskResult == TaskCompleteType.Success ? true : false;
 
-            // reset the environment, as though the task were executed in this process all along.
-            CommunicationsUtilities.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
+            // Update the task environment with the environment changes from the task host execution
+            _taskEnvironment.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
 
             // If it crashed during the execution phase, then we can effectively replicate the inproc task execution
             // behaviour by just throwing here and letting the taskbuilder code take care of it the way it would
@@ -708,7 +698,7 @@ namespace Microsoft.Build.BackEnd
             };
 
             var response = new TaskHostQueryResponse(request.RequestId, result);
-            _taskHostProvider.SendData(_taskHostNodeId, response);
+            _taskHostProvider.SendData(_taskHostNodeKey, response);
         }
 
         /// <summary>
@@ -736,7 +726,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             var response = new TaskHostResourceResponse(request.RequestId, result);
-            _taskHostProvider.SendData(_taskHostNodeId, response);
+            _taskHostProvider.SendData(_taskHostNodeKey, response);
         }
 
         /// <summary>
@@ -865,7 +855,7 @@ namespace Microsoft.Build.BackEnd
                 response = new TaskHostBuildResponse(request.RequestId, result, targetOutputs);
             }
 
-            _taskHostProvider.SendData(_taskHostNodeId, response);
+            _taskHostProvider.SendData(_taskHostNodeKey, response);
         }
 
         /// <summary>
@@ -901,7 +891,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     // Send acknowledgment to TaskHost to unblock the yielded task
                     var response = new TaskHostYieldResponse(request.RequestId, success: true);
-                    _taskHostProvider.SendData(_taskHostNodeId, response);
+                    _taskHostProvider.SendData(_taskHostNodeKey, response);
                     break;
             }
         }

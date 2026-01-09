@@ -8,10 +8,13 @@
 
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_ENGINE_UNITTESTS</DefineConstants>
 
-    <!-- Define a constant so we can skip tests that require MSBuildTaskHost -->
+     <!-- Define a constant so we can skip tests that require MSBuildTaskHost -->
     <DefineConstants Condition="'$(MSBuildRuntimeType)' == 'Core'">$(DefineConstants);NO_MSBUILDTASKHOST</DefineConstants>
 
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+     <!-- Suppression in needed to build ExampleTaskX86 that targets x86 architecture. -->
+    <NoWarn>$(NoWarn);MSB3270</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -125,13 +128,21 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemDefinitionGroup>
-
+  
   <ItemGroup Label="TestAssests" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <ProjectReference Include=".\TestAssets\ExampleNetTask\ExampleTask\ExampleTask.csproj" />
   </ItemGroup>
 
+  <ItemGroup Label="TestAssests" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <ProjectReference Include=".\TestAssets\ExampleFrameworkTask\ExampleTaskX64\ExampleTaskX64.csproj" />
+    <ProjectReference Include=".\TestAssets\ExampleFrameworkTask\ExampleTaskX86\ExampleTaskX86.csproj" />
+  </ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="TestAssets\ExampleNetTask\TestMSBuildTaskInNet\global.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TestAssets\ExampleNetTask\TestNetTaskWithImplicitParams\global.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="TestAssets\ExampleNetTask\TestNetTask\global.json">

@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -80,26 +81,43 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// A mapping of all the task host nodes managed by this provider.
+        /// The key is a TaskHostNodeKey combining HandshakeOptions and scheduled node ID.
         /// </summary>
-        private ConcurrentDictionary<int, NodeContext> _nodeContexts;
+        private ConcurrentDictionary<TaskHostNodeKey, NodeContext> _nodeContexts;
+
+        /// <summary>
+        /// Reverse mapping from communication node ID to TaskHostNodeKey.
+        /// Used for O(1) lookup when handling node termination from ShutdownAllNodes.
+        /// </summary>
+        private ConcurrentDictionary<int, TaskHostNodeKey> _nodeIdToNodeKey;
 
         /// <summary>
         /// A mapping of all of the INodePacketFactories wrapped by this provider.
+        /// Keyed by the communication node ID (NodeContext.NodeId) for O(1) packet routing.
+        /// Thread-safe to support parallel taskhost creation in /mt mode where multiple thread nodes
+        /// can simultaneously create their own taskhosts.
         /// </summary>
-        private IDictionary<int, INodePacketFactory> _nodeIdToPacketFactory;
+        private ConcurrentDictionary<int, INodePacketFactory> _nodeIdToPacketFactory;
 
         /// <summary>
         /// A mapping of all of the INodePacketHandlers wrapped by this provider.
         /// When multiple tasks use the same node (nested BuildProjectFile), handlers
         /// are stacked. The most recent handler receives packets. When it disconnects,
         /// the previous handler is restored.
+        /// Keyed by the communication node ID (NodeContext.NodeId) for O(1) packet routing.
         /// </summary>
-        private IDictionary<int, Stack<INodePacketHandler>> _nodeIdToPacketHandlerStack;
+        private ConcurrentDictionary<int, Stack<INodePacketHandler>> _nodeIdToPacketHandlerStack;
 
         /// <summary>
-        /// Keeps track of the set of nodes for which we have not yet received shutdown notification.
+        /// Keeps track of the set of node IDs for which we have not yet received shutdown notification.
         /// </summary>
         private HashSet<int> _activeNodes;
+
+        /// <summary>
+        /// Counter for generating unique communication node IDs.
+        /// Incremented atomically for each new node created.
+        /// </summary>
+        private int _nextNodeId;
 
         /// <summary>
         /// Packet factory we use if there's not already one associated with a particular context.
@@ -167,12 +185,23 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Sends data to the specified node.
+        /// Note: For task hosts, use the overload that takes TaskHostNodeKey instead.
         /// </summary>
         /// <param name="nodeId">The node to which data shall be sent.</param>
         /// <param name="packet">The packet to send.</param>
         public void SendData(int nodeId, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrow(_nodeContexts.TryGetValue(nodeId, out NodeContext context), "Invalid host context specified: {0}.", nodeId);
+            throw new NotImplementedException("For task hosts, use the overload that takes TaskHostNodeKey.");
+        }
+
+        /// <summary>
+        /// Sends data to the specified task host node.
+        /// </summary>
+        /// <param name="nodeKey">The task host node key identifying the target node.</param>
+        /// <param name="packet">The packet to send.</param>
+        internal void SendData(TaskHostNodeKey nodeKey, INodePacket packet)
+        {
+            ErrorUtilities.VerifyThrow(_nodeContexts.TryGetValue(nodeKey, out NodeContext context), "Invalid host context specified: {0}.", nodeKey);
 
             SendData(context, packet);
         }
@@ -209,10 +238,12 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             this.ComponentHost = host;
-            _nodeContexts = new ConcurrentDictionary<int, NodeContext>();
-            _nodeIdToPacketFactory = new Dictionary<int, INodePacketFactory>();
-            _nodeIdToPacketHandlerStack = new Dictionary<int, Stack<INodePacketHandler>>();
-            _activeNodes = new HashSet<int>();
+            _nodeContexts = new ConcurrentDictionary<TaskHostNodeKey, NodeContext>();
+            _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
+            _nodeIdToPacketFactory = new ConcurrentDictionary<int, INodePacketFactory>();
+            _nodeIdToPacketHandlerStack = new ConcurrentDictionary<int, Stack<INodePacketHandler>>();
+            _activeNodes = [];
+            _nextNodeId = 0;
 
             _noNodesActiveEvent = new ManualResetEvent(true);
             _localPacketFactory = new NodePacketFactory();
@@ -305,19 +336,20 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
-            // Lock to synchronize with DisconnectFromHost to prevent race conditions
+            // Try to find the handler stack for this node and forward the packet.
+            // Lock on the stack to synchronize with DisconnectFromHost to prevent race conditions
             // where we get the handler right before it's popped from the stack.
-            // Note: We call packetHandler.PacketReceived() INSIDE the lock to ensure
-            // the handler is not popped between when we peek and when we forward the packet.
-            lock (_activeNodes)
+            if (_nodeIdToPacketHandlerStack.TryGetValue(node, out Stack<INodePacketHandler> handlerStack))
             {
-                if (_nodeIdToPacketHandlerStack.TryGetValue(node, out Stack<INodePacketHandler> handlerStack) && handlerStack.Count > 0)
+                lock (handlerStack)
                 {
-                    INodePacketHandler packetHandler = handlerStack.Peek();
-
-                    // Forward packet to handler while still holding lock
-                    packetHandler.PacketReceived(node, packet);
-                    return;
+                    if (handlerStack.Count > 0)
+                    {
+                        INodePacketHandler packetHandler = handlerStack.Peek();
+                        // Forward packet to handler while still holding lock
+                        packetHandler.PacketReceived(node, packet);
+                        return;
+                    }
                 }
             }
 
@@ -484,23 +516,20 @@ namespace Microsoft.Build.BackEnd
         /// - RuntimeHostPath: The path to the dotnet executable that will host the .NET runtime
         /// - MSBuildAssemblyPath: The full path to MSBuild.dll that will be loaded by the dotnet host.
         /// </returns>
-        internal static (string RuntimeHostPath, string MSBuildAssemblyPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, Dictionary<string, string> taskHostParameters)
+        internal static (string RuntimeHostPath, string MSBuildAssemblyPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, TaskHostParameters taskHostParameters)
         {
             ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
-            taskHostParameters.TryGetValue(Constants.DotnetHostPath, out string runtimeHostPath);
-            var msbuildAssemblyPath = GetMSBuildAssemblyPath(taskHostParameters);
-
-            return (runtimeHostPath, msbuildAssemblyPath);
+            return (taskHostParameters.DotnetHostPath, GetMSBuildAssemblyPath(taskHostParameters));
         }
 
-        private static string GetMSBuildAssemblyPath(Dictionary<string, string> taskHostParameters)
+        private static string GetMSBuildAssemblyPath(in TaskHostParameters taskHostParameters)
         {
-            if (taskHostParameters.TryGetValue(Constants.MSBuildAssemblyPath, out string msbuildAssemblyPath))
+            if (taskHostParameters.MSBuildAssemblyPath != null)
             {
-                ValidateNetHostSdkVersion(msbuildAssemblyPath);
+                ValidateNetHostSdkVersion(taskHostParameters.MSBuildAssemblyPath);
 
-                return msbuildAssemblyPath;
+                return taskHostParameters.MSBuildAssemblyPath;
             }
 
             throw new InvalidProjectFileException(ResourceUtilities.GetResourceString("NETHostTaskLoad_Failed"));
@@ -601,17 +630,16 @@ namespace Microsoft.Build.BackEnd
         /// Make sure a node in the requested context exists.
         /// </summary>
         internal bool AcquireAndSetUpHost(
-            HandshakeOptions hostContext,
-            int taskHostNodeId,
+            TaskHostNodeKey nodeKey,
             INodePacketFactory factory,
             INodePacketHandler handler,
             TaskHostConfiguration configuration,
-            Dictionary<string, string> taskHostParameters)
+            in TaskHostParameters taskHostParameters)
         {
             bool nodeCreationSucceeded;
-            if (!_nodeContexts.ContainsKey(taskHostNodeId))
+            if (!_nodeContexts.ContainsKey(nodeKey))
             {
-                nodeCreationSucceeded = CreateNode(hostContext, taskHostNodeId, factory, handler, configuration, taskHostParameters);
+                nodeCreationSucceeded = CreateNode(nodeKey, factory, handler, configuration, taskHostParameters);
             }
             else
             {
@@ -621,29 +649,28 @@ namespace Microsoft.Build.BackEnd
 
             if (nodeCreationSucceeded)
             {
-                NodeContext context = _nodeContexts[taskHostNodeId];
+                NodeContext context = _nodeContexts[nodeKey];
 
                 // Only register the factory for the first task on this node.
                 // For nested tasks (BuildProjectFile callbacks), we reuse the existing
                 // factory setup and just push a new handler onto the stack.
                 // This ensures all packets are routed through NodeProviderOutOfProcTaskHost.PacketReceived
                 // which uses the handler stack, rather than going directly to individual TaskHostTask handlers.
-                if (!_nodeIdToPacketFactory.ContainsKey(taskHostNodeId))
+                if (!_nodeIdToPacketFactory.ContainsKey(context.NodeId))
                 {
                     // Use 'this' as the factory so packets route through our PacketReceived
                     // method, which handles the handler stack correctly.
-                    _nodeIdToPacketFactory[taskHostNodeId] = this;
+                    _nodeIdToPacketFactory[context.NodeId] = this;
                 }
 
                 // Push the new handler onto the stack. This supports nested tasks
                 // (e.g., BuildProjectFile callbacks) where multiple TaskHostTask instances
                 // share the same TaskHost process.
-                if (!_nodeIdToPacketHandlerStack.TryGetValue(taskHostNodeId, out Stack<INodePacketHandler> handlerStack))
+                Stack<INodePacketHandler> handlerStack = _nodeIdToPacketHandlerStack.GetOrAdd(context.NodeId, _ => new Stack<INodePacketHandler>());
+                lock (handlerStack)
                 {
-                    handlerStack = new Stack<INodePacketHandler>();
-                    _nodeIdToPacketHandlerStack[taskHostNodeId] = handlerStack;
+                    handlerStack.Push(handler);
                 }
-                handlerStack.Push(handler);
 
                 // Configure the node.
                 context.SendData(configuration);
@@ -656,27 +683,38 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Expected to be called when TaskHostTask is done with host of the given context.
         /// </summary>
-        internal void DisconnectFromHost(int nodeId)
+        internal void DisconnectFromHost(TaskHostNodeKey nodeKey)
         {
-            // Lock to synchronize with PacketReceived to prevent race conditions
-            lock (_activeNodes)
+            // The node context might already have been removed by NodeContextTerminated if the task host
+            // process terminated before we got here. This is a valid race condition - just return early.
+            // Note: NodeContextTerminated does NOT remove handlers, so they'll be orphaned in this case,
+            // but that's acceptable since the task host is dead and the handlers will be cleaned up
+            // when the provider is shut down.
+            if (!_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
             {
-                ErrorUtilities.VerifyThrow(_nodeIdToPacketFactory.ContainsKey(nodeId), "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
-                ErrorUtilities.VerifyThrow(_nodeIdToPacketHandlerStack.ContainsKey(nodeId), "Handler stack missing for node {0}", nodeId);
+                CommunicationsUtilities.Trace("DisconnectFromHost: Node context already removed for key: {0}", nodeKey);
+                return;
+            }
 
-                // Pop the handler from the stack. If there are still handlers remaining,
-                // the previous handler becomes active again (supporting nested tasks).
-                var handlerStack = _nodeIdToPacketHandlerStack[nodeId];
-                if (handlerStack.Count > 0)
-                {
-                    handlerStack.Pop();
-                }
+            int nodeId = context.NodeId;
 
-                // Only fully disconnect when all handlers are done
-                if (handlerStack.Count == 0)
+            // Pop the handler from the stack. If there are still handlers remaining,
+            // the previous handler becomes active again (supporting nested tasks).
+            if (_nodeIdToPacketHandlerStack.TryGetValue(nodeId, out Stack<INodePacketHandler> handlerStack))
+            {
+                lock (handlerStack)
                 {
-                    _nodeIdToPacketFactory.Remove(nodeId);
-                    _nodeIdToPacketHandlerStack.Remove(nodeId);
+                    if (handlerStack.Count > 0)
+                    {
+                        handlerStack.Pop();
+                    }
+
+                    // Only fully disconnect when all handlers are done
+                    if (handlerStack.Count == 0)
+                    {
+                        _nodeIdToPacketFactory.TryRemove(nodeId, out _);
+                        _nodeIdToPacketHandlerStack.TryRemove(nodeId, out _);
+                    }
                 }
             }
         }
@@ -684,13 +722,21 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates a new MSBuild or MSBuildTaskHost process acting as a child node.
         /// </summary>
-        internal bool CreateNode(HandshakeOptions hostContext, int taskHostNodeId, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, Dictionary<string, string> taskHostParameters)
+        internal bool CreateNode(TaskHostNodeKey nodeKey, INodePacketFactory factory, INodePacketHandler handler, TaskHostConfiguration configuration, in TaskHostParameters taskHostParameters)
         {
             ErrorUtilities.VerifyThrowArgumentNull(factory);
-            ErrorUtilities.VerifyThrow(!_nodeIdToPacketFactory.ContainsKey(taskHostNodeId), "We should not already have a factory for this context!  Did we forget to call DisconnectFromHost somewhere?");
+            ErrorUtilities.VerifyThrow(!_nodeContexts.ContainsKey(nodeKey), "We should not already have a node for this context!  Did we forget to call DisconnectFromHost somewhere?");
 
-            // if runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
-            string commandLineArgsPlaceholder = "{0} /nologo /nodemode:2 /nodereuse:{1} /low:{2} ";
+            HandshakeOptions hostContext = nodeKey.HandshakeOptions;
+
+            // If runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
+            string commandLineArgsPlaceholder = "\"{0}\" /nologo /nodemode:2 /nodereuse:{1} /low:{2} ";
+
+            // Generate a unique node ID for communication purposes using atomic increment.
+            int communicationNodeId = Interlocked.Increment(ref _nextNodeId);
+
+            // Create callbacks that capture the TaskHostNodeKey
+            void OnNodeContextCreated(NodeContext context) => NodeContextCreated(context, nodeKey);
 
             IList<NodeContext> nodeContexts;
 
@@ -708,10 +754,10 @@ namespace Microsoft.Build.BackEnd
                 nodeContexts = GetNodes(
                     runtimeHostPath,
                     string.Format(commandLineArgsPlaceholder, Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority),
-                    taskHostNodeId,
+                    communicationNodeId,
                     this,
                     handshake,
-                    NodeContextCreated,
+                    OnNodeContextCreated,
                     NodeContextTerminated,
                     1);
 
@@ -732,10 +778,10 @@ namespace Microsoft.Build.BackEnd
             nodeContexts = GetNodes(
                 msbuildLocation,
                 string.Format(commandLineArgsPlaceholder, string.Empty, NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority),
-                taskHostNodeId,
+                communicationNodeId,
                 this,
                 new Handshake(hostContext),
-                NodeContextCreated,
+                OnNodeContextCreated,
                 NodeContextTerminated,
                 1);
 
@@ -756,34 +802,36 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Method called when a context created.
         /// </summary>
-        private void NodeContextCreated(NodeContext context)
+        private void NodeContextCreated(NodeContext context, TaskHostNodeKey nodeKey)
         {
-            _nodeContexts[context.NodeId] = context;
-
-            // Start the asynchronous read.
-            context.BeginAsyncPacketRead();
+            _nodeContexts[nodeKey] = context;
+            _nodeIdToNodeKey[context.NodeId] = nodeKey;
 
             lock (_activeNodes)
             {
                 _activeNodes.Add(context.NodeId);
+                _noNodesActiveEvent.Reset();
             }
-            _noNodesActiveEvent.Reset();
+
+            // Start the asynchronous read.
+            context.BeginAsyncPacketRead();
         }
 
         /// <summary>
-        /// Method called when a context terminates.
+        /// Method called when a context terminates (called from CreateNode callbacks or ShutdownAllNodes).
         /// </summary>
         private void NodeContextTerminated(int nodeId)
         {
-            _nodeContexts.TryRemove(nodeId, out _);
+            // Remove from nodeKey-based lookup if we have it
+            if (_nodeIdToNodeKey.TryRemove(nodeId, out TaskHostNodeKey nodeKey))
+            {
+                _nodeContexts.TryRemove(nodeKey, out _);
+            }
 
             // May also be removed by unnatural termination, so don't assume it's there
             lock (_activeNodes)
             {
-                if (_activeNodes.Contains(nodeId))
-                {
-                    _activeNodes.Remove(nodeId);
-                }
+                _activeNodes.Remove(nodeId);
 
                 if (_activeNodes.Count == 0)
                 {

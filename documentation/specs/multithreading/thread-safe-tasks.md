@@ -88,16 +88,16 @@ public interface IMultiThreadableTask : ITask
 
 public class TaskEnvironment
 { 
-    public virtual AbsolutePath ProjectDirectory { get; internal set; }
+    public AbsolutePath ProjectDirectory { get; internal set; }
 
     // This function resolves paths relative to ProjectDirectory.
-    public virtual AbsolutePath GetAbsolutePath(string path);
+    public AbsolutePath GetAbsolutePath(string path);
     
-    public virtual string? GetEnvironmentVariable(string name);
-    public virtual IReadOnlyDictionary<string, string> GetEnvironmentVariables();
-    public virtual void SetEnvironmentVariable(string name, string? value);
+    public string? GetEnvironmentVariable(string name);
+    public IReadOnlyDictionary<string, string> GetEnvironmentVariables();
+    public void SetEnvironmentVariable(string name, string? value);
 
-    public virtual ProcessStartInfo GetProcessStartInfo();
+    public ProcessStartInfo GetProcessStartInfo();
 }
 ```
 
@@ -109,15 +109,17 @@ To prevent common thread-safety issues related to path handling, we introduce pa
 
 ```csharp
 namespace Microsoft.Build.Framework;
-public readonly struct AbsolutePath
+public readonly struct AbsolutePath : IEquatable<AbsolutePath>
 {
     // Default value returns string.Empty for Path property
-    public string Path { get; }
+    public string Value { get; }
     internal AbsolutePath(string path, bool ignoreRootedCheck) { }
     public AbsolutePath(string path); // Checks Path.IsPathRooted
     public AbsolutePath(string path, AbsolutePath basePath) { }
     public static implicit operator string(AbsolutePath path) { }
-    public override string ToString() => Path;
+    public override string ToString() => Value;
+
+    // overrides for equality and hashcode
 }
 ```
 
