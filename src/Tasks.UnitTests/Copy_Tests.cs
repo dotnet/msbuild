@@ -2061,7 +2061,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(4, t.CopiedFiles.Length);
 
             // Copy calls to different destinations can come in any order when running in parallel.
-            filesActuallyCopied.Select(f => Path.GetFileName(f.Key.Name)).ShouldBe(new[] { "a.cs", "b.cs" }, ignoreOrder: true);
+            filesActuallyCopied.Select(f => Path.GetFileName(f.Key.Path)).ShouldBe(new[] { "a.cs", "b.cs" }, ignoreOrder: true);
 
             ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
         }
@@ -2130,16 +2130,16 @@ namespace Microsoft.Build.UnitTests
 
             // Copy calls to different destinations can come in any order when running in parallel.
             string xaPath = Path.Combine(tempPath, "xa.cs");
-            var xaCopies = filesActuallyCopied.Where(f => f.Value.Name == xaPath).ToList();
+            var xaCopies = filesActuallyCopied.Where(f => f.Value.Path == xaPath).ToList();
             Assert.Equal(3, xaCopies.Count);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), xaCopies[0].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "b.cs"), xaCopies[1].Key.Name);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), xaCopies[2].Key.Name);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xaCopies[0].Key.Path);
+            Assert.Equal(Path.Combine(tempPath, "b.cs"), xaCopies[1].Key.Path);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xaCopies[2].Key.Path);
 
             string xbPath = Path.Combine(tempPath, "xb.cs");
-            var xbCopies = filesActuallyCopied.Where(f => f.Value.Name == xbPath).ToList();
+            var xbCopies = filesActuallyCopied.Where(f => f.Value.Path == xbPath).ToList();
             Assert.Single(xbCopies);
-            Assert.Equal(Path.Combine(tempPath, "a.cs"), xbCopies[0].Key.Name);
+            Assert.Equal(Path.Combine(tempPath, "a.cs"), xbCopies[0].Key.Path);
 
             ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // Didn't do retries
         }
@@ -2506,8 +2506,8 @@ namespace Microsoft.Build.UnitTests
 
             // Copy calls to different destinations can come in any order when running in parallel.
             // Use .Original to compare against the original input path (before Path.GetFullPath resolution)
-            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Name.OriginalValue == FileUtilities.FixFilePath("c:\\source"));
-            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Name.OriginalValue == FileUtilities.FixFilePath("c:\\source2"));
+            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Path.OriginalValue == FileUtilities.FixFilePath("c:\\source"));
+            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Path.OriginalValue == FileUtilities.FixFilePath("c:\\source2"));
         }
 
         /// <summary>

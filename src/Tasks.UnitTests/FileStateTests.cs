@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests
                 FileInfo info = new FileInfo(file);
                 FileState state = new FileState(TestPath(file));
 
-                Assert.Equal(info.FullName, state.Name);
+                Assert.Equal(info.FullName, state.Path);
             }
             finally
             {
@@ -216,14 +216,14 @@ namespace Microsoft.Build.UnitTests
                 FileInfo info = new FileInfo(file);
                 FileState state = new FileState(TestPath(file));
 
-                Assert.Equal(info.FullName, state.Name);
+                Assert.Equal(info.FullName, state.Path);
                 string originalName = info.FullName;
                 string oldFile = file;
                 file = oldFile + "2";
                 File.Move(oldFile, file);
-                Assert.Equal(originalName, state.Name);
+                Assert.Equal(originalName, state.Path);
                 state.Reset();
-                Assert.Equal(originalName, state.Name); // Name is from the constructor, didn't change
+                Assert.Equal(originalName, state.Path); // Name is from the constructor, didn't change
             }
             finally
             {

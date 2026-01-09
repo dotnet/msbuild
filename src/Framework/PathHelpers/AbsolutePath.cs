@@ -36,7 +36,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// The original string used to create this path.
         /// </summary>
-        public string OriginalValue {get; }
+        public string OriginalValue { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbsolutePath"/> struct.
