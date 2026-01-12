@@ -21,7 +21,8 @@ namespace Microsoft.Build.BackEnd.Logging
             Compiler,
             MSBuildEngine,
             Tasks,
-            SDK,
+            SDKResolvers,
+            NETSDK,
             NuGet,
             BuildCheck,
             Other,
@@ -43,30 +44,27 @@ namespace Microsoft.Build.BackEnd.Logging
         private int _primaryCategoryCount;
 
         /// <summary>
-        /// Lock object for error tracking.
-        /// </summary>
-        private readonly LockType _errorTrackingLock = new();
-
-        /// <summary>
         /// Tracks an error for telemetry purposes by categorizing it.
         /// </summary>
         /// <param name="errorCode">The error code from the BuildErrorEventArgs.</param>
         /// <param name="subcategory">The subcategory from the BuildErrorEventArgs.</param>
         public void TrackError(string? errorCode, string? subcategory)
         {
-            lock (_errorTrackingLock)
+            // Categorize the error
+            ErrorCategory category = CategorizeError(errorCode, subcategory);
+            int categoryIndex = (int)category;
+
+            // Increment the count for this category using Interlocked for thread safety
+            int newCount = System.Threading.Interlocked.Increment(ref _errorCounts[categoryIndex]);
+
+            // Update primary category if this one now has the highest count
+            // Use a simple compare-and-swap pattern for thread-safe update
+            int currentMax = System.Threading.Interlocked.CompareExchange(ref _primaryCategoryCount, 0, 0);
+            if (newCount > currentMax)
             {
-                // Categorize the error
-                ErrorCategory category = CategorizeError(errorCode, subcategory);
-                int categoryIndex = (int)category;
-
-                // Increment the count for this category
-                int newCount = ++_errorCounts[categoryIndex];
-
-                // Update primary category if this one now has the highest count
-                if (newCount > _primaryCategoryCount)
+                // Try to update both the count and category atomically
+                if (System.Threading.Interlocked.CompareExchange(ref _primaryCategoryCount, newCount, currentMax) == currentMax)
                 {
-                    _primaryCategoryCount = newCount;
                     _primaryCategory = category;
                 }
             }
@@ -78,33 +76,31 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="buildTelemetry">The BuildTelemetry object to populate with error data.</param>
         public void PopulateBuildTelemetry(BuildTelemetry buildTelemetry)
         {
-            lock (_errorTrackingLock)
-            {
-                buildTelemetry.ErrorCounts = GetErrorCounts();
+            // Read counts atomically
+            int compilerErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.Compiler], 0, 0);
+            int msbuildEngineErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.MSBuildEngine], 0, 0);
+            int taskErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.Tasks], 0, 0);
+            int sdkResolversErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.SDKResolvers], 0, 0);
+            int netsdkErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.NETSDK], 0, 0);
+            int nugetErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.NuGet], 0, 0);
+            int buildCheckErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.BuildCheck], 0, 0);
+            int otherErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.Other], 0, 0);
 
-                if (_primaryCategoryCount > 0)
-                {
-                    buildTelemetry.FailureCategory = _primaryCategory.ToString();
-                }
-            }
-        }
+            buildTelemetry.ErrorCounts = new ErrorCountsInfo(
+                Compiler: compilerErrorCount > 0 ? compilerErrorCount : null,
+                MsBuildEngine: msbuildEngineErrorCount > 0 ? msbuildEngineErrorCount : null,
+                Task: taskErrorCount > 0 ? taskErrorCount : null,
+                SdkResolvers: sdkResolversErrorCount > 0 ? sdkResolversErrorCount : null,
+                NetSdk: netsdkErrorCount > 0 ? netsdkErrorCount : null,
+                NuGet: nugetErrorCount > 0 ? nugetErrorCount : null,
+                BuildCheck: buildCheckErrorCount > 0 ? buildCheckErrorCount : null,
+                Other: otherErrorCount > 0 ? otherErrorCount : null);
 
-        /// <summary>
-        /// Gets the error counts as an <see cref="ErrorCountsInfo"/> record.
-        /// </summary>
-        /// <returns>Error counts by category.</returns>
-        public ErrorCountsInfo GetErrorCounts()
-        {
-            lock (_errorTrackingLock)
+            // Set the primary failure category
+            int totalErrors = System.Threading.Interlocked.CompareExchange(ref _primaryCategoryCount, 0, 0);
+            if (totalErrors > 0)
             {
-                return new ErrorCountsInfo(
-                    Compiler: _errorCounts[(int)ErrorCategory.Compiler],
-                    MsBuildEngine: _errorCounts[(int)ErrorCategory.MSBuildEngine],
-                    Task: _errorCounts[(int)ErrorCategory.Tasks],
-                    Sdk: _errorCounts[(int)ErrorCategory.SDK],
-                    NuGet: _errorCounts[(int)ErrorCategory.NuGet],
-                    BuildCheck: _errorCounts[(int)ErrorCategory.BuildCheck],
-                    Other: _errorCounts[(int)ErrorCategory.Other]);
+                buildTelemetry.FailureCategory = _primaryCategory.ToString();
             }
         }
 
@@ -120,13 +116,13 @@ namespace Microsoft.Build.BackEnd.Logging
             }
 
             // Check subcategory for compiler errors (CS*, VBC*, FS*)
-            if (!string.IsNullOrEmpty(subcategory) && IsCompilerPrefix(subcategory))
+            if (!string.IsNullOrEmpty(subcategory) && IsCompilerPrefix(subcategory!))
             {
                 return ErrorCategory.Compiler;
             }
 
             // Check error code patterns - order by frequency for fast path
-            if (IsCompilerPrefix(errorCode))
+            if (IsCompilerPrefix(errorCode!))
             {
                 return ErrorCategory.Compiler;
             }
@@ -151,19 +147,20 @@ namespace Microsoft.Build.BackEnd.Logging
                     return ErrorCategory.NuGet;
                 }
 
-                // MSB* or NETSDK*
+                // MSB* -> categorize MSB errors
                 if (c0 == 'M' && c1 == 'S' && codeSpan.Length >= 3 && char.ToUpperInvariant(codeSpan[2]) == 'B')
                 {
                     return CategorizeMSBError(codeSpan);
                 }
 
+                // NETSDK* -> .NET SDK diagnostics
                 if (c0 == 'N' && c1 == 'E' && codeSpan.Length >= 6 &&
                     char.ToUpperInvariant(codeSpan[2]) == 'T' &&
                     char.ToUpperInvariant(codeSpan[3]) == 'S' &&
                     char.ToUpperInvariant(codeSpan[4]) == 'D' &&
                     char.ToUpperInvariant(codeSpan[5]) == 'K')
                 {
-                    return ErrorCategory.SDK;
+                    return ErrorCategory.NETSDK;
                 }
             }
 
@@ -206,7 +203,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Categorizes MSB error codes into MSBuildEngine, Tasks, or SDK.
+        /// Categorizes MSB error codes into MSBuildEngine, Tasks, or SDKResolvers.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ErrorCategory CategorizeMSBError(ReadOnlySpan<char> codeSpan)
@@ -219,10 +216,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 return ErrorCategory.Other;
             }
 
-            // Check for MSB4236 (SDK error) - fast path for exact match
+            // Check for MSB4236 (SDKResolvers error) - fast path for exact match
             if (codeSpan.Length == 7 && codeSpan[3] == '4' && codeSpan[4] == '2' && codeSpan[5] == '3' && codeSpan[6] == '6')
             {
-                return ErrorCategory.SDK;
+                return ErrorCategory.SDKResolvers;
             }
 
             if (!TryParseErrorNumber(codeSpan, out int errorNumber))
@@ -230,7 +227,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 return ErrorCategory.Other;
             }
 
-            // MSB4xxx -> MSBuildEngine (evaluation and execution errors)
+            // MSB4xxx (except MSB4236, handled above as SDKResolvers) -> MSBuildEngine (evaluation and execution errors)
             if (errorNumber is >= 4001 and <= 4999)
             {
                 return ErrorCategory.MSBuildEngine;

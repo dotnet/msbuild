@@ -136,7 +136,8 @@ public class KnownTelemetry_Tests
             Compiler: 5,
             MsBuildEngine: 2,
             Task: 1,
-            Sdk: null,
+            SdkResolvers: null,
+            NetSdk: null,
             NuGet: 3,
             BuildCheck: null,
             Other: 1);
@@ -145,15 +146,20 @@ public class KnownTelemetry_Tests
 
         properties["BuildSuccess"].ShouldBe("False");
         properties["FailureCategory"].ShouldBe("Compiler");
-        properties["errorCounts.compiler"].ShouldBe("5");
-        properties["errorCounts.msbuildEngine"].ShouldBe("2");
-        properties["errorCounts.task"].ShouldBe("1");
-        properties["errorCounts.nuget"].ShouldBe("3");
-        properties["errorCounts.other"].ShouldBe("1");
+        properties.ContainsKey("ErrorCounts").ShouldBeTrue();
 
-        // Should not include null counts
-        properties.ContainsKey("errorCounts.sdk").ShouldBeFalse();
-        properties.ContainsKey("errorCounts.buildCheck").ShouldBeFalse();
+        var activityProperties = buildTelemetry.GetActivityProperties();
+        activityProperties["FailureCategory"].ShouldBe("Compiler");
+        var errorCounts = activityProperties["ErrorCounts"] as ErrorCountsInfo;
+        errorCounts.ShouldNotBeNull();
+        errorCounts.Compiler.ShouldBe(5);
+        errorCounts.MsBuildEngine.ShouldBe(2);
+        errorCounts.Task.ShouldBe(1);
+        errorCounts.NuGet.ShouldBe(3);
+        errorCounts.Other.ShouldBe(1);
+        errorCounts.SdkResolvers.ShouldBeNull();
+        errorCounts.NetSdk.ShouldBeNull();
+        errorCounts.BuildCheck.ShouldBeNull();
     }
 
     [Fact]
@@ -167,7 +173,8 @@ public class KnownTelemetry_Tests
             Compiler: null,
             MsBuildEngine: null,
             Task: 10,
-            Sdk: null,
+            SdkResolvers: null,
+            NetSdk: null,
             NuGet: null,
             BuildCheck: null,
             Other: null);
@@ -176,6 +183,8 @@ public class KnownTelemetry_Tests
 
         activityProperties["BuildSuccess"].ShouldBe(false);
         activityProperties["FailureCategory"].ShouldBe("Tasks");
-        activityProperties["errorCounts.task"].ShouldBe(10);
+        var errorCounts = activityProperties["ErrorCounts"] as ErrorCountsInfo;
+        errorCounts.ShouldNotBeNull();
+        errorCounts.Task.ShouldBe(10);
     }
 }

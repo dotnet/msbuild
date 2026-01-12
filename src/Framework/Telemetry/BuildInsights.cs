@@ -41,7 +41,8 @@ internal sealed class BuildInsights
         int? Compiler,
         int? MsBuildEngine,
         int? Task,
-        int? Sdk,
+        int? SdkResolvers,
+        int? NetSdk,
         int? NuGet,
         int? BuildCheck,
         int? Other);
