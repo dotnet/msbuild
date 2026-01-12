@@ -34,7 +34,7 @@
         "vs18.3": {
             "MergeToBranch": "vs18.4"
         },
-        // MSBuild latest release to main
+        // Automate opening PRs to merge msbuild's vs18.4 (SDK 10.0.3xx, VS) into main
         "vs18.4": {
             "MergeToBranch": "main"
         }
