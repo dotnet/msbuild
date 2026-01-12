@@ -222,19 +222,9 @@ namespace Microsoft.Build.BackEnd.Logging
         private readonly ISet<int> _buildSubmissionIdsThatHaveLoggedBuildcheckErrors = new HashSet<int>();
 
         /// <summary>
-        /// Tracks error counts by category for telemetry purposes.
+        /// Tracker for build error telemetry.
         /// </summary>
-        private readonly Dictionary<string, int> _errorCountsByCategory = new Dictionary<string, int>();
-
-        /// <summary>
-        /// Tracks the first error code encountered for telemetry purposes.
-        /// </summary>
-        private string _firstErrorCode;
-
-        /// <summary>
-        /// Lock object for error tracking.
-        /// </summary>
-        private readonly object _errorTrackingLock = new();
+        private readonly BuildErrorTelemetryTracker _errorTelemetryTracker = new BuildErrorTelemetryTracker();
 
         /// <summary>
         /// A list of warnings to treat as errors for an associated <see cref="BuildEventContext"/>.  If an empty set, all warnings are treated as errors.
@@ -677,52 +667,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="buildTelemetry">The BuildTelemetry object to populate with error data.</param>
         public void PopulateBuildTelemetryWithErrors(Framework.Telemetry.BuildTelemetry buildTelemetry)
         {
-            lock (_errorTrackingLock)
-            {
-                buildTelemetry.FirstErrorCode = _firstErrorCode;
-
-                if (_errorCountsByCategory.TryGetValue("Compiler", out int compilerCount))
-                {
-                    buildTelemetry.CompilerErrorCount = compilerCount;
-                }
-
-                if (_errorCountsByCategory.TryGetValue("MSBuildEngine", out int msbuildEngineCount))
-                {
-                    buildTelemetry.MSBuildEngineErrorCount = msbuildEngineCount;
-                }
-
-                if (_errorCountsByCategory.TryGetValue("Tasks", out int tasksCount))
-                {
-                    buildTelemetry.TaskErrorCount = tasksCount;
-                }
-
-                if (_errorCountsByCategory.TryGetValue("SDK", out int sdkCount))
-                {
-                    buildTelemetry.SDKErrorCount = sdkCount;
-                }
-
-                if (_errorCountsByCategory.TryGetValue("NuGet", out int nugetCount))
-                {
-                    buildTelemetry.NuGetErrorCount = nugetCount;
-                }
-
-                if (_errorCountsByCategory.TryGetValue("BuildCheck", out int buildCheckCount))
-                {
-                    buildTelemetry.BuildCheckErrorCount = buildCheckCount;
-                }
-
-                if (_errorCountsByCategory.TryGetValue("Other", out int otherCount))
-                {
-                    buildTelemetry.OtherErrorCount = otherCount;
-                }
-
-                // Set the primary failure category to the category with the highest error count
-                if (_errorCountsByCategory.Count > 0)
-                {
-                    var primaryCategory = _errorCountsByCategory.OrderByDescending(kvp => kvp.Value).First().Key;
-                    buildTelemetry.FailureCategory = primaryCategory;
-                }
-            }
+            _errorTelemetryTracker.PopulateBuildTelemetry(buildTelemetry);
         }
 
         /// <summary>
@@ -765,93 +710,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="subcategory">The subcategory from the BuildErrorEventArgs.</param>
         private void TrackErrorForTelemetry(string errorCode, string subcategory)
         {
-            lock (_errorTrackingLock)
-            {
-                // Track the first error code encountered
-                _firstErrorCode ??= errorCode;
-
-                // Categorize the error
-                string category = CategorizeErrorForTelemetry(errorCode, subcategory);
-
-                // Increment the count for this category
-                if (!_errorCountsByCategory.ContainsKey(category))
-                {
-                    _errorCountsByCategory[category] = 0;
-                }
-                _errorCountsByCategory[category]++;
-            }
-        }
-
-        /// <summary>
-        /// Categorizes an error based on its error code and subcategory.
-        /// </summary>
-        private static string CategorizeErrorForTelemetry(string errorCode, string subcategory)
-        {
-            if (string.IsNullOrEmpty(errorCode))
-            {
-                return "Other";
-            }
-
-            // Check subcategory for compiler errors (CS*, VBC*, FS*)
-            if (!string.IsNullOrEmpty(subcategory))
-            {
-                if (subcategory.StartsWith("CS", StringComparison.OrdinalIgnoreCase) ||
-                    subcategory.StartsWith("VBC", StringComparison.OrdinalIgnoreCase) ||
-                    subcategory.StartsWith("FS", StringComparison.OrdinalIgnoreCase))
-                {
-                    return "Compiler";
-                }
-            }
-
-            // Check error code patterns
-            if (errorCode.StartsWith("CS", StringComparison.OrdinalIgnoreCase) ||
-                errorCode.StartsWith("VBC", StringComparison.OrdinalIgnoreCase) ||
-                errorCode.StartsWith("FS", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Compiler";
-            }
-
-            if (errorCode.StartsWith("BC", StringComparison.OrdinalIgnoreCase))
-            {
-                return "BuildCheck";
-            }
-
-            if (errorCode.StartsWith("NU", StringComparison.OrdinalIgnoreCase))
-            {
-                return "NuGet";
-            }
-
-            if (errorCode.StartsWith("NETSDK", StringComparison.OrdinalIgnoreCase))
-            {
-                return "SDK";
-            }
-
-            if (errorCode.StartsWith("MSB", StringComparison.OrdinalIgnoreCase))
-            {
-                // Check for specific SDK error first
-                if (errorCode.Equals("MSB4236", StringComparison.OrdinalIgnoreCase))
-                {
-                    return "SDK";
-                }
-
-                // MSB error codes consist of 3-letter prefix + 4-digit number (e.g., MSB3026)
-                const int MinimumMsbCodeLength = 7;
-                
-                // Extract the numeric part
-                if (errorCode.Length >= MinimumMsbCodeLength && int.TryParse(errorCode.Substring(3, 4), out int errorNumber))
-                {
-                    if (errorNumber >= 4001 && errorNumber <= 4999)
-                    {
-                        return "MSBuildEngine";
-                    }
-                    else if (errorNumber >= 3001 && errorNumber <= 3999)
-                    {
-                        return "Tasks";
-                    }
-                }
-            }
-
-            return "Other";
+            _errorTelemetryTracker.TrackError(errorCode, subcategory);
         }
 
         /// <summary>
