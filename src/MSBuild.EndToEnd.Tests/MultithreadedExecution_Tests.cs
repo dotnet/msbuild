@@ -67,7 +67,7 @@ namespace Microsoft.Build.EndToEndTests
         /// Tests binary logging with multithreaded builds and verifies replay functionality.
         /// </summary>
         [Theory]
-        [InlineData(TestAssetsFixture.ProjectWithDependencies, "/m:8 /mt")]
+        [InlineData(TestAssetsFixture.SingleProjectPath, "/m:8 /mt")]
         public void MultithreadedBuild_BinaryLogging(string projectRelativePath, string multithreadingArgs)
         {
             string projectPath = Path.Combine(_testAssetDir, projectRelativePath);
