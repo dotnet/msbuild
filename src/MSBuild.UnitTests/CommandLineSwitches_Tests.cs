@@ -641,6 +641,29 @@ namespace Microsoft.Build.UnitTests
             switches.HaveErrors().ShouldBeTrue();
         }
 
+        [Fact]
+        public void ParseReturnsInstance()
+        {
+            CommandLineParser parser = new CommandLineParser();
+            ICommandLineSwitches result = parser.Parse(["MSBuild.exe", "/targets:targets.txt"]); // first parameter must be the executable name
+
+            result.ShouldNotBeNull();
+            result.Targets.ShouldNotBeNull();
+            result.Targets.ShouldBe(["targets.txt"]);
+        }
+
+        [Fact]
+        public void ParseThrowsException()
+        {
+            CommandLineParser parser = new CommandLineParser();
+
+            Should.Throw<CommandLineSwitchException>(() =>
+            {
+                // first parameter must be the executable name
+                parser.Parse(["MSBuild.exe", "tempproject.proj", "tempproject.proj"]);
+            });
+        }
+
         [Theory]
         [InlineData("isolate")]
         [InlineData("ISOLATE")]

@@ -43,16 +43,22 @@ namespace Microsoft.Build.CommandLine
 
         internal IReadOnlyList<string> IncludedResponseFiles => includedResponseFiles ?? (IReadOnlyList<string>)Array.Empty<string>();
 
-        public (CommandLineSwitches commandLineSwitches, CommandLineSwitches responseFileSwitches) Parse(IEnumerable<string> commandLineArgs)
+        public ICommandLineSwitches Parse(IEnumerable<string> commandLineArgs)
         {
             GatherAllSwitches(
                 commandLineArgs,
                 out CommandLineSwitches responseFileSwitches,
                 out CommandLineSwitches commandLineSwitches,
-                out _,
+                out string fullCommandLine,
                 out _);
 
-            return (commandLineSwitches, responseFileSwitches);
+            CommandLineSwitches result = new CommandLineSwitches();
+            result.Append(responseFileSwitches, fullCommandLine); // lowest precedence
+            result.Append(commandLineSwitches, fullCommandLine);
+
+            result.ThrowErrors();
+
+            return result;
         }
 
         /// <summary>
