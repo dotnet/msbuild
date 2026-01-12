@@ -20,7 +20,7 @@ namespace Microsoft.Build.EndToEndTests
     /// <summary>
     /// Tests for multithreaded MSBuild execution scenarios using test assets.
     /// </summary>
-    public class MultithreadedExecution_Tests : IClassFixture<TestAssetsFixture>, IDisposable
+    public class MultithreadedExecution_Tests : IClassFixture<TestSolutionAssetsFixture>, IDisposable
     {
         private readonly ITestOutputHelper _output;
         private readonly TestEnvironment _env;
@@ -32,7 +32,7 @@ namespace Microsoft.Build.EndToEndTests
         // /v:minimal - Reduces log verbosity for cleaner test output and better performance
         private const string CommonMSBuildArgs = "/nodereuse:false /v:minimal";
 
-        public MultithreadedExecution_Tests(ITestOutputHelper output, TestAssetsFixture testAssetFixture)
+        public MultithreadedExecution_Tests(ITestOutputHelper output, TestSolutionAssetsFixture testAssetFixture)
         {
             _output = output;
             _env = TestEnvironment.Create(output);
@@ -45,71 +45,98 @@ namespace Microsoft.Build.EndToEndTests
         }
 
         /// <summary>
+        /// Prepares an isolated copy of test assets in a temporary directory for each test run.
+        /// This ensures fresh builds and proper test isolation.
+        /// </summary>
+        /// <param name="testAsset">Test asset</param>
+        /// <returns>TestSolutionAsset for the copied asset in a temporary folder.</returns>
+        private TestSolutionAsset PrepareIsolatedTestAssets(TestSolutionAsset testAsset)
+        {
+            string sourceAssetDir = Path.Combine(_testAssetDir, testAsset.SolutionFolder);
+            
+            // Ensure source test asset exists
+            Directory.Exists(sourceAssetDir).ShouldBeTrue($"Test asset not found: {sourceAssetDir}.");
+
+            // Create isolated copy of entire test asset directory structure
+            TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
+            
+            FileSystemUtilities.CopyFilesRecursively(sourceAssetDir, workFolder.Path);
+            
+            // Return TestSolutionAsset with temp folder and project file
+            return new TestSolutionAsset(workFolder.Path, testAsset.ProjectRelativePath);
+        }
+        
+        /// <summary>
+        /// Helper method to resolve TestSolutionAsset instances by name.
+        /// This is the easiest way to work around the limitation that [InlineData] cannot pass complex objects like TestSolutionAsset directly.
+        /// </summary>
+        private static TestSolutionAsset GetTestAssetByName(string testAssetName)
+        {
+            return testAssetName switch
+            {
+                nameof(TestSolutionAssetsFixture.SingleProject) => TestSolutionAssetsFixture.SingleProject,
+                nameof(TestSolutionAssetsFixture.ProjectWithDependencies) => TestSolutionAssetsFixture.ProjectWithDependencies,
+                _ => throw new ArgumentException($"Unknown test asset name: {testAssetName}", nameof(testAssetName))
+            };
+        }
+
+        /// <summary>
         /// Tests building projects with various multithreading flags.
         /// </summary>
         [Theory]
-        [InlineData(TestAssetsFixture.SingleProjectPath, "/m:1 /mt")]
-        [InlineData(TestAssetsFixture.SingleProjectPath, "/m:8 /mt")]
-        [InlineData(TestAssetsFixture.ProjectWithDependencies, "/m:1 /mt")]
-        [InlineData(TestAssetsFixture.ProjectWithDependencies, "/m:2 /mt")]
-        [InlineData(TestAssetsFixture.ProjectWithDependencies, "/m:8 /mt")]
-        public void MultithreadedBuild_Success(string projectRelativePath, string multithreadingArgs)
+        [InlineData(nameof(TestSolutionAssetsFixture.SingleProject), "/m:1 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.SingleProject), "/m:8 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:1 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:2 /mt")]
+        [InlineData(nameof(TestSolutionAssetsFixture.ProjectWithDependencies), "/m:8 /mt")]
+        public void MultithreadedBuild_Success(string testAssetName, string multithreadingArgs)
         {
-            string projectPath = Path.Combine(_testAssetDir, projectRelativePath);
+            // Resolve TestSolutionAsset from name
+            TestSolutionAsset testAsset = GetTestAssetByName(testAssetName);
             
-            // Ensure test asset exists - fail if missing
-            File.Exists(projectPath).ShouldBeTrue($"Test asset not found: {projectPath}.");
+            // Prepare isolated copy of test assets to ensure fresh builds
+            TestSolutionAsset isolatedAsset = PrepareIsolatedTestAssets(testAsset);
 
             string output = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"\"{projectPath}\" {multithreadingArgs} {CommonMSBuildArgs}", 
+                $"\"{isolatedAsset.ProjectPath}\" {multithreadingArgs} {CommonMSBuildArgs}", 
                 out bool success);
 
-            success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {projectRelativePath}. Output:\\n{output}");
+            success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {testAsset.SolutionFolder}. Output:\\n{output}");
             
-            _output.WriteLine($"Built {Path.GetFileNameWithoutExtension(projectRelativePath)} with arguments {multithreadingArgs}.");
+            _output.WriteLine($"Built {testAsset.SolutionFolder} with arguments {multithreadingArgs}.");
         }
 
         /// <summary>
         /// Tests binary logging with multithreaded builds and verifies replay functionality.
         /// </summary>
         [Theory]
-        [InlineData(TestAssetsFixture.SingleProjectPath, "/m:8 /mt")]
-        public void MultithreadedBuild_BinaryLogging(string projectRelativePath, string multithreadingArgs)
+        [InlineData(nameof(TestSolutionAssetsFixture.SingleProject), "/m:8 /mt")]
+        public void MultithreadedBuild_BinaryLogging(string testAssetName, string multithreadingArgs)
         {
-            string projectPath = Path.Combine(_testAssetDir, projectRelativePath);
+            // Resolve TestSolutionAsset from name
+            TestSolutionAsset testAsset = GetTestAssetByName(testAssetName);
             
-            // Ensure test asset exists - fail if missing
-            File.Exists(projectPath).ShouldBeTrue($"Test asset not found: {projectPath}.");
+            // Prepare isolated copy of test assets to ensure fresh builds
+            TestSolutionAsset isolatedAsset = PrepareIsolatedTestAssets(testAsset);
+            
+            string binlogPath = Path.Combine(isolatedAsset.SolutionFolder, "build.binlog");
 
-            var tempFolder = _env.CreateFolder();
-            string binlogPath = Path.Combine(tempFolder.Path, "build.binlog");
+            // Build with binary logging
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{isolatedAsset.ProjectPath}\" {multithreadingArgs} /bl:\"{binlogPath}\" {CommonMSBuildArgs}", 
+                out bool success);
 
-            try
-            {
-                // Build with binary logging
-                string output = RunnerUtilities.ExecBootstrapedMSBuild(
-                    $"\"{projectPath}\" {multithreadingArgs} /bl:\"{binlogPath}\" {CommonMSBuildArgs}", 
-                    out bool success);
-
-                success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {projectRelativePath}. Output:\\n{output}.");
-                
-                // Verify binary log was created and has content
-                File.Exists(binlogPath).ShouldBeTrue("Binary log file was not created.");
-                
-                // Test binlog replay
-                string replayOutput = RunnerUtilities.ExecBootstrapedMSBuild($"\"{binlogPath}\" {CommonMSBuildArgs}", out bool replaySuccess);
-                
-                replaySuccess.ShouldBeTrue($"Binlog replay failed. Output:\\n{replayOutput}");
-                
-                _output.WriteLine($"Built and replayed {Path.GetFileNameWithoutExtension(projectRelativePath)} with arguments {multithreadingArgs}.");
-            }
-            finally
-            {
-                if (File.Exists(binlogPath))
-                {
-                    File.Delete(binlogPath);
-                }
-            }
+            success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {testAsset.SolutionFolder}. Output:\\n{output}.");
+            
+            // Verify binary log was created and has content
+            File.Exists(binlogPath).ShouldBeTrue("Binary log file was not created.");
+            
+            // Test binlog replay
+            string replayOutput = RunnerUtilities.ExecBootstrapedMSBuild($"\"{binlogPath}\" {CommonMSBuildArgs}", out bool replaySuccess);
+            
+            replaySuccess.ShouldBeTrue($"Binlog replay failed. Output:\\n{replayOutput}");
+            
+            _output.WriteLine($"Built and replayed {testAsset.SolutionFolder} with arguments {multithreadingArgs}.");
         }
     }
 }

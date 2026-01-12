@@ -162,7 +162,7 @@ public class EndToEndTests : IDisposable
         const string templateToReplace = "###EmbeddedResourceToAdd";
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
 
-        CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
+        FileSystemUtilities.CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
         ReplaceStringInFile(Path.Combine(workFolder.Path, referencedProjectName, $"{referencedProjectName}.csproj"),
             templateToReplace, resourceXmlToAdd);
         File.Copy(
@@ -195,21 +195,6 @@ public class EndToEndTests : IDisposable
             string text = File.ReadAllText(filePath);
             text = text.Replace(original, replacement);
             File.WriteAllText(filePath, text);
-        }
-    }
-
-    private static void CopyFilesRecursively(string sourcePath, string targetPath)
-    {
-        // First Create all directories
-        foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
-        {
-            Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
-        }
-
-        // Then copy all the files & Replaces any files with the same name
-        foreach (string newPath in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
-        {
-            File.Copy(newPath, newPath.Replace(sourcePath, targetPath), true);
         }
     }
 
@@ -272,7 +257,7 @@ public class EndToEndTests : IDisposable
         const string entryProjectName = "EntryProject";
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
 
-        CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
+        FileSystemUtilities.CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
 
         _env.SetCurrentDirectory(Path.Combine(workFolder.Path, entryProjectName));
 
@@ -377,7 +362,7 @@ public class EndToEndTests : IDisposable
         const string templateToReplace = "###TFM";
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
 
-        CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
+        FileSystemUtilities.CopyFilesRecursively(Path.Combine(TestAssetsRootPath, testAssetsFolderName), workFolder.Path);
         ReplaceStringInFile(Path.Combine(workFolder.Path, $"{projectName}.csproj"),
             templateToReplace, tfmString);
 

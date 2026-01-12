@@ -10,44 +10,45 @@ using Microsoft.Build.UnitTests.Shared;
 namespace Microsoft.Build.EndToEndTests
 {
     /// <summary>
-    /// Fixture for test assets that handles expensive initialization like NuGet restore.
+    /// Fixture for test solution assets that handles expensive initialization like NuGet restore.
     /// </summary>
-    public class TestAssetsFixture : IDisposable
+    public class TestSolutionAssetsFixture : IDisposable
     {
         public string TestAssetDir { get; }
 
-        // Public constants for common project paths
-        public const string SingleProjectPath = "SingleProject\\SingleProject.csproj";
-        public const string ProjectWithDependencies = "ProjectWithDependencies\\ConsoleApp\\ConsoleApp.csproj";
+        // Test solution asset definitions
+        public static readonly TestSolutionAsset SingleProject = new("SingleProject", "SingleProject.csproj");
+        public static readonly TestSolutionAsset ProjectWithDependencies = new("ProjectWithDependencies", "ConsoleApp\\ConsoleApp.csproj");
 
-        private static readonly string[] ProjectsToRestore = 
+        private static readonly TestSolutionAsset[] AssetsToRestore = 
         [
-            SingleProjectPath,
+            SingleProject,
             ProjectWithDependencies
         ];
 
-        public TestAssetsFixture()
+        public TestSolutionAssetsFixture()
         {
-            TestAssetDir = Path.Combine(Path.GetDirectoryName(typeof(TestAssetsFixture).Assembly.Location) ?? AppContext.BaseDirectory, "TestAssets");
+            TestAssetDir = Path.Combine(Path.GetDirectoryName(typeof(TestSolutionAssetsFixture).Assembly.Location) ?? AppContext.BaseDirectory, "TestAssets");
             RestoreTestAssets();
         }
 
         private void RestoreTestAssets()
         {
-            foreach (string projectPath in ProjectsToRestore)
+            foreach (var asset in AssetsToRestore)
             {
-                string fullPath = Path.Combine(TestAssetDir, projectPath);
+                string projectPath = Path.Combine(TestAssetDir, asset.ProjectPath);
                 
-                if (File.Exists(fullPath))
+                if (File.Exists(projectPath))
                 {
-                    RunnerUtilities.ExecBootstrapedMSBuild($"\"{fullPath}\" /t:Restore /v:minimal", out bool success);
+                    RunnerUtilities.ExecBootstrapedMSBuild($"\"{projectPath}\" /t:Restore /v:minimal", out bool success);
                     if (!success)
                     {
-                        System.Diagnostics.Debug.WriteLine($"Warning: Failed to restore {fullPath}");
+                        System.Diagnostics.Debug.WriteLine($"Warning: Failed to restore {projectPath}");
                     }
                 }
             }
         }
+
         public void Dispose()
         {
             // Clean up if needed
