@@ -1331,12 +1331,15 @@ namespace Microsoft.Build.BackEnd
 
                 foreach (TaskRegistry.RegisteredTaskRecord registeredTaskRecord in taskRegistry.TaskRegistrations.Values.SelectMany(record => record))
                 {
-                    telemetryForwarder.AddTask(registeredTaskRecord.TaskIdentity.Name,
+                    telemetryForwarder.AddTask(
+                        registeredTaskRecord.TaskIdentity.Name,
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
                         registeredTaskRecord.Statistics.TotalMemoryConsumption,
                         registeredTaskRecord.ComputeIfCustom(),
-                        registeredTaskRecord.IsFromNugetCache);
+                        registeredTaskRecord.IsFromNugetCache,
+                        registeredTaskRecord.TaskFactoryAttributeName,
+                        registeredTaskRecord.TaskFactoryParameters.Runtime);
 
                     registeredTaskRecord.Statistics.Reset();
                 }
@@ -1345,8 +1348,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private static bool IsMetaprojTargetPath(string targetPath)
-            => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
+        private static bool IsMetaprojTargetPath(string targetPath) => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Saves the current operating environment (working directory and environment variables)
