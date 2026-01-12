@@ -108,7 +108,7 @@ namespace Microsoft.Build.Framework.Telemetry
 
         /// <summary>
         /// Primary failure category when BuildSuccess = false.
-        /// One of: "Compiler", "MSBuildEngine", "Tasks", "SDK", "NuGet", "BuildCheck", "Other".
+        /// One of: "Compiler", "MSBuildEngine", "Tasks", "SDKResolvers", "NETSDK", "NuGet", "BuildCheck", "Other".
         /// </summary>
         public string? FailureCategory { get; set; }
 
@@ -128,9 +128,14 @@ namespace Microsoft.Build.Framework.Telemetry
         public int? TaskErrorCount { get; set; }
 
         /// <summary>
-        /// Number of SDK-related errors (MSB4236, NETSDK*).
+        /// Number of SDK resolver errors (MSB4236).
         /// </summary>
-        public int? SDKErrorCount { get; set; }
+        public int? SDKResolversErrorCount { get; set; }
+
+        /// <summary>
+        /// Number of .NET SDK errors (NETSDK*).
+        /// </summary>
+        public int? NETSDKErrorCount { get; set; }
 
         /// <summary>
         /// Number of NuGet errors (NU*).
@@ -176,7 +181,8 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(CompilerErrorCount);
             AddIfNotNull(MSBuildEngineErrorCount);
             AddIfNotNull(TaskErrorCount);
-            AddIfNotNull(SDKErrorCount);
+            AddIfNotNull(SDKResolversErrorCount);
+            AddIfNotNull(NETSDKErrorCount);
             AddIfNotNull(NuGetErrorCount);
             AddIfNotNull(BuildCheckErrorCount);
             AddIfNotNull(OtherErrorCount);
@@ -213,7 +219,8 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(CompilerErrorCount?.ToString(), "errorCounts.compiler");
             AddIfNotNull(MSBuildEngineErrorCount?.ToString(), "errorCounts.msbuildEngine");
             AddIfNotNull(TaskErrorCount?.ToString(), "errorCounts.tasks");
-            AddIfNotNull(SDKErrorCount?.ToString(), "errorCounts.sdk");
+            AddIfNotNull(SDKResolversErrorCount?.ToString(), "errorCounts.sdkResolvers");
+            AddIfNotNull(NETSDKErrorCount?.ToString(), "errorCounts.netsdk");
             AddIfNotNull(NuGetErrorCount?.ToString(), "errorCounts.nuget");
             AddIfNotNull(BuildCheckErrorCount?.ToString(), "errorCounts.buildCheck");
             AddIfNotNull(OtherErrorCount?.ToString(), "errorCounts.other");

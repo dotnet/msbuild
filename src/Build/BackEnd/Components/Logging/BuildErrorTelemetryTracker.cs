@@ -20,7 +20,8 @@ namespace Microsoft.Build.BackEnd.Logging
             Compiler,
             MSBuildEngine,
             Tasks,
-            SDK,
+            SDKResolvers,
+            NETSDK,
             NuGet,
             BuildCheck,
             Other,
@@ -93,10 +94,16 @@ namespace Microsoft.Build.BackEnd.Logging
                 buildTelemetry.TaskErrorCount = taskErrorCount;
             }
 
-            int sdkErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.SDK], 0, 0);
-            if (sdkErrorCount > 0)
+            int sdkResolversErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.SDKResolvers], 0, 0);
+            if (sdkResolversErrorCount > 0)
             {
-                buildTelemetry.SDKErrorCount = sdkErrorCount;
+                buildTelemetry.SDKResolversErrorCount = sdkResolversErrorCount;
+            }
+
+            int netsdkErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.NETSDK], 0, 0);
+            if (netsdkErrorCount > 0)
+            {
+                buildTelemetry.NETSDKErrorCount = netsdkErrorCount;
             }
 
             int nugetErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.NuGet], 0, 0);
@@ -168,19 +175,20 @@ namespace Microsoft.Build.BackEnd.Logging
                     return ErrorCategory.NuGet;
                 }
 
-                // MSB* or NETSDK*
+                // MSB* -> categorize MSB errors
                 if (c0 == 'M' && c1 == 'S' && codeSpan.Length >= 3 && char.ToUpperInvariant(codeSpan[2]) == 'B')
                 {
                     return CategorizeMSBError(codeSpan);
                 }
 
+                // NETSDK* -> .NET SDK diagnostics
                 if (c0 == 'N' && c1 == 'E' && codeSpan.Length >= 6 &&
                     char.ToUpperInvariant(codeSpan[2]) == 'T' &&
                     char.ToUpperInvariant(codeSpan[3]) == 'S' &&
                     char.ToUpperInvariant(codeSpan[4]) == 'D' &&
                     char.ToUpperInvariant(codeSpan[5]) == 'K')
                 {
-                    return ErrorCategory.SDK;
+                    return ErrorCategory.NETSDK;
                 }
             }
 
@@ -223,7 +231,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Categorizes MSB error codes into MSBuildEngine, Tasks, or SDK.
+        /// Categorizes MSB error codes into MSBuildEngine, Tasks, or SDKResolvers.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ErrorCategory CategorizeMSBError(ReadOnlySpan<char> codeSpan)
@@ -236,10 +244,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 return ErrorCategory.Other;
             }
 
-            // Check for MSB4236 (SDK error) - fast path for exact match
+            // Check for MSB4236 (SDKResolvers error) - fast path for exact match
             if (codeSpan.Length == 7 && codeSpan[3] == '4' && codeSpan[4] == '2' && codeSpan[5] == '3' && codeSpan[6] == '6')
             {
-                return ErrorCategory.SDK;
+                return ErrorCategory.SDKResolvers;
             }
 
             if (!TryParseErrorNumber(codeSpan, out int errorNumber))
@@ -247,7 +255,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 return ErrorCategory.Other;
             }
 
-            // MSB4xxx (except MSB4236, handled above as SDK) -> MSBuildEngine (evaluation and execution errors)
+            // MSB4xxx (except MSB4236, handled above as SDKResolvers) -> MSBuildEngine (evaluation and execution errors)
             if (errorNumber is >= 4001 and <= 4999)
             {
                 return ErrorCategory.MSBuildEngine;

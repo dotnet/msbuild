@@ -148,7 +148,8 @@ public class KnownTelemetry_Tests
         properties["errorCounts.other"].ShouldBe("1");
 
         // Should not include null counts
-        properties.ContainsKey("errorCounts.sdk").ShouldBeFalse();
+        properties.ContainsKey("errorCounts.sdkResolvers").ShouldBeFalse();
+        properties.ContainsKey("errorCounts.netsdk").ShouldBeFalse();
         properties.ContainsKey("errorCounts.buildCheck").ShouldBeFalse();
     }
 

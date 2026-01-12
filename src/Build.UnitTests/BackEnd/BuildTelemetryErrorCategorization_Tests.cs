@@ -22,9 +22,9 @@ public class BuildTelemetryErrorCategorization_Tests
     [InlineData("VBC30451", "VBC", "Compiler")]
     [InlineData("FS0039", null, "Compiler")]
     [InlineData("MSB4018", null, "MSBuildEngine")]
-    [InlineData("MSB4236", null, "SDK")]
+    [InlineData("MSB4236", null, "SDKResolvers")]
     [InlineData("MSB3026", null, "Tasks")]
-    [InlineData("NETSDK1045", null, "SDK")]
+    [InlineData("NETSDK1045", null, "NETSDK")]
     [InlineData("NU1101", null, "NuGet")]
     [InlineData("BC0001", null, "BuildCheck")]
     [InlineData("CUSTOM001", null, "Other")]
@@ -72,8 +72,11 @@ public class BuildTelemetryErrorCategorization_Tests
                 case "Tasks":
                     buildTelemetry.TaskErrorCount.ShouldBe(1);
                     break;
-                case "SDK":
-                    buildTelemetry.SDKErrorCount.ShouldBe(1);
+                case "SDKResolvers":
+                    buildTelemetry.SDKResolversErrorCount.ShouldBe(1);
+                    break;
+                case "NETSDK":
+                    buildTelemetry.NETSDKErrorCount.ShouldBe(1);
                     break;
                 case "NuGet":
                     buildTelemetry.NuGetErrorCount.ShouldBe(1);
