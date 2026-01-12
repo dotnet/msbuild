@@ -210,13 +210,13 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(SACEnabled?.ToString(), nameof(SACEnabled));
             AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
             AddIfNotNull(FailureCategory);
-            AddIfNotNull(CompilerErrorCount?.ToString(), nameof(CompilerErrorCount));
-            AddIfNotNull(MSBuildEngineErrorCount?.ToString(), nameof(MSBuildEngineErrorCount));
-            AddIfNotNull(TaskErrorCount?.ToString(), nameof(TaskErrorCount));
-            AddIfNotNull(SDKErrorCount?.ToString(), nameof(SDKErrorCount));
-            AddIfNotNull(NuGetErrorCount?.ToString(), nameof(NuGetErrorCount));
-            AddIfNotNull(BuildCheckErrorCount?.ToString(), nameof(BuildCheckErrorCount));
-            AddIfNotNull(OtherErrorCount?.ToString(), nameof(OtherErrorCount));
+            AddIfNotNull(CompilerErrorCount?.ToString(), "errorCounts.compiler");
+            AddIfNotNull(MSBuildEngineErrorCount?.ToString(), "errorCounts.msbuildEngine");
+            AddIfNotNull(TaskErrorCount?.ToString(), "errorCounts.tasks");
+            AddIfNotNull(SDKErrorCount?.ToString(), "errorCounts.sdk");
+            AddIfNotNull(NuGetErrorCount?.ToString(), "errorCounts.nuget");
+            AddIfNotNull(BuildCheckErrorCount?.ToString(), "errorCounts.buildCheck");
+            AddIfNotNull(OtherErrorCount?.ToString(), "errorCounts.other");
 
             // Calculate durations
             if (StartAt.HasValue && FinishedAt.HasValue)

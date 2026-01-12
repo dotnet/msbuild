@@ -141,15 +141,15 @@ public class KnownTelemetry_Tests
 
         properties["BuildSuccess"].ShouldBe("False");
         properties["FailureCategory"].ShouldBe("Compiler");
-        properties["CompilerErrorCount"].ShouldBe("5");
-        properties["MSBuildEngineErrorCount"].ShouldBe("2");
-        properties["TaskErrorCount"].ShouldBe("1");
-        properties["NuGetErrorCount"].ShouldBe("3");
-        properties["OtherErrorCount"].ShouldBe("1");
+        properties["errorCounts.compiler"].ShouldBe("5");
+        properties["errorCounts.msbuildEngine"].ShouldBe("2");
+        properties["errorCounts.tasks"].ShouldBe("1");
+        properties["errorCounts.nuget"].ShouldBe("3");
+        properties["errorCounts.other"].ShouldBe("1");
 
         // Should not include null counts
-        properties.ContainsKey("SDKErrorCount").ShouldBeFalse();
-        properties.ContainsKey("BuildCheckErrorCount").ShouldBeFalse();
+        properties.ContainsKey("errorCounts.sdk").ShouldBeFalse();
+        properties.ContainsKey("errorCounts.buildCheck").ShouldBeFalse();
     }
 
     [Fact]
