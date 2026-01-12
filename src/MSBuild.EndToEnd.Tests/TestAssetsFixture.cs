@@ -28,7 +28,7 @@ namespace Microsoft.Build.EndToEndTests
 
         public TestAssetsFixture()
         {
-            TestAssetDir = Path.Combine(AppContext.BaseDirectory, "TestAssets");
+            TestAssetDir = Path.Combine(Path.GetDirectoryName(typeof(TestAssetsFixture).Assembly.Location) ?? AppContext.BaseDirectory, "TestAssets");
             RestoreTestAssets();
         }
 
