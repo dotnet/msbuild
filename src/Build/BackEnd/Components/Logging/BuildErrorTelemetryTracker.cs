@@ -79,14 +79,47 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_errorTrackingLock)
             {
-                buildTelemetry.CompilerErrorCount = _errorCounts[(int)ErrorCategory.Compiler];
-                buildTelemetry.MSBuildEngineErrorCount = _errorCounts[(int)ErrorCategory.MSBuildEngine];
-                buildTelemetry.TaskErrorCount = _errorCounts[(int)ErrorCategory.Tasks];
-                buildTelemetry.SDKErrorCount = _errorCounts[(int)ErrorCategory.SDK];
-                buildTelemetry.NuGetErrorCount = _errorCounts[(int)ErrorCategory.NuGet];
-                buildTelemetry.BuildCheckErrorCount = _errorCounts[(int)ErrorCategory.BuildCheck];
-                buildTelemetry.OtherErrorCount = _errorCounts[(int)ErrorCategory.Other];
+                int compilerErrorCount = _errorCounts[(int)ErrorCategory.Compiler];
+                if (compilerErrorCount > 0)
+                {
+                    buildTelemetry.CompilerErrorCount = compilerErrorCount;
+                }
 
+                int msbuildEngineErrorCount = _errorCounts[(int)ErrorCategory.MSBuildEngine];
+                if (msbuildEngineErrorCount > 0)
+                {
+                    buildTelemetry.MSBuildEngineErrorCount = msbuildEngineErrorCount;
+                }
+
+                int taskErrorCount = _errorCounts[(int)ErrorCategory.Tasks];
+                if (taskErrorCount > 0)
+                {
+                    buildTelemetry.TaskErrorCount = taskErrorCount;
+                }
+
+                int sdkErrorCount = _errorCounts[(int)ErrorCategory.SDK];
+                if (sdkErrorCount > 0)
+                {
+                    buildTelemetry.SDKErrorCount = sdkErrorCount;
+                }
+
+                int nugetErrorCount = _errorCounts[(int)ErrorCategory.NuGet];
+                if (nugetErrorCount > 0)
+                {
+                    buildTelemetry.NuGetErrorCount = nugetErrorCount;
+                }
+
+                int buildCheckErrorCount = _errorCounts[(int)ErrorCategory.BuildCheck];
+                if (buildCheckErrorCount > 0)
+                {
+                    buildTelemetry.BuildCheckErrorCount = buildCheckErrorCount;
+                }
+
+                int otherErrorCount = _errorCounts[(int)ErrorCategory.Other];
+                if (otherErrorCount > 0)
+                {
+                    buildTelemetry.OtherErrorCount = otherErrorCount;
+                }
                 if (_primaryCategoryCount > 0)
                 {
                     buildTelemetry.FailureCategory = _primaryCategory.ToString();
