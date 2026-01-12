@@ -249,7 +249,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 return ErrorCategory.Other;
             }
 
-            // MSB4xxx -> MSBuildEngine (evaluation and execution errors)
+            // MSB4xxx (except MSB4236, handled above as SDK) -> MSBuildEngine (evaluation and execution errors)
             if (errorNumber is >= 4001 and <= 4999)
             {
                 return ErrorCategory.MSBuildEngine;
