@@ -174,7 +174,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _msbuildTaskSubclassUsage.Clear();
         }
 
-        private static void AddIfNotEmpty(Dictionary<string, string> properties, string propertyName, int count)
+        private static void AddCountIfNonZero(Dictionary<string, string> properties, string propertyName, int count)
         {
             if (count > 0)
             {
@@ -186,12 +186,12 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             Dictionary<string, string> properties = new();
 
-            AddIfNotEmpty(properties, "AssemblyTaskFactoryTasksExecutedCount", _assemblyTaskFactoryTasksExecutedCount);
-            AddIfNotEmpty(properties, "IntrinsicTaskFactoryTasksExecutedCount", _intrinsicTaskFactoryTasksExecutedCount);
-            AddIfNotEmpty(properties, "CodeTaskFactoryTasksExecutedCount", _codeTaskFactoryTasksExecutedCount);
-            AddIfNotEmpty(properties, "RoslynCodeTaskFactoryTasksExecutedCount", _roslynCodeTaskFactoryTasksExecutedCount);
-            AddIfNotEmpty(properties, "XamlTaskFactoryTasksExecutedCount", _xamlTaskFactoryTasksExecutedCount);
-            AddIfNotEmpty(properties, "CustomTaskFactoryTasksExecutedCount", _customTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "AssemblyTaskFactoryTasksExecutedCount", _assemblyTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "IntrinsicTaskFactoryTasksExecutedCount", _intrinsicTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "CodeTaskFactoryTasksExecutedCount", _codeTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "RoslynCodeTaskFactoryTasksExecutedCount", _roslynCodeTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "XamlTaskFactoryTasksExecutedCount", _xamlTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "CustomTaskFactoryTasksExecutedCount", _customTaskFactoryTasksExecutedCount);
 
             return properties;
         }
@@ -207,8 +207,8 @@ namespace Microsoft.Build.BackEnd.Logging
                                     _xamlTaskFactoryTasksExecutedCount +
                                     _customTaskFactoryTasksExecutedCount;
 
-            AddIfNotEmpty(properties, "TasksExecutedCount", totalTasksExecuted);
-            AddIfNotEmpty(properties, "TaskHostTasksExecutedCount", _taskHostTasksExecutedCount);
+            AddCountIfNonZero(properties, "TasksExecutedCount", totalTasksExecuted);
+            AddCountIfNonZero(properties, "TaskHostTasksExecutedCount", _taskHostTasksExecutedCount);
 
             return properties;
         }

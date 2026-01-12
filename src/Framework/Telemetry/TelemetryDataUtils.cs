@@ -21,6 +21,7 @@ namespace Microsoft.Build.Framework.Telemetry
             "CodeTaskFactory",
             "RoslynCodeTaskFactory",
             "XamlTaskFactory",
+            "IntrinsicTaskFactory",
         };
 
         /// <summary>

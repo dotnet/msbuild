@@ -27,17 +27,17 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         }
     }
 
-    public void AddTask(TaskOrTargetTelemetryKey task, TimeSpan cumulativeExectionTime, int executionsCount, long totalMemoryConsumption, string? factoryName, string? taskHostRuntime)
+    public void AddTask(TaskOrTargetTelemetryKey task, TimeSpan cumulativeExecutionTime, int executionsCount, long totalMemoryConsumption, string? factoryName, string? taskHostRuntime)
     {
         TaskExecutionStats? taskExecutionStats;
         if (!TasksExecutionData.TryGetValue(task, out taskExecutionStats))
         {
-            taskExecutionStats = new(cumulativeExectionTime, executionsCount, totalMemoryConsumption, factoryName, taskHostRuntime);
+            taskExecutionStats = new(cumulativeExecutionTime, executionsCount, totalMemoryConsumption, factoryName, taskHostRuntime);
             TasksExecutionData[task] = taskExecutionStats;
         }
         else
         {
-            taskExecutionStats.CumulativeExecutionTime += cumulativeExectionTime;
+            taskExecutionStats.CumulativeExecutionTime += cumulativeExecutionTime;
             taskExecutionStats.ExecutionsCount += executionsCount;
             taskExecutionStats.TotalMemoryBytes += totalMemoryConsumption;
             taskExecutionStats.TaskFactoryName ??= factoryName;
@@ -52,7 +52,7 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
             wasExecuted || (TargetsExecutionData.TryGetValue(target, out bool wasAlreadyExecuted) && wasAlreadyExecuted);
     }
 
-    public WorkerNodeTelemetryData() : this([], new Dictionary<TaskOrTargetTelemetryKey, bool>()) { }
+    public WorkerNodeTelemetryData() : this([], []) { }
 
     public Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> TasksExecutionData { get; }
 
