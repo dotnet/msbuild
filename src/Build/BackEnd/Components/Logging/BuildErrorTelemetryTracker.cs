@@ -32,11 +32,6 @@ namespace Microsoft.Build.BackEnd.Logging
         private readonly int[] _errorCounts = new int[Enum.GetValues(typeof(ErrorCategory)).Length];
 
         /// <summary>
-        /// Tracks the first error code encountered for telemetry purposes.
-        /// </summary>
-        private string? _firstErrorCode;
-
-        /// <summary>
         /// Tracks the primary failure category (category with highest count).
         /// </summary>
         private ErrorCategory _primaryCategory;
@@ -60,9 +55,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_errorTrackingLock)
             {
-                // Track the first error code encountered
-                _firstErrorCode ??= errorCode;
-
                 // Categorize the error
                 ErrorCategory category = CategorizeError(errorCode, subcategory);
                 int categoryIndex = (int)category;
@@ -87,7 +79,6 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_errorTrackingLock)
             {
-                buildTelemetry.FirstErrorCode = _firstErrorCode;
                 buildTelemetry.CompilerErrorCount = _errorCounts[(int)ErrorCategory.Compiler];
                 buildTelemetry.MSBuildEngineErrorCount = _errorCounts[(int)ErrorCategory.MSBuildEngine];
                 buildTelemetry.TaskErrorCount = _errorCounts[(int)ErrorCategory.Tasks];

@@ -148,11 +148,6 @@ namespace Microsoft.Build.Framework.Telemetry
         public int? OtherErrorCount { get; set; }
 
         /// <summary>
-        /// First error code encountered during the build.
-        /// </summary>
-        public string? FirstErrorCode { get; set; }
-
-        /// <summary>
         /// Create a list of properties sent to VS telemetry.
         /// </summary>
         public Dictionary<string, object> GetActivityProperties()
@@ -185,7 +180,6 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(NuGetErrorCount);
             AddIfNotNull(BuildCheckErrorCount);
             AddIfNotNull(OtherErrorCount);
-            AddIfNotNull(FirstErrorCode);
 
             return telemetryItems;
 
@@ -223,7 +217,6 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(NuGetErrorCount?.ToString(), nameof(NuGetErrorCount));
             AddIfNotNull(BuildCheckErrorCount?.ToString(), nameof(BuildCheckErrorCount));
             AddIfNotNull(OtherErrorCount?.ToString(), nameof(OtherErrorCount));
-            AddIfNotNull(FirstErrorCode);
 
             // Calculate durations
             if (StartAt.HasValue && FinishedAt.HasValue)

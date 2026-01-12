@@ -59,7 +59,6 @@ public class BuildTelemetryErrorCategorization_Tests
 
             // Verify the category is set correctly
             buildTelemetry.FailureCategory.ShouldBe(expectedCategory);
-            buildTelemetry.FirstErrorCode.ShouldBe(errorCode);
 
             // Verify the appropriate count is incremented
             switch (expectedCategory)
@@ -130,9 +129,6 @@ public class BuildTelemetryErrorCategorization_Tests
 
             // Primary category should be Compiler (highest count)
             buildTelemetry.FailureCategory.ShouldBe("Compiler");
-
-            // First error code should be the first one logged
-            buildTelemetry.FirstErrorCode.ShouldBe("CS0103");
         }
         finally
         {

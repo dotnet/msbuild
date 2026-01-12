@@ -134,10 +134,8 @@ public class KnownTelemetry_Tests
         buildTelemetry.CompilerErrorCount = 5;
         buildTelemetry.MSBuildEngineErrorCount = 2;
         buildTelemetry.TaskErrorCount = 1;
-        // Don't set SDKErrorCount and BuildCheckErrorCount (leave them null)
         buildTelemetry.NuGetErrorCount = 3;
         buildTelemetry.OtherErrorCount = 1;
-        buildTelemetry.FirstErrorCode = "CS0103";
 
         var properties = buildTelemetry.GetProperties();
 
@@ -148,7 +146,6 @@ public class KnownTelemetry_Tests
         properties["TaskErrorCount"].ShouldBe("1");
         properties["NuGetErrorCount"].ShouldBe("3");
         properties["OtherErrorCount"].ShouldBe("1");
-        properties["FirstErrorCode"].ShouldBe("CS0103");
 
         // Should not include null counts
         properties.ContainsKey("SDKErrorCount").ShouldBeFalse();
@@ -163,13 +160,11 @@ public class KnownTelemetry_Tests
         buildTelemetry.BuildSuccess = false;
         buildTelemetry.FailureCategory = "Tasks";
         buildTelemetry.TaskErrorCount = 10;
-        buildTelemetry.FirstErrorCode = "MSB3075";
 
         var activityProperties = buildTelemetry.GetActivityProperties();
 
         activityProperties["BuildSuccess"].ShouldBe(false);
         activityProperties["FailureCategory"].ShouldBe("Tasks");
         activityProperties["TaskErrorCount"].ShouldBe(10);
-        activityProperties["FirstErrorCode"].ShouldBe("MSB3075");
     }
 }

@@ -704,16 +704,6 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Tracks an error for telemetry purposes by categorizing it.
-        /// </summary>
-        /// <param name="errorCode">The error code from the BuildErrorEventArgs.</param>
-        /// <param name="subcategory">The subcategory from the BuildErrorEventArgs.</param>
-        private void TrackErrorForTelemetry(string errorCode, string subcategory)
-        {
-            _errorTelemetryTracker.TrackError(errorCode, subcategory);
-        }
-
-        /// <summary>
         /// Helper method that unifies the logic for GetWarningsAsErrors, GetWarningsNotAsErrors, and GetWarningsAsMessages.
         /// Specifically, this method returns a collection of codes that, within the context of a particular project, should
         /// be treated specially. These tend to come from setting the associated properties in the project file. These are
@@ -1681,8 +1671,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     _buildSubmissionIdsThatHaveLoggedErrors.Add(submissionId);
                 }
 
-                // Track error for telemetry
-                TrackErrorForTelemetry(errorEvent.Code, errorEvent.Subcategory);
+                _errorTelemetryTracker.TrackError(errorEvent.Code, errorEvent.Subcategory);
             }
 
             // Respect warning-promotion properties from the remote project
