@@ -26,6 +26,12 @@ namespace Microsoft.Build.EndToEndTests
         private readonly TestEnvironment _env;
         private readonly string _testAssetDir;
 
+        // Common parameters for all multithreaded tests:
+        // /nodereuse:false - Prevents MSBuild server processes from persisting between tests,
+        //                    ensuring proper test isolation and avoiding potential timeouts
+        // /v:minimal - Reduces log verbosity for cleaner test output and better performance
+        private const string CommonMSBuildArgs = "/nodereuse:false /v:minimal";
+
         public MultithreadedExecution_Tests(ITestOutputHelper output, TestAssetsFixture testAssetFixture)
         {
             _output = output;
@@ -55,7 +61,7 @@ namespace Microsoft.Build.EndToEndTests
             File.Exists(projectPath).ShouldBeTrue($"Test asset not found: {projectPath}.");
 
             string output = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"\"{projectPath}\" {multithreadingArgs} /v:minimal", 
+                $"\"{projectPath}\" {multithreadingArgs} {CommonMSBuildArgs}", 
                 out bool success);
 
             success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {projectRelativePath}. Output:\\n{output}");
@@ -82,7 +88,7 @@ namespace Microsoft.Build.EndToEndTests
             {
                 // Build with binary logging
                 string output = RunnerUtilities.ExecBootstrapedMSBuild(
-                    $"\"{projectPath}\" {multithreadingArgs} /bl:\"{binlogPath}\" /v:minimal", 
+                    $"\"{projectPath}\" {multithreadingArgs} /bl:\"{binlogPath}\" {CommonMSBuildArgs}", 
                     out bool success);
 
                 success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {projectRelativePath}. Output:\\n{output}.");
@@ -91,7 +97,7 @@ namespace Microsoft.Build.EndToEndTests
                 File.Exists(binlogPath).ShouldBeTrue("Binary log file was not created.");
                 
                 // Test binlog replay
-                string replayOutput = RunnerUtilities.ExecBootstrapedMSBuild($"\"{binlogPath}\" /v:minimal", out bool replaySuccess);
+                string replayOutput = RunnerUtilities.ExecBootstrapedMSBuild($"\"{binlogPath}\" {CommonMSBuildArgs}", out bool replaySuccess);
                 
                 replaySuccess.ShouldBeTrue($"Binlog replay failed. Output:\\n{replayOutput}");
                 
