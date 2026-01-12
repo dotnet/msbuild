@@ -4,6 +4,7 @@
 using System;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework.Telemetry;
+using static Microsoft.Build.Framework.Telemetry.BuildInsights;
 
 #nullable enable
 
@@ -79,18 +80,31 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             lock (_errorTrackingLock)
             {
-                buildTelemetry.CompilerErrorCount = _errorCounts[(int)ErrorCategory.Compiler];
-                buildTelemetry.MSBuildEngineErrorCount = _errorCounts[(int)ErrorCategory.MSBuildEngine];
-                buildTelemetry.TaskErrorCount = _errorCounts[(int)ErrorCategory.Tasks];
-                buildTelemetry.SDKErrorCount = _errorCounts[(int)ErrorCategory.SDK];
-                buildTelemetry.NuGetErrorCount = _errorCounts[(int)ErrorCategory.NuGet];
-                buildTelemetry.BuildCheckErrorCount = _errorCounts[(int)ErrorCategory.BuildCheck];
-                buildTelemetry.OtherErrorCount = _errorCounts[(int)ErrorCategory.Other];
+                buildTelemetry.ErrorCounts = GetErrorCounts();
 
                 if (_primaryCategoryCount > 0)
                 {
                     buildTelemetry.FailureCategory = _primaryCategory.ToString();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets the error counts as an <see cref="ErrorCountsInfo"/> record.
+        /// </summary>
+        /// <returns>Error counts by category.</returns>
+        public ErrorCountsInfo GetErrorCounts()
+        {
+            lock (_errorTrackingLock)
+            {
+                return new ErrorCountsInfo(
+                    Compiler: _errorCounts[(int)ErrorCategory.Compiler],
+                    MsBuildEngine: _errorCounts[(int)ErrorCategory.MSBuildEngine],
+                    Task: _errorCounts[(int)ErrorCategory.Tasks],
+                    Sdk: _errorCounts[(int)ErrorCategory.SDK],
+                    NuGet: _errorCounts[(int)ErrorCategory.NuGet],
+                    BuildCheck: _errorCounts[(int)ErrorCategory.BuildCheck],
+                    Other: _errorCounts[(int)ErrorCategory.Other]);
             }
         }
 

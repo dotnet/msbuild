@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using static Microsoft.Build.Framework.Telemetry.BuildInsights;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
@@ -113,39 +114,9 @@ namespace Microsoft.Build.Framework.Telemetry
         public string? FailureCategory { get; set; }
 
         /// <summary>
-        /// Number of compiler errors (CS*, VBC*, FS*).
+        /// Error counts by category.
         /// </summary>
-        public int? CompilerErrorCount { get; set; }
-
-        /// <summary>
-        /// Number of MSBuild engine errors (MSB4001-MSB4999).
-        /// </summary>
-        public int? MSBuildEngineErrorCount { get; set; }
-
-        /// <summary>
-        /// Number of task errors (MSB3001-MSB3999).
-        /// </summary>
-        public int? TaskErrorCount { get; set; }
-
-        /// <summary>
-        /// Number of SDK-related errors (MSB4236, NETSDK*).
-        /// </summary>
-        public int? SDKErrorCount { get; set; }
-
-        /// <summary>
-        /// Number of NuGet errors (NU*).
-        /// </summary>
-        public int? NuGetErrorCount { get; set; }
-
-        /// <summary>
-        /// Number of BuildCheck errors (BC*).
-        /// </summary>
-        public int? BuildCheckErrorCount { get; set; }
-
-        /// <summary>
-        /// Number of other/uncategorized errors.
-        /// </summary>
-        public int? OtherErrorCount { get; set; }
+        public ErrorCountsInfo? ErrorCounts { get; set; }
 
         /// <summary>
         /// Create a list of properties sent to VS telemetry.
@@ -173,13 +144,13 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(SACEnabled);
             AddIfNotNull(IsStandaloneExecution);
             AddIfNotNull(FailureCategory);
-            AddIfNotNull(CompilerErrorCount);
-            AddIfNotNull(MSBuildEngineErrorCount);
-            AddIfNotNull(TaskErrorCount);
-            AddIfNotNull(SDKErrorCount);
-            AddIfNotNull(NuGetErrorCount);
-            AddIfNotNull(BuildCheckErrorCount);
-            AddIfNotNull(OtherErrorCount);
+            AddIfNotNull(ErrorCounts?.Compiler, "errorCounts.compiler");
+            AddIfNotNull(ErrorCounts?.MsBuildEngine, "errorCounts.msbuildEngine");
+            AddIfNotNull(ErrorCounts?.Task, "errorCounts.task");
+            AddIfNotNull(ErrorCounts?.Sdk, "errorCounts.sdk");
+            AddIfNotNull(ErrorCounts?.NuGet, "errorCounts.nuget");
+            AddIfNotNull(ErrorCounts?.BuildCheck, "errorCounts.buildCheck");
+            AddIfNotNull(ErrorCounts?.Other, "errorCounts.other");
 
             return telemetryItems;
 
@@ -210,13 +181,13 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(SACEnabled?.ToString(), nameof(SACEnabled));
             AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
             AddIfNotNull(FailureCategory);
-            AddIfNotNull(CompilerErrorCount?.ToString(), nameof(CompilerErrorCount));
-            AddIfNotNull(MSBuildEngineErrorCount?.ToString(), nameof(MSBuildEngineErrorCount));
-            AddIfNotNull(TaskErrorCount?.ToString(), nameof(TaskErrorCount));
-            AddIfNotNull(SDKErrorCount?.ToString(), nameof(SDKErrorCount));
-            AddIfNotNull(NuGetErrorCount?.ToString(), nameof(NuGetErrorCount));
-            AddIfNotNull(BuildCheckErrorCount?.ToString(), nameof(BuildCheckErrorCount));
-            AddIfNotNull(OtherErrorCount?.ToString(), nameof(OtherErrorCount));
+            AddIfNotNull(ErrorCounts?.Compiler?.ToString(), "errorCounts.compiler");
+            AddIfNotNull(ErrorCounts?.MsBuildEngine?.ToString(), "errorCounts.msbuildEngine");
+            AddIfNotNull(ErrorCounts?.Task?.ToString(), "errorCounts.task");
+            AddIfNotNull(ErrorCounts?.Sdk?.ToString(), "errorCounts.sdk");
+            AddIfNotNull(ErrorCounts?.NuGet?.ToString(), "errorCounts.nuget");
+            AddIfNotNull(ErrorCounts?.BuildCheck?.ToString(), "errorCounts.buildCheck");
+            AddIfNotNull(ErrorCounts?.Other?.ToString(), "errorCounts.other");
 
             // Calculate durations
             if (StartAt.HasValue && FinishedAt.HasValue)

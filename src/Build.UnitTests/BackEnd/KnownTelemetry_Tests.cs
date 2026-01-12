@@ -7,6 +7,7 @@ using System.Globalization;
 using Microsoft.Build.Framework.Telemetry;
 using Shouldly;
 using Xunit;
+using static Microsoft.Build.Framework.Telemetry.BuildInsights;
 
 namespace Microsoft.Build.UnitTests.Telemetry;
 
@@ -131,25 +132,28 @@ public class KnownTelemetry_Tests
 
         buildTelemetry.BuildSuccess = false;
         buildTelemetry.FailureCategory = "Compiler";
-        buildTelemetry.CompilerErrorCount = 5;
-        buildTelemetry.MSBuildEngineErrorCount = 2;
-        buildTelemetry.TaskErrorCount = 1;
-        buildTelemetry.NuGetErrorCount = 3;
-        buildTelemetry.OtherErrorCount = 1;
+        buildTelemetry.ErrorCounts = new ErrorCountsInfo(
+            Compiler: 5,
+            MsBuildEngine: 2,
+            Task: 1,
+            Sdk: null,
+            NuGet: 3,
+            BuildCheck: null,
+            Other: 1);
 
         var properties = buildTelemetry.GetProperties();
 
         properties["BuildSuccess"].ShouldBe("False");
         properties["FailureCategory"].ShouldBe("Compiler");
-        properties["CompilerErrorCount"].ShouldBe("5");
-        properties["MSBuildEngineErrorCount"].ShouldBe("2");
-        properties["TaskErrorCount"].ShouldBe("1");
-        properties["NuGetErrorCount"].ShouldBe("3");
-        properties["OtherErrorCount"].ShouldBe("1");
+        properties["errorCounts.compiler"].ShouldBe("5");
+        properties["errorCounts.msbuildEngine"].ShouldBe("2");
+        properties["errorCounts.task"].ShouldBe("1");
+        properties["errorCounts.nuget"].ShouldBe("3");
+        properties["errorCounts.other"].ShouldBe("1");
 
         // Should not include null counts
-        properties.ContainsKey("SDKErrorCount").ShouldBeFalse();
-        properties.ContainsKey("BuildCheckErrorCount").ShouldBeFalse();
+        properties.ContainsKey("errorCounts.sdk").ShouldBeFalse();
+        properties.ContainsKey("errorCounts.buildCheck").ShouldBeFalse();
     }
 
     [Fact]
@@ -159,12 +163,19 @@ public class KnownTelemetry_Tests
 
         buildTelemetry.BuildSuccess = false;
         buildTelemetry.FailureCategory = "Tasks";
-        buildTelemetry.TaskErrorCount = 10;
+        buildTelemetry.ErrorCounts = new ErrorCountsInfo(
+            Compiler: null,
+            MsBuildEngine: null,
+            Task: 10,
+            Sdk: null,
+            NuGet: null,
+            BuildCheck: null,
+            Other: null);
 
         var activityProperties = buildTelemetry.GetActivityProperties();
 
         activityProperties["BuildSuccess"].ShouldBe(false);
         activityProperties["FailureCategory"].ShouldBe("Tasks");
-        activityProperties["TaskErrorCount"].ShouldBe(10);
+        activityProperties["errorCounts.task"].ShouldBe(10);
     }
 }

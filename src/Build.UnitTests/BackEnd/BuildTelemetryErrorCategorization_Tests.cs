@@ -64,25 +64,25 @@ public class BuildTelemetryErrorCategorization_Tests
             switch (expectedCategory)
             {
                 case "Compiler":
-                    buildTelemetry.CompilerErrorCount.ShouldBe(1);
+                    buildTelemetry.ErrorCounts.Compiler.ShouldBe(1);
                     break;
                 case "MSBuildEngine":
-                    buildTelemetry.MSBuildEngineErrorCount.ShouldBe(1);
+                    buildTelemetry.ErrorCounts.MsBuildEngine.ShouldBe(1);
                     break;
                 case "Tasks":
-                    buildTelemetry.TaskErrorCount.ShouldBe(1);
+                    buildTelemetry.ErrorCounts.Task.ShouldBe(1);
                     break;
                 case "SDK":
-                    buildTelemetry.SDKErrorCount.ShouldBe(1);
+                    buildTelemetry.ErrorCounts.Sdk.ShouldBe(1);
                     break;
                 case "NuGet":
-                    buildTelemetry.NuGetErrorCount.ShouldBe(1);
+                    buildTelemetry.ErrorCounts.NuGet.ShouldBe(1);
                     break;
                 case "BuildCheck":
-                    buildTelemetry.BuildCheckErrorCount.ShouldBe(1);
+                    buildTelemetry.ErrorCounts.BuildCheck.ShouldBe(1);
                     break;
                 case "Other":
-                    buildTelemetry.OtherErrorCount.ShouldBe(1);
+                    buildTelemetry.ErrorCounts.Other.ShouldBe(1);
                     break;
             }
         }
@@ -121,11 +121,11 @@ public class BuildTelemetryErrorCategorization_Tests
             loggingService.PopulateBuildTelemetryWithErrors(buildTelemetry);
 
             // Verify counts
-            buildTelemetry.CompilerErrorCount.ShouldBe(2);
-            buildTelemetry.MSBuildEngineErrorCount.ShouldBe(1);
-            buildTelemetry.TaskErrorCount.ShouldBe(1);
-            buildTelemetry.NuGetErrorCount.ShouldBe(1);
-            buildTelemetry.OtherErrorCount.ShouldBe(1);
+            buildTelemetry.ErrorCounts.Compiler.ShouldBe(2);
+            buildTelemetry.ErrorCounts.MsBuildEngine.ShouldBe(1);
+            buildTelemetry.ErrorCounts.Task.ShouldBe(1);
+            buildTelemetry.ErrorCounts.NuGet.ShouldBe(1);
+            buildTelemetry.ErrorCounts.Other.ShouldBe(1);
 
             // Primary category should be Compiler (highest count)
             buildTelemetry.FailureCategory.ShouldBe("Compiler");
@@ -164,8 +164,8 @@ public class BuildTelemetryErrorCategorization_Tests
 
             // Primary category should be Tasks (3 errors vs 1 compiler error)
             buildTelemetry.FailureCategory.ShouldBe("Tasks");
-            buildTelemetry.TaskErrorCount.ShouldBe(3);
-            buildTelemetry.CompilerErrorCount.ShouldBe(1);
+            buildTelemetry.ErrorCounts.Task.ShouldBe(3);
+            buildTelemetry.ErrorCounts.Compiler.ShouldBe(1);
         }
         finally
         {
@@ -202,7 +202,7 @@ public class BuildTelemetryErrorCategorization_Tests
 
             // Should be categorized as Compiler based on subcategory
             buildTelemetry.FailureCategory.ShouldBe("Compiler");
-            buildTelemetry.CompilerErrorCount.ShouldBe(1);
+            buildTelemetry.ErrorCounts.Compiler.ShouldBe(1);
         }
         finally
         {
