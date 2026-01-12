@@ -141,7 +141,9 @@ namespace Microsoft.Build.Framework
         public const string MSBuildLoggingArgsEnvVarName = "MSBUILD_LOGGING_ARGS";
 
         /// <summary>
-        /// Name of environment variable for logging level (warning or message).
+        /// Name of environment variable that controls the logging level for diagnostic messages
+        /// emitted when processing the MSBUILD_LOGGING_ARGS environment variable.
+        /// Set to "message" to emit as low-importance build messages instead of console warnings.
         /// </summary>
         public const string MSBuildLoggingArgsLevelEnvVarName = "MSBUILD_LOGGING_ARGS_LEVEL";
 
@@ -151,9 +153,16 @@ namespace Microsoft.Build.Framework
         public static string? MSBuildLoggingArgs => Environment.GetEnvironmentVariable(MSBuildLoggingArgsEnvVarName);
 
         /// <summary>
-        /// Value of the MSBUILD_LOGGING_ARGS_LEVEL environment variable.
+        /// Gets if the logging level for MSBUILD_LOGGING_ARGS diagnostic is message.
         /// </summary>
-        public static string? MSBuildLoggingArgsLevel => Environment.GetEnvironmentVariable(MSBuildLoggingArgsLevelEnvVarName);
+        public static bool EmitAsLogsAsMessage
+        {
+            get
+            {
+                string? level = Environment.GetEnvironmentVariable(MSBuildLoggingArgsLevelEnvVarName);
+                return string.Equals(level, "message", StringComparison.OrdinalIgnoreCase);
+            }
+        }
 
         public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
         public readonly bool DebugScheduler;

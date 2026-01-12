@@ -43,6 +43,7 @@ using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorLogger;
 using TerminalLogger = Microsoft.Build.Logging.TerminalLogger;
+using static Microsoft.Build.CommandLine.CommandLineSwitches;
 
 #if NETFRAMEWORK
 // Use I/O operations from Microsoft.IO.Redist which is generally higher perf
@@ -1927,9 +1928,6 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            // Determine if warnings should be emitted as messages (for builds with /warnaserror)
-            bool emitAsMessage = string.Equals(Traits.MSBuildLoggingArgsLevel, BinaryLogRecordKind.Message.ToString(), StringComparison.OrdinalIgnoreCase);
-
             try
             {
                 List<string> envVarArgs = QuotingUtilities.SplitUnquoted(Traits.MSBuildLoggingArgs);
@@ -1960,7 +1958,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     foreach (string invalidArg in invalidArgs)
                     {
-                        LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggingArgsEnvVarUnsupportedArgument", invalidArg), emitAsMessage);
+                        LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggingArgsEnvVarUnsupportedArgument", invalidArg), Traits.EmitAsLogsAsMessage);
                     }
                 }
 
@@ -1972,7 +1970,7 @@ namespace Microsoft.Build.CommandLine
             }
             catch (Exception ex)
             {
-                LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggingArgsEnvVarError", ex.Message), emitAsMessage);
+                LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggingArgsEnvVarError", ex.ToString()), Traits.EmitAsLogsAsMessage);
             }
         }
 
@@ -2125,16 +2123,22 @@ namespace Microsoft.Build.CommandLine
                 return false;
             }
 
-            string switchPart = arg.Substring(GetLengthOfSwitchIndicator(arg));
+            ReadOnlySpan<char> switchPart = arg.AsSpan(GetLengthOfSwitchIndicator(arg));
 
             // Extract switch name (before any ':' parameter indicator)
             int colonIndex = switchPart.IndexOf(':');
-            string switchName = colonIndex >= 0 ? switchPart.Substring(0, colonIndex) : switchPart;
+            ReadOnlySpan<char> switchNameSpan = colonIndex >= 0 ? switchPart.Slice(0, colonIndex) : switchPart;
+            string switchName = switchNameSpan.ToString();
 
-            return IsBinaryLoggerSwitch(switchName) || string.Equals(switchName, "check", StringComparison.OrdinalIgnoreCase);
+            return IsParameterizedSwitch(
+                    switchName,
+                    out ParameterizedSwitch paramSwitch,
+                    out _,
+                    out _,
+                    out _,
+                    out _,
+                    out _) && (paramSwitch == ParameterizedSwitch.BinaryLogger || paramSwitch == ParameterizedSwitch.Check);
         }
-
-        private static bool IsBinaryLoggerSwitch(string switchName) => string.Equals(switchName, "bl", StringComparison.OrdinalIgnoreCase) || string.Equals(switchName, "binarylogger", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Logs a message from MSBUILD_LOGGING_ARGS processing. Messages are either emitted as warnings
