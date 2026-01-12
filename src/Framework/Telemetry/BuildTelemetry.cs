@@ -107,6 +107,52 @@ namespace Microsoft.Build.Framework.Telemetry
         public string? BuildEngineFrameworkName { get; set; }
 
         /// <summary>
+        /// Primary failure category when BuildSuccess = false.
+        /// One of: "Compiler", "MSBuildEngine", "Tasks", "SDK", "NuGet", "BuildCheck", "Other".
+        /// </summary>
+        public string? FailureCategory { get; set; }
+
+        /// <summary>
+        /// Number of compiler errors (CS*, VBC*, FS*).
+        /// </summary>
+        public int? CompilerErrorCount { get; set; }
+
+        /// <summary>
+        /// Number of MSBuild engine errors (MSB4001-MSB4999).
+        /// </summary>
+        public int? MSBuildEngineErrorCount { get; set; }
+
+        /// <summary>
+        /// Number of task errors (MSB3001-MSB3999).
+        /// </summary>
+        public int? TaskErrorCount { get; set; }
+
+        /// <summary>
+        /// Number of SDK-related errors (MSB4236, NETSDK*).
+        /// </summary>
+        public int? SDKErrorCount { get; set; }
+
+        /// <summary>
+        /// Number of NuGet errors (NU*).
+        /// </summary>
+        public int? NuGetErrorCount { get; set; }
+
+        /// <summary>
+        /// Number of BuildCheck errors (BC*).
+        /// </summary>
+        public int? BuildCheckErrorCount { get; set; }
+
+        /// <summary>
+        /// Number of other/uncategorized errors.
+        /// </summary>
+        public int? OtherErrorCount { get; set; }
+
+        /// <summary>
+        /// First error code encountered during the build.
+        /// </summary>
+        public string? FirstErrorCode { get; set; }
+
+        /// <summary>
         /// Create a list of properties sent to VS telemetry.
         /// </summary>
         public Dictionary<string, object> GetActivityProperties()
@@ -131,6 +177,15 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(MultiThreadedModeEnabled);
             AddIfNotNull(SACEnabled);
             AddIfNotNull(IsStandaloneExecution);
+            AddIfNotNull(FailureCategory);
+            AddIfNotNull(CompilerErrorCount);
+            AddIfNotNull(MSBuildEngineErrorCount);
+            AddIfNotNull(TaskErrorCount);
+            AddIfNotNull(SDKErrorCount);
+            AddIfNotNull(NuGetErrorCount);
+            AddIfNotNull(BuildCheckErrorCount);
+            AddIfNotNull(OtherErrorCount);
+            AddIfNotNull(FirstErrorCode);
 
             return telemetryItems;
 
@@ -160,6 +215,15 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(MultiThreadedModeEnabled?.ToString(), nameof(MultiThreadedModeEnabled));
             AddIfNotNull(SACEnabled?.ToString(), nameof(SACEnabled));
             AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
+            AddIfNotNull(FailureCategory);
+            AddIfNotNull(CompilerErrorCount?.ToString(), nameof(CompilerErrorCount));
+            AddIfNotNull(MSBuildEngineErrorCount?.ToString(), nameof(MSBuildEngineErrorCount));
+            AddIfNotNull(TaskErrorCount?.ToString(), nameof(TaskErrorCount));
+            AddIfNotNull(SDKErrorCount?.ToString(), nameof(SDKErrorCount));
+            AddIfNotNull(NuGetErrorCount?.ToString(), nameof(NuGetErrorCount));
+            AddIfNotNull(BuildCheckErrorCount?.ToString(), nameof(BuildCheckErrorCount));
+            AddIfNotNull(OtherErrorCount?.ToString(), nameof(OtherErrorCount));
+            AddIfNotNull(FirstErrorCode);
 
             // Calculate durations
             if (StartAt.HasValue && FinishedAt.HasValue)

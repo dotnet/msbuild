@@ -222,6 +222,21 @@ namespace Microsoft.Build.BackEnd.Logging
         private readonly ISet<int> _buildSubmissionIdsThatHaveLoggedBuildcheckErrors = new HashSet<int>();
 
         /// <summary>
+        /// Tracks error counts by category for telemetry purposes.
+        /// </summary>
+        private readonly Dictionary<string, int> _errorCountsByCategory = [];
+
+        /// <summary>
+        /// Tracks the first error code encountered for telemetry purposes.
+        /// </summary>
+        private string _firstErrorCode;
+
+        /// <summary>
+        /// Lock object for error tracking.
+        /// </summary>
+        private readonly object _errorTrackingLock = new();
+
+        /// <summary>
         /// A list of warnings to treat as errors for an associated <see cref="BuildEventContext"/>.  If an empty set, all warnings are treated as errors.
         /// </summary>
         private IDictionary<WarningsConfigKey, ISet<string>> _warningsAsErrorsByProject;
@@ -657,6 +672,60 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Populates build telemetry with error categorization data.
+        /// </summary>
+        /// <param name="buildTelemetry">The BuildTelemetry object to populate with error data.</param>
+        public void PopulateBuildTelemetryWithErrors(Framework.Telemetry.BuildTelemetry buildTelemetry)
+        {
+            lock (_errorTrackingLock)
+            {
+                buildTelemetry.FirstErrorCode = _firstErrorCode;
+
+                if (_errorCountsByCategory.TryGetValue("Compiler", out int compilerCount))
+                {
+                    buildTelemetry.CompilerErrorCount = compilerCount;
+                }
+
+                if (_errorCountsByCategory.TryGetValue("MSBuildEngine", out int msbuildEngineCount))
+                {
+                    buildTelemetry.MSBuildEngineErrorCount = msbuildEngineCount;
+                }
+
+                if (_errorCountsByCategory.TryGetValue("Tasks", out int tasksCount))
+                {
+                    buildTelemetry.TaskErrorCount = tasksCount;
+                }
+
+                if (_errorCountsByCategory.TryGetValue("SDK", out int sdkCount))
+                {
+                    buildTelemetry.SDKErrorCount = sdkCount;
+                }
+
+                if (_errorCountsByCategory.TryGetValue("NuGet", out int nugetCount))
+                {
+                    buildTelemetry.NuGetErrorCount = nugetCount;
+                }
+
+                if (_errorCountsByCategory.TryGetValue("BuildCheck", out int buildCheckCount))
+                {
+                    buildTelemetry.BuildCheckErrorCount = buildCheckCount;
+                }
+
+                if (_errorCountsByCategory.TryGetValue("Other", out int otherCount))
+                {
+                    buildTelemetry.OtherErrorCount = otherCount;
+                }
+
+                // Set the primary failure category to the category with the highest error count
+                if (_errorCountsByCategory.Count > 0)
+                {
+                    var primaryCategory = _errorCountsByCategory.OrderByDescending(kvp => kvp.Value).First().Key;
+                    buildTelemetry.FailureCategory = primaryCategory;
+                }
+            }
+        }
+
+        /// <summary>
         /// Returns a collection of warnings to be logged as errors for the specified build context.
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as errors.</param>
@@ -687,6 +756,99 @@ namespace Microsoft.Build.BackEnd.Logging
         public ICollection<string> GetWarningsAsMessages(BuildEventContext context)
         {
             return GetWarningsForProject(context, _warningsAsMessagesByProject, WarningsAsMessages);
+        }
+
+        /// <summary>
+        /// Tracks an error for telemetry purposes by categorizing it.
+        /// </summary>
+        /// <param name="errorCode">The error code from the BuildErrorEventArgs.</param>
+        /// <param name="subcategory">The subcategory from the BuildErrorEventArgs.</param>
+        private void TrackErrorForTelemetry(string errorCode, string subcategory)
+        {
+            lock (_errorTrackingLock)
+            {
+                // Track the first error code encountered
+                _firstErrorCode ??= errorCode;
+
+                // Categorize the error
+                string category = CategorizeErrorForTelemetry(errorCode, subcategory);
+
+                // Increment the count for this category
+                if (!_errorCountsByCategory.ContainsKey(category))
+                {
+                    _errorCountsByCategory[category] = 0;
+                }
+                _errorCountsByCategory[category]++;
+            }
+        }
+
+        /// <summary>
+        /// Categorizes an error based on its error code and subcategory.
+        /// </summary>
+        private static string CategorizeErrorForTelemetry(string errorCode, string subcategory)
+        {
+            if (string.IsNullOrEmpty(errorCode))
+            {
+                return "Other";
+            }
+
+            // Check subcategory for compiler errors (CS*, VBC*, FS*)
+            if (!string.IsNullOrEmpty(subcategory))
+            {
+                if (subcategory.StartsWith("CS", StringComparison.OrdinalIgnoreCase) ||
+                    subcategory.StartsWith("VBC", StringComparison.OrdinalIgnoreCase) ||
+                    subcategory.StartsWith("FS", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "Compiler";
+                }
+            }
+
+            // Check error code patterns
+            if (errorCode.StartsWith("CS", StringComparison.OrdinalIgnoreCase) ||
+                errorCode.StartsWith("VBC", StringComparison.OrdinalIgnoreCase) ||
+                errorCode.StartsWith("FS", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Compiler";
+            }
+
+            if (errorCode.StartsWith("BC", StringComparison.OrdinalIgnoreCase))
+            {
+                return "BuildCheck";
+            }
+
+            if (errorCode.StartsWith("NU", StringComparison.OrdinalIgnoreCase))
+            {
+                return "NuGet";
+            }
+
+            if (errorCode.StartsWith("NETSDK", StringComparison.OrdinalIgnoreCase))
+            {
+                return "SDK";
+            }
+
+            if (errorCode.StartsWith("MSB", StringComparison.OrdinalIgnoreCase))
+            {
+                // Check for specific SDK error first
+                if (errorCode.Equals("MSB4236", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "SDK";
+                }
+
+                // Extract the numeric part
+                if (errorCode.Length >= 7 && int.TryParse(errorCode.Substring(3, 4), out int errorNumber))
+                {
+                    if (errorNumber >= 4001 && errorNumber <= 4999)
+                    {
+                        return "MSBuildEngine";
+                    }
+                    else if (errorNumber >= 3001 && errorNumber <= 3999)
+                    {
+                        return "Tasks";
+                    }
+                }
+            }
+
+            return "Other";
         }
 
         /// <summary>
@@ -1656,6 +1818,9 @@ namespace Microsoft.Build.BackEnd.Logging
                     // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
                     _buildSubmissionIdsThatHaveLoggedErrors.Add(submissionId);
                 }
+
+                // Track error for telemetry
+                TrackErrorForTelemetry(errorEvent.Code, errorEvent.Subcategory);
             }
 
             // Respect warning-promotion properties from the remote project

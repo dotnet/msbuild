@@ -123,4 +123,53 @@ public class KnownTelemetry_Tests
         buildTelemetry.FinishedAt = DateTime.MaxValue;
         buildTelemetry.GetProperties().ShouldBeEmpty();
     }
+
+    [Fact]
+    public void BuildTelemetryIncludesFailureCategoryProperties()
+    {
+        BuildTelemetry buildTelemetry = new BuildTelemetry();
+
+        buildTelemetry.BuildSuccess = false;
+        buildTelemetry.FailureCategory = "Compiler";
+        buildTelemetry.CompilerErrorCount = 5;
+        buildTelemetry.MSBuildEngineErrorCount = 2;
+        buildTelemetry.TaskErrorCount = 1;
+        // Don't set SDKErrorCount and BuildCheckErrorCount (leave them null)
+        buildTelemetry.NuGetErrorCount = 3;
+        buildTelemetry.OtherErrorCount = 1;
+        buildTelemetry.FirstErrorCode = "CS0103";
+
+        var properties = buildTelemetry.GetProperties();
+
+        properties["BuildSuccess"].ShouldBe("False");
+        properties["FailureCategory"].ShouldBe("Compiler");
+        properties["CompilerErrorCount"].ShouldBe("5");
+        properties["MSBuildEngineErrorCount"].ShouldBe("2");
+        properties["TaskErrorCount"].ShouldBe("1");
+        properties["NuGetErrorCount"].ShouldBe("3");
+        properties["OtherErrorCount"].ShouldBe("1");
+        properties["FirstErrorCode"].ShouldBe("CS0103");
+
+        // Should not include null counts
+        properties.ContainsKey("SDKErrorCount").ShouldBeFalse();
+        properties.ContainsKey("BuildCheckErrorCount").ShouldBeFalse();
+    }
+
+    [Fact]
+    public void BuildTelemetryActivityPropertiesIncludesFailureData()
+    {
+        BuildTelemetry buildTelemetry = new BuildTelemetry();
+
+        buildTelemetry.BuildSuccess = false;
+        buildTelemetry.FailureCategory = "Tasks";
+        buildTelemetry.TaskErrorCount = 10;
+        buildTelemetry.FirstErrorCode = "MSB3075";
+
+        var activityProperties = buildTelemetry.GetActivityProperties();
+
+        activityProperties["BuildSuccess"].ShouldBe(false);
+        activityProperties["FailureCategory"].ShouldBe("Tasks");
+        activityProperties["TaskErrorCount"].ShouldBe(10);
+        activityProperties["FirstErrorCode"].ShouldBe("MSB3075");
+    }
 }
