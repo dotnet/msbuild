@@ -224,7 +224,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Tracks error counts by category for telemetry purposes.
         /// </summary>
-        private readonly Dictionary<string, int> _errorCountsByCategory = [];
+        private readonly Dictionary<string, int> _errorCountsByCategory = new Dictionary<string, int>();
 
         /// <summary>
         /// Tracks the first error code encountered for telemetry purposes.
@@ -834,8 +834,11 @@ namespace Microsoft.Build.BackEnd.Logging
                     return "SDK";
                 }
 
+                // MSB error codes consist of 3-letter prefix + 4-digit number (e.g., MSB3026)
+                const int MinimumMsbCodeLength = 7;
+                
                 // Extract the numeric part
-                if (errorCode.Length >= 7 && int.TryParse(errorCode.Substring(3, 4), out int errorNumber))
+                if (errorCode.Length >= MinimumMsbCodeLength && int.TryParse(errorCode.Substring(3, 4), out int errorNumber))
                 {
                     if (errorNumber >= 4001 && errorNumber <= 4999)
                     {
