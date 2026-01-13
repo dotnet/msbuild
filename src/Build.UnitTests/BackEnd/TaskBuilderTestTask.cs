@@ -249,52 +249,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// The value for the TaskItemIntOutput.
         /// </summary>
-        private ITaskItem<AbsolutePath> _taskItemIntOutput;
+        private ITaskItem<int> _taskItemIntOutput;
 
         /// <summary>
         /// The value for the TaskItemIntArrayOutput.
         /// </summary>
-        private ITaskItem<AbsolutePath>[] _taskItemIntArrayOutput;
-
-        /// <summary>
-        /// The value for the FileInfoOutput.
-        /// </summary>
-        private System.IO.FileInfo _fileInfoOutput;
-
-        /// <summary>
-        /// The value for the FileInfoArrayOutput.
-        /// </summary>
-        private System.IO.FileInfo[] _fileInfoArrayOutput;
-
-        /// <summary>
-        /// The value for the DirectoryInfoOutput.
-        /// </summary>
-        private System.IO.DirectoryInfo _directoryInfoOutput;
-
-        /// <summary>
-        /// The value for the DirectoryInfoArrayOutput.
-        /// </summary>
-        private System.IO.DirectoryInfo[] _directoryInfoArrayOutput;
-
-        /// <summary>
-        /// The value for the TaskItemFileInfoOutput.
-        /// </summary>
-        private ITaskItem<System.IO.FileInfo> _taskItemFileInfoOutput;
-
-        /// <summary>
-        /// The value for the TaskItemFileInfoArrayOutput.
-        /// </summary>
-        private ITaskItem<System.IO.FileInfo>[] _taskItemFileInfoArrayOutput;
-
-        /// <summary>
-        /// The value for the TaskItemDirectoryInfoOutput.
-        /// </summary>
-        private ITaskItem<System.IO.DirectoryInfo> _taskItemDirectoryInfoOutput;
-
-        /// <summary>
-        /// The value for the TaskItemDirectoryInfoArrayOutput.
-        /// </summary>
-        private ITaskItem<System.IO.DirectoryInfo>[] _taskItemDirectoryInfoArrayOutput;
+        private ITaskItem<int>[] _taskItemIntArrayOutput;
 
         /// <summary>
         /// Property determining if Execute() should throw or not.
@@ -714,9 +674,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// A TaskItem&lt;AbsolutePath&gt; parameter.
+        /// A TaskItem&lt;int&gt; parameter.
         /// </summary>
-        public ITaskItem<AbsolutePath> TaskItemIntParam
+        public ITaskItem<int> TaskItemIntParam
         {
             set
             {
@@ -726,110 +686,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// A TaskItem&lt;AbsolutePath&gt; array parameter.
+        /// A TaskItem&lt;int&gt; array parameter.
         /// </summary>
-        public ITaskItem<AbsolutePath>[] TaskItemIntArrayParam
+        public ITaskItem<int>[] TaskItemIntArrayParam
         {
             set
             {
                 _taskItemIntArrayOutput = value;
                 _testTaskHost?.ParameterSet("TaskItemIntArrayParam", value);
-            }
-        }
-
-        /// <summary>
-        /// A FileInfo parameter.
-        /// </summary>
-        public System.IO.FileInfo FileInfoParam
-        {
-            set
-            {
-                _fileInfoOutput = value;
-                _testTaskHost?.ParameterSet("FileInfoParam", value);
-            }
-        }
-
-        /// <summary>
-        /// A FileInfo array parameter.
-        /// </summary>
-        public System.IO.FileInfo[] FileInfoArrayParam
-        {
-            set
-            {
-                _fileInfoArrayOutput = value;
-                _testTaskHost?.ParameterSet("FileInfoArrayParam", value);
-            }
-        }
-
-        /// <summary>
-        /// A DirectoryInfo parameter.
-        /// </summary>
-        public System.IO.DirectoryInfo DirectoryInfoParam
-        {
-            set
-            {
-                _directoryInfoOutput = value;
-                _testTaskHost?.ParameterSet("DirectoryInfoParam", value);
-            }
-        }
-
-        /// <summary>
-        /// A DirectoryInfo array parameter.
-        /// </summary>
-        public System.IO.DirectoryInfo[] DirectoryInfoArrayParam
-        {
-            set
-            {
-                _directoryInfoArrayOutput = value;
-                _testTaskHost?.ParameterSet("DirectoryInfoArrayParam", value);
-            }
-        }
-
-        /// <summary>
-        /// An ITaskItem&lt;FileInfo&gt; parameter.
-        /// </summary>
-        public ITaskItem<System.IO.FileInfo> TaskItemFileInfoParam
-        {
-            set
-            {
-                _taskItemFileInfoOutput = value;
-                _testTaskHost?.ParameterSet("TaskItemFileInfoParam", value);
-            }
-        }
-
-        /// <summary>
-        /// An ITaskItem&lt;FileInfo&gt; array parameter.
-        /// </summary>
-        public ITaskItem<System.IO.FileInfo>[] TaskItemFileInfoArrayParam
-        {
-            set
-            {
-                _taskItemFileInfoArrayOutput = value;
-                _testTaskHost?.ParameterSet("TaskItemFileInfoArrayParam", value);
-            }
-        }
-
-        /// <summary>
-        /// An ITaskItem&lt;DirectoryInfo&gt; parameter.
-        /// </summary>
-        public ITaskItem<System.IO.DirectoryInfo> TaskItemDirectoryInfoParam
-        {
-            set
-            {
-                _taskItemDirectoryInfoOutput = value;
-                _testTaskHost?.ParameterSet("TaskItemDirectoryInfoParam", value);
-            }
-        }
-
-        /// <summary>
-        /// An ITaskItem&lt;DirectoryInfo&gt; array parameter.
-        /// </summary>
-        public ITaskItem<System.IO.DirectoryInfo>[] TaskItemDirectoryInfoArrayParam
-        {
-            set
-            {
-                _taskItemDirectoryInfoArrayOutput = value;
-                _testTaskHost?.ParameterSet("TaskItemDirectoryInfoArrayParam", value);
             }
         }
 
@@ -1406,10 +1270,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// A TaskItem&lt;AbsolutePath&gt; output.
+        /// A TaskItem&lt;int&gt; output.
         /// </summary>
         [Output]
-        public ITaskItem<AbsolutePath> TaskItemIntOutput
+        public ITaskItem<int> TaskItemIntOutput
         {
             get
             {
@@ -1419,119 +1283,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// A TaskItem&lt;AbsolutePath&gt; array output.
+        /// A TaskItem&lt;int&gt; array output.
         /// </summary>
         [Output]
-        public ITaskItem<AbsolutePath>[] TaskItemIntArrayOutput
+        public ITaskItem<int>[] TaskItemIntArrayOutput
         {
             get
             {
                 _testTaskHost?.OutputRead("TaskItemIntArrayOutput", _taskItemIntArrayOutput);
                 return _taskItemIntArrayOutput;
-            }
-        }
-
-        /// <summary>
-        /// A FileInfo output.
-        /// </summary>
-        [Output]
-        public System.IO.FileInfo FileInfoOutput
-        {
-            get
-            {
-                _testTaskHost?.OutputRead("FileInfoOutput", _fileInfoOutput);
-                return _fileInfoOutput;
-            }
-        }
-
-        /// <summary>
-        /// A FileInfo array output.
-        /// </summary>
-        [Output]
-        public System.IO.FileInfo[] FileInfoArrayOutput
-        {
-            get
-            {
-                _testTaskHost?.OutputRead("FileInfoArrayOutput", _fileInfoArrayOutput);
-                return _fileInfoArrayOutput;
-            }
-        }
-
-        /// <summary>
-        /// A DirectoryInfo output.
-        /// </summary>
-        [Output]
-        public System.IO.DirectoryInfo DirectoryInfoOutput
-        {
-            get
-            {
-                _testTaskHost?.OutputRead("DirectoryInfoOutput", _directoryInfoOutput);
-                return _directoryInfoOutput;
-            }
-        }
-
-        /// <summary>
-        /// A DirectoryInfo array output.
-        /// </summary>
-        [Output]
-        public System.IO.DirectoryInfo[] DirectoryInfoArrayOutput
-        {
-            get
-            {
-                _testTaskHost?.OutputRead("DirectoryInfoArrayOutput", _directoryInfoArrayOutput);
-                return _directoryInfoArrayOutput;
-            }
-        }
-
-        /// <summary>
-        /// An ITaskItem&lt;FileInfo&gt; output.
-        /// </summary>
-        [Output]
-        public ITaskItem<System.IO.FileInfo> TaskItemFileInfoOutput
-        {
-            get
-            {
-                _testTaskHost?.OutputRead("TaskItemFileInfoOutput", _taskItemFileInfoOutput);
-                return _taskItemFileInfoOutput;
-            }
-        }
-
-        /// <summary>
-        /// An ITaskItem&lt;FileInfo&gt; array output.
-        /// </summary>
-        [Output]
-        public ITaskItem<System.IO.FileInfo>[] TaskItemFileInfoArrayOutput
-        {
-            get
-            {
-                _testTaskHost?.OutputRead("TaskItemFileInfoArrayOutput", _taskItemFileInfoArrayOutput);
-                return _taskItemFileInfoArrayOutput;
-            }
-        }
-
-        /// <summary>
-        /// An ITaskItem&lt;DirectoryInfo&gt; output.
-        /// </summary>
-        [Output]
-        public ITaskItem<System.IO.DirectoryInfo> TaskItemDirectoryInfoOutput
-        {
-            get
-            {
-                _testTaskHost?.OutputRead("TaskItemDirectoryInfoOutput", _taskItemDirectoryInfoOutput);
-                return _taskItemDirectoryInfoOutput;
-            }
-        }
-
-        /// <summary>
-        /// An ITaskItem&lt;DirectoryInfo&gt; array output.
-        /// </summary>
-        [Output]
-        public ITaskItem<System.IO.DirectoryInfo>[] TaskItemDirectoryInfoArrayOutput
-        {
-            get
-            {
-                _testTaskHost?.OutputRead("TaskItemDirectoryInfoArrayOutput", _taskItemDirectoryInfoArrayOutput);
-                return _taskItemDirectoryInfoArrayOutput;
             }
         }
 

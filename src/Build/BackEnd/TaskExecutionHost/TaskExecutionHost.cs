@@ -6,7 +6,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
@@ -756,58 +755,24 @@ namespace Microsoft.Build.BackEnd
 
         #region Local Methods
 
-        private static bool IsSupportedTaskItemTypeArgument(Type typeArg) =>
-            typeArg == typeof(AbsolutePath) ||
-            typeArg == typeof(FileInfo) ||
-            typeArg == typeof(DirectoryInfo);
-
         /// <summary>
-        /// Checks if a type is ITaskItem&lt;T&gt; or TaskItem&lt;T&gt; where T is supported by MSBuild task binding.
+        /// Checks if a type is TaskItem&lt;T&gt; where T is a value type.
         /// </summary>
         private static bool IsTaskItemOfT(Type parameterType)
         {
             if (!parameterType.GetTypeInfo().IsGenericType)
             {
-                foreach (Type implementedInterface in parameterType.GetTypeInfo().ImplementedInterfaces)
-                {
-                    if (implementedInterface.GetTypeInfo().IsGenericType &&
-                        implementedInterface.GetGenericTypeDefinition() == typeof(ITaskItem<>))
-                    {
-                        return IsSupportedTaskItemTypeArgument(implementedInterface.GetGenericArguments()[0]);
-                    }
-                }
-
                 return false;
             }
 
             Type genericTypeDefinition = parameterType.GetGenericTypeDefinition();
-            if (genericTypeDefinition == typeof(ITaskItem<>))
+            if (genericTypeDefinition != typeof(ITaskItem<>) && genericTypeDefinition != typeof(TaskItem<>))
             {
-                Type[] genericArguments = parameterType.GetGenericArguments();
-                if (genericArguments.Length != 1)
-                {
-                    return false;
-                }
-
-                return IsSupportedTaskItemTypeArgument(genericArguments[0]);
+                return false;
             }
 
-            if (string.Equals(genericTypeDefinition.FullName, "Microsoft.Build.Utilities.TaskItem`1", StringComparison.Ordinal))
-            {
-                Type[] genericArguments = parameterType.GetGenericArguments();
-                return genericArguments.Length == 1 && IsSupportedTaskItemTypeArgument(genericArguments[0]);
-            }
-
-            foreach (Type implementedInterface in parameterType.GetTypeInfo().ImplementedInterfaces)
-            {
-                if (implementedInterface.GetTypeInfo().IsGenericType &&
-                    implementedInterface.GetGenericTypeDefinition() == typeof(ITaskItem<>))
-                {
-                    return IsSupportedTaskItemTypeArgument(implementedInterface.GetGenericArguments()[0]);
-                }
-            }
-
-            return false;
+            Type[] genericArguments = parameterType.GetGenericArguments();
+            return genericArguments.Length == 1 && genericArguments[0].GetTypeInfo().IsValueType;
         }
 
         /// <summary>
@@ -820,7 +785,7 @@ namespace Microsoft.Build.BackEnd
             Type valueType = genericArguments[0];
 
             // Create TaskItem<T> using the constructor that takes ITaskItem
-            Type constructedType = typeof(Microsoft.Build.Utilities.TaskItem<>).MakeGenericType(valueType);
+            Type constructedType = typeof(TaskItem<>).MakeGenericType(valueType);
             ConstructorInfo constructor = constructedType.GetConstructor(new[] { typeof(ITaskItem) });
 
             return constructor.Invoke(new object[] { item });
@@ -843,20 +808,6 @@ namespace Microsoft.Build.BackEnd
             if (parameterType == typeof(AbsolutePath))
             {
                 return InternalSetTaskParameter(parameter, TaskEnvironment.GetAbsolutePath(expandedParameterValue));
-            }
-
-            // Special handling for FileInfo - validate path through AbsolutePath first
-            if (parameterType == typeof(FileInfo))
-            {
-                AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(expandedParameterValue);
-                return InternalSetTaskParameter(parameter, new FileInfo(absolutePath.Value));
-            }
-
-            // Special handling for DirectoryInfo - validate path through AbsolutePath first
-            if (parameterType == typeof(DirectoryInfo))
-            {
-                AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(expandedParameterValue);
-                return InternalSetTaskParameter(parameter, new DirectoryInfo(absolutePath.Value));
             }
 
             // Use the unified ValueTypeParser for all other types
@@ -894,16 +845,6 @@ namespace Microsoft.Build.BackEnd
                         else if (parameterType == typeof(AbsolutePath[]))
                         {
                             finalTaskInputs.Add(TaskEnvironment.GetAbsolutePath(item.ItemSpec));
-                        }
-                        else if (parameterType == typeof(FileInfo[]))
-                        {
-                            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
-                            finalTaskInputs.Add(new FileInfo(absolutePath.Value));
-                        }
-                        else if (parameterType == typeof(DirectoryInfo[]))
-                        {
-                            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
-                            finalTaskInputs.Add(new DirectoryInfo(absolutePath.Value));
                         }
                         else
                         {

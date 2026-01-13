@@ -12,13 +12,14 @@ namespace Microsoft.Build.Utilities
     /// A strongly-typed wrapper around <see cref="ITaskItem"/> that parses the item's identity
     /// as a value of type <typeparamref name="T"/>.
     /// </summary>
-    /// <typeparam name="T">The type to parse the item identity as. Can be a value type, FileInfo, or DirectoryInfo.</typeparam>
+    /// <typeparam name="T">The type to parse the item identity as. Must be a value type.</typeparam>
     /// <remarks>
     /// This allows tasks to receive strongly-typed parameters while still working with MSBuild's item system.
-    /// The identity (ItemSpec) is parsed using <see cref="ValueTypeParser"/> which handles value types,
-    /// AbsolutePath, FileInfo, and DirectoryInfo.
+    /// The identity (ItemSpec) is parsed using <see cref="Convert.ChangeType(object?, Type)"/> or special handling for
+    /// types like <see cref="AbsolutePath"/>.
     /// </remarks>
     public readonly struct TaskItem<T> : ITaskItem<T>, IEquatable<TaskItem<T>>
+        where T : struct
     {
         private readonly ITaskItem _backingItem;
 
@@ -154,14 +155,13 @@ namespace Microsoft.Build.Utilities
         #region Equality and Conversion
 
         /// <inheritdoc/>
-        public bool Equals(TaskItem<T> other) =>
-            Value?.Equals(other.Value) ?? (other.Value == null);
+        public bool Equals(TaskItem<T> other) => Value.Equals(other.Value);
 
         /// <inheritdoc/>
         public override bool Equals(object? obj) => obj is TaskItem<T> other && Equals(other);
 
         /// <inheritdoc/>
-        public override int GetHashCode() => Value?.GetHashCode() ?? 0;
+        public override int GetHashCode() => Value.GetHashCode();
 
         /// <summary>
         /// Determines whether two <see cref="TaskItem{T}"/> instances are equal.
