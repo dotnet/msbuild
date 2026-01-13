@@ -2852,6 +2852,11 @@
         <target state="translated">MSB3715: Il tipo "{0}" non è stato trovato.</target>
         <note>{StrBegin="MSB3715: "}</note>
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.ErrorDeletingTempFile">
+        <source>Could not delete temporary file "{0}". Error: {1}</source>
+        <target state="translated">Non è possibile eliminare il file temporaneo "{0}". Errore: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1} {2}</source>
         <target state="translated">MSB3491: non è possibile scrivere righe nel file "{0}". {1} {2}</target>
@@ -2882,9 +2887,24 @@
         <target state="translated">MSB3762: non sono stati passati riferimenti all'attività. Sono necessari almeno i riferimenti a mscorlib e Windows.Foundation.</target>
         <note>{StrBegin="MSB3762: "}</note>
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.ErrorReadingFileTransactional">
+        <source>MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</source>
+        <target state="translated">MSB3494: non è possibile leggere il file esistente "{0}" per aggiungere contenuto. Errore: {1}</target>
+        <note>{StrBegin="MSB3494: "}</note>
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.Retry">
+        <source>Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</source>
+        <target state="translated">Nuovo tentativo di ripetere l'operazione sul file "{0}" (tentativo {1} di {2}). Motivo: {3}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
         <source>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</source>
         <target state="translated">L'attributo 'WriteOnlyWhenDifferent' su "{0}" ha effetto solo quando 'Overwrite="true"'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.UsingTransactionalMode">
+        <source>Using transactional mode to write to file "{0}".</source>
+        <target state="translated">Uso della modalità transazionale per scrivere nel file "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">

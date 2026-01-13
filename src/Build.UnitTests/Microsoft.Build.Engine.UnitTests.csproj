@@ -30,10 +30,7 @@
     <PackageReference Include="NuGet.Frameworks">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-
-    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-
+    
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />

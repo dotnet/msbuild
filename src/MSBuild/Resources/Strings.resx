@@ -1700,6 +1700,10 @@
     <value>0: turned off</value>
   </data>
   <!-- **** TerminalLogger strings end **** -->
+  <data name="DuplicateBinaryLoggerPathsIgnored" xml:space="preserve">
+    <value>Duplicate binary log path(s) specified and ignored: {0}</value>
+    <comment>{0} is the list of duplicate paths that were filtered out</comment>
+  </data>
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
@@ -1707,7 +1711,4 @@
 
         Don't forget to update this comment after using the new code.
   -->
-  <data name="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc" xml:space="preserve">
-    <value>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</value>
-  </data>
 </root>

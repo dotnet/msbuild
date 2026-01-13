@@ -3,6 +3,7 @@
 
 #nullable disable
 
+using System;
 using System.IO;
 using Microsoft.Build.Internal;
 
@@ -293,11 +294,13 @@ namespace Microsoft.Build.BackEnd
         /// Version 1: Introduced for the .NET Task Host protocol. This version
         /// excludes the translation of appDomainConfig within TaskHostConfiguration
         /// to maintain backward compatibility and reduce serialization overhead.
+        ///
+        /// Version 2: Adds support of HostServices and target name translation in TaskHostConfiguration.
         /// 
         /// When incrementing this version, ensure compatibility with existing
         /// task hosts and update the corresponding deserialization logic.
         /// </summary>
-        public const byte PacketVersion = 1;
+        public const byte PacketVersion = 2;
 
         // Flag bits in upper 2 bits
         private const byte ExtendedHeaderFlag = 0x40;  // Bit 6: 01000000
@@ -361,5 +364,18 @@ namespace Microsoft.Build.BackEnd
         /// <param name="stream">The stream to write the version byte to.</param>
         /// <param name="version">The protocol version to write to the stream.</param>
         public static void WriteVersion(Stream stream, byte version) => stream.WriteByte(version);
+
+        /// <summary>
+        /// Negotiates the packet version to use for communication between nodes.
+        /// Returns the lower of the two versions to ensure compatibility between
+        /// nodes that may be running different versions of MSBuild.
+        /// 
+        /// This allows forward and backward compatibility when nodes with different
+        /// packet versions communicate - they will use the lowest common version
+        /// that both understand.
+        /// </summary>
+        /// <param name="otherPacketVersion">The packet version supported by the other node.</param>
+        /// <returns>The negotiated protocol version that both nodes can use (the minimum of the two versions).</returns>
+        public static byte GetNegotiatedPacketVersion(byte otherPacketVersion) => Math.Min(PacketVersion, otherPacketVersion);
     }
 }

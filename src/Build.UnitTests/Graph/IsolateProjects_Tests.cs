@@ -484,7 +484,7 @@ BuildEngine5.BuildProjectFilesInParallel(
         }
 
         [Theory]
-        [MemberData(nameof(UndeclaredReferenceEnforcementShouldNormalizeFilePathsTestData))]
+        [MemberData(nameof(UndeclaredReferenceEnforcementShouldNormalizeFilePathsTestData), DisableDiscoveryEnumeration = true)]
         public void UndeclaredReferenceEnforcementShouldNormalizeFilePaths(Func<string, string> projectReferenceModifier, Func<string, string> msbuildProjectModifier, string targetName)
         {
             AssertBuild(new[] { targetName },

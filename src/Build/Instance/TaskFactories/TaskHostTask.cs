@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -28,12 +29,6 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class TaskHostTask : IGeneratedTask, ICancelableTask, INodePacketFactory, INodePacketHandler
     {
-        private const int HANDSHAKE_OPTIONS_BITS = 9;
-
-        private const int HANDSHAKE_OPTIONS_MASK = 0x1FF;
-
-        private const int NODE_ID_MAX_VALUE_FOR_MULTITHREADED = 255;
-
         /// <summary>
         /// The IBuildEngine callback object.
         /// </summary>
@@ -100,9 +95,9 @@ namespace Microsoft.Build.BackEnd
         private HandshakeOptions _requiredContext = HandshakeOptions.None;
 
         /// <summary>
-        /// The task host node ID of the task host we're launching.
+        /// The task host node key identifying the task host we're launching.
         /// </summary>
-        private int _taskHostNodeId;
+        private TaskHostNodeKey _taskHostNodeKey;
 
         /// <summary>
         /// The ID of the node on which this task is scheduled to run.
@@ -149,6 +144,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _useSidecarTaskHost = false;
 
+#if !NET35
+        private readonly HostServices _hostServices;
+#endif
+
+        /// <summary>
+        /// The project file path that requests task execution.
+        /// </summary>
+        private string _projectFile;
+
         /// <summary>
         /// The task environment for virtualized environment operations.
         /// </summary>
@@ -164,8 +168,12 @@ namespace Microsoft.Build.BackEnd
             TaskHostParameters taskHostParameters,
             LoadedType taskType,
             bool useSidecarTaskHost,
+            string projectFile,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
+#endif
+#if !NET35
+            HostServices hostServices,
 #endif
             int scheduledNodeId,
             TaskEnvironment taskEnvironment)
@@ -182,6 +190,10 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
 #endif
+#if !NET35
+            _hostServices = hostServices;
+#endif
+            _projectFile = projectFile;
             _taskHostParameters = taskHostParameters;
             _useSidecarTaskHost = useSidecarTaskHost;
             _taskEnvironment = taskEnvironment;
@@ -278,7 +290,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (_taskHostProvider != null && _connectedToTaskHost)
                     {
-                        _taskHostProvider.SendData(_taskHostNodeId, new TaskHostTaskCancelled());
+                        _taskHostProvider.SendData(_taskHostNodeKey, new TaskHostTaskCancelled());
                     }
                 }
 
@@ -320,6 +332,9 @@ namespace Microsoft.Build.BackEnd
                         (IDictionary<string, string>)_taskEnvironment.GetEnvironmentVariables(),
                         _buildComponentHost.BuildParameters.Culture,
                         _buildComponentHost.BuildParameters.UICulture,
+#if !NET35
+                        _hostServices,
+#endif
 #if FEATURE_APPDOMAIN
                         _appDomainSetup,
 #endif
@@ -329,6 +344,8 @@ namespace Microsoft.Build.BackEnd
                         BuildEngine.ContinueOnError,
                         _taskType.Type.FullName,
                         taskLocation,
+                        _taskLoggingContext?.TargetLoggingContext?.Target?.Name,
+                        _projectFile,
                         _buildComponentHost.BuildParameters.LogTaskInputs,
                         _setParameters,
                         new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),
@@ -347,8 +364,8 @@ namespace Microsoft.Build.BackEnd
                         nodeReuse: _buildComponentHost.BuildParameters.EnableNodeReuse && _useSidecarTaskHost,
                         taskHostParameters: _taskHostParameters);
 
-                    _taskHostNodeId = GenerateTaskHostNodeId(_scheduledNodeId, _requiredContext);
-                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_requiredContext, _taskHostNodeId, this, this, hostConfiguration, _taskHostParameters);
+                    _taskHostNodeKey = new TaskHostNodeKey(_requiredContext, _scheduledNodeId);
+                    _connectedToTaskHost = _taskHostProvider.AcquireAndSetUpHost(_taskHostNodeKey, this, this, hostConfiguration, _taskHostParameters);
                 }
 
                 if (_connectedToTaskHost)
@@ -377,7 +394,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         lock (_taskHostLock)
                         {
-                            _taskHostProvider.DisconnectFromHost(_taskHostNodeId);
+                            _taskHostProvider.DisconnectFromHost(_taskHostNodeKey);
                             _connectedToTaskHost = false;
                         }
                     }
@@ -397,22 +414,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             return _taskExecutionSucceeded;
-        }
-
-        private static int GenerateTaskHostNodeId(int scheduledNodeId, HandshakeOptions handshakeOptions)
-        {
-            // For traditional multi-proc builds, the task host id is just (int)HandshakeOptions that represents the runtime / architecture.
-            // For new multi-threaded mode, NodeProviderOutOfProcTaskHost needs to distinguish task hosts not only by HandshakeOptions (runtime / architecture),
-            // but also by which node they were requested. This is because NodeProviderOutOfProcTaskHost runs on the same process as multiple in-proc nodes,
-            // as opposed to the traditional multi-proc case where each node and single NodeProviderOutOfProcTaskHost runs on its own process.
-            // nodeId: [1, 255] (8 bits more than enough) (max is number of processors, usually 8. Let's assume max is 256 processors)
-            // HandshakeOptions: [0, 511] (9 bits)
-            // Pack nodeId into upper bits, handshakeOptions into lower bits
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(scheduledNodeId == -1 || (scheduledNodeId >= 1 && scheduledNodeId <= NODE_ID_MAX_VALUE_FOR_MULTITHREADED), nameof(scheduledNodeId));
-
-            return scheduledNodeId == -1 ?
-                        (int)handshakeOptions :
-                        (scheduledNodeId << HANDSHAKE_OPTIONS_BITS) | ((int)handshakeOptions & HANDSHAKE_OPTIONS_MASK);
         }
 
         /// <summary>
