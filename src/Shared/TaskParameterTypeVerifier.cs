@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
 using System.Reflection;
 using Microsoft.Build.Framework;
 #if NET35
@@ -35,7 +36,13 @@ namespace Microsoft.Build.BackEnd
             }
 
             Type[] genericArguments = parameterType.GetGenericArguments();
-            return genericArguments.Length == 1 && genericArguments[0].GetTypeInfo().IsValueType;
+            if (genericArguments.Length != 1)
+            {
+                return false;
+            }
+
+            Type typeArg = genericArguments[0];
+            return typeArg.GetTypeInfo().IsValueType || typeArg == typeof(FileInfo) || typeArg == typeof(DirectoryInfo);
         }
 #endif
 
@@ -48,6 +55,8 @@ namespace Microsoft.Build.BackEnd
             parameterType == typeof(ITaskItem)
 #if !TASKHOST
             || parameterType == typeof(AbsolutePath)
+            || parameterType == typeof(FileInfo)
+            || parameterType == typeof(DirectoryInfo)
             || IsTaskItemOfT(parameterType)
 #endif
             ;
@@ -69,6 +78,8 @@ namespace Microsoft.Build.BackEnd
                         parameterType == typeof(ITaskItem[])
 #if !TASKHOST
                         || parameterType == typeof(AbsolutePath[])
+                        || parameterType == typeof(FileInfo[])
+                        || parameterType == typeof(DirectoryInfo[])
                         || IsTaskItemOfT(elementType)
 #endif
                         ;
@@ -111,11 +122,15 @@ namespace Microsoft.Build.BackEnd
                           parameterType == typeof(string[]) ||                                                      /* string array, or */
 #if !TASKHOST
                           parameterType == typeof(AbsolutePath[]) ||                                                /* AbsolutePath array, or */
+                          parameterType == typeof(FileInfo[]) ||                                                    /* FileInfo array, or */
+                          parameterType == typeof(DirectoryInfo[]) ||                                               /* DirectoryInfo array, or */
 #endif
                           parameterType.GetTypeInfo().IsValueType ||                                                /* value type, or */
                           parameterType == typeof(string)                                                           /* string, or */
 #if !TASKHOST
-                          || parameterType == typeof(AbsolutePath)                                                  /* AbsolutePath */
+                          || parameterType == typeof(AbsolutePath)                                                  /* AbsolutePath, or */
+                          || parameterType == typeof(FileInfo)                                                      /* FileInfo, or */
+                          || parameterType == typeof(DirectoryInfo)                                                 /* DirectoryInfo */
 #endif
                           ;
             return result;

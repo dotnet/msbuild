@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.IO;
 using Microsoft.Build.Framework;
 
 #nullable enable
@@ -61,6 +62,18 @@ namespace Microsoft.Build.Shared
                 if (targetType == typeof(AbsolutePath))
                 {
                     return new AbsolutePath(value);
+                }
+
+                // Special handling for FileInfo
+                if (targetType == typeof(FileInfo))
+                {
+                    return new FileInfo(value);
+                }
+
+                // Special handling for DirectoryInfo
+                if (targetType == typeof(DirectoryInfo))
+                {
+                    return new DirectoryInfo(value);
                 }
 
                 // Special handling for bool - MSBuild supports various boolean representations
@@ -130,6 +143,17 @@ namespace Microsoft.Build.Shared
             if (value is AbsolutePath absolutePath)
             {
                 return absolutePath.Value;
+            }
+
+            // FileInfo and DirectoryInfo need special handling to return their path
+            if (value is FileInfo fileInfo)
+            {
+                return fileInfo.FullName;
+            }
+
+            if (value is DirectoryInfo directoryInfo)
+            {
+                return directoryInfo.FullName;
             }
 
             // Use InvariantCulture for consistent formatting

@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
@@ -762,7 +763,7 @@ namespace Microsoft.Build.BackEnd
         #region Local Methods
 
         /// <summary>
-        /// Checks if a type is TaskItem&lt;T&gt; where T is a value type.
+        /// Checks if a type is TaskItem&lt;T&gt; where T is a value type, FileInfo, or DirectoryInfo.
         /// </summary>
         private static bool IsTaskItemOfT(Type parameterType)
         {
@@ -778,7 +779,13 @@ namespace Microsoft.Build.BackEnd
             }
 
             Type[] genericArguments = parameterType.GetGenericArguments();
-            return genericArguments.Length == 1 && genericArguments[0].GetTypeInfo().IsValueType;
+            if (genericArguments.Length != 1)
+            {
+                return false;
+            }
+
+            Type typeArg = genericArguments[0];
+            return typeArg.GetTypeInfo().IsValueType || typeArg == typeof(FileInfo) || typeArg == typeof(DirectoryInfo);
         }
 
         /// <summary>
@@ -816,6 +823,20 @@ namespace Microsoft.Build.BackEnd
                 return InternalSetTaskParameter(parameter, TaskEnvironment.GetAbsolutePath(expandedParameterValue));
             }
 
+            // Special handling for FileInfo - validate path through AbsolutePath first
+            if (parameterType == typeof(FileInfo))
+            {
+                AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(expandedParameterValue);
+                return InternalSetTaskParameter(parameter, new FileInfo(absolutePath.Value));
+            }
+
+            // Special handling for DirectoryInfo - validate path through AbsolutePath first
+            if (parameterType == typeof(DirectoryInfo))
+            {
+                AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(expandedParameterValue);
+                return InternalSetTaskParameter(parameter, new DirectoryInfo(absolutePath.Value));
+            }
+
             // Use the unified ValueTypeParser for all other types
             object parsedValue = ValueTypeParser.Parse(expandedParameterValue, parameterType);
             return InternalSetTaskParameter(parameter, parsedValue);
@@ -851,6 +872,16 @@ namespace Microsoft.Build.BackEnd
                         else if (parameterType == typeof(AbsolutePath[]))
                         {
                             finalTaskInputs.Add(TaskEnvironment.GetAbsolutePath(item.ItemSpec));
+                        }
+                        else if (parameterType == typeof(FileInfo[]))
+                        {
+                            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
+                            finalTaskInputs.Add(new FileInfo(absolutePath.Value));
+                        }
+                        else if (parameterType == typeof(DirectoryInfo[]))
+                        {
+                            AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
+                            finalTaskInputs.Add(new DirectoryInfo(absolutePath.Value));
                         }
                         else
                         {
