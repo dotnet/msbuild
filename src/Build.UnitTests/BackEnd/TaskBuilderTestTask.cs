@@ -237,6 +237,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private ITaskItem[] _itemArrayOutput;
 
         /// <summary>
+        /// The value for the AbsolutePathOutput.
+        /// </summary>
+        private AbsolutePath _absolutePathOutput;
+
+        /// <summary>
+        /// The value for the AbsolutePathArrayOutput.
+        /// </summary>
+        private AbsolutePath[] _absolutePathArrayOutput;
+
+        /// <summary>
         /// Property determining if Execute() should throw or not.
         /// </summary>
         public bool ThrowOnExecute
@@ -626,6 +636,30 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 _itemArrayOutput = value;
                 _testTaskHost?.ParameterSet("ItemArrayParam", value);
+            }
+        }
+
+        /// <summary>
+        /// An AbsolutePath parameter.
+        /// </summary>
+        public AbsolutePath AbsolutePathParam
+        {
+            set
+            {
+                _absolutePathOutput = value;
+                _testTaskHost?.ParameterSet("AbsolutePathParam", value);
+            }
+        }
+
+        /// <summary>
+        /// An AbsolutePath array parameter.
+        /// </summary>
+        public AbsolutePath[] AbsolutePathArrayParam
+        {
+            set
+            {
+                _absolutePathArrayOutput = value;
+                _testTaskHost?.ParameterSet("AbsolutePathArrayParam", value);
             }
         }
 
@@ -1172,6 +1206,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 _testTaskHost?.OutputRead("ItemArrayNullOutput", _itemArrayOutput);
                 return null;
+            }
+        }
+
+        /// <summary>
+        /// An AbsolutePath output.
+        /// </summary>
+        [Output]
+        public AbsolutePath AbsolutePathOutput
+        {
+            get
+            {
+                _testTaskHost?.OutputRead("AbsolutePathOutput", _absolutePathOutput);
+                return _absolutePathOutput;
+            }
+        }
+
+        /// <summary>
+        /// An AbsolutePath array output.
+        /// </summary>
+        [Output]
+        public AbsolutePath[] AbsolutePathArrayOutput
+        {
+            get
+            {
+                _testTaskHost?.OutputRead("AbsolutePathArrayOutput", _absolutePathArrayOutput);
+                return _absolutePathArrayOutput;
             }
         }
 
