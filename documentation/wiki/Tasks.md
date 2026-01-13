@@ -14,8 +14,8 @@ A task is a class implementing [`ITask`](https://github.com/dotnet/msbuild/blob/
     - **Numeric value types**: `int`, `long`, `short`, `byte`, `uint`, `ulong`, `ushort`, `sbyte`, `double`, `float`, `decimal`, and their array equivalents
     - **Other value types**: `char`, `DateTime`, and their array equivalents
     - **Item types**: `ITaskItem` (representation of a file system object with metadata), `ITaskItem[]`
-    - **Strongly-typed items**: `ITaskItem<T>` where `T` is a value type (e.g., `ITaskItem<int>`), and their array equivalents
-    - **Path types**: `AbsolutePath`, `AbsolutePath[]`
+    - **Strongly-typed items**: `ITaskItem<T>` where `T` is a value type, `FileInfo`, or `DirectoryInfo` (e.g., `ITaskItem<int>`, `ITaskItem<FileInfo>`), and their array equivalents
+    - **Path types**: `AbsolutePath`, `AbsolutePath[]`, `FileInfo`, `FileInfo[]`, `DirectoryInfo`, `DirectoryInfo[]`
     - **Custom value types**: Any struct implementing `IConvertible` (for output parameters only)
   - The properties can have attributes `[Required]` which causes the engine to check that it has a value when the task is run and `[Output]` which exposes the property to be used again in XML
 
