@@ -36,4 +36,14 @@ internal sealed class BuildInsights
     internal record TaskCategoryStats(TaskStatsInfo? Total, TaskStatsInfo? FromNuget);
 
     internal record TaskStatsInfo(int ExecutionsCount, double TotalMilliseconds, long TotalMemoryBytes);
+
+    internal record ErrorCountsInfo(
+        int? Compiler,
+        int? MsBuildEngine,
+        int? Task,
+        int? SdkResolvers,
+        int? NetSdk,
+        int? NuGet,
+        int? BuildCheck,
+        int? Other);
 }

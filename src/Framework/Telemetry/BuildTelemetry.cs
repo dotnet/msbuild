@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using static Microsoft.Build.Framework.Telemetry.BuildInsights;
 
 namespace Microsoft.Build.Framework.Telemetry
 {
@@ -107,6 +108,17 @@ namespace Microsoft.Build.Framework.Telemetry
         public string? BuildEngineFrameworkName { get; set; }
 
         /// <summary>
+        /// Primary failure category when BuildSuccess = false.
+        /// One of: "Compiler", "MSBuildEngine", "Tasks", "SDKResolvers", "NETSDK", "NuGet", "BuildCheck", "Other".
+        /// </summary>
+        public string? FailureCategory { get; set; }
+
+        /// <summary>
+        /// Error counts by category.
+        /// </summary>
+        public ErrorCountsInfo? ErrorCounts { get; set; }
+
+        /// <summary>
         /// Create a list of properties sent to VS telemetry.
         /// </summary>
         public Dictionary<string, object> GetActivityProperties()
@@ -131,6 +143,8 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(MultiThreadedModeEnabled);
             AddIfNotNull(SACEnabled);
             AddIfNotNull(IsStandaloneExecution);
+            AddIfNotNull(FailureCategory);
+            AddIfNotNull(ErrorCounts);
 
             return telemetryItems;
 
@@ -160,6 +174,8 @@ namespace Microsoft.Build.Framework.Telemetry
             AddIfNotNull(MultiThreadedModeEnabled?.ToString(), nameof(MultiThreadedModeEnabled));
             AddIfNotNull(SACEnabled?.ToString(), nameof(SACEnabled));
             AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
+            AddIfNotNull(FailureCategory);
+            AddIfNotNull(ErrorCounts?.ToString(), nameof(ErrorCounts));
 
             // Calculate durations
             if (StartAt.HasValue && FinishedAt.HasValue)
