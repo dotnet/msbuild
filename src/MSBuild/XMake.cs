@@ -36,6 +36,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
+using Microsoft.Build.CommandLine.Experimental;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using FileLogger = Microsoft.Build.Logging.FileLogger;
@@ -961,12 +962,12 @@ namespace Microsoft.Build.CommandLine
                     exitType = ExitType.InitializationError;
                 }
             }
-#pragma warning disable CS0618 // Experimental.ProjectCache.ProjectCacheException is obsolete, but we need to support both namespaces for now
-            catch (Exception e) when (e is ProjectCacheException || e is Experimental.ProjectCache.ProjectCacheException)
+#pragma warning disable CS0618 // Microsoft.Build.Experimental.ProjectCache.ProjectCacheException is obsolete, but we need to support both namespaces for now
+            catch (Exception e) when (e is ProjectCacheException || e is Microsoft.Build.Experimental.ProjectCache.ProjectCacheException)
             {
 
                 ProjectCacheException pce = e as ProjectCacheException;
-                Experimental.ProjectCache.ProjectCacheException exppce = e as Experimental.ProjectCache.ProjectCacheException;
+                Microsoft.Build.Experimental.ProjectCache.ProjectCacheException exppce = e as Microsoft.Build.Experimental.ProjectCache.ProjectCacheException;
 
                 Console.WriteLine($"MSBUILD : error {pce?.ErrorCode ?? exppce?.ErrorCode}: {e.Message}");
 

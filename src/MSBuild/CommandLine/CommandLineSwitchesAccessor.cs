@@ -1,9 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using static Microsoft.Build.CommandLine.CommandLineSwitches;
+using static Microsoft.Build.CommandLine.Experimental.CommandLineSwitches;
 
-namespace Microsoft.Build.CommandLine
+namespace Microsoft.Build.CommandLine.Experimental
 {
     internal readonly struct CommandLineSwitchesAccessor
     {

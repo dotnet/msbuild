@@ -16,7 +16,7 @@ using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
 
-namespace Microsoft.Build.CommandLine
+namespace Microsoft.Build.CommandLine.Experimental
 {
     internal class CommandLineParser
     {

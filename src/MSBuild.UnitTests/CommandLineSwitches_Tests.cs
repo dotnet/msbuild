@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Resources;
 using Microsoft.Build.CommandLine;
+using Microsoft.Build.CommandLine.Experimental;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;

@@ -11,7 +11,7 @@ using Microsoft.Build.Shared;
 
 #nullable disable
 
-namespace Microsoft.Build.CommandLine
+namespace Microsoft.Build.CommandLine.Experimental
 {
     /// <summary>
     /// This class encapsulates the switches gathered from the application command line. It helps with switch detection, parameter
@@ -445,12 +445,6 @@ namespace Microsoft.Build.CommandLine
         // NOTE: the above arrays are instance members because this class is not required to be a singleton
 
         internal static List<(string path, string contents)> SwitchesFromResponseFiles = new();
-
-        #region ICommandLineSwitches Members
-
-        
-
-        #endregion
 
         /// <summary>
         /// Default constructor.
