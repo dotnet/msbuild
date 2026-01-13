@@ -21,7 +21,7 @@ namespace Microsoft.Build.BackEnd
         /// Is the parameter type a valid scalar input value
         /// </summary>
         internal static bool IsValidScalarInputParameter(Type parameterType) =>
-            parameterType.GetTypeInfo().IsValueType || parameterType == typeof(string) || parameterType == typeof(ITaskItem);
+            parameterType.GetTypeInfo().IsValueType || parameterType == typeof(string) || parameterType == typeof(ITaskItem) || parameterType == typeof(AbsolutePath);
 
         /// <summary>
         /// Is the passed in parameterType a valid vector input parameter
@@ -30,14 +30,15 @@ namespace Microsoft.Build.BackEnd
         {
             bool result = (parameterType.IsArray && parameterType.GetElementType().GetTypeInfo().IsValueType) ||
                         parameterType == typeof(string[]) ||
-                        parameterType == typeof(ITaskItem[]);
+                        parameterType == typeof(ITaskItem[]) ||
+                        parameterType == typeof(AbsolutePath[]);
             return result;
         }
 
         /// <summary>
-        /// Is the passed in value type assignable to an ITask or Itask[] object
+        /// Is the passed in value type assignable to an ITaskItem or ITaskItem[] object
         /// </summary>
-        internal static bool IsAssignableToITask(Type parameterType)
+        internal static bool IsAssignableToITaskItem(Type parameterType)
         {
             bool result = typeof(ITaskItem[]).GetTypeInfo().IsAssignableFrom(parameterType.GetTypeInfo()) ||    /* ITaskItem array or derived type, or */
                           typeof(ITaskItem).IsAssignableFrom(parameterType);                                    /* ITaskItem or derived type */
@@ -51,8 +52,10 @@ namespace Microsoft.Build.BackEnd
         {
             bool result = (parameterType.IsArray && parameterType.GetElementType().GetTypeInfo().IsValueType) ||    /* array of value types, or */
                           parameterType == typeof(string[]) ||                                                      /* string array, or */
+                          parameterType == typeof(AbsolutePath[]) ||                                                /* AbsolutePath array, or */
                           parameterType.GetTypeInfo().IsValueType ||                                                /* value type, or */
-                          parameterType == typeof(string);                                                          /* string */
+                          parameterType == typeof(string) ||                                                        /* string, or */
+                          parameterType == typeof(AbsolutePath);                                                    /* AbsolutePath */
             return result;
         }
 
@@ -69,7 +72,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static bool IsValidOutputParameter(Type parameterType)
         {
-            return IsValueTypeOutputParameter(parameterType) || IsAssignableToITask(parameterType);
+            return IsValueTypeOutputParameter(parameterType) || IsAssignableToITaskItem(parameterType);
         }
     }
 }

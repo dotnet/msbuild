@@ -470,6 +470,99 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #endregion
 
+        #region AbsolutePath Params
+
+        /// <summary>
+        /// Validate that setting an AbsolutePath parameter with a valid absolute path works.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathParam()
+        {
+            string absolutePath = NativeMethodsShared.IsWindows ? @"C:\temp\file.txt" : "/tmp/file.txt";
+            ValidateTaskParameter("AbsolutePathParam", absolutePath, new AbsolutePath(absolutePath));
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("AbsolutePathParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("AbsolutePathParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("AbsolutePathParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
+        #region AbsolutePath Array Params
+
+        /// <summary>
+        /// Validate that setting an AbsolutePath array with a single value sets the correct value.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathArrayParam()
+        {
+            string absolutePath = NativeMethodsShared.IsWindows ? @"C:\temp\file.txt" : "/tmp/file.txt";
+            ValidateTaskParameterArray("AbsolutePathArrayParam", absolutePath, new AbsolutePath[] { new AbsolutePath(absolutePath) });
+        }
+
+        /// <summary>
+        /// Validate that setting an AbsolutePath array with multiple values sets the correct values.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathArrayParamMultiple()
+        {
+            string path1 = NativeMethodsShared.IsWindows ? @"C:\temp\file1.txt" : "/tmp/file1.txt";
+            string path2 = NativeMethodsShared.IsWindows ? @"C:\temp\file2.txt" : "/tmp/file2.txt";
+            ValidateTaskParameterArray("AbsolutePathArrayParam", path1 + ";" + path2, new AbsolutePath[] { new AbsolutePath(path1), new AbsolutePath(path2) });
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathArrayParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("AbsolutePathArrayParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathArrayParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("AbsolutePathArrayParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathArrayParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("AbsolutePathArrayParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
         #region ITaskItem Params
 
         /// <summary>

@@ -781,6 +781,10 @@ namespace Microsoft.Build.BackEnd
             {
                 return InternalSetTaskParameter(parameter, expandedParameterValue);
             }
+            else if (parameterType == typeof(AbsolutePath))
+            {
+                return InternalSetTaskParameter(parameter, TaskEnvironment.GetAbsolutePath(expandedParameterValue));
+            }
             else
             {
                 return InternalSetTaskParameter(parameter, Convert.ChangeType(expandedParameterValue, parameterType, CultureInfo.InvariantCulture));
@@ -811,6 +815,10 @@ namespace Microsoft.Build.BackEnd
                         else if (parameterType == typeof(bool[]))
                         {
                             finalTaskInputs.Add(ConversionUtilities.ConvertStringToBool(item.ItemSpec));
+                        }
+                        else if (parameterType == typeof(AbsolutePath[]))
+                        {
+                            finalTaskInputs.Add(TaskEnvironment.GetAbsolutePath(item.ItemSpec));
                         }
                         else
                         {
@@ -898,7 +906,15 @@ namespace Microsoft.Build.BackEnd
                 object output = convertibleOutputs.GetValue(i);
                 if (output != null)
                 {
-                    stringOutputs[i] = (string)Convert.ChangeType(output, typeof(string), CultureInfo.InvariantCulture);
+                    // AbsolutePath needs special handling because Convert.ChangeType doesn't work with implicit operators
+                    if (output is AbsolutePath absolutePath)
+                    {
+                        stringOutputs[i] = absolutePath.Value;
+                    }
+                    else
+                    {
+                        stringOutputs[i] = (string)Convert.ChangeType(output, typeof(string), CultureInfo.InvariantCulture);
+                    }
                 }
             }
 
