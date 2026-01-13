@@ -148,6 +148,90 @@ namespace Microsoft.Build.Engine.UnitTests
             workerNodeData.TasksExecutionData.Keys.ShouldAllBe(k => !k.IsNuget);
         }
 
+        [Fact]
+        public void WorkerNodeTelemetryCollection_TaskFactoryName()
+        {
+            WorkerNodeTelemetryData? workerNodeData = null;
+            InternalTelemetryConsumingLogger.TestOnly_InternalTelemetryAggregted += dt => workerNodeData = dt;
+
+            var testProject = """
+                              <Project>
+                              <UsingTask
+                                  TaskName="InlineTask01"
+                                  TaskFactory="RoslynCodeTaskFactory"
+                                  AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll" >
+                                  <ParameterGroup />
+                                  <Task>
+                                    <Code Type="Fragment" Language="cs">
+                                      Log.LogMessage(MessageImportance.Low, "Hello from inline task!");
+                                    </Code>
+                                  </Task>
+                               </UsingTask>
+                                  <Target Name="Build">
+                                      <Message Text="Hello World"/>
+                                      <InlineTask01 />
+                                  </Target>
+                              </Project>
+                      """;
+
+            MockLogger logger = new MockLogger(_output);
+            Helpers.BuildProjectContentUsingBuildManager(
+                testProject,
+                logger,
+                new BuildParameters() { IsTelemetryEnabled = true }).OverallResult.ShouldBe(BuildResultCode.Success);
+
+            workerNodeData!.ShouldNotBeNull();
+
+            // Verify built-in task has AssemblyTaskFactory
+            var messageTaskKey = (TaskOrTargetTelemetryKey)"Microsoft.Build.Tasks.Message";
+            workerNodeData.TasksExecutionData.ShouldContainKey(messageTaskKey);
+            workerNodeData.TasksExecutionData[messageTaskKey].TaskFactoryName.ShouldBe("AssemblyTaskFactory");
+
+            // Verify inline task has RoslynCodeTaskFactory
+            var inlineTaskKey = new TaskOrTargetTelemetryKey("InlineTask01", true, false);
+            workerNodeData.TasksExecutionData.ShouldContainKey(inlineTaskKey);
+            workerNodeData.TasksExecutionData[inlineTaskKey].TaskFactoryName.ShouldBe("RoslynCodeTaskFactory");
+            workerNodeData.TasksExecutionData[inlineTaskKey].ExecutionsCount.ShouldBe(1);
+        }
+
+        [Fact]
+        public void TelemetryDataUtils_HashesCustomFactoryName()
+        {
+            // Create telemetry data with a custom factory name
+            var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>
+            {
+                { new TaskOrTargetTelemetryKey("CustomTask", true, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(100), 1, 1000, "MyCompany.CustomTaskFactory", null) },
+                { new TaskOrTargetTelemetryKey("BuiltInTask", false, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(50), 2, 500, "AssemblyTaskFactory", null) },
+                { new TaskOrTargetTelemetryKey("InlineTask", true, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(75), 1, 750, "RoslynCodeTaskFactory", "CLR4") }
+            };
+            var targetsData = new Dictionary<TaskOrTargetTelemetryKey, bool>();
+            var telemetryData = new WorkerNodeTelemetryData(tasksData, targetsData);
+
+            var activityData = telemetryData.AsActivityDataHolder(includeTasksDetails: true, includeTargetDetails: false);
+            activityData.ShouldNotBeNull();
+
+            var properties = activityData.GetActivityProperties();
+            properties.ShouldContainKey("Tasks");
+
+            var taskDetails = properties["Tasks"] as List<TaskDetailInfo>;
+            taskDetails.ShouldNotBeNull();
+
+            // Custom factory name should be hashed
+            var customTask = taskDetails!.FirstOrDefault(t => t.IsCustom && t.Name != GetHashed("InlineTask"));
+            customTask.ShouldNotBeNull();
+            customTask!.FactoryName.ShouldBe(GetHashed("MyCompany.CustomTaskFactory"));
+
+            // Known factory names should NOT be hashed
+            var builtInTask = taskDetails.FirstOrDefault(t => !t.IsCustom);
+            builtInTask.ShouldNotBeNull();
+            builtInTask!.FactoryName.ShouldBe("AssemblyTaskFactory");
+
+            var inlineTask = taskDetails.FirstOrDefault(t => t.FactoryName == "RoslynCodeTaskFactory");
+            inlineTask.ShouldNotBeNull();
+            inlineTask!.FactoryName.ShouldBe("RoslynCodeTaskFactory");
+            inlineTask.TaskHostRuntime.ShouldBe("CLR4");
+        }
+
 #if NET
         // test in .net core with telemetry opted in to avoid sending it but enable listening to it
         [Fact]
@@ -262,6 +346,10 @@ namespace Microsoft.Build.Engine.UnitTests
             createItemTaskData.ExecutionsCount.ShouldBe(1);
             createItemTaskData.TotalMilliseconds.ShouldBeGreaterThan(0);
             createItemTaskData.TotalMemoryBytes.ShouldBeGreaterThanOrEqualTo(0);
+
+            // Verify TaskFactoryName is populated for built-in tasks
+            messageTaskData.FactoryName.ShouldBe("AssemblyTaskFactory");
+            createItemTaskData.FactoryName.ShouldBe("AssemblyTaskFactory");
 
             // Verify Targets summary information
             var targetsSummaryTagObject = activity.TagObjects.FirstOrDefault(to => to.Key.Contains("VS.MSBuild.TargetsSummary"));
