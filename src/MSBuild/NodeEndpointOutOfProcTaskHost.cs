@@ -15,16 +15,18 @@ namespace Microsoft.Build.CommandLine
     internal class NodeEndpointOutOfProcTaskHost : NodeEndpointOutOfProcBase
     {
         internal bool _nodeReuse;
-        
+
         #region Constructors and Factories
 
         /// <summary>
-        /// Instantiates an endpoint to act as a client
+        /// Instantiates an endpoint to act as a client.
         /// </summary>
-        internal NodeEndpointOutOfProcTaskHost(bool nodeReuse)
+        /// <param name="nodeReuse">Whether node reuse is enabled.</param>
+        /// <param name="parentPacketVersion">The packet version supported by the parent. 1 if parent doesn't support version negotiation.</param>
+        internal NodeEndpointOutOfProcTaskHost(bool nodeReuse, byte parentPacketVersion)
         {
             _nodeReuse = nodeReuse;
-            InternalConstruct();
+            InternalConstruct(pipeName: null, parentPacketVersion);
         }
 
         #endregion // Constructors and Factories
