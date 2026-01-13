@@ -17,7 +17,7 @@ namespace Microsoft.Build.CommandLine
     /// This class encapsulates the switches gathered from the application command line. It helps with switch detection, parameter
     /// accumulation, and error generation.
     /// </summary>
-    internal sealed class CommandLineSwitches : ICommandLineSwitches
+    internal sealed class CommandLineSwitches
     {
         /// <summary>
         /// Enumeration of all recognized switches that do not take any parameters.
@@ -445,147 +445,7 @@ namespace Microsoft.Build.CommandLine
 
         #region ICommandLineSwitches Members
 
-        // Parameterless switches
-        public bool? Help => IsParameterlessSwitchSet(ParameterlessSwitch.Help) ? this[ParameterlessSwitch.Help] : null;
-
-        public bool? Version => IsParameterlessSwitchSet(ParameterlessSwitch.Version) ? this[ParameterlessSwitch.Version] : null;
-
-        public bool? NoLogo => IsParameterlessSwitchSet(ParameterlessSwitch.NoLogo) ? this[ParameterlessSwitch.NoLogo] : null;
-
-        public bool? NoAutoResponse => IsParameterlessSwitchSet(ParameterlessSwitch.NoAutoResponse) ? this[ParameterlessSwitch.NoAutoResponse] : null;
-
-        public bool? NoConsoleLogger => IsParameterlessSwitchSet(ParameterlessSwitch.NoConsoleLogger) ? this[ParameterlessSwitch.NoConsoleLogger] : null;
-
-        public bool? FileLogger => IsParameterlessSwitchSet(ParameterlessSwitch.FileLogger) ? this[ParameterlessSwitch.FileLogger] : null;
-
-        public bool? FileLogger1 => IsParameterlessSwitchSet(ParameterlessSwitch.FileLogger1) ? this[ParameterlessSwitch.FileLogger1] : null;
-
-        public bool? FileLogger2 => IsParameterlessSwitchSet(ParameterlessSwitch.FileLogger2) ? this[ParameterlessSwitch.FileLogger2] : null;
-
-        public bool? FileLogger3 => IsParameterlessSwitchSet(ParameterlessSwitch.FileLogger3) ? this[ParameterlessSwitch.FileLogger3] : null;
-
-        public bool? FileLogger4 => IsParameterlessSwitchSet(ParameterlessSwitch.FileLogger4) ? this[ParameterlessSwitch.FileLogger4] : null;
-
-        public bool? FileLogger5 => IsParameterlessSwitchSet(ParameterlessSwitch.FileLogger5) ? this[ParameterlessSwitch.FileLogger5] : null;
-
-        public bool? FileLogger6 => IsParameterlessSwitchSet(ParameterlessSwitch.FileLogger6) ? this[ParameterlessSwitch.FileLogger6] : null;
-
-        public bool? FileLogger7 => IsParameterlessSwitchSet(ParameterlessSwitch.FileLogger7) ? this[ParameterlessSwitch.FileLogger7] : null;
-
-        public bool? FileLogger8 => IsParameterlessSwitchSet(ParameterlessSwitch.FileLogger8) ? this[ParameterlessSwitch.FileLogger8] : null;
-
-        public bool? FileLogger9 => IsParameterlessSwitchSet(ParameterlessSwitch.FileLogger9) ? this[ParameterlessSwitch.FileLogger9] : null;
-
-        public bool? DistributedFileLogger => IsParameterlessSwitchSet(ParameterlessSwitch.DistributedFileLogger) ? this[ParameterlessSwitch.DistributedFileLogger] : null;
-
-#if DEBUG
-        public bool? WaitForDebugger => IsParameterlessSwitchSet(ParameterlessSwitch.WaitForDebugger) ? this[ParameterlessSwitch.WaitForDebugger] : null;
-#endif
-
-        // Parameterized switches
-        public string[] Project => IsParameterizedSwitchSet(ParameterizedSwitch.Project) ? this[ParameterizedSwitch.Project] : null;
-
-        public string[] Target => IsParameterizedSwitchSet(ParameterizedSwitch.Target) ? this[ParameterizedSwitch.Target] : null;
-
-        public string[] Property => IsParameterizedSwitchSet(ParameterizedSwitch.Property) ? this[ParameterizedSwitch.Property] : null;
-
-        public string[] Logger => IsParameterizedSwitchSet(ParameterizedSwitch.Logger) ? this[ParameterizedSwitch.Logger] : null;
-
-        public string[] DistributedLogger => IsParameterizedSwitchSet(ParameterizedSwitch.DistributedLogger) ? this[ParameterizedSwitch.DistributedLogger] : null;
-
-        public string[] Verbosity => IsParameterizedSwitchSet(ParameterizedSwitch.Verbosity) ? this[ParameterizedSwitch.Verbosity] : null;
-
-#if FEATURE_XML_SCHEMA_VALIDATION
-        public string[] Validate => IsParameterizedSwitchSet(ParameterizedSwitch.Validate) ? this[ParameterizedSwitch.Validate] : null;
-#endif
-
-        public string[] ConsoleLoggerParameters => IsParameterizedSwitchSet(ParameterizedSwitch.ConsoleLoggerParameters) ? this[ParameterizedSwitch.ConsoleLoggerParameters] : null;
-
-        public string[] NodeMode => IsParameterizedSwitchSet(ParameterizedSwitch.NodeMode) ? this[ParameterizedSwitch.NodeMode] : null;
-
-        public string[] MaxCpuCount => IsParameterizedSwitchSet(ParameterizedSwitch.MaxCPUCount) ? this[ParameterizedSwitch.MaxCPUCount] : null;
-
-        public string[] IgnoreProjectExtensions => IsParameterizedSwitchSet(ParameterizedSwitch.IgnoreProjectExtensions) ? this[ParameterizedSwitch.IgnoreProjectExtensions] : null;
-
-        public string[] ToolsVersion => IsParameterizedSwitchSet(ParameterizedSwitch.ToolsVersion) ? this[ParameterizedSwitch.ToolsVersion] : null;
-
-        public string[] FileLoggerParameters => IsParameterizedSwitchSet(ParameterizedSwitch.FileLoggerParameters) ? this[ParameterizedSwitch.FileLoggerParameters] : null;
-
-        public string[] FileLoggerParameters1 => IsParameterizedSwitchSet(ParameterizedSwitch.FileLoggerParameters1) ? this[ParameterizedSwitch.FileLoggerParameters1] : null;
-
-        public string[] FileLoggerParameters2 => IsParameterizedSwitchSet(ParameterizedSwitch.FileLoggerParameters2) ? this[ParameterizedSwitch.FileLoggerParameters2] : null;
-
-        public string[] FileLoggerParameters3 => IsParameterizedSwitchSet(ParameterizedSwitch.FileLoggerParameters3) ? this[ParameterizedSwitch.FileLoggerParameters3] : null;
-
-        public string[] FileLoggerParameters4 => IsParameterizedSwitchSet(ParameterizedSwitch.FileLoggerParameters4) ? this[ParameterizedSwitch.FileLoggerParameters4] : null;
-
-        public string[] FileLoggerParameters5 => IsParameterizedSwitchSet(ParameterizedSwitch.FileLoggerParameters5) ? this[ParameterizedSwitch.FileLoggerParameters5] : null;
-
-        public string[] FileLoggerParameters6 => IsParameterizedSwitchSet(ParameterizedSwitch.FileLoggerParameters6) ? this[ParameterizedSwitch.FileLoggerParameters6] : null;
-
-        public string[] FileLoggerParameters7 => IsParameterizedSwitchSet(ParameterizedSwitch.FileLoggerParameters7) ? this[ParameterizedSwitch.FileLoggerParameters7] : null;
-
-        public string[] FileLoggerParameters8 => IsParameterizedSwitchSet(ParameterizedSwitch.FileLoggerParameters8) ? this[ParameterizedSwitch.FileLoggerParameters8] : null;
-
-        public string[] FileLoggerParameters9 => IsParameterizedSwitchSet(ParameterizedSwitch.FileLoggerParameters9) ? this[ParameterizedSwitch.FileLoggerParameters9] : null;
-
-        public string[] TerminalLogger => IsParameterizedSwitchSet(ParameterizedSwitch.TerminalLogger) ? this[ParameterizedSwitch.TerminalLogger] : null;
-
-        public string[] TerminalLoggerParameters => IsParameterizedSwitchSet(ParameterizedSwitch.TerminalLoggerParameters) ? this[ParameterizedSwitch.TerminalLoggerParameters] : null;
-
-        public string[] NodeReuse => IsParameterizedSwitchSet(ParameterizedSwitch.NodeReuse) ? this[ParameterizedSwitch.NodeReuse] : null;
-
-        public string[] Preprocess => IsParameterizedSwitchSet(ParameterizedSwitch.Preprocess) ? this[ParameterizedSwitch.Preprocess] : null;
-
-        public string[] Targets => IsParameterizedSwitchSet(ParameterizedSwitch.Targets) ? this[ParameterizedSwitch.Targets] : null;
-
-        public string[] WarningsAsErrors => IsParameterizedSwitchSet(ParameterizedSwitch.WarningsAsErrors) ? this[ParameterizedSwitch.WarningsAsErrors] : null;
-
-        public string[] WarningsNotAsErrors => IsParameterizedSwitchSet(ParameterizedSwitch.WarningsNotAsErrors) ? this[ParameterizedSwitch.WarningsNotAsErrors] : null;
-
-        public string[] WarningsAsMessages => IsParameterizedSwitchSet(ParameterizedSwitch.WarningsAsMessages) ? this[ParameterizedSwitch.WarningsAsMessages] : null;
-
-        public string[] BinaryLogger => IsParameterizedSwitchSet(ParameterizedSwitch.BinaryLogger) ? this[ParameterizedSwitch.BinaryLogger] : null;
-
-        public string[] Check => IsParameterizedSwitchSet(ParameterizedSwitch.Check) ? this[ParameterizedSwitch.Check] : null;
-
-        public string[] Restore => IsParameterizedSwitchSet(ParameterizedSwitch.Restore) ? this[ParameterizedSwitch.Restore] : null;
-
-        public string[] ProfileEvaluation => IsParameterizedSwitchSet(ParameterizedSwitch.ProfileEvaluation) ? this[ParameterizedSwitch.ProfileEvaluation] : null;
-
-        public string[] RestoreProperty => IsParameterizedSwitchSet(ParameterizedSwitch.RestoreProperty) ? this[ParameterizedSwitch.RestoreProperty] : null;
-
-        public string[] Interactive => IsParameterizedSwitchSet(ParameterizedSwitch.Interactive) ? this[ParameterizedSwitch.Interactive] : null;
-
-        public string[] IsolateProjects => IsParameterizedSwitchSet(ParameterizedSwitch.IsolateProjects) ? this[ParameterizedSwitch.IsolateProjects] : null;
-
-        public string[] GraphBuild => IsParameterizedSwitchSet(ParameterizedSwitch.GraphBuild) ? this[ParameterizedSwitch.GraphBuild] : null;
-
-        public string[] InputResultsCaches => IsParameterizedSwitchSet(ParameterizedSwitch.InputResultsCaches) ? this[ParameterizedSwitch.InputResultsCaches] : null;
-
-        public string[] OutputResultsCache => IsParameterizedSwitchSet(ParameterizedSwitch.OutputResultsCache) ? this[ParameterizedSwitch.OutputResultsCache] : null;
-
-#if FEATURE_REPORTFILEACCESSES
-        public string[] ReportFileAccesses => IsParameterizedSwitchSet(ParameterizedSwitch.ReportFileAccesses) ? this[ParameterizedSwitch.ReportFileAccesses] : null;
-#endif
-
-        public string[] LowPriority => IsParameterizedSwitchSet(ParameterizedSwitch.LowPriority) ? this[ParameterizedSwitch.LowPriority] : null;
-
-        public string[] Question => IsParameterizedSwitchSet(ParameterizedSwitch.Question) ? this[ParameterizedSwitch.Question] : null;
-
-        public string[] DetailedSummary => IsParameterizedSwitchSet(ParameterizedSwitch.DetailedSummary) ? this[ParameterizedSwitch.DetailedSummary] : null;
-
-        public string[] GetProperty => IsParameterizedSwitchSet(ParameterizedSwitch.GetProperty) ? this[ParameterizedSwitch.GetProperty] : null;
-
-        public string[] GetItem => IsParameterizedSwitchSet(ParameterizedSwitch.GetItem) ? this[ParameterizedSwitch.GetItem] : null;
-
-        public string[] GetTargetResult => IsParameterizedSwitchSet(ParameterizedSwitch.GetTargetResult) ? this[ParameterizedSwitch.GetTargetResult] : null;
-
-        public string[] GetResultOutputFile => IsParameterizedSwitchSet(ParameterizedSwitch.GetResultOutputFile) ? this[ParameterizedSwitch.GetResultOutputFile] : null;
-
-        public string[] FeatureAvailability => IsParameterizedSwitchSet(ParameterizedSwitch.FeatureAvailability) ? this[ParameterizedSwitch.FeatureAvailability] : null;
-
-        public string[] MultiThreaded => IsParameterizedSwitchSet(ParameterizedSwitch.MultiThreaded) ? this[ParameterizedSwitch.MultiThreaded] : null;
+        
 
         #endregion
 

@@ -43,10 +43,26 @@ namespace Microsoft.Build.CommandLine
 
         internal IReadOnlyList<string> IncludedResponseFiles => includedResponseFiles ?? (IReadOnlyList<string>)Array.Empty<string>();
 
-        public ICommandLineSwitches Parse(IEnumerable<string> commandLineArgs)
+        /// <summary>
+        /// Parses the provided command-line arguments into a <see cref="CommandLineSwitchesAccessor"/>.
+        /// </summary>
+        /// <param name="commandLineArgs">
+        /// The command-line arguments excluding the executable path.
+        /// </param>
+        /// <returns>
+        /// A <see cref="CommandLineSwitchesAccessor"/> containing the effective set of switches after combining
+        /// switches from response files (including any auto-response file) with switches from the command line,
+        /// where command-line switches take precedence.
+        /// </returns>
+        /// <exception cref="CommandLineSwitchException">
+        /// Thrown when invalid switch syntax or values are encountered while parsing the command line or response files.
+        /// </exception>
+        public CommandLineSwitchesAccessor Parse(IEnumerable<string> commandLineArgs)
         {
+            List<string> args = [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, ..commandLineArgs];
+
             GatherAllSwitches(
-                commandLineArgs,
+                args,
                 out CommandLineSwitches responseFileSwitches,
                 out CommandLineSwitches commandLineSwitches,
                 out string fullCommandLine,
@@ -58,7 +74,7 @@ namespace Microsoft.Build.CommandLine
 
             result.ThrowErrors();
 
-            return result;
+            return new CommandLineSwitchesAccessor(result);
         }
 
         /// <summary>
