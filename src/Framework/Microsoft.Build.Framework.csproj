@@ -65,6 +65,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\ValueTypeParser.cs">
+      <Link>Shared\ValueTypeParser.cs</Link>
+    </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
   </ItemGroup>
 
