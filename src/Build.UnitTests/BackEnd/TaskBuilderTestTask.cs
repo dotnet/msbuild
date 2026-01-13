@@ -247,6 +247,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private AbsolutePath[] _absolutePathArrayOutput;
 
         /// <summary>
+        /// The value for the TaskItemIntOutput.
+        /// </summary>
+        private ITaskItem<int> _taskItemIntOutput;
+
+        /// <summary>
+        /// The value for the TaskItemIntArrayOutput.
+        /// </summary>
+        private ITaskItem<int>[] _taskItemIntArrayOutput;
+
+        /// <summary>
         /// Property determining if Execute() should throw or not.
         /// </summary>
         public bool ThrowOnExecute
@@ -660,6 +670,30 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 _absolutePathArrayOutput = value;
                 _testTaskHost?.ParameterSet("AbsolutePathArrayParam", value);
+            }
+        }
+
+        /// <summary>
+        /// A TaskItem&lt;int&gt; parameter.
+        /// </summary>
+        public ITaskItem<int> TaskItemIntParam
+        {
+            set
+            {
+                _taskItemIntOutput = value;
+                _testTaskHost?.ParameterSet("TaskItemIntParam", value);
+            }
+        }
+
+        /// <summary>
+        /// A TaskItem&lt;int&gt; array parameter.
+        /// </summary>
+        public ITaskItem<int>[] TaskItemIntArrayParam
+        {
+            set
+            {
+                _taskItemIntArrayOutput = value;
+                _testTaskHost?.ParameterSet("TaskItemIntArrayParam", value);
             }
         }
 
@@ -1232,6 +1266,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 _testTaskHost?.OutputRead("AbsolutePathArrayOutput", _absolutePathArrayOutput);
                 return _absolutePathArrayOutput;
+            }
+        }
+
+        /// <summary>
+        /// A TaskItem&lt;int&gt; output.
+        /// </summary>
+        [Output]
+        public ITaskItem<int> TaskItemIntOutput
+        {
+            get
+            {
+                _testTaskHost?.OutputRead("TaskItemIntOutput", _taskItemIntOutput);
+                return _taskItemIntOutput;
+            }
+        }
+
+        /// <summary>
+        /// A TaskItem&lt;int&gt; array output.
+        /// </summary>
+        [Output]
+        public ITaskItem<int>[] TaskItemIntArrayOutput
+        {
+            get
+            {
+                _testTaskHost?.OutputRead("TaskItemIntArrayOutput", _taskItemIntArrayOutput);
+                return _taskItemIntArrayOutput;
             }
         }
 
