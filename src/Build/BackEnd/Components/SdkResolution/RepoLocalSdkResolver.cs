@@ -79,7 +79,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
 
             if (!hasSdkProps && !hasSdkTargets)
             {
-                return factory.IndicateFailure([$"Repo-local SDK directory '{sdkPath}' does not contain Sdk.props or Sdk.targets."], null);
+                return factory.IndicateFailure(new[] { $"Repo-local SDK directory '{sdkPath}' does not contain Sdk.props or Sdk.targets." }, null);
             }
 
             return factory.IndicateSuccess(sdkPath, string.Empty);
