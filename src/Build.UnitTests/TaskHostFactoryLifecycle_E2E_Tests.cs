@@ -60,12 +60,10 @@ namespace Microsoft.Build.Engine.UnitTests
             using TestEnvironment env = TestEnvironment.Create(_output);
             string testProjectPath = Path.Combine(TestAssetsRootPath, "TaskHostLifecycleTestApp.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n /p:RuntimeToUse={runtimeToUse} /p:TaskFactoryToUse={taskFactoryToUse}", out bool successTestTask);
-
-            if (!successTestTask)
-            {
-                _output.WriteLine(testTaskOutput);
-            }
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{testProjectPath} -v:n /p:RuntimeToUse={runtimeToUse} /p:TaskFactoryToUse={taskFactoryToUse}", 
+                out bool successTestTask,
+                outputHelper: _output);
 
             successTestTask.ShouldBeTrue();
 
