@@ -14,14 +14,11 @@ namespace Microsoft.Build.UnitTests
 {
     public class TaskEnvironment_Tests
     {
-        private const string StubEnvironmentName = "Stub";
-        private const string MultithreadedEnvironmentName = "Multithreaded";
-
         public static TheoryData<string> EnvironmentTypes =>
             new TheoryData<string>
             {
-                StubEnvironmentName,
-                MultithreadedEnvironmentName
+                nameof(MultiProcessTaskEnvironmentDriver),
+                nameof(MultiThreadedTaskEnvironmentDriver)
             };
 
         // CA2000 is suppressed because the caller is responsible for disposal via DisposeTaskEnvironment
@@ -30,8 +27,8 @@ namespace Microsoft.Build.UnitTests
         {
             return environmentType switch
             {
-                StubEnvironmentName => TaskEnvironmentHelper.CreateForTest(),
-                MultithreadedEnvironmentName => new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(GetResolvedTempPath())),
+                nameof(MultiProcessTaskEnvironmentDriver) => TaskEnvironmentHelper.CreateForTest(),
+                nameof(MultiThreadedTaskEnvironmentDriver) => new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(GetResolvedTempPath())),
                 _ => throw new ArgumentException($"Unknown environment type: {environmentType}")
             };
         }
@@ -196,7 +193,7 @@ namespace Microsoft.Build.UnitTests
                 newRetrievedDirectory.Value.ShouldBe(alternateDirectory);
 
                 // Verify behavior differs based on environment type
-                if (environmentType == StubEnvironmentName)
+                if (environmentType == nameof(MultiProcessTaskEnvironmentDriver))
                 {
                     // Stub should change system current directory
                     Directory.GetCurrentDirectory().ShouldBe(alternateDirectory);
@@ -257,6 +254,56 @@ namespace Microsoft.Build.UnitTests
                 DisposeTaskEnvironment(taskEnvironment);
             }
         }
+        
+        [Theory]
+        [MemberData(nameof(EnvironmentTypes))]
+        public void TaskEnvironment_TryGetAbsolutePath_ShouldReturnTrueForValidPaths(string environmentType)
+        {
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
+            string baseDirectory = GetResolvedTempPath();
+            string relativePath = Path.Combine("subdir", "file.txt");
+            string originalDirectory = Directory.GetCurrentDirectory();
+
+            try
+            {
+                taskEnvironment.ProjectDirectory = new AbsolutePath(baseDirectory, ignoreRootedCheck: true);
+
+                var expected = taskEnvironment.GetAbsolutePath(relativePath);
+
+                bool result = taskEnvironment.TryGetAbsolutePath(relativePath, out AbsolutePath actual);
+
+                result.ShouldBeTrue();
+                actual.Value.ShouldBe(expected.Value);
+            }
+            finally
+            {
+                DisposeTaskEnvironment(taskEnvironment);
+                Directory.SetCurrentDirectory(originalDirectory);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EnvironmentTypes))]
+        public void TaskEnvironment_TryGetAbsolutePath_ShouldReturnFalseForInvalidPath(string environmentType)
+        {
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
+
+            try
+            {
+                // Construct a path containing an invalid path character
+                char invalidChar = Path.GetInvalidPathChars().FirstOrDefault();
+                string invalidPath = "invalid" + invalidChar + "path";
+
+                bool result = taskEnvironment.TryGetAbsolutePath(invalidPath, out AbsolutePath _);
+
+                // TryGetAbsolutePath should return false rather than throw
+                result.ShouldBeFalse();
+            }
+            finally
+            {
+                DisposeTaskEnvironment(taskEnvironment);
+            }
+        }
 
         [Theory]
         [MemberData(nameof(EnvironmentTypes))]
@@ -277,7 +324,7 @@ namespace Microsoft.Build.UnitTests
 
                 processStartInfo.ShouldNotBeNull();
 
-                if (environmentType == StubEnvironmentName)
+                if (environmentType == nameof(MultiProcessTaskEnvironmentDriver))
                 {
                     // Stub should reflect system environment, but working directory should be empty
                     processStartInfo.WorkingDirectory.ShouldBe(string.Empty);
