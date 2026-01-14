@@ -25,6 +25,9 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="path">The path to convert to absolute.</param>
         /// <returns>An absolute path representation.</returns>
+        /// <remarks>
+        /// May throw exceptions in case of invalid input (the exceptions are thrown by <see cref="System.IO.Path.Combine(string,string)"/> that is used internally in both implementations).
+        /// </remarks>
         AbsolutePath GetAbsolutePath(string path);
 
         /// <summary>

@@ -33,11 +33,36 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Converts a relative or absolute path string to an absolute path.
-        /// This function resolves paths relative to ProjectDirectory.
+        /// This function resolves paths relative to <see cref="ProjectDirectory"/>.
         /// </summary>
         /// <param name="path">The path to convert.</param>
         /// <returns>An absolute path representation.</returns>
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when <paramref name="path"/> contains one or more invalid path characters as
+        /// returned by <see cref="System.IO.Path.GetInvalidPathChars"/>.
+        /// </exception>
         public AbsolutePath GetAbsolutePath(string path) => _driver.GetAbsolutePath(path);
+
+        /// <summary>
+        /// Converts a relative or absolute path string to an absolute path.
+        /// This function resolves paths relative to <see cref="ProjectDirectory"/>.
+        /// </summary>
+        /// <param name="path">The path to convert to absolute.</param>
+        /// <param name="absolutePath">The resulting absolute path if the conversion succeeded; default otherwise.</param>
+        /// <returns>True if the conversion succeeded; false otherwise.</returns>
+        public bool TryGetAbsolutePath(string path, out AbsolutePath absolutePath)
+        {
+            try
+            {
+                absolutePath = GetAbsolutePath(path);
+                return true;
+            }
+            catch
+            {
+                absolutePath = default;
+                return false;
+            }
+        }
 
         /// <summary>
         /// Gets the value of an environment variable.
