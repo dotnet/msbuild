@@ -694,52 +694,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verify that when task host factory is explicitly requested with Runtime=NET,
-        /// the task host does not use sidecar mode (short-lived, releases locks after build).
-        /// This is a regression test for https://github.com/dotnet/msbuild/issues/13013
-        /// </summary>
-        [Fact]
-        public void VerifyExplicitTaskHostFactoryWithRuntimeNetDoesNotUseSidecar()
-        {
-            ITask createdTask = null;
-            try
-            {
-                // Setup: Task host factory explicitly requested with Runtime=NET
-                TaskHostParameters factoryParameters = new(XMakeAttributes.MSBuildRuntimeValues.net);
-                SetupTaskFactory(factoryParameters, explicitlyLaunchTaskHost: true, isTaskHostFactory: true);
-
-                createdTask = _taskFactory.CreateTaskInstance(
-                    ElementLocation.Create("MSBUILD"),
-                    null,
-                    new MockHost(),
-                    TaskHostParameters.Empty,
-#if FEATURE_APPDOMAIN
-                    new AppDomainSetup(),
-#endif
-                    false,
-                    scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
-                    CreateStubTaskEnvironment());
-
-                createdTask.ShouldNotBeNull();
-                createdTask.ShouldBeOfType<TaskHostTask>();
-
-                // Verify that the task host is not using sidecar mode (short-lived)
-                // When TaskHostFactoryExplicitlyRequested is true, useSidecarTaskHost should be false
-                TaskHostTask taskHostTask = (TaskHostTask)createdTask;
-                bool useSidecarTaskHost = IsUsingSidecarMode(taskHostTask);
-                useSidecarTaskHost.ShouldBeFalse("When task host factory is explicitly requested, useSidecarTaskHost should be false to ensure short-lived task hosts that release locks");
-            }
-            finally
-            {
-                if (createdTask != null)
-                {
-                    _taskFactory.CleanupTask(createdTask);
-                }
-            }
-        }
-
-        /// <summary>
         /// Validates task host lifecycle behavior based on whether the TaskHost runtime matches 
         /// the executing MSBuild runtime and whether TaskHostFactory is explicitly requested.
         /// 
