@@ -148,25 +148,63 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
+        /// On .NET Framework, this throws InvalidOperationException due to eager path validation.
+        /// On modern .NET (Core+), path validation is not performed eagerly.
         /// </summary>
-        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
+        [WindowsOnlyFact]
         public void GetItemSpecModifierOnBadPath()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            if (Xunit.NetCore.Extensions.CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
             {
-                TestGetItemSpecModifierOnBadPath(Directory.GetCurrentDirectory());
-            });
+                // .NET Framework validates paths eagerly and throws
+                Assert.Throws<InvalidOperationException>(() =>
+                {
+                    TestGetItemSpecModifierOnBadPath(Directory.GetCurrentDirectory());
+                });
+            }
+            else
+            {
+                // Modern .NET (Core+) does not validate paths eagerly, so the method may complete or return unexpected results
+                // We just verify it doesn't throw the expected exception
+                try
+                {
+                    TestGetItemSpecModifierOnBadPath(Directory.GetCurrentDirectory());
+                }
+                catch (InvalidOperationException)
+                {
+                    Assert.Fail("Modern .NET should not throw InvalidOperationException for invalid paths");
+                }
+            }
         }
         /// <summary>
         /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
+        /// On .NET Framework, this throws InvalidOperationException due to eager path validation.
+        /// On modern .NET (Core+), path validation is not performed eagerly.
         /// </summary>
-        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
+        [WindowsOnlyFact]
         public void GetItemSpecModifierOnBadPath2()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            if (Xunit.NetCore.Extensions.CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
             {
-                TestGetItemSpecModifierOnBadPath(null);
-            });
+                // .NET Framework validates paths eagerly and throws
+                Assert.Throws<InvalidOperationException>(() =>
+                {
+                    TestGetItemSpecModifierOnBadPath(null);
+                });
+            }
+            else
+            {
+                // Modern .NET (Core+) does not validate paths eagerly, so the method may complete or return unexpected results
+                // We just verify it doesn't throw the expected exception
+                try
+                {
+                    TestGetItemSpecModifierOnBadPath(null);
+                }
+                catch (InvalidOperationException)
+                {
+                    Assert.Fail("Modern .NET should not throw InvalidOperationException for invalid paths");
+                }
+            }
         }
 
         private static void TestGetItemSpecModifierOnBadPath(string currentDirectory)
@@ -461,31 +499,64 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
+        [WindowsOnlyFact]
         public void NormalizePathBadUNC1()
         {
-            Assert.Throws<ArgumentException>(() =>
+            if (Xunit.NetCore.Extensions.CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
             {
-                Assert.Null(FileUtilities.NormalizePath(@"\\"));
-            });
+                // .NET Framework validates paths eagerly and throws
+                Assert.Throws<ArgumentException>(() =>
+                {
+                    Assert.Null(FileUtilities.NormalizePath(@"\\"));
+                });
+            }
+            else
+            {
+                // Modern .NET (Core+) does not validate paths eagerly
+                // The method may return null or an unexpected result without throwing
+                string result = FileUtilities.NormalizePath(@"\\");
+                // We just verify it doesn't throw ArgumentException
+            }
         }
 
-        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
+        [WindowsOnlyFact]
         public void NormalizePathBadUNC2()
         {
-            Assert.Throws<ArgumentException>(() =>
+            if (Xunit.NetCore.Extensions.CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
             {
-                Assert.Null(FileUtilities.NormalizePath(@"\\XXX\"));
-            });
+                // .NET Framework validates paths eagerly and throws
+                Assert.Throws<ArgumentException>(() =>
+                {
+                    Assert.Null(FileUtilities.NormalizePath(@"\\XXX\"));
+                });
+            }
+            else
+            {
+                // Modern .NET (Core+) does not validate paths eagerly
+                // The method may return null or an unexpected result without throwing
+                string result = FileUtilities.NormalizePath(@"\\XXX\");
+                // We just verify it doesn't throw ArgumentException
+            }
         }
 
-        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
+        [WindowsOnlyFact]
         public void NormalizePathBadUNC3()
         {
-            Assert.Throws<ArgumentException>(() =>
+            if (Xunit.NetCore.Extensions.CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
             {
-                Assert.Equal(@"\\localhost", FileUtilities.NormalizePath(@"\\localhost"));
-            });
+                // .NET Framework validates paths eagerly and throws
+                Assert.Throws<ArgumentException>(() =>
+                {
+                    Assert.Equal(@"\\localhost", FileUtilities.NormalizePath(@"\\localhost"));
+                });
+            }
+            else
+            {
+                // Modern .NET (Core+) does not validate paths eagerly
+                // The method may complete without throwing
+                string result = FileUtilities.NormalizePath(@"\\localhost");
+                // We just verify it doesn't throw ArgumentException
+            }
         }
 
         [WindowsOnlyFact]
@@ -501,15 +572,26 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(@"c:\abc\def", FileUtilities.NormalizePath(@"c:\abc\" + longPart + @"\..\def"));
         }
 
-        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
+        [WindowsOnlyFact]
         public void NormalizePathInvalid()
         {
             string filePath = @"c:\aardvark\|||";
 
-            Assert.Throws<ArgumentException>(() =>
+            if (Xunit.NetCore.Extensions.CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
             {
-                FileUtilities.NormalizePath(filePath);
-            });
+                // .NET Framework validates paths eagerly and throws
+                Assert.Throws<ArgumentException>(() =>
+                {
+                    FileUtilities.NormalizePath(filePath);
+                });
+            }
+            else
+            {
+                // Modern .NET (Core+) does not validate paths eagerly
+                // The method may complete without throwing
+                string result = FileUtilities.NormalizePath(filePath);
+                // We just verify it doesn't throw ArgumentException
+            }
         }
 
         [WindowsOnlyFact]

@@ -3123,9 +3123,11 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify we get no resolved paths when we pass in a root with invalid chars
+        /// Verify we get no resolved paths when we pass in a root with invalid chars.
+        /// On .NET Framework, this throws ArgumentException due to eager path validation.
+        /// On modern .NET (Core+), path validation is not performed eagerly, so the method completes without throwing.
         /// </summary>
-        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. No invalid characters on Unix.")]
+        [WindowsOnlyFact]
         public void ResolveFromDirectoryInvalidChar()
         {
             var targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
@@ -3133,7 +3135,20 @@ namespace Microsoft.Build.UnitTests
             // Try a path with invalid chars which does not exist
             string directoryWithInvalidChars = "c:\\<>?";
             var paths = new List<string> { directoryWithInvalidChars };
-            Should.Throw<ArgumentException>(() => { ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatform); });
+            
+            if (Xunit.NetCore.Extensions.CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
+            {
+                // .NET Framework validates paths eagerly and throws
+                Should.Throw<ArgumentException>(() => { ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatform); });
+            }
+            else
+            {
+                // Modern .NET (Core+) does not validate paths eagerly, so no exception is thrown
+                // The method just skips paths that don't exist
+                ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatform);
+                // targetPlatform should be empty since the path doesn't exist
+                targetPlatform.Count.ShouldBe(0);
+            }
         }
 
         /// <summary>
