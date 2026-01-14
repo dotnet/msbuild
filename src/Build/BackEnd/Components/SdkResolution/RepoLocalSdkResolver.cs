@@ -62,7 +62,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 return factory.IndicateFailure(null);
             }
 
-            // Check for .msbuild/Sdk/{SdkName}/Sdk directory
+            // Construct path to .msbuild/Sdk/{SdkName}/Sdk directory
             string sdkPath = Path.Combine(repoRoot, ".msbuild", "Sdk", sdk.Name, "Sdk");
 
             if (!FileUtilities.DirectoryExistsNoThrow(sdkPath))
