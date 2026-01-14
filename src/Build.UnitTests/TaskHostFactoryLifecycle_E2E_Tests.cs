@@ -40,18 +40,22 @@ namespace Microsoft.Build.Engine.UnitTests
         /// 3. Runtime doesn't match + TaskHostFactory requested → short-lived out of proc (nodereuse:False)
         /// 4. Runtime doesn't match + TaskHostFactory NOT requested → long-lived sidecar out of proc (nodereuse:True)
         /// </summary>
+        /// <param name="runtimeToUse">The runtime to use for the task (CurrentRuntime or NET)</param>
+        /// <param name="taskFactoryToUse">The task factory to use (TaskHostFactory or AssemblyTaskFactory)</param>
+        /// <param name="expectedNodeReuse">Expected node reuse value (true for long-lived, false for short-lived, null for in-proc)</param>
         [Theory]
-        [InlineData("CurrentRuntime", "TaskHostFactory")]      // Match + Explicit → short-lived out-of-proc
-        [InlineData("CurrentRuntime", "AssemblyTaskFactory")]  // Match + No Explicit → in-proc
+        [InlineData("CurrentRuntime", "TaskHostFactory", false)]      // Match + Explicit → short-lived out-of-proc
+        [InlineData("CurrentRuntime", "AssemblyTaskFactory", null)]   // Match + No Explicit → in-proc
 
         // Not test-able on .NET msbuild as it can't run a CLR2/CLR4 task host (out-of-proc)
 #if !NET
-        [InlineData("NET", "TaskHostFactory")]     // No Match + Explicit → short-lived out-of-proc
-        [InlineData("NET", "AssemblyTaskFactory")] // No Match + No Explicit → long-lived sidecar out-of-proc
+        [InlineData("NET", "TaskHostFactory", false)]     // No Match + Explicit → short-lived out-of-proc
+        [InlineData("NET", "AssemblyTaskFactory", true)]  // No Match + No Explicit → long-lived sidecar out-of-proc
 #endif
         public void TaskHostLifecycle_ValidatesAllScenarios(
             string runtimeToUse,
-            string taskFactoryToUse)
+            string taskFactoryToUse,
+            bool? expectedNodeReuse)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             string testProjectPath = Path.Combine(TestAssetsRootPath, "TaskHostLifecycleTestApp.csproj");
@@ -64,6 +68,16 @@ namespace Microsoft.Build.Engine.UnitTests
             }
 
             successTestTask.ShouldBeTrue();
+
+            // Verify node reuse behavior based on expected value
+            if (expectedNodeReuse.HasValue)
+            {
+                // For out-of-proc scenarios, validate the nodereuse flag in the task's command-line arguments
+                string expectedFlag = expectedNodeReuse.Value ? "/nodereuse:True" : "/nodereuse:False";
+                testTaskOutput.ShouldContain(expectedFlag, 
+                    customMessage: $"Task should have {expectedFlag} in its command-line arguments");
+            }
+            // For in-proc scenarios (expectedNodeReuse == null), no nodereuse flag validation needed
         }
     }
 }
