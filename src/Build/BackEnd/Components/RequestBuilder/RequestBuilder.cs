@@ -905,8 +905,8 @@ namespace Microsoft.Build.BackEnd
 
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
-                entryToComplete.RequestConfiguration.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
-                entryToComplete.RequestConfiguration.SavedEnvironmentVariables = CommunicationsUtilities.GetEnvironmentVariables();
+                entryToComplete.RequestConfiguration.SavedCurrentDirectory = entryToComplete.TaskEnvironment.ProjectDirectory.Value;
+                entryToComplete.RequestConfiguration.SavedEnvironmentVariables = entryToComplete.TaskEnvironment.GetEnvironmentVariables().ToFrozenDictionary(CommunicationsUtilities.EnvironmentVariableComparer);
             }
 
             entryToComplete.Complete(result);
@@ -1074,17 +1074,14 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// This method is called to reset the current directory to the one appropriate for this project.  It should be called any time
-        /// the project is resumed.
-        /// If the directory does not exist, does nothing.
-        /// This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project.
-        /// No errors are masked by doing this: errors loading the project from disk are reported at load time, if necessary.
+        /// Sets the project directory on the request's <see cref="TaskEnvironment"/>.
+        /// Called when the project is resumed to ensure tasks see the correct working directory.
         /// </summary>
-        private void SetProjectCurrentDirectory()
+        private void SetProjectDirectory()
         {
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
-                NativeMethodsShared.SetCurrentDirectory(_requestEntry.ProjectRootDirectory);
+                _requestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_requestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
             }
         }
 
@@ -1134,7 +1131,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         foreach (ProjectPropertyInstance environmentProperty in environmentProperties)
                         {
-                            Environment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue, EnvironmentVariableTarget.Process);
+                            _requestEntry.TaskEnvironment.SetEnvironmentVariable(environmentProperty.Name, environmentProperty.EvaluatedValue);
                         }
                     }
 
@@ -1190,7 +1187,7 @@ namespace Microsoft.Build.BackEnd
                     _requestEntry.RequestConfiguration.Project.ProjectFileLocation, "NoTargetSpecified");
 
                 // Set the current directory to that required by the project.
-                SetProjectCurrentDirectory();
+                SetProjectDirectory();
 
                 // Transfer results and state from the previous node, if necessary.
                 // In order for the check for target completeness for this project to be valid, all of the target results from the project must be present
@@ -1270,9 +1267,9 @@ namespace Microsoft.Build.BackEnd
         {
             ITelemetryForwarder telemetryForwarder =
                 ((TelemetryForwarderProvider)_componentHost.GetComponent(BuildComponentType.TelemetryForwarder))
-                .Instance;
+                ?.Instance;
 
-            if (!telemetryForwarder.IsTelemetryCollected)
+            if (telemetryForwarder == null || !telemetryForwarder.IsTelemetryCollected)
             {
                 return;
             }
@@ -1281,6 +1278,11 @@ namespace Microsoft.Build.BackEnd
             // The TargetBuilder filters out results for targets not explicitly requested before returning the result.
             // Hence we need to fetch the original result from the cache - to get the data for all executed targets.
             BuildResult unfilteredResult = resultsCache.GetResultsForConfiguration(_requestEntry.Request.ConfigurationId);
+
+            if (unfilteredResult?.ResultsByTarget == null || _requestEntry.RequestConfiguration.Project?.Targets == null)
+            {
+                return;
+            }
 
             foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
             {
@@ -1329,12 +1331,15 @@ namespace Microsoft.Build.BackEnd
 
                 foreach (TaskRegistry.RegisteredTaskRecord registeredTaskRecord in taskRegistry.TaskRegistrations.Values.SelectMany(record => record))
                 {
-                    telemetryForwarder.AddTask(registeredTaskRecord.TaskIdentity.Name,
+                    telemetryForwarder.AddTask(
+                        registeredTaskRecord.TaskIdentity.Name,
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
                         registeredTaskRecord.Statistics.TotalMemoryConsumption,
                         registeredTaskRecord.ComputeIfCustom(),
-                        registeredTaskRecord.IsFromNugetCache);
+                        registeredTaskRecord.IsFromNugetCache,
+                        registeredTaskRecord.TaskFactoryAttributeName,
+                        registeredTaskRecord.TaskFactoryParameters.Runtime);
 
                     registeredTaskRecord.Statistics.Reset();
                 }
@@ -1343,18 +1348,18 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private static bool IsMetaprojTargetPath(string targetPath)
-            => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
+        private static bool IsMetaprojTargetPath(string targetPath) => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
-        /// Saves the current operating environment.
+        /// Saves the current operating environment (working directory and environment variables)
+        /// from the request's <see cref="TaskEnvironment"/> to the configuration for later restoration.
         /// </summary>
         private void SaveOperatingEnvironment()
         {
             if (_componentHost.BuildParameters.SaveOperatingEnvironment)
             {
-                _requestEntry.RequestConfiguration.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
-                _requestEntry.RequestConfiguration.SavedEnvironmentVariables = CommunicationsUtilities.GetEnvironmentVariables();
+                _requestEntry.RequestConfiguration.SavedCurrentDirectory = _requestEntry.TaskEnvironment.ProjectDirectory.Value;
+                _requestEntry.RequestConfiguration.SavedEnvironmentVariables = _requestEntry.TaskEnvironment.GetEnvironmentVariables().ToFrozenDictionary(CommunicationsUtilities.EnvironmentVariableComparer);
             }
         }
 
@@ -1384,7 +1389,8 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Sets the operationg environment to the initial build environment.
+        /// Sets the operating environment to the initial build environment via the request's <see cref="TaskEnvironment"/>.
+        /// Uses saved environment if available, otherwise the original build process environment.
         /// </summary>
         private void InitializeOperatingEnvironment()
         {
@@ -1401,7 +1407,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Restores a previously saved operating environment.
+        /// Restores a previously saved operating environment to the request's <see cref="TaskEnvironment"/>.
         /// </summary>
         private void RestoreOperatingEnvironment()
         {
@@ -1412,50 +1418,19 @@ namespace Microsoft.Build.BackEnd
 
                 // Restore the saved environment variables.
                 SetEnvironmentVariableBlock(_requestEntry.RequestConfiguration.SavedEnvironmentVariables);
-                NativeMethodsShared.SetCurrentDirectory(_requestEntry.RequestConfiguration.SavedCurrentDirectory);
+                _requestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_requestEntry.RequestConfiguration.SavedCurrentDirectory, ignoreRootedCheck: true);
             }
         }
 
         /// <summary>
         /// Sets the environment block to the set of saved variables.
         /// </summary>
-        private void SetEnvironmentVariableBlock(FrozenDictionary<string, string> savedEnvironment)
+        private void SetEnvironmentVariableBlock(IDictionary<string, string> savedEnvironment)
         {
-            FrozenDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
-            ClearVariablesNotInEnvironment(savedEnvironment, currentEnvironment);
-            UpdateEnvironmentVariables(savedEnvironment, currentEnvironment);
-        }
-
-        /// <summary>
-        /// Clears from the current environment any variables which do not exist in the saved environment
-        /// </summary>
-        private void ClearVariablesNotInEnvironment(FrozenDictionary<string, string> savedEnvironment, FrozenDictionary<string, string> currentEnvironment)
-        {
-            foreach (KeyValuePair<string, string> entry in currentEnvironment)
-            {
-                if (!savedEnvironment.ContainsKey(entry.Key))
-                {
-                    Environment.SetEnvironmentVariable(entry.Key, null);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Updates the current environment with values in the saved environment which differ or are not yet set.
-        /// </summary>
-        private void UpdateEnvironmentVariables(FrozenDictionary<string, string> savedEnvironment, FrozenDictionary<string, string> currentEnvironment)
-        {
-            foreach (KeyValuePair<string, string> entry in savedEnvironment)
-            {
-                // If the environment doesn't have the variable set, or if its value differs from what we have saved, set it
-                // to the saved value.  Doing the comparison before setting is faster than unconditionally setting it using
-                // the API.
-                string value;
-                if (!currentEnvironment.TryGetValue(entry.Key, out value) || !String.Equals(entry.Value, value, StringComparison.Ordinal))
-                {
-                    Environment.SetEnvironmentVariable(entry.Key, entry.Value);
-                }
-            }
+            // TaskEnvironment.SetEnvironment delegates to the appropriate driver:
+            // - MultiThreadedTaskEnvironmentDriver: updates virtualized environment dictionary
+            // - MultiProcessTaskEnvironmentDriver: calls CommunicationsUtilities.SetEnvironment (same as legacy behavior)
+            _requestEntry.TaskEnvironment.SetEnvironment(savedEnvironment);
         }
 
         /// <summary>

@@ -233,7 +233,13 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
         [LoaderOptimization(LoaderOptimization.MultiDomain)]
 #endif
-        public static int Main(string[] args)
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+        public static int Main(
+#if !FEATURE_GET_COMMANDLINE
+            string[] args
+#endif
+            )
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
             // Setup the console UI.
             using AutomaticEncodingRestorer _ = new();
@@ -242,9 +248,9 @@ namespace Microsoft.Build.CommandLine
             DebuggerLaunchCheck();
 
             // Initialize new build telemetry and record start of this build.
-            KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
-            // Initialize OpenTelemetry infrastructure
-            OpenTelemetryManager.Instance.Initialize(isStandalone: true);
+            KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow, IsStandaloneExecution = true };
+
+            TelemetryManager.Instance?.Initialize(isStandalone: true);
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
@@ -257,29 +263,46 @@ namespace Microsoft.Build.CommandLine
             if (
                 Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
-                CanRunServerBasedOnCommandLineSwitches(Environment.CommandLine))
+                CanRunServerBasedOnCommandLineSwitches(
+#if FEATURE_GET_COMMANDLINE
+                    Environment.CommandLine))
+#else
+                    ConstructArrayArg(args)))
+#endif
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
 
                 // Use the client app to execute build in msbuild server. Opt-in feature.
-                exitCode = (s_initialized && MSBuildClientApp.Execute(Environment.CommandLine, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1;
+                exitCode = ((s_initialized && MSBuildClientApp.Execute(
+#if FEATURE_GET_COMMANDLINE
+                Environment.CommandLine,
+#else
+                ConstructArrayArg(args),
+#endif
+                s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
             }
             else
             {
                 // return 0 on success, non-zero on failure
-                exitCode = (s_initialized && Execute(Environment.CommandLine) == ExitType.Success) ? 0 : 1;
+                exitCode = ((s_initialized && Execute(
+#if FEATURE_GET_COMMANDLINE
+                Environment.CommandLine)
+#else
+                ConstructArrayArg(args))
+#endif
+                == ExitType.Success) ? 0 : 1);
             }
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
             {
                 DumpCounters(false /* log to console */);
             }
-            OpenTelemetryManager.Instance.Shutdown();
+
+            TelemetryManager.Instance?.Dispose();
 
             return exitCode;
         }
-
 
         /// <summary>
         /// Returns true if arguments allows or make sense to leverage msbuild server.
@@ -287,7 +310,12 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Will not throw. If arguments processing fails, we will not run it on server - no reason as it will not run any build anyway.
         /// </remarks>
-        private static bool CanRunServerBasedOnCommandLineSwitches(string commandLine)
+        private static bool CanRunServerBasedOnCommandLineSwitches(
+#if FEATURE_GET_COMMANDLINE
+            string commandLine)
+#else
+            string[] commandLine)
+#endif
         {
             bool canRunServer = true;
             try
@@ -324,6 +352,23 @@ namespace Microsoft.Build.CommandLine
 
             return canRunServer;
         }
+
+#if !FEATURE_GET_COMMANDLINE
+        /// <summary>
+        /// Insert the command executable path as the first element of the args array.
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        private static string[] ConstructArrayArg(string[] args)
+        {
+            string[] newArgArray = new string[args.Length + 1];
+
+            newArgArray[0] = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
+            Array.Copy(args, 0, newArgArray, 1, args.Length);
+
+            return newArgArray;
+        }
+#endif // !FEATURE_GET_COMMANDLINE
 
         /// <summary>
         /// Append output file with elapsedTime
@@ -552,6 +597,13 @@ namespace Microsoft.Build.CommandLine
                 case "1":
                     Debugger.Launch();
                     break;
+                case "3":
+                    // Value "3" debugs the main MSBuild process but skips debugging child TaskHost processes
+                    if (!DebugUtils.IsInTaskHostNode())
+                    {
+                        Debugger.Launch();
+                    }
+                    break;
 #endif
                 case "2":
                     // Sometimes easier to attach rather than deal with JIT prompt
@@ -571,7 +623,12 @@ namespace Microsoft.Build.CommandLine
         /// is ignored.</param>
         /// <returns>A value of type ExitType that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
-        public static ExitType Execute(string commandLine)
+        public static ExitType Execute(
+#if FEATURE_GET_COMMANDLINE
+            string commandLine)
+#else
+            string[] commandLine)
+#endif
         {
             DebuggerLaunchCheck();
 
@@ -588,7 +645,9 @@ namespace Microsoft.Build.CommandLine
             // and those form the great majority of our unnecessary memory use.
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", "true");
 
+#if FEATURE_GET_COMMANDLINE
             ErrorUtilities.VerifyThrowArgumentLength(commandLine);
+#endif
 
             AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
 
@@ -600,8 +659,14 @@ namespace Microsoft.Build.CommandLine
             TextWriter targetsWriter = null;
             try
             {
+#if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStart(commandLine);
-
+#else
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    MSBuildEventSource.Log.MSBuildExeStart(string.Join(" ", commandLine));
+                }
+#endif
                 Console.CancelKeyPress += cancelHandler;
 
                 // check the operating system the code is running on
@@ -659,8 +724,6 @@ namespace Microsoft.Build.CommandLine
 
                 GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
 
-                CommunicationsUtilities.Trace($"Command line parameters: {commandLine}");
-
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,
                                             switchesNotFromAutoResponseFile,
@@ -706,7 +769,11 @@ namespace Microsoft.Build.CommandLine
                                             ref getTargetResult,
                                             ref getResultOutputFile,
                                             recursing: false,
+#if FEATURE_GET_COMMANDLINE
                                             commandLine);
+#else
+                                            string.Join(' ', commandLine));
+#endif
 
                 CommandLineSwitches.SwitchesFromResponseFiles = null;
 
@@ -1006,7 +1073,14 @@ namespace Microsoft.Build.CommandLine
                 preprocessWriter?.Dispose();
                 targetsWriter?.Dispose();
 
+#if FEATURE_GET_COMMANDLINE
                 MSBuildEventSource.Log.MSBuildExeStop(commandLine);
+#else
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    MSBuildEventSource.Log.MSBuildExeStop(string.Join(" ", commandLine));
+                }
+#endif
             }
             /**********************************************************************************************************************
              * WARNING: Do NOT add any more catch blocks above!
@@ -1185,8 +1259,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static uint? s_originalConsoleMode = null;
 
-        private const int MAX_MULTITHREADED_CPU_COUNT_FOR_TASK_HOST = 256;
-
         /// <summary>
         /// Initializes the build engine, and starts the project building.
         /// </summary>
@@ -1231,14 +1303,12 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_REPORTFILEACCESSES
             bool reportFileAccesses,
 #endif
+#if FEATURE_GET_COMMANDLINE
             string commandLine)
+#else
+            string[] commandLine)
+#endif
         {
-            // Set limitation for multithreaded and MSBUILDFORCEALLTASKSOUTOFPROC=1. Max is 256 because of unique task host id generation.
-            if (multiThreaded && Traits.Instance.ForceAllTasksOutOfProcToTaskHost)
-            {
-                ErrorUtilities.VerifyThrowArgument(cpuCount <= MAX_MULTITHREADED_CPU_COUNT_FOR_TASK_HOST, "MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc", MAX_MULTITHREADED_CPU_COUNT_FOR_TASK_HOST);
-            }
-
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
             {
                 InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XMake.ProjectUpgradeNeededToVcxProj", projectFile), null);
@@ -1485,7 +1555,13 @@ namespace Microsoft.Build.CommandLine
 
                     if (!Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager)
                     {
-                        messagesToLogInBuildLoggers.AddRange(GetMessagesToLogInBuildLoggers(commandLine));
+                        var commandLineString =
+#if FEATURE_GET_COMMANDLINE
+                            commandLine;
+#else
+                            string.Join(" ", commandLine);
+#endif
+                        messagesToLogInBuildLoggers.AddRange(GetMessagesToLogInBuildLoggers(commandLineString));
 
                         // Log a message for every response file and include it in log
                         foreach (var responseFilePath in s_includedResponseFiles)
@@ -1855,23 +1931,26 @@ namespace Microsoft.Build.CommandLine
             CultureInfo.CurrentUICulture = desiredCulture;
             CultureInfo.DefaultThreadCurrentUICulture = desiredCulture;
 
-#if RUNTIME_TYPE_NETCORE
-            if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
-#else
-            if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
-                && !CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase))
-#endif
+            if (!Traits.Instance.ConsoleUseDefaultEncoding)
             {
-                try
+#if RUNTIME_TYPE_NETCORE
+                if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
+#else
+                if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
+                    && !CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase))
+#endif
                 {
-                    // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
-                    Console.OutputEncoding = Encoding.UTF8;
-                    // If the InputEncoding is not set, the encoding will work in CMD but not in PowerShell, as the raw CHCP page won't be changed.
-                    Console.InputEncoding = Encoding.UTF8;
-                }
-                catch (Exception ex) when (ex is IOException || ex is SecurityException)
-                {
-                    // The encoding is unavailable. Do nothing.
+                    try
+                    {
+                        // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
+                        Console.OutputEncoding = Encoding.UTF8;
+                        // If the InputEncoding is not set, the encoding will work in CMD but not in PowerShell, as the raw CHCP page won't be changed.
+                        Console.InputEncoding = Encoding.UTF8;
+                    }
+                    catch (Exception ex) when (ex is IOException || ex is SecurityException)
+                    {
+                        // The encoding is unavailable. Do nothing.
+                    }
                 }
             }
 
@@ -1917,15 +1996,26 @@ namespace Microsoft.Build.CommandLine
         /// <param name="switchesNotFromAutoResponseFile"></param>
         /// <param name="fullCommandLine"></param>
         /// <returns>Combined bag of switches.</returns>
-        private static void GatherAllSwitches(string commandLine,
+        private static void GatherAllSwitches(
+#if FEATURE_GET_COMMANDLINE
+            string commandLine,
+#else
+            string[] commandLine,
+#endif
             out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile, out string fullCommandLine)
         {
             ResetGatheringSwitchesState();
 
+#if FEATURE_GET_COMMANDLINE
             // split the command line on (unquoted) whitespace
             var commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
 
             s_exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote(commandLineArgs[0]));
+#else
+            var commandLineArgs = new List<string>(commandLine);
+
+            s_exeName = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
+#endif
 
 #if USE_MSBUILD_DLL_EXTN
             var msbuildExtn = ".dll";
@@ -1940,7 +2030,11 @@ namespace Microsoft.Build.CommandLine
             // discard the first piece, because that's the path to the executable -- the rest are args
             commandLineArgs.RemoveAt(0);
 
+#if FEATURE_GET_COMMANDLINE
             fullCommandLine = $"'{commandLine}'";
+#else
+            fullCommandLine = $"'{string.Join(' ', commandLine)}'";
+#endif
 
             // parse the command line, and flag syntax errors and obvious switch errors
             switchesNotFromAutoResponseFile = new CommandLineSwitches();
@@ -3141,6 +3235,37 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Processes the parent packet version switch, which indicates the packet version supported by the parent node.
+        /// This is used for backward-compatible packet version negotiation between parent and child nodes.
+        /// If not specified, returns 1 indicating the parent doesn't support version negotiation (old parent).
+        /// </summary>
+        /// <param name="parameters">The command line parameters for the switch.</param>
+        /// <returns>The packet version supported by the parent, or 1 if not specified or invalid.</returns>
+        internal static byte ProcessParentPacketVersionSwitch(string[] parameters)
+        {
+            byte parentPacketVersion = 1;
+
+            if (parameters.Length > 0)
+            {
+                try
+                {
+                    parentPacketVersion = byte.Parse(parameters[parameters.Length - 1], CultureInfo.InvariantCulture);
+                }
+                catch (FormatException ex)
+                {
+                    CommunicationsUtilities.Trace("Invalid node packet version value '{0}': {1}", parameters[parameters.Length - 1], ex.Message);
+                }
+                catch (OverflowException ex)
+                {
+                    // Value too large for byte - log and continue with default
+                    CommunicationsUtilities.Trace("Node packet version value '{0}' out of range: {1}", parameters[parameters.Length - 1], ex.Message);
+                }
+            }
+
+            return parentPacketVersion;
+        }
+
+        /// <summary>
         /// Processes the node reuse switch, the user can set node reuse to true, false or not set the switch. If the switch is
         /// not set the system will check to see if the process is being run as an administrator. This check in localnode provider
         /// will determine the node reuse setting for that case.
@@ -3392,8 +3517,9 @@ namespace Microsoft.Build.CommandLine
                 {
                     // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
                     bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                    OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
-                    shutdownReason = node.Run(out nodeException, nodeReuse);
+                    byte parentPacketVersion = ProcessParentPacketVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ParentPacketVersion]);
+                    OutOfProcTaskHostNode node = new();
+                    shutdownReason = node.Run(out nodeException, nodeReuse, parentPacketVersion);
                 }
                 else if (nodeModeNumber == 3)
                 {
@@ -3949,16 +4075,40 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            string arguments = binaryLoggerParameters[binaryLoggerParameters.Length - 1];
-
-            BinaryLogger logger = new BinaryLogger { Parameters = arguments };
-
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.
             // Since we always want task inputs for a binary logger, set it to diagnostic.
             verbosity = LoggerVerbosity.Diagnostic;
 
-            loggers.Add(logger);
+            // Process the parameters to get distinct paths and configuration info
+            var processedParams = BinaryLogger.ProcessParameters(binaryLoggerParameters);
+
+            if (processedParams.DistinctParameterSets.Count == 0)
+            {
+                return;
+            }
+
+            // Log a message if duplicate paths were filtered out
+            if (processedParams.DuplicateFilePaths.Count > 0)
+            {
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("DuplicateBinaryLoggerPathsIgnored", string.Join(", ", processedParams.DuplicateFilePaths)));
+            }
+
+            if (processedParams.AllConfigurationsIdentical && processedParams.AdditionalFilePaths.Count > 0)
+            {
+                // Optimized approach: single logger writing to one file, then copy to additional locations
+                BinaryLogger logger = new() { Parameters = processedParams.DistinctParameterSets[0], AdditionalFilePaths = processedParams.AdditionalFilePaths };
+                loggers.Add(logger);
+            }
+            else
+            {
+                // Create separate logger instances for each distinct configuration
+                foreach (string paramSet in processedParams.DistinctParameterSets)
+                {
+                    BinaryLogger logger = new BinaryLogger { Parameters = paramSet };
+                    loggers.Add(logger);
+                }
+            }
         }
 
         /// <summary>

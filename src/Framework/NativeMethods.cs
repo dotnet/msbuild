@@ -865,6 +865,31 @@ internal static class NativeMethods
         get { return IsLinux; }
     }
 
+#if !CLR2COMPATIBILITY
+    /// <summary>
+    /// Determines whether the file system is case sensitive by creating a test file.
+    /// Copied from FileUtilities.GetIsFileSystemCaseSensitive() in Shared.
+    /// FIXME: shared code should be consolidated to Framework https://github.com/dotnet/msbuild/issues/6984
+    /// </summary>
+    private static readonly Lazy<bool> s_isFileSystemCaseSensitive = new(() =>
+    {
+        try
+        {
+            string pathWithUpperCase = Path.Combine(Path.GetTempPath(), $"INTCASESENSITIVETEST{Guid.NewGuid():N}");
+            using (new FileStream(pathWithUpperCase, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
+            {
+                return !File.Exists(pathWithUpperCase.ToLowerInvariant());
+            }
+        }
+        catch
+        {
+            return OSUsesCaseSensitivePaths;
+        }
+    });
+
+    internal static bool IsFileSystemCaseSensitive => s_isFileSystemCaseSensitive.Value;
+#endif
+
     /// <summary>
     /// The base directory for all framework paths in Mono
     /// </summary>

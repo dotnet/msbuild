@@ -18,6 +18,11 @@
         <target state="translated">MSB4249: non è possibile compilare il progetto di sito Web "{0}". Il compilatore ASP.NET è disponibile solo nella versione .NET Framework di MSBuild.</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
+      <trans-unit id="AssemblyLoad_Warning">
+        <source>The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</source>
+        <target state="translated">L'attività personalizzata "{0}" ha richiesto un fallback all'esecuzione out-of-process perché la definizione UsingTask non specifica correttamente Runtime e Architecture. Questo riduce le prestazioni della compilazione. Aggiornare l'elemento UsingTask per specificare esplicitamente gli attributi Runtime e Architecture (ad esempio, Runtime="CLR4" Architecture="x64") oppure usare TaskFactory="TaskHostFactory".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
         <source>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</source>
         <target state="translated">MSB4002: errore durante il recupero degli attributi per i parametri nell'attività "{0}". {1}</target>
@@ -484,6 +489,11 @@
         <target state="translated">Legge la variabile di ambiente "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="ErrorCopyingBinaryLog">
+        <source>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</source>
+        <target state="translated">MSB4279: non è possibile copiare il log binario da "{0}" a "{1}". {2}</target>
+        <note>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</note>
+      </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4256: durante la lettura dei file della cache dei risultati di input dal percorso "{0}" è stato rilevato un errore: {1}</target>
@@ -514,6 +524,11 @@
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}" fa riferimento a {0} elemento/i, mentre "{3}" fa riferimento a {1} elemento/i. Devono avere lo stesso numero di elementi.</target>
         <note>{StrBegin="MSB3094: "}</note>
+      </trans-unit>
+      <trans-unit id="HostObjectFailure">
+        <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
+        <target state="translated">L'attività "{0}" non è riuscita ad acquisire il suo oggetto host. {1} Contattare l'autore dell'attività per segnalare questo problema.</target>
+        <note>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -640,11 +655,6 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">Non è possibile chiamare il metodo {0} con una raccolta contenente nomi di destinazione Null o vuoti.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OpenTelemetryLoadFailed">
-        <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="translated">Caricamento delle librerie di telemetria non riuscito con eccezione: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
@@ -897,18 +907,13 @@ Errori: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}" ma era già stata impostata come variabile di ambiente.</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
+        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}" ma era già stata impostata su "{2}" come variabile di ambiente.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}" ma era già stata impostata da un altro SDK.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SdkEnvironmentVariableSet">
-        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}".</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
+        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}" ma era già stata impostata su "{2}" da un altro SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -2019,7 +2024,7 @@ Errori: {3}</target>
       </trans-unit>
       <trans-unit id="OldWrapperGeneratedOldSolutionVersion">
         <source>Using the MSBuild v3.5 solution wrapper generator with a tools version of {0} because the solution file format was version {1} and no tools version was supplied.</source>
-        <target state="translated">Verrà usato il generatore di wrapper per soluzioni MSBuild 3.5 con la versione {0} degli strumenti perché la versione del formato del file di soluzione è {1} e non è stata indicata alcuna versione per gli strumenti.</target>
+        <target state="translated">Verrà usato il generatore di wrapper per soluzioni MSBuild v3.5 con la versione {0} degli strumenti perché la versione del formato file della soluzione è {1} e non è stata indicata alcuna versione per gli strumenti.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionBuildingSolutionConfiguration">
