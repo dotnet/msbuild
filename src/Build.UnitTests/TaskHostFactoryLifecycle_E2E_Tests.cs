@@ -32,14 +32,34 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// Scenario 1: Runtime matches + TaskHostFactory requested → short-lived out of proc (no node reuse)
+        /// Validates task host lifecycle behavior for all scenarios.
+        /// 
+        /// Test scenarios:
+        /// 1. Runtime matches + TaskHostFactory requested → short-lived out of proc (nodereuse:False)
+        /// 2. Runtime matches + TaskHostFactory NOT requested → in-proc execution (MSBuild process)
+        /// 3. Runtime doesn't match + TaskHostFactory requested → short-lived out of proc (nodereuse:False)
+        /// 4. Runtime doesn't match + TaskHostFactory NOT requested → long-lived sidecar out of proc (nodereuse:True)
         /// </summary>
-        [WindowsFullFrameworkOnlyFact]
-        public void Scenario1_MatchingRuntime_ExplicitFactory_ShortLivedOutOfProc()
+        /// <param name="scenarioNumber">Scenario number (1-4)</param>
+        /// <param name="scenarioFolder">Test project folder name</param>
+        /// <param name="projectFile">Test project file name</param>
+        /// <param name="expectedProcessName">Expected process name in output (dotnet or MSBuild)</param>
+        /// <param name="expectedNodeReuse">Expected node reuse flag (True, False, or null for in-proc)</param>
+        [WindowsFullFrameworkOnlyTheory]
+        [InlineData(1, "Scenario1_MatchingRuntime_ExplicitFactory", "Scenario1.csproj", "dotnet", false)]        // Match + Explicit → short-lived out-of-proc
+        [InlineData(2, "Scenario2_MatchingRuntime_NoFactory", "Scenario2.csproj", "MSBuild", null)]              // Match + No Explicit → in-proc
+        [InlineData(3, "Scenario3_NonMatchingRuntime_ExplicitFactory", "Scenario3.csproj", "dotnet", false)]     // No Match + Explicit → short-lived out-of-proc
+        [InlineData(4, "Scenario4_NonMatchingRuntime_NoFactory", "Scenario4.csproj", "dotnet", true)]            // No Match + No Explicit → long-lived sidecar out-of-proc
+        public void TaskHostLifecycle_ValidatesAllScenarios(
+            int scenarioNumber,
+            string scenarioFolder,
+            string projectFile,
+            string expectedProcessName,
+            bool? expectedNodeReuse)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
-            string testProjectPath = Path.Combine(TestAssetsRootPath, "Scenario1_MatchingRuntime_ExplicitFactory", "Scenario1.csproj");
+            string testProjectPath = Path.Combine(TestAssetsRootPath, scenarioFolder, projectFile);
 
             string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
 
@@ -50,86 +70,18 @@ namespace Microsoft.Build.Engine.UnitTests
 
             successTestTask.ShouldBeTrue();
             
-            // Task should run out of process (dotnet.exe for NET runtime on Windows Full Framework MSBuild)
-            testTaskOutput.ShouldContain("The task is executed in process: dotnet", customMessage: "Task should run out of process");
+            // Verify expected process name
+            testTaskOutput.ShouldContain($"The task is executed in process: {expectedProcessName}", 
+                customMessage: $"Scenario {scenarioNumber}: Task should run in {expectedProcessName} process");
             
-            // With explicit TaskHostFactory, node reuse should be False (short-lived)
-            testTaskOutput.ShouldContain("/nodereuse:False", customMessage: "TaskHostFactory explicitly requested should use short-lived task host (no node reuse)");
-        }
-
-        /// <summary>
-        /// Scenario 2: Runtime matches + TaskHostFactory NOT requested → in-proc execution
-        /// </summary>
-        [WindowsFullFrameworkOnlyFact]
-        public void Scenario2_MatchingRuntime_NoFactory_InProc()
-        {
-            using TestEnvironment env = TestEnvironment.Create(_output);
-
-            string testProjectPath = Path.Combine(TestAssetsRootPath, "Scenario2_MatchingRuntime_NoFactory", "Scenario2.csproj");
-
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
-
-            if (!successTestTask)
+            // Verify node reuse behavior if out-of-proc
+            if (expectedNodeReuse.HasValue)
             {
-                _output.WriteLine(testTaskOutput);
+                string expectedFlag = expectedNodeReuse.Value ? "/nodereuse:True" : "/nodereuse:False";
+                string nodeReuseDescription = expectedNodeReuse.Value ? "long-lived sidecar (node reuse enabled)" : "short-lived (no node reuse)";
+                testTaskOutput.ShouldContain(expectedFlag, 
+                    customMessage: $"Scenario {scenarioNumber}: Task host should use {nodeReuseDescription}");
             }
-
-            successTestTask.ShouldBeTrue();
-            
-            // Task should run in-process (MSBuild.exe on Windows Full Framework)
-            testTaskOutput.ShouldContain("The task is executed in process: MSBuild", customMessage: "Task should run in-process when runtime matches and no TaskHostFactory is requested");
-        }
-
-        /// <summary>
-        /// Scenario 3: Runtime doesn't match + TaskHostFactory requested → short-lived out of proc (no node reuse)
-        /// </summary>
-        [WindowsFullFrameworkOnlyFact]
-        public void Scenario3_NonMatchingRuntime_ExplicitFactory_ShortLivedOutOfProc()
-        {
-            using TestEnvironment env = TestEnvironment.Create(_output);
-
-            string testProjectPath = Path.Combine(TestAssetsRootPath, "Scenario3_NonMatchingRuntime_ExplicitFactory", "Scenario3.csproj");
-
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
-
-            if (!successTestTask)
-            {
-                _output.WriteLine(testTaskOutput);
-            }
-
-            successTestTask.ShouldBeTrue();
-            
-            // Task should run out of process (dotnet.exe for NET runtime)
-            testTaskOutput.ShouldContain("The task is executed in process: dotnet", customMessage: "Task should run out of process when runtime doesn't match");
-            
-            // With explicit TaskHostFactory, node reuse should be False (short-lived)
-            testTaskOutput.ShouldContain("/nodereuse:False", customMessage: "TaskHostFactory explicitly requested should use short-lived task host (no node reuse)");
-        }
-
-        /// <summary>
-        /// Scenario 4: Runtime doesn't match + TaskHostFactory NOT requested → long-lived sidecar out of proc (node reuse enabled)
-        /// </summary>
-        [WindowsFullFrameworkOnlyFact]
-        public void Scenario4_NonMatchingRuntime_NoFactory_LongLivedSidecarOutOfProc()
-        {
-            using TestEnvironment env = TestEnvironment.Create(_output);
-
-            string testProjectPath = Path.Combine(TestAssetsRootPath, "Scenario4_NonMatchingRuntime_NoFactory", "Scenario4.csproj");
-
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
-
-            if (!successTestTask)
-            {
-                _output.WriteLine(testTaskOutput);
-            }
-
-            successTestTask.ShouldBeTrue();
-            
-            // Task should run out of process (dotnet.exe for NET runtime)
-            testTaskOutput.ShouldContain("The task is executed in process: dotnet", customMessage: "Task should run out of process when runtime doesn't match");
-            
-            // Without explicit TaskHostFactory, node reuse should be True (long-lived sidecar)
-            testTaskOutput.ShouldContain("/nodereuse:True", customMessage: "When TaskHostFactory is NOT explicitly requested and runtime doesn't match, should use long-lived sidecar task host (node reuse enabled)");
         }
     }
 }
