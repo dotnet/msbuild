@@ -740,18 +740,42 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Scenario 1: TaskHost matches executing MSBuild Runtime + TaskHostFactory requested 
-        /// = short-lived (no node reuse) out of proc task host
+        /// Validates task host lifecycle behavior based on whether the TaskHost runtime matches 
+        /// the executing MSBuild runtime and whether TaskHostFactory is explicitly requested.
+        /// 
+        /// Test scenarios:
+        /// 1. Runtime matches + TaskHostFactory requested → short-lived out of proc (no node reuse)
+        /// 2. Runtime matches + TaskHostFactory NOT requested → in-proc execution
+        /// 3. Runtime doesn't match + TaskHostFactory requested → short-lived out of proc (no node reuse)
+        /// 4. Runtime doesn't match + TaskHostFactory NOT requested → long-lived sidecar out of proc (node reuse enabled)
+        /// 
+        /// This is a regression test for https://github.com/dotnet/msbuild/issues/13013
         /// </summary>
-        [Fact]
-        public void TaskHostLifecycle_MatchingRuntime_ExplicitFactory_ShortLivedOutOfProc()
+        /// <param name="useMatchingRuntime">Whether to use a runtime that matches the current MSBuild runtime.</param>
+        /// <param name="explicitlyRequestTaskHostFactory">Whether to explicitly request TaskHostFactory.</param>
+        /// <param name="shouldBeOutOfProc">Whether the task should execute out of process (TaskHostTask).</param>
+        /// <param name="shouldUseSidecar">Whether the task host should use sidecar mode (long-lived with node reuse). Null if not out of proc.</param>
+        [Theory]
+        [InlineData(true, true, true, false)]   // Scenario 1: Match + Explicit → short-lived out of proc
+        [InlineData(true, false, false, null)]  // Scenario 2: Match + No Explicit → in-proc
+        [InlineData(false, true, true, false)]  // Scenario 3: No Match + Explicit → short-lived out of proc
+        [InlineData(false, false, true, true)]  // Scenario 4: No Match + No Explicit → long-lived sidecar out of proc
+        public void TaskHostLifecycle_ValidatesCorrectBehavior(
+            bool useMatchingRuntime, 
+            bool explicitlyRequestTaskHostFactory, 
+            bool shouldBeOutOfProc, 
+            bool? shouldUseSidecar)
         {
             ITask createdTask = null;
             try
             {
-                // Setup: TaskHostFactory explicitly requested with matching runtime (current runtime)
-                TaskHostParameters factoryParameters = new(XMakeAttributes.GetCurrentMSBuildRuntime());
-                SetupTaskFactory(factoryParameters, explicitlyLaunchTaskHost: true, isTaskHostFactory: true);
+                // Setup: Configure runtime and TaskHostFactory request based on test parameters
+                string runtime = useMatchingRuntime 
+                    ? XMakeAttributes.GetCurrentMSBuildRuntime() 
+                    : XMakeAttributes.MSBuildRuntimeValues.clr2;
+                
+                TaskHostParameters factoryParameters = new(runtime);
+                SetupTaskFactory(factoryParameters, explicitlyRequestTaskHostFactory, explicitlyRequestTaskHostFactory);
 
                 createdTask = _taskFactory.CreateTaskInstance(
                     ElementLocation.Create("MSBUILD"),
@@ -766,145 +790,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     (string propName) => ProjectPropertyInstance.Create("test", "test"),
                     CreateStubTaskEnvironment());
 
-                // Should create TaskHostTask (out of proc)
+                // Validate task creation
                 createdTask.ShouldNotBeNull();
-                createdTask.ShouldBeOfType<TaskHostTask>();
 
-                // Should NOT use sidecar mode (short-lived, no node reuse)
-                TaskHostTask taskHostTask = (TaskHostTask)createdTask;
-                bool useSidecarTaskHost = IsUsingSidecarMode(taskHostTask);
-                useSidecarTaskHost.ShouldBeFalse("When TaskHostFactory is explicitly requested, should use short-lived task host (no node reuse)");
-            }
-            finally
-            {
-                if (createdTask != null)
+                // Validate whether task is out of proc (TaskHostTask) or in-proc
+                if (shouldBeOutOfProc)
                 {
-                    _taskFactory.CleanupTask(createdTask);
+                    createdTask.ShouldBeOfType<TaskHostTask>();
+                    
+                    // Validate sidecar mode if out of proc
+                    TaskHostTask taskHostTask = (TaskHostTask)createdTask;
+                    bool useSidecarTaskHost = IsUsingSidecarMode(taskHostTask);
+                    
+                    if (shouldUseSidecar == true)
+                    {
+                        useSidecarTaskHost.ShouldBeTrue("When TaskHostFactory is NOT explicitly requested and runtime doesn't match, should use long-lived sidecar task host (node reuse enabled)");
+                    }
+                    else
+                    {
+                        useSidecarTaskHost.ShouldBeFalse("When TaskHostFactory is explicitly requested, should use short-lived task host (no node reuse)");
+                    }
                 }
-            }
-        }
-
-        /// <summary>
-        /// Scenario 2: TaskHost matches executing MSBuild Runtime + TaskHostFactory NOT requested
-        /// = in-proc task host
-        /// </summary>
-        [Fact]
-        public void TaskHostLifecycle_MatchingRuntime_NoExplicitFactory_InProc()
-        {
-            ITask createdTask = null;
-            try
-            {
-                // Setup: Matching runtime, no explicit TaskHostFactory request
-                TaskHostParameters factoryParameters = new(XMakeAttributes.GetCurrentMSBuildRuntime());
-                SetupTaskFactory(factoryParameters, explicitlyLaunchTaskHost: false, isTaskHostFactory: false);
-
-                createdTask = _taskFactory.CreateTaskInstance(
-                    ElementLocation.Create("MSBUILD"),
-                    null,
-                    new MockHost(),
-                    TaskHostParameters.Empty,
-#if FEATURE_APPDOMAIN
-                    new AppDomainSetup(),
-#endif
-                    false,
-                    scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
-                    CreateStubTaskEnvironment());
-
-                // Should NOT create TaskHostTask (in-proc)
-                createdTask.ShouldNotBeNull();
-                createdTask.ShouldNotBeOfType<TaskHostTask>();
-            }
-            finally
-            {
-                if (createdTask != null)
+                else
                 {
-                    _taskFactory.CleanupTask(createdTask);
+                    createdTask.ShouldNotBeOfType<TaskHostTask>();
                 }
-            }
-        }
-
-        /// <summary>
-        /// Scenario 3: TaskHost does NOT match executing MSBuild Runtime + TaskHostFactory requested
-        /// = short-lived (no node reuse) out of proc task host
-        /// This is the original regression test for https://github.com/dotnet/msbuild/issues/13013
-        /// </summary>
-        [Fact]
-        public void TaskHostLifecycle_NonMatchingRuntime_ExplicitFactory_ShortLivedOutOfProc()
-        {
-            ITask createdTask = null;
-            try
-            {
-                // Setup: Non-matching runtime (CLR2) with explicit TaskHostFactory request
-                TaskHostParameters factoryParameters = new(XMakeAttributes.MSBuildRuntimeValues.clr2);
-                SetupTaskFactory(factoryParameters, explicitlyLaunchTaskHost: true, isTaskHostFactory: true);
-
-                createdTask = _taskFactory.CreateTaskInstance(
-                    ElementLocation.Create("MSBUILD"),
-                    null,
-                    new MockHost(),
-                    TaskHostParameters.Empty,
-#if FEATURE_APPDOMAIN
-                    new AppDomainSetup(),
-#endif
-                    false,
-                    scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
-                    CreateStubTaskEnvironment());
-
-                // Should create TaskHostTask (out of proc)
-                createdTask.ShouldNotBeNull();
-                createdTask.ShouldBeOfType<TaskHostTask>();
-
-                // Should NOT use sidecar mode (short-lived, no node reuse)
-                TaskHostTask taskHostTask = (TaskHostTask)createdTask;
-                bool useSidecarTaskHost = IsUsingSidecarMode(taskHostTask);
-                useSidecarTaskHost.ShouldBeFalse("When TaskHostFactory is explicitly requested, should use short-lived task host (no node reuse)");
-            }
-            finally
-            {
-                if (createdTask != null)
-                {
-                    _taskFactory.CleanupTask(createdTask);
-                }
-            }
-        }
-
-        /// <summary>
-        /// Scenario 4: TaskHost does NOT match executing MSBuild Runtime + TaskHostFactory NOT requested
-        /// = long-lived (node reuse enabled) sidecar out of proc task host
-        /// </summary>
-        [Fact]
-        public void TaskHostLifecycle_NonMatchingRuntime_NoExplicitFactory_LongLivedSidecarOutOfProc()
-        {
-            ITask createdTask = null;
-            try
-            {
-                // Setup: Non-matching runtime (CLR2), no explicit TaskHostFactory request
-                TaskHostParameters factoryParameters = new(XMakeAttributes.MSBuildRuntimeValues.clr2);
-                SetupTaskFactory(factoryParameters, explicitlyLaunchTaskHost: false, isTaskHostFactory: false);
-
-                createdTask = _taskFactory.CreateTaskInstance(
-                    ElementLocation.Create("MSBUILD"),
-                    null,
-                    new MockHost(),
-                    TaskHostParameters.Empty,
-#if FEATURE_APPDOMAIN
-                    new AppDomainSetup(),
-#endif
-                    false,
-                    scheduledNodeId: 1,
-                    (string propName) => ProjectPropertyInstance.Create("test", "test"),
-                    CreateStubTaskEnvironment());
-
-                // Should create TaskHostTask (out of proc)
-                createdTask.ShouldNotBeNull();
-                createdTask.ShouldBeOfType<TaskHostTask>();
-
-                // Should use sidecar mode (long-lived, node reuse enabled)
-                TaskHostTask taskHostTask = (TaskHostTask)createdTask;
-                bool useSidecarTaskHost = IsUsingSidecarMode(taskHostTask);
-                useSidecarTaskHost.ShouldBeTrue("When TaskHostFactory is NOT explicitly requested and runtime doesn't match, should use long-lived sidecar task host (node reuse enabled)");
             }
             finally
             {
