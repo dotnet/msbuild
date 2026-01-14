@@ -727,10 +727,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 // Verify that the task host is not using sidecar mode (short-lived)
                 // When TaskHostFactoryExplicitlyRequested is true, useSidecarTaskHost should be false
                 TaskHostTask taskHostTask = (TaskHostTask)createdTask;
-                var useSidecarField = typeof(TaskHostTask).GetField("_useSidecarTaskHost", BindingFlags.NonPublic | BindingFlags.Instance);
-                useSidecarField.ShouldNotBeNull("_useSidecarTaskHost field should exist");
-                
-                bool useSidecarTaskHost = (bool)useSidecarField.GetValue(taskHostTask);
+                bool useSidecarTaskHost = IsUsingSidecarMode(taskHostTask);
                 useSidecarTaskHost.ShouldBeFalse("When task host factory is explicitly requested, useSidecarTaskHost should be false to ensure short-lived task hosts that release locks");
             }
             finally
@@ -775,10 +772,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 // Should NOT use sidecar mode (short-lived, no node reuse)
                 TaskHostTask taskHostTask = (TaskHostTask)createdTask;
-                var useSidecarField = typeof(TaskHostTask).GetField("_useSidecarTaskHost", BindingFlags.NonPublic | BindingFlags.Instance);
-                useSidecarField.ShouldNotBeNull();
-                
-                bool useSidecarTaskHost = (bool)useSidecarField.GetValue(taskHostTask);
+                bool useSidecarTaskHost = IsUsingSidecarMode(taskHostTask);
                 useSidecarTaskHost.ShouldBeFalse("When TaskHostFactory is explicitly requested, should use short-lived task host (no node reuse)");
             }
             finally
@@ -864,10 +858,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 // Should NOT use sidecar mode (short-lived, no node reuse)
                 TaskHostTask taskHostTask = (TaskHostTask)createdTask;
-                var useSidecarField = typeof(TaskHostTask).GetField("_useSidecarTaskHost", BindingFlags.NonPublic | BindingFlags.Instance);
-                useSidecarField.ShouldNotBeNull();
-                
-                bool useSidecarTaskHost = (bool)useSidecarField.GetValue(taskHostTask);
+                bool useSidecarTaskHost = IsUsingSidecarMode(taskHostTask);
                 useSidecarTaskHost.ShouldBeFalse("When TaskHostFactory is explicitly requested, should use short-lived task host (no node reuse)");
             }
             finally
@@ -912,10 +903,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 // Should use sidecar mode (long-lived, node reuse enabled)
                 TaskHostTask taskHostTask = (TaskHostTask)createdTask;
-                var useSidecarField = typeof(TaskHostTask).GetField("_useSidecarTaskHost", BindingFlags.NonPublic | BindingFlags.Instance);
-                useSidecarField.ShouldNotBeNull();
-                
-                bool useSidecarTaskHost = (bool)useSidecarField.GetValue(taskHostTask);
+                bool useSidecarTaskHost = IsUsingSidecarMode(taskHostTask);
                 useSidecarTaskHost.ShouldBeTrue("When TaskHostFactory is NOT explicitly requested and runtime doesn't match, should use long-lived sidecar task host (node reuse enabled)");
             }
             finally
@@ -925,6 +913,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     _taskFactory.CleanupTask(createdTask);
                 }
             }
+        }
+
+        /// <summary>
+        /// Helper method to check if a TaskHostTask is using sidecar mode (node reuse).
+        /// </summary>
+        /// <param name="taskHostTask">The TaskHostTask to check.</param>
+        /// <returns>True if using sidecar mode (long-lived, node reuse enabled), false otherwise.</returns>
+        private static bool IsUsingSidecarMode(TaskHostTask taskHostTask)
+        {
+            var useSidecarField = typeof(TaskHostTask).GetField("_useSidecarTaskHost", BindingFlags.NonPublic | BindingFlags.Instance);
+            useSidecarField.ShouldNotBeNull("_useSidecarTaskHost field should exist");
+            return (bool)useSidecarField.GetValue(taskHostTask);
         }
 
         /// <summary>
