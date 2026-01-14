@@ -86,7 +86,16 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             this.CheckValidity();
 
-            LoggingService.LogTargetFinished(BuildEventContext, _target.Name, projectFullPath, _target.Location.File, success, targetOutputs);
+            // Only log target outputs if we are going to log a target finished event and the environment variable is set and the target outputs are not null
+            IEnumerable<TaskItem> targetOutputsToLog = null;
+            if (!LoggingService.OnlyLogCriticalEvents
+                && (LoggingService.EnableTargetOutputLogging || Traits.Instance.EnableTargetOutputLogging)
+                && targetOutputs != null)
+            {
+                targetOutputsToLog = targetOutputs;
+            }
+
+            LoggingService.LogTargetFinished(BuildEventContext, _target.Name, projectFullPath, _target.Location.File, success, targetOutputsToLog);
             this.IsValid = false;
         }
 
