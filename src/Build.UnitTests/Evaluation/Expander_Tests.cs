@@ -1177,6 +1177,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 var logger = Helpers.BuildProjectContentUsingBuildManagerExpectResult(
                     projectContent,
                     BuildResultCode.Failure);
+                logger.AssertLogContains("MSB4248");
             }
             else
             {
