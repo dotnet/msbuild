@@ -9,11 +9,11 @@
     <ExampleTaskPath>$([System.IO.Path]::Combine('$(TestProjectFolder)', '$(TargetFramework)', 'ExampleTask.dll'))</ExampleTaskPath>
   </PropertyGroup>
 
-  <!-- Scenario 4: Runtime doesn't match + TaskHostFactory NOT requested → long-lived sidecar out of proc -->
   <UsingTask
       TaskName="ExampleTask"
       AssemblyFile="$(ExampleTaskPath)"
-      Runtime="NET"/>
+      TaskFactory="$(TaskFactoryToUse)"
+      Runtime="$(RuntimeToUse)"/>
   
   <Target Name="TestTask" BeforeTargets="Build">
     <ExampleTask />
