@@ -151,12 +151,12 @@ TaskHost can be opted-in via `TaskFactory="TaskHostFactory"` in the [`UsingTask`
 
 When `TaskHostFactory` is specified as the task factory, the task always runs out-of-process and short lived. See the below matrix:
 
-| Runtime matches | TaskHostFactory | Result |
-| --- | --- | --- |
-| yes | no | in-process execution |
-| yes | yes | short-lived out-of-proc execution |
-| no | yes | short-lived out-of-proc execution |
-| no | no | long-lived out-of-proc execution |
+| Does TaskHost match executing MSBuild Runtime? | Is TaskHostFactory requested for the Task? | Expected task execution type |
+| :-: | :-: | --- |
+| ✅ | :x: | in-process execution |
+| ✅ | ✅ | short-lived out-of-proc execution |
+| :x: | ✅ | short-lived out-of-proc execution |
+| :x: | :x: | long-lived out-of-proc execution |
 
 ## Caches
 ### Project result cache
