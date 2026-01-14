@@ -279,7 +279,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             repoLocalResolver.Priority.ShouldBeLessThan(defaultResolver.Priority);
         }
 
-        private class MockSdkResolverContext : SdkResolverContext
+        private class MockSdkResolverContext : Microsoft.Build.BackEnd.SdkResolution.SdkResolverContext
         {
             public MockSdkResolverContext(string projectFilePath, string solutionFilePath = null)
             {
