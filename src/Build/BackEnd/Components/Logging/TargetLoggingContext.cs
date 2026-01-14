@@ -1,7 +1,6 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -87,17 +86,7 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             this.CheckValidity();
 
-            TargetOutputItemsInstanceEnumeratorProxy targetOutputWrapper = null;
-
-            // Only log target outputs if we are going to log a target finished event and the environment variable is set and the target outputs are not null
-            if (!LoggingService.OnlyLogCriticalEvents
-                && (LoggingService.EnableTargetOutputLogging || Traits.Instance.EnableTargetOutputLogging)
-                && targetOutputs != null)
-            {
-                targetOutputWrapper = new TargetOutputItemsInstanceEnumeratorProxy(targetOutputs);
-            }
-
-            LoggingService.LogTargetFinished(BuildEventContext, _target.Name, projectFullPath, _target.Location.File, success, targetOutputWrapper);
+            LoggingService.LogTargetFinished(BuildEventContext, _target.Name, projectFullPath, _target.Location.File, success, targetOutputs);
             this.IsValid = false;
         }
 
@@ -109,60 +98,6 @@ namespace Microsoft.Build.BackEnd.Logging
             this.CheckValidity();
 
             return new TaskLoggingContext(this, projectFullPath, task, taskAssemblyLocation);
-        }
-
-        /// <summary>
-        /// An enumerable wrapper for items that clones items as they are requested,
-        /// so that writes have no effect on the items.
-        /// </summary>
-        /// <remarks>
-        /// This class is designed to be passed to loggers.
-        /// The expense of copying items is only incurred if and when
-        /// a logger chooses to enumerate over it.
-        /// </remarks>
-        internal class TargetOutputItemsInstanceEnumeratorProxy : IEnumerable<TaskItem>
-        {
-            /// <summary>
-            /// Enumerable that this proxies
-            /// </summary>
-            private IEnumerable<TaskItem> _backingItems;
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            /// <param name="backingItems">Enumerator this class should proxy</param>
-            internal TargetOutputItemsInstanceEnumeratorProxy(IEnumerable<TaskItem> backingItems)
-            {
-                _backingItems = backingItems;
-            }
-
-            // For performance reasons we need to expose the raw items to BinaryLogger
-            // as we know we're not going to mutate anything. This allows us to bypass DeepClone
-            // for each item
-            internal IEnumerable<TaskItem> BackingItems => _backingItems;
-
-            /// <summary>
-            /// Returns an enumerator that provides copies of the items
-            /// in the backing store.
-            /// Each dictionary entry has key of the item type and value of an ITaskItem.
-            /// Type of the enumerator is imposed by backwards compatibility for ProjectStartedEvent.
-            /// </summary>
-            public IEnumerator<TaskItem> GetEnumerator()
-            {
-                foreach (TaskItem item in _backingItems)
-                {
-                    yield return item.DeepClone();
-                }
-            }
-
-            /// <summary>
-            /// Returns an enumerator that provides copies of the items
-            /// in the backing store.
-            /// </summary>
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return (IEnumerator)GetEnumerator();
-            }
         }
     }
 }

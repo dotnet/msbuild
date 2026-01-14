@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -889,17 +888,6 @@ namespace Microsoft.Build.Logging
             {
                 Write(false);
                 return;
-            }
-
-            // For target outputs bypass copying of all items to save on performance.
-            // The proxy creates a deep clone of each item to protect against writes,
-            // but since we're not writing we don't need the deep cloning.
-            // Additionally, it is safe to access the underlying List<ITaskItem> as it's allocated
-            // in a single location and noboby else mutates it after that:
-            // https://github.com/dotnet/msbuild/blob/f0eebf2872d76ab0cd43fdc4153ba636232b222f/src/Build/BackEnd/Components/RequestBuilder/TargetEntry.cs#L564
-            if (items is TargetLoggingContext.TargetOutputItemsInstanceEnumeratorProxy proxy)
-            {
-                items = proxy.BackingItems;
             }
 
             int count;
