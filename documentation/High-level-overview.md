@@ -149,6 +149,15 @@ TaskHost can be opted-in via `TaskFactory="TaskHostFactory"` in the [`UsingTask`
 - If a task's source code is in the same repository that is being built, and the repository's build needs to use that task during the build process. Using a Task Host makes sure the DLLs are not locked at the end of the build (as MSBuild uses long living worker nodes that survives single build execution)
 - As an isolation mechanism - separating the execution from the engine execution process.
 
+When `TaskHostFactory` is specified as the task factory, the task always runs out-of-process and short lived. See the below matrix:
+
+| Runtime matches | TaskHostFactory | Result |
+| --- | --- | --- |
+| yes | no | in-process execution |
+| yes | yes | short-lived out-of-proc execution |
+| no | yes | short-lived out-of-proc execution |
+| no | no | long-lived out-of-proc execution |
+
 ## Caches
 ### Project result cache
 The project Result Cache refers to the cache used by the scheduler that keeps the build results of already executed project. The result of a target is success, failure, and a list of items that succeeded. Beyond that, the `Returns` and `Outputs` attributes from targets are also serialized with the build result, as to be used by other targets for their execution.
