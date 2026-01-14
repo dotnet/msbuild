@@ -406,11 +406,23 @@ namespace Microsoft.Build.Execution
 
             public string? FilePath { get; }
 
+            /// <summary>
+            /// If true, log as a warning; if false, log as a message.
+            /// </summary>
+            public bool IsWarning { get; }
+
+            /// <summary>
+            /// Warning code (e.g., "MSB1070") if this is a warning.
+            /// </summary>
+            public string? WarningCode { get; }
+
             public DeferredBuildMessage(string text, MessageImportance importance)
             {
                 Importance = importance;
                 Text = text;
                 FilePath = null;
+                IsWarning = false;
+                WarningCode = null;
             }
 
             public DeferredBuildMessage(string text, MessageImportance importance, string filePath)
@@ -418,6 +430,22 @@ namespace Microsoft.Build.Execution
                 Importance = importance;
                 Text = text;
                 FilePath = filePath;
+                IsWarning = false;
+                WarningCode = null;
+            }
+
+            /// <summary>
+            /// Creates a deferred warning message.
+            /// </summary>
+            /// <param name="text">The warning message text.</param>
+            /// <param name="warningCode">The warning code (e.g., "MSB1070").</param>
+            public DeferredBuildMessage(string text, string warningCode)
+            {
+                Importance = MessageImportance.Normal;
+                Text = text;
+                FilePath = null;
+                IsWarning = true;
+                WarningCode = warningCode;
             }
         }
 
@@ -3166,7 +3194,20 @@ namespace Microsoft.Build.Execution
 
             foreach (var message in deferredBuildMessages)
             {
-                loggingService.LogCommentFromText(BuildEventContext.Invalid, message.Importance, message.Text);
+                if (message.IsWarning)
+                {
+                    loggingService.LogWarningFromText(
+                        BuildEventContext.Invalid,
+                        subcategoryResourceName: null,
+                        warningCode: message.WarningCode,
+                        helpKeyword: null,
+                        file: BuildEventFileInfo.Empty,
+                        message: message.Text);
+                }
+                else
+                {
+                    loggingService.LogCommentFromText(BuildEventContext.Invalid, message.Importance, message.Text);
+                }
 
                 // If message includes a file path, include that file
                 if (message.FilePath is not null)

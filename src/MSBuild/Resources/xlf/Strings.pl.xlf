@@ -335,14 +335,14 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
     </note>
       </trans-unit>
       <trans-unit id="LoggingArgsEnvVarError">
-        <source>MSBUILD : error MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</source>
-        <target state="new">MSBUILD : error MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</target>
-        <note>{StrBegin="MSBUILD : error MSB1071: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the error message.</note>
+        <source>MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</source>
+        <target state="new">MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</target>
+        <note>{StrBegin="MSB1071: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the error message.</note>
       </trans-unit>
       <trans-unit id="LoggingArgsEnvVarUnsupportedArgument">
-        <source>MSBUILD : warning MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</source>
-        <target state="new">MSBUILD : warning MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</target>
-        <note>{StrBegin="MSBUILD : warning MSB1070: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the unsupported argument.</note>
+        <source>MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</source>
+        <target state="new">MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</target>
+        <note>{StrBegin="MSB1070: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the unsupported argument.</note>
       </trans-unit>
       <trans-unit id="LoggingArgsEnvVarUsing">
         <source>Using arguments from MSBUILD_LOGGING_ARGS environment variable: {0}</source>

@@ -1960,19 +1960,19 @@ namespace Microsoft.Build.CommandLine
                 {
                     foreach (string invalidArg in invalidArgs)
                     {
-                        LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggingArgsEnvVarUnsupportedArgument", invalidArg), Traits.EmitAsLogsAsMessage);
+                        LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string warningCode, out _, "LoggingArgsEnvVarUnsupportedArgument", invalidArg), warningCode, Traits.Instance.EmitAsLogsAsMessage);
                     }
                 }
 
                 if (validArgs.Count > 0)
                 {
-                    LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LoggingArgsEnvVarUsing", string.Join(" ", validArgs)), emitAsMessage: true);
+                    LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LoggingArgsEnvVarUsing", string.Join(" ", validArgs)), warningCode: string.Empty, emitAsMessage: true);
                     GatherCommandLineSwitches(validArgs, switches, commandLine);
                 }
             }
             catch (Exception ex)
             {
-                LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggingArgsEnvVarError", ex.ToString()), Traits.EmitAsLogsAsMessage);
+                LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "LoggingArgsEnvVarError", ex.ToString()), errorCode, Traits.Instance.EmitAsLogsAsMessage);
             }
         }
 
@@ -2143,23 +2143,17 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Logs a message from MSBUILD_LOGGING_ARGS processing. Messages are either emitted as warnings
-        /// to the console or queued as low-importance build messages.
+        /// Logs a message from MSBUILD_LOGGING_ARGS processing. Messages are either emitted as deferred warnings
+        /// or queued as low-importance build messages.
         /// </summary>
         /// <param name="message">The message to log.</param>
-        /// <param name="emitAsMessage">If true, emit as low-importance message; if false, emit as warning to console.</param>
-        private static void LogLoggingArgsMessage(string message, bool emitAsMessage)
+        /// <param name="warningCode">The warning code when emitting as a warning.</param>
+        /// <param name="emitAsMessage">If true, emit as low-importance message; if false, emit as warning.</param>
+        private static void LogLoggingArgsMessage(string message, string warningCode, bool emitAsMessage)
         {
-            if (emitAsMessage)
-            {
-                // Queue as a low-importance message to be logged when the build starts
-                s_globalMessagesToLogInBuildLoggers.Add(new BuildManager.DeferredBuildMessage(message, MessageImportance.Low));
-            }
-            else
-            {
-                // Emit as warning to console immediately
-                Console.WriteLine(message);
-            }
+            s_globalMessagesToLogInBuildLoggers.Add(emitAsMessage
+                ? new BuildManager.DeferredBuildMessage(message, MessageImportance.Low)
+                : new BuildManager.DeferredBuildMessage(message, warningCode));
         }
 
         /// <summary>

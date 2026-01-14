@@ -1710,12 +1710,12 @@
     <comment>LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is a string with the command-line arguments from the environment variable.</comment>
   </data>
   <data name="LoggingArgsEnvVarUnsupportedArgument" xml:space="preserve">
-    <value>MSBUILD : warning MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</value>
-    <comment>{StrBegin="MSBUILD : warning MSB1070: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the unsupported argument.</comment>
+    <value>MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</value>
+    <comment>{StrBegin="MSB1070: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the unsupported argument.</comment>
   </data>
   <data name="LoggingArgsEnvVarError" xml:space="preserve">
-    <value>MSBUILD : error MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</value>
-    <comment>{StrBegin="MSBUILD : error MSB1071: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the error message.</comment>
+    <value>MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</value>
+    <comment>{StrBegin="MSB1071: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the error message.</comment>
   </data>
   <!-- **** MSBUILD_LOGGING_ARGS strings end **** -->
 

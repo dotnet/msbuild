@@ -155,14 +155,7 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Gets if the logging level for MSBUILD_LOGGING_ARGS diagnostic is message.
         /// </summary>
-        public static bool EmitAsLogsAsMessage
-        {
-            get
-            {
-                string? level = Environment.GetEnvironmentVariable(MSBuildLoggingArgsLevelEnvVarName);
-                return string.Equals(level, "message", StringComparison.OrdinalIgnoreCase);
-            }
-        }
+        public readonly bool EmitAsLogsAsMessage = string.Equals(Environment.GetEnvironmentVariable(MSBuildLoggingArgsLevelEnvVarName), "message", StringComparison.OrdinalIgnoreCase);
 
         public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
         public readonly bool DebugScheduler;
