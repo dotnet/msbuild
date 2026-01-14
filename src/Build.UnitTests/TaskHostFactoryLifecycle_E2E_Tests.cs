@@ -69,15 +69,26 @@ namespace Microsoft.Build.Engine.UnitTests
 
             successTestTask.ShouldBeTrue();
 
-            // Verify node reuse behavior based on expected value
+            // Verify execution mode (out-of-proc vs in-proc) and node reuse behavior
             if (expectedNodeReuse.HasValue)
             {
-                // For out-of-proc scenarios, validate the nodereuse flag in the task's command-line arguments
+                // For out-of-proc scenarios, validate the task runs in a separate process
+                // by checking for the presence of command-line arguments that indicate task host execution
+                testTaskOutput.ShouldContain("/nodemode:", 
+                    customMessage: "Task should run out-of-proc and have /nodemode: in its command-line arguments");
+                
+                // Validate the nodereuse flag in the task's command-line arguments
                 string expectedFlag = expectedNodeReuse.Value ? "/nodereuse:True" : "/nodereuse:False";
                 testTaskOutput.ShouldContain(expectedFlag, 
                     customMessage: $"Task should have {expectedFlag} in its command-line arguments");
             }
-            // For in-proc scenarios (expectedNodeReuse == null), no nodereuse flag validation needed
+            else
+            {
+                // For in-proc scenarios, validate the task does NOT run in a task host
+                // by ensuring task host specific command-line flags are not present
+                testTaskOutput.ShouldNotContain("/nodemode:", 
+                    customMessage: "Task should run in-proc and not have task host command-line arguments like /nodemode:");
+            }
         }
     }
 }
