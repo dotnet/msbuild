@@ -1343,25 +1343,38 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure if the moniker and the root make a too long path that an InvalidOperationException is raised
         /// which indicates there was a problem generating the reference assembly path.
+        /// On .NET Framework, this throws InvalidOperationException due to eager path validation.
+        /// On modern .NET (Core+), path validation is not performed eagerly, so the method completes without throwing.
         /// </summary>
-        [WindowsFullFrameworkOnlyFact]
+        [WindowsOnlyFact]
         public void GenerateReferencAssemblyPathTooLong()
         {
-            Should.Throw<InvalidOperationException>(() =>
+            string pathTooLong = new string('a', 500);
+
+            string targetFrameworkRootPath = NativeMethodsShared.IsWindows
+                                                 ? "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework"
+                                                 : "/usr/lib";
+            string targetFrameworkIdentifier = "Compact Framework" + pathTooLong;
+            Version targetFrameworkVersion = new Version("1.0");
+            string targetFrameworkProfile = "PocketPC";
+
+            FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(targetFrameworkIdentifier, targetFrameworkVersion, targetFrameworkProfile);
+
+            if (Xunit.NetCore.Extensions.CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
             {
-                string pathTooLong = new string('a', 500);
-
-                string targetFrameworkRootPath = NativeMethodsShared.IsWindows
-                                                     ? "c:\\Program Files\\Reference Assemblies\\Microsoft\\Framework"
-                                                     : "/usr/lib";
-                string targetFrameworkIdentifier = "Compact Framework" + pathTooLong;
-                Version targetFrameworkVersion = new Version("1.0");
-                string targetFrameworkProfile = "PocketPC";
-
-                FrameworkNameVersioning frameworkName = new FrameworkNameVersioning(targetFrameworkIdentifier, targetFrameworkVersion, targetFrameworkProfile);
-
-                FrameworkLocationHelper.GenerateReferenceAssemblyPath(targetFrameworkRootPath, frameworkName);
-            });
+                // .NET Framework validates paths eagerly and throws
+                Should.Throw<InvalidOperationException>(() =>
+                {
+                    FrameworkLocationHelper.GenerateReferenceAssemblyPath(targetFrameworkRootPath, frameworkName);
+                });
+            }
+            else
+            {
+                // Modern .NET (Core+) does not validate paths eagerly, so no exception is thrown
+                // The method just returns null or empty string for non-existent paths
+                string result = FrameworkLocationHelper.GenerateReferenceAssemblyPath(targetFrameworkRootPath, frameworkName);
+                // We don't assert a specific value since the behavior is to not throw - the path is just treated as non-existent
+            }
         }
         #endregion
 
@@ -1614,37 +1627,50 @@ namespace Microsoft.Build.UnitTests
         }
         /// <summary>
         /// Make sure we get the correct exception when the xml file points to an included framework which has invalid path chars.
+        /// On .NET Framework, this throws InvalidOperationException due to eager path validation.
+        /// On modern .NET (Core+), path validation is not performed eagerly, so the method completes without throwing.
         /// </summary>
-        [WindowsFullFrameworkOnlyFact]
+        [WindowsOnlyFact]
         public void ChainReferenceAssembliesRedistPathTooLong()
         {
-            Should.Throw<InvalidOperationException>(() =>
+            string tooLong = new string('a', 500);
+            string redistString41 = "<FileList Redist='Random' IncludeFramework='" + tooLong + "'>" +
+                                              "<File AssemblyName='System' Version='4.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='false' />" +
+                                           "</FileList>";
+
+            string tempDirectory = Path.Combine(Path.GetTempPath(), "ChainReferenceAssembliesRedistPathTooLong");
+
+            string redist41Directory = Path.Combine(tempDirectory, "v4.1", "RedistList") + Path.DirectorySeparatorChar;
+            string redist41 = Path.Combine(redist41Directory, "FrameworkList.xml");
+            string tempDirectoryPath = Path.Combine(tempDirectory, "v4.1");
+            try
             {
-                string tooLong = new string('a', 500);
-                string redistString41 = "<FileList Redist='Random' IncludeFramework='" + tooLong + "'>" +
-                                                  "<File AssemblyName='System' Version='4.0.0.0' PublicKeyToken='b77a5c561934e089' Culture='neutral' ProcessorArchitecture='MSIL' FileVersion='4.0.0.0' InGAC='false' />" +
-                                               "</FileList>";
+                Directory.CreateDirectory(redist41Directory);
+                File.WriteAllText(redist41, redistString41);
 
-                string tempDirectory = Path.Combine(Path.GetTempPath(), "ChainReferenceAssembliesRedistPathTooLong");
-
-                string redist41Directory = Path.Combine(tempDirectory, "v4.1", "RedistList") + Path.DirectorySeparatorChar;
-                string redist41 = Path.Combine(redist41Directory, "FrameworkList.xml");
-                string tempDirectoryPath = Path.Combine(tempDirectory, "v4.1");
-                try
+                if (Xunit.NetCore.Extensions.CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
                 {
-                    Directory.CreateDirectory(redist41Directory);
-                    File.WriteAllText(redist41, redistString41);
-
-                    ToolLocationHelper.ChainReferenceAssemblyPath(tempDirectoryPath);
-                }
-                finally
-                {
-                    if (Directory.Exists(redist41Directory))
+                    // .NET Framework validates paths eagerly and throws
+                    Should.Throw<InvalidOperationException>(() =>
                     {
-                        FileUtilities.DeleteWithoutTrailingBackslash(redist41Directory, true);
-                    }
+                        ToolLocationHelper.ChainReferenceAssemblyPath(tempDirectoryPath);
+                    });
                 }
-            });
+                else
+                {
+                    // Modern .NET (Core+) does not validate paths eagerly, so no exception is thrown
+                    // The method just returns null for non-existent paths
+                    string result = ToolLocationHelper.ChainReferenceAssemblyPath(tempDirectoryPath);
+                    // We don't assert a specific value since the behavior is to not throw
+                }
+            }
+            finally
+            {
+                if (Directory.Exists(redist41Directory))
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(redist41Directory, true);
+                }
+            }
         }
         #endregion
 
@@ -3063,24 +3089,37 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify we do not get any resolved paths when we pass in a root which is too long
-        ///
+        /// Verify we do not get any resolved paths when we pass in a root which is too long.
+        /// On .NET Framework, this throws PathTooLongException due to eager path validation.
+        /// On modern .NET (Core+), path validation is not performed eagerly, so the method completes without throwing.
         /// </summary>
-        [WindowsFullFrameworkOnlyFact]
+        [WindowsOnlyFact]
         public void ResolveFromDirectoryPathTooLong()
         {
-            Should.Throw<PathTooLongException>(() =>
+            // Try a path too long, which does not exist
+            string tooLongPath = NativeMethodsShared.IsWindows
+                                 ? ("C:\\" + new string('g', 1800))
+                                 : ("/" + new string('g', 10000));
+
+            var paths = new List<string> { tooLongPath };
+            var targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
+
+            if (Xunit.NetCore.Extensions.CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
             {
-                // Try a path too long, which does not exist
-                string tooLongPath = NativeMethodsShared.IsWindows
-                                     ? ("C:\\" + new string('g', 1800))
-                                     : ("/" + new string('g', 10000));
-
-                var paths = new List<string> { tooLongPath };
-                var targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
-
+                // .NET Framework validates paths eagerly and throws
+                Should.Throw<PathTooLongException>(() =>
+                {
+                    ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatform);
+                });
+            }
+            else
+            {
+                // Modern .NET (Core+) does not validate paths eagerly, so no exception is thrown
+                // The method just skips non-existent paths
                 ToolLocationHelper.GatherSDKListFromDirectory(paths, targetPlatform);
-            });
+                // targetPlatform should be empty since the path doesn't exist
+                targetPlatform.Count.ShouldBe(0);
+            }
         }
 
         /// <summary>
