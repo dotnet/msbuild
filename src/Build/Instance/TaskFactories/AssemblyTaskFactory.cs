@@ -363,8 +363,12 @@ namespace Microsoft.Build.BackEnd
                 mergedParameters = UpdateTaskHostParameters(mergedParameters);
                 (mergedParameters, bool isNetRuntime) = AddNetHostParamsIfNeeded(mergedParameters, getProperty);
 
-                bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false)
-                    || isNetRuntime;
+                // Sidecar here means that the task host is launched with /nodeReuse:true and doesn't terminate
+                // after the task execution. This improves performance for tasks that run multiple times in a build.
+                // If the task host factory is explicitly requested, do not act as a sidecar task host.
+                // This is important as customers use task host factories for short lived tasks to release
+                // potential locks.
+                bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
 
                 TaskHostTask task = new(
                     taskLocation,
