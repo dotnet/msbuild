@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(FileUtilities.FixFilePath(@"C:\SomeoneElsesProject\File2.txt"), t.OutOfPath[0].ItemSpec);
         }
 
-        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. On Unix there is no invalid file name characters.")]
+        [WindowsOnlyFact]
         public void InvalidFile()
         {
             FindUnderPath t = new FindUnderPath();
@@ -46,12 +46,20 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.False(success);
-
-            // Don't crash
+            if (Xunit.NetCore.Extensions.CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
+            {
+                // .NET Framework validates paths eagerly and execution should fail
+                Assert.False(success);
+            }
+            else
+            {
+                // Modern .NET (Core+) does not validate paths eagerly
+                // The task may succeed or fail without path validation errors
+                // Just ensure it doesn't crash
+            }
         }
 
-        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. On Unix there is no invalid file name characters.")]
+        [WindowsOnlyFact]
         public void InvalidPath()
         {
             FindUnderPath t = new FindUnderPath();
@@ -62,9 +70,17 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.False(success);
-
-            // Don't crash
+            if (Xunit.NetCore.Extensions.CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
+            {
+                // .NET Framework validates paths eagerly and execution should fail
+                Assert.False(success);
+            }
+            else
+            {
+                // Modern .NET (Core+) does not validate paths eagerly
+                // The task may succeed or fail without path validation errors
+                // Just ensure it doesn't crash
+            }
         }
 
         // Create a temporary file and run the task on it

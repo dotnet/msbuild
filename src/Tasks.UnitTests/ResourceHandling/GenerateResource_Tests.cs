@@ -3024,7 +3024,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
         }
 
-        [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486")]
+        [WindowsOnlyFact]
         public void Regress25163_OutputResourcesContainsInvalidPathCharacters()
         {
             string resourcesFile = null;
@@ -3039,9 +3039,18 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 bool success = t.Execute();
 
-                Assert.False(success); // "Task should have failed."
-
-                Utilities.AssertLogContains(t, "MSB3553");
+                if (Xunit.NetCore.Extensions.CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
+                {
+                    // .NET Framework validates paths eagerly and task should fail
+                    Assert.False(success); // "Task should have failed."
+                    Utilities.AssertLogContains(t, "MSB3553");
+                }
+                else
+                {
+                    // Modern .NET (Core+) does not validate paths eagerly
+                    // The task may succeed or fail without the specific path validation error
+                    // Just ensure it doesn't crash
+                }
             }
             finally
             {
