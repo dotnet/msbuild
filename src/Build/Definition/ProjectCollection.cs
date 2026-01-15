@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -25,6 +26,10 @@ using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerExcepti
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
 using ObjectModel = System.Collections.ObjectModel;
+
+#if !NET
+using Lock = System.Object;
+#endif
 
 #nullable disable
 
@@ -120,6 +125,11 @@ namespace Microsoft.Build.Evaluation
         /// The projects loaded into this collection.
         /// </summary>
         private readonly LoadedProjectCollection _loadedProjects;
+
+        /// <summary>
+        /// Locks used to serialize concurrent loads for the same project path.
+        /// </summary>
+        private readonly ConcurrentDictionary<string, Lock> _loadProjectLocks = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// External projects support
@@ -1221,57 +1231,66 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentLength(fileName);
             fileName = FileUtilities.NormalizePath(fileName);
 
-            if (globalProperties == null)
+            // Serialize loads for the same project path to avoid races where multiple threads create equivalent
+            // projects concurrently. Loads for different paths can proceed in parallel.
+            Lock pathLock = _loadProjectLocks.GetOrAdd(fileName, static _ => new());
+            lock (pathLock)
             {
-                globalProperties = GlobalProperties;
-            }
-            else
-            {
-                // We need to update the set of global properties to merge in the ProjectCollection global properties --
-                // otherwise we might end up declaring "not matching" a project that actually does ... and then throw
-                // an exception when we go to actually add the newly created project to the ProjectCollection.
-                // BUT remember that project global properties win -- don't override a property that already exists.
-                foreach (KeyValuePair<string, string> globalProperty in GlobalProperties)
+                if (globalProperties == null)
                 {
-                    if (!globalProperties.ContainsKey(globalProperty.Key))
+                    globalProperties = GlobalProperties;
+                }
+                else
+                {
+                    // We need to update the set of global properties to merge in the ProjectCollection global properties --
+                    // otherwise we might end up declaring "not matching" a project that actually does ... and then throw
+                    // an exception when we go to actually add the newly created project to the ProjectCollection.
+                    // BUT remember that project global properties win -- don't override a property that already exists.
+                    using (_locker.EnterDisposableReadLock())
                     {
-                        globalProperties.Add(globalProperty);
+                        foreach (ProjectPropertyInstance globalProperty in _globalProperties)
+                        {
+                            string name = globalProperty.Name;
+                            if (!globalProperties.ContainsKey(name))
+                            {
+                                globalProperties.Add(name, ((IProperty)globalProperty).EvaluatedValueEscaped);
+                            }
+                        }
                     }
                 }
-            }
 
-            // We do not control the current directory at this point, but assume that if we were
-            // passed a relative path, the caller assumes we will prepend the current directory.
-            string toolsVersionFromProject = null;
+                // We do not control the current directory at this point, but assume that if we were
+                // passed a relative path, the caller assumes we will prepend the current directory.
+                string toolsVersionFromProject = null;
 
-            if (toolsVersion == null)
-            {
-                // Load the project XML to get any ToolsVersion attribute.
-                // If there isn't already an equivalent project loaded, the real load we'll do will be satisfied from the cache.
-                // If there is already an equivalent project loaded, we'll never need this XML -- but it'll already
-                // have been loaded by that project so it will have been satisfied from the ProjectRootElementCache.
-                // Either way, no time wasted.
-                try
+                if (toolsVersion == null)
                 {
-                    ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(fileName, globalProperties, toolsVersion, ProjectRootElementCache, isExplicitlyLoaded: true);
-                    toolsVersionFromProject = (xml.ToolsVersion.Length > 0) ? xml.ToolsVersion : DefaultToolsVersion;
+                    // Load the project XML to get any ToolsVersion attribute.
+                    // If there isn't already an equivalent project loaded, the real load we'll do will be satisfied from the cache.
+                    // If there is already an equivalent project loaded, we'll never need this XML -- but it'll already
+                    // have been loaded by that project so it will have been satisfied from the ProjectRootElementCache.
+                    // Either way, no time wasted.
+                    try
+                    {
+                        ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(fileName, globalProperties, toolsVersion, ProjectRootElementCache, isExplicitlyLoaded: true);
+                        toolsVersionFromProject = (xml.ToolsVersion.Length > 0) ? xml.ToolsVersion : DefaultToolsVersion;
+                    }
+                    catch (InvalidProjectFileException ex)
+                    {
+                        var buildEventContext = new BuildEventContext(nodeId: 0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+                        LoggingService.LogInvalidProjectFileError(buildEventContext, ex);
+                        throw;
+                    }
                 }
-                catch (InvalidProjectFileException ex)
-                {
-                    var buildEventContext = new BuildEventContext(nodeId: 0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
-                    LoggingService.LogInvalidProjectFileError(buildEventContext, ex);
-                    throw;
-                }
+
+                string effectiveToolsVersion = Utilities.GenerateToolsVersionToUse(toolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion, out _);
+                Project project = _loadedProjects.GetMatchingProjectIfAny(fileName, globalProperties, effectiveToolsVersion);
+
+                // The Project constructor adds itself to our collection, it is not done by us
+                project ??= new Project(fileName, globalProperties, effectiveToolsVersion, this);
+
+                return project;
             }
-
-            string effectiveToolsVersion = Utilities.GenerateToolsVersionToUse(toolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion, out _);
-            Project project = _loadedProjects.GetMatchingProjectIfAny(fileName, globalProperties, effectiveToolsVersion);
-
-            // The Project constructor adds itself to our collection,
-            // it is not done by us
-            project ??= new Project(fileName, globalProperties, effectiveToolsVersion, this);
-
-            return project;
         }
 
         /// <summary>
