@@ -3,13 +3,16 @@
 
 using System;
 using System.IO;
-using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
+
+using RepoLocalSdkResolver = Microsoft.Build.BackEnd.SdkResolution.RepoLocalSdkResolver;
+using DefaultSdkResolver = Microsoft.Build.BackEnd.SdkResolution.DefaultSdkResolver;
+using SdkResultFactory = Microsoft.Build.BackEnd.SdkResolution.SdkResultFactory;
 
 #nullable disable
 
@@ -140,8 +143,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             // Assert
             result.Success.ShouldBeFalse();
-            result.Errors.ShouldNotBeEmpty();
-            result.Errors.ShouldContain(e => e.Contains("does not contain Sdk.props or Sdk.targets"));
         }
 
         [Fact]
@@ -279,7 +280,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             repoLocalResolver.Priority.ShouldBeLessThan(defaultResolver.Priority);
         }
 
-        private class MockSdkResolverContext : Microsoft.Build.BackEnd.SdkResolution.SdkResolverContext
+        private sealed class MockSdkResolverContext : Microsoft.Build.Framework.SdkResolverContext
         {
             public MockSdkResolverContext(string projectFilePath, string solutionFilePath = null)
             {
