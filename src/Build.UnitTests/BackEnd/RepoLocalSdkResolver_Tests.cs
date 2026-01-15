@@ -57,7 +57,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             File.WriteAllText(projectPath, "<Project />");
 
             var resolver = new RepoLocalSdkResolver();
-            var context = new SdkResolverContext(projectPath);
+            var context = new MockSdkResolverContext(projectPath);
             var factory = new SdkResultFactory(new SdkReference(sdkName, null, null));
 
             // Act
@@ -80,7 +80,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             string sdkName = "My.Test.Sdk";
             var resolver = new RepoLocalSdkResolver();
-            var context = new SdkResolverContext(projectPath);
+            var context = new MockSdkResolverContext(projectPath);
             var factory = new SdkResultFactory(new SdkReference(sdkName, null, null));
 
             // Act
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             string sdkName = "My.Test.Sdk";
             var resolver = new RepoLocalSdkResolver();
-            var context = new SdkResolverContext(projectPath);
+            var context = new MockSdkResolverContext(projectPath);
             var factory = new SdkResultFactory(new SdkReference(sdkName, null, null));
 
             // Act
@@ -132,7 +132,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             File.WriteAllText(projectPath, "<Project />");
 
             var resolver = new RepoLocalSdkResolver();
-            var context = new SdkResolverContext(projectPath);
+            var context = new MockSdkResolverContext(projectPath);
             var factory = new SdkResultFactory(new SdkReference(sdkName, null, null));
 
             // Act
@@ -164,7 +164,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             File.WriteAllText(projectPath, "<Project />");
 
             var resolver = new RepoLocalSdkResolver();
-            var context = new SdkResolverContext(projectPath);
+            var context = new MockSdkResolverContext(projectPath);
             var factory = new SdkResultFactory(new SdkReference(sdkName, null, null));
 
             // Act
@@ -195,7 +195,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             File.WriteAllText(projectPath, "<Project />");
 
             var resolver = new RepoLocalSdkResolver();
-            var context = new SdkResolverContext(projectPath);
+            var context = new MockSdkResolverContext(projectPath);
             var factory = new SdkResultFactory(new SdkReference(sdkName, null, null));
 
             // Act
@@ -227,7 +227,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             File.WriteAllText(projectPath, "<Project />");
 
             var resolver = new RepoLocalSdkResolver();
-            var context = new SdkResolverContext(projectPath);
+            var context = new MockSdkResolverContext(projectPath);
             var factory = new SdkResultFactory(new SdkReference(sdkName, null, null));
 
             // Act
@@ -257,7 +257,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             File.WriteAllText(solutionPath, "");
 
             var resolver = new RepoLocalSdkResolver();
-            var context = new SdkResolverContext(null, solutionPath);
+            var context = new MockSdkResolverContext(null, solutionPath);
             var factory = new SdkResultFactory(new SdkReference(sdkName, null, null));
 
             // Act
@@ -277,6 +277,15 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             var defaultResolver = new DefaultSdkResolver();
 
             repoLocalResolver.Priority.ShouldBeLessThan(defaultResolver.Priority);
+        }
+
+        private class MockSdkResolverContext : Microsoft.Build.BackEnd.SdkResolution.SdkResolverContext
+        {
+            public MockSdkResolverContext(string projectFilePath, string solutionFilePath = null)
+            {
+                ProjectFilePath = projectFilePath;
+                SolutionFilePath = solutionFilePath;
+            }
         }
     }
 }
