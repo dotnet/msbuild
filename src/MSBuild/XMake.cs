@@ -252,9 +252,9 @@ namespace Microsoft.Build.CommandLine
             DebuggerLaunchCheck();
 
             // Initialize new build telemetry and record start of this build.
-            KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
-            // Initialize OpenTelemetry infrastructure
-            OpenTelemetryManager.Instance.Initialize(isStandalone: true);
+            KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow, IsStandaloneExecution = true };
+
+            TelemetryManager.Instance?.Initialize(isStandalone: true);
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
@@ -302,11 +302,11 @@ namespace Microsoft.Build.CommandLine
             {
                 DumpCounters(false /* log to console */);
             }
-            OpenTelemetryManager.Instance.Shutdown();
+
+            TelemetryManager.Instance?.Dispose();
 
             return exitCode;
         }
-
 
         /// <summary>
         /// Returns true if arguments allows or make sense to leverage msbuild server.
@@ -1992,23 +1992,26 @@ namespace Microsoft.Build.CommandLine
             CultureInfo.CurrentUICulture = desiredCulture;
             CultureInfo.DefaultThreadCurrentUICulture = desiredCulture;
 
-#if RUNTIME_TYPE_NETCORE
-            if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
-#else
-            if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
-                && !CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase))
-#endif
+            if (!Traits.Instance.ConsoleUseDefaultEncoding)
             {
-                try
+#if RUNTIME_TYPE_NETCORE
+                if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
+#else
+                if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
+                    && !CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase))
+#endif
                 {
-                    // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
-                    Console.OutputEncoding = Encoding.UTF8;
-                    // If the InputEncoding is not set, the encoding will work in CMD but not in PowerShell, as the raw CHCP page won't be changed.
-                    Console.InputEncoding = Encoding.UTF8;
-                }
-                catch (Exception ex) when (ex is IOException || ex is SecurityException)
-                {
-                    // The encoding is unavailable. Do nothing.
+                    try
+                    {
+                        // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
+                        Console.OutputEncoding = Encoding.UTF8;
+                        // If the InputEncoding is not set, the encoding will work in CMD but not in PowerShell, as the raw CHCP page won't be changed.
+                        Console.InputEncoding = Encoding.UTF8;
+                    }
+                    catch (Exception ex) when (ex is IOException || ex is SecurityException)
+                    {
+                        // The encoding is unavailable. Do nothing.
+                    }
                 }
             }
 
@@ -3342,6 +3345,37 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Processes the parent packet version switch, which indicates the packet version supported by the parent node.
+        /// This is used for backward-compatible packet version negotiation between parent and child nodes.
+        /// If not specified, returns 1 indicating the parent doesn't support version negotiation (old parent).
+        /// </summary>
+        /// <param name="parameters">The command line parameters for the switch.</param>
+        /// <returns>The packet version supported by the parent, or 1 if not specified or invalid.</returns>
+        internal static byte ProcessParentPacketVersionSwitch(string[] parameters)
+        {
+            byte parentPacketVersion = 1;
+
+            if (parameters.Length > 0)
+            {
+                try
+                {
+                    parentPacketVersion = byte.Parse(parameters[parameters.Length - 1], CultureInfo.InvariantCulture);
+                }
+                catch (FormatException ex)
+                {
+                    CommunicationsUtilities.Trace("Invalid node packet version value '{0}': {1}", parameters[parameters.Length - 1], ex.Message);
+                }
+                catch (OverflowException ex)
+                {
+                    // Value too large for byte - log and continue with default
+                    CommunicationsUtilities.Trace("Node packet version value '{0}' out of range: {1}", parameters[parameters.Length - 1], ex.Message);
+                }
+            }
+
+            return parentPacketVersion;
+        }
+
+        /// <summary>
         /// Processes the node reuse switch, the user can set node reuse to true, false or not set the switch. If the switch is
         /// not set the system will check to see if the process is being run as an administrator. This check in localnode provider
         /// will determine the node reuse setting for that case.
@@ -3593,8 +3627,9 @@ namespace Microsoft.Build.CommandLine
                 {
                     // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
                     bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                    OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
-                    shutdownReason = node.Run(out nodeException, nodeReuse);
+                    byte parentPacketVersion = ProcessParentPacketVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ParentPacketVersion]);
+                    OutOfProcTaskHostNode node = new();
+                    shutdownReason = node.Run(out nodeException, nodeReuse, parentPacketVersion);
                 }
                 else if (nodeModeNumber == 3)
                 {

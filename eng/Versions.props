@@ -3,7 +3,7 @@
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.3.0</VersionPrefix>
+    <VersionPrefix>18.4.0</VersionPrefix>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
     <PackageValidationBaselineVersion>18.0.2</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
@@ -59,8 +59,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <MicrosoftVisualStudioOpenTelemetryVersion>0.2.104-beta</MicrosoftVisualStudioOpenTelemetryVersion>
-    <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Directory.Packages.props -->
+    <MicrosoftVisualStudioTelemetryVersion>17.14.18</MicrosoftVisualStudioTelemetryVersion>
+    <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Packages.props -->
   </PropertyGroup>
 
   <!-- Toolset Dependencies -->
