@@ -1092,6 +1092,12 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.BuildEngineDisplayVersion = ProjectCollection.DisplayVersion;
                             _buildTelemetry.BuildEngineFrameworkName = NativeMethodsShared.FrameworkName;
 
+                            // Populate error categorization data from the logging service
+                            if (!_overallBuildSuccess)
+                            {
+                                loggingService.PopulateBuildTelemetryWithErrors(_buildTelemetry);
+                            }
+
                             string? host = null;
                             if (BuildEnvironmentState.s_runningInVisualStudio)
                             {

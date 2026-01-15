@@ -222,6 +222,11 @@ namespace Microsoft.Build.BackEnd.Logging
         private readonly ISet<int> _buildSubmissionIdsThatHaveLoggedBuildcheckErrors = new HashSet<int>();
 
         /// <summary>
+        /// Tracker for build error telemetry.
+        /// </summary>
+        private readonly BuildErrorTelemetryTracker _errorTelemetryTracker = new BuildErrorTelemetryTracker();
+
+        /// <summary>
         /// A list of warnings to treat as errors for an associated <see cref="BuildEventContext"/>.  If an empty set, all warnings are treated as errors.
         /// </summary>
         private IDictionary<WarningsConfigKey, ISet<string>> _warningsAsErrorsByProject;
@@ -654,6 +659,15 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Determine if any of the event sinks have logged an error with this submission ID
             return _buildSubmissionIdsThatHaveLoggedErrors?.Contains(submissionId) == true;
+        }
+
+        /// <summary>
+        /// Populates build telemetry with error categorization data.
+        /// </summary>
+        /// <param name="buildTelemetry">The BuildTelemetry object to populate with error data.</param>
+        public void PopulateBuildTelemetryWithErrors(Framework.Telemetry.BuildTelemetry buildTelemetry)
+        {
+            _errorTelemetryTracker.PopulateBuildTelemetry(buildTelemetry);
         }
 
         /// <summary>
@@ -1656,6 +1670,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
                     _buildSubmissionIdsThatHaveLoggedErrors.Add(submissionId);
                 }
+
+                _errorTelemetryTracker.TrackError(errorEvent.Code, errorEvent.Subcategory);
             }
 
             // Respect warning-promotion properties from the remote project
