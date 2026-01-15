@@ -85,7 +85,19 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="path">The path to combine with the base path.</param>
         /// <param name="basePath">The base path to combine with.</param>
-        public AbsolutePath(string path, AbsolutePath basePath) => Value = Path.Combine(basePath.Value, path);
+        /// <exception cref="System.ArgumentException">
+        /// Thrown when either <paramref name="path"/> or <paramref name="basePath"/> contains one or more invalid path characters as
+        /// returned by <see cref="System.IO.Path.GetInvalidPathChars"/>.
+        /// </exception>
+        public AbsolutePath(string path, AbsolutePath basePath)
+        {
+#pragma warning disable IDE0002
+            // Calling to the System.IO.Path.Combine via fully-qualified name,
+            // as Microsoft.IO.Path.Combine does not throw on illegal characters in the path.
+            // We would like to keep the behavior consistent between dotnet build and msbuild.exe.           
+            Value = System.IO.Path.Combine(basePath.Value, path);
+#pragma warning restore IDE0002
+        }
 
         /// <summary>
         /// Implicitly converts an AbsolutePath to a string.

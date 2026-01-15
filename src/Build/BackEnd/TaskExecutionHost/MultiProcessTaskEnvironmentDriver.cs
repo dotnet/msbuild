@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 
@@ -41,7 +40,13 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public AbsolutePath GetAbsolutePath(string path)
         {
-            return new AbsolutePath(Path.Combine(NativeMethodsShared.GetCurrentDirectory(), path), ignoreRootedCheck: true);
+#pragma warning disable IDE0002
+            // Calling to the System.IO.Path.Combine via fully-qualified name,
+            // as Microsoft.IO.Path.Combine does not throw on illegal characters in the path.
+            // We would like to keep the behavior consistent between dotnet build and msbuild.exe.           
+            return new AbsolutePath(System.IO.Path.Combine(NativeMethodsShared.GetCurrentDirectory(), path), ignoreRootedCheck: true);
+#pragma warning restore IDE0002
+
         }
 
         /// <inheritdoc/>
