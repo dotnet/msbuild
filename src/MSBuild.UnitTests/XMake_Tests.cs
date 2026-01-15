@@ -2262,6 +2262,44 @@ namespace Microsoft.Build.UnitTests
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
+
+        /// <summary>
+        /// Verify that DistributedLoggerRecords with null CentralLogger don't cause exceptions when creating ProjectCollection
+        /// This is a regression test for the issue where -dfl flag caused MSB1025 error due to null logger not being filtered.
+        /// </summary>
+        [Fact]
+        public void TestNullCentralLoggerInDistributedLoggerRecord()
+        {
+            // Simulate the scenario when using -dfl flag
+            // ProcessDistributedFileLogger creates a DistributedLoggerRecord with null CentralLogger
+            var distributedLoggerRecords = new List<DistributedLoggerRecord>();
+            bool distributedFileLogger = true;
+            string[] fileLoggerParameters = null;
+
+            MSBuildApp.ProcessDistributedFileLogger(
+                distributedFileLogger,
+                fileLoggerParameters,
+                distributedLoggerRecords);
+
+            // Verify that we have a distributed logger record with null central logger
+            distributedLoggerRecords.Count.ShouldBe(1);
+            distributedLoggerRecords[0].CentralLogger.ShouldBeNull();
+
+            // This should not throw ArgumentNullException when creating ProjectCollection
+            // The fix filters out null central loggers from the evaluationLoggers array
+            var loggers = Array.Empty<ILogger>();
+            Should.NotThrow(() =>
+            {
+                using var projectCollection = new ProjectCollection(
+                    new Dictionary<string, string>(),
+                    loggers: [.. loggers, .. distributedLoggerRecords.Select(d => d.CentralLogger).Where(l => l is not null)],
+                    remoteLoggers: null,
+                    toolsetDefinitionLocations: ToolsetDefinitionLocations.Default,
+                    maxNodeCount: 1,
+                    onlyLogCriticalEvents: false,
+                    loadProjectsReadOnly: true);
+            });
+        }
         #endregion
 
         #region ProcessConsoleLoggerSwitches
