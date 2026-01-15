@@ -397,6 +397,16 @@ namespace Microsoft.Build.Execution
         LegacyThreadingData IBuildComponentHost.LegacyThreadingData => _legacyThreadingData;
 
         /// <summary>
+        /// Enumeration describing the severity of a deferred build message.
+        /// </summary>
+        public enum DeferredBuildMessageSeverity
+        {
+            Message = 1,
+            Warning,
+            Error
+        }
+
+        /// <summary>
         /// <see cref="BuildManager.BeginBuild(BuildParameters,IEnumerable{DeferredBuildMessage})"/>
         /// </summary>
         public readonly struct DeferredBuildMessage
@@ -407,23 +417,19 @@ namespace Microsoft.Build.Execution
 
             public string? FilePath { get; }
 
-            /// <summary>
-            /// If true, log as a warning; if false, log as a message.
-            /// </summary>
-            public bool IsWarning { get; }
+            public DeferredBuildMessageSeverity MessageSeverity { get; }
 
             /// <summary>
-            /// Warning code (e.g., "MSB1070") if this is a warning.
+            /// Build event code (e.g., "MSB1070").
             /// </summary>
-            public string? WarningCode { get; }
+            public string? Code { get; }
 
             public DeferredBuildMessage(string text, MessageImportance importance)
             {
                 Importance = importance;
                 Text = text;
                 FilePath = null;
-                IsWarning = false;
-                WarningCode = null;
+                Code = null;
             }
 
             public DeferredBuildMessage(string text, MessageImportance importance, string filePath)
@@ -431,22 +437,22 @@ namespace Microsoft.Build.Execution
                 Importance = importance;
                 Text = text;
                 FilePath = filePath;
-                IsWarning = false;
-                WarningCode = null;
+                Code = null;
             }
 
             /// <summary>
             /// Creates a deferred warning message.
             /// </summary>
             /// <param name="text">The warning message text.</param>
-            /// <param name="warningCode">The warning code (e.g., "MSB1070").</param>
-            public DeferredBuildMessage(string text, string warningCode)
+            /// <param name="code">The build message code (e.g., "MSB1070").</param>
+            /// <param name="messageSeverity">The severity of the deferred build message.</param>
+            public DeferredBuildMessage(string text, string code, DeferredBuildMessageSeverity messageSeverity)
             {
                 Importance = MessageImportance.Normal;
                 Text = text;
                 FilePath = null;
-                IsWarning = true;
-                WarningCode = warningCode;
+                Code = code;
+                MessageSeverity = messageSeverity;
             }
         }
 
@@ -3182,12 +3188,12 @@ namespace Microsoft.Build.Execution
 
             foreach (var message in deferredBuildMessages)
             {
-                if (message.IsWarning)
+                if (message.MessageSeverity is DeferredBuildMessageSeverity.Warning)
                 {
                     loggingService.LogWarningFromText(
                         BuildEventContext.Invalid,
                         subcategoryResourceName: null,
-                        warningCode: message.WarningCode,
+                        warningCode: message.Code,
                         helpKeyword: null,
                         file: BuildEventFileInfo.Empty,
                         message: message.Text);

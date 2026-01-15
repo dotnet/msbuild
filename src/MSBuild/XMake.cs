@@ -26,19 +26,18 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.BuildCheck;
-using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
+using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
-
 using static Microsoft.Build.CommandLine.CommandLineSwitches;
-
+using static Microsoft.Build.Execution.BuildManager;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using FileLogger = Microsoft.Build.Logging.FileLogger;
@@ -48,6 +47,7 @@ using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorL
 using TerminalLogger = Microsoft.Build.Logging.TerminalLogger;
 
 #if NETFRAMEWORK
+using System.Linq.Expressions;
 // Use I/O operations from Microsoft.IO.Redist which is generally higher perf
 // and also works around https://github.com/dotnet/msbuild/issues/10540.
 // Unnecessary on .NET 6+ because the perf improvements are in-box there.
@@ -56,7 +56,6 @@ using Directory = Microsoft.IO.Directory;
 using File = Microsoft.IO.File;
 using FileInfo = Microsoft.IO.FileInfo;
 using Path = Microsoft.IO.Path;
-using System.Linq.Expressions;
 #endif
 
 #nullable disable
@@ -1256,7 +1255,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// List of messages to be sent to the logger when it is attached
         /// </summary>
-        private static readonly List<BuildManager.DeferredBuildMessage> s_globalMessagesToLogInBuildLoggers = new();
+        private static readonly List<DeferredBuildMessage> s_globalMessagesToLogInBuildLoggers = new();
 
         /// <summary>
         /// The original console output mode if we changed it as part of initialization.
@@ -1550,7 +1549,7 @@ namespace Microsoft.Build.CommandLine
                         parameters.EnableRarNode = true;
                     }
 
-                    List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = new();
+                    List<DeferredBuildMessage> messagesToLogInBuildLoggers = new();
 
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
 
@@ -1571,7 +1570,7 @@ namespace Microsoft.Build.CommandLine
                         foreach (var responseFilePath in s_includedResponseFiles)
                         {
                             messagesToLogInBuildLoggers.Add(
-                                new BuildManager.DeferredBuildMessage(
+                                new DeferredBuildMessage(
                                     ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                                         "PickedUpSwitchesFromAutoResponse",
                                         responseFilePath),
@@ -1759,72 +1758,44 @@ namespace Microsoft.Build.CommandLine
             }
         }
 
-        private static List<BuildManager.DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
+        private static List<DeferredBuildMessage> GetMessagesToLogInBuildLoggers(string commandLineString)
         {
-            List<BuildManager.DeferredBuildMessage> messages = new(s_globalMessagesToLogInBuildLoggers)
-            {
-                new BuildManager.DeferredBuildMessage(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                        "Process",
-                        EnvironmentUtilities.ProcessPath ?? string.Empty),
-                    MessageImportance.Low),
-                new BuildManager.DeferredBuildMessage(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                        "MSBExePath",
-                        BuildEnvironmentHelper.Instance.CurrentMSBuildExePath),
-                    MessageImportance.Low),
-                new BuildManager.DeferredBuildMessage(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                        "CommandLine",
-                        commandLineString),
-                    MessageImportance.Low),
-                new BuildManager.DeferredBuildMessage(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                        "CurrentDirectory",
-                        Environment.CurrentDirectory),
-                    MessageImportance.Low),
-                new BuildManager.DeferredBuildMessage(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                        "MSBVersion",
-                        ProjectCollection.DisplayVersion),
-                    MessageImportance.Low),
-            };
+            var messages = new List<DeferredBuildMessage>(s_globalMessagesToLogInBuildLoggers);
 
-            NativeMethodsShared.LongPathsStatus longPaths = NativeMethodsShared.IsLongPathsEnabled();
-            if (longPaths != NativeMethodsShared.LongPathsStatus.NotApplicable)
+            AddMessage(messages, "Process", EnvironmentUtilities.ProcessPath ?? string.Empty);
+            AddMessage(messages, "MSBExePath", BuildEnvironmentHelper.Instance.CurrentMSBuildExePath);
+            AddMessage(messages, "CommandLine", commandLineString);
+            AddMessage(messages, "CurrentDirectory", Environment.CurrentDirectory);
+            AddMessage(messages, "MSBVersion", ProjectCollection.DisplayVersion);
+
+            var longPathsStatus = NativeMethodsShared.IsLongPathsEnabled();
+            if (longPathsStatus != NativeMethodsShared.LongPathsStatus.NotApplicable)
             {
-                messages.Add(
-                    new BuildManager.DeferredBuildMessage(
-                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                            "LongPaths",
-                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                                $"LongPaths_{longPaths}")),
-                        MessageImportance.Low));
+                string statusResource = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword($"LongPaths_{longPathsStatus}");
+                AddMessage(messages, "LongPaths", statusResource);
             }
 
-            NativeMethodsShared.SAC_State SAC_State = NativeMethodsShared.GetSACState();
-            if (SAC_State != NativeMethodsShared.SAC_State.NotApplicable && SAC_State != NativeMethodsShared.SAC_State.Missing)
+            var sacState = NativeMethodsShared.GetSACState();
+            if (sacState is not (NativeMethodsShared.SAC_State.NotApplicable or NativeMethodsShared.SAC_State.Missing))
             {
-                messages.Add(
-                    new BuildManager.DeferredBuildMessage(
-                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                            "SAC",
-                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                                $"SAC_{SAC_State}")),
-                        MessageImportance.Low));
+                string stateResource = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword($"SAC_{sacState}");
+                AddMessage(messages, "SAC", stateResource);
             }
 
             if (Traits.Instance.DebugEngine)
             {
-                messages.Add(
-                    new BuildManager.DeferredBuildMessage(
-                        ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                        "MSBuildDebugPath",
-                        DebugUtils.DebugPath),
-                        MessageImportance.High));
+                AddMessage(messages, "MSBuildDebugPath", DebugUtils.DebugPath, MessageImportance.High);
             }
 
             return messages;
+
+            static void AddMessage(
+                List<DeferredBuildMessage> list,
+                string resourceName,
+                string arg,
+                MessageImportance importance = MessageImportance.Low) => list.Add(new DeferredBuildMessage(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(resourceName, arg),
+                    importance));
         }
 
         private static BuildResult ExecuteBuild(BuildManager buildManager, BuildRequestData request)
@@ -1930,6 +1901,8 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
+            DeferredBuildMessageSeverity messageSeverity = Traits.Instance.EmitAsLogsAsMessage ? DeferredBuildMessageSeverity.Message : DeferredBuildMessageSeverity.Warning;
+
             try
             {
                 List<string> envVarArgs = QuotingUtilities.SplitUnquoted(Traits.MSBuildLoggingArgs);
@@ -1960,19 +1933,21 @@ namespace Microsoft.Build.CommandLine
                 {
                     foreach (string invalidArg in invalidArgs)
                     {
-                        LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string warningCode, out _, "LoggingArgsEnvVarUnsupportedArgument", invalidArg), warningCode, Traits.Instance.EmitAsLogsAsMessage);
+                        var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string warningCode, out _, "LoggingArgsEnvVarUnsupportedArgument", invalidArg);
+                        s_globalMessagesToLogInBuildLoggers.Add(new DeferredBuildMessage(message, warningCode, messageSeverity));
                     }
                 }
 
                 if (validArgs.Count > 0)
                 {
-                    LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LoggingArgsEnvVarUsing", string.Join(" ", validArgs)), warningCode: string.Empty, emitAsMessage: true);
+                    s_globalMessagesToLogInBuildLoggers.Add(new DeferredBuildMessage(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LoggingArgsEnvVarUsing", string.Join(" ", validArgs)), MessageImportance.Low));
                     GatherCommandLineSwitches(validArgs, switches, commandLine);
                 }
             }
             catch (Exception ex)
             {
-                LogLoggingArgsMessage(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "LoggingArgsEnvVarError", ex.ToString()), errorCode, Traits.Instance.EmitAsLogsAsMessage);
+                var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "LoggingArgsEnvVarError", ex.ToString());
+                s_globalMessagesToLogInBuildLoggers.Add(new DeferredBuildMessage(message, errorCode, messageSeverity));
             }
         }
 
@@ -2143,20 +2118,6 @@ namespace Microsoft.Build.CommandLine
                     out _,
                     out _,
                     out _) && (paramSwitch == ParameterizedSwitch.BinaryLogger || paramSwitch == ParameterizedSwitch.Check);
-        }
-
-        /// <summary>
-        /// Logs a message from MSBUILD_LOGGING_ARGS processing. Messages are either emitted as deferred warnings
-        /// or queued as low-importance build messages.
-        /// </summary>
-        /// <param name="message">The message to log.</param>
-        /// <param name="warningCode">The warning code when emitting as a warning.</param>
-        /// <param name="emitAsMessage">If true, emit as low-importance message; if false, emit as warning.</param>
-        private static void LogLoggingArgsMessage(string message, string warningCode, bool emitAsMessage)
-        {
-            s_globalMessagesToLogInBuildLoggers.Add(emitAsMessage
-                ? new BuildManager.DeferredBuildMessage(message, MessageImportance.Low)
-                : new BuildManager.DeferredBuildMessage(message, warningCode));
         }
 
         /// <summary>
@@ -2978,7 +2939,7 @@ namespace Microsoft.Build.CommandLine
                 if (IsAutomatedEnvironment())
                 {
                     s_globalMessagesToLogInBuildLoggers.Add(
-                        new BuildManager.DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedAutomated"), MessageImportance.Low));
+                        new DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedAutomated"), MessageImportance.Low));
                     return false;
                 }
 
@@ -2987,7 +2948,7 @@ namespace Microsoft.Build.CommandLine
                 if (!outputIsScreen)
                 {
                     s_globalMessagesToLogInBuildLoggers.Add(
-                        new BuildManager.DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedRedirected"), MessageImportance.Low));
+                        new DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedRedirected"), MessageImportance.Low));
                     return false;
                 }
 
@@ -2995,14 +2956,14 @@ namespace Microsoft.Build.CommandLine
                 if (!acceptAnsiColorCodes)
                 {
                     s_globalMessagesToLogInBuildLoggers.Add(
-                        new BuildManager.DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedNotSupported"), MessageImportance.Low));
+                        new DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedNotSupported"), MessageImportance.Low));
                     return false;
                 }
 
                 if (Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
                 {
                     s_globalMessagesToLogInBuildLoggers.Add(
-                        new BuildManager.DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedDisabled"), MessageImportance.Low));
+                        new DeferredBuildMessage(ResourceUtilities.GetResourceString("TerminalLoggerNotUsedDisabled"), MessageImportance.Low));
                     return false;
                 }
 
@@ -3077,7 +3038,7 @@ namespace Microsoft.Build.CommandLine
                 if (!string.IsNullOrEmpty(terminalLoggerArg))
                 {
                     s_globalMessagesToLogInBuildLoggers.Add(
-                        new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDTERMINALLOGGER was set to {terminalLoggerArg}.", MessageImportance.Low));
+                        new DeferredBuildMessage($"The environment variable MSBUILDTERMINALLOGGER was set to {terminalLoggerArg}.", MessageImportance.Low));
 
                     KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntent = terminalLoggerArg;
                     KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntentSource = "MSBUILDTERMINALLOGGER";
@@ -3086,7 +3047,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     terminalLoggerArg = liveLoggerArg;
                     s_globalMessagesToLogInBuildLoggers.Add(
-                        new BuildManager.DeferredBuildMessage($"The environment variable MSBUILDLIVELOGGER was set to {liveLoggerArg}.", MessageImportance.Low));
+                        new DeferredBuildMessage($"The environment variable MSBUILDLIVELOGGER was set to {liveLoggerArg}.", MessageImportance.Low));
 
                     KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntent = terminalLoggerArg;
                     KnownTelemetry.LoggingConfigurationTelemetry.TerminalLoggerUserIntentSource = "MSBUILDLIVELOGGER";
