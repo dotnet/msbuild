@@ -97,11 +97,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem file in Files)
             {
-                if (!TryGetAbsolutePath(file.ItemSpec, out AbsolutePath path))
-                {
-                    retVal = false;
-                    continue;
-                }
+                AbsolutePath path = TaskEnvironment.GetAbsolutePath(file.ItemSpec);
 
                 // For speed, eliminate duplicates caused by poor targets authoring
                 if (touchedFilesSet.Contains(path))
@@ -166,27 +162,6 @@ namespace Microsoft.Build.Tasks
                 File.SetAttributes,
                 File.SetLastAccessTime,
                 File.SetLastWriteTime);
-        }
-
-        /// <summary>
-        /// Attempts to resolve a path to an absolute path, logging an error if it fails.
-        /// </summary>
-        /// <param name="path">The path to resolve.</param>
-        /// <param name="absolutePath">The resolved absolute path, if successful.</param>
-        /// <returns>True if the path was resolved successfully; false if an error occurred.</returns>
-        private bool TryGetAbsolutePath(string path, out AbsolutePath absolutePath)
-        {
-            try
-            {
-                absolutePath = new AbsolutePath(FileUtilities.FixFilePath(TaskEnvironment.GetAbsolutePath(path)));
-                return true;
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                Log.LogErrorWithCodeFromResources("Touch.CannotTouch", path, e.Message, string.Empty);
-                absolutePath = default;
-                return false;
-            }
         }
 
         /// <summary>

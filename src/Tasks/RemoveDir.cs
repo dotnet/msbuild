@@ -67,10 +67,7 @@ namespace Microsoft.Build.Tasks
                     continue;
                 }
 
-                if (!TryGetAbsolutePath(directory.ItemSpec, out AbsolutePath directoryPath))
-                {
-                    continue;
-                }
+                AbsolutePath directoryPath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
 
                 if (FileSystems.Default.DirectoryExists(directoryPath))
                 {
@@ -118,27 +115,6 @@ namespace Microsoft.Build.Tasks
             // convert the list of deleted files into an array of ITaskItems
             RemovedDirectories = removedDirectoriesList.ToArray();
             return !Log.HasLoggedErrors;
-        }
-
-        /// <summary>
-        /// Attempts to resolve a path to an absolute path, logging an error if it fails.
-        /// </summary>
-        /// <param name="path">The path to resolve.</param>
-        /// <param name="absolutePath">The resolved absolute path, if successful.</param>
-        /// <returns>True if the path was resolved successfully; false if an error occurred.</returns>
-        private bool TryGetAbsolutePath(string path, out AbsolutePath absolutePath)
-        {
-            try
-            {
-                absolutePath = TaskEnvironment.GetAbsolutePath(path);
-                return true;
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                Log.LogErrorWithCodeFromResources("RemoveDir.Error", path, e.Message);
-                absolutePath = default;
-                return false;
-            }
         }
 
         // Core implementation of directory removal
