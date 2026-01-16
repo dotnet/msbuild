@@ -6,11 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-
-#if NETFRAMEWORK
-using Microsoft.IO;
+#pragma warning disable IDE0005 // Using directive is unnecessary - conditional compilation
+#if !FEATURE_MSIOREDIST
+using System.IO;
 #endif
-
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
+#endif
+#pragma warning restore IDE0005
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.XamlTypes;
 using Microsoft.Build.Shared;

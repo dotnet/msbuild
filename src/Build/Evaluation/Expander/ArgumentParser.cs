@@ -4,10 +4,6 @@
 using System;
 using System.Globalization;
 
-#if NETFRAMEWORK
-using Microsoft.IO;
-#endif
-
 namespace Microsoft.Build.Evaluation.Expander
 {
     internal class ArgumentParser
@@ -295,7 +291,7 @@ namespace Microsoft.Build.Evaluation.Expander
             }
 
             // Allow fully-qualified enum, e.g. "System.StringComparison.OrdinalIgnoreCase"
-            if (comparisonTypeName.Contains('.'))
+            if (comparisonTypeName.Contains("."))
             {
                 comparisonTypeName = comparisonTypeName.Replace("System.StringComparison.", "").Replace("StringComparison.", "");
             }

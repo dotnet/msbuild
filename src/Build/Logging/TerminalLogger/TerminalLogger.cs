@@ -4,6 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+#if !FEATURE_MSIOREDIST
+using System.IO;
+#endif
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
+#endif
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -14,12 +20,6 @@ using Microsoft.Build.Shared;
 
 #if NET
 using System.Buffers;
-#endif
-
-#if NETFRAMEWORK
-using Microsoft.IO;
-#else
-using System.IO;
 #endif
 
 namespace Microsoft.Build.Logging;

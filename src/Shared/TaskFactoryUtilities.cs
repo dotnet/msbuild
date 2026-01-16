@@ -6,11 +6,16 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Framework;
-#if NETFRAMEWORK
-using Microsoft.IO;
-#else
+#pragma warning disable IDE0005 // Using directive is unnecessary - conditional compilation
+#if !FEATURE_MSIOREDIST
 using System.IO;
 #endif
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
+using Directory = Microsoft.IO.Directory;
+using File = Microsoft.IO.File;
+#endif
+#pragma warning restore IDE0005
 
 namespace Microsoft.Build.Shared
 {

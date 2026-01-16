@@ -7,10 +7,13 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-#if NET
+#if !FEATURE_MSIOREDIST
 using System.IO;
-#else
-using Microsoft.IO;
+#endif
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
+using Directory = Microsoft.IO.Directory;
+using File = Microsoft.IO.File;
 #endif
 using System.Linq;
 using System.Reflection;
