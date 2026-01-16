@@ -11,7 +11,7 @@ using Microsoft.Build.Shared;
 
 #nullable disable
 
-namespace Microsoft.Build.CommandLine
+namespace Microsoft.Build.CommandLine.Experimental
 {
     /// <summary>
     /// This class encapsulates the switches gathered from the application command line. It helps with switch detection, parameter
@@ -426,6 +426,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// This struct stores the details of a switch that takes parameters that is detected on the command line.
         /// </summary>
+        [DebuggerDisplay("{commandLineArg} | {parameters}")]
         private struct DetectedParameterizedSwitch
         {
             // the actual text of the switch
@@ -435,8 +436,8 @@ namespace Microsoft.Build.CommandLine
             internal ArrayList parameters;
         }
 
-        // for each recognized switch that doesn't take parameters, this array indicates if the switch has been detected on the
-        // command line
+        // for each recognized switch that doesn't take parameters, this array indicates if the switch has been detected on the command
+        // line
         private DetectedParameterlessSwitch[] _parameterlessSwitches;
         // for each recognized switch that takes parameters, this array indicates if the switch has been detected on the command
         // line, and it provides a store for the switch parameters
@@ -504,6 +505,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="switchParameters"></param>
         /// <param name="multipleParametersAllowed"></param>
         /// <param name="unquoteParameters"></param>
+        /// <param name="emptyParametersAllowed"></param>
         /// <returns>true, if the given parameters were successfully stored</returns>
         internal bool SetParameterizedSwitch(
             ParameterizedSwitch parameterizedSwitch,
