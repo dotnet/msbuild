@@ -13,9 +13,6 @@
     <FileSignInfo Include="RuntimeContracts.dll" CertificateName="3PartySHA2" />
 
     <!-- For Telemetry in VS.-->
-    <FileSignInfo Include="OpenTelemetry.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="OpenTelemetry.Api.dll" CertificateName="3PartySHA2" />
-    <FileSignInfo Include="OpenTelemetry.Api.ProviderBuilderExtensions.dll" CertificateName="3PartySHA2" />
     <FileSignInfo Include="Newtonsoft.Json.dll" CertificateName="3PartySHA2" />
   </ItemGroup>
 

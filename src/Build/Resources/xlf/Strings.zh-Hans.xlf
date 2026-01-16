@@ -489,6 +489,11 @@
         <target state="translated">读取环境变量“{0}”</target>
         <note />
       </trans-unit>
+      <trans-unit id="ErrorCopyingBinaryLog">
+        <source>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</source>
+        <target state="translated">MSB4279: 未能将二进制日志从“{0}”复制到“{1}”。{2}</target>
+        <note>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</note>
+      </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4256: 从路径“{0}”读取输入结果缓存文件时遇到错误: {1}</target>
@@ -650,11 +655,6 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">无法使用包含 null 或空目标名称的集合调用方法 {0}。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OpenTelemetryLoadFailed">
-        <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="translated">加载遥测库失败，出现异常: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
@@ -907,18 +907,13 @@ Errors: {3}</source>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="translated">SDK 尝试将环境变量 "{0}" 设置为 "{1}"，但它已设置为环境变量。</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
+        <target state="translated">SDK 尝试将环境变量 "{0}" 设置为 "{1}"，但它已作为环境变量设置为 "{2}"。</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="translated">SDK 尝试将环境变量 "{0}" 设置为 "{1}"，但已由另一个 SDK 设置。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SdkEnvironmentVariableSet">
-        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="translated">SDK 尝试将环境变量 "{0}" 设置为 "{1}"。</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
+        <target state="translated">SDK 尝试将环境变量 "{0}" 设置为 "{1}"，但它已由另一个 SDK 设置为 "{2}"。</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
