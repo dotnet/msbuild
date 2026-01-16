@@ -46,8 +46,8 @@ namespace Microsoft.Build.BackEnd
         public AbsolutePath GetAbsolutePath(string path)
         {
             // This function should not throw when path has illegal characters.
-            // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine.
-            // In case of NET Core, System.IO.Path.Combine does not throw.
+            // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine to achieve it.
+            // For .NET Core, System.IO.Path.Combine already does not throw in this case.
             return new AbsolutePath(Path.Combine(NativeMethodsShared.GetCurrentDirectory(), path), ignoreRootedCheck: true);
         }
 
