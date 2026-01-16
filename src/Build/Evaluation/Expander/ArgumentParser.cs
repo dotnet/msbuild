@@ -291,6 +291,7 @@ namespace Microsoft.Build.Evaluation.Expander
             }
 
             // Allow fully-qualified enum, e.g. "System.StringComparison.OrdinalIgnoreCase"
+            // Note: Using string overload of Contains because char overload doesn't exist in .NET Framework 4.7.2
             if (comparisonTypeName.Contains("."))
             {
                 comparisonTypeName = comparisonTypeName.Replace("System.StringComparison.", "").Replace("StringComparison.", "");
