@@ -6,15 +6,11 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-#pragma warning disable IDE0005 // Using directive is unnecessary - conditional compilation
-#if !FEATURE_MSIOREDIST
+#if NETFRAMEWORK
+using Microsoft.IO;
+#else
 using System.IO;
 #endif
-#if FEATURE_MSIOREDIST
-using Path = Microsoft.IO.Path;
-using Directory = Microsoft.IO.Directory;
-#endif
-#pragma warning restore IDE0005
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
