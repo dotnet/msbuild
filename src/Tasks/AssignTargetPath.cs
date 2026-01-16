@@ -15,9 +15,16 @@ namespace Microsoft.Build.Tasks
     /// Create a new list of items that have &lt;TargetPath&gt; attributes if none was present in
     /// the input.
     /// </summary>
-    public class AssignTargetPath : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class AssignTargetPath : TaskExtension, IMultiThreadableTask
     {
         #region Properties
+
+        /// <summary>
+        /// Gets or sets the task execution environment for thread-safe path resolution.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
+
 
         /// <summary>
         /// The folder to make the links relative to.
@@ -50,26 +57,18 @@ namespace Microsoft.Build.Tasks
             if (Files.Length > 0)
             {
                 // Compose a file in the root folder.
-                // NOTE: at this point fullRootPath may or may not have a trailing
-                // slash because Path.GetFullPath() does not add or remove it
-                string fullRootPath = Path.GetFullPath(RootFolder);
-
+                // NOTE: at this point fullRootPath may or may not have a trailing slash
                 // Ensure trailing slash otherwise c:\bin appears to match part of c:\bin2\foo
-                fullRootPath = FileUtilities.EnsureTrailingSlash(fullRootPath);
+                // Also ensure that relative segments in the path are resolved.
+                AbsolutePath fullRootPath = FrameworkFileUtilities.RemoveRelativeSegments(
+                    TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(RootFolder)));
 
-                string currentDirectory = Directory.GetCurrentDirectory();
+                // Ensure trailing slash for comparison - AbsolutePath handles OS-aware case sensitivity
+                AbsolutePath currentDirectory = FrameworkFileUtilities.RemoveRelativeSegments(
+                    FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory));
 
                 // check if the root folder is the same as the current directory
-                // NOTE: the path returned from Directory.GetCurrentDirectory()
-                // does not have a trailing slash, but fullRootPath does
-                bool isRootFolderSameAsCurrentDirectory =
-                    ((fullRootPath.Length - 1 /* exclude trailing slash */) == currentDirectory.Length)
-                &&
-                    (String.Compare(
-                        fullRootPath, 0,
-                        currentDirectory, 0,
-                        fullRootPath.Length - 1 /* don't compare trailing slash */,
-                        StringComparison.OrdinalIgnoreCase) == 0);
+                bool isRootFolderSameAsCurrentDirectory = fullRootPath == currentDirectory;
 
                 for (int i = 0; i < Files.Length; ++i)
                 {
@@ -95,21 +94,21 @@ namespace Microsoft.Build.Tasks
                             isRootFolderSameAsCurrentDirectory)
                         {
                             // then just use the file path as-is
-                            // PERF NOTE: we do this to avoid calling Path.GetFullPath() below,
+                            // PERF NOTE: we do this to avoid calling Path.GetFullPath() below 
+                            // (which is called by RemoveRelativeSegments method),
                             // because that method consumes a lot of memory, esp. when we have
                             // a lot of items coming through this task
                             targetPath = Files[i].ItemSpec;
                         }
                         else
                         {
-                            // PERF WARNING: Path.GetFullPath() is expensive in terms of memory;
-                            // we should avoid calling it whenever possible
-                            string itemSpecFullFileNamePath = Path.GetFullPath(Files[i].ItemSpec);
+                            AbsolutePath itemSpecFullFileNamePath = FrameworkFileUtilities.RemoveRelativeSegments(
+                                TaskEnvironment.GetAbsolutePath(Files[i].ItemSpec));
 
-                            if (String.Compare(fullRootPath, 0, itemSpecFullFileNamePath, 0, fullRootPath.Length, StringComparison.CurrentCultureIgnoreCase) == 0)
+                            if (itemSpecFullFileNamePath.StartsWith(fullRootPath, StringComparison.OrdinalIgnoreCase))
                             {
                                 // The item spec file is in the "cone" of the RootFolder. Return the relative path from the cone root.
-                                targetPath = itemSpecFullFileNamePath.Substring(fullRootPath.Length);
+                                targetPath = itemSpecFullFileNamePath.Substring(fullRootPath.Value.Length);
                             }
                             else
                             {
