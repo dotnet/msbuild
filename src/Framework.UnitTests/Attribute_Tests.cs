@@ -13,18 +13,6 @@ namespace Microsoft.Build.UnitTests
 {
     public class AttributeTests
     {
-        /// <summary>
-        /// Test RequiredRuntimeAttribute
-        /// </summary>
-        [Fact]
-        public void RequiredRuntimeAttribute()
-        {
-            RequiredRuntimeAttribute attribute =
-                typeof(X).GetTypeInfo().GetCustomAttribute<RequiredRuntimeAttribute>();
-
-            attribute.RuntimeVersion.ShouldBe("v5");
-        }
-
         [Fact]
         public void OutputAttribute()
         {
@@ -43,9 +31,8 @@ namespace Microsoft.Build.UnitTests
     }
 
     /// <summary>
-    /// Sample class with RequiredRuntimeAttribute on it
+    /// Sample class for testing attributes
     /// </summary>
-    [RequiredRuntime("v5")]
     internal static class X
     {
         [Required]
