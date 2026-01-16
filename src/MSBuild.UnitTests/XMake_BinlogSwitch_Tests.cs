@@ -2,9 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.CommandLine;
-using Microsoft.Build.Shared;
+using Microsoft.Build.CommandLine.Experimental;
+using Microsoft.Build.Execution;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
@@ -255,10 +256,12 @@ namespace Microsoft.Build.UnitTests
         [InlineData("/check")]
         public void LoggingArgsEnvVarAllowedSwitches(string switchArg)
         {
-            CommandLineSwitches switches = new();
+            CommandLineParser parser = new();
             _ = _env.SetEnvironmentVariable("MSBUILD_LOGGING_ARGS", switchArg);
 
-            MSBuildApp.GatherLoggingArgsEnvironmentVariableSwitches(ref switches, "test");
+            CommandLineSwitches switches = new();
+            List<BuildManager.DeferredBuildMessage> deferredBuildMessages = new();
+            parser.GatherLoggingArgsEnvironmentVariableSwitches(ref switches, deferredBuildMessages, "test");
 
             switches.HaveErrors().ShouldBeFalse($"Switch {switchArg} should be allowed");
         }

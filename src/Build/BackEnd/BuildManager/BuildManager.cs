@@ -417,7 +417,7 @@ namespace Microsoft.Build.Execution
 
             public string? FilePath { get; }
 
-            public DeferredBuildMessageSeverity MessageSeverity { get; }
+            public DeferredBuildMessageSeverity MessageSeverity { get; } = DeferredBuildMessageSeverity.Message;
 
             /// <summary>
             /// Build event code (e.g., "MSB1070").
