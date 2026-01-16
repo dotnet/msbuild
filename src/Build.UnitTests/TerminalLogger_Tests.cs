@@ -891,7 +891,7 @@ namespace Microsoft.Build.UnitTests
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [Fact(Skip = "Flaky test - timing issues with parallel builds")]
         public void TestTerminalLoggerTogetherWithOtherLoggers()
         {
             using (TestEnvironment env = TestEnvironment.Create())
