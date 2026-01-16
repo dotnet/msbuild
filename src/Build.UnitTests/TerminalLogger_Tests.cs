@@ -891,7 +891,7 @@ namespace Microsoft.Build.UnitTests
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact(Skip = "Flaky test - timing issues with parallel builds")]
+        [Fact]
         public void TestTerminalLoggerTogetherWithOtherLoggers()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -916,11 +916,11 @@ namespace Microsoft.Build.UnitTests
                 string logFileWithoutTL = env.ExpectFile(".binlog").Path;
 
                 // Execute MSBuild with binary, file and terminal loggers
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success,   outputHelper: _outputHelper);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success,   outputHelper: _outputHelper);
                 success.ShouldBeTrue();
 
                 // Execute MSBuild with binary and file loggers
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /m /bl:{logFileWithoutTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithoutTL.log")};verbosity=diagnostic", out success,   outputHelper: _outputHelper);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithoutTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithoutTL.log")};verbosity=diagnostic", out success,   outputHelper: _outputHelper);
                 success.ShouldBeTrue();
 
                 // Read the binary log and replay into mockLogger
