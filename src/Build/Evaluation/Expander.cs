@@ -7,10 +7,10 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-#if NETFRAMEWORK
-using Microsoft.IO;
-#else
+#if NET
 using System.IO;
+#else
+using Microsoft.IO;
 #endif
 using System.Linq;
 using System.Reflection;
