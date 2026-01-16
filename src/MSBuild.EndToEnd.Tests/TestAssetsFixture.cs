@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using Microsoft.Build.UnitTests.Shared;
+using Shouldly;
 
 #nullable disable
 
@@ -38,14 +39,10 @@ namespace Microsoft.Build.EndToEndTests
             {
                 string projectPath = Path.Combine(TestAssetDir, asset.ProjectPath);
                 
-                if (File.Exists(projectPath))
-                {
-                    RunnerUtilities.ExecBootstrapedMSBuild($"\"{projectPath}\" /t:Restore /v:minimal", out bool success);
-                    if (!success)
-                    {
-                        System.Diagnostics.Debug.WriteLine($"Warning: Failed to restore {projectPath}");
-                    }
-                }
+                File.Exists(projectPath).ShouldBeTrue($"Test asset project not found: {projectPath}");
+                
+                string output = RunnerUtilities.ExecBootstrapedMSBuild($"\"{projectPath}\" /t:Restore /v:minimal", out bool success);
+                success.ShouldBeTrue($"Failed to restore test asset {asset.SolutionFolder}\\{asset.ProjectRelativePath}. Output:\n{output}");
             }
         }
 
