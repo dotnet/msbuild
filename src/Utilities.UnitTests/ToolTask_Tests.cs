@@ -36,6 +36,7 @@ namespace Microsoft.Build.UnitTests
             public MyTool()
                 : base()
             {
+                base.TaskResources = AssemblyResources.PrimaryResources;
                 _fullToolName = Path.Combine(
                     NativeMethodsShared.IsUnixLike ? "/bin" : Environment.GetFolderPath(Environment.SpecialFolder.System),
                     NativeMethodsShared.IsUnixLike ? "sh" : "cmd.exe");
@@ -493,6 +494,33 @@ namespace Microsoft.Build.UnitTests
                 engine.AssertLogContains("hello world");
             }
             File.Delete(tempFile);
+        }
+
+        [Theory]
+        [InlineData(true, "InvalidLevel")]
+        [InlineData(false, "InvalidLevel")]
+        public void FailToEnumerateStandardLoggingImportance(bool isErr, string invalidLevel)
+        {
+            using (MyTool t = new MyTool())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+                string toolName = NativeMethodsShared.IsWindows ? "cmd.exe" : "sh";
+                t.FullToolName = toolName;
+                if (isErr)
+                {
+                    t.StandardErrorImportance = invalidLevel;
+                }
+                else
+                {
+                    t.StandardOutputImportance = invalidLevel;
+                }
+
+                t.Execute().ShouldBeFalse();
+                t.ExitCode.ShouldBe(0);
+                engine.Errors.ShouldBe(1);
+                engine.AssertLogContains(invalidLevel);
+            }
         }
 
         /// <summary>
