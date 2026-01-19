@@ -454,6 +454,10 @@ namespace Microsoft.Build.Construction
             rarTask.SetParameter("TargetFrameworkVersion", $"v{new FrameworkName(project.TargetFrameworkMoniker).Version}");
             rarTask.AddOutputItem("CopyLocalFiles", copyLocalFilesItemName, null);
 
+            // Capture whether RAR detected a dependency on netstandard
+            string dependsOnNetStandardPropertyName = GenerateSafePropertyName(project, "_DependsOnNETStandard");
+            rarTask.AddOutputProperty("DependsOnNETStandard", dependsOnNetStandardPropertyName, null);
+
             // Copy all the copy-local files (reported by RAR) to the web project's "bin"
             // directory.
             ProjectTaskInstance copyTask = target.AddTask("Copy", conditionDescribingValidConfigurations, null);
@@ -461,6 +465,14 @@ namespace Microsoft.Build.Construction
             copyTask.SetParameter(
                 "DestinationFiles",
                 String.Format(CultureInfo.InvariantCulture, @"@({0}->'{1}%(DestinationSubDirectory)%(Filename)%(Extension)')", copyLocalFilesItemName, destinationFolder));
+
+            // If any references depend on netstandard, copy netstandard.dll from the Facades folder.
+            // .NET Framework 4.7.1+ has netstandard 2.0 support in the Facades folder.
+            string netstandardFacadePath = String.Format(CultureInfo.InvariantCulture, @"$({0})Facades\netstandard.dll", targetFrameworkDirectoriesName);
+            string copyFacadesCondition = String.Format(CultureInfo.InvariantCulture, "'$({0})' == 'True' AND Exists('{1}')", dependsOnNetStandardPropertyName, netstandardFacadePath);
+            ProjectTaskInstance copyFacadesTask = target.AddTask("Copy", copyFacadesCondition, null);
+            copyFacadesTask.SetParameter("SourceFiles", netstandardFacadePath);
+            copyFacadesTask.SetParameter("DestinationFolder", destinationFolder);
         }
 
         /// <summary>
