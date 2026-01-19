@@ -418,6 +418,7 @@ namespace Microsoft.Build.Construction
             string copyLocalFilesItemName = referenceItemName + "_CopyLocalFiles";
             string targetFrameworkDirectoriesName = GenerateSafePropertyName(project, "_TargetFrameworkDirectories");
             string fullFrameworkRefAssyPathName = GenerateSafePropertyName(project, "_FullFrameworkReferenceAssemblyPaths");
+            string dependsOnNetStandardPropertyName = GenerateSafePropertyName(project, "_DependsOnNETStandard");
             string destinationFolder = String.Format(CultureInfo.InvariantCulture, @"$({0})\Bin\", GenerateSafePropertyName(project, "AspNetPhysicalPath"));
 
             // This is a bit of a hack.  We're actually calling the "Copy" task on all of
@@ -454,6 +455,9 @@ namespace Microsoft.Build.Construction
             rarTask.SetParameter("TargetFrameworkVersion", $"v{new FrameworkName(project.TargetFrameworkMoniker).Version}");
             rarTask.AddOutputItem("CopyLocalFiles", copyLocalFilesItemName, null);
 
+            // Capture whether RAR detected a dependency on netstandard
+            rarTask.AddOutputProperty("DependsOnNETStandard", dependsOnNetStandardPropertyName, null);
+
             // Copy all the copy-local files (reported by RAR) to the web project's "bin"
             // directory.
             ProjectTaskInstance copyTask = target.AddTask("Copy", conditionDescribingValidConfigurations, null);
@@ -461,6 +465,15 @@ namespace Microsoft.Build.Construction
             copyTask.SetParameter(
                 "DestinationFiles",
                 String.Format(CultureInfo.InvariantCulture, @"@({0}->'{1}%(DestinationSubDirectory)%(Filename)%(Extension)')", copyLocalFilesItemName, destinationFolder));
+
+            // If any references depend on netstandard, copy netstandard.dll from the Facades folder.
+            // .NET Framework 4.7.1+ has netstandard 2.0 support in the Facades folder.
+            string netstandardFacadePath = String.Format(CultureInfo.InvariantCulture, @"$({0})Facades\netstandard.dll", targetFrameworkDirectoriesName);
+            string copyFacadesCondition = String.Format(CultureInfo.InvariantCulture, "'$({0})' == 'True' AND Exists('{1}')", dependsOnNetStandardPropertyName, netstandardFacadePath);
+            ProjectTaskInstance copyFacadesTask = target.AddTask("Copy", copyFacadesCondition, null);
+            copyFacadesTask.SetParameter("SourceFiles", netstandardFacadePath);
+            copyFacadesTask.SetParameter("SkipUnchangedFiles", "true");
+            copyFacadesTask.SetParameter("DestinationFolder", destinationFolder);
         }
 
         /// <summary>
@@ -1544,6 +1557,7 @@ namespace Microsoft.Build.Construction
             newTask.SetParameter("DelaySign", "$(" + GenerateSafePropertyName(project, "AspNetDelaySign") + ")");
             newTask.SetParameter("AllowPartiallyTrustedCallers", "$(" + GenerateSafePropertyName(project, "AspNetAPTCA") + ")");
             newTask.SetParameter("FixedNames", "$(" + GenerateSafePropertyName(project, "AspNetFixedNames") + ")");
+            newTask.SetParameter("Clean", "true");
 
             ValidateTargetFrameworkForWebProject(project);
 

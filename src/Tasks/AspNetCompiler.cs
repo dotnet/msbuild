@@ -246,6 +246,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="commandLine">command line builder class to add arguments to</param>
         protected internal override void AddCommandLineCommands(CommandLineBuilderExtension commandLine)
         {
+            commandLine.AppendSwitch("-errorstack");
             commandLine.AppendSwitchIfNotNull("-m ", MetabasePath);
             commandLine.AppendSwitchIfNotNull("-v ", VirtualPath);
             commandLine.AppendSwitchIfNotNull("-p ", PhysicalPath);
