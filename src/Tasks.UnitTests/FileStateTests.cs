@@ -43,22 +43,14 @@ namespace Microsoft.Build.UnitTests
             
             if (Xunit.NetCore.Extensions.CustomXunitAttributesUtilities.IsBuiltAgainstNetFramework)
             {
-                // .NET Framework validates paths eagerly and should throw
+                // .NET Framework validates paths eagerly and should throw ArgumentException
                 Assert.Throws<ArgumentException>(() => { var time = state.LastWriteTime; });
             }
             else
             {
-                // Modern .NET (Core+) does not validate paths eagerly
-                // Accessing LastWriteTime may not throw ArgumentException
-                try
-                {
-                    var time = state.LastWriteTime;
-                    // No exception thrown - acceptable on modern .NET
-                }
-                catch (ArgumentException)
-                {
-                    // Or it may still throw for other reasons - also acceptable
-                }
+                // Modern .NET (Core+) validates paths when accessing the file system
+                // and throws IOException for invalid path characters
+                Assert.Throws<IOException>(() => { var time = state.LastWriteTime; });
             }
         }
 
