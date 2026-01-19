@@ -7,11 +7,7 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-#if NET
 using System.IO;
-#else
-using Microsoft.IO;
-#endif
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -33,6 +29,11 @@ using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
+
+#if FEATURE_MSIOREDIST
+using Directory = Microsoft.IO.Directory;
+using Path = Microsoft.IO.Path;
+#endif
 
 #nullable disable
 

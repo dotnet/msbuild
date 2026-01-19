@@ -4,13 +4,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-#if NETFRAMEWORK
-using Microsoft.IO;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
+
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
 #else
 using System.IO;
 #endif
-using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.BackEnd
 {
