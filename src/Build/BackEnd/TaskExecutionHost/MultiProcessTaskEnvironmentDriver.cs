@@ -4,7 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if NETFRAMEWORK
+using Microsoft.IO;
+#else
 using System.IO;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 
@@ -41,7 +45,10 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public AbsolutePath GetAbsolutePath(string path)
         {
-            return new AbsolutePath(Path.GetFullPath(path), ignoreRootedCheck: true);
+            // This function should not throw when path has illegal characters.
+            // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine to achieve it.
+            // For .NET Core, System.IO.Path.Combine already does not throw in this case.
+            return new AbsolutePath(Path.Combine(NativeMethodsShared.GetCurrentDirectory(), path), ignoreRootedCheck: true);
         }
 
         /// <inheritdoc/>
@@ -72,6 +79,12 @@ namespace Microsoft.Build.BackEnd
         public ProcessStartInfo GetProcessStartInfo()
         {
             return new ProcessStartInfo();
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            // Singleton instance, no cleanup needed.
         }
     }
 }

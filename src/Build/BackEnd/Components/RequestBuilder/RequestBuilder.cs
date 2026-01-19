@@ -1267,9 +1267,9 @@ namespace Microsoft.Build.BackEnd
         {
             ITelemetryForwarder telemetryForwarder =
                 ((TelemetryForwarderProvider)_componentHost.GetComponent(BuildComponentType.TelemetryForwarder))
-                .Instance;
+                ?.Instance;
 
-            if (!telemetryForwarder.IsTelemetryCollected)
+            if (telemetryForwarder == null || !telemetryForwarder.IsTelemetryCollected)
             {
                 return;
             }
@@ -1278,6 +1278,11 @@ namespace Microsoft.Build.BackEnd
             // The TargetBuilder filters out results for targets not explicitly requested before returning the result.
             // Hence we need to fetch the original result from the cache - to get the data for all executed targets.
             BuildResult unfilteredResult = resultsCache.GetResultsForConfiguration(_requestEntry.Request.ConfigurationId);
+
+            if (unfilteredResult?.ResultsByTarget == null || _requestEntry.RequestConfiguration.Project?.Targets == null)
+            {
+                return;
+            }
 
             foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
             {
@@ -1326,12 +1331,15 @@ namespace Microsoft.Build.BackEnd
 
                 foreach (TaskRegistry.RegisteredTaskRecord registeredTaskRecord in taskRegistry.TaskRegistrations.Values.SelectMany(record => record))
                 {
-                    telemetryForwarder.AddTask(registeredTaskRecord.TaskIdentity.Name,
+                    telemetryForwarder.AddTask(
+                        registeredTaskRecord.TaskIdentity.Name,
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
                         registeredTaskRecord.Statistics.TotalMemoryConsumption,
                         registeredTaskRecord.ComputeIfCustom(),
-                        registeredTaskRecord.IsFromNugetCache);
+                        registeredTaskRecord.IsFromNugetCache,
+                        registeredTaskRecord.TaskFactoryAttributeName,
+                        registeredTaskRecord.TaskFactoryParameters.Runtime);
 
                     registeredTaskRecord.Statistics.Reset();
                 }
@@ -1340,8 +1348,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private static bool IsMetaprojTargetPath(string targetPath)
-            => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
+        private static bool IsMetaprojTargetPath(string targetPath) => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Saves the current operating environment (working directory and environment variables)

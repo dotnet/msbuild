@@ -24,6 +24,8 @@ namespace Microsoft.Build.UnitTests
                 MultithreadedEnvironmentName
             };
 
+        // CA2000 is suppressed because the caller is responsible for disposal via DisposeTaskEnvironment
+#pragma warning disable CA2000
         private static TaskEnvironment CreateTaskEnvironment(string environmentType)
         {
             return environmentType switch
@@ -32,6 +34,12 @@ namespace Microsoft.Build.UnitTests
                 MultithreadedEnvironmentName => new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(GetResolvedTempPath())),
                 _ => throw new ArgumentException($"Unknown environment type: {environmentType}")
             };
+        }
+#pragma warning restore CA2000
+
+        private static void DisposeTaskEnvironment(TaskEnvironment taskEnvironment)
+        {
+            taskEnvironment?.Dispose();
         }
 
         /// <summary>
@@ -93,6 +101,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
+                DisposeTaskEnvironment(taskEnvironment);
                 Environment.SetEnvironmentVariable(testVarName, null);
             }
         }
@@ -118,6 +127,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
+                DisposeTaskEnvironment(taskEnvironment);
                 Environment.SetEnvironmentVariable(testVarName, null);
             }
         }
@@ -155,6 +165,7 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 taskEnvironment.SetEnvironment(originalEnvironment);
+                DisposeTaskEnvironment(taskEnvironment);
                 Environment.SetEnvironmentVariable(var1Name, null);
                 Environment.SetEnvironmentVariable(var2Name, null);
                 Environment.SetEnvironmentVariable(var3Name, null);
@@ -198,6 +209,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
+                DisposeTaskEnvironment(taskEnvironment);
                 Directory.SetCurrentDirectory(originalDirectory);
             }
         }
@@ -223,6 +235,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
+                DisposeTaskEnvironment(taskEnvironment);
                 Directory.SetCurrentDirectory(originalDirectory);
             }
         }
@@ -234,9 +247,15 @@ namespace Microsoft.Build.UnitTests
             var taskEnvironment = CreateTaskEnvironment(environmentType);
             string absoluteInputPath = Path.Combine(GetResolvedTempPath(), "already", "absolute", "path.txt");
 
-            var resultPath = taskEnvironment.GetAbsolutePath(absoluteInputPath);
-
-            resultPath.Value.ShouldBe(absoluteInputPath);
+            try
+            {
+                var resultPath = taskEnvironment.GetAbsolutePath(absoluteInputPath);
+                resultPath.Value.ShouldBe(absoluteInputPath);
+            }
+            finally
+            {
+                DisposeTaskEnvironment(taskEnvironment);
+            }
         }
 
         [Theory]
@@ -274,6 +293,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
+                DisposeTaskEnvironment(taskEnvironment);
                 Environment.SetEnvironmentVariable(testVarName, null);
                 Directory.SetCurrentDirectory(originalDirectory);
             }
@@ -315,9 +335,10 @@ namespace Microsoft.Build.UnitTests
             string testVarName = $"MSBUILD_MULTITHREADED_ISOLATION_TEST_{Guid.NewGuid():N}";
             string testVarValue = "multithreaded_test_value";
 
-            var multithreadedEnvironment = new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(
+            using var driver = new MultiThreadedTaskEnvironmentDriver(
                 GetResolvedTempPath(),
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)));
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+            var multithreadedEnvironment = new TaskEnvironment(driver);
 
             try
             {
@@ -335,6 +356,31 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable(testVarName, null);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EnvironmentTypes))]
+        public void TaskEnvironment_GetAbsolutePath_WithInvalidPathChars_ShouldNotThrow(string environmentType)
+        {
+            // Construct a path containing an invalid path character
+            char invalidChar = Path.GetInvalidPathChars().FirstOrDefault();
+            string invalidPath = "invalid" + invalidChar + "path";
+
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
+
+            try
+            {
+                // Should not throw on invalid path characters
+                var absolutePath = taskEnvironment.GetAbsolutePath(invalidPath);
+
+                // The result should contain the invalid path combined with the base directory
+                absolutePath.Value.ShouldNotBeNullOrEmpty();
+                absolutePath.Value.ShouldContain(invalidPath);
+            }
+            finally
+            {
+                DisposeTaskEnvironment(taskEnvironment);
             }
         }
     }

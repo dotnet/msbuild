@@ -4827,6 +4827,25 @@ $(
             TestPropertyFunction(expression, "dummy", "", expected);
         }
 
+        [Fact]
+        public void PropertyFunction_ReplaceDoesNotCallRegexReplace()
+        {
+            // Regression test for https://github.com/dotnet/msbuild/issues/12923
+
+            var properties = new PropertyDictionary<ProjectProperty>();
+            var expander = new Expander<ProjectProperty, ProjectItem>(properties, FileSystems.Default);
+
+            Should.Throw<InvalidProjectFileException>(() =>
+            {
+                string result = expander.ExpandIntoStringLeaveEscaped(
+                    "$([System.TimeSpan]::Replace('abc_123_ghi', '\\d+', 'def'))",
+                    ExpanderOptions.ExpandProperties,
+                    MockElementLocation.Instance);
+
+                result.ShouldNotBe("abc_def_ghi");
+            });
+        }
+
         private void TestPropertyFunction(string expression, string propertyName, string propertyValue, string expected)
         {
             var properties = new PropertyDictionary<ProjectPropertyInstance>();

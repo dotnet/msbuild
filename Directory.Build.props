@@ -84,10 +84,6 @@ ates https://learn.microsoft.com/en-gb/dotnet/fundamentals/syslib-diagnostics/sy
 
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
 
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-    <DirectoryPackagesPropsPath>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', 'eng', 'Packages.props'))</DirectoryPackagesPropsPath>
-
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
   </PropertyGroup>
 

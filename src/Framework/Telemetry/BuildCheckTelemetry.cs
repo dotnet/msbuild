@@ -87,10 +87,7 @@ internal class BuildCheckTelemetry
             yield return (RuleStatsEventName, properties);
         }
 
-
         // set for the new submission in case of build server
         _submissionId = Guid.NewGuid();
     }
 }
-
-
