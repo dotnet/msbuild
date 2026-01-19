@@ -71,6 +71,10 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public AbsolutePath GetAbsolutePath(string path)
         {
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4) && string.IsNullOrEmpty(path))
+            {
+                return default;
+            }
             return new AbsolutePath(path, ProjectDirectory);
         }
 

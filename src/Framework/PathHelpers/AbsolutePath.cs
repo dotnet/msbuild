@@ -19,7 +19,7 @@ namespace Microsoft.Build.Framework
     /// file system conventions (case-sensitive on Linux, case-insensitive on Windows and macOS).
     /// Does not perform any normalization beyond validating the path is fully qualified.
     /// A default instance (created via <c>default(AbsolutePath)</c>) has a null Value 
-    /// and should not be used. Two default instances are considered equal.
+    /// and represents an issue in path handling. Two default instances are considered equal.
     /// </remarks>
     public readonly struct AbsolutePath : IEquatable<AbsolutePath>
     {
