@@ -61,7 +61,7 @@ namespace Microsoft.Build.Engine.UnitTests
             string testProjectPath = Path.Combine(TestAssetsRootPath, "TaskHostLifecycleTestApp.csproj");
 
             string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{testProjectPath} -v:n /p:RuntimeToUse={runtimeToUse} /p:TaskFactoryToUse={taskFactoryToUse}", 
+                $"{testProjectPath} -v:n -restore /p:RuntimeToUse={runtimeToUse} /p:TaskFactoryToUse={taskFactoryToUse}", 
                 out bool successTestTask,
                 outputHelper: _output);
 
