@@ -20,6 +20,14 @@ namespace Microsoft.Build.UnitTests.Shared
 
         public static ArtifactsLocationAttribute ArtifactsLocationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<ArtifactsLocationAttribute>()
                                                    ?? throw new InvalidOperationException("This test assembly does not have the ArtifactsLocationAttribute");
+
+        public static string BootstrapRootPath => BootstrapLocationAttribute.BootstrapRoot;
+
+        public static string BootstrapSdkVersion => BootstrapLocationAttribute.BootstrapSdkVersion;
+
+        internal static BootstrapLocationAttribute BootstrapLocationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<BootstrapLocationAttribute>()
+                                   ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
+
 #if !FEATURE_RUN_EXE_IN_TESTS
         private static readonly string s_dotnetExePath = EnvironmentProvider.GetDotnetExePath();
 

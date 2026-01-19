@@ -12,10 +12,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
-using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Microsoft.Build.UnitTests;
@@ -1732,7 +1732,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             // Build and run the project
             string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath} -restore", out bool success);
             success.ShouldBeTrue(output);
-            string bootstrapCorePath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core", Constants.DotnetProcessName);
+            string bootstrapCorePath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core", NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet");
 
             // Use dotnet exec instead of running the exe directly to ensure using the bootstrap's runtime (which may be newer than the installed one)
             string appDllPath = Path.Combine(directory.Path, $"bin/{s_currentTargetNETFramework}/app.dll");
