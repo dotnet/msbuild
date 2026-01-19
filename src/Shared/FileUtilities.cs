@@ -143,7 +143,7 @@ namespace Microsoft.Build.Shared
         internal static char[] InvalidFileNameChars => InvalidFileNameCharsArray;
 #endif
 
-        internal static readonly char[] Slashes = { '/', '\\' };
+        internal static readonly char[] Slashes = FrameworkFileUtilities.Slashes;
 
         internal static readonly string DirectorySeparatorString = Path.DirectorySeparatorChar.ToString();
 
@@ -246,16 +246,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="fileSpec">The path to check.</param>
         /// <returns>A path with a slash.</returns>
-        internal static string EnsureTrailingSlash(string fileSpec)
-        {
-            fileSpec = FixFilePath(fileSpec);
-            if (fileSpec.Length > 0 && !IsSlash(fileSpec[fileSpec.Length - 1]))
-            {
-                fileSpec += Path.DirectorySeparatorChar;
-            }
-
-            return fileSpec;
-        }
+        internal static string EnsureTrailingSlash(string fileSpec) => FrameworkFileUtilities.EnsureTrailingSlash(fileSpec);
 
         /// <summary>
         /// Ensures the path does not have a leading or trailing slash after removing the first 'start' characters.
@@ -263,16 +254,16 @@ namespace Microsoft.Build.Shared
         internal static string EnsureNoLeadingOrTrailingSlash(string path, int start)
         {
             int stop = path.Length;
-            while (start < stop && IsSlash(path[start]))
+            while (start < stop && FrameworkFileUtilities.IsSlash(path[start]))
             {
                 start++;
             }
-            while (start < stop && IsSlash(path[stop - 1]))
+            while (start < stop && FrameworkFileUtilities.IsSlash(path[stop - 1]))
             {
                 stop--;
             }
 
-            return FixFilePath(path.Substring(start, stop - start));
+            return FrameworkFileUtilities.FixFilePath(path.Substring(start, stop - start));
         }
 
         /// <summary>
@@ -281,12 +272,12 @@ namespace Microsoft.Build.Shared
         internal static string EnsureTrailingNoLeadingSlash(string path, int start)
         {
             int stop = path.Length;
-            while (start < stop && IsSlash(path[start]))
+            while (start < stop && FrameworkFileUtilities.IsSlash(path[start]))
             {
                 start++;
             }
 
-            return FixFilePath(start < stop && IsSlash(path[stop - 1]) ?
+            return FrameworkFileUtilities.FixFilePath(start < stop && FrameworkFileUtilities.IsSlash(path[stop - 1]) ?
                 path.Substring(start) :
 #if NET
                 string.Concat(path.AsSpan(start), new(in Path.DirectorySeparatorChar)));
@@ -298,16 +289,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Ensures the path does not have a trailing slash.
         /// </summary>
-        internal static string EnsureNoTrailingSlash(string path)
-        {
-            path = FixFilePath(path);
-            if (EndsWithSlash(path))
-            {
-                path = path.Substring(0, path.Length - 1);
-            }
-
-            return path;
-        }
+        internal static string EnsureNoTrailingSlash(string path) => FrameworkFileUtilities.EnsureNoTrailingSlash(path);
 
         /// <summary>
         /// Ensures the path is enclosed within single quotes.
@@ -370,22 +352,14 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="fileSpec">The file spec.</param>
         /// <returns>true, if file-spec has trailing slash</returns>
-        internal static bool EndsWithSlash(string fileSpec)
-        {
-            return (fileSpec.Length > 0)
-                ? IsSlash(fileSpec[fileSpec.Length - 1])
-                : false;
-        }
+        internal static bool EndsWithSlash(string fileSpec) => FrameworkFileUtilities.EndsWithSlash(fileSpec);
 
         /// <summary>
         /// Indicates if the given character is a slash.
         /// </summary>
         /// <param name="c"></param>
         /// <returns>true, if slash</returns>
-        internal static bool IsSlash(char c)
-        {
-            return (c == Path.DirectorySeparatorChar) || (c == Path.AltDirectorySeparatorChar);
-        }
+        internal static bool IsSlash(char c) => FrameworkFileUtilities.IsSlash(c);
 
         /// <summary>
         /// Trims the string and removes any double quotes around it.
@@ -578,10 +552,7 @@ namespace Microsoft.Build.Shared
         }
 #endif // FEATURE_LEGACY_GETFULLPATH
 
-        internal static string FixFilePath(string path)
-        {
-            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/'); // .Replace("//", "/");
-        }
+        internal static string FixFilePath(string path) => FrameworkFileUtilities.FixFilePath(path);
 
         /// <summary>
         /// Normalizes all path separators (both forward and back slashes) to forward slashes.
