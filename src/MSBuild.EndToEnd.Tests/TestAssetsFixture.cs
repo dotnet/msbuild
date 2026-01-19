@@ -19,7 +19,7 @@ namespace Microsoft.Build.EndToEndTests
 
         // Test solution asset definitions
         public static readonly TestSolutionAsset SingleProject = new("SingleProject", "SingleProject.csproj");
-        public static readonly TestSolutionAsset ProjectWithDependencies = new("ProjectWithDependencies", "ConsoleApp\\ConsoleApp.csproj");
+        public static readonly TestSolutionAsset ProjectWithDependencies = new("ProjectWithDependencies", "ConsoleApp/ConsoleApp.csproj");
 
         private static readonly TestSolutionAsset[] AssetsToRestore = 
         [
