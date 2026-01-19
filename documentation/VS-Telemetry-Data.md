@@ -8,9 +8,7 @@ MSBuild collects telemetry at multiple levels:
 1. **Build-level telemetry** - Overall build metrics and outcomes
 2. **Task-level telemetry** - Information about task execution
 3. **Target-level telemetry** - Information about target execution and incrementality
-4. **Logging configuration telemetry** - How logging was configured
-5. **BuildCheck telemetry** - Static analysis rules and violations
-6. **Error categorization telemetry** - Classification of build failures
+4. **Error categorization telemetry** - Classification of build failures
 
 All telemetry events use the `VS/MSBuild/` prefix as required by VS exporting/collection. Properties use the `VS.MSBuild.` prefix.
 
@@ -69,22 +67,6 @@ When a build fails, errors are categorized to help identify the source of failur
 | `AspNet` | ASP, BL | ASP.NET and Blazor errors |
 | `Other` | (all others) | Uncategorized errors |
 
-### MSBuild Error Code Ranges
-
-| Range | Category |
-|-------|----------|
-| MSB3001-3999 | Tasks |
-| MSB4001-4099 | General |
-| MSB4100-4199 | Evaluation |
-| MSB4200-4299 | SDKResolvers |
-| MSB4300-4399 | Execution |
-| MSB4400-4499 | Graph |
-| MSB4500-4999 | General |
-| MSB5001-5999 | Execution |
-| MSB6001-6999 | Execution |
-
----
-
 ## 3. Task Telemetry
 
 ### Task Factory Event (`build/tasks/taskfactory`)
@@ -100,100 +82,7 @@ Tracks which task factories are being used.
 | `XamlTaskFactoryTasksExecutedCount` | int | Tasks created via XamlTaskFactory |
 | `CustomTaskFactoryTasksExecutedCount` | int | Tasks from custom task factories |
 
-### Task Summary Event (`build/tasks`)
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `TasksExecutedCount` | int | Total tasks executed |
-| `TaskHostTasksExecutedCount` | int | Tasks executed in task host process |
-
-### Task Subclass Event (`build/tasks/msbuild-subclassed`)
-
-Tracks when users subclass Microsoft-owned MSBuild tasks.
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `Microsoft_Build_Tasks_*` | int | Count of subclass usages per Microsoft task type |
-
-### Tasks Summary (Activity Property)
-
-Detailed task execution statistics attached to build activity.
-
-```
-TasksSummary: {
-    Microsoft: {
-        Total: { ExecutionsCount, TotalMilliseconds, TotalMemoryBytes },
-        FromNuget: { ExecutionsCount, TotalMilliseconds, TotalMemoryBytes }
-    },
-    Custom: {
-        Total: { ExecutionsCount, TotalMilliseconds, TotalMemoryBytes },
-        FromNuget: { ExecutionsCount, TotalMilliseconds, TotalMemoryBytes }
-    }
-}
-```
-
-### Task Details (Activity Property)
-
-Per-task execution details (when enabled).
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `Name` | string | Task name (hashed if custom) |
-| `TotalMilliseconds` | double | Cumulative execution time |
-| `ExecutionsCount` | int | Number of times executed |
-| `TotalMemoryBytes` | long | Memory used by task |
-| `IsCustom` | bool | Whether it's a custom task |
-| `IsNuget` | bool | Whether it came from NuGet |
-| `FactoryName` | string | Task factory name (hashed if custom) |
-| `TaskHostRuntime` | string | Runtime if executed in task host |
-
----
-
-## 4. Target Telemetry
-
-### Targets Summary (Activity Property)
-
-```
-TargetsSummary: {
-    Loaded: {
-        Total: int,
-        Microsoft: { Total, FromNuget, FromMetaproj },
-        Custom: { Total, FromNuget, FromMetaproj }
-    },
-    Executed: {
-        Total: int,
-        Microsoft: { Total, FromNuget, FromMetaproj },
-        Custom: { Total, FromNuget, FromMetaproj }
-    }
-}
-```
-
-### Target Details (Activity Property)
-
-Per-target execution details (when enabled).
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `Name` | string | Target name (hashed if custom or metaproj) |
-| `WasExecuted` | bool | Whether the target ran |
-| `IsCustom` | bool | Whether it's a custom target |
-| `IsNuget` | bool | Whether it came from NuGet |
-| `IsMetaProj` | bool | Whether it's from a metaproject |
-| `SkipReason` | enum | Why target was skipped (if applicable) |
-
-### Target Skip Reasons
-
-| Reason | Description |
-|--------|-------------|
-| `None` | Target was executed |
-| `OutputsUpToDate` | Target outputs were up-to-date |
-| `ConditionWasFalse` | Target condition evaluated to false |
-| `PreviouslyBuiltSuccessfully` | Target was already built successfully |
-| `PreviouslyBuiltUnsuccessfully` | Target was already built but failed |
-
----
-
-## 5. Build Incrementality Telemetry
+## 4. Build Incrementality Telemetry
 
 Classifies builds as full or incremental based on target execution patterns.
 
@@ -211,78 +100,6 @@ Classifies builds as full or incremental based on target execution patterns.
 | `IncrementalityRatio` | double | Ratio of skipped to total (0.0-1.0) |
 
 A build is classified as **Incremental** when more than 70% of targets are skipped.
-
----
-
-## 6. Logging Configuration Telemetry (`loggingConfiguration` event)
-
-Describes how build logging was configured.
-
-### Properties
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `TerminalLogger` | bool | Whether terminal logger was used |
-| `TerminalLoggerUserIntent` | string | User's explicit intent: "on", "off", "auto", or null |
-| `TerminalLoggerUserIntentSource` | string | How intent was specified: "arg", "MSBUILDTERMINALLOGGER", "MSBUILDLIVELOGGER", or null |
-| `TerminalLoggerDefault` | string | Default behavior if no intent: "on", "off", "auto", or null |
-| `TerminalLoggerDefaultSource` | string | Default source: "sdk", "DOTNET_CLI_CONFIGURE_MSBUILD_TERMINAL_LOGGER", "msbuild", or null |
-| `ConsoleLogger` | bool | Whether console logger was used |
-| `ConsoleLoggerVerbosity` | string | Verbosity: "quiet", "minimal", "normal", "detailed", "diagnostic" |
-| `FileLogger` | bool | Whether file logger was used |
-| `FileLoggerVerbosity` | string | File logger verbosity |
-| `BinaryLogger` | bool | Whether binary logger (.binlog) was used |
-| `BinaryLoggerUsedDefaultName` | bool | Whether binary logger used default file name |
-
----
-
-## 7. BuildCheck Telemetry
-
-Static analysis (BuildCheck) telemetry for rule execution and violations.
-
-### Acquisition Failure Event (`buildcheck/acquisitionfailure`)
-
-Logged when a custom check fails to load.
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `SubmissionId` | GUID | Unique build submission ID |
-| `AssemblyName` | string | Name of assembly that failed to load |
-| `ExceptionType` | string | Type of exception thrown |
-| `ExceptionMessage` | string | Exception message |
-
-### Run Event (`buildcheck/run`)
-
-Summary of BuildCheck execution.
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `SubmissionId` | GUID | Unique build submission ID |
-| `RulesCount` | int | Total number of rules |
-| `CustomRulesCount` | int | Number of custom (non-built-in) rules |
-| `ViolationsCount` | int | Total violations found |
-| `TotalRuntimeInMilliseconds` | double | Total BuildCheck runtime |
-
-### Rule Stats Event (`buildcheck/rule`)
-
-Per-rule statistics (one event per rule).
-
-| Property | Type | Description |
-|----------|------|-------------|
-| `SubmissionId` | GUID | Unique build submission ID |
-| `RuleId` | string | Rule identifier (e.g., "BC0101") |
-| `CheckFriendlyName` | string | Human-readable check name |
-| `IsBuiltIn` | bool | Whether rule is built into MSBuild |
-| `DefaultSeverityId` | int | Numeric severity level |
-| `DefaultSeverity` | string | Severity name: "None", "Suggestion", "Warning", "Error" |
-| `EnabledProjectsCount` | int | Number of projects with rule enabled |
-| `ExplicitSeverities` | string | CSV of explicitly configured severities |
-| `ExplicitSeveritiesIds` | string | CSV of explicit severity IDs |
-| `ViolationMessagesCount` | int | Message-level violations |
-| `ViolationWarningsCount` | int | Warning-level violations |
-| `ViolationErrorsCount` | int | Error-level violations |
-| `IsThrottled` | bool | Whether reporting was throttled |
-| `TotalRuntimeInMilliseconds` | double | Time spent evaluating rule |
 
 ---
 
@@ -305,12 +122,6 @@ The following Microsoft-owned task factory names are sent in plain text:
 - `RoslynCodeTaskFactory`
 - `XamlTaskFactory`
 - `IntrinsicTaskFactory`
-
-### Sample Rate
-
-The default telemetry sample rate is 1:25,000 (4e-5), providing statistically significant data while minimizing collection volume.
-
----
 
 ## Related Files
 
