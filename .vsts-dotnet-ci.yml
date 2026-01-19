@@ -20,6 +20,14 @@ jobs:
   steps:
   - powershell: |
       $versionsFile = "eng/Versions.props"
+
+      [xml]$xml = Get-Content $versionsFile
+      $finalVersionKind = $xml.Project.PropertyGroup.DotNetFinalVersionKind
+      if ($finalVersionKind -ne 'release') {
+        Write-Host "Since it is not released, skip the version bump check.";
+        return
+      }
+
       $changedFiles = git diff --name-only HEAD HEAD~1
       $changedVersionsFile = $changedFiles | Where-Object { $_ -eq $versionsFile }
       $isInitialCommit = $false
