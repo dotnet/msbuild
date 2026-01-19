@@ -53,12 +53,12 @@ When a build fails, errors are categorized to help identify the source of failur
 | Category | Error Code Prefixes | Description |
 |----------|---------------------|-------------|
 | `Compiler` | CS, FS, VBC | C#, F#, and Visual Basic compiler errors |
-| `MsBuildGeneral` | MSB1xxx-MSB2xxx | General MSBuild errors |
-| `MsBuildEvaluation` | MSB4xxx | Project evaluation errors |
-| `MsBuildExecution` | MSB5xxx-MSB6xxx | Build execution errors |
-| `MsBuildGraph` | MSB4xxx (subset) | Static graph build errors |
+| `MsBuildGeneral` | MSB4001-MSB4099, MSB4500-MSB4999 | General MSBuild errors |
+| `MsBuildEvaluation` | MSB4100-MSB4199 | Project evaluation errors |
+| `MsBuildExecution` | MSB4300-MSB4399, MSB5xxx-MSB6xxx | Build execution errors |
+| `MsBuildGraph` | MSB4400-MSB4499 | Static graph build errors |
 | `Task` | MSB3xxx | Task-related errors |
-| `SdkResolvers` | MSB4xxx (SDK-related) | SDK resolution errors |
+| `SdkResolvers` | MSB4200-MSB4299 | SDK resolution errors |
 | `NetSdk` | NETSDK | .NET SDK errors |
 | `NuGet` | NU | NuGet package errors |
 | `BuildCheck` | BC | BuildCheck rule violations |
