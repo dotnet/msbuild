@@ -73,6 +73,28 @@ Use `#if NET` for APIs that differ between .NET Framework and .NET Core:
 #endif
 ```
 
+### Immutable Collections
+Choose the right immutable collection type based on usage pattern:
+
+**Build once, read many times** (most common in MSBuild):
+- Use `ImmutableArray<T>` instead of `ImmutableList<T>` - significantly faster for read access
+- Use `FrozenDictionary<TKey, TValue>` instead of `ImmutableDictionary<TKey, TValue>` - optimized for read-heavy scenarios
+
+**Build incrementally over time** (adding items one by one):
+- Use `ImmutableList<T>` and `ImmutableDictionary<TKey, TValue>` - designed for efficient `Add` operations returning new collections
+
+```csharp
+// GOOD: Build once from LINQ, then read many times
+ImmutableArray<string> items = source.Select(x => x.Name).ToImmutableArray();
+FrozenDictionary<string, int> lookup = pairs.ToFrozenDictionary(x => x.Key, x => x.Value);
+
+// AVOID for read-heavy scenarios:
+ImmutableList<string> items = source.Select(x => x.Name).ToImmutableList();
+ImmutableDictionary<string, int> lookup = pairs.ToImmutableDictionary(x => x.Key, x => x.Value);
+```
+
+Note: `ImmutableArray<T>` is a value type. Use `IsDefault` property to check for uninitialized arrays, or use nullable `ImmutableArray<T>?` with `.Value` to unwrap.
+
 ## Working Effectively
 
 #### Bootstrap and Build the Repository
