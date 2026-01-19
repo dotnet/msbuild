@@ -15,8 +15,8 @@ internal interface IWorkerNodeTelemetryData
 /// <summary>
 /// Represents the execution statistics of a target.
 /// </summary>
-/// <param name="WasExecuted">Whether the target was executed (not skipped).</param>
-/// <param name="SkipReason">The reason the target was skipped, if applicable.</param>
+/// <param name="wasExecuted">Whether the target was executed (not skipped).</param>
+/// <param name="skipReason">The reason the target was skipped, if applicable.</param>
 internal readonly struct TargetExecutionStats(bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None)
 {
     /// <summary>
