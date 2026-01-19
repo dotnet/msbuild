@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
@@ -381,6 +382,64 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 DisposeTaskEnvironment(taskEnvironment);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EnvironmentTypes))]
+        public void TaskEnvironment_GetAbsolutePath_WithEmptyPath_WhenWave18_4Disabled_ReturnsDefault(string environmentType)
+        {
+            using TestEnvironment testEnv = TestEnvironment.Create();
+
+            // Disable Wave18_4 to test legacy behavior
+            ChangeWaves.ResetStateForTests();
+            testEnv.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_4.ToString());
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
+
+            try
+            {
+                // When Wave18_4 is disabled, empty path should return default AbsolutePath
+                var absolutePath = taskEnvironment.GetAbsolutePath(string.Empty);
+
+                absolutePath.ShouldBe(default(AbsolutePath));
+                absolutePath.Value.ShouldBeNull();
+            }
+            finally
+            {
+                DisposeTaskEnvironment(taskEnvironment);
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EnvironmentTypes))]
+        public void TaskEnvironment_GetAbsolutePath_WithEmptyPath_WhenWave18_4Enabled_CombinesWithProjectDirectory(string environmentType)
+        {
+            using TestEnvironment testEnv = TestEnvironment.Create();
+
+            // Ensure Wave18_4 is enabled (default behavior when no env var is set)
+            ChangeWaves.ResetStateForTests();
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
+            string baseDirectory = GetResolvedTempPath();
+
+            try
+            {
+                taskEnvironment.ProjectDirectory = new AbsolutePath(baseDirectory, ignoreRootedCheck: true);
+
+                // When Wave18_4 is enabled, empty path should be combined with project directory
+                var absolutePath = taskEnvironment.GetAbsolutePath(string.Empty);
+
+                // The result should be the project directory (Path.Combine with empty string returns the base path)
+                absolutePath.Value.ShouldBe(baseDirectory);
+            }
+            finally
+            {
+                DisposeTaskEnvironment(taskEnvironment);
+                ChangeWaves.ResetStateForTests();
             }
         }
     }
