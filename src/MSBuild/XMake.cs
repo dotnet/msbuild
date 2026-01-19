@@ -1392,8 +1392,8 @@ namespace Microsoft.Build.CommandLine
                         // all of the loggers that are single-node only
                         .. loggers,
                         // all of the central loggers for multi-node systems. These need to be resilient to multiple calls
-                        // to Initialize
-                        .. distributedLoggerRecords.Select(d => d.CentralLogger)
+                        // to Initialize. Filter out null loggers (e.g., DistributedFileLogger uses null central logger).
+                        .. distributedLoggerRecords.Select(d => d.CentralLogger).Where(l => l is not null)
                     ];
 
                 projectCollection = new ProjectCollection(
