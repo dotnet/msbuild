@@ -306,7 +306,14 @@ namespace Microsoft.Build.CommandLine
             bool canRunServer = true;
             try
             {
-                commandLineParser.GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out string fullCommandLine, out s_exeName);
+                commandLineParser.GatherAllSwitches(
+                    commandLine,
+                    s_globalMessagesToLogInBuildLoggers,
+                    out CommandLineSwitches switchesFromAutoResponseFile,
+                    out CommandLineSwitches switchesNotFromAutoResponseFile,
+                    out string fullCommandLine,
+                    out s_exeName);
+
                 CommandLineSwitches commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
                 if (commandLineParser.CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, false, fullCommandLine))
                 {
@@ -681,7 +688,7 @@ namespace Microsoft.Build.CommandLine
                 bool reportFileAccesses = false;
 #endif
 
-                commandLineParser.GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _, out s_exeName);
+                commandLineParser.GatherAllSwitches(commandLine, s_globalMessagesToLogInBuildLoggers, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _, out s_exeName);
 
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,

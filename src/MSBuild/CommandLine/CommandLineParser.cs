@@ -11,8 +11,11 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using static Microsoft.Build.CommandLine.Experimental.CommandLineSwitches;
+using static Microsoft.Build.Execution.BuildManager;
 
 #nullable disable
 
@@ -60,15 +63,17 @@ namespace Microsoft.Build.CommandLine.Experimental
         public CommandLineSwitchesAccessor Parse(IEnumerable<string> commandLineArgs)
         {
             List<string> args = [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, ..commandLineArgs];
+            List<DeferredBuildMessage> deferredBuildMessages = [];
 
             GatherAllSwitches(
                 args,
+                deferredBuildMessages,
                 out CommandLineSwitches responseFileSwitches,
                 out CommandLineSwitches commandLineSwitches,
                 out string fullCommandLine,
                 out _);
 
-            CommandLineSwitches result = new CommandLineSwitches();
+            CommandLineSwitches result = new();
             result.Append(responseFileSwitches, fullCommandLine); // lowest precedence
             result.Append(commandLineSwitches, fullCommandLine);
 
@@ -82,12 +87,14 @@ namespace Microsoft.Build.CommandLine.Experimental
         /// response files, including the auto-response file.
         /// </summary>
         /// <param name="commandLine"></param>
+        /// <param name="deferredBuildMessages"></param>
         /// <param name="switchesFromAutoResponseFile"></param>
         /// <param name="switchesNotFromAutoResponseFile"></param>
         /// <param name="fullCommandLine"></param>
         /// <returns>Combined bag of switches.</returns>
         internal void GatherAllSwitches(
             IEnumerable<string> commandLineArgs,
+            List<DeferredBuildMessage> deferredBuildMessages,
             out CommandLineSwitches switchesFromAutoResponseFile,
             out CommandLineSwitches switchesNotFromAutoResponseFile,
             out string fullCommandLine,
@@ -119,11 +126,108 @@ namespace Microsoft.Build.CommandLine.Experimental
             // parse the auto-response file (if "/noautoresponse" is not specified), and combine those switches with the
             // switches on the command line
             switchesFromAutoResponseFile = new CommandLineSwitches();
-            if (!switchesNotFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
+            if (!switchesNotFromAutoResponseFile[ParameterlessSwitch.NoAutoResponse])
             {
                 string exePath = Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath); // Copied from XMake
                 GatherAutoResponseFileSwitches(exePath, switchesFromAutoResponseFile, fullCommandLine);
             }
+
+            CommandLineSwitches switchesFromEnvironmentVariable = new();
+            GatherLoggingArgsEnvironmentVariableSwitches(ref switchesFromEnvironmentVariable, deferredBuildMessages, fullCommandLine);
+            switchesNotFromAutoResponseFile.Append(switchesFromEnvironmentVariable, fullCommandLine);
+        }
+
+        /// <summary>
+        /// Gathers and validates logging switches from the MSBUILD_LOGGING_ARGS environment variable.
+        /// Only -bl and -check switches are allowed. All other switches are logged as warnings and ignored.
+        /// </summary>
+        internal void GatherLoggingArgsEnvironmentVariableSwitches(
+            ref CommandLineSwitches switches,
+            List<DeferredBuildMessage> deferredBuildMessages,
+            string commandLine)
+        {
+            if (string.IsNullOrWhiteSpace(Traits.MSBuildLoggingArgs))
+            {
+                return;
+            }
+
+            DeferredBuildMessageSeverity messageSeverity = Traits.Instance.EmitLogsAsMessage ? DeferredBuildMessageSeverity.Message : DeferredBuildMessageSeverity.Warning;
+
+            try
+            {
+                List<string> envVarArgs = QuotingUtilities.SplitUnquoted(Traits.MSBuildLoggingArgs);
+
+                List<string> validArgs = new(envVarArgs.Count);
+                List<string> invalidArgs = null;
+
+                foreach (string arg in envVarArgs)
+                {
+                    string unquotedArg = QuotingUtilities.Unquote(arg);
+                    if (string.IsNullOrWhiteSpace(unquotedArg))
+                    {
+                        continue;
+                    }
+
+                    if (IsAllowedLoggingArg(unquotedArg))
+                    {
+                        validArgs.Add(arg);
+                    }
+                    else
+                    {
+                        invalidArgs ??= [];
+                        invalidArgs.Add(unquotedArg);
+                    }
+                }
+
+                if (invalidArgs != null)
+                {
+                    foreach (string invalidArg in invalidArgs)
+                    {
+                        var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string warningCode, out _, "LoggingArgsEnvVarUnsupportedArgument", invalidArg);
+                        deferredBuildMessages.Add(new DeferredBuildMessage(message, warningCode, messageSeverity));
+                    }
+                }
+
+                if (validArgs.Count > 0)
+                {
+                    deferredBuildMessages.Add(new DeferredBuildMessage(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LoggingArgsEnvVarUsing", string.Join(" ", validArgs)), MessageImportance.Low));
+                    GatherCommandLineSwitches(validArgs, switches, commandLine);
+                }
+            }
+            catch (Exception ex)
+            {
+                var message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "LoggingArgsEnvVarError", ex.ToString());
+                deferredBuildMessages.Add(new DeferredBuildMessage(message, errorCode, messageSeverity));
+            }
+        }
+
+        /// <summary>
+        /// Checks if the argument is an allowed logging argument (-bl or -check).
+        /// </summary>
+        /// <param name="arg">The unquoted argument to check.</param>
+        /// <returns>True if the argument is allowed, false otherwise.</returns>
+        private bool IsAllowedLoggingArg(string arg)
+        {
+            if (!ValidateSwitchIndicatorInUnquotedArgument(arg))
+            {
+                return false;
+            }
+
+            ReadOnlySpan<char> switchPart = arg.AsSpan(GetLengthOfSwitchIndicator(arg));
+
+            // Extract switch name (before any ':' parameter indicator)
+            int colonIndex = switchPart.IndexOf(':');
+            ReadOnlySpan<char> switchNameSpan = colonIndex >= 0 ? switchPart.Slice(0, colonIndex) : switchPart;
+            string switchName = switchNameSpan.ToString();
+
+            return IsParameterizedSwitch(
+                    switchName,
+                    out ParameterizedSwitch paramSwitch,
+                    out _,
+                    out _,
+                    out _,
+                    out _,
+                    out _) && (paramSwitch == ParameterizedSwitch.BinaryLogger || paramSwitch == ParameterizedSwitch.Check);
         }
 
         /// <summary>
