@@ -14,7 +14,7 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Known Microsoft task factory type names that should not be hashed.
         /// </summary>
-        private static readonly HashSet<string> KnownTaskFactoryNames = new(StringComparer.Ordinal)
+        private static readonly HashSet<string> KnownTaskFactoryNames = new(StringComparer.OrdinalIgnoreCase)
         {
             "AssemblyTaskFactory",
             "TaskHostFactory",
@@ -44,11 +44,14 @@ namespace Microsoft.Build.Framework.Telemetry
             var tasksSummary = new TasksSummaryConverter();
             tasksSummary.Process(telemetryData.TasksExecutionData);
 
+            var incrementality = ComputeIncrementalityInfo(telemetryData.TargetsExecutionData);
+
             var buildInsights = new BuildInsights(
                 includeTasksDetails ? GetTasksDetails(telemetryData.TasksExecutionData) : [],
                 includeTargetDetails ? GetTargetsDetails(telemetryData.TargetsExecutionData) : [],
                 GetTargetsSummary(targetsSummary),
-                GetTasksSummary(tasksSummary));
+                GetTasksSummary(tasksSummary),
+                incrementality);
 
             return new NodeTelemetry(buildInsights);
         }
@@ -56,20 +59,21 @@ namespace Microsoft.Build.Framework.Telemetry
         /// <summary>
         /// Converts targets details to a list of custom objects for telemetry.
         /// </summary>
-        private static List<TargetDetailInfo> GetTargetsDetails(Dictionary<TaskOrTargetTelemetryKey, bool> targetsDetails)
+        private static List<TargetDetailInfo> GetTargetsDetails(Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> targetsDetails)
         {
             var result = new List<TargetDetailInfo>();
 
-            foreach (KeyValuePair<TaskOrTargetTelemetryKey, bool> valuePair in targetsDetails)
+            foreach (KeyValuePair<TaskOrTargetTelemetryKey, TargetExecutionStats> valuePair in targetsDetails)
             {
                 string targetName = ShouldHashKey(valuePair.Key) ? GetHashed(valuePair.Key.Name) : valuePair.Key.Name;
 
                 result.Add(new TargetDetailInfo(
                     targetName,
-                    valuePair.Value,
+                    valuePair.Value.WasExecuted,
                     valuePair.Key.IsCustom,
                     valuePair.Key.IsNuget,
-                    valuePair.Key.IsMetaProj));
+                    valuePair.Key.IsMetaProj,
+                    valuePair.Value.SkipReason));
             }
 
             return result;
@@ -77,7 +81,7 @@ namespace Microsoft.Build.Framework.Telemetry
             static bool ShouldHashKey(TaskOrTargetTelemetryKey key) => key.IsCustom || key.IsMetaProj;
         }
 
-        internal record TargetDetailInfo(string Name, bool WasExecuted, bool IsCustom, bool IsNuget, bool IsMetaProj);
+        internal record TargetDetailInfo(string Name, bool WasExecuted, bool IsCustom, bool IsNuget, bool IsMetaProj, TargetSkipReason SkipReason);
 
         /// <summary>
         /// Converts tasks details to a list of custom objects for telemetry.
@@ -238,14 +242,14 @@ namespace Microsoft.Build.Framework.Telemetry
             /// <summary>
             /// Processes target execution data to compile summary statistics for both built-in and custom targets.
             /// </summary>
-            public void Process(Dictionary<TaskOrTargetTelemetryKey, bool> targetsExecutionData)
+            public void Process(Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> targetsExecutionData)
             {
                 foreach (var kv in targetsExecutionData)
                 {
                     GetTargetInfo(kv.Key, isExecuted: false).Increment(kv.Key);
 
                     // Update executed targets statistics (only if executed)
-                    if (kv.Value)
+                    if (kv.Value.WasExecuted)
                     {
                         GetTargetInfo(kv.Key, isExecuted: true).Increment(kv.Key);
                     }
@@ -316,27 +320,95 @@ namespace Microsoft.Build.Framework.Telemetry
             }
         }
 
+        /// <summary>
+        /// Threshold ratio above which a build is classified as incremental.
+        /// A build with more than 70% skipped targets is considered incremental.
+        /// </summary>
+        private const double IncrementalBuildThreshold = 0.70;
+
+        /// <summary>
+        /// Computes build incrementality information from target execution data.
+        /// </summary>
+        private static BuildInsights.BuildIncrementalityInfo ComputeIncrementalityInfo(
+            Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> targetsExecutionData)
+        {
+            int totalTargets = targetsExecutionData.Count;
+            int executedTargets = 0;
+            int skippedTargets = 0;
+            int skippedDueToUpToDate = 0;
+            int skippedDueToCondition = 0;
+            int skippedDueToPreviouslyBuilt = 0;
+
+            foreach (var kv in targetsExecutionData)
+            {
+                if (kv.Value.WasExecuted)
+                {
+                    executedTargets++;
+                }
+                else
+                {
+                    skippedTargets++;
+                    _ = kv.Value.SkipReason switch
+                    {
+                        TargetSkipReason.OutputsUpToDate => skippedDueToUpToDate++,
+                        TargetSkipReason.ConditionWasFalse => skippedDueToCondition++,
+                        TargetSkipReason.PreviouslyBuiltSuccessfully or TargetSkipReason.PreviouslyBuiltUnsuccessfully => skippedDueToPreviouslyBuilt++,
+                        _ => 0
+                    };
+                }
+            }
+
+            // Calculate incrementality ratio (0.0 = full build, 1.0 = fully incremental)
+            double incrementalityRatio = totalTargets > 0 ? (double)skippedTargets / totalTargets : 0.0;
+
+            var classification = totalTargets == 0
+                ? BuildInsights.BuildType.Unknown
+                : incrementalityRatio >= IncrementalBuildThreshold
+                    ? BuildInsights.BuildType.Incremental
+                    : BuildInsights.BuildType.Full;
+
+            return new BuildInsights.BuildIncrementalityInfo(
+                Classification: classification,
+                TotalTargetsCount: totalTargets,
+                ExecutedTargetsCount: executedTargets,
+                SkippedTargetsCount: skippedTargets,
+                SkippedDueToUpToDateCount: skippedDueToUpToDate,
+                SkippedDueToConditionCount: skippedDueToCondition,
+                SkippedDueToPreviouslyBuiltCount: skippedDueToPreviouslyBuilt,
+                IncrementalityRatio: incrementalityRatio);
+        }
+
         private sealed class NodeTelemetry(BuildInsights insights) : IActivityTelemetryDataHolder
         {
             Dictionary<string, object> IActivityTelemetryDataHolder.GetActivityProperties()
             {
-                Dictionary<string, object> properties = new()
+                Dictionary<string, object> properties = new(5)
                 {
                     [nameof(BuildInsights.TargetsSummary)] = insights.TargetsSummary,
                     [nameof(BuildInsights.TasksSummary)] = insights.TasksSummary,
                 };
 
-                if (insights.Targets.Count > 0)
-                {
-                    properties[nameof(BuildInsights.Targets)] = insights.Targets;
-                }
-
-                if (insights.Tasks.Count > 0)
-                {
-                    properties[nameof(BuildInsights.Tasks)] = insights.Tasks;
-                }
+                AddIfNotEmpty(nameof(BuildInsights.Targets), insights.Targets);
+                AddIfNotEmpty(nameof(BuildInsights.Tasks), insights.Tasks);
+                AddIfNotNull(nameof(BuildInsights.Incrementality), insights.Incrementality);
 
                 return properties;
+
+                void AddIfNotEmpty<T>(string key, List<T> list)
+                {
+                    if (list.Count > 0)
+                    {
+                        properties[key] = list;
+                    }
+                }
+
+                void AddIfNotNull(string key, object? value)
+                {
+                    if (value != null)
+                    {
+                        properties[key] = value;
+                    }
+                }
             }
         }
     }

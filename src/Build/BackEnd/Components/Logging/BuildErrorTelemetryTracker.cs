@@ -19,12 +19,20 @@ namespace Microsoft.Build.BackEnd.Logging
         private enum ErrorCategory
         {
             Compiler,
-            MSBuildEngine,
+            MSBuildGeneral,
+            MSBuildEvaluation,
+            MSBuildExecution,
+            MSBuildGraph,
             Tasks,
             SDKResolvers,
             NETSDK,
             NuGet,
             BuildCheck,
+            NativeToolchain,
+            CodeAnalysis,
+            Razor,
+            WPF,
+            AspNet,
             Other,
         }
 
@@ -76,36 +84,44 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="buildTelemetry">The BuildTelemetry object to populate with error data.</param>
         public void PopulateBuildTelemetry(BuildTelemetry buildTelemetry)
         {
-            // Read counts atomically
-            int compilerErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.Compiler], 0, 0);
-            int msbuildEngineErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.MSBuildEngine], 0, 0);
-            int taskErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.Tasks], 0, 0);
-            int sdkResolversErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.SDKResolvers], 0, 0);
-            int netsdkErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.NETSDK], 0, 0);
-            int nugetErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.NuGet], 0, 0);
-            int buildCheckErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.BuildCheck], 0, 0);
-            int otherErrorCount = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)ErrorCategory.Other], 0, 0);
-
             buildTelemetry.ErrorCounts = new ErrorCountsInfo(
-                Compiler: compilerErrorCount > 0 ? compilerErrorCount : null,
-                MsBuildEngine: msbuildEngineErrorCount > 0 ? msbuildEngineErrorCount : null,
-                Task: taskErrorCount > 0 ? taskErrorCount : null,
-                SdkResolvers: sdkResolversErrorCount > 0 ? sdkResolversErrorCount : null,
-                NetSdk: netsdkErrorCount > 0 ? netsdkErrorCount : null,
-                NuGet: nugetErrorCount > 0 ? nugetErrorCount : null,
-                BuildCheck: buildCheckErrorCount > 0 ? buildCheckErrorCount : null,
-                Other: otherErrorCount > 0 ? otherErrorCount : null);
+                Compiler: GetCountOrNull(ErrorCategory.Compiler),
+                MsBuildGeneral: GetCountOrNull(ErrorCategory.MSBuildGeneral),
+                MsBuildEvaluation: GetCountOrNull(ErrorCategory.MSBuildEvaluation),
+                MsBuildExecution: GetCountOrNull(ErrorCategory.MSBuildExecution),
+                MsBuildGraph: GetCountOrNull(ErrorCategory.MSBuildGraph),
+                Task: GetCountOrNull(ErrorCategory.Tasks),
+                SdkResolvers: GetCountOrNull(ErrorCategory.SDKResolvers),
+                NetSdk: GetCountOrNull(ErrorCategory.NETSDK),
+                NuGet: GetCountOrNull(ErrorCategory.NuGet),
+                BuildCheck: GetCountOrNull(ErrorCategory.BuildCheck),
+                NativeToolchain: GetCountOrNull(ErrorCategory.NativeToolchain),
+                CodeAnalysis: GetCountOrNull(ErrorCategory.CodeAnalysis),
+                Razor: GetCountOrNull(ErrorCategory.Razor),
+                Wpf: GetCountOrNull(ErrorCategory.WPF),
+                AspNet: GetCountOrNull(ErrorCategory.AspNet),
+                Other: GetCountOrNull(ErrorCategory.Other));
 
             // Set the primary failure category
-            int totalErrors = System.Threading.Interlocked.CompareExchange(ref _primaryCategoryCount, 0, 0);
-            if (totalErrors > 0)
+            if (_primaryCategoryCount > 0)
             {
                 buildTelemetry.FailureCategory = _primaryCategory.ToString();
             }
         }
 
         /// <summary>
+        /// Gets the error count for a category, returning null if zero.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int? GetCountOrNull(ErrorCategory category)
+        {
+            int count = System.Threading.Interlocked.CompareExchange(ref _errorCounts[(int)category], 0, 0);
+            return count > 0 ? count : null;
+        }
+
+        /// <summary>
         /// Categorizes an error based on its error code and subcategory.
+        /// Uses a two-level character switch for O(1) prefix matching.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ErrorCategory CategorizeError(string? errorCode, string? subcategory)
@@ -121,54 +137,82 @@ namespace Microsoft.Build.BackEnd.Logging
                 return ErrorCategory.Compiler;
             }
 
-            // Check error code patterns - order by frequency for fast path
+            // Check error code patterns
             if (IsCompilerPrefix(errorCode!))
             {
                 return ErrorCategory.Compiler;
             }
 
-            // Use Span-based comparison to avoid allocations
-            ReadOnlySpan<char> codeSpan = errorCode.AsSpan();
-
-            if (codeSpan.Length >= 2)
+            if (errorCode!.Length < 2)
             {
-                char c0 = char.ToUpperInvariant(codeSpan[0]);
-                char c1 = char.ToUpperInvariant(codeSpan[1]);
-
-                // BC* -> BuildCheck
-                if (c0 == 'B' && c1 == 'C')
-                {
-                    return ErrorCategory.BuildCheck;
-                }
-
-                // NU* -> NuGet
-                if (c0 == 'N' && c1 == 'U')
-                {
-                    return ErrorCategory.NuGet;
-                }
-
-                // MSB* -> categorize MSB errors
-                if (c0 == 'M' && c1 == 'S' && codeSpan.Length >= 3 && char.ToUpperInvariant(codeSpan[2]) == 'B')
-                {
-                    return CategorizeMSBError(codeSpan);
-                }
-
-                // NETSDK* -> .NET SDK diagnostics
-                if (c0 == 'N' && c1 == 'E' && codeSpan.Length >= 6 &&
-                    char.ToUpperInvariant(codeSpan[2]) == 'T' &&
-                    char.ToUpperInvariant(codeSpan[3]) == 'S' &&
-                    char.ToUpperInvariant(codeSpan[4]) == 'D' &&
-                    char.ToUpperInvariant(codeSpan[5]) == 'K')
-                {
-                    return ErrorCategory.NETSDK;
-                }
+                return ErrorCategory.Other;
             }
 
-            return ErrorCategory.Other;
+            // Two-level switch on first two characters for efficient prefix matching
+            char c0 = char.ToUpperInvariant(errorCode[0]);
+            char c1 = char.ToUpperInvariant(errorCode[1]);
+
+            return (c0, c1) switch
+            {
+                // A*
+                ('A', 'S') when StartsWithASP(errorCode) => ErrorCategory.AspNet,
+
+                // B*
+                ('B', 'C') => ErrorCategory.BuildCheck,
+                ('B', 'L') => ErrorCategory.AspNet,  // Blazor
+
+                // C* (careful: CS is handled by IsCompilerPrefix above)
+                ('C', 'A') => ErrorCategory.CodeAnalysis,
+                ('C', 'L') => ErrorCategory.NativeToolchain,
+                ('C', 'V') when errorCode.Length >= 3 && char.ToUpperInvariant(errorCode[2]) == 'T' => ErrorCategory.NativeToolchain,  // CVT*
+                ('C', >= '0' and <= '9') => ErrorCategory.NativeToolchain,  // C1*, C2*, C4* (C/C++ compiler)
+
+                // I*
+                ('I', 'D') when errorCode.Length >= 3 && char.ToUpperInvariant(errorCode[2]) == 'E' => ErrorCategory.CodeAnalysis,  // IDE*
+
+                // L*
+                ('L', 'N') when errorCode.Length >= 3 && char.ToUpperInvariant(errorCode[2]) == 'K' => ErrorCategory.NativeToolchain,  // LNK*
+
+                // M*
+                ('M', 'C') => ErrorCategory.WPF,  // MC* (Markup Compiler)
+                ('M', 'S') when errorCode.Length >= 3 && char.ToUpperInvariant(errorCode[2]) == 'B' => CategorizeMSBError(errorCode.AsSpan()),
+                ('M', 'T') => ErrorCategory.NativeToolchain,  // MT* (Manifest Tool)
+
+                // N*
+                ('N', 'E') when StartsWithNETSDK(errorCode) => ErrorCategory.NETSDK,
+                ('N', 'U') => ErrorCategory.NuGet,
+
+                // R*
+                ('R', 'C') => ErrorCategory.NativeToolchain,  // RC* (Resource Compiler)
+                ('R', 'Z') => ErrorCategory.Razor,
+
+                // X*
+                ('X', 'C') => ErrorCategory.WPF,  // XC* (XAML Compiler)
+
+                _ => ErrorCategory.Other
+            };
         }
 
         /// <summary>
-        /// Checks if the string starts with a compiler error prefix (CS, VBC, FS).
+        /// Checks if the error code starts with "ASP" (case-insensitive).
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool StartsWithASP(string errorCode)
+            => errorCode.Length >= 3 && char.ToUpperInvariant(errorCode[2]) == 'P';
+
+        /// <summary>
+        /// Checks if the error code starts with "NETSDK" (case-insensitive).
+        /// </summary>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool StartsWithNETSDK(string errorCode)
+            => errorCode.Length >= 6 &&
+               char.ToUpperInvariant(errorCode[2]) == 'T' &&
+               char.ToUpperInvariant(errorCode[3]) == 'S' &&
+               char.ToUpperInvariant(errorCode[4]) == 'D' &&
+               char.ToUpperInvariant(errorCode[5]) == 'K';
+
+        /// <summary>
+        /// Checks if the string starts with a compiler error prefix (CS, FS, VBC).
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsCompilerPrefix(string value)
@@ -181,83 +225,53 @@ namespace Microsoft.Build.BackEnd.Logging
             char c0 = char.ToUpperInvariant(value[0]);
             char c1 = char.ToUpperInvariant(value[1]);
 
-            // CS* -> C# compiler
-            if (c0 == 'C' && c1 == 'S')
+            return (c0, c1) switch
             {
-                return true;
-            }
-
-            // FS* -> F# compiler
-            if (c0 == 'F' && c1 == 'S')
-            {
-                return true;
-            }
-
-            // VBC* -> VB compiler (need 3 chars)
-            if (c0 == 'V' && c1 == 'B' && value.Length >= 3 && char.ToUpperInvariant(value[2]) == 'C')
-            {
-                return true;
-            }
-
-            return false;
+                ('C', 'S') => true,  // CS* -> C# compiler
+                ('F', 'S') => true,  // FS* -> F# compiler
+                ('V', 'B') => value.Length >= 3 && char.ToUpperInvariant(value[2]) == 'C',  // VBC* -> VB compiler
+                _ => false
+            };
         }
 
         /// <summary>
-        /// Categorizes MSB error codes into MSBuildEngine, Tasks, or SDKResolvers.
+        /// Categorizes MSB error codes into granular MSBuild categories.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ErrorCategory CategorizeMSBError(ReadOnlySpan<char> codeSpan)
         {
-            // MSB error codes consist of 3-letter prefix + 4-digit number (e.g., MSB3026)
-            const int MinimumMsbCodeLength = 7;
-
-            if (codeSpan.Length < MinimumMsbCodeLength)
+            // MSB error codes: 3-letter prefix + 4-digit number (e.g., MSB3026)
+            if (codeSpan.Length < 7 || !TryParseErrorNumber(codeSpan, out int errorNumber))
             {
                 return ErrorCategory.Other;
             }
 
-            // Check for MSB4236 (SDKResolvers error) - fast path for exact match
-            if (codeSpan.Length == 7 && codeSpan[3] == '4' && codeSpan[4] == '2' && codeSpan[5] == '3' && codeSpan[6] == '6')
+            return errorNumber switch
             {
-                return ErrorCategory.SDKResolvers;
-            }
-
-            if (!TryParseErrorNumber(codeSpan, out int errorNumber))
-            {
-                return ErrorCategory.Other;
-            }
-
-            // MSB4xxx (except MSB4236, handled above as SDKResolvers) -> MSBuildEngine (evaluation and execution errors)
-            if (errorNumber is >= 4001 and <= 4999)
-            {
-                return ErrorCategory.MSBuildEngine;
-            }
-
-            // MSB3xxx -> Tasks
-            return errorNumber is >= 3001 and <= 3999 ? ErrorCategory.Tasks : ErrorCategory.Other;
+                >= 3001 and <= 3999 => ErrorCategory.Tasks,
+                >= 4001 and <= 4099 => ErrorCategory.MSBuildGeneral,
+                >= 4100 and <= 4199 => ErrorCategory.MSBuildEvaluation,
+                >= 4200 and <= 4299 => ErrorCategory.SDKResolvers,
+                >= 4300 and <= 4399 => ErrorCategory.MSBuildExecution,
+                >= 4400 and <= 4499 => ErrorCategory.MSBuildGraph,
+                >= 4500 and <= 4999 => ErrorCategory.MSBuildGeneral,
+                _ => ErrorCategory.Other
+            };
         }
 
         /// <summary>
-        /// Parses the 4-digit error number from an MSB error code span (starting at index 3).
+        /// Parses the 4-digit error number from an MSB error code span (e.g., "MSB3026" -> 3026).
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool TryParseErrorNumber(ReadOnlySpan<char> codeSpan, out int errorNumber)
         {
-            errorNumber = 0;
-
-            // We need exactly 4 digits starting at position 3
-            for (int i = 3; i < 7; i++)
-            {
-                char c = codeSpan[i];
-                if (c < '0' || c > '9')
-                {
-                    return false;
-                }
-
-                errorNumber = (errorNumber * 10) + (c - '0');
-            }
-
-            return true;
+            // Extract digits after "MSB" prefix (positions 3-6)
+            ReadOnlySpan<char> digits = codeSpan.Slice(3, 4);
+#if NET
+            return int.TryParse(digits, out errorNumber);
+#else
+            return int.TryParse(digits.ToString(), out errorNumber);
+#endif
         }
     }
 }

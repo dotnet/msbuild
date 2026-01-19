@@ -11,7 +11,67 @@ New files should use nullable types but don't refactor aggressively existing cod
 
 Generate tests for new codepaths, and add tests for any bugs you fix. Use the existing test framework, which is xUnit with Shouldly assertions. Use Shouldly assertions for all assertions in modified code, even if the file is predominantly using xUnit assertions.
 
+When making changes, check if related documentation exists in the `documentation/` folder (including `documentation/specs/`) and update it to reflect your changes. Keep documentation in sync with code changes, especially for telemetry, APIs, and architectural decisions.
+
 Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
+
+## Performance Best Practices
+
+MSBuild is performance-critical infrastructure. Follow these patterns:
+
+### Switch Expressions for Dispatch Logic
+Use tuple switch expressions for multi-condition dispatch instead of if-else chains:
+```csharp
+// GOOD: Clean, O(1) dispatch
+return (c0, c1) switch
+{
+    ('C', 'S') => Category.CSharp,
+    ('F', 'S') => Category.FSharp,
+    ('V', 'B') when value.Length >= 3 && value[2] == 'C' => Category.VB,
+    _ => Category.Other
+};
+
+// AVOID: Verbose if-else chains
+if (c0 == 'C' && c1 == 'S') return Category.CSharp;
+else if (c0 == 'F' && c1 == 'S') return Category.FSharp;
+// ...
+```
+
+### Range Pattern Matching
+Use range patterns for numeric categorization:
+```csharp
+// GOOD: Clear and efficient
+return errorNumber switch
+{
+    >= 3001 and <= 3999 => Category.Tasks,
+    >= 4001 and <= 4099 => Category.General,
+    >= 4100 and <= 4199 => Category.Evaluation,
+    _ => Category.Other
+};
+```
+
+### String Comparisons
+- Use `StringComparer.OrdinalIgnoreCase` for case-insensitive HashSets/Dictionaries when the source data may vary in casing
+- Use `char.ToUpperInvariant()` for single-character comparisons
+- Use `ReadOnlySpan<char>` and `Slice()` to avoid string allocations when parsing substrings
+- Use `int.TryParse(span, out var result)` on .NET Core+ for allocation-free parsing
+
+### Inlining
+Mark small, hot-path methods with `[MethodImpl(MethodImplOptions.AggressiveInlining)]`:
+```csharp
+[MethodImpl(MethodImplOptions.AggressiveInlining)]
+private static bool IsCompilerPrefix(string value) => ...
+```
+
+### Conditional Compilation for Framework Differences
+Use `#if NET` for APIs that differ between .NET Framework and .NET Core:
+```csharp
+#if NET
+    return int.TryParse(span, out errorNumber);
+#else
+    return int.TryParse(span.ToString(), out errorNumber);
+#endif
+```
 
 ## Working Effectively
 
