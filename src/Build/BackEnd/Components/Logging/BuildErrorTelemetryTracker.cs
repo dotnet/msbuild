@@ -16,7 +16,7 @@ namespace Microsoft.Build.BackEnd.Logging
     internal sealed class BuildErrorTelemetryTracker
     {
         // Use an enum internally for efficient tracking, convert to string only when needed
-        private enum ErrorCategory
+        internal enum ErrorCategory
         {
             Compiler,
             MSBuildGeneral,
