@@ -663,14 +663,15 @@ namespace Microsoft.Build.Tasks
                             // Compute absolute paths once - reused for ETW, deduplication check, and FileState
                             AbsolutePath sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceSpec);
                             AbsolutePath destAbsolutePath = TaskEnvironment.GetAbsolutePath(destSpec);
-
+                            
                             // Check if we just copied from this location to the destination, don't copy again.
                             MSBuildEventSource.Log.CopyUpToDateStart(destAbsolutePath);
-                            bool copyComplete = partitionIndex > 0 &&
-                                                String.Equals(
-                                                    sourceSpec,
-                                                    SourceFiles[partition[partitionIndex - 1]].ItemSpec,
-                                                    FileUtilities.PathComparison);
+                            bool copyComplete = false;
+                            if (partitionIndex > 0)
+                            {
+                                AbsolutePath prevSourcePath = TaskEnvironment.GetAbsolutePath(SourceFiles[partition[partitionIndex - 1]].ItemSpec);
+                                copyComplete = sourceAbsolutePath == prevSourcePath;
+                            }
 
                             if (!copyComplete)
                             {
