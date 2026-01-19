@@ -1,7 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -42,21 +44,45 @@ namespace Microsoft.Build.Engine.UnitTests
         /// </summary>
         /// <param name="runtimeToUse">The runtime to use for the task (CurrentRuntime or NET)</param>
         /// <param name="taskFactoryToUse">The task factory to use (TaskHostFactory or AssemblyTaskFactory)</param>
-        /// <param name="expectedNodeReuse">Expected node reuse value (true for long-lived, false for short-lived, null for in-proc)</param>
         [Theory]
-        [InlineData("CurrentRuntime", "TaskHostFactory", false)]      // Match + Explicit → short-lived out-of-proc
-        [InlineData("CurrentRuntime", "AssemblyTaskFactory", null)]   // Match + No Explicit → in-proc
-
-        // Not test-able on .NET msbuild as it can't run a CLR2/CLR4 task host (out-of-proc)
-#if !NET
-        [InlineData("NET", "TaskHostFactory", false)]     // No Match + Explicit → short-lived out-of-proc
-        [InlineData("NET", "AssemblyTaskFactory", true)]  // No Match + No Explicit → long-lived sidecar out-of-proc
+#if NET
+        [InlineData("CurrentRuntime", "AssemblyTaskFactory")] // Match + No Explicit → in-proc
+        [InlineData("CurrentRuntime", "TaskHostFactory")]     // Match + Explicit → short-lived out-of-proc
 #endif
+        [InlineData("NET", "AssemblyTaskFactory")]            // No Match + No Explicit → long-lived sidecar out-of-proc
+        [InlineData("NET", "TaskHostFactory")]                // No Match + Explicit → short-lived out-of-proc
         public void TaskHostLifecycle_ValidatesAllScenarios(
             string runtimeToUse,
-            string taskFactoryToUse,
-            bool? expectedNodeReuse)
+            string taskFactoryToUse)
         {
+            bool? expectedNodeReuse;
+
+            // TaskHostFactory is always short lived and out-of-proc
+            if (taskFactoryToUse == "TaskHostFactory")
+            {
+                expectedNodeReuse = false;
+            }
+            // AssemblyTaskFactory behavior depends on runtime
+            else if (taskFactoryToUse == "AssemblyTaskFactory")
+            {
+                if (runtimeToUse == "CurrentRuntime")
+                {
+                    expectedNodeReuse = null;
+                }
+                else if (runtimeToUse == "NET")
+                {
+                    expectedNodeReuse = RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase) ? true : null;
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException(nameof(runtimeToUse), "Unknown runtime to use: " + runtimeToUse);
+                }
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException(nameof(taskFactoryToUse), "Unknown task factory to use: " + taskFactoryToUse);
+            }
+
             using TestEnvironment env = TestEnvironment.Create(_output);
             string testProjectPath = Path.Combine(TestAssetsRootPath, "TaskHostLifecycleTestApp.csproj");
 
