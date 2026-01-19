@@ -67,10 +67,12 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 if (runtimeToUse == "CurrentRuntime")
                 {
+                    // in-proc
                     expectedNodeReuse = null;
                 }
                 else if (runtimeToUse == "NET")
                 {
+                    // When running on .NET Framework: out-of-proc, otherwise on .NET in-proc.
                     expectedNodeReuse = RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase) ? true : null;
                 }
                 else
