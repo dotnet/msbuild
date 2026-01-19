@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,6 +11,19 @@ namespace Microsoft.Build.Framework.Telemetry
 {
     internal static class TelemetryDataUtils
     {
+        /// <summary>
+        /// Known Microsoft task factory type names that should not be hashed.
+        /// </summary>
+        private static readonly HashSet<string> KnownTaskFactoryNames = new(StringComparer.Ordinal)
+        {
+            "AssemblyTaskFactory",
+            "TaskHostFactory",
+            "CodeTaskFactory",
+            "RoslynCodeTaskFactory",
+            "XamlTaskFactory",
+            "IntrinsicTaskFactory",
+        };
+
         /// <summary>
         /// Transforms collected telemetry data to format recognized by the telemetry infrastructure.
         /// </summary>
@@ -76,6 +90,7 @@ namespace Microsoft.Build.Framework.Telemetry
             foreach (KeyValuePair<TaskOrTargetTelemetryKey, TaskExecutionStats> valuePair in tasksDetails)
             {
                 string taskName = valuePair.Key.IsCustom ? GetHashed(valuePair.Key.Name) : valuePair.Key.Name;
+                string? factoryName = GetFactoryNameForTelemetry(valuePair.Value.TaskFactoryName);
 
                 result.Add(new TaskDetailInfo(
                     taskName,
@@ -83,10 +98,25 @@ namespace Microsoft.Build.Framework.Telemetry
                     valuePair.Value.ExecutionsCount,
                     valuePair.Value.TotalMemoryBytes,
                     valuePair.Key.IsCustom,
-                    valuePair.Key.IsNuget));
+                    valuePair.Key.IsNuget,
+                    factoryName,
+                    valuePair.Value.TaskHostRuntime));
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Gets the factory name for telemetry, hashing custom factory names.
+        /// </summary>
+        private static string? GetFactoryNameForTelemetry(string? factoryName)
+        {
+            if (string.IsNullOrEmpty(factoryName))
+            {
+                return null;
+            }
+
+            return KnownTaskFactoryNames.Contains(factoryName!) ? factoryName : GetHashed(factoryName!);
         }
 
         /// <summary>
@@ -130,7 +160,7 @@ namespace Microsoft.Build.Framework.Telemetry
             }
         }
 
-        internal record TaskDetailInfo(string Name, double TotalMilliseconds, int ExecutionsCount, long TotalMemoryBytes, bool IsCustom, bool IsNuget);
+        internal record TaskDetailInfo(string Name, double TotalMilliseconds, int ExecutionsCount, long TotalMemoryBytes, bool IsCustom, bool IsNuget, string? FactoryName, string? TaskHostRuntime);
 
         /// <summary>
         /// Converts targets summary to a custom object for telemetry.

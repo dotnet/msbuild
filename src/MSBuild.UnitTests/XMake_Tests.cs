@@ -14,6 +14,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml.Linq;
 using Microsoft.Build.CommandLine;
+using Microsoft.Build.CommandLine.Experimental;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
@@ -96,11 +97,9 @@ namespace Microsoft.Build.UnitTests
         public void GatherCommandLineSwitchesTwoProperties()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            var arguments = new List<string>();
-            arguments.AddRange(new[] { "/p:a=b", "/p:c=d" });
-
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches);
+            parser.GatherCommandLineSwitches(["/p:a=b", "/p:c=d"], switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.Property];
             parameters[0].ShouldBe("a=b");
@@ -111,13 +110,9 @@ namespace Microsoft.Build.UnitTests
         public void GatherCommandLineSwitchesAnyDash()
         {
             var switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            var arguments = new List<string> {
-                "-p:a=b",
-                "--p:maxcpucount=8"
-            };
-
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches);
+            parser.GatherCommandLineSwitches(["-p:a=b", "--p:maxcpucount=8"], switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.Property];
             parameters[0].ShouldBe("a=b");
@@ -128,11 +123,9 @@ namespace Microsoft.Build.UnitTests
         public void GatherCommandLineSwitchesMaxCpuCountWithArgument()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            var arguments = new List<string>();
-            arguments.AddRange(new[] { "/m:2" });
-
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches);
+            parser.GatherCommandLineSwitches(["/m:2"], switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
             parameters[0].ShouldBe("2");
@@ -145,11 +138,9 @@ namespace Microsoft.Build.UnitTests
         public void GatherCommandLineSwitchesMaxCpuCountWithoutArgument()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            var arguments = new List<string>();
-            arguments.AddRange(new[] { "/m:3", "/m" });
-
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches);
+            parser.GatherCommandLineSwitches(["/m:3", "/m"], switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
             parameters[1].ShouldBe(Convert.ToString(NativeMethodsShared.GetLogicalCoreCount()));
@@ -165,11 +156,9 @@ namespace Microsoft.Build.UnitTests
         public void GatherCommandLineSwitchesMaxCpuCountWithoutArgumentButWithColon()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
 
-            var arguments = new List<string>();
-            arguments.AddRange(new[] { "/m:" });
-
-            MSBuildApp.GatherCommandLineSwitches(arguments, switches);
+            parser.GatherCommandLineSwitches(["/m:"], switches);
 
             string[] parameters = switches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount];
             parameters.Length.ShouldBe(0);
@@ -459,44 +448,44 @@ namespace Microsoft.Build.UnitTests
         {
             string commandLineArg = "\"/p:foo=\"bar";
             string unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out var doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":\"foo=\"bar");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":\"foo=\"bar");
             doubleQuotesRemovedFromArg.ShouldBe(2);
 
             commandLineArg = "\"/p:foo=bar\"";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":foo=bar");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":foo=bar");
             doubleQuotesRemovedFromArg.ShouldBe(2);
 
             commandLineArg = "/p:foo=bar";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":foo=bar");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":foo=bar");
             doubleQuotesRemovedFromArg.ShouldBe(0);
 
             commandLineArg = "\"\"/p:foo=bar\"";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":foo=bar\"");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":foo=bar\"");
             doubleQuotesRemovedFromArg.ShouldBe(3);
 
             // this test is totally unreal -- we'd never attempt to extract switch parameters if the leading character is not a
             // switch indicator (either '-' or '/') -- here the leading character is a double-quote
             commandLineArg = "\"\"\"/p:foo=bar\"";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "/p", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":foo=bar\"");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "/p", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":foo=bar\"");
             doubleQuotesRemovedFromArg.ShouldBe(3);
 
             commandLineArg = "\"/pr\"operty\":foo=bar";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "property", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":foo=bar");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "property", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":foo=bar");
             doubleQuotesRemovedFromArg.ShouldBe(3);
 
             commandLineArg = "\"/pr\"op\"\"erty\":foo=bar\"";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "property", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":foo=bar");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "property", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":foo=bar");
             doubleQuotesRemovedFromArg.ShouldBe(6);
 
             commandLineArg = "/p:\"foo foo\"=\"bar bar\";\"baz=onga\"";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":\"foo foo\"=\"bar bar\";\"baz=onga\"");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 1).ShouldBe(":\"foo foo\"=\"bar bar\";\"baz=onga\"");
             doubleQuotesRemovedFromArg.ShouldBe(6);
         }
 
@@ -505,37 +494,37 @@ namespace Microsoft.Build.UnitTests
         {
             var commandLineArg = "\"--p:foo=\"bar";
             var unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out var doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":\"foo=\"bar");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":\"foo=\"bar");
             doubleQuotesRemovedFromArg.ShouldBe(2);
 
             commandLineArg = "\"--p:foo=bar\"";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar");
             doubleQuotesRemovedFromArg.ShouldBe(2);
 
             commandLineArg = "--p:foo=bar";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar");
             doubleQuotesRemovedFromArg.ShouldBe(0);
 
             commandLineArg = "\"\"--p:foo=bar\"";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar\"");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar\"");
             doubleQuotesRemovedFromArg.ShouldBe(3);
 
             commandLineArg = "\"--pr\"operty\":foo=bar";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "property", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "property", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar");
             doubleQuotesRemovedFromArg.ShouldBe(3);
 
             commandLineArg = "\"--pr\"op\"\"erty\":foo=bar\"";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "property", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "property", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":foo=bar");
             doubleQuotesRemovedFromArg.ShouldBe(6);
 
             commandLineArg = "--p:\"foo foo\"=\"bar bar\";\"baz=onga\"";
             unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out doubleQuotesRemovedFromArg);
-            MSBuildApp.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":\"foo foo\"=\"bar bar\";\"baz=onga\"");
+            CommandLineParser.ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, "p", unquotedCommandLineArg.IndexOf(':'), 2).ShouldBe(":\"foo foo\"=\"bar bar\";\"baz=onga\"");
             doubleQuotesRemovedFromArg.ShouldBe(6);
         }
 
@@ -548,11 +537,11 @@ namespace Microsoft.Build.UnitTests
 
             var commandLineSwitchWithNoneOrIncorrectIndicator = "zSwitch";
 
-            MSBuildApp.GetLengthOfSwitchIndicator(commandLineSwitchWithSlash).ShouldBe(1);
-            MSBuildApp.GetLengthOfSwitchIndicator(commandLineSwitchWithSingleDash).ShouldBe(1);
-            MSBuildApp.GetLengthOfSwitchIndicator(commandLineSwitchWithDoubleDash).ShouldBe(2);
+            CommandLineParser.GetLengthOfSwitchIndicator(commandLineSwitchWithSlash).ShouldBe(1);
+            CommandLineParser.GetLengthOfSwitchIndicator(commandLineSwitchWithSingleDash).ShouldBe(1);
+            CommandLineParser.GetLengthOfSwitchIndicator(commandLineSwitchWithDoubleDash).ShouldBe(2);
 
-            MSBuildApp.GetLengthOfSwitchIndicator(commandLineSwitchWithNoneOrIncorrectIndicator).ShouldBe(0);
+            CommandLineParser.GetLengthOfSwitchIndicator(commandLineSwitchWithNoneOrIncorrectIndicator).ShouldBe(0);
         }
 
         [Theory]
@@ -562,12 +551,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(@"/h")]
         public void Help(string indicator)
         {
-            MSBuildApp.Execute(
-#if FEATURE_GET_COMMANDLINE
-                @$"c:\bin\msbuild.exe {indicator} ")
-#else
-                new[] { @"c:\bin\msbuild.exe", indicator })
-#endif
+            MSBuildApp.Execute([@"c:\bin\msbuild.exe", indicator])
             .ShouldBe(MSBuildApp.ExitType.Success);
         }
 
@@ -660,19 +644,11 @@ namespace Microsoft.Build.UnitTests
         public void ErrorCommandLine()
         {
             string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
-#if FEATURE_GET_COMMANDLINE
-            MSBuildApp.Execute(@"c:\bin\msbuild.exe -junk").ShouldBe(MSBuildApp.ExitType.SwitchError);
 
-            MSBuildApp.Execute(@"msbuild.exe -t").ShouldBe(MSBuildApp.ExitType.SwitchError);
+            MSBuildApp.Execute([@"c:\bin\msbuild.exe", "-junk"]).ShouldBe(MSBuildApp.ExitType.SwitchError);
+            MSBuildApp.Execute([@"msbuild.exe", "-t"]).ShouldBe(MSBuildApp.ExitType.SwitchError);
+            MSBuildApp.Execute([@"msbuild.exe", "@bogus.rsp"]).ShouldBe(MSBuildApp.ExitType.InitializationError);
 
-            MSBuildApp.Execute(@"msbuild.exe @bogus.rsp").ShouldBe(MSBuildApp.ExitType.InitializationError);
-#else
-            MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", "-junk" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
-
-            MSBuildApp.Execute(new[] { @"msbuild.exe", "-t" }).ShouldBe(MSBuildApp.ExitType.SwitchError);
-
-            MSBuildApp.Execute(new[] { @"msbuild.exe", "@bogus.rsp" }).ShouldBe(MSBuildApp.ExitType.InitializationError);
-#endif
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
         }
 
@@ -1185,11 +1161,7 @@ namespace Microsoft.Build.UnitTests
                     sw.WriteLine(projectString);
                 }
                 // Should pass
-#if FEATURE_GET_COMMANDLINE
-                MSBuildApp.Execute(@"c:\bin\msbuild.exe " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
-#else
-                MSBuildApp.Execute(new[] { @"c:\bin\msbuild.exe", quotedProjectFileName }).ShouldBe(MSBuildApp.ExitType.Success);
-#endif
+                MSBuildApp.Execute([@"c:\bin\msbuild.exe", quotedProjectFileName]).ShouldBe(MSBuildApp.ExitType.Success);
             }
             finally
             {
@@ -1222,21 +1194,15 @@ namespace Microsoft.Build.UnitTests
                 {
                     sw.WriteLine(projectString);
                 }
-#if FEATURE_GET_COMMANDLINE
                 // Should pass
-                MSBuildApp.Execute(@$"c:\bin\msbuild.exe /logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"";""LogFile={logFile}"" /verbosity:detailed " + quotedProjectFileName).ShouldBe(MSBuildApp.ExitType.Success);
-
-#else
-                // Should pass
-                MSBuildApp.Execute(
-                    new[]
-                        {
+                MSBuildApp
+                    .Execute([
                             NativeMethodsShared.IsWindows ? @"c:\bin\msbuild.exe" : "/msbuild.exe",
                             @$"/logger:FileLogger,""Microsoft.Build, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"";""LogFile={logFile}""",
                             "/verbosity:detailed",
-                            quotedProjectFileName
-                        }).ShouldBe(MSBuildApp.ExitType.Success);
-#endif
+                            quotedProjectFileName])
+                    .ShouldBe(MSBuildApp.ExitType.Success);
+
                 File.Exists(logFile).ShouldBeTrue();
 
                 var logFileContents = File.ReadAllText(logFile);
@@ -2294,6 +2260,44 @@ namespace Microsoft.Build.UnitTests
             distributedLoggerRecords.Count.ShouldBe(0); // "Expected no distributed loggers to be attached"
             loggers.Count.ShouldBe(0); // "Expected no central loggers to be attached"
         }
+
+        /// <summary>
+        /// Verify that DistributedLoggerRecords with null CentralLogger don't cause exceptions when creating ProjectCollection
+        /// This is a regression test for the issue where -dfl flag caused MSB1025 error due to null logger not being filtered.
+        /// </summary>
+        [Fact]
+        public void TestNullCentralLoggerInDistributedLoggerRecord()
+        {
+            // Simulate the scenario when using -dfl flag
+            // ProcessDistributedFileLogger creates a DistributedLoggerRecord with null CentralLogger
+            var distributedLoggerRecords = new List<DistributedLoggerRecord>();
+            bool distributedFileLogger = true;
+            string[] fileLoggerParameters = null;
+
+            MSBuildApp.ProcessDistributedFileLogger(
+                distributedFileLogger,
+                fileLoggerParameters,
+                distributedLoggerRecords);
+
+            // Verify that we have a distributed logger record with null central logger
+            distributedLoggerRecords.Count.ShouldBe(1);
+            distributedLoggerRecords[0].CentralLogger.ShouldBeNull();
+
+            // This should not throw ArgumentNullException when creating ProjectCollection
+            // The fix filters out null central loggers from the evaluationLoggers array
+            var loggers = Array.Empty<ILogger>();
+            Should.NotThrow(() =>
+            {
+                using var projectCollection = new ProjectCollection(
+                    new Dictionary<string, string>(),
+                    loggers: [.. loggers, .. distributedLoggerRecords.Select(d => d.CentralLogger).Where(l => l is not null)],
+                    remoteLoggers: null,
+                    toolsetDefinitionLocations: ToolsetDefinitionLocations.Default,
+                    maxNodeCount: 1,
+                    onlyLogCriticalEvents: false,
+                    loadProjectsReadOnly: true);
+            });
+        }
         #endregion
 
         #region ProcessConsoleLoggerSwitches
@@ -2714,6 +2718,116 @@ $@"<Project>
             archive.Entries.ShouldContain(e => e.FullName.EndsWith(".proj", StringComparison.OrdinalIgnoreCase), 2);
         }
 
+        [Fact]
+        public void MultipleBinaryLogsCreatesMultipleFiles()
+        {
+            var testProject = _env.CreateFile("TestProject.proj", @"
+            <Project>
+              <Target Name=""Build"">
+                <Message Text=""Hello World!"" />
+              </Target>
+            </Project>
+            ");
+
+            string binLogLocation = _env.DefaultTestDirectory.Path;
+            string binLog1 = Path.Combine(binLogLocation, "1.binlog");
+            string binLog2 = Path.Combine(binLogLocation, "2.binlog");
+            string binLog3 = Path.Combine(binLogLocation, "3.binlog");
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.Path}\" \"/bl:{binLog1}\" \"/bl:{binLog2}\" \"/bl:{binLog3}\"", out var success, _output);
+
+            success.ShouldBeTrue(output);
+
+            // Verify all three binlog files exist
+            File.Exists(binLog1).ShouldBeTrue("First binlog file should exist");
+            File.Exists(binLog2).ShouldBeTrue("Second binlog file should exist");
+            File.Exists(binLog3).ShouldBeTrue("Third binlog file should exist");
+
+            // Verify all files have content (are not empty)
+            new FileInfo(binLog1).Length.ShouldBeGreaterThan(0, "First binlog should not be empty");
+            new FileInfo(binLog2).Length.ShouldBeGreaterThan(0, "Second binlog should not be empty");
+            new FileInfo(binLog3).Length.ShouldBeGreaterThan(0, "Third binlog should not be empty");
+
+            // Verify all files are identical (have the same content)
+            byte[] file1Bytes = File.ReadAllBytes(binLog1);
+            byte[] file2Bytes = File.ReadAllBytes(binLog2);
+            byte[] file3Bytes = File.ReadAllBytes(binLog3);
+
+            file1Bytes.SequenceEqual(file2Bytes).ShouldBeTrue("First and second binlog should be identical");
+            file1Bytes.SequenceEqual(file3Bytes).ShouldBeTrue("First and third binlog should be identical");
+        }
+
+        [Fact]
+        public void MultipleBinaryLogsWithDuplicatesCreateDistinctFiles()
+        {
+            var testProject = _env.CreateFile("TestProject.proj", @"
+            <Project>
+              <Target Name=""Build"">
+                <Message Text=""Hello World!"" />
+              </Target>
+            </Project>
+            ");
+
+            string binLogLocation = _env.DefaultTestDirectory.Path;
+            string binLog1 = Path.Combine(binLogLocation, "1.binlog");
+            string binLog2 = Path.Combine(binLogLocation, "2.binlog");
+
+            // Specify binLog1 twice - should only create two distinct files
+            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.Path}\" \"/bl:{binLog1}\" \"/bl:{binLog2}\" \"/bl:{binLog1}\"", out var success, _output);
+
+            success.ShouldBeTrue(output);
+
+            // Verify both binlog files exist
+            File.Exists(binLog1).ShouldBeTrue("First binlog file should exist");
+            File.Exists(binLog2).ShouldBeTrue("Second binlog file should exist");
+
+            // Verify both files are identical
+            byte[] file1Bytes = File.ReadAllBytes(binLog1);
+            byte[] file2Bytes = File.ReadAllBytes(binLog2);
+
+            file1Bytes.SequenceEqual(file2Bytes).ShouldBeTrue("Binlog files should be identical");
+        }
+
+        [Fact]
+        public void MultipleBinaryLogsWithDifferentConfigurationsCreatesSeparateLoggers()
+        {
+            var testProject = _env.CreateFile("TestProject.proj", @"
+            <Project>
+              <Import Project=""Imported.proj"" />
+              <Target Name=""Build"">
+                <Message Text=""Hello World!"" />
+              </Target>
+            </Project>
+            ");
+
+            _env.CreateFile("Imported.proj", @"
+            <Project>
+              <PropertyGroup>
+                <TestProp>Value</TestProp>
+              </PropertyGroup>
+            </Project>
+            ");
+
+            string binLogLocation = _env.DefaultTestDirectory.Path;
+            string binLog1 = Path.Combine(binLogLocation, "with-imports.binlog");
+            string binLog2 = Path.Combine(binLogLocation, "no-imports.binlog");
+
+            // One with default imports, one with ProjectImports=None
+            string output = RunnerUtilities.ExecMSBuild($"\"{testProject.Path}\" \"/bl:{binLog1}\" \"/bl:{binLog2};ProjectImports=None\"", out var success, _output);
+
+            success.ShouldBeTrue(output);
+
+            // Verify both binlog files exist
+            File.Exists(binLog1).ShouldBeTrue("First binlog file should exist");
+            File.Exists(binLog2).ShouldBeTrue("Second binlog file should exist");
+
+            // Verify files are different sizes (one has imports embedded, one doesn't)
+            long size1 = new FileInfo(binLog1).Length;
+            long size2 = new FileInfo(binLog2).Length;
+
+            size1.ShouldBeGreaterThan(size2, "Binlog with imports should be larger than one without");
+        }
+
         [Theory]
         [InlineData("-warnaserror", "", "", false)]
         [InlineData("-warnaserror -warnnotaserror:FOR123", "", "", true)]
@@ -2966,6 +3080,20 @@ EndGlobal
         }
 
 #endif
+
+        [Fact]
+        public void ThrowsWhenMaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc()
+        {
+            string projectContent = """
+                <Project>
+                </Project>
+                """;
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
+            string project = testEnvironment.CreateTestProjectWithFiles("project.proj", projectContent).ProjectFile;
+
+            MSBuildApp.Execute([@"c:\bin\msbuild.exe", project, "/m:257 /mt"]).ShouldBe(MSBuildApp.ExitType.SwitchError);
+        }
 
         private string CopyMSBuild()
         {

@@ -397,6 +397,16 @@ namespace Microsoft.Build.Execution
         LegacyThreadingData IBuildComponentHost.LegacyThreadingData => _legacyThreadingData;
 
         /// <summary>
+        /// Enumeration describing the severity of a deferred build message.
+        /// </summary>
+        public enum DeferredBuildMessageSeverity
+        {
+            Message = 1,
+            Warning,
+            Error
+        }
+
+        /// <summary>
         /// <see cref="BuildManager.BeginBuild(BuildParameters,IEnumerable{DeferredBuildMessage})"/>
         /// </summary>
         public readonly struct DeferredBuildMessage
@@ -407,11 +417,19 @@ namespace Microsoft.Build.Execution
 
             public string? FilePath { get; }
 
+            public DeferredBuildMessageSeverity MessageSeverity { get; } = DeferredBuildMessageSeverity.Message;
+
+            /// <summary>
+            /// Build event code (e.g., "MSB1070").
+            /// </summary>
+            public string? Code { get; }
+
             public DeferredBuildMessage(string text, MessageImportance importance)
             {
                 Importance = importance;
                 Text = text;
                 FilePath = null;
+                Code = null;
             }
 
             public DeferredBuildMessage(string text, MessageImportance importance, string filePath)
@@ -419,6 +437,22 @@ namespace Microsoft.Build.Execution
                 Importance = importance;
                 Text = text;
                 FilePath = filePath;
+                Code = null;
+            }
+
+            /// <summary>
+            /// Creates a deferred warning message.
+            /// </summary>
+            /// <param name="text">The warning message text.</param>
+            /// <param name="code">The build message code (e.g., "MSB1070").</param>
+            /// <param name="messageSeverity">The severity of the deferred build message.</param>
+            public DeferredBuildMessage(string text, string code, DeferredBuildMessageSeverity messageSeverity)
+            {
+                Importance = MessageImportance.Normal;
+                Text = text;
+                FilePath = null;
+                Code = code;
+                MessageSeverity = messageSeverity;
             }
         }
 
@@ -1091,6 +1125,12 @@ namespace Microsoft.Build.Execution
                             _buildTelemetry.BuildEngineVersion = ProjectCollection.Version;
                             _buildTelemetry.BuildEngineDisplayVersion = ProjectCollection.DisplayVersion;
                             _buildTelemetry.BuildEngineFrameworkName = NativeMethodsShared.FrameworkName;
+
+                            // Populate error categorization data from the logging service
+                            if (!_overallBuildSuccess)
+                            {
+                                loggingService.PopulateBuildTelemetryWithErrors(_buildTelemetry);
+                            }
 
                             string? host = null;
                             if (BuildEnvironmentState.s_runningInVisualStudio)
@@ -3148,7 +3188,20 @@ namespace Microsoft.Build.Execution
 
             foreach (var message in deferredBuildMessages)
             {
-                loggingService.LogCommentFromText(BuildEventContext.Invalid, message.Importance, message.Text);
+                if (message.MessageSeverity is DeferredBuildMessageSeverity.Warning)
+                {
+                    loggingService.LogWarningFromText(
+                        BuildEventContext.Invalid,
+                        subcategoryResourceName: null,
+                        warningCode: message.Code,
+                        helpKeyword: null,
+                        file: BuildEventFileInfo.Empty,
+                        message: message.Text);
+                }
+                else
+                {
+                    loggingService.LogCommentFromText(BuildEventContext.Invalid, message.Importance, message.Text);
+                }
 
                 // If message includes a file path, include that file
                 if (message.FilePath is not null)
