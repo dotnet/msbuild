@@ -491,7 +491,7 @@
       </trans-unit>
       <trans-unit id="ErrorCopyingBinaryLog">
         <source>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</source>
-        <target state="new">MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</target>
+        <target state="translated">MSB4279: не удалось скопировать двоичный журнал из "{0}" в "{1}". {2}</target>
         <note>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</note>
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
