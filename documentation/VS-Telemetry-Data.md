@@ -73,14 +73,15 @@ When a build fails, errors are categorized to help identify the source of failur
 
 | Range | Category |
 |-------|----------|
-| MSB1001-2999 | General |
 | MSB3001-3999 | Tasks |
-| MSB4001-4024 | General |
-| MSB4025-4099 | SDKResolvers |
+| MSB4001-4099 | General |
 | MSB4100-4199 | Evaluation |
-| MSB4200-4299 | Graph |
-| MSB4300-4999 | Evaluation |
-| MSB5001-6999 | Execution |
+| MSB4200-4299 | SDKResolvers |
+| MSB4300-4399 | Execution |
+| MSB4400-4499 | Graph |
+| MSB4500-4999 | General |
+| MSB5001-5999 | Execution |
+| MSB6001-6999 | Execution |
 
 ---
 

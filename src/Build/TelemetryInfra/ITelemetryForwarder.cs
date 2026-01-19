@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 
 namespace Microsoft.Build.TelemetryInfra;

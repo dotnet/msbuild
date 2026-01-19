@@ -255,6 +255,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 >= 4300 and <= 4399 => ErrorCategory.MSBuildExecution,
                 >= 4400 and <= 4499 => ErrorCategory.MSBuildGraph,
                 >= 4500 and <= 4999 => ErrorCategory.MSBuildGeneral,
+                >= 5001 and <= 5999 => ErrorCategory.MSBuildExecution,
+                >= 6001 and <= 6999 => ErrorCategory.MSBuildExecution,
                 _ => ErrorCategory.Other
             };
         }
