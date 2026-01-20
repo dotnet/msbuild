@@ -652,6 +652,9 @@ namespace Microsoft.Build.Tasks
                 {
                     while (partitionQueue.TryDequeue(out List<int> partition))
                     {
+                        // Cache the previous source absolute path to avoid recomputing it
+                        AbsolutePath prevSourceAbsolutePath = default;
+
                         for (int partitionIndex = 0; partitionIndex < partition.Count && !_cancellationTokenSource.IsCancellationRequested; partitionIndex++)
                         {
                             int fileIndex = partition[partitionIndex];
@@ -669,8 +672,8 @@ namespace Microsoft.Build.Tasks
                             bool copyComplete = false;
                             if (partitionIndex > 0)
                             {
-                                AbsolutePath prevSourcePath = TaskEnvironment.GetAbsolutePath(SourceFiles[partition[partitionIndex - 1]].ItemSpec);
-                                copyComplete = sourceAbsolutePath == prevSourcePath;
+                                // Use cached absolute path from previous iteration instead of recomputing
+                                copyComplete = sourceAbsolutePath == prevSourceAbsolutePath;
                             }
 
                             if (!copyComplete)
@@ -698,6 +701,9 @@ namespace Microsoft.Build.Tasks
                                 sourceItem.CopyMetadataTo(destItem);
                                 successFlags[fileIndex] = (IntPtr)1;
                             }
+
+                            // Cache for next iteration's duplicate check
+                            prevSourceAbsolutePath = sourceAbsolutePath;
                         }
                     }
                 }
