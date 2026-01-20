@@ -32,10 +32,11 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
         }
 
         writer.Write7BitEncodedInt(WorkerNodeTelemetryData.TargetsExecutionData.Count);
-        foreach (KeyValuePair<TaskOrTargetTelemetryKey, bool> entry in WorkerNodeTelemetryData.TargetsExecutionData)
+        foreach (KeyValuePair<TaskOrTargetTelemetryKey, TargetExecutionStats> entry in WorkerNodeTelemetryData.TargetsExecutionData)
         {
             WriteToStream(writer, entry.Key);
-            writer.Write(entry.Value);
+            writer.Write(entry.Value.WasExecuted);
+            writer.Write((int)entry.Value.SkipReason);
         }
     }
 
@@ -63,10 +64,13 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
         }
 
         count = reader.Read7BitEncodedInt();
-        Dictionary<TaskOrTargetTelemetryKey, bool> targetsExecutionData = new();
+        Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> targetsExecutionData = new();
         for (int i = 0; i < count; i++)
         {
-            targetsExecutionData.Add(ReadFromStream(reader), reader.ReadBoolean());
+            var key = ReadFromStream(reader);
+            var wasExecuted = reader.ReadBoolean();
+            var skipReason = (TargetSkipReason)reader.ReadInt32();
+            targetsExecutionData.Add(key, new TargetExecutionStats(wasExecuted, skipReason));
         }
 
         WorkerNodeTelemetryData = new WorkerNodeTelemetryData(tasksExecutionData, targetsExecutionData);
