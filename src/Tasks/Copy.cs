@@ -825,7 +825,8 @@ namespace Microsoft.Build.Tasks
 
                     foreach (ITaskItem sourceFolder in SourceFolders)
                     {
-                        string src = FileUtilities.NormalizePath(TaskEnvironment.GetAbsolutePath(sourceFolder.ItemSpec));
+                        ErrorUtilities.VerifyThrowArgumentLength(sourceFolder.ItemSpec);
+                        AbsolutePath src = TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(sourceFolder.ItemSpec));
                         string srcName = Path.GetFileName(src);
 
                         (string[] filesInFolder, _, _, string globFailure) = FileMatcher.Default.GetFiles(src, "**");

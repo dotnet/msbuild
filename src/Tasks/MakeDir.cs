@@ -65,7 +65,7 @@ namespace Microsoft.Build.Tasks
                         // For speed, eliminate duplicates caused by poor targets authoring, don't absolutize yet to save allocation
                         if (!directoriesSet.Contains(directory.ItemSpec))
                         {
-                            absolutePath = TaskEnvironment.GetAbsolutePath(directory.ItemSpec);
+                            absolutePath = TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(directory.ItemSpec));
                             // Only log a message if we actually need to create the folder
                             if (!FileUtilities.DirectoryExistsNoThrow(absolutePath))
                             {
@@ -78,7 +78,7 @@ namespace Microsoft.Build.Tasks
                                     // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
                                     Log.LogMessageFromResources(MessageImportance.Normal, "MakeDir.Comment", absolutePath.Value.OriginalValue);
 
-                                    Directory.CreateDirectory(FileUtilities.FixFilePath(absolutePath));
+                                    Directory.CreateDirectory(absolutePath);
                                 }
                             }
 
