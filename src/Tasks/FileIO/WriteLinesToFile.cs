@@ -147,7 +147,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath.OriginalValue);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
                 Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.OriginalValue, e.Message, lockedFileMessage);
                 return !Log.HasLoggedErrors;
             }
@@ -175,7 +175,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath.OriginalValue);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
                 Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.OriginalValue, e.Message, lockedFileMessage);
                 return !Log.HasLoggedErrors;
             }
@@ -219,7 +219,7 @@ namespace Microsoft.Build.Tasks
                     catch (IOException moveEx)
                     {
                         // Move failed, log and return
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath.OriginalValue);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
                         Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.OriginalValue, moveEx.Message, lockedFileMessage);
                         return !Log.HasLoggedErrors;
                     }
@@ -251,7 +251,7 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception fallbackEx) when (ExceptionHandling.IsIoRelatedException(fallbackEx))
                     {
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath.OriginalValue);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
                         Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.OriginalValue, fallbackEx.Message, lockedFileMessage);
                         return !Log.HasLoggedErrors;
                     }
@@ -299,7 +299,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath.OriginalValue);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
                 Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.OriginalValue, e.Message, lockedFileMessage);
                 return !Log.HasLoggedErrors;
             }

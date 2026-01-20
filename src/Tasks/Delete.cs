@@ -156,7 +156,7 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath?.OriginalValue ?? file.ItemSpec ?? string.Empty);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
                         if (retries < Retries)
                         {
                             retries++;

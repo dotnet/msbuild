@@ -254,7 +254,7 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(file.OriginalValue);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(file);
                         Log.LogErrorWithCodeFromResources("Touch.CannotMakeFileWritable", file.OriginalValue, e.Message, lockedFileMessage);
                         return false;
                     }
@@ -270,7 +270,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(file.OriginalValue);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(file);
                 Log.LogErrorWithCodeFromResources("Touch.CannotTouch", file.OriginalValue, e.Message, lockedFileMessage);
                 return false;
             }
