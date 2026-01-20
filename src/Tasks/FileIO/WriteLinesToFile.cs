@@ -73,11 +73,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
-            if (!TryGetAbsoluteFilePath(out AbsolutePath filePath))
-            {
-                return false;
-            }
-
+            AbsolutePath filePath = TaskEnvironment.GetAbsolutePath(File.ItemSpec);
             string contentsAsString = string.Empty;
 
             if (Lines != null && Lines.Length > 0)
@@ -126,26 +122,6 @@ namespace Microsoft.Build.Tasks
             else
             {
                 return ExecuteNonTransactional(filePath, directoryPath, contentsAsString, encoding);
-            }
-        }
-
-        /// <summary>
-        /// Attempts to resolve the file path to an absolute path, logging an error if it fails.
-        /// </summary>
-        /// <param name="filePath">The resolved absolute path, if successful.</param>
-        /// <returns>True if the path was resolved successfully; false if an error occurred.</returns>
-        private bool TryGetAbsoluteFilePath(out AbsolutePath filePath)
-        {
-            try
-            {
-                filePath = TaskEnvironment.GetAbsolutePath(File.ItemSpec);
-                return true;
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", File.ItemSpec, e.Message, string.Empty);
-                filePath = default;
-                return false;
             }
         }
 
