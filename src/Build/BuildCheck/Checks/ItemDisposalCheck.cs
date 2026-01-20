@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
@@ -17,7 +18,10 @@ internal sealed class ItemDisposalCheck : Check
 {
     private const string RuleId = "BC0303";
 
-    public static readonly CheckRule SupportedRule = new CheckRule(
+    private readonly SimpleProjectRootElementCache _cache = new();
+    private readonly HashSet<string> _projectsSeen = new(MSBuildNameIgnoreCaseComparer.Default);
+
+    public static readonly CheckRule SupportedRule = new(
         RuleId,
         "PrivateItemsNotDisposed",
         ResourceUtilities.GetResourceString("BuildCheck_BC0303_Title"),
@@ -30,34 +34,18 @@ internal sealed class ItemDisposalCheck : Check
 
     internal override bool IsBuiltIn => true;
 
-    private readonly SimpleProjectRootElementCache _cache = new SimpleProjectRootElementCache();
-    private readonly HashSet<string> _projectsSeen = new(MSBuildNameIgnoreCaseComparer.Default);
-
     public override void Initialize(ConfigurationContext configurationContext)
-    {
-        // No custom configuration
-    }
+    { }
 
-    public override void RegisterActions(IBuildCheckRegistrationContext registrationContext)
-    {
-        // We use the ParsedItemsAction as a hook to get access to the project file path,
-        // then we load and analyze the ProjectRootElement ourselves to check targets.
-#pragma warning disable CS0618 // Type or member is obsolete - ParsedItemsCheckData is obsolete but we need it for the hook
-        registrationContext.RegisterParsedItemsAction(ParsedItemsAction);
-#pragma warning restore CS0618
-    }
+    public override void RegisterActions(IBuildCheckRegistrationContext registrationContext) => registrationContext.RegisterEvaluatedItemsAction(EvaluatedItemsAction);
 
-#pragma warning disable CS0618 // Type or member is obsolete
-    private void ParsedItemsAction(BuildCheckDataContext<ParsedItemsCheckData> context)
-#pragma warning restore CS0618
+    private void EvaluatedItemsAction(BuildCheckDataContext<EvaluatedItemsCheckData> context)
     {
-        // Avoid repeated checking of the same project
         if (!_projectsSeen.Add(context.Data.ProjectFilePath))
         {
             return;
         }
 
-        // Load the ProjectRootElement to access targets
         ProjectRootElement? projectRoot;
         try
         {
@@ -70,173 +58,128 @@ internal sealed class ItemDisposalCheck : Check
         }
         catch
         {
-            // If we can't load the project, skip analysis
             return;
         }
 
-        AnalyzeTargets(projectRoot, context);
-    }
-
-    /// <summary>
-    /// Analyzes all targets in the project for private items that are not properly disposed.
-    /// </summary>
-#pragma warning disable CS0618 // Type or member is obsolete - ParsedItemsCheckData is obsolete but we need it for the hook
-    private void AnalyzeTargets(ProjectRootElement projectRoot, BuildCheckDataContext<ParsedItemsCheckData> context)
-#pragma warning restore CS0618
-    {
         foreach (ProjectTargetElement target in projectRoot.Targets)
         {
-            AnalyzeTarget(target, context);
+            AnalyzeTarget(target, context.ReportResult);
         }
     }
 
     /// <summary>
     /// Analyzes a single target for private items that are not properly disposed.
+    /// Single pass through item groups: Include adds to pending, Remove clears from pending.
+    /// Items still pending at the end (and not exposed via Outputs/Returns) are violations.
     /// </summary>
-#pragma warning disable CS0618 // Type or member is obsolete - ParsedItemsCheckData is obsolete but we need it for the hook
-    private void AnalyzeTarget(ProjectTargetElement target, BuildCheckDataContext<ParsedItemsCheckData> context)
-#pragma warning restore CS0618
+    private static void AnalyzeTarget(ProjectTargetElement target, Action<BuildCheckResult> reportResult)
     {
-        AnalyzeTargetCore(target, result => context.ReportResult(result));
-    }
+        // Track private items with Include that need cleanup (case-insensitive)
+        Dictionary<string, ProjectItemElement>? pendingPrivateItems = null;
 
-    /// <summary>
-    /// Core logic for analyzing a single target for private items that are not properly disposed.
-    /// </summary>
-    /// <param name="target">The target to analyze.</param>
-    /// <param name="reportResult">Callback to report violations.</param>
-    private void AnalyzeTargetCore(ProjectTargetElement target, System.Action<BuildCheckResult> reportResult)
-    {
-        // Collect all item types that are referenced in Outputs or Returns attributes
-        HashSet<string> exposedItemTypes = GetExposedItemTypes(target);
-
-        // Track item types that have Include operations and need cleanup
-        // Key: item type (case-insensitive), Value: first Include element for that type
-        Dictionary<string, ProjectItemElement> pendingPrivateItems = new(MSBuildNameIgnoreCaseComparer.Default);
-
-        // Single pass: process operations in order
-        // An Include adds an item type to pending list
-        // A Remove after an Include clears that item type from pending
         foreach (ProjectItemGroupElement itemGroup in target.ItemGroups)
         {
             foreach (ProjectItemElement item in itemGroup.Items)
             {
                 string itemType = item.ItemType;
 
-                // Check if this is a private item (starts with underscore)
-                if (!IsPrivateItemType(itemType))
+                // Only process private items (starting with underscore)
+                if (itemType.Length == 0 || itemType[0] != '_')
                 {
                     continue;
                 }
 
-                // Check for Include operation (creates items)
-                if (!string.IsNullOrEmpty(item.Include))
+                bool hasInclude = item.Include.Length > 0;
+                bool hasRemove = item.Remove.Length > 0;
+
+                if (hasInclude)
                 {
-                    // Record this Include - only if not already tracked
+                    pendingPrivateItems ??= new(MSBuildNameIgnoreCaseComparer.Default);
                     if (!pendingPrivateItems.ContainsKey(itemType))
                     {
                         pendingPrivateItems[itemType] = item;
                     }
                 }
 
-                // Check for Remove operation - clears pending Include
-                if (!string.IsNullOrEmpty(item.Remove))
+                if (hasRemove)
                 {
-                    // Remove clears the pending Include for this item type
-                    pendingPrivateItems.Remove(itemType);
+                    pendingPrivateItems?.Remove(itemType);
                 }
             }
         }
 
-        // Report items that still have pending Includes (not cleaned up)
-        foreach (var kvp in pendingPrivateItems)
+        if (pendingPrivateItems is null || pendingPrivateItems.Count == 0)
         {
-            string itemType = kvp.Key;
-            ProjectItemElement firstIncludeElement = kvp.Value;
+            return;
+        }
 
-            // Skip if item type is exposed via Outputs or Returns
-            if (exposedItemTypes.Contains(itemType))
+        // Get exposed items only if we have pending items to check
+        HashSet<string>? exposedItemTypes = GetExposedItemTypes(target);
+
+        foreach (KeyValuePair<string, ProjectItemElement> kvp in pendingPrivateItems)
+        {
+            if (exposedItemTypes?.Contains(kvp.Key) == true)
             {
                 continue;
             }
 
-            // Report the violation
             reportResult(BuildCheckResult.CreateBuiltIn(
                 SupportedRule,
-                firstIncludeElement.IncludeLocation ?? firstIncludeElement.Location,
-                itemType,
+                kvp.Value.IncludeLocation ?? kvp.Value.Location,
+                kvp.Key,
                 target.Name));
         }
     }
 
     /// <summary>
-    /// Checks if an item type is considered "private" (starts with underscore).
-    /// </summary>
-    private static bool IsPrivateItemType(string itemType)
-    {
-        return !string.IsNullOrEmpty(itemType) && itemType[0] == '_';
-    }
-
-    /// <summary>
     /// Extracts all item types referenced in the target's Outputs and Returns attributes.
+    /// Returns null if neither attribute is set.
     /// </summary>
-    private static HashSet<string> GetExposedItemTypes(ProjectTargetElement target)
+    private static HashSet<string>? GetExposedItemTypes(ProjectTargetElement target)
     {
-        HashSet<string> exposedItems = new(MSBuildNameIgnoreCaseComparer.Default);
+        string outputs = target.Outputs;
+        string returns = target.Returns;
 
-        string[]? expressions =
-            target switch {
-                { Outputs: string outputs, Returns: string returns } => [outputs, returns],
-                { Outputs: string outputs } => [outputs],
-                { Returns: string returns } => [returns],
-                _ => null
-            };
+        bool hasOutputs = outputs.Length > 0;
+        bool hasReturns = returns.Length > 0;
 
-        if (expressions is null)
+        if (!hasOutputs && !hasReturns)
         {
-            return exposedItems;
+            return null;
         }
 
-        ExtractItemReferences(expressions, exposedItems);
+        string[] expressions = (hasOutputs, hasReturns) switch
+        {
+            (true, true) => [outputs, returns],
+            (true, false) => [outputs],
+            (false, true) => [returns],
+            _ => []
+        };
+
+        ItemsAndMetadataPair pair = ExpressionShredder.GetReferencedItemNamesAndMetadata(expressions);
+
+        if (pair.Items is null)
+        {
+            return null;
+        }
+
+        HashSet<string> exposedItems = new(MSBuildNameIgnoreCaseComparer.Default);
+        foreach (string itemType in pair.Items)
+        {
+            exposedItems.Add(itemType);
+        }
 
         return exposedItems;
     }
 
     /// <summary>
-    /// Extracts item type references from a string using MSBuild's expression parser.
-    /// This properly handles complex transforms, separators, and escaped characters.
-    /// </summary>
-    private static void ExtractItemReferences(string[] expressions, HashSet<string> itemTypes)
-    {
-        // Use MSBuild's ExpressionShredder to properly parse the expression
-        ItemsAndMetadataPair pair = ExpressionShredder.GetReferencedItemNamesAndMetadata(expressions);
-
-        // Add all found item types to the output set
-        if (pair.Items != null)
-        {
-            foreach (string itemType in pair.Items)
-            {
-                itemTypes.Add(itemType);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Public method for testing purposes - analyzes targets and adds results to the provided list.
+    /// Internal method for testing - analyzes targets and collects results.
     /// </summary>
     internal void AnalyzeTargets(ProjectRootElement projectRoot, List<BuildCheckResult> results)
     {
         foreach (ProjectTargetElement target in projectRoot.Targets)
         {
-            AnalyzeTargetForTesting(target, results);
+            AnalyzeTarget(target, results.Add);
         }
-    }
-
-    /// <summary>
-    /// Internal method for testing - analyzes a single target.
-    /// </summary>
-    private void AnalyzeTargetForTesting(ProjectTargetElement target, List<BuildCheckResult> results)
-    {
-        AnalyzeTargetCore(target, results.Add);
     }
 }
