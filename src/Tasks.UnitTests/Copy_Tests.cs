@@ -2107,7 +2107,7 @@ namespace Microsoft.Build.UnitTests
             var t = new Copy
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
-                    RetryDelayMilliseconds = 1,  // speed up tests!
+                RetryDelayMilliseconds = 1,  // speed up tests!
                 BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = sourceFiles,
                 DestinationFiles = destFiles,
@@ -2265,7 +2265,7 @@ namespace Microsoft.Build.UnitTests
             var t = new Copy
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
-                    RetryDelayMilliseconds = 1, // speed up tests!
+                RetryDelayMilliseconds = 1, // speed up tests!
                 BuildEngine = new MockEngine(_testOutputHelper),
                 SourceFiles = sourceFiles,
                 DestinationFiles = destinationFiles,
@@ -2416,7 +2416,7 @@ namespace Microsoft.Build.UnitTests
             var t = new Copy
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
-                    RetryDelayMilliseconds = 1,  // speed up tests!
+                RetryDelayMilliseconds = 1,  // speed up tests!
             };
 
             Assert.Equal(10, t.Retries);
@@ -2523,7 +2523,7 @@ namespace Microsoft.Build.UnitTests
             var t = new Copy
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
-                    RetryDelayMilliseconds = 1, // speed up tests!
+                RetryDelayMilliseconds = 1, // speed up tests!
                 BuildEngine = engine,
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
@@ -2553,7 +2553,7 @@ namespace Microsoft.Build.UnitTests
             var t = new Copy
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
-                    RetryDelayMilliseconds = 1,  // speed up tests!
+                RetryDelayMilliseconds = 1,  // speed up tests!
                 BuildEngine = engine,
                 SourceFiles = new ITaskItem[] { new TaskItem("c:\\source") },
                 DestinationFiles = new ITaskItem[] { new TaskItem("c:\\destination") },
@@ -3015,7 +3015,7 @@ namespace Microsoft.Build.UnitTests
             var t = new Copy
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
-                    RetryDelayMilliseconds = 1, // speed up tests!
+                RetryDelayMilliseconds = 1, // speed up tests!
                 BuildEngine = me,
                 SourceFiles = sourceFiles,
                 DestinationFiles = destinationFiles,
