@@ -137,11 +137,11 @@ internal sealed class ItemDisposalCheck : Check
     /// </summary>
     private static HashSet<string>? GetExposedItemTypes(ProjectTargetElement target)
     {
-        string outputs = target.Outputs;
-        string returns = target.Returns;
+        string? outputs = target.Outputs;
+        string? returns = target.Returns;
 
-        bool hasOutputs = outputs.Length > 0;
-        bool hasReturns = returns.Length > 0;
+        bool hasOutputs = !string.IsNullOrEmpty(outputs);
+        bool hasReturns = !string.IsNullOrEmpty(returns);
 
         if (!hasOutputs && !hasReturns)
         {
