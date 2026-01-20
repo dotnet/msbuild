@@ -48,7 +48,7 @@ namespace Microsoft.Build.BackEnd
             // create opt out for throwing on null/empty path
             if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4) && string.IsNullOrEmpty(path))
             {
-                return default;
+                return new AbsolutePath(path, path, ignoreRootedCheck: true);
             }
             // This function should not throw when path has illegal characters.
             // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine to achieve it.

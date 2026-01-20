@@ -73,7 +73,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4) && string.IsNullOrEmpty(path))
             {
-                return default;
+                return new AbsolutePath(path, path, ignoreRootedCheck: true);
             }
             return new AbsolutePath(path, ProjectDirectory);
         }
