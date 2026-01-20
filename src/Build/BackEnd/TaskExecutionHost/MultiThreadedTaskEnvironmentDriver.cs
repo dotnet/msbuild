@@ -72,7 +72,6 @@ namespace Microsoft.Build.BackEnd
         public AbsolutePath GetAbsolutePath(string path)
         {
             // Opt-out for null path when Wave18_4 is disabled - return null as-is.
-            // Empty string "" naturally absolutizes to ProjectDirectory via Path.Combine.
             if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4) && path is null)
             {
                 return new AbsolutePath(path!, path!, ignoreRootedCheck: true);
