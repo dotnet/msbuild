@@ -26,6 +26,8 @@ namespace Microsoft.Build.EndToEndTests
         private readonly TestEnvironment _env;
         private readonly string _testAssetDir;
 
+        private readonly int _timeoutInMilliseconds = 60_000;
+
         // Common parameters for all multithreaded tests:
         // /nodereuse:false - Prevents MSBuild server processes from persisting between tests,
         //                    ensuring proper test isolation and avoiding potential timeouts
@@ -99,7 +101,8 @@ namespace Microsoft.Build.EndToEndTests
 
             string output = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"\"{isolatedAsset.ProjectPath}\" {multithreadingArgs} {CommonMSBuildArgs}", 
-                out bool success);
+                out bool success, 
+                timeoutMilliseconds: _timeoutInMilliseconds);
 
             success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {testAsset.SolutionFolder}. Output:\\n{output}");
             
@@ -124,7 +127,8 @@ namespace Microsoft.Build.EndToEndTests
             // Build with binary logging
             string output = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"\"{isolatedAsset.ProjectPath}\" {multithreadingArgs} /bl:\"{binlogPath}\" {CommonMSBuildArgs}", 
-                out bool success);
+                out bool success, 
+                timeoutMilliseconds: _timeoutInMilliseconds);
 
             success.ShouldBeTrue($"Build failed with args '{multithreadingArgs}' for {testAsset.SolutionFolder}. Output:\\n{output}.");
             
@@ -132,7 +136,10 @@ namespace Microsoft.Build.EndToEndTests
             File.Exists(binlogPath).ShouldBeTrue("Binary log file was not created.");
             
             // Test binlog replay
-            string replayOutput = RunnerUtilities.ExecBootstrapedMSBuild($"\"{binlogPath}\" {CommonMSBuildArgs}", out bool replaySuccess);
+            string replayOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"\"{binlogPath}\" {CommonMSBuildArgs}", 
+                out bool replaySuccess, 
+                timeoutMilliseconds: _timeoutInMilliseconds);
             
             replaySuccess.ShouldBeTrue($"Binlog replay failed. Output:\\n{replayOutput}");
             
