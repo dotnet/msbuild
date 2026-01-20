@@ -4,9 +4,9 @@
 
   <PropertyGroup>
     <VersionPrefix>18.3.0</VersionPrefix>
+    <PreReleaseVersionLabel>release</PreReleaseVersionLabel>
     <PackageValidationBaselineVersion>18.0.2</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
-    <PreReleaseVersionLabel>release</PreReleaseVersionLabel>
 
     <!-- differentiate experimental insertions to avoid package id conflicts, 
      it has to be alphabetically after "preview" to avoid downgrade errors in VS -->
