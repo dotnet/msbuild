@@ -45,15 +45,13 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public AbsolutePath GetAbsolutePath(string path)
         {
-            // create opt out for throwing on null/empty path
-            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4) && string.IsNullOrEmpty(path))
+            // Opt-out for null path when Wave18_4 is disabled - return null as-is.
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4) && path is null)
             {
                 return new AbsolutePath(path, path, ignoreRootedCheck: true);
             }
-            // This function should not throw when path has illegal characters.
-            // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine to achieve it.
-            // For .NET Core, System.IO.Path.Combine already does not throw in this case.
-            return new AbsolutePath(Path.Combine(NativeMethodsShared.GetCurrentDirectory(), path), ignoreRootedCheck: true);
+
+            return new AbsolutePath(path, basePath: ProjectDirectory);
         }
 
         /// <inheritdoc/>

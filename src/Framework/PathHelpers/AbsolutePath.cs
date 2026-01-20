@@ -105,6 +105,9 @@ namespace Microsoft.Build.Framework
         /// <param name="basePath">The base path to combine with.</param>
         public AbsolutePath(string path, AbsolutePath basePath)
         {
+            // This function should not throw when path has illegal characters.
+            // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine to achieve it.
+            // For .NET Core, System.IO.Path.Combine already does not throw in this case.
             Value = Path.Combine(basePath.Value, path);
             OriginalValue = path;
         } 
