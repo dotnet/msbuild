@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="AssemblyLoad_Warning">
         <source>The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</source>
-        <target state="translated">Для настраиваемой задачи "{0}" потребовался возврат к выполнению вне процесса, поскольку в определении UsingTask не указаны правильные атрибуты Runtime и Architecture. При этом снижается производительность сборки. Обновите элемент UsingTask, чтобы атрибуты Runtime и Architecture были указаны явным образом (например, Runtime="CLR4" Architecture="x64"), или используйте TaskFactory="TaskHostFactory".</target>
+        <target state="new">The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</target>
         <note />
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
@@ -218,12 +218,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="translated">В {0} проекта указано свойство "TargetFramework(s)", '{1}', который не использует пакет SDK для .NET. Эти свойства не распознаются проектами, которые импортют целевые объекты C# напрямую.</target>
+        <target state="translated">Проект {0} указывает свойство "TargetFramework(s)" "{1}", которое не использует пакет SDK для .NET. Эти свойства непонятны проектам, которые импортируют целевые объекты C# напрямую.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="translated">Свойства TargetFramework и TargetFrameworks не учитываются и не должны указываться в проектах, не использующих пакет SDK для .NET.</target>
+        <target state="translated">Свойства "TargetFramework" и "TargetFrameworks" не учитываются и не должны указываться в проектах, которые не используют пакет SDK для .NET.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
@@ -268,12 +268,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="translated">Расположение: '{0}' быть полностью доверенным. Поместите проекты за пределы этой папки (проект: {1}).</target>
+        <target state="translated">Расположение "{0}" не может быть полностью доверенным, разместите свои проекты за пределами этой папки (проект: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="translated">Папка "Загрузки" недоверена для сборки проектов.</target>
+        <target state="translated">Папка "Загрузки" не является доверенной для создания проектов.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -453,7 +453,7 @@
       </trans-unit>
       <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
         <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
-        <target state="translated">Настраиваемый TaskFactory '{0}' для задачи '{1}' не поддерживает выполнение TaskHost вне процесса. Отключите многопоточный режим сборки или удалите настраиваемый TaskFactory из &lt;UsingTask&gt; в файлах проекта.</target>
+        <target state="new">Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -468,7 +468,7 @@
       </trans-unit>
       <trans-unit id="DurationDisplay">
         <source>({0:F1}s)</source>
-        <target state="translated">({0:F1}s)</target>
+        <target state="translated">({0:F1}с)</target>
         <note>
         {0}: duration in seconds with 1 decimal point
         's' should reflect the localized abbreviation for seconds
@@ -522,7 +522,7 @@
       </trans-unit>
       <trans-unit id="HostObjectFailure">
         <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
-        <target state="translated">Задаче "{0}" не удалось получить объект узла. {1} Обратитесь к автору задачи, чтобы сообщить об этой проблеме.</target>
+        <target state="new">The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</target>
         <note>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -1090,7 +1090,7 @@ Errors: {3}</source>
       <trans-unit id="UnhandledMSBuildError">
         <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
     {0}</source>
-        <target state="translated">Это необработанное исключение в MSBuild. Проголосуйте за существующую проблему или сообщите о новой по адресу https://aka.ms/msbuild/unhandled
+        <target state="translated">Это необработанное исключение в MSBuild. ПРОГОЛОСУЙТЕ ЗА СУЩЕСТВУЮЩУЮ ПРОБЛЕМУ ИЛИ СООБЩИТЕ О НОВУЙ НА https://aka.ms/msbuild/unhandled
     {0}</target>
         <note />
       </trans-unit>
@@ -1101,7 +1101,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="UnknownLoggingType">
         <source>Logging type {0} is not understood by {1}.</source>
-        <target state="translated">Тип {0} не распознан {1}.</target>
+        <target state="translated">Тип ведения журнала {0} не понятен для {1}.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">
