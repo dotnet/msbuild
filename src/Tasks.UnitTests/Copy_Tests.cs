@@ -2505,10 +2505,10 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogDoesntContain("MSB3027");
 
             // Copy calls to different destinations can come in any order when running in parallel.
-            // Use .OriginalValue to compare against the original input path (before Path.GetFullPath resolution)
-            // OriginalValue preserves the exact string that was passed to the task, including backslashes on Unix.
-            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Path.OriginalValue == "c:\\source");
-            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Path.OriginalValue == "c:\\source2");
+            // Use .OriginalValue to compare against the original input path (before Path.GetFullPath resolution).
+            // TaskItem normalizes paths via FileUtilities.FixFilePath, so we need to do the same for comparison.
+            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Path.OriginalValue == FileUtilities.FixFilePath("c:\\source"));
+            Assert.Contains(copyFunctor.FilesCopiedSuccessfully, f => f.Path.OriginalValue == FileUtilities.FixFilePath("c:\\source2"));
         }
 
         /// <summary>
