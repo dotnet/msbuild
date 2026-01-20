@@ -4,11 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-#if NETFRAMEWORK
-using Microsoft.IO;
-#else
-using System.IO;
-#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 
@@ -48,7 +43,7 @@ namespace Microsoft.Build.BackEnd
             // Opt-out for null path when Wave18_4 is disabled - return null as-is.
             if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4) && path is null)
             {
-                return new AbsolutePath(path, path, ignoreRootedCheck: true);
+                return new AbsolutePath(path!, path!, ignoreRootedCheck: true);
             }
 
             return new AbsolutePath(path, basePath: ProjectDirectory);

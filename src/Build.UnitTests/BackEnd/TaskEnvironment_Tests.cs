@@ -389,7 +389,7 @@ namespace Microsoft.Build.UnitTests
         [MemberData(nameof(EnvironmentTypes))]
         public void TaskEnvironment_GetAbsolutePath_WithEmptyPath_ReturnsProjectDirectory(string environmentType)
         {
-            using var taskEnvironment = CreateTaskEnvironment(environmentType);
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
 
             // Empty path should absolutize to project directory (Path.Combine behavior)
             var absolutePath = taskEnvironment.GetAbsolutePath(string.Empty);
@@ -407,7 +407,7 @@ namespace Microsoft.Build.UnitTests
             testEnv.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_4.ToString());
             BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
-            using var taskEnvironment = CreateTaskEnvironment(environmentType);
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
 
             // When Wave18_4 is disabled, null path returns as-is
             var absolutePath = taskEnvironment.GetAbsolutePath(null!);
@@ -426,7 +426,7 @@ namespace Microsoft.Build.UnitTests
             ChangeWaves.ResetStateForTests();
             BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
-            using var taskEnvironment = CreateTaskEnvironment(environmentType);
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
 
             // When Wave18_4 is enabled, null path should throw
             Should.Throw<ArgumentNullException>(() => taskEnvironment.GetAbsolutePath(null!));
