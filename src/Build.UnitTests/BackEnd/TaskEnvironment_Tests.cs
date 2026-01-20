@@ -358,5 +358,30 @@ namespace Microsoft.Build.UnitTests
                 Environment.SetEnvironmentVariable(testVarName, null);
             }
         }
+
+        [Theory]
+        [MemberData(nameof(EnvironmentTypes))]
+        public void TaskEnvironment_GetAbsolutePath_WithInvalidPathChars_ShouldNotThrow(string environmentType)
+        {
+            // Construct a path containing an invalid path character
+            char invalidChar = Path.GetInvalidPathChars().FirstOrDefault();
+            string invalidPath = "invalid" + invalidChar + "path";
+
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
+
+            try
+            {
+                // Should not throw on invalid path characters
+                var absolutePath = taskEnvironment.GetAbsolutePath(invalidPath);
+
+                // The result should contain the invalid path combined with the base directory
+                absolutePath.Value.ShouldNotBeNullOrEmpty();
+                absolutePath.Value.ShouldContain(invalidPath);
+            }
+            finally
+            {
+                DisposeTaskEnvironment(taskEnvironment);
+            }
+        }
     }
 }
