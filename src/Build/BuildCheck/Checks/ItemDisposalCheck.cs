@@ -95,10 +95,7 @@ internal sealed class ItemDisposalCheck : Check
                 if (hasInclude)
                 {
                     pendingPrivateItems ??= new(MSBuildNameIgnoreCaseComparer.Default);
-                    if (!pendingPrivateItems.ContainsKey(itemType))
-                    {
-                        pendingPrivateItems[itemType] = item;
-                    }
+                    pendingPrivateItems[itemType] = item;
                 }
 
                 if (hasRemove)
