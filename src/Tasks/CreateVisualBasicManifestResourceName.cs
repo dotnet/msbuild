@@ -102,7 +102,7 @@ namespace Microsoft.Build.Tasks
                 embeddedFileName = fileName;
             }
 
-            dependentUponFileName = FileUtilities.FixFilePath(dependentUponFileName);
+            dependentUponFileName = FrameworkFileUtilities.FixFilePath(dependentUponFileName);
             Culture.ItemCultureInfo info;
 
             if (!string.IsNullOrEmpty(culture) && enableCustomCulture)

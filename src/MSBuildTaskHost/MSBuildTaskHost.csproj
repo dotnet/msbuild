@@ -88,8 +88,11 @@
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <Link>ExceptionHandling.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
+    <Compile Include="..\Framework\FileUtilities.cs">
       <Link>FileUtilities.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\FileUtilities.cs">
+      <Link>SharedFileUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileUtilitiesRegex.cs">
       <Link>FileUtilitiesRegex.cs</Link>
