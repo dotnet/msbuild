@@ -1873,8 +1873,8 @@ namespace Microsoft.Build.UnitTests
         {
             if (NativeMethodsShared.IsUnixLike)
             {
-                expectedFixedDirectoryPart = FileUtilities.FixFilePath(expectedFixedDirectoryPart);
-                expectedWildcardDirectoryPart = FileUtilities.FixFilePath(expectedWildcardDirectoryPart);
+                expectedFixedDirectoryPart = FrameworkFileUtilities.FixFilePath(expectedFixedDirectoryPart);
+                expectedWildcardDirectoryPart = FrameworkFileUtilities.FixFilePath(expectedWildcardDirectoryPart);
             }
             TestGetFileSpecInfo(
                 filespec,
@@ -2299,11 +2299,11 @@ namespace Microsoft.Build.UnitTests
                 {
                     if (String.Compare(normalizedPath, 0, normalizedCandidate, 0, normalizedPath.Length, StringComparison.OrdinalIgnoreCase) == 0)
                     {
-                        if (FileUtilities.EndsWithSlash(normalizedPath))
+                        if (FrameworkFileUtilities.EndsWithSlash(normalizedPath))
                         {
                             return true;
                         }
-                        else if (FileUtilities.IsSlash(normalizedCandidate[normalizedPath.Length]))
+                        else if (FrameworkFileUtilities.IsSlash(normalizedCandidate[normalizedPath.Length]))
                         {
                             return true;
                         }
@@ -2508,9 +2508,9 @@ namespace Microsoft.Build.UnitTests
                 out wildcardDirectoryPart,
                 out filenamePart);
 
-            expectedFixedDirectoryPart = FileUtilities.FixFilePath(expectedFixedDirectoryPart);
-            expectedWildcardDirectoryPart = FileUtilities.FixFilePath(expectedWildcardDirectoryPart);
-            expectedFilenamePart = FileUtilities.FixFilePath(expectedFilenamePart);
+            expectedFixedDirectoryPart = FrameworkFileUtilities.FixFilePath(expectedFixedDirectoryPart);
+            expectedWildcardDirectoryPart = FrameworkFileUtilities.FixFilePath(expectedWildcardDirectoryPart);
+            expectedFilenamePart = FrameworkFileUtilities.FixFilePath(expectedFilenamePart);
 
             if
                 (
