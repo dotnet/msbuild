@@ -1384,7 +1384,26 @@ namespace Microsoft.Build.Evaluation
                         }
                         else // This is a regular property
                         {
-                            propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, propertiesUseTracker);
+                            // Check for whitespace in property name - this is likely a typo
+                            int propertyNameStart = propertyStartIndex + 2;
+                            int propertyNameEnd = propertyEndIndex - 1;
+
+                            // Check if there's leading or trailing whitespace
+                            if (Char.IsWhiteSpace(expression[propertyNameStart]) || Char.IsWhiteSpace(expression[propertyNameEnd]))
+                            {
+                                // Find the position of the whitespace for error message
+                                int whitespacePosition = Char.IsWhiteSpace(expression[propertyNameStart])
+                                    ? propertyNameStart
+                                    : propertyNameEnd;
+
+                                ProjectErrorUtilities.ThrowInvalidProject(
+                                    elementLocation,
+                                    "IllFormedPropertySpaceInCondition",
+                                    expression.Substring(propertyStartIndex, propertyEndIndex - propertyStartIndex + 1),  // Full expression like "$( Foo )"
+                                    whitespacePosition - propertyStartIndex + 1);  // Position relative to start of expression
+                            }
+
+                            propertyValue = LookupProperty(properties, expression, propertyNameStart, propertyNameEnd, elementLocation, propertiesUseTracker);
                         }
 
                         if (propertyValue != null)

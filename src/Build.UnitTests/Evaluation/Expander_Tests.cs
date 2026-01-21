@@ -3849,19 +3849,42 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand a property reference that has whitespace around the property name (should result in empty)
+        /// Expand a property reference that has whitespace around the property name should throw error MSB4259
         /// </summary>
-        [Fact]
-        public void PropertySimpleSpaced()
+        [Theory]
+        [InlineData("$( SomeStuff )")]   // Leading and trailing space
+        [InlineData("$( SomeStuff)")]    // Leading space only
+        [InlineData("$(SomeStuff )")]    // Trailing space only
+        public void PropertyWithWhitespace_ShouldThrowError(string expression)
         {
             PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
             pg.Set(ProjectPropertyInstance.Create("SomeStuff", "This IS SOME STUff"));
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            string result = expander.ExpandIntoStringLeaveEscaped(@"$( SomeStuff )", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+            InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(
+                () => expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
 
-            Assert.Equal(String.Empty, result);
+            Assert.Equal("MSB4259", ex.ErrorCode);
+        }
+
+        /// <summary>
+        /// Property functions with whitespace in parameters should still work
+        /// </summary>
+        [Theory]
+        [InlineData("$(SomeStuff.StartsWith( 'This' ))", "True")]
+        [InlineData("$(SomeStuff.StartsWith('This' ))", "True")]
+        [InlineData("$(SomeStuff.StartsWith( 'This'))", "True")]
+        public void PropertyFunctionWithWhitespaceInParameters_ShouldSucceed(string expression, string expected)
+        {
+            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+            pg.Set(ProjectPropertyInstance.Create("SomeStuff", "This IS SOME STUff"));
+
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            string result = expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+            Assert.Equal(expected, result);
         }
 
         [WindowsOnlyFact]
