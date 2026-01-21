@@ -336,7 +336,6 @@ jobs:
 
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
-  variables:
   pool:
     vmImage: 'ubuntu-latest'
   steps:
@@ -427,7 +426,6 @@ jobs:
 
 - job: CoreOnMac
   displayName: "macOS Core"
-  variables:
   pool:
     vmImage: 'macOS-latest'
   steps:
