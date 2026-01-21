@@ -1292,6 +1292,11 @@ namespace Microsoft.Build.BackEnd
                     // E.g. _SourceLinkHasSingleProvider can be brought explicitly via nuget (Microsoft.SourceLink.GitHub) as well as sdk
                     projectTargetInstance.Value.Location.Equals(targetResult.TargetLocation);
 
+                // Get skip reason from TargetResult - it's set when targets are skipped for various reasons:
+                // - ConditionWasFalse: target's condition evaluated to false
+                // - PreviouslyBuiltSuccessfully/Unsuccessfully: target was already built in this session
+                TargetSkipReason skipReason = targetResult?.SkipReason ?? TargetSkipReason.None;
+
                 bool isFromNuget, isMetaprojTarget, isCustom;
 
                 if (IsMetaprojTargetPath(projectTargetInstance.Value.FullPath))
@@ -1316,7 +1321,8 @@ namespace Microsoft.Build.BackEnd
                     wasExecuted,
                     isCustom,
                     isMetaprojTarget,
-                    isFromNuget);
+                    isFromNuget,
+                    skipReason);
             }
 
             TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;

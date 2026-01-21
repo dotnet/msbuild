@@ -1704,10 +1704,25 @@
     <value>Duplicate binary log path(s) specified and ignored: {0}</value>
     <comment>{0} is the list of duplicate paths that were filtered out</comment>
   </data>
+    <!-- **** MSBUILD_LOGGING_ARGS strings **** -->
+  <data name="LoggingArgsEnvVarUsing" xml:space="preserve">
+    <value>Using arguments from MSBUILD_LOGGING_ARGS environment variable: {0}</value>
+    <comment>LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is a string with the command-line arguments from the environment variable.</comment>
+  </data>
+  <data name="LoggingArgsEnvVarUnsupportedArgument" xml:space="preserve">
+    <value>MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</value>
+    <comment>{StrBegin="MSB1070: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the unsupported argument.</comment>
+  </data>
+  <data name="LoggingArgsEnvVarError" xml:space="preserve">
+    <value>MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</value>
+    <comment>{StrBegin="MSB1071: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the error message.</comment>
+  </data>
+  <!-- **** MSBUILD_LOGGING_ARGS strings end **** -->
+
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 
-        Next error code should be MSB1070.
+        Next error code should be MSB1072.
 
         Don't forget to update this comment after using the new code.
   -->
