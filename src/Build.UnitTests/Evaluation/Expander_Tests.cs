@@ -3455,7 +3455,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 string result = expander.ExpandIntoStringAndUnescape(@"$([MSBuild]::GetDirectoryNameOfFileAbove($(StartingDirectory), $(FileToFind)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-                Assert.Equal(Microsoft.Build.Shared.FileUtilities.EnsureTrailingSlash(tempPath), Microsoft.Build.Shared.FileUtilities.EnsureTrailingSlash(result));
+                Assert.Equal(FrameworkFileUtilities.EnsureTrailingSlash(tempPath), FrameworkFileUtilities.EnsureTrailingSlash(result));
 
                 result = expander.ExpandIntoStringAndUnescape(@"$([MSBuild]::GetDirectoryNameOfFileAbove($(StartingDirectory), Hobbits))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
