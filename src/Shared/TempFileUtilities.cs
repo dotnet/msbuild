@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -70,7 +71,7 @@ namespace Microsoft.Build.Shared
             Directory.CreateDirectory(path);
 #endif
 
-            return FileUtilities.EnsureTrailingSlash(path);
+            return FrameworkFileUtilities.EnsureTrailingSlash(path);
         }
 
         /// <summary>
