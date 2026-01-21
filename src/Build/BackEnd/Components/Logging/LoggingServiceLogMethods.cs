@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using Microsoft.Build.BackEnd.Shared;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
@@ -574,8 +573,9 @@ namespace Microsoft.Build.BackEnd.Logging
             string targetNames,
             string toolsVersion)
         {
-            Debug.Assert(currentNodeBuildEventContext.NodeId == Scheduler.VirtualNode, "Cached project build events should only be logged from the scheduler virtual node.");
-
+            // Cached project events can be logged from either:
+            // 1. The scheduler's virtual node (when the scheduler serves a request from cache)
+            // 2. A worker node (when BuildRequestEngine satisfies a request from its local cache)
             BuildEventContext validatedRemoteNodeEvaluationBuildContext = ValidatePreexistingProjectContextId(
                 remoteNodeEvaluationBuildEventContext,
                 projectFile,
