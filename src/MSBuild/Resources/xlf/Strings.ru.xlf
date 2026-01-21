@@ -334,6 +334,21 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarError">
+        <source>MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</source>
+        <target state="new">MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</target>
+        <note>{StrBegin="MSB1071: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the error message.</note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarUnsupportedArgument">
+        <source>MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</source>
+        <target state="new">MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</target>
+        <note>{StrBegin="MSB1070: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the unsupported argument.</note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarUsing">
+        <source>Using arguments from MSBUILD_LOGGING_ARGS environment variable: {0}</source>
+        <target state="new">Using arguments from MSBUILD_LOGGING_ARGS environment variable: {0}</target>
+        <note>LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is a string with the command-line arguments from the environment variable.</note>
+      </trans-unit>
       <trans-unit id="LongPaths">
         <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
         <target state="translated">На основе раздела реестра Windows LongPathsEnabled функция LongPaths имеет значение {0}.</target>

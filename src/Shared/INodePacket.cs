@@ -329,7 +329,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if extended header flag was set, false otherwise.</returns>
         public static bool TryCreateExtendedHeaderType(HandshakeOptions handshakeOptions, NodePacketType type, out byte extendedheader)
         {
-            if (Handshake.IsHandshakeOptionEnabled(handshakeOptions, Handshake.NetTaskHostFlags))
+            if (Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.TaskHost))
             {
                 extendedheader = (byte)((byte)type | ExtendedHeaderFlag);
                 return true;
