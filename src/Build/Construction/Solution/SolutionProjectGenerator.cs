@@ -444,6 +444,7 @@ namespace Microsoft.Build.Construction
             // files need to be copy-localed.
             ProjectTaskInstance rarTask = target.AddTask("ResolveAssemblyReference", String.Format(CultureInfo.InvariantCulture, "Exists('%({0}.Identity)')", referenceItemName), null);
             rarTask.SetParameter("Assemblies", "@(" + referenceItemName + "->'%(FullPath)')");
+            rarTask.SetParameter("AppConfigFile", "$(WebConfigFileName)");
             rarTask.SetParameter("TargetFrameworkDirectories", "$(" + targetFrameworkDirectoriesName + ")");
             rarTask.SetParameter("FullFrameworkFolders", "$(" + fullFrameworkRefAssyPathName + ")");
             rarTask.SetParameter("SearchPaths", "{RawFileName};{TargetFrameworkDirectory};{GAC}");
@@ -462,6 +463,7 @@ namespace Microsoft.Build.Construction
             // directory.
             ProjectTaskInstance copyTask = target.AddTask("Copy", conditionDescribingValidConfigurations, null);
             copyTask.SetParameter("SourceFiles", "@(" + copyLocalFilesItemName + ")");
+            copyTask.SetParameter("SkipUnchangedFiles", "true");
             copyTask.SetParameter(
                 "DestinationFiles",
                 String.Format(CultureInfo.InvariantCulture, @"@({0}->'{1}%(DestinationSubDirectory)%(Filename)%(Extension)')", copyLocalFilesItemName, destinationFolder));
@@ -1256,6 +1258,16 @@ namespace Microsoft.Build.Construction
                     "AspNetCompiler.UnsupportedMSBuildVersion",
                     project.ProjectName);
 #else
+
+                if (File.Exists(Path.Combine(project.AbsolutePath, "web.config")))
+                {
+                    metaprojectInstance.SetProperty("WebConfigFileName", Path.Combine(project.AbsolutePath, "web.config"));
+                }
+                else if (File.Exists(Path.Combine(project.AbsolutePath, "Web.config")))
+                {
+                    metaprojectInstance.SetProperty("WebConfigFileName", Path.Combine(project.AbsolutePath, "Web.config"));
+                }
+
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, null);
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Clean");
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Rebuild");
@@ -1551,6 +1563,7 @@ namespace Microsoft.Build.Construction
             newTask.SetParameter("TargetPath", "$(" + GenerateSafePropertyName(project, "AspNetTargetPath") + ")");
             newTask.SetParameter("Force", "$(" + GenerateSafePropertyName(project, "AspNetForce") + ")");
             newTask.SetParameter("Updateable", "$(" + GenerateSafePropertyName(project, "AspNetUpdateable") + ")");
+            newTask.SetParameter("Clean", "true");
             newTask.SetParameter("Debug", "$(" + GenerateSafePropertyName(project, "AspNetDebug") + ")");
             newTask.SetParameter("KeyFile", "$(" + GenerateSafePropertyName(project, "AspNetKeyFile") + ")");
             newTask.SetParameter("KeyContainer", "$(" + GenerateSafePropertyName(project, "AspNetKeyContainer") + ")");
