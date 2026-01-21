@@ -65,7 +65,7 @@ namespace Microsoft.Build.Tasks
             {
                 conePath =
                     Strings.WeakIntern(
-                        FrameworkFileUtilities.RemoveRelativeSegments(TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(Path.ItemSpec))));
+                        FrameworkFileUtilities.RemoveRelativeSegments(TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(Path.ItemSpec))));
                 conePath = FrameworkFileUtilities.EnsureTrailingSlash(conePath);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
@@ -86,7 +86,7 @@ namespace Microsoft.Build.Tasks
                 {
                     fullPath =
                         Strings.WeakIntern(
-                            FrameworkFileUtilities.RemoveRelativeSegments(TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(item.ItemSpec))));
+                            FrameworkFileUtilities.RemoveRelativeSegments(TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(item.ItemSpec))));
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {

@@ -105,10 +105,10 @@ namespace Microsoft.Build.Tasks
                             AbsolutePath itemSpecFullFileNamePath = FrameworkFileUtilities.RemoveRelativeSegments(
                                 TaskEnvironment.GetAbsolutePath(Files[i].ItemSpec));
 
-                            if (itemSpecFullFileNamePath.StartsWith(fullRootPath, StringComparison.OrdinalIgnoreCase))
+                            if (itemSpecFullFileNamePath.Value.StartsWith(fullRootPath.Value, StringComparison.OrdinalIgnoreCase))
                             {
                                 // The item spec file is in the "cone" of the RootFolder. Return the relative path from the cone root.
-                                targetPath = itemSpecFullFileNamePath.Substring(fullRootPath.Value.Length);
+                                targetPath = itemSpecFullFileNamePath.Value.Substring(fullRootPath.Value.Length);
                             }
                             else
                             {
