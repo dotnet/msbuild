@@ -329,9 +329,10 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if extended header flag was set, false otherwise.</returns>
         public static bool TryCreateExtendedHeaderType(HandshakeOptions handshakeOptions, NodePacketType type, out byte extendedheader)
         {
-            // Extended headers are supported by .NET Core+ and CLR4 task hosts, but not CLR2.
-            if (handshakeOptions.HasFlag(HandshakeOptions.TaskHost) 
-                && (handshakeOptions.HasFlag(HandshakeOptions.NET) || handshakeOptions.HasFlag(HandshakeOptions.CLR4)))
+            // Extended headers are supported by all task hosts except CLR2. CLR4 is represented
+            // by the absence of both CLR2 and NET flags; NET covers .NET Core and later.
+            if (handshakeOptions.HasFlag(HandshakeOptions.TaskHost)
+                && !handshakeOptions.HasFlag(HandshakeOptions.CLR2))
             {
                 extendedheader = (byte)((byte)type | ExtendedHeaderFlag);
                 return true;
