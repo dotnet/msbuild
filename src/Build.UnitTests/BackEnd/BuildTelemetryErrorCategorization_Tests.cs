@@ -9,6 +9,7 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
+using static Microsoft.Build.BackEnd.Logging.BuildErrorTelemetryTracker;
 
 #nullable disable
 
@@ -17,19 +18,19 @@ namespace Microsoft.Build.UnitTests.BackEnd;
 public class BuildTelemetryErrorCategorization_Tests
 {
     [Theory]
-    [InlineData("CS0103", null, "Compiler")]
-    [InlineData("CS1002", "CS", "Compiler")]
-    [InlineData("VBC30451", "VBC", "Compiler")]
-    [InlineData("FS0039", null, "Compiler")]
-    [InlineData("MSB4018", null, "MSBuildEngine")]
-    [InlineData("MSB4236", null, "SDKResolvers")]
-    [InlineData("MSB3026", null, "Tasks")]
-    [InlineData("NETSDK1045", null, "NETSDK")]
-    [InlineData("NU1101", null, "NuGet")]
-    [InlineData("BC0001", null, "BuildCheck")]
-    [InlineData("CUSTOM001", null, "Other")]
-    [InlineData(null, null, "Other")]
-    [InlineData("", null, "Other")]
+    [InlineData("CS0103", null, nameof(ErrorCategory.Compiler))]
+    [InlineData("CS1002", "CS", nameof(ErrorCategory.Compiler))]
+    [InlineData("VBC30451", "VBC", nameof(ErrorCategory.Compiler))]
+    [InlineData("FS0039", null, nameof(ErrorCategory.Compiler))]
+    [InlineData("MSB4018", null, nameof(ErrorCategory.MSBuildGeneral))]
+    [InlineData("MSB4236", null, nameof(ErrorCategory.SDKResolvers))]
+    [InlineData("MSB3026", null, nameof(ErrorCategory.Tasks))]
+    [InlineData("NETSDK1045", null, nameof(ErrorCategory.NETSDK))]
+    [InlineData("NU1101", null, nameof(ErrorCategory.NuGet))]
+    [InlineData("BC0001", null, nameof(ErrorCategory.BuildCheck))]
+    [InlineData("CUSTOM001", null, nameof(ErrorCategory.Other))]
+    [InlineData(null, null, nameof(ErrorCategory.Other))]
+    [InlineData("", null, nameof(ErrorCategory.Other))]
     public void ErrorCategorizationWorksCorrectly(string errorCode, string subcategory, string expectedCategory)
     {
         // Create a LoggingService
@@ -63,28 +64,28 @@ public class BuildTelemetryErrorCategorization_Tests
             // Verify the appropriate count is incremented
             switch (expectedCategory)
             {
-                case "Compiler":
+                case nameof(ErrorCategory.Compiler):
                     buildTelemetry.ErrorCounts.Compiler.ShouldBe(1);
                     break;
-                case "MSBuildEngine":
-                    buildTelemetry.ErrorCounts.MsBuildEngine.ShouldBe(1);
+                case nameof(ErrorCategory.MSBuildGeneral):
+                    buildTelemetry.ErrorCounts.MsBuildGeneral.ShouldBe(1);
                     break;
-                case "Tasks":
+                case nameof(ErrorCategory.Tasks):
                     buildTelemetry.ErrorCounts.Task.ShouldBe(1);
                     break;
-                case "SDKResolvers":
+                case nameof(ErrorCategory.SDKResolvers):
                     buildTelemetry.ErrorCounts.SdkResolvers.ShouldBe(1);
                     break;
-                case "NETSDK":
+                case nameof(ErrorCategory.NETSDK):
                     buildTelemetry.ErrorCounts.NetSdk.ShouldBe(1);
                     break;
-                case "NuGet":
+                case nameof(ErrorCategory.NuGet):
                     buildTelemetry.ErrorCounts.NuGet.ShouldBe(1);
                     break;
-                case "BuildCheck":
+                case nameof(ErrorCategory.BuildCheck):
                     buildTelemetry.ErrorCounts.BuildCheck.ShouldBe(1);
                     break;
-                case "Other":
+                case nameof(ErrorCategory.Other):
                     buildTelemetry.ErrorCounts.Other.ShouldBe(1);
                     break;
             }
@@ -125,13 +126,13 @@ public class BuildTelemetryErrorCategorization_Tests
 
             // Verify counts
             buildTelemetry.ErrorCounts.Compiler.ShouldBe(2);
-            buildTelemetry.ErrorCounts.MsBuildEngine.ShouldBe(1);
+            buildTelemetry.ErrorCounts.MsBuildGeneral.ShouldBe(1);
             buildTelemetry.ErrorCounts.Task.ShouldBe(1);
             buildTelemetry.ErrorCounts.NuGet.ShouldBe(1);
             buildTelemetry.ErrorCounts.Other.ShouldBe(1);
 
             // Primary category should be Compiler (highest count)
-            buildTelemetry.FailureCategory.ShouldBe("Compiler");
+            buildTelemetry.FailureCategory.ShouldBe(nameof(ErrorCategory.Compiler));
         }
         finally
         {
@@ -166,7 +167,7 @@ public class BuildTelemetryErrorCategorization_Tests
             loggingService.PopulateBuildTelemetryWithErrors(buildTelemetry);
 
             // Primary category should be Tasks (3 errors vs 1 compiler error)
-            buildTelemetry.FailureCategory.ShouldBe("Tasks");
+            buildTelemetry.FailureCategory.ShouldBe(nameof(ErrorCategory.Tasks));
             buildTelemetry.ErrorCounts.Task.ShouldBe(3);
             buildTelemetry.ErrorCounts.Compiler.ShouldBe(1);
         }
@@ -204,7 +205,7 @@ public class BuildTelemetryErrorCategorization_Tests
             loggingService.PopulateBuildTelemetryWithErrors(buildTelemetry);
 
             // Should be categorized as Compiler based on subcategory
-            buildTelemetry.FailureCategory.ShouldBe("Compiler");
+            buildTelemetry.FailureCategory.ShouldBe(nameof(ErrorCategory.Compiler));
             buildTelemetry.ErrorCounts.Compiler.ShouldBe(1);
         }
         finally
