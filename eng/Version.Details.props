@@ -6,28 +6,28 @@ This file should be imported by eng/Versions.props
 <Project>
   <PropertyGroup>
     <!-- dotnet/runtime dependencies -->
-    <SystemCodeDomPackageVersion>9.0.11</SystemCodeDomPackageVersion>
-    <SystemCollectionsImmutablePackageVersion>9.0.11</SystemCollectionsImmutablePackageVersion>
-    <SystemConfigurationConfigurationManagerPackageVersion>9.0.11</SystemConfigurationConfigurationManagerPackageVersion>
-    <SystemDiagnosticsDiagnosticSourcePackageVersion>9.0.11</SystemDiagnosticsDiagnosticSourcePackageVersion>
-    <SystemDiagnosticsEventLogPackageVersion>9.0.11</SystemDiagnosticsEventLogPackageVersion>
-    <SystemFormatsAsn1PackageVersion>9.0.11</SystemFormatsAsn1PackageVersion>
-    <SystemFormatsNrbfPackageVersion>9.0.11</SystemFormatsNrbfPackageVersion>
-    <SystemReflectionMetadataPackageVersion>9.0.11</SystemReflectionMetadataPackageVersion>
-    <SystemReflectionMetadataLoadContextPackageVersion>9.0.11</SystemReflectionMetadataLoadContextPackageVersion>
-    <SystemResourcesExtensionsPackageVersion>9.0.11</SystemResourcesExtensionsPackageVersion>
-    <SystemSecurityCryptographyPkcsPackageVersion>9.0.11</SystemSecurityCryptographyPkcsPackageVersion>
-    <SystemSecurityCryptographyProtectedDataPackageVersion>9.0.11</SystemSecurityCryptographyProtectedDataPackageVersion>
-    <SystemSecurityCryptographyXmlPackageVersion>9.0.11</SystemSecurityCryptographyXmlPackageVersion>
-    <SystemTextEncodingCodePagesPackageVersion>9.0.11</SystemTextEncodingCodePagesPackageVersion>
-    <SystemTextJsonPackageVersion>9.0.11</SystemTextJsonPackageVersion>
-    <SystemThreadingChannelsPackageVersion>9.0.11</SystemThreadingChannelsPackageVersion>
-    <SystemThreadingTasksDataflowPackageVersion>9.0.11</SystemThreadingTasksDataflowPackageVersion>
+    <SystemCodeDomPackageVersion>10.0.1</SystemCodeDomPackageVersion>
+    <SystemCollectionsImmutablePackageVersion>10.0.1</SystemCollectionsImmutablePackageVersion>
+    <SystemConfigurationConfigurationManagerPackageVersion>10.0.1</SystemConfigurationConfigurationManagerPackageVersion>
+    <SystemDiagnosticsDiagnosticSourcePackageVersion>10.0.1</SystemDiagnosticsDiagnosticSourcePackageVersion>
+    <SystemDiagnosticsEventLogPackageVersion>10.0.1</SystemDiagnosticsEventLogPackageVersion>
+    <SystemFormatsAsn1PackageVersion>10.0.1</SystemFormatsAsn1PackageVersion>
+    <SystemFormatsNrbfPackageVersion>10.0.1</SystemFormatsNrbfPackageVersion>
+    <SystemReflectionMetadataPackageVersion>10.0.1</SystemReflectionMetadataPackageVersion>
+    <SystemReflectionMetadataLoadContextPackageVersion>10.0.1</SystemReflectionMetadataLoadContextPackageVersion>
+    <SystemResourcesExtensionsPackageVersion>10.0.1</SystemResourcesExtensionsPackageVersion>
+    <SystemSecurityCryptographyPkcsPackageVersion>10.0.1</SystemSecurityCryptographyPkcsPackageVersion>
+    <SystemSecurityCryptographyProtectedDataPackageVersion>10.0.1</SystemSecurityCryptographyProtectedDataPackageVersion>
+    <SystemSecurityCryptographyXmlPackageVersion>10.0.1</SystemSecurityCryptographyXmlPackageVersion>
+    <SystemTextEncodingCodePagesPackageVersion>10.0.1</SystemTextEncodingCodePagesPackageVersion>
+    <SystemTextJsonPackageVersion>10.0.1</SystemTextJsonPackageVersion>
+    <SystemThreadingChannelsPackageVersion>10.0.1</SystemThreadingChannelsPackageVersion>
+    <SystemThreadingTasksDataflowPackageVersion>10.0.1</SystemThreadingTasksDataflowPackageVersion>
     <!-- dotnet/arcade dependencies -->
     <MicrosoftDotNetArcadeSdkPackageVersion>10.0.0-beta.26062.3</MicrosoftDotNetArcadeSdkPackageVersion>
     <MicrosoftDotNetXUnitExtensionsPackageVersion>10.0.0-beta.26062.3</MicrosoftDotNetXUnitExtensionsPackageVersion>
     <!-- nuget/nuget.client dependencies -->
-    <NuGetBuildTasksPackageVersion>7.3.0-preview.1.50</NuGetBuildTasksPackageVersion>
+    <NuGetBuildTasksPackageVersion>7.4.0-rc.12</NuGetBuildTasksPackageVersion>
     <!-- dotnet/roslyn dependencies -->
     <MicrosoftNetCompilersToolsetPackageVersion>5.4.0-2.26068.1</MicrosoftNetCompilersToolsetPackageVersion>
   </PropertyGroup>
