@@ -594,6 +594,32 @@ namespace Microsoft.Build.Internal
             return _regexMatchCache.Value.GetOrAdd(fileSpec, file => s_lazyWildCardExpansionRegexes.Any(regex => regex.IsMatch(fileSpec)));
         }
 
+        /// <summary>
+        /// Validates the DOTNET_HOST_PATH environment variable and logs a warning if it points to a directory instead of a file.
+        /// </summary>
+        /// <param name="loggingService">The logging service to use for logging warnings.</param>
+        internal static void ValidateDotnetHostPath(ILoggingService loggingService)
+        {
+            string? dotnetHostPath = Environment.GetEnvironmentVariable(Constants.DotnetHostPathEnvVarName);
+            if (string.IsNullOrEmpty(dotnetHostPath))
+            {
+                return;
+            }
+
+            try
+            {
+                if (FileSystems.Default.DirectoryExists(dotnetHostPath))
+                {
+                    loggingService.LogWarning(BuildEventContext.Invalid, null, BuildEventFileInfo.Empty, "DotnetHostPathIsDirectory", dotnetHostPath);
+                }
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                // Silently ignore I/O exceptions when checking the path - this validation is best-effort
+                // and should not cause build failures if the path cannot be checked.
+            }
+        }
+
         internal sealed class IOCache
         {
             private readonly Lazy<ConcurrentDictionary<string, bool>> existenceCache = new Lazy<ConcurrentDictionary<string, bool>>(() => new ConcurrentDictionary<string, bool>(), true);
