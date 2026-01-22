@@ -630,7 +630,7 @@ namespace Microsoft.Build.Execution
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
                 // Validate that DOTNET_HOST_PATH is not a directory
-                EngineFileUtilities.ValidateDotnetHostPath(loggingService);
+                ValidateDotnetHostPath(loggingService);
 
                 // Log if BuildCheck is enabled
                 if (_buildParameters.IsBuildCheckEnabled)
@@ -3211,6 +3211,31 @@ namespace Microsoft.Build.Execution
                 {
                     loggingService.LogIncludeFile(BuildEventContext.Invalid, message.FilePath);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Validates the DOTNET_HOST_PATH environment variable and logs a warning if it points to a directory instead of a file.
+        /// </summary>
+        private static void ValidateDotnetHostPath(ILoggingService loggingService)
+        {
+            string? dotnetHostPath = Environment.GetEnvironmentVariable(Constants.DotnetHostPathEnvVarName);
+            if (string.IsNullOrEmpty(dotnetHostPath))
+            {
+                return;
+            }
+
+            try
+            {
+                if (FileSystems.Default.DirectoryExists(dotnetHostPath))
+                {
+                    loggingService.LogWarning(BuildEventContext.Invalid, null, BuildEventFileInfo.Empty, "DotnetHostPathIsDirectory", dotnetHostPath);
+                }
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                // Silently ignore I/O exceptions when checking the path - this validation is best-effort
+                // and should not cause build failures if the path cannot be checked.
             }
         }
 
