@@ -121,8 +121,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             // Create a remote node evaluation context with the original evaluation ID
             BuildEventContext remoteNodeEvaluationBuildEventContext = BuildEventContext.CreateInitial(
-                configuration.ResultsNodeId, // Use the node that originally built this project configuration
-                newRequestThatWasServedFromCache.SubmissionId)
+                newRequestThatWasServedFromCache.SubmissionId,
+                configuration.ResultsNodeId) // Use the node that originally built this project configuration
                 .WithEvaluationId(configuration.ProjectEvaluationId)
                 .WithProjectInstanceId(configuration.ConfigurationId);
                 // we don't know the projectContextId of the remote eval, so we don't set it at all.

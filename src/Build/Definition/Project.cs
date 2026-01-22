@@ -71,7 +71,7 @@ namespace Microsoft.Build.Evaluation
         /// This should only be used on pathways that create Projects outside of the MSBuild exe workflow - users directly loading Projects, etc.
         /// In such cases we don't have a live set of nodes (yet?), but we still need contexts for message association.
         /// </remarks>
-        private static readonly BuildEventContext s_errorBuildEventContext = Scheduler.s_schedulerNodeBuildEventContext.WithSubmissionId(0);
+        private static readonly BuildEventContext s_errorBuildEventContext = BuildEventContext.CreateForSubmission(0);
 
         private ProjectLink implementation;
         private IProjectLinkInternal implementationInternal;

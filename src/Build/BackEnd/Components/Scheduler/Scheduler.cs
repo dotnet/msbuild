@@ -59,14 +59,14 @@ namespace Microsoft.Build.BackEnd
         private const double DefaultCustomSchedulerForSQLConfigurationLimitMultiplier = 1.1;
 
         /// <summary>
-        /// The build event context for the scheduler node - can be used as a 'root' context for contexts' derived or needed when running scheduler operations
+        /// The build event context for the scheduler node - can be used as a 'root' context for contexts' derived or needed when running scheduler operations.
         /// </summary>
-        internal static BuildEventContext s_schedulerNodeBuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, VirtualNode);
+        private static BuildEventContext s_schedulerNodeBuildEventContext = BuildEventContext.CreateForNode(VirtualNode);
 
         /// <summary>
-        /// The build event context for the in-proc node - the worker node that executes on the same 'logical' node as the scheduler
+        /// The build event context for the in-proc node - the worker node that executes on the same 'logical' node as the scheduler.
         /// </summary>
-        internal static BuildEventContext s_schedulerInProcNodeBuildEventContext = BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, InProcNodeId);
+        private static BuildEventContext s_schedulerInProcNodeBuildEventContext = BuildEventContext.CreateForNode(InProcNodeId);
 
         #region Scheduler Data
 

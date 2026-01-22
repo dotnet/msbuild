@@ -507,7 +507,7 @@ namespace Microsoft.Build.BackEnd
             ILoggingService loggingService = _componentHost.LoggingService;
             loggingService.OnLoggingThreadException += OnLoggingThreadException;
 
-            _buildEventContext = Scheduler.s_schedulerNodeBuildEventContext.WithNodeId(configuration.NodeId);
+            _buildEventContext = BuildEventContext.CreateForNode(configuration.NodeId);
 
             // Now prep the buildRequestEngine for the build.
             _loggingContext = new NodeLoggingContext(loggingService, _buildEventContext, configuration.NodeId, true /* inProcNode */);

@@ -81,12 +81,37 @@ namespace Microsoft.Build.Framework
         #region Builders
 
         /// <summary>
+        /// Creates a root context for a build submission. Used by BuildManager when starting a new submission.
+        /// The node ID will be set later when the submission is assigned to a node.
+        /// </summary>
+        /// <param name="submissionId">The submission ID</param>
+        /// <returns>A builder for creating the BuildEventContext</returns>
+        public static BuildEventContextBuilder CreateForSubmission(int submissionId) =>
+            new BuildEventContextBuilder()
+                .WithSubmissionId(submissionId)
+                .WithNodeId(InvalidNodeId);
+
+        /// <summary>
+        /// Creates a root context for a node. Used by nodes when initializing their logging context.
+        /// The submission ID will be set later when processing build requests.
+        /// </summary>
+        /// <param name="nodeId">The node ID</param>
+        /// <returns>A builder for creating the BuildEventContext</returns>
+        public static BuildEventContextBuilder CreateForNode(int nodeId) =>
+            new BuildEventContextBuilder()
+                .WithSubmissionId(InvalidSubmissionId)
+                .WithNodeId(nodeId);
+
+        /// <summary>
         /// Creates an initial BuildEventContext for the beginning of a build.
         /// Uses the efficient builder pattern to minimize allocations.
+        ///
         /// </summary>
         /// <param name="submissionId">The submission ID</param>
         /// <param name="nodeId">The node ID</param>
         /// <returns>A new BuildEventContext with the specified submission and node ID</returns>
+        /// <remarks>Strongly suggest not using this member directly. Prefer building off of an inherited <see cref="BuildEventContext"/>, 
+        /// or use the more-directed factory functions <see cref="CreateForNode"/> or <see cref="CreateForSubmission"/> and build from there.</remarks>
         public static BuildEventContextBuilder CreateInitial(int submissionId, int nodeId) => new BuildEventContextBuilder().WithSubmissionId(submissionId).WithNodeId(nodeId);
 
         /// <summary>
