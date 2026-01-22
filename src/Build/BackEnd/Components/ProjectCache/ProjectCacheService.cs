@@ -572,7 +572,10 @@ namespace Microsoft.Build.ProjectCache
             }
         }
 
-        private BuildEventContext GetCacheRequestBuildEventContext(CacheRequest cacheRequest) => Scheduler.s_schedulerNodeBuildEventContext.WithEvaluationId(cacheRequest.Configuration.ProjectEvaluationId).WithProjectInstanceId(cacheRequest.Configuration.ConfigurationId);
+        private BuildEventContext GetCacheRequestBuildEventContext(CacheRequest cacheRequest) => 
+            BuildEventContext.CreateForNode(Scheduler.VirtualNode)
+                .WithEvaluationId(cacheRequest.Configuration.ProjectEvaluationId)
+                .WithProjectInstanceId(cacheRequest.Configuration.ConfigurationId);
 
         private async ValueTask<CacheResult> GetCacheResultAsync(BuildRequestData buildRequest, BuildRequestConfiguration buildRequestConfiguration, BuildEventContext buildEventContext, CancellationToken cancellationToken)
         {

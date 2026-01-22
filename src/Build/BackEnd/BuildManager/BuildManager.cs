@@ -1582,7 +1582,7 @@ namespace Microsoft.Build.Execution
             var buildEventContext = request.BuildEventContext;
             if (buildEventContext == BuildEventContext.Invalid)
             {
-                buildEventContext = Scheduler.s_schedulerNodeBuildEventContext.WithSubmissionId(request.SubmissionId);
+                buildEventContext = BuildEventContext.CreateForSubmission(request.SubmissionId);
             }
 
             var instances = ProjectInstance.LoadSolutionForBuild(
@@ -1856,7 +1856,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         /// <param name="submissionId">The submission ID</param>
         /// <returns>A BuildEventContext for logging errors</returns>
-        private static BuildEventContext CreateErrorLoggingContext(int submissionId) => Scheduler.s_schedulerInProcNodeBuildEventContext.WithSubmissionId(submissionId);
+        private static BuildEventContext CreateErrorLoggingContext(int submissionId) => BuildEventContext.CreateForSubmission(submissionId);
 
         /// <summary>
         /// Waits to drain all events of logging service.
@@ -2757,7 +2757,7 @@ namespace Microsoft.Build.Execution
 
                         if (newNodes?.Count != response.NumberOfNodesToCreate || newNodes.Any(n => n == null))
                         {
-                            BuildEventContext buildEventContext = Scheduler.s_schedulerNodeBuildEventContext.WithSubmissionId(0);
+                            BuildEventContext buildEventContext = BuildEventContext.CreateForSubmission(0);
                             ((IBuildComponentHost)this).LoggingService.LogError(buildEventContext, new BuildEventFileInfo(String.Empty), "UnableToCreateNode", response.RequiredNodeType.ToString("G"));
 
                             throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnableToCreateNode", response.RequiredNodeType.ToString("G")));

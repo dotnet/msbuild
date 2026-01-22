@@ -851,9 +851,9 @@ namespace Microsoft.Build.Execution
                 _loggingService.SerializeAllProperties = false;
             }
 
-            _buildEventContext = Scheduler.s_schedulerNodeBuildEventContext.WithNodeId(configuration.NodeId);
+            _buildEventContext = BuildEventContext.CreateForNode(configuration.NodeId);
             // Now prep the buildRequestEngine for the build.
-            _loggingContext = new NodeLoggingContext(_loggingService, _buildEventContext,  configuration.NodeId, false /* inProcNode */);
+            _loggingContext = new NodeLoggingContext(_loggingService, _buildEventContext, configuration.NodeId, false /* inProcNode */);
 
             if (_shutdownException != null)
             {
