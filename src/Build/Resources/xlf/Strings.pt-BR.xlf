@@ -18,6 +18,11 @@
         <target state="translated">MSB4249: Não foi possível compilar o projeto do site da Web "{0}". O compilador do ASP.NET está disponível apenas na versão .NET Framework do MSBuild.</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
+      <trans-unit id="AssemblyLoad_Warning">
+        <source>The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</source>
+        <target state="translated">A tarefa personalizada '{0}' precisou recorrer à execução fora do processo porque a definição UsingTask não especifica o Runtime e a Arquitetura corretos. Isso reduz o desempenho da criação. Atualize o elemento UsingTask para especificar explicitamente os atributos Runtime e Architecture (por exemplo, Runtime="CLR4" Architecture="x64") ou use TaskFactory="TaskHostFactory".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
         <source>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</source>
         <target state="translated">MSB4002: Houve uma falha ao recuperar os atributos dos parâmetros na tarefa "{0}". {1}</target>
@@ -446,6 +451,11 @@
         <target state="translated">Regra de verificação personalizada: '{0}' foi registrada com sucesso.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
+        <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
+        <target state="translated">A TaskFactory personalizada "{0}" para a Tarefa "{1}" não dá suporte à execução do TaskHost fora do processo. Desabilite o modo de compilação multithread ou remova a TaskFactory personalizada das suas definições de &lt;UsingTask&gt; nos arquivos do projeto.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: O resolvedor SDK padrão falhou ao resolver SDK "{0}" porque o diretório "{1}" não existia.</target>
@@ -509,6 +519,11 @@
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}" refere-se ao(s) item(ns) {0} e "{3}" refere-se ao(s) item(ns) {1}. Eles devem ter o mesmo número de itens.</target>
         <note>{StrBegin="MSB3094: "}</note>
+      </trans-unit>
+      <trans-unit id="HostObjectFailure">
+        <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
+        <target state="translated">A tarefa "{0}" não conseguiu obter o objeto host. {1} Entre em contato com o autor da tarefa para relatar este problema.</target>
+        <note>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -892,18 +907,13 @@ Erros: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="translated">Um SDK tentou definir a variável de ambiente "{0}" como "{1}", mas ela já foi definida como variável de ambiente.</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="translated">Um SDK tentou definir a variável de ambiente "{0}" como "{1}", mas ela já foi definida por outro SDK.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SdkEnvironmentVariableSet">
-        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="translated">Um SDK tentou definir a variável de ambiente "{0}" como "{1}".</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -2014,7 +2024,7 @@ Erros: {3}</target>
       </trans-unit>
       <trans-unit id="OldWrapperGeneratedOldSolutionVersion">
         <source>Using the MSBuild v3.5 solution wrapper generator with a tools version of {0} because the solution file format was version {1} and no tools version was supplied.</source>
-        <target state="translated">Usando o gerador de wrapper da solução MSBuild v3.5 com uma versão de ferramentas {0} porque o formato de arquivo da solução era versão {1} e nenhuma versão de ferramentas foi fornecida.</target>
+        <target state="translated">Usando o gerador de wrapper da solução MSBuild v3.5 com uma versão de ferramentas {0} porque o formato de arquivo de solução era versão {1} e nenhuma versão de ferramentas foi fornecida.</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionBuildingSolutionConfiguration">

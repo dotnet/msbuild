@@ -18,6 +18,11 @@
         <target state="translated">MSB4249: 無法建置網站專案 "{0}"。ASP.NET 編譯器只適用於 NET Framework 版本的 MSBuild。</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
+      <trans-unit id="AssemblyLoad_Warning">
+        <source>The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</source>
+        <target state="translated">自訂工作 '{0}' 因 UsingTask 定義未指定正確的執行階段與結構，必須後援至程序外執行。這樣會降低組建效能。請更新 UsingTask 元素，以明確指定執行階段與結構屬性 (例如 Runtime="CLR4" Architecture="x64")，或使用 TaskFactory="TaskHostFactory"。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
         <source>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</source>
         <target state="translated">MSB4002: 擷取 "{0}" 工作中參數的屬性時發生失敗。{1}</target>
@@ -446,6 +451,11 @@
         <target state="translated">已成功註冊自訂檢查規則: '{0}'。</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
+        <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
+        <target state="translated">工作 '{1}' 的自訂 TaskFactory '{0}' 不支援進程外 TaskHost 執行。請關閉多執行緒組建模式，或從專案檔中的 &lt;UsingTask&gt; 定義中移除自訂 TaskFactory。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: 預設的 SDK 解析程式無法解析 SDK "{0}"，因為目錄 "{1}" 不存在。</target>
@@ -509,6 +519,11 @@
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}" 參考 {0} 個項目，"{3}" 則參考 {1} 個項目。兩者參考的項目數目必須相同。</target>
         <note>{StrBegin="MSB3094: "}</note>
+      </trans-unit>
+      <trans-unit id="HostObjectFailure">
+        <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
+        <target state="translated">工作 "{0}" 無法取得其主機物件。{1} 請連絡工作的建立者以報告此問題。</target>
+        <note>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -892,18 +907,13 @@ Errors: {3}</source>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="translated">一個 SDK 嘗試將環境變數 "{0}" 設定為 "{1}"，但該變數已設定為環境變數。</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="translated">一個 SDK 嘗試將環境變數 "{0}" 設定為 "{1}"，但該變數已由另一個 SDK 設定。</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SdkEnvironmentVariableSet">
-        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="translated">一個 SDK 嘗試將環境變數 "{0}" 設定為 "{1}"。</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -2014,7 +2024,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="OldWrapperGeneratedOldSolutionVersion">
         <source>Using the MSBuild v3.5 solution wrapper generator with a tools version of {0} because the solution file format was version {1} and no tools version was supplied.</source>
-        <target state="translated">使用工具版本為 {0} 的 MSBuild v3.5 方案包裝函式產生器，因為方案檔案格式的版本為 {1}，而且沒有提供工具版本。</target>
+        <target state="translated">使用工具版本為 {0} 的 MSBuild v3.5 解決方案包裝函式產生器，因為解決方案檔案格式的版本為 {1}，而且沒有提供工具版本。</target>
         <note />
       </trans-unit>
       <trans-unit id="SolutionBuildingSolutionConfiguration">

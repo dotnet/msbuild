@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -995,9 +996,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     null,
 #endif
                     false,
-                    CancellationToken.None);
-                _host.FindTask(null);
-                _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, null);
+                    CancellationToken.None,
+                    TaskEnvironmentHelper.CreateForTest());
+                _host.FindTask(TaskHostParameters.Empty);
+                _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
             });
         }
         /// <summary>
@@ -1023,10 +1025,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 null,
 #endif
                 false,
-                CancellationToken.None);
+                CancellationToken.None,
+                TaskEnvironmentHelper.CreateForTest());
 
-            _host.FindTask(null);
-            _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, null);
+            _host.FindTask(TaskHostParameters.Empty);
+            _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
             _logger.AssertLogContains("MSB4036");
         }
 
@@ -1062,7 +1065,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using TestEnvironment env = TestEnvironment.Create();
             var debugFolder = env.CreateFolder();
             // inject the location for failure logs - not to interact with other tests
-            env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugFolder.Path);
+            var transientEnvVar = env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugFolder.Path);
             // Force initing the DebugPath from the env var - as we need it to be unique for those tests.
             // The ProjectCacheTests DataMemberAttribute usages (specifically SuccessfulGraphsWithBuildParameters) lead
             //  to the DebugPath being set before this test runs - and hence the env var is ignored.
@@ -1092,6 +1095,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 FileUtilities.DeleteNoThrow(ExceptionHandling.DumpFilePath);
             }
+
+            // Reset DebugPath to not affect other tests
+            transientEnvVar.Revert();
+            DebugUtils.SetDebugPath();
         }
 
         [Fact]
@@ -1249,7 +1256,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskBuilderTestTask.TaskBuilderTestTaskFactory taskFactory = new TaskBuilderTestTask.TaskBuilderTestTaskFactory();
             taskFactory.ThrowOnExecute = throwOnExecute;
             string taskName = "TaskBuilderTestTask";
-            (_host as TaskExecutionHost)._UNITTESTONLY_TaskFactoryWrapper = new TaskFactoryWrapper(taskFactory, loadedType, taskName, null);
+            (_host as TaskExecutionHost)._UNITTESTONLY_TaskFactoryWrapper = new TaskFactoryWrapper(taskFactory, loadedType, taskName, TaskHostParameters.Empty);
             _host.InitializeForTask(
                 this,
                 tlc,
@@ -1262,7 +1269,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 null,
 #endif
                 false,
-                CancellationToken.None);
+                CancellationToken.None,
+                TaskEnvironmentHelper.CreateForTest());
 
             ProjectTaskInstance taskInstance = project.Targets["foo"].Tasks.First();
             TaskLoggingContext talc = tlc.LogTaskBatchStarted(".", taskInstance, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).Assembly.GetName().FullName);
@@ -1282,10 +1290,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             itemsByName.Add(item2);
             _twoItems = new ITaskItem[] { new TaskItem(item), new TaskItem(item2) };
 
-            _bucket = new ItemBucket(new Dictionary<string, ICollection<ProjectItemInstance>>().Keys, new Dictionary<string, string>(), new Lookup(itemsByName, new PropertyDictionary<ProjectPropertyInstance>()), 0);
+            _bucket = new ItemBucket(FrozenSet<string>.Empty, new Dictionary<string, string>(), new Lookup(itemsByName, new PropertyDictionary<ProjectPropertyInstance>()), 0);
             _bucket.Initialize(null);
-            _host.FindTask(null);
-            _host.InitializeForBatch(talc, _bucket, null);
+            _host.FindTask(TaskHostParameters.Empty);
+            _host.InitializeForBatch(talc, _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
             _parametersSetOnTask = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             _outputsReadFromTask = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
         }

@@ -89,6 +89,19 @@ namespace Microsoft.Build.Internal
     }
 
     /// <summary>
+    /// Represents a unique key for identifying task host nodes.
+    /// Combines HandshakeOptions (which specify runtime/architecture configuration) with
+    /// the scheduled node ID to uniquely identify task hosts in multi-threaded mode.
+    /// </summary>
+    /// <param name="HandshakeOptions">The handshake options specifying runtime and architecture configuration.</param>
+    /// <param name="NodeId">
+    /// The scheduled node ID. In traditional multi-proc builds, this is -1 (meaning the task host
+    /// is identified by HandshakeOptions alone). In multi-threaded mode, each in-proc node has
+    /// its own task host, so the node ID is used to distinguish them.
+    /// </param>
+    internal readonly record struct TaskHostNodeKey(HandshakeOptions HandshakeOptions, int NodeId);
+
+    /// <summary>
     /// Status codes for the handshake process.
     /// It aggregates return values across several functions so we use an aggregate instead of a separate class for each method.
     /// </summary>
@@ -373,6 +386,13 @@ namespace Microsoft.Build.Internal
         internal delegate void LogDebugCommunications(string format, params object[] stuff);
 
         /// <summary>
+        /// On Windows, environment variables should be case-insensitive;
+        /// on Unix-like systems, they should be case-sensitive, but this might be a breaking change in an edge case.
+        /// https://github.com/dotnet/msbuild/issues/12858
+        /// </summary>
+        internal static StringComparer EnvironmentVariableComparer => StringComparer.OrdinalIgnoreCase;
+
+        /// <summary>
         /// Gets or sets the node connection timeout.
         /// </summary>
         internal static int NodeConnectionTimeout
@@ -621,7 +641,7 @@ namespace Microsoft.Build.Internal
             }
 
             // Otherwise, allocate and update with the current state.
-            Dictionary<string, string> table = new(vars.Count, StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> table = new(vars.Count, EnvironmentVariableComparer);
 
             enumerator.Reset();
             while (enumerator.MoveNext())
@@ -632,7 +652,7 @@ namespace Microsoft.Build.Internal
                 table[key] = value;
             }
 
-            EnvironmentState newState = new(table.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase));
+            EnvironmentState newState = new(table.ToFrozenDictionary(EnvironmentVariableComparer));
             s_environmentState = newState;
 
             return newState.EnvironmentVariables;
@@ -845,10 +865,10 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static HandshakeOptions GetHandshakeOptions(
             bool taskHost,
+            TaskHostParameters taskHostParameters,
             string architectureFlagToSet = null,
             bool nodeReuse = false,
-            bool lowPriority = false,
-            IDictionary<string, string> taskHostParameters = null)
+            bool lowPriority = false)
         {
             HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
 
@@ -858,25 +878,25 @@ namespace Microsoft.Build.Internal
             if (taskHost)
             {
                 // No parameters given, default to current
-                if (taskHostParameters == null)
+                if (taskHostParameters.IsEmpty)
                 {
                     clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
                     architectureFlagToSet = XMakeAttributes.GetCurrentMSBuildArchitecture();
                 }
                 else // Figure out flags based on parameters given
                 {
-                    ErrorUtilities.VerifyThrow(taskHostParameters.TryGetValue(XMakeAttributes.runtime, out string runtimeVersion), "Should always have an explicit runtime when we call this method.");
-                    ErrorUtilities.VerifyThrow(taskHostParameters.TryGetValue(XMakeAttributes.architecture, out string architecture), "Should always have an explicit architecture when we call this method.");
+                    ErrorUtilities.VerifyThrow(taskHostParameters.Runtime != null, "Should always have an explicit runtime when we call this method.");
+                    ErrorUtilities.VerifyThrow(taskHostParameters.Architecture != null, "Should always have an explicit architecture when we call this method.");
 
-                    if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
+                    if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
                     {
                         clrVersion = 2;
                     }
-                    else if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase))
+                    else if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase))
                     {
                         clrVersion = 4;
                     }
-                    else if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
+                    else if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
                     {
                         clrVersion = 5;
                     }
@@ -885,7 +905,7 @@ namespace Microsoft.Build.Internal
                         ErrorUtilities.ThrowInternalErrorUnreachable();
                     }
 
-                    architectureFlagToSet = architecture;
+                    architectureFlagToSet = taskHostParameters.Architecture;
                 }
             }
 

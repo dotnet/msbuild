@@ -37,6 +37,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private string _originalWorkingDirectory;
 
+        /// <summary>
+        /// Creates a stub TaskEnvironment for testing that uses the current process environment.
+        /// </summary>
+        private static TaskEnvironment CreateStubTaskEnvironment() => TaskEnvironmentHelper.CreateForTest();
+
 #pragma warning disable xUnit1013
 
         public void LoggingException(Exception e)
@@ -86,7 +91,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 configCache.AddConfiguration(configuration);
 
                 BuildRequest request = CreateNewBuildRequest(1, new string[1] { "target1" });
-                BuildRequestEntry entry = new BuildRequestEntry(request, configuration);
+                BuildRequestEntry entry = new BuildRequestEntry(request, configuration, CreateStubTaskEnvironment());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget("target1", GetEmptySuccessfulTargetResult());
                 targetBuilder.SetResultsToReturn(result);
@@ -116,7 +121,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 configCache.AddConfiguration(configuration);
 
                 BuildRequest request = CreateNewBuildRequest(1, new string[1] { "target1" });
-                BuildRequestEntry entry = new BuildRequestEntry(request, configuration);
+                BuildRequestEntry entry = new BuildRequestEntry(request, configuration, CreateStubTaskEnvironment());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget("target1", GetEmptySuccessfulTargetResult());
                 targetBuilder.SetResultsToReturn(result);
@@ -150,7 +155,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 configCache.AddConfiguration(configuration);
 
                 BuildRequest request = CreateNewBuildRequest(1, new string[1] { "target1" });
-                BuildRequestEntry entry = new BuildRequestEntry(request, configuration);
+                BuildRequestEntry entry = new BuildRequestEntry(request, configuration, CreateStubTaskEnvironment());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget("target1", GetEmptySuccessfulTargetResult());
                 targetBuilder.SetResultsToReturn(result);
@@ -189,7 +194,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 configCache.AddConfiguration(configuration);
 
                 BuildRequest request = CreateNewBuildRequest(1, new string[1] { "target1" });
-                BuildRequestEntry entry = new BuildRequestEntry(request, configuration);
+                BuildRequestEntry entry = new BuildRequestEntry(request, configuration, CreateStubTaskEnvironment());
                 BuildResult result = new BuildResult(request);
                 result.AddResultsForTarget("target1", GetEmptySuccessfulTargetResult());
                 targetBuilder.SetResultsToReturn(result);
@@ -227,7 +232,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             configCache.AddConfiguration(configuration);
 
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "target1" });
-            BuildRequestEntry entry = new BuildRequestEntry(request, configuration);
+            BuildRequestEntry entry = new BuildRequestEntry(request, configuration, CreateStubTaskEnvironment());
             _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
             WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
             Assert.Equal(BuildRequestEntryState.Complete, entry.State);

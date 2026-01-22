@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 #if RUNTIME_TYPE_NETCORE
 using System.Runtime.InteropServices;
@@ -43,7 +44,7 @@ namespace Microsoft.Build.Tasks
 #endif
                 };
 
-                return possibleLocations.Select(possibleLocation => possibleLocation()).FirstOrDefault(File.Exists);
+                return possibleLocations.Select(possibleLocation => possibleLocation()).FirstOrDefault(FileSystems.Default.FileExists);
             }, isThreadSafe: true);
 
             StandardOutputImportance = MessageImportance.Low.ToString("G");

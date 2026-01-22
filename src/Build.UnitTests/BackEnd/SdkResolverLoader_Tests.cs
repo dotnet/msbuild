@@ -396,6 +396,114 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
+        /// <summary>
+        /// Test that LoadResolverAssembly handles fallback behavior correctly based on BuildEnvironment flags.
+        /// This test calls the actual LoadResolverAssembly method to ensure it fails when the fix is reverted.
+        /// </summary>
+        [Theory]
+        [InlineData(false, false)]   // needsFallback = false (VS/MSBuild.exe), no fallback, should fail when Assembly.Load fails
+        [InlineData(true, true)]     // needsFallback = true (API/dotnet CLI), has fallback, should succeed with LoadFrom
+        public void LoadResolverAssembly_MSBuildSdkResolver_WithAndWithoutFallback(bool needsFallback, bool shouldSucceed)
+        {
+            using (var env = TestEnvironment.Create(_output))
+            {
+                // Save current BuildEnvironment to restore later
+                var currentBuildEnvironment = BuildEnvironmentHelper.Instance;
+
+                try
+                {
+                    // Setup BuildEnvironment based on test scenario
+                    // needsFallback = true: Mode = Standalone && RunningInMSBuildExe = false (API/dotnet CLI)
+                    // needsFallback = false: Mode = Standalone && RunningInMSBuildExe = true (MSBuild.exe direct usage)
+                    // Note: We use Standalone mode for both cases to avoid VisualStudio mode requiring VisualStudioInstallRootDirectory
+                    BuildEnvironmentMode mode = BuildEnvironmentMode.Standalone;
+                    bool runningInMSBuildExe = !needsFallback;
+
+                    // Use current MSBuild path or fallback to a valid path if null
+                    // This ensures MSBuildToolsDirectory32 and MSBuildToolsDirectoryRoot are set correctly
+                    string msBuildExePath = currentBuildEnvironment.CurrentMSBuildExePath;
+                    if (string.IsNullOrEmpty(msBuildExePath))
+                    {
+                        // Use the executing assembly path as fallback
+                        msBuildExePath = FileUtilities.ExecutingAssemblyPath;
+                        // If that's also null/empty, use test assembly location
+                        if (string.IsNullOrEmpty(msBuildExePath))
+                        {
+                            msBuildExePath = typeof(BuildEnvironmentHelper).Assembly.Location;
+                        }
+                    }
+
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(
+                        new BuildEnvironment(
+                            mode,
+                            msBuildExePath,
+                            currentBuildEnvironment.RunningTests,
+                            runningInMSBuildExe,
+                            currentBuildEnvironment.RunningInVisualStudio,
+                            currentBuildEnvironment.VisualStudioInstallRootDirectory));
+
+                    // Create resolver folder structure with the specific name that triggers special logic
+                    var testRoot = env.CreateFolder().Path;
+                    var resolverFolder = Path.Combine(testRoot, "Microsoft.DotNet.MSBuildSdkResolver");
+                    Directory.CreateDirectory(resolverFolder);
+
+                    var assemblyFile = Path.Combine(resolverFolder, "Microsoft.DotNet.MSBuildSdkResolver.dll");
+
+                    // Create file based on test scenario
+                    if (shouldSucceed)
+                    {
+                        // For fallback test: create a valid assembly file using the test assembly
+                        // This avoids side effects from loading Microsoft.Build.dll copy
+                        var sourceAssembly = typeof(MockSdkResolverWithAssemblyPath).Assembly;
+                        string sourceLocation = sourceAssembly.Location;
+                        if (string.IsNullOrEmpty(sourceLocation))
+                        {
+                            throw new InvalidOperationException("Source assembly location is null or empty");
+                        }
+                        File.Copy(sourceLocation, assemblyFile, true);
+                    }
+                    else
+                    {
+                        // For no-fallback test: create invalid assembly content to force Assembly.Load to fail
+                        File.WriteAllText(assemblyFile, "invalid assembly content");
+                    }
+
+                    // Use MockSdkResolverLoader but don't mock LoadResolverAssemblyFunc
+                    // This ensures we test the actual logic in SdkResolverLoader.cs
+                    var loader = new MockSdkResolverLoader
+                    {
+                        FindPotentialSdkResolversFunc = (_, __) => new List<string> { assemblyFile },
+                        GetResolverTypesFunc = assembly => new[] { typeof(MockSdkResolverWithAssemblyPath) }
+                        // LoadResolverAssemblyFunc is not set, so it will call the real method
+                    };
+
+                    if (shouldSucceed)
+                    {
+                        // Test that loading succeeds with fallback logic
+                        var resolvers = loader.LoadAllResolvers(new MockElementLocation("file"));
+                        resolvers.ShouldNotBeNull();
+                        resolvers.Count.ShouldBeGreaterThan(0);
+                    }
+                    else
+                    {
+                        // Should throw InvalidProjectFileException because:
+                        // 1. needsFallback = false → no fallback, uses Assembly.Load directly
+                        // 2. Assembly.Load fails on invalid assembly
+                        // 3. No fallback → exception propagates
+                        var exception = Should.Throw<InvalidProjectFileException>(() =>
+                            loader.LoadAllResolvers(new MockElementLocation("file")));
+
+                        exception.Message.ShouldContain("could not be loaded");
+                    }
+                }
+                finally
+                {
+                    // Restore original BuildEnvironment to avoid test pollution
+                    BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(currentBuildEnvironment);
+                }
+            }
+        }
+
         private sealed class MockSdkResolverThatDoesNotLoad : SdkResolverBase
         {
             public const string ExpectedMessage = "A8BB8B3131D3475D881ACD3AF8D75BD6";
@@ -435,7 +543,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             public string AssemblyPath;
 
-            public MockSdkResolverWithAssemblyPath(string assemblyPath = "")
+            // Parameterless constructor for reflection-based instantiation
+            public MockSdkResolverWithAssemblyPath()
+                : this("")
+            {
+            }
+
+            public MockSdkResolverWithAssemblyPath(string assemblyPath)
             {
                 AssemblyPath = assemblyPath;
             }

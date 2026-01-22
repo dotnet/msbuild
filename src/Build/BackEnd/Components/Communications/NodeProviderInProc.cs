@@ -122,7 +122,19 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             _componentHost = host;
-            _nodeContexts = new ConcurrentDictionary<int, NodeContext>();
+
+            // Initialize with proper capacity for performance optimization
+            // Use Environment.ProcessorCount for concurrencyLevel to handle multi-threaded scenarios
+            if (host.BuildParameters?.MaxNodeCount > 0)
+            {
+                _nodeContexts = new ConcurrentDictionary<int, NodeContext>(
+                    concurrencyLevel: Environment.ProcessorCount,
+                    capacity: host.BuildParameters.MaxNodeCount);
+            }
+            else
+            {
+                _nodeContexts = new ConcurrentDictionary<int, NodeContext>();
+            }
         }
 
         /// <summary>
@@ -357,7 +369,7 @@ namespace Microsoft.Build.BackEnd
             nodeContext._inProcNodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(InProcNodeEndpoint_OnLinkStatusChanged);
 
             nodeContext._packetFactory = factory;
-            nodeContext._inProcNode = new InProcNode(_componentHost, endpoints.NodeEndpoint);
+            nodeContext._inProcNode = new InProcNode(nodeId, _componentHost, endpoints.NodeEndpoint);
 #if FEATURE_THREAD_CULTURE
             nodeContext._inProcNodeThread = new Thread(() => InProcNodeThreadProc(nodeContext._inProcNode), BuildParameters.ThreadStackSize);
 #else
@@ -370,7 +382,7 @@ namespace Microsoft.Build.BackEnd
                 InProcNodeThreadProc(nodeContext._inProcNode);
             });
 #endif
-            nodeContext._inProcNodeThread.Name = $"In-proc Node ({_componentHost.Name})";
+            nodeContext._inProcNodeThread.Name = $"In-proc Node {nodeId} ({_componentHost.Name})";
             nodeContext._inProcNodeThread.IsBackground = true;
 #if FEATURE_THREAD_CULTURE
             nodeContext._inProcNodeThread.CurrentCulture = _componentHost.BuildParameters.Culture;
