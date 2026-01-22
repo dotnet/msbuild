@@ -533,6 +533,10 @@
     <value>MSB4280: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</value>
     <comment>{StrBegin="MSB4259: "}</comment>
   </data>
+  <data name="IllFormedQuotedStringInCondition" xml:space="preserve">
+    <value>MSB4101: Expected a closing quote after position {1} in condition "{0}".</value>
+    <comment>{StrBegin="MSB4101: "}</comment>
+  </data>
   <data name="IllFormedPropertySpaceInExpression" xml:space="preserve">
     <value>MSB4101: Expected a closing quote after position {1} in condition "{0}".</value>
     <comment>{StrBegin="MSB4101: "}</comment>

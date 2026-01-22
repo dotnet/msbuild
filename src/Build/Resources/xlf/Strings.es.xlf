@@ -545,6 +545,11 @@
         <target state="new">MSB4280: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</target>
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
+      <trans-unit id="IllFormedQuotedStringInCondition">
+        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
+        <target state="new">MSB4101: Expected a closing quote after position {1} in condition "{0}".</target>
+        <note>{StrBegin="MSB4101: "}</note>
+      </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
         <target state="translated">Hay caracteres no válidos en '{0}' en el elemento {1}.</target>
