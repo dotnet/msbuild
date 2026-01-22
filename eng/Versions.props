@@ -3,7 +3,7 @@
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.3.0</VersionPrefix>
+    <VersionPrefix>18.3.1</VersionPrefix>
     <PreReleaseVersionLabel>release</PreReleaseVersionLabel> <!-- Keep next to VersionPrefix to create a conflict in forward-flow -->
     <PackageValidationBaselineVersion>18.0.2</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
