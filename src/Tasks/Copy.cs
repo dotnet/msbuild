@@ -826,7 +826,7 @@ namespace Microsoft.Build.Tasks
                     foreach (ITaskItem sourceFolder in SourceFolders)
                     {
                         ErrorUtilities.VerifyThrowArgumentLength(sourceFolder.ItemSpec);
-                        AbsolutePath src = TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(sourceFolder.ItemSpec));
+                        AbsolutePath src = FrameworkFileUtilities.NormalizePath(TaskEnvironment.GetAbsolutePath(sourceFolder.ItemSpec));
                         string srcName = Path.GetFileName(src);
 
                         (string[] filesInFolder, _, _, string globFailure) = FileMatcher.Default.GetFiles(src, "**");
@@ -1111,8 +1111,15 @@ namespace Microsoft.Build.Tasks
         /// Compares two paths to see if they refer to the same file. We can't solve the general
         /// canonicalization problem, so we just compare strings on the full paths.
         /// </summary>
+        /// <remarks>
+        /// This method has a side effect of removing relative segments from the paths before comparison to avoid
+        /// false negatives due to different path representations. This operation may throw in certain cases (e.g. invalid paths on Windows).
+        /// TODO: refactor this task not to rely on this side effect for correct exception handling and caching
+        /// </remarks>
         private static bool PathsAreIdentical(FileState source, FileState destination)
         {
+            source.Path = FrameworkFileUtilities.RemoveRelativeSegments(source.Path);
+            destination.Path = FrameworkFileUtilities.RemoveRelativeSegments(destination.Path);
             return source.Path == destination.Path;
         }
 

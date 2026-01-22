@@ -74,7 +74,7 @@ namespace Microsoft.Build.Tasks
             }
 
             ErrorUtilities.VerifyThrowArgumentLength(File.ItemSpec);
-            AbsolutePath filePath = TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(File.ItemSpec));
+            AbsolutePath filePath = FrameworkFileUtilities.NormalizePath(TaskEnvironment.GetAbsolutePath(File.ItemSpec));
             string contentsAsString = string.Empty;
 
             if (Lines != null && Lines.Length > 0)

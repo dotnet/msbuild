@@ -228,11 +228,6 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// The path of the file.
-        /// </summary>
-        private readonly AbsolutePath _path;
-
-        /// <summary>
         /// Actual file or directory information
         /// </summary>
         private Lazy<FileDirInfo> _data;
@@ -244,9 +239,8 @@ namespace Microsoft.Build.Tasks
         /// <param name="path">The normalized (absolute) path to the file.</param>
         internal FileState(AbsolutePath path)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(path);
-            _path = path;
-            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(_path));
+            Path = path;
+            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(Path));
         }
 
         /// <summary>
@@ -308,7 +302,16 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Path of the file.
         /// </summary>
-        internal AbsolutePath Path => _path;
+        internal AbsolutePath Path
+        {
+            get;
+            set
+            {
+                ErrorUtilities.VerifyThrowArgumentLength(value);
+                field = value;
+                _data = new Lazy<FileDirInfo>(() => new FileDirInfo(value));
+            }
+        }
 
         /// <summary>
         /// Whether this is a directory.
@@ -329,7 +332,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void Reset()
         {
-            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(_path));
+            _data = new Lazy<FileDirInfo>(() => new FileDirInfo(Path));
         }
     }
 }
