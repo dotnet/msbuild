@@ -121,12 +121,14 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private int _activeTaskCount;
 
+#if !CLR2COMPATIBILITY
         /// <summary>
         /// Count of tasks that are currently yielded (blocked on BuildProjectFile callback).
         /// When a task yields, _activeTaskCount decrements but _yieldedTaskCount increments.
         /// indicates we still have work in progress.
         /// </summary>
         private int _yieldedTaskCount;
+#endif
 
         /// <summary>
         /// The event which is set when a task has completed.
@@ -1133,6 +1135,7 @@ namespace Microsoft.Build.CommandLine
         {
             return _currentTaskContext.Value;
         }
+#endif
 
         /// <summary>
         /// Gets the configuration for the currently executing task on this thread.
@@ -1150,6 +1153,7 @@ namespace Microsoft.Build.CommandLine
 #endif
         }
 
+#if !CLR2COMPATIBILITY
         /// <summary>
         /// Creates a new task execution context for the given configuration.
         /// </summary>
