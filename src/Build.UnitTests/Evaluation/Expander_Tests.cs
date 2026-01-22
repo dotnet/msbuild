@@ -3865,7 +3865,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(
                 () => expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
 
-            Assert.Equal("MSB4259", ex.ErrorCode);
+            Assert.Equal("MSB4280", ex.ErrorCode);
         }
 
         /// <summary>

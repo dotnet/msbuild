@@ -1398,7 +1398,7 @@ namespace Microsoft.Build.Evaluation
 
                                 ProjectErrorUtilities.ThrowInvalidProject(
                                     elementLocation,
-                                    "IllFormedPropertySpaceInCondition",
+                                    "IllFormedPropertySpaceInPropertyReference",
                                     expression.Substring(propertyStartIndex, propertyEndIndex - propertyStartIndex + 1),  // Full expression like "$( Foo )"
                                     whitespacePosition - propertyStartIndex + 1);  // Position relative to start of expression
                             }
