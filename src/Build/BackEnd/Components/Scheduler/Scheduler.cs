@@ -63,10 +63,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private static BuildEventContext s_schedulerNodeBuildEventContext = BuildEventContext.CreateForNode(VirtualNode);
 
-        /// <summary>
-        /// The build event context for the in-proc node - the worker node that executes on the same 'logical' node as the scheduler.
-        /// </summary>
-        private static BuildEventContext s_schedulerInProcNodeBuildEventContext = BuildEventContext.CreateForNode(InProcNodeId);
 
         #region Scheduler Data
 
