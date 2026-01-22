@@ -629,6 +629,9 @@ namespace Microsoft.Build.Execution
                 // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
+                // Validate that DOTNET_HOST_PATH is not a directory
+                ValidateDotnetHostPath(loggingService);
+
                 // Log if BuildCheck is enabled
                 if (_buildParameters.IsBuildCheckEnabled)
                 {
@@ -3208,6 +3211,18 @@ namespace Microsoft.Build.Execution
                 {
                     loggingService.LogIncludeFile(BuildEventContext.Invalid, message.FilePath);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Validates the DOTNET_HOST_PATH environment variable and logs a warning if it points to a directory instead of a file.
+        /// </summary>
+        private static void ValidateDotnetHostPath(ILoggingService loggingService)
+        {
+            string? dotnetHostPath = Environment.GetEnvironmentVariable(Constants.DotnetHostPathEnvVarName);
+            if (!string.IsNullOrEmpty(dotnetHostPath) && FileSystems.Default.DirectoryExists(dotnetHostPath))
+            {
+                loggingService.LogWarning(BuildEventContext.Invalid, null, BuildEventFileInfo.Empty, "DotnetHostPathIsDirectory", dotnetHostPath);
             }
         }
 

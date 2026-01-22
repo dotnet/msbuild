@@ -3485,6 +3485,128 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Verifies that a warning is logged when DOTNET_HOST_PATH is set to a directory instead of a file.
+        /// </summary>
+        [Fact]
+        public void DotnetHostPathDirectoryWarning()
+        {
+            // Use a directory that definitely exists
+            string tempDirectory = Path.GetTempPath();
+
+            using (TestEnvironment testEnv = TestEnvironment.Create(_output))
+            {
+                testEnv.SetEnvironmentVariable("DOTNET_HOST_PATH", tempDirectory);
+
+                MockLogger logger = new MockLogger(_output);
+                BuildParameters parameters = new BuildParameters
+                {
+                    ShutdownInProcNodeOnBuildFinish = true,
+                    Loggers = new ILogger[] { logger },
+                    EnableNodeReuse = false
+                };
+
+                using (BuildManager buildManager = new BuildManager())
+                {
+                    string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='test'>
+    <Message Text='[success]'/>
+ </Target>
+</Project>
+");
+                    BuildRequestData data = GetBuildRequestData(contents);
+                    BuildResult result = buildManager.Build(parameters, data);
+                    result.OverallResult.ShouldBe(BuildResultCode.Success);
+                    logger.AssertLogContains("[success]");
+
+                    // Check that a warning was logged for DOTNET_HOST_PATH being a directory
+                    logger.Warnings.Count.ShouldBeGreaterThan(0);
+                    logger.Warnings.ShouldContain(w => w.Code == "MSB4280");
+                    logger.Warnings.ShouldContain(w => w.Message.Contains(tempDirectory));
+                }
+            }
+        }
+
+        /// <summary>
+        /// Verifies that no warning is logged when DOTNET_HOST_PATH is set to a file path.
+        /// </summary>
+        [Fact]
+        public void DotnetHostPathFileNoWarning()
+        {
+            using (TestEnvironment testEnv = TestEnvironment.Create(_output))
+            {
+                // Create a temporary file to use as a valid DOTNET_HOST_PATH
+                TransientTestFile tempFile = testEnv.CreateFile("dotnet.exe", "");
+                testEnv.SetEnvironmentVariable("DOTNET_HOST_PATH", tempFile.Path);
+
+                MockLogger logger = new MockLogger(_output);
+                BuildParameters parameters = new BuildParameters
+                {
+                    ShutdownInProcNodeOnBuildFinish = true,
+                    Loggers = new ILogger[] { logger },
+                    EnableNodeReuse = false
+                };
+
+                using (BuildManager buildManager = new BuildManager())
+                {
+                    string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='test'>
+    <Message Text='[success]'/>
+ </Target>
+</Project>
+");
+                    BuildRequestData data = GetBuildRequestData(contents);
+                    BuildResult result = buildManager.Build(parameters, data);
+                    result.OverallResult.ShouldBe(BuildResultCode.Success);
+                    logger.AssertLogContains("[success]");
+
+                    // Check that no warning was logged for DOTNET_HOST_PATH
+                    logger.Warnings.ShouldNotContain(w => w.Code == "MSB4280");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Verifies that no warning is logged when DOTNET_HOST_PATH is not set.
+        /// </summary>
+        [Fact]
+        public void DotnetHostPathNotSetNoWarning()
+        {
+            using (TestEnvironment testEnv = TestEnvironment.Create(_output))
+            {
+                // Ensure DOTNET_HOST_PATH is not set
+                testEnv.SetEnvironmentVariable("DOTNET_HOST_PATH", null);
+
+                MockLogger logger = new MockLogger(_output);
+                BuildParameters parameters = new BuildParameters
+                {
+                    ShutdownInProcNodeOnBuildFinish = true,
+                    Loggers = new ILogger[] { logger },
+                    EnableNodeReuse = false
+                };
+
+                using (BuildManager buildManager = new BuildManager())
+                {
+                    string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='test'>
+    <Message Text='[success]'/>
+ </Target>
+</Project>
+");
+                    BuildRequestData data = GetBuildRequestData(contents);
+                    BuildResult result = buildManager.Build(parameters, data);
+                    result.OverallResult.ShouldBe(BuildResultCode.Success);
+                    logger.AssertLogContains("[success]");
+
+                    // Check that no warning was logged for DOTNET_HOST_PATH
+                    logger.Warnings.ShouldNotContain(w => w.Code == "MSB4280");
+                }
+            }
+        }
+
+        /// <summary>
         /// Helper for cache tests.  Builds a project and verifies the right cache files are created.
         /// </summary>
         private static string BuildAndCheckCache(BuildManager localBuildManager, IEnumerable<string> exceptCacheDirectories)
