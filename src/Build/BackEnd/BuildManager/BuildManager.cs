@@ -3220,9 +3220,22 @@ namespace Microsoft.Build.Execution
         private static void ValidateDotnetHostPath(ILoggingService loggingService)
         {
             string? dotnetHostPath = Environment.GetEnvironmentVariable(Constants.DotnetHostPathEnvVarName);
-            if (!string.IsNullOrEmpty(dotnetHostPath) && FileSystems.Default.DirectoryExists(dotnetHostPath))
+            if (string.IsNullOrEmpty(dotnetHostPath))
             {
-                loggingService.LogWarning(BuildEventContext.Invalid, null, BuildEventFileInfo.Empty, "DotnetHostPathIsDirectory", dotnetHostPath);
+                return;
+            }
+
+            try
+            {
+                if (FileSystems.Default.DirectoryExists(dotnetHostPath))
+                {
+                    loggingService.LogWarning(BuildEventContext.Invalid, null, BuildEventFileInfo.Empty, "DotnetHostPathIsDirectory", dotnetHostPath);
+                }
+            }
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+            {
+                // Silently ignore I/O exceptions when checking the path - this validation is best-effort
+                // and should not cause build failures if the path cannot be checked.
             }
         }
 
