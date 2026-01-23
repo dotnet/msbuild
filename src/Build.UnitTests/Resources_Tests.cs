@@ -59,18 +59,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that all resource strings referenced in Microsoft.Build.Tasks.Core assembly exist in the corresponding .resx files
         /// </summary>
-        /// <remarks>
-        /// Currently skipped due to known missing resources in XamlTaskFactory (.NETFramework-only code):
-        /// - ClassDescription, PropertyNameDescription, PropertyTypeDescription, PropertySwitchDescription
-        /// - StartSummary, EndSummary
-        /// - AddDefaultsToActiveSwitchListDescription, AddFallbacksToActiveSwitchListDescription
-        /// - ToolExeFieldDescription, ToolNameDescription
-        /// - ConstructorDescription, AddValidateRelationsMethod
-        /// 
-        /// These resources are referenced in XamlTaskFactory code which is only compiled for .NETFramework builds.
-        /// The resources either need to be added to the Tasks .resx file, or the code should be updated.
-        /// </remarks>
-        [Fact(Skip = "Known missing resources in XamlTaskFactory (12 resources). These need to be added to Tasks/Resources/Strings.resx")]
+        [Fact]
         public void AllReferencedResourcesExistInTasksAssembly()
         {
             VerifyResourcesForAssembly(
