@@ -22,9 +22,7 @@ namespace Microsoft.Build.Tasks
         // Default encoding taken from System.IO.WriteAllText()
         private static readonly Encoding s_defaultEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
-        /// <summary>
-        /// The task environment for thread-safe operations.
-        /// </summary>
+        /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>

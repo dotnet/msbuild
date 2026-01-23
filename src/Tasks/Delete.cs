@@ -64,9 +64,7 @@ namespace Microsoft.Build.Tasks
         /// <remarks></remarks>
         public bool FailIfNotIncremental { get; set; }
 
-        /// <summary>
-        /// The task environment for thread-safe operations.
-        /// </summary>
+        /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>

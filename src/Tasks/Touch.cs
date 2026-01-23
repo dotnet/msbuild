@@ -49,9 +49,7 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] TouchedFiles { get; set; }
 
-        /// <summary>
-        /// The task environment for thread-safe operations.
-        /// </summary>
+        /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>

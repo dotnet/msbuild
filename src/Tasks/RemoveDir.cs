@@ -24,9 +24,7 @@ namespace Microsoft.Build.Tasks
         //-----------------------------------------------------------------------------------
         private ITaskItem[] _directories;
 
-        /// <summary>
-        /// The task environment for thread-safe operations.
-        /// </summary>
+        /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; }
 
         [Required]
