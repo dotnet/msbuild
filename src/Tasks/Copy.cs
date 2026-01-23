@@ -287,7 +287,6 @@ namespace Microsoft.Build.Tasks
             string destinationFolder = Path.GetDirectoryName(destinationFileState.Path);
             string originalDestinationFolder = Path.GetDirectoryName(destinationFileState.Path.OriginalValue);
 
-
             if (!string.IsNullOrEmpty(destinationFolder) && !_directoriesKnownToExist.ContainsKey(destinationFolder))
             {
                 if (!FileSystems.Default.DirectoryExists(destinationFolder))
@@ -312,6 +311,7 @@ namespace Microsoft.Build.Tasks
 
             if (FailIfNotIncremental)
             {
+                 // Before the introduction of AbsolutePath, this logged full paths, so preserve that behavior
                 Log.LogError(FileComment, sourceFileState.Path, destinationFileState.Path);
                 return false;
             }
@@ -341,6 +341,7 @@ namespace Microsoft.Build.Tasks
                     if (UseSymboliclinksIfPossible)
                     {
                         // This is a message for fallback to SymbolicLinks if HardLinks fail when UseHardlinksIfPossible and UseSymboliclinksIfPossible are true
+                        // Before the introduction of AbsolutePath, this logged full paths, so preserve that behavior
                         Log.LogMessage(MessageImportance.Normal, RetryingAsSymbolicLink, sourceFileState.Path, destinationFileState.Path, errorMessage);
                     }
                     else
