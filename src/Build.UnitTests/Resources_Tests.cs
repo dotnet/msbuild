@@ -72,16 +72,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that all resource strings referenced in Microsoft.Build.Utilities.Core assembly exist in the corresponding .resx files
         /// </summary>
-        /// <remarks>
-        /// Currently skipped due to known missing resource: Message.InvalidImportance
-        /// 
-        /// This resource is referenced in Utilities/ToolTask.cs but only exists in Tasks/Resources/Strings.resx.
-        /// Since Utilities assembly cannot access Tasks resources, this is a runtime bug that needs to be fixed.
-        /// The resource should either be:
-        /// 1. Added to Utilities/Resources/Strings.resx, OR
-        /// 2. Moved to Shared/Resources/Strings.shared.resx
-        /// </remarks>
-        [Fact(Skip = "Known missing resource: Message.InvalidImportance. This is a real bug - resource is in Tasks but used in Utilities")]
+        [Fact]
         public void AllReferencedResourcesExistInUtilitiesAssembly()
         {
             VerifyResourcesForAssembly(
