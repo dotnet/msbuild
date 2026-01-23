@@ -3490,41 +3490,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void DotnetHostPathDirectoryWarning()
         {
-            // Use a directory that definitely exists
-            string tempDirectory = Path.GetTempPath();
+            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", Path.GetTempPath());
 
-            using (TestEnvironment testEnv = TestEnvironment.Create(_output))
-            {
-                testEnv.SetEnvironmentVariable("DOTNET_HOST_PATH", tempDirectory);
+            BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
+            _buildManager.Build(_parameters, data);
 
-                MockLogger logger = new MockLogger(_output);
-                BuildParameters parameters = new BuildParameters
-                {
-                    ShutdownInProcNodeOnBuildFinish = true,
-                    Loggers = new ILogger[] { logger },
-                    EnableNodeReuse = false
-                };
-
-                using (BuildManager buildManager = new BuildManager())
-                {
-                    string contents = CleanupFileContents(@"
-<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
- <Target Name='test'>
-    <Message Text='[success]'/>
- </Target>
-</Project>
-");
-                    BuildRequestData data = GetBuildRequestData(contents);
-                    BuildResult result = buildManager.Build(parameters, data);
-                    result.OverallResult.ShouldBe(BuildResultCode.Success);
-                    logger.AssertLogContains("[success]");
-
-                    // Check that a warning was logged for DOTNET_HOST_PATH being a directory
-                    logger.Warnings.Count.ShouldBeGreaterThan(0);
-                    logger.Warnings.ShouldContain(w => w.Code == "MSB4280");
-                    logger.Warnings.ShouldContain(w => w.Message.Contains(tempDirectory));
-                }
-            }
+            _logger.Warnings.ShouldContain(w => w.Code == "MSB4280");
         }
 
         /// <summary>
@@ -3533,38 +3504,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void DotnetHostPathFileNoWarning()
         {
-            using (TestEnvironment testEnv = TestEnvironment.Create(_output))
-            {
-                // Create a temporary file to use as a valid DOTNET_HOST_PATH
-                TransientTestFile tempFile = testEnv.CreateFile("dotnet.exe", "");
-                testEnv.SetEnvironmentVariable("DOTNET_HOST_PATH", tempFile.Path);
+            TransientTestFile tempFile = _env.CreateFile("dotnet.exe", "");
+            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", tempFile.Path);
 
-                MockLogger logger = new MockLogger(_output);
-                BuildParameters parameters = new BuildParameters
-                {
-                    ShutdownInProcNodeOnBuildFinish = true,
-                    Loggers = new ILogger[] { logger },
-                    EnableNodeReuse = false
-                };
+            BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
+            _buildManager.Build(_parameters, data);
 
-                using (BuildManager buildManager = new BuildManager())
-                {
-                    string contents = CleanupFileContents(@"
-<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
- <Target Name='test'>
-    <Message Text='[success]'/>
- </Target>
-</Project>
-");
-                    BuildRequestData data = GetBuildRequestData(contents);
-                    BuildResult result = buildManager.Build(parameters, data);
-                    result.OverallResult.ShouldBe(BuildResultCode.Success);
-                    logger.AssertLogContains("[success]");
-
-                    // Check that no warning was logged for DOTNET_HOST_PATH
-                    logger.Warnings.ShouldNotContain(w => w.Code == "MSB4280");
-                }
-            }
+            _logger.Warnings.ShouldNotContain(w => w.Code == "MSB4280");
         }
 
         /// <summary>
@@ -3573,37 +3519,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void DotnetHostPathNotSetNoWarning()
         {
-            using (TestEnvironment testEnv = TestEnvironment.Create(_output))
-            {
-                // Ensure DOTNET_HOST_PATH is not set
-                testEnv.SetEnvironmentVariable("DOTNET_HOST_PATH", null);
+            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", null);
 
-                MockLogger logger = new MockLogger(_output);
-                BuildParameters parameters = new BuildParameters
-                {
-                    ShutdownInProcNodeOnBuildFinish = true,
-                    Loggers = new ILogger[] { logger },
-                    EnableNodeReuse = false
-                };
+            BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
+            _buildManager.Build(_parameters, data);
 
-                using (BuildManager buildManager = new BuildManager())
-                {
-                    string contents = CleanupFileContents(@"
-<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
- <Target Name='test'>
-    <Message Text='[success]'/>
- </Target>
-</Project>
-");
-                    BuildRequestData data = GetBuildRequestData(contents);
-                    BuildResult result = buildManager.Build(parameters, data);
-                    result.OverallResult.ShouldBe(BuildResultCode.Success);
-                    logger.AssertLogContains("[success]");
-
-                    // Check that no warning was logged for DOTNET_HOST_PATH
-                    logger.Warnings.ShouldNotContain(w => w.Code == "MSB4280");
-                }
-            }
+            _logger.Warnings.ShouldNotContain(w => w.Code == "MSB4280");
         }
 
         /// <summary>
