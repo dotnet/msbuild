@@ -2455,10 +2455,14 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</value>
     <comment>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</comment>
   </data>
+  <data name="DotnetHostPathIsDirectory" xml:space="preserve">
+    <value>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</value>
+    <comment>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</comment>
+  </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 
-        Next message code should be MSB4280
+        Next message code should be MSB4281
 
         Don't forget to update this comment after using a new code.
   -->
