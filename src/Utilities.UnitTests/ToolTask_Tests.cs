@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Resources;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -33,10 +34,10 @@ namespace Microsoft.Build.UnitTests
             private string _commandLineCommands = string.Empty;
             private string _pathToToolUsed;
 
-            public MyTool()
+            public MyTool(ResourceManager resourceManager = null)
                 : base()
             {
-                base.TaskResources = AssemblyResources.PrimaryResources;
+                base.TaskResources = resourceManager;
                 _fullToolName = Path.Combine(
                     NativeMethodsShared.IsUnixLike ? "/bin" : Environment.GetFolderPath(Environment.SpecialFolder.System),
                     NativeMethodsShared.IsUnixLike ? "sh" : "cmd.exe");
@@ -501,7 +502,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(false, "InvalidLevel")]
         public void FailToEnumerateStandardLoggingImportance(bool isErr, string invalidLevel)
         {
-            using (MyTool t = new MyTool())
+            using (MyTool t = new MyTool(AssemblyResources.SharedResources))
             {
                 MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
