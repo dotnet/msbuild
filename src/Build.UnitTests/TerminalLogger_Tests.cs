@@ -1070,5 +1070,35 @@ namespace Microsoft.Build.UnitTests
 
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform().UseParameters(runOnCentralNode);
         }
+
+        /// <summary>
+        /// Tests that TerminalLogger handles ProjectStarted events without a prior ProjectEvaluationFinished event.
+        /// This scenario can occur in multithreaded builds with taskhosts where the evaluation event may not be received
+        /// before the project started event.
+        /// </summary>
+        [Fact]
+        public void ProjectStartedWithoutEvaluation_DoesNotCrash()
+        {
+            // Start the build
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+
+            // Intentionally skip the evaluation finished event to simulate a multithreaded build scenario
+            // where ProjectStarted arrives before (or without) ProjectEvaluationFinished
+            var buildContext = MakeBuildEventContext(evalId: -1, projectContextId: 1); // Use invalid eval ID
+
+            // This should not throw or crash
+            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, buildEventContext: buildContext));
+
+            // Verify we can continue with the build
+            _centralNodeEventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build", buildEventContext: buildContext));
+            _centralNodeEventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "Task", buildEventContext: buildContext));
+            _centralNodeEventSource.InvokeTaskFinished(MakeTaskFinishedEventArgs(_projectFile, "Task", true, buildEventContext: buildContext));
+            _centralNodeEventSource.InvokeTargetFinished(MakeTargetFinishedEventArgs(_projectFile, "Build", true, buildEventContext: buildContext));
+            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, true, buildEventContext: buildContext));
+            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
+
+            // If we got here without crashing, the test passed
+            _outputWriter.ToString().ShouldNotBeNull();
+        }
     }
 }

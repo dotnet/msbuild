@@ -722,7 +722,12 @@ public sealed partial class TerminalLogger : INodeLogger
                 targetFramework = evalInfo.TargetFramework;
                 runtimeIdentifier = evalInfo.RuntimeIdentifier;
             }
-            System.Diagnostics.Debug.Assert(evalInfo != default, "EvalProjectInfo should have been captured before ProjectStarted");
+            else
+            {
+                // In some scenarios (e.g., multithreaded builds with taskhosts), the evaluation event
+                // may not have been received before the project started event. Create a fallback.
+                evalInfo = new EvalProjectInfo(evalContext, e.ProjectFile, null, null);
+            }
 
             TerminalProjectInfo projectInfo = new(c, evalInfo, _createStopwatch?.Invoke());
             _projects[c] = projectInfo;
