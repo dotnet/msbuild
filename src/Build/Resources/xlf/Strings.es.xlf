@@ -461,6 +461,11 @@
         <target state="translated">MSB4276: La resolución predeterminada del SDK no pudo resolver el SDK "{0}" porque el directorio "{1}" no existía.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DotnetHostPathIsDirectory">
+        <source>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</source>
+        <target state="new">MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</target>
+        <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
+      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: Se intentaron crear varias invalidaciones de la misma tarea: {0}</target>
