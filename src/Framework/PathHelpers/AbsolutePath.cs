@@ -97,6 +97,28 @@ namespace Microsoft.Build.Framework
             }
 #endif
         }
+        /// <summary>
+        /// Creates an <see cref="AbsolutePath"/> from a relative path combined with a base path.
+        /// </summary>
+        /// <param name="path">The path to combine with the base path.</param>
+        /// <param name="basePath">The base path to combine with.</param>
+        /// <returns>The combined absolute path.</returns>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is empty and ChangeWave 18.4 is enabled.</exception>
+        internal static AbsolutePath CreateFromRelative(string path, AbsolutePath basePath)
+        {
+            // Opt-out for null/empty path when Wave18_4 is disabled - return as-is for legacy behavior.
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4) && string.IsNullOrEmpty(path))
+            {
+                return new AbsolutePath(path!, path!, ignoreRootedCheck: true);
+            }
+
+            if (path == "")
+            {
+                throw new ArgumentException("Path must not be empty.", nameof(path));
+            }
+
+            return new AbsolutePath(path, basePath);
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbsolutePath"/> struct by combining an absolute path with a relative path.
