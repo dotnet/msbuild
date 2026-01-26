@@ -1713,7 +1713,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 else if (String.Equals(propertyName, ReservedPropertyNames.thisFileDirectory, StringComparison.OrdinalIgnoreCase))
                 {
-                    value = FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(elementLocation.File));
+                    value = FrameworkFileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(elementLocation.File));
                 }
                 else if (String.Equals(propertyName, ReservedPropertyNames.thisFileDirectoryNoRoot, StringComparison.OrdinalIgnoreCase))
                 {
@@ -4004,7 +4004,7 @@ namespace Microsoft.Build.Evaluation
                             if (_receiverType == typeof(File) || _receiverType == typeof(Directory)
                                 || _receiverType == typeof(Path))
                             {
-                                argumentValue = FileUtilities.FixFilePath(argumentValue);
+                                argumentValue = FrameworkFileUtilities.FixFilePath(argumentValue);
                             }
 
                             args[n] = EscapingUtilities.UnescapeAll(argumentValue);
