@@ -10,7 +10,8 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Tasks
 {
-    public sealed class ZipDirectory : TaskExtension, IIncrementalTask
+    [MSBuildMultiThreadableTask]
+    public sealed class ZipDirectory : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
         public const string CompressionLevelOptimal = "Optimal";
         public const string CompressionLevelFastest = "Fastest";
@@ -57,87 +58,81 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         public string? CompressionLevel { get; set; }
 
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
         public override bool Execute()
         {
-            DirectoryInfo sourceDirectory = new DirectoryInfo(SourceDirectory.ItemSpec);
+            AbsolutePath sourceDirectoryPath = TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(SourceDirectory.ItemSpec));
 
-            if (!sourceDirectory.Exists)
+            if (!Directory.Exists(sourceDirectoryPath))
             {
-                Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorDirectoryDoesNotExist", sourceDirectory.FullName);
+                Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorDirectoryDoesNotExist", sourceDirectoryPath.OriginalValue);
                 return false;
             }
 
-            FileInfo destinationFile = new FileInfo(DestinationFile.ItemSpec);
+            AbsolutePath destinationFilePath = TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(DestinationFile.ItemSpec));
 
-            BuildEngine3.Yield();
-
-            try
+            if (File.Exists(destinationFilePath))
             {
-                if (destinationFile.Exists)
+                if (!Overwrite || FailIfNotIncremental)
                 {
-                    if (!Overwrite || FailIfNotIncremental)
-                    {
-                        Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFileExists", destinationFile.FullName);
+                    Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFileExists", destinationFilePath.OriginalValue);
 
-                        return false;
-                    }
-
-                    try
-                    {
-                        File.Delete(destinationFile.FullName);
-                    }
-                    catch (Exception e)
-                    {
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(destinationFile.FullName);
-                        Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message, lockedFileMessage);
-
-                        return false;
-                    }
+                    return false;
                 }
 
                 try
                 {
-                    if (FailIfNotIncremental)
-                    {
-                        Log.LogErrorFromResources("ZipDirectory.Comment", sourceDirectory.FullName, destinationFile.FullName);
-                    }
-                    else
-                    {
-                        Log.LogMessageFromResources(MessageImportance.High, "ZipDirectory.Comment", sourceDirectory.FullName, destinationFile.FullName);
-                        if (CompressionLevel is null)
-                        {
-                            ZipFile.CreateFromDirectory(sourceDirectory.FullName, destinationFile.FullName);
-                        }
-                        else if (TryParseCompressionLevel(CompressionLevel, out CompressionLevel? compressionLevel))
-                        {
-                            ZipFile.CreateFromDirectory(sourceDirectory.FullName, destinationFile.FullName, compressionLevel.Value, includeBaseDirectory: false);
-                        }
-                        else
-                        {
-#if NETFRAMEWORK
-                            // If new compression levels are added to .NET in future (and not .NET Framework) we should add a check for them here.
-                            if (StringComparer.OrdinalIgnoreCase.Equals(CompressionLevel, CompressionLevelSmallestSize))
-                            {
-                                Log.LogWarningWithCodeFromResources("ZipDirectory.WarningCompressionLevelUnsupportedOnFramework", CompressionLevel);
-                            }
-                            else
-#endif
-                            {
-                                Log.LogWarningWithCodeFromResources("ZipDirectory.ErrorInvalidCompressionLevel", CompressionLevel);
-                            }
-
-                            ZipFile.CreateFromDirectory(sourceDirectory.FullName, destinationFile.FullName);
-                        }
-                    }
+                    File.Delete(destinationFilePath);
                 }
                 catch (Exception e)
                 {
-                    Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message, string.Empty);
+                    string lockedFileMessage = LockCheck.GetLockedFileMessage(destinationFilePath);
+                    Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFailed", sourceDirectoryPath.OriginalValue, destinationFilePath.OriginalValue, e.Message, lockedFileMessage);
+
+                    return false;
                 }
             }
-            finally
+
+            try
             {
-                BuildEngine3.Reacquire();
+                if (FailIfNotIncremental)
+                {
+                    Log.LogErrorFromResources("ZipDirectory.Comment", sourceDirectoryPath.OriginalValue, destinationFilePath.OriginalValue);
+                }
+                else
+                {
+                    Log.LogMessageFromResources(MessageImportance.High, "ZipDirectory.Comment", sourceDirectoryPath.OriginalValue, destinationFilePath.OriginalValue);
+                    if (CompressionLevel is null)
+                    {
+                        ZipFile.CreateFromDirectory(sourceDirectoryPath, destinationFilePath);
+                    }
+                    else if (TryParseCompressionLevel(CompressionLevel, out CompressionLevel? compressionLevel))
+                    {
+                        ZipFile.CreateFromDirectory(sourceDirectoryPath, destinationFilePath, compressionLevel.Value, includeBaseDirectory: false);
+                    }
+                    else
+                    {
+#if NETFRAMEWORK
+                        // If new compression levels are added to .NET in future (and not .NET Framework) we should add a check for them here.
+                        if (StringComparer.OrdinalIgnoreCase.Equals(CompressionLevel, CompressionLevelSmallestSize))
+                        {
+                            Log.LogWarningWithCodeFromResources("ZipDirectory.WarningCompressionLevelUnsupportedOnFramework", CompressionLevel);
+                        }
+                        else
+#endif
+                        {
+                            Log.LogWarningWithCodeFromResources("ZipDirectory.ErrorInvalidCompressionLevel", CompressionLevel);
+                        }
+
+                        ZipFile.CreateFromDirectory(sourceDirectoryPath, destinationFilePath);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Log.LogErrorWithCodeFromResources("ZipDirectory.ErrorFailed", sourceDirectoryPath.OriginalValue, destinationFilePath.OriginalValue, e.Message, string.Empty);
             }
 
             return !Log.HasLoggedErrors;
