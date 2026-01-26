@@ -242,8 +242,41 @@ artifacts/
 documentation/
 ├── wiki/                     # Developer documentation
 ├── specs/                    # Technical specifications
+├── release-checklist.md     # Release checklist template (PRIMARY SOURCE)
 └── *.md                     # Various documentation files
+
+mcps/
+├── Microsoft.MSBuild.ReleaseSnappingMCP/  # MCP server for release automation
+
+scripts/
+└── *.ps1                    # PowerShell scripts
 ```
+
+## Release Process Automation
+
+The MSBuild release process is documented in `documentation/release-checklist.md`. This file serves as the **primary source of truth** for all release tasks.
+
+### Release Checklist MCP Server
+
+The `mcps/Microsoft.MSBuild.ReleaseSnappingMCP` directory contains an MCP (Model Context Protocol) server that automates release tasks:
+
+- **Checklist Generation**: Reads from `documentation/release-checklist.md` and generates version-specific checklists
+- **GitHub Integration**: Creates release tracking issues and PRs
+- **Pipeline Updates**: Automates VS insertion pipeline YAML changes
+- **Branch Management**: Creates release branches and configures DARC channels
+
+**Important:** When updating the release process:
+1. Update `documentation/release-checklist.md` first - this is the source of truth
+2. Rebuild the MCP server to pick up template changes
+3. The `ReleaseChecklistGenerator` class reads the template as an embedded resource
+
+### Template Placeholders
+
+The release checklist template uses these placeholders:
+- `{{THIS_RELEASE_VERSION}}` - Current release (e.g., `18.4`)
+- `{{PREVIOUS_RELEASE_VERSION}}` - Previous release (e.g., `18.3`)
+- `{{NEXT_VERSION}}` - Next release (e.g., `18.5`)
+- `{{URL_OF_*}}` - Various URL placeholders for PRs and issues
 
 ## Troubleshooting
 
