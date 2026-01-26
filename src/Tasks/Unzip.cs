@@ -177,7 +177,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 AbsolutePath fullDestinationPath = TaskEnvironment.GetAbsolutePath(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
-                ErrorUtilities.VerifyThrowInvalidOperation(((string)fullDestinationPath).StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison), "Unzip.ZipSlipExploit", (string)fullDestinationPath);
+                ErrorUtilities.VerifyThrowInvalidOperation(fullDestinationPath.Value.StartsWith(fullDestinationDirectoryPath.Value, FileUtilities.PathComparison), "Unzip.ZipSlipExploit", fullDestinationPath.Value);
 
                 FileInfo destinationPath = new(fullDestinationPath);
 
