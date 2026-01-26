@@ -8,7 +8,9 @@ using System.Reflection;
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -227,7 +229,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             string[] fileRefInfo = ParseResxFileRefString(value);
 
-            string fileName = FileUtilities.FixFilePath(fileRefInfo[0]);
+            string fileName = FrameworkFileUtilities.FixFilePath(fileRefInfo[0]);
             string fileRefType = fileRefInfo[1];
 
             if (pathsRelativeToBasePath)
@@ -265,7 +267,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             }
             else if (IsByteArray(fileRefType))
             {
-                byte[] byteArray = File.ReadAllBytes(fileName);
+                byte[] byteArray = FileSystems.Default.ReadFileAllBytes(fileName);
 
                 resources.Add(new LiveObjectResource(name, byteArray));
                 return;
@@ -274,7 +276,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             {
                 // See special-case handling in ResXFileRef
                 // https://github.com/dotnet/winforms/blob/689cd9c69e632997bc85bf421af221d79b12ddd4/src/System.Windows.Forms/src/System/Resources/ResXFileRef.cs#L293-L297
-                byte[] byteArray = File.ReadAllBytes(fileName);
+                byte[] byteArray = FileSystems.Default.ReadFileAllBytes(fileName);
 
                 resources.Add(new LiveObjectResource(name, new MemoryStream(byteArray)));
                 return;

@@ -25,12 +25,7 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// A callback used to execute command line build.
         /// </summary>
-        public delegate (int exitCode, string exitType) BuildCallback(
-#if FEATURE_GET_COMMANDLINE
-            string commandLine);
-#else
-            string[] commandLine);
-#endif
+        public delegate (int exitCode, string exitType) BuildCallback(string[] commandLine);
 
         private readonly BuildCallback _buildFunction;
 
@@ -99,7 +94,7 @@ namespace Microsoft.Build.Experimental
         public NodeEngineShutdownReason Run(out Exception? shutdownException)
         {
             ServerNodeHandshake handshake = new(
-                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
+                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
 
             _serverBusyMutexName = GetBusyServerMutexName(handshake);
 

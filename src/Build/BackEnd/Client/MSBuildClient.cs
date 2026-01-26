@@ -48,11 +48,7 @@ namespace Microsoft.Build.Experimental
         /// The command line to process.
         /// The first argument on the command line is assumed to be the name/path of the executable, and is ignored.
         /// </summary>
-#if FEATURE_GET_COMMANDLINE
-        private readonly string _commandLine;
-#else
         private readonly string[] _commandLine;
-#endif
 
         /// <summary>
         /// The MSBuild client execution result.
@@ -112,13 +108,7 @@ namespace Microsoft.Build.Experimental
         /// on the command line is assumed to be the name/path of the executable, and is ignored</param>
         /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
         /// or to version of MSBuild.dll found to be associated with the current process.</param>
-        public MSBuildClient(
-#if FEATURE_GET_COMMANDLINE
-            string commandLine,
-#else
-            string[] commandLine,
-#endif
-            string msbuildLocation)
+        public MSBuildClient(string[] commandLine, string msbuildLocation)
         {
             _serverEnvironmentVariables = new();
             _exitResult = new();
@@ -162,12 +152,7 @@ namespace Microsoft.Build.Experimental
         public MSBuildClientExitResult Execute(CancellationToken cancellationToken)
         {
             // Command line in one string used only in human readable content.
-            string descriptiveCommandLine =
-#if FEATURE_GET_COMMANDLINE
-                _commandLine;
-#else
-                string.Join(" ", _commandLine);
-#endif
+            string descriptiveCommandLine = string.Join(" ", _commandLine);
 
             CommunicationsUtilities.Trace("Executing build with command line '{0}'", descriptiveCommandLine);
 
@@ -534,10 +519,10 @@ namespace Microsoft.Build.Experimental
                         partialBuildTelemetry);
         }
 
-        private ServerNodeHandshake GetHandshake()
-        {
-            return new ServerNodeHandshake(CommunicationsUtilities.GetHandshakeOptions(taskHost: false, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
-        }
+        private ServerNodeHandshake GetHandshake() => new(CommunicationsUtilities.GetHandshakeOptions(
+            taskHost: false,
+            taskHostParameters: TaskHostParameters.Empty,
+            architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
 
         /// <summary>
         /// Handle cancellation.

@@ -34,18 +34,12 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// The locations of msbuild exe/dll and dotnet.exe would be automatically detected if called from dotnet or msbuild cli. Calling this function from other executables might not work.
         /// </remarks>
-        public static MSBuildApp.ExitType Execute(
-#if FEATURE_GET_COMMANDLINE
-            string commandLine,
-#else
-            string[] commandLine,
-#endif
-            CancellationToken cancellationToken)
+        public static MSBuildApp.ExitType Execute(string[] commandLineArgs, CancellationToken cancellationToken)
         {
             string msbuildLocation = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 
             return Execute(
-                commandLine,
+                commandLineArgs,
                 msbuildLocation,
                 cancellationToken);
         }
@@ -53,7 +47,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// This is the entry point for the MSBuild client.
         /// </summary>
-        /// <param name="commandLine">The command line to process. The first argument
+        /// <param name="commandLineArgs">The command line to process. The first argument
         /// on the command line is assumed to be the name/path of the executable, and
         /// is ignored.</param>
         /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
@@ -61,16 +55,9 @@ namespace Microsoft.Build.CommandLine
         /// <param name="cancellationToken">Cancellation token.</param>
         /// <returns>A value of type <see cref="MSBuildApp.ExitType"/> that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
-        public static MSBuildApp.ExitType Execute(
-#if FEATURE_GET_COMMANDLINE
-            string commandLine,
-#else
-            string[] commandLine,
-#endif
-            string msbuildLocation,
-            CancellationToken cancellationToken)
+        public static MSBuildApp.ExitType Execute(string[] commandLineArgs, string msbuildLocation, CancellationToken cancellationToken)
         {
-            MSBuildClient msbuildClient = new MSBuildClient(commandLine, msbuildLocation);
+            MSBuildClient msbuildClient = new MSBuildClient(commandLineArgs, msbuildLocation);
             MSBuildClientExitResult exitResult = msbuildClient.Execute(cancellationToken);
 
             if (exitResult.MSBuildClientExitType == MSBuildClientExitType.ServerBusy ||
@@ -84,7 +71,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 // Server is busy, fallback to old behavior.
-                return MSBuildApp.Execute(commandLine);
+                return MSBuildApp.Execute(commandLineArgs);
             }
 
             if (exitResult.MSBuildClientExitType == MSBuildClientExitType.Success &&

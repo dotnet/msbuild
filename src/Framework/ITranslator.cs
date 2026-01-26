@@ -75,11 +75,17 @@ namespace Microsoft.Build.BackEnd
     internal interface ITranslator : IDisposable
     {
         /// <summary>
-        /// Gets or sets the packet version associated with the stream.
-        /// This can be used to exclude various fields from translation for backwards compatibility,
-        /// e.g. when Writer introduces information that should be skipped in the Reader stream.
+        /// Gets or sets the negotiated packet version between the communicating nodes.
+        /// This represents the minimum packet version supported by both the sender and receiver,
+        /// ensuring backward compatibility during cross-version communication.
         /// </summary>
-        byte PacketVersion { get; set; }
+        /// <remarks>
+        /// This version is determined during the initial handshake between nodes and may differ
+        /// from NodePacketTypeExtensions.PacketVersion when nodes are running different MSBuild versions.
+        /// The negotiated version is used to conditionally serialize/deserialize fields that may
+        /// not be supported by older packet versions.
+        /// </remarks>
+        byte NegotiatedPacketVersion { get; set; }
 
         /// <summary>
         /// Returns the current serialization mode.
@@ -342,6 +348,12 @@ namespace Microsoft.Build.BackEnd
         /// <param name="dictionary">The dictionary to be translated.</param>
         /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
         void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer);
+
+        /// <summary>
+        /// Translates a TaskHostParameters.
+        /// </summary>
+        /// <param name="value">The TaskHostParameters to translate.</param>
+        void Translate(ref TaskHostParameters value);
 
         /// <summary>
         /// Translates a dictionary of { string, string } adding additional entries.

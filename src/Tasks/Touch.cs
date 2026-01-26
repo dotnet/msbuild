@@ -91,7 +91,7 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem file in Files)
             {
-                string path = FileUtilities.FixFilePath(file.ItemSpec);
+                string path = FrameworkFileUtilities.FixFilePath(file.ItemSpec);
                 // For speed, eliminate duplicates caused by poor targets authoring
                 if (touchedFilesSet.Contains(path))
                 {

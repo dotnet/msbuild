@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Microsoft.Build.Framework;
@@ -25,6 +26,7 @@ namespace Microsoft.Build.BackEnd.Logging
         // This means that if we ever add logging non-integer properties for these events, they will not be included in the telemetry.
         private const string TaskFactoryEventName = "build/tasks/taskfactory";
         private const string TasksEventName = "build/tasks";
+        private const string MSBuildTaskSubclassedEventName = "build/tasks/msbuild-subclassed";
 
         private int _assemblyTaskFactoryTasksExecutedCount = 0;
         private int _intrinsicTaskFactoryTasksExecutedCount = 0;
@@ -34,6 +36,10 @@ namespace Microsoft.Build.BackEnd.Logging
         private int _customTaskFactoryTasksExecutedCount = 0;
 
         private int _taskHostTasksExecutedCount = 0;
+
+        // Telemetry for non-sealed subclasses of Microsoft-owned MSBuild tasks
+        // Maps Microsoft task names to counts of their non-sealed usage
+        private readonly Dictionary<string, int> _msbuildTaskSubclassUsage = new();
 
         /// <summary>
         /// Adds a task execution to the telemetry data.
@@ -74,6 +80,44 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Tracks subclasses of Microsoft-owned MSBuild tasks.
+        /// If the task is a subclass of a Microsoft-owned task, increments the usage count for that base task.
+        /// </summary>
+        /// <param name="taskType">The type of the task being loaded.</param>
+        /// <param name="isMicrosoftOwned">Whether the task itself is Microsoft-owned.</param>
+        public void TrackTaskSubclassing(Type taskType, bool isMicrosoftOwned)
+        {
+            if (taskType == null)
+            {
+                return;
+            }
+
+            // Walk the inheritance hierarchy to find Microsoft-owned base tasks
+            Type? baseType = taskType.BaseType;
+            while (baseType != null)
+            {
+                // Check if this base type is a Microsoft-owned task
+                // We identify Microsoft tasks by checking if they're in the Microsoft.Build namespace
+                string? baseTypeName = baseType.FullName;
+                if (!string.IsNullOrEmpty(baseTypeName) &&
+                    (baseTypeName.StartsWith("Microsoft.Build.Tasks.") ||
+                     baseTypeName.StartsWith("Microsoft.Build.Utilities.")))
+                {
+                    // This is a subclass of a Microsoft-owned task
+                    // Track it only if it's NOT itself Microsoft-owned (i.e., user-authored subclass)
+                    if (!isMicrosoftOwned)
+                    {
+                        _msbuildTaskSubclassUsage.TryGetValue(baseTypeName, out int count);
+                        _msbuildTaskSubclassUsage[baseTypeName] = count + 1;
+                    }
+                    // Stop at the first Microsoft-owned base class we find
+                    break;
+                }
+                baseType = baseType.BaseType;
+            }
+        }
+
+        /// <summary>
         /// Logs telemetry data for a project
         /// </summary>
         public void LogProjectTelemetry(ILoggingService loggingService, BuildEventContext buildEventContext)
@@ -96,6 +140,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     loggingService.LogTelemetry(buildEventContext, TasksEventName, taskTotalProperties);
                 }
+
+                Dictionary<string, string> msbuildTaskSubclassProperties = GetMSBuildTaskSubclassProperties();
+                if (msbuildTaskSubclassProperties.Count > 0)
+                {
+                    loggingService.LogTelemetry(buildEventContext, MSBuildTaskSubclassedEventName, msbuildTaskSubclassProperties);
+                }
             }
             catch
             {
@@ -109,7 +159,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 Clean();
             }
         }
-        
+
         private void Clean()
         {
             _assemblyTaskFactoryTasksExecutedCount = 0;
@@ -120,41 +170,28 @@ namespace Microsoft.Build.BackEnd.Logging
             _customTaskFactoryTasksExecutedCount = 0;
 
             _taskHostTasksExecutedCount = 0;
+
+            _msbuildTaskSubclassUsage.Clear();
+        }
+
+        private static void AddCountIfNonZero(Dictionary<string, string> properties, string propertyName, int count)
+        {
+            if (count > 0)
+            {
+                properties[propertyName] = count.ToString(CultureInfo.InvariantCulture);
+            }
         }
 
         private Dictionary<string, string> GetTaskFactoryProperties()
         {
             Dictionary<string, string> properties = new();
 
-            if (_assemblyTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["AssemblyTaskFactoryTasksExecutedCount"] = _assemblyTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_intrinsicTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["IntrinsicTaskFactoryTasksExecutedCount"] = _intrinsicTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_codeTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["CodeTaskFactoryTasksExecutedCount"] = _codeTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_roslynCodeTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["RoslynCodeTaskFactoryTasksExecutedCount"] = _roslynCodeTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_xamlTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["XamlTaskFactoryTasksExecutedCount"] = _xamlTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_customTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["CustomTaskFactoryTasksExecutedCount"] = _customTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
+            AddCountIfNonZero(properties, "AssemblyTaskFactoryTasksExecutedCount", _assemblyTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "IntrinsicTaskFactoryTasksExecutedCount", _intrinsicTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "CodeTaskFactoryTasksExecutedCount", _codeTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "RoslynCodeTaskFactoryTasksExecutedCount", _roslynCodeTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "XamlTaskFactoryTasksExecutedCount", _xamlTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "CustomTaskFactoryTasksExecutedCount", _customTaskFactoryTasksExecutedCount);
 
             return properties;
         }
@@ -162,22 +199,30 @@ namespace Microsoft.Build.BackEnd.Logging
         private Dictionary<string, string> GetTaskProperties()
         {
             Dictionary<string, string> properties = new();
-            
-            var totalTasksExecuted = _assemblyTaskFactoryTasksExecutedCount + 
+
+            var totalTasksExecuted = _assemblyTaskFactoryTasksExecutedCount +
                                     _intrinsicTaskFactoryTasksExecutedCount +
-                                    _codeTaskFactoryTasksExecutedCount + 
+                                    _codeTaskFactoryTasksExecutedCount +
                                     _roslynCodeTaskFactoryTasksExecutedCount +
-                                    _xamlTaskFactoryTasksExecutedCount + 
+                                    _xamlTaskFactoryTasksExecutedCount +
                                     _customTaskFactoryTasksExecutedCount;
-            
-            if (totalTasksExecuted > 0)
+
+            AddCountIfNonZero(properties, "TasksExecutedCount", totalTasksExecuted);
+            AddCountIfNonZero(properties, "TaskHostTasksExecutedCount", _taskHostTasksExecutedCount);
+
+            return properties;
+        }
+
+        private Dictionary<string, string> GetMSBuildTaskSubclassProperties()
+        {
+            Dictionary<string, string> properties = new();
+
+            // Add each Microsoft task name with its non-sealed subclass usage count
+            foreach (var kvp in _msbuildTaskSubclassUsage)
             {
-                properties["TasksExecutedCount"] = totalTasksExecuted.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_taskHostTasksExecutedCount > 0)
-            {
-                properties["TaskHostTasksExecutedCount"] = _taskHostTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
+                // Use a sanitized property name (replace dots with underscores for telemetry)
+                string propertyName = kvp.Key.Replace(".", "_");
+                properties[propertyName] = kvp.Value.ToString(CultureInfo.InvariantCulture);
             }
 
             return properties;

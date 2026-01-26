@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests
 #endif
 
         [Theory]
-        [MemberData(nameof(GetFilesComplexGlobbingMatchingInfo.GetTestData), MemberType = typeof(GetFilesComplexGlobbingMatchingInfo))]
+        [MemberData(nameof(GetFilesComplexGlobbingMatchingInfo.GetTestData), MemberType = typeof(GetFilesComplexGlobbingMatchingInfo), DisableDiscoveryEnumeration = true)]
         public void GetFilesComplexGlobbingMatching(GetFilesComplexGlobbingMatchingInfo info)
         {
             TransientTestFolder testFolder = _env.CreateFolder();
@@ -1100,29 +1100,42 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Unc()
         {
-            // Check UNC functionality
-            ValidateFileMatch(
-                "\\\\server\\c$\\**\\*.cs",
-                "\\\\server\\c$\\Documents and Settings\\User\\Source.cs",
-                true);
+            using (var env = TestEnvironment.Create())
+            {
+                try
+                {
+                    // Set env var to log on drive enumerating wildcard detection
+                    Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
 
-            ValidateNoFileMatch(
-                "\\\\server\\c$\\**\\*.cs",
-                "\\\\server\\c$\\Documents and Settings\\User\\Source.txt",
-                true);
-            ValidateFileMatch(
-                "\\\\**",
-                "\\\\server\\c$\\Documents and Settings\\User\\Source.cs",
-                true);
-            ValidateFileMatch(
-                "\\\\**\\*.*",
-                "\\\\server\\c$\\Documents and Settings\\User\\Source.cs",
-                true);
+                    // Check UNC functionality
+                    ValidateFileMatch(
+                        "\\\\server\\c$\\**\\*.cs",
+                        "\\\\server\\c$\\Documents and Settings\\User\\Source.cs",
+                        true);
 
-            ValidateFileMatch(
-                "**",
-                "\\\\server\\c$\\Documents and Settings\\User\\Source.cs",
-                true);
+                    ValidateNoFileMatch(
+                        "\\\\server\\c$\\**\\*.cs",
+                        "\\\\server\\c$\\Documents and Settings\\User\\Source.txt",
+                        true);
+                    ValidateFileMatch(
+                        "\\\\**",
+                        "\\\\server\\c$\\Documents and Settings\\User\\Source.cs",
+                        true);
+                    ValidateFileMatch(
+                        "\\\\**\\*.*",
+                        "\\\\server\\c$\\Documents and Settings\\User\\Source.cs",
+                        true);
+
+                    ValidateFileMatch(
+                        "**",
+                        "\\\\server\\c$\\Documents and Settings\\User\\Source.cs",
+                        true);
+                }
+                finally
+                {
+                    ChangeWaves.ResetStateForTests();
+                }
+            }
         }
 
         [Fact]
@@ -1168,11 +1181,24 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MultipleStarStar()
         {
-            // Multiple-** matches
-            ValidateFileMatch("c:\\**\\user\\**\\*.*", "c:\\Documents and Settings\\user\\NTUSER.DAT", true);
-            ValidateNoFileMatch("c:\\**\\user1\\**\\*.*", "c:\\Documents and Settings\\user\\NTUSER.DAT", true);
-            ValidateFileMatch("c:\\**\\user\\**\\*.*", "c://Documents and Settings\\user\\NTUSER.DAT", true);
-            ValidateNoFileMatch("c:\\**\\user1\\**\\*.*", "c:\\Documents and Settings//user\\NTUSER.DAT", true);
+            using (var env = TestEnvironment.Create())
+            {
+                try
+                {
+                    // Set env var to log on drive enumerating wildcard detection
+                    Helpers.ResetStateForDriveEnumeratingWildcardTests(env, "0");
+
+                    // Multiple-** matches
+                    ValidateFileMatch("c:\\**\\user\\**\\*.*", "c:\\Documents and Settings\\user\\NTUSER.DAT", true);
+                    ValidateNoFileMatch("c:\\**\\user1\\**\\*.*", "c:\\Documents and Settings\\user\\NTUSER.DAT", true);
+                    ValidateFileMatch("c:\\**\\user\\**\\*.*", "c://Documents and Settings\\user\\NTUSER.DAT", true);
+                    ValidateNoFileMatch("c:\\**\\user1\\**\\*.*", "c:\\Documents and Settings//user\\NTUSER.DAT", true);
+                }
+                finally
+                {
+                    ChangeWaves.ResetStateForTests();
+                }
+            }
         }
 
         [Fact]
@@ -1847,8 +1873,8 @@ namespace Microsoft.Build.UnitTests
         {
             if (NativeMethodsShared.IsUnixLike)
             {
-                expectedFixedDirectoryPart = FileUtilities.FixFilePath(expectedFixedDirectoryPart);
-                expectedWildcardDirectoryPart = FileUtilities.FixFilePath(expectedWildcardDirectoryPart);
+                expectedFixedDirectoryPart = FrameworkFileUtilities.FixFilePath(expectedFixedDirectoryPart);
+                expectedWildcardDirectoryPart = FrameworkFileUtilities.FixFilePath(expectedWildcardDirectoryPart);
             }
             TestGetFileSpecInfo(
                 filespec,
@@ -2273,11 +2299,11 @@ namespace Microsoft.Build.UnitTests
                 {
                     if (String.Compare(normalizedPath, 0, normalizedCandidate, 0, normalizedPath.Length, StringComparison.OrdinalIgnoreCase) == 0)
                     {
-                        if (FileUtilities.EndsWithSlash(normalizedPath))
+                        if (FrameworkFileUtilities.EndsWithSlash(normalizedPath))
                         {
                             return true;
                         }
-                        else if (FileUtilities.IsSlash(normalizedCandidate[normalizedPath.Length]))
+                        else if (FrameworkFileUtilities.IsSlash(normalizedCandidate[normalizedPath.Length]))
                         {
                             return true;
                         }
@@ -2482,9 +2508,9 @@ namespace Microsoft.Build.UnitTests
                 out wildcardDirectoryPart,
                 out filenamePart);
 
-            expectedFixedDirectoryPart = FileUtilities.FixFilePath(expectedFixedDirectoryPart);
-            expectedWildcardDirectoryPart = FileUtilities.FixFilePath(expectedWildcardDirectoryPart);
-            expectedFilenamePart = FileUtilities.FixFilePath(expectedFilenamePart);
+            expectedFixedDirectoryPart = FrameworkFileUtilities.FixFilePath(expectedFixedDirectoryPart);
+            expectedWildcardDirectoryPart = FrameworkFileUtilities.FixFilePath(expectedWildcardDirectoryPart);
+            expectedFilenamePart = FrameworkFileUtilities.FixFilePath(expectedFilenamePart);
 
             if
                 (

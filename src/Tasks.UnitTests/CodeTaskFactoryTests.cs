@@ -758,11 +758,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OutOfProcCodeTaskFactoryCachesAssemblyPath()
         {
-            using var env = TestEnvironment.Create();
-            env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
-
-            TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
-
             try
                         {
                                 const string taskElementContents = @"<Code Type=""Fragment"" Language=""cs"">
@@ -771,7 +766,7 @@ namespace Microsoft.Build.UnitTests
     </Code>";
 
                 var firstFactory = new Microsoft.Build.Tasks.CodeTaskFactory();
-                var firstEngine = new MockEngine();
+                var firstEngine = new MockEngine { ForceOutOfProcessExecution = true };
                 bool initialized = firstFactory.Initialize(
                     "CachedCodeInlineTask",
                     new System.Collections.Generic.Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
@@ -789,7 +784,7 @@ namespace Microsoft.Build.UnitTests
                 firstFactory.CleanupTask(firstTask);
 
                 var secondFactory = new Microsoft.Build.Tasks.CodeTaskFactory();
-                var secondEngine = new MockEngine();
+                var secondEngine = new MockEngine { ForceOutOfProcessExecution = true };
                 bool initializedAgain = secondFactory.Initialize(
                     "CachedCodeInlineTask",
                     new System.Collections.Generic.Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
@@ -808,7 +803,6 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                TaskFactoryUtilities.CleanCurrentProcessInlineTaskDirectory();
             }
         }
 
@@ -1212,15 +1206,15 @@ namespace Microsoft.Build.UnitTests
             {
                 // Ensure we're getting the right temp path (%TMP% == GetTempPath())
                 Assert.Equal(
-                    FileUtilities.EnsureTrailingSlash(Path.GetTempPath()),
-                    FileUtilities.EnsureTrailingSlash(Path.GetFullPath(oldTempPath)));
+                    FrameworkFileUtilities.EnsureTrailingSlash(Path.GetTempPath()),
+                    FrameworkFileUtilities.EnsureTrailingSlash(Path.GetFullPath(oldTempPath)));
                 Assert.False(Directory.Exists(newTempPath));
 
                 Environment.SetEnvironmentVariable("TMP", newTempPath);
 
                 Assert.Equal(
-                    FileUtilities.EnsureTrailingSlash(newTempPath),
-                    FileUtilities.EnsureTrailingSlash(Path.GetTempPath()));
+                    FrameworkFileUtilities.EnsureTrailingSlash(newTempPath),
+                    FrameworkFileUtilities.EnsureTrailingSlash(Path.GetTempPath()));
 
                 MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
                 mockLogger.AssertLogContains("Hello, World!");
@@ -1479,6 +1473,129 @@ namespace Microsoft.Build.UnitTests
             // check to make sure that only 1 tmp file is created
             var tmpFiles = zipArchive.Entries.Where(zE => zE.Name.EndsWith("CustomTask-compilation-file.tmp")).ToList();
             tmpFiles.Count.ShouldBe(1, $"Expected exactly one file ending with 'CustomTask-compilation-file.tmp' in ProjectImports.zip, but found {tmpFiles.Count}.");
+        }
+                /// <summary>
+        /// Verifies that ITaskFactoryBuildParameterProvider.IsMultiThreadedBuild triggers out-of-process compilation
+        /// </summary>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MultiThreadedBuildTriggersOutOfProcCompilation(bool isMultiThreaded)
+        {
+            MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = isMultiThreaded };
+
+            Microsoft.Build.Tasks.CodeTaskFactory factory = new Microsoft.Build.Tasks.CodeTaskFactory();
+
+            string taskBody = @"
+<Code Type=""Fragment"" Language=""cs"">
+    <![CDATA[
+    Log.LogMessage(""Hello from CodeTaskFactory"");
+    ]]>
+</Code>";
+
+            string taskName = isMultiThreaded ? "TestTaskMultiThreaded" : "TestTaskSingleThreaded";
+            bool success = factory.Initialize(taskName, new System.Collections.Generic.Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+            success.ShouldBeTrue();
+
+            // Get assembly path - should be non-null when compiled for out-of-proc
+            string assemblyPath = ((IOutOfProcTaskFactory)factory).GetAssemblyPath();
+
+            if (isMultiThreaded)
+            {
+                assemblyPath.ShouldNotBeNullOrEmpty();
+                File.Exists(assemblyPath).ShouldBeTrue();
+            }
+            else
+            {
+                // In-memory compilation may not produce a file
+            }
+        }
+
+        /// <summary>
+        /// Verifies that ForceOutOfProcessExecution property triggers out-of-proc compilation
+        /// </summary>
+        [Fact]
+        public void ForceOutOfProcessExecutionTriggersOutOfProcCompilation()
+        {
+            MockEngine buildEngine = new MockEngine 
+            { 
+                ForceOutOfProcessExecution = true,
+                IsMultiThreadedBuild = false 
+            };
+
+            Microsoft.Build.Tasks.CodeTaskFactory factory = new Microsoft.Build.Tasks.CodeTaskFactory();
+
+            string taskBody = @"
+<Code Type=""Fragment"" Language=""cs"">
+    <![CDATA[
+    Log.LogMessage(""Hello"");
+    ]]>
+</Code>";
+
+            bool success = factory.Initialize("TestTaskForced", new System.Collections.Generic.Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+            success.ShouldBeTrue();
+
+            string assemblyPath = ((IOutOfProcTaskFactory)factory).GetAssemblyPath();
+            assemblyPath.ShouldNotBeNullOrEmpty();
+            File.Exists(assemblyPath).ShouldBeTrue();
+        }
+
+        /// <summary>
+        /// End-to-end test that verifies inline tasks execute successfully when /mt is used.
+        /// This confirms the inline task factory compiles for out-of-process execution and the task runs correctly.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedBuildExecutesInlineTasksSuccessfully()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                
+                // Create a project with an inline task using CodeTaskFactory
+                TransientTestFile projectFile = env.CreateFile(folder, "test.proj", @"
+<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+  
+  <!-- Define an inline task using CodeTaskFactory -->
+  <UsingTask TaskName=""MyCodeTask"" TaskFactory=""CodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+    <ParameterGroup>
+      <Message ParameterType=""System.String"" Required=""true"" />
+      <OutputValue ParameterType=""System.String"" Output=""true"" />
+    </ParameterGroup>
+    <Task>
+      <Code Type=""Fragment"" Language=""cs"">
+        <![CDATA[
+        Log.LogMessage(MessageImportance.High, ""Code task executed: "" + Message);
+        OutputValue = ""Success from code task"";
+        return true;
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name=""Build"">
+    <Message Text=""Starting code task test..."" Importance=""High"" />
+    <MyCodeTask Message=""Hello from multi-threaded build!"">
+      <Output TaskParameter=""OutputValue"" PropertyName=""TaskResult"" />
+    </MyCodeTask>
+    <Message Text=""Task result: $(TaskResult)"" Importance=""High"" />
+    <Error Text=""Code task did not produce expected output"" Condition=""'$(TaskResult)' != 'Success from code task'"" />
+  </Target>
+
+</Project>");
+
+                // Build with /mt flag with detailed verbosity to see task launching details
+                string output = Microsoft.Build.UnitTests.Shared.RunnerUtilities.ExecMSBuild(
+                    projectFile.Path + " /t:Build /mt /v:detailed", 
+                    out bool success);
+
+                success.ShouldBeTrue();
+                output.ShouldContain("Code task executed: Hello from multi-threaded build!");
+                output.ShouldContain("Task result: Success from code task");
+                
+                // Verify the inline task was launched from a temporary assembly (out-of-process execution)
+                output.ShouldContain(".inline_task.dll");
+                output.ShouldContain("external task host");
+            }
         }
     }
 #else
