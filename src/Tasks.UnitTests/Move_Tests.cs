@@ -515,6 +515,7 @@ namespace Microsoft.Build.UnitTests
                 using (StreamWriter writer = FileUtilities.OpenWrite(file, false)) // lock it for write
                 {
                     move = new Move();
+                    move.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                     move.BuildEngine = new MockEngine(true /* log to console */);
                     move.SourceFiles = new ITaskItem[] { new TaskItem(file) };
                     move.DestinationFiles = new ITaskItem[] { new TaskItem(file + "2") };
