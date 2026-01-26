@@ -88,7 +88,7 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc cref="Task.Execute"/>
         public override bool Execute()
         {
-            AbsolutePath destinationPath = TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(DestinationFolder.ItemSpec));
+            AbsolutePath destinationPath = TaskEnvironment.GetAbsolutePath(DestinationFolder.ItemSpec);
             DirectoryInfo destinationDirectory;
             try
             {
