@@ -34,6 +34,12 @@ namespace Microsoft.Build.BackEnd
     internal abstract class NodeProviderOutOfProcBase
     {
         /// <summary>
+        /// Limits parallelism to prevent thread pool saturation from blocking I/O operations
+        /// (pipe connections with timeouts, process creation retries).
+        /// </summary>
+        internal static readonly ParallelOptions DefaultParallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
+
+        /// <summary>
         /// The maximum number of bytes to write
         /// </summary>
         private const int MaxPacketWriteSize = 1048576;
@@ -241,7 +247,7 @@ namespace Microsoft.Build.BackEnd
             ConcurrentQueue<NodeContext> nodeContexts = new();
             ConcurrentQueue<Exception> exceptions = new();
             int currentProcessId = EnvironmentUtilities.CurrentProcessId;
-            Parallel.For(nextNodeId, nextNodeId + numberOfNodesToCreate, (nodeId) =>
+            Parallel.For(nextNodeId, nextNodeId + numberOfNodesToCreate, DefaultParallelOptions, (nodeId) =>
             {
                 try
                 {
