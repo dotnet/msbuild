@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(sourceFile) };
 
                 Move t = new Move();
-t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
                 t.BuildEngine = new MockEngine(true /* log to console */);
                 t.SourceFiles = sourceFiles;
