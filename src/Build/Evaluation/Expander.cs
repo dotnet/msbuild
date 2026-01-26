@@ -1384,23 +1384,27 @@ namespace Microsoft.Build.Evaluation
                         }
                         else // This is a regular property
                         {
-                            // Check for whitespace in property name - this is likely a typo
                             int propertyNameStart = propertyStartIndex + 2;
                             int propertyNameEnd = propertyEndIndex - 1;
 
-                            // Check if there's leading or trailing whitespace
-                            if (Char.IsWhiteSpace(expression[propertyNameStart]) || Char.IsWhiteSpace(expression[propertyNameEnd]))
+                            // Check for whitespace in property name - this is likely a typo
+                            // Gated behind ChangeWave 18.3 as this is a breaking change
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
                             {
-                                // Find the position of the whitespace for error message
-                                int whitespacePosition = Char.IsWhiteSpace(expression[propertyNameStart])
-                                    ? propertyNameStart
-                                    : propertyNameEnd;
+                                // Check if there's leading or trailing whitespace
+                                if (Char.IsWhiteSpace(expression[propertyNameStart]) || Char.IsWhiteSpace(expression[propertyNameEnd]))
+                                {
+                                    // Find the position of the whitespace for error message
+                                    int whitespacePosition = Char.IsWhiteSpace(expression[propertyNameStart])
+                                        ? propertyNameStart
+                                        : propertyNameEnd;
 
-                                ProjectErrorUtilities.ThrowInvalidProject(
-                                    elementLocation,
-                                    "IllFormedPropertySpaceInPropertyReference",
-                                    expression.Substring(propertyStartIndex, propertyEndIndex - propertyStartIndex + 1),  // Full expression like "$( Foo )"
-                                    whitespacePosition - propertyStartIndex + 1);  // Position relative to start of expression
+                                    ProjectErrorUtilities.ThrowInvalidProject(
+                                        elementLocation,
+                                        "IllFormedPropertySpaceInPropertyReference",
+                                        expression.Substring(propertyStartIndex, propertyEndIndex - propertyStartIndex + 1),
+                                        whitespacePosition - propertyStartIndex + 1);
+                                }
                             }
 
                             propertyValue = LookupProperty(properties, expression, propertyNameStart, propertyNameEnd, elementLocation, propertiesUseTracker);

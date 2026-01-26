@@ -3849,42 +3849,57 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         /// <summary>
-        /// Expand a property reference that has whitespace around the property name should throw error MSB4259
+        /// Expand a property reference that has whitespace around the property name (should result in empty)
+        /// </summary>
+        [Fact]
+        public void PropertySimpleSpaced()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                // Disable ChangeWave 18.3 to preserve old behavior
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_3.ToString());
+
+                PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+                pg.Set(ProjectPropertyInstance.Create("SomeStuff", "This IS SOME STUff"));
+
+                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+                string result = expander.ExpandIntoStringLeaveEscaped(@"$( SomeStuff )", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+                Assert.Equal(String.Empty, result);
+
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        /// <summary>
+        /// Expand a property reference that has whitespace around the property name should throw error MSB4280
+        /// when ChangeWave 18.3 is enabled
         /// </summary>
         [Theory]
         [InlineData("$( SomeStuff )")]   // Leading and trailing space
         [InlineData("$( SomeStuff)")]    // Leading space only
         [InlineData("$(SomeStuff )")]    // Trailing space only
-        public void PropertyWithWhitespace_ShouldThrowError(string expression)
+        public void PropertyWithWhitespace_ShouldThrowError_WhenChangeWaveEnabled(string expression)
         {
-            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
-            pg.Set(ProjectPropertyInstance.Create("SomeStuff", "This IS SOME STUff"));
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+                PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+                pg.Set(ProjectPropertyInstance.Create("SomeStuff", "This IS SOME STUff"));
 
-            InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(
-                () => expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            Assert.Equal("MSB4280", ex.ErrorCode);
-        }
+                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(
+                    () => expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
 
-        /// <summary>
-        /// Property functions with whitespace in parameters should still work
-        /// </summary>
-        [Theory]
-        [InlineData("$(SomeStuff.StartsWith( 'This' ))", "True")]
-        [InlineData("$(SomeStuff.StartsWith('This' ))", "True")]
-        [InlineData("$(SomeStuff.StartsWith( 'This'))", "True")]
-        public void PropertyFunctionWithWhitespaceInParameters_ShouldSucceed(string expression, string expected)
-        {
-            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
-            pg.Set(ProjectPropertyInstance.Create("SomeStuff", "This IS SOME STUff"));
+                Assert.Equal("MSB4280", ex.ErrorCode);
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
-
-            string result = expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-
-            Assert.Equal(expected, result);
+                ChangeWaves.ResetStateForTests();
+            }
         }
 
         [WindowsOnlyFact]
