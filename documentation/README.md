@@ -38,7 +38,6 @@ The folder contains collection of docs and references for MSBuild, detailed info
 
 ### Problems?
 
-* [Common MSBuild gotchas and limitations](wiki/Common-MSBuild-Gotchas.md)
 * [Rebuilding when nothing changed](wiki/Rebuilding-when-nothing-changed.md)
 * [Controling References Behavior](wiki/Controlling-Dependencies-Behavior.md)
 * [Something's wrong in my build](wiki/Something's-wrong-in-my-build.md)
