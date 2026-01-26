@@ -62,17 +62,40 @@ dotnet mcps/Microsoft.MSBuild.ReleaseSnappingMCP/bin/Debug/net10.0/Microsoft.MSB
 
 Once configured, you can use the MCP tools through GitHub Copilot in VS Code. Here are example prompts:
 
-### Generate a Release Checklist
+### Quick Start: Create Release Checklist Issue
+
+The easiest way is to set the `GITHUB_TOKEN` environment variable once:
+
+```powershell
+# PowerShell
+$env:GITHUB_TOKEN = "ghp_your_token_here"
+
+# Or Command Prompt
+set GITHUB_TOKEN=ghp_your_token_here
+```
+
+Then in Copilot Chat:
+```
+Create a release checklist issue for MSBuild 18.4
+```
+
+The MCP will automatically:
+1. Generate the checklist from the template
+2. Fill in all version placeholders (18.3 → 18.4 → 18.5)
+3. Create the GitHub issue in dotnet/msbuild
+4. Return the issue URL
+
+### Preview Before Creating
 
 ```
-Generate a release checklist for MSBuild 18.4
+Preview the release checklist for MSBuild 18.4
 ```
 
-### Create a GitHub Issue
+### Manual Authentication
 
+If you prefer not to use environment variables:
 ```
-Authenticate with GitHub using my token: ghp_xxxx
-Then create a release checklist issue for version 18.4
+Authenticate with GitHub using token ghp_xxxx, then create a release checklist issue for version 18.4
 ```
 
 ### Create Branding PRs

@@ -9,15 +9,36 @@ public sealed class GitHubService
 {
     private const string Owner = "dotnet";
     private const string Repo = "msbuild";
+    private const string GitHubTokenEnvVar = "GITHUB_TOKEN";
 
     private GitHubClient? _client;
+
+    public GitHubService()
+    {
+        // Try to auto-initialize from environment variable
+        TryInitializeFromEnvironment();
+    }
+
+    /// <summary>
+    /// Attempts to initialize from the GITHUB_TOKEN environment variable.
+    /// </summary>
+    public bool TryInitializeFromEnvironment()
+    {
+        var token = Environment.GetEnvironmentVariable(GitHubTokenEnvVar);
+        if (!string.IsNullOrEmpty(token))
+        {
+            Initialize(token);
+            return true;
+        }
+        return false;
+    }
 
     /// <summary>
     /// Initializes the GitHub client with a personal access token.
     /// </summary>
     public void Initialize(string token)
     {
-        _client = new GitHubClient(new ProductHeaderValue("McpRelease"))
+        _client = new GitHubClient(new ProductHeaderValue("MSBuildReleaseSnappingMCP"))
         {
             Credentials = new Credentials(token)
         };
@@ -33,7 +54,7 @@ public sealed class GitHubService
         if (_client is null)
         {
             throw new InvalidOperationException(
-                "GitHub client not initialized. Call the 'github_authenticate' tool first with your GitHub token.");
+                "GitHub client not initialized. Set the GITHUB_TOKEN environment variable or call the 'github_authenticate' tool with your token.");
         }
         return _client;
     }
