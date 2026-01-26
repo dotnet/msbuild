@@ -41,7 +41,7 @@ namespace Microsoft.Build.BackEnd
         public AbsolutePath GetAbsolutePath(string path)
         {
             // Opt-out for null path when Wave18_4 is disabled - return null as-is.
-            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4) && path is null)
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4) && string.IsNullOrEmpty(path))
             {
                 return new AbsolutePath(path!, path!, ignoreRootedCheck: true);
             }
