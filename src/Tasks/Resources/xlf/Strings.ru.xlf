@@ -141,7 +141,7 @@
       </trans-unit>
       <trans-unit id="CodeTaskFactory.AttributeEmptyWithTaskElement">
         <source>MSB3752: The "{0}" attribute of the &lt;{1}&gt; element in the task "{2}" has been set but is empty. Make sure the attribute has a proper value.</source>
-        <target state="translated">MSB3752: атрибут "{0}" элемента &lt;{1}&gt; в задаче "{2}" установлен, но пуст. Предоставьте правильное значение атрибута.</target>
+        <target state="translated">MSB3752: "{0}" элемента &lt;{1}&gt; в задаче "{2}", но пуст. Убедитесь, что атрибут имеет правильное значение.</target>
         <note>{StrBegin="MSB3752: "}</note>
       </trans-unit>
       <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
@@ -1180,8 +1180,8 @@
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/binaryformatter-migration-guide</source>
-        <target state="translated">MSB3825: для ресурса "{0}" будет выполнена десериализация с помощью BinaryFormatter во время выполнения. Сериализация BinaryFormatter упразднена из-за известных рисков безопасности и удалена из .NET 9 и более поздних версий. Чтобы продолжить использовать эту сериализацию, задайте для свойства "GenerateResourceWarnOnBinaryFormatterUse" значение false.
-           Подробнее: https://aka.ms/binaryformatter-migration-guide</target>
+        <target state="translated">MSB3825: для ресурса "{0}" будет выполнена десериализация с помощью BinaryFormatter во время выполнения. BinaryFormatter является нерекомендуемым из-за известных рисков безопасности и удален из .NET 9+. Если вы хотите продолжить использовать его, задайте для свойства GenerateResourceWarnOnBinaryFormatterUse значение false.
+           Дополнительные сведения: https://aka.ms/binaryformatter-migration-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
@@ -2854,7 +2854,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorDeletingTempFile">
         <source>Could not delete temporary file "{0}". Error: {1}</source>
-        <target state="translated">Не удалось удалить временный файл "{0}". Ошибка: {1}</target>
+        <target state="new">Could not delete temporary file "{0}". Error: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
@@ -2889,12 +2889,12 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFileTransactional">
         <source>MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</source>
-        <target state="translated">MSB3494: Не удалось прочитать существующий файл "{0}" для добавления содержимого. Ошибка: {1}</target>
+        <target state="new">MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</target>
         <note>{StrBegin="MSB3494: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.Retry">
         <source>Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</source>
-        <target state="translated">Повторить операцию с файлом "{0}" (попытка {1} из {2}). Причина: {3}</target>
+        <target state="new">Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
@@ -2904,7 +2904,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.UsingTransactionalMode">
         <source>Using transactional mode to write to file "{0}".</source>
-        <target state="translated">Использование транзакционного режима для записи в файл "{0}".</target>
+        <target state="new">Using transactional mode to write to file "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
