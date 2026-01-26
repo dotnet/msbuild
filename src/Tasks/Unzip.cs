@@ -19,7 +19,8 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Represents a task that can extract a .zip archive.
     /// </summary>
-    public sealed class Unzip : TaskExtension, ICancelableTask, IIncrementalTask
+    [MSBuildMultiThreadableTask]
+    public sealed class Unzip : TaskExtension, ICancelableTask, IIncrementalTask, IMultiThreadableTask
     {
         // We pick a value that is the largest multiple of 4096 that is still smaller than the large object heap threshold (85K).
         // The CopyTo/CopyToAsync buffer is short-lived and is likely to be collected at Gen0, and it offers a significant
@@ -75,6 +76,9 @@ namespace Microsoft.Build.Tasks
 
         public bool FailIfNotIncremental { get; set; }
 
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
+
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
         {
@@ -84,10 +88,11 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc cref="Task.Execute"/>
         public override bool Execute()
         {
+            AbsolutePath destinationPath = TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(DestinationFolder.ItemSpec));
             DirectoryInfo destinationDirectory;
             try
             {
-                destinationDirectory = Directory.CreateDirectory(DestinationFolder.ItemSpec);
+                destinationDirectory = Directory.CreateDirectory(destinationPath);
             }
             catch (Exception e)
             {
@@ -106,7 +111,8 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (ITaskItem sourceFile in SourceFiles.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
                     {
-                        if (!FileSystems.Default.FileExists(sourceFile.ItemSpec))
+                        AbsolutePath sourceFilePath = TaskEnvironment.GetAbsolutePath(sourceFile.ItemSpec);
+                        if (!FileSystems.Default.FileExists(sourceFilePath))
                         {
                             Log.LogErrorWithCodeFromResources("Unzip.ErrorFileDoesNotExist", sourceFile.ItemSpec);
                             continue;
@@ -114,7 +120,7 @@ namespace Microsoft.Build.Tasks
 
                         try
                         {
-                            using (FileStream stream = new FileStream(sourceFile.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
+                            using (FileStream stream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
                             {
 #pragma warning disable CA2000 // Dispose objects before losing scope because ZipArchive will dispose the stream when it is disposed.
                                 using (ZipArchive zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: false))
@@ -160,7 +166,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract files to.</param>
         private void Extract(ZipArchive sourceArchive, DirectoryInfo destinationDirectory)
         {
-            string fullDestinationDirectoryPath = Path.GetFullPath(FrameworkFileUtilities.EnsureTrailingSlash(destinationDirectory.FullName));
+            AbsolutePath fullDestinationDirectoryPath = TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(destinationDirectory.FullName));
 
             foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
             {
@@ -170,8 +176,8 @@ namespace Microsoft.Build.Tasks
                     continue;
                 }
 
-                string fullDestinationPath = Path.GetFullPath(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
-                ErrorUtilities.VerifyThrowInvalidOperation(fullDestinationPath.StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison), "Unzip.ZipSlipExploit", fullDestinationPath);
+                AbsolutePath fullDestinationPath = TaskEnvironment.GetAbsolutePath(Path.Combine(destinationDirectory.FullName, zipArchiveEntry.FullName));
+                ErrorUtilities.VerifyThrowInvalidOperation(((string)fullDestinationPath).StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison), "Unzip.ZipSlipExploit", (string)fullDestinationPath);
 
                 FileInfo destinationPath = new(fullDestinationPath);
 
