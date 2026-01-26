@@ -24,6 +24,7 @@ namespace Microsoft.Build.UnitTests
         public void AttributeForwarding()
         {
             Delete t = new Delete();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             ITaskItem i = new TaskItem("MyFiles.nonexistent");
             i.SetMetadata("Locale", "en-GB");
@@ -59,6 +60,7 @@ namespace Microsoft.Build.UnitTests
 
                 var t = new Delete
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(),
                     Files = sourceFiles,
@@ -75,6 +77,7 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem[] duplicateSourceFiles = { sourceItem, sourceItem };
                 t = new Delete
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     RetryDelayMilliseconds = 1,  // speed up tests!
                     BuildEngine = new MockEngine(),
                     Files = duplicateSourceFiles,
