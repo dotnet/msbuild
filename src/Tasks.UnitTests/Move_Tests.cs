@@ -39,6 +39,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(destinationFile);
 
                 Move t = new Move();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.BuildEngine = new MockEngine(true /* log to console */);
                 t.SourceFiles = sourceFiles;
                 t.DestinationFiles = destinationFiles;
@@ -84,6 +85,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(destinationFile);
 
                 Move t = new Move();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.BuildEngine = new MockEngine(true /* log to console */);
                 t.SourceFiles = sourceFiles;
                 t.OverwriteReadOnlyFiles = true;
@@ -133,6 +135,7 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
 
                 Move t = new Move();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.BuildEngine = new MockEngine(true /* log to console */);
                 t.SourceFiles = sourceFiles;
                 t.DestinationFiles = destinationFiles;
@@ -178,6 +181,7 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(sourceFile) };
 
                 Move t = new Move();
+t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
                 t.BuildEngine = new MockEngine(true /* log to console */);
                 t.SourceFiles = sourceFiles;
@@ -222,6 +226,7 @@ namespace Microsoft.Build.UnitTests
                 file.Attributes |= FileAttributes.ReadOnly; // mark destination read only
 
                 Move t = new Move();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.BuildEngine = new MockEngine(true /* log to console */);
                 t.SourceFiles = sourceFiles;
                 t.DestinationFiles = destinationFiles;
@@ -274,6 +279,7 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
 
                 Move t = new Move();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.BuildEngine = new MockEngine(true /* log to console */);
                 t.SourceFiles = sourceFiles;
                 t.DestinationFiles = destinationFiles;
@@ -329,6 +335,7 @@ namespace Microsoft.Build.UnitTests
                 file.Attributes &= ~FileAttributes.ReadOnly; // mark not read only
 
                 Move t = new Move();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.OverwriteReadOnlyFiles = true;
                 t.BuildEngine = new MockEngine(true /* log to console */);
                 t.SourceFiles = sourceFiles;
@@ -383,6 +390,7 @@ namespace Microsoft.Build.UnitTests
                 file.Attributes |= FileAttributes.ReadOnly; // mark read only
 
                 Move t = new Move();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.OverwriteReadOnlyFiles = true;
                 t.BuildEngine = new MockEngine(true /* log to console */);
                 t.SourceFiles = sourceFiles;
@@ -439,6 +447,7 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 Move t = new Move();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 MockEngine engine = new MockEngine(true /* log to console */);
                 t.BuildEngine = engine;
 
@@ -559,6 +568,7 @@ namespace Microsoft.Build.UnitTests
         public void DestinationFileIsDirectory()
         {
             Move move = new Move();
+            move.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             move.BuildEngine = new MockEngine();
             move.SourceFiles = new ITaskItem[] { new TaskItem("source") };
             move.DestinationFiles = new ITaskItem[] { new TaskItem(Directory.GetCurrentDirectory()) };
@@ -574,6 +584,7 @@ namespace Microsoft.Build.UnitTests
         public void SourceFileIsDirectory()
         {
             Move move = new Move();
+            move.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             move.BuildEngine = new MockEngine();
             move.DestinationFiles = new ITaskItem[] { new TaskItem("destination") };
             move.SourceFiles = new ITaskItem[] { new TaskItem(Directory.GetCurrentDirectory()) };
@@ -607,6 +618,7 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 Move t = new Move();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 MockEngine engine = new MockEngine(true /* log to console */);
                 t.BuildEngine = engine;
                 t.SourceFiles = new ITaskItem[] { new TaskItem(file) };
@@ -651,6 +663,7 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 Move t = new Move();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 MockEngine engine = new MockEngine(true /* log to console */);
                 t.BuildEngine = engine;
                 t.SourceFiles = new ITaskItem[] { new TaskItem(file), new TaskItem(invalidFile) };
@@ -692,6 +705,7 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem[] sourceFiles = new ITaskItem[] { new TaskItem(sourceFile) };
 
                 Move t = new Move();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.BuildEngine = new MockEngine(true /* log to console */);
                 t.SourceFiles = sourceFiles;
                 t.DestinationFolder = new TaskItem(destFolder);
@@ -753,6 +767,7 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 Move t = new Move();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 MockEngine engine = new MockEngine(true /* log to console */);
                 t.BuildEngine = engine;
 
@@ -795,6 +810,7 @@ namespace Microsoft.Build.UnitTests
                 ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
 
                 Move t = new Move();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.BuildEngine = new MockEngine(true /* log to console */);
                 t.SourceFiles = sourceFiles;
                 t.DestinationFiles = destinationFiles;
@@ -824,6 +840,7 @@ namespace Microsoft.Build.UnitTests
             ITaskItem[] destinationFiles = new ITaskItem[] { new TaskItem(destinationFile) };
 
             Move t = new Move();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine(true /* log to console */);
             t.SourceFiles = sourceFiles;
             t.DestinationFiles = destinationFiles;
@@ -842,6 +859,7 @@ namespace Microsoft.Build.UnitTests
         public void ExitGracefullyOnInvalidPathCharacters()
         {
             Move t = new Move();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine(true /* log to console */);
             t.SourceFiles = new ITaskItem[] { new TaskItem("foo | bar") };
             t.DestinationFolder = new TaskItem("dest");
@@ -860,6 +878,7 @@ namespace Microsoft.Build.UnitTests
         public void ExitGracefullyOnInvalidPathCharactersInDestinationFile()
         {
             Move t = new Move();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine(true /* log to console */);
             t.SourceFiles = new ITaskItem[] { new TaskItem("source") };
             t.DestinationFiles = new ITaskItem[] { new TaskItem("foo | bar") };
@@ -878,6 +897,7 @@ namespace Microsoft.Build.UnitTests
         public void ExitGracefullyOnInvalidPathCharactersInDestinationFolder()
         {
             Move t = new Move();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine(true /* log to console */);
             t.SourceFiles = new ITaskItem[] { new TaskItem("source") };
             t.DestinationFolder = new TaskItem("foo | bar");
