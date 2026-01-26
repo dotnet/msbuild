@@ -31,7 +31,6 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = _mockEngine,
                 Algorithm = "SHA256",
                 HashEncoding = "red",
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
             }
             .Execute()
             .ShouldBeFalse();
@@ -50,7 +49,6 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = _mockEngine,
                 Algorithm = "BANANA",
                 Hash = "xyz",
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
             }
             .Execute()
             .ShouldBeFalse();
@@ -69,7 +67,6 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = _mockEngine,
                 Algorithm = "BANANA",
                 Hash = "xyz",
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
             }
             .Execute()
             .ShouldBeFalse();
@@ -91,7 +88,6 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = _mockEngine,
                 Algorithm = algoritm,
                 Hash = hash,
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
             };
 
             task.Execute().ShouldBeFalse(_mockEngine.Log);
@@ -112,7 +108,6 @@ namespace Microsoft.Build.UnitTests
                 Algorithm = testBinary.HashAlgorithm,
                 Hash = testBinary.FileHash,
                 HashEncoding = testBinary.HashEncoding,
-                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
             };
 
             task.Execute().ShouldBeTrue();

@@ -13,8 +13,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Verifies that a file matches the expected file hash.
     /// </summary>
-    [MSBuildMultiThreadableTask]
-    public sealed class VerifyFileHash : TaskExtension, ICancelableTask, IMultiThreadableTask
+    public sealed class VerifyFileHash : TaskExtension, ICancelableTask
     {
         /// <summary>
         /// The file path.
@@ -38,13 +37,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string Algorithm { get; set; } = GetFileHash._defaultFileHashAlgorithm;
 
-        /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
-
         public override bool Execute()
         {
-            AbsolutePath filePath = TaskEnvironment.GetAbsolutePath(File);
-            if (!FileSystems.Default.FileExists(filePath))
+            if (!FileSystems.Default.FileExists(File))
             {
                 Log.LogErrorWithCodeFromResources("FileHash.FileNotFound", File);
                 return false;
@@ -62,7 +57,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            byte[] hash = GetFileHash.ComputeHash(algorithmFactory, filePath, _cancellationTokenSource.Token);
+            byte[] hash = GetFileHash.ComputeHash(algorithmFactory, File, _cancellationTokenSource.Token);
             string actualHash = GetFileHash.EncodeHash(encoding, hash);
             var comparison = encoding == Tasks.HashEncoding.Hex
                 ? StringComparison.OrdinalIgnoreCase
