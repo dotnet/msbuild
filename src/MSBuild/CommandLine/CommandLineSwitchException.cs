@@ -11,7 +11,7 @@ using Microsoft.Build.Shared;
 
 #nullable disable
 
-namespace Microsoft.Build.CommandLine
+namespace Microsoft.Build.CommandLine.Experimental
 {
     /// <summary>
     /// This exception is used to flag (syntax) errors in command line switches passed to the application.

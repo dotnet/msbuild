@@ -461,6 +461,11 @@
         <target state="translated">MSB4276: 디렉터리 "{0}"이(가) 없으므로 기본 SDK 확인자가 SDK "{1}"을(를) 확인하지 못했습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DotnetHostPathIsDirectory">
+        <source>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</source>
+        <target state="translated">MSB4280: DOTNET_HOST_PATH 환경 변수가 dotnet 실행 파일에 대한 경로가 아닌 디렉터리("{0}")으(로) 설정되어 있습니다. 이로 인해 Roslyn 컴파일러와 같은 이 변수를 사용하는 작업에서 빌드 오류가 발생할 수 있습니다. 변수를 설정 해제하거나 dotnet 실행 파일을 직접 가리키도록 업데이트합니다(예: "C:\Program Files\dotnet\dotnet.exe").</target>
+        <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
+      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: 동일한 작업의 여러 재정의를 만들려고 했습니다. {0}</target>
@@ -488,6 +493,11 @@
         <source>Read environment variable "{0}"</source>
         <target state="translated">환경 변수 "{0}" 읽기</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ErrorCopyingBinaryLog">
+        <source>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</source>
+        <target state="translated">MSB4279: 이진 로그를 "{0}"에서 "{1}"(으)로 복사하지 못했습니다. {2}</target>
+        <note>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</note>
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
@@ -650,11 +660,6 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">null 또는 빈 대상 이름을 포함하는 컬렉션을 사용하여 {0} 메서드를 호출할 수 없습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OpenTelemetryLoadFailed">
-        <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="translated">예외 {0}(으)로 인해 원격 분석 라이브러리를 로드하지 못했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
@@ -908,12 +913,12 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
-        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</target>
+        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했지만 이미 환경 변수로 "{2}"(으)로 설정되어 있었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
-        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</target>
+        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했지만 이미 다른 SDK에 의해 "{2}"(으)로 설정되어 있었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">

@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
@@ -357,6 +358,80 @@ namespace Microsoft.Build.UnitTests
             {
                 Environment.SetEnvironmentVariable(testVarName, null);
             }
+        }
+
+        [Theory]
+        [MemberData(nameof(EnvironmentTypes))]
+        public void TaskEnvironment_GetAbsolutePath_WithInvalidPathChars_ShouldNotThrow(string environmentType)
+        {
+            // Construct a path containing an invalid path character
+            char invalidChar = Path.GetInvalidPathChars().FirstOrDefault();
+            string invalidPath = "invalid" + invalidChar + "path";
+
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
+
+            try
+            {
+                // Should not throw on invalid path characters
+                var absolutePath = taskEnvironment.GetAbsolutePath(invalidPath);
+
+                // The result should contain the invalid path combined with the base directory
+                absolutePath.Value.ShouldNotBeNullOrEmpty();
+                absolutePath.Value.ShouldContain(invalidPath);
+            }
+            finally
+            {
+                DisposeTaskEnvironment(taskEnvironment);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EnvironmentTypes))]
+        public void TaskEnvironment_GetAbsolutePath_WithEmptyPath_ReturnsProjectDirectory(string environmentType)
+        {
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
+
+            // Empty path should absolutize to project directory (Path.Combine behavior)
+            var absolutePath = taskEnvironment.GetAbsolutePath(string.Empty);
+
+            absolutePath.Value.ShouldBe(taskEnvironment.ProjectDirectory.Value);
+            absolutePath.OriginalValue.ShouldBe(string.Empty);
+        }
+
+        [Theory]
+        [MemberData(nameof(EnvironmentTypes))]
+        public void TaskEnvironment_GetAbsolutePath_WithNullPath_WhenWave18_4Disabled_ReturnsNullPath(string environmentType)
+        {
+            using TestEnvironment testEnv = TestEnvironment.Create();
+            ChangeWaves.ResetStateForTests();
+            testEnv.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_4.ToString());
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
+
+            // When Wave18_4 is disabled, null path returns as-is
+            var absolutePath = taskEnvironment.GetAbsolutePath(null!);
+
+            absolutePath.Value.ShouldBeNull();
+            absolutePath.OriginalValue.ShouldBeNull();
+
+            ChangeWaves.ResetStateForTests();
+        }
+
+        [Theory]
+        [MemberData(nameof(EnvironmentTypes))]
+        public void TaskEnvironment_GetAbsolutePath_WithNullPath_WhenWave18_4Enabled_Throws(string environmentType)
+        {
+            using TestEnvironment testEnv = TestEnvironment.Create();
+            ChangeWaves.ResetStateForTests();
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
+
+            // When Wave18_4 is enabled, null path should throw
+            Should.Throw<ArgumentNullException>(() => taskEnvironment.GetAbsolutePath(null!));
+
+            ChangeWaves.ResetStateForTests();
         }
     }
 }

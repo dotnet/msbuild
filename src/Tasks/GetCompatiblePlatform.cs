@@ -14,6 +14,7 @@ namespace Microsoft.Build.Tasks
     ///
     /// See ProjectReference-Protocol.md for details.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class GetCompatiblePlatform : TaskExtension
     {
         /// <summary>
