@@ -387,15 +387,50 @@ namespace Microsoft.Build.UnitTests
 
         [Theory]
         [MemberData(nameof(EnvironmentTypes))]
-        public void TaskEnvironment_GetAbsolutePath_WithEmptyPath_ReturnsProjectDirectory(string environmentType)
+        public void TaskEnvironment_GetAbsolutePath_WithEmptyPath_WhenWave18_4Disabled_ReturnsEmptyPath(string environmentType)
         {
+            using TestEnvironment testEnv = TestEnvironment.Create();
+            ChangeWaves.ResetStateForTests();
+            testEnv.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_4.ToString());
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
             var taskEnvironment = CreateTaskEnvironment(environmentType);
 
-            // Empty path should absolutize to project directory (Path.Combine behavior)
-            var absolutePath = taskEnvironment.GetAbsolutePath(string.Empty);
+            try
+            {
+                // When Wave18_4 is disabled, empty path returns as-is (legacy behavior)
+                var absolutePath = taskEnvironment.GetAbsolutePath(string.Empty);
 
-            absolutePath.Value.ShouldBe(taskEnvironment.ProjectDirectory.Value);
-            absolutePath.OriginalValue.ShouldBe(string.Empty);
+                absolutePath.Value.ShouldBe(string.Empty);
+                absolutePath.OriginalValue.ShouldBe(string.Empty);
+            }
+            finally
+            {
+                DisposeTaskEnvironment(taskEnvironment);
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(EnvironmentTypes))]
+        public void TaskEnvironment_GetAbsolutePath_WithEmptyPath_WhenWave18_4Enabled_Throws(string environmentType)
+        {
+            using TestEnvironment testEnv = TestEnvironment.Create();
+            ChangeWaves.ResetStateForTests();
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+            var taskEnvironment = CreateTaskEnvironment(environmentType);
+
+            try
+            {
+                // When Wave18_4 is enabled, empty path should throw
+                Should.Throw<ArgumentException>(() => taskEnvironment.GetAbsolutePath(string.Empty));
+            }
+            finally
+            {
+                DisposeTaskEnvironment(taskEnvironment);
+                ChangeWaves.ResetStateForTests();
+            }
         }
 
         [Theory]
