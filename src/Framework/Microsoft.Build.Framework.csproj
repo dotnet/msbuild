@@ -73,4 +73,12 @@
   <ItemGroup>
     <RCResourceFile Include="native.rc" />
   </ItemGroup>
+
+  <!-- Resource Files -->
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\Strings.resx">
+      <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
 </Project>
