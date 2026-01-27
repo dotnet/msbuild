@@ -37,7 +37,7 @@ namespace Microsoft.Build.BackEnd
         /// Limits parallelism to prevent thread pool saturation from blocking I/O operations
         /// (pipe connections with timeouts, process creation retries).
         /// </summary>
-        internal static readonly ParallelOptions DefaultParallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = Environment.ProcessorCount };
+        private static readonly ParallelOptions s_defaultParallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount };
 
         /// <summary>
         /// The maximum number of bytes to write
@@ -247,7 +247,7 @@ namespace Microsoft.Build.BackEnd
             ConcurrentQueue<NodeContext> nodeContexts = new();
             ConcurrentQueue<Exception> exceptions = new();
             int currentProcessId = EnvironmentUtilities.CurrentProcessId;
-            Parallel.For(nextNodeId, nextNodeId + numberOfNodesToCreate, DefaultParallelOptions, (nodeId) =>
+            Parallel.For(nextNodeId, nextNodeId + numberOfNodesToCreate, s_defaultParallelOptions, (nodeId) =>
             {
                 try
                 {
