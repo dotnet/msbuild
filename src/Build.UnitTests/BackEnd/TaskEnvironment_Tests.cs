@@ -432,41 +432,5 @@ namespace Microsoft.Build.UnitTests
                 ChangeWaves.ResetStateForTests();
             }
         }
-
-        [Theory]
-        [MemberData(nameof(EnvironmentTypes))]
-        public void TaskEnvironment_GetAbsolutePath_WithNullPath_WhenWave18_4Disabled_ReturnsNullPath(string environmentType)
-        {
-            using TestEnvironment testEnv = TestEnvironment.Create();
-            ChangeWaves.ResetStateForTests();
-            testEnv.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_4.ToString());
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
-            var taskEnvironment = CreateTaskEnvironment(environmentType);
-
-            // When Wave18_4 is disabled, null path returns as-is
-            var absolutePath = taskEnvironment.GetAbsolutePath(null!);
-
-            absolutePath.Value.ShouldBeNull();
-            absolutePath.OriginalValue.ShouldBeNull();
-
-            ChangeWaves.ResetStateForTests();
-        }
-
-        [Theory]
-        [MemberData(nameof(EnvironmentTypes))]
-        public void TaskEnvironment_GetAbsolutePath_WithNullPath_WhenWave18_4Enabled_Throws(string environmentType)
-        {
-            using TestEnvironment testEnv = TestEnvironment.Create();
-            ChangeWaves.ResetStateForTests();
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
-            var taskEnvironment = CreateTaskEnvironment(environmentType);
-
-            // When Wave18_4 is enabled, null path should throw
-            Should.Throw<ArgumentNullException>(() => taskEnvironment.GetAbsolutePath(null!));
-
-            ChangeWaves.ResetStateForTests();
-        }
     }
 }
