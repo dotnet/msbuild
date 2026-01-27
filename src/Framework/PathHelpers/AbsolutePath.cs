@@ -103,11 +103,12 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="path">The path to combine with the base path.</param>
         /// <param name="basePath">The base path to combine with.</param>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null or empty.</exception>
         public AbsolutePath(string path, AbsolutePath basePath)
         {
-            if (path.Length == 0)
+            if (string.IsNullOrEmpty(path))
             {
-                throw new ArgumentException("Path must not be empty.", nameof(path));
+                throw new ArgumentException("Path must not be null or empty.", nameof(path));
             }
 
             // This function should not throw when path has illegal characters.
