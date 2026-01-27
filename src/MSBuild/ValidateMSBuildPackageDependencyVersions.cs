@@ -91,12 +91,8 @@ namespace MSBuild
                             // we still ship the version we explicitly reference to let
                             // API consumers bind to it at runtime.
                             // See https://github.com/dotnet/msbuild/issues/6976.
-                            if (String.Equals(name, "System.ValueTuple", StringComparison.OrdinalIgnoreCase) &&
-                                String.Equals(version, "4.0.0.0") && String.Equals(assemblyVersion, "4.0.3.0"))
-                            {
-                                // foundSystemValueTuple = true;
-                            }
-                            else
+                            if (!(String.Equals(name, "System.ValueTuple", StringComparison.OrdinalIgnoreCase) &&
+                                String.Equals(version, "4.0.0.0") && String.Equals(assemblyVersion, "4.0.3.0")))
                             {
                                 Log.LogError(
                                     subcategory: null,
@@ -113,12 +109,6 @@ namespace MSBuild
                     }
                 }
             }
-
-            // if (!foundSystemValueTuple)
-            // {
-            //     Log.LogError("Binding redirect for 'System.ValueTuple' missing.");
-            // }
-
             return !Log.HasLoggedErrors;
         }
     }
