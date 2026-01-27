@@ -42,6 +42,7 @@ namespace Microsoft.Build.Framework
         /// Initializes a new instance of the <see cref="AbsolutePath"/> struct.
         /// </summary>
         /// <param name="path">The absolute path string.</param>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null, empty, or not a rooted path.</exception>
         public AbsolutePath(string path)
         {
             ValidatePath(path);
