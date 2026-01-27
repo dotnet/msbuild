@@ -3485,6 +3485,49 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Verifies that a warning is logged when DOTNET_HOST_PATH is set to a directory instead of a file.
+        /// </summary>
+        [Fact]
+        public void DotnetHostPathDirectoryWarning()
+        {
+            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", Path.GetTempPath());
+
+            BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
+            _buildManager.Build(_parameters, data);
+
+            _logger.Warnings.ShouldContain(w => w.Code == "MSB4280");
+        }
+
+        /// <summary>
+        /// Verifies that no warning is logged when DOTNET_HOST_PATH is set to a file path.
+        /// </summary>
+        [Fact]
+        public void DotnetHostPathFileNoWarning()
+        {
+            TransientTestFile tempFile = _env.CreateFile("dotnet.exe", "");
+            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", tempFile.Path);
+
+            BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
+            _buildManager.Build(_parameters, data);
+
+            _logger.Warnings.ShouldNotContain(w => w.Code == "MSB4280");
+        }
+
+        /// <summary>
+        /// Verifies that no warning is logged when DOTNET_HOST_PATH is not set.
+        /// </summary>
+        [Fact]
+        public void DotnetHostPathNotSetNoWarning()
+        {
+            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", null);
+
+            BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
+            _buildManager.Build(_parameters, data);
+
+            _logger.Warnings.ShouldNotContain(w => w.Code == "MSB4280");
+        }
+
+        /// <summary>
         /// Helper for cache tests.  Builds a project and verifies the right cache files are created.
         /// </summary>
         private static string BuildAndCheckCache(BuildManager localBuildManager, IEnumerable<string> exceptCacheDirectories)
