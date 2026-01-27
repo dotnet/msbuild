@@ -40,7 +40,7 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public AbsolutePath GetAbsolutePath(string path)
         {
-            return AbsolutePath.CreateFromRelative(path, ProjectDirectory);
+            return new AbsolutePath(path, ProjectDirectory);
         }
 
         /// <inheritdoc/>

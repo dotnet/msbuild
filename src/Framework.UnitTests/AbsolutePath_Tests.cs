@@ -45,10 +45,26 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void AbsolutePath_NullOrEmpty_ShouldThrow(string? path)
+        {
+            Should.Throw<ArgumentException>(() => new AbsolutePath(path!));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrow(string? path)
+        {
+            var basePath = GetTestBasePath();
+            Should.Throw<ArgumentException>(() => new AbsolutePath(path!, basePath));
+        }
+
+        [Theory]
         [InlineData("subfolder")]
         [InlineData("deep/nested/path")]
         [InlineData(".")]
-        [InlineData("")]
         [InlineData("..")]
         public void AbsolutePath_FromRelativePath_ShouldResolveAgainstBase(string relativePath)
         {
