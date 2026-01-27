@@ -541,9 +541,9 @@
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInPropertyReference">
-        <source>MSB4280: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</source>
-        <target state="new">MSB4280: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</target>
-        <note>{StrBegin="MSB4280: "}</note>
+        <source>MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</source>
+        <target state="new">MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</target>
+        <note>{StrBegin="MSB4281: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedQuotedStringInCondition">
         <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>

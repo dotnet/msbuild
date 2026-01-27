@@ -3856,8 +3856,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                // Disable ChangeWave 18.3 to preserve old behavior
-                ChangeWaves.ResetStateForTests();
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_3.ToString());
 
                 PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -3868,8 +3866,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 string result = expander.ExpandIntoStringLeaveEscaped(@"$( SomeStuff )", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
                 Assert.Equal(String.Empty, result);
-
-                ChangeWaves.ResetStateForTests();
             }
         }
 
@@ -3885,7 +3881,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                ChangeWaves.ResetStateForTests();
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
 
                 PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
@@ -3896,9 +3891,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(
                     () => expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
 
-                Assert.Equal("MSB4280", ex.ErrorCode);
-
-                ChangeWaves.ResetStateForTests();
+                Assert.Equal("MSB4281", ex.ErrorCode);
             }
         }
 
