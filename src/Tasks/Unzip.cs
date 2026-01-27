@@ -160,7 +160,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract files to.</param>
         private void Extract(ZipArchive sourceArchive, DirectoryInfo destinationDirectory)
         {
-            string fullDestinationDirectoryPath = Path.GetFullPath(FileUtilities.EnsureTrailingSlash(destinationDirectory.FullName));
+            string fullDestinationDirectoryPath = Path.GetFullPath(FrameworkFileUtilities.EnsureTrailingSlash(destinationDirectory.FullName));
 
             foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
             {

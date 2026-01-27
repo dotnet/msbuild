@@ -3021,7 +3021,7 @@ namespace Microsoft.Build.CommandLine
 
             if (parameters.Length == 1)
             {
-                projectFile = FileUtilities.FixFilePath(parameters[0]);
+                projectFile = FrameworkFileUtilities.FixFilePath(parameters[0]);
 
                 if (FileSystems.Default.DirectoryExists(projectFile))
                 {
@@ -3607,7 +3607,7 @@ namespace Microsoft.Build.CommandLine
                 // Check to see if the logfile parameter has been set, if not set it to the current directory
                 string logFileParameter = ExtractAnyLoggerParameter(fileParameters, "logfile");
 
-                string logFileName = FileUtilities.FixFilePath(ExtractAnyParameterValue(logFileParameter));
+                string logFileName = FrameworkFileUtilities.FixFilePath(ExtractAnyParameterValue(logFileParameter));
 
                 try
                 {
@@ -3871,7 +3871,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             // figure out whether the assembly's identity (strong/weak name), or its filename/path is provided
-            string testFile = FileUtilities.FixFilePath(loggerAssemblySpec);
+            string testFile = FrameworkFileUtilities.FixFilePath(loggerAssemblySpec);
             if (FileSystems.Default.FileExists(testFile))
             {
                 loggerAssemblyFile = testFile;
@@ -4029,7 +4029,7 @@ namespace Microsoft.Build.CommandLine
             foreach (string parameter in parameters)
             {
                 InitializationException.VerifyThrow(schemaFile == null, "MultipleSchemasError", parameter);
-                string fileName = FileUtilities.FixFilePath(parameter);
+                string fileName = FrameworkFileUtilities.FixFilePath(parameter);
                 InitializationException.VerifyThrow(FileSystems.Default.FileExists(fileName), "SchemaNotFoundError", fileName);
 
                 schemaFile = Path.Combine(Directory.GetCurrentDirectory(), fileName);

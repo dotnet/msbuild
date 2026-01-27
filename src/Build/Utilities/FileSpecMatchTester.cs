@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -131,7 +132,7 @@ namespace Microsoft.Build.Internal
                 ? Directory.GetCurrentDirectory()
                 : FileUtilities.GetFullPathNoThrow(absoluteFixedDirPart);
 
-            normalizedFixedDirPart = FileUtilities.EnsureTrailingSlash(normalizedFixedDirPart);
+            normalizedFixedDirPart = FrameworkFileUtilities.EnsureTrailingSlash(normalizedFixedDirPart);
 
             var recombinedFileSpec = string.Concat(normalizedFixedDirPart, wildcardDirectoryPart, filenamePart);
 

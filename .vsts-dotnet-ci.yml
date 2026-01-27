@@ -20,6 +20,14 @@ jobs:
   steps:
   - powershell: |
       $versionsFile = "eng/Versions.props"
+
+      [xml]$xml = Get-Content $versionsFile
+      $finalVersionKind = $xml.Project.PropertyGroup.DotNetFinalVersionKind
+      if ($finalVersionKind -ne 'release') {
+        Write-Host "Since it is not released, skip the version bump check.";
+        return
+      }
+
       $changedFiles = git diff --name-only HEAD HEAD~1
       $changedVersionsFile = $changedFiles | Where-Object { $_ -eq $versionsFile }
       $isInitialCommit = $false
@@ -51,29 +59,8 @@ jobs:
     condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
     displayName: "Check if patch version is bumped up"
 
-- job: IfOnlyDocumentionChanged
-  displayName: "Check whether Test Results need to be executed"
-  steps:
-  - powershell: |
-      $changedFiles = git diff --name-only HEAD HEAD~1
-      $changedFiles
-      $onlyDocChanged = 1
-      foreach ($file in $changedFiles) {
-        $isUnderDocumentation = $file -match "^documentation/"
-        if(!$isUnderDocumentation)
-        {
-          $onlyDocChanged = 0
-          break;
-        }
-      }
-      Write-Host "##vso[task.setvariable variable=onlyDocChanged;isoutput=true]$onlyDocChanged"
-    name: SetIfOnlyDocumentionChangedVaribale
-    displayName: Check whether only documentation has been updated
-
 - job: BootstrapMSBuildOnFullFrameworkWindows
-  dependsOn: IfOnlyDocumentionChanged
   variables:
-    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
     coverageReportName: WindowsFullFrameworkCoverage
   displayName: "Windows Full"
@@ -81,6 +68,7 @@ jobs:
     vmImage: 'windows-2022'
   timeoutInMinutes: 120
   steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: PowerShell@2
       displayName: Setup Private Feeds Credentials
@@ -180,15 +168,14 @@ jobs:
 
 - job: BootstrapMSBuildOnCoreWindows
   displayName: "Windows Core"
-  dependsOn: IfOnlyDocumentionChanged
   variables:
-    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
     coverageReportName: WindowsCoreCoverage
   pool:
     vmImage: 'windows-2022'
   timeoutInMinutes: 120
   steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: PowerShell@2
       displayName: Setup Private Feeds Credentials
@@ -260,9 +247,7 @@ jobs:
 
 - job: FullReleaseOnWindows
   displayName: "Windows Full Release (no bootstrap)"
-  dependsOn: IfOnlyDocumentionChanged
   variables:
-    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
     coverageReportName: WindowsFullReleaseCoverage
   pool:
@@ -274,6 +259,7 @@ jobs:
       demands: agent.os -equals Windows_NT
   timeoutInMinutes: 120
   steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: PowerShell@2
       displayName: Setup Private Feeds Credentials
@@ -350,12 +336,10 @@ jobs:
 
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
-  dependsOn: IfOnlyDocumentionChanged
-  variables:
-    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
   pool:
     vmImage: 'ubuntu-latest'
   steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: Bash@3
       displayName: Setup Private Feeds Credentials
@@ -442,12 +426,10 @@ jobs:
 
 - job: CoreOnMac
   displayName: "macOS Core"
-  dependsOn: IfOnlyDocumentionChanged
-  variables:
-    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
   pool:
     vmImage: 'macOS-latest'
   steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: Bash@3
       displayName: Setup Private Feeds Credentials
@@ -533,14 +515,13 @@ jobs:
 - job: CodeCoverage
   displayName: "Code Coverage"
   dependsOn:
-  - IfOnlyDocumentionChanged
   - BootstrapMSBuildOnFullFrameworkWindows
   - BootstrapMSBuildOnCoreWindows
   - FullReleaseOnWindows
   - CoreBootstrappedOnLinux
   - CoreOnMac
   variables:
-    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
+    onlyDocChanged: $[ dependencies.BootstrapMSBuildOnFullFrameworkWindows.outputs['CheckDocumentationOnlyChange.onlyDocChanged'] ]
   pool:
     vmImage: 'windows-2022'
   steps:
