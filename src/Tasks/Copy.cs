@@ -680,6 +680,7 @@ namespace Microsoft.Build.Tasks
                             catch (ArgumentException ex)
                             {
                                 Log.LogErrorWithCodeFromResources("Copy.Error", sourceSpec, destSpec, ex.Message);
+                                success = false;
                                 continue;
                             }
 
