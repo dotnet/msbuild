@@ -87,10 +87,6 @@ namespace MSBuild
                         string assemblyVersion = AssemblyName.GetAssemblyName(path).Version.ToString();
                         if (!version.Equals(assemblyVersion))
                         {
-                            // Ensure that the binding redirect is to the GAC version, but
-                            // we still ship the version we explicitly reference to let
-                            // API consumers bind to it at runtime.
-                            // See https://github.com/dotnet/msbuild/issues/6976.
                             Log.LogError(
                                 subcategory: null,
                                 errorCode: null,
