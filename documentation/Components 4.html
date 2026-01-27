@@ -124,7 +124,7 @@
     <label for="vsbuild">Build with <tt>MSBuild.exe</tt> or VS F5</label>
     <br>
     <input type="radio" name="buildOption" id="vsbuild10" value="vsbuild10">
-    <label for="vsbuild10">Build with <tt>MSBuild.exe</tt> or VS F5 (.NET 10 proposed)</label><br>
+    <label for="vsbuild10">Build with <tt>MSBuild.exe</tt> or VS F5 (.NET 10+)</label><br>
 
     <div id="diagram" class="holder">
         <div class="distribution">
@@ -148,8 +148,8 @@
             <div class="component dual sdkbuild">Common Analyzers</div>
             <div class="component sdk sdkbuild"><tt>dotnet</tt> CLI</div>
             <div class="component sdk sdkbuild vsbuild vsbuild10 designtime">SDK Build Logic</div>
-            <div class="component sdk sdkbuild vsbuild10">SDK Tasks (.NET)</div>
-            <div class="component sdk vsbuild designtime">SDK Tasks (net472)</div>
+            <div class="component sdk sdkbuild">SDK Tasks (.NET)</div>
+            <div class="component sdk vsbuild vsbuild10 designtime">SDK Tasks (net472)</div>
             <div class="component sdk sdkbuild vsbuild vsbuild10 designtime">SDK Analyzers</div>
         </div>
         <div class="distribution">
