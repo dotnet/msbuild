@@ -52,7 +52,6 @@ namespace Microsoft.Build.Tasks
     /// This class defines the "GenerateResource" MSBuild task, which enables using resource APIs
     /// to transform resource files.
     /// </summary>
-    [RequiredRuntime("v2.0")]
     public sealed partial class GenerateResource : TaskExtension, IIncrementalTask
     {
 
