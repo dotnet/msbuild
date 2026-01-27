@@ -463,7 +463,7 @@
       </trans-unit>
       <trans-unit id="DotnetHostPathIsDirectory">
         <source>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</source>
-        <target state="new">MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</target>
+        <target state="translated">MSB4280: Die Umgebungsvariable DOTNET_HOST_PATH ist auf ein Verzeichnis („{0}“) und nicht auf den Pfad zur ausführbaren dotnet-Datei festgelegt. Dies kann zu Buildfehlern bei Aufgaben führen, die diese Variable verwenden, wie zum Beispiel beim Roslyn-Compiler. Entfernen Sie die Variable oder aktualisieren Sie sie so, dass sie direkt auf die ausführbare dotnet-Datei zeigt (z. B. „C:\Program Files\dotnet\dotnet.exe“).</target>
         <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
