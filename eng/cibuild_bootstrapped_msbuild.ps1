@@ -5,6 +5,7 @@ Param(
   [switch] $prepareMachine,
   [bool] $buildStage1 = $True,
   [bool] $onlyDocChanged = 0,
+  [switch] $skipTests,
   [string[]] $stage2Properties = @(),
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
@@ -125,6 +126,9 @@ try {
   # - Create bootstrap environment as it's required when also running tests
   if ($onlyDocChanged) {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties @stage2Properties
+  }
+  elseif ($skipTests) {
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /nr:false @properties @stage2Properties
   }
   else {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /nr:false @properties @stage2Properties
