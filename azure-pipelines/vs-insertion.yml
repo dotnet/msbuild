@@ -70,7 +70,7 @@ variables:
   - name: AutoInsertTargetBranch
     ${{ if eq(variables['Build.SourceBranchName'], 'vs18.5') }}:
       value: 'rel/d18.5'
-    ${{ if eq(variables['Build.SourceBranchName'], 'vs18.4') }}:
+    ${{ elseif eq(variables['Build.SourceBranchName'], 'vs18.4') }}:
       value: 'rel/d18.4'
     ${{ elseif eq(variables['Build.SourceBranchName'], 'vs18.3') }}:
       value: 'rel/d18.3'
