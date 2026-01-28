@@ -1,7 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if NETFRAMEWORK
+using Microsoft.IO;
+#else
 using System.IO;
+#endif
 
 namespace Microsoft.Build.Framework
 {
@@ -14,10 +18,31 @@ namespace Microsoft.Build.Framework
     /// </summary>
     internal static class FrameworkFileUtilities
     {
-        internal static readonly char[] Slashes = ['/', '\\'];
+        private const char UnixDirectorySeparator = '/';
+        private const char WindowsDirectorySeparator = '\\';
+
+        internal static readonly char[] Slashes = [UnixDirectorySeparator, WindowsDirectorySeparator];
 
         /// <summary>
-        /// Indicates if the given character is a slash.
+        /// Checks if the path contains backslashes on Unix.
+        /// </summary>
+        private static bool HasWindowsDirectorySeparatorOnUnix(string path)
+            => NativeMethods.IsUnixLike && path.Contains(WindowsDirectorySeparator);
+
+        /// <summary>
+        /// Checks if the path contains forward slashes on Windows.
+        /// </summary>
+        private static bool HasUnixDirectorySeparatorOnWindows(string path)
+            => NativeMethods.IsWindows && path.Contains(UnixDirectorySeparator);
+
+        /// <summary>
+        /// Checks if the path contains relative segments like "." or "..".
+        /// </summary>
+        private static bool HasRelativeSegment(string path)
+            => path.Contains("/.") || path.Contains("\\.");
+
+        /// <summary>
+        /// Indicates if the given character is a slash in current OS.
         /// </summary>
         /// <param name="c"></param>
         /// <returns>true, if slash</returns>
@@ -27,20 +52,12 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Indicates if the given file-spec ends with a slash.
-        /// </summary>
-        /// <param name="fileSpec">The file spec.</param>
-        /// <returns>true, if file-spec has trailing slash</returns>
-        internal static bool EndsWithSlash(string fileSpec)
-        {
-            return (fileSpec.Length > 0)
-                ? IsSlash(fileSpec[fileSpec.Length - 1])
-                : false;
-        }
-
+        /// Fixes backslashes to forward slashes on Unix. This allows to recognise windows style paths on Unix. 
+        /// However, this leads to incorrect path on Linux if backslash was part of the file/directory name.
+        /// </summary>  
         internal static string FixFilePath(string path)
         {
-            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/');
+            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == WindowsDirectorySeparator ? path : path.Replace(WindowsDirectorySeparator, UnixDirectorySeparator);
         }
 
         /// <summary>
@@ -66,7 +83,7 @@ namespace Microsoft.Build.Framework
         internal static string EnsureNoTrailingSlash(string path)
         {
             path = FixFilePath(path);
-            if (EndsWithSlash(path))
+            if (path.Length > 0 && IsSlash(path[path.Length - 1]))
             {
                 path = path.Substring(0, path.Length - 1);
             }
@@ -80,8 +97,24 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="path">The absolute path to check.</param>
         /// <returns>An absolute path with a trailing slash.</returns>
+        /// <remarks>
+        /// If the path does not require modification, returns the current instance to avoid unnecessary allocations.
+        /// Preserves the OriginalValue of the current instance.
+        /// </remarks>
         internal static AbsolutePath EnsureTrailingSlash(AbsolutePath path)
         {
+            if (string.IsNullOrEmpty(path.Value))
+            {
+                return path;
+            }
+
+            // Check if already has trailing slash and no separator fixing needed on unix 
+            // (EnsureTrailingSlash also should fix the paths on unix). 
+            if (IsSlash(path.Value[path.Value.Length - 1]) && !HasWindowsDirectorySeparatorOnUnix(path.Value))
+            {
+                return path;
+            }
+
             return new AbsolutePath(EnsureTrailingSlash(path.Value), 
                 original: path.OriginalValue, 
                 ignoreRootedCheck: true);
@@ -92,8 +125,24 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="path">The absolute path to check.</param>
         /// <returns>An absolute path without a trailing slash.</returns>
+        /// <remarks>
+        /// If the path does not require modification, returns the current instance to avoid unnecessary allocations.
+        /// Preserves the OriginalValue of the current instance.
+        /// </remarks>
         internal static AbsolutePath EnsureNoTrailingSlash(AbsolutePath path)
         {
+            if (string.IsNullOrEmpty(path.Value))
+            {
+                return path;
+            }
+
+            // Check if already has no trailing slash and no separator fixing needed on unix 
+            // (EnsureNoTrailingSlash also should fix the paths on unix). 
+            if (!IsSlash(path.Value[path.Value.Length - 1]) && !HasWindowsDirectorySeparatorOnUnix(path.Value))
+            {
+                return path;
+            }
+
             return new AbsolutePath(EnsureNoTrailingSlash(path.Value),
                 original: path.OriginalValue, 
                 ignoreRootedCheck: true);
@@ -104,26 +153,60 @@ namespace Microsoft.Build.Framework
         /// Resolves relative segments like "." and "..". Fixes directory separators.
         /// ASSUMES INPUT IS ALREADY UNESCAPED.
         /// </summary>
+        /// <remarks>
+        /// If the path does not require modification, returns the current instance to avoid unnecessary allocations.
+        /// Preserves the OriginalValue of the current instance.
+        /// </remarks>
         internal static AbsolutePath NormalizePath(AbsolutePath path)
         {
+            if (string.IsNullOrEmpty(path.Value))
+            {
+                return path;
+            }
+
+            if (!HasRelativeSegment(path.Value) && 
+                !HasWindowsDirectorySeparatorOnUnix(path.Value) && 
+                !HasUnixDirectorySeparatorOnWindows(path.Value))
+            {
+                return path;
+            }
+
             return new AbsolutePath(FixFilePath(Path.GetFullPath(path.Value)),
                 original: path.OriginalValue,
                 ignoreRootedCheck: true);
         }
 
         /// <summary>
-        /// Resolves relative segments like "." and "..".
+        /// Resolves relative segments like "." and "..". Fixes directory separators on windows like Path.GetFullPath does.
         /// ASSUMES INPUT IS ALREADY UNESCAPED.
         /// </summary>
         internal static AbsolutePath RemoveRelativeSegments(AbsolutePath path)
         {
+            if (string.IsNullOrEmpty(path.Value))
+            {
+                return path;
+            }
+
+            if (!HasRelativeSegment(path.Value) && !HasUnixDirectorySeparatorOnWindows(path.Value))
+            {
+                return path;
+            }
+
             return new AbsolutePath(Path.GetFullPath(path.Value), 
                 original: path.OriginalValue, 
                 ignoreRootedCheck: true);
         }
 
+        /// <summary>
+        /// Fixes file path separators for the current platform.
+        /// </summary>
         internal static AbsolutePath FixFilePath(AbsolutePath path)
         {
+            if (string.IsNullOrEmpty(path.Value) || !HasWindowsDirectorySeparatorOnUnix(path.Value))
+            {
+                return path;
+            }
+
             return new AbsolutePath(FixFilePath(path.Value),
                 original: path.OriginalValue, 
                 ignoreRootedCheck: true);
