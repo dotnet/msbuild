@@ -149,7 +149,7 @@ namespace Microsoft.Build.Framework
             bool hasRelativeSegment = Value.Contains("/.") || Value.Contains("\\.");
 
             // Check for directory separator normalization needs (only on Windows: "/" to "\")
-            bool needsSeparatorNormalization = NativeMethods.IsWindows && Value.Contains('/');
+            bool needsSeparatorNormalization = NativeMethods.IsWindows && Value.Contains(Path.AltDirectorySeparatorChar);
 
             if (!hasRelativeSegment && !needsSeparatorNormalization)
             {
