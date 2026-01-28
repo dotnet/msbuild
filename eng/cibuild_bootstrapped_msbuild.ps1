@@ -5,6 +5,8 @@ Param(
   [switch] $prepareMachine,
   [bool] $buildStage1 = $True,
   [bool] $onlyDocChanged = 0,
+  [switch] $skipTests,
+  [string[]] $stage2Properties = @(),
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
@@ -63,6 +65,8 @@ $msbuildToUse = "msbuild"
 try {
   KillProcessesFromRepo
 
+  # Stage 1: Build MSBuild to create bootstrap. Note: stage2Properties is intentionally
+  # not passed here since some MSBuild switches (like /mt) may not work with the SDK MSBuild.
   if ($buildStage1)
   {
     & $PSScriptRoot\Common\Build.ps1 -restore -build -ci -msbuildEngine $msbuildEngine /p:CreateBootstrap=true @properties
@@ -121,10 +125,13 @@ try {
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
   # - Create bootstrap environment as it's required when also running tests
   if ($onlyDocChanged) {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties @stage2Properties
+  }
+  elseif ($skipTests) {
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /nr:false @properties @stage2Properties
   }
   else {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /nr:false @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /nr:false @properties @stage2Properties
   }
 
   exit $lastExitCode
