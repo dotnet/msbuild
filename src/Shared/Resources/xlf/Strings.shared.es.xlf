@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="Message.InvalidImportance">
         <source>MSB3511: "{0}" is an invalid value for the "Importance" parameter. Valid values are: High, Normal and Low.</source>
-        <target state="new">MSB3511: "{0}" is an invalid value for the "Importance" parameter. Valid values are: High, Normal and Low.</target>
+        <target state="translated">MSB3511: "{0}" no es un valor válido para el parámetro "Importance". Los valores válidos son: High, Normal y Low.</target>
         <note>{StrBegin="MSB3511: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.
             The importance enumeration is: High, Normal and Low.  Specifying any other importance will result in this message being shown
             LOCALIZATION: "Importance" should not be localized.
