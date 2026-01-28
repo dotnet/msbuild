@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetFullPath_NullPath_ShouldReturnSameInstance()
         {
-            var absolutePath = new AbsolutePath(null, ignoreRootedCheck: true);
+            var absolutePath = new AbsolutePath(null!, null!, ignoreRootedCheck: true);
             var result = absolutePath.GetFullPath();
             
             // Should return the same struct values when no normalization is needed
