@@ -311,7 +311,7 @@ namespace Microsoft.Build.Tasks
 
             if (FailIfNotIncremental)
             {
-                 // Before the introduction of AbsolutePath, this logged full paths, so preserve that behavior
+                // Before the introduction of AbsolutePath, this logged full paths, so preserve that behavior
                 Log.LogError(FileComment, sourceFileState.Path, destinationFileState.Path);
                 return false;
             }
@@ -508,8 +508,19 @@ namespace Microsoft.Build.Tasks
                 string destSpec = DestinationFiles[i].ItemSpec;
 
                 // Compute absolute paths once - reused for ETW, deduplication dictionary, and FileState
-                AbsolutePath sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceSpec);
-                AbsolutePath destAbsolutePath = TaskEnvironment.GetAbsolutePath(destSpec);
+                AbsolutePath sourceAbsolutePath;
+                AbsolutePath destAbsolutePath;
+                try
+                {
+                    sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceSpec);
+                    destAbsolutePath = TaskEnvironment.GetAbsolutePath(destSpec);
+                }
+                catch (ArgumentException ex)
+                {
+                    Log.LogErrorWithCodeFromResources("Copy.Error", sourceSpec, destSpec, ex.Message);
+                    success = false;
+                    continue;
+                }
 
                 MSBuildEventSource.Log.CopyUpToDateStart(destAbsolutePath);
                 if (filesActuallyCopied.TryGetValue(destAbsolutePath, out string originalSource))
@@ -663,9 +674,20 @@ namespace Microsoft.Build.Tasks
                             string destSpec = destItem.ItemSpec;
 
                             // Compute absolute paths once - reused for ETW, deduplication check, and FileState
-                            AbsolutePath sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceSpec);
-                            AbsolutePath destAbsolutePath = TaskEnvironment.GetAbsolutePath(destSpec);
-                            
+                            AbsolutePath sourceAbsolutePath;
+                            AbsolutePath destAbsolutePath;
+                            try
+                            {
+                                sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceSpec);
+                                destAbsolutePath = TaskEnvironment.GetAbsolutePath(destSpec);
+                            }
+                            catch (ArgumentException ex)
+                            {
+                                Log.LogErrorWithCodeFromResources("Copy.Error", sourceSpec, destSpec, ex.Message);
+                                success = false;
+                                continue;
+                            }
+
                             // Check if we just copied from this location to the destination, don't copy again.
                             MSBuildEventSource.Log.CopyUpToDateStart(destAbsolutePath);
                             bool copyComplete = false;
