@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="AssemblyLoad_Warning">
         <source>The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</source>
-        <target state="translated">L'attività personalizzata "{0}" ha richiesto un fallback all'esecuzione out-of-process perché la definizione UsingTask non specifica correttamente Runtime e Architecture. Questo riduce le prestazioni della compilazione. Aggiornare l'elemento UsingTask per specificare esplicitamente gli attributi Runtime e Architecture (ad esempio, Runtime="CLR4" Architecture="x64") oppure usare TaskFactory="TaskHostFactory".</target>
+        <target state="new">The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</target>
         <note />
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
@@ -153,7 +153,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_MessageFmt">
         <source>Tasks {0} and {1} from projects {2} and {3} write the same file: {4}.</source>
-        <target state="translated">Le attività {0} e {1} dai progetti {2} e {3} scrivere lo stesso file: {4}.</target>
+        <target state="translated">Le attività {0} e {1} dai progetti {2} e {3} scrivono lo stesso file: {4}.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0102_Title">
@@ -218,12 +218,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="translated">Project {0} specifica la proprietà 'TargetFramework(s)' '{1}', che non usa .NET SDK. Queste proprietà non sono comprese dai progetti che importano direttamente destinazioni C#.</target>
+        <target state="translated">Il progetto {0} specifica la proprietà “TargetFramework(s)” “{1}”, che non utilizza il SDK di .NET. Queste proprietà non vengono riconosciute dai progetti che importano direttamente destinazioni C#.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="translated">Le proprietà 'TargetFramework' e 'TargetFrameworks' non vengono rispettate e non devono essere specificate nei progetti che non usano .NET SDK.</target>
+        <target state="translated">Le proprietà “TargetFramework” e “TargetFrameworks” non vengono rispettate e non devono essere specificate nei progetti che non utilizzano il SDK di.NET.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
@@ -268,12 +268,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="translated">Percorso: '{0}' non può essere considerato completamente attendibile. Inserire i progetti all'esterno di tale cartella (Progetto: {1}).</target>
+        <target state="translated">Percorso: '{0}' non può essere completamente attendibile. Posizionare i progetti all'esterno di tale cartella (Progetto: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="translated">La cartella Dei download non è attendibile per la compilazione di progetti.</target>
+        <target state="translated">La cartella Download non è attendibile per la creazione di progetti.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -418,7 +418,7 @@
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
-        <target state="translated">Impossibile trovare l'assembly di controllo personalizzato specificato: “{0}”. Verificare se esiste.</target>
+        <target state="translated">Non è possibile trovare l'assembly del controllo personalizzato specificato: '{0}'. Verificare se esiste.</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
@@ -428,32 +428,32 @@
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">Non è stato possibile caricare il tipo di controllo personalizzato: “{0}” dall'assembly: “{1}”. Assicurarsi che erediti la classe di base Microsoft.Build.Experimental.BuildCheck.Check. Se non è destinato a essere un controllo personalizzato, non deve essere esposto. Per altre informazioni: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">Non è possibile caricare il tipo di controllo personalizzato '{0}' dall'assembly '{1}'. Assicurarsi che erediti la classe di base Microsoft.Build.Experimental.BuildCheck.Check. Se non è destinato a essere un controllo personalizzato, non deve essere esposto. Altre informazioni: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
         <source>Failed to register the custom check: '{0}'.</source>
-        <target state="translated">Impossibile registrare il controllo personalizzato: “{0}”.</target>
+        <target state="translated">Non è possibile registrare il controllo personalizzato: '{0}'.</target>
         <note>The message is emitted on failed loading of the custom check in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedRuleLoading">
         <source>Failed to instantiate the custom check rule with the following exception: '{0}'.</source>
-        <target state="translated">Non è stato possibile creare un'istanza della regola di controllo personalizzata con l'eccezione seguente: “{0}”.</target>
+        <target state="translated">Non è possibile creare un'istanza della regola del controllo personalizzato con l'eccezione seguente: '{0}'.</target>
         <note>The message is emitted on failed loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckRegistered">
         <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="translated">Il controllo personalizzato “{0}” è registrato per la compilazione dal percorso “{1}”.</target>
+        <target state="translated">Il controllo personalizzato '{0}' è registrato per la compilazione dal percorso '{1}'.</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckSuccessfulAcquisition">
         <source>Custom check rule: '{0}' has been registered successfully.</source>
-        <target state="translated">La regola di controllo personalizzata “{0}” è stata registrata correttamente.</target>
+        <target state="translated">La regola del controllo personalizzato '{0}' è stata registrata correttamente.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
         <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
-        <target state="translated">La TaskFactory personalizzata '{0}' per l'attività '{1}' non supporta l'esecuzione di TaskHost fuori processo. Disattivare la modalità di compilazione multithread o rimuovi la TaskFactory personalizzata dalle definizioni di &lt;UsingTask&gt; nei file di progetto.</target>
+        <target state="new">Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -463,7 +463,7 @@
       </trans-unit>
       <trans-unit id="DotnetHostPathIsDirectory">
         <source>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</source>
-        <target state="translated">MSB4280: La variabile di ambiente DOTNET_HOST_PATH è impostata su una directory ("{0}") anziché sul percorso di un file eseguibile dotnet. Questo può causare errori di compilazione nelle attività che usano questa variabile, come il compilatore Roslyn. Annullare la variabile oppure aggiornarla in modo che punti direttamente al file eseguibile dotnet (ad esempio "C:\Programmi\dotnet\dotnet.exe").</target>
+        <target state="new">MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</target>
         <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
@@ -496,7 +496,7 @@
       </trans-unit>
       <trans-unit id="ErrorCopyingBinaryLog">
         <source>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</source>
-        <target state="translated">MSB4279: non è possibile copiare il log binario da "{0}" a "{1}". {2}</target>
+        <target state="new">MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</target>
         <note>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</note>
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
@@ -532,7 +532,7 @@
       </trans-unit>
       <trans-unit id="HostObjectFailure">
         <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
-        <target state="translated">L'attività "{0}" non è riuscita ad acquisire il suo oggetto host. {1} Contattare l'autore dell'attività per segnalare questo problema.</target>
+        <target state="new">The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</target>
         <note>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -600,7 +600,7 @@
       <trans-unit id="NETHostTaskLoad_Failed">
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
     See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
-        <target state="translated">Non è possibile caricare l'attività perché richiede l'host attività di runtime .NET di MSBuild, ma non è possibile trovare l'host attività di runtime .NET per la versione specificata.
+        <target state="translated">Il caricamento dell'attività non è riuscita perché richiede l'host dell’attività di runtime .NET di MSBuild, ma non è possibile trovare l'host dell'attività di runtime .NET per la versione specificata.
     Per informazioni dettagliate su come risolvere l'errore, vedere https://aka.ms/nettaskhost.</target>
         <note />
       </trans-unit>
@@ -882,7 +882,7 @@
         <source>The "{0}" resolver attempted to resolve the SDK "{1}".
 Warnings: {2}
 Errors: {3}</source>
-        <target state="translated">Il resolver "{0}" ha provato a risolvere l'SDK "{1}".
+        <target state="translated">Il resolver "{0}" ha tentato di risolvere l'SDK "{1}".
 Avvisi: {2}
 Errori: {3}</target>
         <note>
@@ -913,12 +913,12 @@ Errori: {3}</target>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
-        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}" ma era già stata impostata su "{2}" come variabile di ambiente.</target>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
-        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}" ma era già stata impostata su "{2}" da un altro SDK.</target>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">

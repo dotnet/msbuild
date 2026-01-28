@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="AssemblyLoad_Warning">
         <source>The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</source>
-        <target state="translated">自定义任务“{0}”需要回退到进程外执行，因为 UsingTask 定义未指定正确的 Runtime 和 Architecture。这会降低构建性能。更新 UsingTask 元素以显式指定 Runtime 和 Architecture 属性(例如，Runtime="CLR4" Architecture="x64")或使用 TaskFactory="TaskHostFactory"。</target>
+        <target state="new">The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</target>
         <note />
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
@@ -163,7 +163,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageAddendum">
         <source>'{0}' with value: '{1}'</source>
-        <target state="translated">值为“{1}”的“{0}”</target>
+        <target state="translated">'{0}'，值为 '{1}'</target>
         <note>Will be used as a parameter {0} in previous message.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_MessageFmt">
@@ -173,7 +173,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0103_Title">
         <source>No implicit property derived from an environment variable should be used during the build.</source>
-        <target state="translated">在生成过程中，不应使用派生自环境变量的隐式属性。</target>
+        <target state="translated">在生成过程中，不应使用派生自环境变量的任何隐式属性。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0104_MessageFmt">
@@ -218,12 +218,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="translated">Project {0} 指定“TargetFramework()”属性 '{1}'，该属性不使用 .NET SDK。直接导入 C# 目标的项目不理解这些属性。</target>
+        <target state="translated">项目 {0} 指定了 “TargetFramework” 属性“{1}”，它不使用 .NET SDK。直接导入 C# 目标的项目无法理解这些属性。</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="translated">不考虑 “TargetFramework” 和 “TargetFrameworks” 属性，不应在不使用 .NET SDK 的项目中指定这些属性。</target>
+        <target state="translated">在不使用 .NET SDK 的项目中，'TargetFramework' 和 'TargetFrameworks' 属性不会生效，并且不应被指定。</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
@@ -238,17 +238,17 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_MessageFmt">
         <source>Property: '{0}' was accessed, but it was never initialized.</source>
-        <target state="translated">已访问属性“{0}”，但从未将其初始化过。</target>
+        <target state="translated">已访问属性 '{0}'，但从未将其初始化。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0201_Title">
         <source>A property that is accessed should be declared first.</source>
-        <target state="translated">应首先声明访问的属性。</target>
+        <target state="translated">应首先声明所访问的属性。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_MessageFmt">
         <source>Property: '{0}' first declared/initialized at {1} used before it was initialized.</source>
-        <target state="translated">属性“{0}”在 {1} 使用时首先声明/初始化，再进行初始化。</target>
+        <target state="translated">属性: '{0}' 在 {1} 处使用时先声明/初始化，然后再进行初始化。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0202_Title">
@@ -258,7 +258,7 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_MessageFmt">
         <source>Property: '{0}' was declared/initialized, but it was never used.</source>
-        <target state="translated">属性“{0}”已声明/初始化，但从未使用过。</target>
+        <target state="translated">属性: '{0}' 已声明/初始化，但从未使用过。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0203_Title">
@@ -268,12 +268,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="translated">位置： '{0}' 不能完全受信任，请将项目置于项目 (文件夹之外 {1})。</target>
+        <target state="translated">位置: 无法完全信任“{0}”，请将项目置于该文件夹之外(项目: {1})。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="translated">生成项目不信任下载文件夹。</target>
+        <target state="translated">下载文件夹不受信任，无法用于项目生成。</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -418,7 +418,7 @@
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
-        <target state="translated">找不到指定的自定义检查程序集: {0}。请检查它是否存在。</target>
+        <target state="translated">找不到指定的自定义检查程序集: '{0}'。请检查它是否存在。</target>
         <note>The message is emitted when the custom check assembly can not be found.</note>
       </trans-unit>
       <trans-unit id="CouldNotDifferentiateBetweenCompatibleMethods">
@@ -428,32 +428,32 @@
       </trans-unit>
       <trans-unit id="CustomCheckBaseTypeNotAssignable">
         <source>Failed to load the custom check type: '{0}' from the assembly: '{1}'. Make sure it inherits the Microsoft.Build.Experimental.BuildCheck.Check base class. If it is not intended to be a custom check, than it should not be exposed. More info: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</source>
-        <target state="translated">未能从程序集“{1}”加载自定义检查类型“{0}”。请确保它继承 Microsoft.Build.Experimental.BuildCheck.Check 基类。如果不打算将其作为自定义检查，则不应将其公开。详细信息: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
+        <target state="translated">未能从程序集 '{1}' 加载自定义检查类型 '{0}'。请确保它继承 Microsoft.Build.Experimental.BuildCheck.Check 基类。如果它不旨在作为自定义检查，则不应将其公开。详细信息: https://github.com/dotnet/msbuild/blob/main/documentation/specs/proposed/BuildCheck-Architecture.md#acquisition</target>
         <note>The message is emitted when the custom check assembly can not be successfully registered.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedAcquisition">
         <source>Failed to register the custom check: '{0}'.</source>
-        <target state="translated">未能注册自定义检查: {0}。</target>
+        <target state="translated">未能注册自定义检查: '{0}'。</target>
         <note>The message is emitted on failed loading of the custom check in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckFailedRuleLoading">
         <source>Failed to instantiate the custom check rule with the following exception: '{0}'.</source>
-        <target state="translated">未能实例化自定义检查规则，出现以下异常: {0}。</target>
+        <target state="translated">未能实例化自定义检查规则，出现以下异常: '{0}'。</target>
         <note>The message is emitted on failed loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomCheckRegistered">
         <source>The custom check: '{0}' is registered for the build from the location: '{1}'.</source>
-        <target state="translated">已从位置“{1}”为内部版本注册自定义检查“{0}”。</target>
+        <target state="translated">已从位置 '{1}' 为内部版本注册自定义检查 '{0}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckSuccessfulAcquisition">
         <source>Custom check rule: '{0}' has been registered successfully.</source>
-        <target state="translated">已成功注册自定义检查规则“{0}”。</target>
+        <target state="translated">已成功注册自定义检查规则 '{0}'。</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
       <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
         <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
-        <target state="translated">任务“{1}”的自定义 TaskFactory“{0}”不支持进程外 TaskHost 执行。关闭多线程生成模式或从项目文件中的 &lt;UsingTask&gt; 定义中移除自定义 TaskFactory。</target>
+        <target state="new">Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -463,7 +463,7 @@
       </trans-unit>
       <trans-unit id="DotnetHostPathIsDirectory">
         <source>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</source>
-        <target state="translated">MSB4280: 环境变量 DOTNET_HOST_PATH 设置为目录(“{0}”)，而不是指向 dotnet 可执行文件的路径。这可能导致使用该变量的任务(如 Roslyn 编译器)出现构建错误。请取消设置该变量，或将其更新为直接指向 dotnet 可执行文件的路径(例如 "C:\Program Files\dotnet\dotnet.exe")。</target>
+        <target state="new">MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</target>
         <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
@@ -496,7 +496,7 @@
       </trans-unit>
       <trans-unit id="ErrorCopyingBinaryLog">
         <source>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</source>
-        <target state="translated">MSB4279: 未能将二进制日志从“{0}”复制到“{1}”。{2}</target>
+        <target state="new">MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</target>
         <note>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</note>
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
@@ -532,7 +532,7 @@
       </trans-unit>
       <trans-unit id="HostObjectFailure">
         <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
-        <target state="translated">任务“{0}”无法获取其主机对象。{1} 请与任务的作者联系以报告此问题。</target>
+        <target state="new">The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</target>
         <note>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -542,7 +542,7 @@
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
-        <target state="translated">{1} 项中的“{0}”中存在非法字符。</target>
+        <target state="translated">'{1}' 项中的 '{0}' 中存在非法字符。</target>
         <note />
       </trans-unit>
       <trans-unit id="ImportedProjectFromVSDistribution">
@@ -562,7 +562,7 @@
       </trans-unit>
       <trans-unit id="IsolatedContextDoesNotSupportFileSystem">
         <source>EvaluationContext objects created with SharingPolicy.Isolated or SharingPolicy.SharedSDKCache do not support being passed an MSBuildFileSystemBase file system.</source>
-        <target state="translated">使用 SharingPolicy.Isolated 或 SharingPolicy.SharedSDKCache 创建的 EvaluationContext 对象不支持被传递 MSBuildFileSystemBase 文件系统。</target>
+        <target state="translated">使用 SharingPolicy.Isolated 创建的 EvaluationContext 对象。SharingPolicy.SharedSDKCache 不支持被传递 MSBuildFileSystemBase 文件系统。</target>
         <note />
       </trans-unit>
       <trans-unit id="ItemReferencingSelfInTarget">
@@ -601,7 +601,7 @@
         <source>The task failed to load because it requires the MSBuild .NET Runtime Task Host, but the .NET Runtime Task Host could not be found for the specified version.
     See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
         <target state="translated">无法加载该任务，因为它需要 MSBuild .NET 运行时任务主机，但找不到指定版本的 .NET 运行时任务主机。
-    有关如何解决此错误的详细信息，请参阅 https://aka.ms/nettaskhost。</target>
+    若要详细了解如何解决此错误，请参阅 https://aka.ms/nettaskhost。</target>
         <note />
       </trans-unit>
       <trans-unit id="NETHostVersion_Failed">
@@ -913,12 +913,12 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
-        <target state="translated">SDK 尝试将环境变量 "{0}" 设置为 "{1}"，但它已作为环境变量设置为 "{2}"。</target>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
-        <target state="translated">SDK 尝试将环境变量 "{0}" 设置为 "{1}"，但它已由另一个 SDK 设置为 "{2}"。</target>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -3029,7 +3029,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="InvalidSdkFormat">
         <source>MSB4229: The value "{0}" is not valid for an Sdk specification. The attribute should be a semicolon-delimited list of Sdk-name/minimum-version pairs, separated by a forward slash.</source>
-        <target state="translated">MSB4229: 值“{0}”对 Sdk 规范无效。此属性应该是以分号分隔的Sdk-name/minimum-version 对（用正斜杠分隔）的列表。</target>
+        <target state="translated">MSB4229: 值“{0}”对 Sdk 规范无效。此属性应该是以分号分隔的Sdk-name/minimum-version 对 (用正斜杠分隔) 的列表。</target>
         <note>{StrBegin="MSB4229: "}</note>
       </trans-unit>
       <trans-unit id="TaskInstantiationFailureNotSupported">
