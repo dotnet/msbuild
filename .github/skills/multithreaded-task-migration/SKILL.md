@@ -27,28 +27,40 @@ public class MyTask : Task, IMultiThreadableTask
 }
 ```
 
-### Step 2: Replace Path Resolution APIs
+### Step 2: Absolutize Paths Before File Operations
 
-**Critical**: absolutize all path strings with `TaskEnvironment.GetAbsolutePath()` before their use.
-`GetAbsolutePath()` throws `ArgumentNullException` for null inputs and throws for empty inputs. Callers are responsible for validating inputs before calling absolutization APIs.
+**Critical**: All path strings must be absolutized with `TaskEnvironment.GetAbsolutePath()` before use in file system APIs. This ensures paths resolve relative to the project directory, not the process working directory.
 
 ```csharp
-// BEFORE - Uses working directory (UNSAFE)
-string absolutePath = Path.GetFullPath(relativePath);
+// BEFORE - File.Exists uses process working directory for relative paths (UNSAFE)
+if (File.Exists(inputPath))
+{
+    string content = File.ReadAllText(inputPath);
+}
 
-// AFTER - Uses project directory (SAFE)
-AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(relativePath);
+// AFTER - Absolutize first, then use in file operations (SAFE)
+AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(inputPath);
+if (File.Exists(absolutePath))
+{
+    string content = File.ReadAllText(absolutePath);
+}
 ```
 
-The `AbsolutePath` struct:
+`GetAbsolutePath()` throws for null/empty inputs. See [Exception Handling in Batch Operations](#exception-handling-in-batch-operations) for handling strategies.
+
+The [`AbsolutePath`](https://github.com/dotnet/msbuild/blob/main/src/Framework/PathHelpers/AbsolutePath.cs) struct:
 - Has `Value` property returning the absolute path string
-- Has `OriginalValue` property preserving the input path
+- Has `OriginalValue` property preserving the input path  
 - Is implicitly convertible to `string` for File/Directory API compatibility
-- **Throws `ArgumentNullException` for null paths** 
-- **Throws for empty paths** 
+
+**CAUTION**: `FileInfo` can be created from relative paths - only use `FileInfo.FullName` if constructed with an absolute path. 
 
 #### Note:
-GetFullPath also resolves relative segments so it should be called after absolutization if that behavior is required, and if a method is explicitly fixing directory separators it should be also preserved instead of replacing with GetAbsolutePath directly.
+If code previously used `Path.GetFullPath()` for canonicalization (resolving `..` segments, normalizing separators), call `AbsolutePath.GetCanonicalForm()` after absolutization to preserve that behavior. Do not simply replace `Path.GetFullPath` with `GetAbsolutePath` if canonicalization was the intent. You can replace `Path.GetFullPath` behavior by combining both:
+
+```csharp
+AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(inputPath).GetCanonicalForm();
+```
 The goal is MAXIMUM compatibility so think about these edge cases so it behaves the same as before.
 
 ### Step 3: Replace Environment Variable APIs
@@ -72,21 +84,6 @@ var psi = new ProcessStartInfo("tool.exe");
 // AFTER (SAFE - uses task's isolated environment)
 var psi = TaskEnvironment.GetProcessStartInfo();
 psi.FileName = "tool.exe";
-```
-
-### Step 5: Use Absolute Paths with File APIs
-
-All file system operations must use absolute paths. The analyzer (MSB9997) will warn on potentially relative paths:
-
-```csharp
-// UNSAFE - may resolve relative to wrong directory
-File.Exists(somePath);
-
-// SAFE - explicitly absolutized
-File.Exists(TaskEnvironment.GetAbsolutePath(somePath));
-
-// ALSO SAFE - already absolute (e.g., from FileInfo.FullName)
-File.Exists(fileInfo.FullName);
 ```
 
 ## Updating Unit Tests
@@ -150,23 +147,77 @@ public void Task_WithNullPath_Throws()
 - `Assembly.Load*`, `LoadFrom`, `LoadFile` - Version conflicts
 - `Activator.CreateInstance*` - Version conflicts
 
-## Practical Notes from Implementation Experience
+## Practical Notes
 
+### CRITICAL: Trace All Path String Usage
 
-### Null/Empty Path Handling Evolution
+**You MUST trace every path string variable through the entire codebase** to find all places where it flows into file system operations - including helper methods, utility classes, and third-party code that may internally use File APIs.
 
+Steps:
+1. Find every path string (e.g., `item.ItemSpec`, function parameters)
+2. **Trace downstream**: Follow the variable through all method calls and assignments
+3. Absolutize BEFORE any code path that touches the file system
+4. Use `OriginalValue` for user-facing output (logs, errors)
 
 ```csharp
-// Current behavior - always throws for null/empty
-TaskEnvironment.GetAbsolutePath(null);    // Throws ArgumentNullException
-TaskEnvironment.GetAbsolutePath(string.Empty);  // Throws
+// WRONG - LockCheck internally uses File APIs with non-absolutized path
+string sourceSpec = item.ItemSpec;  // sourceSpec is string
+string lockedMsg = LockCheck.GetLockedFileMessage(sourceSpec);  // BUG! Trace the call!
 
-// Caller responsibility to validate
-if (!string.IsNullOrEmpty(path))
+// CORRECT - absolutized path passed to helper
+AbsolutePath sourceFile = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
+string lockedMsg = LockCheck.GetLockedFileMessage(sourceFile);
+
+// For error messages, preserve original user input
+Log.LogError("...", sourceFile.OriginalValue, ...);
+```
+
+### Exception Handling in Batch Operations
+
+**Important**: `GetAbsolutePath()` throws on null/empty inputs. In batch processing scenarios (e.g., iterating over multiple files), an unhandled exception will abort the entire batch. Tasks must catch and handle these exceptions appropriately to avoid cutting short processing of valid items:
+
+```csharp
+// WRONG - one bad path aborts entire batch
+foreach (ITaskItem item in SourceFiles)
 {
-    AbsolutePath absolute = TaskEnvironment.GetAbsolutePath(path);
-    ...
+    AbsolutePath path = TaskEnvironment.GetAbsolutePath(item.ItemSpec); // throws, batch stops!
+    ProcessFile(path);
 }
+
+// CORRECT - handle exceptions, continue processing valid items
+bool success = true;
+foreach (ITaskItem item in SourceFiles)
+{
+    try
+    {
+        AbsolutePath path = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
+        ProcessFile(path);
+    }
+    catch (ArgumentException ex)
+    {
+        Log.LogError($"Invalid path '{item.ItemSpec}': {ex.Message}");
+        success = false;
+        // Continue processing remaining items
+    }
+}
+return success;
+```
+
+Consider the task's error semantics: should one invalid path fail the entire task immediately, or should all items be processed with errors collected? Match the original task's behavior.
+
+### Prefer AbsolutePath Over String
+
+When working with paths, stay in the `AbsolutePath` world as much as possible rather than converting back and forth to `string`. This reduces unnecessary conversions and maintains type safety:
+
+```csharp
+// AVOID - unnecessary conversions
+string path = TaskEnvironment.GetAbsolutePath(input).Value;
+AbsolutePath again = TaskEnvironment.GetAbsolutePath(path); // redundant!
+
+// PREFER - stay in AbsolutePath
+AbsolutePath path = TaskEnvironment.GetAbsolutePath(input);
+// Use path directly - it's implicitly convertible to string where needed
+File.ReadAllText(path);
 ```
 
 ### TaskEnvironment is Not Thread-Safe
@@ -179,7 +230,15 @@ If your task spawns multiple threads internally, you must synchronize access to 
 - [ ] All environment variable access uses `TaskEnvironment` APIs
 - [ ] All process spawning uses `TaskEnvironment.GetProcessStartInfo()`
 - [ ] All file system APIs receive absolute paths
+- [ ] All helper methods receiving path strings are traced to verify they don't internally use File APIs with non-absolutized paths
 - [ ] No use of `Environment.CurrentDirectory`
 - [ ] All tests set `TaskEnvironment = TaskEnvironmentHelper.CreateForTest()`
 - [ ] Tests verify exception behavior for null/empty paths
 - [ ] No use of forbidden APIs (Environment.Exit, etc.)
+
+## References
+
+- [Thread-Safe Tasks Spec](https://github.com/dotnet/msbuild/blob/main/documentation/specs/multithreading/thread-safe-tasks.md) - Full specification for multithreaded task support
+- [`AbsolutePath`](https://github.com/dotnet/msbuild/blob/main/src/Framework/PathHelpers/AbsolutePath.cs) - Struct for representing absolute paths
+- [`TaskEnvironment`](https://github.com/dotnet/msbuild/blob/main/src/Framework/TaskEnvironment.cs) - Thread-safe environment APIs for tasks
+- [`IMultiThreadableTask`](https://github.com/dotnet/msbuild/blob/main/src/Framework/IMultiThreadableTask.cs) - Interface for multithreaded task support
