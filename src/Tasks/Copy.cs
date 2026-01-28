@@ -508,10 +508,12 @@ namespace Microsoft.Build.Tasks
                 string destSpec = DestinationFiles[i].ItemSpec;
 
                 // Compute absolute paths once - reused for ETW, deduplication dictionary, and FileState
+                AbsolutePath sourceAbsolutePath;
+                AbsolutePath destAbsolutePath;
                 try
                 {
-                    AbsolutePath sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceSpec);
-                    AbsolutePath destAbsolutePath = TaskEnvironment.GetAbsolutePath(destSpec);
+                    sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceSpec);
+                    destAbsolutePath = TaskEnvironment.GetAbsolutePath(destSpec);
                 }
                 catch (ArgumentException ex)
                 {
@@ -672,10 +674,12 @@ namespace Microsoft.Build.Tasks
                             string destSpec = destItem.ItemSpec;
 
                             // Compute absolute paths once - reused for ETW, deduplication check, and FileState
+                            AbsolutePath sourceAbsolutePath;
+                            AbsolutePath destAbsolutePath;
                             try
                             {
-                                AbsolutePath sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceSpec);
-                                AbsolutePath destAbsolutePath = TaskEnvironment.GetAbsolutePath(destSpec);
+                                sourceAbsolutePath = TaskEnvironment.GetAbsolutePath(sourceSpec);
+                                destAbsolutePath = TaskEnvironment.GetAbsolutePath(destSpec);
                             }
                             catch (ArgumentException ex)
                             {

@@ -95,16 +95,18 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem file in Files)
             {
+                AbsolutePath path;
                 try
                 {
-                    AbsolutePath path = TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(file.ItemSpec));
+                    path = TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(file.ItemSpec));
                 }
                 catch (ArgumentException ex)
                 {
                     Log.LogErrorWithCodeFromResources("Touch.FileDoesNotExist", file.ItemSpec, ex.Message);
                     retVal = false;
                     continue;
-                }       
+                }
+
                 // For speed, eliminate duplicates caused by poor targets authoring
                 if (touchedFilesSet.Contains(path))
                 {
