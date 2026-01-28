@@ -44,6 +44,7 @@ parameters:
     values:
       - auto
       - main
+      - rel/d18.5
       - rel/d18.4
       - rel/d18.3
       - rel/d18.0
