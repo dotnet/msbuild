@@ -2249,6 +2249,14 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="BuildCheck_BC0301_MessageFmt" xml:space="preserve">
     <value>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</value>
   </data>
+  <data name="BuildCheck_BC0303_Title" xml:space="preserve">
+    <value>Private item lists created inside a target should be removed at the end of the target to avoid wasting memory.</value>
+    <comment>Terms in quotes are not to be translated.</comment>
+  </data>
+  <data name="BuildCheck_BC0303_MessageFmt" xml:space="preserve">
+    <value>Private item list '{0}' created in target '{1}' should be removed at the end of the target to avoid wasting memory.</value>
+    <comment>Terms in quotes are not to be translated.</comment>
+  </data>
   <data name="UnknownLoggingType" xml:space="preserve">
     <value>Logging type {0} is not understood by {1}.</value>
   </data>
