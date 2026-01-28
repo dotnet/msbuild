@@ -87,7 +87,7 @@ namespace Microsoft.Build.Framework
         {
             if (string.IsNullOrEmpty(path))
             {
-                throw new ArgumentException("Path must not be null or empty.", nameof(path));
+                throw new ArgumentException(FrameworkResources.GetString("PathMustNotBeNullOrEmpty"));
             }
 
             // Path.IsPathFullyQualified is not available in .NET Standard 2.0
@@ -95,7 +95,7 @@ namespace Microsoft.Build.Framework
 #if NETFRAMEWORK || NET
             if (!Path.IsPathFullyQualified(path))
             {
-                throw new ArgumentException("Path must be rooted.", nameof(path));
+                throw new ArgumentException(FrameworkResources.GetString("PathMustBeRooted"));
             }
 #endif
         }
