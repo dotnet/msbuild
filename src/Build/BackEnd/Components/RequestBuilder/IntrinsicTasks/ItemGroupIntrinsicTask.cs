@@ -259,7 +259,16 @@ namespace Microsoft.Build.BackEnd
             List<ProjectItemInstance> itemsToRemove;
             if (matchOnMetadata == null)
             {
-                itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, bucket.Expander);
+                // Perf optimization: If the Remove operation references itself (e.g. <I Remove="@(I)"/>)
+                // then all items are removed and matching is not necessary
+                if (IsSelfRemove(child.Remove, child.ItemType))
+                {
+                    itemsToRemove = group.ToList();
+                }
+                else
+                {
+                    itemsToRemove = FindItemsMatchingSpecification(group, child.Remove, child.RemoveLocation, bucket.Expander);
+                }
             }
             else
             {
@@ -640,6 +649,24 @@ namespace Microsoft.Build.BackEnd
             }
 
             return itemsRemoved;
+        }
+
+        /// <summary>
+        /// Checks if the Remove specification is a simple self-reference like @(ItemType)
+        /// </summary>
+        /// <param name="removeSpec">The remove specification string</param>
+        /// <param name="itemType">The item type being removed</param>
+        /// <returns>True if this is a self-reference that removes all items</returns>
+        private static bool IsSelfRemove(string removeSpec, string itemType)
+        {
+            if (string.IsNullOrWhiteSpace(removeSpec))
+            {
+                return false;
+            }
+
+            // Check if the specification is exactly @(ItemType) with optional whitespace
+            string trimmedSpec = removeSpec.Trim();
+            return trimmedSpec.Equals($"@({itemType})", StringComparison.OrdinalIgnoreCase);
         }
 
         private List<ProjectItemInstance> FindItemsMatchingMetadataSpecification(
