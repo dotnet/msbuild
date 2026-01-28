@@ -119,6 +119,41 @@ namespace Microsoft.Build.Framework
         public static implicit operator string(AbsolutePath path) => path.Value;
 
         /// <summary>
+        /// Returns a fully resolved path with normalized directory separators and resolved relative path segments.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="AbsolutePath"/> representing the fully resolved path. If this path is already 
+        /// fully resolved (contains no relative segments like "." or ".." and has platform-appropriate directory separators).
+        /// </returns>
+        /// <remarks>
+        /// In case no changes are required returns the current instance to avoid unnecessary allocations.
+        /// Preserves the OriginalValue of the current instance.
+        /// </remarks>
+        public AbsolutePath GetFullPath()
+        {
+            if (Value is null)
+            {
+                return this;
+            }
+
+            // Check for relative path segments "." and ".."
+            // In absolute path those segments can not appear in the beginning of the path, only after a path separator.
+            bool hasRelativeSegment = Value.Contains("/.") || Value.Contains("\\.");
+
+            // Check for directory separator normalization needs (only on Windows: "/" to "\")
+            bool needsSeparatorNormalization = NativeMethods.IsWindows && Value.Contains('/');
+
+            if (!hasRelativeSegment && !needsSeparatorNormalization)
+            {
+                return this;
+            }
+
+            // Use Path.GetFullPath to resolve relative segments and normalize separators.
+            // Skip validation since Path.GetFullPath already ensures the result is absolute.
+            return new AbsolutePath(Path.GetFullPath(Value), OriginalValue, ignoreRootedCheck: true);
+        }
+
+        /// <summary>
         /// Determines whether two <see cref="AbsolutePath"/> instances are equal.
         /// </summary>
         /// <param name="left">The first path to compare.</param>
