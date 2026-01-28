@@ -1180,7 +1180,7 @@
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/binaryformatter-migration-guide</source>
-        <target state="translated">MSB3825: 리소스 "{0}"은(는) 런타임 시 BinaryFormatter를 통해 역직렬화됩니다. BinaryFormatter는 알려진 보안 위험으로 인해 사용되지 않으며 .NET 9 이상에서 제거됩니다. 계속 사용하려면 "GenerateResourceWarnOnBinaryFormatterUse" 속성을 false로 설정하세요.
+        <target state="translated">MSB3825: 리소스 "{0}"은(는) 런타임 시 BinaryFormatter를 통해 역직렬화됩니다. BinaryFormatter는 알려진 보안 위험으로 인해 사용되지 않으며 .NET 9 이상에서 제거됩니다. 계속 사용하려면 "GenerateResourceWarnOnBinaryFormatterUse" 속성을 false로 설정합니다.
            추가 정보: https://aka.ms/binaryformatter-migration-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
@@ -2844,7 +2844,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorDeletingTempFile">
         <source>Could not delete temporary file "{0}". Error: {1}</source>
-        <target state="translated">"{0}" 임시 파일을 삭제하지 못했습니다. 오류: {1}</target>
+        <target state="new">Could not delete temporary file "{0}". Error: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
@@ -2879,12 +2879,12 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFileTransactional">
         <source>MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</source>
-        <target state="translated">MSB3494: 콘텐츠를 추가하기 위해 기존 파일 "{0}"을(를) 읽을 수 없습니다. 오류: {1}</target>
+        <target state="new">MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</target>
         <note>{StrBegin="MSB3494: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.Retry">
         <source>Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</source>
-        <target state="translated">"{0}" 파일에 대한 작업을 다시 시도하는 중입니다({1} 번째 시도 중 {2}번). 이유: {3}</target>
+        <target state="new">Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
@@ -2894,7 +2894,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.UsingTransactionalMode">
         <source>Using transactional mode to write to file "{0}".</source>
-        <target state="translated">트랜잭션 모드로 "{0}" 파일에 기록하는 중입니다.</target>
+        <target state="new">Using transactional mode to write to file "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
