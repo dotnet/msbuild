@@ -1388,8 +1388,8 @@ namespace Microsoft.Build.Evaluation
                             int propertyNameEnd = propertyEndIndex - 1;
 
                             // Check for whitespace in property name - this is likely a typo
-                            // Gated behind ChangeWave 18.3 as this is a breaking change
-                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_3))
+                            // Gated behind ChangeWave 18.4 as this is a breaking change
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4))
                             {
                                 // Check if there's leading or trailing whitespace
                                 if (Char.IsWhiteSpace(expression[propertyNameStart]) || Char.IsWhiteSpace(expression[propertyNameEnd]))
@@ -1456,7 +1456,27 @@ namespace Microsoft.Build.Evaluation
                 Function<T> function = null;
                 string propertyName = propertyBody;
 
-                // Trim the body for compatibility reasons:
+                // Check for whitespace in property body - this is likely a typo
+                // Gated behind ChangeWave 18.4 as this is a breaking change
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4))
+                {
+                    if (Char.IsWhiteSpace(propertyBody[0]) || Char.IsWhiteSpace(propertyBody[propertyBody.Length - 1]))
+                    {
+                        // Calculate the position of the whitespace for error message
+                        // Position is 1-based, relative to the full property reference $({propertyBody})
+                        int whitespacePosition = Char.IsWhiteSpace(propertyBody[0])
+                            ? 3  // Position after "$("
+                            : propertyBody.Length + 2;  // Position before ")"
+
+                        ProjectErrorUtilities.ThrowInvalidProject(
+                            elementLocation,
+                            "IllFormedPropertySpaceInPropertyReference",
+                            $"$({propertyBody})",
+                            whitespacePosition);
+                    }
+                }
+
+                // Trim the body for compatibility reasons (when ChangeWave is disabled):
                 // Spaces are not valid property name chars, but $( Foo ) is allowed, and should always expand to BLANK.
                 // Do a very fast check for leading and trailing whitespace, and trim them from the property body if we have any.
                 // But we will do a property name lookup on the propertyName that we held onto.
