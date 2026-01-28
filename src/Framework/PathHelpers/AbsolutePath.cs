@@ -126,7 +126,8 @@ namespace Microsoft.Build.Framework
         /// </returns>
         /// <remarks>
         /// <para>
-        /// The canonical form of a path has the following properties:
+        /// The canonical form of a path is exactly what <see cref="Path.GetFullPath(string)"/> would produce,
+        /// with the following properties:
         /// <list type="bullet">
         ///   <item>All relative path segments ("." and "..") are resolved.</item>
         ///   <item>Directory separators are normalized to the platform convention (backslash on Windows).</item>
@@ -149,6 +150,7 @@ namespace Microsoft.Build.Framework
             bool hasRelativeSegment = Value.Contains("/.") || Value.Contains("\\.");
 
             // Check for directory separator normalization needs (only on Windows: "/" to "\")
+            // On unix "\" is not a valid path separator, but is a part of the file/directory name, so no normalization is needed. 
             bool needsSeparatorNormalization = NativeMethods.IsWindows && Value.Contains(Path.AltDirectorySeparatorChar);
 
             if (!hasRelativeSegment && !needsSeparatorNormalization)
