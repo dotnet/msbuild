@@ -191,10 +191,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void GetFullPath_NullPath_ShouldReturnSameInstance()
+        public void GetCanonicalForm_NullPath_ShouldReturnSameInstance()
         {
             var absolutePath = new AbsolutePath(null!, null!, ignoreRootedCheck: true);
-            var result = absolutePath.GetFullPath();
+            var result = absolutePath.GetCanonicalForm();
             
             // Should return the same struct values when no normalization is needed
             result.ShouldBe(absolutePath);
@@ -206,9 +206,9 @@ namespace Microsoft.Build.UnitTests
         [InlineData("C:\\foo\\..\\bar")]                   // Parent directory reference
         [InlineData("C:\\foo/bar")]                        // Forward slash to backslash
         [InlineData("C:\\foo\\bar")]                       // Simple Windows path (no normalization needed)
-        public void GetFullPath_WindowsPathNormalization_ShouldMatchPathGetFullPath(string inputPath)
+        public void GetCanonicalForm_WindowsPathNormalization_ShouldMatchPathGetFullPath(string inputPath)
         {
-            ValidateGetFullPathMatchesSystem(inputPath);
+            ValidateGetCanonicalFormMatchesSystem(inputPath);
         }
 
         [UnixOnlyTheory]
@@ -216,15 +216,15 @@ namespace Microsoft.Build.UnitTests
         [InlineData("/foo/../bar")]                        // Parent directory reference     
         [InlineData("/foo/bar")]                           // Simple Unix path (no normalization needed)
         [InlineData("/foo/bar\\baz")]                      // Simple Unix path with backslash that is not a path separator (no normalization needed)
-        public void GetFullPath_UnixPathNormalization_ShouldMatchPathGetFullPath(string inputPath)
+        public void GetCanonicalForm_UnixPathNormalization_ShouldMatchPathGetFullPath(string inputPath)
         {
-            ValidateGetFullPathMatchesSystem(inputPath);
+            ValidateGetCanonicalFormMatchesSystem(inputPath);
         }
         
-        private static void ValidateGetFullPathMatchesSystem(string inputPath)
+        private static void ValidateGetCanonicalFormMatchesSystem(string inputPath)
         {
             var absolutePath = new AbsolutePath(inputPath, ignoreRootedCheck: true);
-            var result = absolutePath.GetFullPath();
+            var result = absolutePath.GetCanonicalForm();
             var systemResult = Path.GetFullPath(inputPath);
             
             // Should match Path.GetFullPath behavior exactly

@@ -119,17 +119,25 @@ namespace Microsoft.Build.Framework
         public static implicit operator string(AbsolutePath path) => path.Value;
 
         /// <summary>
-        /// Returns a fully resolved path with normalized directory separators and resolved relative path segments.
+        /// Returns the canonical form of this path.
         /// </summary>
         /// <returns>
-        /// An <see cref="AbsolutePath"/> representing the fully resolved path. If this path is already 
-        /// fully resolved (contains no relative segments like "." or ".." and has platform-appropriate directory separators).
+        /// An <see cref="AbsolutePath"/> representing the canonical form of the path.
         /// </returns>
         /// <remarks>
-        /// In case no changes are required returns the current instance to avoid unnecessary allocations.
+        /// <para>
+        /// The canonical form of a path has the following properties:
+        /// <list type="bullet">
+        ///   <item>All relative path segments ("." and "..") are resolved.</item>
+        ///   <item>Directory separators are normalized to the platform convention (backslash on Windows).</item>
+        /// </list>
+        /// </para>
+        /// <para>
+        /// If the path is already in canonical form, returns the current instance to avoid unnecessary allocations.
         /// Preserves the OriginalValue of the current instance.
+        /// </para>
         /// </remarks>
-        public AbsolutePath GetFullPath()
+        internal AbsolutePath GetCanonicalForm()
         {
             if (Value is null)
             {
