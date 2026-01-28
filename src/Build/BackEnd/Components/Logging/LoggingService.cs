@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -104,6 +105,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// it is only discoverable with Reflection using the Public flag (go figure!)
         /// </remarks>
         private static readonly Lazy<PropertyInfo> s_projectStartedEventArgsToolsVersion = new Lazy<PropertyInfo>(() => typeof(ProjectStartedEventArgs).GetProperty("ToolsVersion", BindingFlags.Public | BindingFlags.Instance), LazyThreadSafetyMode.PublicationOnly);
+
+        /// <summary>
+        /// Meter for logging service metrics.
+        /// </summary>
+        private static readonly Meter s_meter = new Meter("Microsoft.Build");
 
         #region Data
 
@@ -246,6 +252,19 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Null means that the optimization is disabled or no relevant logger has been registered.
         /// </summary>
         private MessageImportance? _minimumRequiredMessageImportance;
+
+        /// <summary>
+        /// Counter tracking the total number of log messages forwarded from worker nodes to the central node, by source node.
+        /// </summary>
+        private ConcurrentDictionary<int, long> _forwardedLogMessageCountByNode;
+
+        /// <summary>
+        /// Observable counter for forwarded log messages metric.
+        /// Must be kept alive for the observable counter to continue reporting.
+        /// </summary>
+#pragma warning disable IDE0052 // Remove unread private members
+        private ObservableCounter<long> _forwardedLogMessagesCounter;
+#pragma warning restore IDE0052 // Remove unread private members
 
         #region LoggingThread Data
 
@@ -873,6 +892,21 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Callback method to collect forwarded log message counts by source node.
+        /// </summary>
+        /// <returns>Measurements for each source node that has forwarded messages.</returns>
+        private IEnumerable<Measurement<long>> CollectForwardedLogMessageCounts()
+        {
+            if (_forwardedLogMessageCountByNode != null)
+            {
+                foreach (var kvp in _forwardedLogMessageCountByNode)
+                {
+                    yield return new(kvp.Value, new KeyValuePair<string, object>("node.id", kvp.Key));
+                }
+            }
+        }
+
+        /// <summary>
         /// NotThreadSafe, this method should only be called from the component host thread
         /// Called by the build component host when a component is first initialized.
         /// </summary>
@@ -904,6 +938,17 @@ namespace Microsoft.Build.BackEnd.Logging
                 _buildEngineDataRouter = (buildComponentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)?.BuildEngineDataRouter;
 
                 _buildCheckEnabled = buildComponentHost.BuildParameters.IsBuildCheckEnabled;
+
+                // Only create the forwarded log messages counter on the central (scheduler) node
+                if (_nodeId == Scheduler.VirtualNode)
+                {
+                    _forwardedLogMessageCountByNode = new ConcurrentDictionary<int, long>();
+                    _forwardedLogMessagesCounter = s_meter.CreateObservableCounter(
+                        "msbuild_forwarded_log_messages",
+                        CollectForwardedLogMessageCounts,
+                        unit: "messages",
+                        description: "Total number of log messages forwarded from worker nodes to the central node");
+                }
             }
         }
 
@@ -1005,6 +1050,12 @@ namespace Microsoft.Build.BackEnd.Logging
             InjectNonSerializedData(loggingPacket);
 
             ErrorUtilities.VerifyThrow(loggingPacket.EventType != LoggingEventType.CustomEvent, "Custom event types are no longer supported. Does the sending node have a different version?");
+
+            // Increment the forwarded log message counter by source node (only on central node where the counter is created)
+            if (_nodeId == Scheduler.VirtualNode && _forwardedLogMessageCountByNode != null)
+            {
+                _forwardedLogMessageCountByNode.AddOrUpdate(node, 1, (key, oldValue) => oldValue + 1);
+            }
 
             ProcessLoggingEvent(loggingPacket.NodeBuildEvent);
         }

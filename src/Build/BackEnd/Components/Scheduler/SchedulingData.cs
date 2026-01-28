@@ -3,10 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
-
-#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -61,7 +61,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Maps a node id to the currently executing request, if any.
         /// </summary>
-        private readonly Dictionary<int, SchedulableRequest> _executingRequestByNode = new Dictionary<int, SchedulableRequest>(32);
+        private readonly Dictionary<int, SchedulableRequest?> _executingRequestByNode = new Dictionary<int, SchedulableRequest?>(32);
 
         /// <summary>
         /// Maps a node id to those requests which are ready to execute, if any.
@@ -109,18 +109,84 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly List<SchedulingEvent> _buildEvents = new List<SchedulingEvent>(64);
 
+#pragma warning disable IDE0052 // Remove unread private members
+        private readonly ObservableGauge<int> _buildEventGauge;
+        private readonly ObservableGauge<int> _schedulerRequestGauge;
+        private readonly ObservableGauge<int> _nodeConfigurationGauge;
+        private readonly ObservableCounter<long> _nodeIdleTimeCounter;
+#pragma warning restore IDE0052 // Remove unread private members
+
         /// <summary>
         /// The current time for events.  This is set by the scheduler when it does a scheduling cycle in response to an event.
         /// </summary>
         private DateTime _currentEventTime;
 
+        /// <summary>
+        /// Tracks when each node last became idle (timestamp in ticks). Key is node ID.
+        /// </summary>
+        private readonly Dictionary<int, long> _nodeIdleStartTimes = new Dictionary<int, long>();
+
+        /// <summary>
+        /// Accumulates total idle time for each node in milliseconds.
+        /// </summary>
+        private readonly Dictionary<int, double> _nodeIdleTimeMs = new Dictionary<int, double>();
         #endregion
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        public SchedulingData()
+        /// <param name="parentMeter">The Meter to hang metrics off of.</param>
+        public SchedulingData(Meter parentMeter)
         {
+            // gauges for request by state
+            _schedulerRequestGauge = parentMeter.CreateObservableGauge(
+                "msbuild_scheduler_request_count",
+                ComputeSchedulerRequestsMetrics,
+                description: "The current count of requests in the scheduler",
+                unit: "requests");
+
+            _nodeConfigurationGauge = parentMeter.CreateObservableGauge(
+                    "msbuild_scheduler_node_configuration_count",
+                    ReportNodeConfigurations,
+                    description: "The current count of configurations assigned to the node in the scheduler",
+                    unit: "configurations");
+
+            _buildEventGauge = parentMeter.CreateObservableGauge(
+                "msbuild_scheduler_build_event_count",
+                () => _buildEvents.Count,
+                description: "The total count of build events which have occurred during this build",
+                unit: "events");
+
+            _nodeIdleTimeCounter = parentMeter.CreateObservableCounter(
+                "msbuild_node_idle_time",
+                CollectNodeIdleTime,
+                unit: "ms",
+                description: "Total time each node has spent idle");
+        }
+
+        private IEnumerable<Measurement<int>> ComputeSchedulerRequestsMetrics()
+        {
+            yield return new Measurement<int>(_executingRequests.Count, new KeyValuePair<string, object?>("request.type", "executing"));
+            yield return new Measurement<int>(_readyRequests.Count, new KeyValuePair<string, object?>("request.type", "ready"));
+            yield return new Measurement<int>(_blockedRequests.Count, new KeyValuePair<string, object?>("request.type", "blocked"));
+            yield return new Measurement<int>(_yieldingRequests.Count, new KeyValuePair<string, object?>("request.type", "yielding"));
+            yield return new Measurement<int>(_unscheduledRequests.Count, new KeyValuePair<string, object?>("request.type", "unscheduled"));
+        }
+
+        private IEnumerable<Measurement<int>> ReportNodeConfigurations()
+        {
+            foreach (var kvp in _configurationsByNode)
+            {
+                yield return new Measurement<int>(kvp.Value.Count, new KeyValuePair<string, object?>("node.id", kvp.Key));
+            }
+        }
+
+        private IEnumerable<Measurement<long>> CollectNodeIdleTime()
+        {
+            foreach (var kvp in _nodeIdleTimeMs)
+            {
+                yield return new Measurement<long>((long)kvp.Value, new KeyValuePair<string, object?>("node_id", kvp.Key));
+            }
         }
 
         /// <summary>
@@ -252,7 +318,7 @@ namespace Microsoft.Build.BackEnd
         /// New requests always go on the front of the queue, because we prefer to build the projects we just received first (depth first, absent
         /// any particular scheduling algorithm such as in the single-proc case.)
         /// </remarks>
-        public SchedulableRequest CreateRequest(BuildRequest buildRequest, SchedulableRequest parent)
+        public SchedulableRequest CreateRequest(BuildRequest buildRequest, SchedulableRequest? parent)
         {
             SchedulableRequest request = new SchedulableRequest(this, buildRequest, parent);
             request.CreationTime = EventTime;
@@ -261,7 +327,7 @@ namespace Microsoft.Build.BackEnd
             _unscheduledRequestNodesByRequest[request] = requestNode;
 
             // Update the configuration information.
-            HashSet<SchedulableRequest> requests;
+            HashSet<SchedulableRequest>? requests;
             if (!_configurationToRequests.TryGetValue(request.BuildRequest.ConfigurationId, out requests))
             {
                 requests = new HashSet<SchedulableRequest>();
@@ -308,6 +374,9 @@ namespace Microsoft.Build.BackEnd
                 case SchedulableRequestState.Executing:
                     _executingRequests.Remove(request.BuildRequest.GlobalRequestId);
                     _executingRequestByNode[request.AssignedNode] = null;
+
+                    // Node is becoming idle, start tracking idle time
+                    _nodeIdleStartTimes[request.AssignedNode] = Stopwatch.GetTimestamp();
                     break;
 
                 case SchedulableRequestState.Ready:
@@ -323,7 +392,7 @@ namespace Microsoft.Build.BackEnd
                     if (request.State != SchedulableRequestState.Completed)
                     {
                         // Map the request to the node.
-                        HashSet<SchedulableRequest> requestsAssignedToNode;
+                        HashSet<SchedulableRequest>? requestsAssignedToNode;
                         if (!_scheduledRequestsByNode.TryGetValue(request.AssignedNode, out requestsAssignedToNode))
                         {
                             requestsAssignedToNode = new HashSet<SchedulableRequest>();
@@ -334,7 +403,7 @@ namespace Microsoft.Build.BackEnd
                         requestsAssignedToNode.Add(request);
 
                         // Map the configuration to the node.
-                        HashSet<int> configurationsAssignedToNode;
+                        HashSet<int>? configurationsAssignedToNode;
                         if (!_configurationsByNode.TryGetValue(request.AssignedNode, out configurationsAssignedToNode))
                         {
                             configurationsAssignedToNode = new HashSet<int>();
@@ -379,6 +448,21 @@ namespace Microsoft.Build.BackEnd
                     ErrorUtilities.VerifyThrow(!_executingRequests.ContainsKey(request.BuildRequest.GlobalRequestId), "Request with global id {0} is already executing!");
                     ErrorUtilities.VerifyThrow(!_executingRequestByNode.ContainsKey(request.AssignedNode) || _executingRequestByNode[request.AssignedNode] == null, "Node {0} is currently executing a request.", request.AssignedNode);
 
+                    // Node is becoming busy, record idle time if it was idle
+                    if (_nodeIdleStartTimes.TryGetValue(request.AssignedNode, out long idleStartTime))
+                    {
+                        long endTime = Stopwatch.GetTimestamp();
+                        double idleDurationMs = (endTime - idleStartTime) * 1000.0 / Stopwatch.Frequency;
+
+                        if (!_nodeIdleTimeMs.ContainsKey(request.AssignedNode))
+                        {
+                            _nodeIdleTimeMs[request.AssignedNode] = 0;
+                        }
+                        _nodeIdleTimeMs[request.AssignedNode] += idleDurationMs;
+
+                        _nodeIdleStartTimes.Remove(request.AssignedNode);
+                    }
+
                     _executingRequests[request.BuildRequest.GlobalRequestId] = request;
                     _executingRequestByNode[request.AssignedNode] = request;
                     _configurationToNode[request.BuildRequest.ConfigurationId] = request.AssignedNode;
@@ -392,7 +476,7 @@ namespace Microsoft.Build.BackEnd
                 case SchedulableRequestState.Ready:
                     ErrorUtilities.VerifyThrow(!_readyRequests.ContainsKey(request.BuildRequest.GlobalRequestId), "Request with global id {0} is already ready!");
                     _readyRequests[request.BuildRequest.GlobalRequestId] = request;
-                    HashSet<SchedulableRequest> readyRequestsOnNode;
+                    HashSet<SchedulableRequest>? readyRequestsOnNode;
                     if (!_readyRequestsByNode.TryGetValue(request.AssignedNode, out readyRequestsOnNode))
                     {
                         readyRequestsOnNode = new HashSet<SchedulableRequest>();
@@ -424,7 +508,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public int GetRequestsAssignedToConfigurationCount(int configurationId)
         {
-            HashSet<SchedulableRequest> requests;
+            HashSet<SchedulableRequest>? requests;
             if (!_configurationToRequests.TryGetValue(configurationId, out requests))
             {
                 return 0;
@@ -454,9 +538,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Retrieves a request which is currently blocked, or null if there is none.
         /// </summary>
-        public SchedulableRequest GetBlockedRequestIfAny(int globalRequestId)
+        public SchedulableRequest? GetBlockedRequestIfAny(int globalRequestId)
         {
-            SchedulableRequest request;
+            SchedulableRequest? request;
             if (_blockedRequests.TryGetValue(globalRequestId, out request))
             {
                 return request;
@@ -488,7 +572,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public SchedulableRequest GetScheduledRequest(int globalRequestId)
         {
-            SchedulableRequest returnValue = InternalGetScheduledRequestByGlobalRequestId(globalRequestId);
+            SchedulableRequest? returnValue = InternalGetScheduledRequestByGlobalRequestId(globalRequestId);
             ErrorUtilities.VerifyThrow(returnValue != null, "Global Request Id {0} has not been assigned and cannot be retrieved.", globalRequestId);
             return returnValue;
         }
@@ -498,7 +582,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool IsNodeWorking(int nodeId)
         {
-            SchedulableRequest request;
+            SchedulableRequest? request;
             if (!_executingRequestByNode.TryGetValue(nodeId, out request))
             {
                 return false;
@@ -510,9 +594,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Returns the number of configurations assigned to the specified node.
         /// </summary>
-        public int GetConfigurationsCountByNode(int nodeId, bool excludeTraversals, IConfigCache configCache)
+        public int GetConfigurationsCountByNode(int nodeId, bool excludeTraversals, IConfigCache? configCache)
         {
-            HashSet<int> configurationsAssignedToNode;
+            HashSet<int>? configurationsAssignedToNode;
 
             if (!_configurationsByNode.TryGetValue(nodeId, out configurationsAssignedToNode))
             {
@@ -537,9 +621,10 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets the request currently executing on the node.
         /// </summary>
-        public SchedulableRequest GetExecutingRequestByNode(int nodeId)
+        public SchedulableRequest? GetExecutingRequestByNode(int nodeId)
         {
-            return _executingRequestByNode[nodeId];
+            _executingRequestByNode.TryGetValue(nodeId, out var request);
+            return request;
         }
 
         /// <summary>
@@ -555,7 +640,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public int GetScheduledRequestsCountByNode(int nodeId)
         {
-            HashSet<SchedulableRequest> requests;
+            HashSet<SchedulableRequest>? requests;
             if (!_scheduledRequestsByNode.TryGetValue(nodeId, out requests))
             {
                 return 0;
@@ -569,7 +654,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public IEnumerable<SchedulableRequest> GetScheduledRequestsByNode(int nodeId)
         {
-            HashSet<SchedulableRequest> requests;
+            HashSet<SchedulableRequest>? requests;
             if (!_scheduledRequestsByNode.TryGetValue(nodeId, out requests))
             {
                 return ReadOnlyEmptyCollection<SchedulableRequest>.Instance;
@@ -583,7 +668,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public IEnumerable<SchedulableRequest> GetReadyRequestsByNode(int nodeId)
         {
-            HashSet<SchedulableRequest> requests;
+            HashSet<SchedulableRequest>? requests;
             if (!_readyRequestsByNode.TryGetValue(nodeId, out requests))
             {
                 return ReadOnlyEmptyCollection<SchedulableRequest>.Instance;
@@ -596,7 +681,7 @@ namespace Microsoft.Build.BackEnd
         /// Retrieves a set of build requests which have the specified parent.  If root is null, this will retrieve all of the
         /// top-level requests.
         /// </summary>
-        public IEnumerable<SchedulableRequest> GetRequestsByHierarchy(SchedulableRequest root)
+        public IEnumerable<SchedulableRequest> GetRequestsByHierarchy(SchedulableRequest? root)
         {
             if (root == null)
             {
@@ -691,9 +776,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets a schedulable request with the specified global request id if it is currently scheduled.
         /// </summary>
-        private SchedulableRequest InternalGetScheduledRequestByGlobalRequestId(int globalRequestId)
+        private SchedulableRequest? InternalGetScheduledRequestByGlobalRequestId(int globalRequestId)
         {
-            SchedulableRequest returnValue;
+            SchedulableRequest? returnValue;
             if (_executingRequests.TryGetValue(globalRequestId, out returnValue))
             {
                 return returnValue;
@@ -722,7 +807,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void ExpectScheduledRequestState(int globalRequestId, SchedulableRequestState state)
         {
-            SchedulableRequest request = InternalGetScheduledRequestByGlobalRequestId(globalRequestId);
+            SchedulableRequest? request = InternalGetScheduledRequestByGlobalRequestId(globalRequestId);
             if (request == null)
             {
                 ErrorUtilities.ThrowInternalError("Request {0} was expected to be in state {1} but is not scheduled at all (it may be unscheduled or may be unknown to the system.)", globalRequestId, state);
@@ -742,7 +827,7 @@ namespace Microsoft.Build.BackEnd
             {
                 _schedulingData = schedulingData;
                 _enumerator = _schedulingData._unscheduledRequests.GetEnumerator();
-                Current = default;
+                Current = default!;
             }
 
             public UnscheduledRequestsWhichCanBeScheduledEnumerator GetEnumerator() => this;
