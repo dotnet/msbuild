@@ -23,13 +23,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _output = outputHelper;
         }
 
+        private NodeLoggingContext CreateNodeLoggingContext(int nodeId, bool isInProc) => new NodeLoggingContext(new MockLoggingService(_output.WriteLine), BuildEventContext.Invalid.WithNodeId(nodeId), nodeId, isInProc);
+
         /// <summary>
         /// A few simple tests for NodeLoggingContexts.
         /// </summary>
         [Fact]
         public void CreateValidNodeLoggingContexts()
         {
-            NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(_output.WriteLine), 1, true);
+            NodeLoggingContext context = CreateNodeLoggingContext(1, true);
             context.IsInProcNode.ShouldBeTrue();
             context.IsValid.ShouldBeTrue();
 
@@ -38,7 +40,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             context.BuildEventContext.NodeId.ShouldBe(1);
 
-            NodeLoggingContext context2 = new NodeLoggingContext(new MockLoggingService(_output.WriteLine), 2, false);
+            NodeLoggingContext context2 = CreateNodeLoggingContext(2, false);
             context2.IsInProcNode.ShouldBeFalse();
             context2.IsValid.ShouldBeTrue();
 
@@ -58,14 +60,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<InternalErrorException>(() =>
             {
-                _ = new NodeLoggingContext(new MockLoggingService(), -2, true);
+                _ = CreateNodeLoggingContext(-2, true);
             });
         }
 
         [Fact]
         public void HasLoggedErrors()
         {
-            NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(_output.WriteLine), 1, true);
+            NodeLoggingContext context = CreateNodeLoggingContext(1, true);
             context.HasLoggedErrors.ShouldBeFalse();
 
             context.LogCommentFromText(Framework.MessageImportance.High, "Test message");

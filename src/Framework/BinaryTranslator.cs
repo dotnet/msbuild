@@ -490,14 +490,20 @@ namespace Microsoft.Build.BackEnd
             /// <param name="value">The context to be translated.</param>
             public void Translate(ref BuildEventContext value)
             {
-                value = new BuildEventContext(
-                    _reader.ReadInt32(),
-                    _reader.ReadInt32(),
-                    _reader.ReadInt32(),
-                    _reader.ReadInt32(),
-                    _reader.ReadInt32(),
-                    _reader.ReadInt32(),
-                    _reader.ReadInt32());
+                int submissionId = _reader.ReadInt32();
+                int nodeId = _reader.ReadInt32();
+                int evaluationId = _reader.ReadInt32();
+                int projectInstanceId = _reader.ReadInt32();
+                int projectContextId = _reader.ReadInt32();
+                int targetId = _reader.ReadInt32();
+                int taskId = _reader.ReadInt32();
+
+                value = BuildEventContext.CreateInitial(submissionId, nodeId)
+                    .WithEvaluationId(evaluationId)
+                    .WithProjectInstanceId(projectInstanceId)
+                    .WithProjectContextId(projectContextId)
+                    .WithTargetId(targetId)
+                    .WithTaskId(taskId);
             }
 #endif
 
