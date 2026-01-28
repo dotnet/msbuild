@@ -159,12 +159,15 @@ namespace Microsoft.Build.Tasks
                 string sourceSpec = SourceFiles[i].ItemSpec;
                 string destinationSpec = DestinationFiles[i].ItemSpec;
 
-                AbsolutePath sourceFile = TaskEnvironment.GetAbsolutePath(sourceSpec);
-                AbsolutePath destinationFile = TaskEnvironment.GetAbsolutePath(destinationSpec);
+                AbsolutePath? sourceFile = null;
+                AbsolutePath? destinationFile = null;
 
                 try
                 {
-                    if (!FailIfNotIncremental && MoveFileWithLogging(sourceFile, destinationFile))
+                    sourceFile = TaskEnvironment.GetAbsolutePath(sourceSpec);
+                    destinationFile = TaskEnvironment.GetAbsolutePath(destinationSpec);
+
+                    if (!FailIfNotIncremental && MoveFileWithLogging(sourceFile.Value, destinationFile.Value))
                     {
                         SourceFiles[i].CopyMetadataTo(DestinationFiles[i]);
                         destinationFilesSuccessfullyMoved.Add(DestinationFiles[i]);
