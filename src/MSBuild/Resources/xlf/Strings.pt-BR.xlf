@@ -35,7 +35,7 @@
       </trans-unit>
       <trans-unit id="DuplicateBinaryLoggerPathsIgnored">
         <source>Duplicate binary log path(s) specified and ignored: {0}</source>
-        <target state="translated">Caminhos de log binários duplicados especificados e ignorados: {0}</target>
+        <target state="new">Duplicate binary log path(s) specified and ignored: {0}</target>
         <note>{0} is the list of duplicate paths that were filtered out</note>
       </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
@@ -67,8 +67,9 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Faz com que o MSBuild relate acessos a arquivos para qualquer plug-in
-                     de cache de projeto configurado.
+                     Faz com que o MSBuild relate acessos a arquivos a qualquer
+ configurado
+                     plug-ins de cache do projeto.
 
                      Este sinalizador é experimental e pode não funcionar conforme o esperado.
     </target>
@@ -253,18 +254,18 @@
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
-                     Habilita o modo multithread EXPERIMENTAL no MSBuild.
-                     Isso significa que o MSBuild usará vários threads
-                     para criar projetos em paralelo,
-                     em vez de vários processos.
-                     Essa opção não tem suporte.
-                     O número máximo de threads usados é determinado pela
-                     opção -maxCpuCount.
-                     No caso do modo multithread em
-                     e MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount não pode ser maior que 256.
-                     (Forma abreviada: -mt)
+        <target state="new">  -multithreaded
+                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
+                     This means that MSBuild will use multiple threads
+                     to build projects in parallel,
+                     instead of multiple processes.
+                     This option is not supported.
+                     The maximum number of threads used is determined by the
+                     -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
+                     (Short form: -mt)
     </target>
         <note />
       </trans-unit>
@@ -276,7 +277,7 @@
                      -getProperty:Bar -getResultOutputFile:Biz.txt
                      This writes the value of property Bar into Biz.txt.
     </source>
-        <target state="translated">  -getResultOutputFile:file
+        <target state="translated">  -getResultOutputFile:arquivo
                      Redirecionar a saída de get* para um arquivo.
 
                      Exemplo:
@@ -336,17 +337,17 @@
       </trans-unit>
       <trans-unit id="LoggingArgsEnvVarError">
         <source>MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</source>
-        <target state="translated">MSB1071: erro ao processar MSBUILD_LOGGING_ARGS de ambiente: {0}</target>
+        <target state="new">MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</target>
         <note>{StrBegin="MSB1071: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the error message.</note>
       </trans-unit>
       <trans-unit id="LoggingArgsEnvVarUnsupportedArgument">
         <source>MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</source>
-        <target state="translated">MSB1070: MSBUILD_LOGGING_ARGS: ignorando argumento sem suporte "{0}". Somente os argumentos -bl e -check são permitidos.</target>
+        <target state="new">MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</target>
         <note>{StrBegin="MSB1070: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the unsupported argument.</note>
       </trans-unit>
       <trans-unit id="LoggingArgsEnvVarUsing">
         <source>Using arguments from MSBUILD_LOGGING_ARGS environment variable: {0}</source>
-        <target state="translated">Usando argumentos de uma MSBUILD_LOGGING_ARGS de ambiente: {0}</target>
+        <target state="new">Using arguments from MSBUILD_LOGGING_ARGS environment variable: {0}</target>
         <note>LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is a string with the command-line arguments from the environment variable.</note>
       </trans-unit>
       <trans-unit id="LongPaths">
@@ -891,7 +892,7 @@ arquivo de resposta.
                         ShowCommandLine--Mostrar mensagens do TaskCommandLineEvent
                         ShowTimestamp--Exibir o Timestamp como prefixo de qualquer
                             mensagem.
-                        ShowEventId--Mostrar eventId para eventos iniciados,
+                        ShowEventId--Mostrar eventId para eventos iniciados
                             eventos concluídos e mensagens
                         ForceNoAlign--Não alinha o texto ao tamanho do
                             buffer do console

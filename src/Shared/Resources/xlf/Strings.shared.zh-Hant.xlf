@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
         <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="translated">不支援自定義事件類型 '{0}'，因為所有自定義事件類型都已過時。請改用 Extended*EventArgs。更多資訊： https://aka.ms/msbuild/eventargs</target>
+        <target state="translated">不支援自訂事件類型 '{0}'，因為所有自訂事件類型都已淘汰。請改為使用 Extended*EventArgs。詳細資訊: https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
@@ -49,7 +49,7 @@
       </trans-unit>
       <trans-unit id="Message.InvalidImportance">
         <source>MSB3511: "{0}" is an invalid value for the "Importance" parameter. Valid values are: High, Normal and Low.</source>
-        <target state="translated">MSB3511: "{0}" 對 "Importance" 參數而言為無效值。有效值為: High、Normal 和 Low。</target>
+        <target state="new">MSB3511: "{0}" is an invalid value for the "Importance" parameter. Valid values are: High, Normal and Low.</target>
         <note>{StrBegin="MSB3511: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.
             The importance enumeration is: High, Normal and Low.  Specifying any other importance will result in this message being shown
             LOCALIZATION: "Importance" should not be localized.
