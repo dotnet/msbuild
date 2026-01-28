@@ -20,7 +20,7 @@
       </trans-unit>
       <trans-unit id="AssemblyLoad_Warning">
         <source>The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</source>
-        <target state="translated">사용자 지정 작업 '{0}'은(는) UsingTask 정의에 올바른 런타임과 아키텍처가 지정되어 있지 않아 out-of-process 실행으로 대체되었습니다. 이로 인해 빌드 성능이 저하될 수 있습니다. UsingTask 요소를 업데이트하여 런타임과 아키텍처 속성(예: Runtime="CLR4" Architecture="x64")을 명확히 지정하거나 TaskFactory="TaskHostFactory"를 사용하세요.</target>
+        <target state="new">The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</target>
         <note />
       </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
@@ -218,12 +218,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_MessageFmt">
         <source>Project {0} specifies 'TargetFramework(s)' property '{1}', which does not use the .NET SDK. Those properties are not understood by projects that import C# targets directly.</source>
-        <target state="translated">프로젝트 {0} .NET SDK를 사용하지 않는 'TargetFramework' 속성 '{1}' 지정합니다. 이러한 속성은 C# 대상을 직접 가져오는 프로젝트에서 이해할 수 없습니다.</target>
+        <target state="translated">프로젝트 {0}은(는) .NET SDK를 사용하지 않는 'TargetFramework' 속성 '{1}'을(를) 지정합니다. 이러한 속성은 C# 대상을 직접 가져오는 프로젝트에서는 이해되지 않습니다.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0108_Title">
         <source>'TargetFramework' and 'TargetFrameworks' properties are not respected and should not be specified in projects that do not use the .NET SDK.</source>
-        <target state="translated">'TargetFramework' 및 'TargetFrameworks' 속성은 사용되지 않으며 .NET SDK를 사용하지 않는 프로젝트에서 지정해서는 안 됩니다.</target>
+        <target state="translated">'TargetFramework' 및 'TargetFrameworks' 속성은 적용되지 않으므로 .NET SDK를 사용하지 않는 프로젝트에서 지정해서는 안 됩니다.</target>
         <note>Terms in quotes are not to be translated.</note>
       </trans-unit>
       <trans-unit id="BuildCheck_BC0302_MessageFmt">
@@ -268,12 +268,12 @@
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_MessageFmt">
         <source>Location: '{0}' cannot be fully trusted, place your projects outside of that folder (Project: {1}).</source>
-        <target state="translated">위치: '{0}' 완전히 신뢰할 수 없습니다. 프로젝트를 해당 폴더 외부에 배치하세요(프로젝트: {1}).</target>
+        <target state="translated">위치: '{0}'은(는) 완전히 신뢰할 수 없으므로 프로젝트를 해당 폴더 외부에 배치합니다(프로젝트: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildCheck_BC0301_Title">
         <source>Downloads folder is untrusted for projects building.</source>
-        <target state="translated">프로젝트 빌드에 대해 다운로드 폴더를 신뢰할 수 없습니다.</target>
+        <target state="translated">다운로드 폴더는 프로젝트 빌드에 대해 신뢰할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="BuildFinished">
@@ -453,7 +453,7 @@
       </trans-unit>
       <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
         <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
-        <target state="translated">작업 '{1}'에 대한 사용자 지정 TaskFactory '{0}'은(는) 프로세스 외부 TaskHost 실행을 지원하지 않습니다. 다중 스레드 빌드 모드를 끄거나 프로젝트 파일의 &lt;UsingTask&gt; 정의에서 사용자 지정 TaskFactory를 제거하세요.</target>
+        <target state="new">Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
@@ -463,7 +463,7 @@
       </trans-unit>
       <trans-unit id="DotnetHostPathIsDirectory">
         <source>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</source>
-        <target state="translated">MSB4280: DOTNET_HOST_PATH 환경 변수가 dotnet 실행 파일에 대한 경로가 아닌 디렉터리("{0}")으(로) 설정되어 있습니다. 이로 인해 Roslyn 컴파일러와 같은 이 변수를 사용하는 작업에서 빌드 오류가 발생할 수 있습니다. 변수를 설정 해제하거나 dotnet 실행 파일을 직접 가리키도록 업데이트합니다(예: "C:\Program Files\dotnet\dotnet.exe").</target>
+        <target state="new">MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</target>
         <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
@@ -496,7 +496,7 @@
       </trans-unit>
       <trans-unit id="ErrorCopyingBinaryLog">
         <source>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</source>
-        <target state="translated">MSB4279: 이진 로그를 "{0}"에서 "{1}"(으)로 복사하지 못했습니다. {2}</target>
+        <target state="new">MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</target>
         <note>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</note>
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
@@ -532,7 +532,7 @@
       </trans-unit>
       <trans-unit id="HostObjectFailure">
         <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
-        <target state="translated">작업 "{0}"이(가) 호스트 개체를 가져오지 못했습니다. {1} 이 문제를 보고하려면 작업 작성자에게 문의하세요.</target>
+        <target state="new">The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</target>
         <note>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
@@ -913,12 +913,12 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
-        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했지만 이미 환경 변수로 "{2}"(으)로 설정되어 있었습니다.</target>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
         <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
-        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했지만 이미 다른 SDK에 의해 "{2}"(으)로 설정되어 있었습니다.</target>
+        <target state="new">An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -1106,7 +1106,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="UnknownLoggingType">
         <source>Logging type {0} is not understood by {1}.</source>
-        <target state="translated">로깅 유형 {0} {1} 이해할 수 없습니다.</target>
+        <target state="translated">로깅 유형 {0}은(는) {1}에서는 이해되지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="UsingInputCaches">

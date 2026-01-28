@@ -1180,7 +1180,7 @@
       <trans-unit id="GenerateResource.BinaryFormatterUse">
         <source>MSB3825: Resource "{0}" will be deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to known security risks and is removed from .NET 9+. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
            More information: https://aka.ms/binaryformatter-migration-guide</source>
-        <target state="translated">MSB3825: zasób „{0}” może być deserializowany za pośrednictwem funkcji BinaryFormatter w czasie wykonywania. Funkcja BinaryFormatter jest przestarzała ze względu na znane zagrożenia bezpieczeństwa i została usunięta z platformy .NET 9 lub nowszej. Jeśli chcesz nadal jej używać, ustaw właściwość „GenerateResourceWarnOnBinaryFormatterUse” na wartość false.
+        <target state="translated">MSB3825: zasób „{0}” może być deserializowany za pośrednictwem narzędzia BinaryFormatter w środowisku uruchomieniowym. Narzędzie BinaryFormatter jest przestarzałe ze względu na znane zagrożenia bezpieczeństwa i zostało usunięte z platformy .NET 9+. Jeśli chcesz nadal go używać, ustaw właściwość „GenerateResourceWarnOnBinaryFormatterUse” na wartość false.
            Więcej informacji: https://aka.ms/binaryformatter-migration-guide</target>
         <note>{StrBegin="MSB3825: "}</note>
       </trans-unit>
@@ -2844,7 +2844,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorDeletingTempFile">
         <source>Could not delete temporary file "{0}". Error: {1}</source>
-        <target state="translated">Nie można usunąć pliku tymczasowego „{0}”. Błąd: {1}</target>
+        <target state="new">Could not delete temporary file "{0}". Error: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
@@ -2879,12 +2879,12 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFileTransactional">
         <source>MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</source>
-        <target state="translated">MSB3494: nie można odczytać istniejącego pliku „{0}” w celu dołączenia zawartości. Błąd: {1}</target>
+        <target state="new">MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</target>
         <note>{StrBegin="MSB3494: "}</note>
       </trans-unit>
       <trans-unit id="WriteLinesToFile.Retry">
         <source>Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</source>
-        <target state="translated">Ponawianie próby wykonania operacji w przypadku pliku „{0}” (próba {1} z {2}). Przyczyna: {3}</target>
+        <target state="new">Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
@@ -2894,7 +2894,7 @@
       </trans-unit>
       <trans-unit id="WriteLinesToFile.UsingTransactionalMode">
         <source>Using transactional mode to write to file "{0}".</source>
-        <target state="translated">Używanie trybu transakcyjnego w celu zapisania w pliku „{0}”.</target>
+        <target state="new">Using transactional mode to write to file "{0}".</target>
         <note />
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
