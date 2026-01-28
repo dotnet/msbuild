@@ -87,38 +87,21 @@ namespace MSBuild
                         string assemblyVersion = AssemblyName.GetAssemblyName(path).Version.ToString();
                         if (!version.Equals(assemblyVersion))
                         {
-                            // Ensure that the binding redirect is to the GAC version, but
-                            // we still ship the version we explicitly reference to let
-                            // API consumers bind to it at runtime.
-                            // See https://github.com/dotnet/msbuild/issues/6976.
-                            if (String.Equals(name, "System.ValueTuple", StringComparison.OrdinalIgnoreCase) &&
-                                String.Equals(version, "4.0.0.0") && String.Equals(assemblyVersion, "4.0.3.0"))
-                            {
-                                // foundSystemValueTuple = true;
-                            }
-                            else
-                            {
-                                Log.LogError(
-                                    subcategory: null,
-                                    errorCode: null,
-                                    helpKeyword: null,
-                                    file: appConfigPath,
-                                    lineNumber: bindingRedirectLineNumber,
-                                    columnNumber: 0,
-                                    endLineNumber: 0,
-                                    endColumnNumber: 0,
-                                    message: $"Binding redirect for '{name}' redirects to a different version ({version}) than MSBuild ships ({assemblyVersion}).");
-                            }
+                            Log.LogError(
+                                subcategory: null,
+                                errorCode: null,
+                                helpKeyword: null,
+                                file: appConfigPath,
+                                lineNumber: bindingRedirectLineNumber,
+                                columnNumber: 0,
+                                endLineNumber: 0,
+                                endColumnNumber: 0,
+                                message: $"Binding redirect for '{name}' redirects to a different version ({version}) than MSBuild ships ({assemblyVersion}).");
+                            
                         }
                     }
                 }
             }
-
-            // if (!foundSystemValueTuple)
-            // {
-            //     Log.LogError("Binding redirect for 'System.ValueTuple' missing.");
-            // }
-
             return !Log.HasLoggedErrors;
         }
     }
