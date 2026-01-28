@@ -2,8 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-#if NETFRAMEWORK
-using Microsoft.IO;
+
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
 #else
 using System.IO;
 #endif

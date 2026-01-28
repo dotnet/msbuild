@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -13,15 +14,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
-#if NETFRAMEWORK
-using Microsoft.IO;
-#else
-using System.IO;
-#endif
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Path = System.IO.Path;
 
 namespace Microsoft.Build.Engine.UnitTests
 {

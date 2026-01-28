@@ -6,12 +6,13 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-#if !NETFRAMEWORK
-using System.IO;
-#else
-using Microsoft.IO;
-#endif
 using System.Linq;
+
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
+#else
+using System.IO;
+#endif
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;

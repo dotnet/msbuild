@@ -6,8 +6,10 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Framework;
-#if NETFRAMEWORK
-using Microsoft.IO;
+
+#if FEATURE_MSIOREDIST
+using File = Microsoft.IO.File;
+using Path = Microsoft.IO.Path;
 #else
 using System.IO;
 #endif
