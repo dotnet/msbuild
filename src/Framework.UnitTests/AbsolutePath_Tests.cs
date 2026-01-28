@@ -1,8 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.IO;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
@@ -10,6 +12,12 @@ namespace Microsoft.Build.UnitTests
 {
     public class AbsolutePath_Tests
     {
+        private static AbsolutePath GetTestBasePath()
+        {
+            string baseDirectory = Path.Combine(Path.GetTempPath(), "abspath_test_base");
+            return new AbsolutePath(baseDirectory, ignoreRootedCheck: false);
+        }
+
         private static void ValidatePathAcceptance(string path, bool shouldBeAccepted)
         {
             if (shouldBeAccepted)
@@ -37,10 +45,26 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void AbsolutePath_NullOrEmpty_ShouldThrow(string? path)
+        {
+            Should.Throw<ArgumentException>(() => new AbsolutePath(path!));
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrow(string? path)
+        {
+            var basePath = GetTestBasePath();
+            Should.Throw<ArgumentException>(() => new AbsolutePath(path!, basePath));
+        }
+
+        [Theory]
         [InlineData("subfolder")]
         [InlineData("deep/nested/path")]
         [InlineData(".")]
-        [InlineData("")]
         [InlineData("..")]
         public void AbsolutePath_FromRelativePath_ShouldResolveAgainstBase(string relativePath)
         {
