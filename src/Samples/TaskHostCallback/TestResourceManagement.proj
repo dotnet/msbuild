@@ -1,0 +1,26 @@
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- 
+    Test project that uses TaskHost to run a task and validates RequestCores/ReleaseCores callback.
+    Run with: msbuild TestResourceManagement.proj /m
+  -->
+
+  <UsingTask TaskName="TestIsRunningMultipleNodesTask" 
+             AssemblyFile="$(MSBuildThisFileDirectory)..\..\..\artifacts\bin\Samples\TaskHostCallback\Debug\net472\TaskHostCallback.dll"
+             TaskFactory="TaskHostFactory"
+             Runtime="CLR4"
+             Architecture="x86" />
+
+  <Target Name="Build">
+    <Message Text="Testing RequestCores/ReleaseCores callback from TaskHost..." Importance="high" />
+    
+    <TestIsRunningMultipleNodesTask TestResourceManagement="true">
+      <Output TaskParameter="IsRunningMultipleNodes" PropertyName="MultiNodeResult" />
+      <Output TaskParameter="CoresGranted" PropertyName="CoresResult" />
+    </TestIsRunningMultipleNodesTask>
+    
+    <Message Text="Result: IsRunningMultipleNodes = $(MultiNodeResult)" Importance="high" />
+    <Message Text="Result: CoresGranted = $(CoresResult)" Importance="high" />
+  </Target>
+
+</Project>
