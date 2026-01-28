@@ -139,7 +139,7 @@ namespace Microsoft.Build.Framework
         /// </remarks>
         internal AbsolutePath GetCanonicalForm()
         {
-            if (Value is null)
+            if (string.IsNullOrEmpty(Value))
             {
                 return this;
             }
