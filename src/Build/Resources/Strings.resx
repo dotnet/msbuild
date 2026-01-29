@@ -529,6 +529,10 @@
     <value>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</value>
     <comment>{StrBegin="MSB4259: "}</comment>
   </data>
+  <data name="IllFormedPropertySpaceInPropertyReference" xml:space="preserve">
+    <value>MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</value>
+    <comment>{StrBegin="MSB4281: "}</comment>
+  </data>
   <data name="IllFormedQuotedStringInCondition" xml:space="preserve">
     <value>MSB4101: Expected a closing quote after position {1} in condition "{0}".</value>
     <comment>{StrBegin="MSB4101: "}</comment>
@@ -2462,7 +2466,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 
-        Next message code should be MSB4281
+        Next message code should be MSB4282
 
         Don't forget to update this comment after using a new code.
   -->
