@@ -1,8 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if NETFRAMEWORK
-using Microsoft.IO;
+#if NETFRAMEWORK && !TASKHOST
+using Path = Microsoft.IO.Path;
 #else
 using System.IO;
 #endif
@@ -22,24 +22,6 @@ namespace Microsoft.Build.Framework
         private const char WindowsDirectorySeparator = '\\';
 
         internal static readonly char[] Slashes = [UnixDirectorySeparator, WindowsDirectorySeparator];
-
-        /// <summary>
-        /// Checks if the path contains backslashes on Unix.
-        /// </summary>
-        private static bool HasWindowsDirectorySeparatorOnUnix(string path)
-            => NativeMethods.IsUnixLike && path.Contains(WindowsDirectorySeparator);
-
-        /// <summary>
-        /// Checks if the path contains forward slashes on Windows.
-        /// </summary>
-        private static bool HasUnixDirectorySeparatorOnWindows(string path)
-            => NativeMethods.IsWindows && path.Contains(UnixDirectorySeparator);
-
-        /// <summary>
-        /// Checks if the path contains relative segments like "." or "..".
-        /// </summary>
-        private static bool HasRelativeSegment(string path)
-            => path.Contains("/.") || path.Contains("\\.");
 
         /// <summary>
         /// Indicates if the given character is a slash in current OS.
@@ -104,6 +86,24 @@ namespace Microsoft.Build.Framework
         }
 
 #if !TASKHOST
+        /// <summary>
+        /// Checks if the path contains backslashes on Unix.
+        /// </summary>
+        private static bool HasWindowsDirectorySeparatorOnUnix(string path)
+            => NativeMethods.IsUnixLike && path.IndexOf(WindowsDirectorySeparator) >= 0;
+
+        /// <summary>
+        /// Checks if the path contains forward slashes on Windows.
+        /// </summary>
+        private static bool HasUnixDirectorySeparatorOnWindows(string path)
+            => NativeMethods.IsWindows && path.IndexOf(UnixDirectorySeparator) >= 0;
+
+        /// <summary>
+        /// Checks if the path contains relative segments like "." or "..".
+        /// </summary>
+        private static bool HasRelativeSegment(string path)
+            => path.Contains("/.") || path.Contains("\\.");
+
         /// <summary>
         /// If the given path doesn't have a trailing slash then add one.
         /// </summary>
