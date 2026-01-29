@@ -27,6 +27,7 @@ param(
     [switch]$DryRun
 )
 
+Set-StrictMode -Version 'Latest'
 $ErrorActionPreference = 'Stop'
 
 # Find repo root by looking for eng/Versions.props
@@ -36,7 +37,7 @@ $repoRoot = Split-Path -Parent $scriptDir
 $versionsPropsPath = Join-Path $repoRoot 'eng\Versions.props'
 
 if (-not (Test-Path $versionsPropsPath)) {
-    Write-Error "Could not find eng/Versions.props. Please run this script from the repository root or scripts directory."
+    Write-Error "Could not find eng/Versions.props at expected location: '$versionsPropsPath'. Repository structure may have changed."
     exit 1
 }
 
@@ -81,6 +82,9 @@ if ($content -match '<PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>'
 $versionForCommit = ""
 if ($content -match '<VersionPrefix>(\d+\.\d+)\.\d+</VersionPrefix>') {
     $versionForCommit = $Matches[1]
+} else {
+    Write-Error "Could not extract VersionPrefix for commit message."
+    exit 1
 }
 
 if ($DryRun) {
@@ -88,7 +92,7 @@ if ($DryRun) {
     Write-Host "`nResulting content of eng/Versions.props (first 30 lines):" -ForegroundColor Cyan
     $content -split "`n" | Select-Object -First 30 | ForEach-Object { Write-Host $_ }
 } else {
-    Set-Content -Path $versionsPropsPath -Value $content -NoNewline
+    [System.IO.File]::WriteAllText($versionsPropsPath, $content, [System.Text.Encoding]::UTF8)
     Write-Host "`nStabilization complete. Changes written to: $versionsPropsPath" -ForegroundColor Green
     Write-Host "`nNext steps:" -ForegroundColor Cyan
     Write-Host "  1. Review the changes: git diff eng/Versions.props"
