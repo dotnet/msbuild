@@ -256,7 +256,8 @@
           SkipUnchangedFiles="true" />
 
     <Copy SourceFiles="@(FreshlyBuiltNetBinaries)"
-          DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
+          DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')"
+          SkipUnchangedFiles="true" />
 
   </Target>
 
