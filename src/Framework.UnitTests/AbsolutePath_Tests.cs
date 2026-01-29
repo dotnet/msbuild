@@ -213,5 +213,37 @@ namespace Microsoft.Build.UnitTests
         {
             ValidatePathAcceptance(path, shouldBeAccepted);
         }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void AbsolutePath_NullOrEmpty_ShouldThrowWithLocalizedMessage(string? path)
+        {
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path!));
+            // Verify the message is not empty and comes from resources (not a fallback)
+            exception.Message.ShouldNotBeNullOrEmpty();
+            exception.Message.ShouldContain("Path must not be null or empty");
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrowWithLocalizedMessage(string? path)
+        {
+            var basePath = GetTestBasePath();
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path!, basePath));
+            // Verify the message is not empty and comes from resources (not a fallback)
+            exception.Message.ShouldNotBeNullOrEmpty();
+            exception.Message.ShouldContain("Path must not be null or empty");
+        }
+
+        [WindowsOnlyFact]
+        public void AbsolutePath_NotRooted_ShouldThrowWithLocalizedMessage()
+        {
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath("relative/path"));
+            // Verify the message is not empty and comes from resources (not a fallback)
+            exception.Message.ShouldNotBeNullOrEmpty();
+            exception.Message.ShouldContain("Path must be rooted");
+        }
     }
 }
