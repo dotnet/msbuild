@@ -21,6 +21,7 @@ namespace Microsoft.Build.UnitTests
         public void BasicFilter()
         {
             FindUnderPath t = new FindUnderPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 
             t.Path = new TaskItem(@"C:\MyProject");
@@ -39,6 +40,7 @@ namespace Microsoft.Build.UnitTests
         public void InvalidFile()
         {
             FindUnderPath t = new FindUnderPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 
             t.Path = new TaskItem(@"C:\MyProject");
@@ -55,6 +57,7 @@ namespace Microsoft.Build.UnitTests
         public void InvalidPath()
         {
             FindUnderPath t = new FindUnderPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 
             t.Path = new TaskItem(@"||::||");
@@ -96,6 +99,7 @@ namespace Microsoft.Build.UnitTests
         public void VerifyFullPath()
         {
             FindUnderPath t = new FindUnderPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 
             t.UpdateToAbsolutePaths = true;
@@ -118,6 +122,7 @@ namespace Microsoft.Build.UnitTests
         public void VerifyFullPathNegative()
         {
             FindUnderPath t = new FindUnderPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 
             t.UpdateToAbsolutePaths = false;
