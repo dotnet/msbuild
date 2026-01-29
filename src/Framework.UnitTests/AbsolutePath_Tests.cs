@@ -7,6 +7,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -47,18 +48,22 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         [InlineData(null)]
         [InlineData("")]
+        [UseInvariantCulture]
         public void AbsolutePath_NullOrEmpty_ShouldThrow(string? path)
         {
-            Should.Throw<ArgumentException>(() => new AbsolutePath(path!));
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path!));
+            exception.Message.ShouldContain("Path must not be null or empty");
         }
 
         [Theory]
         [InlineData(null)]
         [InlineData("")]
+        [UseInvariantCulture]
         public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrow(string? path)
         {
             var basePath = GetTestBasePath();
-            Should.Throw<ArgumentException>(() => new AbsolutePath(path!, basePath));
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path!, basePath));
+            exception.Message.ShouldContain("Path must not be null or empty");
         }
 
         [Theory]
@@ -212,6 +217,14 @@ namespace Microsoft.Build.UnitTests
         public void AbsolutePath_UnixPathValidation_ShouldAcceptOnlyTrueAbsolutePaths(string path, bool shouldBeAccepted)
         {
             ValidatePathAcceptance(path, shouldBeAccepted);
+        }
+
+        [WindowsOnlyFact]
+        [UseInvariantCulture]
+        public void AbsolutePath_NotRooted_ShouldThrowWithLocalizedMessage()
+        {
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath("relative/path"));
+            exception.Message.ShouldContain("Path must be rooted");
         }
     }
 }
