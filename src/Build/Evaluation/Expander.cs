@@ -1388,8 +1388,8 @@ namespace Microsoft.Build.Evaluation
                             int propertyNameEnd = propertyEndIndex - 1;
 
                             // Check for whitespace in property name - this is likely a typo
-                            // Gated behind ChangeWave 18.4 as this is a breaking change
-                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4))
+                            // Gated behind ChangeWave 18.5 as this is a breaking change
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
                             {
                                 // Check if there's leading or trailing whitespace
                                 if (Char.IsWhiteSpace(expression[propertyNameStart]) || Char.IsWhiteSpace(expression[propertyNameEnd]))
@@ -1457,8 +1457,8 @@ namespace Microsoft.Build.Evaluation
                 string propertyName = propertyBody;
 
                 // Check for whitespace in property body - this is likely a typo
-                // Gated behind ChangeWave 18.4 as this is a breaking change
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4))
+                // Gated behind ChangeWave 18.5 as this is a breaking change
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
                 {
                     if (Char.IsWhiteSpace(propertyBody[0]) || Char.IsWhiteSpace(propertyBody[propertyBody.Length - 1]))
                     {

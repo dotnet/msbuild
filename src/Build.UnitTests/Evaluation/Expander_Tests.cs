@@ -3871,7 +3871,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         /// <summary>
         /// Expand a property reference that has whitespace around the property name should throw error MSB4281
-        /// when ChangeWave 18.4 is enabled
+        /// when ChangeWave 18.5 is enabled
         /// </summary>
         [Theory]
         [InlineData("$( SomeStuff )")]   // Leading and trailing space
@@ -3897,7 +3897,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         /// <summary>
         /// Expand a property function call that has whitespace around the property name should throw error MSB4281
-        /// when ChangeWave 18.4 is enabled
+        /// when ChangeWave 18.5 is enabled
         /// </summary>
         [Theory]
         [InlineData("$( SomeStuff.StartsWith('This'))")]   // Leading space only
