@@ -108,8 +108,8 @@ namespace Microsoft.Build.Framework
                 return path;
             }
 
-            // Check if already has trailing slash and no separator fixing needed on unix 
-            // (EnsureTrailingSlash also should fix the paths on unix). 
+            // Check if the path already has a trailing slash and no separator fixing is needed on Unix.
+            // EnsureTrailingSlash should also fix the path separators on Unix.
             if (IsSlash(path.Value[path.Value.Length - 1]) && !HasWindowsDirectorySeparatorOnUnix(path.Value))
             {
                 return path;
