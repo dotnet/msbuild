@@ -52,7 +52,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Fixes backslashes to forward slashes on Unix. This allows to recognise windows style paths on Unix. 
+        /// Fixes backslashes to forward slashes on Unix. This allows recognizing Windows-style paths on Unix. 
         /// However, this leads to incorrect path on Linux if backslash was part of the file/directory name.
         /// </summary>  
         internal static string FixFilePath(string path)
