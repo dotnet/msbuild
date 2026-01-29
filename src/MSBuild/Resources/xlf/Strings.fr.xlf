@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="fr" original="../Strings.resx">
     <body>
@@ -1844,6 +1844,10 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
         <source>Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</source>
         <target state="new">Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</target>
         <note>LOCALIZATION: {0} is the name of the task output parameter, {1} is the count of null elements filtered.</note>
+      <trans-unit id="TaskHostCallbackConnectionLost">
+        <source>MSB5027: TaskHost lost connection to parent process during callback. The build may have been cancelled.</source>
+        <target state="new">MSB5027: TaskHost lost connection to parent process during callback. The build may have been cancelled.</target>
+        <note>{StrBegin="MSB5027: "}</note>
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>

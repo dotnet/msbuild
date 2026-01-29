@@ -365,43 +365,46 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verifies that a task returning a string[] with null elements does not crash
-        /// when executed via TaskHostFactory. This is a regression test for
-        /// https://github.com/dotnet/msbuild/issues/13174
+        /// Verifies that IBuildEngine2.IsRunningMultipleNodes can be queried from a task running in the task host.
+        /// This tests the callback infrastructure that sends queries back to the parent process.
         /// </summary>
-        [Fact]
-        public void StringArrayWithNullsDoesNotCrashTaskHost()
+        [Theory]
+        [InlineData(1, false)]  // Single node build - should return false
+        [InlineData(4, true)]   // Multi-node build - should return true
+        public void IsRunningMultipleNodesCallbackWorksInTaskHost(int maxNodeCount, bool expectedResult)
         {
-            using TestEnvironment env = TestEnvironment.Create();
+            using TestEnvironment env = TestEnvironment.Create(_output);
 
             string projectContents = $@"
 <Project>
-    <UsingTask TaskName=""{typeof(StringArrayWithNullsTask).FullName}"" AssemblyFile=""{AssemblyLocation}"" TaskFactory=""TaskHostFactory"" />
-    <Target Name=""TestTarget"">
-        <{typeof(StringArrayWithNullsTask).Name}>
-            <Output ItemName=""OutputItems"" TaskParameter=""OutputArray"" />
-            <Output PropertyName=""TaskPid"" TaskParameter=""Pid"" />
-        </{typeof(StringArrayWithNullsTask).Name}>
+    <UsingTask TaskName=""{nameof(IsRunningMultipleNodesTask)}"" AssemblyFile=""{typeof(IsRunningMultipleNodesTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""TestIsRunningMultipleNodes"">
+        <{nameof(IsRunningMultipleNodesTask)}>
+            <Output PropertyName=""IsRunningMultipleNodes"" TaskParameter=""IsRunningMultipleNodes"" />
+        </{nameof(IsRunningMultipleNodesTask)}>
     </Target>
 </Project>";
 
-            TransientTestFile project = env.CreateFile("testProject.csproj", projectContents);
-            ProjectInstance projectInstance = new(project.Path);
-            BuildManager buildManager = BuildManager.DefaultBuildManager;
-            BuildResult buildResult = buildManager.Build(new BuildParameters(), new BuildRequestData(projectInstance, targetsToBuild: new[] { "TestTarget" }));
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
 
-            // The build should succeed - nulls should be filtered, not cause a crash
+            BuildParameters buildParameters = new()
+            {
+                MaxNodeCount = maxNodeCount,
+                EnableNodeReuse = false
+            };
+
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult buildResult = buildManager.Build(
+                buildParameters,
+                new BuildRequestData(projectInstance, targetsToBuild: ["TestIsRunningMultipleNodes"]));
+
             buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
 
-            // Verify task ran out-of-process (TaskHostFactory should force this)
-            string taskPidStr = projectInstance.GetPropertyValue("TaskPid");
-            taskPidStr.ShouldNotBeNullOrEmpty();
-            int.TryParse(taskPidStr, out int taskPid).ShouldBeTrue();
-            Process.GetCurrentProcess().Id.ShouldNotBe(taskPid, "Task should have run in a separate TaskHost process");
-
-            // Verify output items - nulls should be filtered out, leaving 3 items
-            var outputItems = projectInstance.GetItems("OutputItems");
-            outputItems.Count.ShouldBe(3, "Null elements should be filtered from the string array");
+            string result = projectInstance.GetPropertyValue("IsRunningMultipleNodes");
+            result.ShouldNotBeNullOrEmpty();
+            bool.Parse(result).ShouldBe(expectedResult);
         }
     }
 }

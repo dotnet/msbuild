@@ -203,6 +203,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostQueryRequest, TaskHostQueryRequest.FactoryForDeserialization, this);
 
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
@@ -509,6 +510,9 @@ namespace Microsoft.Build.BackEnd
                 case NodePacketType.LogMessage:
                     HandleLoggedMessage(packet as LogMessagePacket);
                     break;
+                case NodePacketType.TaskHostQueryRequest:
+                    HandleQueryRequest(packet as TaskHostQueryRequest);
+                    break;
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     break;
@@ -646,6 +650,22 @@ namespace Microsoft.Build.BackEnd
 
                     break;
             }
+        }
+
+        /// <summary>
+        /// Handle query requests from the TaskHost for simple build engine state.
+        /// </summary>
+        private void HandleQueryRequest(TaskHostQueryRequest request)
+        {
+            bool result = request.Query switch
+            {
+                TaskHostQueryRequest.QueryType.IsRunningMultipleNodes
+                    => _buildEngine is IBuildEngine2 engine2 && engine2.IsRunningMultipleNodes,
+                _ => false  // Unknown query type - return safe default
+            };
+
+            var response = new TaskHostQueryResponse(request.RequestId, result);
+            _taskHostProvider.SendData(_taskHostNodeKey, response);
         }
 
         /// <summary>

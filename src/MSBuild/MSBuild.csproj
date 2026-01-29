@@ -117,6 +117,9 @@
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
+    <Compile Include="..\Shared\ITaskHostCallbackPacket.cs" />
+    <Compile Include="..\Shared\TaskHostQueryRequest.cs" />
+    <Compile Include="..\Shared\TaskHostQueryResponse.cs" />
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\MSBuildLoadContext.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
     <Compile Include="..\Shared\TypeLoader.cs" />
