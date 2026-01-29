@@ -98,6 +98,31 @@ BuildProjectFile Flow (similar):
   4. Build result returned → TaskA's thread unblocks
 ```
 
+### Callback Request/Response Flow (Sequence)
+
+```mermaid
+sequenceDiagram
+    participant Task as Task Thread (TaskHost)
+    participant Main as Main Thread (TaskHost)
+    participant Parent as TaskHostTask (Parent)
+
+    Task->>Task: Task calls IBuildEngine callback
+    Task->>Task: Create request packet with unique requestId
+    Task->>Task: Store TCS in _pendingCallbackRequests[requestId]
+    Task->>Parent: SendData(request)
+    Note over Task: Blocks on TCS.Task
+
+    Parent->>Parent: HandleCallbackRequest(request)
+    Parent->>Parent: Execute via real IBuildEngine
+    Parent->>Main: SendData(response with requestId)
+
+    Main->>Main: HandleCallbackResponse(response)
+    Main->>Main: _pendingCallbackRequests[requestId].SetResult(response)
+
+    Note over Task: TCS unblocks
+    Task->>Task: Return result to task
+```
+
 ---
 
 ## 4. Design
