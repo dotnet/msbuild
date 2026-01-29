@@ -177,7 +177,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Resolves relative segments like "." and "..". Fixes directory separators on windows like Path.GetFullPath does.
+        /// Resolves relative segments like "." and "..". Fixes directory separators on Windows like Path.GetFullPath does.
         /// ASSUMES INPUT IS ALREADY UNESCAPED.
         /// </summary>
         internal static AbsolutePath RemoveRelativeSegments(AbsolutePath path)
