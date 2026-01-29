@@ -246,25 +246,24 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
 
 - job: BootstrapMSBuildWithMTMode
-  displayName: "Windows Core Multithreaded Mode"
+  displayName: "Linux Core Multithreaded Mode"
   pool:
-    vmImage: 'windows-2022'
+    vmImage: 'ubuntu-latest'
   timeoutInMinutes: 120
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
-    - task: PowerShell@2
+    - task: Bash@3
       displayName: Setup Private Feeds Credentials
       inputs:
-        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
-        arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
+        arguments: $(Build.SourcesDirectory)/NuGet.config $Token
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
-  - task: PowerShell@2
+  - bash: sudo apt-get update
+  - bash: sudo apt-get install -y libxml2
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged) --skipTests --stage2Properties '/mt'
     displayName: 'Build with bootstrapped MSBuild and -mt mode'
-    inputs:
-      filePath: $(Build.SourcesDirectory)/eng/cibuild_bootstrapped_msbuild.ps1
-      arguments: -msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged) -skipTests -stage2Properties '/mt'
     condition: eq(variables.onlyDocChanged, 0)
     env:
       MSBUILDUSESERVER: "1"
@@ -272,7 +271,7 @@ jobs:
     displayName: 'Publish Artifact: logs'
     inputs:
       PathtoPublish: 'artifacts/log/Debug'
-      ArtifactName: 'MTModeOnWindows build logs'
+      ArtifactName: 'MTModeOnLinux build logs'
     continueOnError: true
     condition: always()
 
