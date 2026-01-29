@@ -144,7 +144,9 @@
     <Compile Include="MSBuildClientApp.cs" />
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
     <Compile Include="ProjectSchemaValidationHandler.cs" />
+    <Compile Include="OutOfProcTaskHostNodeBase.cs" />
     <Compile Include="OutOfProcTaskHostNode.cs" />
+    <Compile Include="SidecarTaskHostNode.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
     <Compile Include="PerformanceLogEventListener.cs" />

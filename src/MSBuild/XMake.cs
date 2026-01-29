@@ -2905,7 +2905,12 @@ namespace Microsoft.Build.CommandLine
                     // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
                     bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
                     byte parentPacketVersion = ProcessParentPacketVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ParentPacketVersion]);
-                    OutOfProcTaskHostNode node = new();
+
+                    // Use the appropriate task host node based on whether we're in sidecar mode (nodeReuse).
+                    // Sidecar taskhosts support IBuildEngine callbacks, regular taskhosts do not.
+                    OutOfProcTaskHostNodeBase node = nodeReuse
+                        ? new SidecarTaskHostNode()
+                        : new OutOfProcTaskHostNode();
                     shutdownReason = node.Run(out nodeException, nodeReuse, parentPacketVersion);
                 }
                 else if (nodeModeNumber == 3)
