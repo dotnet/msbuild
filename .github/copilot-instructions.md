@@ -249,6 +249,11 @@ documentation/
 
 ### Common Issues and Solutions
 
+**Build fails with file locking errors:**
+- Kill lingering compiler and build processes before rebuilding:
+  - Windows: `Get-Process -Name "dotnet", "msbuild", "VBCSCompiler" -ErrorAction SilentlyContinue | Stop-Process -Force`
+  - Linux/macOS: `pkill -f 'dotnet|msbuild|VBCSCompiler' 2>/dev/null || true`
+
 **Build fails with "Could not resolve SDK":**
 - Ensure you run `source artifacts/sdk-build-env.sh` after building
 - Verify `dotnet --version` shows the preview/RC/internal version (e.g. 10.0.100-preview.7.25372.107)
