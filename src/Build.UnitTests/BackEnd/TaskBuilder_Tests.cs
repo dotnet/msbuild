@@ -449,8 +449,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// Verifies that RecursiveDir metadata is preserved when items are gathered from task outputs.
-        /// This tests the fix for https://github.com/dotnet/msbuild/issues/XXXX where RecursiveDir
-        /// metadata was lost when gathering task item outputs.
+        /// RecursiveDir metadata was previously lost when gathering task item outputs because
+        /// the IncludeBeforeWildcardExpansionEscaped value was not being preserved.
         /// </summary>
         [Fact]
         public void RecursiveDirMetadataPreservedInTaskOutputs()
