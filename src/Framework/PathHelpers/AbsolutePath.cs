@@ -149,9 +149,9 @@ namespace Microsoft.Build.Framework
             // In absolute path those segments can not appear in the beginning of the path, only after a path separator.
             bool hasRelativeSegment = Value.Contains("/.") || Value.Contains("\\.");
 
-            // Check for directory separator normalization needs (only on Windows: "/" to "\")
+            // Check if directory separator normalization is required (only on Windows: "/" to "\")
             // On unix "\" is not a valid path separator, but is a part of the file/directory name, so no normalization is needed. 
-            bool needsSeparatorNormalization = NativeMethods.IsWindows && Value.Contains(Path.AltDirectorySeparatorChar);
+            bool needsSeparatorNormalization = NativeMethods.IsWindows && Value.IndexOf(Path.AltDirectorySeparatorChar) >= 0;
 
             if (!hasRelativeSegment && !needsSeparatorNormalization)
             {
