@@ -28,9 +28,9 @@
         },
         // Automate opening PRs to merge msbuild's vs18.0 (SDK 10.0.1xx) into vs18.3 (SDK 10.0.2xx, VS)
         "vs18.0": {
-            "MergeToBranch": "main" // update to flow through vs18.3 after we fork for release
+            "MergeToBranch": "vs18.3"
         },
-        // MSBuild latest release to main
+        // Automate opening PRs to merge msbuild's vs18.3 (SDK 10.0.2xx) into main
         "vs18.3": {
             "MergeToBranch": "main"
         }

@@ -6,6 +6,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -211,27 +212,27 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Exercises FileUtilities.EndsWithSlash
+        /// Exercises FrameworkFileUtilities.EndsWithSlash
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void EndsWithSlash()
         {
-            Assert.True(FileUtilities.EndsWithSlash(@"C:\foo\"));
-            Assert.True(FileUtilities.EndsWithSlash(@"C:\"));
-            Assert.True(FileUtilities.EndsWithSlash(@"\"));
+            Assert.True(FrameworkFileUtilities.EndsWithSlash(@"C:\foo\"));
+            Assert.True(FrameworkFileUtilities.EndsWithSlash(@"C:\"));
+            Assert.True(FrameworkFileUtilities.EndsWithSlash(@"\"));
 
-            Assert.True(FileUtilities.EndsWithSlash(@"http://www.microsoft.com/"));
-            Assert.True(FileUtilities.EndsWithSlash(@"//server/share/"));
-            Assert.True(FileUtilities.EndsWithSlash(@"/"));
+            Assert.True(FrameworkFileUtilities.EndsWithSlash(@"http://www.microsoft.com/"));
+            Assert.True(FrameworkFileUtilities.EndsWithSlash(@"//server/share/"));
+            Assert.True(FrameworkFileUtilities.EndsWithSlash(@"/"));
 
-            Assert.False(FileUtilities.EndsWithSlash(@"C:\foo"));
-            Assert.False(FileUtilities.EndsWithSlash(@"C:"));
-            Assert.False(FileUtilities.EndsWithSlash(@"foo"));
+            Assert.False(FrameworkFileUtilities.EndsWithSlash(@"C:\foo"));
+            Assert.False(FrameworkFileUtilities.EndsWithSlash(@"C:"));
+            Assert.False(FrameworkFileUtilities.EndsWithSlash(@"foo"));
 
             // confirm that empty string doesn't barf
-            Assert.False(FileUtilities.EndsWithSlash(String.Empty));
+            Assert.False(FrameworkFileUtilities.EndsWithSlash(String.Empty));
         }
 
         /// <summary>
@@ -245,16 +246,16 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(NativeMethodsShared.IsWindows ? @"c:\" : "/", FileUtilities.GetDirectory(NativeMethodsShared.IsWindows ? @"c:\" : "/"));
             Assert.Equal(NativeMethodsShared.IsWindows ? @"c:\" : "/", FileUtilities.GetDirectory(NativeMethodsShared.IsWindows ? @"c:\foo" : "/foo"));
             Assert.Equal(NativeMethodsShared.IsWindows ? @"c:" : "/", FileUtilities.GetDirectory(NativeMethodsShared.IsWindows ? @"c:" : "/"));
-            Assert.Equal(FileUtilities.FixFilePath(@"\"), FileUtilities.GetDirectory(@"\"));
-            Assert.Equal(FileUtilities.FixFilePath(@"\"), FileUtilities.GetDirectory(@"\foo"));
-            Assert.Equal(FileUtilities.FixFilePath(@"..\"), FileUtilities.GetDirectory(@"..\foo"));
-            Assert.Equal(FileUtilities.FixFilePath(@"\foo\"), FileUtilities.GetDirectory(@"\foo\"));
-            Assert.Equal(FileUtilities.FixFilePath(@"\\server\share"), FileUtilities.GetDirectory(@"\\server\share"));
-            Assert.Equal(FileUtilities.FixFilePath(@"\\server\share\"), FileUtilities.GetDirectory(@"\\server\share\"));
-            Assert.Equal(FileUtilities.FixFilePath(@"\\server\share\"), FileUtilities.GetDirectory(@"\\server\share\file"));
-            Assert.Equal(FileUtilities.FixFilePath(@"\\server\share\directory\"), FileUtilities.GetDirectory(@"\\server\share\directory\"));
-            Assert.Equal(FileUtilities.FixFilePath(@"foo\"), FileUtilities.GetDirectory(@"foo\bar"));
-            Assert.Equal(FileUtilities.FixFilePath(@"\foo\bar\"), FileUtilities.GetDirectory(@"\foo\bar\"));
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"\"), FileUtilities.GetDirectory(@"\"));
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"\"), FileUtilities.GetDirectory(@"\foo"));
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"..\"), FileUtilities.GetDirectory(@"..\foo"));
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"\foo\"), FileUtilities.GetDirectory(@"\foo\"));
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"\\server\share"), FileUtilities.GetDirectory(@"\\server\share"));
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"\\server\share\"), FileUtilities.GetDirectory(@"\\server\share\"));
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"\\server\share\"), FileUtilities.GetDirectory(@"\\server\share\file"));
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"\\server\share\directory\"), FileUtilities.GetDirectory(@"\\server\share\directory\"));
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"foo\"), FileUtilities.GetDirectory(@"foo\bar"));
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"\foo\bar\"), FileUtilities.GetDirectory(@"\foo\bar\"));
             Assert.Equal(String.Empty, FileUtilities.GetDirectory("foo"));
         }
 
@@ -315,20 +316,20 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Exercises FileUtilities.EnsureTrailingSlash
+        /// Exercises FrameworkFileUtilities.EnsureTrailingSlash
         /// </summary>
         [Fact]
         public void EnsureTrailingSlash()
         {
             // Doesn't have a trailing slash to start with.
-            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar\"), FileUtilities.EnsureTrailingSlash(@"foo\bar")); // "test 1"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar")); // "test 2"
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"foo\bar\"), FrameworkFileUtilities.EnsureTrailingSlash(@"foo\bar")); // "test 1"
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"foo/bar\"), FrameworkFileUtilities.EnsureTrailingSlash(@"foo/bar")); // "test 2"
 
             // Already has a trailing slash to start with.
-            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar/"), FileUtilities.EnsureTrailingSlash(@"foo/bar/")); // test 3"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar\"), FileUtilities.EnsureTrailingSlash(@"foo\bar\")); // test 4"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo/bar\"), FileUtilities.EnsureTrailingSlash(@"foo/bar\")); // test 5"
-            Assert.Equal(FileUtilities.FixFilePath(@"foo\bar/"), FileUtilities.EnsureTrailingSlash(@"foo\bar/")); // "test 5"
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"foo/bar/"), FrameworkFileUtilities.EnsureTrailingSlash(@"foo/bar/")); // test 3"
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"foo\bar\"), FrameworkFileUtilities.EnsureTrailingSlash(@"foo\bar\")); // test 4"
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"foo/bar\"), FrameworkFileUtilities.EnsureTrailingSlash(@"foo/bar\")); // test 5"
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"foo\bar/"), FrameworkFileUtilities.EnsureTrailingSlash(@"foo\bar/")); // "test 5"
         }
 
         /// <summary>

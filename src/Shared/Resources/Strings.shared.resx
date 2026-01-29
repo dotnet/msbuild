@@ -367,4 +367,13 @@
   <data name="CollectionCopyToFailureProvidedArrayIsTooSmall" xml:space="preserve">
     <value>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</value>
   </data>
+  <data name="Message.InvalidImportance" xml:space="preserve">
+    <value>MSB3511: "{0}" is an invalid value for the "Importance" parameter. Valid values are: High, Normal and Low.</value>
+    <comment>{StrBegin="MSB3511: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.
+            The importance enumeration is: High, Normal and Low.  Specifying any other importance will result in this message being shown
+            LOCALIZATION: "Importance" should not be localized.
+            High should not be localized.
+            Normal should not be localized.
+            Low should not be localized.</comment>
+  </data>
 </root>

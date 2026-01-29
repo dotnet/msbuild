@@ -301,7 +301,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (!_isTraversalProject.HasValue)
                 {
-#if NET471_OR_GREATER
+#if FEATURE_MSIOREDIST
                     if (MemoryExtensions.Equals(Microsoft.IO.Path.GetFileName(ProjectFullPath.AsSpan()), "dirs.proj".AsSpan(), StringComparison.OrdinalIgnoreCase))
 #else
                     if (MemoryExtensions.Equals(Path.GetFileName(ProjectFullPath.AsSpan()), "dirs.proj", StringComparison.OrdinalIgnoreCase))

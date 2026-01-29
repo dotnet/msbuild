@@ -4,7 +4,6 @@
 #if NETFRAMEWORK
 using System;
 
-using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 #endif
 
@@ -56,7 +55,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        s_path = FileUtilities.EnsureTrailingSlash(s_path);
+                        s_path = FrameworkFileUtilities.EnsureTrailingSlash(s_path);
                         Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", s_path);
                     }
                 }
@@ -93,7 +92,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        s_version20Path = FileUtilities.EnsureTrailingSlash(s_version20Path);
+                        s_version20Path = FrameworkFileUtilities.EnsureTrailingSlash(s_version20Path);
                         Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", s_version20Path);
                     }
                 }
@@ -126,7 +125,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        s_version35Path = FileUtilities.EnsureTrailingSlash(s_version35Path);
+                        s_version35Path = FrameworkFileUtilities.EnsureTrailingSlash(s_version35Path);
                         Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", s_version35Path);
                     }
                 }
@@ -159,7 +158,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        s_version40Path = FileUtilities.EnsureTrailingSlash(s_version40Path);
+                        s_version40Path = FrameworkFileUtilities.EnsureTrailingSlash(s_version40Path);
                         Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", s_version40Path);
                     }
                 }
@@ -192,7 +191,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        s_version45Path = FileUtilities.EnsureTrailingSlash(s_version45Path);
+                        s_version45Path = FrameworkFileUtilities.EnsureTrailingSlash(s_version45Path);
                         Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", s_version45Path);
                     }
                 }
@@ -225,7 +224,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        s_version451Path = FileUtilities.EnsureTrailingSlash(s_version451Path);
+                        s_version451Path = FrameworkFileUtilities.EnsureTrailingSlash(s_version451Path);
                         Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", s_version451Path);
                     }
                 }
@@ -258,7 +257,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        s_version46Path = FileUtilities.EnsureTrailingSlash(s_version46Path);
+                        s_version46Path = FrameworkFileUtilities.EnsureTrailingSlash(s_version46Path);
                         Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", s_version46Path);
                     }
                 }
@@ -291,7 +290,7 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        s_version461Path = FileUtilities.EnsureTrailingSlash(s_version461Path);
+                        s_version461Path = FrameworkFileUtilities.EnsureTrailingSlash(s_version461Path);
                         Log.LogMessageFromResources(MessageImportance.Low, "GetFrameworkSdkPath.FoundSDK", s_version461Path);
                     }
                 }

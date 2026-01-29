@@ -13,9 +13,8 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
-#if NET
 using Microsoft.Build.Framework;
-#endif
+
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -367,7 +366,7 @@ namespace Microsoft.Build.Evaluation
                 // technically hurt anything, but it doesn't look nice.)
                 string toolsPathToUse = value;
 
-                if (FileUtilities.EndsWithSlash(toolsPathToUse))
+                if (FrameworkFileUtilities.EndsWithSlash(toolsPathToUse))
                 {
                     string rootPath = Path.GetPathRoot(Path.GetFullPath(toolsPathToUse));
 

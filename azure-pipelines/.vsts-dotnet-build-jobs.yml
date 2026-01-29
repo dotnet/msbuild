@@ -29,7 +29,10 @@ jobs:
     - output: artifactsDrop
       sourcePath: '$(Build.SourcesDirectory)\artifacts\official\OptProf\$(BuildConfiguration)\Data'
       dropServiceURI: 'https://devdiv.artifacts.visualstudio.com'
-      dropMetadataContainerName: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
+      buildNumber: 'ProfilingInputs/DevDiv/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)'
+      toLowerCase: false
+      usePat: true
+      dropMetadataContainerName: 'DropMetadata-OptProf'
       condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
     # Publish bootstrapper info for OptProf data collection run to consume
@@ -159,6 +162,9 @@ jobs:
       channelName: $(VisualStudio.ChannelName)
       manifests: $(VisualStudio.SetupManifestList)
       outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+      ConnectedServiceName: 'VSEng-VSDrop-MI'
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
     displayName: 'OptProf - Build VS bootstrapper'
     condition: and(succeeded(), ${{ parameters.enableOptProf }})
 

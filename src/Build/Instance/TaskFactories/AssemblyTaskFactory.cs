@@ -11,8 +11,9 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-#if NETFRAMEWORK
-using Microsoft.IO;
+
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
 #else
 using System.IO;
 #endif
@@ -317,6 +318,10 @@ namespace Microsoft.Build.BackEnd
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
             in TaskHostParameters taskIdentityParameters,
+            string projectFile,
+#if !NET35
+            HostServices hostServices,
+#endif
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -377,8 +382,12 @@ namespace Microsoft.Build.BackEnd
                     mergedParameters,
                     _loadedType,
                     useSidecarTaskHost: useSidecarTaskHost,
+                    projectFile,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
+#endif
+#if !NET35
+                    hostServices,
 #endif
                     scheduledNodeId,
                     taskEnvironment: taskEnvironment);
