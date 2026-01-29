@@ -52,7 +52,19 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Fixes backslashes to forward slashes on Unix. This allows recognizing Windows-style paths on Unix. 
+        /// Indicates if the given file-spec ends with a slash.
+        /// </summary>
+        /// <param name="fileSpec">The file spec.</param>
+        /// <returns>true, if file-spec has trailing slash</returns>
+        internal static bool EndsWithSlash(string fileSpec)
+        {
+            return (fileSpec.Length > 0)
+                ? IsSlash(fileSpec[fileSpec.Length - 1])
+                : false;
+        }
+
+        /// <summary>
+        /// Fixes backslashes to forward slashes on Unix. This allows to recognise windows style paths on Unix. 
         /// However, this leads to incorrect path on Linux if backslash was part of the file/directory name.
         /// </summary>  
         internal static string FixFilePath(string path)
