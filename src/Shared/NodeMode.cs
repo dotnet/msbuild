@@ -1,8 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable disable
-
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -41,9 +39,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="nodeMode">The node mode to convert</param>
         /// <returns>The command line argument string (e.g., "/nodemode:1")</returns>
-        public static string ToCommandLineArgument(NodeMode nodeMode)
-        {
-            return $"/nodemode:{(int)nodeMode}";
-        }
+        public static string ToCommandLineArgument(NodeMode nodeMode) => $"/nodemode:{(int)nodeMode}";
     }
 }

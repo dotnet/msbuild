@@ -113,17 +113,6 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Converts a NodeMode value to a command line argument string.
-        /// </summary>
-        /// <param name="nodeMode">The node mode to convert</param>
-        /// <returns>The command line argument string (e.g., "/nodemode:1")</returns>
-        public static string NodeModeToCommandLineArgument(NodeMode nodeMode)
-        {
-            // Delegate to the shared helper by casting to the shared enum type
-            return NodeModeHelper.ToCommandLineArgument((Shared.NodeMode)(int)nodeMode);
-        }
-
-        /// <summary>
         /// Whether the static constructor ran successfully.
         /// </summary>
         private static bool s_initialized;
