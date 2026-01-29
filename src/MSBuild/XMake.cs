@@ -2902,15 +2902,12 @@ namespace Microsoft.Build.CommandLine
                 }
                 else if (nodeModeNumber == 2)
                 {
-                    // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
+                    // Regular TaskHost node - short-lived, does not support IBuildEngine callbacks.
+                    // Used for cross-targeting (architecture/runtime mismatch) scenarios.
                     bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
                     byte parentPacketVersion = ProcessParentPacketVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ParentPacketVersion]);
 
-                    // Use the appropriate task host node based on whether we're in sidecar mode (nodeReuse).
-                    // Sidecar taskhosts support IBuildEngine callbacks, regular taskhosts do not.
-                    OutOfProcTaskHostNodeBase node = nodeReuse
-                        ? new SidecarTaskHostNode()
-                        : new OutOfProcTaskHostNode();
+                    OutOfProcTaskHostNode node = new();
                     shutdownReason = node.Run(out nodeException, nodeReuse, parentPacketVersion);
                 }
                 else if (nodeModeNumber == 3)
@@ -2927,6 +2924,16 @@ namespace Microsoft.Build.CommandLine
                         RarNodeShutdownReason.ConnectionTimedOut => NodeEngineShutdownReason.ConnectionFailed,
                         _ => throw new ArgumentOutOfRangeException(nameof(rarShutdownReason), $"Unexpected value: {rarShutdownReason}"),
                     };
+                }
+                else if (nodeModeNumber == 4)
+                {
+                    // Sidecar TaskHost node - long-lived, supports IBuildEngine callbacks.
+                    // Used for thread-unsafe tasks in multithreaded build mode (-mt).
+                    bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+                    byte parentPacketVersion = ProcessParentPacketVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ParentPacketVersion]);
+
+                    SidecarTaskHostNode node = new();
+                    shutdownReason = node.Run(out nodeException, nodeReuse, parentPacketVersion);
                 }
                 else if (nodeModeNumber == 8)
                 {

@@ -18,7 +18,8 @@ namespace Microsoft.Build.Shared.Debugging
         {
             CentralNode,
             OutOfProcNode,
-            OutOfProcTaskHostNode
+            OutOfProcTaskHostNode,
+            SidecarTaskHostNode
         }
 
         static DebugUtils()
@@ -70,7 +71,7 @@ namespace Microsoft.Build.Shared.Debugging
 
             NodeMode ScanNodeMode(string input)
             {
-                var match = Regex.Match(input, @"/nodemode:(?<nodemode>[12\s])(\s|$)", RegexOptions.IgnoreCase);
+                var match = Regex.Match(input, @"/nodemode:(?<nodemode>[124\s])(\s|$)", RegexOptions.IgnoreCase);
 
                 if (!match.Success)
                 {
@@ -84,6 +85,7 @@ namespace Microsoft.Build.Shared.Debugging
                 {
                     "1" => NodeMode.OutOfProcNode,
                     "2" => NodeMode.OutOfProcTaskHostNode,
+                    "4" => NodeMode.SidecarTaskHostNode,
                     _ => throw new NotImplementedException(),
                 };
             }
@@ -109,11 +111,11 @@ namespace Microsoft.Build.Shared.Debugging
         /// Returns true if the current process is an out-of-proc TaskHost node.
         /// </summary>
         /// <returns>
-        /// True if this process was launched with /nodemode:2 (indicating it's a TaskHost process),
+        /// True if this process was launched with /nodemode:2 (TaskHost) or /nodemode:4 (SidecarTaskHost),
         /// false otherwise. This is useful for conditionally enabling debugging or other behaviors
         /// based on whether the code is running in the main MSBuild process or a child TaskHost process.
         /// </returns>
-        public static bool IsInTaskHostNode() => ProcessNodeMode.Value == NodeMode.OutOfProcTaskHostNode;
+        public static bool IsInTaskHostNode() => ProcessNodeMode.Value is NodeMode.OutOfProcTaskHostNode or NodeMode.SidecarTaskHostNode;
 
         public static string FindNextAvailableDebugFilePath(string fileName)
         {
