@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -444,6 +445,51 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains(slashAndBracket);
             logger.AssertLogDoesntContain("MSB4118");
             logger.AssertLogDoesntContain("MSB3031");
+        }
+
+        /// <summary>
+        /// Verifies that RecursiveDir metadata is preserved when items are gathered from task outputs.
+        /// This tests the fix for https://github.com/dotnet/msbuild/issues/XXXX where RecursiveDir
+        /// metadata was lost when gathering task item outputs.
+        /// </summary>
+        [Fact]
+        public void RecursiveDirMetadataPreservedInTaskOutputs()
+        {
+            using (var env = TestEnvironment.Create(_testOutput))
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                env.CreateFile(folder, "file.txt", "content");
+                TransientTestFolder subFolder = env.CreateFolder(Path.Combine(folder.Path, "subdir"));
+                env.CreateFile(subFolder, "nested.txt", "nested content");
+
+                MockLogger logger = new MockLogger(_testOutput);
+
+                string projectFileContents = ObjectModelHelpers.CleanupFileContents($@"
+<Project>
+<Target Name='t' Returns='@(OutputItems)'>
+  <CreateItem Include='{folder.Path}{Path.DirectorySeparatorChar}**{Path.DirectorySeparatorChar}*.txt'>
+    <Output TaskParameter='Include' ItemName='OutputItems' />
+  </CreateItem>
+</Target>
+</Project>");
+
+                using ProjectFromString projectFromString = new(projectFileContents);
+                Project project = projectFromString.Project;
+                ProjectInstance projectInstance = project.CreateProjectInstance();
+                bool success = projectInstance.Build(["t"], [logger]);
+                success.ShouldBeTrue();
+
+                // Verify that the items have correct RecursiveDir metadata
+                ICollection<ProjectItemInstance> outputItems = projectInstance.GetItems("OutputItems");
+                outputItems.Count.ShouldBe(2);
+
+                ProjectItemInstance nestedItem = outputItems.FirstOrDefault(i => i.EvaluatedInclude.Contains("nested.txt"));
+                nestedItem.ShouldNotBeNull();
+
+                // The RecursiveDir should be "subdir/" (or "subdir\" on Windows)
+                string recursiveDir = nestedItem.GetMetadataValue("RecursiveDir");
+                recursiveDir.ShouldBe("subdir" + Path.DirectorySeparatorChar);
+            }
         }
 
         /// <summary>
