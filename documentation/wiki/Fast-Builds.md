@@ -29,8 +29,8 @@ A specialized script that builds only the minimal MSBuild assemblies without tes
 | Full build (`build.cmd`) | 2-3 minutes |
 | Minimal build with bootstrap (cold) | ~50 seconds |
 | Minimal build with bootstrap (incremental) | ~15 seconds |
-| Single TFM `-core` (net10.0 only) | ~3-25 seconds |
-| Single TFM `-netfx` (net472 only) | ~12 seconds |
+| Single TFM `-core` (net10.0 only) | ~3-7 seconds |
+| Single TFM `-netfx` (net472 only) | ~3-6 seconds |
 | Minimal build without bootstrap (incremental) | ~10 seconds |
 
 #### Options

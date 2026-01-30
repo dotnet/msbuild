@@ -184,13 +184,12 @@ if /i "%Verbosity%"=="normal" set "MSBuildVerbosity=normal"
 if /i "%Verbosity%"=="d" set "MSBuildVerbosity=detailed"
 if /i "%Verbosity%"=="detailed" set "MSBuildVerbosity=detailed"
 
-REM Build with single TFM using MSBuild.exe
-set "MSBuildArgs=%RepoRoot%MSBuild.Minimal.slnf /p:Configuration=%Configuration%"
-set "MSBuildArgs=%MSBuildArgs% /p:RuntimeOutputTargetFrameworks=%SingleTFM%"
-set "MSBuildArgs=%MSBuildArgs% /p:EnablePackageValidation=false"
+REM Build single TFM by building MSBuild.csproj directly with TargetFramework
+REM This builds only the specified TFM and its dependencies (including netstandard2.0)
+set "MSBuildArgs=%RepoRoot%src\MSBuild\MSBuild.csproj /p:Configuration=%Configuration%"
+set "MSBuildArgs=%MSBuildArgs% /p:TargetFramework=%SingleTFM%"
 set "MSBuildArgs=%MSBuildArgs% /restore:false /v:%MSBuildVerbosity%"
 if defined Rebuild set "MSBuildArgs=%MSBuildArgs% /t:Rebuild"
-set "MSBuildArgs=%MSBuildArgs% /p:UsingToolIbcOptimization=false /p:UsingToolVisualStudioIbcTraining=false"
 
 "%MSBuildExe%" %MSBuildArgs% %ExtraArgs%
 set "ExitCode=%ERRORLEVEL%"
