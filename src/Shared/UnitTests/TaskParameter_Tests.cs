@@ -543,7 +543,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that RecursiveDir built-in metadata survives serialization.
         /// RecursiveDir cannot be derived from the item spec alone - it requires the original
         /// wildcard pattern. This test ensures it is copied to custom metadata during serialization.
-        /// See https://github.com/Microsoft/msbuild/issues/3121
+        /// See https://github.com/dotnet/msbuild/issues/3121
         /// </summary>
         [Fact]
         public void ITaskItemParameter_RecursiveDirMetadataPreserved()
