@@ -5,8 +5,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 
-#nullable disable
-
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>

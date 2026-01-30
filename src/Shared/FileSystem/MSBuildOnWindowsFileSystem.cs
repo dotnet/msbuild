@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Versioning;
 
-#nullable disable
 
 namespace Microsoft.Build.Shared.FileSystem
 {

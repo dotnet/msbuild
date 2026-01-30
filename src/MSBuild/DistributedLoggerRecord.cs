@@ -4,8 +4,6 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 
-#nullable disable
-
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>

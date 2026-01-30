@@ -7,7 +7,6 @@ using System.Buffers;
 #endif
 using System.IO;
 
-#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -81,7 +80,6 @@ namespace Microsoft.Build.Shared
         /// A property set during an implicit restore (/restore) or explicit restore (/t:restore) to indicate that a restore is executing.
         /// </summary>
         internal const string MSBuildIsRestoring = nameof(MSBuildIsRestoring);
-
 
         /// <summary>
         /// The most current VSGeneralAssemblyVersion known to this version of MSBuild.

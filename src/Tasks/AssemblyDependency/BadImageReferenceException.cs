@@ -4,7 +4,6 @@
 using System;
 using System.Runtime.Serialization;
 
-#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
