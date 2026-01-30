@@ -4,7 +4,6 @@
 using System.Resources;
 using System.Resources.Extensions;
 
-#nullable disable
 
 namespace Microsoft.Build.Tasks.ResourceHandling
 {

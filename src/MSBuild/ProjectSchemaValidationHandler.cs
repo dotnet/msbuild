@@ -10,8 +10,6 @@ using System.Xml.Schema;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
-#nullable disable
-
 namespace Microsoft.Build.CommandLine
 {
     /// <summary>
