@@ -1744,7 +1744,7 @@
         Don't forget to update this comment after using the new code.
   -->
   <data name="TaskHostCallbackConnectionLost" xml:space="preserve">
-    <value>MSB5025: TaskHost lost connection to parent process during callback. The build may have been cancelled.</value>
-    <comment>{StrBegin="MSB5025: "}</comment>
+    <value>MSB5027: TaskHost lost connection to parent process during callback. The build may have been cancelled.</value>
+    <comment>{StrBegin="MSB5027: "}</comment>
   </data>
 </root>
