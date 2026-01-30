@@ -547,7 +547,7 @@
       </trans-unit>
       <trans-unit id="IllFormedQuotedStringInCondition">
         <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
-        <target state="new">MSB4101: Expected a closing quote after position {1} in condition "{0}".</target>
+        <target state="translated">MSB4101: 條件 "{0}" 的位置 {1} 後面必須是結束引號。</target>
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">

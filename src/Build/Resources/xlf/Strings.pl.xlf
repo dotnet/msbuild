@@ -547,7 +547,7 @@
       </trans-unit>
       <trans-unit id="IllFormedQuotedStringInCondition">
         <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
-        <target state="new">MSB4101: Expected a closing quote after position {1} in condition "{0}".</target>
+        <target state="translated">MSB4101: Oczekiwano cudzysłowu zamykającego po położeniu {1} w warunku „{0}”.</target>
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
