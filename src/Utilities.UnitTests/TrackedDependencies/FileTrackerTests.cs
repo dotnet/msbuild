@@ -363,8 +363,8 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // Should track directories when '/e' is passed
-                FileTrackerTestHelper.AssertFoundStringInTLog("GetFileAttributesExW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
-                FileTrackerTestHelper.AssertFoundStringInTLog("GetFileAttributesW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertFoundStringInTLog("GetFileAttributesExW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertFoundStringInTLog("GetFileAttributesW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -376,8 +376,8 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // With '/a', should *not* track GetFileAttributes on directories, even though we do so on files.
-                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesExW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
-                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesExW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -389,8 +389,8 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // With neither '/a' nor '/e', should not do any directory tracking whatsoever
-                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesExW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
-                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesExW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -402,7 +402,7 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // Should track directories when '/e' is passed
-                FileTrackerTestHelper.AssertFoundStringInTLog(FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertFoundStringInTLog(FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -414,7 +414,7 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // With '/a', should *not* track GetFileAttributes on directories, even though we do so on files.
-                FileTrackerTestHelper.AssertDidntFindStringInTLog(FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog(FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -426,7 +426,7 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // With neither '/a' nor '/e', should not do any directory tracking whatsoever
-                FileTrackerTestHelper.AssertDidntFindStringInTLog(FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog(FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
             }
             finally
             {
@@ -909,12 +909,12 @@ class X
             // The short path to temp
             string tempShortPath = NativeMethodsShared.IsUnixLike
                                        ? tempPath
-                                       : FileUtilities.EnsureTrailingSlash(
+                                       : FrameworkFileUtilities.EnsureTrailingSlash(
                                            NativeMethodsShared.GetShortFilePath(tempPath).ToUpperInvariant());
             // The long path to temp
             string tempLongPath = NativeMethodsShared.IsUnixLike
                                       ? tempPath
-                                      : FileUtilities.EnsureTrailingSlash(
+                                      : FrameworkFileUtilities.EnsureTrailingSlash(
                                           NativeMethodsShared.GetLongFilePath(tempPath).ToUpperInvariant());
 
             // We don't want to be including these as dependencies or outputs:
