@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
                 new PropertyDictionary<ProjectPropertyInstance>(),
                 itemDictionary,
                 (IFileSystem)FileSystems.Default,
-                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+                new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4)));
         }
 
         private static ItemDictionary<ProjectItemInstance> ToItemDictionary(Dictionary<string, string[]> itemTypes)
