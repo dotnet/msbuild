@@ -23,9 +23,9 @@ A specialized script that builds only the minimal MSBuild assemblies without tes
 | Scenario | Approximate Time |
 |----------|------------------|
 | Full build (`build.cmd`) | 2-3 minutes |
-| Minimal build with bootstrap | 20-30 seconds |
-| Minimal build without bootstrap | 9-15 seconds |
-| Incremental (no changes) | 5-10 seconds |
+| Minimal build with bootstrap (cold) | ~1 minute |
+| Minimal build with bootstrap (incremental) | ~15 seconds |
+| Minimal build without bootstrap (incremental) | ~10 seconds |
 
 #### Options
 
@@ -37,9 +37,6 @@ Options:
   -release          Build in Release configuration (default: Debug)
   -debug            Build in Debug configuration
   -rebuild          Force a rebuild (clean + build)
-  -restore          Restore only, don't build
-  -netcore, -core   Build only .NET Core target (net10.0)
-  -netfx            Build only .NET Framework target (net472)
   -v <level>        Verbosity: q[uiet], m[inimal], n[ormal], d[etailed]
 ```
 
@@ -52,21 +49,18 @@ Options:
 # Fast incremental build (when bootstrap already exists)
 .\build-minimal.cmd -nobootstrap
 
-# Even faster: .NET Core only (skips .NET Framework targets)
-.\build-minimal.cmd -nobootstrap -netcore
-
-# .NET Framework only
-.\build-minimal.cmd -nobootstrap -netfx
-
 # Release build
 .\build-minimal.cmd -release
+
+# Force clean rebuild
+.\build-minimal.cmd -rebuild
 ```
 
 ### Unix/macOS
 
 ```bash
 ./build-minimal.sh --nobootstrap
-./build-minimal.sh --netcore
+./build-minimal.sh --release
 ```
 
 ## Solution Filters
