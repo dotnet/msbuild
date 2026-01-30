@@ -2398,8 +2398,10 @@ namespace Microsoft.Build.Execution
                     if (!_globalProperties.Contains(property.Name) || !String.Equals(_globalProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase))
                     {
                         if ((!_environmentVariableProperties.Contains(property.Name) || !String.Equals(_environmentVariableProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase))
-                            && _sdkResolvedEnvironmentVariableProperties is not null
-                            && (!_sdkResolvedEnvironmentVariableProperties.Contains(property.Name) || !String.Equals(_sdkResolvedEnvironmentVariableProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase)))
+                            && (!Toolset.Properties.ContainsKey(property.Name) || !String.Equals(Toolset.Properties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase))
+                            && (_sdkResolvedEnvironmentVariableProperties is null
+                                || !_sdkResolvedEnvironmentVariableProperties.Contains(property.Name)
+                                || !String.Equals(_sdkResolvedEnvironmentVariableProperties[property.Name].EvaluatedValue, property.EvaluatedValue, StringComparison.OrdinalIgnoreCase)))
                         {
                             property.ToProjectPropertyElement(propertyGroupElement);
                         }
