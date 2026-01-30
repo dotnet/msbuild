@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="it" original="../Strings.resx">
     <body>
@@ -1840,9 +1840,9 @@ Nota: livello di dettaglio dei logger di file
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
       <trans-unit id="TaskHostCallbackConnectionLost">
-        <source>MSB5025: TaskHost lost connection to parent process during callback. The build may have been cancelled.</source>
-        <target state="new">MSB5025: TaskHost lost connection to parent process during callback. The build may have been cancelled.</target>
-        <note>{StrBegin="MSB5025: "}</note>
+        <source>MSB5027: TaskHost lost connection to parent process during callback. The build may have been cancelled.</source>
+        <target state="new">MSB5027: TaskHost lost connection to parent process during callback. The build may have been cancelled.</target>
+        <note>{StrBegin="MSB5027: "}</note>
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
