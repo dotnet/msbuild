@@ -1385,7 +1385,30 @@ namespace Microsoft.Build.Evaluation
                         }
                         else // This is a regular property
                         {
-                            propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, propertiesUseTracker);
+                            int propertyNameStart = propertyStartIndex + 2;
+                            int propertyNameEnd = propertyEndIndex - 1;
+
+                            // Check for whitespace in property name - this is likely a typo
+                            // Gated behind ChangeWave 18.5 as this is a breaking change
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
+                            {
+                                // Check if there's leading or trailing whitespace
+                                if (Char.IsWhiteSpace(expression[propertyNameStart]) || Char.IsWhiteSpace(expression[propertyNameEnd]))
+                                {
+                                    // Find the position of the whitespace for error message
+                                    int whitespacePosition = Char.IsWhiteSpace(expression[propertyNameStart])
+                                        ? propertyNameStart
+                                        : propertyNameEnd;
+
+                                    ProjectErrorUtilities.ThrowInvalidProject(
+                                        elementLocation,
+                                        "IllFormedPropertySpaceInPropertyReference",
+                                        expression.Substring(propertyStartIndex, propertyEndIndex - propertyStartIndex + 1),
+                                        whitespacePosition - propertyStartIndex + 1);
+                                }
+                            }
+
+                            propertyValue = LookupProperty(properties, expression, propertyNameStart, propertyNameEnd, elementLocation, propertiesUseTracker);
                         }
 
                         if (propertyValue != null)
@@ -1434,7 +1457,27 @@ namespace Microsoft.Build.Evaluation
                 Function<T> function = null;
                 string propertyName = propertyBody;
 
-                // Trim the body for compatibility reasons:
+                // Check for whitespace in property body - this is likely a typo
+                // Gated behind ChangeWave 18.5 as this is a breaking change
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
+                {
+                    if (Char.IsWhiteSpace(propertyBody[0]) || Char.IsWhiteSpace(propertyBody[propertyBody.Length - 1]))
+                    {
+                        // Calculate the position of the whitespace for error message
+                        // Position is 1-based, relative to the full property reference $({propertyBody})
+                        int whitespacePosition = Char.IsWhiteSpace(propertyBody[0])
+                            ? 3  // Position after "$("
+                            : propertyBody.Length + 2;  // Position before ")"
+
+                        ProjectErrorUtilities.ThrowInvalidProject(
+                            elementLocation,
+                            "IllFormedPropertySpaceInPropertyReference",
+                            $"$({propertyBody})",
+                            whitespacePosition);
+                    }
+                }
+
+                // Trim the body for compatibility reasons (when ChangeWave is disabled):
                 // Spaces are not valid property name chars, but $( Foo ) is allowed, and should always expand to BLANK.
                 // Do a very fast check for leading and trailing whitespace, and trim them from the property body if we have any.
                 // But we will do a property name lookup on the propertyName that we held onto.
