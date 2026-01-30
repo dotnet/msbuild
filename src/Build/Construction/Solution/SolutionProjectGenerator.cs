@@ -451,6 +451,7 @@ namespace Microsoft.Build.Construction
             rarTask.SetParameter("FindSerializationAssemblies", "true");
             rarTask.SetParameter("FindRelatedFiles", "true");
             rarTask.SetParameter("TargetFrameworkMoniker", project.TargetFrameworkMoniker);
+            rarTask.SetParameter("TargetFrameworkVersion", $"v{new FrameworkName(project.TargetFrameworkMoniker).Version}");
             rarTask.AddOutputItem("CopyLocalFiles", copyLocalFilesItemName, null);
 
             // Copy all the copy-local files (reported by RAR) to the web project's "bin"
