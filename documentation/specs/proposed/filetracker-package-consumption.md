@@ -39,6 +39,8 @@ private static readonly Lazy<string> fileTrackerDllName = new Lazy<string>(() =>
             : "FileTracker64.dll");
 ```
 
+> **Note**: The code snippet above is reformatted for readability. The actual source code is a single line.
+
 The path is resolved via `FrameworkLocationHelper.GeneratePathToBuildToolsForToolsVersion()`.
 
 ## Proposed Solution
@@ -83,13 +85,23 @@ In `eng/BootStrapMsBuild.targets`, replace VS-sourced FileTracker binaries with 
 
 <ItemGroup>
   <!-- Use package instead of VS installation -->
+  <!-- Note: Actual path structure depends on package layout (e.g., tools\, runtimes\, contentFiles\) -->
   <FileTrackerBinaries Include="$(FileTrackerPackagePath)tools\**\*.*" />
 </ItemGroup>
 ```
 
+> **Note**: The actual package content path (`tools\`, `runtimes\`, `contentFiles\`, etc.) would need to be determined based on how the package is structured.
+
 #### 3. Update Test Infrastructure
 
-Ensure tests can locate FileTracker from the package location or bootstrap folder rather than requiring VS installation.
+Tests currently rely on `FileTracker.GetTrackerPath()` and `FileTracker.GetFileTrackerPath()` which look for binaries in:
+1. MSBuild tools directory (via `ToolLocationHelper.GetPathToBuildToolsFile()`)
+2. Fallback to `C:\Program Files (x86)\MSBuild\15.0\FileTracker\`
+
+Changes needed:
+- Modify `FileTrackerTests.cs` to use bootstrap folder paths when package is available
+- Update `InprocTrackingNativeMethods.cs` to support alternative lookup paths
+- Consider adding a configuration property to specify FileTracker location for tests
 
 #### 4. Consider Conditional Fallback
 
