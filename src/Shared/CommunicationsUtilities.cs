@@ -995,6 +995,13 @@ namespace Microsoft.Build.Internal
 
             if (!string.IsNullOrEmpty(architectureFlagToSet))
             {
+                // Convert "any" (*) architecture to the current architecture for handshake matching.
+                // This ensures that parent and child processes use the same architecture flag in the handshake.
+                if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.any, StringComparison.OrdinalIgnoreCase))
+                {
+                    architectureFlagToSet = XMakeAttributes.GetCurrentMSBuildArchitecture();
+                }
+
                 if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
                 {
                     context |= HandshakeOptions.X64;

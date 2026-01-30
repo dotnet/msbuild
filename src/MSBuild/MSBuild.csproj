@@ -116,6 +116,15 @@
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
+    <Compile Include="..\Shared\ITaskHostCallbackPacket.cs" />
+    <Compile Include="..\Shared\TaskHostQueryRequest.cs" />
+    <Compile Include="..\Shared\TaskHostQueryResponse.cs" />
+    <Compile Include="..\Shared\TaskHostResourceRequest.cs" />
+    <Compile Include="..\Shared\TaskHostResourceResponse.cs" />
+    <Compile Include="..\Shared\TaskHostBuildRequest.cs" />
+    <Compile Include="..\Shared\TaskHostBuildResponse.cs" />
+    <Compile Include="..\Shared\TaskHostYieldRequest.cs" />
+    <Compile Include="..\Shared\TaskHostYieldResponse.cs" />
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\MSBuildLoadContext.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
     <Compile Include="..\Shared\TypeLoader.cs" />
@@ -145,6 +154,7 @@
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
     <Compile Include="ProjectSchemaValidationHandler.cs" />
     <Compile Include="OutOfProcTaskHostNode.cs" />
+    <Compile Include="TaskExecutionContext.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
     <Compile Include="PerformanceLogEventListener.cs" />
