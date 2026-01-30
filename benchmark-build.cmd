@@ -97,13 +97,35 @@ echo Minimal build without bootstrap (incremental): %Duration% >> "%ResultsFile%
 REM ============================================================================
 REM Benchmark 6: Minimal build .NET Core only (incremental)
 REM ============================================================================
-echo [8/8] Running: Minimal build .NET Core only (incremental)...
+echo [8/10] Running: Minimal build -core (net10.0 only)...
 set "StartTime=%time%"
-powershell -NoLogo -NoProfile -ExecutionPolicy ByPass -Command "& """%RepoRoot%eng\common\build.ps1""" -restore -build -configuration Debug -v quiet /p:CreateBootstrap=false /p:Projects=%RepoRoot%MSBuild.Minimal.slnf /p:TargetFrameworks=net10.0" > nul 2>&1
+call "%RepoRoot%build-minimal.cmd" -core -v quiet > nul 2>&1
 set "EndTime=%time%"
 call :CalcDuration "%StartTime%" "%EndTime%" Duration
-echo   Minimal build .NET Core only (incremental): %Duration%
-echo Minimal build .NET Core only (incremental): %Duration% >> "%ResultsFile%"
+echo   Minimal build -core (net10.0): %Duration%
+echo Minimal build -core (net10.0): %Duration% >> "%ResultsFile%"
+
+REM ============================================================================
+REM Benchmark 7: Minimal build .NET Framework only (incremental)
+REM ============================================================================
+echo [9/10] Running: Minimal build -netfx (net472 only)...
+set "StartTime=%time%"
+call "%RepoRoot%build-minimal.cmd" -netfx -v quiet > nul 2>&1
+set "EndTime=%time%"
+call :CalcDuration "%StartTime%" "%EndTime%" Duration
+echo   Minimal build -netfx (net472): %Duration%
+echo Minimal build -netfx (net472): %Duration% >> "%ResultsFile%"
+
+REM ============================================================================
+REM Benchmark 8: Minimal build Release
+REM ============================================================================
+echo [10/10] Running: Minimal build Release...
+set "StartTime=%time%"
+call "%RepoRoot%build-minimal.cmd" -release -v quiet > nul 2>&1
+set "EndTime=%time%"
+call :CalcDuration "%StartTime%" "%EndTime%" Duration
+echo   Minimal build Release: %Duration%
+echo Minimal build Release: %Duration% >> "%ResultsFile%"
 
 echo. >> "%ResultsFile%"
 echo ============================================================================ >> "%ResultsFile%"

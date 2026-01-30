@@ -46,6 +46,8 @@ show_help() {
     echo "  ./build-minimal.sh --nobootstrap       Fast incremental build"
     echo "  ./build-minimal.sh --release           Release build"
     echo ""
+    echo "Note: --core and --netfx options are Windows-only (require Visual Studio)."
+    echo ""
     echo "For full builds including tests, use: ./build.sh"
     echo ""
     exit 0

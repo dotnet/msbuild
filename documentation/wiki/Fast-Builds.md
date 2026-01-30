@@ -12,6 +12,10 @@ For the fastest possible development workflow:
 
 # After that: Fast incremental rebuilds (no bootstrap, ~10 seconds)
 .\build-minimal.cmd -nobootstrap
+
+# Even faster: Single TFM build (~3-12 seconds, requires prior restore)
+.\build-minimal.cmd -core    # .NET Core only (net10.0)
+.\build-minimal.cmd -netfx   # .NET Framework only (net472)
 ```
 
 ## Build Scripts
@@ -23,8 +27,10 @@ A specialized script that builds only the minimal MSBuild assemblies without tes
 | Scenario | Approximate Time |
 |----------|------------------|
 | Full build (`build.cmd`) | 2-3 minutes |
-| Minimal build with bootstrap (cold) | ~1 minute |
+| Minimal build with bootstrap (cold) | ~50 seconds |
 | Minimal build with bootstrap (incremental) | ~15 seconds |
+| Single TFM `-core` (net10.0 only) | ~3-25 seconds |
+| Single TFM `-netfx` (net472 only) | ~12 seconds |
 | Minimal build without bootstrap (incremental) | ~10 seconds |
 
 #### Options
@@ -34,6 +40,8 @@ A specialized script that builds only the minimal MSBuild assemblies without tes
 
 Options:
   -nobootstrap      Skip creating the bootstrap folder (fastest builds)
+  -core             Build only .NET Core (net10.0) - requires prior restore
+  -netfx            Build only .NET Framework (net472) - requires prior restore
   -release          Build in Release configuration (default: Debug)
   -debug            Build in Debug configuration
   -rebuild          Force a rebuild (clean + build)
@@ -49,6 +57,10 @@ Options:
 # Fast incremental build (when bootstrap already exists)
 .\build-minimal.cmd -nobootstrap
 
+# Fastest: Single TFM (requires prior restore from build-minimal.cmd)
+.\build-minimal.cmd -core      # Just .NET Core
+.\build-minimal.cmd -netfx     # Just .NET Framework
+
 # Release build
 .\build-minimal.cmd -release
 
@@ -62,6 +74,8 @@ Options:
 ./build-minimal.sh --nobootstrap
 ./build-minimal.sh --release
 ```
+
+Note: `--core` and `--netfx` options are Windows-only (require Visual Studio MSBuild.exe).
 
 ## Solution Filters
 
