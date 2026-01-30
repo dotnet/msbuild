@@ -14,6 +14,7 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using Microsoft.Build.UnitTests.BackEnd;
 
 #nullable disable
 
@@ -382,6 +383,62 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             logger.FullLog.ShouldContain("TaskWithAttribute executed");
         }
 
+        /// <summary>
+        /// Verifies that IBuildEngine callbacks work correctly when an unmarked task
+        /// is automatically ejected to TaskHost in multithreaded mode.
+        /// This is the key integration test for Stage 1 callback infrastructure.
+        /// </summary>
+        [Theory]
+        [InlineData(1, false)]  // Single node build - IsRunningMultipleNodes should be false
+        [InlineData(4, true)]   // Multi-node build - IsRunningMultipleNodes should be true
+        public void IsRunningMultipleNodesCallback_WorksWhenTaskEjectedToTaskHost_InMultiThreadedMode(int maxNodeCount, bool expectedResult)
+        {
+            // Arrange - Use IsRunningMultipleNodesTask which is NOT marked with MSBuildMultiThreadableTask
+            // In MT mode, this task will be automatically ejected to TaskHost
+            // This tests that IBuildEngine2.IsRunningMultipleNodes callback works end-to-end
+            string projectContent = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(IsRunningMultipleNodesTask)}"" AssemblyFile=""{typeof(IsRunningMultipleNodesTask).Assembly.Location}"" />
+    <Target Name=""TestTarget"">
+        <{nameof(IsRunningMultipleNodesTask)}>
+            <Output PropertyName=""IsRunningMultipleNodes"" TaskParameter=""IsRunningMultipleNodes"" />
+        </{nameof(IsRunningMultipleNodesTask)}>
+    </Target>
+</Project>";
+
+            string projectFile = Path.Combine(_testProjectsDir, $"IsRunningMultipleNodes_MT_{maxNodeCount}.proj");
+            File.WriteAllText(projectFile, projectContent);
+
+            var logger = new MockLogger(_output);
+            var buildParameters = new BuildParameters
+            {
+                MultiThreaded = true,  // Enable multithreaded mode - causes unmarked tasks to use TaskHost
+                MaxNodeCount = maxNodeCount,
+                Loggers = new[] { logger },
+                DisableInProcNode = false,
+                EnableNodeReuse = false
+            };
+
+            var buildRequestData = new BuildRequestData(
+                projectFile,
+                new Dictionary<string, string>(),
+                null,
+                new[] { "TestTarget" },
+                null);
+
+            // Act
+            var buildManager = BuildManager.DefaultBuildManager;
+            var result = buildManager.Build(buildParameters, buildRequestData);
+
+            // Assert
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Verify task was ejected to TaskHost (because it lacks MSBuildMultiThreadableTask attribute)
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, nameof(IsRunningMultipleNodesTask));
+
+            // Verify the callback returned the correct value
+            logger.FullLog.ShouldContain($"IsRunningMultipleNodes = {expectedResult}");
+        }
 
 
         private string CreateTestProject(string taskName, string taskClass)
