@@ -507,11 +507,14 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _projectFileOfTask);
             translator.Translate(ref _taskName);
             translator.Translate(ref _taskLocation);
-            if (translator.NegotiatedPacketVersion >= 2)
+
+            // Version 0 = Framework-to-Framework (e.g. CLR4),
+            // Version 2+ = .NET task host with support of translation for these fields.
+            if (translator.NegotiatedPacketVersion == 0 || translator.NegotiatedPacketVersion >= 2)
             {
                 translator.Translate(ref _targetName);
                 translator.Translate(ref _projectFile);
-#if !NET35    
+#if !NET35
                 translator.Translate(ref _hostServices);
 #endif
             }
