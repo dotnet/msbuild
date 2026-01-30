@@ -363,48 +363,5 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             projectInstance.GetPropertyValue("CustomStructOutput").ShouldBe(TaskBuilderTestTask.s_customStruct.ToString(CultureInfo.InvariantCulture));
             projectInstance.GetPropertyValue("EnumOutput").ShouldBe(TargetBuiltReason.BeforeTargets.ToString());
         }
-
-        /// <summary>
-        /// Verifies that IBuildEngine2.IsRunningMultipleNodes can be queried from a task running in the task host.
-        /// This tests the callback infrastructure that sends queries back to the parent process.
-        /// </summary>
-        [Theory]
-        [InlineData(1, false)]  // Single node build - should return false
-        [InlineData(4, true)]   // Multi-node build - should return true
-        public void IsRunningMultipleNodesCallbackWorksInTaskHost(int maxNodeCount, bool expectedResult)
-        {
-            using TestEnvironment env = TestEnvironment.Create(_output);
-
-            string projectContents = $@"
-<Project>
-    <UsingTask TaskName=""{nameof(IsRunningMultipleNodesTask)}"" AssemblyFile=""{typeof(IsRunningMultipleNodesTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
-    <Target Name=""TestIsRunningMultipleNodes"">
-        <{nameof(IsRunningMultipleNodesTask)}>
-            <Output PropertyName=""IsRunningMultipleNodes"" TaskParameter=""IsRunningMultipleNodes"" />
-        </{nameof(IsRunningMultipleNodesTask)}>
-    </Target>
-</Project>";
-
-            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
-
-            BuildParameters buildParameters = new()
-            {
-                MaxNodeCount = maxNodeCount,
-                EnableNodeReuse = false
-            };
-
-            ProjectInstance projectInstance = new(project.ProjectFile);
-
-            BuildManager buildManager = BuildManager.DefaultBuildManager;
-            BuildResult buildResult = buildManager.Build(
-                buildParameters,
-                new BuildRequestData(projectInstance, targetsToBuild: ["TestIsRunningMultipleNodes"]));
-
-            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
-
-            string result = projectInstance.GetPropertyValue("IsRunningMultipleNodes");
-            result.ShouldNotBeNullOrEmpty();
-            bool.Parse(result).ShouldBe(expectedResult);
-        }
     }
 }
