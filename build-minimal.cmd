@@ -194,13 +194,31 @@ if defined Rebuild set "MSBuildArgs=%MSBuildArgs% /t:Rebuild"
 "%MSBuildExe%" %MSBuildArgs% %ExtraArgs%
 set "ExitCode=%ERRORLEVEL%"
 
+REM Also build Bootstrap to create usable MSBuild
+if %ExitCode%==0 (
+    set "BootstrapArgs=%RepoRoot%src\MSBuild.Bootstrap\MSBuild.Bootstrap.csproj /p:Configuration=%Configuration%"
+    set "BootstrapArgs=!BootstrapArgs! /p:TargetFramework=%SingleTFM%"
+    set "BootstrapArgs=!BootstrapArgs! /restore:false /v:%MSBuildVerbosity%"
+    if defined Rebuild set "BootstrapArgs=!BootstrapArgs! /t:Rebuild"
+    
+    "%MSBuildExe%" !BootstrapArgs! %ExtraArgs%
+    set "ExitCode=!ERRORLEVEL!"
+)
+
 :build_done
 
 if %ExitCode%==0 (
     echo.
     echo ============================================================
     echo  Build succeeded!
-    if "%CreateBootstrap%"=="true" (
+    if defined SingleTFM (
+        echo.
+        if "%SingleTFM%"=="net10.0" (
+            echo  Bootstrap: artifacts\bin\bootstrap\core\dotnet.exe build
+        ) else (
+            echo  Bootstrap: artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe
+        )
+    ) else if "%CreateBootstrap%"=="true" (
         echo.
         echo  To use the bootstrapped MSBuild, run:
         echo    artifacts\msbuild-build-env.bat
