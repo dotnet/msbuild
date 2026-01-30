@@ -591,7 +591,7 @@ namespace Microsoft.Build.BackEnd
                     // RecursiveDir is a built-in metadata that cannot be derived from the item spec alone -
                     // it requires the original wildcard pattern. When crossing process boundaries (e.g., to TaskHost),
                     // this information is lost. Copy it to custom metadata so it survives serialization.
-                    // See https://github.com/Microsoft/msbuild/issues/3121
+                    // See https://github.com/dotnet/msbuild/issues/3121
                     // Check ContainsKey first to avoid expensive FileMatcher call when not needed.
                     if (!_customEscapedMetadata.ContainsKey(FileUtilities.ItemSpecModifiers.RecursiveDir))
                     {
