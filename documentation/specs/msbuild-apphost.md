@@ -10,16 +10,17 @@ Enable MSBuild to be invoked directly as a native executable (`MSBuild.exe` / `M
 - Simplified invocation model
 
 ### Important consideration
-The .NET SDK currently invokes MSBuild in two modes:
+The .NET SDK currently invokes MSBuild in multiple ways:
 
 | Mode | Current Behavior | After App Host |
 |------|------------------|----------------|
 | **In-proc** | SDK loads `MSBuild.dll` directly | No change |
-| **Out-of-proc** | SDK launches `dotnet exec MSBuild.dll` | SDK will launch `MSBuild.exe` |
+| **Out-of-proc (exec)** | SDK launches `dotnet exec MSBuild.dll` | SDK *can* launch `MSBuild.exe` |
+| **Out-of-proc (direct)** | SDK launches `dotnet MSBuild.dll` (no `exec`) | SDK *can* launch `MSBuild.exe` |
 
 The AppHost introduction does not break SDK integration since we are not modifying the in-proc flow. The SDK will continue to load `MSBuild.dll` directly for in-proc scenarios.
 
-**SDK out-of-proc consideration**: The SDK can be configured to run MSBuild out-of-proc today via `DOTNET_CLI_RUN_MSBUILD_OUTOFPROC`, and this pattern will likely become more common as AOT work progresses for CLI commands that wrap MSBuild invocations. When the SDK does launch MSBuild out-of-proc, it will use the new app host (`MSBuild.exe`) when available.
+**SDK out-of-proc consideration**: The SDK can be configured to run MSBuild out-of-proc today via `DOTNET_CLI_RUN_MSBUILD_OUTOFPROC`, and this pattern will likely become more common as AOT work progresses for CLI commands that wrap MSBuild invocations. When the SDK does launch MSBuild out-of-proc, it *can* opt to use the new app host (`MSBuild.exe`) when available, but this is **not required**—the existing `dotnet MSBuild.dll` invocation pattern continues to work. Switching to the app host in the SDK is a simplification/cleanup opportunity enabled by this work, not a forced change.
 
 ### Critical: COM Manifest for Out-of-Proc Host Objects
 
@@ -121,7 +122,9 @@ When running under the SDK, the runtime may be in a non-standard location. The S
 
 ### Solution
 
-Before launching an app host process, set `DOTNET_ROOT` in the `ProcessStartInfo.Environment`:
+Before launching an app host process, set `DOTNET_ROOT` in the `ProcessStartInfo.Environment`.
+
+**Note**: This solution applies to MSBuild's internal node launching (worker nodes, task hosts). The SDK's entry-point invocation (`dotnet MSBuild.dll`, `dotnet exec MSBuild.dll`, or eventually `MSBuild.exe`) is a separate concern—if the SDK continues using `dotnet.exe MSBuild.dll` with `DOTNET_CLI_RUN_MSBUILD_OUTOFPROC`, that path still works and doesn't require `DOTNET_ROOT` handling (since `dotnet.exe` handles runtime discovery itself).
 ```csharp
 // Derive DOTNET_ROOT from DOTNET_HOST_PATH
 var dotnetHostPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
@@ -152,10 +155,15 @@ startInfo.Environment.Remove("DOTNET_ROOT_ARM64");
 
 **Concern**: When MSBuild sets `DOTNET_ROOT` to launch a worker node, that environment variable propagates to any tools the worker node executes. This could change tool behavior if the tool relies on `DOTNET_ROOT` to find its runtime.
 
-**Solution**: The worker node should explicitly clear `DOTNET_ROOT` (and architecture-specific variants) after startup, restoring the original entry-point environment:
+**Solution**: The worker node (and out-of-proc task host nodes) should explicitly clear `DOTNET_ROOT` (and architecture-specific variants) after startup, restoring the original entry-point environment.
+
+**Applies to**:
+- Worker nodes (`OutOfProcNode`)
+- Out-of-proc task host nodes (`OutOfProcTaskHostNode`)
 
 ```csharp
-// In OutOfProcNode.HandleNodeConfiguration, after setting BuildProcessEnvironment:
+// In OutOfProcNode.HandleNodeConfiguration (and similar location in OutOfProcTaskHostNode),
+// after setting BuildProcessEnvironment:
 
 // Clear DOTNET_ROOT variants that were set only for app host bootstrap.
 // These should not leak to tools executed by this worker node.
