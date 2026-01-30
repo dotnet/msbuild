@@ -6,7 +6,7 @@
 
 ## Background
 
-The source code for `Tracker.exe` and `FileTracker.dll` (FileTracker32.dll, FileTracker64.dll, FileTrackerA4.dll) is not open source, but those assemblies are part of the MSBuild binary distribution. Currently:
+The source code for `Tracker.exe` and `FileTracker.dll` (`FileTracker32.dll`, `FileTracker64.dll`, `FileTrackerA4.dll`) is not open source, but those assemblies are part of the MSBuild binary distribution. Currently:
 
 1. **Bootstrap process** copies FileTracker binaries from the installed Visual Studio (`$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\`)
 2. **Tests** fall back to installed versions, making testing coordinated changes difficult
