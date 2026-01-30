@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using Microsoft.Build.Exceptions;
 
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -83,6 +84,25 @@ namespace Microsoft.Build.UnitTests
             {
                 File.Delete(file);
             }
+        }
+
+        /// <summary>
+        /// Verify that wrapping an InvalidProjectFileException with null ProjectFile does not throw ArgumentNullException.
+        /// Regression test for https://github.com/dotnet/msbuild/issues/11901
+        /// </summary>
+        [Fact]
+        public void WrappingExceptionWithNullProjectFileShouldNotThrow()
+        {
+            // Create an exception using basic constructor which leaves ProjectFile null
+            var innerException = new InvalidProjectFileException("Inner exception message");
+            innerException.ProjectFile.ShouldBeNull();
+
+            // This should not throw ArgumentNullException
+            var wrappedException = new InvalidProjectFileException("Wrapper message", innerException);
+
+            wrappedException.ShouldNotBeNull();
+            wrappedException.ProjectFile.ShouldBe(string.Empty);
+            wrappedException.BaseMessage.ShouldBe("Wrapper message");
         }
     }
 }
