@@ -79,8 +79,8 @@ Roslyn added app host support in [PR #80026](https://github.com/dotnet/roslyn/pu
 
 The SDK will then produce both `MSBuild.dll` and `MSBuild.exe` (Windows) / `MSBuild` (Unix).
 
-### 2. Installer Repository (dotnet/dotnet VMR)
-The app host creation happens in the installer/layout targets, similar to how Roslyn app hosts are created (PR https://github.com/dotnet/dotnet/pull/3180).
+### 2. VMR Changes (dotnet/dotnet - SDK component)
+The app host creation happens in the SDK layout targets within the VMR. Changes are made in the `sdk` component of `dotnet/dotnet` to simplify integration and avoid coordinated arcade SDK changes. Similar to how Roslyn app hosts are created (PR https://github.com/dotnet/dotnet/pull/3180).
 
 ### 3. Node Launching Logic
 
