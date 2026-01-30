@@ -3,13 +3,22 @@
 
 using System;
 using System.Collections;
+#if !CLR2COMPATIBILITY
+using System.Collections.Concurrent;
+#endif
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
+#if !CLR2COMPATIBILITY
+using System.Threading.Tasks;
+#endif
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
+#if !CLR2COMPATIBILITY
+using Microsoft.Build.Exceptions;
+#endif
 using Microsoft.Build.Framework;
 #if !CLR2COMPATIBILITY
 using Microsoft.Build.Experimental.FileAccess;
@@ -178,6 +187,19 @@ namespace Microsoft.Build.CommandLine
         private List<FileAccessData> _fileAccessData = new List<FileAccessData>();
 #endif
 
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// Counter for generating unique request IDs for callback correlation.
+        /// </summary>
+        private int _nextCallbackRequestId;
+
+        /// <summary>
+        /// Pending callback requests awaiting responses from the parent.
+        /// Key is the request ID, value is the TaskCompletionSource to signal when response arrives.
+        /// </summary>
+        private readonly ConcurrentDictionary<int, TaskCompletionSource<INodePacket>> _pendingCallbackRequests = new();
+#endif
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -203,6 +225,10 @@ namespace Microsoft.Build.CommandLine
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostConfiguration, TaskHostConfiguration.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostTaskCancelled, TaskHostTaskCancelled.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
+
+#if !CLR2COMPATIBILITY
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostQueryResponse, TaskHostQueryResponse.FactoryForDeserialization, this);
+#endif
 
 #if !CLR2COMPATIBILITY
             EngineServices = new EngineServicesImpl(this);
@@ -264,15 +290,21 @@ namespace Microsoft.Build.CommandLine
         #region IBuildEngine2 Implementation (Properties)
 
         /// <summary>
-        /// Stub implementation of IBuildEngine2.IsRunningMultipleNodes.  The task host does not support this sort of
-        /// IBuildEngine callback, so error.
+        /// Implementation of IBuildEngine2.IsRunningMultipleNodes.
+        /// Queries the parent process and returns the actual value.
         /// </summary>
         public bool IsRunningMultipleNodes
         {
             get
             {
+#if CLR2COMPATIBILITY
                 LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
                 return false;
+#else
+                var request = new TaskHostQueryRequest(TaskHostQueryRequest.QueryType.IsRunningMultipleNodes);
+                var response = SendCallbackRequestAndWaitForResponse<TaskHostQueryResponse>(request);
+                return response.BoolResult;
+#endif
             }
         }
 
@@ -725,8 +757,105 @@ namespace Microsoft.Build.CommandLine
                 case NodePacketType.NodeBuildComplete:
                     HandleNodeBuildComplete(packet as NodeBuildComplete);
                     break;
+
+#if !CLR2COMPATIBILITY
+                // Callback response packet - route to pending request
+                case NodePacketType.TaskHostQueryResponse:
+                    HandleCallbackResponse(packet);
+                    break;
+#endif
             }
         }
+
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// Handles a callback response packet by completing the pending request's TaskCompletionSource.
+        /// This is called on the main thread and unblocks the task thread waiting for the response.
+        /// </summary>
+        private void HandleCallbackResponse(INodePacket packet)
+        {
+            // Silent no-op if packet doesn't implement ITaskHostCallbackPacket or request ID unknown.
+            // Unknown ID can occur if request was cancelled/abandoned before response arrived.
+            if (packet is ITaskHostCallbackPacket callbackPacket
+                && _pendingCallbackRequests.TryRemove(callbackPacket.RequestId, out TaskCompletionSource<INodePacket> tcs))
+            {
+                tcs.TrySetResult(packet);
+            }
+        }
+
+        /// <summary>
+        /// Sends a callback request packet to the parent and waits for the corresponding response.
+        /// This is called from task threads and blocks until the response arrives on the main thread.
+        /// </summary>
+        /// <typeparam name="TResponse">The expected response packet type.</typeparam>
+        /// <param name="request">The request packet to send (must implement ITaskHostCallbackPacket).</param>
+        /// <returns>The response packet.</returns>
+        /// <exception cref="InvalidOperationException">If the connection is lost.</exception>
+        /// <exception cref="BuildAbortedException">If the task is cancelled during the callback.</exception>
+        /// <remarks>
+        /// This method is infrastructure for callback support. Used by IsRunningMultipleNodes,
+        /// RequestCores/ReleaseCores, BuildProjectFile, etc.
+        /// </remarks>
+        private TResponse SendCallbackRequestAndWaitForResponse<TResponse>(ITaskHostCallbackPacket request)
+            where TResponse : class, INodePacket
+        {
+            int requestId = Interlocked.Increment(ref _nextCallbackRequestId);
+            request.RequestId = requestId;
+
+            // Use ManualResetEvent to bridge TaskCompletionSource to WaitHandle
+            using var responseEvent = new ManualResetEvent(false);
+            var tcs = new TaskCompletionSource<INodePacket>(TaskCreationOptions.RunContinuationsAsynchronously);
+            tcs.Task.ContinueWith(_ => responseEvent.Set(), TaskContinuationOptions.ExecuteSynchronously);
+            _pendingCallbackRequests[requestId] = tcs;
+
+            try
+            {
+                // Send the request packet to the parent
+                _nodeEndpoint.SendData(request);
+
+                // Wait for either: response arrives, task cancelled, or connection lost
+                // No timeout - callbacks like BuildProjectFile can legitimately take hours
+                WaitHandle[] waitHandles = [responseEvent, _taskCancelledEvent];
+
+                while (true)
+                {
+                    int signaledIndex = WaitHandle.WaitAny(waitHandles, millisecondsTimeout: 1000);
+
+                    if (signaledIndex == 0)
+                    {
+                        // Response received
+                        break;
+                    }
+                    else if (signaledIndex == 1)
+                    {
+                        // Task cancelled
+                        throw new BuildAbortedException();
+                    }
+
+                    // Timeout - check connection status (no WaitHandle available for this)
+                    if (_nodeEndpoint.LinkStatus != LinkStatus.Active)
+                    {
+                        throw new InvalidOperationException(
+                            ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskHostCallbackConnectionLost"));
+                    }
+                }
+
+                INodePacket response = tcs.Task.Result;
+
+                if (response is TResponse typedResponse)
+                {
+                    return typedResponse;
+                }
+
+                throw new InvalidOperationException(
+                    $"Unexpected callback response type: expected {typeof(TResponse).Name}, got {response?.GetType().Name ?? "null"}");
+            }
+            finally
+            {
+                _pendingCallbackRequests.TryRemove(requestId, out _);
+            }
+        }
+#endif
 
         /// <summary>
         /// Configure the task host according to the information received in the

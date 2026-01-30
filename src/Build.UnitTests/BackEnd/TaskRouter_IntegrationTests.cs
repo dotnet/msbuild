@@ -383,7 +383,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
 
-
         private string CreateTestProject(string taskName, string taskClass)
         {
             return $@"
