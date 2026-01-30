@@ -159,6 +159,12 @@ namespace Microsoft.Build.BackEnd
         public BuildRequestEntryState State { get; private set; }
 
         /// <summary>
+        /// Returns the reason why this request is currently waiting, or null if not waiting.
+        /// Internal-only API for metrics tracking.
+        /// </summary>
+        internal string WaitReason { get; private set; }
+
+        /// <summary>
         /// Returns the request which originated this entry.
         /// </summary>
         public BuildRequest Request { get; }
@@ -226,6 +232,7 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrow(State == BuildRequestEntryState.Active, "Must be in Active state to wait for blocking request.  Config: {0} State: {1}", RequestConfiguration.ConfigurationId, State);
 
                 _blockingGlobalRequestId = blockingGlobalRequestId;
+                WaitReason = "blocking_target";
 
                 ChangeState(BuildRequestEntryState.Waiting);
             }
@@ -384,6 +391,7 @@ namespace Microsoft.Build.BackEnd
                 // If we are out of outstanding requests, we are ready to continue.
                 if (_outstandingRequests == null && _unresolvedConfigurations == null && _blockingGlobalRequestId == BuildRequest.InvalidGlobalRequestId)
                 {
+                    WaitReason = null;
                     ChangeState(BuildRequestEntryState.Ready);
                 }
             }
@@ -400,6 +408,7 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrow(_blockingGlobalRequestId != BuildRequest.InvalidGlobalRequestId, "Entry must be waiting on another request to be unblocked.  Config: {0} Request: {1}", RequestConfiguration.ConfigurationId, Request.GlobalRequestId);
 
                 _blockingGlobalRequestId = BuildRequest.InvalidGlobalRequestId;
+                WaitReason = null;
 
                 ChangeState(BuildRequestEntryState.Ready);
             }
@@ -522,6 +531,7 @@ namespace Microsoft.Build.BackEnd
 
                     ErrorUtilities.VerifyThrow(!_outstandingRequests.ContainsKey(newRequest.NodeRequestId), "Already waiting for local request {0}", newRequest.NodeRequestId);
                     _outstandingRequests.Add(newRequest.NodeRequestId, newRequest);
+                    WaitReason = "child_requests";
                 }
                 else
                 {
@@ -535,6 +545,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     value.Add(newRequest);
+                    WaitReason = "unresolved_configuration";
                 }
 
                 if (addToIssueList)
