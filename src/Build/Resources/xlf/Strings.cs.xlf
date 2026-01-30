@@ -547,7 +547,7 @@
       </trans-unit>
       <trans-unit id="IllFormedQuotedStringInCondition">
         <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
-        <target state="new">MSB4101: Expected a closing quote after position {1} in condition "{0}".</target>
+        <target state="translated">MSB4101: Na pozici {1} v podmínce {0} byla očekávána pravá uvozovka.</target>
         <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
