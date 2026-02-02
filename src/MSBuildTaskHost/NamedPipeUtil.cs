@@ -22,16 +22,7 @@ namespace Microsoft.Build.Shared
 
         internal static string GetPlatformSpecificPipeName(string pipeName)
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                // We should never get here. This would be a net35 task host running on unix.
-                ErrorUtilities.ThrowInternalError("Task host used on unix in retrieving the pipe name.");
-                return string.Empty;
-            }
-            else
-            {
-                return pipeName;
-            }
+            return pipeName;
         }
 
         internal static string GetRarNodePipeName(ServerNodeHandshake handshake)

@@ -248,35 +248,22 @@ namespace Microsoft.Build.Shared
 
                         modifiedItemSpec = GetDirectory(fullPath);
 
-                        if (NativeMethodsShared.IsWindows)
+                        int length = -1;
+                        if (FileUtilitiesRegex.StartsWithDrivePattern(modifiedItemSpec))
                         {
-                            int length = -1;
-                            if (FileUtilitiesRegex.StartsWithDrivePattern(modifiedItemSpec))
-                            {
-                                length = 2;
-                            }
-                            else
-                            {
-                                length = FileUtilitiesRegex.StartsWithUncPatternMatchLength(modifiedItemSpec);
-                            }
-
-                            if (length != -1)
-                            {
-                                ErrorUtilities.VerifyThrow((modifiedItemSpec.Length > length) && FrameworkFileUtilities.IsSlash(modifiedItemSpec[length]),
-                                                           "Root directory must have a trailing slash.");
-
-                                modifiedItemSpec = modifiedItemSpec.Substring(length + 1);
-                            }
+                            length = 2;
                         }
                         else
                         {
-                            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(modifiedItemSpec) && FrameworkFileUtilities.IsSlash(modifiedItemSpec[0]),
-                                                       "Expected a full non-windows path rooted at '/'.");
+                            length = FileUtilitiesRegex.StartsWithUncPatternMatchLength(modifiedItemSpec);
+                        }
 
-                            // A full unix path is always rooted at
-                            // `/`, and a root-relative path is the
-                            // rest of the string.
-                            modifiedItemSpec = modifiedItemSpec.Substring(1);
+                        if (length != -1)
+                        {
+                            ErrorUtilities.VerifyThrow((modifiedItemSpec.Length > length) && FrameworkFileUtilities.IsSlash(modifiedItemSpec[length]),
+                                                       "Root directory must have a trailing slash.");
+
+                            modifiedItemSpec = modifiedItemSpec.Substring(length + 1);
                         }
                     }
                     else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase))

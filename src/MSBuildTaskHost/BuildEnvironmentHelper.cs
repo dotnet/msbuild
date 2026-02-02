@@ -128,11 +128,6 @@ namespace Microsoft.Build.Shared
 
         private static BuildEnvironment TryFromVisualStudioProcess()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return null;
-            }
-
             var vsProcess = s_getProcessFromRunningProcess();
             if (!IsProcessInList(vsProcess, s_visualStudioProcess))
             {
@@ -160,8 +155,7 @@ namespace Microsoft.Build.Shared
             }
 
             // First check if we're in a VS installation
-            if (NativeMethodsShared.IsWindows &&
-                Regex.IsMatch(msBuildExe, $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*MSBuild(?:TaskHost)?\.exe", RegexOptions.IgnoreCase))
+            if (Regex.IsMatch(msBuildExe, $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*MSBuild(?:TaskHost)?\.exe", RegexOptions.IgnoreCase))
             {
                 return new BuildEnvironment(
                     BuildEnvironmentMode.VisualStudio,
@@ -233,8 +227,7 @@ namespace Microsoft.Build.Shared
                 ? $@".*\\MSBuild\\({CurrentToolsVersion}|\d+\.0)\\Bin\\.*"
                 : $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*";
 
-            if (NativeMethodsShared.IsWindows &&
-                Regex.IsMatch(msbuildExe, msBuildPathPattern, RegexOptions.IgnoreCase))
+            if (Regex.IsMatch(msbuildExe, msBuildPathPattern, RegexOptions.IgnoreCase))
             {
                 string visualStudioRoot = GetVsRootFromMSBuildAssembly(msbuildExe);
                 return new BuildEnvironment(

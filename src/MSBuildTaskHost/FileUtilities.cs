@@ -419,7 +419,7 @@ namespace Microsoft.Build.Shared
 
         private static bool IsUNCPath(string path)
         {
-            if (!NativeMethodsShared.IsWindows || !path.StartsWith(@"\\", StringComparison.Ordinal))
+            if (!path.StartsWith(@"\\", StringComparison.Ordinal))
             {
                 return false;
             }
@@ -549,7 +549,7 @@ namespace Microsoft.Build.Shared
                 fullPath = EscapingUtilities.Escape(fullPath);
             }
 
-            if (NativeMethodsShared.IsWindows && !FrameworkFileUtilities.EndsWithSlash(fullPath))
+            if (!FrameworkFileUtilities.EndsWithSlash(fullPath))
             {
                 if (FileUtilitiesRegex.IsDrivePattern(fileSpec) ||
                     FileUtilitiesRegex.IsUncPattern(fullPath))
