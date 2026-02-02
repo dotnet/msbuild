@@ -18,13 +18,10 @@ using System.IO.Pipes;
 using System.IO;
 using System.Collections.Generic;
 
-#if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
 #endif
-#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
-
-#endif
 #if NET451_OR_GREATER || NETCOREAPP
 using System.Threading.Tasks;
 #endif
@@ -137,7 +134,7 @@ namespace Microsoft.Build.BackEnd
             nameof(HandshakeComponents.FileVersionPrivate)];
 #endif
 
-#endregion
+        #endregion
 
         #region INodeEndpoint Events
 
@@ -236,7 +233,6 @@ namespace Microsoft.Build.BackEnd
 
             pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
-#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
             SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
             PipeSecurity security = new PipeSecurity();
 
@@ -263,20 +259,6 @@ namespace Microsoft.Build.BackEnd
                 PipeBufferSize,  // Default output buffer
                 security,
                 HandleInheritability.None);
-#else
-            _pipeServer = new NamedPipeServerStream(
-                pipeName,
-                PipeDirection.InOut,
-                1, // Only allow one connection at a time.
-                PipeTransmissionMode.Byte,
-                PipeOptions.Asynchronous | PipeOptions.WriteThrough
-#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-                | PipeOptions.CurrentUserOnly
-#endif
-                ,
-                PipeBufferSize, // Default input buffer
-                PipeBufferSize);  // Default output buffer
-#endif
         }
 
         #endregion
@@ -413,7 +395,7 @@ namespace Microsoft.Build.BackEnd
                         int index = 0;
                         foreach (var component in handshakeComponents.EnumerateComponents())
                         {
-                           
+
                             if (!_pipeServer.TryReadIntForHandshake(
                                 byteToAccept: index == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null, /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1_OR_GREATER
@@ -802,8 +784,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-#endregion
+        #endregion
 
-#endregion
+        #endregion
     }
 }
