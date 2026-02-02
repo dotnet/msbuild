@@ -459,15 +459,23 @@ namespace Microsoft.Build.Construction
                 // Only pass TargetFrameworkVersion for .NET Framework 4.7.1+ which has netstandard 2.0 support.
                 // For older frameworks, omitting this preserves the existing warning behavior (MSB3268)
                 // when netstandard dependencies cannot be resolved.
-                var frameworkName = new FrameworkName(project.TargetFrameworkMoniker);
-                var minVersionForNetstandard = new Version(4, 7, 1);
-
-                if (frameworkName.Version >= minVersionForNetstandard)
+                try
                 {
-                    // Pass TargetFrameworkVersion so RAR can find netstandard facades
-                    rarTask.SetParameter("TargetFrameworkVersion", $"v{frameworkName.Version}");
-                    // Pass web.config as AppConfigFile so RAR can detect assembly binding redirects
-                    rarTask.SetParameter("AppConfigFile", "$(WebConfigFileName)");
+                    var frameworkName = new FrameworkName(project.TargetFrameworkMoniker);
+                    var minVersionForNetstandard = new Version(4, 7, 1);
+
+                    if (frameworkName.Version >= minVersionForNetstandard)
+                    {
+                        // Pass TargetFrameworkVersion so RAR can find netstandard facades
+                        rarTask.SetParameter("TargetFrameworkVersion", $"v{frameworkName.Version}");
+                        // Pass web.config as AppConfigFile so RAR can detect assembly binding redirects
+                        rarTask.SetParameter("AppConfigFile", "$(WebConfigFileName)");
+                    }
+                }
+                catch (ArgumentException)
+                {
+                    // If the TargetFrameworkMoniker is malformed, skip setting TargetFrameworkVersion/AppConfigFile.
+                    // This preserves existing behavior while avoiding an unhandled exception.
                 }
             }
 

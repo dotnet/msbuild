@@ -268,7 +268,6 @@ namespace Microsoft.Build.Tasks
             if (Debug)
             {
                 commandLine.AppendSwitch("-d");
-                commandLine.AppendSwitch("-errorstack");
             }
 
             if (FixedNames)
