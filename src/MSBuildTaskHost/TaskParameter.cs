@@ -5,11 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
-using System.Reflection;
-using Microsoft.Build.Collections;
-
-using System.Runtime.Remoting;
 using System.Security;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -564,7 +559,7 @@ namespace Microsoft.Build.BackEnd
 
                     if (_customEscapedMetadata is null)
                     {
-                        _customEscapedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                        _customEscapedMetadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                         foreach (DictionaryEntry entry in nonGenericEscapedMetadata)
                         {
                             _customEscapedMetadata[(string)entry.Key] = (string)entry.Value ?? string.Empty;
@@ -581,7 +576,7 @@ namespace Microsoft.Build.BackEnd
                     _escapedDefiningProject = EscapingUtilities.EscapeWithCaching(copyFrom.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath));
 
                     IDictionary customMetadata = copyFrom.CloneCustomMetadata();
-                    _customEscapedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                    _customEscapedMetadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                     if (customMetadata?.Count > 0)
                     {
@@ -689,7 +684,7 @@ namespace Microsoft.Build.BackEnd
                 // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
                 ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
 
-                _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                _customEscapedMetadata ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 _customEscapedMetadata[metadataName] = metadataValue ?? String.Empty;
             }
@@ -759,7 +754,7 @@ namespace Microsoft.Build.BackEnd
             /// <returns>Dictionary of cloned metadata</returns>
             public IDictionary CloneCustomMetadata()
             {
-                IDictionary<string, string> clonedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                IDictionary<string, string> clonedMetadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
                 if (_customEscapedMetadata != null)
                 {
@@ -885,7 +880,7 @@ namespace Microsoft.Build.BackEnd
             {
                 translator.Translate(ref _escapedItemSpec);
                 translator.Translate(ref _escapedDefiningProject);
-                translator.TranslateDictionary(ref _customEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default);
+                translator.TranslateDictionary(ref _customEscapedMetadata, StringComparer.OrdinalIgnoreCase);
 
                 ErrorUtilities.VerifyThrowInternalNull(_escapedItemSpec);
                 ErrorUtilities.VerifyThrowInternalNull(_customEscapedMetadata);

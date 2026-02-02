@@ -68,7 +68,6 @@
     <Compile Include="Framework\BuildException\GenericBuildTransferredException.cs" />
     <Compile Include="Framework\ChangeWaves.cs" />
     <Compile Include="Framework\ErrorUtilities.cs" />
-    <Compile Include="Framework\IConstrainedEqualityComparer.cs" />
     <Compile Include="Framework\InternalErrorException.cs" />
     <Compile Include="Framework\InterningReadTranslator.cs" />
     <Compile Include="Framework\InterningWriteTranslator.cs" />
@@ -77,7 +76,6 @@
     <Compile Include="Framework\ITranslatable.cs" />
     <Compile Include="Framework\ITranslator.cs" />
     <Compile Include="Framework\Logging\AnsiDetector.cs" />
-    <Compile Include="Framework\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="Framework\NativeMethods.cs" />
     <Compile Include="Framework\ResponseFileUsedEventArgs.cs" />
     <Compile Include="Framework\RunInSTAAttribute.cs" />
