@@ -43,12 +43,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private CultureInfo _uiCulture = CultureInfo.CurrentUICulture;
 
-#if FEATURE_APPDOMAIN
         /// <summary>
         /// The AppDomainSetup that we may want to use on AppDomainIsolated tasks.
         /// </summary>
         private AppDomainSetup _appDomainSetup;
-#endif
 
         /// <summary>
         /// Line number where the instance of this task is defined.
@@ -107,7 +105,6 @@ namespace Microsoft.Build.BackEnd
 
         private ICollection<string> _warningsAsMessages;
 
-#if FEATURE_APPDOMAIN
         /// <summary>
         /// Initializes a new instance of the <see cref="TaskHostConfiguration"/> class.
         /// </summary>
@@ -132,40 +129,13 @@ namespace Microsoft.Build.BackEnd
         /// <param name="warningsAsErrors">A collection of warning codes to be treated as errors.</param>
         /// <param name="warningsNotAsErrors">A collection of warning codes not to be treated as errors.</param>
         /// <param name="warningsAsMessages">A collection of warning codes to be treated as messages.</param>
-#else
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TaskHostConfiguration"/> class.
-        /// </summary>
-        /// <param name="nodeId">The ID of the node being configured.</param>
-        /// <param name="startupDirectory">The startup directory for the task being executed.</param>
-        /// <param name="buildProcessEnvironment">The set of environment variables to apply to the task execution process.</param>
-        /// <param name="culture">The culture of the thread that will execute the task.</param>
-        /// <param name="uiCulture">The UI culture of the thread that will execute the task.</param>
-        /// <param name="hostServices">The host services to be used by the task host.</param>
-        /// <param name="lineNumberOfTask">The line number of the location from which this task was invoked.</param>
-        /// <param name="columnNumberOfTask">The column number of the location from which this task was invoked.</param>
-        /// <param name="projectFileOfTask">The project file from which this task was invoked.</param>
-        /// <param name="continueOnError">A flag to indicate whether to continue with the build after the task fails.</param>
-        /// <param name="taskName">The name of the task.</param>
-        /// <param name="taskLocation">The location of the assembly from which the task is to be loaded.</param>
-        /// <param name="targetName">The name of the target that is requesting the task execution.</param>
-        /// <param name="projectFile">The project path that invokes the task.</param>
-        /// <param name="isTaskInputLoggingEnabled">A flag to indicate whether task inputs are logged.</param>
-        /// <param name="taskParameters">The parameters to apply to the task.</param>
-        /// <param name="globalParameters">The global properties for the current project.</param>
-        /// <param name="warningsAsErrors">A collection of warning codes to be treated as errors.</param>
-        /// <param name="warningsNotAsErrors">A collection of warning codes not to be treated as errors.</param>
-        /// <param name="warningsAsMessages">A collection of warning codes to be treated as messages.</param>
-#endif
         public TaskHostConfiguration(
             int nodeId,
             string startupDirectory,
             IDictionary<string, string> buildProcessEnvironment,
             CultureInfo culture,
             CultureInfo uiCulture,
-#if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
-#endif
             int lineNumberOfTask,
             int columnNumberOfTask,
             string projectFileOfTask,
@@ -199,9 +169,7 @@ namespace Microsoft.Build.BackEnd
 
             _culture = culture;
             _uiCulture = uiCulture;
-#if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
-#endif
             _lineNumberOfTask = lineNumberOfTask;
             _columnNumberOfTask = columnNumberOfTask;
             _projectFileOfTask = projectFileOfTask;
@@ -285,7 +253,6 @@ namespace Microsoft.Build.BackEnd
             { return _uiCulture; }
         }
 
-#if FEATURE_APPDOMAIN
         /// <summary>
         /// The AppDomain configuration bytes that we may want to use to initialize
         /// AppDomainIsolated tasks.
@@ -296,7 +263,6 @@ namespace Microsoft.Build.BackEnd
             get
             { return _appDomainSetup; }
         }
-#endif
 
         /// <summary>
         /// Line number where the instance of this task is defined.
@@ -456,7 +422,7 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
-#if FEATURE_APPDOMAIN
+
             // The packet version is used to determine if the AppDomain configuration should be serialized.
             // If the packet version is bigger then 0, it means the task host will running under .NET.
             // Although MSBuild.exe runs under .NET Framework and has AppDomain support,
@@ -479,7 +445,7 @@ namespace Microsoft.Build.BackEnd
                     _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
                 }
             }
-#endif
+
             translator.Translate(ref _lineNumberOfTask);
             translator.Translate(ref _columnNumberOfTask);
             translator.Translate(ref _projectFileOfTask);

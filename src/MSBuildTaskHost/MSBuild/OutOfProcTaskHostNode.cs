@@ -13,9 +13,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-#if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
-#endif
 
 #nullable disable
 
@@ -24,11 +22,7 @@ namespace Microsoft.Build.CommandLine
     /// <summary>
     /// This class represents an implementation of INode for out-of-proc node for hosting tasks.
     /// </summary>
-    internal class OutOfProcTaskHostNode :
-#if FEATURE_APPDOMAIN
-        MarshalByRefObject,
-#endif
-        INodePacketFactory, INodePacketHandler, IBuildEngine3
+    internal class OutOfProcTaskHostNode : MarshalByRefObject, INodePacketFactory, INodePacketHandler, IBuildEngine3
     {
         /// <summary>
         /// Keeps a record of all environment variables that, on startup of the task host, have a different
@@ -776,9 +770,7 @@ namespace Microsoft.Build.CommandLine
                     taskConfiguration.ColumnNumberOfTask,
                     taskConfiguration.TargetName,
                     taskConfiguration.ProjectFile,
-#if FEATURE_APPDOMAIN
                     taskConfiguration.AppDomainSetup,
-#endif
                     taskParams);
             }
             catch (ThreadAbortException)
@@ -806,13 +798,11 @@ namespace Microsoft.Build.CommandLine
                         _taskCompletePacket = new TaskHostTaskComplete(taskResult, currentEnvironment);
                     }
 
-#if FEATURE_APPDOMAIN
                     foreach (TaskParameter param in taskParams.Values)
                     {
                         // Tell remoting to forget connections to the parameter
                         RemotingServices.Disconnect(param);
                     }
-#endif
 
                     // Restore the original clean environment
                     CommunicationsUtilities.SetEnvironment(_savedEnvironment);

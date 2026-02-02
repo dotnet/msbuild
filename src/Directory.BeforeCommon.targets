@@ -73,7 +73,6 @@
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net3'))">
     <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>

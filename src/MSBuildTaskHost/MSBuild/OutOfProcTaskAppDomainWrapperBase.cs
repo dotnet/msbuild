@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-#if FEATURE_APPDOMAIN
 using System.Threading;
-#endif
 using System.Reflection;
 
 using Microsoft.Build.BackEnd;
@@ -20,18 +18,13 @@ namespace Microsoft.Build.CommandLine
     /// Class for executing a task in an AppDomain
     /// </summary>
     [Serializable]
-    internal class OutOfProcTaskAppDomainWrapperBase
-#if FEATURE_APPDOMAIN
-        : MarshalByRefObject
-#endif
+    internal class OutOfProcTaskAppDomainWrapperBase : MarshalByRefObject
     {
         /// <summary>
         /// This is the actual user task whose instance we will create and invoke Execute
         /// </summary>
         private ITask wrappedTask;
 
-
-#if FEATURE_APPDOMAIN
         /// <summary>
         /// This is an appDomain instance if any is created for running this task
         /// </summary>
@@ -42,7 +35,6 @@ namespace Microsoft.Build.CommandLine
         /// </comments>
         [NonSerialized]
         private AppDomain _taskAppDomain;
-#endif
 
         /// <summary>
         /// Need to keep the build engine around in order to log from the task loader.
@@ -100,17 +92,13 @@ namespace Microsoft.Build.CommandLine
                 int taskColumn,
                 string targetName,
                 string projectFile,
-#if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
-#endif
                 IDictionary<string, TaskParameter> taskParams)
         {
             buildEngine = oopTaskHostNode;
             this.taskName = taskName;
 
-#if FEATURE_APPDOMAIN
             _taskAppDomain = null;
-#endif
             wrappedTask = null;
 
             LoadedType taskType = null;
@@ -151,9 +139,7 @@ namespace Microsoft.Build.CommandLine
                     taskColumn,
                     targetName,
                     projectFile,
-#if FEATURE_APPDOMAIN
                     appDomainSetup,
-#endif
                     taskParams);
 #else
                 return new OutOfProcTaskHostTaskResult(
@@ -175,9 +161,7 @@ namespace Microsoft.Build.CommandLine
                     taskColumn,
                     targetName,
                     projectFile,
-#if FEATURE_APPDOMAIN
                     appDomainSetup,
-#endif
                     taskParams);
             }
 
@@ -191,14 +175,12 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         internal void CleanupTask()
         {
-#if FEATURE_APPDOMAIN
             if (_taskAppDomain != null)
             {
                 AppDomain.Unload(_taskAppDomain);
             }
 
             TaskLoader.RemoveAssemblyResolver();
-#endif
             wrappedTask = null;
         }
 
@@ -220,9 +202,7 @@ namespace Microsoft.Build.CommandLine
                 int taskColumn,
                 string targetName,
                 string projectFile,
-#if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
-#endif
                 IDictionary<string, TaskParameter> taskParams)
         {
             ManualResetEvent taskRunnerFinished = new ManualResetEvent(false);
@@ -245,9 +225,7 @@ namespace Microsoft.Build.CommandLine
                                                 taskColumn,
                                                 targetName,
                                                 projectFile,
-#if FEATURE_APPDOMAIN
                                                 appDomainSetup,
-#endif
                                                 taskParams);
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
@@ -299,14 +277,10 @@ namespace Microsoft.Build.CommandLine
                 int taskColumn,
                 string targetName,
                 string projectFile,
-#if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
-#endif
                 IDictionary<string, TaskParameter> taskParams)
         {
-#if FEATURE_APPDOMAIN
             _taskAppDomain = null;
-#endif
             wrappedTask = null;
 
             try
@@ -319,16 +293,11 @@ namespace Microsoft.Build.CommandLine
                     taskLine,
                     taskColumn,
                     new TaskLoader.LogError(LogErrorDelegate),
-#if FEATURE_APPDOMAIN
                     appDomainSetup,
                     // custom app domain assembly loading won't be available for task host
                     null,
-#endif
-                    true /* always out of proc */
-#if FEATURE_APPDOMAIN
-                    , out _taskAppDomain
-#endif
-                    );
+                    true, /* always out of proc */
+                    out _taskAppDomain);
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
                 wrappedTask.BuildEngine = oopTaskHostNode;
