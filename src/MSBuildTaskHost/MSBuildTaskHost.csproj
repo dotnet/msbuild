@@ -71,7 +71,6 @@
     <Compile Include="Framework\ChangeWaves.cs" />
     <Compile Include="Framework\ErrorUtilities.cs" />
     <Compile Include="Framework\IConstrainedEqualityComparer.cs" />
-    <Compile Include="Framework\ImmutableDictionaryExtensions.cs" />
     <Compile Include="Framework\InternalErrorException.cs" />
     <Compile Include="Framework\InterningReadTranslator.cs" />
     <Compile Include="Framework\InterningWriteTranslator.cs" />
@@ -89,7 +88,6 @@
     <Compile Include="Framework\TaskHostParameters.cs" />
     <Compile Include="Framework\Traits.cs" />
     <Compile Include="GlobalUsings.cs" />
-    <Compile Include="Immutable\ImmutableDictionary.cs" />
     <Compile Include="INodeEndpoint.cs" />
     <Compile Include="INodePacket.cs" />
     <Compile Include="INodePacketFactory.cs" />

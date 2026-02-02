@@ -77,9 +77,6 @@
     <Compile Include="..\Shared\UnitTests\CopyOnWriteDictionary_Tests.cs">
       <Link>Collections\CopyOnWriteDictionary_Tests.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\ImmutableDictionary_Tests.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' == 'Full'">
-      <Link>Collections\ImmutableDictionary_Tests.cs</Link>
-    </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <None Include="..\Shared\UnitTests\App.config">
