@@ -105,7 +105,6 @@
     <Compile Include="MSBuild\NodeEndpointOutOfProcTaskHost.cs" />
     <Compile Include="MSBuild\OutOfProcTaskHostNode.cs" />
     <Compile Include="MSBuild\OutOfProcTaskAppDomainWrapperBase.cs" />
-    <Compile Include="NamedPipeUtil.cs" />
     <Compile Include="NodeBuildComplete.cs" />
     <Compile Include="NodeEndpointOutOfProcBase.cs" />
     <Compile Include="NodeEngineShutdownReason.cs" />

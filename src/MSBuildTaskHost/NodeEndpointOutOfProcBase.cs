@@ -201,7 +201,7 @@ namespace Microsoft.Build.BackEnd
             _binaryWriter = new BinaryWriter(_packetStream);
             _parentPacketVersion = parentPacketVersion;
 
-            pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
+            pipeName ??= $"MSBuild{EnvironmentUtilities.CurrentProcessId}";
 
             SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
             PipeSecurity security = new PipeSecurity();
