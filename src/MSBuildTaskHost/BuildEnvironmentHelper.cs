@@ -77,8 +77,7 @@ namespace Microsoft.Build.Shared
                 TryFromVisualStudioProcess,
                 TryFromMSBuildProcess,
                 TryFromMSBuildAssembly,
-                TryFromDevConsole,
-                TryFromSetupApi
+                TryFromDevConsole
             };
 
             foreach (var location in possibleLocations)
@@ -278,39 +277,6 @@ namespace Microsoft.Build.Shared
                 visualStudioPath: vsInstallDir);
         }
 
-        private static BuildEnvironment TryFromSetupApi()
-        {
-            if (s_runningTests())
-            {
-                // If running unit tests, then don't try to get the build environment from MSBuild installed on the machine
-                //  (we should be using the locally built MSBuild instead)
-                return null;
-            }
-
-            Version v = new Version(CurrentVisualStudioVersion);
-            var instances = s_getVisualStudioInstances()
-                .Where(i => i.Version.Major == v.Major && FileSystems.Default.DirectoryExists(i.Path))
-                .ToList();
-
-            if (instances.Count == 0)
-            {
-                return null;
-            }
-
-            if (instances.Count > 1)
-            {
-                // TODO: Warn user somehow. We may have picked the wrong one.
-            }
-
-            return new BuildEnvironment(
-                BuildEnvironmentMode.VisualStudio,
-                GetMSBuildExeFromVsRoot(instances[0].Path),
-                runningTests: false,
-                runningInMSBuildExe: false,
-                runningInVisualStudio: false,
-                visualStudioPath: instances[0].Path);
-        }
-
         private static BuildEnvironment TryFromStandaloneMSBuildExe(string msBuildExePath)
         {
             if (!string.IsNullOrEmpty(msBuildExePath) && FileSystems.Default.FileExists(msBuildExePath))
@@ -430,13 +396,11 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void ResetInstance_ForUnitTestsOnly(Func<string> getProcessFromRunningProcess = null,
             Func<string> getExecutingAssemblyPath = null,
-            Func<IEnumerable<VisualStudioInstance>> getVisualStudioInstances = null,
             Func<string, string> getEnvironmentVariable = null,
             Func<bool> runningTests = null)
         {
             s_getProcessFromRunningProcess = getProcessFromRunningProcess ?? GetProcessFromRunningProcess;
             s_getExecutingAssemblyPath = getExecutingAssemblyPath ?? GetExecutingAssemblyPath;
-            s_getVisualStudioInstances = getVisualStudioInstances ?? VisualStudioLocationHelper.GetInstances;
             s_getEnvironmentVariable = getEnvironmentVariable ?? GetEnvironmentVariable;
 
             // Tests which specifically test the BuildEnvironmentHelper need it to be able to act as if it is not running tests
@@ -457,7 +421,6 @@ namespace Microsoft.Build.Shared
 
         private static Func<string> s_getProcessFromRunningProcess = GetProcessFromRunningProcess;
         private static Func<string> s_getExecutingAssemblyPath = GetExecutingAssemblyPath;
-        private static Func<IEnumerable<VisualStudioInstance>> s_getVisualStudioInstances = VisualStudioLocationHelper.GetInstances;
         private static Func<string, string> s_getEnvironmentVariable = GetEnvironmentVariable;
         private static Func<bool> s_runningTests = CheckIfRunningTests;
 

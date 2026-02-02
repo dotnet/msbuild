@@ -94,7 +94,6 @@
     <Compile Include="Framework\SupportedOSPlatform.cs" />
     <Compile Include="Framework\TaskHostParameters.cs" />
     <Compile Include="Framework\Traits.cs" />
-    <Compile Include="Framework\VisualStudioLocationHelper.cs" />
     <Compile Include="GlobalUsings.cs" />
     <Compile Include="Immutable\ImmutableDictionary.cs" />
     <Compile Include="INodeEndpoint.cs" />
