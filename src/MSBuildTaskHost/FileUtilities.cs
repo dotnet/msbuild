@@ -463,36 +463,30 @@ namespace Microsoft.Build.Shared
 
         private static string GetFullPath(string path)
         {
-#if FEATURE_LEGACY_GETFULLPATH
-            if (NativeMethodsShared.IsWindows)
+            string uncheckedFullPath = NativeMethodsShared.GetFullPath(path);
+
+            if (IsPathTooLong(uncheckedFullPath))
             {
-                string uncheckedFullPath = NativeMethodsShared.GetFullPath(path);
-
-                if (IsPathTooLong(uncheckedFullPath))
-                {
-                    string message = ResourceUtilities.FormatString(AssemblyResources.GetString("Shared.PathTooLong"), path, NativeMethodsShared.MaxPath);
-                    throw new PathTooLongException(message);
-                }
-
-                // We really don't care about extensions here, but Path.HasExtension provides a great way to
-                // invoke the CLR's invalid path checks (these are independent of path length)
-                Path.HasExtension(uncheckedFullPath);
-
-                // If we detect we are a UNC path then we need to use the regular get full path in order to do the correct checks for UNC formatting
-                // and security checks for strings like \\?\GlobalRoot
-                return IsUNCPath(uncheckedFullPath) ? Path.GetFullPath(uncheckedFullPath) : uncheckedFullPath;
+                string message = ResourceUtilities.FormatString(AssemblyResources.GetString("Shared.PathTooLong"), path, NativeMethodsShared.MaxPath);
+                throw new PathTooLongException(message);
             }
-#endif
-            return Path.GetFullPath(path);
+
+            // We really don't care about extensions here, but Path.HasExtension provides a great way to
+            // invoke the CLR's invalid path checks (these are independent of path length)
+            _ = Path.HasExtension(uncheckedFullPath);
+
+            // If we detect we are a UNC path then we need to use the regular get full path in order to do the correct checks for UNC formatting
+            // and security checks for strings like \\?\GlobalRoot
+            return IsUNCPath(uncheckedFullPath) ? Path.GetFullPath(uncheckedFullPath) : uncheckedFullPath;
         }
 
-#if FEATURE_LEGACY_GETFULLPATH
         private static bool IsUNCPath(string path)
         {
             if (!NativeMethodsShared.IsWindows || !path.StartsWith(@"\\", StringComparison.Ordinal))
             {
                 return false;
             }
+
             bool isUNC = true;
             for (int i = 2; i < path.Length - 1; i++)
             {
@@ -521,7 +515,6 @@ namespace Microsoft.Build.Shared
             */
             return isUNC || path.IndexOf(@"\\?\globalroot", StringComparison.OrdinalIgnoreCase) != -1;
         }
-#endif // FEATURE_LEGACY_GETFULLPATH
 
         /// <summary>
         /// Normalizes all path separators (both forward and back slashes) to forward slashes.
@@ -1595,7 +1588,7 @@ namespace System.IO
                 {
                     throw new EndOfStreamException();
                 }
-                offset +=read;
+                offset += read;
                 count -= read;
             }
         }
