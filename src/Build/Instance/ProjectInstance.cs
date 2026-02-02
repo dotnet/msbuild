@@ -1387,14 +1387,11 @@ namespace Microsoft.Build.Execution
 
         public void AddSdkResolvedEnvironmentVariable(string name, string value)
         {
-            // If the property has already been set as an environment variable, we do not overwrite it.
-            if (_environmentVariableProperties.Contains(name))
-            {
-                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySet", name, value);
-                return;
-            }
+            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ErrorUtilities.VerifyThrowArgumentNull(value);
+
             // If another SDK already set it, we do not overwrite it.
-            else if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
+            if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
             {
                 _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySetBySdk", name, value);
                 return;
@@ -1406,8 +1403,18 @@ namespace Microsoft.Build.Execution
 
             _sdkResolvedEnvironmentVariableProperties.Set(property);
 
-            // Only set the local property if it does not already exist, prioritizing regular properties defined in XML.
-            if (GetProperty(name) is null)
+            // SDK-resolved environment variables override ambient environment variables.
+            bool overridingAmbient = _environmentVariableProperties.Contains(name);
+            if (overridingAmbient)
+            {
+                _environmentVariableProperties.Remove(name);
+                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableOverridingAmbient", name, value);
+            }
+
+            // Set the property, overriding ambient environment variables but not regular properties defined in XML.
+            // If we're overriding an ambient variable, or if the property doesn't exist, set it.
+            // Otherwise, prioritize regular properties defined in XML.
+            if (overridingAmbient || GetProperty(name) is null)
             {
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this)
                    .SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: _loggingContext, isEnvironmentVariable: true, isCommandLineProperty: false);

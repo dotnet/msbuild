@@ -901,6 +901,11 @@ Errors: {3}</source>
         <target state="translated">一個 SDK 嘗試將環境變數 "{0}" 設定為 "{1}"，但該變數已由另一個 SDK 設定。</target>
         <note />
       </trans-unit>
+      <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
+        <source>An SDK set the environment variable "{0}" to "{1}", overriding the ambient environment variable value.</source>
+        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the ambient environment variable value.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="SdkEnvironmentVariableSet">
         <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
         <target state="translated">一個 SDK 嘗試將環境變數 "{0}" 設定為 "{1}"。</target>
