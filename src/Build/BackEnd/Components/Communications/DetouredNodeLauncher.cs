@@ -23,8 +23,6 @@ namespace Microsoft.Build.BackEnd
     {
         private readonly List<ISandboxedProcess> _sandboxedProcesses = new();
 
-        private readonly BuildParameters.IBuildParameters _environmentVariables = CreateEnvironmentVariables();
-
         private IFileAccessManager _fileAccessManager;
 
         public static IBuildComponent CreateComponent(BuildComponentType type)
@@ -51,9 +49,9 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Creates a new MSBuild process
+        /// Creates a new MSBuild process.
         /// </summary>
-        public Process Start(string msbuildLocation, string commandLineArgs, int nodeId)
+        public Process Start(string msbuildLocation, string commandLineArgs, int nodeId, IDictionary<string, string> environmentOverrides = null)
         {
             // Should always have been set already.
             ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
@@ -92,7 +90,7 @@ namespace Microsoft.Build.BackEnd
                 PipDescription = "MSBuild",
                 PipSemiStableHash = 0,
                 Arguments = commandLineArgs,
-                EnvironmentVariables = _environmentVariables,
+                EnvironmentVariables = CreateEnvironmentVariables(environmentOverrides),
                 MaxLengthInMemory = 0, // Don't buffer any output
             };
 
@@ -140,13 +138,25 @@ namespace Microsoft.Build.BackEnd
             return Process.GetProcessById(sp.ProcessId);
         }
 
-        private static BuildParameters.IBuildParameters CreateEnvironmentVariables()
+        /// <summary>
+        /// Creates environment variables with optional overrides for app host bootstrap.
+        /// </summary>
+        /// <param name="environmentOverrides">
+        /// Environment variables to set or remove in the child process.
+        /// A non-null value sets or overrides that variable. A null value removes the variable
+        /// from the child process environment - this is used to clear architecture-specific
+        /// DOTNET_ROOT variants (e.g., DOTNET_ROOT_X64) that would otherwise take precedence
+        /// over DOTNET_ROOT when launching an app host.
+        /// </param>
+        private static BuildParameters.IBuildParameters CreateEnvironmentVariables(IDictionary<string, string> environmentOverrides)
         {
             var envVars = new Dictionary<string, string>();
             foreach (DictionaryEntry baseVar in Environment.GetEnvironmentVariables())
             {
                 envVars.Add((string)baseVar.Key, (string)baseVar.Value);
             }
+
+            DotnetHostEnvironmentHelper.ApplyEnvironmentOverrides(envVars, environmentOverrides);
 
             return BuildParameters.GetFactory().PopulateFromDictionary(envVars);
         }

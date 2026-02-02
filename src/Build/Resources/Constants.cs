@@ -111,11 +111,6 @@ namespace Microsoft.Build.Internal
     internal static class Constants
     {
         /// <summary>
-        /// Defines the name of dotnet host path environment variable (e.g  DOTNET_HOST_PATH = C:\msbuild\.dotnet\dotnet.exe).
-        /// </summary>
-        internal const string DotnetHostPathEnvVarName = "DOTNET_HOST_PATH";
-
-        /// <summary>
         /// The project property name used to get the path to the MSBuild assembly.
         /// </summary>
         internal const string RuntimeIdentifierGraphPath = nameof(RuntimeIdentifierGraphPath);
@@ -131,9 +126,14 @@ namespace Microsoft.Build.Internal
         internal const string MSBuildAssemblyName = "MSBuild.dll";
 
         /// <summary>
-        /// Defines the name of MSBuild executable.
+        /// Defines the name of MSBuild application name.
         /// </summary>
-        internal const string MSBuildExecutableName = "MSBuild.exe";
+        internal const string MSBuildAppName = "MSBuild";
+
+        /// <summary>
+        /// Defines the name of MSBuild executable name based on the operating system.
+        /// </summary>
+        internal static readonly string MSBuildExecutableName = NativeMethodsShared.IsWindows ? $"{MSBuildAppName}.exe" : MSBuildAppName;
 
         /// <summary>
         /// If no default tools version is specified in the config file or registry, we'll use 2.0.

@@ -466,6 +466,11 @@
         <target state="translated">MSB4280: zmienna środowiskowa DOTNET_HOST_PATH jest ustawiona na katalog („{0}”) zamiast ścieżki do pliku wykonywalnego dotnet. Może to prowadzić do błędów kompilacji w zadaniach korzystających z tej zmiennej, takich jak kompilator Roslyn. Usuń ustawienie zmiennej lub zaktualizuj ją, aby wskazywała bezpośrednio plik wykonywalny dotnet (np. „C:\Program Files\dotnet\dotnet.exe”).</target>
         <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
       </trans-unit>
+      <trans-unit id="DotnetHostPathNotSet">
+        <source>DOTNET_HOST_PATH is not set. Cannot determine runtime location for app host bootstrap. This should always be set when running under the .NET SDK.</source>
+        <target state="new">DOTNET_HOST_PATH is not set. Cannot determine runtime location for app host bootstrap. This should always be set when running under the .NET SDK.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: Podjęto próbę utworzenia wielu zastąpień tego samego zadania: {0}</target>

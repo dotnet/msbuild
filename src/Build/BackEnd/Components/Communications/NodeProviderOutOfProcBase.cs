@@ -89,6 +89,17 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Represents the resolved configuration for launching a node process.
+        /// </summary>
+        /// <param name="MsbuildLocation">The path to the executable to launch (e.g., MSBuild.exe or dotnet.exe).</param>
+        /// <param name="CommandLineArgs">The command line arguments to pass to the executable.</param>
+        /// <param name="EnvironmentOverrides">Optional environment variable overrides for the process.</param>
+        protected readonly record struct NodeLaunchData(
+            string MsbuildLocation,
+            string CommandLineArgs,
+            IDictionary<string, string> EnvironmentOverrides);
+
+        /// <summary>
         /// Sends data to the specified node.
         /// </summary>
         /// <param name="context">The node to which data shall be sent.</param>
@@ -181,8 +192,54 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Finds or creates a child processes which can act as a node.
+        /// Finds or creates child processes which can act as nodes using the provided launch data.
         /// </summary>
+        /// <param name="nodeLaunchData">The launch configuration containing executable path, arguments, and environment overrides.</param>
+        /// <param name="nextNodeId">The next node ID to use.</param>
+        /// <param name="factory">The packet factory for communication.</param>
+        /// <param name="hostHandshake">The handshake information.</param>
+        /// <param name="createNode">Callback when a node is created.</param>
+        /// <param name="terminateNode">Callback when a node terminates.</param>
+        /// <param name="numberOfNodesToCreate">Number of nodes to create.</param>
+        protected IList<NodeContext> GetNodes(
+            NodeLaunchData nodeLaunchData,
+            int nextNodeId,
+            INodePacketFactory factory,
+            Handshake hostHandshake,
+            NodeContextCreatedDelegate createNode,
+            NodeContextTerminateDelegate terminateNode,
+            int numberOfNodesToCreate)
+        {
+            return GetNodes(
+                nodeLaunchData.MsbuildLocation,
+                nodeLaunchData.CommandLineArgs,
+                nextNodeId,
+                factory,
+                hostHandshake,
+                createNode,
+                terminateNode,
+                numberOfNodesToCreate,
+                nodeLaunchData.EnvironmentOverrides);
+        }
+
+        /// <summary>
+        /// Finds or creates child processes which can act as nodes, with optional environment variable overrides.
+        /// </summary>
+        /// <param name="msbuildLocation">Path to the MSBuild executable or app host.</param>
+        /// <param name="commandLineArgs">Command line arguments for the process.</param>
+        /// <param name="nextNodeId">The next node ID to use.</param>
+        /// <param name="factory">The packet factory for communication.</param>
+        /// <param name="hostHandshake">The handshake information.</param>
+        /// <param name="createNode">Callback when a node is created.</param>
+        /// <param name="terminateNode">Callback when a node terminates.</param>
+        /// <param name="numberOfNodesToCreate">Number of nodes to create.</param>
+        /// <param name="environmentOverrides">
+        /// Environment variables to set or remove in the child process.
+        /// A non-null value overrides that variable. A null value removes the variable
+        /// from the child process environment - this is used to clear architecture-specific
+        /// DOTNET_ROOT variants (e.g., DOTNET_ROOT_X64) that would otherwise take precedence
+        /// over DOTNET_ROOT when launching an app host.
+        /// </param>
         protected IList<NodeContext> GetNodes(
             string msbuildLocation,
             string commandLineArgs,
@@ -191,7 +248,8 @@ namespace Microsoft.Build.BackEnd
             Handshake hostHandshake,
             NodeContextCreatedDelegate createNode,
             NodeContextTerminateDelegate terminateNode,
-            int numberOfNodesToCreate)
+            int numberOfNodesToCreate,
+            IDictionary<string, string> environmentOverrides = null)
         {
 #if DEBUG
             if (Execution.BuildManager.WaitForDebugger)
@@ -342,7 +400,7 @@ namespace Microsoft.Build.BackEnd
 #endif
                     // Create the node process
                     INodeLauncher nodeLauncher = (INodeLauncher)_componentHost.GetComponent(BuildComponentType.NodeLauncher);
-                    Process msbuildProcess = nodeLauncher.Start(msbuildLocation, commandLineArgs, nodeId);
+                    Process msbuildProcess = nodeLauncher.Start(msbuildLocation, commandLineArgs, nodeId, environmentOverrides);
 
                     _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id), default);
 

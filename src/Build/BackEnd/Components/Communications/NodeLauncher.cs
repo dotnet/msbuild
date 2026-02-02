@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Text;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -35,17 +37,17 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Creates a new MSBuild process
         /// </summary>
-        public Process Start(string msbuildLocation, string commandLineArgs, int nodeId)
+        public Process Start(string msbuildLocation, string commandLineArgs, int nodeId, IDictionary<string, string> environmentOverrides = null)
         {
             // Disable MSBuild server for a child process.
             // In case of starting msbuild server it prevents an infinite recursion. In case of starting msbuild node we also do not want this variable to be set.
-            return DisableMSBuildServer(() => StartInternal(msbuildLocation, commandLineArgs));
+            return DisableMSBuildServer(() => StartInternal(msbuildLocation, commandLineArgs, environmentOverrides));
         }
 
         /// <summary>
         /// Creates new MSBuild or dotnet process.
         /// </summary>
-        private Process StartInternal(string msbuildLocation, string commandLineArgs)
+        private Process StartInternal(string msbuildLocation, string commandLineArgs, IDictionary<string, string> environmentOverrides)
         {
             // Should always have been set already.
             ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
@@ -114,6 +116,7 @@ namespace Microsoft.Build.BackEnd
                     processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
                 }
                 processStartInfo.UseShellExecute = false;
+                DotnetHostEnvironmentHelper.ApplyEnvironmentOverrides(processStartInfo.Environment, environmentOverrides);
 
                 Process process;
                 try
@@ -147,48 +150,95 @@ namespace Microsoft.Build.BackEnd
                 processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
                 threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
 
-                bool result = BackendNativeMethods.CreateProcess(
-                        exeName,
-                        commandLineArgs,
-                        ref processSecurityAttributes,
-                        ref threadSecurityAttributes,
-                        false,
-                        creationFlags,
-                        BackendNativeMethods.NullPtr,
-                        null,
-                        ref startInfo,
-                        out processInfo);
+                IntPtr environmentBlock = BuildEnvironmentBlock(environmentOverrides);
 
-                if (!result)
+                try
                 {
-                    // Creating an instance of this exception calls GetLastWin32Error and also converts it to a user-friendly string.
-                    System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception();
+                    bool result = BackendNativeMethods.CreateProcess(
+                            exeName,
+                            commandLineArgs,
+                            ref processSecurityAttributes,
+                            ref threadSecurityAttributes,
+                            false,
+                            creationFlags,
+                            environmentBlock,
+                            null,
+                            ref startInfo,
+                            out processInfo);
 
-                    CommunicationsUtilities.Trace(
-                            "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {2}",
-                            msbuildLocation,
-                            e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
-                            e.Message,
-                            commandLineArgs);
+                    if (!result)
+                    {
+                        // Creating an instance of this exception calls GetLastWin32Error and also converts it to a user-friendly string.
+                        System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception();
 
-                    throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
+                        CommunicationsUtilities.Trace(
+                                "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {2}",
+                                msbuildLocation,
+                                e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
+                                e.Message,
+                                commandLineArgs);
+
+                        throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
+                    }
+
+                    int childProcessId = processInfo.dwProcessId;
+
+                    if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
+                    {
+                        NativeMethodsShared.CloseHandle(processInfo.hProcess);
+                    }
+
+                    if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
+                    {
+                        NativeMethodsShared.CloseHandle(processInfo.hThread);
+                    }
+
+                    CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", childProcessId, exeName);
+                    return Process.GetProcessById(childProcessId);
                 }
-
-                int childProcessId = processInfo.dwProcessId;
-
-                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
+                finally
                 {
-                    NativeMethodsShared.CloseHandle(processInfo.hProcess);
+                    if (environmentBlock != BackendNativeMethods.NullPtr)
+                    {
+                        Marshal.FreeHGlobal(environmentBlock);
+                    }
                 }
-
-                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
-                {
-                    NativeMethodsShared.CloseHandle(processInfo.hThread);
-                }
-
-                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", childProcessId, exeName);
-                return Process.GetProcessById(childProcessId);
             }
+        }
+
+        /// <summary>
+        /// Builds a Windows environment block for CreateProcess.
+        /// </summary>
+        /// <param name="environmentOverrides">Environment variable overrides. Null values remove variables.</param>
+        /// <returns>Pointer to environment block that must be freed with Marshal.FreeHGlobal, or BackendNativeMethods.NullPtr.</returns>
+        private static IntPtr BuildEnvironmentBlock(IDictionary<string, string> environmentOverrides)
+        {
+            if (environmentOverrides == null || environmentOverrides.Count == 0)
+            {
+                return BackendNativeMethods.NullPtr;
+            }
+
+            var environment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (System.Collections.DictionaryEntry entry in Environment.GetEnvironmentVariables())
+            {
+                environment[(string)entry.Key] = (string)entry.Value;
+            }
+
+            DotnetHostEnvironmentHelper.ApplyEnvironmentOverrides(environment, environmentOverrides);
+
+            // Build the environment block: "key=value\0key=value\0\0"
+            var sb = new StringBuilder();
+            foreach (var kvp in environment)
+            {
+                sb.Append(kvp.Key);
+                sb.Append('=');
+                sb.Append(kvp.Value);
+                sb.Append('\0');
+            }
+
+            sb.Append('\0');
+
+            return Marshal.StringToHGlobalUni(sb.ToString());
         }
 
         private static Process DisableMSBuildServer(Func<Process> func)

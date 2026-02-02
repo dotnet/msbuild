@@ -661,9 +661,6 @@ namespace Microsoft.Build.BackEnd
 
             HandshakeOptions hostContext = nodeKey.HandshakeOptions;
 
-            // If runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
-            string commandLineArgsPlaceholder = "\"{0}\" /nologo /nodemode:2 /nodereuse:{1} /low:{2} /parentpacketversion:{3} ";
-
             // Generate a unique node ID for communication purposes using atomic increment.
             int communicationNodeId = Interlocked.Increment(ref _nextNodeId);
 
@@ -676,16 +673,19 @@ namespace Microsoft.Build.BackEnd
 #if NETFRAMEWORK
             if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
             {
-                (string runtimeHostPath, string msbuildAssemblyPath) = GetMSBuildLocationForNETRuntime(hostContext, taskHostParameters);
+                string msbuildAssemblyPath = GetMSBuildAssemblyPath(taskHostParameters);
 
-                CommunicationsUtilities.Trace("For a host context of {0}, spawning dotnet.exe from {1}.", hostContext.ToString(), runtimeHostPath);
+                NodeLaunchData nodeLaunchData = ResolveAppHostOrFallback(
+                    msbuildAssemblyPath,
+                    taskHostParameters.DotnetHostPath,
+                    hostContext,
+                    NodeReuseIsEnabled(hostContext));
 
                 var handshake = new Handshake(hostContext, predefinedToolsDirectory: msbuildAssemblyPath);
 
-                // There is always one task host per host context so we always create just 1 one task host node here.      
+                // There is always one task host per host context so we always create just 1 one task host node here.
                 nodeContexts = GetNodes(
-                    runtimeHostPath,
-                    string.Format(commandLineArgsPlaceholder, Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority, NodePacketTypeExtensions.PacketVersion),
+                    nodeLaunchData,
                     communicationNodeId,
                     this,
                     handshake,
@@ -709,7 +709,7 @@ namespace Microsoft.Build.BackEnd
 
             nodeContexts = GetNodes(
                 msbuildLocation,
-                string.Format(commandLineArgsPlaceholder, string.Empty, NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority, NodePacketTypeExtensions.PacketVersion),
+                BuildCommandLineArgs(NodeReuseIsEnabled(hostContext)),
                 communicationNodeId,
                 this,
                 new Handshake(hostContext),
@@ -730,6 +730,43 @@ namespace Microsoft.Build.BackEnd
                     && !isCLR2;
             }
         }
+
+#if NETFRAMEWORK
+        /// <summary>
+        /// Resolves whether to use the MSBuild app host or fall back to dotnet.exe.
+        /// </summary>
+        /// <param name="msbuildAssemblyPath">Path to the MSBuild assembly directory.</param>
+        /// <param name="dotnetHostPath">Path to the dotnet executable.</param>
+        /// <param name="hostContext">The handshake options for the host context.</param>
+        /// <param name="nodeReuseEnabled">Whether node reuse is enabled.</param>
+        /// <returns>The resolved node launch configuration.</returns>
+        private NodeLaunchData ResolveAppHostOrFallback(
+            string msbuildAssemblyPath,
+            string dotnetHostPath,
+            HandshakeOptions hostContext,
+            bool nodeReuseEnabled)
+        {
+            string appHostPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildExecutableName);
+            string commandLineArgs = BuildCommandLineArgs(nodeReuseEnabled);
+
+            if (FileSystems.Default.FileExists(appHostPath))
+            {
+                CommunicationsUtilities.Trace("For a host context of {0}, using app host from {1}.", hostContext, appHostPath);
+                return new NodeLaunchData(
+                    appHostPath,
+                    $"\"\" {commandLineArgs}",
+                    DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(dotnetHostPath, throwIfNotSet: true));
+            }
+
+            string msbuildDllPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName);
+            CommunicationsUtilities.Trace("For a host context of {0}, app host not found at {1}, falling back to dotnet.exe from {2}.", hostContext, appHostPath, dotnetHostPath);
+            return new NodeLaunchData(
+                dotnetHostPath,
+                $"\"{msbuildDllPath}\" {commandLineArgs}",
+                null);
+        }
+#endif
+        private string BuildCommandLineArgs(bool nodeReuseEnabled) => $"/nologo /nodemode:2 /nodereuse:{nodeReuseEnabled} /low:{ComponentHost.BuildParameters.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";
 
         /// <summary>
         /// Method called when a context created.

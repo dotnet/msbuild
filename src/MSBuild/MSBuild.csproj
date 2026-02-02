@@ -10,9 +10,7 @@
     <!-- MSBuild.exe needs to be architecture specific, the rest of the .dlls can be AnyCPU. -->
     <PlatformTarget Condition="'$(Platform)' == 'arm64'">arm64</PlatformTarget>
 
-    <!-- MSBuild.csproj no longer uses apphost. This fixes an issue where certain tests would find
-         MSBuild.exe AND MSBuild.dll when they should only find MSBuild.dll. -->
-    <UseAppHost>false</UseAppHost>
+
 
     <!-- Set RuntimeIdentifiers so that NuGet will restore for both AnyCPU as well as x86 and x64.
          This is important for the MSBuild.VSSetup project, which "references" both the x86 and x64
@@ -110,6 +108,7 @@
     <Compile Include="..\Shared\INodePacketHandler.cs" />
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
+    <Compile Include="..\Shared\DotnetHostEnvironmentHelper.cs" />
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
     <Compile Include="..\Shared\TaskFactoryUtilities.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />

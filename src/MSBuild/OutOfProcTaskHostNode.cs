@@ -937,6 +937,9 @@ namespace Microsoft.Build.CommandLine
 
                 // Now set the new environment
                 SetTaskHostEnvironment(taskConfiguration.BuildProcessEnvironment);
+#if !CLR2COMPATIBILITY
+                DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(taskConfiguration.BuildProcessEnvironment);
+#endif
 
                 // Set culture
                 Thread.CurrentThread.CurrentCulture = taskConfiguration.Culture;
