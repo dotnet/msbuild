@@ -1063,35 +1063,173 @@ echo line 3"" />
         }
 
         /// <summary>
-        /// Verify that Exec implements IMultiThreadableTask for thread-safe execution
+        /// Verify that Exec resolves relative WorkingDirectory via TaskEnvironment in multiprocess mode.
         /// </summary>
         [Fact]
-        public void ExecImplementsIMultiThreadableTask()
-        {
-            Exec exec = new Exec();
-            exec.ShouldBeAssignableTo<IMultiThreadableTask>();
-        }
-
-        /// <summary>
-        /// Verify that Exec uses TaskEnvironment for working directory resolution
-        /// </summary>
-        [Fact]
-        public void ExecUsesTaskEnvironmentForWorkingDirectory()
+        public void ExecResolvesRelativeWorkingDirectoryWithMultiProcessDriver()
         {
             using (var testEnv = TestEnvironment.Create(_output))
             {
-                var workDir = testEnv.CreateFolder();
-                var testFile = Path.Combine(workDir.Path, "testfile.txt");
+                // Create a project directory and a subdirectory
+                var projectDir = testEnv.CreateFolder();
+                var subDir = Directory.CreateDirectory(Path.Combine(projectDir.Path, "subdir"));
+                var testFile = Path.Combine(subDir.FullName, "testfile.txt");
                 File.WriteAllText(testFile, "test content");
 
-                Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? $"dir /b" : $"ls");
-                exec.WorkingDirectory = workDir.Path;
-                exec.ConsoleToMSBuild = true;
+                string originalDirectory = Directory.GetCurrentDirectory();
+                try
+                {
+                    // Set current directory to project directory (simulating multiprocess mode)
+                    Directory.SetCurrentDirectory(projectDir.Path);
 
-                bool result = exec.Execute();
+                    // Create task with multiprocess driver (uses process current directory)
+                    Exec exec = new Exec();
+                    exec.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
+                    exec.BuildEngine = new MockEngine(_output);
+                    exec.Command = NativeMethodsShared.IsWindows ? "dir /b" : "ls";
+                    exec.WorkingDirectory = "subdir"; // Relative path
+                    exec.ConsoleToMSBuild = true;
 
-                result.ShouldBeTrue();
-                ((MockEngine)exec.BuildEngine).AssertLogContains("testfile.txt");
+                    bool result = exec.Execute();
+
+                    result.ShouldBeTrue();
+                    ((MockEngine)exec.BuildEngine).AssertLogContains("testfile.txt");
+                }
+                finally
+                {
+                    Directory.SetCurrentDirectory(originalDirectory);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Verify that Exec uses TaskEnvironment.ProjectDirectory when WorkingDirectory is not specified.
+        /// This is critical for multithreaded mode where CWD differs from project directory.
+        /// </summary>
+        [Fact]
+        public void ExecUsesProjectDirectoryAsDefaultWorkingDirectory()
+        {
+            using (var testEnv = TestEnvironment.Create(_output))
+            {
+                // Create a project directory with a test file
+                var projectDir = testEnv.CreateFolder();
+                var testFile = Path.Combine(projectDir.Path, "projectfile.txt");
+                File.WriteAllText(testFile, "project content");
+
+                string originalDirectory = Directory.GetCurrentDirectory();
+                try
+                {
+                    // Set current directory to project directory
+                    Directory.SetCurrentDirectory(projectDir.Path);
+
+                    // Create task without specifying WorkingDirectory
+                    Exec exec = new Exec();
+                    exec.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
+                    exec.BuildEngine = new MockEngine(_output);
+                    exec.Command = NativeMethodsShared.IsWindows ? "dir /b" : "ls";
+                    exec.ConsoleToMSBuild = true;
+                    // Note: WorkingDirectory is NOT set - should use TaskEnvironment.ProjectDirectory
+
+                    bool result = exec.Execute();
+
+                    result.ShouldBeTrue();
+                    ((MockEngine)exec.BuildEngine).AssertLogContains("projectfile.txt");
+                }
+                finally
+                {
+                    Directory.SetCurrentDirectory(originalDirectory);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Verify that Exec correctly handles absolute WorkingDirectory paths.
+        /// </summary>
+        [Fact]
+        public void ExecHandlesAbsoluteWorkingDirectory()
+        {
+            using (var testEnv = TestEnvironment.Create(_output))
+            {
+                // Create a completely separate directory (not related to CWD)
+                var workDir = testEnv.CreateFolder();
+                var testFile = Path.Combine(workDir.Path, "absolutedir.txt");
+                File.WriteAllText(testFile, "absolute content");
+
+                string originalDirectory = Directory.GetCurrentDirectory();
+                try
+                {
+                    // Create task with absolute WorkingDirectory
+                    Exec exec = new Exec();
+                    exec.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
+                    exec.BuildEngine = new MockEngine(_output);
+                    exec.Command = NativeMethodsShared.IsWindows ? "dir /b" : "ls";
+                    exec.WorkingDirectory = workDir.Path; // Absolute path
+                    exec.ConsoleToMSBuild = true;
+
+                    bool result = exec.Execute();
+
+                    result.ShouldBeTrue();
+                    ((MockEngine)exec.BuildEngine).AssertLogContains("absolutedir.txt");
+                }
+                finally
+                {
+                    Directory.SetCurrentDirectory(originalDirectory);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Verify that Exec resolves relative WorkingDirectory relative to TaskEnvironment.ProjectDirectory,
+        /// not the process current directory. This uses the MultiThreadedTaskEnvironmentDriver which 
+        /// virtualizes the project directory, simulating multithreaded mode where process CWD differs 
+        /// from project directory.
+        /// </summary>
+        [Fact]
+        public void ExecResolvesRelativeWorkingDirectoryRelativeToProjectDirectory()
+        {
+            using (var testEnv = TestEnvironment.Create(_output))
+            {
+                // Create a project directory with a subdirectory
+                var projectDir = testEnv.CreateFolder();
+                var subDir = Directory.CreateDirectory(Path.Combine(projectDir.Path, "builddir"));
+                var testFile = Path.Combine(subDir.FullName, "multithreaded.txt");
+                File.WriteAllText(testFile, "multithreaded content");
+
+                // Create a different directory to be the "process CWD"
+                var differentCwd = testEnv.CreateFolder();
+
+                string originalDirectory = Directory.GetCurrentDirectory();
+                TaskEnvironment taskEnvironment = null;
+                try
+                {
+                    // Set process CWD to a DIFFERENT directory than the project directory
+                    // This simulates multithreaded mode where the global CWD is not the project's directory
+                    Directory.SetCurrentDirectory(differentCwd.Path);
+
+                    // Create task with MultiThreadedTaskEnvironmentDriver which virtualizes the project directory
+                    // This is the key difference - the driver's ProjectDirectory is set to projectDir.Path,
+                    // not the process CWD (differentCwd.Path), allowing relative paths to resolve correctly
+                    taskEnvironment = TaskEnvironmentHelper.CreateMultithreadedForTest(projectDir.Path);
+                    Exec exec = new Exec();
+                    exec.TaskEnvironment = taskEnvironment;
+                    exec.BuildEngine = new MockEngine(_output);
+                    exec.Command = NativeMethodsShared.IsWindows ? "dir /b" : "ls";
+                    exec.WorkingDirectory = "builddir"; // Relative path - should resolve relative to projectDir, not process CWD
+                    exec.ConsoleToMSBuild = true;
+
+                    bool result = exec.Execute();
+
+                    result.ShouldBeTrue();
+                    ((MockEngine)exec.BuildEngine).AssertLogContains("multithreaded.txt");
+
+                    // Verify process CWD was NOT changed (multithreaded mode should not modify global state)
+                    Directory.GetCurrentDirectory().ShouldBe(differentCwd.Path);
+                }
+                finally
+                {
+                    taskEnvironment?.Dispose();
+                    Directory.SetCurrentDirectory(originalDirectory);
+                }
             }
         }
     }
