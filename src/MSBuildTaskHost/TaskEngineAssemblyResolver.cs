@@ -5,10 +5,6 @@ using System;
 using System.IO;
 using System.Reflection;
 using System.Diagnostics;
-
-#if FEATURE_ASSEMBLYLOADCONTEXT
-using System.Runtime.Loader;
-#endif
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
