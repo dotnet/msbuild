@@ -24,6 +24,9 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 
 ## Current Rotation of Change Waves
 
+### 18.5
+- [Throw MSB4281 error for property references and property function calls with leading or trailing whitespace (e.g., `$( Foo )`, `$( Foo.StartsWith('Bar') )`).](https://github.com/dotnet/msbuild/pull/13076)
+
 ### 18.4
 - [Start throwing on null or empty paths in MultiProcess and MultiThreaded Task Environment Drivers.](https://github.com/dotnet/msbuild/pull/12914)
 

@@ -3854,14 +3854,71 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void PropertySimpleSpaced()
         {
-            PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
-            pg.Set(ProjectPropertyInstance.Create("SomeStuff", "This IS SOME STUff"));
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_4.ToString());
 
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+                PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+                pg.Set(ProjectPropertyInstance.Create("SomeStuff", "This IS SOME STUff"));
 
-            string result = expander.ExpandIntoStringLeaveEscaped(@"$( SomeStuff )", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            Assert.Equal(String.Empty, result);
+                string result = expander.ExpandIntoStringLeaveEscaped(@"$( SomeStuff )", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+
+                Assert.Equal(String.Empty, result);
+            }
+        }
+
+        /// <summary>
+        /// Expand a property reference that has whitespace around the property name should throw error MSB4281
+        /// when ChangeWave 18.5 is enabled
+        /// </summary>
+        [Theory]
+        [InlineData("$( SomeStuff )")]   // Leading and trailing space
+        [InlineData("$( SomeStuff)")]    // Leading space only
+        [InlineData("$(SomeStuff )")]    // Trailing space only
+        public void PropertyWithWhitespace_ShouldThrowError_WhenChangeWaveEnabled(string expression)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
+
+                PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+                pg.Set(ProjectPropertyInstance.Create("SomeStuff", "This IS SOME STUff"));
+
+                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(
+                    () => expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+
+                Assert.Equal("MSB4281", ex.ErrorCode);
+            }
+        }
+
+        /// <summary>
+        /// Expand a property function call that has whitespace around the property name should throw error MSB4281
+        /// when ChangeWave 18.5 is enabled
+        /// </summary>
+        [Theory]
+        [InlineData("$( SomeStuff.StartsWith('This'))")]   // Leading space only
+        [InlineData("$(SomeStuff.StartsWith('This') )")]   // Trailing space only
+        [InlineData("$( SomeStuff.StartsWith('This') )")]  // Leading and trailing space
+        public void PropertyFunctionWithWhitespace_ShouldThrowError_WhenChangeWaveEnabled(string expression)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
+
+                PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
+                pg.Set(ProjectPropertyInstance.Create("SomeStuff", "This IS SOME STUff"));
+
+                Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+                InvalidProjectFileException ex = Assert.Throws<InvalidProjectFileException>(
+                    () => expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance));
+
+                Assert.Equal("MSB4281", ex.ErrorCode);
+            }
         }
 
         [WindowsOnlyFact]
@@ -5286,6 +5343,36 @@ $(
                 _ = logger.AllBuildEvents.Select(be => be.ShouldBeOfType<BuildCheckAcquisitionEventArgs>());
                 logger.AllBuildEvents.Count.ShouldBe(1);
             }
+        }
+
+        /// <summary>
+        /// Test for issue where chained item functions with empty results incorrectly evaluate as non-empty in conditions
+        /// </summary>
+        [Fact]
+        public void ChainedItemFunctionEmptyResultInCondition()
+        {
+            string content = @"
+<Project>
+  <Target Name='Test'>
+    <ItemGroup>
+      <TestItem Include='Test1' Foo='Bar' />
+      <TestItem Include='Test2' />
+    </ItemGroup>
+
+    <!-- This should be empty because Test1 has Foo='Bar', not 'Baz' -->
+    <PropertyGroup Condition=""'@(TestItem->WithMetadataValue('Identity', 'Test1')->WithMetadataValue('Foo', 'Baz'))' == ''"">
+      <EmptyResult>TRUE</EmptyResult>
+    </PropertyGroup>
+
+    <Message Text='EmptyResult=$(EmptyResult)' Importance='high' />
+  </Target>
+</Project>
+            ";
+
+            MockLogger log = Helpers.BuildProjectWithNewOMExpectSuccess(content);
+
+            // The chained WithMetadataValue should return empty, so the condition should be true and EmptyResult should be set
+            log.AssertLogContains("EmptyResult=TRUE");
         }
     }
 }
