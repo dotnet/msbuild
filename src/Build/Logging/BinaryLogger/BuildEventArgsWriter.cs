@@ -935,6 +935,24 @@ namespace Microsoft.Build.Logging
                 {
                     Write(taskItem, writeMetadata);
                 }
+                else if (item is IItemData itemData)
+                {
+                    WriteDeduplicatedString(itemData.EvaluatedInclude);
+                    if (writeMetadata)
+                    {
+                        foreach (var kvp in itemData.EnumerateMetadata())
+                        {
+                            nameValueListBuffer.Add(kvp);
+                        }
+
+                        WriteNameValueList();
+                        nameValueListBuffer.Clear();
+                    }
+                    else
+                    {
+                        Write((byte)0);
+                    }
+                }
                 else
                 {
                     WriteDeduplicatedString(item?.ToString() ?? ""); // itemspec
