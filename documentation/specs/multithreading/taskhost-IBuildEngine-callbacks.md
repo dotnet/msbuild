@@ -11,7 +11,6 @@ The MSBuild TaskHost (`OutOfProcTaskHostNode`) implements `IBuildEngine10` but l
 TaskHost is used when:
 1. `MSBUILDFORCEALLTASKSOUTOFPROC=1`
 2. or `-mt` mode - forces non-thread-safe tasks out-of-proc
-3. **Explicit `TaskHostFactory`** in `<UsingTask>` declarations - we don't care about this scenario
 
 If tasks in TaskHost call unsupported callbacks, the build fails with MSB5022 or `NotImplementedException`.
 
