@@ -940,13 +940,7 @@ namespace Microsoft.Build.Logging
                     WriteDeduplicatedString(itemData.EvaluatedInclude);
                     if (writeMetadata)
                     {
-                        foreach (var kvp in itemData.EnumerateMetadata())
-                        {
-                            nameValueListBuffer.Add(kvp);
-                        }
-
-                        WriteNameValueList();
-                        nameValueListBuffer.Clear();
+                        Write(itemData.EnumerateMetadata());
                     }
                     else
                     {
