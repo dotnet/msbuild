@@ -466,11 +466,6 @@ namespace Microsoft.Build.Shared
             CurrentMSBuildExePath = currentMSBuildExePath;
             VisualStudioInstallRootDirectory = visualStudioPath;
 
-#if !NO_FRAMEWORK_IVT
-            Framework.BuildEnvironmentState.s_runningTests = runningTests;
-            Framework.BuildEnvironmentState.s_runningInVisualStudio = runningInVisualStudio;
-#endif
-
             if (!string.IsNullOrEmpty(currentMSBuildExePath))
             {
                 currentMSBuildExeFile = new FileInfo(currentMSBuildExePath);
