@@ -1014,14 +1014,11 @@ namespace Microsoft.Build.Internal
             // Both the client and the host will calculate this separately, and the idea is that if they come out the same
             // then we can be sufficiently confident that the other side has the same elevation level as us.  This is complementary
             // to the username check which is also done on connection.
-            if (
-#if RUNTIME_TYPE_NETCORE
-                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
-#endif
-                new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
+            if (new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
             {
                 context |= HandshakeOptions.Administrator;
             }
+
             return context;
         }
 

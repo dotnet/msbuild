@@ -51,21 +51,15 @@ namespace Microsoft.Build.Shared
             name.Flags = assemblyNameToClone.Flags;
             name.ProcessorArchitecture = assemblyNameToClone.ProcessorArchitecture;
 
-#if !RUNTIME_TYPE_NETCORE
             name.CultureInfo = assemblyNameToClone.CultureInfo;
             name.HashAlgorithm = assemblyNameToClone.HashAlgorithm;
             name.VersionCompatibility = assemblyNameToClone.VersionCompatibility;
             name.CodeBase = assemblyNameToClone.CodeBase;
             name.KeyPair = assemblyNameToClone.KeyPair;
             name.VersionCompatibility = assemblyNameToClone.VersionCompatibility;
-#else
-            // Setting the culture name creates a new CultureInfo, leading to many allocations. Only set CultureName when the CultureInfo member is not available.
-            name.CultureName = assemblyNameToClone.CultureName;
-#endif
 
             return name;
 #endif
-
         }
 
         private static Assembly GetEntryAssembly()
