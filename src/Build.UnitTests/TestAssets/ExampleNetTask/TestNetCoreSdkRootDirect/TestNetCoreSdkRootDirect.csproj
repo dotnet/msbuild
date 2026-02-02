@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- Explicitly set NetCoreSdkRoot to verify it's used directly -->
+    <NetCoreSdkRoot>$(MSBuildSDKsPath)\..</NetCoreSdkRoot>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TestProjectFolder>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine('$(AssemblyLocation)', '..'))'))</TestProjectFolder>
+    <ExampleTaskPath>$([System.IO.Path]::Combine('$(TestProjectFolder)', '$(TargetFramework)', 'ExampleTask.dll'))</ExampleTaskPath>
+  </PropertyGroup>
+
+  <UsingTask
+	    TaskName="ExampleTask"
+      AssemblyFile="$(ExampleTaskPath)"
+      TaskFactory="TaskHostFactory"
+	    Runtime="NET"/>
+	
+  <Target Name="TestTask" BeforeTargets="Build">
+	  <ExampleTask />
+    <Message Text="NetCoreSdkRoot test: $(NetCoreSdkRoot)" Importance="high" />
+  </Target>
+
+</Project>

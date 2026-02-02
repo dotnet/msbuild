@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- Explicitly clear both properties to test behavior when both are missing -->
+    <NetCoreSdkRoot></NetCoreSdkRoot>
+    <RuntimeIdentifierGraphPath></RuntimeIdentifierGraphPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TestProjectFolder>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine('$(AssemblyLocation)', '..'))'))</TestProjectFolder>
+    <ExampleTaskPath>$([System.IO.Path]::Combine('$(TestProjectFolder)', '$(TargetFramework)', 'ExampleTask.dll'))</ExampleTaskPath>
+  </PropertyGroup>
+
+  <UsingTask
+	    TaskName="ExampleTask"
+      AssemblyFile="$(ExampleTaskPath)"
+      TaskFactory="TaskHostFactory"
+	    Runtime="NET"/>
+	
+  <Target Name="TestTask" BeforeTargets="Build">
+	  <ExampleTask />
+    <Message Text="NoSDKProperties test completed" Importance="high" />
+  </Target>
+
+</Project>

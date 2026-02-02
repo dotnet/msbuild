@@ -163,5 +163,89 @@ namespace Microsoft.Build.Engine.UnitTests
             // Output from the task where neither TaskHost nor Runtime were specified
             testTaskOutput.ShouldContain("Found item: Banana");
         }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_WithNetCoreSdkRootSet_UsesNetCoreSdkRootDirectly()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var dotnetPath = env.GetEnvironmentVariable("DOTNET_ROOT");
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetCoreSdkRootDirect", "TestNetCoreSdkRootDirect.csproj");
+
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
+
+            if (!successTestTask)
+            {
+                _output.WriteLine(testTaskOutput);
+            }
+
+            successTestTask.ShouldBeTrue();
+            // Verify the task ran successfully with NetCoreSdkRoot property set
+            testTaskOutput.ShouldContain($"The task is executed in process: dotnet");
+            testTaskOutput.ShouldContain($"Process path: {dotnetPath}", customMessage: testTaskOutput);
+            testTaskOutput.ShouldContain("NetCoreSdkRoot test:");
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_WithRuntimeIdentifierGraphPath_FallsBackToRIDGraph()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var dotnetPath = env.GetEnvironmentVariable("DOTNET_ROOT");
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestRIDGraphFallback", "TestRIDGraphFallback.csproj");
+
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
+
+            if (!successTestTask)
+            {
+                _output.WriteLine(testTaskOutput);
+            }
+
+            successTestTask.ShouldBeTrue();
+            // Verify the task ran successfully with fallback to RuntimeIdentifierGraphPath
+            testTaskOutput.ShouldContain($"The task is executed in process: dotnet");
+            testTaskOutput.ShouldContain($"Process path: {dotnetPath}", customMessage: testTaskOutput);
+            testTaskOutput.ShouldContain("RIDGraphFallback test");
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_WithNoSDKProperties_StillSucceeds()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNoSDKProperties", "TestNoSDKProperties.csproj");
+
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
+
+            if (!successTestTask)
+            {
+                _output.WriteLine(testTaskOutput);
+            }
+
+            // The task should still succeed even without SDK properties
+            // This tests the scenario where the fallback returns original parameters
+            successTestTask.ShouldBeTrue();
+            testTaskOutput.ShouldContain("NoSDKProperties test completed");
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_WithRIDGraphPathAtRoot_HandlesEdgeCase()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestRIDGraphEdgeCase", "TestRIDGraphEdgeCase.csproj");
+
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
+
+            if (!successTestTask)
+            {
+                _output.WriteLine(testTaskOutput);
+            }
+
+            // The task should succeed even with edge case RID graph path
+            // This tests that Path.GetDirectoryName returning null or empty is handled correctly
+            successTestTask.ShouldBeTrue();
+            testTaskOutput.ShouldContain("RIDGraphEdgeCase test");
+        }
     }
 }

@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <!-- Explicitly clear NetCoreSdkRoot to test fallback -->
+    <NetCoreSdkRoot></NetCoreSdkRoot>
+    <!-- Set RuntimeIdentifierGraphPath to a file in a near-root directory to test edge case -->
+    <RuntimeIdentifierGraphPath Condition="$([MSBuild]::IsOSPlatform('Windows'))">\runtime.json</RuntimeIdentifierGraphPath>
+    <RuntimeIdentifierGraphPath Condition="!$([MSBuild]::IsOSPlatform('Windows'))">/runtime.json</RuntimeIdentifierGraphPath>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TestProjectFolder>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine('$(AssemblyLocation)', '..'))'))</TestProjectFolder>
+    <ExampleTaskPath>$([System.IO.Path]::Combine('$(TestProjectFolder)', '$(TargetFramework)', 'ExampleTask.dll'))</ExampleTaskPath>
+  </PropertyGroup>
+
+  <UsingTask
+	    TaskName="ExampleTask"
+      AssemblyFile="$(ExampleTaskPath)"
+      TaskFactory="TaskHostFactory"
+	    Runtime="NET"/>
+	
+  <Target Name="TestTask" BeforeTargets="Build">
+	  <ExampleTask />
+    <Message Text="RIDGraphEdgeCase test - RIDGraphPath: $(RuntimeIdentifierGraphPath)" Importance="high" />
+  </Target>
+
+</Project>
