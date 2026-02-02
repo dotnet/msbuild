@@ -3,11 +3,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
-#if CLR2COMPATIBILITY
 using Microsoft.Build.Shared.Concurrent;
-#else
-using System.Collections.Concurrent;
-#endif
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -274,11 +270,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(_packetPump.ManagedThreadId != Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
             _terminatePacketPump.Set();
             _packetPump.Join();
-#if CLR2COMPATIBILITY
             _terminatePacketPump.Close();
-#else
-            _terminatePacketPump.Dispose();
-#endif
             _pipeServer.Dispose();
             _packetPump = null;
             ChangeLinkStatus(LinkStatus.Inactive);

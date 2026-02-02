@@ -3,9 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-#if !CLR2COMPATIBILITY
-using System.Runtime.InteropServices;
-#endif
 
 #nullable disable
 
@@ -420,29 +417,7 @@ namespace Microsoft.Build.Shared
         /// </comments>
         internal static string GetCurrentMSBuildArchitecture()
         {
-#if !CLR2COMPATIBILITY
-            string currentArchitecture = string.Empty;
-            switch (RuntimeInformation.ProcessArchitecture)
-            {
-                case Architecture.X86:
-                    currentArchitecture = MSBuildArchitectureValues.x86;
-                    break;
-                case Architecture.X64:
-                    currentArchitecture = MSBuildArchitectureValues.x64;
-                    break;
-                case Architecture.Arm64:
-                    currentArchitecture = MSBuildArchitectureValues.arm64;
-                    break;
-                default:
-                    // We're not sure what the architecture is, default to original 32/64bit logic.
-                    // This allows architectures like s390x to continue working.
-                    // https://github.com/dotnet/msbuild/issues/7729
-                    currentArchitecture = (IntPtr.Size == sizeof(Int64)) ? MSBuildArchitectureValues.x64 : MSBuildArchitectureValues.x86;
-                    break;
-            }
-#else
             string currentArchitecture = (IntPtr.Size == sizeof(Int64)) ? MSBuildArchitectureValues.x64 : MSBuildArchitectureValues.x86;
-#endif
             return currentArchitecture;
         }
 

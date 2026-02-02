@@ -11,9 +11,6 @@ using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-#if !CLR2COMPATIBILITY
-using Microsoft.Build.Experimental.FileAccess;
-#endif
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if FEATURE_APPDOMAIN
@@ -31,12 +28,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        INodePacketFactory, INodePacketHandler,
-#if CLR2COMPATIBILITY
-        IBuildEngine3
-#else
-        IBuildEngine10
-#endif
+        INodePacketFactory, INodePacketHandler, IBuildEngine3
     {
         /// <summary>
         /// Keeps a record of all environment variables that, on startup of the task host, have a different
@@ -164,13 +156,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private bool _nodeReuse;
 
-#if !CLR2COMPATIBILITY
-        /// <summary>
-        /// The task object cache.
-        /// </summary>
-        private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
-#endif
-
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -196,10 +181,6 @@ namespace Microsoft.Build.CommandLine
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostConfiguration, TaskHostConfiguration.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostTaskCancelled, TaskHostTaskCancelled.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
-
-#if !CLR2COMPATIBILITY
-            EngineServices = new EngineServicesImpl(this);
-#endif
         }
 
         #region IBuildEngine Implementation (Properties)
@@ -417,134 +398,6 @@ namespace Microsoft.Build.CommandLine
 
         #endregion // IBuildEngine3 Implementation
 
-#if !CLR2COMPATIBILITY
-        #region IBuildEngine4 Implementation
-
-        /// <summary>
-        /// Registers an object with the system that will be disposed of at some specified time
-        /// in the future.
-        /// </summary>
-        /// <param name="key">The key used to retrieve the object.</param>
-        /// <param name="obj">The object to be held for later disposal.</param>
-        /// <param name="lifetime">The lifetime of the object.</param>
-        /// <param name="allowEarlyCollection">The object may be disposed earlier that the requested time if
-        /// MSBuild needs to reclaim memory.</param>
-        public void RegisterTaskObject(object key, object obj, RegisteredTaskObjectLifetime lifetime, bool allowEarlyCollection)
-        {
-            _registeredTaskObjectCache.RegisterTaskObject(key, obj, lifetime, allowEarlyCollection);
-        }
-
-        /// <summary>
-        /// Retrieves a previously registered task object stored with the specified key.
-        /// </summary>
-        /// <param name="key">The key used to retrieve the object.</param>
-        /// <param name="lifetime">The lifetime of the object.</param>
-        /// <returns>
-        /// The registered object, or null is there is no object registered under that key or the object
-        /// has been discarded through early collection.
-        /// </returns>
-        public object GetRegisteredTaskObject(object key, RegisteredTaskObjectLifetime lifetime)
-        {
-            return _registeredTaskObjectCache.GetRegisteredTaskObject(key, lifetime);
-        }
-
-        /// <summary>
-        /// Unregisters a previously-registered task object.
-        /// </summary>
-        /// <param name="key">The key used to retrieve the object.</param>
-        /// <param name="lifetime">The lifetime of the object.</param>
-        /// <returns>
-        /// The registered object, or null is there is no object registered under that key or the object
-        /// has been discarded through early collection.
-        /// </returns>
-        public object UnregisterTaskObject(object key, RegisteredTaskObjectLifetime lifetime)
-        {
-            return _registeredTaskObjectCache.UnregisterTaskObject(key, lifetime);
-        }
-
-        #endregion
-
-        #region IBuildEngine5 Implementation
-
-        /// <summary>
-        /// Logs a telemetry event.
-        /// </summary>
-        /// <param name="eventName">The event name.</param>
-        /// <param name="properties">The list of properties associated with the event.</param>
-        public void LogTelemetry(string eventName, IDictionary<string, string> properties)
-        {
-            SendBuildEvent(new TelemetryEventArgs
-            {
-                EventName = eventName,
-                Properties = properties == null ? new Dictionary<string, string>() : new Dictionary<string, string>(properties),
-            });
-        }
-
-        #endregion
-
-        #region IBuildEngine6 Implementation
-
-        /// <summary>
-        /// Gets the global properties for the current project.
-        /// </summary>
-        /// <returns>An <see cref="IReadOnlyDictionary{String, String}" /> containing the global properties of the current project.</returns>
-        public IReadOnlyDictionary<string, string> GetGlobalProperties()
-        {
-            return new Dictionary<string, string>(_currentConfiguration.GlobalProperties);
-        }
-
-        #endregion
-
-        #region IBuildEngine9 Implementation
-
-        public int RequestCores(int requestedCores)
-        {
-            // No resource management in OOP nodes
-            throw new NotImplementedException();
-        }
-
-        public void ReleaseCores(int coresToRelease)
-        {
-            // No resource management in OOP nodes
-            throw new NotImplementedException();
-        }
-
-        #endregion
-
-        #region IBuildEngine10 Members
-
-        [Serializable]
-        private sealed class EngineServicesImpl : EngineServices
-        {
-            private readonly OutOfProcTaskHostNode _taskHost;
-
-            internal EngineServicesImpl(OutOfProcTaskHostNode taskHost)
-            {
-                _taskHost = taskHost;
-            }
-
-            /// <summary>
-            /// No logging verbosity optimization in OOP nodes.
-            /// </summary>
-            public override bool LogsMessagesOfImportance(MessageImportance importance) => true;
-
-            /// <inheritdoc />
-            public override bool IsTaskInputLoggingEnabled
-            {
-                get
-                {
-                    ErrorUtilities.VerifyThrow(_taskHost._currentConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
-                    return _taskHost._currentConfiguration.IsTaskInputLoggingEnabled;
-                }
-            }
-        }
-
-        public EngineServices EngineServices { get; }
-
-        #endregion
-
-#endif
-
         #region INodePacketFactory Members
 
         /// <summary>
@@ -628,9 +481,6 @@ namespace Microsoft.Build.CommandLine
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(out Exception shutdownException, bool nodeReuse = false, byte parentPacketVersion = 1)
         {
-#if !CLR2COMPATIBILITY
-            _registeredTaskObjectCache = new RegisteredTaskObjectCacheBase();
-#endif
             shutdownException = null;
 
             // Snapshot the current environment
@@ -819,11 +669,6 @@ namespace Microsoft.Build.CommandLine
 
             debugWriter?.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
 
-#if !CLR2COMPATIBILITY
-            _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
-            _registeredTaskObjectCache = null;
-#endif
-
             // On Windows, a process holds a handle to the current directory,
             // so reset it away from a user-requested folder that may get deleted.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
@@ -850,17 +695,10 @@ namespace Microsoft.Build.CommandLine
             _nodeEndpoint.Disconnect();
 
             // Dispose these WaitHandles
-#if CLR2COMPATIBILITY
             _packetReceivedEvent.Close();
             _shutdownEvent.Close();
             _taskCompleteEvent.Close();
             _taskCancelledEvent.Close();
-#else
-            _packetReceivedEvent.Dispose();
-            _shutdownEvent.Dispose();
-            _taskCompleteEvent.Dispose();
-            _taskCancelledEvent.Dispose();
-#endif
 
             return _shutdownReason;
         }
@@ -924,9 +762,7 @@ namespace Microsoft.Build.CommandLine
 
                 string taskName = taskConfiguration.TaskName;
                 string taskLocation = taskConfiguration.TaskLocation;
-#if !CLR2COMPATIBILITY
-                TaskFactoryUtilities.RegisterAssemblyResolveHandlersFromManifest(taskLocation);
-#endif
+
                 // We will not create an appdomain now because of a bug
                 // As a fix, we will create the class directly without wrapping it in a domain
                 _taskWrapper = new OutOfProcTaskAppDomainWrapper();

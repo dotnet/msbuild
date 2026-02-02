@@ -126,12 +126,6 @@ namespace Microsoft.Build.Shared
         /// <param name="locker">The object that should already have been used as a lock.</param>
         internal static void VerifyThrowInternalLockHeld(object locker)
         {
-#if !CLR2COMPATIBILITY
-            if (!Monitor.IsEntered(locker))
-            {
-                ThrowInternalError("Lock should already have been taken");
-            }
-#endif
         }
 
         /// <summary>
@@ -514,33 +508,6 @@ namespace Microsoft.Build.Shared
                 ThrowArgumentLength(parameterName);
             }
         }
-
-#if !CLR2COMPATIBILITY
-        /// <summary>
-        /// Throws an ArgumentNullException if the given collection is null
-        /// and ArgumentException if it has zero length.
-        /// </summary>
-        internal static void VerifyThrowArgumentLength<T>([NotNull] IReadOnlyCollection<T> parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-        {
-            VerifyThrowArgumentNull(parameter, parameterName);
-
-            if (parameter.Count == 0)
-            {
-                ThrowArgumentLength(parameterName);
-            }
-        }
-
-        /// <summary>
-        /// Throws an ArgumentException if the given collection is not null but of zero length.
-        /// </summary>
-        internal static void VerifyThrowArgumentLengthIfNotNull<T>([MaybeNull] IReadOnlyCollection<T>? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-        {
-            if (parameter?.Count == 0)
-            {
-                ThrowArgumentLength(parameterName);
-            }
-        }
-#endif
 
         [DoesNotReturn]
         private static void ThrowArgumentLength(string? parameterName)

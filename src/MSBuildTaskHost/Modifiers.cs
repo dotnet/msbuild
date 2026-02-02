@@ -2,11 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-#if !CLR2COMPATIBILITY
-using System.Collections.Frozen;
-#else
 using System.Collections.Generic;
-#endif
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Microsoft.Build.Framework;
@@ -65,7 +61,6 @@ namespace Microsoft.Build.Shared
                     DefiningProjectExtension
                 };
 
-#if CLR2COMPATIBILITY
             private static readonly HashSet<string> s_tableOfItemSpecModifiers = new HashSet<string>(All, StringComparer.OrdinalIgnoreCase);
             private static readonly HashSet<string> s_tableOfDefiningProjectModifiers = new HashSet<string>(
                 [
@@ -74,16 +69,6 @@ namespace Microsoft.Build.Shared
                     DefiningProjectName,
                     DefiningProjectExtension,
                 ], StringComparer.OrdinalIgnoreCase);
-#else
-            private static readonly FrozenSet<string> s_tableOfItemSpecModifiers = FrozenSet.Create(StringComparer.OrdinalIgnoreCase, All);
-            private static readonly FrozenSet<string> s_tableOfDefiningProjectModifiers = FrozenSet.Create(StringComparer.OrdinalIgnoreCase,
-                [
-                    DefiningProjectFullPath,
-                    DefiningProjectDirectory,
-                    DefiningProjectName,
-                    DefiningProjectExtension,
-                ]);
-#endif
 
             /// <summary>
             /// Indicates if the given name is reserved for an item-spec modifier.

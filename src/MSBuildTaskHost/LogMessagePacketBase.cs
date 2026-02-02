@@ -506,11 +506,7 @@ namespace Microsoft.Build.Shared
             {
                 try
                 {
-#if CLR2COMPATIBILITY
                     delegateMethod = Delegate.CreateDelegate(type, firstArgument, methodInfo);
-#else
-                    delegateMethod = methodInfo.CreateDelegate(type, firstArgument);
-#endif
                 }
                 catch (FileLoadException) when (i < 5)
                 {
@@ -899,11 +895,6 @@ namespace Microsoft.Build.Shared
             string filePath = responseFileUsedEventArgs.ResponseFilePath;
 
             translator.Translate(ref filePath);
-
-#if !CLR2COMPATIBILITY
-            DateTime timestamp = responseFileUsedEventArgs.RawTimestamp;
-            translator.Translate(ref timestamp);
-#endif
         }
 
         #endregion
@@ -1058,12 +1049,6 @@ namespace Microsoft.Build.Shared
             string responseFilePath = String.Empty;
             translator.Translate(ref responseFilePath);
             ResponseFileUsedEventArgs buildEvent = new ResponseFileUsedEventArgs(responseFilePath);
-
-#if !CLR2COMPATIBILITY
-            DateTime timestamp = default;
-            translator.Translate(ref timestamp);
-            buildEvent.RawTimestamp = timestamp;
-#endif
 
             return buildEvent;
         }

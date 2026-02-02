@@ -17,13 +17,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd;
 
-#if !CLR2COMPATIBILITY
-using Microsoft.Build.Shared.Debugging;
-using System.Collections;
-using System.Collections.Frozen;
-using Microsoft.NET.StringTools;
-#endif
-
 #nullable disable
 
 namespace Microsoft.Build.Internal
@@ -397,14 +390,6 @@ namespace Microsoft.Build.Internal
         /// </summary>
         private static long s_lastLoggedTicks = DateTime.UtcNow.Ticks;
 
-#if !CLR2COMPATIBILITY
-        /// <summary>
-        /// A set of environment variables cached from the last time we called GetEnvironmentVariables.
-        /// Used to avoid allocations if the environment has not changed.
-        /// </summary>
-        private static EnvironmentState s_environmentState;
-#endif
-
         /// <summary>
         /// Delegate to debug the communication utilities.
         /// </summary>
@@ -461,15 +446,6 @@ namespace Microsoft.Build.Internal
             }
         }
 
-#if !CLR2COMPATIBILITY
-        /// <summary>
-        /// A container to atomically swap a cached set of environment variables and the block string used to create it.
-        /// The environment block property will only be set on Windows, since on Unix we need to directly call
-        /// Environment.GetEnvironmentVariables().
-        /// </summary>
-        private sealed record class EnvironmentState(FrozenDictionary<string, string> EnvironmentVariables, ReadOnlyMemory<char> EnvironmentBlock = default);
-#endif
-
         /// <summary>
         /// Returns key value pairs of environment variables in a new dictionary
         /// with a case-insensitive key comparer.
@@ -477,19 +453,8 @@ namespace Microsoft.Build.Internal
         /// <remarks>
         /// Copied from the BCL implementation to eliminate some expensive security asserts on .NET Framework.
         /// </remarks>
-#if CLR2COMPATIBILITY
         internal static Dictionary<string, string> GetEnvironmentVariables()
         {
-#else
-        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-        private static FrozenDictionary<string, string> GetEnvironmentVariablesWindows()
-        {
-            // The DebugUtils static constructor can set the MSBUILDDEBUGPATH environment variable to propagate the debug path to out of proc nodes.
-            // Need to ensure that constructor is called before this method returns in order to capture its env var write.
-            // Otherwise the env var is not captured and thus gets deleted when RequiestBuilder resets the environment based on the cached results of this method.
-            ErrorUtilities.VerifyThrowInternalNull(DebugUtils.ProcessInfoString, nameof(DebugUtils.DebugPath));
-#endif
-
             unsafe
             {
                 char* pEnvironmentBlock = null;
@@ -509,17 +474,6 @@ namespace Microsoft.Build.Internal
                         pEnvironmentBlockEnd++;
                     }
                     long stringBlockLength = pEnvironmentBlockEnd - pEnvironmentBlock;
-
-#if !CLR2COMPATIBILITY
-                    // Avoid allocating any objects if the environment still matches the last state.
-                    // We speed this up by comparing the full block instead of individual key-value pairs.
-                    ReadOnlySpan<char> stringBlock = new(pEnvironmentBlock, (int)stringBlockLength);
-                    EnvironmentState lastState = s_environmentState;
-                    if (lastState?.EnvironmentBlock.Span.SequenceEqual(stringBlock) == true)
-                    {
-                        return lastState.EnvironmentVariables;
-                    }
-#endif
 
                     Dictionary<string, string> table = new(200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
 
@@ -564,11 +518,7 @@ namespace Microsoft.Build.Internal
                             continue;
                         }
 
-#if !CLR2COMPATIBILITY
-                        string key = Strings.WeakIntern(new ReadOnlySpan<char>(pEnvironmentBlock + startKey, i - startKey));
-#else
                         string key = new string(pEnvironmentBlock, startKey, i - startKey);
-#endif
 
                         i++;
 
@@ -581,25 +531,13 @@ namespace Microsoft.Build.Internal
                             i++;
                         }
 
-#if !CLR2COMPATIBILITY
-                        string value = Strings.WeakIntern(new ReadOnlySpan<char>(pEnvironmentBlock + startValue, i - startValue));
-#else
                         string value = new string(pEnvironmentBlock, startValue, i - startValue);
-#endif
 
                         // skip over 0 handled by for loop's i++
                         table[key] = value;
                     }
 
-#if !CLR2COMPATIBILITY
-                    // Update with the current state.
-                    EnvironmentState currentState =
-                        new(table.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase), stringBlock.ToArray());
-                    s_environmentState = currentState;
-                    return currentState.EnvironmentVariables;
-#else
                     return table;
-#endif
                 }
                 finally
                 {
@@ -610,69 +548,6 @@ namespace Microsoft.Build.Internal
                 }
             }
         }
-
-#if !CLR2COMPATIBILITY
-        /// <summary>
-        /// Returns key value pairs of environment variables in a read-only dictionary
-        /// with a case-insensitive key comparer.
-        ///
-        /// If the environment variables have not changed since the last time
-        /// this method was called, the same dictionary instance will be returned.
-        /// </summary>
-        internal static FrozenDictionary<string, string> GetEnvironmentVariables()
-        {
-            // Always call the native method on Windows, as we'll be able to avoid the internal
-            // string and Hashtable allocations caused by Environment.GetEnvironmentVariables().
-            if (NativeMethodsShared.IsWindows)
-            {
-                return GetEnvironmentVariablesWindows();
-            }
-
-            IDictionary vars = Environment.GetEnvironmentVariables();
-
-            // Directly use the enumerator since Current will box DictionaryEntry.
-            IDictionaryEnumerator enumerator = vars.GetEnumerator();
-
-            // If every key-value pair matches the last state, return a cached dictionary.
-            FrozenDictionary<string, string> lastEnvironmentVariables = s_environmentState?.EnvironmentVariables;
-            if (vars.Count == lastEnvironmentVariables?.Count)
-            {
-                bool sameState = true;
-
-                while (enumerator.MoveNext() && sameState)
-                {
-                    DictionaryEntry entry = enumerator.Entry;
-                    if (!lastEnvironmentVariables.TryGetValue((string)entry.Key, out string value)
-                        || !string.Equals((string)entry.Value, value, StringComparison.Ordinal))
-                    {
-                        sameState = false;
-                    }
-                }
-
-                if (sameState)
-                {
-                    return lastEnvironmentVariables;
-                }
-            }
-
-            // Otherwise, allocate and update with the current state.
-            Dictionary<string, string> table = new(vars.Count, EnvironmentVariableComparer);
-
-            enumerator.Reset();
-            while (enumerator.MoveNext())
-            {
-                DictionaryEntry entry = enumerator.Entry;
-                string key = Strings.WeakIntern((string)entry.Key);
-                string value = Strings.WeakIntern((string)entry.Value);
-                table[key] = value;
-            }
-
-            EnvironmentState newState = new(table.ToFrozenDictionary(EnvironmentVariableComparer));
-            s_environmentState = newState;
-
-            return newState.EnvironmentVariables;
-        }
-#endif
 
         /// <summary>
         /// Updates the environment to match the provided dictionary.
@@ -1069,12 +944,7 @@ namespace Microsoft.Build.Internal
         {
             lock (s_traceLock)
             {
-                s_debugDumpPath ??=
-#if CLR2COMPATIBILITY
-                    Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
-#else
-                        DebugUtils.DebugPath;
-#endif
+                s_debugDumpPath ??= Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 
                 if (String.IsNullOrEmpty(s_debugDumpPath))
                 {

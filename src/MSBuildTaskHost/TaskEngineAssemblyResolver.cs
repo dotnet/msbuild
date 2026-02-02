@@ -113,12 +113,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
                         if (taskAssemblyName.Equals(argAssemblyName))
                         {
-#if (!CLR2COMPATIBILITY)
-                            return Assembly.UnsafeLoadFrom(_taskAssemblyFile);
-#else
                             return Assembly.LoadFrom(_taskAssemblyFile);
-#endif
-
                         }
 #else // !FEATURE_APPDOMAIN
                         AssemblyNameExtension taskAssemblyName = new AssemblyNameExtension(AssemblyLoadContext.GetAssemblyName(_taskAssemblyFile));

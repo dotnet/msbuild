@@ -17,9 +17,6 @@ using System.Xml;
 using Microsoft.Build.Shared.FileSystem;
 using System.Xml.Schema;
 using System.Runtime.Serialization;
-#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-using Microsoft.Build.Shared.Debugging;
-#endif
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
@@ -37,32 +34,7 @@ namespace Microsoft.Build.Shared
         /// <returns></returns>
         private static string GetDebugDumpPath()
         {
-            string debugPath =
-
-                /* Unmerged change from project 'Microsoft.Build.Engine.OM.UnitTests (net7.0)'
-                Before:
-                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
-                After:
-                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
-                */
-                /* Unmerged change from project 'Microsoft.Build.Engine.OM.UnitTests (net472)'
-                Before:
-                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
-                After:
-                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
-                */
-                /* Unmerged change from project 'MSBuildTaskHost'
-                Before:
-                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
-                After:
-                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
-                */
-                // Cannot access change wave logic from these assemblies (https://github.com/dotnet/msbuild/issues/6707)
-#if CLR2COMPATIBILITY || MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
-                Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
-#else
-                DebugUtils.DebugPath;
-#endif
+            string debugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 
             return !string.IsNullOrEmpty(debugPath)
                     ? debugPath
@@ -122,8 +94,7 @@ namespace Microsoft.Build.Shared
 #if !TASKHOST
              || e is CriticalTaskException
 #endif
-             || e is InternalErrorException
-             )
+             || e is InternalErrorException)
             {
                 // Ideally we would include NullReferenceException, because it should only ever be thrown by CLR (use ArgumentNullException for arguments)
                 // but we should handle it if tasks and loggers throw it.
@@ -131,20 +102,6 @@ namespace Microsoft.Build.Shared
                 // ExecutionEngineException has been deprecated by the CLR
                 return true;
             }
-
-#if !CLR2COMPATIBILITY
-            // Check if any critical exceptions
-            var aggregateException = e as AggregateException;
-
-            if (aggregateException != null)
-            {
-                // If the aggregate exception contains a critical exception it is considered a critical exception
-                if (aggregateException.InnerExceptions.Any(innerException => IsCriticalException(innerException)))
-                {
-                    return true;
-                }
-            }
-#endif
 
             return false;
         }
