@@ -59,7 +59,6 @@
     <Compile Include="FileSystem\MSBuildTaskHostFileSystem.cs" />
     <Compile Include="FileUtilities.cs" />
     <Compile Include="FileUtilitiesRegex.cs" />
-    <Compile Include="Framework\AssemblyUtilities.cs" />
     <Compile Include="Framework\BinaryReaderFactory.cs" />
     <Compile Include="Framework\BinaryTranslator.cs" />
     <Compile Include="Framework\BuildEnvironmentState.cs" />

@@ -598,7 +598,7 @@ namespace Microsoft.Build.Shared
 
             if (asAssemblyName != null)
             {
-                newExtension.asAssemblyName = asAssemblyName.CloneIfPossible();
+                newExtension.asAssemblyName = (AssemblyName)asAssemblyName.Clone();
             }
 
             newExtension.asString = asString;
