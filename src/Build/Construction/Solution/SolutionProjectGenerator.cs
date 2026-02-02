@@ -418,6 +418,7 @@ namespace Microsoft.Build.Construction
             string copyLocalFilesItemName = referenceItemName + "_CopyLocalFiles";
             string targetFrameworkDirectoriesName = GenerateSafePropertyName(project, "_TargetFrameworkDirectories");
             string fullFrameworkRefAssyPathName = GenerateSafePropertyName(project, "_FullFrameworkReferenceAssemblyPaths");
+            string dependsOnNetStandardPropertyName = GenerateSafePropertyName(project, "_DependsOnNETStandard");
             string destinationFolder = String.Format(CultureInfo.InvariantCulture, @"$({0})\Bin\", GenerateSafePropertyName(project, "AspNetPhysicalPath"));
 
             // This is a bit of a hack.  We're actually calling the "Copy" task on all of
@@ -451,28 +452,53 @@ namespace Microsoft.Build.Construction
             rarTask.SetParameter("FindSerializationAssemblies", "true");
             rarTask.SetParameter("FindRelatedFiles", "true");
             rarTask.SetParameter("TargetFrameworkMoniker", project.TargetFrameworkMoniker);
-            rarTask.SetParameter("TargetFrameworkVersion", $"v{new FrameworkName(project.TargetFrameworkMoniker).Version}");
+
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
+            {
+                // Parse the target framework version to determine if we should pass it to RAR.
+                // Only pass TargetFrameworkVersion for .NET Framework 4.7.1+ which has netstandard 2.0 support.
+                // For older frameworks, omitting this preserves the existing warning behavior (MSB3268)
+                // when netstandard dependencies cannot be resolved.
+                var frameworkName = new FrameworkName(project.TargetFrameworkMoniker);
+                var minVersionForNetstandard = new Version(4, 7, 1);
+
+                if (frameworkName.Version >= minVersionForNetstandard)
+                {
+                    // Pass TargetFrameworkVersion so RAR can find netstandard facades
+                    rarTask.SetParameter("TargetFrameworkVersion", $"v{frameworkName.Version}");
+                    // Pass web.config as AppConfigFile so RAR can detect assembly binding redirects
+                    rarTask.SetParameter("AppConfigFile", "$(WebConfigFileName)");
+                }
+            }
+
             rarTask.AddOutputItem("CopyLocalFiles", copyLocalFilesItemName, null);
 
-            // Capture whether RAR detected a dependency on netstandard
-            string dependsOnNetStandardPropertyName = GenerateSafePropertyName(project, "_DependsOnNETStandard");
-            rarTask.AddOutputProperty("DependsOnNETStandard", dependsOnNetStandardPropertyName, null);
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
+            {
+                // Capture whether RAR detected a dependency on netstandard
+                rarTask.AddOutputProperty("DependsOnNETStandard", dependsOnNetStandardPropertyName, null);
+            }
 
             // Copy all the copy-local files (reported by RAR) to the web project's "bin"
             // directory.
             ProjectTaskInstance copyTask = target.AddTask("Copy", conditionDescribingValidConfigurations, null);
             copyTask.SetParameter("SourceFiles", "@(" + copyLocalFilesItemName + ")");
+            copyTask.SetParameter("SkipUnchangedFiles", "true");
             copyTask.SetParameter(
                 "DestinationFiles",
                 String.Format(CultureInfo.InvariantCulture, @"@({0}->'{1}%(DestinationSubDirectory)%(Filename)%(Extension)')", copyLocalFilesItemName, destinationFolder));
 
-            // If any references depend on netstandard, copy netstandard.dll from the Facades folder.
-            // .NET Framework 4.7.1+ has netstandard 2.0 support in the Facades folder.
-            string netstandardFacadePath = String.Format(CultureInfo.InvariantCulture, @"$({0})Facades\netstandard.dll", targetFrameworkDirectoriesName);
-            string copyFacadesCondition = String.Format(CultureInfo.InvariantCulture, "'$({0})' == 'True' AND Exists('{1}')", dependsOnNetStandardPropertyName, netstandardFacadePath);
-            ProjectTaskInstance copyFacadesTask = target.AddTask("Copy", copyFacadesCondition, null);
-            copyFacadesTask.SetParameter("SourceFiles", netstandardFacadePath);
-            copyFacadesTask.SetParameter("DestinationFolder", destinationFolder);
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
+            {
+                // If any references depend on netstandard, copy netstandard.dll from the Facades folder.
+                // .NET Framework 4.7.1+ has netstandard 2.0 support in the Facades folder.
+                string netstandardFacadePath = String.Format(CultureInfo.InvariantCulture, @"$({0})Facades\netstandard.dll", targetFrameworkDirectoriesName);
+                string copyFacadesCondition = String.Format(CultureInfo.InvariantCulture, "'$({0})' == 'true' AND Exists('{1}')", dependsOnNetStandardPropertyName, netstandardFacadePath);
+                ProjectTaskInstance copyFacadesTask = target.AddTask("Copy", copyFacadesCondition, null);
+                copyFacadesTask.SetParameter("SourceFiles", netstandardFacadePath);
+                copyFacadesTask.SetParameter("SkipUnchangedFiles", "true");
+                copyFacadesTask.SetParameter("DestinationFolder", destinationFolder);
+            }
         }
 
         /// <summary>
@@ -1255,6 +1281,16 @@ namespace Microsoft.Build.Construction
                     "AspNetCompiler.UnsupportedMSBuildVersion",
                     project.ProjectName);
 #else
+                // Set WebConfigFileName property if web.config exists (for RAR AppConfigFile parameter)
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
+                {
+                    string webConfigPath = Path.Combine(project.AbsolutePath, "web.config");
+                    if (File.Exists(webConfigPath))
+                    {
+                        metaprojectInstance.SetProperty("WebConfigFileName", webConfigPath);
+                    }
+                }
+
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, null);
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Clean");
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Rebuild");
