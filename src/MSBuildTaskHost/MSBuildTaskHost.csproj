@@ -84,7 +84,6 @@
     <Compile Include="Framework\NativeMethods.cs" />
     <Compile Include="Framework\ResponseFileUsedEventArgs.cs" />
     <Compile Include="Framework\RunInSTAAttribute.cs" />
-    <Compile Include="Framework\SerializableMetadata.cs" />
     <Compile Include="Framework\StringBuilderCache.cs" />
     <Compile Include="Framework\SupportedOSPlatform.cs" />
     <Compile Include="Framework\TaskHostParameters.cs" />
