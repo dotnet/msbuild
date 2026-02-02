@@ -95,10 +95,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private string _projectFile;
 
-#if !NET35
-        private HostServices _hostServices;
-#endif
-
         /// <summary>
         /// The set of parameters to apply to the task prior to execution.
         /// </summary>
@@ -167,9 +163,6 @@ namespace Microsoft.Build.BackEnd
             IDictionary<string, string> buildProcessEnvironment,
             CultureInfo culture,
             CultureInfo uiCulture,
-#if !NET35
-            HostServices hostServices,
-#endif
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -206,9 +199,6 @@ namespace Microsoft.Build.BackEnd
 
             _culture = culture;
             _uiCulture = uiCulture;
-#if !NET35
-            _hostServices = hostServices;
-#endif
 #if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
 #endif
@@ -305,18 +295,6 @@ namespace Microsoft.Build.BackEnd
             [DebuggerStepThrough]
             get
             { return _appDomainSetup; }
-        }
-#endif
-
-#if !NET35
-        /// <summary>
-        /// The HostServices to be used by the task host.
-        /// </summary>
-        public HostServices HostServices
-        {
-            [DebuggerStepThrough]
-            get
-            { return _hostServices; }
         }
 #endif
 
@@ -511,9 +489,6 @@ namespace Microsoft.Build.BackEnd
             {
                 translator.Translate(ref _targetName);
                 translator.Translate(ref _projectFile);
-#if !NET35    
-                translator.Translate(ref _hostServices);
-#endif
             }
 
             translator.Translate(ref _isTaskInputLoggingEnabled);

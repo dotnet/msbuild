@@ -55,118 +55,9 @@ namespace Microsoft.Build.Shared
                 : loadedAssembly.Location;
 
             LoadedAssembly = loadedAssembly;
-
-#if !NET35
-            // This block is reflection only loaded type implementation. Net35 does not support it, and fall backs to former implementation in #else
-            // Property `Properties` set in this block aren't used by TaskHosts. Properties below are only used on the NodeProvider side to get information about the
-            // properties and reflect over them without needing them to be fully loaded, so it also isn't need for TaskHosts.
-
-            // MetadataLoadContext-loaded Type objects don't support testing for inherited attributes, so we manually walk the BaseType chain.
-            Type? t = type;
-            while (t is not null)
-            {
-                try
-                {
-                    if (TypeUtilities.HasAttribute<LoadInSeparateAppDomainAttribute>(t))
-                    {
-                        HasLoadInSeparateAppDomainAttribute = true;
-                    }
-
-                    if (TypeUtilities.HasAttribute<RunInSTAAttribute>(t))
-                    {
-                        HasSTAThreadAttribute = true;
-                    }
-
-                    if (t.IsMarshalByRef)
-                    {
-                        IsMarshalByRef = true;
-                    }
-                }
-                catch when (loadedViaMetadataLoadContext)
-                {
-                    // when assembly is loaded via metadata load context we can ignore exception because there is no expectation to have it in proc.
-                    // BUT we should throw for in-proc case and handle it on higher level.
-                }
-
-                t = t.BaseType;
-            }
-
-            PropertyInfo[] props = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-            Properties = new ReflectableTaskPropertyInfo[props.Length];
-            if (loadedViaMetadataLoadContext)
-            {
-                PropertyAssemblyQualifiedNames = new string[props.Length];
-            }
-
-            for (int i = 0; i < props.Length; i++)
-            {
-                bool outputAttribute = false;
-                bool requiredAttribute = false;
-                foreach (CustomAttributeData attr in CustomAttributeData.GetCustomAttributes(props[i]))
-                {
-                    try
-                    {
-                        if (attr.AttributeType?.Name.Equals(nameof(OutputAttribute)) == true)
-                        {
-                            outputAttribute = true;
-                        }
-                        else if (attr.AttributeType?.Name.Equals(nameof(RequiredAttribute)) == true)
-                        {
-                            requiredAttribute = true;
-                        }
-                    }
-                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-                    {
-                        // Skip attributes that can't be loaded
-                        continue;
-                    }
-                }
-
-                // Check whether it's assignable to ITaskItem or ITaskItem[]. Simplify to just checking for ITaskItem.
-                Type? pt = null;
-                try
-                {
-                    pt = props[i].PropertyType;
-                    if (pt.IsArray)
-                    {
-                        pt = pt.GetElementType();
-                    }
-                }
-                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-                {
-                    // Skip properties that can't be loaded
-                    continue;
-                }
-
-                bool isAssignableToITask = false;
-                try
-                {
-                    isAssignableToITask = pt != null && iTaskItemType.IsAssignableFrom(pt);
-                }
-                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-                {
-                    // Can't determine assignability, default to false
-                }
-
-                Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, isAssignableToITask);
-                if (loadedViaMetadataLoadContext && PropertyAssemblyQualifiedNames != null)
-                {
-                    try
-                    {
-                        PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName ?? string.Empty;
-                    }
-                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-                    {
-                        PropertyAssemblyQualifiedNames[i] = string.Empty;
-                    }
-                }
-            }
-#else
-            // For v3.5 fallback to old full type approach, as oppose to reflection only
             HasLoadInSeparateAppDomainAttribute = Type.GetTypeInfo().IsDefined(typeof(LoadInSeparateAppDomainAttribute), true /* inherited */);
             HasSTAThreadAttribute = Type.GetTypeInfo().IsDefined(typeof(RunInSTAAttribute), true /* inherited */);
             IsMarshalByRef = Type.IsMarshalByRef;
-#endif
         }
 
         #endregion
@@ -235,10 +126,6 @@ namespace Microsoft.Build.Shared
         /// We use this information to help created AppDomains to resolve types that it could not load successfully
         /// </summary>
         internal Assembly LoadedAssembly { get; private set; }
-
-#if !NET35
-        internal ReflectableTaskPropertyInfo[] Properties { get; private set; }
-#endif
 
         /// <summary>
         /// Assembly-qualified names for properties. Only has a value if this type was loaded using MetadataLoadContext.

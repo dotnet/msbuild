@@ -156,9 +156,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="pattern">Input to check for UNC pattern minimum requirements.</param>
         /// <returns>true if the UNC pattern is a minimum length of 5 and the first two characters are be a slash, false otherwise.</returns>
-#if !NET35
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
         internal static bool MeetsUncPatternMinimumRequirements(string pattern)
         {
             return pattern.Length >= 5 &&

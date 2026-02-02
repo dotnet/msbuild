@@ -11,9 +11,6 @@ using System.Reflection;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-#if !NET35
-using Microsoft.Build.Execution;
-#endif
 
 #nullable disable
 
@@ -57,10 +54,6 @@ namespace Microsoft.Build.CommandLine
         /// from the task loader.
         /// </summary>
         private string taskName;
-
-#if !NET35
-        private HostServices _hostServices;
-#endif
 
         /// <summary>
         /// This is the actual user task whose instance we will create and invoke Execute
@@ -110,9 +103,6 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                 AppDomainSetup appDomainSetup,
 #endif
-#if !NET35
-                HostServices hostServices,
-#endif
                 IDictionary<string, TaskParameter> taskParams)
         {
             buildEngine = oopTaskHostNode;
@@ -120,9 +110,6 @@ namespace Microsoft.Build.CommandLine
 
 #if FEATURE_APPDOMAIN
             _taskAppDomain = null;
-#endif
-#if !NET35
-            _hostServices = hostServices;
 #endif
             wrappedTask = null;
 
@@ -347,13 +334,6 @@ namespace Microsoft.Build.CommandLine
 #endif
                     );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-
-#if !NET35
-                if (projectFile != null && _hostServices != null)
-                {
-                    wrappedTask.HostObject = _hostServices.GetHostObject(projectFile, targetName, taskName);
-                }
-#endif
 
                 wrappedTask.BuildEngine = oopTaskHostNode;
             }
