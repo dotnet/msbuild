@@ -48,7 +48,6 @@
     <Compile Include="BufferedReadStream.cs" />
     <Compile Include="CollectionHelpers.cs" />
     <Compile Include="Constants.cs" />
-    <Compile Include="CopyOnWriteDictionary.cs" />
     <Compile Include="CommunicationsUtilities.cs" />
     <Compile Include="Concurrent\ConcurrentDictionary.cs" />
     <Compile Include="Concurrent\ConcurrentQueue.cs" />
@@ -120,8 +119,6 @@
     <Compile Include="Polyfills\IsExternalInit.cs" />
     <Compile Include="Polyfills\NullableAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ReadOnlyEmptyCollection.cs" />
-    <Compile Include="ReadOnlyEmptyDictionary.cs" />
     <Compile Include="ResourceUtilities.cs" />
     <Compile Include="TaskEngineAssemblyResolver.cs" />
     <Compile Include="TaskHostTaskCancelled.cs" />
