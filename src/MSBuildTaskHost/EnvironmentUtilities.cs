@@ -3,19 +3,15 @@
 
 #nullable enable
 
-using System;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Microsoft.Build.Shared
 {
     internal static partial class EnvironmentUtilities
     {
-
         private static volatile int s_processId;
         private static volatile string? s_processPath;
-        private static volatile string? s_processName;
 
         /// <summary>Gets the unique identifier for the current process.</summary>
         public static int CurrentProcessId
@@ -62,29 +58,6 @@ namespace Microsoft.Build.Shared
 
                 return (processPath?.Length != 0) ? processPath : null;
             }
-        }
-
-        public static string ProcessName
-        {
-            get
-            {
-                string? processName = s_processName;
-                if (processName == null)
-                {
-                    using Process currentProcess = Process.GetCurrentProcess();
-                    Interlocked.CompareExchange(ref s_processName, currentProcess.ProcessName, null);
-                    processName = s_processName;
-                }
-
-                return processName;
-            }
-        }
-
-        public static bool IsWellKnownEnvironmentDerivedProperty(string propertyName)
-        {
-            return propertyName.StartsWith("MSBUILD", StringComparison.OrdinalIgnoreCase) ||
-                propertyName.StartsWith("COMPLUS_", StringComparison.OrdinalIgnoreCase) ||
-                propertyName.StartsWith("DOTNET_", StringComparison.OrdinalIgnoreCase);
         }
     }
 }
