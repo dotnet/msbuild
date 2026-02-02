@@ -37,6 +37,7 @@ namespace Microsoft.Build.UnitTests
         {
             IBuildEngine2 mockEngine = new MockEngine(_output);
             Exec exec = new Exec();
+            exec.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             exec.BuildEngine = mockEngine;
             exec.Command = command;
             return exec;
@@ -46,6 +47,7 @@ namespace Microsoft.Build.UnitTests
         {
             IBuildEngine2 mockEngine = new MockEngine(_output);
             ExecWrapper exec = new ExecWrapper();
+            exec.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             exec.BuildEngine = mockEngine;
             exec.Command = command;
             return exec;
@@ -894,6 +896,7 @@ namespace Microsoft.Build.UnitTests
         public void SetEnvironmentVariableParameter()
         {
             Exec exec = new Exec();
+            exec.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             exec.BuildEngine = new MockEngine();
             exec.Command = NativeMethodsShared.IsWindows ? "echo [%MYENVVAR%]" : "echo [$myenvvar]";
             exec.EnvironmentVariables = new[] { "myenvvar=myvalue" };
@@ -1056,6 +1059,39 @@ echo line 3"" />
                 result.ShouldBeTrue();
                 exec.ConsoleOutput.Length.ShouldBe(1);
                 exec.ConsoleOutput[0].ItemSpec.ShouldBe(lineWithLeadingWhitespace);
+            }
+        }
+
+        /// <summary>
+        /// Verify that Exec implements IMultiThreadableTask for thread-safe execution
+        /// </summary>
+        [Fact]
+        public void ExecImplementsIMultiThreadableTask()
+        {
+            Exec exec = new Exec();
+            exec.ShouldBeAssignableTo<IMultiThreadableTask>();
+        }
+
+        /// <summary>
+        /// Verify that Exec uses TaskEnvironment for working directory resolution
+        /// </summary>
+        [Fact]
+        public void ExecUsesTaskEnvironmentForWorkingDirectory()
+        {
+            using (var testEnv = TestEnvironment.Create(_output))
+            {
+                var workDir = testEnv.CreateFolder();
+                var testFile = Path.Combine(workDir.Path, "testfile.txt");
+                File.WriteAllText(testFile, "test content");
+
+                Exec exec = PrepareExec(NativeMethodsShared.IsWindows ? $"dir /b" : $"ls");
+                exec.WorkingDirectory = workDir.Path;
+                exec.ConsoleToMSBuild = true;
+
+                bool result = exec.Execute();
+
+                result.ShouldBeTrue();
+                ((MockEngine)exec.BuildEngine).AssertLogContains("testfile.txt");
             }
         }
     }
