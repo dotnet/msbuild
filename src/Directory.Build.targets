@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+
+    <UseVSTestRunner Condition="'$(IsTestProject)' == 'true'">true</UseVSTestRunner>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsUnitTestProject)' != 'true'">
@@ -153,12 +155,39 @@
     <FrozenSystemThreadingTasksExtensionsVersion>4.5.4</FrozenSystemThreadingTasksExtensionsVersion>
     <FrozenSystemBuffersVersion>4.5.1</FrozenSystemBuffersVersion>
     <FrozenSystemNumericsVectorsVersion>4.5.0</FrozenSystemNumericsVectorsVersion>
+    <FrozenSystemTextJsonVersion>4.5.0</FrozenSystemTextJsonVersion>
+    <FrozenSystemThreadingChannelsVersion>4.7.1</FrozenSystemThreadingChannelsVersion>
+
+    <!-- In 10.x runtime packages started referencing live maintenance-packages outputs so pin several of them to 9.x -->
+    <FrozenRuntimeVersionFor9>9.0.11</FrozenRuntimeVersionFor9>
+    <FrozenMicrosoftMicrosoftBclAsyncInterfacesVersion>$(FrozenRuntimeVersionFor9)</FrozenMicrosoftMicrosoftBclAsyncInterfacesVersion>
+    <FrozenSystemDiagnosticsDiagnosticSourceVersion>$(FrozenRuntimeVersionFor9)</FrozenSystemDiagnosticsDiagnosticSourceVersion>
+    <FrozenSystemCollectionsImmutableVersion>$(FrozenRuntimeVersionFor9)</FrozenSystemCollectionsImmutableVersion>
+    <FrozenSystemIOPipelinesVersion>$(FrozenRuntimeVersionFor9)</FrozenSystemIOPipelinesVersion>
+    <FrozenSystemReflectionMetadataVersion>$(FrozenRuntimeVersionFor9)</FrozenSystemReflectionMetadataVersion>
+    <FrozenSystemReflectionMetadataLoadContextVersion>$(FrozenRuntimeVersionFor9)</FrozenSystemReflectionMetadataLoadContextVersion>
+    <FrozenSystemFormatsNrbfVersion>$(FrozenRuntimeVersionFor9)</FrozenSystemFormatsNrbfVersion>
+    <FrozenSystemResourcesExtensionsVersion>$(FrozenRuntimeVersionFor9)</FrozenSystemResourcesExtensionsVersion>
+    <FrozenSystemTextEncodingsWebVersion>$(FrozenRuntimeVersionFor9)</FrozenSystemTextEncodingsWebVersion>
+    <FrozenSystemTextJsonVersion>$(FrozenRuntimeVersionFor9)</FrozenSystemTextJsonVersion>
+    <FrozenSystemThreadingChannelsVersion>$(FrozenRuntimeVersionFor9)</FrozenSystemThreadingChannelsVersion>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(UseFrozenMaintenancePackageVersions)' == 'true'">
+    <PackageDownload Include="Microsoft.Bcl.AsyncInterfaces" Version="[$(FrozenMicrosoftMicrosoftBclAsyncInterfacesVersion)]" />
     <PackageDownload Include="Microsoft.IO.Redist" Version="[$(FrozenMicrosoftIORedistVersion)]" />
+    <PackageDownload Include="System.Diagnostics.DiagnosticSource" Version="[$(FrozenSystemDiagnosticsDiagnosticSourceVersion)]" />
+    <PackageDownload Include="System.Collections.Immutable" Version="[$(FrozenSystemCollectionsImmutableVersion)]" />
+    <PackageDownload Include="System.IO.Pipelines" Version="[$(FrozenSystemIOPipelinesVersion)]" />
     <PackageDownload Include="System.Memory" Version="[$(FrozenSystemMemoryVersion)]" />
+    <PackageDownload Include="System.Formats.Nrbf" Version="[$(FrozenSystemFormatsNrbfVersion)]" />
+    <PackageDownload Include="System.Reflection.Metadata" Version="[$(FrozenSystemReflectionMetadataVersion)]" />
+    <PackageDownload Include="System.Reflection.MetadataLoadContext" Version="[$(FrozenSystemReflectionMetadataLoadContextVersion)]" />
+    <PackageDownload Include="System.Resources.Extensions" Version="[$(FrozenSystemResourcesExtensionsVersion)]" />
     <PackageDownload Include="System.Runtime.CompilerServices.Unsafe" Version="[$(FrozenSystemRuntimeCompilerServicesUnsafeVersion)]" />
+    <PackageDownload Include="System.Text.Encodings.Web" Version="[$(FrozenSystemTextEncodingsWebVersion)]" />
+    <PackageDownload Include="System.Text.Json" Version="[$(FrozenSystemTextJsonVersion)]" />
+    <PackageDownload Include="System.Threading.Channels" Version="[$(FrozenSystemThreadingChannelsVersion)]" />
     <PackageDownload Include="System.Threading.Tasks.Extensions" Version="[$(FrozenSystemThreadingTasksExtensionsVersion)]" />
     <PackageDownload Include="System.Buffers" Version="[$(FrozenSystemBuffersVersion)]" />
     <PackageDownload Include="System.Numerics.Vectors" Version="[$(FrozenSystemNumericsVectorsVersion)]" />
@@ -173,11 +202,38 @@
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'Microsoft.IO.Redist' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenMicrosoftIORedistVersion)'))" />
       <Reference Include="$(NuGetPackageRoot)microsoft.io.redist\$(FrozenMicrosoftIORedistVersion)\lib\net472\Microsoft.IO.Redist.dll" />
 
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'Microsoft.Bcl.AsyncInterfaces' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenMicrosoftMicrosoftBclAsyncInterfacesVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)microsoft.bcl.asyncinterfaces\$(FrozenMicrosoftMicrosoftBclAsyncInterfacesVersion)\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll" />
+
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Buffers' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemBuffersVersion)'))" />
       <Reference Include="$(NuGetPackageRoot)system.buffers\$(FrozenSystemBuffersVersion)\lib\net461\System.Buffers.dll" />
 
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Diagnostics.DiagnosticSource' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemDiagnosticsDiagnosticSourceVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.diagnostics.diagnosticsource\$(FrozenSystemDiagnosticsDiagnosticSourceVersion)\lib\net462\System.Diagnostics.DiagnosticSource.dll" />
+
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Collections.Immutable' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemCollectionsImmutableVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.collections.immutable\$(FrozenSystemCollectionsImmutableVersion)\lib\net462\System.Collections.Immutable.dll" />
+
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.IO.Pipelines' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemIOPipelinesVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.io.pipelines\$(FrozenSystemIOPipelinesVersion)\lib\net462\System.IO.Pipelines.dll" />
+
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Memory' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemMemoryVersion)'))" />
       <Reference Include="$(NuGetPackageRoot)system.memory\$(FrozenSystemMemoryVersion)\lib\net461\System.Memory.dll" />
+
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Reflection.Metadata' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemReflectionMetadataVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.reflection.metadata\$(FrozenSystemReflectionMetadataVersion)\lib\netstandard2.0\System.Reflection.Metadata.dll" />
+
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Reflection.MetadataLoadContext' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemReflectionMetadataLoadContextVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.reflection.metadataloadcontext\$(FrozenSystemReflectionMetadataLoadContextVersion)\lib\netstandard2.0\System.Reflection.MetadataLoadContext.dll" />
+
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Formats.Nrbf' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemFormatsNrbfVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.formats.nrbf\$(FrozenSystemFormatsNrbfVersion)\lib\netstandard2.0\System.Formats.Nrbf.dll" />
+
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Resources.Extensions' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemResourcesExtensionsVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.resources.extensions\$(FrozenSystemResourcesExtensionsVersion)\lib\netstandard2.0\System.Resources.Extensions.dll" />
+
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Text.Encodings.Web' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemTextEncodingsWebVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.text.encodings.web\$(FrozenSystemTextEncodingsWebVersion)\lib\net462\System.Text.Encodings.Web.dll" />
 
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Numerics.Vectors' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemNumericsVectorsVersion)'))" />
       <Reference Include="$(NuGetPackageRoot)system.numerics.vectors\$(FrozenSystemNumericsVectorsVersion)\lib\net46\System.Numerics.Vectors.dll" />
@@ -185,8 +241,14 @@
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Runtime.CompilerServices.Unsafe' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemRuntimeCompilerServicesUnsafeVersion)'))" />
       <Reference Include="$(NuGetPackageRoot)system.runtime.compilerservices.unsafe\$(FrozenSystemRuntimeCompilerServicesUnsafeVersion)\lib\net461\System.Runtime.CompilerServices.Unsafe.dll" />
 
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Threading.Channels' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemThreadingChannelsVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.threading.channels\$(FrozenSystemThreadingChannelsVersion)\lib\net462\System.Threading.Channels.dll" />
+
       <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Threading.Tasks.Extensions' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemThreadingTasksExtensionsVersion)'))" />
       <Reference Include="$(NuGetPackageRoot)system.threading.tasks.extensions\$(FrozenSystemThreadingTasksExtensionsVersion)\lib\net461\System.Threading.Tasks.Extensions.dll" />
+
+      <Reference Remove="@(Reference)" Condition="'%(Reference.NuGetPackageId)' == 'System.Text.Json' and $([MSBuild]::VersionGreaterThan(%(Reference.NuGetPackageVersion), '$(FrozenSystemTextJsonVersion)'))" />
+      <Reference Include="$(NuGetPackageRoot)system.text.json\$(FrozenSystemTextJsonVersion)\lib\net462\System.Text.Json.dll" />
     </ItemGroup>
   </Target>
 

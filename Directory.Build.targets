@@ -12,14 +12,20 @@
     <EnablePackageValidation>false</EnablePackageValidation>
   </PropertyGroup>
 
+  <!-- Add telemetry package to API compat search paths to suppress resolution warnings.
+       Microsoft.VisualStudio.Telemetry is referenced with PrivateAssets="all" in Framework,
+       so package validation can't resolve it when validating dependent packages. -->
+  <PropertyGroup Condition="'$(EnablePackageValidation)' == 'true'">
+    <ApiCompatAdditionalSearchPaths>$(ApiCompatAdditionalSearchPaths);$(NuGetPackageRoot)microsoft.visualstudio.telemetry\$(MicrosoftVisualStudioTelemetryVersion)\lib\$(FullFrameworkTFM)</ApiCompatAdditionalSearchPaths>
+  </PropertyGroup>
+
   <ItemGroup Condition=" '$(IsPackable)' == 'true' ">
     <None Include="$(ThirdPartyNotice)" Pack="true" PackagePath="notices" Visible="false" />
     <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
   <!-- Global Analyzer Config -->
-  <ItemGroup Condition="'$(ProjectIsDeprecated)' != 'true'">
-    <!-- Include Common.globalconfig for non-deprecated projects-->
+  <ItemGroup>
     <EditorConfigFiles Include="$(MSBuildThisFileDirectory)eng/Common.globalconfig" />
   </ItemGroup>
 

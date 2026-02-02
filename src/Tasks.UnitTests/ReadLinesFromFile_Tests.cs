@@ -31,6 +31,7 @@ namespace Microsoft.Build.UnitTests
                 // Append one line to the file.
                 var a = new WriteLinesToFile
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("Line1") }
                 };
@@ -39,6 +40,7 @@ namespace Microsoft.Build.UnitTests
                 // Read the line from the file.
                 var r = new ReadLinesFromFile
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file)
                 };
                 Assert.True(r.Execute());
@@ -78,6 +80,7 @@ namespace Microsoft.Build.UnitTests
                 // Append one line to the file.
                 var a = new WriteLinesToFile
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("Line1_%253b_") }
                 };
@@ -86,6 +89,7 @@ namespace Microsoft.Build.UnitTests
                 // Read the line from the file.
                 var r = new ReadLinesFromFile
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file)
                 };
                 Assert.True(r.Execute());
@@ -123,6 +127,7 @@ namespace Microsoft.Build.UnitTests
                 // Append one line to the file.
                 var a = new WriteLinesToFile
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("My special character is \u00C3") }
                 };
@@ -131,6 +136,7 @@ namespace Microsoft.Build.UnitTests
                 // Read the line from the file.
                 var r = new ReadLinesFromFile
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file)
                 };
                 Assert.True(r.Execute());
@@ -155,7 +161,8 @@ namespace Microsoft.Build.UnitTests
             // Read the line from the file.
             var r = new ReadLinesFromFile
             {
-                File = new TaskItem(file)
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    File = new TaskItem(file)
             };
             Assert.True(r.Execute());
 
@@ -175,6 +182,7 @@ namespace Microsoft.Build.UnitTests
                 // Append one line to the file.
                 var a = new WriteLinesToFile
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
                     Lines = new ITaskItem[]
                 {
@@ -191,6 +199,7 @@ namespace Microsoft.Build.UnitTests
                 // Read the line from the file.
                 var r = new ReadLinesFromFile
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file)
                 };
                 Assert.True(r.Execute());
@@ -225,6 +234,7 @@ namespace Microsoft.Build.UnitTests
                 // Append one line to the file.
                 var a = new WriteLinesToFile
                 {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("This is a new line") }
                 };
@@ -240,6 +250,7 @@ namespace Microsoft.Build.UnitTests
                 var r = new ReadLinesFromFile();
                 var mEngine = new MockEngine();
                 r.BuildEngine = mEngine;
+                r.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 r.File = new TaskItem(file);
                 Assert.False(r.Execute());
             }

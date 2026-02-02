@@ -18,6 +18,11 @@
         <target state="translated">MSB4249: Nejde sestavit projekt webu {0}. Kompilátor ASP.NET je k dispozici jen ve verzi MSBuildu pro .NET Framework.</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
+      <trans-unit id="AssemblyLoad_Warning">
+        <source>The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</source>
+        <target state="translated">Vlastní úloha {0} vyžadovala náhradní spuštění mimo proces, protože definice UsingTask neurčuje správný modul runtime a architekturu. Tím se sníží výkon buildu. Aktualizujte element UsingTask tak, aby explicitně určoval atributy Runtime a Architecture (např. Runtime="CLR4" Architecture="x64"), nebo použijte TaskFactory="TaskHostFactory".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
         <source>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</source>
         <target state="translated">MSB4002: Došlo k chybě při načítání atributů pro parametry úlohy {0}. {1}</target>
@@ -456,6 +461,11 @@
         <target state="translated">MSB4276: Výchozí překladač sady SDK nedokázal přeložit sadu SDK „{0}“, protože adresář „{1}“ neexistoval.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DotnetHostPathIsDirectory">
+        <source>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</source>
+        <target state="translated">MSB4280: Proměnná prostředí DOTNET_HOST_PATH je nastavena na adresář ({0}) místo na cestu ke spustitelnému souboru dotnet. To může způsobit chyby sestavení v úlohách, které tuto proměnnou používají, například v kompilátoru Roslyn. Buď nastavení proměnné zrušte, nebo ji aktualizujte tak, aby přímo odkazovala na spustitelný soubor dotnet (např. „C:\Program Files\dotnet\dotnet.exe“).</target>
+        <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
+      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: Došlo k pokusu o vytvoření více přepsání stejné úlohy: {0}</target>
@@ -483,6 +493,11 @@
         <source>Read environment variable "{0}"</source>
         <target state="translated">Číst proměnnou prostředí {0}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ErrorCopyingBinaryLog">
+        <source>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</source>
+        <target state="translated">MSB4279: Nepodařilo se zkopírovat binární protokol z {0} do {1}. {2}</target>
+        <note>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</note>
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
@@ -515,10 +530,25 @@
         <target state="translated">MSB3094: Položka {2} odkazuje na {0} položek a položka {3} odkazuje na {1} položek. Musí mít stejný počet položek.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="HostObjectFailure">
+        <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
+        <target state="translated">Úloze {0} se nepodařilo získat objekt hostitele. {1} Pokud chcete tento problém nahlásit, obraťte se na autora úlohy.</target>
+        <note>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</note>
+      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: Na pozici {1} podmínky {0} je neočekávaná mezera. Nezapomněli jste ji odebrat?</target>
         <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
+      <trans-unit id="IllFormedPropertySpaceInPropertyReference">
+        <source>MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</source>
+        <target state="new">MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</target>
+        <note>{StrBegin="MSB4281: "}</note>
+      </trans-unit>
+      <trans-unit id="IllFormedQuotedStringInCondition">
+        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
+        <target state="translated">MSB4101: Na pozici {1} v podmínce {0} byla očekávána pravá uvozovka.</target>
+        <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
@@ -640,11 +670,6 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">Metoda {0} se nedá zavolat s kolekcí, která obsahuje prázdné cílové názvy nebo názvy null.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OpenTelemetryLoadFailed">
-        <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="translated">Načítání knihoven telemetrie se nezdařilo s výjimkou: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
@@ -897,18 +922,13 @@ Chyby: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="translated">Sada SDK se pokusila nastavit proměnnou prostředí {0} na {1}, která ale již byla nastavena jako proměnná prostředí.</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
+        <target state="translated">Sada SDK se pokusila nastavit proměnnou prostředí {0} na {1}, která ale již byla nastavena na „{2}“ jako proměnná prostředí.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="translated">Sada SDK se pokusila nastavit proměnnou prostředí {0} na {1}, která ale už byla nastavena jinou sadou SDK.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SdkEnvironmentVariableSet">
-        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="translated">Sada SDK se pokusila nastavit proměnnou prostředí {0} na {1}.</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
+        <target state="translated">Sada SDK se pokusila nastavit proměnnou prostředí „{0}“ na „{1}“, která ale už byla nastavena jinou sadou SDK na „{2}“.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -1515,11 +1535,6 @@ Chyby: {3}</target>
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
         <target state="translated">MSB4110: Na pozici {1} v podmínce {0} byla očekávána vlastnost. Nezapomněli jste zadat levou závorku za znak $? Chcete-li použít literál $, použijte místo toho znak %24.</target>
         <note>{StrBegin="MSB4110: "}</note>
-      </trans-unit>
-      <trans-unit id="IllFormedQuotedStringInCondition">
-        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
-        <target state="translated">MSB4101: Na pozici {1} v podmínce {0} byla očekávána pravá uvozovka.</target>
-        <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>

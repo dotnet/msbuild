@@ -1576,16 +1576,6 @@
         <target state="translated">MSB3191: Nelze vytvořit adresář {0}. {1}</target>
         <note>{StrBegin="MSB3191: "}</note>
       </trans-unit>
-      <trans-unit id="Message.InvalidImportance">
-        <source>MSB3511: "{0}" is an invalid value for the "Importance" parameter. Valid values are: High, Normal and Low.</source>
-        <target state="translated">MSB3511: {0} je neplatná hodnota parametru Importance. Platné hodnoty: High, Normal a Low.</target>
-        <note>{StrBegin="MSB3511: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.
-            The importance enumeration is: High, Normal and Low.  Specifying any other importance will result in this message being shown
-            LOCALIZATION: "Importance" should not be localized.
-            High should not be localized.
-            Normal should not be localized.
-            Low should not be localized.</note>
-      </trans-unit>
       <trans-unit id="Move.CreatesDirectory">
         <source>Creating directory "{0}".</source>
         <target state="translated">Probíhá vytváření adresáře {0}.</target>
@@ -2852,6 +2842,11 @@
         <target state="translated">MSB3715: Typ „{0}“ ne nenašel.</target>
         <note>{StrBegin="MSB3715: "}</note>
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.ErrorDeletingTempFile">
+        <source>Could not delete temporary file "{0}". Error: {1}</source>
+        <target state="translated">Dočasný soubor {0} nelze odstranit. Chyba: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1} {2}</source>
         <target state="translated">MSB3491: Nelze zapsat řádky do souboru {0}. {1} {2}</target>
@@ -2882,9 +2877,24 @@
         <target state="translated">MSB3762: Úloze nebyly předány žádné odkazy. Je vyžadován odkaz alespoň na knihovny mscorlib a Windows.Foundation.</target>
         <note>{StrBegin="MSB3762: "}</note>
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.ErrorReadingFileTransactional">
+        <source>MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</source>
+        <target state="translated">MSB3494: Nelze přečíst existující soubor {0} pro připojení obsahu. Chyba: {1}</target>
+        <note>{StrBegin="MSB3494: "}</note>
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.Retry">
+        <source>Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</source>
+        <target state="translated">Probíhá opakování operace se souborem {0} (pokus o {1}/{2}). Důvod: {3}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
         <source>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</source>
         <target state="translated">Atribut „WriteOnlyWhenDifferent“ pro „{0}“ se projeví jenom v případě, že overwrite="true"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.UsingTransactionalMode">
+        <source>Using transactional mode to write to file "{0}".</source>
+        <target state="translated">Pro zápis do souboru {0} se používá transakční režim.</target>
         <note />
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">

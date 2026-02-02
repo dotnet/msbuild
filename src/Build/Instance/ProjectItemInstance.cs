@@ -554,6 +554,8 @@ namespace Microsoft.Build.Execution
 
         void IMetadataContainer.ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata) => _taskItem.ImportMetadata(metadata);
 
+        void IMetadataContainer.RemoveMetadataRange(IEnumerable<string> metadataNames) => _taskItem.RemoveMetadataRange(metadataNames);
+
         #region IMetadataTable Members
 
         /// <summary>
@@ -741,7 +743,8 @@ namespace Microsoft.Build.Execution
             if (itemDefinitions == null || !useItemDefinitionsWithoutModification)
             {
                 // TaskItems don't have an item type. So for their benefit, we have to lookup and add the regular item definition.
-                inheritedItemDefinitions = (itemDefinitions == null) ? null : new List<ProjectItemDefinitionInstance>(itemDefinitions);
+                inheritedItemDefinitions = (itemDefinitions == null) ? null : new List<ProjectItemDefinitionInstance>(itemDefinitions.Count + 1);
+                ((List<ProjectItemDefinitionInstance>)inheritedItemDefinitions)?.AddRange(itemDefinitions);
 
                 ProjectItemDefinitionInstance itemDefinition;
                 if (projectToUse.ItemDefinitions.TryGetValue(itemTypeToUse, out itemDefinition))
@@ -863,8 +866,8 @@ namespace Microsoft.Build.Execution
                 ErrorUtilities.VerifyThrowArgumentLength(includeEscaped);
                 ErrorUtilities.VerifyThrowArgumentLength(includeBeforeWildcardExpansionEscaped);
 
-                _includeEscaped = FileUtilities.FixFilePath(includeEscaped);
-                _includeBeforeWildcardExpansionEscaped = FileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped);
+                _includeEscaped = FrameworkFileUtilities.FixFilePath(includeEscaped);
+                _includeBeforeWildcardExpansionEscaped = FrameworkFileUtilities.FixFilePath(includeBeforeWildcardExpansionEscaped);
                 _directMetadata = (directMetadata == null || directMetadata.Count == 0) ? null : directMetadata; // If the metadata was all removed, toss the dictionary
                 _itemDefinitions = itemDefinitions;
                 _projectDirectory = projectDirectory;
@@ -1138,6 +1141,20 @@ namespace Microsoft.Build.Execution
             /// <param name="metadata">The metadata to set.</param>
             public void ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata) =>
                 ImportMetadata(metadata, validateKeys: true);
+
+            /// <summary>
+            /// Removes any metadata matching the given names.
+            /// </summary>
+            /// <param name="metadataNames">The metadata names to remove.</param>
+            public void RemoveMetadataRange(IEnumerable<string> metadataNames)
+            {
+                ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
+
+                if (DirectMetadataCount > 0)
+                {
+                    _directMetadata = DirectMetadata.RemoveRange(metadataNames);
+                }
+            }
 
             /// <summary>
             /// Sets the given metadata.

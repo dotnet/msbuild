@@ -100,6 +100,14 @@ Expressed and collected via [BuildTelemetry type](https://github.com/dotnet/msbu
 | >= 9.0.100   | Indication of enablement of BuildCheck feature. |
 | >= 9.0.100   | Indication of Smart App Control being in evaluation mode on machine executing the build. |
 | >= 10.0.100  | Indication if the build was run in multithreaded mode. |
+| >= 10.0.200  | Primary failure category when BuildSuccess = false (one of: "Compiler", "MSBuildEngine", "Tasks", "SDK", "NuGet", "BuildCheck", "Other"). |
+| >= 10.0.200  | Count of compiler errors encountered during the build. |
+| >= 10.0.200  | Count of MSBuild engine errors encountered during the build. |
+| >= 10.0.200  | Count of task errors encountered during the build. |
+| >= 10.0.200  | Count of SDK errors encountered during the build. |
+| >= 10.0.200  | Count of NuGet errors encountered during the build. |
+| >= 10.0.200  | Count of BuildCheck errors encountered during the build. |
+| >= 10.0.200  | Count of other errors encountered during the build. |
 
 ### Project Build
 

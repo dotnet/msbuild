@@ -502,11 +502,7 @@ namespace Microsoft.Build.Evaluation
             runtime = XMakeAttributes.GetExplicitMSBuildRuntime(runtime);
             architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(architecture);
 
-            Dictionary<string, string> parameters = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                { XMakeAttributes.runtime, runtime },
-                { XMakeAttributes.architecture, architecture },
-            };
+            TaskHostParameters parameters = new(runtime, architecture);
 
             HandshakeOptions desiredContext = CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: parameters);
 
@@ -529,7 +525,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>The specified path with a trailing slash.</returns>
         internal static string EnsureTrailingSlash(string path)
         {
-            return FileUtilities.EnsureTrailingSlash(path);
+            return FrameworkFileUtilities.EnsureTrailingSlash(path);
         }
 
         /// <summary>

@@ -3,10 +3,16 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Framework;
+
+#if FEATURE_MSIOREDIST
+using File = Microsoft.IO.File;
+using Path = Microsoft.IO.Path;
+#else
+using System.IO;
+#endif
 
 namespace Microsoft.Build.Shared
 {
@@ -27,10 +33,6 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class TaskFactoryUtilities
     {
-        /// <summary>
-        /// The sub-path within the temporary directory where compiled inline tasks are located.
-        /// </summary>
-        public const string InlineTaskTempDllSubPath = nameof(InlineTaskTempDllSubPath);
         public const string InlineTaskSuffix = "inline_task.dll";
         public const string InlineTaskLoadManifestSuffix = ".loadmanifest";
 
@@ -57,30 +59,13 @@ namespace Microsoft.Build.Shared
             public bool IsValid => string.IsNullOrEmpty(AssemblyPath) || FileUtilities.FileExistsNoThrow(AssemblyPath);
         }
 
-
-        /// <summary>
-        /// Creates a process-specific temporary directory for inline task assemblies.
-        /// </summary>
-        /// <returns>The path to the created temporary directory.</returns>
-        public static string CreateProcessSpecificTemporaryTaskDirectory()
-        {
-            string processSpecificInlineTaskDir = Path.Combine(
-                FileUtilities.TempFileDirectory,
-                InlineTaskTempDllSubPath,
-                $"pid_{EnvironmentUtilities.CurrentProcessId}");
-
-            Directory.CreateDirectory(processSpecificInlineTaskDir);
-            return processSpecificInlineTaskDir;
-        }
-
         /// <summary>
         /// Gets a temporary file path for an inline task assembly in the process-specific directory.
         /// </summary>
         /// <returns>The full path to the temporary file.</returns>
         public static string GetTemporaryTaskAssemblyPath()
         {
-            string taskDir = CreateProcessSpecificTemporaryTaskDirectory();
-            return FileUtilities.GetTemporaryFile(taskDir, fileName: null, extension: "inline_task.dll", createFile: false);
+            return FileUtilities.GetTemporaryFile(directory: null, fileName: null, extension: "inline_task.dll", createFile: false);
         }
 
         /// <summary>
@@ -157,9 +142,9 @@ namespace Microsoft.Build.Shared
                 if (!string.IsNullOrEmpty(assemblyPath) && FileSystems.Default.FileExists(assemblyPath))
                 {
                     string? directory = Path.GetDirectoryName(assemblyPath);
-                    if (!string.IsNullOrEmpty(directory) && seenDirectories.Add(directory))
+                    if (!string.IsNullOrEmpty(directory) && seenDirectories.Add(directory!))
                     {
-                        directories.Add(directory);
+                        directories.Add(directory!);
                     }
                 }
             }
@@ -257,28 +242,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Cleans up the current process's inline task directory by deleting the temporary directory
-        /// and its contents used for inline task assemblies for this specific process.
-        /// This should be called at the end of a build to prevent dangling DLL files.
-        /// </summary>
-        /// <remarks>
-        /// On Windows platforms, this may fail to delete files that are still locked by the current process.
-        /// However, it will clean up any files that are no longer in use.
-        /// </remarks>
-        public static void CleanCurrentProcessInlineTaskDirectory()
-        {
-            string processSpecificInlineTaskDir = Path.Combine(
-                FileUtilities.TempFileDirectory,
-                InlineTaskTempDllSubPath,
-                $"pid_{EnvironmentUtilities.CurrentProcessId}");
-                
-            if (FileSystems.Default.DirectoryExists(processSpecificInlineTaskDir))
-            {
-                FileUtilities.DeleteDirectoryNoThrow(processSpecificInlineTaskDir, recursive: true);
-            }
-        }
-
-        /// <summary>
         /// Attempts to load an assembly by searching in the specified directories.
         /// </summary>
         /// <param name="directories">The directories to search in.</param>
@@ -309,6 +272,33 @@ namespace Microsoft.Build.Shared
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Resolves a potentially relative source code file path for inline task factories.
+        /// In multithreaded mode (/mt), relative paths are resolved relative to the project file directory
+        /// rather than the current working directory. In other modes, the path is returned unchanged.
+        /// </summary>
+        /// <param name="path">The source code file path to resolve (may be relative or absolute).</param>
+        /// <param name="isMultiThreadedBuild">Whether the build is running in multithreaded mode.</param>
+        /// <param name="projectDirectory">The directory of the project file.</param>
+        /// <returns>The resolved absolute path in multithreaded mode, or the original path otherwise.</returns>
+        /// <remarks>
+        /// This method only modifies path resolution in multithreaded builds to maintain
+        /// backward compatibility with existing multi-process build behavior.
+        /// </remarks>
+        public static string ResolveTaskSourceCodePath(string path, bool isMultiThreadedBuild, string projectDirectory)
+        {
+// Path.IsPathFullyQualified is not available in .NET Standard 2.0
+// in .NET Framework it's provided by package and in .NET it's built-in
+#if NETFRAMEWORK || NET
+            if (!isMultiThreadedBuild || Path.IsPathFullyQualified(path))
+            {
+                return path;
+            }
+#endif
+
+            return Path.Combine(projectDirectory, path);
         }
     }
 }

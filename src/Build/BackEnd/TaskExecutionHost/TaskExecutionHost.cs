@@ -109,6 +109,11 @@ namespace Microsoft.Build.BackEnd
         private string _taskName;
 
         /// <summary>
+        /// The project file path that runs the task.
+        /// </summary>
+        private string _projectFile;
+
+        /// <summary>
         /// The XML location of the task element.
         /// </summary>
         private ElementLocation _taskLocation;
@@ -158,6 +163,11 @@ namespace Microsoft.Build.BackEnd
         private readonly Dictionary<string, TaskFactoryWrapper> _intrinsicTasks = new Dictionary<string, TaskFactoryWrapper>(StringComparer.OrdinalIgnoreCase);
 
         private readonly PropertyTrackingSetting _propertyTrackingSettings;
+
+        /// <summary>
+        /// The task environment to be used by IMultiThreadableTask instances.
+        /// </summary>
+        internal TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// Constructor
@@ -221,6 +231,10 @@ namespace Microsoft.Build.BackEnd
             set => _taskFactoryWrapper = value;
         }
 
+#if !NET35
+        private HostServices _hostServices;
+#endif
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// App domain configuration.
@@ -247,16 +261,30 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize to run a specific task.
         /// </summary>
-        public void InitializeForTask(IBuildEngine2 buildEngine, TargetLoggingContext loggingContext, ProjectInstance projectInstance, string taskName, ElementLocation taskLocation, ITaskHost taskHost, bool continueOnError,
+        public void InitializeForTask(
+            IBuildEngine2 buildEngine,
+            TargetLoggingContext loggingContext,
+            ProjectInstance projectInstance,
+            string taskName,
+            ElementLocation taskLocation,
+            ITaskHost taskHost,
+            bool continueOnError,
+            string projectFile,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-            bool isOutOfProc, CancellationToken cancellationToken)
+#if !NET35
+            HostServices hostServices,
+#endif
+            bool isOutOfProc,
+            CancellationToken cancellationToken,
+            TaskEnvironment taskEnvironment)
         {
             _buildEngine = buildEngine;
             _projectInstance = projectInstance;
             _targetLoggingContext = loggingContext;
             _taskName = taskName;
+            _projectFile = projectFile;
             _taskLocation = taskLocation;
             _cancellationTokenRegistration = cancellationToken.Register(Cancel);
             _taskHost = taskHost;
@@ -264,14 +292,18 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup = appDomainSetup;
 #endif
+#if !NET35
+            _hostServices = hostServices;
+#endif
             IsOutOfProc = isOutOfProc;
+            TaskEnvironment = taskEnvironment;
         }
 
         /// <summary>
         /// Ask the task host to find its task in the registry and get it ready for initializing the batch
         /// </summary>
         /// <returns>The task requirements and task factory wrapper if the task is found, (null, null) otherwise.</returns>
-        public (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) FindTask(IDictionary<string, string> taskIdentityParameters)
+        public (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) FindTask(in TaskHostParameters taskIdentityParameters)
         {
             _taskFactoryWrapper ??= FindTaskInRegistry(taskIdentityParameters);
 
@@ -302,7 +334,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initialize to run a specific batch of the current task.
         /// </summary>
-        public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, IDictionary<string, string> taskIdentityParameters, int scheduledNodeId)
+        public bool InitializeForBatch(TaskLoggingContext loggingContext, ItemBucket batchBucket, in TaskHostParameters taskIdentityParameters, int scheduledNodeId)
         {
             ErrorUtilities.VerifyThrowArgumentNull(loggingContext);
 
@@ -367,6 +399,11 @@ namespace Microsoft.Build.BackEnd
 
             TaskInstance.BuildEngine = _buildEngine;
             TaskInstance.HostObject = _taskHost;
+            
+            if (TaskInstance is IMultiThreadableTask multiThreadableTask)
+            {
+                multiThreadableTask.TaskEnvironment = TaskEnvironment;
+            }
 
             return true;
 
@@ -425,7 +462,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            if (this.TaskInstance is IIncrementalTask incrementalTask)
+            if (TaskInstance is IIncrementalTask incrementalTask)
             {
                 incrementalTask.FailIfNotIncremental = _buildComponentHost.BuildParameters.Question;
             }
@@ -614,6 +651,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
+                Debug.Assert(TaskInstance is not IMultiThreadableTask multiThreadableTask || multiThreadableTask.TaskEnvironment != null, "task environment missing for multi-threadable task");
                 taskReturnValue = TaskInstance.Execute();
             }
             finally
@@ -886,7 +924,7 @@ namespace Microsoft.Build.BackEnd
         /// If the set of task identity parameters are defined, only tasks that match that identity are chosen.
         /// </summary>
         /// <returns>The Type of the task, or null if it was not found.</returns>
-        private TaskFactoryWrapper FindTaskInRegistry(IDictionary<string, string> taskIdentityParameters)
+        private TaskFactoryWrapper FindTaskInRegistry(in TaskHostParameters taskIdentityParameters)
         {
             if (!_intrinsicTasks.TryGetValue(_taskName, out TaskFactoryWrapper returnClass))
             {
@@ -897,11 +935,11 @@ namespace Microsoft.Build.BackEnd
 
                     if (returnClass == null)
                     {
-                        returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, null, true /* exact match */, _targetLoggingContext, _taskLocation, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false);
+                        returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, TaskHostParameters.Empty, true /* exact match */, _targetLoggingContext, _taskLocation, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false);
 
                         if (returnClass == null)
                         {
-                            returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, null, false /* fuzzy match */, _targetLoggingContext, _taskLocation, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false);
+                            returnClass = _projectInstance.TaskRegistry.GetRegisteredTask(_taskName, null, TaskHostParameters.Empty, false /* fuzzy match */, _targetLoggingContext, _taskLocation, _buildComponentHost?.BuildParameters?.MultiThreaded ?? false);
 
                             if (returnClass == null)
                             {
@@ -915,26 +953,14 @@ namespace Microsoft.Build.BackEnd
                             }
                         }
 
-                        string usingTaskRuntime = null;
-                        string usingTaskArchitecture = null;
-
-                        if (returnClass.FactoryIdentityParameters != null)
-                        {
-                            returnClass.FactoryIdentityParameters.TryGetValue(XMakeAttributes.runtime, out usingTaskRuntime);
-                            returnClass.FactoryIdentityParameters.TryGetValue(XMakeAttributes.architecture, out usingTaskArchitecture);
-                        }
-
-                        taskIdentityParameters.TryGetValue(XMakeAttributes.runtime, out string taskRuntime);
-                        taskIdentityParameters.TryGetValue(XMakeAttributes.architecture, out string taskArchitecture);
-
                         _targetLoggingContext.LogError(
                                 new BuildEventFileInfo(_taskLocation),
                                 "TaskExistsButHasMismatchedIdentityError",
                                 _taskName,
-                                usingTaskRuntime ?? XMakeAttributes.MSBuildRuntimeValues.any,
-                                usingTaskArchitecture ?? XMakeAttributes.MSBuildArchitectureValues.any,
-                                taskRuntime ?? XMakeAttributes.MSBuildRuntimeValues.any,
-                                taskArchitecture ?? XMakeAttributes.MSBuildArchitectureValues.any);
+                                returnClass.FactoryIdentityParameters.Runtime ?? XMakeAttributes.MSBuildRuntimeValues.any,
+                                returnClass.FactoryIdentityParameters.Architecture ?? XMakeAttributes.MSBuildArchitectureValues.any,
+                                taskIdentityParameters.Runtime ?? XMakeAttributes.MSBuildRuntimeValues.any,
+                                taskIdentityParameters.Architecture ?? XMakeAttributes.MSBuildArchitectureValues.any);
 
                         // if we've logged this error, even though we've found something, we want to act like we didn't.
                         return null;
@@ -945,13 +971,13 @@ namespace Microsoft.Build.BackEnd
                 if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))
                 {
                     Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).GetTypeInfo().Assembly;
-                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, null);
+                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, TaskHostParameters.Empty);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
                 else if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.CallTarget", StringComparison.OrdinalIgnoreCase))
                 {
                     Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).GetTypeInfo().Assembly;
-                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, null);
+                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, TaskHostParameters.Empty);
                     _intrinsicTasks[_taskName] = returnClass;
                 }
             }
@@ -962,7 +988,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates the task.
         /// </summary>
-        private ITask InstantiateTask(int scheduledNodeId, IDictionary<string, string> taskIdentityParameters)
+        private ITask InstantiateTask(int scheduledNodeId, in TaskHostParameters taskIdentityParameters)
         {
             ITask task = null;
 
@@ -970,13 +996,22 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_taskFactoryWrapper.TaskFactory is AssemblyTaskFactory assemblyTaskFactory)
                 {
-                    task = assemblyTaskFactory.CreateTaskInstance(_taskLocation, _taskLoggingContext, _buildComponentHost, taskIdentityParameters,
+                    task = assemblyTaskFactory.CreateTaskInstance(
+                        _taskLocation,
+                        _taskLoggingContext,
+                        _buildComponentHost,
+                        taskIdentityParameters,
+                        _projectFile,
+#if !NET35
+                        _hostServices,
+#endif
 #if FEATURE_APPDOMAIN
                         AppDomainSetup,
 #endif
                         IsOutOfProc,
                         scheduledNodeId,
-                        ProjectInstance.GetProperty);
+                        ProjectInstance.GetProperty,
+                        TaskEnvironment);
                 }
                 else
                 {
@@ -1006,12 +1041,21 @@ namespace Microsoft.Build.BackEnd
                             task = CreateTaskHostTaskForOutOfProcFactory(taskIdentityParameters, taskFactoryEngineContext, outOfProcTaskFactory, scheduledNodeId);
                             isTaskHost = true;
                         }
+
+                        // Normal in-process execution for custom task factories
                         else
                         {
-                            // Normal in-process execution for custom task factories
-                            task = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
-                                taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityParameters) :
-                                _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
+                            // ITaskFactory2 is here for compat reasons
+                            if (_taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2)
+                            {
+                                task = taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityParameters.ToDictionary());
+                            }
+                            else
+                            {
+                                task = _taskFactoryWrapper.TaskFactory is ITaskFactory3 taskFactory3
+                                    ? taskFactory3.CreateTask(taskFactoryEngineContext, taskIdentityParameters)
+                                    : _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
+                            }
                         }
 
                         // Track telemetry for non-AssemblyTaskFactory task factories
@@ -1743,16 +1787,24 @@ namespace Microsoft.Build.BackEnd
         /// <param name="scheduledNodeId">Node for which the task host should be called</param>
         /// <returns>A TaskHostTask that will execute the inner task out of process, or <code>null</code> if task creation fails.</returns>
         private ITask CreateTaskHostTaskForOutOfProcFactory(
-            IDictionary<string, string> taskIdentityParameters,
+            in TaskHostParameters taskIdentityParameters,
             TaskFactoryEngineContext taskFactoryEngineContext,
             IOutOfProcTaskFactory outOfProcTaskFactory,
             int scheduledNodeId)
         {
             ITask innerTask;
 
-            innerTask = _taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2 ?
-                taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityParameters) :
-                _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
+            // ITaskFactory2 is used for compatibility reasons
+            if (_taskFactoryWrapper.TaskFactory is ITaskFactory2 taskFactory2)
+            {
+                innerTask = taskFactory2.CreateTask(taskFactoryEngineContext, taskIdentityParameters.ToDictionary());
+            }
+            else
+            {
+                innerTask = _taskFactoryWrapper.TaskFactory is ITaskFactory3 taskFactory3
+                    ? taskFactory3.CreateTask(taskFactoryEngineContext, taskIdentityParameters)
+                    : _taskFactoryWrapper.TaskFactory.CreateTask(taskFactoryEngineContext);
+            }
 
             if (innerTask == null)
             {
@@ -1778,19 +1830,12 @@ namespace Microsoft.Build.BackEnd
                 typeof(ITaskItem));
 
             // Default task host parameters for out-of-process execution for inline tasks
-            Dictionary<string, string> taskHostParameters = new Dictionary<string, string>
-            {
-                [XMakeAttributes.runtime] = XMakeAttributes.GetCurrentMSBuildRuntime(),
-                [XMakeAttributes.architecture] = XMakeAttributes.GetCurrentMSBuildArchitecture()
-            };
+            TaskHostParameters taskHostParameters = new(XMakeAttributes.GetCurrentMSBuildRuntime(), XMakeAttributes.GetCurrentMSBuildArchitecture());
 
             // Merge with any existing task identity parameters
-            if (taskIdentityParameters?.Count > 0)
+            if (!taskIdentityParameters.IsEmpty)
             {
-                foreach (var kvp in taskIdentityParameters.Where(kvp => !taskHostParameters.ContainsKey(kvp.Key)))
-                {
-                    taskHostParameters[kvp.Key] = kvp.Value;
-                }
+                taskHostParameters = TaskHostParameters.MergeTaskHostParameters(taskHostParameters, taskIdentityParameters);
             }
 
             // Clean up the original task since we're going to wrap it
@@ -1802,11 +1847,16 @@ namespace Microsoft.Build.BackEnd
                 _buildComponentHost,
                 taskHostParameters,
                 taskLoadedType,
-                true,
+                useSidecarTaskHost: true,
+                _projectFile,
 #if FEATURE_APPDOMAIN
                 AppDomainSetup,
 #endif
-                scheduledNodeId);
+#if !NET35
+                _hostServices,
+#endif
+                scheduledNodeId,
+                TaskEnvironment);
         }
     }
 }

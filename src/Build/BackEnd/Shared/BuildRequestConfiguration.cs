@@ -14,6 +14,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -300,7 +301,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (!_isTraversalProject.HasValue)
                 {
-#if NET471_OR_GREATER
+#if FEATURE_MSIOREDIST
                     if (MemoryExtensions.Equals(Microsoft.IO.Path.GetFileName(ProjectFullPath.AsSpan()), "dirs.proj".AsSpan(), StringComparison.OrdinalIgnoreCase))
 #else
                     if (MemoryExtensions.Equals(Path.GetFileName(ProjectFullPath.AsSpan()), "dirs.proj", StringComparison.OrdinalIgnoreCase))
@@ -939,7 +940,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _transferredProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.Translate(ref _resultsNodeId);
             translator.Translate(ref _savedCurrentDirectory);
-            translator.TranslateDictionary(ref _savedEnvironmentVariables, StringComparer.OrdinalIgnoreCase);
+            translator.TranslateDictionary(ref _savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer);
 
             // if the  entire state is translated, then the transferred state represents the full evaluation data
             if (translator.Mode == TranslationDirection.ReadFromStream && _transferredState?.TranslateEntireState == true)

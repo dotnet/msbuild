@@ -24,6 +24,15 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 
 ## Current Rotation of Change Waves
 
+### 18.5
+- [Throw MSB4281 error for property references and property function calls with leading or trailing whitespace (e.g., `$( Foo )`, `$( Foo.StartsWith('Bar') )`).](https://github.com/dotnet/msbuild/pull/13076)
+
+### 18.4
+- [Start throwing on null or empty paths in MultiProcess and MultiThreaded Task Environment Drivers.](https://github.com/dotnet/msbuild/pull/12914)
+
+### 18.3
+- [Replace Transactional property with ChangeWave control, implement atomic file replacement with retry logic, and update tests.](https://github.com/dotnet/msbuild/pull/12627)
+
 ### 17.14
 - ~[.SLNX support - use the new parser for .sln and .slnx](https://github.com/dotnet/msbuild/pull/10836)~ reverted after compat problems discovered
 - ~~[Support custom culture in RAR](https://github.com/dotnet/msbuild/pull/11000)~~ - see [11607](https://github.com/dotnet/msbuild/pull/11607) for details

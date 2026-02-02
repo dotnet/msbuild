@@ -323,7 +323,7 @@ namespace Microsoft.Build.Utilities
                 // our "starts with" comparison doesn't pick up incomplete matches, such as C:\Foo matching C:\FooFile.txt
                 foreach (string excludePath in excludedInputPaths)
                 {
-                    string fullexcludePath = FileUtilities.EnsureTrailingSlash(FileUtilities.NormalizePath(excludePath)).ToUpperInvariant();
+                    string fullexcludePath = FrameworkFileUtilities.EnsureTrailingSlash(FileUtilities.NormalizePath(excludePath)).ToUpperInvariant();
                     _excludedInputPaths.Add(fullexcludePath);
                 }
             }
