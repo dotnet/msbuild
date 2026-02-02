@@ -710,7 +710,7 @@ namespace Microsoft.Build.BackEnd
                             bool hasExtendedHeader = NodePacketTypeExtensions.HasExtendedHeader(rawType);
                             NodePacketType packetType = hasExtendedHeader ? NodePacketTypeExtensions.GetNodePacketType(rawType) : (NodePacketType)rawType;
 
-                            byte? parentVersion = null;
+                            byte parentVersion = 0;
                             if (hasExtendedHeader)
                             {
                                 parentVersion = NodePacketTypeExtensions.ReadVersion(localReadPipe);
@@ -721,8 +721,8 @@ namespace Microsoft.Build.BackEnd
                                 ITranslator readTranslator = BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer);
 
                                 // parent sends a packet version that is already negotiated during handshake.
-                                // null = no extended header (CLR2/CLR4 Framework task hosts)
-                                // 2+ = extended header present (.NET task host)
+                                // For Framework task hosts (CLR2/CLR4) without extended headers, defaults to 0.
+                                // For .NET task hosts, read from extended header (>= 1).
                                 readTranslator.NegotiatedPacketVersion = parentVersion;
                                 _packetFactory.DeserializeAndRoutePacket(0, packetType, readTranslator);
                             }
