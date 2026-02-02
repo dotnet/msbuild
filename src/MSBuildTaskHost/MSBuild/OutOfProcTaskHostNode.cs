@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -975,7 +975,7 @@ namespace Microsoft.Build.CommandLine
 #pragma warning disable SYSLIB0050
                 // Types which are not serializable and are not IExtendedBuildEventArgs as
                 // those always implement custom serialization by WriteToStream and CreateFromStream.
-                if (!e.GetType().GetTypeInfo().IsSerializable && e is not IExtendedBuildEventArgs)
+                if (!e.GetType().GetTypeInfo().IsSerializable)
 #pragma warning disable SYSLIB0050
                 {
                     // log a warning and bail.  This will end up re-calling SendBuildEvent, but we know for a fact

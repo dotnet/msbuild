@@ -71,7 +71,6 @@
     <Compile Include="Framework\ChangeWaves.cs" />
     <Compile Include="Framework\ErrorUtilities.cs" />
     <Compile Include="Framework\IConstrainedEqualityComparer.cs" />
-    <Compile Include="Framework\IExtendedBuildEventArgs.cs" />
     <Compile Include="Framework\ImmutableDictionaryExtensions.cs" />
     <Compile Include="Framework\InternalErrorException.cs" />
     <Compile Include="Framework\InterningReadTranslator.cs" />
