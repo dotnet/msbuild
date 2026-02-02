@@ -1557,7 +1557,7 @@ namespace Microsoft.Build.Construction
                 AddTasksToCopyAllDependenciesIntoBinDir(newTarget, project, referenceItemName.ToString(), conditionDescribingValidConfigurations.ToString());
 
                 // Add a call to the AspNetCompiler task, conditioned on having a valid Configuration.
-                AddTaskForAspNetCompiler(newTarget, project, conditionDescribingValidConfigurations.ToString(), targetName);
+                AddTaskForAspNetCompiler(newTarget, project, conditionDescribingValidConfigurations.ToString());
 
                 // Add a call to the <Message> task, conditioned on having an *invalid* Configuration.  The
                 // message says that we're skipping the Venus project because it's either not enabled
@@ -1577,8 +1577,7 @@ namespace Microsoft.Build.Construction
         private void AddTaskForAspNetCompiler(
             ProjectTargetInstance target,
             ProjectInSolution project,
-            string conditionDescribingValidConfigurations,
-            string targetName)
+            string conditionDescribingValidConfigurations)
         {
             // Add a call to the AspNetCompiler task, conditioned on having a valid Configuration.
             ProjectTaskInstance newTask = target.AddTask("AspNetCompiler", conditionDescribingValidConfigurations, null);
@@ -1588,7 +1587,6 @@ namespace Microsoft.Build.Construction
             newTask.SetParameter("Force", "$(" + GenerateSafePropertyName(project, "AspNetForce") + ")");
             newTask.SetParameter("Updateable", "$(" + GenerateSafePropertyName(project, "AspNetUpdateable") + ")");
             newTask.SetParameter("Debug", "$(" + GenerateSafePropertyName(project, "AspNetDebug") + ")");
-            newTask.SetParameter("Clean", String.Equals(targetName, "Rebuild", StringComparison.OrdinalIgnoreCase) ? "true" : "false");
             newTask.SetParameter("KeyFile", "$(" + GenerateSafePropertyName(project, "AspNetKeyFile") + ")");
             newTask.SetParameter("KeyContainer", "$(" + GenerateSafePropertyName(project, "AspNetKeyContainer") + ")");
             newTask.SetParameter("DelaySign", "$(" + GenerateSafePropertyName(project, "AspNetDelaySign") + ")");
