@@ -795,11 +795,9 @@ namespace Microsoft.Build.CommandLine
                     // It means we're already in the process of shutting down - Wait for the taskCompleteEvent to be set instead.
                     if (_isTaskExecuting)
                     {
-#if FEATURE_THREAD_ABORT
                         // The thread will be terminated crudely so our environment may be trashed but it's ok since we are
                         // shutting down ASAP.
                         _taskRunnerThread.Abort();
-#endif
                     }
                 }
             }

@@ -76,7 +76,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
     <FeatureAppDomain>true</FeatureAppDomain>
     <FeatureSystemConfiguration>true</FeatureSystemConfiguration>
-    <DefineConstants>$(DefineConstants);FEATURE_THREAD_ABORT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_NET35_TASKHOST</DefineConstants>
     <FeatureXamlTypes>true</FeatureXamlTypes>
     <DefineConstants Condition="'$(TargetFrameworkVersion)' != 'v3.5' and '$(DotNetBuildSourceOnly)' != 'true'">$(DefineConstants);FEATURE_VISUALSTUDIOSETUP</DefineConstants>
