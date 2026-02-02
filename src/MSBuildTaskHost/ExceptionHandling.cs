@@ -18,7 +18,10 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class ExceptionHandling
     {
-        private static readonly string s_debugDumpPath = GetDebugDumpPath();
+        /// <summary>
+        /// The directory used for diagnostic log files.
+        /// </summary>
+        public static string DebugDumpPath { get; } = GetDebugDumpPath();
 
         /// <summary>
         /// Gets the location of the directory used for diagnostic log files.
@@ -29,35 +32,8 @@ namespace Microsoft.Build.Shared
             string debugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 
             return !string.IsNullOrEmpty(debugPath)
-                    ? debugPath
-                    : FileUtilities.TempFileDirectory;
-        }
-
-        private static string s_debugDumpPathInRunningTests = GetDebugDumpPath();
-        internal static bool ResetDebugDumpPathInRunningTests = false;
-
-        /// <summary>
-        /// The directory used for diagnostic log files.
-        /// </summary>
-        internal static string DebugDumpPath
-        {
-            get
-            {
-                if (BuildEnvironmentHelper.Instance.RunningTests)
-                {
-                    if (ResetDebugDumpPathInRunningTests)
-                    {
-                        s_debugDumpPathInRunningTests = GetDebugDumpPath();
-                        // reset dump file name so new one is created in new path
-                        s_dumpFileName = null;
-                        ResetDebugDumpPathInRunningTests = false;
-                    }
-
-                    return s_debugDumpPathInRunningTests;
-                }
-
-                return s_debugDumpPath;
-            }
+                ? debugPath
+                : FileUtilities.TempFileDirectory;
         }
 
         /// <summary>

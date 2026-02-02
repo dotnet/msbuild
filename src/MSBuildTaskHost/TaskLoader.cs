@@ -37,7 +37,6 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Creates an ITask instance and returns it.
         /// </summary>
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         internal static ITask? CreateTask(
             LoadedType loadedType,
             string taskName,
@@ -48,9 +47,7 @@ namespace Microsoft.Build.Shared
             AppDomainSetup appDomainSetup,
             Action<AppDomain> appDomainCreated,
             bool isOutOfProc,
-            out AppDomain? taskAppDomain
-            )
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            out AppDomain? taskAppDomain)
         {
             bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute;
             s_resolverLoadedType = null;
@@ -86,14 +83,6 @@ namespace Microsoft.Build.Shared
 
                         // Apply the appdomain settings to the new appdomain before creating it
                         appDomainInfo.SetConfigurationBytes(currentAppdomainBytes);
-
-                        if (BuildEnvironmentHelper.Instance.RunningTests)
-                        {
-                            // Prevent the new app domain from looking in the VS test runner location. If this
-                            // is not done, we will not be able to find Microsoft.Build.* assemblies.
-                            appDomainInfo.ApplicationBase = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
-                            appDomainInfo.ConfigurationFile = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile;
-                        }
 
                         AppDomain.CurrentDomain.AssemblyResolve += AssemblyResolver;
                         s_resolverLoadedType = loadedType;
@@ -162,7 +151,7 @@ namespace Microsoft.Build.Shared
         /// This is a resolver to help created AppDomains when they are unable to load an assembly into their domain we will help
         /// them succeed by providing the already loaded one in the currentdomain so that they can derive AssemblyName info from it
         /// </summary>
-        internal static Assembly? AssemblyResolver(object sender, ResolveEventArgs args)
+        private static Assembly? AssemblyResolver(object sender, ResolveEventArgs args)
         {
             if (args.Name.Equals(s_resolverLoadedType?.LoadedAssemblyName?.FullName, StringComparison.OrdinalIgnoreCase))
             {
@@ -170,6 +159,7 @@ namespace Microsoft.Build.Shared
                 {
                     return null;
                 }
+
                 return s_resolverLoadedType.LoadedAssembly ?? Assembly.Load(s_resolverLoadedType.Path);
             }
 
