@@ -255,7 +255,7 @@ jobs:
       name: NetCore-Public
       demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
     ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      name: VSEngSS-MicroBuild2022-1ES
+      name: VSEng-MicroBuildVSStable
       demands: agent.os -equals Windows_NT
   timeoutInMinutes: 120
   steps:

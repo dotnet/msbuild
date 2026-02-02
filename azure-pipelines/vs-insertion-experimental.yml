@@ -64,7 +64,7 @@ extends:
     settings:
       networkIsolationPolicy: Permissive,CFSClean
     pool:
-      name: VSEngSS-MicroBuild2022-1ES
+      name: VSEng-MicroBuildVSStable
     stages:
     - stage: VSInsertion
       displayName: VS insertion
