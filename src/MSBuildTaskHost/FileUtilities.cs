@@ -18,40 +18,7 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static partial class FileUtilities
     {
-        private static readonly char[] s_slashes = ['/', '\\'];
-
-        // net35 taskhost does not support AsyncLocal, and the scenario is not relevant there.
-        internal static string CurrentThreadWorkingDirectory = null;
-
         internal static string TempFileDirectory => Path.GetTempPath();
-
-        /// <summary>
-        /// Copied from https://github.com/dotnet/corefx/blob/056715ff70e14712419d82d51c8c50c54b9ea795/src/Common/src/System/IO/PathInternal.Windows.cs#L61
-        /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/dotnet/msbuild/issues/781#issuecomment-243942514
-        /// </summary>
-        internal static readonly char[] InvalidPathChars =
-        [
-            '|', '\0',
-            (char)1, (char)2, (char)3, (char)4, (char)5, (char)6, (char)7, (char)8, (char)9, (char)10,
-            (char)11, (char)12, (char)13, (char)14, (char)15, (char)16, (char)17, (char)18, (char)19, (char)20,
-            (char)21, (char)22, (char)23, (char)24, (char)25, (char)26, (char)27, (char)28, (char)29, (char)30,
-            (char)31
-        ];
-
-        /// <summary>
-        /// Copied from https://github.com/dotnet/corefx/blob/387cf98c410bdca8fd195b28cbe53af578698f94/src/System.Runtime.Extensions/src/System/IO/Path.Windows.cs#L18
-        /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/dotnet/msbuild/issues/781#issuecomment-243942514
-        /// </summary>
-        internal static readonly char[] InvalidFileNameCharsArray =
-        [
-            '\"', '<', '>', '|', '\0',
-            (char)1, (char)2, (char)3, (char)4, (char)5, (char)6, (char)7, (char)8, (char)9, (char)10,
-            (char)11, (char)12, (char)13, (char)14, (char)15, (char)16, (char)17, (char)18, (char)19, (char)20,
-            (char)21, (char)22, (char)23, (char)24, (char)25, (char)26, (char)27, (char)28, (char)29, (char)30,
-            (char)31, ':', '*', '?', '\\', '/'
-        ];
-
-        internal static char[] InvalidFileNameChars => InvalidFileNameCharsArray;
 
         /// <summary>
         /// Indicates if the given character is a slash.
@@ -233,20 +200,6 @@ namespace Microsoft.Build.Shared
             }
 
             return path;
-        }
-
-        internal static bool PathIsInvalid(string path)
-        {
-            // Path.GetFileName does not react well to malformed filenames.
-            // For example, Path.GetFileName("a/b/foo:bar") returns bar instead of foo:bar
-            // It also throws exceptions on illegal path characters
-            if (path.IndexOfAny(InvalidPathChars) < 0)
-            {
-                int lastDirectorySeparator = path.LastIndexOfAny(s_slashes);
-                return path.IndexOfAny(InvalidFileNameChars, lastDirectorySeparator >= 0 ? lastDirectorySeparator + 1 : 0) >= 0;
-            }
-
-            return true;
         }
 
         /// <summary>
