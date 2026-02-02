@@ -61,6 +61,12 @@
     <!-- Loading certificate data through the constructor or Import is obsolete. Use X509CertificateLoader instead to load certific
 ates https://learn.microsoft.com/en-gb/dotnet/fundamentals/syslib-diagnostics/syslib0057 -->
     <NoWarn>$(NoWarn);SYSLIB0057;</NoWarn>
+
+    <!-- Some VMR builds will occur after MSBuild has gone stable, but other VMR repos haven't.
+         That means the .NET 10 packages referenced by the MSBuild packages will have unstable
+         version numbers. This is ok in that context, since VMR-produced MSBuild packages won't
+         be published. -->
+    <NoWarn Condition="'$(DotNetBuild)' == 'true'">$(NoWarn);NU5104;</NoWarn>
   </PropertyGroup>
 
   <!-- Configuration MSBuild for portable (xcopy-install) toolsets: works on WinNT and linux/mac via Mono, isolates from machine environment:
@@ -77,10 +83,6 @@ ates https://learn.microsoft.com/en-gb/dotnet/fundamentals/syslib-diagnostics/sy
     <DefaultItemExcludes>$(DefaultItemExcludes);*.binlog</DefaultItemExcludes>
 
     <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
-
-    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-    <DirectoryPackagesPropsPath>$([MSBuild]::NormalizePath('$(MSBuildThisFileDirectory)', 'eng', 'Packages.props'))</DirectoryPackagesPropsPath>
 
     <AccelerateBuildsInVisualStudio>true</AccelerateBuildsInVisualStudio>
   </PropertyGroup>

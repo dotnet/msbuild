@@ -108,20 +108,16 @@ namespace Microsoft.Build.UnitTests
 
             var mockLogFromBuild = new MockLogger();
 
-            var serialFromBuildText = new StringBuilder();
-            var serialFromBuild = new SerialConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => serialFromBuildText.Append(t), colorSet: null, colorReset: null);
-            serialFromBuild.Parameters = "NOPERFORMANCESUMMARY";
-
             var parallelFromBuildText = new StringBuilder();
             var parallelFromBuild = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromBuildText.Append(t), colorSet: null, colorReset: null);
             parallelFromBuild.Parameters = "NOPERFORMANCESUMMARY";
 
-            // build and log into binary logger, mock logger, serial and parallel console loggers
+            // build and log into binary logger, mock logger and parallel console loggers
             // no logging on evaluation
             using (ProjectCollection collection = new())
             {
                 Project project = ObjectModelHelpers.CreateInMemoryProject(collection, projectText);
-                project.Build(new ILogger[] { binaryLogger, mockLogFromBuild, serialFromBuild, parallelFromBuild }).ShouldBeTrue();
+                project.Build(new ILogger[] { binaryLogger, mockLogFromBuild, parallelFromBuild }).ShouldBeTrue();
             }
 
             string fileToReplay;
@@ -156,34 +152,25 @@ namespace Microsoft.Build.UnitTests
 
             var mockLogFromPlayback = new MockLogger();
 
-            var serialFromPlaybackText = new StringBuilder();
-            var serialFromPlayback = new SerialConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => serialFromPlaybackText.Append(t), colorSet: null, colorReset: null);
-            serialFromPlayback.Parameters = "NOPERFORMANCESUMMARY";
-
             var parallelFromPlaybackText = new StringBuilder();
             var parallelFromPlayback = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromPlaybackText.Append(t), colorSet: null, colorReset: null);
             parallelFromPlayback.Parameters = "NOPERFORMANCESUMMARY";
 
             var binaryLogReader = new BinaryLogReplayEventSource();
             mockLogFromPlayback.Initialize(binaryLogReader);
-            serialFromPlayback.Initialize(binaryLogReader);
             parallelFromPlayback.Initialize(binaryLogReader);
 
             // read the binary log and replay into mockLogger2
             binaryLogReader.Replay(fileToReplay);
             mockLogFromPlayback.Shutdown();
-            serialFromPlayback.Shutdown();
             parallelFromPlayback.Shutdown();
 
             // the binlog will have more information than recorded by the text log
             mockLogFromPlayback.FullLog.ShouldContainWithoutWhitespace(mockLogFromBuild.FullLog);
 
-            var serialExpected = serialFromBuildText.ToString();
-            var serialActual = serialFromPlaybackText.ToString();
             var parallelExpected = parallelFromBuildText.ToString();
             var parallelActual = parallelFromPlaybackText.ToString();
 
-            serialActual.ShouldContainWithoutWhitespace(serialExpected);
             parallelActual.ShouldContainWithoutWhitespace(parallelExpected);
         }
 
@@ -692,6 +679,250 @@ namespace Microsoft.Build.UnitTests
             // We need to create the file to satisfy the invariant set by the ctor of this testclass
             File.Create(_logFile).Dispose();
         }
+
+        [Theory]
+        [InlineData("mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [InlineData("LogFile=mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [InlineData("\"mylog.binlog\"", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [InlineData("LogFile=\"mylog.binlog\"", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [InlineData("mylog.binlog;ProjectImports=None", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.None, false)]
+        [InlineData("ProjectImports=None;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.None, false)]
+        [InlineData("ProjectImports=Embed;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [InlineData("ProjectImports=ZipFile;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.ZipFile, false)]
+        [InlineData("mylog.binlog;OmitInitialInfo", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, true)]
+        [InlineData("OmitInitialInfo;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, true)]
+        [InlineData("ProjectImports=None;OmitInitialInfo;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.None, true)]
+        public void ParseParametersTests(string parametersString, string expectedLogFilePath, BinaryLogger.ProjectImportsCollectionMode expectedImportsMode, bool expectedOmitInitialInfo)
+        {
+            var result = BinaryLogger.ParseParameters(parametersString);
+
+            result.LogFilePath.ShouldBe(expectedLogFilePath);
+            result.ProjectImportsCollectionMode.ShouldBe(expectedImportsMode);
+            result.OmitInitialInfo.ShouldBe(expectedOmitInitialInfo);
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Theory]
+        [InlineData("{}")]  // Wildcard without extension
+        [InlineData("{}.binlog")]  // Wildcard with extension
+        [InlineData("mylog-{}.binlog")]  // Wildcard with prefix
+        [InlineData("LogFile={}.binlog")]  // Wildcard with LogFile= prefix
+        public void ParseParameters_WildcardPath_ReturnsNullPath(string parametersString)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                // Enable Wave17_12 to support wildcard parameters
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                var result = BinaryLogger.ParseParameters(parametersString);
+
+                result.LogFilePath.ShouldBeNull();
+            }
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Fact]
+        public void ParseParameters_NullParameter_ThrowsLoggerException()
+        {
+            Should.Throw<LoggerException>(() => BinaryLogger.ParseParameters(null));
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Theory]
+        [InlineData("invalidparameter")]
+        [InlineData("mylog.txt")]  // Wrong extension
+        [InlineData("LogFile=mylog.txt")]  // Wrong extension with LogFile prefix
+        public void ParseParameters_InvalidParameter_ThrowsLoggerException(string parametersString)
+        {
+            Should.Throw<LoggerException>(() => BinaryLogger.ParseParameters(parametersString));
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        #region ExtractFilePathFromParameters Tests
+
+        [Theory]
+        [InlineData(null, "msbuild.binlog")]
+        [InlineData("", "msbuild.binlog")]
+        [InlineData("output.binlog", "output.binlog")]
+        [InlineData("LogFile=output.binlog", "output.binlog")]
+        [InlineData("output.binlog;ProjectImports=None", "output.binlog")]
+        [InlineData("ProjectImports=None;output.binlog", "output.binlog")]
+        [InlineData("ProjectImports=None;LogFile=output.binlog;OmitInitialInfo", "output.binlog")]
+        [InlineData("ProjectImports=None", "msbuild.binlog")]  // No path specified
+        [InlineData("OmitInitialInfo", "msbuild.binlog")]  // No path specified
+        public void ExtractFilePathFromParameters_ReturnsExpectedPath(string parameters, string expectedFileName)
+        {
+            string result = BinaryLogger.ExtractFilePathFromParameters(parameters);
+
+            // The method returns full paths, so check just the filename
+            Path.GetFileName(result).ShouldBe(expectedFileName);
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Fact]
+        public void ExtractFilePathFromParameters_ReturnsFullPath()
+        {
+            string result = BinaryLogger.ExtractFilePathFromParameters("mylog.binlog");
+
+            // Should be a full path, not relative
+            Path.IsPathRooted(result).ShouldBeTrue();
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        #endregion
+
+        #region ExtractNonPathParameters Tests
+
+        [Theory]
+        [InlineData(null, "")]
+        [InlineData("", "")]
+        [InlineData("output.binlog", "")]  // Path only, no config
+        [InlineData("LogFile=output.binlog", "")]  // Path only, no config
+        [InlineData("ProjectImports=None", "ProjectImports=None")]
+        [InlineData("OmitInitialInfo", "OmitInitialInfo")]
+        [InlineData("output.binlog;ProjectImports=None", "ProjectImports=None")]
+        [InlineData("output.binlog;ProjectImports=None;OmitInitialInfo", "OmitInitialInfo;ProjectImports=None")]  // Sorted
+        [InlineData("OmitInitialInfo;output.binlog;ProjectImports=None", "OmitInitialInfo;ProjectImports=None")]  // Sorted
+        public void ExtractNonPathParameters_ReturnsExpectedConfig(string parameters, string expectedConfig)
+        {
+            string result = BinaryLogger.ExtractNonPathParameters(parameters);
+            result.ShouldBe(expectedConfig);
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        #endregion
+
+        #region ProcessParameters Tests
+
+        [Fact]
+        public void ProcessParameters_NullArray_ReturnsEmptyResult()
+        {
+            var result = BinaryLogger.ProcessParameters(null);
+
+            result.DistinctParameterSets.ShouldBeEmpty();
+            result.AdditionalFilePaths.ShouldBeEmpty();
+            result.DuplicateFilePaths.ShouldBeEmpty();
+            result.AllConfigurationsIdentical.ShouldBeTrue();
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Fact]
+        public void ProcessParameters_EmptyArray_ReturnsEmptyResult()
+        {
+            var result = BinaryLogger.ProcessParameters(Array.Empty<string>());
+
+            result.DistinctParameterSets.ShouldBeEmpty();
+            result.AdditionalFilePaths.ShouldBeEmpty();
+            result.DuplicateFilePaths.ShouldBeEmpty();
+            result.AllConfigurationsIdentical.ShouldBeTrue();
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Fact]
+        public void ProcessParameters_SingleParameter_ReturnsOneParameterSet()
+        {
+            var result = BinaryLogger.ProcessParameters(new[] { "output.binlog" });
+
+            result.DistinctParameterSets.Count.ShouldBe(1);
+            result.DistinctParameterSets[0].ShouldBe("output.binlog");
+            result.AdditionalFilePaths.ShouldBeEmpty();
+            result.DuplicateFilePaths.ShouldBeEmpty();
+            result.AllConfigurationsIdentical.ShouldBeTrue();
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Fact]
+        public void ProcessParameters_MultipleIdenticalConfigs_OptimizesWithAdditionalPaths()
+        {
+            var result = BinaryLogger.ProcessParameters(new[] { "1.binlog", "2.binlog", "3.binlog" });
+
+            result.DistinctParameterSets.Count.ShouldBe(3);
+            result.AllConfigurationsIdentical.ShouldBeTrue();
+            result.AdditionalFilePaths.Count.ShouldBe(2);  // 2.binlog and 3.binlog
+            result.DuplicateFilePaths.ShouldBeEmpty();
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Fact]
+        public void ProcessParameters_DifferentConfigs_NoOptimization()
+        {
+            var result = BinaryLogger.ProcessParameters(new[] { "1.binlog", "2.binlog;ProjectImports=None" });
+
+            result.DistinctParameterSets.Count.ShouldBe(2);
+            result.AllConfigurationsIdentical.ShouldBeFalse();
+            result.AdditionalFilePaths.ShouldBeEmpty();
+            result.DuplicateFilePaths.ShouldBeEmpty();
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Fact]
+        public void ProcessParameters_DuplicatePaths_FilteredOut()
+        {
+            var result = BinaryLogger.ProcessParameters(new[] { "1.binlog", "1.binlog", "2.binlog" });
+
+            result.DistinctParameterSets.Count.ShouldBe(2);  // 1.binlog and 2.binlog
+            result.DuplicateFilePaths.Count.ShouldBe(1);  // One duplicate of 1.binlog
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Fact]
+        public void ProcessParameters_DuplicatePaths_CaseInsensitive()
+        {
+            var result = BinaryLogger.ProcessParameters(new[] { "Output.binlog", "output.BINLOG", "other.binlog" });
+
+            result.DistinctParameterSets.Count.ShouldBe(2);  // Output.binlog and other.binlog
+            result.DuplicateFilePaths.Count.ShouldBe(1);  // One duplicate
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        [Fact]
+        public void ProcessParameters_MixedConfigsWithDuplicates_HandledCorrectly()
+        {
+            var result = BinaryLogger.ProcessParameters(new[] { 
+                "1.binlog", 
+                "2.binlog;ProjectImports=None", 
+                "1.binlog;ProjectImports=None"  // Different config but same path - filtered as duplicate
+            });
+
+            result.DistinctParameterSets.Count.ShouldBe(2);
+            result.AllConfigurationsIdentical.ShouldBeFalse();
+            result.DuplicateFilePaths.Count.ShouldBe(1);
+
+            // Create the expected log file to satisfy test environment expectations
+            File.Create(_logFile).Dispose();
+        }
+
+        #endregion
 
         public void Dispose()
         {

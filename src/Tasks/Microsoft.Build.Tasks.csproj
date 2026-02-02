@@ -42,6 +42,7 @@
     <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
+    <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
@@ -161,6 +162,7 @@
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\TaskFactoryUtilities.cs" />
     <Compile Include="..\Shared\XMakeAttributes.cs" />
     <Compile Include="..\Shared\XMakeElements.cs" />
     <Compile Include="AppConfig\*.cs" />
@@ -201,6 +203,7 @@
     <Compile Include="AssemblyDependency\Node\OutOfProcRarClient.cs" />
     <Compile Include="AssemblyDependency\Node\OutOfProcRarNode.cs" />
     <Compile Include="AssemblyDependency\Node\OutOfProcRarNodeEndpoint.cs" />
+    <Compile Include="AssemblyDependency\Node\RarNodeBufferedLogEvents.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeBuildEngine.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeExecuteRequest.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeExecuteResponse.cs" />
@@ -685,6 +688,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
+    <PackageReference Include="System.Threading.Channels" PrivateAssets="all" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
     <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
@@ -696,18 +700,25 @@
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\net472\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <PackageReference Include="Microsoft.Win32.Registry" />
-    <PackageReference Include="System.Reflection.Metadata" />
-    <PackageReference Include="System.Threading.Channels" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <PackageReference Include="System.CodeDom" />
     <PackageReference Include="System.Security.Cryptography.Pkcs" />
     <PackageReference Include="System.Security.Cryptography.Xml" />
 
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\netcore\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
+  </ItemGroup>
+
+  <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
+    <ProjectReference Update="..\StringTools\StringTools.csproj" PrivateAssets="all" />
+    <PackageReference Update="System.CodeDom" PrivateAssets="all" />
+    <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
+    <PackageReference Update="System.Resources.Extensions" PrivateAssets="all" />
+    <PackageReference Update="System.Security.Cryptography.Pkcs" PrivateAssets="all" />
+    <PackageReference Update="System.Security.Cryptography.Xml" PrivateAssets="all" />
+    <PackageReference Update="System.Threading.Tasks.Dataflow" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Win32.Registry" PrivateAssets="all" />
+    <PackageReference Include="System.Reflection.Metadata" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

@@ -121,6 +121,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BinaryWriter _binaryWriter;
 
+        /// <summary>
+        /// Represents the version of the parent packet associated with the node instantiation.
+        /// </summary>
+        private byte _parentPacketVersion;
+
 #if NET
         /// <summary>
         /// The set of property names from handshake responsible for node version.
@@ -217,9 +222,9 @@ namespace Microsoft.Build.BackEnd
         #region Construction
 
         /// <summary>
-        /// Instantiates an endpoint to act as a client
+        /// Instantiates an endpoint to act as a client.
         /// </summary>
-        internal void InternalConstruct(string pipeName = null)
+        internal void InternalConstruct(string pipeName = null, byte parentPacketVersion = 1)
         {
             _status = LinkStatus.Inactive;
             _asyncDataMonitor = new object();
@@ -227,6 +232,7 @@ namespace Microsoft.Build.BackEnd
 
             _packetStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetStream);
+            _parentPacketVersion = parentPacketVersion;
 
             pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
@@ -415,20 +421,22 @@ namespace Microsoft.Build.BackEnd
                         int index = 0;
                         foreach (var component in handshakeComponents.EnumerateComponents())
                         {
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-                            int handshakePart = _pipeServer.ReadIntForHandshake(
-                                byteToAccept: index == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+                           
+                            if (!_pipeServer.TryReadIntForHandshake(
+                                byteToAccept: index == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null, /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1_OR_GREATER
-                            , ClientConnectTimeout /* wait a long time for the handshake from this side */
+                             ClientConnectTimeout, /* wait a long time for the handshake from this side */
 #endif
-                            );
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                              out HandshakeResult result))
+                            {
+                                CommunicationsUtilities.Trace($"Handshake failed with error: {result.ErrorMessage}");
+                            }
 
-                            if (!IsHandshakePartValid(component, handshakePart, index))
+                            if (!IsHandshakePartValid(component, result.Value, index))
                             {
                                 CommunicationsUtilities.Trace(
                                         "Handshake failed. Received {0} from host  for {1} but expected {2}. Probably the host is a different MSBuild build.",
-                                        handshakePart,
+                                        result.Value,
                                         component.Key,
                                         component.Value);
                                 _pipeServer.WriteIntForHandshake(index + 1);
@@ -442,29 +450,41 @@ namespace Microsoft.Build.BackEnd
                         if (gotValidConnection)
                         {
                             // To ensure that our handshake and theirs have the same number of bytes, receive and send a magic number indicating EOS.
+
+                            if (
 #if NETCOREAPP2_1_OR_GREATER
-                            _pipeServer.ReadEndOfHandshakeSignal(false, ClientConnectTimeout); /* wait a long time for the handshake from this side */
+                            _pipeServer.TryReadEndOfHandshakeSignal(false, ClientConnectTimeout, out HandshakeResult _)) /* wait a long time for the handshake from this side */
 #else
-                            _pipeServer.ReadEndOfHandshakeSignal(false);
+                            _pipeServer.TryReadEndOfHandshakeSignal(false, out HandshakeResult _))
 #endif
-                            CommunicationsUtilities.Trace("Successfully connected to parent.");
-                            _pipeServer.WriteEndOfHandshakeSignal();
-
-#if FEATURE_SECURITY_PERMISSIONS
-                            // We will only talk to a host that was started by the same user as us.  Even though the pipe access is set to only allow this user, we want to ensure they
-                            // haven't attempted to change those permissions out from under us.  This ensures that the only way they can truly gain access is to be impersonating the
-                            // user we were started by.
-                            WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
-                            WindowsIdentity clientIdentity = null;
-                            localPipeServer.RunAsClient(delegate () { clientIdentity = WindowsIdentity.GetCurrent(true); });
-
-                            if (clientIdentity == null || !String.Equals(clientIdentity.Name, currentIdentity.Name, StringComparison.OrdinalIgnoreCase))
                             {
-                                CommunicationsUtilities.Trace("Handshake failed. Host user is {0} but we were created by {1}.", (clientIdentity == null) ? "<unknown>" : clientIdentity.Name, currentIdentity.Name);
-                                gotValidConnection = false;
-                                continue;
-                            }
+                                // Send supported PacketVersion after EndOfHandshakeSignal
+                                // Based on this parent node decides how to communicate with the child.
+                                if (_parentPacketVersion >= 2)
+                                {
+                                    _pipeServer.WriteIntForHandshake(Handshake.PacketVersionFromChildMarker);  // Marker: PacketVersion follows
+                                    _pipeServer.WriteIntForHandshake(NodePacketTypeExtensions.PacketVersion);
+                                    CommunicationsUtilities.Trace("Sent PacketVersion: {0}", NodePacketTypeExtensions.PacketVersion);
+                                }
+
+                                CommunicationsUtilities.Trace("Successfully connected to parent.");
+                                _pipeServer.WriteEndOfHandshakeSignal();
+#if FEATURE_SECURITY_PERMISSIONS
+                                // We will only talk to a host that was started by the same user as us.  Even though the pipe access is set to only allow this user, we want to ensure they
+                                // haven't attempted to change those permissions out from under us.  This ensures that the only way they can truly gain access is to be impersonating the
+                                // user we were started by.
+                                WindowsIdentity currentIdentity = WindowsIdentity.GetCurrent();
+                                WindowsIdentity clientIdentity = null;
+                                localPipeServer.RunAsClient(delegate () { clientIdentity = WindowsIdentity.GetCurrent(true); });
+
+                                if (clientIdentity == null || !String.Equals(clientIdentity.Name, currentIdentity.Name, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    CommunicationsUtilities.Trace("Handshake failed. Host user is {0} but we were created by {1}.", (clientIdentity == null) ? "<unknown>" : clientIdentity.Name, currentIdentity.Name);
+                                    gotValidConnection = false;
+                                    continue;
+                                }
 #endif
+                            }
                         }
                     }
                     catch (IOException e)
@@ -690,16 +710,18 @@ namespace Microsoft.Build.BackEnd
                             bool hasExtendedHeader = NodePacketTypeExtensions.HasExtendedHeader(rawType);
                             NodePacketType packetType = hasExtendedHeader ? NodePacketTypeExtensions.GetNodePacketType(rawType) : (NodePacketType)rawType;
 
-                            byte version = 0;
+                            byte parentVersion = 0;
                             if (hasExtendedHeader)
                             {
-                                version = NodePacketTypeExtensions.ReadVersion(localReadPipe);
+                                parentVersion = NodePacketTypeExtensions.ReadVersion(localReadPipe);
                             }
 
                             try
                             {
                                 ITranslator readTranslator = BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer);
-                                readTranslator.PacketVersion = version;
+
+                                // parent sends a packet version that is already negotiated during handshake.
+                                readTranslator.NegotiatedPacketVersion = parentVersion;
                                 _packetFactory.DeserializeAndRoutePacket(0, packetType, readTranslator);
                             }
                             catch (Exception e)

@@ -59,6 +59,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\Shared\FrameworkLocationHelper.cs">
+      <Link>Shared\FrameworkLocationHelper.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>BuildEnvironmentHelper.cs</Link>
     </Compile>
@@ -108,6 +111,7 @@
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
+    <Compile Include="..\Shared\TaskFactoryUtilities.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
@@ -116,6 +120,7 @@
     <Compile Include="..\Shared\MSBuildLoadContext.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
     <Compile Include="..\Shared\TypeLoader.cs" />
     <Compile Include="..\Shared\LoadedType.cs" />
+    <Compile Include="..\Shared\TypeUtilities.cs" />
     <Compile Include="..\Shared\AssemblyLoadInfo.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
@@ -129,14 +134,15 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyResources.cs" />
     <Compile Include="AutomaticEncodingRestorer.cs" />
-    <Compile Include="CommandLineSwitches.cs" />
-    <Compile Include="CommandLineSwitchException.cs" />
+    <Compile Include="CommandLine\CommandLineParser.cs" />
+    <Compile Include="CommandLine\CommandLineSwitches.cs" />
+    <Compile Include="CommandLine\CommandLineSwitchException.cs" />
     <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
+    <Compile Include="CommandLine\CommandLineSwitchesAccessor.cs" />
     <Compile Include="DistributedLoggerRecord.cs" />
     <Compile Include="InitializationException.cs" />
     <Compile Include="MSBuildClientApp.cs" />
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
-    <Compile Include="LogMessagePacket.cs" />
     <Compile Include="ProjectSchemaValidationHandler.cs" />
     <Compile Include="OutOfProcTaskHostNode.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
@@ -191,6 +197,7 @@
     <Reference Include="System.Xml" />
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" /><!-- for consistency with Framework via transitives -->
+    <PackageReference Include="System.ValueTuple" ExcludeAssets="Build" /><!-- We ship the new version but binding redirect to the old version manually, so must avoid the drop-binding-redirect logic in the 4.6.1 package. -->
   </ItemGroup>
 
   <ItemGroup>
@@ -206,7 +213,7 @@
 
   <Target Name="AvoidValueTupleConflict" BeforeTargets="ResolveAssemblyReferences">
     <ItemGroup>
-      <Reference Remove="@(Reference->WithMetadataValue(`NuGetPackageId`, `System.ValueTuple`))" />
+      <Reference Remove="@(Reference-&gt;WithMetadataValue(`NuGetPackageId`, `System.ValueTuple`))" />
     </ItemGroup>
   </Target>
 
@@ -312,3 +319,4 @@
   </Target>
 
 </Project>
+ 

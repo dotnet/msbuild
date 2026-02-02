@@ -33,6 +33,11 @@
         <target state="translated">MSBUILD : error MSB1027: MSBuild.rsp 自動応答ファイルや、自動応答ファイルによって参照される応答ファイルに -noAutoResponse スイッチを指定することはできません。</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="DuplicateBinaryLoggerPathsIgnored">
+        <source>Duplicate binary log path(s) specified and ignored: {0}</source>
+        <target state="translated">重複するバイナリ ログ パスが指定され、次は無視されました: {0}</target>
+        <note>{0} is the list of duplicate paths that were filtered out</note>
+      </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
                      (Experimental) Question whether there is any build work.
@@ -244,6 +249,9 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
         <target state="translated">  -multithreaded
@@ -254,6 +262,9 @@
                      このオプションはサポートされていません。
                      使用されるスレッドの最大数は、
                      -maxCpuCount スイッチによって決まります。
+                     マルチスレッド モードが有効で、
+                     MSBUILDFORCEALLTASKSOUTOFPROC=1 の場合、
+                     maxCpuCount は 256 を超えることはできません。
                      (短い形式: -mt)
     </target>
         <note />
@@ -282,12 +293,12 @@
         <source>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+                     of the build. For more info see https://aka.ms/buildcheck
 	</source>
         <target state="translated">  -check
                      ビルド中に BuildChecks を有効にします。
                      BuildCheck を使用すると、ビルドのプロパティを保証するための
-                     評価ルールが有効になります。詳細については、aka.ms/buildcheck を参照してください
+                     評価ルールが有効になります。詳しくは https://aka.ms/maxmemory を参照してください
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -323,6 +334,21 @@
       This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarError">
+        <source>MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</source>
+        <target state="translated">MSB1071: MSBUILD_LOGGING_ARGS 環境変数の処理中にエラーが発生しました: {0}</target>
+        <note>{StrBegin="MSB1071: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the error message.</note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarUnsupportedArgument">
+        <source>MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</source>
+        <target state="translated">MSB1070: MSBUILD_LOGGING_ARGS: サポートされていない引数 '{0}' を無視します。使用できる引数は -bl と -check のみです。</target>
+        <note>{StrBegin="MSB1070: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the unsupported argument.</note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarUsing">
+        <source>Using arguments from MSBUILD_LOGGING_ARGS environment variable: {0}</source>
+        <target state="translated">MSBUILD_LOGGING_ARGS 環境変数からの引数を使用しています: {0}</target>
+        <note>LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is a string with the command-line arguments from the environment variable.</note>
       </trans-unit>
       <trans-unit id="LongPaths">
         <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
@@ -837,9 +863,6 @@
                             the console buffer
                         DisableConsoleColor--Use the default console colors
                             for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
                         EnableMPLogging--Enable the multiprocessor logging
                             style even when running in non-multiprocessor
                             mode. This logging style is on by default.
@@ -874,9 +897,6 @@
                             サイズに合わせません
                         DisableConsoleColor--すべてのログ メッセージに対して
                             既定のコンソール カラーを使用します。
-                        DisableMPLogging-- 非マルチプロセッサ モードで
-                            実行する際、マルチプロセッサの
-                            出力ログ形式を無効にします。
                         EnableMPLogging--非マルチプロセッサ モードで
                             実行する場合も、マルチプロセッサのログ形式を有効にします。
                             このログ形式は、既定で有効です。
@@ -886,7 +906,7 @@
                             ANSI コンソール カラーを使用します
                      Verbosity--このロガーの -verbosity 設定を
                             上書きします。
-                     例::
+                     例:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>

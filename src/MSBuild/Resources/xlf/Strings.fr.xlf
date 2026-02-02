@@ -33,6 +33,11 @@
         <target state="translated">MSBUILD : error MSB1027: Impossible de spécifier le commutateur -noAutoResponse dans le fichier réponse automatique MSBuild.rsp, ni dans aucun autre fichier réponse référencé par le fichier réponse automatique.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="DuplicateBinaryLoggerPathsIgnored">
+        <source>Duplicate binary log path(s) specified and ignored: {0}</source>
+        <target state="translated">Chemins d'accès aux journaux binaires en double spécifiés et ignorés : {0}</target>
+        <note>{0} is the list of duplicate paths that were filtered out</note>
+      </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
                      (Experimental) Question whether there is any build work.
@@ -244,16 +249,22 @@ futures
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
         <target state="translated">  -multithread
                      Active le mode EXPERIMENTAL multithread dans MSBuild.
                      Cela signifie que MSBuild utilisera plusieurs threads
-                     pour construire des projets en parallèle,
+                     pour générer des projets en parallèle,
                      au lieu de plusieurs processus.
-                     Cette option n'est pas prise en charge.
+                     Cette option n’est pas prise en charge.
                      Le nombre maximal de threads utilisés est déterminé par le
                      commutateur -maxCpuCount.
+                     En cas d’activation du mode multithread
+                     et de MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount ne doit pas être supérieur à 256.
                      (Forme courte : -m)
     </target>
         <note />
@@ -282,12 +293,12 @@ futures
         <source>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+                     of the build. For more info see https://aka.ms/buildcheck
 	</source>
         <target state="translated">  -check
                      Active BuildChecks pendant la construction.
                      BuildCheck permet d'évaluer les règles pour garantir les propriétés
-                     de la build. Pour plus d'informations, consultez aka.ms/buildcheck
+                     de la build. Pour plus d'informations, consultez https://aka.ms/build
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -323,6 +334,21 @@ futures
       This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarError">
+        <source>MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</source>
+        <target state="translated">MSB1071: erreur lors du traitement de la variable d’environnement MSBUILD_LOGGING_ARGS : {0}</target>
+        <note>{StrBegin="MSB1071: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the error message.</note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarUnsupportedArgument">
+        <source>MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</source>
+        <target state="translated">MSB1070: MSBUILD_LOGGING_ARGS : argument non pris en charge ignoré « {0} ». Seuls les arguments -bl et -check sont autorisés.</target>
+        <note>{StrBegin="MSB1070: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the unsupported argument.</note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarUsing">
+        <source>Using arguments from MSBUILD_LOGGING_ARGS environment variable: {0}</source>
+        <target state="translated">Utilisation des arguments de la variable d’environnement MSBUILD_LOGGING_ARGS : {0}</target>
+        <note>LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is a string with the command-line arguments from the environment variable.</note>
       </trans-unit>
       <trans-unit id="LongPaths">
         <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
@@ -837,9 +863,6 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                             the console buffer
                         DisableConsoleColor--Use the default console colors
                             for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
                         EnableMPLogging--Enable the multiprocessor logging
                             style even when running in non-multiprocessor
                             mode. This logging style is on by default.
@@ -854,41 +877,38 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
                                                  Verbosity=minimal
 </source>
         <target state="translated">  -consoleLoggerParameters:&lt;paramètres&gt;
-         Paramètres du journaliseur de la console. (Forme abrégée : -clp)
-         Paramètres disponibles :
-            PerformanceSummary--Affiche la durée des tâches, des cibles
-                et des projets.
-            Summary--Récapitulatif des erreurs et des avertissements à la fin.
-            NoSummary--Aucun récapitulatif des erreurs et des avertissements
-                à la fin.
-            ErrorsOnly--Affiche uniquement les erreurs.
-            WarningsOnly--Affiche uniquement les avertissements.
-            NoItemAndPropertyList--N'affiche pas la liste des éléments et
-                des propriétés au début de chaque build de projet.
-            ShowCommandLine--Affiche les messages de TaskCommandLineEvent
-            ShowTimestamp--Affiche l'horodatage en tant que préfixe des
-                messages.
-            ShowEventId--Affiche eventId pour les événements démarrés et
-                achevés ainsi que les messages
-            ForceNoAlign--N'aligne pas le texte par rapport à la taille de la
-                mémoire tampon de la console
-            DisableConsoleColor--Utilise les couleurs de la console par défaut
-                pour tous les messages de journalisation.
-            DisableMPLogging--Désactive le style de journalisation
-                multiprocesseur de la sortie durant l'exécution en
-                mode non multiprocesseur.
-            EnableMPLogging--Active le style de journalisation multiprocesseur
-                même durant l'exécution en mode non
-                multiprocesseur. Style de journalisation activé par défaut.
-            ForceConsoleColor--Utilise les couleurs de la console ANSI même si
-                cela n'est pas pris en charge par la console
-            PreferConsoleColor-Utilise les couleurs de console ANSI uniquement si
-                            la console cible le prend en charge
-                     Verbosity--Remplace le paramètre -verbosity pour ce
-                            journaliseur.
-                     Exemple:
+                     Paramètres de l’enregistreur d’événements de la console. (Forme abrégée : -clp)
+                     Les paramètres disponibles sont :
+                        PerformanceSummary--Afficher la durée des tâches, des cibles
+                            et des projets.
+                        Summary--Afficher le résumé des erreurs et des avertissements à la fin.
+                        NoSummary--Ne pas afficher le résumé des erreurs et des avertissements à la
+                            fin.
+                        ErrorsOnly--Afficher uniquement les erreurs.
+                        WarningsOnly--Afficher uniquement les avertissements.
+                        NoItemAndPropertyList--Ne pas afficher la liste des éléments et
+                            des propriétés au début de chaque build de projet.
+                        ShowCommandLine--Afficher les messages de TaskCommandLineEvent
+                        ShowTimestamp--Afficher l'horodatage en tant que préfixe de tout
+                            message.
+                        ShowEventId--Afficher l’eventId pour les événements démarrés et
+                            achevés, ainsi que les messages
+                        ForceNoAlign--Ne pas aligner le texte par rapport à la taille de la
+                            mémoire tampon de la console
+                        DisableConsoleColor--Utiliser les couleurs de la console par défaut
+                            pour tous les messages de journalisation.
+                        EnableMPLogging--Activer le style de journalisation multiprocesseur,
+                            même durant une exécution en mode non
+                            multiprocesseur. Ce style de journalisation est activé par défaut.
+                        ForceConsoleColor--Utiliser les couleurs de la console ANSI même si
+                            la console ne les prend pas en charge
+                        PreferConsoleColor--N’utiliser les couleurs de la console ANSI que si
+                            la console cible les prend en charge
+                     Verbosity--Remplace le paramètre -verbosity pour cet
+                            enregistreur d’événement.
+                     Exemple :
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
-                         Verbosity=minimal
+                                                 Verbosity=minimal
 </target>
         <note>
       LOCALIZATION: The following should not be localized:

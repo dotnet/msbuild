@@ -18,6 +18,11 @@
         <target state="translated">MSB4249: "{0}" 웹 사이트 프로젝트를 빌드할 수 없습니다. ASP.NET 컴파일러는 .NET Framework 버전의 MSBuild에서만 사용할 수 있습니다.</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
+      <trans-unit id="AssemblyLoad_Warning">
+        <source>The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</source>
+        <target state="translated">사용자 지정 작업 '{0}'은(는) UsingTask 정의에 올바른 런타임과 아키텍처가 지정되어 있지 않아 out-of-process 실행으로 대체되었습니다. 이로 인해 빌드 성능이 저하될 수 있습니다. UsingTask 요소를 업데이트하여 런타임과 아키텍처 속성(예: Runtime="CLR4" Architecture="x64")을 명확히 지정하거나 TaskFactory="TaskHostFactory"를 사용하세요.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
         <source>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</source>
         <target state="translated">MSB4002: "{0}" 작업의 매개 변수 특성을 검색하지 못했습니다. {1}</target>
@@ -446,10 +451,20 @@
         <target state="translated">사용자 지정 검사 규칙 '{0}'이(가) 등록되었습니다.</target>
         <note>The message is emitted on successful loading of the custom check rule in process.</note>
       </trans-unit>
+      <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
+        <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
+        <target state="translated">작업 '{1}'에 대한 사용자 지정 TaskFactory '{0}'은(는) 프로세스 외부 TaskHost 실행을 지원하지 않습니다. 다중 스레드 빌드 모드를 끄거나 프로젝트 파일의 &lt;UsingTask&gt; 정의에서 사용자 지정 TaskFactory를 제거하세요.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: 디렉터리 "{0}"이(가) 없으므로 기본 SDK 확인자가 SDK "{1}"을(를) 확인하지 못했습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="DotnetHostPathIsDirectory">
+        <source>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</source>
+        <target state="translated">MSB4280: DOTNET_HOST_PATH 환경 변수가 dotnet 실행 파일에 대한 경로가 아닌 디렉터리("{0}")으(로) 설정되어 있습니다. 이로 인해 Roslyn 컴파일러와 같은 이 변수를 사용하는 작업에서 빌드 오류가 발생할 수 있습니다. 변수를 설정 해제하거나 dotnet 실행 파일을 직접 가리키도록 업데이트합니다(예: "C:\Program Files\dotnet\dotnet.exe").</target>
+        <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
@@ -478,6 +493,11 @@
         <source>Read environment variable "{0}"</source>
         <target state="translated">환경 변수 "{0}" 읽기</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ErrorCopyingBinaryLog">
+        <source>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</source>
+        <target state="translated">MSB4279: 이진 로그를 "{0}"에서 "{1}"(으)로 복사하지 못했습니다. {2}</target>
+        <note>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</note>
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
@@ -510,10 +530,25 @@
         <target state="translated">MSB3094: "{2}"은(는) 항목을 {0}개 참조하고 "{3}"은(는) 항목을 {1}개 참조합니다. 참조하는 항목 수는 같아야 합니다.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="HostObjectFailure">
+        <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
+        <target state="translated">작업 "{0}"이(가) 호스트 개체를 가져오지 못했습니다. {1} 이 문제를 보고하려면 작업 작성자에게 문의하세요.</target>
+        <note>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</note>
+      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: "{0}" 조건의 "{1}" 위치에 예기치 않은 공백이 있습니다. 공백을 제거했는지 확인하세요.</target>
         <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
+      <trans-unit id="IllFormedPropertySpaceInPropertyReference">
+        <source>MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</source>
+        <target state="new">MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</target>
+        <note>{StrBegin="MSB4281: "}</note>
+      </trans-unit>
+      <trans-unit id="IllFormedQuotedStringInCondition">
+        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
+        <target state="translated">MSB4101: "{0}" 조건의 {1} 위치 뒤에 닫는 따옴표가 필요합니다.</target>
+        <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
@@ -635,11 +670,6 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">null 또는 빈 대상 이름을 포함하는 컬렉션을 사용하여 {0} 메서드를 호출할 수 없습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OpenTelemetryLoadFailed">
-        <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="translated">예외 {0}(으)로 인해 원격 분석 라이브러리를 로드하지 못했습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
@@ -778,6 +808,20 @@
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
+      <trans-unit id="ProjectFinished_WithTFAndRID">
+        <source>{0}{1} {2} {3} {4} ({5}s)</source>
+        <target state="translated">{0}{1} {2} {3} {4}({5}초)</target>
+        <note>
+      Project finished summary including target framework and runtime identifier information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: runtime identifier (RID)
+      {4}: BuildResult_{X}
+      {5}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectGraphDoesNotSupportProjectReferenceWithToolset">
         <source>MSB4250: ProjectGraph does not support ProjectReference items with the ToolsVersion metadata set. Found ProjectReference "{0}" with ToolsVersion in file "{1}"</source>
         <target state="translated">MSB4250: ProjectGraph는 ToolsVersion 메타데이터가 설정된 ProjectReference 항목을 지원하지 않습니다. "{1}" 파일에 ToolsVersion이 포함된 ProjectReference "{0}"이(가) 있습니다.</target>
@@ -878,18 +922,13 @@ Errors: {3}</source>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했지만 이미 환경 변수로 설정되었습니다.</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
+        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했지만 이미 환경 변수로 "{2}"(으)로 설정되어 있었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했지만 이미 다른 SDK에 의해 설정되었습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SdkEnvironmentVariableSet">
-        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했습니다.</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
+        <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하려고 했지만 이미 다른 SDK에 의해 "{2}"(으)로 설정되어 있었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -1010,6 +1049,20 @@ Errors: {3}</source>
       {2}: target framework
       {3}: BuildResult_{X}
       {4}: duration in seconds with 1 decimal point
+      's' should reflect the localized abbreviation for seconds
+    </note>
+      </trans-unit>
+      <trans-unit id="TestProjectFinished_WithTFAndRID">
+        <source>{0}{1} test {2} {3} {4} ({5}s)</source>
+        <target state="translated">{0}{1}테스트{2} {3} {4}({5}초)</target>
+        <note>
+      Project finished summary including target framework and runtime identifier information.
+      {0}: indentation - few spaces to visually indent row
+      {1}: project name
+      {2}: target framework
+      {3}: runtime identifier (RID)
+      {4}: BuildResult_{X}
+      {5}: duration in seconds with 1 decimal point
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
@@ -1482,11 +1535,6 @@ Errors: {3}</source>
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
         <target state="translated">MSB4110: "{0}" 조건의 {1} 위치에 속성이 필요합니다. '$' 뒤에 여는 괄호가 없습니다. '$' 리터럴을 사용하려면 '%24'를 대신 사용하세요.</target>
         <note>{StrBegin="MSB4110: "}</note>
-      </trans-unit>
-      <trans-unit id="IllFormedQuotedStringInCondition">
-        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
-        <target state="translated">MSB4101: "{0}" 조건의 {1} 위치 뒤에 닫는 따옴표가 필요합니다.</target>
-        <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>

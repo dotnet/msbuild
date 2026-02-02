@@ -466,17 +466,17 @@ namespace Microsoft.Build.Execution
             InitializeTargetsData(null, null, null, null);
 
             // Imports
-            var importsListConverter = new ImmutableStringValuedListConverter<ResolvedImport>(linkedProject.Imports, GetImportFullPath);
-            _importPaths = importsListConverter;
-            ImportPaths = importsListConverter;
+            var lazyImportsList = new LazyStringValuedList(linkedProject.Link, GetImportFullPaths);
+            _importPaths = lazyImportsList;
+            ImportPaths = lazyImportsList;
 
-            importsListConverter = new ImmutableStringValuedListConverter<ResolvedImport>(linkedProject.ImportsIncludingDuplicates, GetImportFullPath);
-            _importPathsIncludingDuplicates = importsListConverter;
-            ImportPathsIncludingDuplicates = importsListConverter;
+            lazyImportsList = new LazyStringValuedList(linkedProject.Link, GetImportFullPathsIncludingDuplicates);
+            _importPathsIncludingDuplicates = lazyImportsList;
+            ImportPathsIncludingDuplicates = lazyImportsList;
 
-            Toolset = linkedProject.ProjectCollection.GetToolset(linkedProject.ToolsVersion);
+            Toolset = string.IsNullOrEmpty(linkedProject.ToolsVersion) ? null : linkedProject.ProjectCollection.GetToolset(linkedProject.ToolsVersion);
             SubToolsetVersion = linkedProject.SubToolsetVersion;
-            TaskRegistry = new TaskRegistry(Toolset, linkedProject.ProjectCollection.ProjectRootElementCache);
+            TaskRegistry = Toolset is null ? new TaskRegistry(linkedProject.ProjectCollection.ProjectRootElementCache) : new TaskRegistry(Toolset, linkedProject.ProjectCollection.ProjectRootElementCache);
 
             ProjectRootElementCache = linkedProject.ProjectCollection.ProjectRootElementCache;
 
@@ -487,6 +487,38 @@ namespace Microsoft.Build.Execution
             _explicitToolsVersionSpecified = linkedProject.SubToolsetVersion != null;
 
             _isImmutable = true;
+
+            static List<string> GetImportFullPaths(ObjectModelRemoting.ProjectLink projectLink)
+            {
+                // Imports collection contains ResolvedImports, which are structures which are much bigger than the string list.
+                // We convert to the string list and let Imports itself to BE GCed.
+                var imports = projectLink.Imports;
+                var paths = new List<string>(imports.Count);
+                foreach (var import in imports)
+                {
+                    if (import.ImportedProject != null)
+                    {
+                        paths.Add(import.ImportedProject.FullPath);
+                    }
+                }
+
+                return paths;
+            }
+
+            static List<string> GetImportFullPathsIncludingDuplicates(ObjectModelRemoting.ProjectLink projectLink)
+            {
+                var imports = projectLink.ImportsIncludingDuplicates;
+                var paths = new List<string>(imports.Count);
+                foreach (var import in imports)
+                {
+                    if (import.ImportedProject != null)
+                    {
+                        paths.Add(import.ImportedProject.FullPath);
+                    }
+                }
+
+                return paths;
+            }
         }
 
         /// <summary>
@@ -813,7 +845,7 @@ namespace Microsoft.Build.Execution
                             _globalProperties.Set(globalProperty.DeepClone(isImmutable: true));
                         }
 
-                        var environmentProperty = that._environmentVariableProperties.GetProperty(desiredProperty);
+                        var environmentProperty = that._environmentVariableProperties?.GetProperty(desiredProperty);
                         if (environmentProperty != null)
                         {
                             _environmentVariableProperties.Set(environmentProperty.DeepClone(isImmutable: true));
@@ -1023,7 +1055,8 @@ namespace Microsoft.Build.Execution
                 out IDictionary<string, ProjectProperty> elementsDictionary,
                 out IDictionary<(string, int, int), ProjectProperty> constrainedElementsDictionary);
 
-            var hashSet = new ImmutableValuedElementCollectionConverter<ProjectProperty, ProjectPropertyInstance>(
+            var hashSet = new ImmutableProjectPropertyCollectionConverter(
+                                linkedProject,
                                 elementsDictionary,
                                 constrainedElementsDictionary,
                                 ConvertCachedPropertyToInstance);
@@ -1089,14 +1122,7 @@ namespace Microsoft.Build.Execution
                     return ReadOnlyEmptyDictionary<string, string>.Instance;
                 }
 
-                Dictionary<string, string> dictionary = new Dictionary<string, string>(_globalProperties.Count, MSBuildNameIgnoreCaseComparer.Default);
-
-                foreach (ProjectPropertyInstance property in _globalProperties)
-                {
-                    dictionary[property.Name] = ((IProperty)property).EvaluatedValueEscaped;
-                }
-
-                return new ObjectModel.ReadOnlyDictionary<string, string>(dictionary);
+                return _globalProperties.ToReadOnlyDictionary();
             }
         }
 
@@ -1364,13 +1390,13 @@ namespace Microsoft.Build.Execution
             // If the property has already been set as an environment variable, we do not overwrite it.
             if (_environmentVariableProperties.Contains(name))
             {
-                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySet", name, value);
+                LogIfValueDiffers(_environmentVariableProperties, name, value, "SdkEnvironmentVariableAlreadySet");
                 return;
             }
             // If another SDK already set it, we do not overwrite it.
             else if (_sdkResolvedEnvironmentVariableProperties?.Contains(name) == true)
             {
-                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableAlreadySetBySdk", name, value);
+                LogIfValueDiffers(_sdkResolvedEnvironmentVariableProperties, name, value, "SdkEnvironmentVariableAlreadySetBySdk");
                 return;
             }
 
@@ -1380,17 +1406,24 @@ namespace Microsoft.Build.Execution
 
             _sdkResolvedEnvironmentVariableProperties.Set(property);
 
-            // Also set the property in the EnvironmentVariablePropertiesDictionary so that it can be used in regular evaluation
-            _environmentVariableProperties.Set(property);
-
             // Only set the local property if it does not already exist, prioritizing regular properties defined in XML.
             if (GetProperty(name) is null)
             {
                 ((IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>)this)
                    .SetProperty(name, value, isGlobalProperty: false, mayBeReserved: false, loggingContext: _loggingContext, isEnvironmentVariable: true, isCommandLineProperty: false);
             }
+        }
 
-            _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableSet", name, value);
+        /// <summary>
+        /// Helper method to log a message if the attempted value differs from the existing value.
+        /// </summary>
+        private void LogIfValueDiffers(PropertyDictionary<ProjectPropertyInstance> propertyDictionary, string name, string attemptedValue, string messageResourceName)
+        {
+            ProjectPropertyInstance existingProperty = propertyDictionary.GetProperty(name);
+            if (existingProperty != null && !string.Equals(existingProperty.EvaluatedValue, attemptedValue, StringComparison.Ordinal))
+            {
+                _loggingContext.LogComment(MessageImportance.Low, messageResourceName, name, attemptedValue, existingProperty.EvaluatedValue);
+            }
         }
 
         /// <summary>
@@ -3460,14 +3493,21 @@ namespace Microsoft.Build.Execution
                     itemTypeDefinition,
                     ConvertCachedItemDefinitionToInstance);
 
-            ImmutableDictionary<string, string> directMetadata = null;
+            IReadOnlyDictionary<string, string> directMetadata = null;
             if (item.DirectMetadata is not null)
             {
-                IEnumerable<KeyValuePair<string, string>> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum
-                    => new KeyValuePair<string, string>(directMetadatum.Name, directMetadatum.EvaluatedValueEscaped));
+                if (item.DirectMetadata is IDictionary<string, ProjectMetadata> metadataDict)
+                {
+                    directMetadata = new ImmutableProjectMetadataCollectionConverter(item, metadataDict);
+                }
+                else
+                {
+                    IEnumerable<KeyValuePair<string, string>> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum
+                        => new KeyValuePair<string, string>(directMetadatum.Name, directMetadatum.EvaluatedValueEscaped));
 
-                directMetadata = ImmutableDictionaryExtensions.EmptyMetadata
-                    .SetItems(projectMetadataInstances, ProjectMetadataInstance.VerifyThrowReservedName);
+                    directMetadata = ImmutableDictionaryExtensions.EmptyMetadata
+                        .SetItems(projectMetadataInstances, ProjectMetadataInstance.VerifyThrowReservedName);
+                }
             }
 
             GetEvaluatedIncludesFromProjectItem(
@@ -3485,11 +3525,6 @@ namespace Microsoft.Build.Execution
                 item.Xml.ContainingProject.EscapedFullPath,
                 useItemDefinitionsWithoutModification: true);
             return instance;
-        }
-
-        private static string GetImportFullPath(ResolvedImport import)
-        {
-            return import.ImportedProject.FullPath;
         }
 
         /// <summary>

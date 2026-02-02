@@ -159,6 +159,11 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private bool _updateEnvironmentAndLog;
 
+        /// <summary>
+        /// setting this to true means we're running a long-lived sidecar node.
+        /// </summary>
+        private bool _nodeReuse;
+
 #if !CLR2COMPATIBILITY
         /// <summary>
         /// The task object cache.
@@ -639,7 +644,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="shutdownException">The exception which caused shutdown, if any.</param>
         /// <returns>The reason for shutting down.</returns>
-        public NodeEngineShutdownReason Run(out Exception shutdownException)
+        public NodeEngineShutdownReason Run(out Exception shutdownException, bool nodeReuse = false, byte parentPacketVersion = 1)
         {
 #if !CLR2COMPATIBILITY
             _registeredTaskObjectCache = new RegisteredTaskObjectCacheBase();
@@ -649,7 +654,8 @@ namespace Microsoft.Build.CommandLine
             // Snapshot the current environment
             _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
-            _nodeEndpoint = new NodeEndpointOutOfProcTaskHost();
+            _nodeReuse = nodeReuse;
+            _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(nodeReuse, parentPacketVersion);
             _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
             _nodeEndpoint.Listen(this);
 
@@ -806,8 +812,16 @@ namespace Microsoft.Build.CommandLine
         {
             ErrorUtilities.VerifyThrow(!_isTaskExecuting, "We should never have a task in the process of executing when we receive NodeBuildComplete.");
 
-            // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
-            _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
+            // Sidecar TaskHost will persist after the build is done.
+            if (_nodeReuse)
+            {
+                _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
+            }
+            else
+            {
+                // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
+                _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
+            }
             _shutdownEvent.Set();
         }
 
@@ -930,7 +944,9 @@ namespace Microsoft.Build.CommandLine
 
                 string taskName = taskConfiguration.TaskName;
                 string taskLocation = taskConfiguration.TaskLocation;
-
+#if !CLR2COMPATIBILITY
+                TaskFactoryUtilities.RegisterAssemblyResolveHandlersFromManifest(taskLocation);
+#endif
                 // We will not create an appdomain now because of a bug
                 // As a fix, we will create the class directly without wrapping it in a domain
                 _taskWrapper = new OutOfProcTaskAppDomainWrapper();
@@ -942,8 +958,13 @@ namespace Microsoft.Build.CommandLine
                     taskConfiguration.ProjectFileOfTask,
                     taskConfiguration.LineNumberOfTask,
                     taskConfiguration.ColumnNumberOfTask,
+                    taskConfiguration.TargetName,
+                    taskConfiguration.ProjectFile,
 #if FEATURE_APPDOMAIN
                     taskConfiguration.AppDomainSetup,
+#endif
+#if !NET35
+                    taskConfiguration.HostServices,
 #endif
                     taskParams);
             }
@@ -1204,7 +1225,7 @@ namespace Microsoft.Build.CommandLine
                     return;
                 }
 
-                LogMessagePacket logMessage = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
+                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
                 _nodeEndpoint.SendData(logMessage);
             }
         }

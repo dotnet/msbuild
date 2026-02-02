@@ -1576,16 +1576,6 @@
         <target state="translated">MSB3191: Das Verzeichnis "{0}" kann nicht erstellt werden. {1}</target>
         <note>{StrBegin="MSB3191: "}</note>
       </trans-unit>
-      <trans-unit id="Message.InvalidImportance">
-        <source>MSB3511: "{0}" is an invalid value for the "Importance" parameter. Valid values are: High, Normal and Low.</source>
-        <target state="translated">MSB3511: "{0}" ist ein ungültiger Wert für den "Importance"-Parameter. Gültige Werte sind: High, Normal und Low.</target>
-        <note>{StrBegin="MSB3511: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.
-            The importance enumeration is: High, Normal and Low.  Specifying any other importance will result in this message being shown
-            LOCALIZATION: "Importance" should not be localized.
-            High should not be localized.
-            Normal should not be localized.
-            Low should not be localized.</note>
-      </trans-unit>
       <trans-unit id="Move.CreatesDirectory">
         <source>Creating directory "{0}".</source>
         <target state="translated">Das Verzeichnis "{0}" wird erstellt.</target>
@@ -2852,6 +2842,11 @@
         <target state="translated">MSB3715: Der Typ "{0}" wurde nicht gefunden.</target>
         <note>{StrBegin="MSB3715: "}</note>
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.ErrorDeletingTempFile">
+        <source>Could not delete temporary file "{0}". Error: {1}</source>
+        <target state="translated">Temporäre Datei „{0}“ konnte nicht gelöscht werden. Fehler: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorOrWarning">
         <source>MSB3491: Could not write lines to file "{0}". {1} {2}</source>
         <target state="translated">MSB3491: Zeilen konnten nicht in die Datei „{0}“ geschrieben werden. {1} {2}</target>
@@ -2882,9 +2877,24 @@
         <target state="translated">MSB3762: Es wurden keine Verweise an die Aufgabe übergeben. Es sind mindestens Verweise auf mscorlib und Windows.Foundation erforderlich.</target>
         <note>{StrBegin="MSB3762: "}</note>
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.ErrorReadingFileTransactional">
+        <source>MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</source>
+        <target state="translated">MSB3494: Die vorhandene Datei „{0}“ konnte zum Anfügen von Inhalten nicht gelesen werden. Fehler: {1}</target>
+        <note>{StrBegin="MSB3494: "}</note>
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.Retry">
+        <source>Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</source>
+        <target state="translated">Wiederholungsversuch für die Datei „{0}“ (Versuch {1} von {2}). Grund: {3}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
         <source>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</source>
         <target state="translated">Das Attribut "WriteOnlyWhenDifferent" für "{0}" wird nur bei "Overwrite="true"" wirksam.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="WriteLinesToFile.UsingTransactionalMode">
+        <source>Using transactional mode to write to file "{0}".</source>
+        <target state="translated">Der Transaktionsmodus wird verwendet, um in die Datei „{0}“ zu schreiben.</target>
         <note />
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">

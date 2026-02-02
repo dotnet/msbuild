@@ -336,7 +336,7 @@ namespace Microsoft.Build.Utilities
                 // their own quotes. Quotes are illegal.
                 VerifyThrowNoEmbeddedDoubleQuotes(string.Empty, fileName);
 
-                fileName = FileUtilities.FixFilePath(fileName);
+                fileName = FrameworkFileUtilities.FixFilePath(fileName);
                 if (fileName.Length != 0 && fileName[0] == '-')
                 {
                     AppendTextWithQuoting("." + Path.DirectorySeparatorChar + fileName);

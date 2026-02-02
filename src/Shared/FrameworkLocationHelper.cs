@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.Versioning;
+using Microsoft.Build.Framework;
+
 #if FEATURE_WIN32_REGISTRY
 using Microsoft.Win32;
 #endif
@@ -1422,7 +1424,7 @@ namespace Microsoft.Build.Shared
                                 FindDotNetFrameworkPath(
                                     Path.GetDirectoryName(typeof(object).Module.FullyQualifiedName),
                                     this.DotNetFrameworkFolderPrefix,
-                                    Directory.Exists,
+                                    FileSystems.Default.DirectoryExists,
                                     Directory.GetDirectories,
                                     architecture);
 
@@ -1432,8 +1434,8 @@ namespace Microsoft.Build.Shared
                 // Rollback see https://developercommunity.visualstudio.com/t/Unable-to-locate-MSBuild-path-with-Lates/10824132 
                 if (this._hasMsBuild &&
                     generatedPathToDotNetFramework != null &&
-                    (!File.Exists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")) &&
-                     !File.Exists(Path.Combine(generatedPathToDotNetFramework, "Microsoft.Build.dll"))))
+                    (!FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? "MSBuild.exe" : "mcs.exe")) &&
+                     !FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, "Microsoft.Build.dll"))))
                 {
                     return null;
                 }
@@ -1572,7 +1574,7 @@ namespace Microsoft.Build.Shared
                     string referencePath = GenerateReferenceAssemblyPath(FrameworkLocationHelper.programFilesReferenceAssemblyLocation, this.FrameworkName);
                     if (FileSystems.Default.DirectoryExists(referencePath))
                     {
-                        this._pathToDotNetFrameworkReferenceAssemblies = FileUtilities.EnsureTrailingSlash(referencePath);
+                        this._pathToDotNetFrameworkReferenceAssemblies = FrameworkFileUtilities.EnsureTrailingSlash(referencePath);
                     }
                 }
 

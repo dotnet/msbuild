@@ -33,6 +33,11 @@
         <target state="translated">MSBUILD : error MSB1027: -noAutoResponse anahtarı, MSBuild.rsp otomatik yanıt dosyasında ve bu dosyanın başvuruda bulunduğu herhangi bir yanıt dosyasında belirtilemez.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="DuplicateBinaryLoggerPathsIgnored">
+        <source>Duplicate binary log path(s) specified and ignored: {0}</source>
+        <target state="translated">Belirtilen ve yok sayılan yinelenen ikili günlük yolları: {0}</target>
+        <note>{0} is the list of duplicate paths that were filtered out</note>
+      </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
                      (Experimental) Question whether there is any build work.
@@ -243,16 +248,22 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -çok iş parçacıklı 
-                     MSBuild'de DENEME amaçlı çok iş parçacıklı modu etkinleştirir.
-                     Bu, MSBuild'in
+        <target state="translated">  -çok iş parçacıklı
+                     MSBuild’de DENEYSEL çok iş parçacıklı modu etkinleştirir.
+                     Bu, MSBuild’in
                      projeleri işlemek için birden çok iş parçacığı kullanacağı,
                      birden çok işlem kullanmayacağı anlamına gelir.
-                     Bu seçenek desteklenmemektedir.
+                     Bu seçenek desteklenmiyor.
                      Kullanılan maksimum iş parçacığı sayısı
                      -maxCpuCount anahtarı ile belirlenir.
+                     Çok iş parçacıklı modun açık
+                     ve MSBUILDFORCEALLTASKSOUTOFPROC=1 olması durumunda,
+                     maxCpuCount değeri 256’dan büyük olamaz.
                      (Kısa form: -mt)
     </target>
         <note />
@@ -281,12 +292,12 @@
         <source>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+                     of the build. For more info see https://aka.ms/buildcheck
 	</source>
         <target state="translated">  -check
                      Derleme sırasında BuildChecks'i sağlar.
                      BuildCheck, özelliklerin güvenliğini sağlamak için kuralların değerlendirilmesini sağlar
-                     kuralların değerlendirilmesini sağlar. Daha fazla bilgi için bkz. aka.ms/buildcheck
+                     kuralların değerlendirilmesini sağlar. Daha fazla bilgi için bkz. https://aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -322,6 +333,21 @@
       This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarError">
+        <source>MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</source>
+        <target state="translated">MSB1071: MSBUILD_LOGGING_ARGS ortam değişkeni işlenirken hata oluştu: {0}</target>
+        <note>{StrBegin="MSB1071: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the error message.</note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarUnsupportedArgument">
+        <source>MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</source>
+        <target state="translated">MSB1070: MSBUILD_LOGGING_ARGS: Desteklenmeyen '{0}' bağımsız değişkeni yoksayılıyor. Yalnızca -bl ve -check bağımsız değişkenlerine izin verilir.</target>
+        <note>{StrBegin="MSB1070: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the unsupported argument.</note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarUsing">
+        <source>Using arguments from MSBUILD_LOGGING_ARGS environment variable: {0}</source>
+        <target state="translated">MSBUILD_LOGGING_ARGS ortam değişkeninden alınan bağımsız değişkenler kullanılıyor: {0}</target>
+        <note>LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is a string with the command-line arguments from the environment variable.</note>
       </trans-unit>
       <trans-unit id="LongPaths">
         <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
@@ -836,9 +862,6 @@
                             the console buffer
                         DisableConsoleColor--Use the default console colors
                             for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
                         EnableMPLogging--Enable the multiprocessor logging
                             style even when running in non-multiprocessor
                             mode. This logging style is on by default.
@@ -853,38 +876,35 @@
                                                  Verbosity=minimal
 </source>
         <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Konsol günlüğü için parametreler. (Kısa form: -clp)
-                     Mevcut parametreler:
-                        PerformanceSummary--Görevlerde, hedeflerde harcanan zamanı göster
-                            ve projelerde.
+                     Konsol günlüğüne parametreler. (Kısa form: -clp)
+                     Kullanılabilir parametreler şunlardır:
+                        PerformanceSummary--Harcanan süreyi göster, görevler
+                            ve projeler.
                         Summary--Sonunda hata ve uyarı özetini göster.
-                        NoSummary--Sonunda hata ve uyarı özeti
-                            gösterme.
+                        NoSummary--Hata ve uyarı özetini
+                            sonunda gösterme.
                         ErrorsOnly--Yalnızca hataları göster.
                         WarningsOnly--Yalnızca uyarıları göster.
-                        NoItemAndPropertyList--Her proje derlemesinin başlangıcında öğe
-                            ve özellik listesini gösterme.
+                        NoItemAndPropertyList--Öğe ve özelliklerin listesini
+                            her proje derlemesinin başında gösterme.
                         ShowCommandLine--TaskCommandLineEvent mesajlarını göster
-                        ShowTimestamp--Zaman Damgasını herhangi bir iletinin öneki olarak
-                            görüntüleyin.
-                        ShowEventId--Başlatılan olaylar, biten olaylar ve mesajlar için
-                            eventId'i göster
-                        ForceNoAlign--Metni konsol arabelleğinin boyutuna
-                            hizalamaz
-                        DisableConsoleColor--Tüm günlük iletileri için varsayılan konsol
-                            renklerini kullanın.
-                        DisableMPLogging-- Çok işlemcili olmayan modda
-                            çalışırken çıktının çok işlemcili günlüğe kaydetme stilini
-                            devre dışı bırakın.
-                        EnableMPLogging--Çok işlemcili olmayan modda çalışırken bile
-                            çok işlemcili günlüğe kaydetme stilini
-                            etkinleştirin. Bu günlük kaydı stili varsayılan olarak açıktır.
-                        ForceConsoleColor--Konsol desteklemese bile ANSI
-                            konsol renklerini kullanın
-                        PreferConsoleColor--ANSI konsol renklerini yalnızca
-                            hedef konsol destekliyorsa kullanın
-                     Verbosity--bu günlükçü için -verbosity ayarını geçersiz
-                            kılar.
+                        ShowTimestamp--Zaman damgasını herhangi bir
+                            mesajın başına önek olarak göster.
+                        ShowEventId--Başlatılan olaylar, tamamlanan olaylar
+                            ve mesajlar için olay kimliğini göster
+                        ForceNoAlign--Metni konsol arabelleğinin
+                            boyutuna hizalama yapmaz
+                        DisableConsoleColor--Tüm günlük mesajları için
+                            varsayılan konsol renklerini kullanın.
+                        EnableMPLogging--Çok işlemcili modda olmayan sistemlerde bile
+                            çok işlemcili günlük kaydı stilini
+                            etkinleştirir. Bu günlük kaydı stili varsayılan olarak açıktır.
+                        ForceConsoleColor--Konsol desteklemiyor olsa bile
+                            ANSI konsol renklerini kullan
+                        PreferConsoleColor--Hedef konsol destekliyorsa
+                            yalnızca ANSI konsol renklerini kullan
+                     Verbosity--Bu kaydedici için -verbosity ayarını
+                            geçersiz kılar.
                      Örnek:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal

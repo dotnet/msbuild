@@ -1221,15 +1221,7 @@
 
         If this bucket overflows, pls. contact 'vsppbdev'.
   -->
-  <data name="Message.InvalidImportance" UESanitized="false" Visibility="Public">
-    <value>MSB3511: "{0}" is an invalid value for the "Importance" parameter. Valid values are: High, Normal and Low.</value>
-    <comment>{StrBegin="MSB3511: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.
-            The importance enumeration is: High, Normal and Low.  Specifying any other importance will result in this message being shown
-            LOCALIZATION: "Importance" should not be localized.
-            High should not be localized.
-            Normal should not be localized.
-            Low should not be localized.</comment>
-  </data>
+  <!-- MSB3511 is moved into shared resource file src\Shared\Resources\Strings.shared.resx -->
   <!--
         The Move task message bucket is: MSB3676 - MSB3685
 
@@ -2204,6 +2196,19 @@
   </data>
   <data name="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
     <value>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</value>
+  </data>
+  <data name="WriteLinesToFile.UsingTransactionalMode">
+    <value>Using transactional mode to write to file "{0}".</value>
+  </data>
+  <data name="WriteLinesToFile.ErrorReadingFileTransactional">
+    <value>MSB3494: Could not read existing file "{0}" for appending content. Error: {1}</value>
+    <comment>{StrBegin="MSB3494: "}</comment>
+  </data>
+  <data name="WriteLinesToFile.Retry">
+    <value>Retrying operation on file "{0}" (attempt {1} of {2}). Reason: {3}</value>
+  </data>
+  <data name="WriteLinesToFile.ErrorDeletingTempFile">
+    <value>Could not delete temporary file "{0}". Error: {1}</value>
   </data>
   <!--
         The GetReferenceAssemblyPaths message bucket is: MSB3642 - MSB3646.

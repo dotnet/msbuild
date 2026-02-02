@@ -33,6 +33,11 @@
         <target state="translated">MSBUILD : error MSB1027: Přepínač -noAutoResponse nelze zadat v souboru automatických odpovědí MSBuild.rsp ani v žádném jiném souboru odpovědí, na který se v souboru automatických odpovědí odkazuje.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="DuplicateBinaryLoggerPathsIgnored">
+        <source>Duplicate binary log path(s) specified and ignored: {0}</source>
+        <target state="translated">Byly zadány duplicitní cesty k binárnímu protokolu a byly ignorovány: {0}</target>
+        <note>{0} is the list of duplicate paths that were filtered out</note>
+      </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
                      (Experimental) Question whether there is any build work.
@@ -244,16 +249,22 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -vícevláknový
+        <target state="translated">  -multithreaded
                      Povolí experimentální vícevláknový režim v nástroji MSBuild.
                      To znamená, že nástroj MSBuild bude používat více vláken
-                     k paralelnímu sestavování projektů,
-                     místo více procesů.
+                     k paralelnímu sestavování projektů
+                     namísto více procesů.
                      Tato možnost není podporována.
                      Maximální počet použitých vláken je určen
                      přepínačem -maxCpuCount.
+                     V případě zapnutého režimu s více vlákny
+                     a MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     nemůže být maxCpuCount větší než 256.
                      (Krátký tvar: -mt)
     </target>
         <note />
@@ -282,12 +293,12 @@
         <source>  -check
                      Enables BuildChecks during the build.
                      BuildCheck enables evaluating rules to ensure properties
-                     of the build. For more info see aka.ms/buildcheck
+                     of the build. For more info see https://aka.ms/buildcheck
 	</source>
         <target state="translated">  -check
                      Povolí během sestavování BuildChecks.
                      BuildCheck umožňuje vyhodnocovat pravidla, aby se zajistily vlastnosti
-                     sestavení. Další informace viz aka.ms/buildcheck
+                     sestavení. Další informace najdete na https://aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -323,6 +334,21 @@
       This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarError">
+        <source>MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</source>
+        <target state="translated">MSB1071: Při zpracování proměnné prostředí MSBUILD_LOGGING_ARGS došlo k chybě: {0}</target>
+        <note>{StrBegin="MSB1071: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the error message.</note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarUnsupportedArgument">
+        <source>MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</source>
+        <target state="translated">MSB1070: MSBUILD_LOGGING_ARGS: Nepodporovaný argument {0} se ignoruje. Jsou povoleny pouze argumenty -bl a -check.</target>
+        <note>{StrBegin="MSB1070: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the unsupported argument.</note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarUsing">
+        <source>Using arguments from MSBUILD_LOGGING_ARGS environment variable: {0}</source>
+        <target state="translated">Používají se argumenty z proměnné prostředí MSBUILD_LOGGING_ARGS: {0}</target>
+        <note>LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is a string with the command-line arguments from the environment variable.</note>
       </trans-unit>
       <trans-unit id="LongPaths">
         <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
@@ -844,9 +870,6 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                             the console buffer
                         DisableConsoleColor--Use the default console colors
                             for all logging messages.
-                        DisableMPLogging-- Disable the multiprocessor
-                            logging style of output when running in
-                            non-multiprocessor mode.
                         EnableMPLogging--Enable the multiprocessor logging
                             style even when running in non-multiprocessor
                             mode. This logging style is on by default.
@@ -861,40 +884,37 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                                                  Verbosity=minimal
 </source>
         <target state="translated">  -consoleloggerparameters:&lt;parameters&gt;
-                     Parametry do protokolovacího nástroje konzoly. (Krátký tvar: -clp)
-                     Dostupné parametry jsou:
+                     Parametry protokolovacího nástroje konzoly. (Krátký tvar: -clp)
+                     Dostupné parametry:
                         PerformanceSummary – zobrazí dobu zpracování úloh, cílů
                             a projektů.
-                        Summary – zobrazí souhrn chyb a upozornění na konci.
-                        NoSummary – nezobrazí souhrny chyb a upozornění na
-                            konci.
+                        Summary – na konci zobrazí souhrn chyb a upozornění.
+                        NoSummary – na konci nezobrazí souhrny chyb
+                            a upozornění.
                         ErrorsOnly – zobrazí jenom chyby.
                         WarningsOnly – zobrazí jenom upozornění.
                         NoItemAndPropertyList – nezobrazí na začátku sestavení každého
                             projektu seznamy položek a vlastností.
-                        ShowCommandLine – zobrazí zprávy TaskCommandLineEvent.
+                        ShowCommandLine – zobrazí zprávy TaskCommandLineEvent
                         ShowTimestamp – před každou zprávou zobrazí
                             časové razítko.
                         ShowEventId – zobrazí ID události pro spuštěné a dokončené
-                            události a zprávy.
-                        ForceNoAlign – nenastav9 text podle velikosti vyrovnávací
-                            paměti konzoly.
+                            události a zprávy
+                        ForceNoAlign – nenastavuje text podle velikosti vyrovnávací
+                            paměti konzoly
                         DisableConsoleColor – použije výchozí barvy konzoly
                             pro všechny zprávy protokolování.
-                        DisableMPLogging – zakáže víceprocesorový styl výstupu
-                            protokolování při práci v jiném než víceprocesorovém
-                            režimu.
                         EnableMPLogging – povolí víceprocesorový styl výstupu
                             protokolování i při práci v jiném
-                            režimu. Tento styl protokolování je výchozí. 
+                            režimu. Tento styl protokolování je výchozí.
                         ForceConsoleColor – použije barvy konzoly ANSI,
-                            i když to konzola nepodporuje.
-                        PreferConsoleColor– použije barvy konzoly ANSI, pouze pokud
-                            to cílová konzola podporuje.
-                        Verbosity – potlačí nastavení -verbosity
+                            i když to konzola nepodporuje
+                        PreferConsoleColor--Barvy konzoly ANSI použít pouze v případě, že
+                            je cílová konzole podporuje
+                     Verbosity – potlačí nastavení -verbosity
                             pro tento protokolovací nástroj.
                      Příklad:
-                        -consoleLoggerParameters:PerformanceSummary;NoSummary;
+                        -consoleloggerparameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
 </target>
         <note>

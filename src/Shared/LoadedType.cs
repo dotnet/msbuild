@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -24,9 +23,18 @@ namespace Microsoft.Build.Shared
         /// <param name="type">The Type to be loaded</param>
         /// <param name="assemblyLoadInfo">Information used to load the assembly</param>
         /// <param name="loadedAssembly">The assembly which has been loaded, if any</param>
-        /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
         /// <param name="iTaskItemType">type of an ITaskItem</param>
-        internal LoadedType(Type type, AssemblyLoadInfo assemblyLoadInfo, Assembly loadedAssembly, Type iTaskItemType, bool loadedViaMetadataLoadContext = false)
+        /// <param name="runtime">Assembly runtime based on assembly attributes.</param>
+        /// <param name="architecture">Assembly architecture extracted from PE flags</param>
+        /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
+        internal LoadedType(
+            Type type,
+            AssemblyLoadInfo assemblyLoadInfo,
+            Assembly loadedAssembly,
+            Type iTaskItemType,
+            string? runtime = null,
+            string? architecture = null,
+            bool loadedViaMetadataLoadContext = false)
         {
             ErrorUtilities.VerifyThrow(type != null, "We must have the type.");
             ErrorUtilities.VerifyThrow(assemblyLoadInfo != null, "We must have the assembly the type was loaded from.");
@@ -37,7 +45,15 @@ namespace Microsoft.Build.Shared
 
             HasSTAThreadAttribute = CheckForHardcodedSTARequirement();
             LoadedAssemblyName = loadedAssembly.GetName();
-            Path = loadedAssembly.Location;
+            LoadedViaMetadataLoadContext = loadedViaMetadataLoadContext;
+            Architecture = architecture;
+            Runtime = runtime;
+
+            // For inline tasks loaded from bytes, Assembly.Location is empty, so use the original path
+            Path = string.IsNullOrEmpty(loadedAssembly.Location)
+                ? assemblyLoadInfo.AssemblyLocation
+                : loadedAssembly.Location;
+
             LoadedAssembly = loadedAssembly;
 
 #if !NET35
@@ -49,19 +65,27 @@ namespace Microsoft.Build.Shared
             Type? t = type;
             while (t is not null)
             {
-                if (CustomAttributeData.GetCustomAttributes(t).Any(attr => attr.AttributeType.Name.Equals(nameof(LoadInSeparateAppDomainAttribute))))
+                try
                 {
-                    HasLoadInSeparateAppDomainAttribute = true;
-                }
+                    if (TypeUtilities.HasAttribute<LoadInSeparateAppDomainAttribute>(t))
+                    {
+                        HasLoadInSeparateAppDomainAttribute = true;
+                    }
 
-                if (CustomAttributeData.GetCustomAttributes(t).Any(attr => attr.AttributeType.Name.Equals(nameof(RunInSTAAttribute))))
-                {
-                    HasSTAThreadAttribute = true;
-                }
+                    if (TypeUtilities.HasAttribute<RunInSTAAttribute>(t))
+                    {
+                        HasSTAThreadAttribute = true;
+                    }
 
-                if (t.IsMarshalByRef)
+                    if (t.IsMarshalByRef)
+                    {
+                        IsMarshalByRef = true;
+                    }
+                }
+                catch when (loadedViaMetadataLoadContext)
                 {
-                    IsMarshalByRef = true;
+                    // when assembly is loaded via metadata load context we can ignore exception because there is no expectation to have it in proc.
+                    // BUT we should throw for in-proc case and handle it on higher level.
                 }
 
                 t = t.BaseType;
@@ -80,39 +104,70 @@ namespace Microsoft.Build.Shared
                 bool requiredAttribute = false;
                 foreach (CustomAttributeData attr in CustomAttributeData.GetCustomAttributes(props[i]))
                 {
-                    if (attr.AttributeType.Name.Equals(nameof(OutputAttribute)))
+                    try
                     {
-                        outputAttribute = true;
+                        if (attr.AttributeType?.Name.Equals(nameof(OutputAttribute)) == true)
+                        {
+                            outputAttribute = true;
+                        }
+                        else if (attr.AttributeType?.Name.Equals(nameof(RequiredAttribute)) == true)
+                        {
+                            requiredAttribute = true;
+                        }
                     }
-                    else if (attr.AttributeType.Name.Equals(nameof(RequiredAttribute)))
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
-                        requiredAttribute = true;
+                        // Skip attributes that can't be loaded
+                        continue;
                     }
                 }
 
                 // Check whether it's assignable to ITaskItem or ITaskItem[]. Simplify to just checking for ITaskItem.
-                Type? pt = props[i].PropertyType;
-                if (pt.IsArray)
+                Type? pt = null;
+                try
                 {
-                    pt = pt.GetElementType();
+                    pt = props[i].PropertyType;
+                    if (pt.IsArray)
+                    {
+                        pt = pt.GetElementType();
+                    }
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    // Skip properties that can't be loaded
+                    continue;
                 }
 
-                bool isAssignableToITask = iTaskItemType.IsAssignableFrom(pt);
+                bool isAssignableToITask = false;
+                try
+                {
+                    isAssignableToITask = pt != null && iTaskItemType.IsAssignableFrom(pt);
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    // Can't determine assignability, default to false
+                }
 
                 Properties[i] = new ReflectableTaskPropertyInfo(props[i], outputAttribute, requiredAttribute, isAssignableToITask);
                 if (loadedViaMetadataLoadContext && PropertyAssemblyQualifiedNames != null)
                 {
-                    PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName?? string.Empty;
+                    try
+                    {
+                        PropertyAssemblyQualifiedNames[i] = Properties[i]?.PropertyType?.AssemblyQualifiedName ?? string.Empty;
+                    }
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        PropertyAssemblyQualifiedNames[i] = string.Empty;
+                    }
                 }
             }
 #else
             // For v3.5 fallback to old full type approach, as oppose to reflection only
-            HasLoadInSeparateAppDomainAttribute = this.Type.GetTypeInfo().IsDefined(typeof(LoadInSeparateAppDomainAttribute), true /* inherited */);
-            HasSTAThreadAttribute = this.Type.GetTypeInfo().IsDefined(typeof(RunInSTAAttribute), true /* inherited */);
-            IsMarshalByRef = this.Type.IsMarshalByRef;
+            HasLoadInSeparateAppDomainAttribute = Type.GetTypeInfo().IsDefined(typeof(LoadInSeparateAppDomainAttribute), true /* inherited */);
+            HasSTAThreadAttribute = Type.GetTypeInfo().IsDefined(typeof(RunInSTAAttribute), true /* inherited */);
+            IsMarshalByRef = Type.IsMarshalByRef;
 #endif
         }
-
 
         #endregion
 
@@ -130,6 +185,11 @@ namespace Microsoft.Build.Shared
         /// Gets whether this type implements MarshalByRefObject.
         /// </summary>
         public bool IsMarshalByRef { get; }
+
+        /// <summary>
+        /// Gets whether this type was loaded by using MetadataLoadContext.
+        /// </summary>
+        public bool LoadedViaMetadataLoadContext { get; }
 
         /// <summary>
         /// Determines if the task has a hardcoded requirement for STA thread usage.
@@ -163,6 +223,10 @@ namespace Microsoft.Build.Shared
         internal Type Type { get; private set; }
 
         internal AssemblyName LoadedAssemblyName { get; private set; }
+
+        internal string? Architecture { get; private set; }
+
+        internal string? Runtime { get; private set; }
 
         internal string Path { get; private set; }
 

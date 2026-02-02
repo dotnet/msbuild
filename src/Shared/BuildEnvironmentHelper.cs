@@ -477,6 +477,7 @@ namespace Microsoft.Build.Shared
             // Tests which specifically test the BuildEnvironmentHelper need it to be able to act as if it is not running tests
             s_runningTests = runningTests ?? CheckIfRunningTests;
 
+            _runningTests = null;
             BuildEnvironmentHelperSingleton.s_instance = Initialize();
         }
 
@@ -486,6 +487,7 @@ namespace Microsoft.Build.Shared
         internal static void ResetInstance_ForUnitTestsOnly(BuildEnvironment buildEnvironment)
         {
             BuildEnvironmentHelperSingleton.s_instance = buildEnvironment;
+            _runningTests = buildEnvironment.RunningTests;
         }
 
         private static Func<string> s_getProcessFromRunningProcess = GetProcessFromRunningProcess;
@@ -606,7 +608,7 @@ namespace Microsoft.Build.Shared
 
                 // Check for existence of an MSBuild file. Note this is not necessary in a VS installation where we always want to
                 // assume the correct layout.
-                var existsCheck = mode == BuildEnvironmentMode.VisualStudio ? new Func<string, bool>(_ => true) : File.Exists;
+                var existsCheck = mode == BuildEnvironmentMode.VisualStudio ? new Func<string, bool>(_ => true) : FileSystems.Default.FileExists;
 
                 MSBuildToolsDirectory32 = MSBuildToolsDirectoryRoot;
                 MSBuildToolsDirectory64 = existsCheck(potentialAmd64FromX86) ? Path.Combine(MSBuildToolsDirectoryRoot, "amd64") : CurrentMSBuildToolsDirectory;

@@ -26,6 +26,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             _pipeClient = new NodePipeClient(NamedPipeUtil.GetRarNodeEndpointPipeName(handshake), handshake);
 
             NodePacketFactory packetFactory = new();
+            packetFactory.RegisterPacketHandler(NodePacketType.RarNodeBufferedLogEvents, static t => new RarNodeBufferedLogEvents(t), null);
             packetFactory.RegisterPacketHandler(NodePacketType.RarNodeExecuteResponse, static t => new RarNodeExecuteResponse(t), null);
             _pipeClient.RegisterPacketFactory(packetFactory);
         }
@@ -55,7 +56,10 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             if (!_pipeClient.IsConnected)
             {
                 // Don't set a timeout since the build manager already blocks until the server is running.
-                _pipeClient.ConnectToServer(0);
+                if (!_pipeClient.ConnectToServer(0))
+                {
+                    return false;
+                }
             }
 
             _pipeClient.WritePacket(new RarNodeExecuteRequest(rarTask));
@@ -66,7 +70,26 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             {
                 if (packet.Type == NodePacketType.RarNodeBufferedLogEvents)
                 {
-                    // TODO: Stub for replaying logs to the real build engine.
+                    RarNodeBufferedLogEvents logEvents = (RarNodeBufferedLogEvents)packet;
+                    foreach (LogMessagePacketBase logMessagePacket in logEvents.EventQueue)
+                    {
+                        BuildEventArgs buildEvent = logMessagePacket.NodeBuildEvent?.Value!;
+                        switch (logMessagePacket.EventType)
+                        {
+                            case LoggingEventType.BuildErrorEvent:
+                                rarTask.BuildEngine.LogErrorEvent((BuildErrorEventArgs)buildEvent);
+                                break;
+                            case LoggingEventType.BuildWarningEvent:
+                                rarTask.BuildEngine.LogWarningEvent((BuildWarningEventArgs)buildEvent);
+                                break;
+                            case LoggingEventType.BuildMessageEvent:
+                                rarTask.BuildEngine.LogMessageEvent((BuildMessageEventArgs)buildEvent);
+                                break;
+                            default:
+                                ErrorUtilities.ThrowInternalError($"Received unexpected log event type {logMessagePacket.Type}");
+                                break;
+                        }
+                    }
                 }
                 else
                 {
