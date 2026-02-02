@@ -17,7 +17,8 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Generates an application manifest or adds an entry to the existing one when PreferNativeArm64 property is true.
     /// </summary>
-    public sealed class AddToWin32Manifest : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public sealed class AddToWin32Manifest : TaskExtension, IMultiThreadableTask
     {
         private const string supportedArchitectures = "supportedArchitectures";
         private const string windowsSettings = "windowsSettings";
@@ -86,17 +87,27 @@ namespace Microsoft.Build.Tasks
             private set => _generatedManifestFullPath = value;
         }
 
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
         private string? GetManifestPath()
         {
             if (ApplicationManifest != null)
             {
-                if (string.IsNullOrEmpty(ApplicationManifest.ItemSpec) || !FileSystems.Default.FileExists(ApplicationManifest?.ItemSpec))
+                if (string.IsNullOrEmpty(ApplicationManifest.ItemSpec))
                 {
-                    Log.LogErrorWithCodeFromResources(null, ApplicationManifest?.ItemSpec, 0, 0, 0, 0, "AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound");
+                    Log.LogErrorWithCodeFromResources(null, ApplicationManifest.ItemSpec, 0, 0, 0, 0, "AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound");
                     return null;
                 }
 
-                return ApplicationManifest!.ItemSpec;
+                AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(ApplicationManifest.ItemSpec);
+                if (!FileSystems.Default.FileExists(absolutePath))
+                {
+                    Log.LogErrorWithCodeFromResources(null, ApplicationManifest.ItemSpec, 0, 0, 0, 0, "AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound");
+                    return null;
+                }
+
+                return absolutePath;
             }
 
             string? defaultManifestPath = ToolLocationHelper.GetPathToDotNetFrameworkFile(DefaultManifestName, TargetDotNetFrameworkVersion.Version46);
@@ -168,8 +179,9 @@ namespace Microsoft.Build.Tasks
 
         private void SaveManifest(XmlDocument document, string manifestName)
         {
-            ManifestPath = Path.Combine(OutputDirectory, manifestName);
-            using (var xmlWriter = new XmlTextWriter(ManifestPath, Encoding.UTF8))
+            AbsolutePath outputPath = TaskEnvironment.GetAbsolutePath(Path.Combine(OutputDirectory, manifestName));
+            ManifestPath = outputPath;
+            using (var xmlWriter = new XmlTextWriter(outputPath, Encoding.UTF8))
             {
                 xmlWriter.Formatting = Formatting.Indented;
                 xmlWriter.Indentation = 4;

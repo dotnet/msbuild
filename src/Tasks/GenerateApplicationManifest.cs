@@ -18,6 +18,7 @@ namespace Microsoft.Build.Tasks
     /// Generates an application manifest for ClickOnce projects.
     /// </summary>
     [SupportedOSPlatform("windows")]
+    [MSBuildMultiThreadableTask]
     public sealed class GenerateApplicationManifest : GenerateManifestBase
     {
         private enum _ManifestType
@@ -280,8 +281,9 @@ namespace Microsoft.Build.Tasks
 
             if (!String.IsNullOrEmpty(TrustInfoFile?.ItemSpec))
             {
+                AbsolutePath trustInfoPath = TaskEnvironment.GetAbsolutePath(TrustInfoFile.ItemSpec);
                 manifest.TrustInfo = new TrustInfo();
-                manifest.TrustInfo.Read(TrustInfoFile.ItemSpec);
+                manifest.TrustInfo.Read(trustInfoPath);
             }
 
             if (manifest.TrustInfo == null)
@@ -448,7 +450,8 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                using (Stream s = File.Open(InputManifest.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read))
+                AbsolutePath inputManifestPath = TaskEnvironment.GetAbsolutePath(InputManifest.ItemSpec);
+                using (Stream s = File.Open(inputManifestPath, FileMode.Open, FileAccess.Read, FileShare.Read))
                 {
                     var document = new XmlDocument();
                     var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };

@@ -36,7 +36,8 @@ namespace Microsoft.Build.Tasks
     ///    Apply Group and Optional attributes from PublishFile items to built items
     ///    (8) Insure all output items have a TargetPath, and if in a Group that IsOptional is set
     /// </comment>
-    public sealed class ResolveManifestFiles : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public sealed class ResolveManifestFiles : TaskExtension, IMultiThreadableTask
     {
         #region Fields
 
@@ -154,6 +155,9 @@ namespace Microsoft.Build.Tasks
             }
             set => _targetFrameworkIdentifier = value;
         }
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         #endregion
 
@@ -507,7 +511,7 @@ namespace Microsoft.Build.Tasks
             var fileMap = new FileMap();
 
             // Dictionary used to look up any content output files that are also in References
-            var outputAssembliesMap = outputAssemblies.ToDictionary(p => Path.GetFullPath(p.ItemSpec), StringComparer.OrdinalIgnoreCase);
+            var outputAssembliesMap = outputAssemblies.ToDictionary(p => TaskEnvironment.GetAbsolutePath(p.ItemSpec).Value, StringComparer.OrdinalIgnoreCase);
 
             // Add all input Files to the FileMap, flagging them to be published by default...
             if (Files != null)
@@ -519,7 +523,7 @@ namespace Microsoft.Build.Tasks
                     // Lookup full path of the File in outputAssembliesMap and skip the
                     // file if the target/destination path is the same.
                     //
-                    string key = Path.GetFullPath(item.ItemSpec);
+                    string key = TaskEnvironment.GetAbsolutePath(item.ItemSpec);
                     outputAssembliesMap.TryGetValue(key, out var assembly);
                     if (assembly != null)
                     {

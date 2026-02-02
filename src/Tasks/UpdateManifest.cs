@@ -17,7 +17,8 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Updates selected properties in a manifest and resigns.
     /// </summary>
-    public class UpdateManifest : Task, IUpdateManifestTaskContract
+    [MSBuildMultiThreadableTask]
+    public class UpdateManifest : Task, IUpdateManifestTaskContract, IMultiThreadableTask
     {
         [Required]
         public string ApplicationPath { get; set; }
@@ -33,9 +34,16 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem OutputManifest { get; set; }
 
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
+
         public override bool Execute()
         {
-            Manifest.UpdateEntryPoint(InputManifest.ItemSpec, OutputManifest.ItemSpec, ApplicationPath, ApplicationManifest.ItemSpec, TargetFrameworkVersion);
+            AbsolutePath inputManifestPath = TaskEnvironment.GetAbsolutePath(InputManifest.ItemSpec);
+            AbsolutePath outputManifestPath = TaskEnvironment.GetAbsolutePath(OutputManifest.ItemSpec);
+            AbsolutePath applicationManifestPath = TaskEnvironment.GetAbsolutePath(ApplicationManifest.ItemSpec);
+
+            Manifest.UpdateEntryPoint(inputManifestPath, outputManifestPath, ApplicationPath, applicationManifestPath, TargetFrameworkVersion);
 
             return true;
         }
@@ -43,7 +51,8 @@ namespace Microsoft.Build.Tasks
 
 #else
 
-    public sealed class UpdateManifest : TaskRequiresFramework, IUpdateManifestTaskContract
+    [MSBuildMultiThreadableTask]
+    public sealed class UpdateManifest : TaskRequiresFramework, IUpdateManifestTaskContract, IMultiThreadableTask
     {
         public UpdateManifest()
             : base(nameof(UpdateManifest))
@@ -62,6 +71,9 @@ namespace Microsoft.Build.Tasks
 
         [Output]
         public ITaskItem OutputManifest { get; set; }
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         #endregion
     }
