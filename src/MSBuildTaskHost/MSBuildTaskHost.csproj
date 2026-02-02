@@ -47,7 +47,6 @@
     <Compile Include="BuildEnvironmentHelper.cs" />
     <Compile Include="BufferedReadStream.cs" />
     <Compile Include="CollectionHelpers.cs" />
-    <Compile Include="Constants.cs" />
     <Compile Include="CommunicationsUtilities.cs" />
     <Compile Include="Concurrent\ConcurrentDictionary.cs" />
     <Compile Include="Concurrent\ConcurrentQueue.cs" />
