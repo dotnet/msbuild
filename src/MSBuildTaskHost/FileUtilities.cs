@@ -7,9 +7,6 @@ using System.Collections.Concurrent;
 #else
 using Microsoft.Build.Shared.Concurrent;
 #endif
-#if NET
-using System.Buffers;
-#endif
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -111,11 +108,7 @@ namespace Microsoft.Build.Shared
         /// Copied from https://github.com/dotnet/corefx/blob/056715ff70e14712419d82d51c8c50c54b9ea795/src/Common/src/System/IO/PathInternal.Windows.cs#L61
         /// MSBuild should support the union of invalid path chars across the supported OSes, so builds can have the same behaviour crossplatform: https://github.com/dotnet/msbuild/issues/781#issuecomment-243942514
         /// </summary>
-#if NET
-        internal static readonly SearchValues<char> InvalidPathChars = SearchValues.Create(
-#else
         internal static readonly char[] InvalidPathChars = (
-#endif
         [
             '|', '\0',
             (char)1, (char)2, (char)3, (char)4, (char)5, (char)6, (char)7, (char)8, (char)9, (char)10,
@@ -137,11 +130,7 @@ namespace Microsoft.Build.Shared
             (char)31, ':', '*', '?', '\\', '/'
         ];
 
-#if NET
-        internal static readonly SearchValues<char> InvalidFileNameChars = SearchValues.Create(InvalidFileNameCharsArray);
-#else
         internal static char[] InvalidFileNameChars => InvalidFileNameCharsArray;
-#endif
 
         internal static readonly string DirectorySeparatorString = Path.DirectorySeparatorChar.ToString();
 
@@ -269,11 +258,7 @@ namespace Microsoft.Build.Shared
 
             return FrameworkFileUtilities.FixFilePath(start < stop && FrameworkFileUtilities.IsSlash(path[stop - 1]) ?
                 path.Substring(start) :
-#if NET
-                string.Concat(path.AsSpan(start), new(in Path.DirectorySeparatorChar)));
-#else
                 path.Substring(start) + Path.DirectorySeparatorChar);
-#endif
         }
 
         /// <summary>
@@ -316,11 +301,7 @@ namespace Microsoft.Build.Shared
                 // Special case: convert the quotes.
                 if (path.Length > 1 && path[0] == convertQuote && path[path.Length - 1] == convertQuote)
                 {
-#if NET
-                    path = $"{targetQuote}{path.AsSpan(1, path.Length - 2)}{targetQuote}";
-#else
                     path = $"{targetQuote}{path.Substring(1, path.Length - 2)}{targetQuote}";
-#endif
                 }
                 // Enclose the path in a set of the 'target' quote unless the string is already quoted with the 'target' quotes.
                 else if (path.Length == 1 || path[0] != targetQuote || path[path.Length - 1] != targetQuote)
@@ -859,19 +840,12 @@ namespace Microsoft.Build.Shared
             // Path.GetFileName does not react well to malformed filenames.
             // For example, Path.GetFileName("a/b/foo:bar") returns bar instead of foo:bar
             // It also throws exceptions on illegal path characters
-#if NET
-            if (!path.AsSpan().ContainsAny(InvalidPathChars))
-            {
-                int lastDirectorySeparator = path.LastIndexOfAny(FrameworkFileUtilities.Slashes);
-                return path.AsSpan(lastDirectorySeparator >= 0 ? lastDirectorySeparator + 1 : 0).ContainsAny(InvalidFileNameChars);
-            }
-#else
             if (path.IndexOfAny(InvalidPathChars) < 0)
             {
                 int lastDirectorySeparator = path.LastIndexOfAny(FrameworkFileUtilities.Slashes);
                 return path.IndexOfAny(InvalidFileNameChars, lastDirectorySeparator >= 0 ? lastDirectorySeparator + 1 : 0) >= 0;
             }
-#endif
+
             return true;
         }
 

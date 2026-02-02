@@ -272,15 +272,9 @@ namespace Microsoft.Build.Internal
         }
 
         private string GetToolsDirectory(bool isNetTaskHost, string predefinedToolsDirectory) =>
-#if NETFRAMEWORK
-            isNetTaskHost
-
-                // For .NET TaskHost assembly directory we set the expectation for the child dotnet process to connect to.
+            isNetTaskHost // For .NET TaskHost assembly directory we set the expectation for the child dotnet process to connect to.
                 ? predefinedToolsDirectory
                 : BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-#else
-            BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-#endif
 
         private static HandshakeComponents CreateNetTaskHostComponents(int options, int salt, int sessionId) => new(
             options,
@@ -353,13 +347,8 @@ namespace Microsoft.Build.Internal
             {
                 var input = GetKey();
                 byte[] utf8 = Encoding.UTF8.GetBytes(input);
-#if NET
-                Span<byte> bytes = stackalloc byte[SHA256.HashSizeInBytes];
-                SHA256.HashData(utf8, bytes);
-#else
                 using var sha = SHA256.Create();
                 var bytes = sha.ComputeHash(utf8);
-#endif
                 _computedHash = Convert.ToBase64String(bytes)
                     .Replace("/", "_")
                     .Replace("=", string.Empty);
@@ -450,7 +439,6 @@ namespace Microsoft.Build.Internal
         [System.Runtime.Versioning.SupportedOSPlatform("windows")]
         internal static extern unsafe bool FreeEnvironmentStrings(char* pStrings);
 
-#if NETFRAMEWORK
         /// <summary>
         /// Set environment variable P/Invoke.
         /// </summary>
@@ -472,7 +460,6 @@ namespace Microsoft.Build.Internal
                 throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
             }
         }
-#endif
 
 #if !CLR2COMPATIBILITY
         /// <summary>
@@ -624,14 +611,6 @@ namespace Microsoft.Build.Internal
             }
         }
 
-#if NET
-        /// <summary>
-        /// Sets an environment variable using <see cref="Environment.SetEnvironmentVariable(string,string)" />.
-        /// </summary>
-        internal static void SetEnvironmentVariable(string name, string value)
-            => Environment.SetEnvironmentVariable(name, value);
-#endif
-
 #if !CLR2COMPATIBILITY
         /// <summary>
         /// Returns key value pairs of environment variables in a read-only dictionary
@@ -754,17 +733,11 @@ namespace Microsoft.Build.Internal
         internal static bool TryReadEndOfHandshakeSignal(
             this PipeStream stream,
             bool isProvider,
-#if NETCOREAPP2_1_OR_GREATER
-            int timeout,
-#endif
             out HandshakeResult result)
         {
             // Accept only the first byte of the EndOfHandshakeSignal
             if (stream.TryReadIntForHandshake(
                 byteToAccept: null,
-#if NETCOREAPP2_1_OR_GREATER
-                timeout,
-#endif
                 out HandshakeResult innerResult))
             {
                 byte negotiatedPacketVersion = 1;
@@ -782,9 +755,6 @@ namespace Microsoft.Build.Internal
                     // We detected packet version marker, now let's read actual PacketVersion
                     if (!stream.TryReadIntForHandshake(
                             byteToAccept: null,
-#if NETCOREAPP2_1_OR_GREATER
-                            timeout,
-#endif
                             out HandshakeResult versionResult))
                     {
                         result = versionResult;
@@ -797,9 +767,6 @@ namespace Microsoft.Build.Internal
 
                     if (!stream.TryReadIntForHandshake(
                             byteToAccept: null,
-#if NETCOREAPP2_1_OR_GREATER
-                            timeout,
-#endif
                             out innerResult))
                     {
                         result = innerResult;
@@ -841,61 +808,29 @@ namespace Microsoft.Build.Internal
         internal static bool TryReadIntForHandshake(
             this PipeStream stream,
             byte? byteToAccept,
-#if NETCOREAPP2_1_OR_GREATER
-            int timeout,
-#endif
             out HandshakeResult result
             )
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         {
             byte[] bytes = new byte[4];
+            int bytesRead = stream.Read(bytes, 0, bytes.Length);
 
-#if NETCOREAPP2_1_OR_GREATER
-            if (!NativeMethodsShared.IsWindows)
+            // Abort for connection attempts from ancient MSBuild.exes
+            if (byteToAccept != null && bytesRead > 0 && byteToAccept != bytes[0])
             {
-                // Enforce a minimum timeout because the timeout passed to Connect() just before
-                // calling this method does not apply on UNIX domain socket-based
-                // implementations of PipeStream.
-                // https://github.com/dotnet/corefx/issues/28791
-                timeout = Math.Max(timeout, 50);
-
-                // A legacy MSBuild.exe won't try to connect to MSBuild running
-                // in a dotnet host process, so we can read the bytes simply.
-                var readTask = stream.ReadAsync(bytes, 0, bytes.Length);
-
-                // Manual timeout here because the timeout passed to Connect() just before
-                // calling this method does not apply on UNIX domain socket-based
-                // implementations of PipeStream.
-                // https://github.com/dotnet/corefx/issues/28791
-                if (!readTask.Wait(timeout))
-                {
-                    result = HandshakeResult.Failure(HandshakeStatus.Timeout, String.Format(CultureInfo.InvariantCulture, "Did not receive return handshake in {0}ms", timeout));
-                    return false;
-                }
-                readTask.GetAwaiter().GetResult();
+                stream.WriteIntForHandshake(0x0F0F0F0F);
+                stream.WriteIntForHandshake(0x0F0F0F0F);
+                result = HandshakeResult.Failure(HandshakeStatus.OldMSBuild, String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
+                return false;
             }
-            else
-#endif
+
+            if (bytesRead != bytes.Length)
             {
-                int bytesRead = stream.Read(bytes, 0, bytes.Length);
+                // We've unexpectly reached end of stream.
+                // We are now in a bad state, disconnect on our end
+                result = HandshakeResult.Failure(HandshakeStatus.UnexpectedEndOfStream, String.Format(CultureInfo.InvariantCulture, "Unexpected end of stream while reading for handshake"));
 
-                // Abort for connection attempts from ancient MSBuild.exes
-                if (byteToAccept != null && bytesRead > 0 && byteToAccept != bytes[0])
-                {
-                    stream.WriteIntForHandshake(0x0F0F0F0F);
-                    stream.WriteIntForHandshake(0x0F0F0F0F);
-                    result = HandshakeResult.Failure(HandshakeStatus.OldMSBuild, String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
-                    return false;
-                }
-
-                if (bytesRead != bytes.Length)
-                {
-                    // We've unexpectly reached end of stream.
-                    // We are now in a bad state, disconnect on our end
-                    result = HandshakeResult.Failure(HandshakeStatus.UnexpectedEndOfStream, String.Format(CultureInfo.InvariantCulture, "Unexpected end of stream while reading for handshake"));
-
-                    return false;
-                }
+                return false;
             }
 
             try

@@ -451,11 +451,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GetCurrentMSBuildRuntime()
         {
-#if NET40_OR_GREATER
-            return MSBuildRuntimeValues.clr4;
-#else
             return MSBuildRuntimeValues.net;
-#endif
         }
 
         /// <summary>

@@ -12,17 +12,9 @@ namespace Microsoft.Build.Shared
 {
     internal static partial class EnvironmentUtilities
     {
-#if NET472_OR_GREATER || NETCOREAPP
-        public static bool Is64BitProcess => Marshal.SizeOf<IntPtr>() == 8;
 
-        public static bool Is64BitOperatingSystem =>
-            Environment.Is64BitOperatingSystem;
-#endif
-
-#if !NETCOREAPP
         private static volatile int s_processId;
         private static volatile string? s_processPath;
-#endif
         private static volatile string? s_processName;
 
         /// <summary>Gets the unique identifier for the current process.</summary>
@@ -30,9 +22,6 @@ namespace Microsoft.Build.Shared
         {
             get
             {
-#if NETCOREAPP
-                return Environment.ProcessId;
-#else
                 // copied from Environment.ProcessId
                 int processId = s_processId;
                 if (processId == 0)
@@ -45,7 +34,6 @@ namespace Microsoft.Build.Shared
                 }
 
                 return processId;
-#endif
             }
         }
 
@@ -60,9 +48,6 @@ namespace Microsoft.Build.Shared
         {
             get
             {
-#if NETCOREAPP
-                return Environment.ProcessPath;
-#else
                 // copied from Environment.ProcessPath
                 string? processPath = s_processPath;
                 if (processPath == null)
@@ -76,7 +61,6 @@ namespace Microsoft.Build.Shared
                 }
 
                 return (processPath?.Length != 0) ? processPath : null;
-#endif
             }
         }
 

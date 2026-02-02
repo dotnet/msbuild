@@ -64,29 +64,13 @@ namespace Microsoft.Build.BackEnd
         /// <param name="initialCapacity">An estimate of the number of unique strings to be interned.</param>
         internal void Setup(IEqualityComparer<string> comparer, int initialCapacity)
         {
-#if NET
-            if (_stringToIds.Comparer == comparer)
-            {
-                // Clear before setting capacity, since dictionaries will rehash every entry.
-                _strings.Clear();
-                _stringToIds.Clear();
-                _stringToPathIds.Clear();
-                _strings.EnsureCapacity(initialCapacity);
-                _stringToIds.EnsureCapacity(initialCapacity);
-                _stringToPathIds.EnsureCapacity(initialCapacity);
-            }
-            else
-            {
-#endif
-                // If the interner is in a reused translator, the comparer might not match between packets.
-                // Just throw away the old collections in this case.
-                _strings.Clear();
-                _strings.Capacity = initialCapacity;
-                _stringToIds = new Dictionary<string, int>(initialCapacity, comparer);
-                _stringToPathIds = new Dictionary<string, InternPathIds>(initialCapacity, comparer);
-#if NET
-            }
-#endif
+            // If the interner is in a reused translator, the comparer might not match between packets.
+            // Just throw away the old collections in this case.
+            _strings.Clear();
+            _strings.Capacity = initialCapacity;
+            _stringToIds = new Dictionary<string, int>(initialCapacity, comparer);
+            _stringToPathIds = new Dictionary<string, InternPathIds>(initialCapacity, comparer);
+
             _packetStream.Position = 0;
             _packetStream.SetLength(0);
 

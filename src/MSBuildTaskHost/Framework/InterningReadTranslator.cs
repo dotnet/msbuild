@@ -73,12 +73,7 @@ namespace Microsoft.Build.BackEnd
         {
             // Only deserialize the intern header since the caller will be reading directly from the stream.
             _translator.Translate(ref _strings);
-#if NET
-            _pathIdsToString.Clear();
-            _pathIdsToString.EnsureCapacity(_strings.Count);
-#else
             _pathIdsToString = new(_strings.Count);
-#endif
         }
     }
 }

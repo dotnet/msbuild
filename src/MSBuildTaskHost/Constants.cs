@@ -2,9 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-#if NET
-using System.Buffers;
-#endif
 using System.IO;
 
 #nullable disable
@@ -134,12 +131,7 @@ namespace Microsoft.Build.Shared
         internal static readonly string[] EnvironmentNewLine = [Environment.NewLine];
         internal static readonly char[] PipeChar = ['|'];
         internal static readonly char[] PathSeparatorChar = [Path.PathSeparator];
-
-#if NET
-        internal static readonly SearchValues<char> InvalidPathChars = SearchValues.Create(Path.GetInvalidPathChars());
-#else
         internal static readonly char[] InvalidPathChars = Path.GetInvalidPathChars();
-#endif
     }
 
     internal static class PropertyNames

@@ -577,11 +577,6 @@ namespace Microsoft.Build.Shared
                 baseLenThat = asString2.Length;
             }
 
-#if NET
-            ReadOnlySpan<char> nameThis = asString1.AsSpan(0, baseLenThis);
-            ReadOnlySpan<char> nameThat = asString2.AsSpan(0, baseLenThat);
-            return nameThis.CompareTo(nameThat, StringComparison.OrdinalIgnoreCase);
-#else
             // If the lengths are the same then we can compare without copying.
             if (baseLenThis == baseLenThat)
             {
@@ -592,7 +587,6 @@ namespace Microsoft.Build.Shared
             string nameThis = asString1.Substring(0, baseLenThis);
             string nameThat = asString2.Substring(0, baseLenThat);
             return string.Compare(nameThis, nameThat, StringComparison.OrdinalIgnoreCase);
-#endif
         }
 
         /// <summary>
@@ -784,9 +778,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static bool ComparePublicKeyTokens(byte[] aPKT, byte[] bPKT)
         {
-#if NET
-            return aPKT.AsSpan().SequenceEqual(bPKT.AsSpan());
-#else
             // Some assemblies (real case was interop assembly) may have null PKTs.
             aPKT ??= [];
             bPKT ??= [];
@@ -805,7 +796,6 @@ namespace Microsoft.Build.Shared
             }
 
             return true;
-#endif
         }
 
         /// <summary>

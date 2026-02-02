@@ -64,9 +64,6 @@ namespace Microsoft.Build.Collections
                 return false;
             }
 
-#if NET
-            return compareToString.AsSpan().Equals(constrainedString.AsSpan(start, lengthToCompare), StringComparison.OrdinalIgnoreCase);
-#else
             if (lengthToCompare != compareToString.Length)
             {
                 return false;
@@ -107,7 +104,6 @@ namespace Microsoft.Build.Collections
             }
 
             return true;
-#endif
         }
 
         /// <summary>

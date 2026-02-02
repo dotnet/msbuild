@@ -463,27 +463,6 @@ internal static class NativeMethods
             else
             {
                 ProcessorArchitectures processorArchitecture = ProcessorArchitectures.Unknown;
-
-#if NET || NETSTANDARD1_1_OR_GREATER
-                // Get the architecture from the runtime.
-                processorArchitecture = RuntimeInformation.OSArchitecture switch
-                {
-                    Architecture.Arm => ProcessorArchitectures.ARM,
-                    Architecture.Arm64 => ProcessorArchitectures.ARM64,
-                    Architecture.X64 => ProcessorArchitectures.X64,
-                    Architecture.X86 => ProcessorArchitectures.X86,
-#if NET
-                    Architecture.Wasm => ProcessorArchitectures.WASM,
-                    Architecture.S390x => ProcessorArchitectures.S390X,
-                    Architecture.LoongArch64 => ProcessorArchitectures.LOONGARCH64,
-                    Architecture.Armv6 => ProcessorArchitectures.ARMV6,
-                    Architecture.Ppc64le => ProcessorArchitectures.PPC64LE,
-#endif
-                    _ => ProcessorArchitectures.Unknown,
-                };
-
-#endif
-
                 ProcessorArchitectureTypeNative = ProcessorArchitectureType = processorArchitecture;
             }
         }
