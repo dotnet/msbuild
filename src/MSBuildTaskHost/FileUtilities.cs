@@ -58,7 +58,7 @@ namespace Microsoft.Build.Shared
         /// is rooted, using ErrorUtilities.VerifyThrowPathRooted.
         /// ASSUMES INPUT IS ALREADY UNESCAPED.
         /// </summary>
-        internal static string NormalizePath(string path)
+        private static string NormalizePath(string path)
         {
             ErrorUtilities.VerifyThrowArgumentLength(path);
             string fullPath = GetFullPath(path);
@@ -125,7 +125,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="fileSpec">The filespec.</param>
         /// <returns>directory path</returns>
-        internal static string GetDirectory(string fileSpec)
+        private static string GetDirectory(string fileSpec)
         {
             string directory = Path.GetDirectoryName(FrameworkFileUtilities.FixFilePath(fileSpec));
 
@@ -161,7 +161,7 @@ namespace Microsoft.Build.Shared
         /// <param name="currentDirectory"></param>
         /// <param name="escape">Whether to escape the path after getting the full path.</param>
         /// <returns>Full path to the file, escaped if not specified otherwise.</returns>
-        internal static string GetFullPath(string fileSpec, string currentDirectory, bool escape = true)
+        private static string GetFullPath(string fileSpec, string currentDirectory, bool escape = true)
         {
             // Sending data out of the engine into the filesystem, so time to unescape.
             fileSpec = FrameworkFileUtilities.FixFilePath(EscapingUtilities.UnescapeAll(fileSpec));
@@ -193,7 +193,7 @@ namespace Microsoft.Build.Shared
         /// Useful to get a better path for an error message, without the risk of throwing
         /// if the error message was itself caused by the path being invalid!
         /// </summary>
-        internal static string GetFullPathNoThrow(string path)
+        private static string GetFullPathNoThrow(string path)
         {
             try
             {
@@ -230,7 +230,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns>FileInfo around path if it is an existing /file/, else null</returns>
-        internal static FileInfo GetFileInfoNoThrow(string filePath)
+        private static FileInfo GetFileInfoNoThrow(string filePath)
         {
             filePath = AttemptToShortenPath(filePath);
 
@@ -263,7 +263,7 @@ namespace Microsoft.Build.Shared
         /// or would be if rooted by the current directory.
         /// This may make it shorter by removing ".."'s.
         /// </summary>
-        internal static string AttemptToShortenPath(string path)
+        private static string AttemptToShortenPath(string path)
         {
             if (IsPathTooLong(path) || IsPathTooLongIfRooted(path))
             {
@@ -273,7 +273,7 @@ namespace Microsoft.Build.Shared
             return FrameworkFileUtilities.FixFilePath(path);
         }
 
-        public static bool IsPathTooLong(string path)
+        private static bool IsPathTooLong(string path)
         {
             // >= not > because MAX_PATH assumes a trailing null
             return path.Length >= NativeMethodsShared.MaxPath;
