@@ -152,6 +152,15 @@ namespace Microsoft.Build.BackEnd
 
                 IntPtr environmentBlock = BuildEnvironmentBlock(environmentOverrides);
 
+                // When passing a Unicode environment block (created via Marshal.StringToHGlobalUni),
+                // we must set CREATE_UNICODE_ENVIRONMENT. Without this flag, CreateProcess interprets
+                // the block as ANSI, causing "The parameter is incorrect" (error 87).
+                uint effectiveCreationFlags = creationFlags;
+                if (environmentBlock != BackendNativeMethods.NullPtr)
+                {
+                    effectiveCreationFlags |= BackendNativeMethods.CREATE_UNICODE_ENVIRONMENT;
+                }
+
                 try
                 {
                     bool result = BackendNativeMethods.CreateProcess(
@@ -160,7 +169,7 @@ namespace Microsoft.Build.BackEnd
                             ref processSecurityAttributes,
                             ref threadSecurityAttributes,
                             false,
-                            creationFlags,
+                            effectiveCreationFlags,
                             environmentBlock,
                             null,
                             ref startInfo,

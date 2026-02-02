@@ -1011,7 +1011,7 @@ namespace Microsoft.Build.UnitTests
         {
             // this project will report a TFM and a RID and so will show a both in the output
             var buildOutputEvent = MakeBuildOutputEventArgs(_projectFile);
-            InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("TargetFramework", "net10.0"), ("RuntimeIdentifier", "win-x64")], additionalCallbacks: () =>
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, properties: [("TargetFramework", RunnerUtilities.LatestDotNetCoreForMSBuild), ("RuntimeIdentifier", "win-x64")], additionalCallbacks: () =>
             {
                 _centralNodeEventSource.InvokeMessageRaised(buildOutputEvent);
             });

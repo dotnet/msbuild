@@ -10,9 +10,11 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -59,7 +61,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns>
         /// A configured TestEnvironment instance with the specified settings applied.
         /// </returns>
-        public static TestEnvironment Create(ITestOutputHelper output = null, bool ignoreBuildErrorFiles = false)
+        public static TestEnvironment Create(ITestOutputHelper output = null, bool ignoreBuildErrorFiles = false, bool setupDotnetEnvVars = false)
         {
             var env = new TestEnvironment(output ?? new DefaultOutput());
 
@@ -69,12 +71,27 @@ namespace Microsoft.Build.UnitTests
                 env.WithInvariant(new BuildFailureLogInvariant());
             }
 
+            if (setupDotnetEnvVars)
+            {
+                SetupDotnetEnvironmentVariables();
+            }
+
             // Clear these two environment variables first in case pre-setting affects the test.
             env.SetEnvironmentVariable("MSBUILDLIVELOGGER", null);
             env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", null);
             env.SetEnvironmentVariable("MSBUILDUSESERVER", null);
 
             return env;
+
+            void SetupDotnetEnvironmentVariables()
+            {
+                var coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
+                var bootstrapCorePath = Path.Combine(coreDirectory, Constants.DotnetProcessName);
+
+                _ = env.SetEnvironmentVariable("PATH", $"{coreDirectory}{Path.PathSeparator}{Environment.GetEnvironmentVariable("PATH")}");
+                _ = env.SetEnvironmentVariable("DOTNET_ROOT", coreDirectory);
+                _ = env.SetEnvironmentVariable("DOTNET_HOST_PATH", bootstrapCorePath);
+            }
         }
 
         private TestEnvironment(ITestOutputHelper output)
