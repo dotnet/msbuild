@@ -901,24 +901,10 @@ internal static class NativeMethods
     private static string s_frameworkCurrentPath;
 
     /// <summary>
-    /// Gets the currently running framework path
+    /// Gets the currently running framework path.
     /// </summary>
     internal static string FrameworkCurrentPath
-    {
-        get
-        {
-            if (s_frameworkCurrentPath == null)
-            {
-                var baseTypeLocation = AssemblyUtilities.GetAssemblyLocation(typeof(string).GetTypeInfo().Assembly);
-
-                s_frameworkCurrentPath =
-                    Path.GetDirectoryName(baseTypeLocation)
-                    ?? string.Empty;
-            }
-
-            return s_frameworkCurrentPath;
-        }
-    }
+        => s_frameworkCurrentPath ??= Path.GetDirectoryName(typeof(string).Assembly.Location) ?? string.Empty;
 
     /// <summary>
     /// Gets the base directory of all Mono frameworks

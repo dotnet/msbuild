@@ -37,24 +37,6 @@ namespace Microsoft.Build.Shared
         public static Assembly EntryAssembly = GetEntryAssembly();
 #endif
 
-        public static string GetAssemblyLocation(Assembly assembly)
-        {
-#if FEATURE_ASSEMBLY_LOCATION
-            return assembly.Location;
-#else
-            // Assembly.Location is only available in .netstandard1.5, but MSBuild needs to target 1.3.
-            // use reflection to access the property
-            Initialize();
-
-            if (s_assemblylocationProperty == null)
-            {
-                throw new NotSupportedException("Type Assembly does not have the Location property");
-            }
-
-            return (string)s_assemblylocationProperty.GetValue(assembly);
-#endif
-        }
-
 #if CLR2COMPATIBILITY
         /// <summary>
         /// Shim for the lack of <see cref="System.Reflection.IntrospectionExtensions.GetTypeInfo"/> in .NET 3.5.
