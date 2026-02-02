@@ -241,25 +241,6 @@ When TaskHost manages multiple concurrent tasks (due to yields or BuildProjectFi
 
 ---
 
-## 6. Phased Rollout
-
-| Phase | Scope | Risk | Effort |
-|-------|-------|------|--------|
-| 1 | `IsRunningMultipleNodes`, `RequestCores`/`ReleaseCores` | Low | 1 day |
-| 2 | `BuildProjectFile*` + `Yield`/`Reacquire` | High | 7-10 days |
-
-**Rationale:** 
-- Phase 1 is trivial: `IsRunningMultipleNodes` can just return `true`, `RequestCores`/`ReleaseCores` can be no-ops. These are not critical for correctness.
-- Phase 2 combines `BuildProjectFile*` and `Yield`/`Reacquire` because they use a similar approach and Yield "comes almost for free" once BuildProjectFile is implemented
-
-**Note:** Phase 2 is highest complexity due to:
-- Complex `ITaskItem[]` serialization
-- Recursive build scenarios  
-- Concurrent task management within single TaskHost process
-- Environment/CWD state save/restore per task context
-
----
-
 ## 7. Open Questions
 
 ### Q1: Error handling for parent crash during callback
