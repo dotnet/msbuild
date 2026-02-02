@@ -171,13 +171,6 @@ namespace Microsoft.Build.CommandLine
         private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
 #endif
 
-#if FEATURE_REPORTFILEACCESSES
-        /// <summary>
-        /// The file accesses reported by the most recently completed task.
-        /// </summary>
-        private List<FileAccessData> _fileAccessData = new List<FileAccessData>();
-#endif
-
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -544,17 +537,6 @@ namespace Microsoft.Build.CommandLine
                     return _taskHost._currentConfiguration.IsTaskInputLoggingEnabled;
                 }
             }
-
-#if FEATURE_REPORTFILEACCESSES
-            /// <summary>
-            /// Reports a file access from a task.
-            /// </summary>
-            /// <param name="fileAccessData">The file access to report.</param>
-            public void ReportFileAccess(FileAccessData fileAccessData)
-            {
-                _taskHost._fileAccessData.Add(fileAccessData);
-            }
-#endif
         }
 
         public EngineServices EngineServices { get; }
@@ -988,12 +970,7 @@ namespace Microsoft.Build.CommandLine
 
                     lock (_taskCompleteLock)
                     {
-                        _taskCompletePacket = new TaskHostTaskComplete(
-                            taskResult,
-#if FEATURE_REPORTFILEACCESSES
-                            _fileAccessData,
-#endif
-                            currentEnvironment);
+                        _taskCompletePacket = new TaskHostTaskComplete(taskResult, currentEnvironment);
                     }
 
 #if FEATURE_APPDOMAIN
@@ -1014,18 +991,11 @@ namespace Microsoft.Build.CommandLine
                         // Create a minimal taskCompletePacket to carry the exception so that the TaskHostTask does not hang while waiting
                         _taskCompletePacket = new TaskHostTaskComplete(
                             new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e),
-#if FEATURE_REPORTFILEACCESSES
-                            _fileAccessData,
-#endif
-                            null);
+                            buildProcessEnvironment: null);
                     }
                 }
                 finally
                 {
-#if FEATURE_REPORTFILEACCESSES
-                    _fileAccessData = new List<FileAccessData>();
-#endif
-
                     // Call CleanupTask to unload any domains and other necessary cleanup in the taskWrapper
                     _taskWrapper.CleanupTask();
 
