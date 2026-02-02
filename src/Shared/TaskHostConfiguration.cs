@@ -510,8 +510,8 @@ namespace Microsoft.Build.BackEnd
 
             // Version 0 = Framework-to-Framework (e.g. CLR4),
             // Version 2+ = .NET task host with support of translation for these fields.
-#if !NET35
-            if (translator.NegotiatedPacketVersion == 0 || translator.NegotiatedPacketVersion >= 2)
+#if NET472 || NETCOREAPP
+            if (translator.NegotiatedPacketVersion is 0 or >= 2)
             {
                 translator.Translate(ref _targetName);
                 translator.Translate(ref _projectFile);
