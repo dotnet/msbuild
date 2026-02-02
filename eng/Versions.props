@@ -53,6 +53,7 @@
         See uses of $(UseFrozenMaintenancePackageVersions) for details.
     -->
     <SystemMemoryVersion>4.6.3</SystemMemoryVersion>
+    <SystemNumericsVectorsVersion>4.6.1</SystemNumericsVectorsVersion>
     <SystemRuntimeCompilerServicesUnsafeVersion>6.1.2</SystemRuntimeCompilerServicesUnsafeVersion>
     <SystemThreadingTasksExtensionsVersion>4.6.3</SystemThreadingTasksExtensionsVersion>
     <SystemValueTupleVersion>4.6.1</SystemValueTupleVersion>
