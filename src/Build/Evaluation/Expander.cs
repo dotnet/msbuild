@@ -2065,20 +2065,24 @@ namespace Microsoft.Build.Evaluation
                             break;
                     }
 
-                    foreach (KeyValuePair<string, S> itemTuple in transformedItems)
-                    {
-                        if (!string.IsNullOrEmpty(itemTuple.Key) && (options & ExpanderOptions.BreakOnNotEmpty) != 0)
-                        {
-                            brokeEarly = true;
-                            return transformedItems; // break out early
-                        }
-                    }
-
                     // If we have another transform, swap the source and transform lists.
                     if (i < captures.Count - 1)
                     {
                         (transformedItems, sourceItems) = (sourceItems, transformedItems);
                         transformedItems.Clear();
+                    }
+                }
+
+                // Check for break on non-empty only after ALL transforms are complete
+                if ((options & ExpanderOptions.BreakOnNotEmpty) != 0)
+                {
+                    foreach (KeyValuePair<string, S> itemTuple in transformedItems)
+                    {
+                        if (!string.IsNullOrEmpty(itemTuple.Key))
+                        {
+                            brokeEarly = true;
+                            return transformedItems; // break out early
+                        }
                     }
                 }
 
