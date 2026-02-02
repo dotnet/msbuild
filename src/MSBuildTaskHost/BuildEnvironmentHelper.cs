@@ -34,11 +34,6 @@ namespace Microsoft.Build.Shared
         private static readonly string[] s_msBuildProcess = { "MSBUILD", "MSBUILDTASKHOST" };
 
         /// <summary>
-        /// Name of MSBuild executable files.
-        /// </summary>
-        private static readonly string[] s_msBuildExeNames = { "MSBuild.exe", "MSBuild.dll" };
-
-        /// <summary>
         /// Gets the cached Build Environment instance.
         /// </summary>
         public static BuildEnvironment Instance
@@ -83,8 +78,7 @@ namespace Microsoft.Build.Shared
                 TryFromMSBuildProcess,
                 TryFromMSBuildAssembly,
                 TryFromDevConsole,
-                TryFromSetupApi,
-                TryFromAppContextBaseDirectory
+                TryFromSetupApi
             };
 
             foreach (var location in possibleLocations)
@@ -317,25 +311,6 @@ namespace Microsoft.Build.Shared
                 visualStudioPath: instances[0].Path);
         }
 
-        private static BuildEnvironment TryFromAppContextBaseDirectory()
-        {
-            // Assemblies compiled against anything older than .NET 4.0 won't have a System.AppContext
-            // Try the base directory that the assembly resolver uses to probe for assemblies.
-            // Under certain scenarios the assemblies are loaded from spurious locations like the NuGet package cache
-            // but the toolset files are copied to the app's directory via "contentFiles".
-
-            var appContextBaseDirectory = s_getAppContextBaseDirectory();
-            if (string.IsNullOrEmpty(appContextBaseDirectory))
-            {
-                return null;
-            }
-
-            // Look for possible MSBuild exe names in the AppContextBaseDirectory
-            return s_msBuildExeNames
-                .Select((name) => TryFromStandaloneMSBuildExe(Path.Combine(appContextBaseDirectory, name)))
-                .FirstOrDefault(env => env != null);
-        }
-
         private static BuildEnvironment TryFromStandaloneMSBuildExe(string msBuildExePath)
         {
             if (!string.IsNullOrEmpty(msBuildExePath) && FileSystems.Default.FileExists(msBuildExePath))
@@ -445,15 +420,6 @@ namespace Microsoft.Build.Shared
             return FileUtilities.ExecutingAssemblyPath;
         }
 
-        private static string GetAppContextBaseDirectory()
-        {
-#if !CLR2COMPATIBILITY // Assemblies compiled against anything older than .NET 4.0 won't have a System.AppContext
-            return AppContext.BaseDirectory;
-#else
-            return null;
-#endif
-        }
-
         private static string GetEnvironmentVariable(string variable)
         {
             return Environment.GetEnvironmentVariable(variable);
@@ -463,14 +429,13 @@ namespace Microsoft.Build.Shared
         /// Resets the current singleton instance (for testing).
         /// </summary>
         internal static void ResetInstance_ForUnitTestsOnly(Func<string> getProcessFromRunningProcess = null,
-            Func<string> getExecutingAssemblyPath = null, Func<string> getAppContextBaseDirectory = null,
+            Func<string> getExecutingAssemblyPath = null,
             Func<IEnumerable<VisualStudioInstance>> getVisualStudioInstances = null,
             Func<string, string> getEnvironmentVariable = null,
             Func<bool> runningTests = null)
         {
             s_getProcessFromRunningProcess = getProcessFromRunningProcess ?? GetProcessFromRunningProcess;
             s_getExecutingAssemblyPath = getExecutingAssemblyPath ?? GetExecutingAssemblyPath;
-            s_getAppContextBaseDirectory = getAppContextBaseDirectory ?? GetAppContextBaseDirectory;
             s_getVisualStudioInstances = getVisualStudioInstances ?? VisualStudioLocationHelper.GetInstances;
             s_getEnvironmentVariable = getEnvironmentVariable ?? GetEnvironmentVariable;
 
@@ -492,7 +457,6 @@ namespace Microsoft.Build.Shared
 
         private static Func<string> s_getProcessFromRunningProcess = GetProcessFromRunningProcess;
         private static Func<string> s_getExecutingAssemblyPath = GetExecutingAssemblyPath;
-        private static Func<string> s_getAppContextBaseDirectory = GetAppContextBaseDirectory;
         private static Func<IEnumerable<VisualStudioInstance>> s_getVisualStudioInstances = VisualStudioLocationHelper.GetInstances;
         private static Func<string, string> s_getEnvironmentVariable = GetEnvironmentVariable;
         private static Func<bool> s_runningTests = CheckIfRunningTests;
