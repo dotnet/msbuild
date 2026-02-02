@@ -542,7 +542,7 @@
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInPropertyReference">
         <source>MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</source>
-        <target state="new">MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</target>
+        <target state="translated">MSB4281: spazio imprevisto alla posizione "{1}" del riferimento alla proprietà "{0}". Si è dimenticato di rimuovere uno spazio?</target>
         <note>{StrBegin="MSB4281: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedQuotedStringInCondition">

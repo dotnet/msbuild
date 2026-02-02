@@ -542,7 +542,7 @@
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInPropertyReference">
         <source>MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</source>
-        <target state="new">MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</target>
+        <target state="translated">MSB4281: "{0}" 속성 참조의 "{1}" 위치에 예기치 않은 공백이 있습니다. 공백을 제거했는지 확인하세요.</target>
         <note>{StrBegin="MSB4281: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedQuotedStringInCondition">
