@@ -786,13 +786,12 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void RoundtripProjectEvaluationFinishedEventArgsWithIItemData()
         {
-            var projectFile = @"C:\foo\bar.proj";
             var itemDataWithMetadata = new TestItemData(
                 "TestItemSpec",
                 new Dictionary<string, string> { { "MetadataKey", "MetadataValue" }, { "Another", "Data" } });
             var args = new ProjectEvaluationFinishedEventArgs(
                 ResourceUtilities.GetResourceString("EvaluationFinished"),
-                projectFile)
+                @"C:\foo\bar.proj")
             {
                 BuildEventContext = BuildEventContext.Invalid,
                 ProjectFile = @"C:\foo\bar.proj",
@@ -811,6 +810,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Test implementation of IItemData for testing serialization of non-ITaskItem items.
+        /// This simulates how ProjectItem (which implements IItemData but not ITaskItem) is serialized.
         /// </summary>
         private sealed class TestItemData : IItemData
         {
@@ -823,8 +823,10 @@ namespace Microsoft.Build.UnitTests
                 _metadata = metadata ?? new Dictionary<string, string>();
             }
 
+            /// <inheritdoc />
             public string EvaluatedInclude => _evaluatedInclude;
 
+            /// <inheritdoc />
             public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata() => _metadata;
         }
 
