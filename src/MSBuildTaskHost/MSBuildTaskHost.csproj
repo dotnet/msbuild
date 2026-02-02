@@ -63,7 +63,6 @@
     <Compile Include="Framework\AssemblyUtilities.cs" />
     <Compile Include="Framework\BinaryReaderFactory.cs" />
     <Compile Include="Framework\BinaryTranslator.cs" />
-    <Compile Include="Framework\BuildEngineResult.cs" />
     <Compile Include="Framework\BuildEnvironmentState.cs" />
     <Compile Include="Framework\BuildException\BuildExceptionBase.cs" />
     <Compile Include="Framework\BuildException\BuildExceptionRemoteState.cs" />
@@ -71,7 +70,6 @@
     <Compile Include="Framework\BuildException\GenericBuildTransferredException.cs" />
     <Compile Include="Framework\ChangeWaves.cs" />
     <Compile Include="Framework\ErrorUtilities.cs" />
-    <Compile Include="Framework\IBuildEngine3.cs" />
     <Compile Include="Framework\IConstrainedEqualityComparer.cs" />
     <Compile Include="Framework\IExtendedBuildEventArgs.cs" />
     <Compile Include="Framework\ImmutableDictionaryExtensions.cs" />

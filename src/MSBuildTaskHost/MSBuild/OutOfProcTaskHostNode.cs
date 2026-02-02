@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -22,7 +22,7 @@ namespace Microsoft.Build.CommandLine
     /// <summary>
     /// This class represents an implementation of INode for out-of-proc node for hosting tasks.
     /// </summary>
-    internal class OutOfProcTaskHostNode : MarshalByRefObject, INodePacketFactory, INodePacketHandler, IBuildEngine3
+    internal class OutOfProcTaskHostNode : MarshalByRefObject, INodePacketFactory, INodePacketHandler, IBuildEngine2
     {
         /// <summary>
         /// Keeps a record of all environment variables that, on startup of the task host, have a different
@@ -359,38 +359,6 @@ namespace Microsoft.Build.CommandLine
         }
 
         #endregion // IBuildEngine2 Implementation (Methods)
-
-        #region IBuildEngine3 Implementation
-
-        /// <summary>
-        /// Stub implementation of IBuildEngine3.BuildProjectFilesInParallel.  The task host does not support IBuildEngine
-        /// callbacks for the purposes of building projects, so error.
-        /// </summary>
-        public BuildEngineResult BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<string>[] removeGlobalProperties, string[] toolsVersion, bool returnTargetOutputs)
-        {
-            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-            return new BuildEngineResult(false, null);
-        }
-
-        /// <summary>
-        /// Stub implementation of IBuildEngine3.Yield.  The task host does not support yielding, so just go ahead and silently
-        /// return, letting the task continue.
-        /// </summary>
-        public void Yield()
-        {
-            return;
-        }
-
-        /// <summary>
-        /// Stub implementation of IBuildEngine3.Reacquire. The task host does not support yielding, so just go ahead and silently
-        /// return, letting the task continue.
-        /// </summary>
-        public void Reacquire()
-        {
-            return;
-        }
-
-        #endregion // IBuildEngine3 Implementation
 
         #region INodePacketFactory Members
 
