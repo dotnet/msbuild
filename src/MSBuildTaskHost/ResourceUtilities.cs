@@ -2,18 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-#if !BUILDINGAPPXTASKS
 using System.Resources;
 using System.Diagnostics;
-#endif
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 
-#if BUILDINGAPPXTASKS
-namespace Microsoft.Build.AppxPackage.Shared
-#else
 namespace Microsoft.Build.Shared
-#endif
 {
     /// <summary>
     /// This class contains utility methods for dealing with resources.
@@ -35,10 +29,6 @@ namespace Microsoft.Build.Shared
         [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Scope = "member", Target = "Microsoft.Build.Shared.ResourceUtilities.#ExtractMessageCode(System.Boolean,System.String,System.String&)", Justification = "Unavoidable complexity")]
         internal static string ExtractMessageCode(bool msbuildCodeOnly, string message, out string? code)
         {
-#if !BUILDINGAPPXTASKS
-            ErrorUtilities.VerifyThrowInternalNull(message);
-#endif
-
             code = null;
             int i = 0;
 
@@ -47,7 +37,6 @@ namespace Microsoft.Build.Shared
                 i++;
             }
 
-#if !BUILDINGAPPXTASKS
             if (msbuildCodeOnly)
             {
                 if (
@@ -69,7 +58,6 @@ namespace Microsoft.Build.Shared
                 i += 8;
             }
             else
-#endif
             {
                 int j = i;
                 for (; j < message.Length; j++)
@@ -134,7 +122,6 @@ namespace Microsoft.Build.Shared
         private static string GetHelpKeyword(string resourceName)
             => "MSBuild." + resourceName;
 
-#if !BUILDINGAPPXTASKS
         /// <summary>
         /// Retrieves the contents of the named resource string.
         /// </summary>
@@ -475,7 +462,6 @@ namespace Microsoft.Build.Shared
 #endif
                 ErrorUtilities.ThrowInternalError(e.Message);
             }
-#endif
         }
     }
 }

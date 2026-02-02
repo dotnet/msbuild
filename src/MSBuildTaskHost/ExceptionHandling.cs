@@ -3,9 +3,6 @@
 
 #nullable disable
 
-#if BUILDINGAPPXTASKS
-namespace Microsoft.Build.AppxPackage.Shared
-#else
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -26,7 +23,6 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
-#endif
 {
     /// <summary>
     /// Utility methods for classifying and handling exceptions.
@@ -105,12 +101,10 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string DumpFilePath => s_dumpFileName;
 
-#if !BUILDINGAPPXTASKS
         /// <summary>
         /// The filename that exceptions will be dumped to
         /// </summary>
         private static string s_dumpFileName;
-#endif
         /// <summary>
         /// If the given exception is "ignorable under some circumstances" return false.
         /// Otherwise it's "really bad", and return true.
@@ -128,9 +122,7 @@ namespace Microsoft.Build.Shared
 #if !TASKHOST
              || e is CriticalTaskException
 #endif
-#if !BUILDINGAPPXTASKS
              || e is InternalErrorException
-#endif
              )
             {
                 // Ideally we would include NullReferenceException, because it should only ever be thrown by CLR (use ArgumentNullException for arguments)
@@ -232,8 +224,6 @@ namespace Microsoft.Build.Shared
                 Column = column
             };
         }
-
-#if !BUILDINGAPPXTASKS
 
         /// <summary>
         /// If the given exception is file IO related or Xml related return false.
@@ -424,7 +414,6 @@ namespace Microsoft.Build.Shared
 
             return builder.ToString();
         }
-#endif
 
         /// <summary> Line and column pair. </summary>
         internal struct LineAndColumn

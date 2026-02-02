@@ -11,11 +11,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Build.Framework;
 
-#if BUILDINGAPPXTASKS
-namespace Microsoft.Build.AppxPackage.Shared
-#else
 namespace Microsoft.Build.Shared
-#endif
 {
     /// <summary>
     /// This class contains methods that are useful for error checking and validation.
@@ -38,8 +34,6 @@ namespace Microsoft.Build.Shared
                 }
             }
         }
-
-#if !BUILDINGAPPXTASKS
 
         internal static void VerifyThrowInternalError([DoesNotReturnIf(false)] bool condition, string message, params object?[]? args)
         {
@@ -646,6 +640,5 @@ namespace Microsoft.Build.Shared
                     arrayParameterName);
             }
         }
-#endif
     }
 }
