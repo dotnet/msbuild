@@ -199,7 +199,7 @@ namespace Microsoft.Build.Shared
 
                         modifiedItemSpec = Path.GetPathRoot(fullPath);
 
-                        if (!FrameworkFileUtilities.EndsWithSlash(modifiedItemSpec))
+                        if (!EndsWithSlash(modifiedItemSpec))
                         {
                             ErrorUtilities.VerifyThrow(FileUtilitiesRegex.StartsWithUncPattern(modifiedItemSpec),
                                 "Only UNC shares should be missing trailing slashes.");
@@ -221,7 +221,7 @@ namespace Microsoft.Build.Shared
                         else
                         {
                             // Fix path to avoid problem with Path.GetFileNameWithoutExtension when backslashes in itemSpec on Unix
-                            modifiedItemSpec = Path.GetFileNameWithoutExtension(FrameworkFileUtilities.FixFilePath(itemSpec));
+                            modifiedItemSpec = Path.GetFileNameWithoutExtension(FixFilePath(itemSpec));
                         }
                     }
                     else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Extension, StringComparison.OrdinalIgnoreCase))
@@ -260,7 +260,7 @@ namespace Microsoft.Build.Shared
 
                         if (length != -1)
                         {
-                            ErrorUtilities.VerifyThrow((modifiedItemSpec.Length > length) && FrameworkFileUtilities.IsSlash(modifiedItemSpec[length]),
+                            ErrorUtilities.VerifyThrow((modifiedItemSpec.Length > length) && IsSlash(modifiedItemSpec[length]),
                                                        "Root directory must have a trailing slash.");
 
                             modifiedItemSpec = modifiedItemSpec.Substring(length + 1);

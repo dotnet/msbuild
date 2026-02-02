@@ -18,6 +18,8 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static partial class FileUtilities
     {
+        private static readonly char[] s_slashes = ['/', '\\'];
+
         // net35 taskhost does not support AsyncLocal, and the scenario is not relevant there.
         internal static string CurrentThreadWorkingDirectory = null;
 
@@ -52,6 +54,33 @@ namespace Microsoft.Build.Shared
         internal static char[] InvalidFileNameChars => InvalidFileNameCharsArray;
 
         /// <summary>
+        /// Indicates if the given character is a slash.
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns>true, if slash</returns>
+        private static bool IsSlash(char c)
+        {
+            return (c == Path.DirectorySeparatorChar) || (c == Path.AltDirectorySeparatorChar);
+        }
+
+        /// <summary>
+        /// Indicates if the given file-spec ends with a slash.
+        /// </summary>
+        /// <param name="fileSpec">The file spec.</param>
+        /// <returns>true, if file-spec has trailing slash</returns>
+        private static bool EndsWithSlash(string fileSpec)
+        {
+            return (fileSpec.Length > 0)
+                ? IsSlash(fileSpec[fileSpec.Length - 1])
+                : false;
+        }
+
+        private static string FixFilePath(string path)
+        {
+            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/');
+        }
+
+        /// <summary>
         /// Gets the canonicalized full path of the provided path.
         /// Guidance for use: call this on all paths accepted through public entry
         /// points that need normalization. After that point, only verify the path
@@ -62,7 +91,7 @@ namespace Microsoft.Build.Shared
         {
             ErrorUtilities.VerifyThrowArgumentLength(path);
             string fullPath = GetFullPath(path);
-            return FrameworkFileUtilities.FixFilePath(fullPath);
+            return FixFilePath(fullPath);
         }
 
         private static string GetFullPath(string path)
@@ -127,7 +156,7 @@ namespace Microsoft.Build.Shared
         /// <returns>directory path</returns>
         private static string GetDirectory(string fileSpec)
         {
-            string directory = Path.GetDirectoryName(FrameworkFileUtilities.FixFilePath(fileSpec));
+            string directory = Path.GetDirectoryName(FixFilePath(fileSpec));
 
             // if file-spec is a root directory e.g. c:, c:\, \, \\server\share
             // NOTE: Path.GetDirectoryName also treats invalid UNC file-specs as root directories e.g. \\, \\server
@@ -136,7 +165,7 @@ namespace Microsoft.Build.Shared
                 // just use the file-spec as-is
                 directory = fileSpec;
             }
-            else if ((directory.Length > 0) && !FrameworkFileUtilities.EndsWithSlash(directory))
+            else if ((directory.Length > 0) && !EndsWithSlash(directory))
             {
                 // restore trailing slash if Path.GetDirectoryName has removed it (this happens with non-root directories)
                 directory += Path.DirectorySeparatorChar;
@@ -164,7 +193,7 @@ namespace Microsoft.Build.Shared
         private static string GetFullPath(string fileSpec, string currentDirectory, bool escape = true)
         {
             // Sending data out of the engine into the filesystem, so time to unescape.
-            fileSpec = FrameworkFileUtilities.FixFilePath(EscapingUtilities.UnescapeAll(fileSpec));
+            fileSpec = FixFilePath(EscapingUtilities.UnescapeAll(fileSpec));
 
             string fullPath = NormalizePath(Path.Combine(currentDirectory, fileSpec));
             // In some cases we might want to NOT escape in order to preserve symbols like @, %, $ etc.
@@ -174,7 +203,7 @@ namespace Microsoft.Build.Shared
                 fullPath = EscapingUtilities.Escape(fullPath);
             }
 
-            if (!FrameworkFileUtilities.EndsWithSlash(fullPath))
+            if (!EndsWithSlash(fullPath))
             {
                 if (FileUtilitiesRegex.IsDrivePattern(fileSpec) ||
                     FileUtilitiesRegex.IsUncPattern(fullPath))
@@ -213,7 +242,7 @@ namespace Microsoft.Build.Shared
             // It also throws exceptions on illegal path characters
             if (path.IndexOfAny(InvalidPathChars) < 0)
             {
-                int lastDirectorySeparator = path.LastIndexOfAny(FrameworkFileUtilities.Slashes);
+                int lastDirectorySeparator = path.LastIndexOfAny(s_slashes);
                 return path.IndexOfAny(InvalidFileNameChars, lastDirectorySeparator >= 0 ? lastDirectorySeparator + 1 : 0) >= 0;
             }
 
@@ -270,7 +299,7 @@ namespace Microsoft.Build.Shared
                 // Attempt to make it shorter -- perhaps there are some \..\ elements
                 path = GetFullPathNoThrow(path);
             }
-            return FrameworkFileUtilities.FixFilePath(path);
+            return FixFilePath(path);
         }
 
         private static bool IsPathTooLong(string path)
@@ -294,7 +323,7 @@ namespace Microsoft.Build.Shared
         {
             try
             {
-                return Path.IsPathRooted(FrameworkFileUtilities.FixFilePath(path));
+                return Path.IsPathRooted(FixFilePath(path));
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {

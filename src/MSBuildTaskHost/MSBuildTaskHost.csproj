@@ -71,7 +71,6 @@
     <Compile Include="Framework\BuildException\GenericBuildTransferredException.cs" />
     <Compile Include="Framework\ChangeWaves.cs" />
     <Compile Include="Framework\ErrorUtilities.cs" />
-    <Compile Include="Framework\FileUtilities.cs" />
     <Compile Include="Framework\IBuildEngine3.cs" />
     <Compile Include="Framework\IConstrainedEqualityComparer.cs" />
     <Compile Include="Framework\IExtendedBuildEventArgs.cs" />
