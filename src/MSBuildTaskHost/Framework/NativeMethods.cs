@@ -12,6 +12,8 @@ namespace Microsoft.Build.Framework;
 
 internal static class NativeMethods
 {
+    public static bool Is64Bit => IntPtr.Size == 8;
+
     private const int FILE_ATTRIBUTE_DIRECTORY = 0x00000010;
 
     /// <summary>
@@ -21,13 +23,6 @@ internal static class NativeMethods
 
     private const string WINDOWS_FILE_SYSTEM_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\FileSystem";
     private const string WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME = "LongPathsEnabled";
-
-    // As defined in winnt.h:
-    private const ushort PROCESSOR_ARCHITECTURE_INTEL = 0;
-    private const ushort PROCESSOR_ARCHITECTURE_ARM = 5;
-    private const ushort PROCESSOR_ARCHITECTURE_IA64 = 6;
-    private const ushort PROCESSOR_ARCHITECTURE_AMD64 = 9;
-    private const ushort PROCESSOR_ARCHITECTURE_ARM64 = 12;
 
     private enum LOGICAL_PROCESSOR_RELATIONSHIP
     {
@@ -64,66 +59,6 @@ internal static class NativeMethods
     }
 
     /// <summary>
-    /// Processor architecture values
-    /// </summary>
-    public enum ProcessorArchitectures
-    {
-        // Intel 32 bit
-        X86,
-
-        // AMD64 64 bit
-        X64,
-
-        // Itanium 64
-        IA64,
-
-        // ARM
-        ARM,
-
-        // ARM64
-        ARM64,
-
-        // WebAssembly
-        WASM,
-
-        // S390x
-        S390X,
-
-        // LongAarch64
-        LOONGARCH64,
-
-        // 32-bit ARMv6
-        ARMV6,
-
-        // PowerPC 64-bit (little-endian)
-        PPC64LE,
-
-        // Who knows
-        Unknown
-    }
-
-    /// <summary>
-    /// Structure that contain information about the system on which we are running
-    /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
-    private struct SYSTEM_INFO
-    {
-        // This is a union of a DWORD and a struct containing 2 WORDs.
-        internal ushort wProcessorArchitecture;
-        internal ushort wReserved;
-
-        internal uint dwPageSize;
-        internal IntPtr lpMinimumApplicationAddress;
-        internal IntPtr lpMaximumApplicationAddress;
-        internal IntPtr dwActiveProcessorMask;
-        internal uint dwNumberOfProcessors;
-        internal uint dwProcessorType;
-        internal uint dwAllocationGranularity;
-        internal ushort wProcessorLevel;
-        internal ushort wProcessorRevision;
-    }
-
-    /// <summary>
     /// Contains information about a file or directory; used by GetFileAttributesEx.
     /// </summary>
     [StructLayout(LayoutKind.Sequential)]
@@ -138,45 +73,6 @@ internal static class NativeMethods
         internal uint ftLastWriteTimeHigh;
         internal uint fileSizeHigh;
         internal uint fileSizeLow;
-    }
-
-    private class SystemInformationData
-    {
-        /// <summary>
-        /// Architecture as far as the current process is concerned.
-        /// It's x86 in wow64 (native architecture is x64 in that case).
-        /// Otherwise it's the same as the native architecture.
-        /// </summary>
-        public readonly ProcessorArchitectures ProcessorArchitectureType;
-
-        /// <summary>
-        /// Convert SYSTEM_INFO architecture values to the internal enum
-        /// </summary>
-        /// <param name="arch"></param>
-        /// <returns></returns>
-        private static ProcessorArchitectures ConvertSystemArchitecture(ushort arch)
-        {
-            return arch switch
-            {
-                PROCESSOR_ARCHITECTURE_INTEL => ProcessorArchitectures.X86,
-                PROCESSOR_ARCHITECTURE_AMD64 => ProcessorArchitectures.X64,
-                PROCESSOR_ARCHITECTURE_ARM => ProcessorArchitectures.ARM,
-                PROCESSOR_ARCHITECTURE_IA64 => ProcessorArchitectures.IA64,
-                PROCESSOR_ARCHITECTURE_ARM64 => ProcessorArchitectures.ARM64,
-                _ => ProcessorArchitectures.Unknown,
-            };
-        }
-
-        /// <summary>
-        /// Read system info values
-        /// </summary>
-        public SystemInformationData()
-        {
-            var systemInfo = new SYSTEM_INFO();
-
-            GetSystemInfo(ref systemInfo);
-            ProcessorArchitectureType = ConvertSystemArchitecture(systemInfo.wProcessorArchitecture);
-        }
     }
 
     public static int GetLogicalCoreCount()
@@ -342,44 +238,6 @@ internal static class NativeMethods
             }
         }
     }
-
-    /// <summary>
-    /// System information, initialized when required.
-    /// </summary>
-    /// <remarks>
-    /// Initially implemented as <see cref="Lazy{SystemInformationData}"/>, but
-    /// that's .NET 4+, and this is used in MSBuildTaskHost.
-    /// </remarks>
-    private static SystemInformationData SystemInformation
-    {
-        get
-        {
-            if (!_systemInformationInitialized)
-            {
-                lock (SystemInformationLock)
-                {
-                    if (!_systemInformationInitialized)
-                    {
-                        _systemInformation = new SystemInformationData();
-                        _systemInformationInitialized = true;
-                    }
-                }
-            }
-            return _systemInformation;
-        }
-    }
-
-    private static SystemInformationData _systemInformation;
-    private static bool _systemInformationInitialized;
-    private static readonly LockType SystemInformationLock = new LockType();
-
-    /// <summary>
-    /// Architecture getter
-    /// </summary>
-    internal static ProcessorArchitectures ProcessorArchitecture => SystemInformation.ProcessorArchitectureType;
-
-    [DllImport("kernel32.dll", SetLastError = true)]
-    private static extern void GetSystemInfo(ref SYSTEM_INFO lpSystemInfo);
 
     [DllImport("kernel32.dll", SetLastError = true)]
     private static extern bool GetLogicalProcessorInformationEx(LOGICAL_PROCESSOR_RELATIONSHIP RelationshipType, IntPtr Buffer, ref uint ReturnedLength);
