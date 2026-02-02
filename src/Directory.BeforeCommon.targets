@@ -75,7 +75,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
     <FeatureAppDomain>true</FeatureAppDomain>
-    <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PRINCIPAL_WINDOWS</DefineConstants>
     <FeatureSystemConfiguration>true</FeatureSystemConfiguration>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_ABORT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_NET35_TASKHOST</DefineConstants>

@@ -8,10 +8,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Runtime.InteropServices;
-#if FEATURE_SECURITY_PRINCIPAL_WINDOWS || RUNTIME_TYPE_NETCORE
 using System.Security.Principal;
-#endif
-
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
@@ -1013,7 +1010,6 @@ namespace Microsoft.Build.Internal
                 context |= HandshakeOptions.LowPriority;
             }
 
-#if FEATURE_SECURITY_PRINCIPAL_WINDOWS || RUNTIME_TYPE_NETCORE
             // If we are running in elevated privs, we will only accept a handshake from an elevated process as well.
             // Both the client and the host will calculate this separately, and the idea is that if they come out the same
             // then we can be sufficiently confident that the other side has the same elevation level as us.  This is complementary
@@ -1026,7 +1022,6 @@ namespace Microsoft.Build.Internal
             {
                 context |= HandshakeOptions.Administrator;
             }
-#endif
             return context;
         }
 
