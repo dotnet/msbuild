@@ -75,50 +75,15 @@
     <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
     <FeatureAppDomain>true</FeatureAppDomain>
-    <DefineConstants>$(DefineConstants);FEATURE_ASPNET_COMPILER</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_COMPILED_XSL</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_COMPILE_IN_TESTS</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_CODETASKFACTORY</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_ENCODING_DEFAULT</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_ENVIRONMENT_SYSTEMDIRECTORY</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_FILE_TRACKER</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_GAC</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_HTTP_LISTENER</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_INSTALLED_MSBUILD</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_PERFORMANCE_COUNTERS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_PIPE_SECURITY</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_PFX_SIGNING</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_REFLECTION_EMIT_DEBUG_INFO</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_REGISTRY_TOOLSETS</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_REGISTRY_SDKS</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_REGISTRYHIVE_DYNDATA</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_RESGEN</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_RESGENCACHE</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_RESOURCE_EXPOSURE</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_RESXREADER_LIVEDESERIALIZATION</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_RUN_EXE_IN_TESTS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PERMISSIONS</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_SECURITY_PRINCIPAL_WINDOWS</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_STRONG_NAMES</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_SYSTEM_CONFIGURATION</DefineConstants>
     <FeatureSystemConfiguration>true</FeatureSystemConfiguration>
-    <DefineConstants>$(DefineConstants);FEATURE_TASK_GENERATERESOURCES</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_ABORT</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_THREAD_CULTURE</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_MULTIPLE_TOOLSETS</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_NET35_TASKHOST</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_XAML_TYPES</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_XAMLTASKFACTORY</DefineConstants>
     <FeatureXamlTypes>true</FeatureXamlTypes>
-    <DefineConstants>$(DefineConstants);FEATURE_XML_SCHEMA_VALIDATION</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_WIN32_REGISTRY</DefineConstants>
     <DefineConstants Condition="'$(TargetFrameworkVersion)' != 'v3.5' and '$(DotNetBuildSourceOnly)' != 'true'">$(DefineConstants);FEATURE_VISUALSTUDIOSETUP</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_MSCOREE</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
