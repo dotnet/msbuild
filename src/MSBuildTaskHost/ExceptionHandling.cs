@@ -91,9 +91,6 @@ namespace Microsoft.Build.Shared
              || e is ThreadAbortException
              || e is ThreadInterruptedException
              || e is AccessViolationException
-#if !TASKHOST
-             || e is CriticalTaskException
-#endif
              || e is InternalErrorException)
             {
                 // Ideally we would include NullReferenceException, because it should only ever be thrown by CLR (use ArgumentNullException for arguments)

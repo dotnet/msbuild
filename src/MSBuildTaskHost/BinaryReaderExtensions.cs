@@ -11,25 +11,16 @@ namespace Microsoft.Build.Shared
 {
     internal static class BinaryReaderExtensions
     {
-#if !TASKHOST
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
         public static string? ReadOptionalString(this BinaryReader reader)
         {
             return reader.ReadByte() == 0 ? null : reader.ReadString();
         }
 
-#if !TASKHOST
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
         public static int? ReadOptionalInt32(this BinaryReader reader)
         {
             return reader.ReadByte() == 0 ? null : reader.ReadInt32();
         }
 
-#if !TASKHOST
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
         public static int Read7BitEncodedInt(this BinaryReader reader)
         {
             // Read out an Int32 7 bits at a time.  The high bit
@@ -53,10 +44,6 @@ namespace Microsoft.Build.Shared
             } while ((b & 0x80) != 0);
             return count;
         }
-
-#if !TASKHOST
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
         public static DateTime ReadTimestamp(this BinaryReader reader)
         {
             long timestampTicks = reader.ReadInt64();
@@ -65,37 +52,6 @@ namespace Microsoft.Build.Shared
             return timestamp;
         }
 
-#if !TASKHOST
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static BuildEventContext? ReadOptionalBuildEventContext(this BinaryReader reader)
-        {
-            if (reader.ReadByte() == 0)
-            {
-                return null;
-            }
-
-            return reader.ReadBuildEventContext();
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static BuildEventContext ReadBuildEventContext(this BinaryReader reader)
-        {
-            int nodeId = reader.ReadInt32();
-            int projectContextId = reader.ReadInt32();
-            int targetId = reader.ReadInt32();
-            int taskId = reader.ReadInt32();
-            int submissionId = reader.ReadInt32();
-            int projectInstanceId = reader.ReadInt32();
-            int evaluationId = reader.ReadInt32();
-
-            var buildEventContext = new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, targetId, taskId);
-            return buildEventContext;
-        }
-#endif
-
-#if !TASKHOST
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-#endif
         public static unsafe Guid ReadGuid(this BinaryReader reader)
         {
             return new Guid(reader.ReadBytes(sizeof(Guid)));

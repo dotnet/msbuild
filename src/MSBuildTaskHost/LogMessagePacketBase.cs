@@ -9,11 +9,6 @@ using System.Reflection;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 
-#if !TASKHOST
-using Microsoft.Build.Framework.Telemetry;
-using Microsoft.Build.Experimental.BuildCheck;
-#endif
-
 #nullable disable
 
 namespace Microsoft.Build.Shared
@@ -260,13 +255,11 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static readonly int s_defaultPacketVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
 
-#if TASKHOST
         /// <summary>
         /// Dictionary of methods used to read BuildEventArgs.
         /// </summary>
         private static readonly Dictionary<LoggingEventType, MethodInfo> s_readMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
 
-#endif
         /// <summary>
         /// Dictionary of methods used to write BuildEventArgs.
         /// </summary>
@@ -442,7 +435,6 @@ namespace Microsoft.Build.Shared
             if (eventCanSerializeItself)
             {
 
-#if TASKHOST
                 MethodInfo methodInfo = null;
                 lock (s_readMethodCache)
                 {
@@ -457,10 +449,6 @@ namespace Microsoft.Build.Shared
                 ArgsReaderDelegate readerMethod = (ArgsReaderDelegate)CreateDelegateRobust(typeof(ArgsReaderDelegate), _buildEvent, methodInfo);
 
                 readerMethod(translator.Reader, packetVersion);
-
-#else
-                _buildEvent.CreateFromStream(translator.Reader, packetVersion);
-#endif
 
                 TranslateAdditionalProperties(translator, _eventType, _buildEvent);
             }
@@ -542,37 +530,6 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
                 LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(null),
 
-#if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
-                LoggingEventType.AssemblyLoadEvent => new AssemblyLoadBuildEventArgs(),
-                LoggingEventType.TaskParameterEvent => new TaskParameterEventArgs(0, null, null, true, default),
-                LoggingEventType.ProjectEvaluationStartedEvent => new ProjectEvaluationStartedEventArgs(),
-                LoggingEventType.ProjectEvaluationFinishedEvent => new ProjectEvaluationFinishedEventArgs(),
-                LoggingEventType.ProjectImportedEvent => new ProjectImportedEventArgs(),
-                LoggingEventType.TargetSkipped => new TargetSkippedEventArgs(),
-                LoggingEventType.Telemetry => new TelemetryEventArgs(),
-                LoggingEventType.ExtendedCustomEvent => new ExtendedCustomBuildEventArgs(),
-                LoggingEventType.ExtendedBuildErrorEvent => new ExtendedBuildErrorEventArgs(),
-                LoggingEventType.ExtendedBuildWarningEvent => new ExtendedBuildWarningEventArgs(),
-                LoggingEventType.ExtendedBuildMessageEvent => new ExtendedBuildMessageEventArgs(),
-                LoggingEventType.ExtendedCriticalBuildMessageEvent => new ExtendedCriticalBuildMessageEventArgs(),
-                LoggingEventType.ExternalProjectStartedEvent => new ExternalProjectStartedEventArgs(null, null, null, null, null),
-                LoggingEventType.ExternalProjectFinishedEvent => new ExternalProjectFinishedEventArgs(null, null, null, null, false),
-                LoggingEventType.CriticalBuildMessage => new CriticalBuildMessageEventArgs(null, null, null, -1, -1, -1, -1, null, null, null),
-                LoggingEventType.MetaprojectGenerated => new MetaprojectGeneratedEventArgs(null, null, null),
-                LoggingEventType.PropertyInitialValueSet => new PropertyInitialValueSetEventArgs(),
-                LoggingEventType.PropertyReassignment => new PropertyReassignmentEventArgs(),
-                LoggingEventType.UninitializedPropertyRead => new UninitializedPropertyReadEventArgs(),
-                LoggingEventType.GeneratedFileUsedEvent => new GeneratedFileUsedEventArgs(),
-                LoggingEventType.BuildCheckMessageEvent => new BuildCheckResultMessage(),
-                LoggingEventType.BuildCheckWarningEvent => new BuildCheckResultWarning(),
-                LoggingEventType.BuildCheckErrorEvent => new BuildCheckResultError(),
-                LoggingEventType.BuildCheckAcquisitionEvent => new BuildCheckAcquisitionEventArgs(),
-                LoggingEventType.BuildCheckTracingEvent => new BuildCheckTracingEventArgs(),
-                LoggingEventType.EnvironmentVariableReadEvent => new EnvironmentVariableReadEventArgs(),
-                LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(),
-                LoggingEventType.BuildCanceledEvent => new BuildCanceledEventArgs("Build canceled."),
-                LoggingEventType.WorkerNodeTelemetryEvent => new WorkerNodeTelemetryEventArgs(),
-#endif
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
         }
@@ -595,12 +552,6 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.TaskCommandLineEvent;
             }
-#if !TASKHOST
-            else if (eventType == typeof(TaskParameterEventArgs))
-            {
-                return LoggingEventType.TaskParameterEvent;
-            }
-#endif
             else if (eventType == typeof(ProjectFinishedEventArgs))
             {
                 return LoggingEventType.ProjectFinishedEvent;
@@ -617,113 +568,6 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.ExternalProjectFinishedEvent;
             }
-
-#if !TASKHOST
-            else if (eventType == typeof(ProjectEvaluationFinishedEventArgs))
-            {
-                return LoggingEventType.ProjectEvaluationFinishedEvent;
-            }
-            else if (eventType == typeof(ProjectEvaluationStartedEventArgs))
-            {
-                return LoggingEventType.ProjectEvaluationStartedEvent;
-            }
-            else if (eventType == typeof(ProjectImportedEventArgs))
-            {
-                return LoggingEventType.ProjectImportedEvent;
-            }
-            else if (eventType == typeof(TargetSkippedEventArgs))
-            {
-                return LoggingEventType.TargetSkipped;
-            }
-            else if (eventType == typeof(TelemetryEventArgs))
-            {
-                return LoggingEventType.Telemetry;
-            }
-            else if (eventType == typeof(AssemblyLoadBuildEventArgs))
-            {
-                return LoggingEventType.AssemblyLoadEvent;
-            }
-            else if (eventType == typeof(ExtendedCustomBuildEventArgs))
-            {
-                return LoggingEventType.ExtendedCustomEvent;
-            }
-            else if (eventType == typeof(ExtendedBuildErrorEventArgs))
-            {
-                return LoggingEventType.ExtendedBuildErrorEvent;
-            }
-            else if (eventType == typeof(ExtendedBuildWarningEventArgs))
-            {
-                return LoggingEventType.ExtendedBuildWarningEvent;
-            }
-            else if (eventType == typeof(ExtendedBuildMessageEventArgs))
-            {
-                return LoggingEventType.ExtendedBuildMessageEvent;
-            }
-            else if (eventType == typeof(CriticalBuildMessageEventArgs))
-            {
-                return LoggingEventType.CriticalBuildMessage;
-            }
-            else if (eventType == typeof(ExtendedCriticalBuildMessageEventArgs))
-            {
-                return LoggingEventType.ExtendedCriticalBuildMessageEvent;
-            }
-            else if (eventType == typeof(MetaprojectGeneratedEventArgs))
-            {
-                return LoggingEventType.MetaprojectGenerated;
-            }
-            else if (eventType == typeof(PropertyInitialValueSetEventArgs))
-            {
-                return LoggingEventType.PropertyInitialValueSet;
-            }
-            else if (eventType == typeof(PropertyReassignmentEventArgs))
-            {
-                return LoggingEventType.PropertyReassignment;
-            }
-            else if (eventType == typeof(UninitializedPropertyReadEventArgs))
-            {
-                return LoggingEventType.UninitializedPropertyRead;
-            }
-            else if (eventType == typeof(GeneratedFileUsedEventArgs))
-            {
-                return LoggingEventType.GeneratedFileUsedEvent;
-            }
-            else if (eventType == typeof(BuildCheckResultMessage))
-            {
-                return LoggingEventType.BuildCheckMessageEvent;
-            }
-            else if (eventType == typeof(BuildCheckResultWarning))
-            {
-                return LoggingEventType.BuildCheckWarningEvent;
-            }
-            else if (eventType == typeof(BuildCheckResultError))
-            {
-                return LoggingEventType.BuildCheckErrorEvent;
-            }
-            else if (eventType == typeof(BuildCheckAcquisitionEventArgs))
-            {
-                return LoggingEventType.BuildCheckAcquisitionEvent;
-            }
-            else if (eventType == typeof(BuildCheckTracingEventArgs))
-            {
-                return LoggingEventType.BuildCheckTracingEvent;
-            }
-            else if (eventType == typeof(EnvironmentVariableReadEventArgs))
-            {
-                return LoggingEventType.EnvironmentVariableReadEvent;
-            }
-            else if (eventType == typeof(BuildSubmissionStartedEventArgs))
-            {
-                return LoggingEventType.BuildSubmissionStartedEvent;
-            }
-            else if (eventType == typeof(BuildCanceledEventArgs))
-            {
-                return LoggingEventType.BuildCanceledEvent;
-            }
-            else if (eventType == typeof(WorkerNodeTelemetryEventArgs))
-            {
-                return LoggingEventType.WorkerNodeTelemetryEvent;
-            }
-#endif
             else if (eventType == typeof(TargetStartedEventArgs))
             {
                 return LoggingEventType.TargetStartedEvent;

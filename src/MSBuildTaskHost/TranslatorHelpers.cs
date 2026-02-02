@@ -2,10 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-#if !TASKHOST
-using System.Collections.Frozen;
-using System.Collections.Immutable;
-#endif
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
@@ -177,87 +173,6 @@ namespace Microsoft.Build.BackEnd
         {
             translator.TranslateDictionary(ref dictionary, AdaptFactory(valueFactory), valueFactory, collectionCreator);
         }
-
-#if !TASKHOST
-        public static void TranslateDictionary(
-            this ITranslator translator,
-            ref FrozenDictionary<string, string> dictionary,
-            IEqualityComparer<string> comparer)
-        {
-            IDictionary<string, string> localDict = dictionary;
-            translator.TranslateDictionary(ref localDict, capacity => new Dictionary<string, string>(capacity, comparer));
-
-            if (translator.Mode == TranslationDirection.ReadFromStream)
-            {
-                dictionary = localDict?.ToFrozenDictionary(comparer);
-            }
-        }
-
-        public static void TranslateDictionary(
-            this ITranslator translator,
-            ref IReadOnlyDictionary<string, string> dictionary,
-            IEqualityComparer<string> comparer)
-        {
-            // Defensive copy since immutable dictionaries are expected to be overwritten.
-            IReadOnlyDictionary<string, string> localDict = dictionary;
-
-            if (!translator.TranslateNullable(localDict))
-            {
-                return;
-            }
-
-            if (translator.Mode == TranslationDirection.WriteToStream)
-            {
-                int count = localDict.Count;
-                translator.Translate(ref count);
-
-                foreach (KeyValuePair<string, string> kvp in localDict)
-                {
-                    string key = kvp.Key;
-                    string value = kvp.Value;
-
-                    translator.Translate(ref key);
-                    translator.Translate(ref value);
-                }
-            }
-            else
-            {
-                int count = default;
-                translator.Translate(ref count);
-
-                ImmutableDictionary<string, string>.Builder builder = ImmutableDictionary.Create<string, string>(comparer).ToBuilder();
-
-                for (int i = 0; i < count; i++)
-                {
-                    string key = null;
-                    string value = null;
-
-                    translator.Translate(ref key);
-                    translator.Translate(ref value);
-
-                    builder[key] = value;
-                }
-
-                dictionary = builder.ToImmutable();
-            }
-        }
-
-        public static void TranslateDictionary(
-            this ITranslator translator,
-            ref ImmutableDictionary<string, string> dictionary,
-            IEqualityComparer<string> comparer)
-        {
-            // Defensive copy since immutable dictionaries are expected to be overwritten.
-            IReadOnlyDictionary<string, string> localDict = dictionary;
-
-            TranslateDictionary(translator, ref localDict, comparer);
-
-            if (translator.Mode == TranslationDirection.ReadFromStream)
-            {
-                dictionary = (ImmutableDictionary<string, string>)localDict;
-            }
-        }
-#endif
 
         public static void TranslateHashSet<T>(
             this ITranslator translator,
