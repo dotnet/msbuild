@@ -78,7 +78,6 @@
     <FeatureSystemConfiguration>true</FeatureSystemConfiguration>
     <DefineConstants>$(DefineConstants);FEATURE_NET35_TASKHOST</DefineConstants>
     <FeatureXamlTypes>true</FeatureXamlTypes>
-    <DefineConstants Condition="'$(TargetFrameworkVersion)' != 'v3.5' and '$(DotNetBuildSourceOnly)' != 'true'">$(DefineConstants);FEATURE_VISUALSTUDIOSETUP</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>

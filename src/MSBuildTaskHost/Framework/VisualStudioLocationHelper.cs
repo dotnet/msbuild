@@ -3,10 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-#if FEATURE_VISUALSTUDIOSETUP
-using System.Runtime.InteropServices;
-using Microsoft.VisualStudio.Setup.Configuration;
-#endif
 
 #nullable disable
 
@@ -19,10 +15,6 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal class VisualStudioLocationHelper
     {
-#if FEATURE_VISUALSTUDIOSETUP
-        private const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
-#endif // FEATURE_VISUALSTUDIOSETUP
-
         /// <summary>
         /// Query the Visual Studio setup API to get instances of Visual Studio installed
         /// on the machine. Will not include anything before Visual Studio "15".
@@ -31,86 +23,8 @@ namespace Microsoft.Build.Shared
         internal static IList<VisualStudioInstance> GetInstances()
         {
             var validInstances = new List<VisualStudioInstance>();
-
-#if FEATURE_VISUALSTUDIOSETUP
-            try
-            {
-                // This code is not obvious. See the sample (link above) for reference.
-                var query = (ISetupConfiguration2)GetQuery();
-                var e = query.EnumAllInstances();
-
-                int fetched;
-                var instances = new ISetupInstance[1];
-                do
-                {
-                    // Call e.Next to query for the next instance (single item or nothing returned).
-                    e.Next(1, instances, out fetched);
-                    if (fetched <= 0)
-                    {
-                        continue;
-                    }
-
-                    var instance = instances[0];
-                    var state = ((ISetupInstance2)instance).GetState();
-                    Version version;
-
-                    try
-                    {
-                        version = new Version(instance.GetInstallationVersion());
-                    }
-                    catch (FormatException)
-                    {
-                        continue;
-                    }
-
-                    // If the install was complete and a valid version, consider it.
-                    if (state == InstanceState.Complete)
-                    {
-                        validInstances.Add(new VisualStudioInstance(
-                            instance.GetDisplayName(),
-                            instance.GetInstallationPath(),
-                            version));
-                    }
-                } while (fetched > 0);
-            }
-            catch (COMException)
-            { }
-            catch (DllNotFoundException)
-            {
-                // This is OK, VS "15" or greater likely not installed.
-            }
-#endif
             return validInstances;
         }
-
-#if FEATURE_VISUALSTUDIOSETUP
-        private static ISetupConfiguration GetQuery()
-        {
-            try
-            {
-                // Try to CoCreate the class object.
-                return new SetupConfiguration();
-            }
-            catch (COMException ex) when (ex.ErrorCode == REGDB_E_CLASSNOTREG)
-            {
-                // Try to get the class object using app-local call.
-                ISetupConfiguration query;
-                var result = GetSetupConfiguration(out query, IntPtr.Zero);
-
-                if (result < 0)
-                {
-                    throw new COMException("Failed to get query", result);
-                }
-
-                return query;
-            }
-        }
-
-        [DllImport("Microsoft.VisualStudio.Setup.Configuration.Native.dll", ExactSpelling = true, PreserveSig = true)]
-        private static extern int GetSetupConfiguration(
-            [MarshalAs(UnmanagedType.Interface), Out] out ISetupConfiguration configuration,
-            IntPtr reserved);
-#endif
     }
 
     /// <summary>
