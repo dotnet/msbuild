@@ -73,7 +73,6 @@
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net3'))">
     <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_APM</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
     <FeatureAppDomain>true</FeatureAppDomain>
     <DefineConstants>$(DefineConstants);FEATURE_ASPNET_COMPILER</DefineConstants>
@@ -82,7 +81,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_CONSTRAINED_EXECUTION</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CODETASKFACTORY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_CRYPTOGRAPHIC_FACTORY_ALGORITHM_NAMES</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_CULTUREINFO_GETCULTURES</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ENCODING_DEFAULT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_ENVIRONMENT_SYSTEMDIRECTORY</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_FILE_TRACKER</DefineConstants>

@@ -389,15 +389,9 @@ namespace Microsoft.Build.BackEnd
                 try
                 {
                     // Wait for a connection
-#if FEATURE_APM
                     IAsyncResult resultForConnection = localPipeServer.BeginWaitForConnection(null, null);
                     CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
                     bool connected = resultForConnection.AsyncWaitHandle.WaitOne(waitTimeRemaining, false);
-#else
-                    Task connectionTask = localPipeServer.WaitForConnectionAsync();
-                    CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
-                    bool connected = connectionTask.Wait(waitTimeRemaining);
-#endif
                     if (!connected)
                     {
                         CommunicationsUtilities.Trace("Connection timed out waiting a host to contact us.  Exiting comm thread.");
@@ -406,9 +400,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     CommunicationsUtilities.Trace("Parent started connecting. Reading handshake from parent");
-#if FEATURE_APM
                     localPipeServer.EndWaitForConnection(resultForConnection);
-#endif
 
                     // The handshake protocol is a series of int exchanges.  The host sends us a each component, and we
                     // verify it. Afterwards, the host sends an "End of Handshake" signal, to which we respond in kind.

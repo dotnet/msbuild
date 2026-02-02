@@ -25,10 +25,6 @@ using Microsoft.Build.Shared.Debugging;
 using System.Collections;
 using System.Collections.Frozen;
 using Microsoft.NET.StringTools;
-
-#endif
-#if !FEATURE_APM
-using System.Threading.Tasks;
 #endif
 
 #nullable disable
@@ -925,24 +921,6 @@ namespace Microsoft.Build.Internal
             return true;
         }
 #nullable disable
-
-#if !FEATURE_APM
-        internal static async ValueTask<int> ReadAsync(Stream stream, byte[] buffer, int bytesToRead)
-        {
-            int totalBytesRead = 0;
-            while (totalBytesRead < bytesToRead)
-            {
-                int bytesRead = await stream.ReadAsync(buffer.AsMemory(totalBytesRead, bytesToRead - totalBytesRead), CancellationToken.None);
-                if (bytesRead == 0)
-                {
-                    return totalBytesRead;
-                }
-                totalBytesRead += bytesRead;
-            }
-
-            return totalBytesRead;
-        }
-#endif
 
         /// <summary>
         /// Given the appropriate information, return the equivalent HandshakeOptions.
