@@ -196,7 +196,6 @@ namespace Microsoft.Build.Framework
 
         private static bool TryParseVersion(string stringVersion, out Version version)
         {
-#if FEATURE_NET35_TASKHOST
             try
             {
                 version = new Version(stringVersion);
@@ -207,9 +206,6 @@ namespace Microsoft.Build.Framework
                 version = null;
                 return false;
             }
-#else
-            return Version.TryParse(stringVersion, out version);
-#endif
         }
     }
 }

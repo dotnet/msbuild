@@ -74,7 +74,6 @@
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net3'))">
     <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_NET35_TASKHOST</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
