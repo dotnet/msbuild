@@ -508,10 +508,10 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _taskName);
             translator.Translate(ref _taskLocation);
 
-            // Version 0 = Framework-to-Framework (e.g. CLR4),
-            // Version 2+ = .NET task host with support of translation for these fields.
+            // null = CLR2 (NET35) task hosts which don't have these fields compiled in.
+            // 0 = CLR4, 2+ = .NET - both support these fields.
 #if NET472 || NETCOREAPP
-            if (translator.NegotiatedPacketVersion is 0 or >= 2)
+            if (translator.NegotiatedPacketVersion.HasValue && translator.NegotiatedPacketVersion is 0 or >= 2)
             {
                 translator.Translate(ref _targetName);
                 translator.Translate(ref _projectFile);

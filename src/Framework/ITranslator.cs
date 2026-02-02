@@ -85,11 +85,11 @@ namespace Microsoft.Build.BackEnd
         /// The negotiated version is used to conditionally serialize/deserialize fields that may
         /// not be supported by older packet versions.
         /// Special values:
-        /// 0: Indicates Framework-to-Framework (e.g. TaskHost with CLR4 runtime) task host communication.
-        /// 1: Base version for .NET task host communication without newer features. Skips serialization of AppDomain.
-        /// 2+: NET task host communication with support for additional fields like HostServices, TargetName, and ProjectFile in TaskHostConfiguration.
+        /// null: CLR2 (NET35) task host communication. Version-dependent fields are skipped because NET35 doesn't have them.
+        /// 0: The constant value for Framework-to-Framework (CLR4) task host communication. Supports HostServices, TargetName, ProjectFile, and AppDomain.
+        /// 2+: .NET task host communication with full support for version-dependent fields.
         /// </remarks>
-        byte NegotiatedPacketVersion { get; set; }
+        byte? NegotiatedPacketVersion { get; set; }
 
         /// <summary>
         /// Returns the current serialization mode.
