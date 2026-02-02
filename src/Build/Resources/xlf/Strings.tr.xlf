@@ -461,6 +461,11 @@
         <target state="translated">MSB4276: "{1}" dizini olmadığından, varsayılan SDK çözümleyicisi "{0}" SDK’sını çözümleyemedi.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DotnetHostPathIsDirectory">
+        <source>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</source>
+        <target state="translated">MSB4280: DOTNET_HOST_PATH ortam değişkeni, dotnet yürütülebilir dosyasının yolu yerine bir dizin (“{0}”) olarak ayarlanmıştır. Bu, Roslyn derleyicisi gibi bu değişkeni kullanan görevlerde derleme hatalarına yol açabilir. Değişkeni kaldırın veya doğrudan dotnet yürütülebilir dosyasını gösterecek şekilde güncelleyin (örneğin, “C:\Program Files\dotnet\dotnet.exe”).</target>
+        <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
+      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: Aynı {0} görevi için birden çok geçersiz kılma işlemi oluşturulmaya çalışıldı</target>
@@ -534,6 +539,16 @@
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: "{0}" koşulunun "{1}" konumunda beklenmeyen boşluk var. Boşluğu kaldırmayı unutmuş olabilirsiniz.</target>
         <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
+      <trans-unit id="IllFormedPropertySpaceInPropertyReference">
+        <source>MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</source>
+        <target state="translated">MSB4281: "{0}" özellik başvurusunun "{1}" konumunda beklenmeyen boşluk var. Boşluğu kaldırmayı unutmuş olabilirsiniz.</target>
+        <note>{StrBegin="MSB4281: "}</note>
+      </trans-unit>
+      <trans-unit id="IllFormedQuotedStringInCondition">
+        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
+        <target state="translated">MSB4101: "{0}" koşulunda {1} konumundan sonra bir kapatma tırnağı bekleniyor.</target>
+        <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
@@ -1520,11 +1535,6 @@ Hatalar: {3}</target>
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
         <target state="translated">MSB4110: "{0}" koşulunda, {1} konumunda bir özellik bekleniyordu. '$' sonrasında parantez açmayı mı unuttunuz? '$' sabit değerini kullanmak için '%24' kullanın.</target>
         <note>{StrBegin="MSB4110: "}</note>
-      </trans-unit>
-      <trans-unit id="IllFormedQuotedStringInCondition">
-        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
-        <target state="translated">MSB4101: "{0}" koşulunda {1} konumundan sonra bir kapatma tırnağı bekleniyor.</target>
-        <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>

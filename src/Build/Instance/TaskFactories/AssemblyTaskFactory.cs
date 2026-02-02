@@ -11,8 +11,9 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-#if NETFRAMEWORK
-using Microsoft.IO;
+
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
 #else
 using System.IO;
 #endif
@@ -365,10 +366,14 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrowInternalNull(buildComponentHost);
 
                 mergedParameters = UpdateTaskHostParameters(mergedParameters);
-                (mergedParameters, bool isNetRuntime) = AddNetHostParamsIfNeeded(mergedParameters, getProperty);
+                mergedParameters = AddNetHostParamsIfNeeded(mergedParameters, getProperty);
 
-                bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false)
-                    || isNetRuntime;
+                // Sidecar here means that the task host is launched with /nodeReuse:true and doesn't terminate
+                // after the task execution. This improves performance for tasks that run multiple times in a build.
+                // If the task host factory is explicitly requested, do not act as a sidecar task host.
+                // This is important as customers use task host factories for short lived tasks to release
+                // potential locks.
+                bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
 
                 TaskHostTask task = new(
                     taskLocation,
@@ -639,7 +644,7 @@ namespace Microsoft.Build.BackEnd
         /// Adds the properties necessary for .NET task host instantiation if the runtime is .NET.
         /// Returns a new TaskHostParameters with .NET host parameters added, or the original if not needed.
         /// </summary>
-        private static (TaskHostParameters TaskHostParams, bool isNetRuntime) AddNetHostParamsIfNeeded(
+        private static TaskHostParameters AddNetHostParamsIfNeeded(
             in TaskHostParameters currentParams,
             Func<string, ProjectPropertyInstance> getProperty)
         {
@@ -647,7 +652,7 @@ namespace Microsoft.Build.BackEnd
             if (currentParams.Runtime == null ||
                 !currentParams.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
             {
-                return (currentParams, isNetRuntime: false);
+                return currentParams;
             }
 
             string dotnetHostPath = getProperty(Constants.DotnetHostPathEnvVarName)?.EvaluatedValue;
@@ -655,17 +660,16 @@ namespace Microsoft.Build.BackEnd
 
             if (string.IsNullOrEmpty(dotnetHostPath) || string.IsNullOrEmpty(ridGraphPath))
             {
-                return (currentParams, isNetRuntime: false);
+                return currentParams;
             }
 
             string msBuildAssemblyPath = Path.GetDirectoryName(ridGraphPath) ?? string.Empty;
 
-            return (new TaskHostParameters(
+            return new TaskHostParameters(
                 runtime: currentParams.Runtime,
                 architecture: currentParams.Architecture,
                 dotnetHostPath: dotnetHostPath,
-                msBuildAssemblyPath: msBuildAssemblyPath),
-                isNetRuntime: true);
+                msBuildAssemblyPath: msBuildAssemblyPath);
         }
 
         /// <summary>

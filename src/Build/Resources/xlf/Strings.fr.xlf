@@ -461,6 +461,11 @@
         <target state="translated">MSB4276: Le programme de résolution du SDK par défaut n’a pas pu résoudre le SDK «{0}», car le répertoire «{1}» n’existait pas.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DotnetHostPathIsDirectory">
+        <source>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</source>
+        <target state="translated">MSB4280: la variable d’environnement DOTNET_HOST_PATH est définie sur un répertoire (« {0} ») au lieu d’un chemin vers l’exécutable dotnet. Cela peut provoquer des erreurs de compilation dans les tâches qui utilisent cette variable, comme le compilateur Roslyn. Désactivez la variable ou modifiez-la pour qu’elle pointe directement vers l’exécutable dotnet (par exemple, « C:\Program Files\dotnet\dotnet.exe »).</target>
+        <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
+      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: Tentative de création de plusieurs remplacements de la même tâche : {0}</target>
@@ -534,6 +539,16 @@
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: espace inattendu à la position "{1}" de la condition "{0}". Avez-vous oublié de supprimer un espace ?</target>
         <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
+      <trans-unit id="IllFormedPropertySpaceInPropertyReference">
+        <source>MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</source>
+        <target state="translated">MSB4281: espace inattendu à la position « {1} » de la référence de propriété « {0} ». Avez-vous oublié de supprimer un espace ?</target>
+        <note>{StrBegin="MSB4281: "}</note>
+      </trans-unit>
+      <trans-unit id="IllFormedQuotedStringInCondition">
+        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
+        <target state="translated">MSB4101: Guillemet fermant attendu après la position {1} dans la condition "{0}".</target>
+        <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
@@ -1520,11 +1535,6 @@ Erreurs : {3}</target>
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
         <target state="translated">MSB4110: Propriété attendue à la position {1} dans la condition "{0}". Avez-vous oublié la parenthèse ouvrante après '$' ? Pour utiliser un '$' littéral, utilisez plutôt '%24'.</target>
         <note>{StrBegin="MSB4110: "}</note>
-      </trans-unit>
-      <trans-unit id="IllFormedQuotedStringInCondition">
-        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
-        <target state="translated">MSB4101: Guillemet fermant attendu après la position {1} dans la condition "{0}".</target>
-        <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>

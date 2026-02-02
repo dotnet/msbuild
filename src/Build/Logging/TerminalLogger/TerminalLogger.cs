@@ -16,8 +16,8 @@ using Microsoft.Build.Shared;
 using System.Buffers;
 #endif
 
-#if NETFRAMEWORK
-using Microsoft.IO;
+#if FEATURE_MSIOREDIST
+using Path = Microsoft.IO.Path;
 #else
 using System.IO;
 #endif

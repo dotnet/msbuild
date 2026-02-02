@@ -54,7 +54,7 @@ namespace Microsoft.Build.Engine.UnitTests
             workerNodeTelemetryData!.ShouldNotBeNull();
             var buildTargetKey = new TaskOrTargetTelemetryKey("Build", true, false);
             workerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(buildTargetKey);
-            workerNodeTelemetryData.TargetsExecutionData[buildTargetKey].ShouldBeTrue();
+            workerNodeTelemetryData.TargetsExecutionData[buildTargetKey].WasExecuted.ShouldBeTrue();
             workerNodeTelemetryData.TargetsExecutionData.Keys.Count.ShouldBe(1);
 
             workerNodeTelemetryData.TasksExecutionData.Keys.Count.ShouldBeGreaterThan(2);
@@ -124,11 +124,11 @@ namespace Microsoft.Build.Engine.UnitTests
 
             workerNodeData!.ShouldNotBeNull();
             workerNodeData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("Build", true, false));
-            workerNodeData.TargetsExecutionData[new TaskOrTargetTelemetryKey("Build", true, false)].ShouldBeTrue();
+            workerNodeData.TargetsExecutionData[new TaskOrTargetTelemetryKey("Build", true, false)].WasExecuted.ShouldBeTrue();
             workerNodeData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("BeforeBuild", true, false));
-            workerNodeData.TargetsExecutionData[new TaskOrTargetTelemetryKey("BeforeBuild", true, false)].ShouldBeTrue();
+            workerNodeData.TargetsExecutionData[new TaskOrTargetTelemetryKey("BeforeBuild", true, false)].WasExecuted.ShouldBeTrue();
             workerNodeData.TargetsExecutionData.ShouldContainKey(new TaskOrTargetTelemetryKey("NotExecuted", true, false));
-            workerNodeData.TargetsExecutionData[new TaskOrTargetTelemetryKey("NotExecuted", true, false)].ShouldBeFalse();
+            workerNodeData.TargetsExecutionData[new TaskOrTargetTelemetryKey("NotExecuted", true, false)].WasExecuted.ShouldBeFalse();
             workerNodeData.TargetsExecutionData.Keys.Count.ShouldBe(3);
 
             workerNodeData.TasksExecutionData.Keys.Count.ShouldBeGreaterThan(2);
@@ -204,7 +204,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 { new TaskOrTargetTelemetryKey("BuiltInTask", false, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(50), 2, 500, "AssemblyTaskFactory", null) },
                 { new TaskOrTargetTelemetryKey("InlineTask", true, false), new TaskExecutionStats(TimeSpan.FromMilliseconds(75), 1, 750, "RoslynCodeTaskFactory", "CLR4") }
             };
-            var targetsData = new Dictionary<TaskOrTargetTelemetryKey, bool>();
+            var targetsData = new Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats>();
             var telemetryData = new WorkerNodeTelemetryData(tasksData, targetsData);
 
             var activityData = telemetryData.AsActivityDataHolder(includeTasksDetails: true, includeTargetDetails: false);
@@ -387,6 +387,88 @@ namespace Microsoft.Build.Engine.UnitTests
             private void EventSource_ProjectFinished(object sender, ProjectFinishedEventArgs e) => _projectFinishedEventArgs.Add(e);
 
             public void Shutdown() { }
+        }
+
+        [Fact]
+        public void BuildIncrementalityInfo_AllTargetsExecuted_ClassifiedAsFull()
+        {
+            // Arrange: All targets were executed (none skipped)
+            var targetsData = new Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats>
+            {
+                { new TaskOrTargetTelemetryKey("Build", false, false), TargetExecutionStats.Executed() },
+                { new TaskOrTargetTelemetryKey("Compile", false, false), TargetExecutionStats.Executed() },
+                { new TaskOrTargetTelemetryKey("Link", false, false), TargetExecutionStats.Executed() },
+                { new TaskOrTargetTelemetryKey("Pack", false, false), TargetExecutionStats.Executed() },
+            };
+            var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>();
+            var telemetryData = new WorkerNodeTelemetryData(tasksData, targetsData);
+
+            // Act
+            var activityData = telemetryData.AsActivityDataHolder(includeTasksDetails: false, includeTargetDetails: false);
+            var properties = activityData!.GetActivityProperties();
+
+            // Assert
+            properties.ShouldContainKey("Incrementality");
+            var incrementality = properties["Incrementality"] as BuildInsights.BuildIncrementalityInfo;
+            incrementality.ShouldNotBeNull();
+            incrementality!.Classification.ShouldBe(BuildInsights.BuildType.Full);
+            incrementality.TotalTargetsCount.ShouldBe(4);
+            incrementality.ExecutedTargetsCount.ShouldBe(4);
+            incrementality.SkippedTargetsCount.ShouldBe(0);
+            incrementality.IncrementalityRatio.ShouldBe(0.0);
+        }
+
+        [Fact]
+        public void BuildIncrementalityInfo_MostTargetsSkipped_ClassifiedAsIncremental()
+        {
+            // Arrange: Most targets were skipped (>70%)
+            var targetsData = new Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats>
+            {
+                { new TaskOrTargetTelemetryKey("Build", false, false), TargetExecutionStats.Skipped(TargetSkipReason.OutputsUpToDate) },
+                { new TaskOrTargetTelemetryKey("Compile", false, false), TargetExecutionStats.Skipped(TargetSkipReason.OutputsUpToDate) },
+                { new TaskOrTargetTelemetryKey("Link", false, false), TargetExecutionStats.Skipped(TargetSkipReason.ConditionWasFalse) },
+                { new TaskOrTargetTelemetryKey("Pack", false, false), TargetExecutionStats.Executed() }, // Only one executed
+            };
+            var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>();
+            var telemetryData = new WorkerNodeTelemetryData(tasksData, targetsData);
+
+            // Act
+            var activityData = telemetryData.AsActivityDataHolder(includeTasksDetails: false, includeTargetDetails: false);
+            var properties = activityData!.GetActivityProperties();
+
+            // Assert
+            properties.ShouldContainKey("Incrementality");
+            var incrementality = properties["Incrementality"] as BuildInsights.BuildIncrementalityInfo;
+            incrementality.ShouldNotBeNull();
+            incrementality!.Classification.ShouldBe(BuildInsights.BuildType.Incremental);
+            incrementality.TotalTargetsCount.ShouldBe(4);
+            incrementality.ExecutedTargetsCount.ShouldBe(1);
+            incrementality.SkippedTargetsCount.ShouldBe(3);
+            incrementality.SkippedDueToUpToDateCount.ShouldBe(2);
+            incrementality.SkippedDueToConditionCount.ShouldBe(1);
+            incrementality.SkippedDueToPreviouslyBuiltCount.ShouldBe(0);
+            incrementality.IncrementalityRatio.ShouldBe(0.75);
+        }
+
+        [Fact]
+        public void BuildIncrementalityInfo_NoTargets_ClassifiedAsUnknown()
+        {
+            // Arrange: No targets
+            var targetsData = new Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats>();
+            var tasksData = new Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats>();
+            var telemetryData = new WorkerNodeTelemetryData(tasksData, targetsData);
+
+            // Act
+            var activityData = telemetryData.AsActivityDataHolder(includeTasksDetails: false, includeTargetDetails: false);
+            var properties = activityData!.GetActivityProperties();
+
+            // Assert
+            properties.ShouldContainKey("Incrementality");
+            var incrementality = properties["Incrementality"] as BuildInsights.BuildIncrementalityInfo;
+            incrementality.ShouldNotBeNull();
+            incrementality!.Classification.ShouldBe(BuildInsights.BuildType.Unknown);
+            incrementality.TotalTargetsCount.ShouldBe(0);
+            incrementality.IncrementalityRatio.ShouldBe(0.0);
         }
     }
 }

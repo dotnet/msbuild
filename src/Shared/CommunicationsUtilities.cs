@@ -220,8 +220,6 @@ namespace Microsoft.Build.Internal
         // The number is selected as an arbitrary value that is unlikely to conflict with any future sdk version.
         public const int NetTaskHostHandshakeVersion = 99;
 
-        public const HandshakeOptions NetTaskHostFlags = HandshakeOptions.NET | HandshakeOptions.TaskHost;
-
         protected readonly HandshakeComponents _handshakeComponents;
 
         /// <summary>
@@ -259,7 +257,7 @@ namespace Microsoft.Build.Internal
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
             // Calculate salt from environment and tools directory
-            bool isNetTaskHost = IsHandshakeOptionEnabled(nodeType, NetTaskHostFlags);
+            bool isNetTaskHost = IsHandshakeOptionEnabled(nodeType, HandshakeOptions.NET | HandshakeOptions.TaskHost);
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
             string toolsDirectory = GetToolsDirectory(isNetTaskHost, predefinedToolsDirectory);
             int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
