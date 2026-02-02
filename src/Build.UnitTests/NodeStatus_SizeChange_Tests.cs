@@ -8,23 +8,20 @@ using System.Threading.Tasks;
 using Microsoft.Build.Logging;
 using VerifyXunit;
 using Xunit;
-
+using Xunit.NetCore.Extensions;
 using static VerifyXunit.Verifier;
 
 
 namespace Microsoft.Build.CommandLine.UnitTests;
 
 [UsesVerify]
-public class NodeStatus_SizeChange_Tests : IDisposable
+[UseInvariantCulture]
+public class NodeStatus_SizeChange_Tests
 {
     private readonly TerminalNodeStatus _status = new("Namespace.Project", "TargetFramework", null, "Target", new MockStopwatch());
-    private CultureInfo _currentCulture;
 
     public NodeStatus_SizeChange_Tests()
     {
-        _currentCulture = CultureInfo.CurrentCulture;
-        CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-
         UseProjectRelativeDirectory("Snapshots");
     }
 
@@ -58,10 +55,5 @@ public class NodeStatus_SizeChange_Tests : IDisposable
         TerminalNodesFrame frame = new([_status], width: 10, height: 5);
 
         await Verify(frame.RenderNodeStatus(0).ToString());
-    }
-
-    public void Dispose()
-    {
-        CultureInfo.CurrentCulture = _currentCulture;
     }
 }

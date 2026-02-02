@@ -24,6 +24,9 @@ parameters:
     displayName: 'Insertion Target Branch (select for manual insertion)'
     values:
       - main
+      - rel/d18.5
+      - rel/d18.4
+      - rel/d18.3
       - rel/d18.0
       - rel/d17.14
       - rel/d17.13
@@ -58,6 +61,8 @@ variables:
 extends:
   template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
   parameters:
+    settings:
+      networkIsolationPolicy: Permissive,CFSClean
     pool:
       name: VSEngSS-MicroBuild2022-1ES
     stages:
@@ -65,15 +70,15 @@ extends:
       displayName: VS insertion
       variables:
         VSDropPath: https://vsdrop.corp.microsoft.com/file/v1/Products/DevDiv/DotNet-msbuild-Trusted/$(SourceBranchName)/$(MSBuild_CI_BuildNumber)
-        VSManVersionSuffix: $(MSBuild_ExtApisPackageVersion)+$(MSBuild_CI_SourceVersion)
+        VSManVersionSuffix: $(MSBuild_PackageVersion)+$(MSBuild_CI_SourceVersion)
         StandardVSManPath: Microsoft.Build.vsman{$(VSManVersionSuffix)}=$(VSDropPath);Microsoft.Build.vsman
         Arm64VSManPath: Microsoft.Build.Arm64.vsman{$(VSManVersionSuffix)}=$(VSDropPath);Microsoft.Build.Arm64.vsman
         UnGACVSManPath: Microsoft.Build.UnGAC.vsman=$(VSDropPath);Microsoft.Build.UnGAC.vsman
         InsertJsonValues: $(StandardVSManPath),$(Arm64VSManPath),$(UnGACVSManPath)
-        InsertConfigValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion)
+        InsertConfigValues: VS.ExternalAPIs.MSBuild=$(MSBuild_PackageVersion)
         InsertCustomScriptExecutionCommand: $(Pipeline.Workspace)\xsd\Update-MSBuildXsds.ps1
-        InsertDescription: Insert MSBuild $(MSBuild_CI_BuildNumber) from the branch $(SourceBranchName) at commit $(MSBuild_CI_SourceVersion). Corresponding package version is $(MSBuild_ExtApisPackageVersion)
-        InsertPayloadName: '[Experimental] [Skip-SymbolCheck] MSBuild $(SourceBranchName) $(MSBuild_ExtApisPackageVersion)'
+        InsertDescription: Insert MSBuild $(MSBuild_CI_BuildNumber) from the branch $(SourceBranchName) at commit $(MSBuild_CI_SourceVersion). Corresponding package version is $(MSBuild_PackageVersion)
+        InsertPayloadName: '[Experimental] [Skip-SymbolCheck] MSBuild $(SourceBranchName) $(MSBuild_PackageVersion)'
       jobs:
       - job: PushPackagesAndInsert
         displayName: Push Packages and Insert VS payload
@@ -144,21 +149,17 @@ extends:
               Write-Host "##vso[task.setvariable variable=FinalTargetBranch]$finalTargetBranch"
 
         - task: Powershell@2
-          name: PwshMungeExternalAPIsPkgVersion
-          displayName: Munge ExternalAPIs package version
+          name: PwshMungeMSBuildPkgVersion
+          displayName: Munge Build package version
           inputs:
             targetType: inline
             script: |
               $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/VS.ExternalAPIs.*.nupkg"
               $packageFile = Get-ChildItem -Path $folder -Filter VS.ExternalAPIs.*.nupkg | Select-Object -First 1
               $packageVersion = $packageFile.BaseName.TrimStart("VS.ExternalAPIs.MSBuild")
-              Write-Host "Setting MSBuild_ExtApisPackageVersion to '$packageVersion'"
-              Write-Host "##vso[task.setvariable variable=MSBuild_ExtApisPackageVersion]$($packageVersion)"
-              $folder = "$(Build.ArtifactStagingDirectory)/PackageArtifacts/Microsoft.NET.StringTools*.nupkg"
-              $packageFile = Get-ChildItem -Path $folder -Filter Microsoft.NET.StringTools*.nupkg | Select-Object -First 1
-              $packageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
-              Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$packageVersion'"
-              Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($packageVersion)"
+              Write-Host "Setting MSBuild_PackageVersion to '$packageVersion'"
+              Write-Host "##vso[task.setvariable variable=MSBuild_PackageVersion]$($packageVersion)"
+              
         - task: 1ES.PublishNuGet@1
           displayName: 'Push MSBuild CoreXT packages'
           inputs:
@@ -167,8 +168,8 @@ extends:
             nuGetFeedType: internal
             publishVstsFeed: VS
             allowPackageConflicts: true
-        - task: MicroBuildInsertVsPayload@4
-          name: MicroBuildInsertVsPayload_4
+        - task: MicroBuildInsertVsPayload@5
+          name: MicroBuildInsertVsPayload_5
           displayName: Insert VS Payload
           inputs:
             LinkWorkItemsToPR: true
@@ -176,11 +177,13 @@ extends:
             TeamEmail: $(TeamEmail)
             TargetBranch: $(FinalTargetBranch)
             InsertionPayloadName: $(InsertPayloadName)
-            PackagePropsValues: VS.ExternalAPIs.MSBuild=$(MSBuild_ExtApisPackageVersion);Microsoft.Build=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Framework=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Tasks.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.Build.Utilities.Core=$(MicrosoftNETStringToolsPackageVersion);Microsoft.NET.StringTools=$(MicrosoftNETStringToolsPackageVersion)
             InsertionDescription: $(InsertDescription)
             ComponentJsonValues: $(InsertJsonValues)
             DefaultConfigValues: $(InsertConfigValues)
             InsertionReviewers: MSBuild
             CustomScriptExecutionCommand: $(InsertCustomScriptExecutionCommand)
-            InsertionBuildPolicy: Request Perf DDRITs
+            InsertionBuildPolicies: 'Request Perf DDRITs'
+            ConnectedVSDropServiceName: 'VSEng-VSDrop-MI'
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 

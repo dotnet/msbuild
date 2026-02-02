@@ -1513,12 +1513,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously: needs to be async for xunit's timeout system
+#pragma warning disable IDE0390 // Method can be made synchronous
         /// <summary>
         /// A canceled build
         /// </summary>
         [Fact(Timeout = 20_000)]
         public async System.Threading.Tasks.Task CancelledBuild()
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
+#pragma warning restore IDE0390 // Method can be made synchronous
         {
             Console.WriteLine("Starting CancelledBuild test that is known to hang.");
             string contents = CleanupFileContents(@"
@@ -1801,7 +1803,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
  </Target>
 </Project>
 ");
-
             Project project = CreateProject(contents, MSBuildDefaultToolsVersion, _projectCollection, true);
             ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
             _buildManager.BeginBuild(_parameters);
@@ -1812,12 +1813,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             submission.WaitHandle.WaitOne();
             var result1 = submission.BuildResult;
+            _buildManager.EndBuild();
 
             Assert.Equal(BuildResultCode.Success, result1.OverallResult);
             Assert.True(result1.HasResultsForTarget("target1")); // "Results for target1 missing"
             Assert.Equal(BuildResultCode.Success, result2.OverallResult);
             Assert.True(result2.HasResultsForTarget("target2")); // "Results for target2 missing"
-            _buildManager.EndBuild();
         }
 
         /// <summary>
@@ -1846,12 +1847,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result2 = _buildManager.BuildRequest(new BuildRequestData(project.CreateProjectInstance(), new[] { "target1" }));
             submission.WaitHandle.WaitOne();
             var result1 = submission.BuildResult;
+            _buildManager.EndBuild();
 
             Assert.Equal(BuildResultCode.Success, result1.OverallResult);
             Assert.True(result1.HasResultsForTarget("target1")); // "Results for target1 missing"
             Assert.Equal(BuildResultCode.Success, result2.OverallResult);
             Assert.True(result2.HasResultsForTarget("target1")); // "Results for target1 (second call) missing"
-            _buildManager.EndBuild();
         }
 
         /// <summary>
@@ -3481,6 +3482,49 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Logging a warning as an error does not change execution, only the final result of the build
             Assert.Equal(TargetResultCode.Success, buildResult.ResultsByTarget["target1"].ResultCode);
             Assert.Equal(TargetResultCode.Success, buildResult.ResultsByTarget["target2"].ResultCode);
+        }
+
+        /// <summary>
+        /// Verifies that a warning is logged when DOTNET_HOST_PATH is set to a directory instead of a file.
+        /// </summary>
+        [Fact]
+        public void DotnetHostPathDirectoryWarning()
+        {
+            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", Path.GetTempPath());
+
+            BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
+            _buildManager.Build(_parameters, data);
+
+            _logger.Warnings.ShouldContain(w => w.Code == "MSB4280");
+        }
+
+        /// <summary>
+        /// Verifies that no warning is logged when DOTNET_HOST_PATH is set to a file path.
+        /// </summary>
+        [Fact]
+        public void DotnetHostPathFileNoWarning()
+        {
+            TransientTestFile tempFile = _env.CreateFile("dotnet.exe", "");
+            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", tempFile.Path);
+
+            BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
+            _buildManager.Build(_parameters, data);
+
+            _logger.Warnings.ShouldNotContain(w => w.Code == "MSB4280");
+        }
+
+        /// <summary>
+        /// Verifies that no warning is logged when DOTNET_HOST_PATH is not set.
+        /// </summary>
+        [Fact]
+        public void DotnetHostPathNotSetNoWarning()
+        {
+            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", null);
+
+            BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
+            _buildManager.Build(_parameters, data);
+
+            _logger.Warnings.ShouldNotContain(w => w.Code == "MSB4280");
         }
 
         /// <summary>

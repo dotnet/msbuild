@@ -1,0 +1,21 @@
+<Project ToolsVersion="msbuilddefaulttoolsversion"  xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <TestProjectFolder>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine('$(AssemblyLocation)', '..'))'))</TestProjectFolder>
+    <ExampleTaskX86Path>$([System.IO.Path]::Combine('$(TestProjectFolder)', '$(TargetFramework)', 'ExampleTaskX86.dll'))</ExampleTaskX86Path>
+    <ExampleTaskX64Path>$([System.IO.Path]::Combine('$(TestProjectFolder)', '$(TargetFramework)', 'ExampleTaskX64.dll'))</ExampleTaskX64Path>
+  </PropertyGroup>
+
+  <UsingTask TaskName="ExampleTaskX86" AssemblyFile="$(ExampleTaskX86Path)"/>
+  <UsingTask TaskName="ExampleTaskX64" AssemblyFile="$(ExampleTaskX64Path)"/>
+
+  <Target Name="TestTask" BeforeTargets="Build">
+    <ExampleTaskX86 PlatformTarget="x86" />
+    <ExampleTaskX64 PlatformTarget="x64" />
+  </Target>
+  
+</Project>

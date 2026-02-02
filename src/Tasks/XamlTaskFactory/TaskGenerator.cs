@@ -316,11 +316,6 @@ namespace Microsoft.Build.Tasks.Xaml
         }
 
         /// <summary>
-        /// When set to true, the generated code will include comments.
-        /// </summary>
-        public bool GenerateComments { get; set; }
-
-        /// <summary>
         /// Constructor that takes a parser
         /// </summary>
         internal TaskGenerator(TaskParser parser)
@@ -371,15 +366,6 @@ namespace Microsoft.Build.Tasks.Xaml
                 var compileUnit = new CodeCompileUnit();
                 var dataDrivenToolTaskNamespace = new CodeNamespace(_taskParser.Namespace);
                 var taskClass = new CodeTypeDeclaration(_taskParser.GeneratedTaskName);
-
-                if (GenerateComments)
-                {
-                    // add comments to the class
-                    taskClass.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("StartSummary"), true));
-                    string commentContent = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ClassDescription", _taskParser.GeneratedTaskName);
-                    taskClass.Comments.Add(new CodeCommentStatement(commentContent, true));
-                    taskClass.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("EndSummary"), true));
-                }
 
                 // set up the class attributes
                 taskClass.IsClass = true;
@@ -457,15 +443,6 @@ namespace Microsoft.Build.Tasks.Xaml
                     addToActiveSwitchList.Statements.Add(removeExisting);
                 }
                 taskClass.Members.Add(addToActiveSwitchList);
-
-                if (GenerateComments)
-                {
-                    // comments
-                    addToActiveSwitchList.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("StartSummary"), true));
-                    string commentContent = ResourceUtilities.GetResourceString("AddDefaultsToActiveSwitchListDescription");
-                    addToActiveSwitchList.Comments.Add(new CodeCommentStatement(commentContent, true));
-                    addToActiveSwitchList.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("EndSummary"), true));
-                }
             }
         }
 
@@ -492,15 +469,6 @@ namespace Microsoft.Build.Tasks.Xaml
                     addToActiveSwitchList.Statements.Add(removeExisting);
                 }
                 taskClass.Members.Add(addToActiveSwitchList);
-
-                if (GenerateComments)
-                {
-                    // comments
-                    addToActiveSwitchList.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("StartSummary"), true));
-                    string commentContent = ResourceUtilities.GetResourceString("AddFallbacksToActiveSwitchListDescription");
-                    addToActiveSwitchList.Comments.Add(new CodeCommentStatement(commentContent, true));
-                    addToActiveSwitchList.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("EndSummary"), true));
-                }
             }
         }
 
@@ -700,19 +668,6 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 var setInclude = new CodeAssignStatement(new CodePropertyReferenceExpression(new CodeVariableReferenceExpression(SwitchToAdd), "IncludeInCommandLine"), new CodePrimitiveExpression(true));
                 propertyName.SetStatements.Add(setInclude);
-            }
-
-            if (GenerateComments)
-            {
-                // comments
-                propertyName.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("StartSummary"), true));
-                string commentContent = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PropertyNameDescription", property.Name);
-                propertyName.Comments.Add(new CodeCommentStatement(commentContent, true));
-                commentContent = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PropertyTypeDescription", type);
-                propertyName.Comments.Add(new CodeCommentStatement(commentContent, true));
-                commentContent = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("PropertySwitchDescription", property.SwitchName);
-                propertyName.Comments.Add(new CodeCommentStatement(commentContent, true));
-                propertyName.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("EndSummary"), true));
             }
         }
 
@@ -1076,26 +1031,8 @@ namespace Microsoft.Build.Tasks.Xaml
                 Type = new CodeTypeReference(typeof(string))
             };
 
-            string commentContent;
-
-            if (GenerateComments)
-            {
-                // Comment on this property assignment
-                commentContent = ResourceUtilities.GetResourceString("ToolExeFieldDescription");
-                toolNameAccessor.GetStatements.Add(new CodeCommentStatement(commentContent, false));
-            }
-
             toolNameAccessor.GetStatements.Add(new CodeMethodReturnStatement(new CodeSnippetExpression(SurroundWithQuotes(_taskParser.ToolName))));
             taskClass.Members.Add(toolNameAccessor);
-
-            if (GenerateComments)
-            {
-                // comments
-                toolNameAccessor.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("StartSummary"), true));
-                commentContent = ResourceUtilities.GetResourceString("ToolNameDescription");
-                toolNameAccessor.Comments.Add(new CodeCommentStatement(commentContent, true));
-                toolNameAccessor.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("EndSummary"), true));
-            }
         }
 
         /// <summary>
@@ -1149,15 +1086,6 @@ namespace Microsoft.Build.Tasks.Xaml
             defaultConstructor.BaseConstructorArgs.Add(resourceManager);
 
             taskClass.Members.Add(defaultConstructor);
-
-            if (GenerateComments)
-            {
-                // comments
-                defaultConstructor.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("StartSummary"), true));
-                string commentContent = ResourceUtilities.GetResourceString("ConstructorDescription");
-                defaultConstructor.Comments.Add(new CodeCommentStatement(commentContent, true));
-                defaultConstructor.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("EndSummary"), true));
-            }
         }
 
         /// <summary>
@@ -1201,15 +1129,6 @@ namespace Microsoft.Build.Tasks.Xaml
                 }
 
                 taskClass.Members.Add(addValidateRelationsMethod);
-
-                if (GenerateComments)
-                {
-                    // comments
-                    addValidateRelationsMethod.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("StartSummary"), true));
-                    string commentContent = ResourceUtilities.GetResourceString("AddValidateRelationsMethod");
-                    addValidateRelationsMethod.Comments.Add(new CodeCommentStatement(commentContent, true));
-                    addValidateRelationsMethod.Comments.Add(new CodeCommentStatement(ResourceUtilities.GetResourceString("EndSummary"), true));
-                }
             }
         }
 

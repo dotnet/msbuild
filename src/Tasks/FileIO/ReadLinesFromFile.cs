@@ -15,13 +15,17 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Read a list of items from a file.
     /// </summary>
-    public class ReadLinesFromFile : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class ReadLinesFromFile : TaskExtension, IMultiThreadableTask
     {
         /// <summary>
         /// File to read lines from.
         /// </summary>
         [Required]
         public ITaskItem File { get; set; }
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// Receives lines from file.
@@ -38,12 +42,12 @@ namespace Microsoft.Build.Tasks
             bool success = true;
             if (File != null)
             {
-                if (FileSystems.Default.FileExists(File.ItemSpec))
+                AbsolutePath filePath = TaskEnvironment.GetAbsolutePath(File.ItemSpec);
+                if (FileSystems.Default.FileExists(filePath))
                 {
                     try
                     {
-                        string[] textLines = System.IO.File.ReadAllLines(File.ItemSpec);
-
+                        string[] textLines = System.IO.File.ReadAllLines(filePath);
                         var nonEmptyLines = new List<ITaskItem>();
                         char[] charsToTrim = { '\0', ' ', '\t' };
 
@@ -66,7 +70,7 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
-                        Log.LogErrorWithCodeFromResources("ReadLinesFromFile.ErrorOrWarning", File.ItemSpec, e.Message);
+                        Log.LogErrorWithCodeFromResources("ReadLinesFromFile.ErrorOrWarning", filePath.OriginalValue, e.Message);
                         success = false;
                     }
                 }

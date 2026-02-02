@@ -33,6 +33,11 @@
         <target state="translated">MSBUILD : error MSB1027: MSBuild.rsp 자동 지시 파일과 자동 지시 파일에서 참조하는 모든 지시 파일에는 -noAutoResponse 스위치를 지정할 수 없습니다.</target>
         <note>{StrBegin="MSBUILD : error MSB1027: "}LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:", "-noAutoResponse" and "MSBuild.rsp" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="DuplicateBinaryLoggerPathsIgnored">
+        <source>Duplicate binary log path(s) specified and ignored: {0}</source>
+        <target state="translated">중복된 이진 로그 경로가 지정되어 무시되었습니다. {0}</target>
+        <note>{0} is the list of duplicate paths that were filtered out</note>
+      </trans-unit>
       <trans-unit id="HelpMessage_41_QuestionSwitch">
         <source>  -question
                      (Experimental) Question whether there is any build work.
@@ -249,18 +254,19 @@
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="new">  -multithreaded
-                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
-                     This means that MSBuild will use multiple threads
-                     to build projects in parallel,
-                     instead of multiple processes.
-                     This option is not supported.
-                     The maximum number of threads used is determined by the
-                     -maxCpuCount switch.
-                     In case of multi-threaded mode on
-                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount cannot be greater than 256.
-                     (Short form: -mt)
+        <target state="translated">  -multithreaded
+                     MSBuild에서 실험적 다중 스레드 모드를 활성화합니다.
+                     즉, MSBuild는 여러 스레드를 사용하여
+                     프로젝트를 병렬로 빌드합니다.
+                     여러 프로세스 대신에 말이죠.
+                     이 옵션은 지원되지 않습니다.
+                     사용되는 최대 스레드 수는 
+에 의해 결정됩니다.
+                     -maxCpuCount 스위치에 의해 결정됩니다.
+                     다중 스레드 모드가 켜져 있고
+                     MSBUILDFORCEALLTASKSOUTOFPROC=1인 경우
+                     maxCpuCount는 256보다 클 수 없습니다.
+                     (약식: -mt)
     </target>
         <note />
       </trans-unit>
@@ -329,6 +335,21 @@
       This error is shown when a user specifies a value that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarError">
+        <source>MSB1071: Error processing MSBUILD_LOGGING_ARGS environment variable: {0}</source>
+        <target state="translated">MSB1071: MSBUILD_LOGGING_ARGS 환경 변수를 처리하는 중 오류가 발생했습니다. {0}</target>
+        <note>{StrBegin="MSB1071: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the error message.</note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarUnsupportedArgument">
+        <source>MSB1070: MSBUILD_LOGGING_ARGS: Ignoring unsupported argument '{0}'. Only -bl and -check arguments are allowed.</source>
+        <target state="translated">MSB1070: MSBUILD_LOGGING_ARGS: 지원되지 않는 인수 '{0}'을(를) 무시합니다. -bl과 -check 인수만 허용됩니다.</target>
+        <note>{StrBegin="MSB1070: "}LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is the unsupported argument.</note>
+      </trans-unit>
+      <trans-unit id="LoggingArgsEnvVarUsing">
+        <source>Using arguments from MSBUILD_LOGGING_ARGS environment variable: {0}</source>
+        <target state="translated">MSBUILD_LOGGING_ARGS 환경 변수에서 다음 인수를 사용합니다. {0}</target>
+        <note>LOCALIZATION: "MSBUILD_LOGGING_ARGS" should not be localized. {0} is a string with the command-line arguments from the environment variable.</note>
       </trans-unit>
       <trans-unit id="LongPaths">
         <source>Based on the Windows registry key LongPathsEnabled, the LongPaths feature is {0}.</source>
@@ -1510,11 +1531,6 @@
       <trans-unit id="MSBuildDebugPath">
         <source>MSBuild logs and debug information will be at "{0}"</source>
         <target state="translated">MSBuild 로그 및 디버그 정보는 "{0}"에 있습니다.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc">
-        <source>With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</source>
-        <target state="new">With multiThreaded mode on and MSBUILDFORCEALLTASKSOUTOFPROC=1, maxCpuCount cannot be greater that {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MissingFeatureAvailabilityError">

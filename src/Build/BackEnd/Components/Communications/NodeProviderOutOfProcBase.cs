@@ -161,19 +161,19 @@ namespace Microsoft.Build.BackEnd
                 int timeout = 30;
 
                 // Attempt to connect to the process with the handshake without low priority.
-                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false));
+                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false), out HandshakeResult result);
 
                 if (nodeStream == null)
                 {
                     // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true));
+                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true), out result);
                 }
 
                 if (nodeStream != null)
                 {
                     // If we're able to connect to such a process, send a packet requesting its termination
                     CommunicationsUtilities.Trace("Shutting down node with pid = {0}", nodeProcess.Id);
-                    NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode);
+                    NodeContext nodeContext = new NodeContext(0, nodeProcess, nodeStream, factory, terminateNode, result.NegotiatedPacketVersion);
                     nodeContext.SendData(new NodeBuildComplete(false /* no node reuse */));
                     nodeStream.Dispose();
                 }
@@ -216,6 +216,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+            bool nodeReuseRequested = Handshake.IsHandshakeOptionEnabled(hostHandshake.HandshakeOptions, HandshakeOptions.NodeReuse);
             // Get all process of possible running node processes for reuse and put them into ConcurrentQueue.
             // Processes from this queue will be concurrently consumed by TryReusePossibleRunningNodes while
             //    trying to connect to them and reuse them. When queue is empty, no process to reuse left
@@ -224,7 +225,7 @@ namespace Microsoft.Build.BackEnd
             ConcurrentQueue<Process> possibleRunningNodes = null;
 #if FEATURE_NODE_REUSE
             // Try to connect to idle nodes if node reuse is enabled.
-            if (_componentHost.BuildParameters.EnableNodeReuse)
+            if (nodeReuseRequested)
             {
                 IList<Process> possibleRunningNodesList;
                 (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation);
@@ -236,6 +237,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 #endif
+
             ConcurrentQueue<NodeContext> nodeContexts = new();
             ConcurrentQueue<Exception> exceptions = new();
             int currentProcessId = EnvironmentUtilities.CurrentProcessId;
@@ -243,7 +245,12 @@ namespace Microsoft.Build.BackEnd
             {
                 try
                 {
-                    if (!TryReuseAnyFromPossibleRunningNodes(currentProcessId, nodeId) && !StartNewNode(nodeId))
+                    if (nodeReuseRequested && TryReuseAnyFromPossibleRunningNodes(currentProcessId, nodeId))
+                    {
+                        return;
+                    }
+
+                    if (!StartNewNode(nodeId))
                     {
                         // We were unable to reuse or launch a node.
                         CommunicationsUtilities.Trace("FAILED TO CONNECT TO A CHILD NODE");
@@ -283,7 +290,7 @@ namespace Microsoft.Build.BackEnd
                     _processesToIgnore.TryAdd(nodeLookupKey, default);
 
                     // Attempt to connect to each process in turn.
-                    Stream nodeStream = TryConnectToProcess(nodeToReuse.Id, 0 /* poll, don't wait for connections */, hostHandshake);
+                    Stream nodeStream = TryConnectToProcess(nodeToReuse.Id, 0 /* poll, don't wait for connections */, hostHandshake, out HandshakeResult result);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
@@ -294,7 +301,7 @@ namespace Microsoft.Build.BackEnd
                             BuildEventContext = new BuildEventContext(nodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId)
                         });
 
-                        CreateNodeContext(nodeId, nodeToReuse, nodeStream);
+                        CreateNodeContext(nodeId, nodeToReuse, nodeStream, result.NegotiatedPacketVersion);
                         return true;
                     }
                 }
@@ -344,13 +351,13 @@ namespace Microsoft.Build.BackEnd
                     // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
 
                     // Now try to connect to it.
-                    Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, hostHandshake);
+                    Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, hostHandshake, out HandshakeResult result);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
                         CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcess.Id);
 
-                        CreateNodeContext(nodeId, msbuildProcess, nodeStream);
+                        CreateNodeContext(nodeId, msbuildProcess, nodeStream, result.NegotiatedPacketVersion);
                         return true;
                     }
 
@@ -379,9 +386,9 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream)
+            void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream, byte negotiatedVersion)
             {
-                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, hostHandshake.HandshakeOptions);
+                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, hostHandshake.HandshakeOptions);
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
@@ -447,7 +454,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
-        private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake)
+        private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake, out HandshakeResult result)
         {
             // Try and connect to the process.
             string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(nodeProcessId);
@@ -467,7 +474,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                if (TryConnectToPipeStream(nodeStream, pipeName, handshake, timeout, out HandshakeResult result))
+                if (TryConnectToPipeStream(nodeStream, pipeName, handshake, timeout, out result))
                 {
                     return nodeStream;
                 }
@@ -490,6 +497,8 @@ namespace Microsoft.Build.BackEnd
                 // If we don't close any stream, we might hang up the child
                 nodeStream?.Dispose();
             }
+
+            result = HandshakeResult.Failure(HandshakeStatus.Undefined, "Check the COMM traces to diagnose the issue with communication.");
 
             return null;
         }
@@ -529,17 +538,16 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("Reading handshake from pipe {0}", pipeName);
 
-            if (
-
-            nodeStream.TryReadEndOfHandshakeSignal(true,
+            if (nodeStream.TryReadEndOfHandshakeSignal(
+                true,
 #if NETCOREAPP2_1_OR_GREATER
-            timeout,
+                timeout,
 #endif
-            out HandshakeResult innerResult))
+                out HandshakeResult innerResult))
             {
                 // We got a connection.
                 CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", pipeName);
-                result = HandshakeResult.Success(0);
+                result = HandshakeResult.Success(0, innerResult.NegotiatedPacketVersion);
                 return true;
             }
             else
@@ -643,6 +651,12 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private ExitPacketState _exitPacketState;
 
+            /// <summary>
+            /// The minimum packet version supported by both the host and the node.
+            /// </summary>
+            private readonly byte _negotiatedPacketVersion;
+
+
 #if FEATURE_APM
             // used in BodyReadComplete callback to avoid allocations due to passing state through BeginRead
             private int _currentPacketLength;
@@ -657,6 +671,7 @@ namespace Microsoft.Build.BackEnd
                 Stream nodePipe,
                 INodePacketFactory factory,
                 NodeContextTerminateDelegate terminateDelegate,
+                byte negotiatedVersion,
                 HandshakeOptions handshakeOptions = HandshakeOptions.None)
             {
                 _nodeId = nodeId;
@@ -670,6 +685,7 @@ namespace Microsoft.Build.BackEnd
                 _writeTranslator = BinaryTranslator.GetWriteTranslator(_writeBufferMemoryStream);
                 _terminateDelegate = terminateDelegate;
                 _handshakeOptions = handshakeOptions;
+                _negotiatedPacketVersion = negotiatedVersion;
 #if FEATURE_APM
                 _headerReadCompleteCallback = HeaderReadComplete;
                 _bodyReadCompleteCallback = BodyReadComplete;
@@ -683,6 +699,7 @@ namespace Microsoft.Build.BackEnd
                 // We select a thread size empirically - for debug builds the minimum possible stack size was too small.
                 // The current size is reported to not have the issue.
                 _drainPacketQueueThread = new Thread(DrainPacketQueue, 0x30000);
+                _drainPacketQueueThread.Name = "DrainPacketQueueThread";
                 _drainPacketQueueThread.IsBackground = true;
                 _drainPacketQueueThread.Start(this);
             }
@@ -829,8 +846,8 @@ namespace Microsoft.Build.BackEnd
                             if (extendedHeaderCreated)
                             {
                                 // Write extended header with version BEFORE writing packet data
-                                NodePacketTypeExtensions.WriteVersion(writeStream, NodePacketTypeExtensions.PacketVersion);
-                                writeTranslator.PacketVersion = NodePacketTypeExtensions.PacketVersion;
+                                NodePacketTypeExtensions.WriteVersion(writeStream, context._negotiatedPacketVersion);
+                                writeTranslator.NegotiatedPacketVersion = context._negotiatedPacketVersion;
                             }
 
                             packet.Translate(writeTranslator);
@@ -850,10 +867,13 @@ namespace Microsoft.Build.BackEnd
                                 serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
                             }
 
-                            if (IsExitPacket(packet))
+                            if (packet is NodeBuildComplete)
                             {
-                                context._exitPacketState = ExitPacketState.ExitPacketSent;
-                                context._packetQueueDrainDelayCancellation.Cancel();
+                                if (IsExitPacket(packet))
+                                {
+                                    context._exitPacketState = ExitPacketState.ExitPacketSent;
+                                    context._packetQueueDrainDelayCancellation.Cancel();
+                                }
 
                                 return;
                             }

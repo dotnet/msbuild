@@ -18,6 +18,11 @@
         <target state="translated">MSB4249: No se puede compilar el proyecto del sitio web "{0}". El compilador de ASP.NET solo está disponible en la versión de .NET Framework de MSBuild.</target>
         <note>{StrBegin="MSB4249: "}</note>
       </trans-unit>
+      <trans-unit id="AssemblyLoad_Warning">
+        <source>The custom task '{0}' required a fallback to out-of-process execution because the UsingTask definition does not specify the correct Runtime and Architecture. This reduces build performance. Update the UsingTask element to explicitly specify Runtime and Architecture attributes (e.g., Runtime="CLR4" Architecture="x64") or use TaskFactory="TaskHostFactory".</source>
+        <target state="translated">La tarea personalizada ''{0}'' requirió una reserva para la ejecución fuera de proceso porque la definición UsingTask no especifica el runtime y la arquitectura correctos. Esto reduce el rendimiento de la compilación. Actualice el elemento UsingTask para especificar explícitamente los atributos Runtime y Architecture (por ejemplo, Runtime="CLR4" Architecture="x64") o use TaskFactory="TaskHostFactory".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="AttributeTypeLoadError">
         <source>MSB4002: There was a failure retrieving the attributes for parameters in the "{0}" task. {1}</source>
         <target state="translated">MSB4002: No se pudieron recuperar los atributos de los parámetros de la tarea "{0}". {1}</target>
@@ -448,13 +453,18 @@
       </trans-unit>
       <trans-unit id="CustomTaskFactoryOutOfProcNotSupported">
         <source>Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</source>
-        <target state="new">Custom TaskFactory '{0}' for Task '{1}' does not support out of process TaskHost execution. Turn off the multithreaded build mode or remove the custom TaskFactory from your &lt;UsingTask&gt; definitions in project files.</target>
+        <target state="translated">La TaskFactory personalizada '{0}' para la tarea '{1}' no admite la ejecución de TaskHost fuera de proceso. Desactive el modo de compilación multiproceso o quite el TaskFactory personalizado de las definiciones de &lt;UsingTask&gt; en los archivos del proyecto.</target>
         <note />
       </trans-unit>
       <trans-unit id="DefaultSDKResolverError">
         <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
         <target state="translated">MSB4276: La resolución predeterminada del SDK no pudo resolver el SDK "{0}" porque el directorio "{1}" no existía.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="DotnetHostPathIsDirectory">
+        <source>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</source>
+        <target state="translated">MSB4280: la variable de entorno DOTNET_HOST_PATH se establece en un directorio ("{0}") en lugar de una ruta de acceso al ejecutable dotnet. Esto puede provocar errores de compilación en tareas que usan esta variable, como el compilador Roslyn. Quite la variable o actualícela para que apunte directamente al ejecutable de dotnet (por ejemplo, "C:\Archivos de programa\dotnet\dotnet.exe").</target>
+        <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
@@ -483,6 +493,11 @@
         <source>Read environment variable "{0}"</source>
         <target state="translated">Leer la variable de entorno "{0}"</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ErrorCopyingBinaryLog">
+        <source>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</source>
+        <target state="translated">MSB4279: no se pudo copiar el registro binario de "{0}" a "{1}". {2}</target>
+        <note>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</note>
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
@@ -515,10 +530,25 @@
         <target state="translated">MSB3094: "{2}" hace referencia a {0} elementos y "{3}" hace referencia a {1} elementos. Deben tener el mismo número de elementos.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="HostObjectFailure">
+        <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
+        <target state="translated">La tarea "{0}" no pudo adquirir su objeto host. Póngase en contacto con el autor de la tarea {1} para informar de este problema.</target>
+        <note>{0} is the task name, {1} is the detailed error message from the HostObjectException. This error occurs when a task that expects a host object (typically from an IDE like Visual Studio) cannot obtain it, often due to COM interop issues, incorrect moniker registration, or platform incompatibility. The user should contact the task author as this is typically a task implementation issue.</note>
+      </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
         <target state="translated">MSB4259: Espacio inesperado en la posición "{1}" de la condición "{0}". ¿Olvidó quitar un espacio?</target>
         <note>{StrBegin="MSB4259: "}</note>
+      </trans-unit>
+      <trans-unit id="IllFormedPropertySpaceInPropertyReference">
+        <source>MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</source>
+        <target state="translated">MSB4281: espacio inesperado en la posición "{1}" de la referencia de propiedad "{0}". ¿Olvidó quitar un espacio?</target>
+        <note>{StrBegin="MSB4281: "}</note>
+      </trans-unit>
+      <trans-unit id="IllFormedQuotedStringInCondition">
+        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
+        <target state="translated">MSB4101: Se esperaban unas comillas de cierre después de la posición {1} en la condición "{0}".</target>
+        <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
@@ -640,11 +670,6 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">No se puede llamar al método {0} con una colección que contiene nombres de destino nulos o vacíos.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OpenTelemetryLoadFailed">
-        <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="translated">Error al cargar las bibliotecas de telemetría con la excepción: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
@@ -897,18 +922,13 @@ Errores: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="translated">Un SDK intentó establecer la variable de entorno "{0}" en "{1}", pero ya se estableció como variable de entorno.</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
+        <target state="translated">Un SDK intentó establecer la variable de entorno "{0}" en "{1}", pero ya estaba establecida en "{2}" como variable de entorno.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="translated">Un SDK intentó establecer la variable de entorno "{0}" en "{1}", pero ya la estableció otro SDK.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SdkEnvironmentVariableSet">
-        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="translated">Un SDK intentó establecer la variable de entorno "{0}" en "{1}".</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
+        <target state="translated">Un SDK intentó establecer la variable de entorno "{0}" en "{1}", pero otro SDK ya la estableció en "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
@@ -1515,11 +1535,6 @@ Errores: {3}</target>
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
         <target state="translated">MSB4110: Se esperaba una propiedad en la posición {1} en la condición "{0}". ¿Olvidó el paréntesis de apertura después de '$'? Para usar '$' literal, use '%24' en su lugar.</target>
         <note>{StrBegin="MSB4110: "}</note>
-      </trans-unit>
-      <trans-unit id="IllFormedQuotedStringInCondition">
-        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
-        <target state="translated">MSB4101: Se esperaban unas comillas de cierre después de la posición {1} en la condición "{0}".</target>
-        <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>

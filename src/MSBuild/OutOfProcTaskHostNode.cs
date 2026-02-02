@@ -644,7 +644,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="shutdownException">The exception which caused shutdown, if any.</param>
         /// <returns>The reason for shutting down.</returns>
-        public NodeEngineShutdownReason Run(out Exception shutdownException, bool nodeReuse = false)
+        public NodeEngineShutdownReason Run(out Exception shutdownException, bool nodeReuse = false, byte parentPacketVersion = 1)
         {
 #if !CLR2COMPATIBILITY
             _registeredTaskObjectCache = new RegisteredTaskObjectCacheBase();
@@ -655,7 +655,7 @@ namespace Microsoft.Build.CommandLine
             _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
             _nodeReuse = nodeReuse;
-            _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(nodeReuse);
+            _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(nodeReuse, parentPacketVersion);
             _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
             _nodeEndpoint.Listen(this);
 
@@ -817,7 +817,7 @@ namespace Microsoft.Build.CommandLine
             {
                 _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
             }
-            else 
+            else
             {
                 // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
                 _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
@@ -958,8 +958,13 @@ namespace Microsoft.Build.CommandLine
                     taskConfiguration.ProjectFileOfTask,
                     taskConfiguration.LineNumberOfTask,
                     taskConfiguration.ColumnNumberOfTask,
+                    taskConfiguration.TargetName,
+                    taskConfiguration.ProjectFile,
 #if FEATURE_APPDOMAIN
                     taskConfiguration.AppDomainSetup,
+#endif
+#if !NET35
+                    taskConfiguration.HostServices,
 #endif
                     taskParams);
             }
@@ -1220,7 +1225,7 @@ namespace Microsoft.Build.CommandLine
                     return;
                 }
 
-                LogMessagePacket logMessage = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
+                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
                 _nodeEndpoint.SendData(logMessage);
             }
         }

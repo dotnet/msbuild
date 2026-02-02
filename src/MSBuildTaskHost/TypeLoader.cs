@@ -124,6 +124,13 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Delegate used to log warning messages with formatted string support.
+        /// </summary>
+        /// <param name="format">A composite format string for the warning message.</param>
+        /// <param name="args">An array of objects to format into the warning message.</param>
+        internal delegate void LogWarningDelegate(string format, params object[] args);
+
+        /// <summary>
         /// Loads the specified type if it exists in the given assembly. If the type name is fully qualified, then a match (if
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
@@ -132,7 +139,9 @@ namespace Microsoft.Build.Shared
         internal LoadedType Load(
             string typeName,
             AssemblyLoadInfo assembly,
-            bool _)
+            LogWarningDelegate logWarning,
+            bool useTaskHost = false,
+            bool taskHostParamsMatchCurrentProc = true)
         {
             return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly);
         }
@@ -274,7 +283,7 @@ namespace Microsoft.Build.Shared
                     foreach (KeyValuePair<string, Type> desiredTypeInAssembly in _publicTypeNameToType)
                     {
                         // if type matches partially on its name
-                        if (typeName.Length == 0 || TypeLoader.IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
+                        if (typeName.Length == 0 || IsPartialTypeNameMatch(desiredTypeInAssembly.Key, typeName))
                         {
                             return desiredTypeInAssembly.Value;
                         }

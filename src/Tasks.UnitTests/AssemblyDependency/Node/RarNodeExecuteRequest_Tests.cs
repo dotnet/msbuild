@@ -4,6 +4,8 @@
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
@@ -31,7 +33,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             RarNodeExecuteRequest request = new(clientRar);
 
             ResolveAssemblyReference nodeRar = new();
-            request.SetTaskInputs(nodeRar, new RarNodeBuildEngine());
+            request.SetTaskInputs(nodeRar, CreateBuildEngine());
 
             Assert.Equal(clientRar.Assemblies.Length, nodeRar.Assemblies.Length);
             for (int i = 0; i < clientRar.Assemblies.Length; i++)
@@ -69,7 +71,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             RarNodeExecuteRequest request = new(clientRar);
 
             ResolveAssemblyReference nodeRar = new();
-            request.SetTaskInputs(nodeRar, new RarNodeBuildEngine());
+            request.SetTaskInputs(nodeRar, CreateBuildEngine());
 
             Assert.Equal(Path.GetFullPath(AppConfigFileName), nodeRar.AppConfigFile);
             Assert.Equal(Path.GetFullPath(StateFileName), nodeRar.StateFile);
@@ -87,7 +89,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             RarNodeExecuteRequest request = new(clientRar);
 
             ResolveAssemblyReference nodeRar = new();
-            request.SetTaskInputs(nodeRar, new RarNodeBuildEngine());
+            request.SetTaskInputs(nodeRar, CreateBuildEngine());
 
             Assert.Equal(mockEngine.LineNumberOfTaskNode, nodeRar.BuildEngine.LineNumberOfTaskNode);
             Assert.Equal(mockEngine.ColumnNumberOfTaskNode, nodeRar.BuildEngine.ColumnNumberOfTaskNode);
@@ -115,12 +117,21 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             RarNodeExecuteRequest request = new(clientRar);
 
             ResolveAssemblyReference nodeRar = new();
-            request.SetTaskInputs(nodeRar, new RarNodeBuildEngine());
+            request.SetTaskInputs(nodeRar, CreateBuildEngine());
 
             IBuildEngine10 buildEngine10 = Assert.IsAssignableFrom<IBuildEngine10>(nodeRar.BuildEngine);
             EngineServices engineServices = buildEngine10.EngineServices;
             Assert.False(nodeRar.AllowOutOfProcNode);
             Assert.False(engineServices.IsOutOfProcRarNodeEnabled);
+        }
+
+        private RarNodeBuildEngine CreateBuildEngine()
+        {
+            // Since RarNodeBuildEngine normally handles buffering log events back to the client, we need to pass it a
+            // pipe server. We don't ever connect to a client for these tests though, so we can immediately dispose it.
+            OutOfProcRarNodeEndpoint.SharedConfig config = OutOfProcRarNodeEndpoint.CreateConfig(maxNumberOfServerInstances: 1);
+            using NodePipeServer pipeServer = new(config.PipeName, config.Handshake, config.MaxNumberOfServerInstances);
+            return new RarNodeBuildEngine(pipeServer);
         }
     }
 }
