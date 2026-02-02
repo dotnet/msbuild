@@ -92,6 +92,8 @@
     <Compile Include="LoadedType.cs" />
     <Compile Include="LogMessagePacketBase.cs" />
     <Compile Include="Modifiers.cs" />
+    <Compile Include="MSBuildArchitecture.cs" />
+    <Compile Include="MSBuildRuntime.cs" />
     <Compile Include="MSBuild\NodeEndpointOutOfProcTaskHost.cs" />
     <Compile Include="MSBuild\OutOfProcTaskHostNode.cs" />
     <Compile Include="MSBuild\OutOfProcTaskAppDomainWrapperBase.cs" />
@@ -117,7 +119,6 @@
     <Compile Include="TaskParameterTypeVerifier.cs" />
     <Compile Include="TranslatorHelpers.cs" />
     <Compile Include="TypeLoader.cs" />
-    <Compile Include="XMakeAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

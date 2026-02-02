@@ -7,15 +7,15 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Security.Principal;
 using System.Text;
 using System.Threading;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd;
 
 #nullable disable
 
@@ -750,22 +750,22 @@ namespace Microsoft.Build.Internal
                 if (taskHostParameters.IsEmpty)
                 {
                     clrVersion = typeof(bool).Assembly.GetName().Version.Major;
-                    architectureFlagToSet = XMakeAttributes.GetCurrentMSBuildArchitecture();
+                    architectureFlagToSet = MSBuildArchitecture.GetCurrent();
                 }
                 else // Figure out flags based on parameters given
                 {
                     ErrorUtilities.VerifyThrow(taskHostParameters.Runtime != null, "Should always have an explicit runtime when we call this method.");
                     ErrorUtilities.VerifyThrow(taskHostParameters.Architecture != null, "Should always have an explicit architecture when we call this method.");
 
-                    if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
+                    if (taskHostParameters.Runtime.Equals(MSBuildRuntime.clr2, StringComparison.OrdinalIgnoreCase))
                     {
                         clrVersion = 2;
                     }
-                    else if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase))
+                    else if (taskHostParameters.Runtime.Equals(MSBuildRuntime.clr4, StringComparison.OrdinalIgnoreCase))
                     {
                         clrVersion = 4;
                     }
-                    else if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
+                    else if (taskHostParameters.Runtime.Equals(MSBuildRuntime.net, StringComparison.OrdinalIgnoreCase))
                     {
                         clrVersion = 5;
                     }
@@ -780,11 +780,11 @@ namespace Microsoft.Build.Internal
 
             if (!string.IsNullOrEmpty(architectureFlagToSet))
             {
-                if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
+                if (architectureFlagToSet.Equals(MSBuildArchitecture.x64, StringComparison.OrdinalIgnoreCase))
                 {
                     context |= HandshakeOptions.X64;
                 }
-                else if (architectureFlagToSet.Equals(XMakeAttributes.MSBuildArchitectureValues.arm64, StringComparison.OrdinalIgnoreCase))
+                else if (architectureFlagToSet.Equals(MSBuildArchitecture.arm64, StringComparison.OrdinalIgnoreCase))
                 {
                     context |= HandshakeOptions.Arm64;
                 }
