@@ -18,9 +18,7 @@ using System.IO.Pipes;
 using System.IO;
 using System.Collections.Generic;
 
-#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
-#endif
 using System.Security.Principal;
 #if NET451_OR_GREATER || NETCOREAPP
 using System.Threading.Tasks;
@@ -443,7 +441,7 @@ namespace Microsoft.Build.BackEnd
 
                                 CommunicationsUtilities.Trace("Successfully connected to parent.");
                                 _pipeServer.WriteEndOfHandshakeSignal();
-#if FEATURE_SECURITY_PERMISSIONS
+
                                 // We will only talk to a host that was started by the same user as us.  Even though the pipe access is set to only allow this user, we want to ensure they
                                 // haven't attempted to change those permissions out from under us.  This ensures that the only way they can truly gain access is to be impersonating the
                                 // user we were started by.
@@ -457,7 +455,6 @@ namespace Microsoft.Build.BackEnd
                                     gotValidConnection = false;
                                     continue;
                                 }
-#endif
                             }
                         }
                     }
