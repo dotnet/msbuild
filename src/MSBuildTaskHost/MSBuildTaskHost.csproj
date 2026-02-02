@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <!-- The .NET Core version of MSBuild doesn't support targeting .NET Framework 3.5.  So in that case, we import
        a .props file that prevents building the project from doing much of anything. -->
@@ -87,7 +87,6 @@
     <Compile Include="Framework\Logging\AnsiDetector.cs" />
     <Compile Include="Framework\MSBuildNameIgnoreCaseComparer.cs" />
     <Compile Include="Framework\NativeMethods.cs" />
-    <Compile Include="Framework\Polyfills\*.cs" />
     <Compile Include="Framework\ResponseFileUsedEventArgs.cs" />
     <Compile Include="Framework\RunInSTAAttribute.cs" />
     <Compile Include="Framework\SerializableMetadata.cs" />
@@ -103,7 +102,6 @@
     <Compile Include="INodePacketFactory.cs" />
     <Compile Include="INodePacketHandler.cs" />
     <Compile Include="InterningBinaryReader.cs" />
-    <Compile Include="IsExternalInit.cs" />
     <Compile Include="LoadedType.cs" />
     <Compile Include="LogMessagePacketBase.cs" />
     <Compile Include="Modifiers.cs" />
@@ -116,10 +114,13 @@
     <Compile Include="NodeEngineShutdownReason.cs" />
     <Compile Include="NodePacketFactory.cs" />
     <Compile Include="NodeShutdown.cs" />
-    <Compile Include="NullableAttributes.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
     <Compile Include="OutOfProcTaskHost.cs" />
     <Compile Include="OutOfProcTaskHostTaskResult.cs" />
+    <Compile Include="Polyfills\CallerArgumentExpressionAttribute.cs" />
+    <Compile Include="Polyfills\IsExternalInit.cs" />
+    <Compile Include="Polyfills\NullableAttributes.cs" />
+    <Compile Include="Polyfills\StringSyntaxAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReadOnlyEmptyCollection.cs" />
     <Compile Include="ReadOnlyEmptyDictionary.cs" />
