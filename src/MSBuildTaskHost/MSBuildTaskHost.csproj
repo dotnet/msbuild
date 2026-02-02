@@ -120,7 +120,6 @@
     <Compile Include="Polyfills\CallerArgumentExpressionAttribute.cs" />
     <Compile Include="Polyfills\IsExternalInit.cs" />
     <Compile Include="Polyfills\NullableAttributes.cs" />
-    <Compile Include="Polyfills\StringSyntaxAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ReadOnlyEmptyCollection.cs" />
     <Compile Include="ReadOnlyEmptyDictionary.cs" />
