@@ -549,11 +549,11 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             internal TaskParameterTaskItem(ITaskItem copyFrom)
             {
-                if (copyFrom is TaskParameterTaskItem taskParmeterTaskItem)
+                if (copyFrom is TaskParameterTaskItem taskParameterTaskItem)
                 {
-                    _escapedItemSpec = taskParmeterTaskItem._escapedItemSpec;
-                    _escapedDefiningProject = taskParmeterTaskItem.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
-                    _customEscapedMetadata = new(taskParmeterTaskItem._customEscapedMetadata);
+                    _escapedItemSpec = taskParameterTaskItem._escapedItemSpec;
+                    _escapedDefiningProject = taskParameterTaskItem.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
+                    _customEscapedMetadata = new(taskParameterTaskItem._customEscapedMetadata);
                 }
                 else
                 {
@@ -769,64 +769,6 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 return metadataValue ?? String.Empty;
-            }
-
-            public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata()
-            {
-                if (!AppDomain.CurrentDomain.IsDefaultAppDomain())
-                {
-                    return EnumerateMetadataEager();
-                }
-
-                return EnumerateMetadataLazy();
-            }
-
-            private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager()
-            {
-                if (_customEscapedMetadata == null || _customEscapedMetadata.Count == 0)
-                {
-                    return [];
-                }
-
-                var result = new KeyValuePair<string, string>[_customEscapedMetadata.Count];
-                int index = 0;
-                foreach (var kvp in _customEscapedMetadata)
-                {
-                    var unescaped = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
-                    result[index++] = unescaped;
-                }
-
-                return result;
-            }
-
-            private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataLazy()
-            {
-                if (_customEscapedMetadata == null)
-                {
-                    yield break;
-                }
-
-                foreach (var kvp in _customEscapedMetadata)
-                {
-                    var unescaped = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
-                    yield return unescaped;
-                }
-            }
-
-            public void ImportMetadata(IEnumerable<KeyValuePair<string, string>> metadata)
-            {
-                foreach (KeyValuePair<string, string> kvp in metadata)
-                {
-                    SetMetadata(kvp.Key, kvp.Value);
-                }
-            }
-
-            public void RemoveMetadataRange(IEnumerable<string> metadataNames)
-            {
-                foreach (string metadataName in metadataNames)
-                {
-                    RemoveMetadata(metadataName);
-                }
             }
 
             public void Translate(ITranslator translator)
