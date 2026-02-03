@@ -39,8 +39,6 @@
     <!-- Source Files -->
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyLoadInfo.cs" />
-    <Compile Include="AssemblyNameComparer.cs" />
-    <Compile Include="AssemblyNameExtension.cs" />
     <Compile Include="AssemblyResources.cs" />
     <Compile Include="BinaryReaderExtensions.cs" />
     <Compile Include="BinaryWriterExtensions.cs" />
