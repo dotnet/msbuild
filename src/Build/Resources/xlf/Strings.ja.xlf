@@ -540,16 +540,6 @@
         <target state="translated">MSB4259: 条件 "{0}" の位置 "{1}" に予期しないスペースがあります。スペースを削除したか確認してください。</target>
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
-      <trans-unit id="IllFormedPropertySpaceInPropertyReference">
-        <source>MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</source>
-        <target state="translated">MSB4281: プロパティ参照 "{0}" の位置 "{1}" に予期しないスペースがあります。スペースを削除したか確認してください。</target>
-        <note>{StrBegin="MSB4281: "}</note>
-      </trans-unit>
-      <trans-unit id="IllFormedQuotedStringInCondition">
-        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
-        <target state="translated">MSB4101: 条件 "{0}" の場所 {1} の後に終わり引用符が必要です。</target>
-        <note>{StrBegin="MSB4101: "}</note>
-      </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
         <target state="translated">{1} 項目内の '{0}' に不正な文字があります。</target>
@@ -1535,6 +1525,11 @@ Errors: {3}</source>
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
         <target state="translated">MSB4110: 条件 "{0}" の場所 {1} にプロパティが必要です。始めかっこが '$' の後に入力されていることを確認してください。リテラル '$' を使用するには、'%24' を代わりに使用してください。</target>
         <note>{StrBegin="MSB4110: "}</note>
+      </trans-unit>
+      <trans-unit id="IllFormedQuotedStringInCondition">
+        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
+        <target state="translated">MSB4101: 条件 "{0}" の場所 {1} の後に終わり引用符が必要です。</target>
+        <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>

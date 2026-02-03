@@ -540,16 +540,6 @@
         <target state="translated">MSB4259: 條件 "{0}" 的位置 "{1}" 出現非預期的空格。忘記移除空格了嗎?</target>
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
-      <trans-unit id="IllFormedPropertySpaceInPropertyReference">
-        <source>MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</source>
-        <target state="translated">MSB4281: 屬性參考 "{0}" 的位置 "{1}" 有非預期的空格。忘記移除空格了嗎?</target>
-        <note>{StrBegin="MSB4281: "}</note>
-      </trans-unit>
-      <trans-unit id="IllFormedQuotedStringInCondition">
-        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
-        <target state="translated">MSB4101: 條件 "{0}" 的位置 {1} 後面必須是結束引號。</target>
-        <note>{StrBegin="MSB4101: "}</note>
-      </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
         <target state="translated">{1} 項目中的 '{0}' 有不合法的字元。</target>
@@ -1535,6 +1525,11 @@ Errors: {3}</source>
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
         <target state="translated">MSB4110: 條件 "{0}" 的位置 {1} 中必須是屬性。是否忘記 '$' 後面的左括弧?若要使用常值 '$'，請改用 '%24'。</target>
         <note>{StrBegin="MSB4110: "}</note>
+      </trans-unit>
+      <trans-unit id="IllFormedQuotedStringInCondition">
+        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
+        <target state="translated">MSB4101: 條件 "{0}" 的位置 {1} 後面必須是結束引號。</target>
+        <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>
