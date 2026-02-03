@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-#nullable disable
 
 namespace Microsoft.Build.Shared
 {
