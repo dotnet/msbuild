@@ -61,7 +61,6 @@
     <Compile Include="FileUtilitiesRegex.cs" />
     <Compile Include="Framework\BinaryReaderFactory.cs" />
     <Compile Include="Framework\BinaryTranslator.cs" />
-    <Compile Include="Framework\BuildEnvironmentState.cs" />
     <Compile Include="Framework\BuildException\BuildExceptionBase.cs" />
     <Compile Include="Framework\BuildException\BuildExceptionRemoteState.cs" />
     <Compile Include="Framework\BuildException\BuildExceptionSerializationHelper.cs" />

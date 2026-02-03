@@ -10,19 +10,7 @@ namespace Microsoft.Build.Framework
     /// </summary>
     internal class Traits
     {
-        private static Traits _instance = new Traits();
-
-        public static Traits Instance
-        {
-            get
-            {
-                if (BuildEnvironmentState.s_runningTests)
-                {
-                    return new Traits();
-                }
-                return _instance;
-            }
-        }
+        public static Traits Instance { get; } = new Traits();
 
         public Traits()
         {

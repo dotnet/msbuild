@@ -116,7 +116,7 @@ namespace Microsoft.Build.Framework
             }
 
 #if DEBUG
-            if (!RunningTests() && Environment.GetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER") == null
+            if (Environment.GetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER") == null
                 && Environment.GetEnvironmentVariable("_NTROOT") == null)
             {
                 LaunchDebugger(message, innerMessage);
@@ -144,9 +144,5 @@ namespace Microsoft.Build.Framework
 #endif
         }
         #endregion
-
-#if DEBUG
-        private static bool RunningTests() => BuildEnvironmentState.s_runningTests;
-#endif
     }
 }
