@@ -35,6 +35,6 @@ namespace Microsoft.Build.CommandLine
         /// Returns the host handshake for this node endpoint
         /// </summary>
         protected override Handshake GetHandshake() =>
-            new(CommunicationsUtilities.GetHandshakeOptions(taskHost: true, taskHostParameters: TaskHostParameters.Empty, nodeReuse: _nodeReuse));
+            new(CommunicationsUtilities.GetHandshakeOptions());
     }
 }

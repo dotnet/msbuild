@@ -730,92 +730,16 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Given the appropriate information, return the equivalent HandshakeOptions.
         /// </summary>
-        internal static HandshakeOptions GetHandshakeOptions(
-            bool taskHost,
-            TaskHostParameters taskHostParameters,
-            string architectureFlagToSet = null,
-            bool nodeReuse = false,
-            bool lowPriority = false)
+        internal static HandshakeOptions GetHandshakeOptions()
         {
-            HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
+            // For MSBuildTaskHost, the HandshakeOptions are easy to compute.
+            HandshakeOptions options = HandshakeOptions.TaskHost;
 
-            int clrVersion = 0;
+            options |= HandshakeOptions.CLR2;
 
-            // We don't know about the TaskHost.
-            if (taskHost)
+            if (NativeMethodsShared.Is64Bit)
             {
-                // No parameters given, default to current
-                if (taskHostParameters.IsEmpty)
-                {
-                    clrVersion = typeof(bool).Assembly.GetName().Version.Major;
-                    architectureFlagToSet = MSBuildArchitecture.GetCurrent();
-                }
-                else // Figure out flags based on parameters given
-                {
-                    ErrorUtilities.VerifyThrow(taskHostParameters.Runtime != null, "Should always have an explicit runtime when we call this method.");
-                    ErrorUtilities.VerifyThrow(taskHostParameters.Architecture != null, "Should always have an explicit architecture when we call this method.");
-
-                    if (taskHostParameters.Runtime.Equals(MSBuildRuntime.clr2, StringComparison.OrdinalIgnoreCase))
-                    {
-                        clrVersion = 2;
-                    }
-                    else if (taskHostParameters.Runtime.Equals(MSBuildRuntime.clr4, StringComparison.OrdinalIgnoreCase))
-                    {
-                        clrVersion = 4;
-                    }
-                    else if (taskHostParameters.Runtime.Equals(MSBuildRuntime.net, StringComparison.OrdinalIgnoreCase))
-                    {
-                        clrVersion = 5;
-                    }
-                    else
-                    {
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
-                    }
-
-                    architectureFlagToSet = taskHostParameters.Architecture;
-                }
-            }
-
-            if (!string.IsNullOrEmpty(architectureFlagToSet))
-            {
-                if (architectureFlagToSet.Equals(MSBuildArchitecture.x64, StringComparison.OrdinalIgnoreCase))
-                {
-                    context |= HandshakeOptions.X64;
-                }
-                else if (architectureFlagToSet.Equals(MSBuildArchitecture.arm64, StringComparison.OrdinalIgnoreCase))
-                {
-                    context |= HandshakeOptions.Arm64;
-                }
-            }
-
-            switch (clrVersion)
-            {
-                case 0:
-                // Not a taskhost, runtime must match
-                case 4:
-                    // Default for MSBuild running on .NET Framework 4,
-                    // not represented in handshake
-                    break;
-                case 2:
-                    context |= HandshakeOptions.CLR2;
-                    break;
-                case >= 5:
-                    context |= HandshakeOptions.NET;
-                    break;
-                default:
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
-                    break;
-            }
-
-            // Node reuse is not supported in CLR2 because it's a legacy runtime.
-            if (nodeReuse && clrVersion != 2)
-            {
-                context |= HandshakeOptions.NodeReuse;
-            }
-
-            if (lowPriority)
-            {
-                context |= HandshakeOptions.LowPriority;
+                options |= HandshakeOptions.X64;
             }
 
             // If we are running in elevated privs, we will only accept a handshake from an elevated process as well.
@@ -824,10 +748,10 @@ namespace Microsoft.Build.Internal
             // to the username check which is also done on connection.
             if (new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
             {
-                context |= HandshakeOptions.Administrator;
+                options |= HandshakeOptions.Administrator;
             }
 
-            return context;
+            return options;
         }
 
         /// <summary>
