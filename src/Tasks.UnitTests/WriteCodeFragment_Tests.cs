@@ -1243,12 +1243,13 @@ namespace Microsoft.Build.UnitTests
                 resultFrench.ShouldBeTrue();
                 string contentFrench = File.ReadAllText(taskFrench.OutputFile.ItemSpec);
                 
-                // Extract comment lines from both outputs
-                string[] linesEnglish = contentEnglish.Split(MSBuildConstants.CrLf);
-                string[] linesFrench = contentFrench.Split(MSBuildConstants.CrLf);
+                // Helper function to extract the WriteCodeFragment comment from generated code
+                static string ExtractMSBuildComment(string content) =>
+                    content.Split(MSBuildConstants.CrLf)
+                           .FirstOrDefault(line => line.Trim().StartsWith("//") && line.Contains("MSBuild"));
                 
-                string commentEnglish = linesEnglish.FirstOrDefault(line => line.Trim().StartsWith("//") && line.Contains("MSBuild"));
-                string commentFrench = linesFrench.FirstOrDefault(line => line.Trim().StartsWith("//") && line.Contains("MSBuild"));
+                string commentEnglish = ExtractMSBuildComment(contentEnglish);
+                string commentFrench = ExtractMSBuildComment(contentFrench);
                 
                 // Comments should be identical regardless of culture
                 commentEnglish.ShouldNotBeNullOrWhiteSpace();
