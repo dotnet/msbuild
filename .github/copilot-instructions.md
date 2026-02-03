@@ -98,7 +98,7 @@ Note: `ImmutableArray<T>` is a value type. Use `IsDefault` property to check for
 ## Working Effectively
 
 #### Bootstrap and Build the Repository
-NEVER build the repository with just `dotnet build MSBuild.sln` or `dotnet build src/.../Project.csproj`.
+NEVER build the repository with just `dotnet build MSBuild.slnx` or `dotnet build src/.../Project.csproj`.
 Run these commands in sequence to set up a complete development environment:
 
 **Windows:**
