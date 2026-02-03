@@ -76,8 +76,6 @@
     <Compile Include="LoadedType.cs" />
     <Compile Include="LogMessagePacketBase.cs" />
     <Compile Include="Modifiers.cs" />
-    <Compile Include="MSBuildArchitecture.cs" />
-    <Compile Include="MSBuildRuntime.cs" />
     <Compile Include="MSBuild\OutOfProcTaskHostNode.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
     <Compile Include="NodeBuildComplete.cs" />
