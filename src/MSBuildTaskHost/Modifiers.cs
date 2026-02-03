@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
 
@@ -296,7 +294,7 @@ namespace Microsoft.Build.Shared
                         // to unescape first.
                         string unescapedItemSpec = EscapingUtilities.UnescapeAll(itemSpec);
 
-                        if (FileSystems.Default.FileExists(unescapedItemSpec))
+                        if (NativeMethodsShared.FileExists(unescapedItemSpec))
                         {
                             modifiedItemSpec = File.GetCreationTime(unescapedItemSpec).ToString(FileTimeFormat, null);
                         }
@@ -312,7 +310,7 @@ namespace Microsoft.Build.Shared
                         // to unescape first.
                         string unescapedItemSpec = EscapingUtilities.UnescapeAll(itemSpec);
 
-                        if (FileSystems.Default.FileExists(unescapedItemSpec))
+                        if (NativeMethodsShared.FileExists(unescapedItemSpec))
                         {
                             modifiedItemSpec = File.GetLastAccessTime(unescapedItemSpec).ToString(FileTimeFormat, null);
                         }

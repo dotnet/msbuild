@@ -52,9 +52,6 @@
     <Compile Include="ErrorUtilities.cs" />
     <Compile Include="EscapingUtilities.cs" />
     <Compile Include="ExceptionHandling.cs" />
-    <Compile Include="FileSystem\FileSystems.cs" />
-    <Compile Include="FileSystem\IFileSystem.cs" />
-    <Compile Include="FileSystem\MSBuildTaskHostFileSystem.cs" />
     <Compile Include="FileUtilities.cs" />
     <Compile Include="FileUtilitiesRegex.cs" />
     <Compile Include="Framework\BinaryReaderFactory.cs" />

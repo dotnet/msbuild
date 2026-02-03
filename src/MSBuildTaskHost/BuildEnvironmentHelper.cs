@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
 
@@ -158,11 +157,11 @@ namespace Microsoft.Build.Shared
 
             // We're not in VS, check for MSBuild.exe / dll to consider this a standalone environment.
             string msBuildPath = null;
-            if (FileSystems.Default.FileExists(msBuildExe))
+            if (NativeMethodsShared.FileExists(msBuildExe))
             {
                 msBuildPath = msBuildExe;
             }
-            else if (FileSystems.Default.FileExists(msBuildDll))
+            else if (NativeMethodsShared.FileExists(msBuildDll))
             {
                 msBuildPath = msBuildDll;
             }
@@ -200,7 +199,7 @@ namespace Microsoft.Build.Shared
             var vsVersion = GetEnvironmentVariable("VisualStudioVersion");
 
             if (string.IsNullOrEmpty(vsInstallDir) || string.IsNullOrEmpty(vsVersion) ||
-                vsVersion != CurrentVisualStudioVersion || !FileSystems.Default.DirectoryExists(vsInstallDir))
+                vsVersion != CurrentVisualStudioVersion || !NativeMethodsShared.DirectoryExists(vsInstallDir))
             {
                 return null;
             }
@@ -212,7 +211,7 @@ namespace Microsoft.Build.Shared
 
         private static BuildEnvironment TryFromStandaloneMSBuildExe(string msBuildExePath)
         {
-            if (!string.IsNullOrEmpty(msBuildExePath) && FileSystems.Default.FileExists(msBuildExePath))
+            if (!string.IsNullOrEmpty(msBuildExePath) && NativeMethodsShared.FileExists(msBuildExePath))
             {
                 // MSBuild.exe was found outside of Visual Studio. Assume Standalone mode.
                 return new BuildEnvironment(BuildEnvironmentMode.Standalone, msBuildExePath);
