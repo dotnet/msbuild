@@ -2,17 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using Microsoft.Build.Shared.Concurrent;
+using System.IO;
+using System.IO.Pipes;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.IO.Pipes;
-using System.IO;
-using System.Collections.Generic;
-
-using System.Security.AccessControl;
-using System.Security.Principal;
+using Microsoft.Build.Shared.Concurrent;
 
 #nullable disable
 
@@ -22,7 +21,7 @@ namespace Microsoft.Build.BackEnd
     /// This is an implementation of INodeEndpoint for the out-of-proc nodes.  It acts only as a client.
     /// </summary>
     [SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is expected to keep the stream open for the process lifetime")]
-    internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
+    internal sealed class NodeEndpointOutOfProcTaskHost : INodeEndpoint
     {
         #region Private Data
 
@@ -106,6 +105,42 @@ namespace Microsoft.Build.BackEnd
 
         #endregion
 
+        public NodeEndpointOutOfProcTaskHost(byte parentPacketVersion)
+        {
+            _status = LinkStatus.Inactive;
+            _asyncDataMonitor = new object();
+            _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
+
+            _packetStream = new MemoryStream();
+            _binaryWriter = new BinaryWriter(_packetStream);
+            _parentPacketVersion = parentPacketVersion;
+
+            string pipeName = $"MSBuild{EnvironmentUtilities.CurrentProcessId}";
+
+            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
+            PipeSecurity security = new PipeSecurity();
+
+            // Restrict access to just this account.  We set the owner specifically here, and on the
+            // pipe client side they will check the owner against this one - they must have identical
+            // SIDs or the client will reject this server.  This is used to avoid attacks where a
+            // hacked server creates a less restricted pipe in an attempt to lure us into using it and
+            // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
+            PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
+            security.AddAccessRule(rule);
+            security.SetOwner(identifier);
+
+            _pipeServer = new NamedPipeServerStream(
+                pipeName,
+                PipeDirection.InOut,
+                1, // Only allow one connection at a time.
+                PipeTransmissionMode.Byte,
+                PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                PipeBufferSize, // Default input buffer
+                PipeBufferSize,  // Default output buffer
+                security,
+                HandleInheritability.None);
+        }
+
         #region INodeEndpoint Events
 
         /// <summary>
@@ -124,10 +159,6 @@ namespace Microsoft.Build.BackEnd
         {
             get { return _status; }
         }
-
-        #endregion
-
-        #region Properties
 
         #endregion
 
@@ -186,59 +217,11 @@ namespace Microsoft.Build.BackEnd
 
         #endregion
 
-        #region Construction
-
-        /// <summary>
-        /// Instantiates an endpoint to act as a client.
-        /// </summary>
-        internal void InternalConstruct(string pipeName = null, byte parentPacketVersion = 1)
-        {
-            _status = LinkStatus.Inactive;
-            _asyncDataMonitor = new object();
-            _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
-
-            _packetStream = new MemoryStream();
-            _binaryWriter = new BinaryWriter(_packetStream);
-            _parentPacketVersion = parentPacketVersion;
-
-            pipeName ??= $"MSBuild{EnvironmentUtilities.CurrentProcessId}";
-
-            SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
-            PipeSecurity security = new PipeSecurity();
-
-            // Restrict access to just this account.  We set the owner specifically here, and on the
-            // pipe client side they will check the owner against this one - they must have identical
-            // SIDs or the client will reject this server.  This is used to avoid attacks where a
-            // hacked server creates a less restricted pipe in an attempt to lure us into using it and
-            // then sending build requests to the real pipe client (which is the MSBuild Build Manager.)
-            PipeAccessRule rule = new PipeAccessRule(identifier, PipeAccessRights.ReadWrite, AccessControlType.Allow);
-            security.AddAccessRule(rule);
-            security.SetOwner(identifier);
-
-            _pipeServer = new NamedPipeServerStream(
-                pipeName,
-                PipeDirection.InOut,
-                1, // Only allow one connection at a time.
-                PipeTransmissionMode.Byte,
-                PipeOptions.Asynchronous | PipeOptions.WriteThrough,
-                PipeBufferSize, // Default input buffer
-                PipeBufferSize,  // Default output buffer
-                security,
-                HandleInheritability.None);
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Returns the host handshake for this node endpoint.
-        /// </summary>
-        protected abstract Handshake GetHandshake();
-
         /// <summary>
         /// Updates the current link status if it has changed and notifies any registered delegates.
         /// </summary>
         /// <param name="newStatus">The status the node should now be in.</param>
-        protected void ChangeLinkStatus(LinkStatus newStatus)
+        private void ChangeLinkStatus(LinkStatus newStatus)
         {
             ErrorUtilities.VerifyThrow(_status != newStatus, "Attempting to change status to existing status {0}.", _status);
             CommunicationsUtilities.Trace("Changing link status from {0} to {1}", _status.ToString(), newStatus.ToString());
@@ -349,7 +332,7 @@ namespace Microsoft.Build.BackEnd
                     // The handshake protocol is a series of int exchanges.  The host sends us a each component, and we
                     // verify it. Afterwards, the host sends an "End of Handshake" signal, to which we respond in kind.
                     // Once the handshake is complete, both sides can be assured the other is ready to accept data.
-                    Handshake handshake = GetHandshake();
+                    Handshake handshake = new(CommunicationsUtilities.GetHandshakeOptions());
                     try
                     {
                         HandshakeComponents handshakeComponents = handshake.RetrieveHandshakeComponents();
