@@ -422,8 +422,9 @@ namespace Microsoft.Build.CommandLine
                     {
                         object outputValue = value.GetValue(wrappedTask, null);
 
-                        // Filter null elements from string[] outputs to avoid crash (see #13174).
-                        if (outputValue is string[] stringArray && stringArray.Contains(null))
+                        // Filter null elements from string[] outputs to avoid crash.
+                        // See https://github.com/dotnet/msbuild/issues/13174
+                        if (outputValue is string[] stringArray)
                         {
                             outputValue = FilterNullsFromStringArray(stringArray, value.Name);
                         }
@@ -462,10 +463,16 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Filters null elements from a string[] task output. See https://github.com/dotnet/msbuild/issues/13174
+        /// Filters null elements from a string[] task output.
+        /// See https://github.com/dotnet/msbuild/issues/13174
         /// </summary>
         private string[] FilterNullsFromStringArray(string[] stringArray, string parameterName)
         {
+            if (!stringArray.Contains(null))
+            {
+                return stringArray;
+            }
+
             // Filter nulls and log
             string[] filtered = stringArray.Where(s => s != null).ToArray();
             int nullCount = stringArray.Length - filtered.Length;
