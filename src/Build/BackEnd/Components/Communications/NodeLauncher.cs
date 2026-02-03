@@ -101,11 +101,12 @@ namespace Microsoft.Build.BackEnd
             string exeName = msbuildLocation;
 
 #if RUNTIME_TYPE_NETCORE
-            // If msbuildLocation is a managed assembly (.dll), use dotnet.exe to run it.
-            // Otherwise (native app host like MSBuild.exe on Windows or MSBuild on Linux), run it directly.
-            // Note: We avoid using Constants.MSBuildExecutableName here to prevent static initialization order issues.
-            bool isManagedAssembly = msbuildLocation.EndsWith("MSBuild.dll", StringComparison.OrdinalIgnoreCase);
-            if (isManagedAssembly)
+            // If msbuildLocation is a native app host (e.g., MSBuild.exe on Windows, MSBuild on Linux), run it directly.
+            // Otherwise, use dotnet.exe to run the managed assembly (e.g., MSBuild.dll).
+            // Check if the filename (not path) matches the executable name exactly.
+            string fileName = Path.GetFileName(msbuildLocation);
+            bool isNativeAppHost = fileName.Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
+            if (!isNativeAppHost)
             {
                 // Run the child process with the same host as the currently-running process.
                 exeName = CurrentHost.GetCurrentHost();
@@ -153,7 +154,7 @@ namespace Microsoft.Build.BackEnd
             {
 #if RUNTIME_TYPE_NETCORE
                 // When using dotnet.exe (for managed assemblies), repeat the executable name in the args to suit CreateProcess
-                if (isManagedAssembly)
+                if (isNativeAppHost)
                 {
                     commandLineArgs = $"\"{exeName}\" {commandLineArgs}";
                 }
