@@ -56,19 +56,9 @@ namespace Microsoft.Build.BackEnd
         private class BinaryReadTranslator : ITranslator
         {
             /// <summary>
-            /// The intern reader used in an intern scope.
-            /// </summary>
-            private InterningReadTranslator _interner;
-
-            /// <summary>
             /// The binary reader used in read mode.
             /// </summary>
             private BinaryReader _reader;
-
-            /// <summary>
-            /// Whether the caller has entered an intern scope.
-            /// </summary>
-            private bool _isInterning;
 
 #nullable enable
             /// <summary>
@@ -823,81 +813,6 @@ namespace Microsoft.Build.BackEnd
                 bool haveRef = _reader.ReadBoolean();
                 return haveRef;
             }
-
-            public void WithInterning(IEqualityComparer<string> comparer, int initialCapacity, Action<ITranslator> internBlock)
-            {
-                if (_isInterning)
-                {
-                    throw new InvalidOperationException("Cannot enter recursive intern block.");
-                }
-
-                _isInterning = true;
-
-                // Deserialize the intern header before entering the intern scope.
-                _interner ??= new InterningReadTranslator(this);
-                _interner.Translate(this);
-
-                // No other setup is needed since we can parse the packet directly from the stream.
-                internBlock(this);
-
-                _isInterning = false;
-            }
-
-            public void Intern(ref string str, bool nullable = true)
-            {
-                if (!_isInterning)
-                {
-                    Translate(ref str);
-                    return;
-                }
-
-                if (nullable && !TranslateNullable(string.Empty))
-                {
-                    str = null;
-                    return;
-                }
-
-                str = _interner.Read();
-            }
-
-            public void Intern(ref string[] array)
-            {
-                if (!_isInterning)
-                {
-                    Translate(ref array);
-                    return;
-                }
-
-                if (!TranslateNullable(array))
-                {
-                    return;
-                }
-
-                int count = _reader.ReadInt32();
-                array = new string[count];
-
-                for (int i = 0; i < count; i++)
-                {
-                    array[i] = _interner.Read();
-                }
-            }
-
-            public void InternPath(ref string str, bool nullable = true)
-            {
-                if (!_isInterning)
-                {
-                    Translate(ref str);
-                    return;
-                }
-
-                if (nullable && !TranslateNullable(string.Empty))
-                {
-                    str = null;
-                    return;
-                }
-
-                str = _interner.ReadPath();
-            }
         }
 
         /// <summary>
@@ -909,18 +824,6 @@ namespace Microsoft.Build.BackEnd
             /// The binary writer used in write mode.
             /// </summary>
             private BinaryWriter _writer;
-
-            /// <summary>
-            /// The intern writer used in an intern scope.
-            /// This must be lazily instantiated since the interner has its own internal write translator, and
-            /// would otherwise go into a recursive loop on initalization.
-            /// </summary>
-            private InterningWriteTranslator _interner;
-
-            /// <summary>
-            /// Whether the caller has entered an intern scope.
-            /// </summary>
-            private bool _isInterning;
 
             /// <summary>
             /// Constructs a serializer from the specified stream, operating in the designated mode.
@@ -1664,92 +1567,6 @@ namespace Microsoft.Build.BackEnd
                 bool haveRef = (value != null);
                 _writer.Write(haveRef);
                 return haveRef;
-            }
-
-            public void WithInterning(IEqualityComparer<string> comparer, int initialCapacity, Action<ITranslator> internBlock)
-            {
-                if (_isInterning)
-                {
-                    throw new InvalidOperationException("Cannot enter recursive intern block.");
-                }
-
-                // Every new scope requires the interner's state to be reset.
-                _interner ??= new InterningWriteTranslator();
-                _interner.Setup(comparer, initialCapacity);
-
-                // Temporaily swap our writer with the interner.
-                // This forwards all writes to this translator into the interning buffer, so that any non-interned
-                // writes which are interleaved will be in the correct order.
-                BinaryWriter streamWriter = _writer;
-                _writer = _interner.Writer;
-                _isInterning = true;
-
-                try
-                {
-                    internBlock(this);
-                }
-                finally
-                {
-                    _writer = streamWriter;
-                    _isInterning = false;
-                }
-
-                // Write the interned buffer into the real output stream.
-                _interner.Translate(this);
-            }
-
-            public void Intern(ref string str, bool nullable = true)
-            {
-                if (!_isInterning)
-                {
-                    Translate(ref str);
-                    return;
-                }
-
-                if (nullable && !TranslateNullable(str))
-                {
-                    return;
-                }
-
-                _interner.Intern(str);
-            }
-
-            public void Intern(ref string[] array)
-            {
-                if (!_isInterning)
-                {
-                    Translate(ref array);
-                    return;
-                }
-
-                if (!TranslateNullable(array))
-                {
-                    return;
-                }
-
-                int count = array.Length;
-                Translate(ref count);
-
-                for (int i = 0; i < count; i++)
-                {
-                    _interner.Intern(array[i]);
-                }
-            }
-
-            public void InternPath(ref string str, bool nullable = true)
-            {
-                if (!_isInterning)
-                {
-                    Translate(ref str);
-                    return;
-                }
-
-                if (nullable && !TranslateNullable(str))
-                {
-                    return;
-                }
-
-                _interner.InternPath(str);
             }
         }
     }

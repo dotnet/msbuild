@@ -62,9 +62,6 @@
     <Compile Include="Framework\BuildException\GenericBuildTransferredException.cs" />
     <Compile Include="Framework\ErrorUtilities.cs" />
     <Compile Include="Framework\InternalErrorException.cs" />
-    <Compile Include="Framework\InterningReadTranslator.cs" />
-    <Compile Include="Framework\InterningWriteTranslator.cs" />
-    <Compile Include="Framework\InternPathIds.cs" />
     <Compile Include="Framework\ITranslatable.cs" />
     <Compile Include="Framework\ITranslator.cs" />
     <Compile Include="Framework\NativeMethods.cs" />
