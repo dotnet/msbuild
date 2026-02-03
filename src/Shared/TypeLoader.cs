@@ -258,6 +258,7 @@ namespace Microsoft.Build.Shared
             string assemblyDirectory = Path.GetDirectoryName(assemblyFilePath);
             string[] dlls = Directory.GetFiles(assemblyDirectory, "*.dll");
             string[] exes = Directory.GetFiles(assemblyDirectory, "*.exe");
+
             string[] localAssemblies = [.. dlls, .. exes];
 
 #if !NETFRAMEWORK

@@ -13,6 +13,8 @@
     <PackageReference Include="xunit.assert" VersionOverride="$(XUnitVersion)" />
     <PackageReference Include="xunit.core" VersionOverride="$(XUnitVersion)" />
     <PackageReference Include="Shouldly" />
+    <!-- For detecting native app host executables in RunnerUtilities -->
+    <PackageReference Include="System.Reflection.Metadata" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />

@@ -61,9 +61,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             overrides["DOTNET_ROOT_ARM64"].ShouldBeNull();
         }
 
-        [Fact]
-        public void CreateDotnetRootEnvironmentOverrides_ThrowsWhenHostPathIsNull() =>
-            Should.Throw<InvalidOperationException>(() => DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(null));
 
         [WindowsOnlyTheory]
         [InlineData(@"C:\custom\sdk\dotnet.exe", @"C:\custom\sdk")]

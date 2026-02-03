@@ -565,22 +565,14 @@ namespace Microsoft.Build.UnitTests
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
             BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
-            List<string> cmdLine = new()
-            {
-#if !FEATURE_RUN_EXE_IN_TESTS
-                EnvironmentProvider.GetDotnetExePath(),
-#endif
-                FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
-                "-nologo",
-                "-version"
-            };
+            var (fileName, arguments) = RunnerUtilities.GetMSBuildExeAndArgs("-nologo -version");
 
             using Process process = new()
             {
                 StartInfo =
                 {
-                    FileName = cmdLine[0],
-                    Arguments = string.Join(" ", cmdLine.Skip(1)),
+                    FileName = fileName,
+                    Arguments = arguments,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                 },
@@ -609,22 +601,14 @@ namespace Microsoft.Build.UnitTests
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_10.ToString());
             BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
-            List<string> cmdLine = new()
-            {
-#if !FEATURE_RUN_EXE_IN_TESTS
-                EnvironmentProvider.GetDotnetExePath(),
-#endif
-                FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
-                "-nologo",
-                "-version"
-            };
+            var (fileName, arguments) = RunnerUtilities.GetMSBuildExeAndArgs("-nologo -version");
 
             using Process process = new()
             {
                 StartInfo =
                 {
-                    FileName = cmdLine[0],
-                    Arguments = string.Join(" ", cmdLine.Skip(1)),
+                    FileName = fileName,
+                    Arguments = arguments,
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                 },
@@ -1228,19 +1212,23 @@ namespace Microsoft.Build.UnitTests
                                                         ? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "notepad.exe")
                                                         : "/bin/cat";
 
+        private readonly string _verbosityArg = NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag";
+
         /// <summary>
         /// Basic case
         /// </summary>
         [Fact]
         public void GetCommandLine()
         {
-            var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
+            var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + _verbosityArg;
             File.Exists(_pathToArbitraryBogusFile).ShouldBeTrue();
 
             string output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
             successfulExit.ShouldBeFalse();
 
-            output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, Case.Insensitive);
+            output.ShouldContain(RunnerUtilities.MSBuildBasePath, Case.Insensitive);
+            output.ShouldContain(_verbosityArg, Case.Insensitive);
+            output.ShouldContain(_pathToArbitraryBogusFile, Case.Insensitive);
         }
 
         /// <summary>
@@ -1249,7 +1237,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetCommandLineQuotedExe()
         {
-            var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
+            var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + _verbosityArg;
             File.Exists(_pathToArbitraryBogusFile).ShouldBeTrue();
 
             string pathToMSBuildExe = RunnerUtilities.PathToCurrentlyRunningMsBuildExe;
@@ -1263,7 +1251,11 @@ namespace Microsoft.Build.UnitTests
             string output = RunnerUtilities.ExecMSBuild(pathToMSBuildExe, msbuildParameters, out var successfulExit, outputHelper: _output);
             successfulExit.ShouldBeFalse();
 
-            output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, Case.Insensitive);
+            // When running as app host, MSBuild logs the DLL path in command line arguments, not the EXE path.
+            // Check for the base name without extension to handle both cases.
+            output.ShouldContain(RunnerUtilities.MSBuildBasePath, Case.Insensitive);
+            output.ShouldContain(_verbosityArg, Case.Insensitive);
+            output.ShouldContain(_pathToArbitraryBogusFile, Case.Insensitive);
         }
 
         /// <summary>
@@ -1279,7 +1271,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(RunnerUtilities.PathToCurrentlyRunningMsBuildExe));
 
-                var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
+                var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + _verbosityArg;
 
                 output = RunnerUtilities.ExecMSBuild(msbuildParameters, out var successfulExit, _output);
                 successfulExit.ShouldBeFalse();
@@ -1289,7 +1281,11 @@ namespace Microsoft.Build.UnitTests
                 Directory.SetCurrentDirectory(current);
             }
 
-            output.ShouldContain(RunnerUtilities.PathToCurrentlyRunningMsBuildExe + (NativeMethodsShared.IsWindows ? " /v:diag " : " -v:diag ") + _pathToArbitraryBogusFile, Case.Insensitive);
+            // When running as app host, MSBuild logs the DLL path in command line arguments, not the EXE path.
+            // Check for the base name without extension to handle both cases.
+            output.ShouldContain(RunnerUtilities.MSBuildBasePath, Case.Insensitive);
+            output.ShouldContain(_verbosityArg, Case.Insensitive);
+            output.ShouldContain(_pathToArbitraryBogusFile, Case.Insensitive);
         }
 
         /// <summary>

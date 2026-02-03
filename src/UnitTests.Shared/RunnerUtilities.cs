@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Reflection.PortableExecutable;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -40,6 +41,62 @@ namespace Microsoft.Build.UnitTests.Shared
             // Built msbuild.dll executed by dotnet.exe needs this environment variable for msbuild tasks such as RoslynCodeTaskFactory.
             testEnvironment.SetEnvironmentVariable("DOTNET_HOST_PATH", s_dotnetExePath);
         }
+
+        /// <summary>
+        /// Checks if the given file is a native executable (app host) rather than a managed .NET assembly.
+        /// </summary>
+        private static bool IsNativeExecutable(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                return false;
+            }
+
+            try
+            {
+                using var stream = File.OpenRead(filePath);
+                using var peReader = new PEReader(stream);
+
+                // If it's not a valid PE file, it's not a native exe we care about
+                if (!peReader.HasMetadata)
+                {
+                    // No .NET metadata means it's a native executable (like an app host)
+                    return true;
+                }
+
+                // Has .NET metadata, so it's a managed assembly
+                return false;
+            }
+            catch
+            {
+                // If we can't read it, assume it's not a native exe
+                return false;
+            }
+        }
+#endif
+
+        /// <summary>
+        /// Gets the base path to the MSBuild executable without extension.
+        /// Useful for checking command line output which may log either the EXE or DLL path.
+        /// </summary>
+        public static string MSBuildBasePath => Path.Combine(
+            Path.GetDirectoryName(PathToCurrentlyRunningMsBuildExe)!,
+            Path.GetFileNameWithoutExtension(PathToCurrentlyRunningMsBuildExe));
+
+        /// <summary>
+        /// Gets the executable path and arguments needed to run MSBuild with the given parameters.
+        /// Handles both native app host and managed assembly cases.
+        /// </summary>
+        /// <param name="msbuildArgs">The arguments to pass to MSBuild.</param>
+        /// <returns>A tuple of (executablePath, arguments) suitable for Process.StartInfo.</returns>
+        public static (string Executable, string Arguments) GetMSBuildExeAndArgs(string msbuildArgs) =>
+#if FEATURE_RUN_EXE_IN_TESTS
+            (PathToCurrentlyRunningMsBuildExe, msbuildArgs);
+#else
+            // Native app host can be run directly
+            IsNativeExecutable(PathToCurrentlyRunningMsBuildExe)
+                ? (PathToCurrentlyRunningMsBuildExe, msbuildArgs)
+                : (s_dotnetExePath, FileUtilities.EnsureDoubleQuotes(PathToCurrentlyRunningMsBuildExe) + " " + msbuildArgs);
 #endif
 
         /// <summary>
@@ -60,8 +117,23 @@ namespace Microsoft.Build.UnitTests.Shared
 #if FEATURE_RUN_EXE_IN_TESTS
             var pathToExecutable = pathToMsBuildExe;
 #else
-            var pathToExecutable = s_dotnetExePath;
-            msbuildParameters = FileUtilities.EnsureDoubleQuotes(pathToMsBuildExe) + " " + msbuildParameters;
+            // Strip quotes from the path before checking if it's a native executable
+            string unquotedPath = pathToMsBuildExe.Trim('"');
+
+            // Check if the MSBuild path is a native app host (e.g., MSBuild.exe created with UseAppHost=true)
+            // If so, run it directly. Otherwise, use dotnet exec for managed assemblies.
+            string pathToExecutable;
+            if (IsNativeExecutable(unquotedPath))
+            {
+                // Native app host - run directly
+                pathToExecutable = pathToMsBuildExe;
+            }
+            else
+            {
+                // Managed assembly - use dotnet exec
+                pathToExecutable = s_dotnetExePath;
+                msbuildParameters = FileUtilities.EnsureDoubleQuotes(unquotedPath) + " " + msbuildParameters;
+            }
 #endif
 
             return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);

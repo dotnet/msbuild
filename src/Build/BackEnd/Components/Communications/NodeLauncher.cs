@@ -5,6 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+
+#if RUNTIME_TYPE_NETCORE
+using System.IO;
+#endif
+
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Build.Exceptions;
@@ -96,8 +101,15 @@ namespace Microsoft.Build.BackEnd
             string exeName = msbuildLocation;
 
 #if RUNTIME_TYPE_NETCORE
-            // Run the child process with the same host as the currently-running process.
-            exeName = CurrentHost.GetCurrentHost();
+            // If msbuildLocation is a managed assembly (.dll), use dotnet.exe to run it.
+            // Otherwise (native app host like MSBuild.exe on Windows or MSBuild on Linux), run it directly.
+            // Note: We avoid using Constants.MSBuildExecutableName here to prevent static initialization order issues.
+            bool isManagedAssembly = msbuildLocation.EndsWith("MSBuild.dll", StringComparison.OrdinalIgnoreCase);
+            if (isManagedAssembly)
+            {
+                // Run the child process with the same host as the currently-running process.
+                exeName = CurrentHost.GetCurrentHost();
+            }
 #endif
 
             if (!NativeMethodsShared.IsWindows)
@@ -140,8 +152,11 @@ namespace Microsoft.Build.BackEnd
             else
             {
 #if RUNTIME_TYPE_NETCORE
-                // Repeat the executable name in the args to suit CreateProcess
-                commandLineArgs = $"\"{exeName}\" {commandLineArgs}";
+                // When using dotnet.exe (for managed assemblies), repeat the executable name in the args to suit CreateProcess
+                if (isManagedAssembly)
+                {
+                    commandLineArgs = $"\"{exeName}\" {commandLineArgs}";
+                }
 #endif
 
                 BackendNativeMethods.PROCESS_INFORMATION processInfo = new();

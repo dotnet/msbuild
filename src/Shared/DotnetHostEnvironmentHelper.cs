@@ -53,20 +53,39 @@ namespace Microsoft.Build.Internal
         {
             dotnetHostPath ??= Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
 
-            if (string.IsNullOrEmpty(dotnetHostPath))
+            string? dotnetRoot = null;
+
+            if (!string.IsNullOrEmpty(dotnetHostPath))
+            {
+                dotnetRoot = Path.GetDirectoryName(dotnetHostPath);
+            }
+#if RUNTIME_TYPE_NETCORE && BUILD_ENGINE
+            else
+            {
+                // DOTNET_HOST_PATH not set - use CurrentHost to find the dotnet executable.
+                string? currentHost = BackEnd.CurrentHost.GetCurrentHost();
+                if (!string.IsNullOrEmpty(currentHost))
+                {
+                    dotnetRoot = Path.GetDirectoryName(currentHost);
+                }
+            }
+#endif
+
+            if (string.IsNullOrEmpty(dotnetRoot))
             {
                 if (throwIfNotSet)
                 {
                     throw new InvalidOperationException(ResourceUtilities.GetResourceString("DotnetHostPathNotSet"));
                 }
 
-                // DOTNET_HOST_PATH not set - not running under SDK, no overrides needed
+                // Could not determine DOTNET_ROOT - no overrides needed
                 return null;
             }
 
             return new Dictionary<string, string>
             {
-                [DotnetRootEnvVarName] = Path.GetDirectoryName(dotnetHostPath)!,
+                [DotnetRootEnvVarName] = dotnetRoot!,
+
                 // Clear architecture-specific overrides that would take precedence over DOTNET_ROOT
                 [DotnetRootX64EnvVarName] = null!,
                 [DotnetRootX86EnvVarName] = null!,
