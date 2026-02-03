@@ -1831,6 +1831,11 @@
         <target state="translated">MSBUILD : error MSB1059: Hedefler yazdırılamadı. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
       </trans-unit>
+      <trans-unit id="TaskHostAcquired_NullsFiltered">
+        <source>Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</source>
+        <target state="new">Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</target>
+        <note>LOCALIZATION: {0} is the name of the task output parameter, {1} is the count of null elements filtered.</note>
+      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
         <target state="translated">Terminal Günlükçüsü, derlemenin otomatik bir ortamda çalıştığı tespit edildiğinden kullanılmadı.</target>

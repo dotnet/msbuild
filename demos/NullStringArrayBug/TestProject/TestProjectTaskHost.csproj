@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net9.0</TargetFramework>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <!-- Force TaskHost by using net472 task assembly -->
+  <UsingTask TaskName="NullStringArrayBug.NullArrayTask" 
+             AssemblyFile="C:\Users\janprovaznik\dev\msbuild3\msbuild\artifacts\bin\NullStringArrayTasks\Debug\net472\NullStringArrayTasks.dll" />
+
+  <Target Name="TestNullArray" BeforeTargets="Build">
+    <NullArrayTask>
+      <Output TaskParameter="OutputItems" ItemName="TestItems" />
+    </NullArrayTask>
+    <Message Text="Got @(TestItems->Count()) items: @(TestItems)" Importance="High" />
+  </Target>
+</Project>
