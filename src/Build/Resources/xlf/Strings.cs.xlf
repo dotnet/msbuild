@@ -540,16 +540,6 @@
         <target state="translated">MSB4259: Na pozici {1} podmínky {0} je neočekávaná mezera. Nezapomněli jste ji odebrat?</target>
         <note>{StrBegin="MSB4259: "}</note>
       </trans-unit>
-      <trans-unit id="IllFormedPropertySpaceInPropertyReference">
-        <source>MSB4281: Unexpected space at position "{1}" of property reference "{0}". Did you forget to remove a space?</source>
-        <target state="translated">MSB4281: Neočekávaná mezera na pozici {1} odkazu na vlastnost {0}. Nezapomněli jste ji odebrat?</target>
-        <note>{StrBegin="MSB4281: "}</note>
-      </trans-unit>
-      <trans-unit id="IllFormedQuotedStringInCondition">
-        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
-        <target state="translated">MSB4101: Na pozici {1} v podmínce {0} byla očekávána pravá uvozovka.</target>
-        <note>{StrBegin="MSB4101: "}</note>
-      </trans-unit>
       <trans-unit id="IllegalCharactersInFileOrDirectory">
         <source>There are illegal characters in '{0}' in the {1} item.</source>
         <target state="translated">V položce {1} jsou v „{0}“ neplatné znaky.</target>
@@ -1535,6 +1525,11 @@ Chyby: {3}</target>
         <source>MSB4110: Expected a property at position {1} in condition "{0}". Did you forget the opening parenthesis after the '$'? To use a literal '$', use '%24' instead.</source>
         <target state="translated">MSB4110: Na pozici {1} v podmínce {0} byla očekávána vlastnost. Nezapomněli jste zadat levou závorku za znak $? Chcete-li použít literál $, použijte místo toho znak %24.</target>
         <note>{StrBegin="MSB4110: "}</note>
+      </trans-unit>
+      <trans-unit id="IllFormedQuotedStringInCondition">
+        <source>MSB4101: Expected a closing quote after position {1} in condition "{0}".</source>
+        <target state="translated">MSB4101: Na pozici {1} v podmínce {0} byla očekávána pravá uvozovka.</target>
+        <note>{StrBegin="MSB4101: "}</note>
       </trans-unit>
       <trans-unit id="ImportedProjectNotFound">
         <source>MSB4019: The imported project "{0}" was not found. Confirm that the expression in the Import declaration "{1}", which evaluated to "{2}", is correct, and that the file exists on disk.</source>
