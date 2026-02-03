@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Microsoft.Build.Framework;
 
@@ -310,19 +309,84 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Combine multiple paths. Should only be used when compiling against .NET 2.0.
-        /// <remarks>
-        /// Only use in .NET 2.0. Otherwise, use System.IO.Path.Combine(...)
-        /// </remarks>
         /// </summary>
         /// <param name="root">Root path.</param>
         /// <param name="paths">Paths to concatenate.</param>
         /// <returns>Combined path.</returns>
-        internal static string CombinePaths(string root, params string[] paths)
+        /// <remarks>
+        /// Only use in .NET 2.0. Otherwise, use System.IO.Path.Combine(...)
+        /// </remarks>
+        internal static string CombinePaths(params string[] paths)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(root);
+            // The code below is derived from .NET Framework reference source:
+            // https://github.com/microsoft/referencesource/blob/ec9fa9ae770d522a5b5f0607898044b7478574a3/mscorlib/system/io/path.cs#L1230-L1285
+
             ErrorUtilities.VerifyThrowArgumentNull(paths);
 
-            return paths.Aggregate(root, Path.Combine);
+            int firstComponent = 0;
+            int finalSize = paths.Length;
+
+            for (int i = 0; i < paths.Length; i++)
+            {
+                string path = paths[i];
+                ErrorUtilities.VerifyThrowArgumentNull(path, nameof(paths));
+
+                if (path.Length == 0)
+                {
+                    continue;
+                }
+
+                if (Path.IsPathRooted(path))
+                {
+                    firstComponent = i;
+                    finalSize = path.Length;
+                }
+                else
+                {
+                    finalSize += path.Length;
+                }
+
+                char ch = path[path.Length - 1];
+                if (!IsDirectorySeparator(ch))
+                {
+                    finalSize++;
+                }
+            }
+
+            StringBuilder builder = StringBuilderCache.Acquire(finalSize);
+            try
+            {
+                for (int i = firstComponent; i < paths.Length; i++)
+                {
+                    string path = paths[i];
+
+                    if (path.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    if (builder.Length > 0)
+                    {
+                        char ch = builder[builder.Length - 1];
+
+                        if (!IsDirectorySeparator(ch) && ch != Path.VolumeSeparatorChar)
+                        {
+                            builder.Append(Path.DirectorySeparatorChar);
+                        }
+                    }
+
+                    builder.Append(path);
+                }
+
+                return builder.ToString();
+            }
+            finally
+            {
+                StringBuilderCache.Release(builder);
+            }
+
+            static bool IsDirectorySeparator(char ch)
+                => ch == Path.DirectorySeparatorChar || ch == Path.AltDirectorySeparatorChar;
         }
 
         internal static StreamWriter OpenWrite(string path, bool append, Encoding encoding = null)
