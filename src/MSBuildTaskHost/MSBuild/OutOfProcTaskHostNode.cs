@@ -6,14 +6,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Reflection;
+using System.Runtime.Remoting;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.Runtime.Remoting;
 
 #nullable disable
 
@@ -170,11 +169,9 @@ namespace Microsoft.Build.CommandLine
 
             _packetFactory = new NodePacketFactory();
 
-            INodePacketFactory thisINodePacketFactory = (INodePacketFactory)this;
-
-            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostConfiguration, TaskHostConfiguration.FactoryForDeserialization, this);
-            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostTaskCancelled, TaskHostTaskCancelled.FactoryForDeserialization, this);
-            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
+            RegisterPacketHandler(NodePacketType.TaskHostConfiguration, TaskHostConfiguration.FactoryForDeserialization, this);
+            RegisterPacketHandler(NodePacketType.TaskHostTaskCancelled, TaskHostTaskCancelled.FactoryForDeserialization, this);
+            RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
         }
 
         #region IBuildEngine Implementation (Properties)
@@ -182,7 +179,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Returns the value of ContinueOnError for the currently executing task.
         /// </summary>
-        public bool ContinueOnError
+        bool IBuildEngine.ContinueOnError
         {
             get
             {
@@ -235,7 +232,7 @@ namespace Microsoft.Build.CommandLine
         /// Stub implementation of IBuildEngine2.IsRunningMultipleNodes.  The task host does not support this sort of
         /// IBuildEngine callback, so error.
         /// </summary>
-        public bool IsRunningMultipleNodes
+        bool IBuildEngine2.IsRunningMultipleNodes
         {
             get
             {
@@ -245,42 +242,6 @@ namespace Microsoft.Build.CommandLine
         }
 
         #endregion // IBuildEngine2 Implementation (Properties)
-
-        #region IBuildEngine7 Implementation
-        /// <summary>
-        /// Enables or disables emitting a default error when a task fails without logging errors
-        /// </summary>
-        public bool AllowFailureWithoutError { get; set; } = false;
-        #endregion
-
-        #region IBuildEngine8 Implementation
-
-        /// <summary>
-        /// Contains all warnings that should be logged as errors.
-        /// Non-null empty set when all warnings should be treated as errors.
-        /// </summary>
-        private ICollection<string> WarningsAsErrors { get; set; }
-
-        private ICollection<string> WarningsNotAsErrors { get; set; }
-
-        private ICollection<string> WarningsAsMessages { get; set; }
-
-        public bool ShouldTreatWarningAsError(string warningCode)
-        {
-            // Warnings as messages overrides warnings as errors.
-            if (WarningsAsErrors == null || WarningsAsMessages?.Contains(warningCode) == true)
-            {
-                return false;
-            }
-
-            return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsMessages.Contains(warningCode);
-        }
-
-        private bool WarningAsErrorNotOverriden(string warningCode)
-        {
-            return WarningsNotAsErrors?.Contains(warningCode) != true;
-        }
-        #endregion
 
         #region IBuildEngine Implementation (Methods)
 
@@ -328,7 +289,7 @@ namespace Microsoft.Build.CommandLine
         /// Stub implementation of IBuildEngine.BuildProjectFile.  The task host does not support IBuildEngine
         /// callbacks for the purposes of building projects, so error.
         /// </summary>
-        public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs)
+        bool IBuildEngine.BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs)
         {
             LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
             return false;
@@ -342,7 +303,7 @@ namespace Microsoft.Build.CommandLine
         /// Stub implementation of IBuildEngine2.BuildProjectFile.  The task host does not support IBuildEngine
         /// callbacks for the purposes of building projects, so error.
         /// </summary>
-        public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs, string toolsVersion)
+        bool IBuildEngine2.BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs, string toolsVersion)
         {
             LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
             return false;
@@ -352,7 +313,7 @@ namespace Microsoft.Build.CommandLine
         /// Stub implementation of IBuildEngine2.BuildProjectFilesInParallel.  The task host does not support IBuildEngine
         /// callbacks for the purposes of building projects, so error.
         /// </summary>
-        public bool BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IDictionary[] targetOutputsPerProject, string[] toolsVersion, bool useResultsCache, bool unloadProjectsOnCompletion)
+        bool IBuildEngine2.BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IDictionary[] targetOutputsPerProject, string[] toolsVersion, bool useResultsCache, bool unloadProjectsOnCompletion)
         {
             LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
             return false;
@@ -702,9 +663,7 @@ namespace Microsoft.Build.CommandLine
             _debugCommunications = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBUILDDEBUGCOMM", "1", StringComparison.OrdinalIgnoreCase);
             _updateEnvironment = !taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostDoNotUpdateEnvironment", "1", StringComparison.OrdinalIgnoreCase);
             _updateEnvironmentAndLog = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostUpdateEnvironmentAndLog", "1", StringComparison.OrdinalIgnoreCase);
-            WarningsAsErrors = taskConfiguration.WarningsAsErrors;
-            WarningsNotAsErrors = taskConfiguration.WarningsNotAsErrors;
-            WarningsAsMessages = taskConfiguration.WarningsAsMessages;
+
             try
             {
                 // Change to the startup directory
