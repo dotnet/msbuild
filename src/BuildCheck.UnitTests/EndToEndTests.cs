@@ -171,7 +171,7 @@ public class EndToEndTests : IDisposable
 
         _env.SetCurrentDirectory(Path.Combine(workFolder.Path, entryProjectName));
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild("-check -restore /p:WarnOnCultureOverwritten=True /p:RespectCulture=" + (respectCulture ? "True" : "\"\""), out bool success, timeoutMilliseconds: timeoutInMilliseconds);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check -restore /p:WarnOnCultureOverwritten=True /p:RespectCulture={(respectCulture ? "True" : "\"\"")} /p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue();
@@ -232,7 +232,7 @@ public class EndToEndTests : IDisposable
 
     private CopyTestOutput RunCopyToOutputTest(bool restore, bool skipUnchangedDuringCopy)
     {
-        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check {(restore ? "-restore" : null)} /p:SkipUnchanged={(skipUnchangedDuringCopy ? "True" : "\"\"")}", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
+        string output = RunnerUtilities.ExecBootstrapedMSBuild($"-check {(restore ? "-restore" : null)} /p:SkipUnchanged={(skipUnchangedDuringCopy ? "True" : "\"\"")} /p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool success, timeoutMilliseconds: timeoutInMilliseconds);
         _env.Output.WriteLine(output);
         _env.Output.WriteLine("=========================");
         success.ShouldBeTrue();

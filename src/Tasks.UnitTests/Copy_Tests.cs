@@ -3174,7 +3174,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(tempDir);
 
                 // Create a subdirectory structure to match the real scenario
-                string outputDir = Path.Combine(tempDir, "bin", "Debug", "net10.0");
+                string outputDir = Path.Combine(tempDir, "bin", "Debug", RunnerUtilities.LatestDotNetCoreForMSBuild);
                 Directory.CreateDirectory(outputDir);
 
                 // Create a directory named "cs" (lowercase) in the output directory
@@ -3182,7 +3182,7 @@ namespace Microsoft.Build.UnitTests
                 Directory.CreateDirectory(lowercaseDir);
 
                 // Create a few source files to copy (representing multiple files being copied to same dest dir)
-                string sourceDir = Path.Combine(tempDir, "CS", "obj", "Debug", "net10.0");
+                string sourceDir = Path.Combine(tempDir, "CS", "obj", "Debug", RunnerUtilities.LatestDotNetCoreForMSBuild);
                 Directory.CreateDirectory(sourceDir);
                 
                 string sourceFile1 = Path.Combine(sourceDir, "apphost");
