@@ -79,13 +79,12 @@
     <Compile Include="MSBuildArchitecture.cs" />
     <Compile Include="MSBuildRuntime.cs" />
     <Compile Include="MSBuild\OutOfProcTaskHostNode.cs" />
-    <Compile Include="MSBuild\OutOfProcTaskAppDomainWrapperBase.cs" />
+    <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
     <Compile Include="NodeBuildComplete.cs" />
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
     <Compile Include="NodeEngineShutdownReason.cs" />
     <Compile Include="NodePacketFactory.cs" />
     <Compile Include="NodeShutdown.cs" />
-    <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
     <Compile Include="OutOfProcTaskHost.cs" />
     <Compile Include="OutOfProcTaskHostTaskResult.cs" />
     <Compile Include="Polyfills\CallerArgumentExpressionAttribute.cs" />
