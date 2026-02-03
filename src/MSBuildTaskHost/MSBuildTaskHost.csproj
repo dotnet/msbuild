@@ -106,7 +106,6 @@
     <Compile Include="Polyfills\NullableAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceUtilities.cs" />
-    <Compile Include="TaskEngineAssemblyResolver.cs" />
     <Compile Include="TaskHostTaskCancelled.cs" />
     <Compile Include="TaskHostConfiguration.cs" />
     <Compile Include="TaskHostTaskComplete.cs" />
