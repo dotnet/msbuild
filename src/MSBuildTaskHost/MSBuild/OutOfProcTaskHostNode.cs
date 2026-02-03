@@ -530,24 +530,16 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void CancelTask()
         {
-            // If the task is an ICancellable task in CLR4 we will call it here and wait for it to complete
-            // Otherwise it's a classic ITask.
-
-            // Store in a local to avoid a race
-            var wrapper = _taskWrapper;
-            if (wrapper?.CancelTask() == false)
+            // Create a possibility for the task to be aborted if the user really wants it dropped dead asap
+            if (Environment.GetEnvironmentVariable("MSBUILDTASKHOSTABORTTASKONCANCEL") == "1")
             {
-                // Create a possibility for the task to be aborted if the user really wants it dropped dead asap
-                if (Environment.GetEnvironmentVariable("MSBUILDTASKHOSTABORTTASKONCANCEL") == "1")
+                // Don't bother aborting the task if it has passed the actual user task Execute()
+                // It means we're already in the process of shutting down - Wait for the taskCompleteEvent to be set instead.
+                if (_isTaskExecuting)
                 {
-                    // Don't bother aborting the task if it has passed the actual user task Execute()
-                    // It means we're already in the process of shutting down - Wait for the taskCompleteEvent to be set instead.
-                    if (_isTaskExecuting)
-                    {
-                        // The thread will be terminated crudely so our environment may be trashed but it's ok since we are
-                        // shutting down ASAP.
-                        _taskRunnerThread.Abort();
-                    }
+                    // The thread will be terminated crudely so our environment may be trashed but it's ok since we are
+                    // shutting down ASAP.
+                    _taskRunnerThread.Abort();
                 }
             }
         }
