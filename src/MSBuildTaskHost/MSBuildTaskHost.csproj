@@ -66,7 +66,6 @@
     <Compile Include="Framework\NativeMethods.cs" />
     <Compile Include="Framework\RunInSTAAttribute.cs" />
     <Compile Include="Framework\StringBuilderCache.cs" />
-    <Compile Include="Framework\TaskHostParameters.cs" />
     <Compile Include="Framework\Traits.cs" />
     <Compile Include="GlobalUsings.cs" />
     <Compile Include="INodeEndpoint.cs" />
