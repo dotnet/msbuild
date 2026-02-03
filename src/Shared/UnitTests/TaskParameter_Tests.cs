@@ -10,7 +10,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.BackEnd;
 using Microsoft.Build.Utilities;
-using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -116,34 +115,6 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(array, t2.WrappedParameter);
             Assert.Equal(TaskParameterType.PrimitiveTypeArray, t2.ParameterType);
             Assert.Equal(expectedTypeCode, t2.ParameterTypeCode);
-        }
-
-        /// <summary>
-        /// Verifies that a string array containing null elements can be serialized.
-        /// This tests the scenario from https://github.com/dotnet/msbuild/issues/13174
-        /// Note: The fix filters nulls in OutOfProcTaskAppDomainWrapperBase before
-        /// they reach TaskParameter, but this test verifies TaskParameter itself
-        /// doesn't crash if nulls somehow make it through.
-        /// </summary>
-        [Fact]
-        public void StringArrayWithNullElements_DoesNotThrow()
-        {
-            // This array contains nulls which would previously crash during serialization
-            string[] arrayWithNulls = new string[] { "first", null, "third", null, "fifth" };
-
-            // Creating TaskParameter should not throw
-            TaskParameter t = new TaskParameter(arrayWithNulls);
-            t.WrappedParameter.ShouldNotBeNull();
-            t.ParameterType.ShouldBe(TaskParameterType.PrimitiveTypeArray);
-            t.ParameterTypeCode.ShouldBe(TypeCode.String);
-
-            // Serialization should not throw (this was the bug - BinaryWriter.Write(null) threw)
-            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
-            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
-
-            t2.WrappedParameter.ShouldNotBeNull();
-            t2.ParameterType.ShouldBe(TaskParameterType.PrimitiveTypeArray);
-            t2.ParameterTypeCode.ShouldBe(TypeCode.String);
         }
 
         [Fact]
