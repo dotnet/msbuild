@@ -70,7 +70,6 @@
     <Compile Include="Framework\InterningReadTranslator.cs" />
     <Compile Include="Framework\InterningWriteTranslator.cs" />
     <Compile Include="Framework\InternPathIds.cs" />
-    <Compile Include="Framework\ITaskItem2.cs" />
     <Compile Include="Framework\ITranslatable.cs" />
     <Compile Include="Framework\ITranslator.cs" />
     <Compile Include="Framework\Logging\AnsiDetector.cs" />

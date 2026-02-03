@@ -522,7 +522,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Super simple ITaskItem derivative that we can use as a container for read items.
         /// </summary>
-        private class TaskParameterTaskItem : MarshalByRefObject, ITaskItem, ITaskItem2, ITranslatable
+        private class TaskParameterTaskItem : MarshalByRefObject, ITaskItem, ITranslatable
         {
             /// <summary>
             /// The item spec
@@ -549,22 +549,11 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             internal TaskParameterTaskItem(ITaskItem copyFrom)
             {
-                if (copyFrom is ITaskItem2 copyFromAsITaskItem2)
+                if (copyFrom is TaskParameterTaskItem taskParmeterTaskItem)
                 {
-                    _escapedItemSpec = copyFromAsITaskItem2.EvaluatedIncludeEscaped;
-                    _escapedDefiningProject = copyFromAsITaskItem2.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
-
-                    IDictionary nonGenericEscapedMetadata = copyFromAsITaskItem2.CloneCustomMetadataEscaped();
-                    _customEscapedMetadata = nonGenericEscapedMetadata as Dictionary<string, string>;
-
-                    if (_customEscapedMetadata is null)
-                    {
-                        _customEscapedMetadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                        foreach (DictionaryEntry entry in nonGenericEscapedMetadata)
-                        {
-                            _customEscapedMetadata[(string)entry.Key] = (string)entry.Value ?? string.Empty;
-                        }
-                    }
+                    _escapedItemSpec = taskParmeterTaskItem._escapedItemSpec;
+                    _escapedDefiningProject = taskParmeterTaskItem.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
+                    _customEscapedMetadata = new(taskParmeterTaskItem._customEscapedMetadata);
                 }
                 else
                 {
@@ -645,29 +634,13 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Returns the escaped version of this item's ItemSpec
-            /// </summary>
-            string ITaskItem2.EvaluatedIncludeEscaped
-            {
-                get
-                {
-                    return _escapedItemSpec;
-                }
-
-                set
-                {
-                    _escapedItemSpec = value;
-                }
-            }
-
-            /// <summary>
             /// Allows the values of metadata on the item to be queried.
             /// </summary>
             /// <param name="metadataName">The name of the metadata to retrieve.</param>
             /// <returns>The value of the specified metadata.</returns>
             public string GetMetadata(string metadataName)
             {
-                string metadataValue = (this as ITaskItem2).GetMetadataValueEscaped(metadataName);
+                string metadataValue = GetMetadataValueEscaped(metadataName);
                 return EscapingUtilities.UnescapeAll(metadataValue);
             }
 
@@ -778,10 +751,7 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
-            /// <summary>
-            /// Returns the escaped value of the requested metadata name.
-            /// </summary>
-            string ITaskItem2.GetMetadataValueEscaped(string metadataName)
+            private string GetMetadataValueEscaped(string metadataName)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(metadataName);
 
@@ -799,23 +769,6 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 return metadataValue ?? String.Empty;
-            }
-
-            /// <summary>
-            /// Sets the exact metadata value given to the metadata name requested.
-            /// </summary>
-            void ITaskItem2.SetMetadataValueLiteral(string metadataName, string metadataValue)
-            {
-                SetMetadata(metadataName, EscapingUtilities.Escape(metadataValue));
-            }
-
-            /// <summary>
-            /// Returns a dictionary containing all metadata and their escaped forms.
-            /// </summary>
-            IDictionary ITaskItem2.CloneCustomMetadataEscaped()
-            {
-                IDictionary clonedDictionary = new Dictionary<string, string>(_customEscapedMetadata);
-                return clonedDictionary;
             }
 
             public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata()
