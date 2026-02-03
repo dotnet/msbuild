@@ -153,8 +153,8 @@
     <FrozenSystemMemoryVersion>4.5.5</FrozenSystemMemoryVersion>
     <FrozenSystemRuntimeCompilerServicesUnsafeVersion>6.0.0</FrozenSystemRuntimeCompilerServicesUnsafeVersion>
     <FrozenSystemThreadingTasksExtensionsVersion>4.5.4</FrozenSystemThreadingTasksExtensionsVersion>
-    <FrozenSystemBuffersVersion>4.5.1</FrozenSystemBuffersVersion>
-    <FrozenSystemNumericsVectorsVersion>4.5.0</FrozenSystemNumericsVectorsVersion>
+    <FrozenSystemBuffersVersion>4.6.1</FrozenSystemBuffersVersion>
+    <FrozenSystemNumericsVectorsVersion>4.6.1</FrozenSystemNumericsVectorsVersion>
     <FrozenSystemTextJsonVersion>4.5.0</FrozenSystemTextJsonVersion>
     <FrozenSystemThreadingChannelsVersion>4.7.1</FrozenSystemThreadingChannelsVersion>
 
