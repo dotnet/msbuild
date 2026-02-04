@@ -4,7 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+#if NET
 using System.Runtime.InteropServices;
+#endif
 using Microsoft.Build.Shared;
 
 #nullable enable
@@ -21,20 +23,33 @@ namespace Microsoft.Build.Internal
         // Environment variable name for .NET runtime root directory.
         private const string DotnetRootEnvVarName = "DOTNET_ROOT";
 
+#if NET
         // Architecture-specific DOTNET_ROOT environment variable names, dynamically generated
         // to match the native implementation and cover all architectures supported by the runtime.
-        private static readonly string[] _archSpecificRootVars;
+        private static readonly string[] _archSpecificRootVars = InitializeArchSpecificRootVars();
 
-        static DotnetHostEnvironmentHelper()
+        private static string[] InitializeArchSpecificRootVars()
         {
             var names = Enum.GetNames<Architecture>();
-            _archSpecificRootVars = new string[names.Length];
+            var result = new string[names.Length];
 
             for (int i = 0; i < names.Length; i++)
             {
-                _archSpecificRootVars[i] = $"DOTNET_ROOT_{names[i].ToUpperInvariant()}";
+                result[i] = $"DOTNET_ROOT_{names[i].ToUpperInvariant()}";
             }
+
+            return result;
         }
+#else
+        // On .NET Framework, Architecture enum doesn't exist, so we use hardcoded values.
+        // This is sufficient since .NET Framework only runs on Windows x86/x64.
+        private static readonly string[] _archSpecificRootVars =
+        [
+            "DOTNET_ROOT_X86",
+            "DOTNET_ROOT_X64",
+            "DOTNET_ROOT_ARM64",
+        ];
+#endif
 
         /// <summary>
         /// Clears DOTNET_ROOT environment variables that were set only for app host bootstrap.
