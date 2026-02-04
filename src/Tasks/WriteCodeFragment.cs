@@ -117,16 +117,16 @@ namespace Microsoft.Build.Tasks
 
                 if (OutputFile != null)
                 {
-                    outputFilePath = FrameworkFileUtilities.NormalizePath(TaskEnvironment.GetAbsolutePath(OutputFile.ItemSpec));
+                    outputFilePath = TaskEnvironment.GetAbsolutePath(OutputFile.ItemSpec);
                 }
                 else
                 {
-                    AbsolutePath outputDirectoryPath = FrameworkFileUtilities.NormalizePath(TaskEnvironment.GetAbsolutePath(OutputDirectory.ItemSpec));
+                    AbsolutePath outputDirectoryPath = TaskEnvironment.GetAbsolutePath(OutputDirectory.ItemSpec);
                     outputFilePath = new AbsolutePath(FileUtilities.GetTemporaryFile(outputDirectoryPath, null, extension), ignoreRootedCheck: true);
-                    OutputFile = new TaskItem(outputFilePath.Value);
+                    OutputFile = new TaskItem(outputFilePath);
                 }
 
-                FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(outputFilePath.Value));
+                FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(outputFilePath));
 
                 File.WriteAllText(outputFilePath, code); // Overwrites file if it already exists (and can be overwritten)
             }
