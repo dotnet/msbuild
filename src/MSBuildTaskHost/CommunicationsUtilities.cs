@@ -208,8 +208,7 @@ namespace Microsoft.Build.Internal
             var options = (int)nodeType | (handshakeVersion << 24);
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
-            // Tools directory is the path of MSBuildTaskHost.exe
-            string toolsDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string toolsDirectory = FileUtilities.MSBuildTaskHostDirectory;
 
             // Calculate salt from environment and tools directory
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";

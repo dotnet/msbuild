@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Reflection;
 using System.Runtime.Remoting;
 using System.Threading;
 using Microsoft.Build.BackEnd;
@@ -568,14 +569,14 @@ namespace Microsoft.Build.CommandLine
             _taskRunnerThread?.Join();
 
             using StreamWriter debugWriter = _debugCommunications
-                    ? File.CreateText(string.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), EnvironmentUtilities.CurrentProcessId))
-                    : null;
+                ? File.CreateText(Path.Combine(FileUtilities.TempFileDirectory, $"MSBuild_NodeShutdown_{EnvironmentUtilities.CurrentProcessId}.txt"))
+                : null;
 
             debugWriter?.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
 
             // On Windows, a process holds a handle to the current directory,
             // so reset it away from a user-requested folder that may get deleted.
-            NativeMethodsShared.SetCurrentDirectory(FileUtilities.ExecutingAssemblyDirectory);
+            NativeMethodsShared.SetCurrentDirectory(FileUtilities.MSBuildTaskHostDirectory);
 
             // Restore the original environment, best effort.
             try
