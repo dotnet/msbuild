@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 #if FEATURE_APPDOMAIN
 using System.Threading;
 #endif
@@ -468,14 +467,31 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private string[] FilterNullsFromStringArray(string[] stringArray, string parameterName)
         {
-            if (!stringArray.Contains(null))
+            // Count nulls
+            int nullCount = 0;
+            foreach (string s in stringArray)
+            {
+                if (s == null)
+                {
+                    nullCount++;
+                }
+            }
+
+            if (nullCount == 0)
             {
                 return stringArray;
             }
 
             // Filter nulls and log
-            string[] filtered = stringArray.Where(s => s != null).ToArray();
-            int nullCount = stringArray.Length - filtered.Length;
+            string[] filtered = new string[stringArray.Length - nullCount];
+            int j = 0;
+            foreach (string s in stringArray)
+            {
+                if (s != null)
+                {
+                    filtered[j++] = s;
+                }
+            }
 
             buildEngine.LogMessageEvent(new BuildMessageEventArgs(
                 message: ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TaskHostAcquired_NullsFiltered", parameterName, nullCount),

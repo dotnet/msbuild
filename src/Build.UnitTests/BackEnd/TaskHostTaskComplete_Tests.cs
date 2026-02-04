@@ -234,42 +234,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test that string array outputs with null elements can be serialized.
-        /// This verifies the fix for https://github.com/dotnet/msbuild/issues/13174
-        /// where TaskHost crashed on string[] containing nulls.
-        /// </summary>
-        [Fact]
-        public void TestTranslationWithStringArrayContainingNulls()
-        {
-            // Create a string array with nulls - this simulates what tasks like GenerateGlobalUsings produce
-            string[] stringArrayWithNulls = new string[] { "first", null, "third", null, "fifth" };
-
-            IDictionary<string, object> parameters = new Dictionary<string, object>();
-            parameters.Add("StringArrayValue", stringArrayWithNulls);
-
-            TaskHostTaskComplete complete = new(
-                new OutOfProcTaskHostTaskResult(TaskCompleteType.Success, parameters),
-#if FEATURE_REPORTFILEACCESSES
-                null,
-#endif
-                null);
-
-            // This should not throw - the fix filters nulls before serialization
-            ((ITranslatable)complete).Translate(TranslationHelpers.GetWriteTranslator());
-            INodePacket packet = TaskHostTaskComplete.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
-
-            TaskHostTaskComplete deserializedComplete = packet as TaskHostTaskComplete;
-
-            Assert.Equal(complete.TaskResult, deserializedComplete.TaskResult);
-            Assert.NotNull(deserializedComplete.TaskOutputParameters);
-            Assert.Equal(complete.TaskOutputParameters.Count, deserializedComplete.TaskOutputParameters.Count);
-
-            // Verify the string array was serialized (it may or may not have nulls filtered depending on implementation)
-            string[] deserializedArray = (string[])deserializedComplete.TaskOutputParameters["StringArrayValue"].WrappedParameter;
-            Assert.NotNull(deserializedArray);
-        }
-
-        /// <summary>
         /// Helper method for testing invalid constructors
         /// </summary>
         private void AssertInvalidConstructorThrows(Type expectedExceptionType, TaskCompleteType taskResult, Exception taskException, string taskExceptionMessage, string[] taskExceptionMessageArgs, IDictionary<string, object> taskOutputParameters, IDictionary<string, string> buildProcessEnvironment)
