@@ -888,6 +888,38 @@ namespace Microsoft.Build.UnitTests
             result.ShouldContain("MSB1068");
         }
 
+        /// <summary>
+        /// Regression test for issue where getTargetResult/getItem would throw an unhandled exception
+        /// when the item spec contained illegal path characters (e.g. compiler command line flags).
+        /// </summary>
+        [Theory]
+        [InlineData("-getTargetResult:GetCompileCommands", "\"Result\": \"Success\"")]
+        [InlineData("-getItem:CompileCommands", "\"Identity\":")]
+        public void GetTargetResultWithIllegalPathCharacters(string extraSwitch, string expectedContent)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            // Create a project that mimics the ClangTidy target - it outputs items with illegal path characters
+            // (compiler command line flags) as the item spec.
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <ItemGroup>
+    <CompileCommands Include=""/c /nologo /W3 /WX- /diagnostics:column /Od /D _DEBUG"" />
+  </ItemGroup>
+
+  <Target Name=""GetCompileCommands"" Returns=""@(CompileCommands)"">
+    <ItemGroup>
+      <CompileCommands Include=""/c /fp:precise /permissive- /Fa&quot;Debug\\&quot; /Fo&quot;Debug\\&quot; /Gd --target=amd64-pc-windows-msvc /TP"" />
+    </ItemGroup>
+  </Target>
+</Project>
+");
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} /t:GetCompileCommands {extraSwitch}", out bool success);
+            // The build should succeed instead of throwing an unhandled exception
+            success.ShouldBeTrue(results);
+            // The output should contain the expected content
+            results.ShouldContain(expectedContent);
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -2915,6 +2947,35 @@ EndGlobal
             testEnvironment.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", "1");
             RunnerUtilities.ExecMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, _output);
             success.ShouldBeTrue();
+        }
+
+        [Theory]
+        [InlineData("-v:diag -m:1 -tl:off")]
+        [InlineData("-v:diag -m -tl:off")]
+        [InlineData("-v:m -m:1 -tl:off")]
+        [InlineData("-v:m -m -tl:off")]
+        [InlineData("-v:diag -m:1 -tl:on")]
+        [InlineData("-v:diag -m -tl:on")]
+        [InlineData("-v:m -m:1 -tl:on")]
+        [InlineData("-v:m -m -tl:on")]
+        public void PreprocessProjectWell(string arguments)
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(
+                $"""
+                <Project Sdk="Microsoft.NET.Sdk">
+                  <PropertyGroup>
+                    <TargetFramework>netstandard2.0</TargetFramework>
+                  </PropertyGroup>
+                </Project>
+                """);
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            TransientTestProjectWithFiles testProject = testEnvironment.CreateTestProjectWithFiles(projectContents);
+            var preprocessFile = Path.Combine(testProject.TestRoot, "Preprocess.xml");
+            arguments += $" -pp:{preprocessFile}";
+
+            string output = RunnerUtilities.ExecBootstrapedMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, outputHelper: _output, attachProcessId: false);
+            success.ShouldBeTrue();
+            File.Exists(preprocessFile).ShouldBeTrue();
         }
 
 #if FEATURE_ASSEMBLYLOADCONTEXT

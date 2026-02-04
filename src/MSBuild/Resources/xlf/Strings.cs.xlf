@@ -244,16 +244,22 @@
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -vícevláknový
+        <target state="translated">  -multithreaded
                      Povolí experimentální vícevláknový režim v nástroji MSBuild.
                      To znamená, že nástroj MSBuild bude používat více vláken
-                     k paralelnímu sestavování projektů,
-                     místo více procesů.
+                     k paralelnímu sestavování projektů
+                     namísto více procesů.
                      Tato možnost není podporována.
                      Maximální počet použitých vláken je určen
                      přepínačem -maxCpuCount.
+                     V případě zapnutého režimu s více vlákny
+                     a MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     nemůže být maxCpuCount větší než 256.
                      (Krátký tvar: -mt)
     </target>
         <note />

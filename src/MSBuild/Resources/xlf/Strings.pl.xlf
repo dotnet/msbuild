@@ -243,6 +243,9 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      This option is not supported.
                      The maximum number of threads used is determined by the
                      -maxCpuCount switch.
+                     In case of multi-threaded mode on
+                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
         <target state="translated">  -multithreaded
@@ -253,6 +256,9 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      Ta opcja nie jest obsługiwana.
                      Maksymalna liczba używanych wątków jest określana przez
                      przełącznik -maxCpuCount.
+                     W przypadku trybu wielowątkowego włączonego
+                     i MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     Wartość maxCpuCount nie może być większa niż 256.
                      (Krótka forma: -mt)
     </target>
         <note />

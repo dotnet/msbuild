@@ -599,7 +599,14 @@ namespace Microsoft.Build.UnitTests
             TempPath = tempPath;
             _deleteTempDirectory = deleteTempDirectory;
 
+            // Ensure the temp directory exists before setting it as TMPDIR
+            // This is required because Directory.CreateTempSubdirectory() expects TMPDIR to exist
+            Directory.CreateDirectory(tempPath);
+
             _oldtempPaths = SetTempPath(tempPath);
+            
+            // Clear the cached temp directory so FileUtilities picks up the new TMPDIR/TMP/TEMP
+            FileUtilities.ClearTempFileDirectory();
         }
 
         private static TempPaths SetTempPath(string tempPath)
@@ -645,6 +652,9 @@ namespace Microsoft.Build.UnitTests
         public override void Revert()
         {
             SetTempPaths(_oldtempPaths);
+            
+            // Clear the cached temp directory so FileUtilities picks up the restored TMPDIR/TMP/TEMP
+            FileUtilities.ClearTempFileDirectory();
 
             if (_deleteTempDirectory)
             {

@@ -48,6 +48,23 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string cacheDirectory = null;
 
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// AsyncLocal working directory for use during property/item expansion in multithreaded mode.
+        /// Set by MultiThreadedTaskEnvironmentDriver when building projects. null in multiprocess mode.
+        /// Using AsyncLocal ensures the value flows to child threads/tasks spawned during execution of tasks.
+        /// </summary>
+        private static readonly AsyncLocal<string> s_currentThreadWorkingDirectory = new();
+        internal static string CurrentThreadWorkingDirectory
+        {
+            get => s_currentThreadWorkingDirectory.Value;
+            set => s_currentThreadWorkingDirectory.Value = value;
+        }
+#else
+        // net35 taskhost does not support AsyncLocal, and the scenario is not relevant there.
+        internal static string CurrentThreadWorkingDirectory = null;
+#endif
+
 #if CLR2COMPATIBILITY
         internal static string TempFileDirectory => Path.GetTempPath();
 #endif
@@ -78,7 +95,7 @@ namespace Microsoft.Build.Shared
                 using (new FileStream(pathWithUpperCase, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
                 {
                     string lowerCased = pathWithUpperCase.ToLowerInvariant();
-                    return !File.Exists(lowerCased);
+                    return !FileSystems.Default.FileExists(lowerCased);
                 }
             }
             catch (Exception exc)
@@ -566,6 +583,18 @@ namespace Microsoft.Build.Shared
             return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == '\\' ? path : path.Replace('\\', '/'); // .Replace("//", "/");
         }
 
+        /// <summary>
+        /// Normalizes all path separators (both forward and back slashes) to forward slashes.
+        /// This is platform-independent, unlike FixFilePath which only normalizes on non-Windows platforms.
+        /// Use this when you need consistent path comparison regardless of which separator style is used.
+        /// </summary>
+        /// <param name="path">The path to normalize</param>
+        /// <returns>The path with all backslashes replaced by forward slashes, or the original path if null/empty</returns>
+        internal static string NormalizePathSeparatorsToForwardSlash(string path)
+        {
+            return string.IsNullOrEmpty(path) ? path : path.Replace('\\', '/');
+        }
+
 #if !CLR2COMPATIBILITY
         /// <summary>
         /// If on Unix, convert backslashes to slashes for strings that resemble paths.
@@ -730,6 +759,35 @@ namespace Microsoft.Build.Shared
 
             return directory;
         }
+
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// Deletes all subdirectories within the specified directory without throwing exceptions.
+        /// This method enumerates all subdirectories in the given directory and attempts to delete
+        /// each one recursively. If any IO-related exceptions occur during enumeration or deletion,
+        /// they are silently ignored.
+        /// </summary>
+        /// <param name="directory">The directory whose subdirectories should be deleted.</param>
+        /// <remarks>
+        /// This method is useful for cleanup operations where partial failure is acceptable.
+        /// It will not delete the root directory itself, only its subdirectories.
+        /// IO exceptions during directory enumeration or deletion are caught and ignored.
+        /// </remarks>
+        internal static void DeleteSubdirectoriesNoThrow(string directory)
+        {
+            try
+            {
+                foreach (string dir in FileSystems.Default.EnumerateDirectories(directory))
+                {
+                    DeleteDirectoryNoThrow(dir, recursive: true, retryCount: 1);
+                }
+            }
+            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
+            {
+                // If we can't enumerate the directories, ignore. Other cases should be handled by DeleteDirectoryNoThrow.
+            }
+        }
+#endif
 
         /// <summary>
         /// Determines whether the given assembly file name has one of the listed extensions.
