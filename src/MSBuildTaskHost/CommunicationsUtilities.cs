@@ -192,25 +192,6 @@ namespace Microsoft.Build.Internal
 
         private readonly HandshakeComponents _handshakeComponents;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Handshake"/> class with the specified node type
-        /// and optional predefined tools directory.
-        /// </summary>
-        /// <param name="nodeType">
-        /// The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
-        /// </param>
-        /// <param name="predefinedToolsDirectory">
-        /// An optional directory path used for .NET TaskHost handshake salt calculation (only on .NET Framework).
-        /// When specified for .NET TaskHost nodes, this directory path is included in the handshake salt 
-        /// to ensure the child dotnet process connects with the expected tools directory context.
-        /// For non-.NET TaskHost nodes or on .NET Core, the MSBuildToolsDirectoryRoot is used instead.
-        /// This parameter is ignored when not running .NET TaskHost on .NET Framework.
-        /// </param>
-        public Handshake(HandshakeOptions nodeType, string predefinedToolsDirectory = null)
-            : this(nodeType, includeSessionId: true, predefinedToolsDirectory)
-        {
-        }
-
         // Helper method to validate handshake option presence
         internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option)
             => (hostContext & option) == option;
@@ -218,7 +199,7 @@ namespace Microsoft.Build.Internal
         // Source options of the handshake.
         internal HandshakeOptions HandshakeOptions { get; }
 
-        private Handshake(HandshakeOptions nodeType, bool includeSessionId, string predefinedToolsDirectory)
+        public Handshake(HandshakeOptions nodeType, bool includeSessionId = true)
         {
             HandshakeOptions = nodeType;
 
@@ -227,9 +208,11 @@ namespace Microsoft.Build.Internal
             var options = (int)nodeType | (handshakeVersion << 24);
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
+            // Tools directory is the path of MSBuildTaskHost.exe
+            string toolsDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
             // Calculate salt from environment and tools directory
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
-            string toolsDirectory = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
             int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
 
             CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt);

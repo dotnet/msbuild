@@ -176,6 +176,7 @@
     <Compile Include="BackEnd\Components\Communications\DetouredNodeLauncher.cs" />
     <Compile Include="BackEnd\Components\Communications\SerializationContractInitializer.cs" />
     <Compile Include="BackEnd\Components\Communications\ServerNodeEndpointOutOfProc.cs" />
+    <Compile Include="BackEnd\Components\Communications\TaskHostLaunchArgs.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\IFileAccessManager.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\FileAccessManager.cs" />
     <Compile Include="BackEnd\Components\FileAccesses\FileAccessReport.cs" />
