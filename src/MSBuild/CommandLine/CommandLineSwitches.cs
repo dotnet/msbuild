@@ -300,6 +300,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             new ParameterizedSwitchInfo(  ["multithreaded", "mt"],              ParameterizedSwitch.MultiThreaded,              null,                           false,          null,                                  true,   false,   "HelpMessage_49_MultiThreadedSwitch"),
             new ParameterizedSwitchInfo(  ["parentpacketversion"],              ParameterizedSwitch.ParentPacketVersion,        null,                           false,          null,                                  false,  false,   null),
             new ParameterizedSwitchInfo(  ["nologo"],                           ParameterizedSwitch.NoLogo,                     null,                           false,          null,                                  true,   false,   "HelpMessage_5_NoLogoSwitch")
+            // Add to ParameterizedSwitch enum (before NumberOfParameterizedSwitches):
         };
 
         /// <summary>
