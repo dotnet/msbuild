@@ -380,8 +380,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     <Target Name=""TestTarget"">
         <{typeof(StringArrayWithNullsTask).Name}>
             <Output ItemName=""OutputItems"" TaskParameter=""OutputArray"" />
+            <Output PropertyName=""TaskPid"" TaskParameter=""Pid"" />
         </{typeof(StringArrayWithNullsTask).Name}>
-        <Message Text=""Got %(OutputItems.Identity)"" Importance=""High"" />
     </Target>
 </Project>";
 
@@ -392,6 +392,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             // The build should succeed - nulls should be filtered, not cause a crash
             buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Verify task ran out-of-process (TaskHostFactory should force this)
+            string taskPidStr = projectInstance.GetPropertyValue("TaskPid");
+            taskPidStr.ShouldNotBeNullOrEmpty();
+            int.TryParse(taskPidStr, out int taskPid).ShouldBeTrue();
+            Process.GetCurrentProcess().Id.ShouldNotBe(taskPid, "Task should have run in a separate TaskHost process");
+
+            // Verify output items - nulls should be filtered out, leaving 3 items
+            var outputItems = projectInstance.GetItems("OutputItems");
+            outputItems.Count.ShouldBe(3, "Null elements should be filtered from the string array");
         }
     }
 }
