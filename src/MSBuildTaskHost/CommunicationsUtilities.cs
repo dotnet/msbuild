@@ -11,13 +11,12 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+using Microsoft.Build.TaskHost.BackEnd;
+using Microsoft.Build.TaskHost.Utilities;
 
 #nullable disable
 
-namespace Microsoft.Build.Internal
+namespace Microsoft.Build.TaskHost
 {
     /// <summary>
     /// Enumeration of all possible (currently supported) options for handshakes.
@@ -280,7 +279,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Lock trace to ensure we are logging in serial fashion.
         /// </summary>
-        private static readonly LockType s_traceLock = new LockType();
+        private static readonly object s_traceLock = new();
 
         /// <summary>
         /// Place to dump trace
@@ -624,7 +623,7 @@ namespace Microsoft.Build.Internal
 
             options |= HandshakeOptions.CLR2;
 
-            if (NativeMethodsShared.Is64Bit)
+            if (NativeMethods.Is64Bit)
             {
                 options |= HandshakeOptions.X64;
             }

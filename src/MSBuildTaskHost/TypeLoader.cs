@@ -7,11 +7,12 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared.Concurrent;
+using Microsoft.Build.TaskHost.Collections;
+using Microsoft.Build.TaskHost.Utilities;
 
 #nullable disable
 
-namespace Microsoft.Build.Shared
+namespace Microsoft.Build.TaskHost
 {
     /// <summary>
     /// This class is used to load types from their assemblies.
@@ -175,7 +176,7 @@ namespace Microsoft.Build.Shared
             /// Lock to prevent two threads from using this object at the same time.
             /// Since we fill up internal structures with what is in the assembly
             /// </summary>
-            private readonly LockType _lockObject = new();
+            private readonly object _lockObject = new();
 
             /// <summary>
             /// Type filter to pick the correct types out of an assembly

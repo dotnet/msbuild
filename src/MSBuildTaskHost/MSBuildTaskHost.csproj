@@ -17,18 +17,20 @@
     <UseRidGraph>true</UseRidGraph>
 
     <EnableDefaultItems>false</EnableDefaultItems>
-    <DefineConstants>$(DefineConstants);CLR2COMPATIBILITY;TASKHOST;NO_FRAMEWORK_IVT</DefineConstants>
-    <!-- Need pointers for getting environment block -->
+
+    <RootNamespace>Microsoft.Build.TaskHost</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
     <!-- It is vital that msbuildtaskhost.exe is allowed to use the full 4GB on 64 bit machines in order to help avoid
          out of memory problems on large trees -->
     <LargeAddressAware>true</LargeAddressAware>
-    <ApplicationIcon>MSBuild\MSBuild.ico</ApplicationIcon>
+    <ApplicationIcon>MSBuild.ico</ApplicationIcon>
 
     <!-- workaround for https://github.com/dotnet/msbuild/issues/5620 -->
     <BypassFrameworkInstallChecks>true</BypassFrameworkInstallChecks>
 
-    <DebugType>full</DebugType><!-- Work around arcade stomping on symbols for same-program-different-arches. -->
+    <!-- Work around arcade stomping on symbols for same-program-different-arches. -->
+    <DebugType>full</DebugType>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Build.Framework, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
@@ -37,64 +39,62 @@
   </ItemGroup>
   <ItemGroup>
     <!-- Source Files -->
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="AssemblyResources.cs" />
-    <Compile Include="BinaryReaderExtensions.cs" />
-    <Compile Include="BinaryWriterExtensions.cs" />
-    <Compile Include="BufferedReadStream.cs" />
-    <Compile Include="CollectionHelpers.cs" />
+    <Compile Include="BackEnd\BinaryReaderExtensions.cs" />
+    <Compile Include="BackEnd\BinaryReaderFactory.cs" />
+    <Compile Include="BackEnd\BinaryTranslator.cs" />
+    <Compile Include="BackEnd\BinaryWriterExtensions.cs" />
+    <Compile Include="BackEnd\BufferedReadStream.cs" />
+    <Compile Include="BackEnd\INodeEndpoint.cs" />
+    <Compile Include="BackEnd\INodePacket.cs" />
+    <Compile Include="BackEnd\INodePacketFactory.cs" />
+    <Compile Include="BackEnd\INodePacketHandler.cs" />
+    <Compile Include="BackEnd\InterningBinaryReader.cs" />
+    <Compile Include="BackEnd\ITranslatable.cs" />
+    <Compile Include="BackEnd\ITranslator.cs" />
+    <Compile Include="BackEnd\NodeBuildComplete.cs" />
+    <Compile Include="BackEnd\NodeEndpointOutOfProcTaskHost.cs" />
+    <Compile Include="BackEnd\NodeEngineShutdownReason.cs" />
+    <Compile Include="BackEnd\NodePacketFactory.cs" />
+    <Compile Include="BackEnd\NodeShutdown.cs" />
+    <Compile Include="BackEnd\TaskHostTaskCancelled.cs" />
+    <Compile Include="BackEnd\TaskHostTaskComplete.cs" />
+    <Compile Include="BackEnd\TaskHostConfiguration.cs" />
+    <Compile Include="BackEnd\TaskParameter.cs" />
+    <Compile Include="BackEnd\TaskParameterTypeVerifier.cs" />
+    <Compile Include="BackEnd\TranslatorHelpers.cs" />
+    <Compile Include="Collections\CollectionHelpers.cs" />
+    <Compile Include="Collections\ConcurrentDictionary.cs" />
+    <Compile Include="Collections\ConcurrentQueue.cs" />
     <Compile Include="CommunicationsUtilities.cs" />
-    <Compile Include="Concurrent\ConcurrentDictionary.cs" />
-    <Compile Include="Concurrent\ConcurrentQueue.cs" />
-    <Compile Include="EnvironmentUtilities.cs" />
-    <Compile Include="ErrorUtilities.cs" />
-    <Compile Include="EscapingUtilities.cs" />
-    <Compile Include="ExceptionHandling.cs" />
-    <Compile Include="FileUtilities.cs" />
-    <Compile Include="FileUtilitiesRegex.cs" />
-    <Compile Include="Framework\BinaryReaderFactory.cs" />
-    <Compile Include="Framework\BinaryTranslator.cs" />
-    <Compile Include="Framework\BuildException\BuildExceptionBase.cs" />
-    <Compile Include="Framework\BuildException\BuildExceptionRemoteState.cs" />
-    <Compile Include="Framework\BuildException\BuildExceptionSerializationHelper.cs" />
-    <Compile Include="Framework\BuildException\GenericBuildTransferredException.cs" />
-    <Compile Include="Framework\InternalErrorException.cs" />
-    <Compile Include="Framework\ITranslatable.cs" />
-    <Compile Include="Framework\ITranslator.cs" />
-    <Compile Include="Framework\NativeMethods.cs" />
-    <Compile Include="Framework\StringBuilderCache.cs" />
-    <Compile Include="Framework\Traits.cs" />
-    <Compile Include="GlobalUsings.cs" />
-    <Compile Include="INodeEndpoint.cs" />
-    <Compile Include="INodePacket.cs" />
-    <Compile Include="INodePacketFactory.cs" />
-    <Compile Include="INodePacketHandler.cs" />
-    <Compile Include="InterningBinaryReader.cs" />
+    <Compile Include="Exceptions\BuildExceptionBase.cs" />
+    <Compile Include="Exceptions\BuildExceptionRemoteState.cs" />
+    <Compile Include="Exceptions\BuildExceptionSerializationHelper.cs" />
+    <Compile Include="Exceptions\GenericBuildTransferredException.cs" />
+    <Compile Include="Exceptions\InternalErrorException.cs" />
     <Compile Include="LoadedType.cs" />
-    <Compile Include="LogMessagePacketBase.cs" />
-    <Compile Include="Modifiers.cs" />
-    <Compile Include="MSBuild\OutOfProcTaskHostNode.cs" />
+    <Compile Include="BackEnd\LogMessagePacketBase.cs" />
+    <Compile Include="OutOfProcTaskHostNode.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
-    <Compile Include="NodeBuildComplete.cs" />
-    <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
-    <Compile Include="NodeEngineShutdownReason.cs" />
-    <Compile Include="NodePacketFactory.cs" />
-    <Compile Include="NodeShutdown.cs" />
     <Compile Include="OutOfProcTaskHost.cs" />
     <Compile Include="OutOfProcTaskHostTaskResult.cs" />
     <Compile Include="Polyfills\CallerArgumentExpressionAttribute.cs" />
     <Compile Include="Polyfills\IsExternalInit.cs" />
     <Compile Include="Polyfills\NullableAttributes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ResourceUtilities.cs" />
-    <Compile Include="TaskHostTaskCancelled.cs" />
-    <Compile Include="TaskHostConfiguration.cs" />
-    <Compile Include="TaskHostTaskComplete.cs" />
+    <Compile Include="Resources\AssemblyResources.cs" />
     <Compile Include="TaskLoader.cs" />
-    <Compile Include="TaskParameter.cs" />
-    <Compile Include="TaskParameterTypeVerifier.cs" />
-    <Compile Include="TranslatorHelpers.cs" />
+    <Compile Include="Traits.cs" />
     <Compile Include="TypeLoader.cs" />
+    <Compile Include="Utilities\EnvironmentUtilities.cs" />
+    <Compile Include="Utilities\ErrorUtilities.cs" />
+    <Compile Include="Utilities\EscapingUtilities.cs" />
+    <Compile Include="Utilities\ExceptionHandling.cs" />
+    <Compile Include="Utilities\FileUtilities.cs" />
+    <Compile Include="Utilities\FileUtilitiesRegex.cs" />
+    <Compile Include="Utilities\Modifiers.cs" />
+    <Compile Include="Utilities\NativeMethods.cs" />
+    <Compile Include="Utilities\StringBuilderCache.cs" />
+    <Compile Include="Utilities\ResourceUtilities.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -106,7 +106,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="MSBuild\MSBuild.ico" />
+    <Content Include="MSBuild.ico" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\StringTools\StringTools.csproj" />

@@ -4,11 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+using Microsoft.Build.TaskHost.BackEnd;
+using Microsoft.Build.TaskHost.Resources;
+using Microsoft.Build.TaskHost.Utilities;
 
-namespace Microsoft.Build.CommandLine;
+namespace Microsoft.Build.TaskHost;
 
 /// <summary>
 /// Class for executing a task in an AppDomain.

@@ -4,8 +4,9 @@
 using System;
 using System.Reflection;
 using Microsoft.Build.Framework;
+using Microsoft.Build.TaskHost.Utilities;
 
-namespace Microsoft.Build.Shared
+namespace Microsoft.Build.TaskHost
 {
     /// <summary>
     /// This class packages information about a type loaded from an assembly: for example,

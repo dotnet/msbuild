@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.BackEnd;
+using Microsoft.Build.TaskHost.BackEnd;
 
-namespace Microsoft.Build.Shared;
+namespace Microsoft.Build.TaskHost;
 
 /// <summary>
 /// A result of executing a target or task.

@@ -3,14 +3,12 @@
 
 using System;
 using System.Diagnostics;
-
-// CR: We could move MSBuildApp.ExitType out of MSBuildApp
-using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
+using Microsoft.Build.TaskHost.BackEnd;
+using Microsoft.Build.TaskHost.Utilities;
 
 #nullable disable
 
-namespace Microsoft.Build.CommandLine
+namespace Microsoft.Build.TaskHost
 {
     /// <summary>
     /// This is the Out-Of-Proc Task Host for supporting Cross-Targeting tasks.
