@@ -19,6 +19,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Microsoft.VisualStudio.TestPlatform.Utilities;
@@ -74,7 +75,7 @@ namespace Microsoft.Build.UnitTests
                 + "</Project>");
         }
 
-        private const string MSBuildExeName = "MSBuild.exe";
+        private const string MSBuildExeName = NativeMethodsShared.IsWindows ? $"MSBuild.exe" : MSBuild;
 
         private readonly ITestOutputHelper _output;
         private readonly TestEnvironment _env;

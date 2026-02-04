@@ -36,7 +36,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Name of MSBuild executable files.
         /// </summary>
-        private static readonly string[] s_msBuildExeNames = { "MSBuild.exe", "MSBuild.dll" };
+        private static readonly string[] s_msBuildExeNames = { "MSBuild.exe" };
 
         /// <summary>
         /// Gets the cached Build Environment instance.

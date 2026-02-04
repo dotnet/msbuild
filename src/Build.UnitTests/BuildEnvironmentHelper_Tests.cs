@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -14,7 +15,7 @@ namespace Microsoft.Build.Engine.UnitTests
 {
     public class BuildEnvironmentHelper_Tests
     {
-        private const string MSBuildExeName = "MSBuild.exe";
+        private string MSBuildExeName = Constants.MSBuildExecutableName;
 
         [Fact]
         public void GetExecutablePath()
@@ -458,7 +459,8 @@ namespace Microsoft.Build.Engine.UnitTests
 
             public string MSBuildExePath64 => Path.Combine(BuildDirectory64, MSBuildExeName);
 
-            public EmptyVSEnviroment(string toolsVersion = MSBuildConstants.CurrentToolsVersion) : base("MSBuild.exe", false)
+            public EmptyVSEnviroment(string toolsVersion = MSBuildConstants.CurrentToolsVersion)
+                : base(Constants.MSBuildExecutableName, false)
             {
                 try
                 {

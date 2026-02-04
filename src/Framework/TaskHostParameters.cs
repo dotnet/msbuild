@@ -63,7 +63,7 @@ namespace Microsoft.Build.Framework
         public string? DotnetHostPath => _dotnetHostPath;
 
         /// <summary>
-        /// Gets the path to the MSBuild assembly.
+        /// Gets the path to the MSBuild assembly.It can be either path to MSBuild.dll or to app host (MSBuild.exe).
         /// </summary>
         /// <value>The MSBuild assembly path, or null if not specified.</value>
         public string? MSBuildExecutablePath => _msBuildAssemblyPath;
