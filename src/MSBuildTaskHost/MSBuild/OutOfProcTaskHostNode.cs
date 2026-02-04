@@ -636,7 +636,6 @@ namespace Microsoft.Build.CommandLine
             _isTaskExecuting = true;
             OutOfProcTaskHostTaskResult taskResult = null;
             TaskHostConfiguration taskConfiguration = state as TaskHostConfiguration;
-            IDictionary<string, TaskParameter> taskParams = taskConfiguration.TaskParameters;
 
             // We only really know the values of these variables for sure once we see what we received from our parent
             // environment -- otherwise if this was a completely new build, we could lose out on expected environment
@@ -662,33 +661,28 @@ namespace Microsoft.Build.CommandLine
                 Thread.CurrentThread.CurrentCulture = taskConfiguration.Culture;
                 Thread.CurrentThread.CurrentUICulture = taskConfiguration.UICulture;
 
-                string taskName = taskConfiguration.TaskName;
-                string taskLocation = taskConfiguration.TaskLocation;
-
                 // We will not create an appdomain now because of a bug
                 // As a fix, we will create the class directly without wrapping it in a domain
                 _taskWrapper = new OutOfProcTaskAppDomainWrapper();
 
                 taskResult = _taskWrapper.ExecuteTask(
-                    this as IBuildEngine,
-                    taskName,
-                    taskLocation,
+                    buildEngine: this,
+                    taskConfiguration.TaskName,
+                    taskConfiguration.TaskLocation,
                     taskConfiguration.ProjectFileOfTask,
                     taskConfiguration.LineNumberOfTask,
                     taskConfiguration.ColumnNumberOfTask,
-                    taskConfiguration.TargetName,
-                    taskConfiguration.ProjectFile,
                     taskConfiguration.AppDomainSetup,
-                    taskParams);
+                    taskConfiguration.TaskParameters);
             }
             catch (ThreadAbortException)
             {
                 // This thread was aborted as part of Cancellation, we will return a failure task result
-                taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
+                taskResult = OutOfProcTaskHostTaskResult.Failure();
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
+                taskResult = OutOfProcTaskHostTaskResult.CrashedDuringExecution(e);
             }
             finally
             {
@@ -699,14 +693,14 @@ namespace Microsoft.Build.CommandLine
                     IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
-                    taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
+                    taskResult ??= OutOfProcTaskHostTaskResult.Failure();
 
                     lock (_taskCompleteLock)
                     {
                         _taskCompletePacket = new TaskHostTaskComplete(taskResult, currentEnvironment);
                     }
 
-                    foreach (TaskParameter param in taskParams.Values)
+                    foreach (TaskParameter param in taskConfiguration.TaskParameters.Values)
                     {
                         // Tell remoting to forget connections to the parameter
                         RemotingServices.Disconnect(param);
@@ -721,14 +715,14 @@ namespace Microsoft.Build.CommandLine
                     {
                         // Create a minimal taskCompletePacket to carry the exception so that the TaskHostTask does not hang while waiting
                         _taskCompletePacket = new TaskHostTaskComplete(
-                            new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e),
+                            OutOfProcTaskHostTaskResult.CrashedAfterExecution(e),
                             buildProcessEnvironment: null);
                     }
                 }
                 finally
                 {
-                    // Call CleanupTask to unload any domains and other necessary cleanup in the taskWrapper
-                    _taskWrapper.CleanupTask();
+                    // Call Dispose to unload any AppDomains and other necessary cleanup in the taskWrapper
+                    _taskWrapper.Dispose();
 
                     // The task has now fully completed executing
                     _taskCompleteEvent.Set();

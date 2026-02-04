@@ -45,7 +45,7 @@ namespace Microsoft.Build.Shared
             int taskColumn,
             LogError logError,
             AppDomainSetup appDomainSetup,
-            Action<AppDomain> appDomainCreated,
+            Action<AppDomain>? appDomainCreated,
             bool isOutOfProc,
             out AppDomain? taskAppDomain)
         {
