@@ -342,7 +342,7 @@ namespace Microsoft.Build.BackEnd
                         {
 
                             if (!_pipeServer.TryReadIntForHandshake(
-                                byteToAccept: index == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null, /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+                                byteToAccept: index == 0 ? (byte?)CommunicationsUtilities.HandshakeVersion : null, /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
                               out HandshakeResult result))
                             {
                                 CommunicationsUtilities.Trace($"Handshake failed with error: {result.ErrorMessage}");

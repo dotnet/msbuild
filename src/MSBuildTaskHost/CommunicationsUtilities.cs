@@ -9,9 +9,7 @@ using System.IO;
 using System.IO.Pipes;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Security.Cryptography;
 using System.Security.Principal;
-using System.Text;
 using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
@@ -74,19 +72,6 @@ namespace Microsoft.Build.Internal
         /// </summary>
         SidecarTaskHost = 256,
     }
-
-    /// <summary>
-    /// Represents a unique key for identifying task host nodes.
-    /// Combines HandshakeOptions (which specify runtime/architecture configuration) with
-    /// the scheduled node ID to uniquely identify task hosts in multi-threaded mode.
-    /// </summary>
-    /// <param name="HandshakeOptions">The handshake options specifying runtime and architecture configuration.</param>
-    /// <param name="NodeId">
-    /// The scheduled node ID. In traditional multi-proc builds, this is -1 (meaning the task host
-    /// is identified by HandshakeOptions alone). In multi-threaded mode, each in-proc node has
-    /// its own task host, so the node ID is used to distinguish them.
-    /// </param>
-    internal readonly record struct TaskHostNodeKey(HandshakeOptions HandshakeOptions, int NodeId);
 
     /// <summary>
     /// Status codes for the handshake process.
@@ -185,7 +170,8 @@ namespace Microsoft.Build.Internal
         /// <param name="value">The value returned from the handshake operation.</param>
         /// <param name="negotiatedPacketVersion">The packet version received from the child node.</param>
         /// <returns>A new <see cref="HandshakeResult"/> instance representing a successful operation.</returns>
-        public static HandshakeResult Success(int value = 0, byte negotiatedPacketVersion = 1) => new(HandshakeStatus.Success, value, null, negotiatedPacketVersion);
+        public static HandshakeResult Success(int value = 0, byte negotiatedPacketVersion = 1)
+            => new(HandshakeStatus.Success, value, null, negotiatedPacketVersion);
 
         /// <summary>
         /// Creates a failed handshake result with the specified status and error message.
@@ -193,20 +179,18 @@ namespace Microsoft.Build.Internal
         /// <param name="status">The error status code for the failure.</param>
         /// <param name="errorMessage">A description of the error that occurred.</param>
         /// <returns>A new <see cref="HandshakeResult"/> instance representing a failed operation.</returns>
-        public static HandshakeResult Failure(HandshakeStatus status, string errorMessage) => new(status, 0, errorMessage);
+        public static HandshakeResult Failure(HandshakeStatus status, string errorMessage)
+            => new(status, 0, errorMessage);
     }
 
-    internal class Handshake
+    internal sealed class Handshake
     {
         /// <summary>
         /// Marker indicating that the next integer in the child handshake response is the PacketVersion.
         /// </summary>
         public const int PacketVersionFromChildMarker = -1;
 
-        // The number is selected as an arbitrary value that is unlikely to conflict with any future sdk version.
-        public const int NetTaskHostHandshakeVersion = 99;
-
-        protected readonly HandshakeComponents _handshakeComponents;
+        private readonly HandshakeComponents _handshakeComponents;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Handshake"/> class with the specified node type
@@ -222,30 +206,30 @@ namespace Microsoft.Build.Internal
         /// For non-.NET TaskHost nodes or on .NET Core, the MSBuildToolsDirectoryRoot is used instead.
         /// This parameter is ignored when not running .NET TaskHost on .NET Framework.
         /// </param>
-        internal Handshake(HandshakeOptions nodeType, string predefinedToolsDirectory = null)
+        public Handshake(HandshakeOptions nodeType, string predefinedToolsDirectory = null)
             : this(nodeType, includeSessionId: true, predefinedToolsDirectory)
         {
         }
 
         // Helper method to validate handshake option presence
-        internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option) => (hostContext & option) == option;
+        internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option)
+            => (hostContext & option) == option;
 
         // Source options of the handshake.
         internal HandshakeOptions HandshakeOptions { get; }
 
-        protected Handshake(HandshakeOptions nodeType, bool includeSessionId, string predefinedToolsDirectory)
+        private Handshake(HandshakeOptions nodeType, bool includeSessionId, string predefinedToolsDirectory)
         {
             HandshakeOptions = nodeType;
 
             // Build handshake options with version in upper bits
-            const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
+            const int handshakeVersion = CommunicationsUtilities.HandshakeVersion;
             var options = (int)nodeType | (handshakeVersion << 24);
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
             // Calculate salt from environment and tools directory
-            bool isNetTaskHost = IsHandshakeOptionEnabled(nodeType, HandshakeOptions.NET | HandshakeOptions.TaskHost);
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
-            string toolsDirectory = GetToolsDirectory(isNetTaskHost, predefinedToolsDirectory);
+            string toolsDirectory = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
             int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
 
             CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt);
@@ -259,24 +243,8 @@ namespace Microsoft.Build.Internal
                 sessionId = currentProcess.SessionId;
             }
 
-            _handshakeComponents = isNetTaskHost
-                ? CreateNetTaskHostComponents(options, salt, sessionId)
-                : CreateStandardComponents(options, salt, sessionId);
+            _handshakeComponents = CreateStandardComponents(options, salt, sessionId);
         }
-
-        private string GetToolsDirectory(bool isNetTaskHost, string predefinedToolsDirectory) =>
-            isNetTaskHost // For .NET TaskHost assembly directory we set the expectation for the child dotnet process to connect to.
-                ? predefinedToolsDirectory
-                : BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-
-        private static HandshakeComponents CreateNetTaskHostComponents(int options, int salt, int sessionId) => new(
-            options,
-            salt,
-            NetTaskHostHandshakeVersion,
-            NetTaskHostHandshakeVersion,
-            NetTaskHostHandshakeVersion,
-            NetTaskHostHandshakeVersion,
-            sessionId);
 
         private static HandshakeComponents CreateStandardComponents(int options, int salt, int sessionId)
         {
@@ -292,7 +260,7 @@ namespace Microsoft.Build.Internal
                 sessionId);
         }
 
-        public virtual HandshakeComponents RetrieveHandshakeComponents() => new HandshakeComponents(
+        public HandshakeComponents RetrieveHandshakeComponents() => new(
             CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Options),
             CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Salt),
             CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMajor),
@@ -300,54 +268,6 @@ namespace Microsoft.Build.Internal
             CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionBuild),
             CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionPrivate),
             CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.SessionId));
-
-        public virtual string GetKey() => $"{_handshakeComponents.Options} {_handshakeComponents.Salt} {_handshakeComponents.FileVersionMajor} {_handshakeComponents.FileVersionMinor} {_handshakeComponents.FileVersionBuild} {_handshakeComponents.FileVersionPrivate} {_handshakeComponents.SessionId}".ToString(CultureInfo.InvariantCulture);
-
-        public virtual byte? ExpectedVersionInFirstByte => CommunicationsUtilities.handshakeVersion;
-    }
-
-    internal sealed class ServerNodeHandshake : Handshake
-    {
-        /// <summary>
-        /// Caching computed hash.
-        /// </summary>
-        private string _computedHash = null;
-
-        public override byte? ExpectedVersionInFirstByte => null;
-
-        internal ServerNodeHandshake(HandshakeOptions nodeType)
-            : base(nodeType, includeSessionId: false, predefinedToolsDirectory: null)
-        {
-        }
-
-        public override HandshakeComponents RetrieveHandshakeComponents() => new HandshakeComponents(
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Options),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Salt),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMajor),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMinor),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionBuild),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionPrivate));
-
-        public override string GetKey() => $"{_handshakeComponents.Options} {_handshakeComponents.Salt} {_handshakeComponents.FileVersionMajor} {_handshakeComponents.FileVersionMinor} {_handshakeComponents.FileVersionBuild} {_handshakeComponents.FileVersionPrivate}"
-            .ToString(CultureInfo.InvariantCulture);
-
-        /// <summary>
-        /// Computes Handshake stable hash string representing whole state of handshake.
-        /// </summary>
-        public string ComputeHash()
-        {
-            if (_computedHash == null)
-            {
-                var input = GetKey();
-                byte[] utf8 = Encoding.UTF8.GetBytes(input);
-                using var sha = SHA256.Create();
-                var bytes = sha.ComputeHash(utf8);
-                _computedHash = Convert.ToBase64String(bytes)
-                    .Replace("/", "_")
-                    .Replace("=", string.Empty);
-            }
-            return _computedHash;
-        }
     }
 
     /// <summary>
@@ -363,7 +283,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// The version of the handshake. This should be updated each time the handshake structure is altered.
         /// </summary>
-        internal const byte handshakeVersion = 0x01;
+        internal const byte HandshakeVersion = 0x01;
 
         /// <summary>
         /// The timeout to connect to a node.
@@ -389,18 +309,6 @@ namespace Microsoft.Build.Internal
         /// Ticks at last time logged
         /// </summary>
         private static long s_lastLoggedTicks = DateTime.UtcNow.Ticks;
-
-        /// <summary>
-        /// Delegate to debug the communication utilities.
-        /// </summary>
-        internal delegate void LogDebugCommunications(string format, params object[] stuff);
-
-        /// <summary>
-        /// On Windows, environment variables should be case-insensitive;
-        /// on Unix-like systems, they should be case-sensitive, but this might be a breaking change in an edge case.
-        /// https://github.com/dotnet/msbuild/issues/12858
-        /// </summary>
-        internal static StringComparer EnvironmentVariableComparer => StringComparer.OrdinalIgnoreCase;
 
         /// <summary>
         /// Gets or sets the node connection timeout.
@@ -627,8 +535,8 @@ namespace Microsoft.Build.Internal
 
                     // We detected packet version marker, now let's read actual PacketVersion
                     if (!stream.TryReadIntForHandshake(
-                            byteToAccept: null,
-                            out HandshakeResult versionResult))
+                        byteToAccept: null,
+                        out HandshakeResult versionResult))
                     {
                         result = versionResult;
                         return false;
@@ -673,7 +581,6 @@ namespace Microsoft.Build.Internal
             return HandshakeResult.Failure(HandshakeStatus.VersionMismatch, errorMessage);
         }
 
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         /// <summary>
         /// Extension method to read a series of bytes from a stream.
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
@@ -681,9 +588,7 @@ namespace Microsoft.Build.Internal
         internal static bool TryReadIntForHandshake(
             this PipeStream stream,
             byte? byteToAccept,
-            out HandshakeResult result
-            )
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+            out HandshakeResult result)
         {
             byte[] bytes = new byte[4];
             int bytesRead = stream.Read(bytes, 0, bytes.Length);
@@ -868,7 +773,7 @@ namespace Microsoft.Build.Internal
             {
                 s_debugDumpPath ??= Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
 
-                if (String.IsNullOrEmpty(s_debugDumpPath))
+                if (string.IsNullOrEmpty(s_debugDumpPath))
                 {
                     s_debugDumpPath = FileUtilities.TempFileDirectory;
                 }
@@ -879,16 +784,13 @@ namespace Microsoft.Build.Internal
 
                 try
                 {
-                    string fileName = @"MSBuild_CommTrace_PID_{0}";
-                    if (nodeId != -1)
-                    {
-                        fileName += "_node_" + nodeId;
-                    }
+                    string fileName = nodeId != -1
+                        ? $"MSBuild_CommTrace_PID_{EnvironmentUtilities.CurrentProcessId}_node_{nodeId}.txt"
+                        : $"MSBuild_CommTrace_PID_{EnvironmentUtilities.CurrentProcessId}.txt";
 
-                    fileName += ".txt";
+                    string filePath = Path.Combine(s_debugDumpPath, fileName);
 
-                    using (StreamWriter file = FileUtilities.OpenWrite(
-                        string.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), EnvironmentUtilities.CurrentProcessId, nodeId), append: true))
+                    using (StreamWriter file = FileUtilities.OpenWrite(filePath, append: true))
                     {
                         long now = DateTime.UtcNow.Ticks;
                         float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;
