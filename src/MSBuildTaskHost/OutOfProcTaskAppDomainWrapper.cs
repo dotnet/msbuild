@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -121,48 +120,21 @@ namespace Microsoft.Build.CommandLine
                                 TaskCompleteType.CrashedDuringInitialization,
                                 exceptionToReturn,
                                 "TaskInstantiationFailureError",
-                                [taskName, taskLocation, String.Empty]);
+                                [taskName, taskLocation, string.Empty]);
             }
 
-            OutOfProcTaskHostTaskResult taskResult;
-            if (taskType.HasSTAThreadAttribute)
-            {
-#if FEATURE_APARTMENT_STATE
-                taskResult = InstantiateAndExecuteTaskInSTAThread(
-                    oopTaskHostNode,
-                    taskType,
-                    taskName,
-                    taskLocation,
-                    taskFile,
-                    taskLine,
-                    taskColumn,
-                    targetName,
-                    projectFile,
-                    appDomainSetup,
-                    taskParams);
-#else
-                return new OutOfProcTaskHostTaskResult(
-                                                    TaskCompleteType.CrashedDuringInitialization,
-                                                    null,
-                                                    "TaskInstantiationFailureNotSupported",
-                                                    [taskName, taskLocation, typeof(RunInSTAAttribute).FullName]);
-#endif
-            }
-            else
-            {
-                taskResult = InstantiateAndExecuteTask(
-                    oopTaskHostNode,
-                    taskType,
-                    taskName,
-                    taskLocation,
-                    taskFile,
-                    taskLine,
-                    taskColumn,
-                    targetName,
-                    projectFile,
-                    appDomainSetup,
-                    taskParams);
-            }
+            OutOfProcTaskHostTaskResult taskResult = InstantiateAndExecuteTask(
+                oopTaskHostNode,
+                taskType,
+                taskName,
+                taskLocation,
+                taskFile,
+                taskLine,
+                taskColumn,
+                targetName,
+                projectFile,
+                appDomainSetup,
+                taskParams);
 
             return taskResult;
         }
@@ -182,86 +154,6 @@ namespace Microsoft.Build.CommandLine
             TaskLoader.RemoveAssemblyResolver();
             wrappedTask = null;
         }
-
-#if FEATURE_APARTMENT_STATE
-        /// <summary>
-        /// Execute a task on the STA thread.
-        /// </summary>
-        /// <comment>
-        /// STA thread launching code lifted from XMakeBuildEngine\BackEnd\Components\RequestBuilder\TaskBuilder.cs, ExecuteTaskInSTAThread method.
-        /// Any bug fixes made to this code, please ensure that you also fix that code.
-        /// </comment>
-        private OutOfProcTaskHostTaskResult InstantiateAndExecuteTaskInSTAThread(
-                IBuildEngine oopTaskHostNode,
-                LoadedType taskType,
-                string taskName,
-                string taskLocation,
-                string taskFile,
-                int taskLine,
-                int taskColumn,
-                string targetName,
-                string projectFile,
-                AppDomainSetup appDomainSetup,
-                IDictionary<string, TaskParameter> taskParams)
-        {
-            ManualResetEvent taskRunnerFinished = new ManualResetEvent(false);
-            OutOfProcTaskHostTaskResult taskResult = null;
-            Exception exceptionFromExecution = null;
-
-            try
-            {
-                ThreadStart taskRunnerDelegate = delegate ()
-                {
-                    try
-                    {
-                        taskResult = InstantiateAndExecuteTask(
-                                                oopTaskHostNode,
-                                                taskType,
-                                                taskName,
-                                                taskLocation,
-                                                taskFile,
-                                                taskLine,
-                                                taskColumn,
-                                                targetName,
-                                                projectFile,
-                                                appDomainSetup,
-                                                taskParams);
-                    }
-                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-                    {
-                        exceptionFromExecution = e;
-                    }
-                    finally
-                    {
-                        taskRunnerFinished.Set();
-                    }
-                };
-
-                Thread staThread = new Thread(taskRunnerDelegate);
-                staThread.SetApartmentState(ApartmentState.STA);
-                staThread.Name = "MSBuild STA task runner thread";
-                staThread.CurrentCulture = Thread.CurrentThread.CurrentCulture;
-                staThread.CurrentUICulture = Thread.CurrentThread.CurrentUICulture;
-                staThread.Start();
-
-                // TODO: Why not just Join on the thread???
-                taskRunnerFinished.WaitOne();
-            }
-            finally
-            {
-                taskRunnerFinished.Close();
-                taskRunnerFinished = null;
-            }
-
-            if (exceptionFromExecution != null)
-            {
-                // Unfortunately this will reset the callstack
-                throw exceptionFromExecution;
-            }
-
-            return taskResult;
-        }
-#endif
 
         /// <summary>
         /// Do the work of actually instantiating and running the task.

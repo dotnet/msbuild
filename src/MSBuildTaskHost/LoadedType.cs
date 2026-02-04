@@ -3,7 +3,6 @@
 
 using System;
 using System.Reflection;
-using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
@@ -45,11 +44,6 @@ namespace Microsoft.Build.Shared
         /// Gets whether there's a LoadInSeparateAppDomain attribute on this type.
         /// </summary>
         public bool HasLoadInSeparateAppDomainAttribute { get; }
-
-        /// <summary>
-        /// Gets whether there's a STAThread attribute on the Execute method of this type.
-        /// </summary>
-        public bool HasSTAThreadAttribute { get; }
 
         /// <summary>
         /// Gets whether this type implements MarshalByRefObject.

@@ -71,10 +71,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_MSCOREE</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('net3'))">
-    <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
-  </PropertyGroup>
-
   <PropertyGroup>
     <!-- Useful for tests that need OS information as a constant -->
     <DefineConstants Condition="$([MSBuild]::IsOSPlatform('windows'))">$(DefineConstants);TEST_ISWINDOWS</DefineConstants>
