@@ -291,11 +291,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Defines the communication protocol version for node communication.
         /// 
-        /// Version 1: Introduced for the .NET Task Host protocol. This version
-        /// excludes the translation of appDomainConfig within TaskHostConfiguration
-        /// to maintain backward compatibility and reduce serialization overhead.
-        ///
-        /// Version 2: Adds support of HostServices and target name translation in TaskHostConfiguration.
+        /// null: CLR2 (NET35) task host. Version-dependent fields skipped (not compiled in NET35).
+        /// 0: The constant value for Framework-to-Framework (CLR4) task host. Supports HostServices, TargetName, ProjectFile.
+        /// 2+: .NET task host with full support for version-dependent fields.
         /// 
         /// When incrementing this version, ensure compatibility with existing
         /// task hosts and update the corresponding deserialization logic.
