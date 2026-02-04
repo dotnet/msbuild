@@ -20,12 +20,6 @@ namespace Microsoft.Build.Shared
         private const string CurrentToolsVersion = "Current";
 
         /// <summary>
-        /// Name of the Visual Studio (and Blend) process.
-        /// VS ASP intellisense server fails without Microsoft.VisualStudio.Web.Host. Remove when issue fixed: https://devdiv.visualstudio.com/DevDiv/_workitems/edit/574986
-        /// </summary>
-        private static readonly string[] s_visualStudioProcess = { "DEVENV", "BLEND", "Microsoft.VisualStudio.Web.Host" };
-
-        /// <summary>
         /// Name of the MSBuild process(es)
         /// </summary>
         private static readonly string[] s_msBuildProcess = { "MSBUILD", "MSBUILDTASKHOST" };
@@ -71,7 +65,6 @@ namespace Microsoft.Build.Shared
             var possibleLocations = new Func<BuildEnvironment>[]
             {
                 TryFromEnvironmentVariable,
-                TryFromVisualStudioProcess,
                 TryFromMSBuildProcess,
                 TryFromMSBuildAssembly,
                 TryFromDevConsole
@@ -102,20 +95,6 @@ namespace Microsoft.Build.Shared
             return msBuildExePath == null
                 ? null
                 : TryFromMSBuildExeUnderVisualStudio(msBuildExePath, allowLegacyToolsVersion: true) ?? TryFromStandaloneMSBuildExe(msBuildExePath);
-        }
-
-        private static BuildEnvironment TryFromVisualStudioProcess()
-        {
-            var vsProcess = GetProcessFromRunningProcess();
-            if (!IsProcessInList(vsProcess, s_visualStudioProcess))
-            {
-                return null;
-            }
-
-            var vsRoot = FileUtilities.GetFolderAbove(vsProcess, 3);
-            string msBuildExe = GetMSBuildExeFromVsRoot(vsRoot);
-
-            return new BuildEnvironment(BuildEnvironmentMode.VisualStudio, msBuildExe);
         }
 
         private static BuildEnvironment TryFromMSBuildProcess()
