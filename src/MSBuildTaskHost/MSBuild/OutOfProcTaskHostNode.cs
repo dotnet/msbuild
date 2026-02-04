@@ -575,7 +575,7 @@ namespace Microsoft.Build.CommandLine
 
             // On Windows, a process holds a handle to the current directory,
             // so reset it away from a user-requested folder that may get deleted.
-            NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+            NativeMethodsShared.SetCurrentDirectory(FileUtilities.ExecutingAssemblyDirectory);
 
             // Restore the original environment, best effort.
             try

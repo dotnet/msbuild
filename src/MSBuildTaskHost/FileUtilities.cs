@@ -148,6 +148,8 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string ExecutingAssemblyPath => Path.GetFullPath(typeof(FileUtilities).Assembly.Location);
 
+        public static string ExecutingAssemblyDirectory => Path.GetDirectoryName(ExecutingAssemblyPath);
+
         /// <summary>
         /// Determines the full path for the given file-spec.
         /// ASSUMES INPUT IS STILL ESCAPED
