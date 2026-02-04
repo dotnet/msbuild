@@ -363,5 +363,35 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             projectInstance.GetPropertyValue("CustomStructOutput").ShouldBe(TaskBuilderTestTask.s_customStruct.ToString(CultureInfo.InvariantCulture));
             projectInstance.GetPropertyValue("EnumOutput").ShouldBe(TargetBuiltReason.BeforeTargets.ToString());
         }
+
+        /// <summary>
+        /// Verifies that a task returning a string[] with null elements does not crash
+        /// when executed via TaskHostFactory. This is a regression test for
+        /// https://github.com/dotnet/msbuild/issues/13174
+        /// </summary>
+        [Fact]
+        public void StringArrayWithNullsDoesNotCrashTaskHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{typeof(StringArrayWithNullsTask).FullName}"" AssemblyFile=""{AssemblyLocation}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""TestTarget"">
+        <{typeof(StringArrayWithNullsTask).Name}>
+            <Output ItemName=""OutputItems"" TaskParameter=""OutputArray"" />
+        </{typeof(StringArrayWithNullsTask).Name}>
+        <Message Text=""Got %(OutputItems.Identity)"" Importance=""High"" />
+    </Target>
+</Project>";
+
+            TransientTestFile project = env.CreateFile("testProject.csproj", projectContents);
+            ProjectInstance projectInstance = new(project.Path);
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult buildResult = buildManager.Build(new BuildParameters(), new BuildRequestData(projectInstance, targetsToBuild: new[] { "TestTarget" }));
+
+            // The build should succeed - nulls should be filtered, not cause a crash
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+        }
     }
 }
