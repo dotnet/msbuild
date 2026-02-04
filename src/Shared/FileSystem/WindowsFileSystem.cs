@@ -65,7 +65,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public override bool FileExists(string path)
         {
-#if FEATURE_MSIOREDIST
+#if NETFRAMEWORK
             return Microsoft.IO.File.Exists(path);
 #else
             return File.Exists(path);
