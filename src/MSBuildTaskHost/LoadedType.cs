@@ -6,7 +6,6 @@ using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
-
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -15,26 +14,13 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal sealed class LoadedType
     {
-        #region Constructor
-
         /// <summary>
         /// Creates an instance of this class for the given type.
         /// </summary>
         /// <param name="type">The Type to be loaded</param>
-        /// <param name="assemblyLoadInfo">The assembly file path used to load the assembly</param>
+        /// <param name="assemblyFilePath">The assembly file path used to load the assembly</param>
         /// <param name="loadedAssembly">The assembly which has been loaded, if any</param>
-        /// <param name="iTaskItemType">type of an ITaskItem</param>
-        /// <param name="runtime">Assembly runtime based on assembly attributes.</param>
-        /// <param name="architecture">Assembly architecture extracted from PE flags</param>
-        /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
-        internal LoadedType(
-            Type type,
-            string assemblyFilePath,
-            Assembly loadedAssembly,
-            Type iTaskItemType,
-            string? runtime = null,
-            string? architecture = null,
-            bool loadedViaMetadataLoadContext = false)
+        internal LoadedType(Type type, string assemblyFilePath, Assembly loadedAssembly)
         {
             ErrorUtilities.VerifyThrow(type != null, "We must have the type.");
             ErrorUtilities.VerifyThrow(assemblyFilePath != null, "We must have the assembly file path the type was loaded from.");
@@ -45,9 +31,6 @@ namespace Microsoft.Build.Shared
 
             HasSTAThreadAttribute = CheckForHardcodedSTARequirement();
             LoadedAssemblyName = loadedAssembly.GetName();
-            LoadedViaMetadataLoadContext = loadedViaMetadataLoadContext;
-            Architecture = architecture;
-            Runtime = runtime;
 
             // For inline tasks loaded from bytes, Assembly.Location is empty, so use the original path
             Path = string.IsNullOrEmpty(loadedAssembly.Location)
@@ -55,12 +38,10 @@ namespace Microsoft.Build.Shared
                 : loadedAssembly.Location;
 
             LoadedAssembly = loadedAssembly;
-            HasLoadInSeparateAppDomainAttribute = Type.IsDefined(typeof(LoadInSeparateAppDomainAttribute), true /* inherited */);
-            HasSTAThreadAttribute = Type.IsDefined(typeof(RunInSTAAttribute), true /* inherited */);
+            HasLoadInSeparateAppDomainAttribute = Type.IsDefined(typeof(LoadInSeparateAppDomainAttribute), inherit: true);
+            HasSTAThreadAttribute = Type.IsDefined(typeof(RunInSTAAttribute), inherit: true);
             IsMarshalByRef = Type.IsMarshalByRef;
         }
-
-        #endregion
 
         /// <summary>
         /// Gets whether there's a LoadInSeparateAppDomain attribute on this type.
@@ -76,11 +57,6 @@ namespace Microsoft.Build.Shared
         /// Gets whether this type implements MarshalByRefObject.
         /// </summary>
         public bool IsMarshalByRef { get; }
-
-        /// <summary>
-        /// Gets whether this type was loaded by using MetadataLoadContext.
-        /// </summary>
-        public bool LoadedViaMetadataLoadContext { get; }
 
         /// <summary>
         /// Determines if the task has a hardcoded requirement for STA thread usage.
@@ -105,35 +81,22 @@ namespace Microsoft.Build.Shared
             return false;
         }
 
-        #region Properties
-
         /// <summary>
         /// Gets the type that was loaded from an assembly.
         /// </summary>
         /// <value>The loaded type.</value>
-        internal Type Type { get; private set; }
+        internal Type Type { get; }
 
-        internal AssemblyName LoadedAssemblyName { get; private set; }
+        internal AssemblyName LoadedAssemblyName { get; }
 
-        internal string? Architecture { get; private set; }
-
-        internal string? Runtime { get; private set; }
-
-        internal string Path { get; private set; }
+        internal string Path { get; }
 
         /// <summary>
         /// If we loaded an assembly for this type.
         /// We use this information to help created AppDomains to resolve types that it could not load successfully
         /// </summary>
-        internal Assembly LoadedAssembly { get; private set; }
-
-        /// <summary>
-        /// Assembly-qualified names for properties. Only has a value if this type was loaded using MetadataLoadContext.
-        /// </summary>
-        internal string[]? PropertyAssemblyQualifiedNames { get; private set; }
+        internal Assembly LoadedAssembly { get; }
 
         internal string AssemblyFilePath { get; }
-
-        #endregion
     }
 }

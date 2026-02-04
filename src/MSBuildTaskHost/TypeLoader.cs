@@ -259,7 +259,7 @@ namespace Microsoft.Build.Shared
                 });
 
                 return type != null
-                    ? new LoadedType(type, _assemblyFilePath, _loadedAssembly ?? type.Assembly, typeof(ITaskItem))
+                    ? new LoadedType(type, _assemblyFilePath, _loadedAssembly ?? type.Assembly)
                     : null;
             }
 
