@@ -63,7 +63,6 @@
     <Compile Include="Framework\ITranslatable.cs" />
     <Compile Include="Framework\ITranslator.cs" />
     <Compile Include="Framework\NativeMethods.cs" />
-    <Compile Include="Framework\RunInSTAAttribute.cs" />
     <Compile Include="Framework\StringBuilderCache.cs" />
     <Compile Include="Framework\Traits.cs" />
     <Compile Include="GlobalUsings.cs" />

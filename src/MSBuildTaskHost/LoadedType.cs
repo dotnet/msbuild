@@ -29,7 +29,6 @@ namespace Microsoft.Build.Shared
             Type = type;
             AssemblyFilePath = assemblyFilePath;
 
-            HasSTAThreadAttribute = CheckForHardcodedSTARequirement();
             LoadedAssemblyName = loadedAssembly.GetName();
 
             // For inline tasks loaded from bytes, Assembly.Location is empty, so use the original path
@@ -39,7 +38,6 @@ namespace Microsoft.Build.Shared
 
             LoadedAssembly = loadedAssembly;
             HasLoadInSeparateAppDomainAttribute = Type.IsDefined(typeof(LoadInSeparateAppDomainAttribute), inherit: true);
-            HasSTAThreadAttribute = Type.IsDefined(typeof(RunInSTAAttribute), inherit: true);
             IsMarshalByRef = Type.IsMarshalByRef;
         }
 
@@ -57,29 +55,6 @@ namespace Microsoft.Build.Shared
         /// Gets whether this type implements MarshalByRefObject.
         /// </summary>
         public bool IsMarshalByRef { get; }
-
-        /// <summary>
-        /// Determines if the task has a hardcoded requirement for STA thread usage.
-        /// </summary>
-        private bool CheckForHardcodedSTARequirement()
-        {
-            // Special hard-coded attributes for certain legacy tasks which need to run as STA because they were written before
-            // we changed to running all tasks in MTA.
-            if (String.Equals("Microsoft.Build.Tasks.Xaml.PartialClassGenerationTask", Type.FullName, StringComparison.OrdinalIgnoreCase))
-            {
-                AssemblyName assemblyName = Type.Assembly.GetName();
-                Version lastVersionToForce = new Version(3, 5);
-                if (assemblyName.Version?.CompareTo(lastVersionToForce) > 0)
-                {
-                    if (String.Equals(assemblyName.Name, "PresentationBuildTasks", StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
-        }
 
         /// <summary>
         /// Gets the type that was loaded from an assembly.
