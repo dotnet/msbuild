@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using System.IO;
 #if NET
 using System.Runtime.InteropServices;
+using Microsoft.Build.BackEnd;
+
 #endif
 using Microsoft.Build.Shared;
-
-#nullable enable
 
 namespace Microsoft.Build.Internal
 {
@@ -26,20 +26,7 @@ namespace Microsoft.Build.Internal
 #if NET
         // Architecture-specific DOTNET_ROOT environment variable names, dynamically generated
         // to match the native implementation and cover all architectures supported by the runtime.
-        private static readonly string[] _archSpecificRootVars = InitializeArchSpecificRootVars();
-
-        private static string[] InitializeArchSpecificRootVars()
-        {
-            var names = Enum.GetNames<Architecture>();
-            var result = new string[names.Length];
-
-            for (int i = 0; i < names.Length; i++)
-            {
-                result[i] = $"DOTNET_ROOT_{names[i].ToUpperInvariant()}";
-            }
-
-            return result;
-        }
+        private static readonly string[] _archSpecificRootVars = Array.ConvertAll(Enum.GetNames<Architecture>(), name => $"{DotnetRootEnvVarName}_{name.ToUpperInvariant()}");
 #else
         // On .NET Framework, Architecture enum doesn't exist, so we use hardcoded values.
         // This is sufficient since .NET Framework only runs on Windows x86/x64.
@@ -82,35 +69,11 @@ namespace Microsoft.Build.Internal
         /// <returns>Dictionary of environment variable overrides, or null if DOTNET_HOST_PATH is not set and throwIfNotSet is false.</returns>
         internal static IDictionary<string, string>? CreateDotnetRootEnvironmentOverrides(string? dotnetHostPath = null, bool throwIfNotSet = false)
         {
-            dotnetHostPath ??= Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
-
-            string? dotnetRoot = null;
-
-            if (!string.IsNullOrEmpty(dotnetHostPath))
-            {
-                dotnetRoot = Path.GetDirectoryName(dotnetHostPath);
-            }
-#if RUNTIME_TYPE_NETCORE && BUILD_ENGINE
-            else
-            {
-                // DOTNET_HOST_PATH not set - use CurrentHost to find the dotnet executable.
-                string? currentHost = BackEnd.CurrentHost.GetCurrentHost();
-                if (!string.IsNullOrEmpty(currentHost))
-                {
-                    dotnetRoot = Path.GetDirectoryName(currentHost);
-                }
-            }
-#endif
+            string? dotnetRoot = ResolveDotnetRoot(dotnetHostPath);
 
             if (string.IsNullOrEmpty(dotnetRoot))
             {
-                if (throwIfNotSet)
-                {
-                    throw new InvalidOperationException(ResourceUtilities.GetResourceString("DotnetHostPathNotSet"));
-                }
-
-                // Could not determine DOTNET_ROOT - no overrides needed
-                return null;
+                return throwIfNotSet ? throw new InvalidOperationException(ResourceUtilities.GetResourceString("DotnetHostPathNotSet")) : null;
             }
 
             var overrides = new Dictionary<string, string>
@@ -135,14 +98,14 @@ namespace Microsoft.Build.Internal
         /// <param name="overrides">The overrides to apply. If null, no changes are made.</param>
         internal static void ApplyEnvironmentOverrides(IDictionary<string, string> environment, IDictionary<string, string>? overrides)
         {
-            if (overrides == null)
+            if (overrides is null)
             {
                 return;
             }
 
             foreach (KeyValuePair<string, string> kvp in overrides)
             {
-                if (kvp.Value == null)
+                if (kvp.Value is null)
                 {
                     environment.Remove(kvp.Key);
                 }
@@ -151,6 +114,27 @@ namespace Microsoft.Build.Internal
                     environment[kvp.Key] = kvp.Value;
                 }
             }
+        }
+
+        private static string? ResolveDotnetRoot(string? dotnetHostPath)
+        {
+            dotnetHostPath ??= Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+
+            if (!string.IsNullOrEmpty(dotnetHostPath))
+            {
+                return Path.GetDirectoryName(dotnetHostPath);
+            }
+
+#if RUNTIME_TYPE_NETCORE && BUILD_ENGINE
+            // DOTNET_HOST_PATH not set - use CurrentHost to find the dotnet executable.
+            string? currentHost = CurrentHost.GetCurrentHost();
+            if (!string.IsNullOrEmpty(currentHost))
+            {
+                return Path.GetDirectoryName(currentHost);
+            }
+#endif
+
+            return null;
         }
     }
 }

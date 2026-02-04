@@ -412,19 +412,8 @@ namespace Microsoft.Build.BackEnd
                     return s_msbuildName;
                 }
 
-#if NETFRAMEWORK
-                // In .NET Framework, use dotnet for .NET task hosts
-                if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
-                {
-                    s_msbuildName = Constants.DotnetProcessName;
-
-                    return s_msbuildName;
-                }
-#endif
                 // Default based on whether it's .NET or Framework
-                s_msbuildName = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET)
-                    ? Constants.MSBuildAssemblyName
-                    : Constants.MSBuildExecutableName;
+                s_msbuildName = Constants.MSBuildExecutableName;
             }
 
             return s_msbuildName;
@@ -481,22 +470,22 @@ namespace Microsoft.Build.BackEnd
         /// <returns>
         /// A tuple containing:
         /// - RuntimeHostPath: The path to the dotnet executable that will host the .NET runtime
-        /// - MSBuildAssemblyPath: The full path to MSBuild.dll that will be loaded by the dotnet host.
+        /// - MSBuildExecutablePath: The full path to MSBuild.dll that will be loaded by the dotnet host.
         /// </returns>
-        internal static (string RuntimeHostPath, string MSBuildAssemblyPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, TaskHostParameters taskHostParameters)
+        internal static (string RuntimeHostPath, string MSBuildExecutablePath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, TaskHostParameters taskHostParameters)
         {
             ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
-            return (taskHostParameters.DotnetHostPath, GetMSBuildAssemblyPath(taskHostParameters));
+            return (taskHostParameters.DotnetHostPath, GetMSBuildExecutablePath(taskHostParameters));
         }
 
-        private static string GetMSBuildAssemblyPath(in TaskHostParameters taskHostParameters)
+        private static string GetMSBuildExecutablePath(in TaskHostParameters taskHostParameters)
         {
-            if (taskHostParameters.MSBuildAssemblyPath != null)
+            if (taskHostParameters.MSBuildExecutablePath != null)
             {
-                ValidateNetHostSdkVersion(taskHostParameters.MSBuildAssemblyPath);
+                ValidateNetHostSdkVersion(taskHostParameters.MSBuildExecutablePath);
 
-                return taskHostParameters.MSBuildAssemblyPath;
+                return taskHostParameters.MSBuildExecutablePath;
             }
 
 #if NET
@@ -704,7 +693,7 @@ namespace Microsoft.Build.BackEnd
             // Handle .NET task host context
             if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
             {
-                string msbuildAssemblyPath = GetMSBuildAssemblyPath(taskHostParameters);
+                string msbuildAssemblyPath = GetMSBuildExecutablePath(taskHostParameters);
                 nodeLaunchData = ResolveAppHostOrFallback(
                     msbuildAssemblyPath,
                     taskHostParameters.DotnetHostPath,

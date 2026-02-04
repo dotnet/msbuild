@@ -197,9 +197,8 @@ namespace Microsoft.Build.Shared
                 return null;
             }
 
-            // Check for MSBuild.[exe|dll] next to the current assembly
+            // Check for MSBuild.[exe] next to the current assembly
             var msBuildExe = Path.Combine(FileUtilities.GetFolderAbove(buildAssembly), "MSBuild.exe");
-            var msBuildDll = Path.Combine(FileUtilities.GetFolderAbove(buildAssembly), "MSBuild.dll");
 
             // First check if we're in a VS installation
             var environment = TryFromMSBuildExeUnderVisualStudio(msBuildExe);
@@ -213,10 +212,6 @@ namespace Microsoft.Build.Shared
             if (FileSystems.Default.FileExists(msBuildExe))
             {
                 msBuildPath = msBuildExe;
-            }
-            else if (FileSystems.Default.FileExists(msBuildDll))
-            {
-                msBuildPath = msBuildDll;
             }
 
             if (!string.IsNullOrEmpty(msBuildPath))

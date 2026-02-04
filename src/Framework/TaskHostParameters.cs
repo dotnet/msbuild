@@ -66,7 +66,7 @@ namespace Microsoft.Build.Framework
         /// Gets the path to the MSBuild assembly.
         /// </summary>
         /// <value>The MSBuild assembly path, or null if not specified.</value>
-        public string? MSBuildAssemblyPath => _msBuildAssemblyPath;
+        public string? MSBuildExecutablePath => _msBuildAssemblyPath;
 
         /// <summary>
         /// Gets if Task Host Factory was requested explicitly (by specifying TaskHost="TaskHostFactory" in UsingTask element).
@@ -132,7 +132,7 @@ namespace Microsoft.Build.Framework
                 runtime: overrideParameters.Runtime ?? baseParameters.Runtime,
                 architecture: overrideParameters.Architecture ?? baseParameters.Architecture,
                 dotnetHostPath: overrideParameters.DotnetHostPath ?? baseParameters.DotnetHostPath,
-                msBuildAssemblyPath: overrideParameters.MSBuildAssemblyPath ?? baseParameters.MSBuildAssemblyPath,
+                msBuildAssemblyPath: overrideParameters.MSBuildExecutablePath ?? baseParameters.MSBuildExecutablePath,
                 taskHostFactoryExplicitlyRequested: overrideParameters.TaskHostFactoryExplicitlyRequested ?? baseParameters.TaskHostFactoryExplicitlyRequested);
         }
 

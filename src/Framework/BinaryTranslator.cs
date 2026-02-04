@@ -1123,7 +1123,7 @@ namespace Microsoft.Build.BackEnd
                 string runtime = value.Runtime;
                 string architecture = value.Architecture;
                 string dotnetHostPath = value.DotnetHostPath;
-                string msBuildAssemblyPath = value.MSBuildAssemblyPath;
+                string msBuildAssemblyPath = value.MSBuildExecutablePath;
 
                 Translate(ref runtime);
                 Translate(ref architecture);
