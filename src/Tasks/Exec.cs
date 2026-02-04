@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text;
@@ -457,7 +458,9 @@ namespace Microsoft.Build.Tasks
             }
 
             // determine what the working directory for the exec command is going to be -- if the user specified a working
-            // directory use that, otherwise it's the current directory
+            // directory use that, otherwise default to the project directory (TaskEnvironment.ProjectDirectory). Using the
+            // project directory instead of the process current directory is important for correctness in multithreaded (/mt)
+            // builds, where the process working directory may not match the project being built.
             _workingDirectory = !string.IsNullOrEmpty(WorkingDirectory)
                 ? TaskEnvironment.GetAbsolutePath(WorkingDirectory)
                 : TaskEnvironment.ProjectDirectory;
@@ -557,6 +560,46 @@ namespace Microsoft.Build.Tasks
         internal string GetWorkingDirectoryAccessor()
         {
             return GetWorkingDirectory();
+        }
+
+        /// <summary>
+        /// Gets the ProcessStartInfo for the spawned process, with environment variables from TaskEnvironment.
+        /// In multithreaded mode, TaskEnvironment contains the virtualized environment for this project,
+        /// which must be passed to the spawned process since it won't inherit it from the (shared) process environment.
+        /// </summary>
+        protected override ProcessStartInfo GetProcessStartInfo(
+            string pathToTool,
+            string commandLineCommands,
+            string responseFileSwitch)
+        {
+            // Get the base ProcessStartInfo with all ToolTask settings (command line, redirections, encodings, etc.)
+            ProcessStartInfo startInfo = base.GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
+
+            // In multithreaded mode, the base ProcessStartInfo inherits from the shared process environment,
+            // but we need the virtualized environment from TaskEnvironment. Replace the environment with
+            // TaskEnvironment's environment, then re-apply any explicit EnvironmentVariables overrides.
+            startInfo.Environment.Clear();
+            foreach (var kvp in TaskEnvironment.GetEnvironmentVariables())
+            {
+                startInfo.Environment[kvp.Key] = kvp.Value;
+            }
+
+            // Re-apply EnvironmentVariables property overrides (these should take precedence over TaskEnvironment).
+            // The base class already validated and applied these, but we cleared the environment above,
+            // so we need to re-apply them.
+            if (EnvironmentVariables != null)
+            {
+                foreach (string entry in EnvironmentVariables)
+                {
+                    string[] nameValuePair = entry.Split(new[] { '=' }, 2);
+                    if (nameValuePair.Length == 2 && nameValuePair[0].Length > 0)
+                    {
+                        startInfo.Environment[nameValuePair[0]] = nameValuePair[1];
+                    }
+                }
+            }
+
+            return startInfo;
         }
 
         /// <summary>
