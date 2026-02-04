@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks
 
         // Are the encodings for StdErr and StdOut streams valid
         private bool _encodingParametersValid = true;
-        private string _workingDirectory;
+        private AbsolutePath _workingDirectory;
         private ITaskItem[] _outputs;
         internal bool workingDirectoryIsUNC; // internal for unit testing
         private string _batchFile;
@@ -248,7 +248,7 @@ namespace Microsoft.Build.Tasks
                     // https://support.microsoft.com/en-us/kb/156276
                     if (workingDirectoryIsUNC)
                     {
-                        sw.WriteLine("pushd " + _workingDirectory);
+                        sw.WriteLine("pushd " + _workingDirectory.Value);
                     }
                 }
                 else
@@ -459,17 +459,17 @@ namespace Microsoft.Build.Tasks
             // determine what the working directory for the exec command is going to be -- if the user specified a working
             // directory use that, otherwise it's the current directory
             _workingDirectory = !string.IsNullOrEmpty(WorkingDirectory)
-                ? TaskEnvironment.GetAbsolutePath(WorkingDirectory).Value
-                : TaskEnvironment.ProjectDirectory.Value;
+                ? TaskEnvironment.GetAbsolutePath(WorkingDirectory)
+                : TaskEnvironment.ProjectDirectory;
 
             // check if the working directory we're going to use for the exec command is a UNC path
-            workingDirectoryIsUNC = FileUtilitiesRegex.StartsWithUncPattern(_workingDirectory);
+            workingDirectoryIsUNC = FileUtilitiesRegex.StartsWithUncPattern(_workingDirectory.Value);
 
             // if the working directory is a UNC path, and all drive letters are mapped, bail out, because the pushd command
             // will not be able to auto-map to the UNC path
             if (workingDirectoryIsUNC && NativeMethods.AllDrivesMapped())
             {
-                Log.LogErrorWithCodeFromResources("Exec.AllDriveLettersMappedError", _workingDirectory);
+                Log.LogErrorWithCodeFromResources("Exec.AllDriveLettersMappedError", _workingDirectory.OriginalValue);
                 return false;
             }
 
@@ -530,9 +530,9 @@ namespace Microsoft.Build.Tasks
             // If the working directory is UNC, we're going to use "pushd" in the batch file to set it.
             // If it's invalid, pushd won't fail: it will just go ahead and use the system folder.
             // So verify it's valid here.
-            if (!FileSystems.Default.DirectoryExists(_workingDirectory))
+            if (!FileSystems.Default.DirectoryExists(_workingDirectory.Value))
             {
-                throw new DirectoryNotFoundException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Exec.InvalidWorkingDirectory", _workingDirectory));
+                throw new DirectoryNotFoundException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Exec.InvalidWorkingDirectory", _workingDirectory.OriginalValue));
             }
 
             if (workingDirectoryIsUNC)
@@ -546,7 +546,7 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                return _workingDirectory;
+                return _workingDirectory.Value;
             }
         }
 
