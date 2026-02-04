@@ -21,7 +21,7 @@ namespace Microsoft.Build.Shared
         /// Creates an instance of this class for the given type.
         /// </summary>
         /// <param name="type">The Type to be loaded</param>
-        /// <param name="assemblyLoadInfo">Information used to load the assembly</param>
+        /// <param name="assemblyLoadInfo">The assembly file path used to load the assembly</param>
         /// <param name="loadedAssembly">The assembly which has been loaded, if any</param>
         /// <param name="iTaskItemType">type of an ITaskItem</param>
         /// <param name="runtime">Assembly runtime based on assembly attributes.</param>
@@ -29,7 +29,7 @@ namespace Microsoft.Build.Shared
         /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
         internal LoadedType(
             Type type,
-            AssemblyLoadInfo assemblyLoadInfo,
+            string assemblyFilePath,
             Assembly loadedAssembly,
             Type iTaskItemType,
             string? runtime = null,
@@ -37,11 +37,11 @@ namespace Microsoft.Build.Shared
             bool loadedViaMetadataLoadContext = false)
         {
             ErrorUtilities.VerifyThrow(type != null, "We must have the type.");
-            ErrorUtilities.VerifyThrow(assemblyLoadInfo != null, "We must have the assembly the type was loaded from.");
+            ErrorUtilities.VerifyThrow(assemblyFilePath != null, "We must have the assembly file path the type was loaded from.");
             ErrorUtilities.VerifyThrow(loadedAssembly is not null, "The assembly should always be loaded even if only by MetadataLoadContext.");
 
             Type = type;
-            Assembly = assemblyLoadInfo;
+            AssemblyFilePath = assemblyFilePath;
 
             HasSTAThreadAttribute = CheckForHardcodedSTARequirement();
             LoadedAssemblyName = loadedAssembly.GetName();
@@ -51,7 +51,7 @@ namespace Microsoft.Build.Shared
 
             // For inline tasks loaded from bytes, Assembly.Location is empty, so use the original path
             Path = string.IsNullOrEmpty(loadedAssembly.Location)
-                ? assemblyLoadInfo.AssemblyLocation
+                ? assemblyFilePath
                 : loadedAssembly.Location;
 
             LoadedAssembly = loadedAssembly;
@@ -132,11 +132,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal string[]? PropertyAssemblyQualifiedNames { get; private set; }
 
-        /// <summary>
-        /// Gets the assembly the type was loaded from.
-        /// </summary>
-        /// <value>The assembly info for the loaded type.</value>
-        internal AssemblyLoadInfo Assembly { get; private set; }
+        internal string AssemblyFilePath { get; }
 
         #endregion
     }

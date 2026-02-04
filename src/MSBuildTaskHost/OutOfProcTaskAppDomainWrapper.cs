@@ -106,7 +106,7 @@ namespace Microsoft.Build.CommandLine
                 TypeLoader typeLoader = new(TaskLoader.IsTaskClass);
                 taskType = typeLoader.Load(
                     taskName,
-                    AssemblyLoadInfo.Create(null, taskLocation),
+                    taskLocation,
                     logWarning: (format, args) => { },
                     useTaskHost: false,
                     taskHostParamsMatchCurrentProc: true);

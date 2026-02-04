@@ -21,7 +21,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Cache to keep track of the assemblyLoadInfos based on a given typeFilter.
         /// </summary>
-        private static ConcurrentDictionary<TypeFilter, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> s_cacheOfLoadedTypesByFilter = new ConcurrentDictionary<TypeFilter, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>>();
+        private static ConcurrentDictionary<TypeFilter, ConcurrentDictionary<string, AssemblyInfoToLoadedTypes>> s_cacheOfLoadedTypesByFilter = new();
 
         /// <summary>
         /// Typefilter for this typeloader
@@ -134,12 +134,12 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal LoadedType Load(
             string typeName,
-            AssemblyLoadInfo assembly,
+            string assemblyFilePath,
             LogWarningDelegate logWarning,
             bool useTaskHost = false,
             bool taskHostParamsMatchCurrentProc = true)
         {
-            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assembly);
+            return GetLoadedType(s_cacheOfLoadedTypesByFilter, typeName, assemblyFilePath);
         }
 
         /// <summary>
@@ -147,16 +147,18 @@ namespace Microsoft.Build.Shared
         /// any) is unambiguous; otherwise, if there are multiple types with the same name in different namespaces, the first type
         /// found will be returned.
         /// </summary>
-        private LoadedType GetLoadedType(ConcurrentDictionary<TypeFilter, ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache, string typeName, AssemblyLoadInfo assembly)
+        private LoadedType GetLoadedType(
+            ConcurrentDictionary<TypeFilter, ConcurrentDictionary<string, AssemblyInfoToLoadedTypes>> cache,
+            string typeName,
+            string assemblyFilePath)
         {
-            // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which
-            // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
-            ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes> loadInfoToType =
-                cache.GetOrAdd(_isDesiredType, (_) => new ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>());
+            // A given type filter have been used on a number of assemblies, Based on the type filter
+            // we will get another dictionary which will map a specific assembly file path to a
+            // AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
+            var loadInfoToType = cache.GetOrAdd(_isDesiredType, _ => new(StringComparer.OrdinalIgnoreCase));
 
             // Get an object which is able to take a typename and determine if it is in the assembly pointed to by the AssemblyInfo.
-            AssemblyInfoToLoadedTypes typeNameToType =
-                loadInfoToType.GetOrAdd(assembly, (_) => new AssemblyInfoToLoadedTypes(_isDesiredType, _));
+            var typeNameToType = loadInfoToType.GetOrAdd(assemblyFilePath, assemblyFilePath => new(_isDesiredType, assemblyFilePath));
 
             return typeNameToType.GetLoadedTypeByTypeName(typeName);
         }
@@ -181,9 +183,9 @@ namespace Microsoft.Build.Shared
             private TypeFilter _isDesiredType;
 
             /// <summary>
-            /// Assembly load information so we can load an assembly
+            /// Assembly file path so we can load an assembly
             /// </summary>
-            private AssemblyLoadInfo _assemblyLoadInfo;
+            private string _assemblyFilePath;
 
             /// <summary>
             /// What is the type for the given type name, this may be null if the typeName does not map to a type.
@@ -210,13 +212,13 @@ namespace Microsoft.Build.Shared
             /// <summary>
             /// Given a type filter, and an assembly to load the type information from determine if a given type name is in the assembly or not.
             /// </summary>
-            internal AssemblyInfoToLoadedTypes(TypeFilter typeFilter, AssemblyLoadInfo loadInfo)
+            internal AssemblyInfoToLoadedTypes(TypeFilter typeFilter, string assemblyFilePath)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(typeFilter, "typefilter");
-                ErrorUtilities.VerifyThrowArgumentNull(loadInfo);
+                ErrorUtilities.VerifyThrowArgumentNull(assemblyFilePath);
 
                 _isDesiredType = typeFilter;
-                _assemblyLoadInfo = loadInfo;
+                _assemblyFilePath = assemblyFilePath;
                 _typeNameToType = new ConcurrentDictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
                 _publicTypeNameToType = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
             }
@@ -232,25 +234,6 @@ namespace Microsoft.Build.Shared
 
                 Type type = _typeNameToType.GetOrAdd(typeName, (key) =>
                 {
-                    if ((_assemblyLoadInfo.AssemblyName != null) && (typeName.Length > 0))
-                    {
-                        try
-                        {
-                            // try to load the type using its assembly qualified name
-                            Type t2 = Type.GetType(typeName + "," + _assemblyLoadInfo.AssemblyName, false /* don't throw on error */, true /* case-insensitive */);
-                            if (t2 != null)
-                            {
-                                return !_isDesiredType(t2, null) ? null : t2;
-                            }
-                        }
-                        catch (ArgumentException)
-                        {
-                            // Type.GetType() will throw this exception if the type name is invalid -- but we have no idea if it's the
-                            // type or the assembly name that's the problem -- so just ignore the exception, because we're going to
-                            // check the existence/validity of the assembly and type respectively, below anyway
-                        }
-                    }
-
                     if (Interlocked.Read(ref _haveScannedPublicTypes) == 0)
                     {
                         lock (_lockObject)
@@ -275,7 +258,9 @@ namespace Microsoft.Build.Shared
                     return null;
                 });
 
-                return type != null ? new LoadedType(type, _assemblyLoadInfo, _loadedAssembly ?? type.Assembly, typeof(ITaskItem)) : null;
+                return type != null
+                    ? new LoadedType(type, _assemblyFilePath, _loadedAssembly ?? type.Assembly, typeof(ITaskItem))
+                    : null;
             }
 
             /// <summary>
@@ -287,21 +272,14 @@ namespace Microsoft.Build.Shared
                 // we need to search the assembly for the type...
                 try
                 {
-                    if (_assemblyLoadInfo.AssemblyName != null)
-                    {
-                        _loadedAssembly = Assembly.Load(_assemblyLoadInfo.AssemblyName);
-                    }
-                    else
-                    {
-                        _loadedAssembly = Assembly.LoadFrom(_assemblyLoadInfo.AssemblyFile);
-                    }
+                    _loadedAssembly = Assembly.LoadFrom(_assemblyFilePath);
                 }
                 catch (ArgumentException e)
                 {
                     // Assembly.Load() and Assembly.LoadFrom() will throw an ArgumentException if the assembly name is invalid
                     // convert to a FileNotFoundException because it's more meaningful
                     // NOTE: don't use ErrorUtilities.VerifyThrowFileExists() here because that will hit the disk again
-                    throw new FileNotFoundException(null, _assemblyLoadInfo.AssemblyLocation, e);
+                    throw new FileNotFoundException(null, _assemblyFilePath, e);
                 }
 
                 // only look at public types

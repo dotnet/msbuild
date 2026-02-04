@@ -106,9 +106,9 @@ namespace Microsoft.Build.Shared
                     return (ITask?)Activator.CreateInstance(loadedType.Type);
                 }
 
-                if (loadedType.Assembly.AssemblyFile != null)
+                if (loadedType.AssemblyFilePath != null)
                 {
-                    taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceFromAndUnwrap(loadedType.Assembly.AssemblyFile, loadedType.Type.FullName);
+                    taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceFromAndUnwrap(loadedType.AssemblyFilePath, loadedType.Type.FullName);
 
                     // this will force evaluation of the task class type and try to load the task assembly
                     Type taskType = taskInstanceInOtherAppDomain.GetType();
@@ -123,7 +123,7 @@ namespace Microsoft.Build.Shared
                         taskLine,
                         taskColumn,
                         "ConflictingTaskAssembly",
-                        loadedType.Assembly.AssemblyFile,
+                        loadedType.AssemblyFilePath,
                         loadedType.Type.Assembly.Location);
 
                         taskInstanceInOtherAppDomain = null;
