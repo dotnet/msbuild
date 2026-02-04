@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Framework;
@@ -11,6 +10,10 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
+using System.IO;
+#if NETFRAMEWORK
+using MicrosoftIO = Microsoft.IO;
+#endif
 using Shouldly;
 using VerifyTests;
 using VerifyXunit;
