@@ -24,8 +24,6 @@ Instructions for GitHub Copilot and other AI coding agents working with the MSBu
 
 * Performance is the top priority - minimize allocations, avoid LINQ in hot paths, use efficient algorithms.
 * Always use the latest C# features, currently C# 13, especially collection expressions (`[]` over `new Type[]`).
-* Never change `global.json` unless explicitly asked to.
-* Never change `NuGet.config` files unless explicitly asked to.
 * Match the style of surrounding code when making edits, but modernize aggressively for substantial changes.
 
 ## Code Review Instructions
@@ -244,6 +242,7 @@ documentation/
 ### Key Configuration Files
 
 * **`global.json`**: Pins .NET SDK version - never modify without explicit request
+* **`NuGet.config`**: Package source configuration - never modify without explicit request
 * **`.editorconfig`**: Code formatting rules
 * **`Directory.Build.props`**: Shared MSBuild properties across all projects
 * **`Directory.Packages.props`**: Centralized package version management
@@ -261,10 +260,10 @@ Before completing any change:
 
 ## Do NOT Modify
 
-* `global.json` - Controls .NET SDK version
-* `NuGet.config` - Package source configuration
 * `artifacts/` directory contents - Generated during build
 * `.dotnet/` directory contents - Local SDK location
+
+See **Key Configuration Files** section for files that should not be modified without explicit request.
 
 ## Documentation
 
