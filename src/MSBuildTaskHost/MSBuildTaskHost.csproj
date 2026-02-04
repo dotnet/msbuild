@@ -41,7 +41,6 @@
     <Compile Include="AssemblyResources.cs" />
     <Compile Include="BinaryReaderExtensions.cs" />
     <Compile Include="BinaryWriterExtensions.cs" />
-    <Compile Include="BuildEnvironmentHelper.cs" />
     <Compile Include="BufferedReadStream.cs" />
     <Compile Include="CollectionHelpers.cs" />
     <Compile Include="CommunicationsUtilities.cs" />
