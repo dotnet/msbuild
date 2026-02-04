@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.Build.Shared;
 
 #nullable enable
@@ -17,12 +18,23 @@ namespace Microsoft.Build.Internal
     /// </summary>
     internal static class DotnetHostEnvironmentHelper
     {
-        // Environment variable names for .NET runtime root directories.
-        // Duplicated here because this file is shared across assemblies and Constants class is not always accessible.
+        // Environment variable name for .NET runtime root directory.
         private const string DotnetRootEnvVarName = "DOTNET_ROOT";
-        private const string DotnetRootX64EnvVarName = "DOTNET_ROOT_X64";
-        private const string DotnetRootX86EnvVarName = "DOTNET_ROOT_X86";
-        private const string DotnetRootArm64EnvVarName = "DOTNET_ROOT_ARM64";
+
+        // Architecture-specific DOTNET_ROOT environment variable names, dynamically generated
+        // to match the native implementation and cover all architectures supported by the runtime.
+        private static readonly string[] _archSpecificRootVars;
+
+        static DotnetHostEnvironmentHelper()
+        {
+            var names = Enum.GetNames<Architecture>();
+            _archSpecificRootVars = new string[names.Length];
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                _archSpecificRootVars[i] = $"DOTNET_ROOT_{names[i].ToUpperInvariant()}";
+            }
+        }
 
         /// <summary>
         /// Clears DOTNET_ROOT environment variables that were set only for app host bootstrap.
@@ -32,8 +44,12 @@ namespace Microsoft.Build.Internal
         /// <param name="buildProcessEnvironment">The original environment from the entry-point process.</param>
         internal static void ClearBootstrapDotnetRootEnvironment(IDictionary<string, string> buildProcessEnvironment)
         {
-            string[] dotnetRootVars = [DotnetRootEnvVarName, DotnetRootX64EnvVarName, DotnetRootX86EnvVarName, DotnetRootArm64EnvVarName];
-            foreach (string varName in dotnetRootVars)
+            if (!buildProcessEnvironment.ContainsKey(DotnetRootEnvVarName))
+            {
+                Environment.SetEnvironmentVariable(DotnetRootEnvVarName, null);
+            }
+
+            foreach (string varName in _archSpecificRootVars)
             {
                 if (!buildProcessEnvironment.ContainsKey(varName))
                 {
@@ -82,15 +98,18 @@ namespace Microsoft.Build.Internal
                 return null;
             }
 
-            return new Dictionary<string, string>
+            var overrides = new Dictionary<string, string>
             {
                 [DotnetRootEnvVarName] = dotnetRoot!,
-
-                // Clear architecture-specific overrides that would take precedence over DOTNET_ROOT
-                [DotnetRootX64EnvVarName] = null!,
-                [DotnetRootX86EnvVarName] = null!,
-                [DotnetRootArm64EnvVarName] = null!,
             };
+
+            // Clear architecture-specific overrides that would take precedence over DOTNET_ROOT
+            foreach (string varName in _archSpecificRootVars)
+            {
+                overrides[varName] = null!;
+            }
+
+            return overrides;
         }
 
         /// <summary>
