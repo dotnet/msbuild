@@ -25,7 +25,7 @@ Build MSBuild to create the bootstrap directory:
 
 This creates the bootstrap at `artifacts\bin\bootstrap\` with your changes.
 
-Rerun this after making any code change. If run in the default mode, there may be 
+Rerun this after making any code change. If run in the default mode, there may be some errors on subsequent builds about locked files (due to MSBuild worker node processes lingering). If so, run `./artifacts/bin/bootstrap/core/dotnet build-server shutdown`.
 
 ## Step 2: Run Your Repro Project
 
@@ -43,7 +43,7 @@ artifacts\bin\bootstrap\core\dotnet.exe build <path-to-repro.csproj>
 ./artifacts/bin/bootstrap/core/dotnet build <path-to-repro.csproj>
 ```
 
-All of the usual command line arguments should work, incluing `-bl` to create binlogs.
+All of the usual command line arguments should work, including `-bl` to create binlogs.
 
 ### .NET Framework Projects
 
