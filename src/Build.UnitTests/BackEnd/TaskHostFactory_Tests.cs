@@ -363,5 +363,353 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             projectInstance.GetPropertyValue("CustomStructOutput").ShouldBe(TaskBuilderTestTask.s_customStruct.ToString(CultureInfo.InvariantCulture));
             projectInstance.GetPropertyValue("EnumOutput").ShouldBe(TargetBuiltReason.BeforeTargets.ToString());
         }
+
+        /// <summary>
+        /// Verifies that IBuildEngine2.IsRunningMultipleNodes can be queried from a task running in the task host.
+        /// This tests the callback infrastructure that sends queries back to the parent process.
+        /// </summary>
+        [Theory]
+        [InlineData(1, false)]  // Single node build - should return false
+        [InlineData(4, true)]   // Multi-node build - should return true
+        public void IsRunningMultipleNodesCallbackWorksInTaskHost(int maxNodeCount, bool expectedResult)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(IsRunningMultipleNodesTask)}"" AssemblyFile=""{typeof(IsRunningMultipleNodesTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""TestIsRunningMultipleNodes"">
+        <{nameof(IsRunningMultipleNodesTask)}>
+            <Output PropertyName=""IsRunningMultipleNodes"" TaskParameter=""IsRunningMultipleNodes"" />
+        </{nameof(IsRunningMultipleNodesTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+
+            BuildParameters buildParameters = new()
+            {
+                MaxNodeCount = maxNodeCount,
+                EnableNodeReuse = false
+            };
+
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult buildResult = buildManager.Build(
+                buildParameters,
+                new BuildRequestData(projectInstance, targetsToBuild: ["TestIsRunningMultipleNodes"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            string result = projectInstance.GetPropertyValue("IsRunningMultipleNodes");
+            result.ShouldNotBeNullOrEmpty();
+            bool.Parse(result).ShouldBe(expectedResult);
+        }
+
+        /// <summary>
+        /// Verifies that IBuildEngine9.RequestCores can be called from a task running in the task host.
+        /// This tests the resource management callback infrastructure.
+        /// </summary>
+        [Fact]
+        public void RequestCoresCallbackWorksInTaskHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(ResourceManagementTask)}"" AssemblyFile=""{typeof(ResourceManagementTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""TestRequestCores"">
+        <{nameof(ResourceManagementTask)} RequestedCores=""4"" ReleaseCoresAfterRequest=""true"">
+            <Output PropertyName=""CoresGranted"" TaskParameter=""CoresGranted"" />
+            <Output PropertyName=""CompletedSuccessfully"" TaskParameter=""CompletedSuccessfully"" />
+            <Output PropertyName=""ErrorMessage"" TaskParameter=""ErrorMessage"" />
+        </{nameof(ResourceManagementTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+
+            BuildParameters buildParameters = new()
+            {
+                MaxNodeCount = 4,
+                EnableNodeReuse = false
+            };
+
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult buildResult = buildManager.Build(
+                buildParameters,
+                new BuildRequestData(projectInstance, targetsToBuild: ["TestRequestCores"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Verify the task completed successfully (no NotImplementedException)
+            string completedSuccessfully = projectInstance.GetPropertyValue("CompletedSuccessfully");
+            completedSuccessfully.ShouldBe("True",
+                $"Task failed with error: {projectInstance.GetPropertyValue("ErrorMessage")}");
+
+            // Verify we got at least 1 core (implicit core guarantee)
+            string coresGranted = projectInstance.GetPropertyValue("CoresGranted");
+            coresGranted.ShouldNotBeNullOrEmpty();
+            int.Parse(coresGranted).ShouldBeGreaterThanOrEqualTo(1);
+        }
+
+        /// <summary>
+        /// Verifies that IBuildEngine9.ReleaseCores can be called from a task running in the task host
+        /// without throwing exceptions.
+        /// </summary>
+        [Fact]
+        public void ReleaseCoresCallbackWorksInTaskHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(ResourceManagementTask)}"" AssemblyFile=""{typeof(ResourceManagementTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""TestReleaseCores"">
+        <{nameof(ResourceManagementTask)} RequestedCores=""2"" ReleaseCoresAfterRequest=""true"">
+            <Output PropertyName=""CompletedSuccessfully"" TaskParameter=""CompletedSuccessfully"" />
+            <Output PropertyName=""ErrorMessage"" TaskParameter=""ErrorMessage"" />
+        </{nameof(ResourceManagementTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+
+            BuildParameters buildParameters = new()
+            {
+                EnableNodeReuse = false
+            };
+
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult buildResult = buildManager.Build(
+                buildParameters,
+                new BuildRequestData(projectInstance, targetsToBuild: ["TestReleaseCores"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            string completedSuccessfully = projectInstance.GetPropertyValue("CompletedSuccessfully");
+            completedSuccessfully.ShouldBe("True",
+                $"Task failed with error: {projectInstance.GetPropertyValue("ErrorMessage")}");
+        }
+
+        /// <summary>
+        /// Verifies that multiple callbacks can be made from a single task execution
+        /// and that request/response correlation works correctly.
+        /// </summary>
+        [Fact]
+        public void MultipleCallbacksWorkInTaskHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(MultipleCallbackTask)}"" AssemblyFile=""{typeof(MultipleCallbackTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""TestMultipleCallbacks"">
+        <{nameof(MultipleCallbackTask)} Iterations=""10"">
+            <Output PropertyName=""SuccessfulCallbacks"" TaskParameter=""SuccessfulCallbacks"" />
+            <Output PropertyName=""TotalCoresGranted"" TaskParameter=""TotalCoresGranted"" />
+        </{nameof(MultipleCallbackTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+
+            BuildParameters buildParameters = new()
+            {
+                MaxNodeCount = 4,
+                EnableNodeReuse = false
+            };
+
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult buildResult = buildManager.Build(
+                buildParameters,
+                new BuildRequestData(projectInstance, targetsToBuild: ["TestMultipleCallbacks"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // 1 IsRunningMultipleNodes + 10 RequestCores + 10 ReleaseCores = 21 callbacks
+            string successfulCallbacks = projectInstance.GetPropertyValue("SuccessfulCallbacks");
+            successfulCallbacks.ShouldNotBeNullOrEmpty();
+            int.Parse(successfulCallbacks).ShouldBeGreaterThanOrEqualTo(11); // At minimum: 1 + 10 requests
+        }
+
+        /// <summary>
+        /// Verifies that callbacks work with the MSBUILDFORCEALLTASKSOUTOFPROC environment variable
+        /// which forces all tasks to run in the task host.
+        /// </summary>
+        [Fact]
+        public void CallbacksWorkWithForceTaskHostEnvVar()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            // Force all tasks out of proc
+            env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(MultipleCallbackTask)}"" AssemblyFile=""{typeof(MultipleCallbackTask).Assembly.Location}"" />
+    <Target Name=""TestCallbacksWithEnvVar"">
+        <{nameof(MultipleCallbackTask)} Iterations=""3"">
+            <Output PropertyName=""SuccessfulCallbacks"" TaskParameter=""SuccessfulCallbacks"" />
+            <Output PropertyName=""IsRunningMultipleNodes"" TaskParameter=""IsRunningMultipleNodes"" />
+        </{nameof(MultipleCallbackTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+
+            BuildParameters buildParameters = new()
+            {
+                MaxNodeCount = 2,
+                EnableNodeReuse = true  // Sidecar mode with env var
+            };
+
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult buildResult = buildManager.Build(
+                buildParameters,
+                new BuildRequestData(projectInstance, targetsToBuild: ["TestCallbacksWithEnvVar"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            string successfulCallbacks = projectInstance.GetPropertyValue("SuccessfulCallbacks");
+            int.Parse(successfulCallbacks).ShouldBeGreaterThan(0);
+        }
+
+        /// <summary>
+        /// Verifies that IBuildEngine3.Yield() and IBuildEngine3.Reacquire() callbacks work correctly
+        /// when a task runs in TaskHost.
+        /// </summary>
+        [Fact]
+        public void YieldReacquireCallbackWorksInTaskHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(YieldReacquireTask)}"" AssemblyFile=""{typeof(YieldReacquireTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""TestYieldReacquire"">
+        <{nameof(YieldReacquireTask)} PerformYieldReacquire=""true"">
+            <Output PropertyName=""CompletedSuccessfully"" TaskParameter=""CompletedSuccessfully"" />
+            <Output PropertyName=""YieldCalled"" TaskParameter=""YieldCalled"" />
+            <Output PropertyName=""ReacquireCalled"" TaskParameter=""ReacquireCalled"" />
+            <Output PropertyName=""ErrorMessage"" TaskParameter=""ErrorMessage"" />
+        </{nameof(YieldReacquireTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+
+            BuildParameters buildParameters = new()
+            {
+                MaxNodeCount = 2,
+                EnableNodeReuse = false
+            };
+
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            BuildManager buildManager = BuildManager.DefaultBuildManager;
+            BuildResult buildResult = buildManager.Build(
+                buildParameters,
+                new BuildRequestData(projectInstance, targetsToBuild: ["TestYieldReacquire"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Verify the task completed successfully (no exceptions)
+            string completedSuccessfully = projectInstance.GetPropertyValue("CompletedSuccessfully");
+            completedSuccessfully.ShouldBe("True",
+                $"Task failed with error: {projectInstance.GetPropertyValue("ErrorMessage")}");
+
+            // Verify Yield was called
+            string yieldCalled = projectInstance.GetPropertyValue("YieldCalled");
+            yieldCalled.ShouldBe("True");
+
+            // Verify Reacquire was called
+            string reacquireCalled = projectInstance.GetPropertyValue("ReacquireCalled");
+            reacquireCalled.ShouldBe("True");
+        }
+
+        /// <summary>
+        /// Verifies that BuildProjectFile callback works correctly when a task runs in TaskHost.
+        /// The task calls BuildEngine.BuildProjectFile to build another project, and the callback
+        /// should be forwarded to the parent process and executed there.
+        /// </summary>
+        [Fact]
+        public void BuildProjectFileCallbackWorksInTaskHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            // Force tasks to run out of process
+            env.SetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC", "1");
+
+            // Enable debug communication
+            // env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
+
+            // Child project that will be built via BuildProjectFile callback
+            // The Message task will run in the TaskHost as a nested task while
+            // the parent task (BuildProjectFileTask) is yielded waiting for the callback.
+            string childProject = @"
+<Project>
+    <Target Name=""Build"">
+        <Message Text=""Child project is building!"" Importance=""high"" />
+    </Target>
+</Project>";
+
+            // Parent project that uses BuildProjectFileTask to build the child
+            // NOTE: Don't use any other tasks (like Message) here because they would also go to TaskHost
+            string parentProject = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(BuildProjectFileTask)}"" AssemblyFile=""{typeof(BuildProjectFileTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""Build"">
+        <{nameof(BuildProjectFileTask)} ProjectToBuild=""child.proj"" Targets=""Build"">
+            <Output PropertyName=""ChildBuildResult"" TaskParameter=""BuildSucceeded"" />
+        </{nameof(BuildProjectFileTask)}>
+    </Target>
+</Project>";
+
+            TransientTestFile childFile = env.CreateFile("child.proj", childProject);
+            TransientTestFile parentFile = env.CreateFile("parent.proj", parentProject);
+
+            _output.WriteLine($"Parent project: {parentFile.Path}");
+            _output.WriteLine($"Child project: {childFile.Path}");
+
+            ProjectInstance projectInstance = new(parentFile.Path);
+
+            BuildParameters buildParameters = new()
+            {
+                EnableNodeReuse = false,
+                MaxNodeCount = 1  // Single node to reduce complexity for debugging
+            };
+
+            using (BuildManager buildManager = new BuildManager())
+            {
+                buildManager.BeginBuild(buildParameters);
+                try
+                {
+                    _output.WriteLine("Starting build request...");
+                    BuildResult buildResult = buildManager.BuildRequest(
+                        new BuildRequestData(projectInstance, targetsToBuild: ["Build"]));
+
+                    _output.WriteLine($"Build completed with result: {buildResult.OverallResult}");
+                    buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+                    string childBuildResult = projectInstance.GetPropertyValue("ChildBuildResult");
+                    _output.WriteLine($"ChildBuildResult property: {childBuildResult}");
+                    childBuildResult.ShouldBe("True", "BuildProjectFile callback should have succeeded");
+                }
+                finally
+                {
+                    buildManager.EndBuild();
+                }
+            }
+        }
     }
 }

@@ -101,11 +101,12 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// A mapping of all of the INodePacketHandlers wrapped by this provider.
+        /// When multiple tasks use the same node (nested BuildProjectFile), handlers
+        /// are stacked. The most recent handler receives packets. When it disconnects,
+        /// the previous handler is restored.
         /// Keyed by the communication node ID (NodeContext.NodeId) for O(1) packet routing.
-        /// Thread-safe to support parallel taskhost creation in /mt mode where multiple thread nodes
-        /// can simultaneously create their own taskhosts.
         /// </summary>
-        private ConcurrentDictionary<int, INodePacketHandler> _nodeIdToPacketHandler;
+        private ConcurrentDictionary<int, Stack<INodePacketHandler>> _nodeIdToPacketHandlerStack;
 
         /// <summary>
         /// Keeps track of the set of node IDs for which we have not yet received shutdown notification.
@@ -240,7 +241,7 @@ namespace Microsoft.Build.BackEnd
             _nodeContexts = new ConcurrentDictionary<TaskHostNodeKey, NodeContext>();
             _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
             _nodeIdToPacketFactory = new ConcurrentDictionary<int, INodePacketFactory>();
-            _nodeIdToPacketHandler = new ConcurrentDictionary<int, INodePacketHandler>();
+            _nodeIdToPacketHandlerStack = new ConcurrentDictionary<int, Stack<INodePacketHandler>>();
             _activeNodes = [];
             _nextNodeId = 0;
 
@@ -250,6 +251,11 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+            // Register callback packet handlers for TaskHost IBuildEngine callbacks
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostQueryRequest, TaskHostQueryRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostResourceRequest, TaskHostResourceRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostYieldRequest, TaskHostYieldRequest.FactoryForDeserialization, this);
         }
 
         /// <summary>
@@ -291,14 +297,10 @@ namespace Microsoft.Build.BackEnd
         /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
-            if (_nodeIdToPacketFactory.TryGetValue(nodeId, out INodePacketFactory nodePacketFactory))
-            {
-                nodePacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
-            }
-            else
-            {
-                _localPacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
-            }
+            // Always use _localPacketFactory to deserialize packets. The _nodeIdToPacketFactory
+            // mapping is used to track which nodes have active handlers, but all deserialization
+            // should go through our local factory which routes through PacketReceived.
+            _localPacketFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
         }
 
         /// <summary>
@@ -318,14 +320,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to route.</param>
         public void RoutePacket(int nodeId, INodePacket packet)
         {
-            if (_nodeIdToPacketFactory.TryGetValue(nodeId, out INodePacketFactory nodePacketFactory))
-            {
-                nodePacketFactory.RoutePacket(nodeId, packet);
-            }
-            else
-            {
-                _localPacketFactory.RoutePacket(nodeId, packet);
-            }
+            // Always route through our PacketReceived method, which uses the handler stack.
+            _localPacketFactory.RoutePacket(nodeId, packet);
         }
 
         #endregion
@@ -340,14 +336,51 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
-            if (_nodeIdToPacketHandler.TryGetValue(node, out INodePacketHandler packetHandler))
+            // Try to find the handler stack for this node and forward the packet.
+            // Lock on the stack to synchronize with DisconnectFromHost to prevent race conditions
+            // where we get the handler right before it's popped from the stack.
+            if (_nodeIdToPacketHandlerStack.TryGetValue(node, out Stack<INodePacketHandler> handlerStack))
             {
-                packetHandler.PacketReceived(node, packet);
+                lock (handlerStack)
+                {
+                    if (handlerStack.Count > 0)
+                    {
+                        INodePacketHandler packetHandler = handlerStack.Peek();
+                        // Forward packet to handler while still holding lock
+                        packetHandler.PacketReceived(node, packet);
+                        return;
+                    }
+                }
             }
-            else
-            {
-                ErrorUtilities.VerifyThrow(packet.Type == NodePacketType.NodeShutdown, "We should only ever handle packets of type NodeShutdown -- everything else should only come in when there's an active task");
 
+            // No handler on the stack. This can happen in nested BuildProjectFile scenarios
+            // where late-arriving packets (log messages, completion packets) arrive after
+            // the handler has disconnected due to network timing. These can be safely ignored
+            // for certain packet types.
+            switch (packet.Type)
+            {
+                case NodePacketType.NodeShutdown:
+                    // Expected - node is shutting down and no handler needed
+                    break;
+
+                case NodePacketType.LogMessage:
+                case NodePacketType.TaskHostTaskComplete:
+                case NodePacketType.TaskHostQueryRequest:
+                case NodePacketType.TaskHostResourceRequest:
+                case NodePacketType.TaskHostBuildRequest:
+                case NodePacketType.TaskHostYieldRequest:
+                    // Late-arriving packets from already-completed tasks - safe to ignore
+                    break;
+
+                default:
+                    // Unexpected packet when no handler is active
+                    ErrorUtilities.ThrowInternalError("Received unexpected packet of type {0} when no task handler is active", packet.Type);
+                    break;
+            }
+
+            // Handle node cleanup for shutdown
+            if (packet.Type == NodePacketType.NodeShutdown)
+            {
                 // May also be removed by unnatural termination, so don't assume it's there
                 lock (_activeNodes)
                 {
@@ -617,9 +650,27 @@ namespace Microsoft.Build.BackEnd
             if (nodeCreationSucceeded)
             {
                 NodeContext context = _nodeContexts[nodeKey];
-                // Map the transport ID directly to the handlers for O(1) packet routing
-                _nodeIdToPacketFactory[context.NodeId] = factory;
-                _nodeIdToPacketHandler[context.NodeId] = handler;
+
+                // Only register the factory for the first task on this node.
+                // For nested tasks (BuildProjectFile callbacks), we reuse the existing
+                // factory setup and just push a new handler onto the stack.
+                // This ensures all packets are routed through NodeProviderOutOfProcTaskHost.PacketReceived
+                // which uses the handler stack, rather than going directly to individual TaskHostTask handlers.
+                if (!_nodeIdToPacketFactory.ContainsKey(context.NodeId))
+                {
+                    // Use 'this' as the factory so packets route through our PacketReceived
+                    // method, which handles the handler stack correctly.
+                    _nodeIdToPacketFactory[context.NodeId] = this;
+                }
+
+                // Push the new handler onto the stack. This supports nested tasks
+                // (e.g., BuildProjectFile callbacks) where multiple TaskHostTask instances
+                // share the same TaskHost process.
+                Stack<INodePacketHandler> handlerStack = _nodeIdToPacketHandlerStack.GetOrAdd(context.NodeId, _ => new Stack<INodePacketHandler>());
+                lock (handlerStack)
+                {
+                    handlerStack.Push(handler);
+                }
 
                 // Configure the node.
                 context.SendData(configuration);
@@ -645,10 +696,27 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            bool successRemoveFactory = _nodeIdToPacketFactory.TryRemove(context.NodeId, out _);
-            bool successRemoveHandler = _nodeIdToPacketHandler.TryRemove(context.NodeId, out _);
+            int nodeId = context.NodeId;
 
-            ErrorUtilities.VerifyThrow(successRemoveFactory && successRemoveHandler, "Why are we trying to disconnect from a context that we already disconnected from?  Did we call DisconnectFromHost twice?");
+            // Pop the handler from the stack. If there are still handlers remaining,
+            // the previous handler becomes active again (supporting nested tasks).
+            if (_nodeIdToPacketHandlerStack.TryGetValue(nodeId, out Stack<INodePacketHandler> handlerStack))
+            {
+                lock (handlerStack)
+                {
+                    if (handlerStack.Count > 0)
+                    {
+                        handlerStack.Pop();
+                    }
+
+                    // Only fully disconnect when all handlers are done
+                    if (handlerStack.Count == 0)
+                    {
+                        _nodeIdToPacketFactory.TryRemove(nodeId, out _);
+                        _nodeIdToPacketHandlerStack.TryRemove(nodeId, out _);
+                    }
+                }
+            }
         }
 
         /// <summary>

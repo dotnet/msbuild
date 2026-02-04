@@ -57,6 +57,12 @@ namespace Microsoft.Build.BackEnd
 #endif
 
         /// <summary>
+        /// The ID of the task that completed, used for correlation when multiple
+        /// tasks run in the same TaskHost (nested BuildProjectFile scenarios).
+        /// </summary>
+        private int _taskId;
+
+        /// <summary>
         /// Result of the task's execution.
         /// </summary>
         private TaskCompleteType _taskResult;
@@ -97,16 +103,19 @@ namespace Microsoft.Build.BackEnd
         /// <param name="result">The result of the task's execution.</param>
         /// <param name="fileAccessData">The file accesses reported by the task.</param>
         /// <param name="buildProcessEnvironment">The build process environment as it was at the end of the task's execution.</param>
+        /// <param name="taskId">The ID of the task that completed, for correlation in nested build scenarios.</param>
 #pragma warning restore CS1572 // XML comment has a param tag, but there is no parameter by that name
         public TaskHostTaskComplete(
             OutOfProcTaskHostTaskResult result,
 #if FEATURE_REPORTFILEACCESSES
             List<FileAccessData> fileAccessData,
 #endif
-            IDictionary<string, string> buildProcessEnvironment)
+            IDictionary<string, string> buildProcessEnvironment,
+            int taskId = 0)
         {
             ErrorUtilities.VerifyThrowInternalNull(result);
 
+            _taskId = taskId;
             _taskResult = result.Result;
             _taskException = result.TaskException;
             _taskExceptionMessage = result.ExceptionMessage;
@@ -140,6 +149,17 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskHostTaskComplete()
         {
+        }
+
+        /// <summary>
+        /// The ID of the task that completed, used for correlation when multiple
+        /// tasks run in the same TaskHost (nested BuildProjectFile scenarios).
+        /// A value of 0 indicates no specific task ID (legacy behavior).
+        /// </summary>
+        public int TaskId
+        {
+            [DebuggerStepThrough]
+            get { return _taskId; }
         }
 
         /// <summary>
@@ -237,6 +257,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="translator">The translator to use.</param>
         public void Translate(ITranslator translator)
         {
+            translator.Translate(ref _taskId);
             translator.TranslateEnum(ref _taskResult, (int)_taskResult);
             translator.TranslateException(ref _taskException);
             translator.Translate(ref _taskExceptionMessage);

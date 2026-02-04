@@ -111,6 +111,12 @@ namespace Microsoft.Build.BackEnd
 
         private ICollection<string> _warningsAsMessages;
 
+        /// <summary>
+        /// Unique identifier for this task execution, used for correlating
+        /// callbacks when multiple tasks are executing concurrently in the TaskHost.
+        /// </summary>
+        private int _taskId;
+
 #if FEATURE_APPDOMAIN
         /// <summary>
         /// Initializes a new instance of the <see cref="TaskHostConfiguration"/> class.
@@ -468,6 +474,17 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Gets or sets the unique task execution identifier.
+        /// Used for callback correlation when multiple tasks execute concurrently.
+        /// </summary>
+        public int TaskId
+        {
+            [DebuggerStepThrough]
+            get => _taskId;
+            set => _taskId = value;
+        }
+
+        /// <summary>
         /// Translates the packet to/from binary form.
         /// </summary>
         /// <param name="translator">The translator to use.</param>
@@ -544,6 +561,7 @@ namespace Microsoft.Build.BackEnd
 #else
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
 #endif
+            translator.Translate(ref _taskId);
         }
 
         /// <summary>
