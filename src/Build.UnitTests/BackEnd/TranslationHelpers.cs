@@ -240,6 +240,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     sb.Append($";{name}={value}");
                 }
             }
+            else if (item is IItemData itemData)
+            {
+                sb.Append(itemData.EvaluatedInclude);
+                foreach (var kvp in itemData.EnumerateMetadata())
+                {
+                    sb.Append($";{kvp.Key}={kvp.Value}");
+                }
+            }
             else
             {
                 sb.Append(Convert.ToString(item));

@@ -480,10 +480,10 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateCulture(ref _uiCulture);
 #if FEATURE_APPDOMAIN
             // The packet version is used to determine if the AppDomain configuration should be serialized.
-            // If the packet version is bigger then 0, it means the task host will running under .NET.
-            // Although MSBuild.exe runs under .NET Framework and has AppDomain support,
-            // we don't transmit AppDomain config when communicating with dotnet.exe (it is not supported in .NET 5+).
-            if (translator.NegotiatedPacketVersion == 0)
+            // null = CLR2 (NET35) task host - supports AppDomain
+            // 0 = CLR4 (NET472) task host - supports AppDomain
+            // We serialize AppDomain for Framework task hosts (null or 0), but not for .NET (>= 2).
+            if (translator.NegotiatedPacketVersion is null or 0)
             {
                 byte[] appDomainConfigBytes = null;
 
@@ -507,14 +507,17 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _projectFileOfTask);
             translator.Translate(ref _taskName);
             translator.Translate(ref _taskLocation);
-            if (translator.NegotiatedPacketVersion >= 2)
+
+            // null = CLR2 (NET35) task hosts which don't have these fields compiled in.
+            // 0 = CLR4, 2+ = .NET - both support these fields.
+#if NET472 || NETCOREAPP
+            if (translator.NegotiatedPacketVersion.HasValue && translator.NegotiatedPacketVersion is 0 or >= 2)
             {
                 translator.Translate(ref _targetName);
                 translator.Translate(ref _projectFile);
-#if !NET35    
                 translator.Translate(ref _hostServices);
-#endif
             }
+#endif
 
             translator.Translate(ref _isTaskInputLoggingEnabled);
             translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);

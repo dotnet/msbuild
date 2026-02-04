@@ -163,8 +163,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using TestEnvironment env = TestEnvironment.Create(_output);
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestMSBuildTaskInNet", "TestMSBuildTaskInNet.csproj");
-
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore  -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
 
             if (!successTestTask)
             {
@@ -183,7 +182,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskWithImplicitParams", "TestNetTaskWithImplicitParams.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore  -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
 
             if (!successTestTask)
             {

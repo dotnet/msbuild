@@ -4,7 +4,6 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework.XamlTypes;
 
-#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -218,7 +217,6 @@ namespace Microsoft.Build.Shared
             // Unknown derivation, but that's ok.
         }
 
-
         /// <summary>
         /// Validates the properties of this object. This method should be called
         /// after initialization is complete.
@@ -228,7 +226,6 @@ namespace Microsoft.Build.Shared
             string namePropertyId = GetPropertyId("Name", type);
             VerifyThrowPropertyNotSetOrEmptyString(type.Name, namePropertyId);
         }
-
 
         /// <summary>
         /// Validates the properties of this object. This method should be called
@@ -262,7 +259,6 @@ namespace Microsoft.Build.Shared
             (type as BaseProperty).Validate();
             ErrorUtilities.VerifyThrowArgumentLength(type.EnumProvider, "EnumProvider");
         }
-
 
         /// <summary>
         /// Validates the properties of this object. This method should be called
@@ -302,7 +298,6 @@ namespace Microsoft.Build.Shared
                 }
             }
         }
-
 
         /// <summary>
         /// Validates the properties of this object. This method should be called

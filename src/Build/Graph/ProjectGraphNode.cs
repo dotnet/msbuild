@@ -7,8 +7,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 
-#nullable disable
-
 namespace Microsoft.Build.Graph
 {
     /// <summary>
