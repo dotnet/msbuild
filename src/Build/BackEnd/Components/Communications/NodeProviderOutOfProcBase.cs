@@ -97,7 +97,7 @@ namespace Microsoft.Build.BackEnd
         protected readonly record struct NodeLaunchData(
             string MsbuildLocation,
             string CommandLineArgs,
-            IDictionary<string, string> EnvironmentOverrides);
+            IDictionary<string, string> EnvironmentOverrides = null);
 
         /// <summary>
         /// Sends data to the specified node.
@@ -565,7 +565,7 @@ namespace Microsoft.Build.BackEnd
         /// Connect to named pipe stream and ensure validate handshake and security.
         /// </summary>
         /// <remarks>
-        /// Reused by MSBuild server client <see cref="Microsoft.Build.Experimental.MSBuildClient"/>.
+        /// Reused by MSBuild server client <see cref="Experimental.MSBuildClient"/>.
         /// </remarks>
         internal static bool TryConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout, out HandshakeResult result)
         {

@@ -56,16 +56,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// This method may invoke msbuild via other runtimes.
         /// </summary>
         public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
-        {
-#if FEATURE_RUN_EXE_IN_TESTS
-            var pathToExecutable = pathToMsBuildExe;
-#else
-            var pathToExecutable = s_dotnetExePath;
-            msbuildParameters = FileUtilities.EnsureDoubleQuotes(pathToMsBuildExe) + " " + msbuildParameters;
-#endif
-
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
-        }
+            => RunProcessAndGetOutput(pathToMsBuildExe, msbuildParameters, out successfulExit, shellExecute, outputHelper);
 
         public static string ExecBootstrapedMSBuild(
             string msbuildParameters,
