@@ -979,10 +979,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 #if FEATURE_SYSTEM_CONFIGURATION
                 projColln = new ProjectCollection();
 #else
-                // On .NET Core, ConfigurationFile alone is not sufficient because there's no
-                // .NET Framework installed for fallback toolsets. Include Local to ensure
-                // the current MSBuild toolset is available.
-                projColln = new ProjectCollection(ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Local);
+                projColln = new ProjectCollection(ToolsetDefinitionLocations.ConfigurationFile);
 #endif
             }
             else
@@ -990,10 +987,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 #if FEATURE_SYSTEM_CONFIGURATION
                 projColln = new ProjectCollection(globalProperties);
 #else
-                // On .NET Core, ConfigurationFile alone is not sufficient because there's no
-                // .NET Framework installed for fallback toolsets. Include Local to ensure
-                // the current MSBuild toolset is available.
-                projColln = new ProjectCollection(globalProperties, loggers: null, ToolsetDefinitionLocations.ConfigurationFile | ToolsetDefinitionLocations.Local);
+                projColln = new ProjectCollection(globalProperties, loggers: null, ToolsetDefinitionLocations.ConfigurationFile);
 #endif
             }
 
