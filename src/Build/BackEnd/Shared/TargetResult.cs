@@ -57,6 +57,11 @@ namespace Microsoft.Build.Execution
         private BuildEventContext _originalBuildEventContext;
 
         /// <summary>
+        /// The reason why the target was skipped, if applicable.
+        /// </summary>
+        private TargetSkipReason _skipReason;
+
+        /// <summary>
         /// Initializes the results with specified items and result.
         /// </summary>
         /// <param name="items">The items produced by the target.</param>
@@ -68,13 +73,15 @@ namespace Microsoft.Build.Execution
         ///  * in <see cref="ITargetBuilderCallback.LegacyCallTarget"/> when Cancellation was requested
         ///  * in ProjectCache.CacheResult.ConstructBuildResult
         /// </param>
-        internal TargetResult(TaskItem[] items, WorkUnitResult result, BuildEventContext originalBuildEventContext = null)
+        /// <param name="skipReason">The reason why the target was skipped, if applicable.</param>
+        internal TargetResult(TaskItem[] items, WorkUnitResult result, BuildEventContext originalBuildEventContext = null, TargetSkipReason skipReason = TargetSkipReason.None)
         {
             ErrorUtilities.VerifyThrowArgumentNull(items);
             ErrorUtilities.VerifyThrowArgumentNull(result);
             _items = items;
             _result = result;
             _originalBuildEventContext = originalBuildEventContext;
+            _skipReason = skipReason;
         }
 
         /// <summary>
@@ -147,6 +154,19 @@ namespace Microsoft.Build.Execution
                         return TargetResultCode.Skipped;
                 }
             }
+        }
+
+        /// <summary>
+        /// Gets the reason why the target was skipped, if applicable.
+        /// </summary>
+        /// <value>The reason for skipping, or <see cref="TargetSkipReason.None"/> if the target was not skipped or the reason is unknown.</value>
+        internal TargetSkipReason SkipReason
+        {
+            [DebuggerStepThrough]
+            get => _skipReason;
+
+            [DebuggerStepThrough]
+            set => _skipReason = value;
         }
 
         public string TargetResultCodeToString()
@@ -323,6 +343,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _targetFailureDoesntCauseBuildFailure);
             translator.Translate(ref _afterTargetsHaveFailed);
             translator.TranslateOptionalBuildEventContext(ref _originalBuildEventContext);
+            translator.TranslateEnum(ref _skipReason, (int)_skipReason);
             TranslateItems(translator);
         }
 

@@ -103,7 +103,7 @@ namespace Microsoft.Build.Utilities
         {
             ErrorUtilities.VerifyThrowArgumentNull(itemSpec);
 
-            _itemSpec = treatAsFilePath ? FileUtilities.FixFilePath(itemSpec) : itemSpec;
+            _itemSpec = treatAsFilePath ? FrameworkFileUtilities.FixFilePath(itemSpec) : itemSpec;
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace Microsoft.Build.Utilities
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, nameof(ItemSpec));
 
-                _itemSpec = FileUtilities.FixFilePath(value);
+                _itemSpec = FrameworkFileUtilities.FixFilePath(value);
                 _fullPath = null;
             }
         }
@@ -204,7 +204,7 @@ namespace Microsoft.Build.Utilities
 
             set
             {
-                _itemSpec = FileUtilities.FixFilePath(value);
+                _itemSpec = FrameworkFileUtilities.FixFilePath(value);
                 _fullPath = null;
             }
         }

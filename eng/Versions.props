@@ -3,8 +3,8 @@
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.3.2</VersionPrefix>
-    <PreReleaseVersionLabel>release</PreReleaseVersionLabel> <!-- Keep next to VersionPrefix to create a conflict in forward-flow -->
+    <VersionPrefix>18.4.0</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind><!-- Keep next to VersionPrefix to create a conflict in forward-flow -->
+    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
     <PackageValidationBaselineVersion>18.0.2</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
@@ -48,9 +48,10 @@
         However, we can update, binding-redirect to, and distribute the newest version (that matches the VS-referenced versions) in order to get the benefits of updating.
         See uses of $(UseFrozenMaintenancePackageVersions) for details.
     -->
-    <SystemMemoryVersion>4.6.0</SystemMemoryVersion>
-    <SystemRuntimeCompilerServicesUnsafeVersion>6.1.0</SystemRuntimeCompilerServicesUnsafeVersion>
-    <SystemThreadingTasksExtensionsVersion>4.6.0</SystemThreadingTasksExtensionsVersion>
+    <SystemMemoryVersion>4.6.3</SystemMemoryVersion>
+    <SystemRuntimeCompilerServicesUnsafeVersion>6.1.2</SystemRuntimeCompilerServicesUnsafeVersion>
+    <SystemThreadingTasksExtensionsVersion>4.6.3</SystemThreadingTasksExtensionsVersion>
+    <SystemValueTupleVersion>4.6.1</SystemValueTupleVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -59,8 +60,8 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <MicrosoftVisualStudioOpenTelemetryVersion>0.2.104-beta</MicrosoftVisualStudioOpenTelemetryVersion>
-    <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Directory.Packages.props -->
+    <MicrosoftVisualStudioTelemetryVersion>17.14.18</MicrosoftVisualStudioTelemetryVersion>
+    <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Packages.props -->
   </PropertyGroup>
 
   <!-- Toolset Dependencies -->
@@ -80,7 +81,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <BootstrapSdkVersion>10.0.100</BootstrapSdkVersion>
+    <BootstrapSdkVersion>10.0.101</BootstrapSdkVersion>
   </PropertyGroup>
 
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
