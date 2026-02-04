@@ -79,13 +79,15 @@ try {
   if ($msbuildEngine -eq 'vs')
   {
     $buildToolPath = Join-Path $bootstrapRoot "net472\MSBuild\Current\Bin\MSBuild.exe"
+    $buildToolCommand = "";
     $buildToolFramework = "netframework"
   }
   else
   {
-    $buildToolPath = "$bootstrapRoot\core\sdk\$bootstrapSdkVersion\MSBuild.exe"
+    $buildToolPath = "$bootstrapRoot\core\dotnet.exe"
     $propsFile = Join-Path $PSScriptRoot "Versions.props"
     $bootstrapSdkVersion = ([xml](Get-Content $propsFile)).SelectSingleNode("//PropertyGroup/BootstrapSdkVersion").InnerText
+    $buildToolCommand = "$bootstrapRoot\core\sdk\$bootstrapSdkVersion\MSBuild.dll"
     $buildToolFramework = "net"
 
     $env:DOTNET_ROOT="$bootstrapRoot\core"
@@ -106,7 +108,7 @@ try {
     Move-Item -Path $ArtifactsDir -Destination $Stage1Dir -Force
   }
 
-  $buildTool = @{ Path = $buildToolPath; Tool = $msbuildEngine; Framework = $buildToolFramework }
+  $buildTool = @{ Path = $buildToolPath; Command = $buildToolCommand; Tool = $msbuildEngine; Framework = $buildToolFramework }
   $global:_BuildTool = $buildTool
 
   # Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
