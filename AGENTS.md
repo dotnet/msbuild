@@ -291,3 +291,7 @@ These instructions are comprehensive and tested. Only search for additional info
 3. You need details about new features not yet documented
 
 For most development tasks, following these instructions should be sufficient to build, test, and validate changes successfully.
+
+## Updating these instructions
+
+When working on a task, if user input is required to complete the task or feedback is provided for guidance around a specific area of the code, evaluate that feedback/guidance and update this document to incorporate that feedback if it's missing.  This document should be a live, evolving set of instructions.
