@@ -419,7 +419,16 @@ namespace Microsoft.Build.CommandLine
                 {
                     try
                     {
-                        finalParameterValues[value.Name] = value.GetValue(wrappedTask, null);
+                        object outputValue = value.GetValue(wrappedTask, null);
+
+                        // Filter null elements from string[] outputs to avoid crash.
+                        // See https://github.com/dotnet/msbuild/issues/13174
+                        if (outputValue is string[] stringArray)
+                        {
+                            outputValue = FilterNullsFromStringArray(stringArray, value.Name);
+                        }
+
+                        finalParameterValues[value.Name] = outputValue;
                     }
                     catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
@@ -450,6 +459,47 @@ namespace Microsoft.Build.CommandLine
                 ResourceUtilities.FormatString(AssemblyResources.GetString(message), messageArgs),
                 null,
                 taskName));
+        }
+
+        /// <summary>
+        /// Filters null elements from a string[] task output.
+        /// See https://github.com/dotnet/msbuild/issues/13174
+        /// </summary>
+        private string[] FilterNullsFromStringArray(string[] stringArray, string parameterName)
+        {
+            // Count nulls
+            int nullCount = 0;
+            foreach (string s in stringArray)
+            {
+                if (s == null)
+                {
+                    nullCount++;
+                }
+            }
+
+            if (nullCount == 0)
+            {
+                return stringArray;
+            }
+
+            // Filter nulls and log
+            string[] filtered = new string[stringArray.Length - nullCount];
+            int j = 0;
+            foreach (string s in stringArray)
+            {
+                if (s != null)
+                {
+                    filtered[j++] = s;
+                }
+            }
+
+            buildEngine.LogMessageEvent(new BuildMessageEventArgs(
+                message: ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TaskHostAcquired_NullsFiltered", parameterName, nullCount),
+                helpKeyword: null,
+                senderName: taskName,
+                importance: MessageImportance.Normal));
+
+            return filtered;
         }
     }
 }
