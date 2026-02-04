@@ -75,7 +75,7 @@ namespace Microsoft.Build.UnitTests
                 + "</Project>");
         }
 
-        private const string MSBuildExeName = NativeMethodsShared.IsWindows ? $"MSBuild.exe" : MSBuild;
+        private string MSBuildExeName = NativeMethodsShared.IsWindows ? "MSBuild.exe" : "MSBuild";
 
         private readonly ITestOutputHelper _output;
         private readonly TestEnvironment _env;
