@@ -555,7 +555,9 @@ namespace Microsoft.Build.TaskHost.BackEnd
                             // Check if this packet has an extended header that includes a version part.
                             byte rawType = headerByte[0];
                             bool hasExtendedHeader = NodePacketTypeExtensions.HasExtendedHeader(rawType);
-                            NodePacketType packetType = hasExtendedHeader ? NodePacketTypeExtensions.GetNodePacketType(rawType) : (NodePacketType)rawType;
+                            NodePacketType packetType = hasExtendedHeader
+                                ? NodePacketTypeExtensions.GetNodePacketType(rawType)
+                                : (NodePacketType)rawType;
 
                             byte parentVersion = 0;
                             if (hasExtendedHeader)
