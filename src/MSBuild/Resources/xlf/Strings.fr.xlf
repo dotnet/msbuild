@@ -667,7 +667,8 @@ Cet indicateur est expérimental et peut ne pas fonctionner comme prévu.
         <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
                        Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="needs-review-translation">  -noLogo            Ne pas afficher la bannière de démarrage ni le message de copyright.
+        <target state="new">  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
