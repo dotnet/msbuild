@@ -74,7 +74,7 @@ namespace Microsoft.Build.Framework
             }
 
             // Try to parse as an enum name (case-insensitive)
-            if (Enum.TryParse(value, ignoreCase: true, out NodeMode enumValue))
+            if (Enum.TryParse(value, ignoreCase: true, out NodeMode enumValue) && Enum.IsDefined(typeof(NodeMode), enumValue))
             {
                 nodeMode = enumValue;
                 return true;
