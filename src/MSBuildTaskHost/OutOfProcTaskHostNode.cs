@@ -689,7 +689,7 @@ namespace Microsoft.Build.TaskHost
                 {
                     _isTaskExecuting = false;
 
-                    IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+                    Dictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
                     taskResult ??= OutOfProcTaskHostTaskResult.Failure();
@@ -797,10 +797,10 @@ namespace Microsoft.Build.TaskHost
         /// so that when we pass this dictionary back to the main node, all it should have to do
         /// is just set it.
         /// </summary>
-        private IDictionary<string, string> UpdateEnvironmentForMainNode(IDictionary<string, string> environment)
+        private Dictionary<string, string> UpdateEnvironmentForMainNode(Dictionary<string, string> environment)
         {
             ErrorUtilities.VerifyThrowInternalNull(s_mismatchedEnvironmentValues, "mismatchedEnvironmentValues");
-            IDictionary<string, string> updatedEnvironment = null;
+            Dictionary<string, string> updatedEnvironment = null;
 
             if (_updateEnvironment)
             {
