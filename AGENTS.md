@@ -61,23 +61,6 @@ When reviewing pull requests:
 
 ## Performance Best Practices
 
-### Switch Expressions for Dispatch Logic
-
-```csharp
-// GOOD: Clean, readable dispatch
-return (c0, c1) switch
-{
-    ('C', 'S') => Category.CSharp,
-    ('F', 'S') => Category.FSharp,
-    ('V', 'B') when value.Length >= 3 && value[2] == 'C' => Category.VB,
-    _ => Category.Other
-};
-
-// AVOID: Verbose if-else chains
-if (c0 == 'C' && c1 == 'S') return Category.CSharp;
-else if (c0 == 'F' && c1 == 'S') return Category.FSharp;
-```
-
 ### Range Pattern Matching
 
 ```csharp
