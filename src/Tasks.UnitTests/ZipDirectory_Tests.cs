@@ -52,6 +52,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     CompressionLevel = compressionLevel,
                     DestinationFile = new TaskItem(zipFilePath),
                     SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
                 zipDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
@@ -109,7 +110,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                     BuildEngine = _mockEngine,
                     DestinationFile = new TaskItem(file.Path),
                     Overwrite = true,
-                    SourceDirectory = new TaskItem(sourceFolder.Path)
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
                 zipDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
@@ -146,7 +148,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     BuildEngine = _mockEngine,
                     DestinationFile = new TaskItem(file.Path),
-                    SourceDirectory = new TaskItem(folder.Path)
+                    SourceDirectory = new TaskItem(folder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
                 zipDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
@@ -161,7 +164,8 @@ namespace Microsoft.Build.Tasks.UnitTests
             ZipDirectory zipDirectory = new ZipDirectory
             {
                 BuildEngine = _mockEngine,
-                SourceDirectory = new TaskItem(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")))
+                SourceDirectory = new TaskItem(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))),
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
             };
 
             zipDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
