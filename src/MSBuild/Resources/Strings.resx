@@ -216,7 +216,8 @@
     </comment>
   </data>
   <data name="HelpMessage_5_NoLogoSwitch" xml:space="preserve">
-    <value>  -noLogo            Do not display the startup banner and copyright message.
+    <value>  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </value>
     <comment>
       LOCALIZATION: The following should not be localized:
@@ -1468,6 +1469,15 @@
       {StrBegin="MSBUILD : error MSB1055: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the interactive parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </comment>
+  </data>
+  <data name="InvalidNoLogoValue" xml:space="preserve">
+    <value>MSBUILD : error MSB1071: NoLogo value is not valid. {0}</value>
+    <comment>
+      {StrBegin="MSBUILD : error MSB1071: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the nologo parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </comment>
   </data>

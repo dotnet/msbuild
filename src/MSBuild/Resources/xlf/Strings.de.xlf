@@ -315,6 +315,16 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="InvalidNoLogoValue">
+        <source>MSBUILD : error MSB1071: NoLogo value is not valid. {0}</source>
+        <target state="new">MSBUILD : error MSB1071: NoLogo value is not valid. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1071: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the nologo parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
         <target state="translated">MSBUILD : error MSB1065: Der Terminalprotokollierungswert ist ungültig. Es sollte "auto", "true" oder "false" sein. {0}</target>
@@ -654,9 +664,10 @@ Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_5_NoLogoSwitch">
-        <source>  -noLogo            Do not display the startup banner and copyright message.
+        <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="translated">  -noLogo            Zeigt kein Startbanner und keine Copyrightmeldung an.
+        <target state="needs-review-translation">  -noLogo            Zeigt kein Startbanner und keine Copyrightmeldung an.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
