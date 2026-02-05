@@ -666,7 +666,8 @@ Esta marca es experimental y puede que no funcione según lo previsto.
         <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
                        Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="needs-review-translation">  noLogo            No mostrar la pancarta de inicio ni el mensaje de copyright.
+        <target state="new">  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:

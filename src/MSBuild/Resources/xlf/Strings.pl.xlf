@@ -671,7 +671,8 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
         <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
                        Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="needs-review-translation">  -nologo            Nie wyświetla baneru początkowego ani komunikatu o prawach autorskich.
+        <target state="new">  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
