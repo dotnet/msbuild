@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using Microsoft.Build.TaskHost.BackEnd;
+using Microsoft.Build.TaskHost.Exceptions;
 using Microsoft.Build.TaskHost.Utilities;
 
 #nullable disable

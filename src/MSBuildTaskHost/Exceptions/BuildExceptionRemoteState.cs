@@ -10,6 +10,18 @@ namespace Microsoft.Build.TaskHost.Exceptions;
 /// </summary>
 internal class BuildExceptionRemoteState
 {
+    public string RemoteTypeName { get; }
+
+    public string? RemoteStackTrace { get; }
+
+    public string? Source { get; }
+
+    public string? HelpLink { get; }
+
+    public int HResult { get; }
+
+    public IDictionary<string, string?>? CustomKeyedSerializedData { get; }
+
     public BuildExceptionRemoteState(
         string remoteTypeName,
         string? remoteStackTrace,
@@ -25,11 +37,4 @@ internal class BuildExceptionRemoteState
         HResult = hResult;
         CustomKeyedSerializedData = customKeyedSerializedData;
     }
-
-    public string RemoteTypeName { get; init; }
-    public string? RemoteStackTrace { get; init; }
-    public string? Source { get; init; }
-    public string? HelpLink { get; init; }
-    public int HResult { get; init; }
-    public IDictionary<string, string?>? CustomKeyedSerializedData { get; init; }
 }

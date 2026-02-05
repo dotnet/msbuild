@@ -8,15 +8,15 @@ namespace Microsoft.Build.TaskHost.Exceptions;
 /// <summary>
 /// A catch-all type for remote exceptions that we don't know how to deserialize.
 /// </summary>
-internal sealed class GenericBuildTransferredException : BuildExceptionBase
+internal sealed class GeneralBuildTransferredException : BuildExceptionBase
 {
-    public GenericBuildTransferredException()
+    public GeneralBuildTransferredException()
         : base()
-    { }
+    {
+    }
 
-    internal GenericBuildTransferredException(
-        string message,
-        Exception? inner)
-        : base(message, inner)
-    { }
+    internal GeneralBuildTransferredException(string message, Exception? innerException)
+        : base(message, innerException)
+    {
+    }
 }

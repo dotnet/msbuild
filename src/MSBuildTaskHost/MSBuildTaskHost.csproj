@@ -69,7 +69,7 @@
     <Compile Include="Exceptions\BuildExceptionBase.cs" />
     <Compile Include="Exceptions\BuildExceptionRemoteState.cs" />
     <Compile Include="Exceptions\BuildExceptionSerializationHelper.cs" />
-    <Compile Include="Exceptions\GenericBuildTransferredException.cs" />
+    <Compile Include="Exceptions\GeneralBuildTransferredException.cs" />
     <Compile Include="Exceptions\InternalErrorException.cs" />
     <Compile Include="LoadedType.cs" />
     <Compile Include="BackEnd\LogMessagePacketBase.cs" />

@@ -10,63 +10,67 @@ using Microsoft.Build.TaskHost.BackEnd;
 
 namespace Microsoft.Build.TaskHost.Exceptions;
 
-public abstract class BuildExceptionBase : Exception
+internal abstract class BuildExceptionBase : Exception
 {
     private string? _remoteTypeName;
     private string? _remoteStackTrace;
 
     private protected BuildExceptionBase()
         : base()
-    { }
+    {
+    }
 
     private protected BuildExceptionBase(string? message)
         : base(message)
-    { }
+    {
+    }
 
-    private protected BuildExceptionBase(
-        string? message,
-        Exception? inner)
+    private protected BuildExceptionBase(string? message, Exception? inner)
         : base(message, inner)
-    { }
+    {
+    }
 
     // This is needed to allow opting back in to BinaryFormatter serialization
     private protected BuildExceptionBase(SerializationInfo info, StreamingContext context)
         : base(info, context)
-    { }
+    {
+    }
 
-    public override string? StackTrace => string.IsNullOrEmpty(_remoteStackTrace) ? base.StackTrace : _remoteStackTrace;
+    public override string? StackTrace
+        => string.IsNullOrEmpty(_remoteStackTrace) ? base.StackTrace : _remoteStackTrace;
 
-    public override string ToString() => string.IsNullOrEmpty(_remoteTypeName) ? base.ToString() : $"{_remoteTypeName}->{base.ToString()}";
+    public override string ToString()
+        => string.IsNullOrEmpty(_remoteTypeName) ? base.ToString() : $"{_remoteTypeName}->{base.ToString()}";
 
     /// <summary>
     /// Override this method to recover subtype-specific state from the remote exception.
     /// </summary>
     protected virtual void InitializeCustomState(IDictionary<string, string?>? customKeyedSerializedData)
-    { }
+    {
+    }
 
     /// <summary>
     /// Override this method to provide subtype-specific state to be serialized.
     /// </summary>
     /// <returns></returns>
-    protected virtual IDictionary<string, string?>? FlushCustomState()
-    {
-        return null;
-    }
+    protected virtual IDictionary<string, string?>? FlushCustomState() => null;
 
     private void InitializeFromRemoteState(BuildExceptionRemoteState remoteState)
     {
         _remoteTypeName = remoteState.RemoteTypeName;
         _remoteStackTrace = remoteState.RemoteStackTrace;
-        base.Source = remoteState.Source;
-        base.HelpLink = remoteState.HelpLink;
-        base.HResult = remoteState.HResult;
+
+        Source = remoteState.Source;
+        HelpLink = remoteState.HelpLink;
+        HResult = remoteState.HResult;
+
         if (remoteState.Source != null)
         {
             InitializeCustomState(remoteState.CustomKeyedSerializedData);
         }
     }
 
-    internal static void WriteExceptionToTranslator(ITranslator translator, Exception exception)
+    public static void WriteExceptionToTranslator(ITranslator translator, Exception exception)
     {
         BinaryWriter writer = translator.Writer;
         writer.Write(exception.InnerException != null);
@@ -75,12 +79,13 @@ public abstract class BuildExceptionBase : Exception
             WriteExceptionToTranslator(translator, exception.InnerException);
         }
 
-        string serializationType = BuildExceptionSerializationHelper.GetExceptionSerializationKey(exception.GetType());
+        string serializationType = BuildExceptionSerializationHelper.GetSerializationKey(exception.GetType());
         writer.Write(serializationType);
         writer.Write(exception.Message);
         writer.WriteOptionalString(exception.StackTrace);
         writer.WriteOptionalString(exception.Source);
         writer.WriteOptionalString(exception.HelpLink);
+
         // HResult is completely protected up till net4.5
         int? hresult = null;
         writer.WriteOptionalInt32(hresult);
@@ -105,7 +110,7 @@ public abstract class BuildExceptionBase : Exception
             "Exception Data is not supported in BuildTransferredException");
     }
 
-    internal static Exception ReadExceptionFromTranslator(ITranslator translator)
+    public static Exception ReadExceptionFromTranslator(ITranslator translator)
     {
         BinaryReader reader = translator.Reader;
         Exception? innerException = null;
@@ -133,7 +138,7 @@ public abstract class BuildExceptionBase : Exception
             }
         }
 
-        BuildExceptionBase exception = BuildExceptionSerializationHelper.CreateExceptionFactory(serializationType)(message, innerException);
+        BuildExceptionBase exception = BuildExceptionSerializationHelper.DeserializeException(serializationType, message, innerException);
 
         exception.InitializeFromRemoteState(
             new BuildExceptionRemoteState(
