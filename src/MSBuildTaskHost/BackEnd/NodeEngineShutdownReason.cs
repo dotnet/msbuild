@@ -1,35 +1,30 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#nullable disable
+namespace Microsoft.Build.TaskHost.BackEnd;
 
-namespace Microsoft.Build.TaskHost.BackEnd
+/// <summary>
+/// Reasons for a node to shutdown.
+/// </summary>
+internal enum NodeEngineShutdownReason
 {
-    #region Enums
     /// <summary>
-    /// Reasons for a node to shutdown.
+    /// The BuildManager sent a command instructing the node to terminate.
     /// </summary>
-    public enum NodeEngineShutdownReason
-    {
-        /// <summary>
-        /// The BuildManager sent a command instructing the node to terminate.
-        /// </summary>
-        BuildComplete,
+    BuildComplete,
 
-        /// <summary>
-        /// The BuildManager sent a command instructing the node to terminate, but to restart for reuse.
-        /// </summary>
-        BuildCompleteReuse,
+    /// <summary>
+    /// The BuildManager sent a command instructing the node to terminate, but to restart for reuse.
+    /// </summary>
+    BuildCompleteReuse,
 
-        /// <summary>
-        /// The communication link failed.
-        /// </summary>
-        ConnectionFailed,
+    /// <summary>
+    /// The communication link failed.
+    /// </summary>
+    ConnectionFailed,
 
-        /// <summary>
-        /// The NodeEngine caught an exception which requires the Node to shut down.
-        /// </summary>
-        Error,
-    }
-    #endregion
+    /// <summary>
+    /// The NodeEngine caught an exception which requires the Node to shut down.
+    /// </summary>
+    Error,
 }
