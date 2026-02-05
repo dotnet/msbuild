@@ -154,8 +154,8 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void FindBuildEnvironmentFromExecutingAssemblyAsDll()
         {
-            // Ensure the correct file is found (.dll not .exe)
-            using (var env = new EmptyStandaloneEnviroment("MSBuild.dll"))
+            // Ensure the correct file is found
+            using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName))
             {
                 // All we know about is path to msbuild.exe as the current process
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, () => env.MSBuildExePath, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -176,7 +176,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 // Only the app base directory will be available
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, () => env.BuildDirectory, env.VsInstanceMock, env.EnvironmentMock, () => false);
 
-                // Make sure we get the right MSBuild entry point. On .NET Core this will be MSBuild.dll, otherwise MSBuild.exe
+                // Make sure we get the right MSBuild entry point.
                 Path.GetFileName(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath).ShouldBe(MSBuildExeName);
 
                 BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32.ShouldBe(env.BuildDirectory);

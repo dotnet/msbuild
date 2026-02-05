@@ -418,22 +418,7 @@ namespace Microsoft.Build.Shared
                 processFileName.Equals(s, StringComparison.OrdinalIgnoreCase));
         }
 
-        private static string GetProcessFromRunningProcess()
-        {
-#if RUNTIME_TYPE_NETCORE
-            // The EntryAssembly property can return null when a managed assembly has been loaded from
-            // an unmanaged application (for example, using custom CLR hosting).
-            if (AssemblyUtilities.EntryAssembly == null)
-            {
-                return EnvironmentUtilities.ProcessPath;
-            }
-
-            return AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
-#else
-
-            return EnvironmentUtilities.ProcessPath;
-#endif
-        }
+        private static string GetProcessFromRunningProcess() => EnvironmentUtilities.ProcessPath;
 
         private static string GetExecutingAssemblyPath()
         {
@@ -533,8 +518,13 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal sealed class BuildEnvironment
     {
-        public BuildEnvironment(BuildEnvironmentMode mode, string currentMSBuildExePath, bool runningTests, bool runningInMSBuildExe, bool runningInVisualStudio,
-                string visualStudioPath)
+        public BuildEnvironment(
+            BuildEnvironmentMode mode,
+            string currentMSBuildExePath,
+            bool runningTests,
+            bool runningInMSBuildExe,
+            bool runningInVisualStudio,
+            string visualStudioPath)
         {
             FileInfo currentMSBuildExeFile = null;
             DirectoryInfo currentToolsDirectory = null;
