@@ -315,6 +315,16 @@
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="InvalidNoLogoValue">
+        <source>MSBUILD : error MSB1071: NoLogo value is not valid. {0}</source>
+        <target state="new">MSBUILD : error MSB1071: NoLogo value is not valid. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1071: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the nologo parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
         <target state="translated">MSBUILD : error MSB1065: Hodnota terminálového protokolovacího nástroje není platná. Mělo by to být auto, true nebo false. {0}</target>
@@ -658,9 +668,10 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_5_NoLogoSwitch">
-        <source>  -noLogo            Do not display the startup banner and copyright message.
+        <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="translated">  -noLogo            Nezobrazí se úvodní nápis a zpráva o autorských právech.
+        <target state="needs-review-translation">  -noLogo            Nezobrazí se úvodní nápis a zpráva o autorských právech.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
