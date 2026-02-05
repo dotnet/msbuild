@@ -237,6 +237,14 @@ See **Key Configuration Files** section for files that should not be modified wi
 
 When making changes, check if related documentation exists in the `documentation/` folder (including `documentation/specs/`) and update it to reflect your changes. Keep documentation in sync with code changes.
 
+## Breaking Changes
+
+Because MSBuild is a critical part of the build process for a huge number of customers, we avoid breaking changes. Adding new errors or warnings, even when well-intentioned and pointing out things that are very likely to be wrong, is an unacceptable breaking change. Adding warnings is a breaking change because many production builds use `/WarnAsError`.
+
+The exception to this policy is in new, opt-in behavior. In new, opt-in functionality, liberally emit warnings and errors--they can always be removed later.
+
+When reviewing PRs, always consider whether the behavior change could be experienced as a break in existing builds and flag any new warnings or errors.
+
 ## Development Workflow
 
 1. Make your changes to source code
