@@ -178,6 +178,14 @@ dotnet build src/Samples/Dependency/Dependency.csproj
 dotnet artifacts/bin/bootstrap/core/MSBuild.dll --help
 ```
 
+## Breaking Changes
+
+Because MSBuild is a critical part of the build process for a huge number of customers, we avoid breaking changes. Adding new errors or warnings, even when well-intentioned and pointing out things that are very likely to be wrong, is an unacceptable breaking change. Adding warnings is a breaking change because many production builds use `/WarnAsError`.
+
+The exception to this policy is in new, opt-in behavior. In new, opt-in functionality, liberally emit warnings and errors--they can always be removed later.
+
+When reviewing PRs, always consider whether the behavior change could be experienced as a break in existing builds and flag any new warnings or errors.
+
 ## Validation
 
 ### Always Test These Scenarios After Making Changes:
