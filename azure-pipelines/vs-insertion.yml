@@ -38,7 +38,7 @@ resources:
 
 parameters:
   - name: TargetBranch
-    default: auto
+    default: dev/mipavlik/enable-msbuild-retail-validation
     type: string
     displayName: 'Insertion Target Branch (select for manual insertion)'
     values:
@@ -57,6 +57,7 @@ parameters:
       - rel/d17.6
       - rel/d17.3
       - rel/d17.0
+      - dev/mipavlik/enable-msbuild-retail-validation
   - name: DropRetentionDays
     default: 183
     type: number
