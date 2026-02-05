@@ -4,124 +4,92 @@
 using System.Collections.Generic;
 using Microsoft.Build.TaskHost.Utilities;
 
-#nullable disable
+namespace Microsoft.Build.TaskHost.BackEnd;
 
-namespace Microsoft.Build.TaskHost.BackEnd
+/// <summary>
+/// Implementation of INodePacketFactory as a helper class for classes which expose this interface publicly.
+/// </summary>
+internal sealed class NodePacketFactory : INodePacketFactory
 {
     /// <summary>
-    /// Implementation of INodePacketFactory as a helper class for classes which expose this interface publicly.
+    /// Mapping of packet types to factory information.
     /// </summary>
-    internal class NodePacketFactory : INodePacketFactory
+    private readonly Dictionary<NodePacketType, PacketFactoryRecord> _packetFactories;
+
+    public NodePacketFactory()
+    {
+        _packetFactories = new Dictionary<NodePacketType, PacketFactoryRecord>();
+    }
+
+    /// <summary>
+    /// Registers a packet handler.
+    /// </summary>
+    public void RegisterPacketHandler(NodePacketType packetType, NodePacketFactoryMethod factory, INodePacketHandler handler)
+        => _packetFactories[packetType] = new PacketFactoryRecord(handler, factory);
+
+    /// <summary>
+    /// Unregisters a packet handler.
+    /// </summary>
+    public void UnregisterPacketHandler(NodePacketType packetType)
+        => _packetFactories.Remove(packetType);
+
+    /// <summary>
+    /// Creates and routes a packet with data from a binary stream.
+    /// </summary>
+    public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
+    {
+        if (!_packetFactories.TryGetValue(packetType, out PacketFactoryRecord? record))
+        {
+            ErrorUtilities.ThrowInternalError($"No packet handler for type {packetType}");
+        }
+
+        INodePacket packet = record.DeserializePacket(translator);
+        record.RoutePacket(nodeId, packet);
+    }
+
+    /// <summary>
+    /// Creates a packet with data from a binary stream.
+    /// </summary>
+    public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
+    {
+        if (!_packetFactories.TryGetValue(packetType, out PacketFactoryRecord? record))
+        {
+            ErrorUtilities.ThrowInternalError($"No packet handler for type {packetType}");
+        }
+
+        return record.DeserializePacket(translator);
+    }
+
+    /// <summary>
+    /// Routes the specified packet.
+    /// </summary>
+    public void RoutePacket(int nodeId, INodePacket packet)
+    {
+        if (!_packetFactories.TryGetValue(packet.Type, out PacketFactoryRecord record))
+        {
+            ErrorUtilities.ThrowInternalError($"No packet handler for type {packet.Type}");
+        }
+
+        record.RoutePacket(nodeId, packet);
+    }
+
+    /// <summary>
+    /// A record for a packet factory.
+    /// </summary>
+    /// <param name="handler">The handler to invoke when the packet is deserialized.</param>
+    /// <param name="factoryMethod">The method used to construct a packet from a translator stream.</param>
+    private sealed class PacketFactoryRecord(INodePacketHandler handler, NodePacketFactoryMethod factoryMethod)
     {
         /// <summary>
-        /// Mapping of packet types to factory information.
+        /// Creates a packet from a binary stream.
         /// </summary>
-        private Dictionary<NodePacketType, PacketFactoryRecord> _packetFactories;
+        public INodePacket DeserializePacket(ITranslator translator)
+            => factoryMethod(translator);
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        public NodePacketFactory()
-        {
-            _packetFactories = new Dictionary<NodePacketType, PacketFactoryRecord>();
-        }
-
-        #region INodePacketFactory Members
-
-        /// <summary>
-        /// Registers a packet handler
-        /// </summary>
-        public void RegisterPacketHandler(NodePacketType packetType, NodePacketFactoryMethod factory, INodePacketHandler handler)
-        {
-            _packetFactories[packetType] = new PacketFactoryRecord(handler, factory);
-        }
-
-        /// <summary>
-        /// Unregisters a packet handler.
-        /// </summary>
-        public void UnregisterPacketHandler(NodePacketType packetType)
-        {
-            _packetFactories.Remove(packetType);
-        }
-
-        /// <summary>
-        /// Creates and routes a packet with data from a binary stream.
-        /// </summary>
-        public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
-        {
-            // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
-            if (!_packetFactories.TryGetValue(packetType, out PacketFactoryRecord record))
-            {
-                ErrorUtilities.ThrowInternalError($"No packet handler for type {packetType}");
-            }
-
-            INodePacket packet = record.DeserializePacket(translator);
-            record.RoutePacket(nodeId, packet);
-        }
-
-        /// <summary>
-        /// Creates a packet with data from a binary stream.
-        /// </summary>
-        public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator)
-        {
-            // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
-            if (!_packetFactories.TryGetValue(packetType, out PacketFactoryRecord record))
-            {
-                ErrorUtilities.ThrowInternalError($"No packet handler for type {packetType}");
-            }
-
-            return record.DeserializePacket(translator);
-        }
-
-        /// <summary>
-        /// Routes the specified packet.
+        /// Routes the packet to the correct destination.
         /// </summary>
         public void RoutePacket(int nodeId, INodePacket packet)
-        {
-            // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
-            if (!_packetFactories.TryGetValue(packet.Type, out PacketFactoryRecord record))
-            {
-                ErrorUtilities.ThrowInternalError($"No packet handler for type {packet.Type}");
-            }
-
-            record.RoutePacket(nodeId, packet);
-        }
-
-        #endregion
-
-        /// <summary>
-        /// A record for a packet factory
-        /// </summary>
-        private class PacketFactoryRecord
-        {
-            /// <summary>
-            /// The handler to invoke when the packet is deserialized.
-            /// </summary>
-            private readonly INodePacketHandler _handler;
-
-            /// <summary>
-            /// The method used to construct a packet from a translator stream.
-            /// </summary>
-            private readonly NodePacketFactoryMethod _factoryMethod;
-
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            public PacketFactoryRecord(INodePacketHandler handler, NodePacketFactoryMethod factoryMethod)
-            {
-                _handler = handler;
-                _factoryMethod = factoryMethod;
-            }
-
-            /// <summary>
-            /// Creates a packet from a binary stream.
-            /// </summary>
-            public INodePacket DeserializePacket(ITranslator translator) => _factoryMethod(translator);
-
-            /// <summary>
-            /// Routes the packet to the correct destination.
-            /// </summary>
-            public void RoutePacket(int nodeId, INodePacket packet) => _handler.PacketReceived(nodeId, packet);
-        }
+            => handler.PacketReceived(nodeId, packet);
     }
 }
