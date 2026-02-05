@@ -17,7 +17,6 @@ Instructions for GitHub Copilot and other AI coding agents working with the MSBu
 - .NET 10.0 and .NET Framework 4.7.2
 - C# 13 features (especially collection expressions)
 - xUnit with Shouldly for testing
-- Microsoft.DotNet.Arcade.Sdk for build infrastructure
 - Multi-platform support (Windows, Linux, macOS)
 
 ## General
@@ -100,16 +99,6 @@ FrozenDictionary<string, int> lookup = pairs.ToFrozenDictionary(x => x.Key, x =>
 ```csharp
 ImmutableList<string> items = ...;  // Use when adding items one by one
 ImmutableDictionary<string, int> lookup = ...;
-```
-
-### Conditional Compilation
-
-```csharp
-#if NET
-    return int.TryParse(span, out errorNumber);
-#else
-    return int.TryParse(span.ToString(), out errorNumber);
-#endif
 ```
 
 ## Building
