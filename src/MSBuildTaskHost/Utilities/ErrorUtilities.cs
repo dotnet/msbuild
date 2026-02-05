@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.TaskHost.Exceptions;
+using Microsoft.Build.TaskHost.Resources;
 
 namespace Microsoft.Build.TaskHost.Utilities
 {
@@ -13,25 +14,37 @@ namespace Microsoft.Build.TaskHost.Utilities
     /// </summary>
     internal static class ErrorUtilities
     {
-        /// <summary>
-        /// Throws InternalErrorException.
-        /// This is only for situations that would mean that there is a bug in MSBuild itself.
-        /// </summary>
         [DoesNotReturn]
-        internal static void ThrowInternalError(string message, params object?[]? args)
-        {
-            throw new InternalErrorException(ResourceUtilities.FormatString(message, args));
-        }
+        internal static void ThrowInternalError(string message)
+            => throw new InternalErrorException(message);
+
+        [DoesNotReturn]
+        internal static void ThrowInternalError(string format, object? arg0)
+            => throw new InternalErrorException(string.Format(format, arg0));
+
+        [DoesNotReturn]
+        internal static void ThrowInternalError(string format, object? arg0, object? arg1)
+            => throw new InternalErrorException(string.Format(format, arg0, arg1));
+
+        [DoesNotReturn]
+        internal static void ThrowInternalError(string format, object? arg0, object? arg1, object? arg2)
+            => throw new InternalErrorException(string.Format(format, arg0, arg1, arg2));
 
         /// <summary>
         /// Throws InternalErrorException.
         /// This is only for situations that would mean that there is a bug in MSBuild itself.
         /// </summary>
         [DoesNotReturn]
-        internal static void ThrowInternalError(string message, Exception? innerException, params object?[]? args)
-        {
-            throw new InternalErrorException(ResourceUtilities.FormatString(message, args), innerException);
-        }
+        internal static void ThrowInternalError(string format, params object?[] args)
+            => throw new InternalErrorException(string.Format(format, args));
+
+        /// <summary>
+        /// Throws InternalErrorException.
+        /// This is only for situations that would mean that there is a bug in MSBuild itself.
+        /// </summary>
+        [DoesNotReturn]
+        internal static void ThrowInternalError(string message, Exception? innerException)
+            => throw new InternalErrorException(message, innerException);
 
         /// <summary>
         /// Throws InternalErrorException.
@@ -40,9 +53,7 @@ namespace Microsoft.Build.TaskHost.Utilities
         /// </summary>
         [DoesNotReturn]
         internal static void ThrowInternalErrorUnreachable()
-        {
-            throw new InternalErrorException("Unreachable?");
-        }
+            => throw new InternalErrorException("Unreachable?");
 
         /// <summary>
         /// Helper to throw an InternalErrorException when the specified parameter is null.
@@ -51,11 +62,13 @@ namespace Microsoft.Build.TaskHost.Utilities
         /// </summary>
         /// <param name="parameter">The value of the argument.</param>
         /// <param name="parameterName">Parameter that should not be null</param>
-        internal static void VerifyThrowInternalNull([NotNull] object? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+        internal static void VerifyThrowInternalNull(
+            [NotNull] object? parameter,
+            [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
         {
             if (parameter is null)
             {
-                ThrowInternalError("{0} unexpectedly null", parameterName);
+                ThrowInternalError($"{parameterName} unexpectedly null");
             }
         }
 
@@ -66,13 +79,15 @@ namespace Microsoft.Build.TaskHost.Utilities
         /// </summary>
         /// <param name="parameterValue">The value of the argument.</param>
         /// <param name="parameterName">Parameter that should not be null or zero length</param>
-        internal static void VerifyThrowInternalLength([NotNull] string? parameterValue, [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
+        internal static void VerifyThrowInternalLength(
+            [NotNull] string? parameterValue,
+            [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
         {
             VerifyThrowInternalNull(parameterValue, parameterName);
 
             if (parameterValue.Length == 0)
             {
-                ThrowInternalError("{0} unexpectedly empty", parameterName);
+                ThrowInternalError($"{parameterName} unexpectedly empty");
             }
         }
 
@@ -83,35 +98,33 @@ namespace Microsoft.Build.TaskHost.Utilities
         /// code somewhere. This should not be used to throw errors based on bad
         /// user input or anything that the user did wrong.
         /// </summary>
-        internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string unformattedMessage)
+        internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string message)
         {
             if (!condition)
             {
-                ThrowInternalError(unformattedMessage, null, null);
+                ThrowInternalError(message);
             }
         }
 
         /// <summary>
         /// Overload for one string format argument.
         /// </summary>
-        internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string unformattedMessage, object arg0)
+        internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string format, object? arg0)
         {
             if (!condition)
             {
-                ThrowInternalError(unformattedMessage, arg0);
+                ThrowInternalError(format, arg0);
             }
         }
 
         /// <summary>
         /// Throws an InvalidOperationException with the specified resource string
         /// </summary>
-        /// <param name="resourceName">Resource to use in the exception</param>
+        /// <param name="format">Resource to use in the exception</param>
         /// <param name="args">Formatting args.</param>
         [DoesNotReturn]
-        internal static void ThrowInvalidOperation(string resourceName, params object?[]? args)
-        {
-            throw new InvalidOperationException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args));
-        }
+        internal static void ThrowInvalidOperation(string format, object? arg0, object? arg1, object? arg2)
+            => throw new InvalidOperationException(string.Format(format, arg0, arg1, arg2));
 
         /// <summary>
         /// Throws an ArgumentException that can include an inner exception.
@@ -124,32 +137,27 @@ namespace Microsoft.Build.TaskHost.Utilities
         /// This method is thread-safe.
         /// </remarks>
         /// <param name="innerException">Can be null.</param>
-        /// <param name="resourceName"></param>
+        /// <param name="format"></param>
         /// <param name="args"></param>
         [DoesNotReturn]
-        internal static void ThrowArgument(Exception? innerException, string resourceName, params object?[]? args)
-        {
-            throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args), innerException);
-        }
+        private static void ThrowArgument(Exception? innerException, string format, object? arg0)
+            => throw new ArgumentException(string.Format(format, arg0), innerException);
 
         /// <summary>
         /// Overload for one string format argument.
         /// </summary>
-        internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, string resourceName, object arg0)
-        {
-            VerifyThrowArgument(condition, null, resourceName, arg0);
-        }
+        internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, string format, object? arg0)
+            => VerifyThrowArgument(condition, innerException: null, format, arg0);
 
         /// <summary>
         /// Overload for one string format argument.
         /// </summary>
-        internal static void VerifyThrowArgument([DoesNotReturnIf(false)] bool condition, Exception? innerException, string resourceName, object arg0)
+        internal static void VerifyThrowArgument(
+            [DoesNotReturnIf(false)] bool condition, Exception? innerException, string format, object? arg0)
         {
-            ResourceUtilities.VerifyResourceStringExists(resourceName);
-
             if (!condition)
             {
-                ThrowArgument(innerException, resourceName, arg0);
+                ThrowArgument(innerException, format, arg0);
             }
         }
 
@@ -157,7 +165,9 @@ namespace Microsoft.Build.TaskHost.Utilities
         /// Throws an ArgumentNullException if the given string parameter is null
         /// and ArgumentException if it has zero length.
         /// </summary>
-        internal static void VerifyThrowArgumentLength([NotNull] string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+        internal static void VerifyThrowArgumentLength(
+            [NotNull] string? parameter,
+            [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
         {
             VerifyThrowArgumentNull(parameter, parameterName);
 
@@ -169,35 +179,23 @@ namespace Microsoft.Build.TaskHost.Utilities
 
         [DoesNotReturn]
         private static void ThrowArgumentLength(string? parameterName)
-        {
-            throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
-        }
+            => throw new ArgumentException(string.Format(SR.Shared_ParameterCannotHaveZeroLength, parameterName), parameterName);
 
         /// <summary>
         /// Throws an ArgumentNullException if the given parameter is null.
         /// </summary>
-        internal static void VerifyThrowArgumentNull([NotNull] object? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+        internal static void VerifyThrowArgumentNull(
+            [NotNull] object? parameter,
+            [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
         {
-            VerifyThrowArgumentNull(parameter, parameterName, "Shared.ParameterCannotBeNull");
-        }
-
-        /// <summary>
-        /// Throws an ArgumentNullException if the given parameter is null.
-        /// </summary>
-        internal static void VerifyThrowArgumentNull([NotNull] object? parameter, string? parameterName, string resourceName)
-        {
-            ResourceUtilities.VerifyResourceStringExists(resourceName);
             if (parameter is null)
             {
-                ThrowArgumentNull(parameterName, resourceName);
+                ThrowArgumentNull(parameterName, SR.Shared_ParameterCannotBeNull);
             }
         }
 
         [DoesNotReturn]
-        internal static void ThrowArgumentNull(string? parameterName, string resourceName)
-        {
-            // Most ArgumentNullException overloads append its own rather clunky multi-line message. So use the one overload that doesn't.
-            throw new ArgumentNullException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, parameterName), (Exception?)null);
-        }
+        private static void ThrowArgumentNull(string? parameterName, string message)
+            => throw new ArgumentNullException(parameterName, string.Format(message, parameterName));
     }
 }

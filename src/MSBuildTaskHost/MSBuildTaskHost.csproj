@@ -29,6 +29,9 @@
 
     <!-- Work around arcade stomping on symbols for same-program-different-arches. -->
     <DebugType>full</DebugType>
+
+    <!-- Work around arcade generating invalid string resource code on .NET 3.5 -->
+    <DefineConstants>$(DefineConstants);NET20</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -53,9 +56,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Update="Resources\Strings.shared.resx">
-      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
-      <SubType>Designer</SubType>
+    <EmbeddedResource Update="Resources\SR.resx">
+      <GenerateSource>true</GenerateSource>
     </EmbeddedResource>
   </ItemGroup>
 

@@ -52,7 +52,7 @@ namespace Microsoft.Build.TaskHost.BackEnd
             // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
             if (!_packetFactories.TryGetValue(packetType, out PacketFactoryRecord record))
             {
-                ErrorUtilities.ThrowInternalError("No packet handler for type {0}", packetType);
+                ErrorUtilities.ThrowInternalError($"No packet handler for type {packetType}");
             }
 
             INodePacket packet = record.DeserializePacket(translator);
@@ -67,7 +67,7 @@ namespace Microsoft.Build.TaskHost.BackEnd
             // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
             if (!_packetFactories.TryGetValue(packetType, out PacketFactoryRecord record))
             {
-                ErrorUtilities.ThrowInternalError("No packet handler for type {0}", packetType);
+                ErrorUtilities.ThrowInternalError($"No packet handler for type {packetType}");
             }
 
             return record.DeserializePacket(translator);
@@ -81,7 +81,7 @@ namespace Microsoft.Build.TaskHost.BackEnd
             // PERF: Not using VerifyThrow to avoid boxing of packetType in the non-error case
             if (!_packetFactories.TryGetValue(packet.Type, out PacketFactoryRecord record))
             {
-                ErrorUtilities.ThrowInternalError("No packet handler for type {0}", packet.Type);
+                ErrorUtilities.ThrowInternalError($"No packet handler for type {packet.Type}");
             }
 
             record.RoutePacket(nodeId, packet);

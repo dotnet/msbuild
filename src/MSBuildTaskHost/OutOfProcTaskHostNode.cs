@@ -299,7 +299,7 @@ namespace Microsoft.Build.TaskHost
         /// </summary>
         bool IBuildEngine2.BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs, string toolsVersion)
         {
-            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
+            LogErrorFromResource(SR.BuildEngineCallbacksInTaskHostUnsupported);
             return false;
         }
 
@@ -309,7 +309,7 @@ namespace Microsoft.Build.TaskHost
         /// </summary>
         bool IBuildEngine2.BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IDictionary[] targetOutputsPerProject, string[] toolsVersion, bool useResultsCache, bool unloadProjectsOnCompletion)
         {
-            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
+            LogErrorFromResource(SR.BuildEngineCallbacksInTaskHostUnsupported);
             return false;
         }
 
@@ -758,7 +758,7 @@ namespace Microsoft.Build.TaskHost
                         {
                             if (_updateEnvironmentAndLog)
                             {
-                                LogMessageFromResource(MessageImportance.Low, "ModifyingTaskHostEnvironmentHeader");
+                                LogMessageFromResource(MessageImportance.Low, SR.ModifyingTaskHostEnvironmentHeader);
                             }
 
                             updatedEnvironment = new Dictionary<string, string>(environment, StringComparer.OrdinalIgnoreCase);
@@ -768,7 +768,7 @@ namespace Microsoft.Build.TaskHost
                         {
                             if (_updateEnvironmentAndLog)
                             {
-                                LogMessageFromResource(MessageImportance.Low, "ModifyingTaskHostEnvironmentVariable", variable.Key, newValue, environmentValue ?? String.Empty);
+                                LogMessageFromResource(MessageImportance.Low, string.Format(SR.ModifyingTaskHostEnvironmentVariable, variable.Key, newValue, environmentValue ?? string.Empty));
                             }
 
                             updatedEnvironment[variable.Key] = newValue;
@@ -913,7 +913,7 @@ namespace Microsoft.Build.TaskHost
                 {
                     // log a warning and bail.  This will end up re-calling SendBuildEvent, but we know for a fact
                     // that the warning that we constructed is serializable, so everything should be good.
-                    LogWarningFromResource("ExpectedEventToBeSerializable", e.GetType().Name);
+                    LogWarningFromResource(string.Format(SR.ExpectedEventToBeSerializable, e.GetType().Name));
                     return;
                 }
 
@@ -925,64 +925,61 @@ namespace Microsoft.Build.TaskHost
         /// <summary>
         /// Generates the message event corresponding to a particular resource string and set of args
         /// </summary>
-        private void LogMessageFromResource(MessageImportance importance, string messageResource, params object[] messageArgs)
+        private void LogMessageFromResource(MessageImportance importance, string message)
         {
             ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration when we're trying to log messages!");
 
-            // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
-            BuildMessageEventArgs message = new BuildMessageEventArgs(
-                                                    ResourceUtilities.FormatString(AssemblyResources.GetString(messageResource), messageArgs),
-                                                    null,
-                                                    _currentConfiguration.TaskName,
-                                                    importance);
+            BuildMessageEventArgs messageArgs = new(
+                message,
+                helpKeyword: null,
+                _currentConfiguration.TaskName,
+                importance);
 
-            LogMessageEvent(message);
+            LogMessageEvent(messageArgs);
         }
 
         /// <summary>
         /// Generates the error event corresponding to a particular resource string and set of args
         /// </summary>
-        private void LogWarningFromResource(string messageResource, params object[] messageArgs)
+        private void LogWarningFromResource(string message)
         {
             ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration when we're trying to log warnings!");
 
-            // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
-            BuildWarningEventArgs warning = new BuildWarningEventArgs(
-                                                    null,
-                                                    null,
-                                                    ProjectFileOfTaskNode,
-                                                    LineNumberOfTaskNode,
-                                                    ColumnNumberOfTaskNode,
-                                                    0,
-                                                    0,
-                                                    ResourceUtilities.FormatString(AssemblyResources.GetString(messageResource), messageArgs),
-                                                    null,
-                                                    _currentConfiguration.TaskName);
+            BuildWarningEventArgs warningArgs = new(
+                subcategory: null,
+                code: null,
+                file: ProjectFileOfTaskNode,
+                lineNumber: LineNumberOfTaskNode,
+                columnNumber: ColumnNumberOfTaskNode,
+                endLineNumber: 0,
+                endColumnNumber: 0,
+                message: message,
+                helpKeyword: null,
+                senderName: _currentConfiguration.TaskName);
 
-            LogWarningEvent(warning);
+            LogWarningEvent(warningArgs);
         }
 
         /// <summary>
         /// Generates the error event corresponding to a particular resource string and set of args
         /// </summary>
-        private void LogErrorFromResource(string messageResource)
+        private void LogErrorFromResource(string message)
         {
             ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration when we're trying to log errors!");
 
-            // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
-            BuildErrorEventArgs error = new BuildErrorEventArgs(
-                                                    null,
-                                                    null,
-                                                    ProjectFileOfTaskNode,
-                                                    LineNumberOfTaskNode,
-                                                    ColumnNumberOfTaskNode,
-                                                    0,
-                                                    0,
-                                                    AssemblyResources.GetString(messageResource),
-                                                    null,
-                                                    _currentConfiguration.TaskName);
+            BuildErrorEventArgs errorArgs = new(
+                subcategory: null,
+                code: null,
+                file: ProjectFileOfTaskNode,
+                lineNumber: LineNumberOfTaskNode,
+                columnNumber: ColumnNumberOfTaskNode,
+                endLineNumber: 0,
+                endColumnNumber: 0,
+                message: message,
+                helpKeyword: null,
+                senderName: _currentConfiguration.TaskName);
 
-            LogErrorEvent(error);
+            LogErrorEvent(errorArgs);
         }
     }
 }

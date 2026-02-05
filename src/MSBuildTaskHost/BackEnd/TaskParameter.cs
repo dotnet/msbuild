@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Security;
 using Microsoft.Build.Framework;
+using Microsoft.Build.TaskHost.Resources;
 using Microsoft.Build.TaskHost.Utilities;
 
 #nullable disable
@@ -104,9 +105,9 @@ namespace Microsoft.Build.TaskHost.BackEnd
 
             // It's not null or invalid, so it should be a valid parameter type.
             ErrorUtilities.VerifyThrow(
-                    TaskParameterTypeVerifier.IsValidInputParameter(wrappedParameterType) || TaskParameterTypeVerifier.IsValidOutputParameter(wrappedParameterType),
-                    "How did we manage to get a task parameter of type {0} that isn't a valid parameter type?",
-                    wrappedParameterType);
+                TaskParameterTypeVerifier.IsValidInputParameter(wrappedParameterType) || TaskParameterTypeVerifier.IsValidOutputParameter(wrappedParameterType),
+                "How did we manage to get a task parameter of type {0} that isn't a valid parameter type?",
+                wrappedParameterType);
 
             if (wrappedParameterType.IsArray)
             {
@@ -655,7 +656,10 @@ namespace Microsoft.Build.TaskHost.BackEnd
 
                 // Non-derivable metadata can only be set at construction time.
                 // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
-                ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
+                ErrorUtilities.VerifyThrowArgument(
+                    !FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName),
+                    SR.Shared_CannotChangeItemSpecModifiers,
+                    metadataName);
 
                 _customEscapedMetadata ??= new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -669,7 +673,10 @@ namespace Microsoft.Build.TaskHost.BackEnd
             public void RemoveMetadata(string metadataName)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(metadataName);
-                ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
+                ErrorUtilities.VerifyThrowArgument(
+                    !FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName),
+                    SR.Shared_CannotChangeItemSpecModifiers,
+                    metadataName);
 
                 if (_customEscapedMetadata == null)
                 {
@@ -703,14 +710,14 @@ namespace Microsoft.Build.TaskHost.BackEnd
                     {
                         string value = destinationItem.GetMetadata(entry.Key);
 
-                        if (String.IsNullOrEmpty(value))
+                        if (string.IsNullOrEmpty(value))
                         {
                             destinationItem.SetMetadata(entry.Key, entry.Value);
                         }
                     }
                 }
 
-                if (String.IsNullOrEmpty(originalItemSpec))
+                if (string.IsNullOrEmpty(originalItemSpec))
                 {
                     destinationItem.SetMetadata("OriginalItemSpec", EscapingUtilities.Escape(ItemSpec));
                 }

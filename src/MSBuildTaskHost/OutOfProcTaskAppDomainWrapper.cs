@@ -161,7 +161,7 @@ internal sealed class OutOfProcTaskAppDomainWrapper : IDisposable
             ? OutOfProcTaskHostTaskResult.Success(finalParameterValues)
             : OutOfProcTaskHostTaskResult.Failure(finalParameterValues);
 
-        void LogErrorDelegate(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs)
+        void LogErrorDelegate(string taskLocation, int taskLine, int taskColumn, string message)
         {
             BuildErrorEventArgs error = new(
                 subcategory: null,
@@ -171,7 +171,7 @@ internal sealed class OutOfProcTaskAppDomainWrapper : IDisposable
                 columnNumber: taskColumn,
                 endLineNumber: 0,
                 endColumnNumber: 0,
-                message: ResourceUtilities.FormatString(AssemblyResources.GetString(message), messageArgs),
+                message,
                 helpKeyword: null,
                 senderName: taskName);
 

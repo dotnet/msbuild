@@ -4,6 +4,7 @@
 using System;
 using System.Reflection;
 using Microsoft.Build.Framework;
+using Microsoft.Build.TaskHost.Resources;
 using Microsoft.Build.TaskHost.Utilities;
 
 namespace Microsoft.Build.TaskHost
@@ -22,7 +23,7 @@ namespace Microsoft.Build.TaskHost
         /// <summary>
         /// Delegate for logging task loading errors.
         /// </summary>
-        internal delegate void LogError(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs);
+        internal delegate void LogError(string taskLocation, int taskLine, int taskColumn, string message);
 
         /// <summary>
         /// Checks if the given type is a task factory.
@@ -61,13 +62,7 @@ namespace Microsoft.Build.TaskHost
                 {
                     if (!loadedType.IsMarshalByRef)
                     {
-                        logError(
-                            taskLocation,
-                            taskLine,
-                            taskColumn,
-                            "TaskNotMarshalByRef",
-                            taskName);
-
+                        logError(taskLocation, taskLine, taskColumn, string.Format(SR.TaskNotMarshalByRef, taskName));
                         return null;
                     }
                     else
@@ -119,14 +114,7 @@ namespace Microsoft.Build.TaskHost
                     // to fail here.
                     if (taskType != loadedType.Type)
                     {
-                        logError(
-                        taskLocation,
-                        taskLine,
-                        taskColumn,
-                        "ConflictingTaskAssembly",
-                        loadedType.AssemblyFilePath,
-                        loadedType.Type.Assembly.Location);
-
+                        logError(taskLocation, taskLine, taskColumn, string.Format(SR.ConflictingTaskAssembly, loadedType.AssemblyFilePath, loadedType.Type.Assembly.Location));
                         taskInstanceInOtherAppDomain = null;
                     }
                 }

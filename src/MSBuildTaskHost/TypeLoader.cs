@@ -215,7 +215,7 @@ namespace Microsoft.Build.TaskHost
             /// </summary>
             internal AssemblyInfoToLoadedTypes(TypeFilter typeFilter, string assemblyFilePath)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(typeFilter, "typefilter");
+                ErrorUtilities.VerifyThrowArgumentNull(typeFilter);
                 ErrorUtilities.VerifyThrowArgumentNull(assemblyFilePath);
 
                 _isDesiredType = typeFilter;

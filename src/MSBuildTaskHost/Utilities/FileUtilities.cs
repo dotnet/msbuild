@@ -66,7 +66,7 @@ namespace Microsoft.Build.TaskHost.Utilities
 
             if (IsPathTooLong(uncheckedFullPath))
             {
-                string message = ResourceUtilities.FormatString(AssemblyResources.GetString("Shared.PathTooLong"), path, NativeMethods.MaxPath);
+                string message = string.Format(SR.Shared_PathTooLong, path, NativeMethods.MaxPath);
                 throw new PathTooLongException(message);
             }
 

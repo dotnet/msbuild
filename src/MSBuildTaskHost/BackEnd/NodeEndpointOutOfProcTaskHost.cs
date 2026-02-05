@@ -170,7 +170,7 @@ namespace Microsoft.Build.TaskHost.BackEnd
         public void Listen(INodePacketFactory factory)
         {
             ErrorUtilities.VerifyThrow(_status == LinkStatus.Inactive, "Link not inactive.  Status is {0}", _status);
-            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
+            ErrorUtilities.VerifyThrowArgumentNull(factory);
             _packetFactory = factory;
 
             InitializeAsyncPacketThread();
@@ -262,7 +262,7 @@ namespace Microsoft.Build.TaskHost.BackEnd
         /// <param name="packet">The packet to be transmitted.</param>
         private void EnqueuePacket(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
+            ErrorUtilities.VerifyThrowArgumentNull(packet);
             ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue is null");
             ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable is null");
             _packetQueue.Enqueue(packet);
@@ -640,7 +640,7 @@ namespace Microsoft.Build.TaskHost.BackEnd
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError("waitId {0} out of range.", waitId);
+                        ErrorUtilities.ThrowInternalError($"waitId {waitId} out of range.");
                         break;
                 }
             }

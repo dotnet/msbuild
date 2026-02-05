@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using Microsoft.Build.TaskHost.Resources;
 
 #nullable disable
 
@@ -354,7 +355,7 @@ namespace Microsoft.Build.TaskHost.Utilities
                                 }
                                 else
                                 {
-                                    ErrorUtilities.ThrowInternalError("\"{0}\" is not a valid item-spec modifier.", modifier);
+                                    ErrorUtilities.ThrowInternalError($"\"{modifier}\" is not a valid item-spec modifier.");
                                 }
 
                                 modifiedItemSpec = GetItemSpecModifier(currentDirectory, definingProjectEscaped, null, additionalModifier);
@@ -363,12 +364,12 @@ namespace Microsoft.Build.TaskHost.Utilities
                     }
                     else
                     {
-                        ErrorUtilities.ThrowInternalError("\"{0}\" is not a valid item-spec modifier.", modifier);
+                        ErrorUtilities.ThrowInternalError($"\"{modifier}\" is not a valid item-spec modifier.");
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    ErrorUtilities.ThrowInvalidOperation("Shared.InvalidFilespecForTransform", modifier, itemSpec, e.Message);
+                    ErrorUtilities.ThrowInvalidOperation(SR.Shared_InvalidFilespecForTransform, modifier, itemSpec, e.Message);
                 }
 
                 return modifiedItemSpec;
