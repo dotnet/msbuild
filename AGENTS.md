@@ -14,7 +14,7 @@ Instructions for GitHub Copilot and other AI coding agents working with the MSBu
 - **MSBuild CLI**: Command-line tool for invoking builds
 
 ### Technology Stack
-- .NET 10.0
+- .NET 10.0 and .NET Framework 4.7.2
 - C# 13 features (especially collection expressions)
 - xUnit with Shouldly for testing
 - Microsoft.DotNet.Arcade.Sdk for build infrastructure
@@ -34,9 +34,8 @@ When reviewing pull requests:
 
 * **Flag any unnecessary allocations** in hot paths
 * **Flag LINQ usage** in performance-critical code paths
-* **Verify switch expressions** are used instead of if-else chains for dispatch logic
 * **Check for proper use of `Span<T>`** and `ReadOnlySpan<T>` for string parsing
-* **Ensure immutable collections** use the correct type (`ImmutableArray<T>` and `FrozenDictionary<T>` for read-heavy, `ImmutableList<T>` for incremental building)
+* **Ensure immutable collections** use the correct type (`ImmutableArray<T>` and `FrozenDictionary<TKey, TValue>` for read-heavy, `ImmutableList<T>` for incremental building)
 
 ### NuGet Feed Configuration
 
@@ -58,7 +57,6 @@ When reviewing pull requests:
 * **New files**: Always use nullable reference types (do NOT add `#nullable disable`)
 * **Existing files with `#nullable disable`**: Match the existing style; don't add nullable annotations (`?`) to types
 * **Existing files with nullable enabled**: Use proper nullable annotations
-* **Shared files** (in `src/Shared/`): Be careful - may be compiled into multiple assemblies with different nullable contexts
 * Always use `is null` or `is not null` instead of `== null` or `!= null`
 
 ## Performance Best Practices
@@ -66,7 +64,7 @@ When reviewing pull requests:
 ### Switch Expressions for Dispatch Logic
 
 ```csharp
-// GOOD: Clean, O(1) dispatch
+// GOOD: Clean, readable dispatch
 return (c0, c1) switch
 {
     ('C', 'S') => Category.CSharp,
@@ -95,7 +93,7 @@ return errorNumber switch
 
 ### String Handling
 
-* Use `StringComparer.OrdinalIgnoreCase` for case-insensitive HashSets/Dictionaries
+* Use `MSBuildNameIgnoreCaseComparer` for case-insensitive comparisons of MSBuild names; use `StringComparer.OrdinalIgnoreCase` only for non-MSBuild string comparisons
 * Use `char.ToUpperInvariant()` for single-character comparisons
 * Use `ReadOnlySpan<char>` and `Slice()` to avoid string allocations
 * Use `int.TryParse(span, out var result)` on .NET Core+ for allocation-free parsing
@@ -181,7 +179,7 @@ dotnet --version
 
 **Windows:**
 ```cmd
-# Full test suite (~9 minutes, some failures expected) - NEVER CANCEL
+# Full test suite (~9 minutes) - NEVER CANCEL
 .\build.cmd -test
 
 # Individual test project (recommended):
@@ -191,7 +189,7 @@ dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
 
 **macOS/Linux:**
 ```bash
-# Full test suite (~9 minutes, some failures expected) - NEVER CANCEL
+# Full test suite (~9 minutes) - NEVER CANCEL
 ./build.sh --test
 
 # Individual test project (recommended):
@@ -199,12 +197,10 @@ source artifacts/sdk-build-env.sh
 dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
 ```
 
-**CRITICAL**: Some unit tests fail in the full test suite due to environment/CI dependencies. This is EXPECTED and normal in development environments. Run individual test projects for validation.
-
 ### Test Verification
 
 * **Individual Test Project**: ~10-60 seconds per project
-* **Full Test Suite**: ~9 minutes with some expected failures
+* **Full Test Suite**: ~9 minutes
 
 ## Project Layout and Architecture
 
