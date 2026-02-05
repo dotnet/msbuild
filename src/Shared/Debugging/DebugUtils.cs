@@ -14,7 +14,7 @@ namespace Microsoft.Build.Shared.Debugging
 {
     internal static class DebugUtils
     {
-        private enum NodeMode
+        private enum ProcessMode
         {
             CentralNode,
             OutOfProcNode,
@@ -63,18 +63,18 @@ namespace Microsoft.Build.Shared.Debugging
             DebugPath = debugDirectory;
         }
 
-        private static readonly Lazy<NodeMode> ProcessNodeMode = new(
+        private static readonly Lazy<ProcessMode> ProcessNodeMode = new(
         () =>
         {
             return ScanNodeMode(Environment.CommandLine);
 
-            NodeMode ScanNodeMode(string input)
+            ProcessMode ScanNodeMode(string input)
             {
                 var match = Regex.Match(input, @"/nodemode:(?<nodemode>[12\s])(\s|$)", RegexOptions.IgnoreCase);
 
                 if (!match.Success)
                 {
-                    return NodeMode.CentralNode;
+                    return ProcessMode.CentralNode;
                 }
                 var nodeMode = match.Groups["nodemode"].Value;
 
@@ -82,8 +82,8 @@ namespace Microsoft.Build.Shared.Debugging
 
                 return nodeMode switch
                 {
-                    "1" => NodeMode.OutOfProcNode,
-                    "2" => NodeMode.OutOfProcTaskHostNode,
+                    "1" => ProcessMode.OutOfProcNode,
+                    "2" => ProcessMode.OutOfProcTaskHostNode,
                     _ => throw new NotImplementedException(),
                 };
             }
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Shared.Debugging
         /// false otherwise. This is useful for conditionally enabling debugging or other behaviors
         /// based on whether the code is running in the main MSBuild process or a child TaskHost process.
         /// </returns>
-        public static bool IsInTaskHostNode() => ProcessNodeMode.Value == NodeMode.OutOfProcTaskHostNode;
+        public static bool IsInTaskHostNode() => ProcessNodeMode.Value == ProcessMode.OutOfProcTaskHostNode;
 
         public static string FindNextAvailableDebugFilePath(string fileName)
         {
