@@ -14,13 +14,6 @@ namespace Microsoft.Build.Shared.Debugging
 {
     internal static class DebugUtils
     {
-        private enum NodeMode
-        {
-            CentralNode,
-            OutOfProcNode,
-            OutOfProcTaskHostNode
-        }
-
         static DebugUtils()
         {
             SetDebugPath();
@@ -63,29 +56,31 @@ namespace Microsoft.Build.Shared.Debugging
             DebugPath = debugDirectory;
         }
 
-        private static readonly Lazy<NodeMode> ProcessNodeMode = new(
+        private static readonly Lazy<NodeMode?> ProcessNodeMode = new(
         () =>
         {
             return ScanNodeMode(Environment.CommandLine);
 
-            NodeMode ScanNodeMode(string input)
+            NodeMode? ScanNodeMode(string input)
             {
-                var match = Regex.Match(input, @"/nodemode:(?<nodemode>[12\s])(\s|$)", RegexOptions.IgnoreCase);
+                var match = Regex.Match(input, @"/nodemode:(?<nodemode>[1-9]\d*)(\s|$)", RegexOptions.IgnoreCase);
 
                 if (!match.Success)
                 {
-                    return NodeMode.CentralNode;
+                    return null; // Central/main process (not running as a node)
                 }
                 var nodeMode = match.Groups["nodemode"].Value;
 
                 Trace.Assert(!string.IsNullOrEmpty(nodeMode));
 
-                return nodeMode switch
+                // Try to parse using the shared NodeModeHelper
+                if (NodeModeHelper.TryParse(nodeMode, out NodeMode? parsedMode))
                 {
-                    "1" => NodeMode.OutOfProcNode,
-                    "2" => NodeMode.OutOfProcTaskHostNode,
-                    _ => throw new NotImplementedException(),
-                };
+                    return parsedMode;
+                }
+
+                // If parsing fails, this is an unknown/unsupported node mode
+                return null;
             }
         });
 
@@ -99,7 +94,7 @@ namespace Microsoft.Build.Shared.Debugging
         }
 
         public static readonly string ProcessInfoString =
-            $"{ProcessNodeMode.Value}_{EnvironmentUtilities.ProcessName}_PID={EnvironmentUtilities.CurrentProcessId}_x{(Environment.Is64BitProcess ? "64" : "86")}";
+            $"{(ProcessNodeMode.Value?.ToString() ?? "CentralNode")}_{EnvironmentUtilities.ProcessName}_PID={EnvironmentUtilities.CurrentProcessId}_x{(Environment.Is64BitProcess ? "64" : "86")}";
 
         public static readonly bool ShouldDebugCurrentProcess = CurrentProcessMatchesDebugName();
 

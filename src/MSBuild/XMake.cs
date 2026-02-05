@@ -2870,31 +2870,14 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         /// <param name="value">The value to parse (can be an integer or enum name)</param>
         /// <returns>The parsed NodeMode value</returns>
-        private static NodeMode ParseNodeMode(string value)
+        internal static NodeMode ParseNodeMode(string value)
         {
-            // First try to parse as an integer for backward compatibility
-            if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int intValue))
+            if (!NodeModeHelper.TryParse(value, out NodeMode? nodeMode))
             {
-                // Validate that the integer corresponds to a valid enum value
-                if (Enum.IsDefined(typeof(NodeMode), intValue))
-                {
-                    return (NodeMode)intValue;
-                }
-                else
-                {
-                    CommandLineSwitchException.Throw("InvalidNodeNumberValue", value);
-                }
+                CommandLineSwitchException.Throw("InvalidNodeNumberValue", value);
             }
 
-            // Try to parse as an enum name (case-insensitive)
-            if (Enum.TryParse(value, ignoreCase: true, out NodeMode enumValue))
-            {
-                return enumValue;
-            }
-
-            // If neither worked, throw an error
-            CommandLineSwitchException.Throw("InvalidNodeNumberValue", value);
-            return default; // This line will never be reached, but is required for compilation
+            return nodeMode.Value;
         }
 
         /// <summary>
