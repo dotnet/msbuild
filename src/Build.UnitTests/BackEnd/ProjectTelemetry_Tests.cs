@@ -23,12 +23,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TrackTaskSubclassing_TracksSealedTasks()
         {
             var telemetry = new ProjectTelemetry();
-            
+
             // Sealed task should be tracked if it derives from Microsoft task
             telemetry.TrackTaskSubclassing(typeof(TestSealedTask), isMicrosoftOwned: false);
-            
+
             var properties = GetMSBuildTaskSubclassProperties(telemetry);
-            
+
             // Should track sealed tasks that inherit from Microsoft tasks
             properties.Count.ShouldBe(1);
             properties.ShouldContainKey("Microsoft_Build_Utilities_Task");
@@ -42,12 +42,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TrackTaskSubclassing_TracksSubclass()
         {
             var telemetry = new ProjectTelemetry();
-            
+
             // User task inheriting from Microsoft.Build.Utilities.Task
             telemetry.TrackTaskSubclassing(typeof(UserTask), isMicrosoftOwned: false);
-            
+
             var properties = GetMSBuildTaskSubclassProperties(telemetry);
-            
+
             // Should track the Microsoft.Build.Utilities.Task base class
             properties.Count.ShouldBe(1);
             properties.ShouldContainKey("Microsoft_Build_Utilities_Task");
@@ -61,12 +61,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TrackTaskSubclassing_IgnoresMicrosoftOwnedTasks()
         {
             var telemetry = new ProjectTelemetry();
-            
+
             // Microsoft-owned task should not be tracked even if non-sealed
             telemetry.TrackTaskSubclassing(typeof(UserTask), isMicrosoftOwned: true);
-            
+
             var properties = GetMSBuildTaskSubclassProperties(telemetry);
-            
+
             // Should not track Microsoft-owned tasks
             properties.Count.ShouldBe(0);
         }
@@ -78,13 +78,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TrackTaskSubclassing_TracksMultipleSubclasses()
         {
             var telemetry = new ProjectTelemetry();
-            
+
             // Track multiple user tasks
             telemetry.TrackTaskSubclassing(typeof(UserTask), isMicrosoftOwned: false);
             telemetry.TrackTaskSubclassing(typeof(AnotherUserTask), isMicrosoftOwned: false);
-            
+
             var properties = GetMSBuildTaskSubclassProperties(telemetry);
-            
+
             // Should aggregate counts for the same base class
             properties.Count.ShouldBe(1);
             properties["Microsoft_Build_Utilities_Task"].ShouldBe("2");
@@ -97,13 +97,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TrackTaskSubclassing_HandlesNull()
         {
             var telemetry = new ProjectTelemetry();
-            
+
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type
             telemetry.TrackTaskSubclassing(null, isMicrosoftOwned: false);
 #pragma warning restore CS8625
-            
+
             var properties = GetMSBuildTaskSubclassProperties(telemetry);
-            
+
             properties.Count.ShouldBe(0);
         }
 
@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private System.Collections.Generic.Dictionary<string, string> GetMSBuildTaskSubclassProperties(ProjectTelemetry telemetry)
         {
-            var method = typeof(ProjectTelemetry).GetMethod("GetMSBuildTaskSubclassProperties", 
+            var method = typeof(ProjectTelemetry).GetMethod("GetMSBuildTaskSubclassProperties",
                 System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             return (System.Collections.Generic.Dictionary<string, string>)method!.Invoke(telemetry, null)!;
         }
@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             var events = new System.Collections.Generic.List<BuildEventArgs>();
             var logger = new Microsoft.Build.Logging.ConsoleLogger(LoggerVerbosity.Diagnostic);
-            
+
             using var projectCollection = new ProjectCollection();
             using var stringReader = new System.IO.StringReader(projectContent);
             using var xmlReader = System.Xml.XmlReader.Create(stringReader);
@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Build the project
             var result = project.Build();
-            
+
             result.ShouldBeTrue();
         }
     }

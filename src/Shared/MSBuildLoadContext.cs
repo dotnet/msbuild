@@ -83,7 +83,7 @@ namespace Microsoft.Build.Shared
                 }
 
                 AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
-                if (candidateAssemblyName.Version != assemblyName.Version)
+                if (candidateAssemblyName.Version < assemblyName.Version)
                 {
                     continue;
                 }

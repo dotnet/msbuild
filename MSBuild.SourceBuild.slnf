@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "MSBuild.sln",
+    "path": "MSBuild.slnx",
     "projects": [
       "src\\Build\\Microsoft.Build.csproj",
       "src\\Framework\\Microsoft.Build.Framework.csproj",

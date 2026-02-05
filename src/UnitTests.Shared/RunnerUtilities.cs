@@ -27,6 +27,8 @@ namespace Microsoft.Build.UnitTests.Shared
 
         public static string BootstrapRootPath => BootstrapLocationAttribute.BootstrapRoot;
 
+        public static string LatestDotNetCoreForMSBuild => BootstrapLocationAttribute.LatestDotNetCoreForMSBuild;
+
         internal static BootstrapLocationAttribute BootstrapLocationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<BootstrapLocationAttribute>()
                                            ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
 

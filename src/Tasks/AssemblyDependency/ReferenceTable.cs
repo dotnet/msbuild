@@ -1720,7 +1720,7 @@ namespace Microsoft.Build.Tasks
                     {
                         // We don't look for associated files for FX assemblies.
                         bool hasFrameworkPath = false;
-                        string referenceDirectoryName = FileUtilities.EnsureTrailingSlash(reference.DirectoryName);
+                        string referenceDirectoryName = FrameworkFileUtilities.EnsureTrailingSlash(reference.DirectoryName);
 
                         foreach (string frameworkPath in _frameworkPaths)
                         {
@@ -2768,7 +2768,7 @@ namespace Microsoft.Build.Tasks
                 // Set up the satellites.
                 foreach (string satelliteFile in satellites)
                 {
-                    relatedItemBase.SetMetadata(ItemMetadataNames.destinationSubDirectory, FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(satelliteFile)));
+                    relatedItemBase.SetMetadata(ItemMetadataNames.destinationSubDirectory, FrameworkFileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(satelliteFile)));
                     AddRelatedItem(satelliteItems, relatedItemBase, Path.Combine(reference.DirectoryName, satelliteFile));
                 }
             }

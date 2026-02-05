@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 
@@ -34,14 +33,14 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public AbsolutePath ProjectDirectory
         {
-            get => new AbsolutePath(Directory.GetCurrentDirectory(), ignoreRootedCheck: true);
-            set => Directory.SetCurrentDirectory(value.Value);
+            get => new AbsolutePath(NativeMethodsShared.GetCurrentDirectory(), ignoreRootedCheck: true);
+            set => NativeMethodsShared.SetCurrentDirectory(value.Value);
         }
 
         /// <inheritdoc/>
         public AbsolutePath GetAbsolutePath(string path)
         {
-            return new AbsolutePath(Path.GetFullPath(path), ignoreRootedCheck: true);
+            return new AbsolutePath(path, ProjectDirectory);
         }
 
         /// <inheritdoc/>
@@ -72,6 +71,12 @@ namespace Microsoft.Build.BackEnd
         public ProcessStartInfo GetProcessStartInfo()
         {
             return new ProcessStartInfo();
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            // Singleton instance, no cleanup needed.
         }
     }
 }

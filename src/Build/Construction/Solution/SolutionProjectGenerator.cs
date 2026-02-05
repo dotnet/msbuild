@@ -1308,7 +1308,7 @@ namespace Microsoft.Build.Construction
                 baseName = project.ProjectName;
             }
 
-            baseName = FileUtilities.EnsureNoTrailingSlash(baseName);
+            baseName = FrameworkFileUtilities.EnsureNoTrailingSlash(baseName);
 
             return GetMetaprojectName(baseName);
         }

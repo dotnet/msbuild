@@ -317,12 +317,17 @@ namespace Microsoft.Build.BackEnd
             TaskLoggingContext taskLoggingContext,
             IBuildComponentHost buildComponentHost,
             in TaskHostParameters taskIdentityParameters,
+            string projectFile,
+#if !NET35
+            HostServices hostServices,
+#endif
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
             bool isOutOfProc,
             int scheduledNodeId,
-            Func<string, ProjectPropertyInstance> getProperty)
+            Func<string, ProjectPropertyInstance> getProperty,
+            TaskEnvironment taskEnvironment)
         {
             // If the type was loaded via MetadataLoadContext, we MUST use TaskFactory since it didn't load any task assemblies in memory.
             bool useTaskFactory = _loadedType.LoadedViaMetadataLoadContext;
@@ -360,10 +365,14 @@ namespace Microsoft.Build.BackEnd
                 ErrorUtilities.VerifyThrowInternalNull(buildComponentHost);
 
                 mergedParameters = UpdateTaskHostParameters(mergedParameters);
-                (mergedParameters, bool isNetRuntime) = AddNetHostParamsIfNeeded(mergedParameters, getProperty);
+                mergedParameters = AddNetHostParamsIfNeeded(mergedParameters, getProperty);
 
-                bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false)
-                    || isNetRuntime;
+                // Sidecar here means that the task host is launched with /nodeReuse:true and doesn't terminate
+                // after the task execution. This improves performance for tasks that run multiple times in a build.
+                // If the task host factory is explicitly requested, do not act as a sidecar task host.
+                // This is important as customers use task host factories for short lived tasks to release
+                // potential locks.
+                bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
 
                 TaskHostTask task = new(
                     taskLocation,
@@ -372,10 +381,15 @@ namespace Microsoft.Build.BackEnd
                     mergedParameters,
                     _loadedType,
                     useSidecarTaskHost: useSidecarTaskHost,
+                    projectFile,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif
-                    scheduledNodeId);
+#if !NET35
+                    hostServices,
+#endif
+                    scheduledNodeId,
+                    taskEnvironment: taskEnvironment);
                 return task;
             }
             else
@@ -629,7 +643,7 @@ namespace Microsoft.Build.BackEnd
         /// Adds the properties necessary for .NET task host instantiation if the runtime is .NET.
         /// Returns a new TaskHostParameters with .NET host parameters added, or the original if not needed.
         /// </summary>
-        private static (TaskHostParameters TaskHostParams, bool isNetRuntime) AddNetHostParamsIfNeeded(
+        private static TaskHostParameters AddNetHostParamsIfNeeded(
             in TaskHostParameters currentParams,
             Func<string, ProjectPropertyInstance> getProperty)
         {
@@ -637,25 +651,34 @@ namespace Microsoft.Build.BackEnd
             if (currentParams.Runtime == null ||
                 !currentParams.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
             {
-                return (currentParams, isNetRuntime: false);
+                return currentParams;
             }
 
             string dotnetHostPath = getProperty(Constants.DotnetHostPathEnvVarName)?.EvaluatedValue;
-            string ridGraphPath = getProperty(Constants.RuntimeIdentifierGraphPath)?.EvaluatedValue;
+            string netCoreSdkRoot = getProperty(Constants.NetCoreSdkRoot)?.EvaluatedValue?.TrimEnd('/', '\\');
 
-            if (string.IsNullOrEmpty(dotnetHostPath) || string.IsNullOrEmpty(ridGraphPath))
+            // The NetCoreSdkRoot property got added with .NET 11, so for earlier SDKs we fall back to the RID graph path
+            if (string.IsNullOrEmpty(netCoreSdkRoot))
             {
-                return (currentParams, isNetRuntime: false);
+                string ridGraphPath = getProperty(Constants.RuntimeIdentifierGraphPath)?.EvaluatedValue;
+                if (!string.IsNullOrEmpty(ridGraphPath))
+                {
+                    netCoreSdkRoot = Path.GetDirectoryName(ridGraphPath);
+                }
             }
 
-            string msBuildAssemblyPath = Path.GetDirectoryName(ridGraphPath) ?? string.Empty;
+            // Both DOTNET_HOST_PATH and NetCoreSdkRoot are required to launch .NET task host.
+            // If both are not present, return the original parameters.
+            if (string.IsNullOrEmpty(dotnetHostPath) || string.IsNullOrEmpty(netCoreSdkRoot))
+            {
+                return currentParams;
+            }
 
-            return (new TaskHostParameters(
+            return new TaskHostParameters(
                 runtime: currentParams.Runtime,
                 architecture: currentParams.Architecture,
                 dotnetHostPath: dotnetHostPath,
-                msBuildAssemblyPath: msBuildAssemblyPath),
-                isNetRuntime: true);
+                msBuildAssemblyPath: netCoreSdkRoot);
         }
 
         /// <summary>

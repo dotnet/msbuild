@@ -461,6 +461,11 @@
         <target state="translated">MSB4276: il resolver SDK predefinito non è riuscito a risolvere l'SDK "{0}" perché la directory "{1}" non esiste.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DotnetHostPathIsDirectory">
+        <source>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</source>
+        <target state="translated">MSB4280: La variabile di ambiente DOTNET_HOST_PATH è impostata su una directory ("{0}") anziché sul percorso di un file eseguibile dotnet. Questo può causare errori di compilazione nelle attività che usano questa variabile, come il compilatore Roslyn. Annullare la variabile oppure aggiornarla in modo che punti direttamente al file eseguibile dotnet (ad esempio "C:\Programmi\dotnet\dotnet.exe").</target>
+        <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
+      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: tentativo di creare più sostituzioni della stessa attività: {0}</target>
@@ -488,6 +493,11 @@
         <source>Read environment variable "{0}"</source>
         <target state="translated">Legge la variabile di ambiente "{0}"</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ErrorCopyingBinaryLog">
+        <source>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</source>
+        <target state="translated">MSB4279: non è possibile copiare il log binario da "{0}" a "{1}". {2}</target>
+        <note>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</note>
       </trans-unit>
       <trans-unit id="ErrorReadingCacheFile">
         <source>MSB4256: Reading input result cache files from path "{0}" encountered an error: {1}</source>
@@ -650,11 +660,6 @@
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">Non è possibile chiamare il metodo {0} con una raccolta contenente nomi di destinazione Null o vuoti.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="OpenTelemetryLoadFailed">
-        <source>Loading telemetry libraries failed with exception: {0}.</source>
-        <target state="translated">Caricamento delle librerie di telemetria non riuscito con eccezione: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="OutputPropertyLogMessagePrefix">
@@ -907,18 +912,13 @@ Errori: {3}</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySet">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set as an environment variable.</source>
-        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}" ma era già stata impostata come variabile di ambiente.</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" as an environment variable.</source>
+        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}" ma era già stata impostata su "{2}" come variabile di ambiente.</target>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableAlreadySetBySdk">
-        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set by another SDK.</source>
-        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}" ma era già stata impostata da un altro SDK.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SdkEnvironmentVariableSet">
-        <source>An SDK attempted set the environment variable "{0}" to "{1}".</source>
-        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}".</target>
+        <source>An SDK attempted to set the environment variable "{0}" to "{1}" but it was already set to "{2}" by another SDK.</source>
+        <target state="translated">Un SDK ha tentato di impostare la variabile di ambiente "{0}" su "{1}" ma era già stata impostata su "{2}" da un altro SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">

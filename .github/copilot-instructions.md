@@ -11,12 +11,94 @@ New files should use nullable types but don't refactor aggressively existing cod
 
 Generate tests for new codepaths, and add tests for any bugs you fix. Use the existing test framework, which is xUnit with Shouldly assertions. Use Shouldly assertions for all assertions in modified code, even if the file is predominantly using xUnit assertions.
 
+When making changes, check if related documentation exists in the `documentation/` folder (including `documentation/specs/`) and update it to reflect your changes. Keep documentation in sync with code changes, especially for telemetry, APIs, and architectural decisions.
+
 Always reference these instructions first and fallback to search or bash commands only when you encounter unexpected information that does not match the info here.
+
+## Performance Best Practices
+
+MSBuild is performance-critical infrastructure. Follow these patterns:
+
+### Switch Expressions for Dispatch Logic
+Use tuple switch expressions for multi-condition dispatch instead of if-else chains:
+```csharp
+// GOOD: Clean, O(1) dispatch
+return (c0, c1) switch
+{
+    ('C', 'S') => Category.CSharp,
+    ('F', 'S') => Category.FSharp,
+    ('V', 'B') when value.Length >= 3 && value[2] == 'C' => Category.VB,
+    _ => Category.Other
+};
+
+// AVOID: Verbose if-else chains
+if (c0 == 'C' && c1 == 'S') return Category.CSharp;
+else if (c0 == 'F' && c1 == 'S') return Category.FSharp;
+// ...
+```
+
+### Range Pattern Matching
+Use range patterns for numeric categorization:
+```csharp
+// GOOD: Clear and efficient
+return errorNumber switch
+{
+    >= 3001 and <= 3999 => Category.Tasks,
+    >= 4001 and <= 4099 => Category.General,
+    >= 4100 and <= 4199 => Category.Evaluation,
+    _ => Category.Other
+};
+```
+
+### String Comparisons
+- Use `StringComparer.OrdinalIgnoreCase` for case-insensitive HashSets/Dictionaries when the source data may vary in casing
+- Use `char.ToUpperInvariant()` for single-character comparisons
+- Use `ReadOnlySpan<char>` and `Slice()` to avoid string allocations when parsing substrings
+- Use `int.TryParse(span, out var result)` on .NET Core+ for allocation-free parsing
+
+### Inlining
+Mark small, hot-path methods with `[MethodImpl(MethodImplOptions.AggressiveInlining)]`:
+```csharp
+[MethodImpl(MethodImplOptions.AggressiveInlining)]
+private static bool IsCompilerPrefix(string value) => ...
+```
+
+### Conditional Compilation for Framework Differences
+Use `#if NET` for APIs that differ between .NET Framework and .NET Core:
+```csharp
+#if NET
+    return int.TryParse(span, out errorNumber);
+#else
+    return int.TryParse(span.ToString(), out errorNumber);
+#endif
+```
+
+### Immutable Collections
+Choose the right immutable collection type based on usage pattern:
+
+**Build once, read many times** (most common in MSBuild):
+- Use `ImmutableArray<T>` instead of `ImmutableList<T>` - significantly faster for read access
+- Use `FrozenDictionary<TKey, TValue>` instead of `ImmutableDictionary<TKey, TValue>` - optimized for read-heavy scenarios
+
+**Build incrementally over time** (adding items one by one):
+- Use `ImmutableList<T>` and `ImmutableDictionary<TKey, TValue>` - designed for efficient `Add` operations returning new collections
+
+```csharp
+// GOOD: Build once from LINQ, then read many times
+ImmutableArray<string> items = source.Select(x => x.Name).ToImmutableArray();
+FrozenDictionary<string, int> lookup = pairs.ToFrozenDictionary(x => x.Key, x => x.Value);
+
+// AVOID for read-heavy scenarios:
+ImmutableList<string> items = source.Select(x => x.Name).ToImmutableList();
+ImmutableDictionary<string, int> lookup = pairs.ToImmutableDictionary(x => x.Key, x => x.Value);
+```
+
+Note: `ImmutableArray<T>` is a value type. Use `IsDefault` property to check for uninitialized arrays, or use nullable `ImmutableArray<T>?` with `.Value` to unwrap.
 
 ## Working Effectively
 
 #### Bootstrap and Build the Repository
-NEVER build the repository with just `dotnet build MSBuild.sln` or `dotnet build src/.../Project.csproj`.
+NEVER build the repository with just `dotnet build MSBuild.slnx` or `dotnet build src/.../Project.csproj`.
 Run these commands in sequence to set up a complete development environment:
 
 **Windows:**
@@ -95,6 +177,14 @@ dotnet build src/Samples/Dependency/Dependency.csproj
 # Run MSBuild directly
 dotnet artifacts/bin/bootstrap/core/MSBuild.dll --help
 ```
+
+## Breaking Changes
+
+Because MSBuild is a critical part of the build process for a huge number of customers, we avoid breaking changes. Adding new errors or warnings, even when well-intentioned and pointing out things that are very likely to be wrong, is an unacceptable breaking change. Adding warnings is a breaking change because many production builds use `/WarnAsError`.
+
+The exception to this policy is in new, opt-in behavior. In new, opt-in functionality, liberally emit warnings and errors--they can always be removed later.
+
+When reviewing PRs, always consider whether the behavior change could be experienced as a break in existing builds and flag any new warnings or errors.
 
 ## Validation
 

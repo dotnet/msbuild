@@ -33,7 +33,7 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Converts a relative or absolute path string to an absolute path.
-        /// This function resolves paths relative to ProjectDirectory.
+        /// This function resolves paths relative to <see cref="ProjectDirectory"/>.
         /// </summary>
         /// <param name="path">The path to convert.</param>
         /// <returns>An absolute path representation.</returns>
@@ -71,5 +71,10 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <returns>A ProcessStartInfo object configured for the current task execution environment.</returns>
         public ProcessStartInfo GetProcessStartInfo() => _driver.GetProcessStartInfo();
+
+        /// <summary>
+        /// Disposes the underlying driver, cleaning up any thread-local state.
+        /// </summary>
+        internal void Dispose() => _driver.Dispose();
     }
 }

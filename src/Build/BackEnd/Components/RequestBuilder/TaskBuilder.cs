@@ -104,7 +104,7 @@ namespace Microsoft.Build.BackEnd
         private TargetLoggingContext _targetLoggingContext;
 
         /// <summary>
-        /// Full path to the project, for errors
+        /// Full path to the project.
         /// </summary>
         private string _projectFullPath;
 
@@ -155,6 +155,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(taskInstance != null, "Need to specify the task instance.");
 
             _buildRequestEntry = requestEntry;
+
             _targetBuilderCallback = targetBuilderCallback;
             _cancellationToken = cancellationToken;
             _targetChildInstance = taskInstance;
@@ -319,11 +320,24 @@ namespace Microsoft.Build.BackEnd
                 if (_taskNode != null)
                 {
                     taskHost = new TaskHost(_componentHost, _buildRequestEntry, _targetChildInstance.Location, _targetBuilderCallback);
-                    _taskExecutionHost.InitializeForTask(taskHost, _targetLoggingContext, _buildRequestEntry.RequestConfiguration.Project, _taskNode.Name, _taskNode.Location, _taskHostObject, _continueOnError != ContinueOnError.ErrorAndStop,
+                    _taskExecutionHost.InitializeForTask(
+                        taskHost,
+                        _targetLoggingContext,
+                        _buildRequestEntry.RequestConfiguration.Project,
+                        _taskNode.Name,
+                        _taskNode.Location,
+                        _taskHostObject,
+                        _continueOnError != ContinueOnError.ErrorAndStop,
+                        _projectFullPath,
 #if FEATURE_APPDOMAIN
                         taskHost.AppDomainSetup,
 #endif
-                        taskHost.IsOutOfProc, _cancellationToken);
+#if !NET35
+                        _buildRequestEntry.Request.HostServices,
+#endif
+                        taskHost.IsOutOfProc,
+                        _cancellationToken,
+                        _buildRequestEntry.TaskEnvironment);
                 }
 
                 List<string> taskParameterValues = CreateListOfParameterValues();
@@ -428,7 +442,7 @@ namespace Microsoft.Build.BackEnd
                     // If that directory does not exist, do nothing. (Do not check first as it is almost always there and it is slow)
                     // This is because if the project has not been saved, this directory may not exist, yet it is often useful to still be able to build the project.
                     // No errors are masked by doing this: errors loading the project from disk are reported at load time, if necessary.
-                    NativeMethodsShared.SetCurrentDirectory(_buildRequestEntry.ProjectRootDirectory);
+                    _buildRequestEntry.TaskEnvironment.ProjectDirectory = new AbsolutePath(_buildRequestEntry.ProjectRootDirectory, ignoreRootedCheck: true);
                 }
 
                 if (howToExecuteTask == TaskExecutionMode.ExecuteTaskAndGatherOutputs)

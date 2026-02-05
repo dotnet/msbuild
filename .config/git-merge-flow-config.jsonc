@@ -26,8 +26,16 @@
         "vs17.14": {
             "MergeToBranch": "vs18.0"
         },
-        // MSBuild latest release to main
+        // Automate opening PRs to merge msbuild's vs18.0 (SDK 10.0.1xx) into vs18.3 (SDK 10.0.2xx, VS)
         "vs18.0": {
+            "MergeToBranch": "vs18.3"
+        },
+        // Automate opening PRs to merge msbuild's vs18.3 (SDK 10.0.2xx) into vs18.4 (VS)
+        "vs18.3": {
+            "MergeToBranch": "vs18.4"
+        },
+        // Automate opening PRs to merge msbuild's vs18.4 (VS) into main (VS canary, SDK main & next-feature-band)
+        "vs18.4": {
             "MergeToBranch": "main"
         }
     }

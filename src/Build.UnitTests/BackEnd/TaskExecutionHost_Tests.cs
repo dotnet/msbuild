@@ -992,11 +992,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     ElementLocation.Create("none", 1, 1),
                     this,
                     false,
+                    projectFile: "proj.proj",
 #if FEATURE_APPDOMAIN
                     null,
 #endif
+#if !NET35
+                    null,
+#endif
                     false,
-                    CancellationToken.None);
+                    CancellationToken.None,
+                    TaskEnvironmentHelper.CreateForTest());
                 _host.FindTask(TaskHostParameters.Empty);
                 _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
             });
@@ -1020,11 +1025,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ElementLocation.Create("none", 1, 1),
                 this,
                 false,
+                projectFile: "proj.proj",
 #if FEATURE_APPDOMAIN
                 null,
 #endif
+#if !NET35
+                null,
+#endif
                 false,
-                CancellationToken.None);
+                CancellationToken.None,
+                TaskEnvironmentHelper.CreateForTest());
 
             _host.FindTask(TaskHostParameters.Empty);
             _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
@@ -1263,11 +1273,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ElementLocation.Create("none", 1, 1),
                 this,
                 false,
+                projectFile: "proj.proj",
 #if FEATURE_APPDOMAIN
                 null,
 #endif
+#if !NET35
+                null,
+#endif
                 false,
-                CancellationToken.None);
+                CancellationToken.None,
+                TaskEnvironmentHelper.CreateForTest());
 
             ProjectTaskInstance taskInstance = project.Targets["foo"].Tasks.First();
             TaskLoggingContext talc = tlc.LogTaskBatchStarted(".", taskInstance, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).Assembly.GetName().FullName);
