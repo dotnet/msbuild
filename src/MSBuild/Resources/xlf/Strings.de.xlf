@@ -667,7 +667,8 @@ Dies ist ein restriktiverer Modus von MSBuild, da er erfordert,
         <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
                        Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="needs-review-translation">  -noLogo            Zeigt kein Startbanner und keine Copyrightmeldung an.
+        <target state="new">  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
