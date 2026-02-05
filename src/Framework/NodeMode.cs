@@ -10,7 +10,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Enumeration of the various node modes that MSBuild.exe can run in.
     /// </summary>
-    public enum NodeMode
+    internal enum NodeMode
     {
         /// <summary>
         /// Normal out-of-process node.
