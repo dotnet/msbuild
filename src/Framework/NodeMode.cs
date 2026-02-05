@@ -36,7 +36,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Helper methods for the NodeMode enum.
     /// </summary>
-    public static class NodeModeHelper
+    internal static class NodeModeHelper
     {
         /// <summary>
         /// Converts a NodeMode value to a command line argument string.
