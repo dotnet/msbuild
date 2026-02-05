@@ -463,8 +463,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             setup.SetConfigurationBytes(configBytes);
 
-            ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
-            INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            // Set version to 0 for CLR4 (Framework-to-Framework) communication which supports AppDomain.
+            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+            writeTranslator.NegotiatedPacketVersion = 0;
+            ((ITranslatable)config).Translate(writeTranslator);
+
+            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+            readTranslator.NegotiatedPacketVersion = 0;
+            INodePacket packet = TaskHostConfiguration.FactoryForDeserialization(readTranslator);
 
             TaskHostConfiguration deserializedConfig = packet as TaskHostConfiguration;
 

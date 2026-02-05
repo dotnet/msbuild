@@ -65,7 +65,7 @@ Use developer command prompt for Visual Studio or put devenv on you PATH
 ```shell
 build.cmd # to have a full build first
 .\artifacts\msbuild-build-env.bat
-devenv MSBuild.sln
+devenv MSBuild.slnx
 ```
 
 Note again that in Visual studio "Use previews of the .NET SDK (requires restart)" must be checked. See the above comment for how to enable this.

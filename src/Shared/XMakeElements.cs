@@ -6,7 +6,6 @@ using System.Buffers;
 using System;
 using System.Collections.Frozen;
 
-#nullable disable
 
 namespace Microsoft.Build.Shared
 {

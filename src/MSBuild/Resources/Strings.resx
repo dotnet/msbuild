@@ -1719,6 +1719,13 @@
   </data>
   <!-- **** MSBUILD_LOGGING_ARGS strings end **** -->
 
+  <!-- **** TaskHost strings begin **** -->
+  <data name="TaskHostAcquired_NullsFiltered" xml:space="preserve">
+    <value>Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</value>
+    <comment>LOCALIZATION: {0} is the name of the task output parameter, {1} is the count of null elements filtered.</comment>
+  </data>
+  <!-- **** TaskHost strings end **** -->
+
     <!--
         The command line message bucket is: MSB1001 - MSB1999
 

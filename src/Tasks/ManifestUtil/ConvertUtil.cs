@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 
-#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {

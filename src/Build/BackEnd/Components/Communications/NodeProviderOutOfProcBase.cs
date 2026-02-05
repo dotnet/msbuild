@@ -849,6 +849,12 @@ namespace Microsoft.Build.BackEnd
                                 NodePacketTypeExtensions.WriteVersion(writeStream, context._negotiatedPacketVersion);
                                 writeTranslator.NegotiatedPacketVersion = context._negotiatedPacketVersion;
                             }
+                            else if (!Handshake.IsHandshakeOptionEnabled(_handshakeOptions, HandshakeOptions.CLR2))
+                            {
+                                // CLR4 task hosts: set version to 0 to enable version-dependent fields.
+                                // CLR2 task hosts: leave as null (default) to skip version-dependent fields.
+                                writeTranslator.NegotiatedPacketVersion = 0;
+                            }
 
                             packet.Translate(writeTranslator);
 
