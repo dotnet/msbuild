@@ -4,33 +4,32 @@
 using System;
 using System.Collections.Generic;
 
-namespace Microsoft.Build.TaskHost.Exceptions
+namespace Microsoft.Build.TaskHost.Exceptions;
+
+internal static class BuildExceptionSerializationHelper
 {
-    internal static class BuildExceptionSerializationHelper
+    private static Dictionary<string, Func<string, Exception?, BuildExceptionBase>> s_exceptionFactories = new()
     {
-        private static Dictionary<string, Func<string, Exception?, BuildExceptionBase>> s_exceptionFactories = new()
+        { GetSerializationKey<InternalErrorException>(), InternalErrorException.CreateFromRemote }
+    };
+
+    private static readonly Func<string, Exception?, BuildExceptionBase> s_defaultFactory =
+        (message, innerException) => new GeneralBuildTransferredException(message, innerException);
+
+    public static string GetSerializationKey<T>()
+        where T : BuildExceptionBase
+        => GetSerializationKey(typeof(T));
+
+    public static string GetSerializationKey(Type exceptionType)
+        => exceptionType.FullName ?? exceptionType.ToString();
+
+    public static BuildExceptionBase DeserializeException(string serializationType, string message, Exception? innerException)
+    {
+        if (s_exceptionFactories.TryGetValue(serializationType, out var factory))
         {
-            { GetSerializationKey<InternalErrorException>(), InternalErrorException.CreateFromRemote }
-        };
-
-        private static readonly Func<string, Exception?, BuildExceptionBase> s_defaultFactory =
-            (message, innerException) => new GeneralBuildTransferredException(message, innerException);
-
-        public static string GetSerializationKey<T>()
-            where T : BuildExceptionBase
-            => GetSerializationKey(typeof(T));
-
-        public static string GetSerializationKey(Type exceptionType)
-            => exceptionType.FullName ?? exceptionType.ToString();
-
-        public static BuildExceptionBase DeserializeException(string serializationType, string message, Exception? innerException)
-        {
-            if (s_exceptionFactories.TryGetValue(serializationType, out var factory))
-            {
-                factory = s_defaultFactory;
-            }
-
-            return factory(message, innerException);
+            factory = s_defaultFactory;
         }
+
+        return factory(message, innerException);
     }
 }

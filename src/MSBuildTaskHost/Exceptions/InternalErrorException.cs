@@ -5,8 +5,6 @@ using System;
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
-#nullable disable
-
 namespace Microsoft.Build.TaskHost.Exceptions;
 
 /// <summary>
@@ -17,21 +15,13 @@ namespace Microsoft.Build.TaskHost.Exceptions;
 [Serializable]
 internal sealed class InternalErrorException : BuildExceptionBase
 {
-    /// <summary>
-    /// Default constructor.
-    /// SHOULD ONLY BE CALLED BY DESERIALIZER.
-    /// SUPPLY A MESSAGE INSTEAD.
-    /// </summary>
     private InternalErrorException()
         : base()
     {
     }
 
-    /// <summary>
-    /// Creates an instance of this exception using the given message.
-    /// </summary>
     internal InternalErrorException(string message)
-        : base("MSB0001: Internal MSBuild Error: " + message)
+        : base($"MSB0001: Internal MSBuild Error: {message}")
     {
         ConsiderDebuggerLaunch(message, null);
     }
@@ -41,24 +31,16 @@ internal sealed class InternalErrorException : BuildExceptionBase
     /// Adds the inner exception's details to the exception message because most bug reporters don't bother
     /// to provide the inner exception details which is typically what we care about.
     /// </summary>
-    internal InternalErrorException(string message, Exception innerException)
-        : this(message, innerException, false)
+    internal InternalErrorException(string message, Exception? innerException)
+        : this(message, innerException, calledFromDeserialization: false)
     {
     }
 
-    internal static InternalErrorException CreateFromRemote(string message, Exception innerException)
-    {
-        return new InternalErrorException(message, innerException, calledFromDeserialization: true);
-    }
+    internal static InternalErrorException CreateFromRemote(string message, Exception? innerException)
+        => new(message, innerException, calledFromDeserialization: true);
 
-    private InternalErrorException(string message, Exception innerException, bool calledFromDeserialization)
-        : base(
-            calledFromDeserialization
-                ? message
-                : "MSB0001: Internal MSBuild Error: " + message + (innerException == null
-                    ? string.Empty
-                    : $"\n=============\n{innerException}\n\n"),
-            innerException)
+    private InternalErrorException(string message, Exception? innerException, bool calledFromDeserialization)
+        : base(GetMessage(calledFromDeserialization, message, innerException))
     {
         if (!calledFromDeserialization)
         {
@@ -66,7 +48,12 @@ internal sealed class InternalErrorException : BuildExceptionBase
         }
     }
 
-    #region Serialization (update when adding new class members)
+    private static string GetMessage(bool calledFromDeserialization, string message, Exception? innerException)
+        => calledFromDeserialization
+            ? message
+            : innerException is null
+                ? $"MSB0001: Internal MSBuild Error: {message}"
+                : $"MSB0001: Internal MSBuild Error: {message}\n=============\n{innerException}\n\n";
 
     /// <summary>
     /// Private constructor used for (de)serialization. The constructor is private as this class is sealed
@@ -78,10 +65,6 @@ internal sealed class InternalErrorException : BuildExceptionBase
         // Do nothing: no fields
     }
 
-    // Base implementation of GetObjectData() is sufficient; we have no fields
-    #endregion
-
-    #region ConsiderDebuggerLaunch
     /// <summary>
     /// A fatal internal error due to a bug has occurred. Give the dev a chance to debug it, if possible.
     ///
@@ -102,9 +85,9 @@ internal sealed class InternalErrorException : BuildExceptionBase
     /// If it is going to launch the debugger, it first does a Debug.Fail to give information about what needs to
     /// be debugged -- the exception hasn't been thrown yet. This automatically displays the current callstack.
     /// </summary>
-    private static void ConsiderDebuggerLaunch(string message, Exception innerException)
+    private static void ConsiderDebuggerLaunch(string message, Exception? innerException)
     {
-        string innerMessage = (innerException == null) ? String.Empty : innerException.ToString();
+        string innerMessage = innerException == null ? string.Empty : innerException.ToString();
 
         if (Environment.GetEnvironmentVariable("MSBUILDLAUNCHDEBUGGER") != null)
         {
@@ -140,5 +123,4 @@ internal sealed class InternalErrorException : BuildExceptionBase
         }
 #endif
     }
-    #endregion
 }
