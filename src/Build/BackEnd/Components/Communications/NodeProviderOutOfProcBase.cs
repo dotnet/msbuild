@@ -116,23 +116,39 @@ namespace Microsoft.Build.BackEnd
                                 !Console.IsInputRedirected &&
                                 Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout;
 
+            // Determine which nodes should actually be reused based on system-wide node count
+            bool[] shouldReuseNode = DetermineNodesForReuse(contextsToShutDown.Count, enableReuse);
+
             Task[] waitForExitTasks = waitForExit && contextsToShutDown.Count > 0 ? new Task[contextsToShutDown.Count] : null;
             int i = 0;
+            int contextIndex = 0;
             var loggingService = _componentHost.LoggingService;
             foreach (NodeContext nodeContext in contextsToShutDown)
             {
                 if (nodeContext is null)
                 {
+                    contextIndex++;
                     continue;
                 }
-                nodeContext.SendData(new NodeBuildComplete(enableReuse));
-                if (waitForExit)
+                
+                // Use the per-node reuse decision
+                bool reuseThisNode = shouldReuseNode[contextIndex++];
+                nodeContext.SendData(new NodeBuildComplete(reuseThisNode));
+                
+                if (!reuseThisNode || waitForExit)
                 {
-                    waitForExitTasks[i++] = nodeContext.WaitForExitAsync(loggingService);
+                    if (i < (waitForExitTasks?.Length ?? 0))
+                    {
+                        waitForExitTasks[i++] = nodeContext.WaitForExitAsync(loggingService);
+                    }
                 }
             }
-            if (waitForExitTasks != null)
+            if (waitForExitTasks != null && i > 0)
             {
+                if (i < waitForExitTasks.Length)
+                {
+                    Array.Resize(ref waitForExitTasks, i);
+                }
                 Task.WaitAll(waitForExitTasks);
             }
         }
@@ -509,6 +525,114 @@ namespace Microsoft.Build.BackEnd
 #else
             return $"{hostHandshake}|{nodeProcessId.ToString(CultureInfo.InvariantCulture)}";
 #endif
+        }
+
+        /// <summary>
+        /// Determines which nodes should be reused based on system-wide node count to avoid over-provisioning.
+        /// </summary>
+        /// <param name="nodeCount">The number of nodes in this MSBuild instance</param>
+        /// <param name="enableReuse">Whether reuse is enabled at all</param>
+        /// <returns>Array indicating which nodes should be reused (true) or terminated (false)</returns>
+        protected virtual bool[] DetermineNodesForReuse(int nodeCount, bool enableReuse)
+        {
+            bool[] shouldReuse = new bool[nodeCount];
+            
+            // If reuse is disabled, no nodes should be reused
+            if (!enableReuse)
+            {
+                return shouldReuse; // All false
+            }
+
+            // Get threshold for this node type
+            int maxNodesToKeep = GetNodeReuseThreshold();
+            
+            // If threshold is 0, terminate all nodes in this instance
+            if (maxNodesToKeep == 0)
+            {
+                CommunicationsUtilities.Trace("Node reuse threshold is 0, terminating all {0} nodes", nodeCount);
+                return shouldReuse; // All false
+            }
+
+            // Count system-wide active nodes of the same type
+            int systemWideNodeCount = CountSystemWideActiveNodes();
+            
+            CommunicationsUtilities.Trace("System-wide node count: {0}, threshold: {1}, this instance has: {2} nodes",
+                systemWideNodeCount, maxNodesToKeep, nodeCount);
+
+            // If we're already under the threshold system-wide, keep all our nodes
+            if (systemWideNodeCount <= maxNodesToKeep)
+            {
+                for (int i = 0; i < nodeCount; i++)
+                {
+                    shouldReuse[i] = true;
+                }
+                return shouldReuse;
+            }
+
+            // We're over-provisioned. Determine how many of our nodes to keep.
+            // Strategy: Keep nodes up to the threshold, terminate the rest.
+            // This instance's contribution is limited to help reach the threshold.
+            int nodesToKeepInThisInstance = Math.Max(0, maxNodesToKeep - (systemWideNodeCount - nodeCount));
+            
+            CommunicationsUtilities.Trace("Keeping {0} of {1} nodes in this instance to help meet threshold of {2}",
+                nodesToKeepInThisInstance, nodeCount, maxNodesToKeep);
+
+            // Mark the first N nodes for reuse
+            for (int i = 0; i < Math.Min(nodesToKeepInThisInstance, nodeCount); i++)
+            {
+                shouldReuse[i] = true;
+            }
+            
+            return shouldReuse;
+        }
+
+        /// <summary>
+        /// Gets the maximum number of nodes of this type that should remain active system-wide.
+        /// </summary>
+        /// <returns>The threshold for node reuse</returns>
+        protected virtual int GetNodeReuseThreshold()
+        {
+            // Default for worker nodes: NUM_PROCS / 2
+            // Derived classes (Server, RAR) can override to return 0
+            return Math.Max(1, NativeMethodsShared.GetLogicalCoreCount() / 2);
+        }
+
+        /// <summary>
+        /// Counts the number of active MSBuild node processes of the same type system-wide.
+        /// Uses improved node detection logic to filter by NodeMode and handle dotnet processes.
+        /// </summary>
+        /// <returns>The count of active node processes</returns>
+        protected virtual int CountSystemWideActiveNodes()
+        {
+            try
+            {
+                // Use the improved node detection logic from PR #13256
+                // Filter for OutOfProcNode (worker nodes) to get accurate count
+                (string expectedProcessName, IList<Process> nodeProcesses) = GetPossibleRunningNodes(
+                    msbuildLocation: null, 
+                    expectedNodeMode: NodeMode.OutOfProcNode);
+                
+                // Count only worker nodes (filtered by NodeMode)
+                // This automatically handles:
+                // - Filtering dotnet processes to those hosting MSBuild.dll
+                // - Extracting and matching NodeMode from command line
+                // - Cross-platform process command line retrieval
+                int count = nodeProcesses.Count;
+                
+                // Dispose the process objects
+                foreach (var process in nodeProcesses)
+                {
+                    process?.Dispose();
+                }
+                
+                return count;
+            }
+            catch (Exception ex)
+            {
+                // If we can't enumerate processes, be conservative and don't terminate nodes
+                CommunicationsUtilities.Trace("Error counting system-wide nodes: {0}", ex.Message);
+                return 0;
+            }
         }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
