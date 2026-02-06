@@ -90,8 +90,8 @@ namespace Microsoft.Build.UnitTests
         [InlineData("NoLogo")]
         public void NoLogoSwitchIdentificationTests(string nologo)
         {
-            CommandLineSwitches.IsParameterlessSwitch(nologo, out CommandLineSwitches.ParameterlessSwitch parameterlessSwitch, out string duplicateSwitchErrorMessage).ShouldBeTrue();
-            parameterlessSwitch.ShouldBe(CommandLineSwitches.ParameterlessSwitch.NoLogo);
+            CommandLineSwitches.IsParameterizedSwitch(nologo, out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch, out string duplicateSwitchErrorMessage, out bool multipleParametersAllowed, out string missingParametersErrorMessage, out bool unquoteParameters, out bool emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.NoLogo);
             duplicateSwitchErrorMessage.ShouldBeNull();
         }
 
@@ -778,18 +778,18 @@ namespace Microsoft.Build.UnitTests
         {
             CommandLineSwitches switches = new CommandLineSwitches();
 
-            switches.SetParameterlessSwitch(CommandLineSwitches.ParameterlessSwitch.NoLogo, "/nologo");
+            switches.SetParameterlessSwitch(CommandLineSwitches.ParameterlessSwitch.Help, "/help");
 
-            Assert.Equal("/nologo", switches.GetParameterlessSwitchCommandLineArg(CommandLineSwitches.ParameterlessSwitch.NoLogo));
-            Assert.True(switches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.NoLogo));
-            Assert.True(switches[CommandLineSwitches.ParameterlessSwitch.NoLogo]);
+            Assert.Equal("/help", switches.GetParameterlessSwitchCommandLineArg(CommandLineSwitches.ParameterlessSwitch.Help));
+            Assert.True(switches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.Help));
+            Assert.True(switches[CommandLineSwitches.ParameterlessSwitch.Help]);
 
             // set it again
-            switches.SetParameterlessSwitch(CommandLineSwitches.ParameterlessSwitch.NoLogo, "-NOLOGO");
+            switches.SetParameterlessSwitch(CommandLineSwitches.ParameterlessSwitch.Help, "-HELP");
 
-            Assert.Equal("-NOLOGO", switches.GetParameterlessSwitchCommandLineArg(CommandLineSwitches.ParameterlessSwitch.NoLogo));
-            Assert.True(switches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.NoLogo));
-            Assert.True(switches[CommandLineSwitches.ParameterlessSwitch.NoLogo]);
+            Assert.Equal("-HELP", switches.GetParameterlessSwitchCommandLineArg(CommandLineSwitches.ParameterlessSwitch.Help));
+            Assert.True(switches.IsParameterlessSwitchSet(CommandLineSwitches.ParameterlessSwitch.Help));
+            Assert.True(switches[CommandLineSwitches.ParameterlessSwitch.Help]);
 
             // we didn't set this switch
             Assert.Null(switches.GetParameterlessSwitchCommandLineArg(CommandLineSwitches.ParameterlessSwitch.Version));
@@ -1492,6 +1492,43 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessBooleanSwitch(new[] { "false" }, defaultValue: true, resourceName: null).ShouldBeFalse();
 
             Should.Throw<CommandLineSwitchException>(() => MSBuildApp.ProcessBooleanSwitch(new[] { "invalid" }, defaultValue: true, resourceName: "InvalidRestoreValue"));
+        }
+
+        [Fact]
+        public void NoLogoParameterizedSwitchTest()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+
+            // Test that nologo is now identified as a parameterized switch
+            CommandLineSwitches.IsParameterizedSwitch("nologo", out CommandLineSwitches.ParameterizedSwitch parameterizedSwitch, out string duplicateSwitchErrorMessage, out bool multipleParametersAllowed, out string missingParametersErrorMessage, out bool unquoteParameters, out bool emptyParametersAllowed).ShouldBeTrue();
+            parameterizedSwitch.ShouldBe(CommandLineSwitches.ParameterizedSwitch.NoLogo);
+
+            // Test setting parameterized nologo switch with explicit true
+            switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.NoLogo, "/nologo:true", "true", false, true, false);
+            switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NoLogo).ShouldBeTrue();
+            switches[CommandLineSwitches.ParameterizedSwitch.NoLogo][0].ShouldBe("true");
+
+            // Test setting parameterized nologo switch with explicit false
+            switches = new CommandLineSwitches();
+            switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.NoLogo, "/nologo:false", "false", false, true, false);
+            switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NoLogo).ShouldBeTrue();
+            switches[CommandLineSwitches.ParameterizedSwitch.NoLogo][0].ShouldBe("false");
+        }
+
+        [Fact]
+        public void NoLogoBooleanProcessingTest()
+        {
+            // Test ProcessBooleanSwitch behavior for nologo
+            // Default value should be true when no parameters are provided
+            MSBuildApp.ProcessBooleanSwitch(Array.Empty<string>(), defaultValue: true, resourceName: "InvalidNoLogoValue").ShouldBeTrue();
+            MSBuildApp.ProcessBooleanSwitch(Array.Empty<string>(), defaultValue: false, resourceName: "InvalidNoLogoValue").ShouldBeFalse();
+
+            // Test with explicit true/false values
+            MSBuildApp.ProcessBooleanSwitch(new[] { "true" }, defaultValue: false, resourceName: "InvalidNoLogoValue").ShouldBeTrue();
+            MSBuildApp.ProcessBooleanSwitch(new[] { "false" }, defaultValue: true, resourceName: "InvalidNoLogoValue").ShouldBeFalse();
+
+            // Test invalid value throws exception
+            Should.Throw<CommandLineSwitchException>(() => MSBuildApp.ProcessBooleanSwitch(new[] { "invalid" }, defaultValue: true, resourceName: "InvalidNoLogoValue"));
         }
 
         public static IEnumerable<object[]> ProcessGraphBuildSwitchData()

@@ -168,7 +168,7 @@ namespace Microsoft.Build.Tasks
                 unit.Namespaces.Add(globalNamespace);
 
                 // Declare authorship. Unfortunately CodeDOM puts this comment after the attributes.
-                string comment = ResourceUtilities.GetResourceString("WriteCodeFragment.Comment");
+                string comment = AssemblyResources.GetInvariantString("WriteCodeFragment.Comment");
                 globalNamespace.Comments.Add(new CodeCommentStatement(comment));
 
                 if (AssemblyAttributes == null)

@@ -4,7 +4,6 @@
 using System;
 using System.Runtime.Serialization;
 
-#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -26,7 +25,6 @@ namespace Microsoft.Build.Tasks
                 return fileName;
             }
         }
-
 
         /// <summary>
         /// The line number with the error. Is initialized to zero
@@ -51,7 +49,6 @@ namespace Microsoft.Build.Tasks
                 return column;
             }
         }
-
 
         /// <summary>
         /// Construct the exception.

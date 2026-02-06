@@ -629,6 +629,9 @@ namespace Microsoft.Build.Execution
                 // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
+                // Validate environment variables (e.g., DOTNET_HOST_PATH)
+                EnvironmentVariableValidator.ValidateEnvironmentVariables(loggingService);
+
                 // Log if BuildCheck is enabled
                 if (_buildParameters.IsBuildCheckEnabled)
                 {

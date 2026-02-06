@@ -1,15 +1,24 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.IO;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.UnitTests
 {
     public class AbsolutePath_Tests
     {
+        private static AbsolutePath GetTestBasePath()
+        {
+            string baseDirectory = Path.Combine(Path.GetTempPath(), "abspath_test_base");
+            return new AbsolutePath(baseDirectory, ignoreRootedCheck: false);
+        }
+
         private static void ValidatePathAcceptance(string path, bool shouldBeAccepted)
         {
             if (shouldBeAccepted)
@@ -37,10 +46,30 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [UseInvariantCulture]
+        public void AbsolutePath_NullOrEmpty_ShouldThrow(string? path)
+        {
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path!));
+            exception.Message.ShouldContain("Path must not be null or empty");
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [UseInvariantCulture]
+        public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrow(string? path)
+        {
+            var basePath = GetTestBasePath();
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path!, basePath));
+            exception.Message.ShouldContain("Path must not be null or empty");
+        }
+
+        [Theory]
         [InlineData("subfolder")]
         [InlineData("deep/nested/path")]
         [InlineData(".")]
-        [InlineData("")]
         [InlineData("..")]
         public void AbsolutePath_FromRelativePath_ShouldResolveAgainstBase(string relativePath)
         {
@@ -232,6 +261,14 @@ namespace Microsoft.Build.UnitTests
             
             // Should preserve original value
             result.OriginalValue.ShouldBe(absolutePath.OriginalValue);
+        }
+      
+        [WindowsOnlyFact]
+        [UseInvariantCulture]
+        public void AbsolutePath_NotRooted_ShouldThrowWithLocalizedMessage()
+        {
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath("relative/path"));
+            exception.Message.ShouldContain("Path must be rooted");
         }
     }
 }
