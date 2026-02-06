@@ -123,7 +123,7 @@ namespace Microsoft.Build.Tasks
                 {
                     AbsolutePath outputDirectoryPath = TaskEnvironment.GetAbsolutePath(OutputDirectory.ItemSpec);
                     outputFilePath = new AbsolutePath(FileUtilities.GetTemporaryFile(outputDirectoryPath, null, extension));
-                    OutputFile = new TaskItem(outputFilePath);
+                    OutputFile = new TaskItem(Path.Combine(OutputDirectory.ItemSpec, Path.GetFileName(outputFilePath.Value)));
                 }
 
                 FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(outputFilePath));
