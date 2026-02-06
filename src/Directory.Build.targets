@@ -60,6 +60,8 @@
          9.0.1, causing it to be downloaded and flagged by component governance -->
     <PackageReference Include="Newtonsoft.Json" />
 
+    <PackageReference Include="Microsoft.DotNet.XUnitV3Extensions" />
+
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
 

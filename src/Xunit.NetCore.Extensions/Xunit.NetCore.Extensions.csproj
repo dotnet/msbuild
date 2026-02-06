@@ -1,4 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <!--
+    This project exists for MSBuild-specific xUnit extensions not provided by Microsoft.DotNet.XUnitV3Extensions:
+    - UseInvariantCultureAttribute: sets invariant culture for the duration of a test
+    - ConditionalFactAttribute: xUnit v3 wrapper using SkipUnless (not in the v3 extensions package)
+  -->
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <CLSCompliant>false</CLSCompliant>
@@ -9,5 +14,6 @@
   <ItemGroup>
     <!-- xUnit v3 extensibility package (not xunit.v3.core, which requires OutputType=Exe) -->
     <PackageReference Include="xunit.v3.extensibility.core" VersionOverride="$(XUnitV3Version)" />
+    <PackageReference Include="Microsoft.DotNet.XUnitV3Extensions" />
   </ItemGroup>
 </Project>

@@ -8,7 +8,8 @@
     <IsTestLibrary>true</IsTestLibrary>
   </PropertyGroup>
   <ItemGroup>
-    <!-- xUnit v3 packages used by test library (extensibility.core avoids Exe requirement) -->
+    <!-- Implicit references to xunit packages in test projects by Arcade
+         cause restore failures if PackageVersion is in the normal .props file. -->
     <PackageReference Include="xunit.v3.assert" VersionOverride="$(XUnitV3Version)" />
     <PackageReference Include="xunit.v3.extensibility.core" VersionOverride="$(XUnitV3Version)" />
     <PackageReference Include="Shouldly" />

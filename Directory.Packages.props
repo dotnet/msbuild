@@ -15,6 +15,7 @@
      -->
   <ItemGroup>
     <PackageVersion Include="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
+    <PackageVersion Include="Microsoft.DotNet.XUnitV3Extensions" Version="$(MicrosoftDotNetXUnitExtensionsVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Collections" Version="$(MicrosoftCodeAnalysisCollectionsVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Contracts" Version="$(MicrosoftCodeAnalysisContractsVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.PooledObjects" Version="$(MicrosoftCodeAnalysisPooledObjectsVersion)" />
