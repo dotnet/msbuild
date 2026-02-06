@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-using Xunit.Abstractions;
+using Xunit;
 
 #nullable disable
 

@@ -47,8 +47,8 @@
     <PackageVersion Include="Microsoft.VisualStudio.SolutionPersistence" Version="1.0.52" />
     <PackageVersion Update="Microsoft.VisualStudio.SolutionPersistence" Condition="'$(MicrosoftVisualStudioSolutionPersistenceVersion)' != ''" Version="$(MicrosoftVisualStudioSolutionPersistenceVersion)" />
 
-    <PackageVersion Include="Verify.Xunit" Version="19.14.1" />
-    <PackageVersion Update="Verify.XUnit" Condition="'$(VerifyXUnitVersion)' != ''" Version="$(VerifyXUnitVersion)" />
+    <PackageVersion Include="Verify.XunitV3" Version="28.12.0" />
+    <PackageVersion Update="Verify.XunitV3" Condition="'$(VerifyXUnitVersion)' != ''" Version="$(VerifyXUnitVersion)" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(DotNetBuildSourceOnly)' != 'true'">

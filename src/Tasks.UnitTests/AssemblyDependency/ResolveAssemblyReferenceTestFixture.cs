@@ -14,7 +14,6 @@ using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using Xunit;
-using Xunit.Abstractions;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using NativeMethods = Microsoft.Build.Tasks.NativeMethods;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;

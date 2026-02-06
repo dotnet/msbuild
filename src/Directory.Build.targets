@@ -4,6 +4,8 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
 
     <UseVSTestRunner Condition="'$(IsTestProject)' == 'true'">true</UseVSTestRunner>
+    <TestRunnerName Condition="'$(IsTestProject)' == 'true'">XUnitV3</TestRunnerName>
+    <UseMicrosoftTestingPlatformRunner>false</UseMicrosoftTestingPlatformRunner>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsUnitTestProject)' != 'true'">
@@ -18,9 +20,8 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsUnitTestProject)' == 'true'">
-    <!-- Set output type of test projects to EXE.  This will allow us to run tests on .NET Core via F5 or "dotnet run" -->
+    <!-- Set output type of test projects to EXE.  xUnit v3 requires Exe output type. -->
     <OutputType>Exe</OutputType>
-    <GenerateProgramFile>false</GenerateProgramFile>
 
     <!-- Makes xunit print all test names in stdout -->
     <XunitOptions>$(XunitOptions)</XunitOptions>
@@ -37,7 +38,7 @@
     <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions)&amp;Category!=nonnetcoreapptests</XunitOptions>
     <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(XunitOptions)&amp;Category!=nonnetfxtests</XunitOptions>
 
-    <XunitOptions>$(XunitOptions)&amp;Category!=failing&quot; --Diag $(TargetName).log</XunitOptions>
+    <XunitOptions>$(XunitOptions)&amp;Category!=failing&quot;</XunitOptions>
     
     <!-- Enable code coverage -->
     <!-- There are separate runsettings files for Windows and non-Windows. -->
@@ -65,7 +66,6 @@
     <PackageReference Remove="XliffTasks" />
 
     <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestAssemblyInfo.cs" Condition="'$(IsLibraryTestProject)' != 'true'" />
-    <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestProgram.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -84,10 +84,6 @@
     <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard'">netstandard</PublicApiTfm>
     <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETCoreApp'">netstandard</PublicApiTfm>
   </PropertyGroup>
-
-  <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
-    <PackageReference Include="xunit.console" />
-  </ItemGroup>
 
   <ItemGroup Condition="'$(OutputType)' == 'Exe'">
     <!-- Copy empty Directory.Build.props and Directory.Build.targets files to output directory to prevent

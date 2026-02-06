@@ -24,7 +24,6 @@ using Microsoft.Build.Utilities;
 using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 

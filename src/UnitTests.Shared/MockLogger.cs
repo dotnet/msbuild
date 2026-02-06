@@ -12,7 +12,6 @@ using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 
 #nullable disable

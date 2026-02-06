@@ -18,7 +18,6 @@ using Shouldly;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
-using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
 using static VerifyXunit.Verifier;
 

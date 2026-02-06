@@ -7,8 +7,7 @@
     <IsTestProject>false</IsTestProject><!-- while this project references xunit it isn't itself a test -->
   </PropertyGroup>
   <ItemGroup>
-    <!-- Implicit references to xunit.core and xunit.assert in test projects by Arcade
-         cause restore failures if PackageVersion is in the normal .props file. -->
-    <PackageReference Include="xunit.core" VersionOverride="$(XUnitVersion)" />
+    <!-- xUnit v3 package for test framework extension -->
+    <PackageReference Include="xunit.v3.core" VersionOverride="$(XUnitV3Version)" />
   </ItemGroup>
 </Project>
