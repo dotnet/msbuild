@@ -5,12 +5,12 @@
       <trans-unit id="PathMustBeRooted">
         <source>Path must be rooted.</source>
         <target state="new">Path must be rooted.</target>
-        <note>Error thrown when a relative (non-absolute) path is passed to AbsolutePath constructor.</note>
+        <note />
       </trans-unit>
       <trans-unit id="PathMustNotBeNullOrEmpty">
         <source>Path must not be null or empty.</source>
         <target state="new">Path must not be null or empty.</target>
-        <note>Error thrown when a null or empty path is passed to AbsolutePath constructor.</note>
+        <note />
       </trans-unit>
     </body>
   </file>

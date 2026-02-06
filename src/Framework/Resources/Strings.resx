@@ -119,10 +119,8 @@
   </resheader>
   <data name="PathMustNotBeNullOrEmpty" xml:space="preserve">
     <value>Path must not be null or empty.</value>
-    <comment>Error thrown when a null or empty path is passed to AbsolutePath constructor.</comment>
   </data>
   <data name="PathMustBeRooted" xml:space="preserve">
     <value>Path must be rooted.</value>
-    <comment>Error thrown when a relative (non-absolute) path is passed to AbsolutePath constructor.</comment>
   </data>
 </root>
