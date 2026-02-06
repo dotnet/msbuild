@@ -197,7 +197,8 @@ namespace Microsoft.Build.TaskHost.Utilities
 
                         if (!EndsWithSlash(modifiedItemSpec))
                         {
-                            ErrorUtilities.VerifyThrow(FileUtilitiesRegex.StartsWithUncPattern(modifiedItemSpec),
+                            ErrorUtilities.VerifyThrow(
+                                StartsWithUncPattern(modifiedItemSpec),
                                 "Only UNC shares should be missing trailing slashes.");
 
                             // restore/append trailing slash if Path.GetPathRoot() has either removed it, or failed to add it
@@ -244,19 +245,13 @@ namespace Microsoft.Build.TaskHost.Utilities
 
                         modifiedItemSpec = GetDirectory(fullPath);
 
-                        int length = -1;
-                        if (FileUtilitiesRegex.StartsWithDrivePattern(modifiedItemSpec))
-                        {
-                            length = 2;
-                        }
-                        else
-                        {
-                            length = FileUtilitiesRegex.StartsWithUncPatternMatchLength(modifiedItemSpec);
-                        }
+                        int length = StartsWithDrivePattern(modifiedItemSpec)
+                            ? 2
+                            : StartsWithUncPatternMatchLength(modifiedItemSpec);
 
                         if (length != -1)
                         {
-                            ErrorUtilities.VerifyThrow((modifiedItemSpec.Length > length) && IsSlash(modifiedItemSpec[length]),
+                            ErrorUtilities.VerifyThrow((modifiedItemSpec.Length > length) && IsAnySlash(modifiedItemSpec[length]),
                                                        "Root directory must have a trailing slash.");
 
                             modifiedItemSpec = modifiedItemSpec.Substring(length + 1);
@@ -389,11 +384,11 @@ namespace Microsoft.Build.TaskHost.Utilities
                     return false;
                 }
 
-                int uncMatchLength = FileUtilitiesRegex.StartsWithUncPatternMatchLength(path);
+                int uncMatchLength = StartsWithUncPatternMatchLength(path);
 
                 // Determine if the given path is a standard drive/unc pattern root
-                if (FileUtilitiesRegex.IsDrivePattern(path) ||
-                    FileUtilitiesRegex.IsDrivePatternWithSlash(path) ||
+                if (IsDrivePattern(path) ||
+                    IsDrivePatternWithSlash(path) ||
                     uncMatchLength == path.Length)
                 {
                     return true;
@@ -408,9 +403,9 @@ namespace Microsoft.Build.TaskHost.Utilities
                 // Eliminate any drive patterns that don't have a slash after the colon or where the 4th character is a non-slash
                 // A non-slash at [3] is specifically checked here because Path.GetDirectoryName
                 // considers "C:///" a valid root.
-                if (FileUtilitiesRegex.StartsWithDrivePattern(path) &&
-                    ((path.Length >= 3 && path[2] != '\\' && path[2] != '/') ||
-                    (path.Length >= 4 && path[3] != '\\' && path[3] != '/')))
+                if (StartsWithDrivePattern(path) &&
+                    ((path.Length >= 3 && path[2] is not (BackSlash or ForwardSlash)) ||
+                     (path.Length >= 4 && path[3] is not (BackSlash or ForwardSlash))))
                 {
                     return false;
                 }
