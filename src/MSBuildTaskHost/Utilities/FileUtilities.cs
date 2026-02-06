@@ -174,11 +174,6 @@ internal static partial class FileUtilities
     private static string NormalizePath(string path)
     {
         ErrorUtilities.VerifyThrowArgumentLength(path);
-        return GetFullPath(path);
-    }
-
-    private static string GetFullPath(string path)
-    {
         string uncheckedFullPath = NativeMethods.GetFullPath(path);
 
         if (IsPathTooLong(uncheckedFullPath))
@@ -248,7 +243,8 @@ internal static partial class FileUtilities
             // just use the file-spec as-is
             directory = fileSpec;
         }
-        else if (directory.Length > 0 && !EndsWithSlash(directory))
+
+        if (directory.Length > 0 && !EndsWithSlash(directory))
         {
             // restore trailing slash if Path.GetDirectoryName has removed it (this happens with non-root directories)
             directory += Path.DirectorySeparatorChar;
@@ -291,97 +287,8 @@ internal static partial class FileUtilities
         return fullPath;
     }
 
-    /// <summary>
-    /// A variation of Path.GetFullPath that will return the input value
-    /// instead of throwing any IO exception.
-    /// Useful to get a better path for an error message, without the risk of throwing
-    /// if the error message was itself caused by the path being invalid!
-    /// </summary>
-    private static string GetFullPathNoThrow(string path)
-    {
-        try
-        {
-            path = NormalizePath(path);
-        }
-        catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
-        {
-        }
-
-        return path;
-    }
-
-    /// <summary>
-    /// Gets a file info object for the specified file path. If the file path
-    /// is invalid, or is a directory, or cannot be accessed, or does not exist,
-    /// it returns null rather than throwing or returning a FileInfo around a non-existent file.
-    /// This allows it to be called where File.Exists() (which never throws, and returns false
-    /// for directories) was called - but with the advantage that a FileInfo object is returned
-    /// that can be queried (e.g., for LastWriteTime) without hitting the disk again.
-    /// </summary>
-    /// <param name="filePath"></param>
-    /// <returns>FileInfo around path if it is an existing /file/, else nul.l</returns>
-    private static FileInfo? GetFileInfoNoThrow(string filePath)
-    {
-        filePath = AttemptToShortenPath(filePath);
-
-        FileInfo fileInfo;
-
-        try
-        {
-            fileInfo = new FileInfo(filePath);
-        }
-        catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-        {
-            // Invalid or inaccessible path: treat as if nonexistent file, just as File.Exists does
-            return null;
-        }
-
-        return fileInfo.Exists
-            ? fileInfo // It's an existing file
-            : null; // Nonexistent, or existing but a directory, just as File.Exists behaves
-    }
-
-    /// <summary>
-    /// Normalizes the path if and only if it is longer than max path,
-    /// or would be if rooted by the current directory.
-    /// This may make it shorter by removing ".."'s.
-    /// </summary>
-    private static string AttemptToShortenPath(string path)
-    {
-        if (IsPathTooLong(path) || IsPathTooLongIfRooted(path))
-        {
-            // Attempt to make it shorter -- perhaps there are some \..\ elements
-            path = GetFullPathNoThrow(path);
-        }
-
-        return path;
-    }
-
     private static bool IsPathTooLong(string path)
         => path.Length >= NativeMethods.MaxPath; // >= not > because MAX_PATH assumes a trailing null
-
-    private static bool IsPathTooLongIfRooted(string path)
-    {
-        bool hasMaxPath = NativeMethods.HasMaxPath;
-        int maxPath = NativeMethods.MaxPath;
-        // >= not > because MAX_PATH assumes a trailing null
-        return hasMaxPath && !IsRootedNoThrow(path) && NativeMethods.GetCurrentDirectory().Length + path.Length + 1 /* slash */ >= maxPath;
-    }
-
-    /// <summary>
-    /// A variation of Path.IsRooted that not throw any IO exception.
-    /// </summary>
-    private static bool IsRootedNoThrow(string path)
-    {
-        try
-        {
-            return Path.IsPathRooted(path);
-        }
-        catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
-        {
-            return false;
-        }
-    }
 
     internal static StreamWriter CreateWriterForAppend(string path)
     {

@@ -735,7 +735,8 @@ internal class TaskParameter : MarshalByRefObject, ITranslatable
             {
                 // FileUtilities.GetItemSpecModifier is expecting escaped data, which we assume we already are.
                 // Passing in a null for currentDirectory indicates we are already in the correct current directory
-                metadataValue = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(null, _escapedItemSpec, _escapedDefiningProject, metadataName, ref _fullPath);
+                metadataValue = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(
+                    currentDirectory: null, _escapedItemSpec!, _escapedDefiningProject, metadataName, ref _fullPath);
             }
             else if (_customEscapedMetadata != null)
             {

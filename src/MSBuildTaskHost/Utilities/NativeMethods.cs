@@ -6,8 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
 
-#nullable disable
-
 namespace Microsoft.Build.TaskHost.Utilities;
 
 internal static class NativeMethods
@@ -21,8 +19,8 @@ internal static class NativeMethods
     /// </summary>
     private const int MAX_PATH = 260;
 
-    private const string WINDOWS_FILE_SYSTEM_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\FileSystem";
-    private const string WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME = "LongPathsEnabled";
+    private const string WindowsFileSystemKeyName = @"SYSTEM\CurrentControlSet\Control\FileSystem";
+    private const string LongPathsEnabledValueName = "LongPathsEnabled";
 
     private enum LOGICAL_PROCESSOR_RELATIONSHIP
     {
@@ -138,104 +136,40 @@ internal static class NativeMethods
         return -1;
     }
 
-    internal static bool HasMaxPath => MaxPath == MAX_PATH;
+    /// <summary>
+    /// Cached value for MaxPath.
+    /// </summary>
+    private static int? s_maxPath;
 
     /// <summary>
     /// Gets the max path limit of the current OS.
     /// </summary>
     internal static int MaxPath
-    {
-        get
-        {
-            if (!IsMaxPathSet)
-            {
-                SetMaxPath();
-            }
+        => s_maxPath ??= ComputeMaxPath();
 
-            return _maxPath;
-        }
-    }
+    private static int ComputeMaxPath()
+        => Traits.Instance.EscapeHatches.DisableLongPaths || !LongPathsEnabled()
+            ? MAX_PATH
+            : int.MaxValue;
 
-    /// <summary>
-    /// Cached value for MaxPath.
-    /// </summary>
-    private static int _maxPath;
-
-    private static bool IsMaxPathSet { get; set; }
-
-    private static readonly object MaxPathLock = new();
-
-    private static void SetMaxPath()
-    {
-        lock (MaxPathLock)
-        {
-            if (!IsMaxPathSet)
-            {
-                bool isMaxPathRestricted = Traits.Instance.EscapeHatches.DisableLongPaths || IsMaxPathLegacyWindows();
-                _maxPath = isMaxPathRestricted ? MAX_PATH : int.MaxValue;
-                IsMaxPathSet = true;
-            }
-        }
-    }
-
-    private enum LongPathsStatus
-    {
-        /// <summary>
-        ///  The registry key is set to 0 or does not exist.
-        /// </summary>
-        Disabled,
-
-        /// <summary>
-        /// The registry key does not exist.
-        /// </summary>
-        Missing,
-
-        /// <summary>
-        /// The registry key is set to 1.
-        /// </summary>
-        Enabled,
-
-        /// <summary>
-        /// Not on Windows.
-        /// </summary>
-        NotApplicable,
-    }
-
-    private static LongPathsStatus IsLongPathsEnabled()
+    private static bool LongPathsEnabled()
     {
         try
         {
-            return IsLongPathsEnabledRegistry();
+            using RegistryKey? fileSystemKey = Registry.LocalMachine.OpenSubKey(WindowsFileSystemKeyName);
+
+            if (fileSystemKey is null)
+            {
+                return false;
+            }
+
+            int longPathsEnabledValue = (int)fileSystemKey.GetValue(LongPathsEnabledValueName, defaultValue: -1);
+
+            return longPathsEnabledValue == 1;
         }
         catch
         {
-            return LongPathsStatus.Disabled;
-        }
-    }
-
-    private static bool IsMaxPathLegacyWindows()
-    {
-        var longPathsStatus = IsLongPathsEnabled();
-        return longPathsStatus == LongPathsStatus.Disabled || longPathsStatus == LongPathsStatus.Missing;
-    }
-
-    private static LongPathsStatus IsLongPathsEnabledRegistry()
-    {
-        using (RegistryKey fileSystemKey = Registry.LocalMachine.OpenSubKey(WINDOWS_FILE_SYSTEM_REGISTRY_KEY))
-        {
-            object longPathsEnabledValue = fileSystemKey?.GetValue(WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME, -1);
-            if (fileSystemKey != null && Convert.ToInt32(longPathsEnabledValue) == -1)
-            {
-                return LongPathsStatus.Missing;
-            }
-            else if (fileSystemKey != null && Convert.ToInt32(longPathsEnabledValue) == 1)
-            {
-                return LongPathsStatus.Enabled;
-            }
-            else
-            {
-                return LongPathsStatus.Disabled;
-            }
+            return false;
         }
     }
 
@@ -259,26 +193,6 @@ internal static class NativeMethods
 
         // Throw an exception as best we can
         Marshal.ThrowExceptionForHR(errorCode);
-    }
-
-    /// <summary>
-    ///  Internal, optimized GetCurrentDirectory implementation that simply delegates to the native method.
-    /// </summary>
-    internal static unsafe string GetCurrentDirectory()
-    {
-        int bufferSize = GetCurrentDirectoryWin32(nBufferLength: 0, lpBuffer: null);
-
-        char* buffer = stackalloc char[bufferSize];
-        int length = GetCurrentDirectoryWin32(bufferSize, buffer);
-
-        return new string(buffer, startIndex: 0, length);
-    }
-
-    private static unsafe int GetCurrentDirectoryWin32(int nBufferLength, char* lpBuffer)
-    {
-        int pathLength = GetCurrentDirectory(nBufferLength, lpBuffer);
-        VerifyThrowWin32Result(pathLength);
-        return pathLength;
     }
 
     internal static unsafe string GetFullPath(string path)
@@ -346,10 +260,6 @@ internal static class NativeMethods
     private static extern bool GetFileAttributesEx(String name, int fileInfoLevel, ref WIN32_FILE_ATTRIBUTE_DATA lpFileInformation);
 
     [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
-    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-    private static extern unsafe int GetCurrentDirectory(int nBufferLength, char* lpBuffer);
-
-    [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SetCurrentDirectory")]
     [return: MarshalAs(UnmanagedType.Bool)]
     private static extern bool SetCurrentDirectoryWindows(string path);
@@ -360,23 +270,10 @@ internal static class NativeMethods
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     private static extern unsafe int GetFullPathName(string target, int bufferLength, char* buffer, IntPtr mustBeZero);
 
-    public static bool DirectoryExists(string fullPath)
-    {
-        WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-        bool success = GetFileAttributesEx(fullPath, 0, ref data);
-        return success && (data.fileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
-    }
-
     public static bool FileExists(string fullPath)
     {
         WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
         bool success = GetFileAttributesEx(fullPath, 0, ref data);
         return success && (data.fileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0;
-    }
-
-    public static bool FileOrDirectoryExists(string path)
-    {
-        WIN32_FILE_ATTRIBUTE_DATA data = new WIN32_FILE_ATTRIBUTE_DATA();
-        return GetFileAttributesEx(path, 0, ref data);
     }
 }
