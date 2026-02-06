@@ -15,6 +15,35 @@ For more information on how the terminal logger behaves see the [dotnet build op
 
 To specify verbosity the `-verbosity` flag or `/tlp:verbosity={verbosity level}`
 
+#### Controlling Colorization
+
+The Terminal Logger supports controlling whether colorized output is used through:
+
+- **`-tlp:use_color=<true|false>`** - Explicitly enables or disables color output
+- **`NO_COLOR` environment variable** - When set (to any value), disables color output
+- **`FORCE_COLOR` environment variable** - When set (to any value), enables color output
+
+**Precedence order** (highest to lowest):
+1. Explicit `-tlp:use_color` parameter
+2. `NO_COLOR` environment variable (supersedes `FORCE_COLOR`)
+3. `FORCE_COLOR` environment variable
+4. Default behavior (colors enabled)
+
+Example:
+```bash
+# Disable colors explicitly
+dotnet build -tl:on -tlp:use_color=false
+
+# Disable colors via environment variable
+NO_COLOR=1 dotnet build -tl:on
+
+# Force colors (e.g., in CI where output might be redirected)
+FORCE_COLOR=1 dotnet build -tl:on
+
+# Override NO_COLOR with explicit parameter
+NO_COLOR=1 dotnet build -tl:on -tlp:use_color=true
+```
+
 | Verbosity                  | Quiet | Minimal | Normal | Detailed | Diagnostic |
 | ---------                  | ----- | ------- | ------ | -------- | ---------- |
 | Errors                     |&check;| &check; | &check;| &check;  |   &check;  |
@@ -35,6 +64,33 @@ Console logger refers to the logger that outputs to the console in VS or the ter
 The console logger is a 1:1 textual representation of the data that are emitted during the build. It attempts small amounts of formatting, but it writes received messages from all of the worker nodes in an unbuffered format so can be difficult to follow the chain of execution.
 
 The console logger defaults to normal verbosity, and can be overriden by passing the `-verbosity` attribute, or passing the `verbosity` property to the console logger `clp:verbosity={verbosity level}`.
+
+#### Controlling Colorization
+
+The Console Logger supports controlling whether colorized output is used through:
+
+- **`-clp:use_color=<true|false>`** - Explicitly enables or disables color output
+- **`NO_COLOR` environment variable** - When set (to any value), disables color output
+- **`FORCE_COLOR` environment variable** - When set (to any value), enables color output
+
+**Precedence order** (highest to lowest):
+1. Explicit `-clp:use_color` parameter
+2. `NO_COLOR` environment variable (supersedes `FORCE_COLOR`)
+3. `FORCE_COLOR` environment variable
+4. Legacy color parameters (`DISABLECONSOLECOLOR`, `FORCECONSOLECOLOR`, etc.)
+5. Default behavior (colors enabled)
+
+Example:
+```bash
+# Disable colors explicitly
+dotnet build -tl:off -clp:use_color=false
+
+# Disable colors via environment variable
+NO_COLOR=1 dotnet build -tl:off
+
+# Force colors (e.g., in CI where output might be redirected)
+FORCE_COLOR=1 dotnet build -tl:off
+```
 
 | Verbosity                  | Quiet | Minimal | Normal | Detailed | Diagnostic |
 | ---------                  | ----- | ------- | ------ | -------- | ---------- |
