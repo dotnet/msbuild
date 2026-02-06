@@ -5,7 +5,7 @@ using System;
 using System.Globalization;
 using System.Reflection;
 using System.Threading;
-using Xunit;
+using Xunit.v3;
 
 namespace Xunit.NetCore.Extensions
 {
@@ -15,7 +15,7 @@ namespace Xunit.NetCore.Extensions
         private CultureInfo? originalCulture;
         private CultureInfo? originalUICulture;
 
-        public override void Before(MethodInfo methodUnderTest)
+        public override void Before(MethodInfo methodUnderTest, IXunitTest test)
         {
             originalCulture = CultureInfo.CurrentCulture;
             originalUICulture = CultureInfo.CurrentUICulture;
@@ -24,7 +24,7 @@ namespace Xunit.NetCore.Extensions
             CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
         }
 
-        public override void After(MethodInfo methodUnderTest)
+        public override void After(MethodInfo methodUnderTest, IXunitTest test)
         {
             if (originalCulture != null)
             {

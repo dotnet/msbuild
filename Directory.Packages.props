@@ -18,7 +18,6 @@
     <PackageVersion Include="Microsoft.CodeAnalysis.Collections" Version="$(MicrosoftCodeAnalysisCollectionsVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.Contracts" Version="$(MicrosoftCodeAnalysisContractsVersion)" />
     <PackageVersion Include="Microsoft.CodeAnalysis.PooledObjects" Version="$(MicrosoftCodeAnalysisPooledObjectsVersion)" />
-    <PackageVersion Include="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsVersion)" />
     <PackageVersion Include="Microsoft.IO.Redist" Version="$(MicrosoftIORedistVersion)" />
     <PackageVersion Include="Microsoft.Net.Compilers.Toolset" Version="$(MicrosoftNetCompilersToolsetVersion)" Condition="'$(UsingToolMicrosoftNetCompilers)' != 'true'" />
     <PackageVersion Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
