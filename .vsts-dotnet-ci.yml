@@ -1,7 +1,19 @@
 trigger:
-- main
-- exp/*
-- vs*
+  branches:
+    include:
+    - main
+    - exp/*
+    - vs*
+  paths:
+    exclude:
+    - documentation/*
+    - .github/*
+
+pr:
+  paths:
+    exclude:
+    - documentation/*
+    - .github/*
 
 variables:
 - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:

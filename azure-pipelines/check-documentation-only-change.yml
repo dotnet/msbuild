@@ -8,8 +8,8 @@ steps:
     $changedFiles
     $onlyDocChanged = 1
     foreach ($file in $changedFiles) {
-      $isUnderDocumentation = $file -match "^documentation/"
-      if(!$isUnderDocumentation)
+      $isNonBuildFile = ($file -match "^documentation/") -or ($file -match "^\.github/")
+      if(!$isNonBuildFile)
       {
         $onlyDocChanged = 0
         break;
