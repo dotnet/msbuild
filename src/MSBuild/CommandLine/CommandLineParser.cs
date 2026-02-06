@@ -107,16 +107,6 @@ namespace Microsoft.Build.CommandLine.Experimental
 
             exeName = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 
-#if USE_MSBUILD_DLL_EXTN
-            var msbuildExtn = ".dll";
-#else
-            var msbuildExtn = ".exe";
-#endif
-            if (!exeName.EndsWith(msbuildExtn, StringComparison.OrdinalIgnoreCase))
-            {
-                exeName += msbuildExtn;
-            }
-
             fullCommandLine = $"'{string.Join(" ", commandLineArgs)}'";
 
             // parse the command line, and flag syntax errors and obvious switch errors

@@ -564,9 +564,6 @@ namespace Microsoft.Build.UnitTests
 
             List<string> cmdLine = new()
             {
-#if !FEATURE_RUN_EXE_IN_TESTS
-                EnvironmentProvider.GetDotnetExePath(),
-#endif
                 FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
                 "-nologo",
                 "-version"
@@ -608,9 +605,6 @@ namespace Microsoft.Build.UnitTests
 
             List<string> cmdLine = new()
             {
-#if !FEATURE_RUN_EXE_IN_TESTS
-                EnvironmentProvider.GetDotnetExePath(),
-#endif
                 FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
                 "-nologo",
                 "-version"

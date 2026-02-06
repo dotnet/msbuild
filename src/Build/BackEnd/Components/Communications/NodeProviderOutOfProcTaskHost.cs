@@ -745,8 +745,7 @@ namespace Microsoft.Build.BackEnd
 
             return new NodeLaunchData(
                 dotnetHostPath,
-                $"\"{msbuildDllPath}\" {commandLineArgs}",
-                null);
+                $"\"{msbuildDllPath}\" {commandLineArgs}");
         }
 
         private string BuildCommandLineArgs(bool nodeReuseEnabled) => $"/nologo /nodemode:2 /nodereuse:{nodeReuseEnabled} /low:{ComponentHost.BuildParameters.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";

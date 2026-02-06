@@ -75,7 +75,6 @@ try {
   # we need to do this to guarantee we have/know where dotnet.exe is installed
   $dotnetToolPath = InitializeDotNetCli $true
   $dotnetExePath = Join-Path $dotnetToolPath "dotnet.exe"
-
   if ($msbuildEngine -eq 'vs')
   {
     $buildToolPath = Join-Path $bootstrapRoot "net472\MSBuild\Current\Bin\MSBuild.exe"
@@ -84,10 +83,10 @@ try {
   }
   else
   {
-    $buildToolPath = "$bootstrapRoot\core\dotnet.exe"
     $propsFile = Join-Path $PSScriptRoot "Versions.props"
-    $bootstrapSdkVersion = ([xml](Get-Content $propsFile)).SelectSingleNode("//PropertyGroup/BootstrapSdkVersion").InnerText
-    $buildToolCommand = "$bootstrapRoot\core\sdk\$bootstrapSdkVersion\MSBuild.dll"
+    $parsedSdkVersion = ([xml](Get-Content $propsFile)).SelectSingleNode("//PropertyGroup/BootstrapSdkVersion").InnerText
+    $buildToolPath = "$bootstrapRoot\core\sdk\$parsedSdkVersion\MSBuild.exe"
+    $buildToolCommand = ""
     $buildToolFramework = "net"
 
     $env:DOTNET_ROOT="$bootstrapRoot\core"

@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
         private readonly ITestOutputHelper _output;
 #endif
 
-        private const string MSBuildExeName = "MSBuild.exe";
+        private const string MSBuildExeName = NativeMethodsShared.IsWindows ? "MSBuild.exe" : "MSBuild";
 
         public ToolLocationHelper_Tests(ITestOutputHelper output)
         {

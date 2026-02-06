@@ -319,5 +319,12 @@
     <ValidateMSBuildPackageDependencyVersions AppConfig="@(AppConfigWithTargetPath)" AssemblyPath="$(OutputPath)" />
   </Target>
 
+  <!-- Add MSBuild.exe.config for the app host on .NET Core (SDK only generates MSBuild.dll.config) -->
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <AppConfigWithTargetPath Include="$(AppConfig)" Condition="'$(AppConfig)' != ''">
+      <TargetPath>$(AssemblyName).exe.config</TargetPath>
+    </AppConfigWithTargetPath>
+  </ItemGroup>
+
 </Project>
  

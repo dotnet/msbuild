@@ -9,13 +9,6 @@ The code is written in C# and should follow the .NET coding conventions. Use the
 You should generally match the style of surrounding code when making edits, but if making a substantial change, you can modernize more aggressively.
 New files should use nullable types but don't refactor aggressively existing code.
 
-### Nullable Reference Types
-- **New files**: Always use nullable reference types (do NOT add `#nullable disable`)
-- **Existing files with `#nullable disable`**: Match the existing style; don't add nullable annotations (`?`) to types
-- **Existing files with nullable enabled**: Use proper nullable annotations
-- When a file has `#nullable disable`, parameters like `IDictionary<string, string>` should NOT have `?` suffix
-- Shared files (in `src/Shared/`) may be compiled into multiple assemblies with different nullable contexts; be careful with nullable annotations in these files
-
 Generate tests for new codepaths, and add tests for any bugs you fix. Use the existing test framework, which is xUnit with Shouldly assertions. Use Shouldly assertions for all assertions in modified code, even if the file is predominantly using xUnit assertions.
 
 When making changes, check if related documentation exists in the `documentation/` folder (including `documentation/specs/`) and update it to reflect your changes. Keep documentation in sync with code changes, especially for telemetry, APIs, and architectural decisions.

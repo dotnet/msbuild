@@ -6,22 +6,31 @@ using System.Diagnostics;
 
 namespace Microsoft.Build.BackEnd
 {
+    /// <summary>
+    /// Represents the configuration data needed to launch a node process.
+    /// </summary>
+    /// <param name="MsbuildLocation">The path to the executable to launch (e.g., MSBuild.exe or dotnet.exe).</param>
+    /// <param name="CommandLineArgs">The command line arguments to pass to the executable.</param>
+    /// <param name="EnvironmentOverrides">
+    /// Optional environment variable overrides for the process.
+    /// A non-null value sets or overrides that variable. A null value removes the variable
+    /// from the child process environment - this is used to clear architecture-specific
+    /// DOTNET_ROOT variants (e.g., DOTNET_ROOT_X64) that would otherwise take precedence
+    /// over DOTNET_ROOT when launching an app host.
+    /// </param>
+    internal readonly record struct NodeLaunchData(
+        string MsbuildLocation,
+        string CommandLineArgs,
+        IDictionary<string, string>? EnvironmentOverrides = null);
+
     internal interface INodeLauncher
     {
         /// <summary>
-        /// Creates a new MSBuild process with optional environment variable overrides.
+        /// Creates a new MSBuild process using the specified launch configuration.
         /// </summary>
-        /// <param name="msbuildLocation">Path to the MSBuild executable or app host.</param>
-        /// <param name="commandLineArgs">Command line arguments for the process.</param>
-        /// <param name="nodeId">The node ID for this process.</param>
-        /// <param name="environmentOverrides">
-        /// Environment variables to set or remove in the child process.
-        /// A non-null value sets or overrides that variable. A null value removes the variable
-        /// from the child process environment - this is used to clear architecture-specific
-        /// DOTNET_ROOT variants (e.g., DOTNET_ROOT_X64) that would otherwise take precedence
-        /// over DOTNET_ROOT when launching an app host.
-        /// </param>
+        /// <param name="launchData">The configuration data for launching the node process.</param>
+        /// <param name="nodeId">The unique identifier for the node being launched.</param>
         /// <returns>The started process.</returns>
-        Process Start(string msbuildLocation, string commandLineArgs, int nodeId, IDictionary<string, string>? environmentOverrides = null);
+        Process Start(NodeLaunchData launchData, int nodeId);
     }
 }

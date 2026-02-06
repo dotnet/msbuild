@@ -40,31 +40,31 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Creates a new MSBuild process
+        /// Creates a new MSBuild process using the specified launch configuration.
         /// </summary>
-        public Process Start(string msbuildLocation, string commandLineArgs, int nodeId, IDictionary<string, string> environmentOverrides = null)
+        public Process Start(NodeLaunchData launchData, int nodeId)
         {
             // Disable MSBuild server for a child process.
             // In case of starting msbuild server it prevents an infinite recursion. In case of starting msbuild node we also do not want this variable to be set.
-            return DisableMSBuildServer(() => StartInternal(msbuildLocation, commandLineArgs, environmentOverrides));
+            return DisableMSBuildServer(() => StartInternal(launchData));
         }
 
         /// <summary>
         /// Creates new MSBuild or dotnet process.
         /// </summary>
-        private Process StartInternal(string msbuildLocation, string commandLineArgs, IDictionary<string, string> environmentOverrides)
+        private Process StartInternal(NodeLaunchData nodeLaunchData)
         {
             // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
+            ErrorUtilities.VerifyThrowInternalLength(nodeLaunchData.MsbuildLocation, nameof(nodeLaunchData.MsbuildLocation));
 
-            if (!FileSystems.Default.FileExists(msbuildLocation))
+            if (!FileSystems.Default.FileExists(nodeLaunchData.MsbuildLocation))
             {
-                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", msbuildLocation));
+                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", nodeLaunchData.MsbuildLocation));
             }
 
             // Repeat the executable name as the first token of the command line because the command line
             // parser logic expects it and will otherwise skip the first argument
-            commandLineArgs = $"\"{msbuildLocation}\" {commandLineArgs}";
+            var commandLineArgs = $"\"{nodeLaunchData.MsbuildLocation}\" {nodeLaunchData.CommandLineArgs}";
 
             BackendNativeMethods.STARTUP_INFO startInfo = new();
             startInfo.cb = Marshal.SizeOf<BackendNativeMethods.STARTUP_INFO>();
@@ -96,15 +96,15 @@ namespace Microsoft.Build.BackEnd
                 creationFlags |= BackendNativeMethods.CREATE_NEW_CONSOLE;
             }
 
-            CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
+            CommunicationsUtilities.Trace("Launching node from {0}", nodeLaunchData.MsbuildLocation);
 
-            string exeName = msbuildLocation;
+            string exeName = nodeLaunchData.MsbuildLocation;
 
 #if RUNTIME_TYPE_NETCORE
             // If msbuildLocation is a native app host (e.g., MSBuild.exe on Windows, MSBuild on Linux), run it directly.
             // Otherwise, use dotnet.exe to run the managed assembly (e.g., MSBuild.dll).
             // Check if the filename (not path) matches the executable name exactly.
-            string fileName = Path.GetFileName(msbuildLocation);
+            string fileName = Path.GetFileName(nodeLaunchData.MsbuildLocation);
             bool isNativeAppHost = fileName.Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
             if (!isNativeAppHost)
             {
@@ -128,8 +128,9 @@ namespace Microsoft.Build.BackEnd
                     processStartInfo.RedirectStandardError = true;
                     processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
                 }
+
                 processStartInfo.UseShellExecute = false;
-                DotnetHostEnvironmentHelper.ApplyEnvironmentOverrides(processStartInfo.Environment, environmentOverrides);
+                DotnetHostEnvironmentHelper.ApplyEnvironmentOverrides(processStartInfo.Environment, nodeLaunchData.EnvironmentOverrides);
 
                 Process process;
                 try
@@ -140,7 +141,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     CommunicationsUtilities.Trace(
                            "Failed to launch node from {0}. CommandLine: {1}" + Environment.NewLine + "{2}",
-                           msbuildLocation,
+                           nodeLaunchData.MsbuildLocation,
                            commandLineArgs,
                            ex.ToString());
 
@@ -166,7 +167,7 @@ namespace Microsoft.Build.BackEnd
                 processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
                 threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
 
-                IntPtr environmentBlock = BuildEnvironmentBlock(environmentOverrides);
+                IntPtr environmentBlock = BuildEnvironmentBlock(nodeLaunchData.EnvironmentOverrides);
 
                 // When passing a Unicode environment block (created via Marshal.StringToHGlobalUni),
                 // we must set CREATE_UNICODE_ENVIRONMENT. Without this flag, CreateProcess interprets
@@ -198,7 +199,7 @@ namespace Microsoft.Build.BackEnd
 
                         CommunicationsUtilities.Trace(
                                 "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {2}",
-                                msbuildLocation,
+                                nodeLaunchData.MsbuildLocation,
                                 e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
                                 e.Message,
                                 commandLineArgs);

@@ -99,7 +99,10 @@ class FullFrameworkBuildInstance : BuildInstance{
 
 class NetCoreBuildInstance : BuildInstance{
     NetCoreBuildInstance([String] $root) : base ($root) {
-        ([BuildInstance]$this).AssemblyNames += "MSBuild.dll"
+        ([BuildInstance]$this).AssemblyNames += @(
+            "MSBuild.exe",
+            "MSBuild.dll"
+        )
     }
 }
 

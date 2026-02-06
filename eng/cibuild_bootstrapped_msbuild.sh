@@ -62,8 +62,8 @@ then
   props_file="$script_dir/Versions.props"
   sdk_version=$(grep -A1 "BootstrapSdkVersion" "$props_file" | grep -o ">.*<" | sed 's/[><]//g')
 
-  _InitializeBuildTool="${bootstrapRoot}/core/dotnet"
-  _InitializeBuildToolCommand="${bootstrapRoot}/core/sdk/${sdk_version}/MSBuild.dll"
+  _InitializeBuildTool="${bootstrapRoot}/core/sdk/${sdk_version}/MSBuild"
+  _InitializeBuildToolCommand=""
   _InitializeBuildToolFramework="net10.0"
 
   export DOTNET_ROOT="${bootstrapRoot}/core"

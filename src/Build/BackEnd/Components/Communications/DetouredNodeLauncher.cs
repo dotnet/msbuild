@@ -49,27 +49,27 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Creates a new MSBuild process.
+        /// Creates a new MSBuild process using the specified launch configuration.
         /// </summary>
-        public Process Start(string msbuildLocation, string commandLineArgs, int nodeId, IDictionary<string, string> environmentOverrides = null)
+        public Process Start(NodeLaunchData launchData, int nodeId)
         {
             // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
+            ErrorUtilities.VerifyThrowInternalLength(launchData.MsbuildLocation, nameof(launchData.MsbuildLocation));
 
             ErrorUtilities.VerifyThrowInternalNull(_fileAccessManager, nameof(_fileAccessManager));
 
-            if (!FileSystems.Default.FileExists(msbuildLocation))
+            if (!FileSystems.Default.FileExists(launchData.MsbuildLocation))
             {
-                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", msbuildLocation));
+                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", launchData.MsbuildLocation));
             }
 
             // Repeat the executable name as the first token of the command line because the command line
             // parser logic expects it and will otherwise skip the first argument
-            commandLineArgs = $"\"{msbuildLocation}\" {commandLineArgs}";
+            var commandLineArgs = $"\"{launchData.MsbuildLocation}\" {launchData.CommandLineArgs}";
 
-            CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
+            CommunicationsUtilities.Trace("Launching node from {0}", launchData.MsbuildLocation);
 
-            string exeName = msbuildLocation;
+            string exeName = launchData.MsbuildLocation;
 
 #if RUNTIME_TYPE_NETCORE
             // Run the child process with the same host as the currently-running process.
@@ -90,7 +90,7 @@ namespace Microsoft.Build.BackEnd
                 PipDescription = "MSBuild",
                 PipSemiStableHash = 0,
                 Arguments = commandLineArgs,
-                EnvironmentVariables = CreateEnvironmentVariables(environmentOverrides),
+                EnvironmentVariables = CreateEnvironmentVariables(launchData.EnvironmentOverrides),
                 MaxLengthInMemory = 0, // Don't buffer any output
             };
 
@@ -141,13 +141,6 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Creates environment variables with optional overrides for app host bootstrap.
         /// </summary>
-        /// <param name="environmentOverrides">
-        /// Environment variables to set or remove in the child process.
-        /// A non-null value sets or overrides that variable. A null value removes the variable
-        /// from the child process environment - this is used to clear architecture-specific
-        /// DOTNET_ROOT variants (e.g., DOTNET_ROOT_X64) that would otherwise take precedence
-        /// over DOTNET_ROOT when launching an app host.
-        /// </param>
         private static BuildParameters.IBuildParameters CreateEnvironmentVariables(IDictionary<string, string> environmentOverrides)
         {
             var envVars = new Dictionary<string, string>();

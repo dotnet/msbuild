@@ -293,12 +293,14 @@ namespace Microsoft.Build.BackEnd
         /// 
         /// null: CLR2 (NET35) task host. Version-dependent fields skipped (not compiled in NET35).
         /// 0: The constant value for Framework-to-Framework (CLR4) task host. Supports HostServices, TargetName, ProjectFile.
-        /// 2+: .NET task host with full support for version-dependent fields.
+        /// 1: .NET task host support.
+        /// 2: Added support for translating/reading HostServices, ProjectFile, TargetName in TaskHostConfiguration.
+        /// 3: Added App Host support.
         /// 
         /// When incrementing this version, ensure compatibility with existing
         /// task hosts and update the corresponding deserialization logic.
         /// </summary>
-        public const byte PacketVersion = 2;
+        public const byte PacketVersion = 3;
 
         // Flag bits in upper 2 bits
         private const byte ExtendedHeaderFlag = 0x40;  // Bit 6: 01000000
