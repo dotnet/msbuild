@@ -14,6 +14,5 @@
   <ItemGroup>
     <!-- xUnit v3 extensibility package (not xunit.v3.core, which requires OutputType=Exe) -->
     <PackageReference Include="xunit.v3.extensibility.core" VersionOverride="$(XUnitV3Version)" />
-    <PackageReference Include="Microsoft.DotNet.XUnitV3Extensions" />
   </ItemGroup>
 </Project>
