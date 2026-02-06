@@ -99,9 +99,16 @@ namespace Microsoft.Build.Framework
             => NativeMethods.IsWindows && path.IndexOf(UnixDirectorySeparator) >= 0;
 
         /// <summary>
-        /// Checks if the path contains relative segments like "." or "..".
+        /// Quickly checks if the path may contain relative segments like "." or "..".
+        /// This is a non-precise detection that may have false positives but no false negatives.
         /// </summary>
-        private static bool HasRelativeSegment(string path)
+        /// <remarks>
+        /// Check for relative path segments "." and ".."
+        /// In absolute path those segments can not appear in the beginning of the path, only after a path separator.
+        /// This is not a precise full detection of relative segments. There are no false negatives as this might affect correctness, but it may have false positives:
+        /// like when there is a hidden file or directory starting with a dot, or on linux the backslash and dot can be part of the file name.
+        /// </remarks>
+        private static bool MayHaveRelativeSegment(string path)
             => path.Contains("/.") || path.Contains("\\.");
 
         /// <summary>
@@ -176,7 +183,7 @@ namespace Microsoft.Build.Framework
                 return path;
             }
 
-            if (!HasRelativeSegment(path.Value) && 
+            if (!MayHaveRelativeSegment(path.Value) && 
                 !HasWindowsDirectorySeparatorOnUnix(path.Value) && 
                 !HasUnixDirectorySeparatorOnWindows(path.Value))
             {
@@ -199,7 +206,7 @@ namespace Microsoft.Build.Framework
                 return path;
             }
 
-            if (!HasRelativeSegment(path.Value) && !HasUnixDirectorySeparatorOnWindows(path.Value))
+            if (!MayHaveRelativeSegment(path.Value) && !HasUnixDirectorySeparatorOnWindows(path.Value))
             {
                 return path;
             }
