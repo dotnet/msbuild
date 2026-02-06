@@ -422,6 +422,55 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// When OutputDirectory is relative and OutputFile is not specified, the resulting OutputFile should be relative.
+        /// </summary>
+        [Fact]
+        public void RelativeOutputDirectoryProducesRelativeOutputFile()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            // Create an actual folder and get a relative path to it
+            string absoluteFolder = env.CreateFolder().Path;
+            string relativeFolder = Path.GetFileName(absoluteFolder);
+
+            // Change current directory to the parent so the relative path works
+            string originalDir = Directory.GetCurrentDirectory();
+            try
+            {
+                Directory.SetCurrentDirectory(Path.GetDirectoryName(absoluteFolder));
+
+                WriteCodeFragment task = new WriteCodeFragment();
+                task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
+                MockEngine engine = new MockEngine(true);
+                task.BuildEngine = engine;
+                TaskItem attribute = new TaskItem("System.AssemblyTrademarkAttribute");
+                task.AssemblyAttributes = new TaskItem[] { attribute };
+                task.Language = "c#";
+                task.OutputDirectory = new TaskItem(relativeFolder);
+                bool result = task.Execute();
+
+                result.ShouldBeTrue(engine.Log);
+
+                // The output file should be relative (not rooted) since OutputDirectory was relative
+                Path.IsPathRooted(task.OutputFile.ItemSpec).ShouldBeFalse("OutputFile should be relative when OutputDirectory is relative");
+
+                // The output file should start with the relative folder name
+                task.OutputFile.ItemSpec.ShouldStartWith(relativeFolder);
+
+                // Cleanup the generated file
+                string absoluteOutputFile = Path.Combine(Path.GetDirectoryName(absoluteFolder), task.OutputFile.ItemSpec);
+                if (File.Exists(absoluteOutputFile))
+                {
+                    File.Delete(absoluteOutputFile);
+                }
+            }
+            finally
+            {
+                Directory.SetCurrentDirectory(originalDir);
+            }
+        }
+
+        /// <summary>
         /// Regular case
         /// </summary>
         [Fact]
