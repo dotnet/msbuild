@@ -217,7 +217,7 @@ namespace Microsoft.Build.TaskHost.Utilities
                         else
                         {
                             // Fix path to avoid problem with Path.GetFileNameWithoutExtension when backslashes in itemSpec on Unix
-                            modifiedItemSpec = Path.GetFileNameWithoutExtension(FixFilePath(itemSpec));
+                            modifiedItemSpec = Path.GetFileNameWithoutExtension(itemSpec);
                         }
                     }
                     else if (string.Equals(modifier, FileUtilities.ItemSpecModifiers.Extension, StringComparison.OrdinalIgnoreCase))

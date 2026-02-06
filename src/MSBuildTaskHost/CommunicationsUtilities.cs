@@ -771,7 +771,7 @@ namespace Microsoft.Build.TaskHost
 
                     string filePath = Path.Combine(s_debugDumpPath, fileName);
 
-                    using (StreamWriter file = FileUtilities.OpenWrite(filePath, append: true))
+                    using (StreamWriter file = FileUtilities.CreateWriterForAppend(filePath))
                     {
                         long now = DateTime.UtcNow.Ticks;
                         float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;

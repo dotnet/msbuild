@@ -108,14 +108,14 @@ internal static class ExceptionHandling
                     // This naming pattern is assumed in ReadAnyExceptionFromFile
                     s_dumpFileName = Path.Combine(DebugDumpPath, $"MSBuild_pid-{pid}_{guid:n}.failure.txt");
 
-                    using (StreamWriter writer = FileUtilities.OpenWrite(s_dumpFileName, append: true))
+                    using (StreamWriter writer = FileUtilities.CreateWriterForAppend(s_dumpFileName))
                     {
                         writer.WriteLine("UNHANDLED EXCEPTIONS FROM PROCESS {0}:", pid);
                         writer.WriteLine("=====================");
                     }
                 }
 
-                using (StreamWriter writer = FileUtilities.OpenWrite(s_dumpFileName, append: true))
+                using (StreamWriter writer = FileUtilities.CreateWriterForAppend(s_dumpFileName))
                 {
                     // "G" format is, e.g., 6/15/2008 9:15:07 PM
                     writer.WriteLine(DateTime.Now.ToString("G", CultureInfo.CurrentCulture));
