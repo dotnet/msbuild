@@ -639,9 +639,9 @@ namespace Microsoft.Build.TaskHost
             // We only really know the values of these variables for sure once we see what we received from our parent
             // environment -- otherwise if this was a completely new build, we could lose out on expected environment
             // variables.
-            _debugCommunications = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBUILDDEBUGCOMM", "1", StringComparison.OrdinalIgnoreCase);
-            _updateEnvironment = !taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostDoNotUpdateEnvironment", "1", StringComparison.OrdinalIgnoreCase);
-            _updateEnvironmentAndLog = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostUpdateEnvironmentAndLog", "1", StringComparison.OrdinalIgnoreCase);
+            _debugCommunications = taskConfiguration.BuildProcessEnvironment.HasValue("MSBUILDDEBUGCOMM", "1", StringComparison.OrdinalIgnoreCase);
+            _updateEnvironment = !taskConfiguration.BuildProcessEnvironment.HasValue("MSBuildTaskHostDoNotUpdateEnvironment", "1", StringComparison.OrdinalIgnoreCase);
+            _updateEnvironmentAndLog = taskConfiguration.BuildProcessEnvironment.HasValue("MSBuildTaskHostUpdateEnvironmentAndLog", "1", StringComparison.OrdinalIgnoreCase);
 
             try
             {
