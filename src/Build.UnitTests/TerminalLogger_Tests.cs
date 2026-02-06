@@ -1136,5 +1136,78 @@ namespace Microsoft.Build.UnitTests
 
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform().UseParameters(runOnCentralNode);
         }
+
+        [Theory]
+        [InlineData("", "", true)] // Default: colors enabled
+        [InlineData("", " ", true)] // NO_COLOR="" means colors enabled (not set)
+        [InlineData("1", "", false)] // NO_COLOR set, colors disabled
+        [InlineData("1", "1", false)] // NO_COLOR supersedes FORCE_COLOR
+        [InlineData("", "1", true)] // FORCE_COLOR set, colors enabled
+        public void ColorEnvironmentVariables(string noColor, string forceColor, bool shouldUseColor)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                if (!string.IsNullOrWhiteSpace(noColor))
+                {
+                    env.SetEnvironmentVariable("NO_COLOR", noColor);
+                }
+                if (!string.IsNullOrWhiteSpace(forceColor))
+                {
+                    env.SetEnvironmentVariable("FORCE_COLOR", forceColor);
+                }
+
+                TerminalLogger logger = new TerminalLogger();
+                logger.Initialize(_centralNodeEventSource);
+
+                logger.ShouldUseColor().ShouldBe(shouldUseColor);
+            }
+        }
+
+        [Theory]
+        [InlineData("true", true)]
+        [InlineData("false", false)]
+        [InlineData("TRUE", true)]
+        [InlineData("FALSE", false)]
+        public void UseColorParameter(string paramValue, bool expectedUseColor)
+        {
+            TerminalLogger logger = new TerminalLogger();
+            logger.Parameters = $"use_color={paramValue}";
+            logger.Initialize(_centralNodeEventSource);
+
+            logger.ShouldUseColor().ShouldBe(expectedUseColor);
+        }
+
+        [Fact]
+        public void UseColorParameterOverridesEnvironment()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("NO_COLOR", "1");
+                env.SetEnvironmentVariable("FORCE_COLOR", "1");
+
+                TerminalLogger logger = new TerminalLogger();
+                logger.Parameters = "use_color=true";
+                logger.Initialize(_centralNodeEventSource);
+
+                // Explicit parameter should override environment variables
+                logger.ShouldUseColor().ShouldBeTrue();
+            }
+        }
+
+        [Fact]
+        public void NoColorSupersedesForceColor()
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("NO_COLOR", "1");
+                env.SetEnvironmentVariable("FORCE_COLOR", "1");
+
+                TerminalLogger logger = new TerminalLogger();
+                logger.Initialize(_centralNodeEventSource);
+
+                // NO_COLOR should supersede FORCE_COLOR
+                logger.ShouldUseColor().ShouldBeFalse();
+            }
+        }
     }
 }

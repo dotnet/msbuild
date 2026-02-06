@@ -1962,5 +1962,108 @@ namespace Microsoft.Build.UnitTests
                 return false;
             }
         }
+
+        [Theory]
+        [InlineData("", "", true)] // Default: colors enabled
+        [InlineData("1", "", false)] // NO_COLOR set, colors disabled
+        [InlineData("1", "1", false)] // NO_COLOR supersedes FORCE_COLOR
+        [InlineData("", "1", true)] // FORCE_COLOR set, colors enabled
+        public void ColorEnvironmentVariables(string noColor, string forceColor, bool expectColor)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                if (!string.IsNullOrWhiteSpace(noColor))
+                {
+                    env.SetEnvironmentVariable("NO_COLOR", noColor);
+                }
+                if (!string.IsNullOrWhiteSpace(forceColor))
+                {
+                    env.SetEnvironmentVariable("FORCE_COLOR", forceColor);
+                }
+
+                EventSourceSink es = new EventSourceSink();
+                SimulatedConsole sc = new SimulatedConsole();
+                ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, sc.SetColor, sc.ResetColor);
+                logger.Initialize(es);
+
+                // Log an error to see if color is applied
+                es.Consume(new BuildStartedEventArgs("Build started", null));
+                BuildEventContext context = new BuildEventContext(1, 1, 1, 1);
+                BuildErrorEventArgs errorArgs = new BuildErrorEventArgs(null, "ERR001", "file.cs", 1, 1, 0, 0, "Test error", null, null);
+                errorArgs.BuildEventContext = context;
+                es.Consume(errorArgs);
+                
+                string log = sc.ToString();
+                if (expectColor)
+                {
+                    // Should contain color codes
+                    log.ShouldContain("<red>");
+                }
+                else
+                {
+                    // Should not contain color codes
+                    log.ShouldNotContain("<red>");
+                    log.ShouldNotContain("<yellow>");
+                    log.ShouldNotContain("<green>");
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData("true", true)]
+        [InlineData("false", false)]
+        public void UseColorParameter(string paramValue, bool expectColor)
+        {
+            EventSourceSink es = new EventSourceSink();
+            SimulatedConsole sc = new SimulatedConsole();
+            ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, sc.SetColor, sc.ResetColor);
+            logger.Parameters = $"use_color={paramValue}";
+            logger.Initialize(es);
+
+            // Log an error to see if color is applied
+            es.Consume(new BuildStartedEventArgs("Build started", null));
+            BuildEventContext context = new BuildEventContext(1, 1, 1, 1);
+            BuildErrorEventArgs errorArgs = new BuildErrorEventArgs(null, "ERR001", "file.cs", 1, 1, 0, 0, "Test error", null, null);
+            errorArgs.BuildEventContext = context;
+            es.Consume(errorArgs);
+            
+            string log = sc.ToString();
+            if (expectColor)
+            {
+                log.ShouldContain("<red>");
+            }
+            else
+            {
+                log.ShouldNotContain("<red>");
+                log.ShouldNotContain("<yellow>");
+                log.ShouldNotContain("<green>");
+            }
+        }
+
+        [Fact]
+        public void UseColorParameterOverridesEnvironment()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("NO_COLOR", "1");
+
+                EventSourceSink es = new EventSourceSink();
+                SimulatedConsole sc = new SimulatedConsole();
+                ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, sc.SetColor, sc.ResetColor);
+                logger.Parameters = "use_color=true";
+                logger.Initialize(es);
+
+                // Log an error to see if color is applied
+                es.Consume(new BuildStartedEventArgs("Build started", null));
+                BuildEventContext context = new BuildEventContext(1, 1, 1, 1);
+                BuildErrorEventArgs errorArgs = new BuildErrorEventArgs(null, "ERR001", "file.cs", 1, 1, 0, 0, "Test error", null, null);
+                errorArgs.BuildEventContext = context;
+                es.Consume(errorArgs);
+                
+                string log = sc.ToString();
+                // Explicit parameter should override NO_COLOR environment variable
+                log.ShouldContain("<red>");
+            }
+        }
     }
 }
