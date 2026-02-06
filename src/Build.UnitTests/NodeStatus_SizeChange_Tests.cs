@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.Threading.Tasks;
 
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Logging;
 using VerifyXunit;
 using Xunit;
@@ -28,7 +29,7 @@ public class NodeStatus_SizeChange_Tests
     [Fact]
     public async Task EverythingFits()
     {
-        TerminalNodesFrame frame = new([_status], width: 80, height: 5);
+        TerminalNodesFrame frame = new([_status], width: 80, height: 5, colorize: AnsiCodes.Colorize);
 
         await Verify(frame.RenderNodeStatus(0).ToString());
     }
@@ -36,7 +37,7 @@ public class NodeStatus_SizeChange_Tests
     [Fact]
     public async Task TargetIsTruncatedFirst()
     {
-        TerminalNodesFrame frame = new([_status], width: 45, height: 5);
+        TerminalNodesFrame frame = new([_status], width: 45, height: 5, colorize: AnsiCodes.Colorize);
 
         await Verify(frame.RenderNodeStatus(0).ToString());
     }
@@ -44,7 +45,7 @@ public class NodeStatus_SizeChange_Tests
     [Fact]
     public async Task NamespaceIsTruncatedNext()
     {
-        TerminalNodesFrame frame = new([_status], width: 40, height: 5);
+        TerminalNodesFrame frame = new([_status], width: 40, height: 5, colorize: AnsiCodes.Colorize);
 
         await Verify(frame.RenderNodeStatus(0).ToString());
     }
@@ -52,7 +53,7 @@ public class NodeStatus_SizeChange_Tests
     [Fact]
     public async Task GoesToProject()
     {
-        TerminalNodesFrame frame = new([_status], width: 10, height: 5);
+        TerminalNodesFrame frame = new([_status], width: 10, height: 5, colorize: AnsiCodes.Colorize);
 
         await Verify(frame.RenderNodeStatus(0).ToString());
     }
