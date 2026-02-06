@@ -1018,6 +1018,72 @@ namespace Microsoft.Build.UnitTests
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
+        [Fact]
+        public void ReplayBinaryLogWithFewerNodesThanOriginalBuild()
+        {
+            // This test validates that replaying a binary log with terminal logger
+            // using fewer nodes than the original build does not cause an IndexOutOfRangeException.
+            // See issue: https://github.com/dotnet/msbuild/issues/10596
+
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                // Create multiple projects that will build in parallel
+                TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
+                
+                // Create three simple projects
+                TransientTestFile project1 = env.CreateFile(logFolder, "project1.proj", @"
+<Project>
+    <Target Name='Build'>
+        <Message Text='Building project1' Importance='High' />
+    </Target>
+</Project>");
+                
+                TransientTestFile project2 = env.CreateFile(logFolder, "project2.proj", @"
+<Project>
+    <Target Name='Build'>
+        <Message Text='Building project2' Importance='High' />
+    </Target>
+</Project>");
+                
+                TransientTestFile project3 = env.CreateFile(logFolder, "project3.proj", @"
+<Project>
+    <Target Name='Build'>
+        <Message Text='Building project3' Importance='High' />
+    </Target>
+</Project>");
+                
+                // Create a solution file that builds all projects in parallel
+                string solutionContents = $@"
+<Project>
+    <Target Name='Build'>
+        <MSBuild Projects='{project1.Path};{project2.Path};{project3.Path}' BuildInParallel='true' />
+    </Target>
+</Project>";
+                TransientTestFile solutionFile = env.CreateFile(logFolder, "solution.proj", solutionContents);
+
+                string binlogPath = env.ExpectFile(".binlog").Path;
+
+                // Build with multiple nodes to create a binlog with higher node IDs
+                RunnerUtilities.ExecMSBuild($"{solutionFile.Path} /m:4 /bl:{binlogPath}", out bool success, outputHelper: _outputHelper);
+                success.ShouldBeTrue();
+
+                // Replay the binlog with TerminalLogger using only 1 node
+                // This should NOT throw an IndexOutOfRangeException
+                var replayEventSource = new BinaryLogReplayEventSource();
+                using var outputWriter = new StringWriter();
+                using var mockTerminal = new Terminal(outputWriter);
+                var terminalLogger = new TerminalLogger(mockTerminal);
+
+                // Initialize with only 1 node (fewer than the original build)
+                terminalLogger.Initialize(replayEventSource, nodeCount: 1);
+
+                // This should complete without throwing an exception
+                Should.NotThrow(() => replayEventSource.Replay(binlogPath));
+
+                terminalLogger.Shutdown();
+            }
+        }
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
