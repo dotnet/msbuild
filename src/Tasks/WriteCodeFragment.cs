@@ -133,9 +133,7 @@ namespace Microsoft.Build.Tasks
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
                 string itemSpec = OutputFile?.ItemSpec ?? String.Empty;
-                string lockedFileMessage = outputFilePath.Value != null
-                    ? LockCheck.GetLockedFileMessage(outputFilePath)
-                    : LockCheck.GetLockedFileMessage(itemSpec);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(outputFilePath.Value ?? itemSpec);
                 Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotWriteOutput", itemSpec, ex.Message, lockedFileMessage);
                 return false;
             }
