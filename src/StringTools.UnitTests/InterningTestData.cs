@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 
 using Xunit;
+using Xunit.Sdk;
 
 #nullable disable
 

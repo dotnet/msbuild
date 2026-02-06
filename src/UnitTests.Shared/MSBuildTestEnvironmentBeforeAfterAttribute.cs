@@ -5,6 +5,7 @@ using System;
 using System.Reflection;
 using System.Threading;
 using Xunit;
+using Xunit.v3;
 
 #nullable disable
 
@@ -20,12 +21,12 @@ namespace Microsoft.Build.UnitTests
     {
         private static readonly AsyncLocal<TestEnvironment> s_testEnvironment = new();
 
-        public override void Before(MethodInfo methodUnderTest)
+        public override void Before(MethodInfo methodUnderTest, IXunitTest test)
         {
             s_testEnvironment.Value = TestEnvironment.Create();
         }
 
-        public override void After(MethodInfo methodUnderTest)
+        public override void After(MethodInfo methodUnderTest, IXunitTest test)
         {
             s_testEnvironment.Value?.Dispose();
             s_testEnvironment.Value = null;

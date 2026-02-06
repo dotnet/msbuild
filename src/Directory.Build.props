@@ -19,7 +19,8 @@
     <!-- https://github.com/NuGet/Home/issues/8684 -->
     <NoWarn>$(NoWarn);NU5131</NoWarn>
     <!-- xUnit1004: Test methods should not be skipped - suppress for xUnit v3 migration -->
-    <NoWarn Condition="'$(IsTestProject)' == 'true' or '$(IsTestLibrary)' == 'true'">$(NoWarn);xUnit1004</NoWarn>
+    <!-- xUnit1051: CancellationToken recommendation - address incrementally after migration -->
+    <NoWarn Condition="'$(IsTestProject)' == 'true' or '$(IsTestLibrary)' == 'true'">$(NoWarn);xUnit1004;xUnit1051</NoWarn>
 
     <!-- TODO: This is not a good idea. We are in props here, but individual projects might alter IsTestProject property, so we don't read the correct value here. -->
     <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->

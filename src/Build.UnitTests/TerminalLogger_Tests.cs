@@ -131,7 +131,6 @@ namespace Microsoft.Build.UnitTests
         public void InvokeCustomEventRaised(CustomBuildEventArgs args) => CustomEventRaised?.Invoke(_eventSender, args);
     }
 
-    [UsesVerify]
     [UseInvariantCulture]
     public class TerminalLogger_Tests
     {
