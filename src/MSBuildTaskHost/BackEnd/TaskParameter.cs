@@ -718,7 +718,7 @@ internal class TaskParameter : MarshalByRefObject, ITranslatable
             {
                 foreach (KeyValuePair<string, string?> metadatum in _customEscapedMetadata)
                 {
-                    clonedMetadata.Add(metadatum.Key, EscapingUtilities.UnescapeAll(metadatum.Value));
+                    clonedMetadata.Add(metadatum.Key, EscapingUtilities.UnescapeAll(metadatum.Value!));
                 }
             }
 
