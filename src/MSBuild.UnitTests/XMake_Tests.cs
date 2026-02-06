@@ -564,7 +564,6 @@ namespace Microsoft.Build.UnitTests
 
             List<string> cmdLine = new()
             {
-                FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
                 "-nologo",
                 "-version"
             };
@@ -573,8 +572,8 @@ namespace Microsoft.Build.UnitTests
             {
                 StartInfo =
                 {
-                    FileName = cmdLine[0],
-                    Arguments = string.Join(" ", cmdLine.Skip(1)),
+                    FileName = RunnerUtilities.PathToCurrentlyRunningMsBuildExe,
+                    Arguments = string.Join(" ", cmdLine),
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                 },
@@ -605,7 +604,6 @@ namespace Microsoft.Build.UnitTests
 
             List<string> cmdLine = new()
             {
-                FileUtilities.EnsureDoubleQuotes(RunnerUtilities.PathToCurrentlyRunningMsBuildExe),
                 "-nologo",
                 "-version"
             };
@@ -614,8 +612,8 @@ namespace Microsoft.Build.UnitTests
             {
                 StartInfo =
                 {
-                    FileName = cmdLine[0],
-                    Arguments = string.Join(" ", cmdLine.Skip(1)),
+                    FileName = RunnerUtilities.PathToCurrentlyRunningMsBuildExe,
+                    Arguments = string.Join(" ", cmdLine),
                     UseShellExecute = false,
                     RedirectStandardOutput = true,
                 },

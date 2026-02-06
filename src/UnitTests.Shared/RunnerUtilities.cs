@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.Shared
             bool shellExecute = false,
             ITestOutputHelper outputHelper = null,
             bool attachProcessId = true,
-            int timeoutMilliseconds = 300000000)
+            int timeoutMilliseconds = 30_000)
         {
             if (shellExecute)
             {
