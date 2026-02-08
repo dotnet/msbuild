@@ -30,7 +30,7 @@ internal sealed class TerminalNodesFrame
     {
         Width = Math.Min(width, MaxColumn);
         Height = height;
-        _colorize = colorize;
+        _colorize = colorize ?? throw new ArgumentNullException(nameof(colorize));
 
         _nodes = new (TerminalNodeStatus, int)[nodes.Length];
 

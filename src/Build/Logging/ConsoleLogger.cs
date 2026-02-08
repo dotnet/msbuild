@@ -160,13 +160,14 @@ namespace Microsoft.Build.Logging
             {
                 // Explicit parameter takes precedence
                 shouldUseColor = useColor.Value;
-                shouldUseAnsi = useColor.Value && ConsoleConfiguration.AcceptAnsiColorCodes;
+                // When explicitly requested, use ANSI colors unconditionally (similar to FORCECONSOLECOLOR)
+                shouldUseAnsi = useColor.Value;
             }
             else
             {
-                // Check environment variables
+                // Check environment variables - NO_COLOR / FORCE_COLOR are intended to apply when set to any value
                 string noColor = Environment.GetEnvironmentVariable("NO_COLOR");
-                if (!string.IsNullOrEmpty(noColor))
+                if (noColor is not null)
                 {
                     shouldUseColor = false;
                     shouldUseAnsi = false;
@@ -174,10 +175,11 @@ namespace Microsoft.Build.Logging
                 else
                 {
                     string forceColorEnv = Environment.GetEnvironmentVariable("FORCE_COLOR");
-                    if (!string.IsNullOrEmpty(forceColorEnv))
+                    if (forceColorEnv is not null)
                     {
                         shouldUseColor = true;
-                        shouldUseAnsi = ConsoleConfiguration.AcceptAnsiColorCodes;
+                        // FORCE_COLOR should force ANSI color output even when AcceptAnsiColorCodes is false
+                        shouldUseAnsi = true;
                     }
                     else
                     {

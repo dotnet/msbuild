@@ -222,9 +222,14 @@ public sealed partial class TerminalLogger : INodeLogger
     private bool _showNodesDisplay = true;
 
     /// <summary>
-    /// Controls whether to use colorized output. Null means auto-detect.
+    /// Controls whether to use colorized output. Null means not explicitly specified by parameter.
     /// </summary>
     private bool? _useColor = null;
+
+    /// <summary>
+    /// Cached result of color decision to avoid repeated environment variable lookups.
+    /// </summary>
+    private bool _shouldUseColorCached;
 
     private uint? _originalConsoleMode;
 
@@ -442,6 +447,9 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         ParseParameters();
 
+        // Compute and cache the color decision once during initialization
+        _shouldUseColorCached = ComputeShouldUseColor();
+
         // Initialize the current frame with the colorize function
         _currentFrame = new TerminalNodesFrame(Array.Empty<TerminalNodeStatus>(), 0, 0, Colorize);
 
@@ -587,10 +595,11 @@ public sealed partial class TerminalLogger : INodeLogger
     }
 
     /// <summary>
-    /// Determines whether colorized output should be used based on environment variables and parameters.
+    /// Computes whether colorized output should be used based on environment variables and parameters.
     /// Precedence: explicit parameter > NO_COLOR > FORCE_COLOR > default (true)
+    /// Called once during initialization to cache the result.
     /// </summary>
-    internal bool ShouldUseColor()
+    private bool ComputeShouldUseColor()
     {
         // Explicit parameter takes precedence
         if (_useColor.HasValue)
@@ -598,16 +607,16 @@ public sealed partial class TerminalLogger : INodeLogger
             return _useColor.Value;
         }
 
-        // NO_COLOR supersedes FORCE_COLOR
+        // NO_COLOR supersedes FORCE_COLOR - check if variable is set (not if it has a value)
         string? noColor = Environment.GetEnvironmentVariable("NO_COLOR");
-        if (!string.IsNullOrEmpty(noColor))
+        if (noColor is not null)
         {
             return false;
         }
 
-        // FORCE_COLOR makes color mandatory
+        // FORCE_COLOR makes color mandatory - check if variable is set (not if it has a value)
         string? forceColor = Environment.GetEnvironmentVariable("FORCE_COLOR");
-        if (!string.IsNullOrEmpty(forceColor))
+        if (forceColor is not null)
         {
             return true;
         }
@@ -617,11 +626,16 @@ public sealed partial class TerminalLogger : INodeLogger
     }
 
     /// <summary>
+    /// Returns the cached color decision.
+    /// </summary>
+    internal bool ShouldUseColor() => _shouldUseColorCached;
+
+    /// <summary>
     /// Colorizes text if color is enabled, otherwise returns the text unchanged.
     /// </summary>
     private string Colorize(string? text, TerminalColor color)
     {
-        if (ShouldUseColor())
+        if (_shouldUseColorCached)
         {
             return AnsiCodes.Colorize(text, color);
         }
