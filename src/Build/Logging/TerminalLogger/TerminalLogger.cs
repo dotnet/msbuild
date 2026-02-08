@@ -227,9 +227,10 @@ public sealed partial class TerminalLogger : INodeLogger
     private bool? _useColor = null;
 
     /// <summary>
-    /// Cached result of color decision to avoid repeated environment variable lookups.
+    /// Cached colorize function determined during initialization.
+    /// Either returns AnsiCodes.Colorize or returns plain text depending on color settings.
     /// </summary>
-    private bool _shouldUseColorCached;
+    private Func<string?, TerminalColor, string> _colorizeFunc = null!; // Initialized in Initialize()
 
     private uint? _originalConsoleMode;
 
@@ -447,11 +448,13 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         ParseParameters();
 
-        // Compute and cache the color decision once during initialization
-        _shouldUseColorCached = ComputeShouldUseColor();
+        // Compute the colorize function to use based on settings
+        _colorizeFunc = ComputeShouldUseColor() 
+            ? AnsiCodes.Colorize 
+            : static (text, _) => text ?? "";
 
         // Initialize the current frame with the colorize function
-        _currentFrame = new TerminalNodesFrame(Array.Empty<TerminalNodeStatus>(), 0, 0, Colorize);
+        _currentFrame = new TerminalNodesFrame(Array.Empty<TerminalNodeStatus>(), 0, 0, _colorizeFunc);
 
         // Detect if we're in replay mode
         _isReplayMode = eventSource is IBinaryLogReplaySource;
@@ -597,7 +600,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Computes whether colorized output should be used based on environment variables and parameters.
     /// Precedence: explicit parameter > NO_COLOR > FORCE_COLOR > default (true)
-    /// Called once during initialization to cache the result.
+    /// Called once during initialization to determine which colorize function to use.
     /// </summary>
     private bool ComputeShouldUseColor()
     {
@@ -626,21 +629,14 @@ public sealed partial class TerminalLogger : INodeLogger
     }
 
     /// <summary>
-    /// Returns the cached color decision.
+    /// Returns whether color should be used (based on the cached function).
     /// </summary>
-    internal bool ShouldUseColor() => _shouldUseColorCached;
+    internal bool ShouldUseColor() => _colorizeFunc == AnsiCodes.Colorize;
 
     /// <summary>
-    /// Colorizes text if color is enabled, otherwise returns the text unchanged.
+    /// Colorizes text using the cached colorize function determined during initialization.
     /// </summary>
-    private string Colorize(string? text, TerminalColor color)
-    {
-        if (_shouldUseColorCached)
-        {
-            return AnsiCodes.Colorize(text, color);
-        }
-        return text ?? "";
-    }
+    private string Colorize(string? text, TerminalColor color) => _colorizeFunc(text, color);
 
     public MessageImportance GetMinimumMessageImportance()
     {
@@ -1572,7 +1568,7 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         int width = updateSize ? Terminal.Width : _currentFrame.Width;
         int height = updateSize ? Terminal.Height : _currentFrame.Height;
-        TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: width, height: height, colorize: Colorize);
+        TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: width, height: height, colorize: _colorizeFunc);
 
         // Do not render delta but clear everything if Terminal width or height have changed.
         if (newFrame.Width != _currentFrame.Width || newFrame.Height != _currentFrame.Height)
