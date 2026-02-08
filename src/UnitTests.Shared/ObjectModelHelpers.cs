@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -588,7 +589,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns></returns>
         public static string CleanupFileContents([StringSyntax(StringSyntaxAttribute.Xml)] string projectFileContents)
         {
-            StringBuilder temp = new (projectFileContents);
+            StringBuilder temp = new(projectFileContents);
 
             // Replace reverse-single-quotes with double-quotes.
             temp.Replace('`', '"');
@@ -2005,11 +2006,14 @@ namespace Microsoft.Build.UnitTests
         /// <param name="timeSpan">A <see cref="TimeSpan"/> representing the amount of time to sleep.</param>
         public static string GetSleepCommand(TimeSpan timeSpan)
         {
+            string sleepArgument = NativeMethodsShared.IsWindows
+                ? timeSpan.TotalMilliseconds.ToString(CultureInfo.InvariantCulture)
+                : timeSpan.TotalSeconds.ToString(CultureInfo.InvariantCulture);
+
             return string.Format(
+                CultureInfo.InvariantCulture,
                 GetSleepCommandTemplate(),
-                NativeMethodsShared.IsWindows
-                    ? timeSpan.TotalMilliseconds // powershell can't handle floating point seconds, so give it milliseconds
-                    : timeSpan.TotalSeconds);
+                sleepArgument);
         }
 
         /// <summary>
