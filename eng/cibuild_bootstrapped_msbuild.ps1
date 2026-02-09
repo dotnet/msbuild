@@ -83,10 +83,10 @@ try {
   }
   else
   {
-    $propsFile = Join-Path $PSScriptRoot "Versions.props"
-    $parsedSdkVersion = ([xml](Get-Content $propsFile)).SelectSingleNode("//PropertyGroup/BootstrapSdkVersion").InnerText
-    $buildToolPath = "$bootstrapRoot\core\sdk\$parsedSdkVersion\MSBuild.exe"
-    $buildToolCommand = ""
+    # Use dotnet msbuild to invoke MSBuild through the CLI, not directly via MSBuild.exe
+    # This matches how users should invoke MSBuild in the bootstrapped environment
+    $buildToolPath = "$bootstrapRoot\core\dotnet.exe"
+    $buildToolCommand = "msbuild"
     $buildToolFramework = "net"
 
     $env:DOTNET_ROOT="$bootstrapRoot\core"

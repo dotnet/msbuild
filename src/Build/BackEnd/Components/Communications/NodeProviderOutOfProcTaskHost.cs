@@ -734,10 +734,15 @@ namespace Microsoft.Build.BackEnd
             if (FileSystems.Default.FileExists(appHostPath))
             {
                 CommunicationsUtilities.Trace("For a host context of {0}, using app host from {1}.", hostContext, appHostPath);
-                return new NodeLaunchData(
-                    appHostPath,
-                    commandLineArgs,
-                    DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(dotnetHostPath, throwIfNotSet: true));
+
+                IDictionary<string, string> dotnetOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides();
+
+                return dotnetOverrides != null
+                    ? new NodeLaunchData(
+                        appHostPath,
+                        commandLineArgs,
+                        dotnetOverrides)
+                    : throw new InvalidProjectFileException(ResourceUtilities.GetResourceString("DotnetHostPathNotSet"));
             }
 
             string msbuildDllPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName);

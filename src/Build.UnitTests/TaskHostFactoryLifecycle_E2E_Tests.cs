@@ -64,16 +64,9 @@ namespace Microsoft.Build.Engine.UnitTests
 
             using TestEnvironment env = TestEnvironment.Create(_output);
 
-            string testProjectPath = Path.Combine(TestAssetsRootPath, "TaskHostLifecycleTestApp.csproj");
+            string buildOutput = ExecuteBuildWithTaskHost(runtimeToUse, taskFactoryToUse);
 
-            string output = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{testProjectPath} -v:n -restore /p:RuntimeToUse={runtimeToUse} /p:TaskFactoryToUse={taskFactoryToUse} /p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}",
-                out bool success,
-                outputHelper: _output);
-
-            success.ShouldBeTrue("Build should succeed");
-
-            ValidateTaskHostBehavior(output, expectedNodeReuse);
+            ValidateTaskHostBehavior(buildOutput, expectedNodeReuse);
         }
 
         private static bool? DetermineExpectedNodeReuse(string runtimeToUse, string taskFactoryToUse)
@@ -96,6 +89,20 @@ namespace Microsoft.Build.Engine.UnitTests
 #endif
                 _ => throw new ArgumentException($"Unknown combination: runtime={runtimeToUse}, factory={taskFactoryToUse}")
             };
+
+        private string ExecuteBuildWithTaskHost(string runtimeToUse, string taskFactoryToUse)
+        {
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "TaskHostLifecycleTestApp.csproj");
+
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{testProjectPath} -v:n -restore /p:RuntimeToUse={runtimeToUse} /p:TaskFactoryToUse={taskFactoryToUse} /p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}",
+                out bool success,
+                outputHelper: _output);
+
+            success.ShouldBeTrue("Build should succeed");
+
+            return output;
+        }
 
         private static void ValidateTaskHostBehavior(string buildOutput, bool? expectedNodeReuse)
         {

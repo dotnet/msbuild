@@ -4,12 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+
 #if NET
 using System.Runtime.InteropServices;
-using Microsoft.Build.BackEnd;
-
 #endif
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Internal
 {
@@ -29,7 +27,7 @@ namespace Microsoft.Build.Internal
         private static readonly string[] _archSpecificRootVars = Array.ConvertAll(Enum.GetNames<Architecture>(), name => $"{DotnetRootEnvVarName}_{name.ToUpperInvariant()}");
 #else
         // On .NET Framework, Architecture enum doesn't exist, so we use hardcoded values.
-        // This is sufficient since .NET Framework only runs on Windows x86/x64.
+        // This is sufficient since .NET Framework only runs on Windows x86/x64/ARM64.
         private static readonly string[] _archSpecificRootVars =
         [
             "DOTNET_ROOT_X86",
@@ -40,7 +38,7 @@ namespace Microsoft.Build.Internal
 
         /// <summary>
         /// Clears DOTNET_ROOT environment variables that were set only for app host bootstrap.
-        /// These should not leak to tools executed by worker nodes.
+        /// These should not leak to tools executed by the build.
         /// Only clears if the variable was NOT present in the original build process environment.
         /// </summary>
         /// <param name="buildProcessEnvironment">The original environment from the entry-point process.</param>
@@ -61,19 +59,18 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Creates environment variable overrides for app host bootstrap.
-        /// Sets DOTNET_ROOT derived from DOTNET_HOST_PATH and clears architecture-specific variants.
+        /// Creates environment variable overrides for app host.
+        /// Sets DOTNET_ROOT derived from the specified dotnet host path.
         /// </summary>
-        /// <param name="dotnetHostPath">Optional path to the dotnet executable. If null, reads from DOTNET_HOST_PATH environment variable.</param>
-        /// <param name="throwIfNotSet">If true, throws when dotnetHostPath is not available. If false, returns null.</param>
-        /// <returns>Dictionary of environment variable overrides, or null if DOTNET_HOST_PATH is not set and throwIfNotSet is false.</returns>
-        internal static IDictionary<string, string>? CreateDotnetRootEnvironmentOverrides(string? dotnetHostPath = null, bool throwIfNotSet = false)
+        /// <param name="dotnetHostPath">Path to the dotnet executable.</param>
+        /// <returns>Dictionary of environment variable overrides, or null if dotnetHostPath is empty.</returns>
+        internal static IDictionary<string, string>? CreateDotnetRootEnvironmentOverrides(string? dotnetHostPath = null)
         {
             string? dotnetRoot = ResolveDotnetRoot(dotnetHostPath);
 
             if (string.IsNullOrEmpty(dotnetRoot))
             {
-                return throwIfNotSet ? throw new InvalidOperationException(ResourceUtilities.GetResourceString("DotnetHostPathNotSet")) : null;
+                return null;
             }
 
             var overrides = new Dictionary<string, string>

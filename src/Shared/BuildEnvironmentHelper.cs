@@ -36,7 +36,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Name of MSBuild executable files.
         /// </summary>
-        private static readonly string[] s_msBuildExeNames = { "MSBuild.exe" };
+        private static readonly string[] s_msBuildExeNames = { "MSBuild.exe", "MSBuild.dll" };
 
         /// <summary>
         /// Gets the cached Build Environment instance.
@@ -197,14 +197,18 @@ namespace Microsoft.Build.Shared
                 return null;
             }
 
-            // Check for MSBuild.[exe] next to the current assembly
-            var exe = NativeMethodsShared.IsWindows ? $"MSBuild.exe" : "MSBuild";
-            var msBuildExe = Path.Combine(FileUtilities.GetFolderAbove(buildAssembly), exe);
+            var msBuildExecutableCandidateName =
+#if NETCOREAPP
+               "MSBuild.dll";
+#else
+               "MSBuild.exe";
+#endif
 
-            var msBuildDll = Path.Combine(FileUtilities.GetFolderAbove(buildAssembly), "MSBuild.dll");
+            // Check for MSBuild.[exe|dll] next to the current assembly
+            var msBuildExecutableCandidate = Path.Combine(Path.GetDirectoryName(buildAssembly), msBuildExecutableCandidateName);
 
             // First check if we're in a VS installation
-            var environment = TryFromMSBuildExeUnderVisualStudio(msBuildExe);
+            var environment = TryFromMSBuildExeUnderVisualStudio(msBuildExecutableCandidate);
             if (environment != null)
             {
                 return environment;
@@ -212,13 +216,9 @@ namespace Microsoft.Build.Shared
 
             // We're not in VS, check for MSBuild.exe / dll to consider this a standalone environment.
             string msBuildPath = null;
-            if (FileSystems.Default.FileExists(msBuildExe))
+            if (FileSystems.Default.FileExists(msBuildExecutableCandidate))
             {
-                msBuildPath = msBuildExe;
-            }
-            else if (FileSystems.Default.FileExists(msBuildDll))
-            {
-                msBuildPath = msBuildDll;
+                msBuildPath = msBuildExecutableCandidate;
             }
 
             if (!string.IsNullOrEmpty(msBuildPath))
@@ -428,22 +428,14 @@ namespace Microsoft.Build.Shared
         private static string GetProcessFromRunningProcess()
         {
 #if RUNTIME_TYPE_NETCORE
-            // Prefer the app host (process path) if available
-            string processPath = EnvironmentUtilities.ProcessPath;
-            if (!string.IsNullOrEmpty(processPath))
-            {
-                return processPath;
-            }
-
-            // Fall back to entry assembly location if app host isn't available
             // The EntryAssembly property can return null when a managed assembly has been loaded from
             // an unmanaged application (for example, using custom CLR hosting).
-            if (AssemblyUtilities.EntryAssembly != null)
+            if (AssemblyUtilities.EntryAssembly == null)
             {
-                return AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
+                return EnvironmentUtilities.ProcessPath;
             }
 
-            return null;
+            return AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
 #else
 
             return EnvironmentUtilities.ProcessPath;
@@ -548,13 +540,8 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal sealed class BuildEnvironment
     {
-        public BuildEnvironment(
-            BuildEnvironmentMode mode,
-            string currentMSBuildExePath,
-            bool runningTests,
-            bool runningInMSBuildExe,
-            bool runningInVisualStudio,
-            string visualStudioPath)
+        public BuildEnvironment(BuildEnvironmentMode mode, string currentMSBuildExePath, bool runningTests, bool runningInMSBuildExe, bool runningInVisualStudio,
+                string visualStudioPath)
         {
             FileInfo currentMSBuildExeFile = null;
             DirectoryInfo currentToolsDirectory = null;

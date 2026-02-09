@@ -106,7 +106,6 @@
     <Compile Include="..\Shared\INodePacketHandler.cs" />
     <Compile Include="..\Shared\TranslatorHelpers.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
-    <Compile Include="..\Shared\DotnetHostEnvironmentHelper.cs" />
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
     <Compile Include="..\Shared\TaskFactoryUtilities.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
@@ -165,12 +164,9 @@
     <Content Include="MSBuild.rsp" Pack="false">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <!-- Exclude MSBuild/*.xsd on non-Windows to avoid creating a 'MSBuild' folder in output
-         that conflicts with the app host (which is named 'MSBuild' without extension on Unix).
-         These XSDs are only needed on Windows for VS Setup and schema validation. -->
-    <XsdsForVS Include="**\*.xsd" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition="$([MSBuild]::IsOSPlatform('Windows')) == 'true'" />
-    <XsdsForVS Include="**\*.xsd" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder);MSBuild\**" Condition="$([MSBuild]::IsOSPlatform('Windows')) == 'false'" />
-    <XsdsForVS Include="Update-MSBuildXsds.ps1" />
+    <!-- Only include XSDs for .NET Framework (VS Setup and schema validation). -->
+    <XsdsForVS Include="**\*.xsd" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <XsdsForVS Include="Update-MSBuildXsds.ps1" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
     <None Include="@(XsdsForVS)">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

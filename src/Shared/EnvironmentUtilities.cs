@@ -11,8 +11,10 @@ namespace Microsoft.Build.Shared
 {
     internal static partial class EnvironmentUtilities
     {
+#if !NETCOREAPP
         private static volatile int s_processId;
         private static volatile string? s_processPath;
+#endif
         private static volatile string? s_processName;
 
         /// <summary>Gets the unique identifier for the current process.</summary>
@@ -20,7 +22,9 @@ namespace Microsoft.Build.Shared
         {
             get
             {
-                // copied from Environment.ProcessId
+#if NETCOREAPP
+                return Environment.ProcessId;
+#else
                 int processId = s_processId;
                 if (processId == 0)
                 {
@@ -32,6 +36,7 @@ namespace Microsoft.Build.Shared
                 }
 
                 return processId;
+#endif
             }
         }
 
@@ -46,6 +51,9 @@ namespace Microsoft.Build.Shared
         {
             get
             {
+#if NETCOREAPP
+                return Environment.ProcessPath;
+#else
                 string? processPath = s_processPath;
                 if (processPath == null)
                 {
@@ -58,6 +66,7 @@ namespace Microsoft.Build.Shared
                 }
 
                 return (processPath?.Length != 0) ? processPath : null;
+#endif
             }
         }
 
