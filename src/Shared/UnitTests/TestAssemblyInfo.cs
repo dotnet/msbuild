@@ -19,8 +19,11 @@ using Xunit;
 // xUnit v3 has built-in assembly fixture support - no custom TestFramework needed
 [assembly: AssemblyFixture(typeof(MSBuildTestAssemblyFixture))]
 
-// Wrap a TestEnvironment around each test method and class so if invariants have changed we will know where
-[assembly: AssemblyFixture(typeof(MSBuildTestEnvironmentFixture))]
+// Note: In xUnit v2, MSBuildTestEnvironmentFixture was registered with Class and Method scopes
+// to wrap a TestEnvironment around each test class/method and detect invariant changes.
+// xUnit v3's [AssemblyFixture] only supports assembly scope, so that per-class/per-method
+// checking is not available. The assembly-level fixture (MSBuildTestAssemblyFixture) still
+// provides the core test environment setup.
 
 namespace Microsoft.Build.UnitTests
 {
@@ -145,27 +148,6 @@ namespace Microsoft.Build.UnitTests
 
                 currentFolder = Directory.GetParent(currentFolder)?.FullName;
             }
-        }
-
-        public void Dispose()
-        {
-            if (!_disposed)
-            {
-                _testEnvironment.Dispose();
-
-                _disposed = true;
-            }
-        }
-    }
-
-    public class MSBuildTestEnvironmentFixture : IDisposable
-    {
-        private bool _disposed;
-        private TestEnvironment _testEnvironment;
-
-        public MSBuildTestEnvironmentFixture()
-        {
-            _testEnvironment = TestEnvironment.Create();
         }
 
         public void Dispose()
