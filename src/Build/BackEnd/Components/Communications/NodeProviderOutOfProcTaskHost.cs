@@ -753,7 +753,7 @@ namespace Microsoft.Build.BackEnd
                 $"\"{msbuildDllPath}\" {commandLineArgs}");
         }
 
-        private string BuildCommandLineArgs(bool nodeReuseEnabled) => $"/nologo /nodemode:2 /nodereuse:{nodeReuseEnabled} /low:{ComponentHost.BuildParameters.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";
+        private string BuildCommandLineArgs(bool nodeReuseEnabled) => $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuseEnabled} /low:{ComponentHost.BuildParameters.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";
 
         /// <summary>
         /// Method called when a context created.
