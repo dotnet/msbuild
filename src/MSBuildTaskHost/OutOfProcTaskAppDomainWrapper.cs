@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.TaskHost.BackEnd;
-using Microsoft.Build.TaskHost.Resources;
 using Microsoft.Build.TaskHost.Utilities;
 
 namespace Microsoft.Build.TaskHost;
@@ -52,16 +51,11 @@ internal sealed class OutOfProcTaskAppDomainWrapper : IDisposable
     {
         _taskAppDomain = null;
 
-        LoadedType taskType;
+        LoadedType? taskType;
         try
         {
             TypeLoader typeLoader = new(TaskLoader.IsTaskClass);
-            taskType = typeLoader.Load(
-                taskName,
-                taskLocation,
-                logWarning: (format, args) => { },
-                useTaskHost: false,
-                taskHostParamsMatchCurrentProc: true);
+            taskType = typeLoader.Load(taskName, taskLocation);
         }
         catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
         {
@@ -73,7 +67,7 @@ internal sealed class OutOfProcTaskAppDomainWrapper : IDisposable
 
         return InstantiateAndExecuteTask(
             buildEngine,
-            taskType,
+            taskType!,
             taskName,
             taskLocation,
             taskFile,
