@@ -9,13 +9,13 @@ using System.Text;
 
 #nullable disable
 
-namespace Microsoft.Build.Shared
+namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// This class implements static methods to assist with escaping arguments for shell invocation.
     /// Provides platform-specific escaping for Windows cmd.exe and Unix sh.
     /// </summary>
-    internal static class ShellEscapingUtilities
+    public static class ShellEscapingUtilities
     {
 #if NET
         // Characters that require quoting in Windows cmd.exe
@@ -27,7 +27,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="argument">The argument to escape.</param>
         /// <returns>The escaped argument ready for cmd.exe invocation.</returns>
-        internal static string EscapeArgumentForWindows(string argument)
+        public static string EscapeArgumentForWindows(string argument)
         {
             if (string.IsNullOrEmpty(argument))
             {
@@ -169,7 +169,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="argument">The argument to escape.</param>
         /// <returns>The escaped argument ready for sh invocation.</returns>
-        internal static string EscapeArgumentForUnix(string argument)
+        public static string EscapeArgumentForUnix(string argument)
         {
             if (string.IsNullOrEmpty(argument))
             {
