@@ -314,6 +314,16 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
+      <trans-unit id="InvalidNoLogoValue">
+        <source>MSBUILD : error MSB1071: NoLogo value is not valid. {0}</source>
+        <target state="new">MSBUILD : error MSB1071: NoLogo value is not valid. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1071: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the nologo parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
         <target state="translated">MSBUILD : error MSB1065: El valor del registrador de terminales no es válido. Debe ser uno de "auto", "true", o "false".{0}</target>
@@ -653,9 +663,11 @@ Esta marca es experimental y puede que no funcione según lo previsto.
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_5_NoLogoSwitch">
-        <source>  -noLogo            Do not display the startup banner and copyright message.
+        <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="translated">  noLogo            No mostrar la pancarta de inicio ni el mensaje de copyright.
+        <target state="new">  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -1833,6 +1845,11 @@ Esta marca es experimental y puede que no funcione según lo previsto.
         <source>MSBUILD : error MSB1059: Targets could not be printed. {0}</source>
         <target state="translated">MSBUILD : error MSB1059: No se pudieron imprimir los destinos. {0}</target>
         <note>{StrBegin="MSBUILD : error MSB1059: "}</note>
+      </trans-unit>
+      <trans-unit id="TaskHostAcquired_NullsFiltered">
+        <source>Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</source>
+        <target state="new">Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</target>
+        <note>LOCALIZATION: {0} is the name of the task output parameter, {1} is the count of null elements filtered.</note>
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>

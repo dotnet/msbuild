@@ -8,7 +8,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
-#nullable disable
 
 namespace Microsoft.Build.Shared.FileSystem
 {

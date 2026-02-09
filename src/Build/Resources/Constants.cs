@@ -121,6 +121,11 @@ namespace Microsoft.Build.Internal
         internal const string RuntimeIdentifierGraphPath = nameof(RuntimeIdentifierGraphPath);
 
         /// <summary>
+        /// The project property name used to get the root of the .NET Core SDK.
+        /// </summary>
+        internal const string NetCoreSdkRoot = nameof(NetCoreSdkRoot);
+
+        /// <summary>
         /// Defines the name of dotnet process based on the operating system.
         /// </summary>
         internal static readonly string DotnetProcessName = NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet";

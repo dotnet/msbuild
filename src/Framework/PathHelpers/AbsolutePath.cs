@@ -42,6 +42,7 @@ namespace Microsoft.Build.Framework
         /// Initializes a new instance of the <see cref="AbsolutePath"/> struct.
         /// </summary>
         /// <param name="path">The absolute path string.</param>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null, empty, or not a rooted path.</exception>
         public AbsolutePath(string path)
         {
             ValidatePath(path);
@@ -85,7 +86,7 @@ namespace Microsoft.Build.Framework
         {
             if (string.IsNullOrEmpty(path))
             {
-                throw new ArgumentException("Path must not be null or empty.", nameof(path));
+                throw new ArgumentException(FrameworkResources.GetString("PathMustNotBeNullOrEmpty"), nameof(path));
             }
 
             // Path.IsPathFullyQualified is not available in .NET Standard 2.0
@@ -93,7 +94,7 @@ namespace Microsoft.Build.Framework
 #if NETFRAMEWORK || NET
             if (!Path.IsPathFullyQualified(path))
             {
-                throw new ArgumentException("Path must be rooted.", nameof(path));
+                throw new ArgumentException(FrameworkResources.GetString("PathMustBeRooted"), nameof(path));
             }
 #endif
         }
@@ -103,20 +104,79 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="path">The path to combine with the base path.</param>
         /// <param name="basePath">The base path to combine with.</param>
+        /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null or empty.</exception>
         public AbsolutePath(string path, AbsolutePath basePath)
         {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentException(FrameworkResources.GetString("PathMustNotBeNullOrEmpty"), nameof(path));
+            }
+
             // This function should not throw when path has illegal characters.
             // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine to achieve it.
             // For .NET Core, System.IO.Path.Combine already does not throw in this case.
             Value = Path.Combine(basePath.Value, path);
             OriginalValue = path;
-        } 
+        }
 
         /// <summary>
         /// Implicitly converts an AbsolutePath to a string.
         /// </summary>
         /// <param name="path">The path to convert.</param>
         public static implicit operator string(AbsolutePath path) => path.Value;
+
+        /// <summary>
+        /// Returns the canonical form of this path.
+        /// </summary>
+        /// <returns>
+        /// An <see cref="AbsolutePath"/> representing the canonical form of the path.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// The canonical form of a path is exactly what <see cref="Path.GetFullPath(string)"/> would produce,
+        /// with the following properties:
+        /// <list type="bullet">
+        ///   <item>All relative path segments ("." and "..") are resolved.</item>
+        ///   <item>Directory separators are normalized to the platform convention (backslash on Windows).</item>
+        /// </list>
+        /// </para>
+        /// <para>
+        /// If the path is already in canonical form, returns the current instance to avoid unnecessary allocations.
+        /// Preserves the OriginalValue of the current instance.
+        /// </para>
+        /// </remarks>
+        internal AbsolutePath GetCanonicalForm()
+        {
+            if (string.IsNullOrEmpty(Value))
+            {
+                return this;
+            }
+
+
+            // Note: this is a quick check to avoid calling Path.GetFullPath when it's not necessary, since it can be expensive. 
+            // It should cover the most common cases and avoid the overhead of Path.GetFullPath in those cases.
+
+            // Check for relative path segments "." and ".."
+            // In absolute path those segments can not appear in the beginning of the path, only after a path separator.
+            // This is not a precise full detection of relative segments. There is no false negatives as this might affect correctenes, but it may have false positives:
+            // like when there is a hidden file or directory starting with a dot, or on linux the backslash and dot can be part of the file name.
+            // In case of false positives we would call Path.GetFullPath and the result would still be correct.
+
+            bool hasRelativeSegment = Value.Contains("/.") || Value.Contains("\\.");
+
+            // Check if directory separator normalization is required (only on Windows: "/" to "\")
+            // On unix "\" is not a valid path separator, but is a part of the file/directory name, so no normalization is needed. 
+            bool needsSeparatorNormalization = NativeMethods.IsWindows && Value.IndexOf(Path.AltDirectorySeparatorChar) >= 0;
+
+            if (!hasRelativeSegment && !needsSeparatorNormalization)
+            {
+                return this;
+            }
+
+            // Use Path.GetFullPath to resolve relative segments and normalize separators.
+            // Skip validation since Path.GetFullPath already ensures the result is absolute.
+            return new AbsolutePath(Path.GetFullPath(Value), OriginalValue, ignoreRootedCheck: true);
+        }
 
         /// <summary>
         /// Determines whether two <see cref="AbsolutePath"/> instances are equal.

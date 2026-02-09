@@ -48,6 +48,7 @@
     <IncludeSatelliteOutputInPack>false</IncludeSatelliteOutputInPack>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <AddAppConfigToBuildOutputs>false</AddAppConfigToBuildOutputs>
+    <DisableNETStandardCompatErrors>true</DisableNETStandardCompatErrors>
 
     <!-- Setting DebugType here goes hand in hand with eng\AfterSigning.targets. This is to prompt the x64 build to produce a 'full' .pdb that's `more compatible` then 'portable' and 'embedded' .pdbs. This doesn't get set on 32 bit architecture, which will default to 'embedded' and 'pdb2pdb' will convert those as needed. See https://github.com/dotnet/msbuild/pull/5070 for context. -->
     <DebugType Condition="'$(Platform)' == 'x64'">full</DebugType>
@@ -197,6 +198,7 @@
     <Reference Include="System.Xml" />
     <PackageReference Include="LargeAddressAware" PrivateAssets="All" />
     <PackageReference Include="System.Diagnostics.DiagnosticSource" /><!-- for consistency with Framework via transitives -->
+    <PackageReference Include="System.ValueTuple" ExcludeAssets="Build" /><!-- We ship the new version but binding redirect to the old version manually, so must avoid the drop-binding-redirect logic in the 4.6.1 package. -->
   </ItemGroup>
 
   <ItemGroup>

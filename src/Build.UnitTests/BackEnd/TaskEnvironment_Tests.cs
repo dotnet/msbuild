@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 

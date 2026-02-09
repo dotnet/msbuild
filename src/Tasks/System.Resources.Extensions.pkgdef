@@ -3,5 +3,5 @@
 "codeBase"="$BaseInstallDir$\MSBuild\Current\Bin\System.Resources.Extensions.dll"
 "publicKeyToken"="cc7b13ffcd2ddd51"
 "culture"="neutral"
-"oldVersion"="0.0.0.0-9.0.0.11"
-"newVersion"="9.0.0.11"
+"oldVersion"="0.0.0.0-10.0.0.1"
+"newVersion"="10.0.0.1"

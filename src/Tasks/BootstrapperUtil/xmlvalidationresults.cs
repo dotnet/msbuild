@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 
-#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {
