@@ -1296,6 +1296,7 @@ namespace Microsoft.Build.UnitTests
                 System.Globalization.CultureInfo.CurrentUICulture = new System.Globalization.CultureInfo(cultureName);
                 
                 WriteCodeFragment task = new WriteCodeFragment();
+                task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 MockEngine engine = new MockEngine(true);
                 task.BuildEngine = engine;
                 TaskItem attribute = new TaskItem("System.AssemblyVersionAttribute");
