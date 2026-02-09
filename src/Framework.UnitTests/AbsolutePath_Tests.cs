@@ -219,6 +219,50 @@ namespace Microsoft.Build.UnitTests
             ValidatePathAcceptance(path, shouldBeAccepted);
         }
 
+        [Fact]
+        public void GetCanonicalForm_NullPath_ShouldReturnSameInstance()
+        {
+            var absolutePath = new AbsolutePath(null!, null!, ignoreRootedCheck: true);
+            var result = absolutePath.GetCanonicalForm();
+            
+            // Should return the same struct values when no normalization is needed
+            result.ShouldBe(absolutePath);
+        }
+
+
+        [WindowsOnlyTheory]
+        [InlineData("C:\\foo\\.\\bar")]                    // Current directory reference
+        [InlineData("C:\\foo\\..\\bar")]                   // Parent directory reference
+        [InlineData("C:\\foo/bar")]                        // Forward slash to backslash
+        [InlineData("C:\\foo\\bar")]                       // Simple Windows path (no normalization needed)
+        public void GetCanonicalForm_WindowsPathNormalization_ShouldMatchPathGetFullPath(string inputPath)
+        {
+            ValidateGetCanonicalFormMatchesSystem(inputPath);
+        }
+
+        [UnixOnlyTheory]
+        [InlineData("/foo/./bar")]                         // Current directory reference
+        [InlineData("/foo/../bar")]                        // Parent directory reference     
+        [InlineData("/foo/bar")]                           // Simple Unix path (no normalization needed)
+        [InlineData("/foo/bar\\baz")]                      // Simple Unix path with backslash that is not a path separator (no normalization needed)
+        public void GetCanonicalForm_UnixPathNormalization_ShouldMatchPathGetFullPath(string inputPath)
+        {
+            ValidateGetCanonicalFormMatchesSystem(inputPath);
+        }
+        
+        private static void ValidateGetCanonicalFormMatchesSystem(string inputPath)
+        {
+            var absolutePath = new AbsolutePath(inputPath, ignoreRootedCheck: true);
+            var result = absolutePath.GetCanonicalForm();
+            var systemResult = Path.GetFullPath(inputPath);
+            
+            // Should match Path.GetFullPath behavior exactly
+            result.Value.ShouldBe(systemResult);
+            
+            // Should preserve original value
+            result.OriginalValue.ShouldBe(absolutePath.OriginalValue);
+        }
+      
         [WindowsOnlyFact]
         [UseInvariantCulture]
         public void AbsolutePath_NotRooted_ShouldThrowWithLocalizedMessage()
