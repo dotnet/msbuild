@@ -21,10 +21,10 @@ internal static class CollectionExtensions
     ///  the specified value; otherwise, <see langword="false"/>.
     /// </returns>
     internal static bool HasValue(
-        this Dictionary<string, string> dictionary,
+        this Dictionary<string, string?> dictionary,
         string key,
-        string value,
+        string? value,
         StringComparison comparison)
-        => dictionary.TryGetValue(key, out string existingValue)
+        => dictionary.TryGetValue(key, out string? existingValue)
             && string.Equals(value, existingValue, comparison);
 }

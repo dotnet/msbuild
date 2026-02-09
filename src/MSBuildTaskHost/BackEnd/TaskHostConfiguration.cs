@@ -196,12 +196,12 @@ internal sealed class TaskHostConfiguration : INodePacket
     /// <summary>
     /// Gets the startup directory.
     /// </summary>
-    public string? StartupDirectory => _startupDirectory;
+    public string StartupDirectory => _startupDirectory!;
 
     /// <summary>
     /// Gets the process environment.
     /// </summary>
-    public Dictionary<string, string?>? BuildProcessEnvironment => _buildProcessEnvironment;
+    public Dictionary<string, string?> BuildProcessEnvironment => _buildProcessEnvironment!;
 
     /// <summary>
     /// Gets the culture.
@@ -217,7 +217,7 @@ internal sealed class TaskHostConfiguration : INodePacket
     /// Gets the AppDomain configuration bytes that we may want to use to initialize
     /// AppDomainIsolated tasks.
     /// </summary>
-    public AppDomainSetup? AppDomainSetup => _appDomainSetup;
+    public AppDomainSetup AppDomainSetup => _appDomainSetup!;
 
     /// <summary>
     /// Gets the line number where the instance of this task is defined.
@@ -247,17 +247,17 @@ internal sealed class TaskHostConfiguration : INodePacket
     /// <summary>
     /// Gets the project file where the instance of this task is defined.
     /// </summary>
-    public string? ProjectFileOfTask => _projectFileOfTask;
+    public string ProjectFileOfTask => _projectFileOfTask!;
 
     /// <summary>
     /// Gets the name of the task to execute.
     /// </summary>
-    public string? TaskName => _taskName;
+    public string TaskName => _taskName!;
 
     /// <summary>
     /// Gets the path to the assembly to load the task from.
     /// </summary>
-    public string? TaskLocation => _taskLocation;
+    public string TaskLocation => _taskLocation!;
 
     /// <summary>
     /// Returns <see langword="true"/> if the build is configured to log all task inputs.
@@ -267,7 +267,7 @@ internal sealed class TaskHostConfiguration : INodePacket
     /// <summary>
     /// Gets the parameters to set on the instantiated task prior to execution.
     /// </summary>
-    public Dictionary<string, TaskParameter>? TaskParameters => _taskParameters;
+    public Dictionary<string, TaskParameter> TaskParameters => _taskParameters!;
 
     /// <summary>
     /// Gets the global properties for the current project.
@@ -308,7 +308,7 @@ internal sealed class TaskHostConfiguration : INodePacket
             // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
             if (translator.Mode == TranslationDirection.WriteToStream)
             {
-                appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
+                appDomainConfigBytes = _appDomainSetup!.GetConfigurationBytes();
             }
 
             translator.Translate(ref appDomainConfigBytes);

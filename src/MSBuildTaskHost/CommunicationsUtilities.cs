@@ -330,7 +330,7 @@ internal static class CommunicationsUtilities
     /// <remarks>
     /// Copied from the BCL implementation to eliminate some expensive security asserts on .NET Framework.
     /// </remarks>
-    internal static Dictionary<string, string> GetEnvironmentVariables()
+    internal static Dictionary<string, string?> GetEnvironmentVariables()
     {
         unsafe
         {
@@ -353,7 +353,8 @@ internal static class CommunicationsUtilities
 
                 long stringBlockLength = pEnvironmentBlockEnd - pEnvironmentBlock;
 
-                Dictionary<string, string> table = new(capacity: 200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
+                // Razzle has 150 environment variables
+                Dictionary<string, string?> table = new(capacity: 200, StringComparer.OrdinalIgnoreCase);
 
                 // Copy strings out, parsing into pairs and inserting into the table.
                 // The first few environment variable entries start with an '='!
@@ -430,7 +431,7 @@ internal static class CommunicationsUtilities
     /// <summary>
     /// Updates the environment to match the provided dictionary.
     /// </summary>
-    internal static void SetEnvironment(Dictionary<string, string>? newEnvironment)
+    internal static void SetEnvironment(Dictionary<string, string?>? newEnvironment)
     {
         if (newEnvironment == null)
         {
@@ -438,8 +439,8 @@ internal static class CommunicationsUtilities
         }
 
         // First, delete all no longer set variables
-        Dictionary<string, string> currentEnvironment = GetEnvironmentVariables();
-        foreach (KeyValuePair<string, string> entry in currentEnvironment)
+        Dictionary<string, string?> currentEnvironment = GetEnvironmentVariables();
+        foreach (KeyValuePair<string, string?> entry in currentEnvironment)
         {
             if (!newEnvironment.ContainsKey(entry.Key))
             {
@@ -448,9 +449,9 @@ internal static class CommunicationsUtilities
         }
 
         // Then, make sure the new ones have their new values.
-        foreach (KeyValuePair<string, string> entry in newEnvironment)
+        foreach (KeyValuePair<string, string?> entry in newEnvironment)
         {
-            if (!currentEnvironment.TryGetValue(entry.Key, out string currentValue) || currentValue != entry.Value)
+            if (!currentEnvironment.TryGetValue(entry.Key, out string? currentValue) || currentValue != entry.Value)
             {
                 SetEnvironmentVariable(entry.Key, entry.Value);
             }
