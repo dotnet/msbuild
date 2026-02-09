@@ -780,8 +780,8 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            // Request ID not found is expected if the request was cancelled before response arrived.
-            // The task thread already threw BuildAbortedException and cleaned up.
+            // Request ID not found is expected if the connection was lost and the task thread
+            // already cleaned up via the finally block in SendCallbackRequestAndWaitForResponse.
             if (_pendingCallbackRequests.TryRemove(callbackPacket.RequestId, out TaskCompletionSource<INodePacket> tcs))
             {
                 tcs.TrySetResult(packet);
@@ -796,10 +796,15 @@ namespace Microsoft.Build.CommandLine
         /// <param name="request">The request packet to send (must implement ITaskHostCallbackPacket).</param>
         /// <returns>The response packet.</returns>
         /// <exception cref="InvalidOperationException">If the connection is lost.</exception>
-        /// <exception cref="BuildAbortedException">If the task is cancelled during the callback.</exception>
         /// <remarks>
         /// This method is infrastructure for callback support. Used by IsRunningMultipleNodes,
         /// RequestCores/ReleaseCores, BuildProjectFile, etc.
+        ///
+        /// We intentionally do NOT check _taskCancelledEvent here. This aligns with in-process
+        /// mode where IBuildEngine callbacks are direct method calls that complete regardless of
+        /// cancellation state. The parent continues processing callback requests even after
+        /// sending TaskHostTaskCancelled, so the response will arrive. Cancellation is handled
+        /// cooperatively via ICancelableTask.Cancel() on the task itself.
         /// </remarks>
         private TResponse SendCallbackRequestAndWaitForResponse<TResponse>(ITaskHostCallbackPacket request)
             where TResponse : class, INodePacket
@@ -818,23 +823,16 @@ namespace Microsoft.Build.CommandLine
                 // Send the request packet to the parent
                 _nodeEndpoint.SendData(request);
 
-                // Wait for either: response arrives, task cancelled, or connection lost
-                // No timeout - callbacks like BuildProjectFile can legitimately take hours
-                WaitHandle[] waitHandles = [responseEvent, _taskCancelledEvent];
-
+                // Wait for the response or connection loss.
+                // No timeout - callbacks like BuildProjectFile can legitimately take hours.
                 while (true)
                 {
-                    int signaledIndex = WaitHandle.WaitAny(waitHandles, millisecondsTimeout: 1000);
+                    int signaledIndex = WaitHandle.WaitAny([responseEvent], millisecondsTimeout: 1000);
 
                     if (signaledIndex == 0)
                     {
                         // Response received
                         break;
-                    }
-                    else if (signaledIndex == 1)
-                    {
-                        // Task cancelled
-                        throw new BuildAbortedException();
                     }
 
                     // Timeout - check connection status (no WaitHandle available for this)
