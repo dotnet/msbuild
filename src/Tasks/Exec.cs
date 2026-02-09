@@ -214,15 +214,86 @@ namespace Microsoft.Build.Tasks
                 return "\"\"";
             }
 
-            // Characters that require quoting in Windows cmd.exe
-            // Based on cmd.exe special characters
-            char[] specialChars = { ' ', '\t', '"', '&', '|', '<', '>', '^', '%', '(', ')', '!', '=', ';', ',' };
+#if NET
+            return EscapeArgumentForWindowsCore(argument);
+#else
+            return EscapeArgumentForWindowsFramework(argument);
+#endif
+        }
 
-            // Check if the argument contains special characters that need quoting
+#if NET
+        /// <summary>
+        /// Modern .NET span-based implementation for Windows escaping.
+        /// </summary>
+        private static string EscapeArgumentForWindowsCore(string argument)
+        {
+            // Characters that require quoting in Windows cmd.exe
+            ReadOnlySpan<char> specialChars = [' ', '\t', '"', '&', '|', '<', '>', '^', '%', '(', ')', '!', '=', ';', ','];
+            
+            ReadOnlySpan<char> argSpan = argument.AsSpan();
+            
+            // Fast path: check if any special characters exist
+            bool needsQuoting = argSpan.IndexOfAny(specialChars) >= 0;
+            
+            if (!needsQuoting)
+            {
+                return argument;
+            }
+
+            // Calculate required capacity
+            int extraChars = 2; // Opening and closing quotes
+            foreach (char c in argSpan)
+            {
+                if (c == '"' || c == '%')
+                {
+                    extraChars++; // Need to double these characters
+                }
+            }
+
+            // Use string.Create for efficient string building
+            return string.Create(argument.Length + extraChars, argument, (span, arg) =>
+            {
+                int pos = 0;
+                span[pos++] = '"';
+
+                foreach (char c in arg)
+                {
+                    if (c == '"')
+                    {
+                        span[pos++] = '"';
+                        span[pos++] = '"';
+                    }
+                    else if (c == '%')
+                    {
+                        span[pos++] = '%';
+                        span[pos++] = '%';
+                    }
+                    else
+                    {
+                        span[pos++] = c;
+                    }
+                }
+
+                span[pos] = '"';
+            });
+        }
+#endif
+
+#if !NET
+        /// <summary>
+        /// .NET Framework implementation for Windows escaping.
+        /// </summary>
+        private static string EscapeArgumentForWindowsFramework(string argument)
+        {
+            // Characters that require quoting in Windows cmd.exe
             bool needsQuoting = false;
+            
+            // Check if the argument contains special characters that need quoting
             foreach (char c in argument)
             {
-                if (Array.IndexOf(specialChars, c) >= 0)
+                if (c == ' ' || c == '\t' || c == '"' || c == '&' || c == '|' || 
+                    c == '<' || c == '>' || c == '^' || c == '%' || c == '(' || 
+                    c == ')' || c == '!' || c == '=' || c == ';' || c == ',')
                 {
                     needsQuoting = true;
                     break;
@@ -234,21 +305,27 @@ namespace Microsoft.Build.Tasks
                 return argument;
             }
 
-            StringBuilder escaped = new StringBuilder();
+            // Pre-calculate capacity to minimize allocations
+            int capacity = argument.Length + 2; // quotes
+            foreach (char c in argument)
+            {
+                if (c == '"' || c == '%')
+                {
+                    capacity++; // Need to double these
+                }
+            }
+
+            StringBuilder escaped = new StringBuilder(capacity);
             escaped.Append('"');
 
-            for (int i = 0; i < argument.Length; i++)
+            foreach (char c in argument)
             {
-                char c = argument[i];
-
                 if (c == '"')
                 {
-                    // Escape double quotes by doubling them
                     escaped.Append("\"\"");
                 }
                 else if (c == '%')
                 {
-                    // Escape percent signs
                     escaped.Append("%%");
                 }
                 else
@@ -260,6 +337,7 @@ namespace Microsoft.Build.Tasks
             escaped.Append('"');
             return escaped.ToString();
         }
+#endif
 
         /// <summary>
         /// Escapes an argument for Unix sh.
@@ -271,15 +349,98 @@ namespace Microsoft.Build.Tasks
                 return "''";
             }
 
-            // Use single quotes for Unix, which preserve everything literally except single quotes
-            // For single quotes within the string, we end the quoted string, add an escaped single quote, and start a new quoted string
+#if NET
+            return EscapeArgumentForUnixCore(argument);
+#else
+            return EscapeArgumentForUnixFramework(argument);
+#endif
+        }
+
+#if NET
+        /// <summary>
+        /// Modern .NET span-based implementation for Unix escaping.
+        /// </summary>
+        private static string EscapeArgumentForUnixCore(string argument)
+        {
+            ReadOnlySpan<char> argSpan = argument.AsSpan();
+            
+            // Fast path: no single quotes
+            int singleQuoteIndex = argSpan.IndexOf('\'');
+            if (singleQuoteIndex < 0)
+            {
+                // Use string.Create for efficient concatenation
+                return string.Create(argument.Length + 2, argument, (span, arg) =>
+                {
+                    span[0] = '\'';
+                    arg.AsSpan().CopyTo(span.Slice(1));
+                    span[^1] = '\'';
+                });
+            }
+
+            // Count single quotes for capacity calculation
+            int singleQuoteCount = 0;
+            foreach (char c in argSpan)
+            {
+                if (c == '\'')
+                {
+                    singleQuoteCount++;
+                }
+            }
+
+            // Each single quote becomes '\'' (4 chars), plus opening and closing quotes
+            int capacity = argument.Length + 2 + (singleQuoteCount * 3);
+
+            return string.Create(capacity, argument, (span, arg) =>
+            {
+                int pos = 0;
+                span[pos++] = '\'';
+
+                foreach (char c in arg)
+                {
+                    if (c == '\'')
+                    {
+                        // End current quote, add escaped quote, start new quote: '\''
+                        span[pos++] = '\'';
+                        span[pos++] = '\\';
+                        span[pos++] = '\'';
+                        span[pos++] = '\'';
+                    }
+                    else
+                    {
+                        span[pos++] = c;
+                    }
+                }
+
+                span[pos] = '\'';
+            });
+        }
+#endif
+
+#if !NET
+        /// <summary>
+        /// .NET Framework implementation for Unix escaping.
+        /// </summary>
+        private static string EscapeArgumentForUnixFramework(string argument)
+        {
+            // Fast path: no single quotes
             if (argument.IndexOf('\'') == -1)
             {
                 return "'" + argument + "'";
             }
 
-            // If there are single quotes, we need to handle them specially
-            StringBuilder escaped = new StringBuilder();
+            // Count single quotes for capacity calculation
+            int singleQuoteCount = 0;
+            foreach (char c in argument)
+            {
+                if (c == '\'')
+                {
+                    singleQuoteCount++;
+                }
+            }
+
+            // Pre-calculate capacity: each ' becomes '\'' (4 chars total, 3 extra)
+            int capacity = argument.Length + 2 + (singleQuoteCount * 3);
+            StringBuilder escaped = new StringBuilder(capacity);
             escaped.Append('\'');
 
             foreach (char c in argument)
@@ -298,6 +459,7 @@ namespace Microsoft.Build.Tasks
             escaped.Append('\'');
             return escaped.ToString();
         }
+#endif
 
         /// <summary>
         /// Write out a temporary batch file with the user-specified command in it.
