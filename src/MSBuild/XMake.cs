@@ -45,10 +45,11 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorLogger;
 using TerminalLogger = Microsoft.Build.Logging.TerminalLogger;
 
-#if FEATURE_MSIOREDIST
+#if NETFRAMEWORK
 // Use I/O operations from Microsoft.IO.Redist which is generally higher perf
 // and also works around https://github.com/dotnet/msbuild/issues/10540.
 // Unnecessary on .NET 6+ because the perf improvements are in-box there.
+using Microsoft.IO;
 using Directory = Microsoft.IO.Directory;
 using File = Microsoft.IO.File;
 using FileInfo = Microsoft.IO.FileInfo;
@@ -2009,11 +2010,18 @@ namespace Microsoft.Build.CommandLine
 
             bool useTerminalLogger = ProcessTerminalLoggerConfiguration(commandLineSwitches, out string aggregatedTerminalLoggerParameters);
 
+            // Process nologo switch early so it can be used in DisplayVersionMessageIfNeeded
+            bool noLogo = false;
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NoLogo))
+            {
+                noLogo = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NoLogo], defaultValue: true, resourceName: "InvalidNoLogoValue");
+            }
+
             // This is temporary until we can remove the need for the environment variable.
             // DO NOT use this environment variable for any new features as it will be removed without further notice.
             Environment.SetEnvironmentVariable("_MSBUILDTLENABLED", useTerminalLogger ? "1" : "0");
 
-            DisplayVersionMessageIfNeeded(recursing, useTerminalLogger, commandLineSwitches);
+            DisplayVersionMessageIfNeeded(recursing, useTerminalLogger, noLogo, commandLineSwitches);
 
             // Idle priority would prevent the build from proceeding as the user does normal actions.
             // This switch is processed early to capture both the command line case (main node should
@@ -4069,7 +4077,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Displays the application version message/logo.
         /// </summary>
-        private static void DisplayVersionMessageIfNeeded(bool recursing, bool useTerminalLogger, CommandLineSwitches commandLineSwitches)
+        private static void DisplayVersionMessageIfNeeded(bool recursing, bool useTerminalLogger, bool noLogo, CommandLineSwitches commandLineSwitches)
         {
             if (recursing)
             {
@@ -4080,7 +4088,7 @@ namespace Microsoft.Build.CommandLine
             //  where it is not appropriate to show the versioning information (information querying mode that can be plugged into CLI scripts,
             //  terminal logger mode, where we want to display only the most relevant info, while output is not meant for investigation).
             // NOTE: response files are not reflected in this check. So enabling TL in response file will lead to version message still being shown.
-            bool shouldShowLogo = !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoLogo] &&
+            bool shouldShowLogo = !noLogo &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess) &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetProperty) &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetItem) &&

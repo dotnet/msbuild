@@ -721,6 +721,8 @@ namespace Microsoft.Build.BackEnd
                                 ITranslator readTranslator = BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer);
 
                                 // parent sends a packet version that is already negotiated during handshake.
+                                // For Framework task hosts (CLR2/CLR4) without extended headers, defaults to 0.
+                                // For .NET task hosts, read from extended header (>= 1).
                                 readTranslator.NegotiatedPacketVersion = parentVersion;
                                 _packetFactory.DeserializeAndRoutePacket(0, packetType, readTranslator);
                             }
