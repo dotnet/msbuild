@@ -76,7 +76,7 @@ namespace Microsoft.Build.TaskHost
         /// <summary>
         /// The saved environment for the process.
         /// </summary>
-        private IDictionary<string, string> _savedEnvironment;
+        private Dictionary<string, string> _savedEnvironment;
 
         /// <summary>
         /// The event which is set when we should shut down.
@@ -734,10 +734,10 @@ namespace Microsoft.Build.TaskHost
         /// environment somewhat to account for expected environment differences between,
         /// e.g. parent processes and task hosts of different bitnesses.
         /// </summary>
-        private void SetTaskHostEnvironment(IDictionary<string, string> environment)
+        private void SetTaskHostEnvironment(Dictionary<string, string> environment)
         {
             ErrorUtilities.VerifyThrowInternalNull(s_mismatchedEnvironmentValues, "mismatchedEnvironmentValues");
-            IDictionary<string, string> updatedEnvironment = null;
+            Dictionary<string, string> updatedEnvironment = null;
 
             if (_updateEnvironment)
             {

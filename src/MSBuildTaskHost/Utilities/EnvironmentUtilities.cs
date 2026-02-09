@@ -10,6 +10,7 @@ internal static partial class EnvironmentUtilities
 {
     private static volatile int s_processId;
     private static volatile string? s_processPath;
+    private static int? s_processSessionId;
 
     /// <summary>Gets the unique identifier for the current process.</summary>
     public static int CurrentProcessId
@@ -55,6 +56,20 @@ internal static partial class EnvironmentUtilities
             }
 
             return (processPath?.Length != 0) ? processPath : null;
+        }
+    }
+
+    public static int ProcessSessionId
+    {
+        get
+        {
+            return s_processSessionId ??= GetProcessSessionId();
+
+            static int GetProcessSessionId()
+            {
+                using Process currentProcess = Process.GetCurrentProcess();
+                return currentProcess.SessionId;
+            }
         }
     }
 }
