@@ -661,7 +661,7 @@ namespace Microsoft.Build.BackEnd
             {
                 TaskHostQueryRequest.QueryType.IsRunningMultipleNodes
                     => _buildEngine is IBuildEngine2 engine2 && engine2.IsRunningMultipleNodes,
-                _ => false  // Unknown query type - return safe default
+                _ => throw new System.NotImplementedException($"Unknown TaskHost query type: {request.Query}")
             };
 
             var response = new TaskHostQueryResponse(request.RequestId, result);
