@@ -10,8 +10,6 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
-#nullable disable
-
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -133,7 +131,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     Loggers = [logger],
                     EnableNodeReuse = false
                 },
-                new BuildRequestData(projectFile, new Dictionary<string, string>(), null, ["Test"], null));
+                new BuildRequestData(projectFile, new Dictionary<string, string?>(), null, ["Test"], null));
 
             buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
 

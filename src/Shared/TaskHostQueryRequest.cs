@@ -3,8 +3,6 @@
 
 #if !CLR2COMPATIBILITY
 
-#nullable disable
-
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
