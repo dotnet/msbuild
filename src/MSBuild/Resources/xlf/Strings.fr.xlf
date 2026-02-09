@@ -1842,7 +1842,7 @@ Remarque : verbosité des enregistreurs d’événements de fichiers
       </trans-unit>
       <trans-unit id="TaskHostAcquired_NullsFiltered">
         <source>Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</source>
-        <target state="new">Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</target>
+        <target state="translated">Le paramètre de sortie de la tâche « {0} » contenait {1} élément(s) null qui ont été filtrés.</target>
         <note>LOCALIZATION: {0} is the name of the task output parameter, {1} is the count of null elements filtered.</note>
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
