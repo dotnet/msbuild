@@ -1,8 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if !CLR2COMPATIBILITY
-
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -51,5 +49,3 @@ namespace Microsoft.Build.BackEnd
         }
     }
 }
-
-#endif
