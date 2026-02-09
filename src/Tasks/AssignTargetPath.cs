@@ -60,12 +60,12 @@ namespace Microsoft.Build.Tasks
                 // NOTE: at this point fullRootPath may or may not have a trailing slash
                 // Ensure trailing slash otherwise c:\bin appears to match part of c:\bin2\foo
                 // Also ensure that relative segments in the path are resolved.
-                AbsolutePath fullRootPath = FrameworkFileUtilities.RemoveRelativeSegments(
-                    TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(RootFolder)));
+                AbsolutePath fullRootPath = 
+                    TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(RootFolder)).GetCanonicalForm();
 
                 // Ensure trailing slash for comparison - AbsolutePath handles OS-aware case sensitivity
-                AbsolutePath currentDirectory = FrameworkFileUtilities.RemoveRelativeSegments(
-                    FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory));
+                AbsolutePath currentDirectory = 
+                    new AbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory), ignoreRootedCheck: true).GetCanonicalForm();
 
                 // check if the root folder is the same as the current directory
                 bool isRootFolderSameAsCurrentDirectory = fullRootPath == currentDirectory;
@@ -102,8 +102,8 @@ namespace Microsoft.Build.Tasks
                         }
                         else
                         {
-                            AbsolutePath itemSpecFullFileNamePath = FrameworkFileUtilities.RemoveRelativeSegments(
-                                TaskEnvironment.GetAbsolutePath(Files[i].ItemSpec));
+                            AbsolutePath itemSpecFullFileNamePath = 
+                                TaskEnvironment.GetAbsolutePath(Files[i].ItemSpec).GetCanonicalForm();
 
                             if (itemSpecFullFileNamePath.Value.StartsWith(fullRootPath.Value, StringComparison.OrdinalIgnoreCase))
                             {
