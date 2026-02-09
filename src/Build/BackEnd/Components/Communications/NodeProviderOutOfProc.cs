@@ -95,7 +95,7 @@ namespace Microsoft.Build.BackEnd
             // Note: We need to always pass /nodeReuse to ensure the value for /nodeReuse from msbuild.rsp
             // (next to msbuild.exe) is ignored.
             NodeLaunchData nodeLaunchData = new(
-                MsbuildLocation: null,
+                MSBuildLocation: null,
                 CommandLineArgs: $"/noautoresponse /nologo /nodemode:1 /nodeReuse:{ComponentHost.BuildParameters.EnableNodeReuse.ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()}",
                 EnvironmentOverrides: DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides());
 

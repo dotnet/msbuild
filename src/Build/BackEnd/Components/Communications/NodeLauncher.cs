@@ -54,182 +54,202 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Process StartInternal(NodeLaunchData nodeLaunchData)
         {
-            // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(nodeLaunchData.MsbuildLocation, nameof(nodeLaunchData.MsbuildLocation));
-
-            if (!FileSystems.Default.FileExists(nodeLaunchData.MsbuildLocation))
-            {
-                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", nodeLaunchData.MsbuildLocation));
-            }
+            ValidateMSBuildLocation(nodeLaunchData.MSBuildLocation);
 
             // Repeat the executable name as the first token of the command line because the command line
             // parser logic expects it and will otherwise skip the first argument
-            var commandLineArgs = $"\"{nodeLaunchData.MsbuildLocation}\" {nodeLaunchData.CommandLineArgs}";
+            string commandLineArgs = $"\"{nodeLaunchData.MSBuildLocation}\" {nodeLaunchData.CommandLineArgs}";
+            string exeName = ResolveExecutableName(nodeLaunchData.MSBuildLocation, out bool isNativeAppHost);
+            uint creationFlags = GetCreationFlags(out bool redirectStreams);
 
-            BackendNativeMethods.STARTUP_INFO startInfo = new();
-            startInfo.cb = Marshal.SizeOf<BackendNativeMethods.STARTUP_INFO>();
+            CommunicationsUtilities.Trace("Launching node from {0}", nodeLaunchData.MSBuildLocation);
 
-            // Null out the process handles so that the parent process does not wait for the child process
-            // to exit before it can exit.
-            uint creationFlags = 0;
-            if (Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
+            return NativeMethodsShared.IsWindows
+                ? StartProcessWindows(nodeLaunchData, exeName, commandLineArgs, creationFlags, redirectStreams, isNativeAppHost)
+                : StartProcessUnix(nodeLaunchData, exeName, commandLineArgs, creationFlags, redirectStreams);
+
+            static void ValidateMSBuildLocation(string msbuildLocation)
             {
-                creationFlags = BackendNativeMethods.NORMALPRIORITYCLASS;
-            }
+                // Should always have been set already.
+                ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
 
-            if (String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDNODEWINDOW")))
-            {
-                if (!Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
+                if (!FileSystems.Default.FileExists(msbuildLocation))
                 {
-                    // Redirect the streams of worker nodes so that this MSBuild.exe's
-                    // parent doesn't wait on idle worker nodes to close streams
-                    // after the build is complete.
-                    startInfo.hStdError = BackendNativeMethods.InvalidHandle;
-                    startInfo.hStdInput = BackendNativeMethods.InvalidHandle;
-                    startInfo.hStdOutput = BackendNativeMethods.InvalidHandle;
-                    startInfo.dwFlags = BackendNativeMethods.STARTFUSESTDHANDLES;
-                    creationFlags |= BackendNativeMethods.CREATENOWINDOW;
+                    throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", msbuildLocation));
                 }
             }
-            else
-            {
-                creationFlags |= BackendNativeMethods.CREATE_NEW_CONSOLE;
-            }
+        }
 
-            CommunicationsUtilities.Trace("Launching node from {0}", nodeLaunchData.MsbuildLocation);
-
-            string exeName = nodeLaunchData.MsbuildLocation;
+        private static string ResolveExecutableName(string msbuildLocation, out bool isNativeAppHost)
+        {
+            isNativeAppHost = false;
 
 #if RUNTIME_TYPE_NETCORE
             // If msbuildLocation is a native app host (e.g., MSBuild.exe on Windows, MSBuild on Linux), run it directly.
             // Otherwise, use dotnet.exe to run the managed assembly (e.g., MSBuild.dll).
-            // Check if the filename (not path) matches the executable name exactly.
-            string fileName = Path.GetFileName(nodeLaunchData.MsbuildLocation);
-            bool isNativeAppHost = fileName.Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
+            string fileName = Path.GetFileName(msbuildLocation);
+            isNativeAppHost = fileName.Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
             if (!isNativeAppHost)
             {
-                // Run the child process with the same host as the currently-running process.
-                exeName = CurrentHost.GetCurrentHost();
+                return CurrentHost.GetCurrentHost();
             }
 #endif
+            return msbuildLocation;
+        }
 
-            if (!NativeMethodsShared.IsWindows)
+        private static uint GetCreationFlags(out bool redirectStreams)
+        {
+            bool ensureStdOut = Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout;
+            bool showNodeWindow = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDNODEWINDOW"));
+
+            redirectStreams = !ensureStdOut && !showNodeWindow;
+
+            uint flags = (ensureStdOut, showNodeWindow) switch
             {
-                ProcessStartInfo processStartInfo = new ProcessStartInfo();
-                processStartInfo.FileName = exeName;
-                processStartInfo.Arguments = commandLineArgs;
-                if (!Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
-                {
-                    // Redirect the streams of worker nodes so that this MSBuild.exe's
-                    // parent doesn't wait on idle worker nodes to close streams
-                    // after the build is complete.
-                    processStartInfo.RedirectStandardInput = true;
-                    processStartInfo.RedirectStandardOutput = true;
-                    processStartInfo.RedirectStandardError = true;
-                    processStartInfo.CreateNoWindow = (creationFlags | BackendNativeMethods.CREATENOWINDOW) == BackendNativeMethods.CREATENOWINDOW;
-                }
+                (true, true) => BackendNativeMethods.NORMALPRIORITYCLASS | BackendNativeMethods.CREATE_NEW_CONSOLE,
+                (true, false) => BackendNativeMethods.NORMALPRIORITYCLASS,
+                (false, true) => BackendNativeMethods.CREATE_NEW_CONSOLE,
+                (false, false) => BackendNativeMethods.CREATENOWINDOW,
+            };
 
-                processStartInfo.UseShellExecute = false;
-                DotnetHostEnvironmentHelper.ApplyEnvironmentOverrides(processStartInfo.Environment, nodeLaunchData.EnvironmentOverrides);
+            return flags;
+        }
 
-                Process process;
-                try
-                {
-                    process = Process.Start(processStartInfo);
-                }
-                catch (Exception ex)
-                {
-                    CommunicationsUtilities.Trace(
-                           "Failed to launch node from {0}. CommandLine: {1}" + Environment.NewLine + "{2}",
-                           nodeLaunchData.MsbuildLocation,
-                           commandLineArgs,
-                           ex.ToString());
+        private static Process StartProcessUnix(NodeLaunchData nodeLaunchData, string exeName, string commandLineArgs, uint creationFlags, bool redirectStreams)
+        {
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = exeName,
+                Arguments = commandLineArgs,
+                UseShellExecute = false,
+                RedirectStandardInput = redirectStreams,
+                RedirectStandardOutput = redirectStreams,
+                RedirectStandardError = redirectStreams,
+                CreateNoWindow = redirectStreams && (creationFlags & BackendNativeMethods.CREATENOWINDOW) != 0,
+            };
 
-                    throw new NodeFailedToLaunchException(ex);
-                }
+            DotnetHostEnvironmentHelper.ApplyEnvironmentOverrides(processStartInfo.Environment, nodeLaunchData.EnvironmentOverrides);
 
+            try
+            {
+                Process process = Process.Start(processStartInfo);
                 CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", process.Id, exeName);
                 return process;
             }
-            else
+            catch (Exception ex)
             {
+                CommunicationsUtilities.Trace(
+                    "Failed to launch node from {0}. CommandLine: {1}" + Environment.NewLine + "{2}",
+                    nodeLaunchData.MSBuildLocation,
+                    commandLineArgs,
+                    ex.ToString());
+
+                throw new NodeFailedToLaunchException(ex);
+            }
+        }
+
+        private static Process StartProcessWindows(NodeLaunchData nodeLaunchData, string exeName, string commandLineArgs, uint creationFlags, bool redirectStreams, bool isNativeAppHost)
+        {
 #if RUNTIME_TYPE_NETCORE
-                // When using dotnet.exe (for managed assemblies), repeat the executable name in the args to suit CreateProcess
-                if (isNativeAppHost)
-                {
-                    commandLineArgs = $"\"{exeName}\" {commandLineArgs}";
-                }
+            // When using native app host, repeat the executable name in the args for CreateProcess
+            if (isNativeAppHost)
+            {
+                commandLineArgs = $"\"{exeName}\" {commandLineArgs}";
+            }
 #endif
 
-                BackendNativeMethods.PROCESS_INFORMATION processInfo = new();
-                BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new();
-                BackendNativeMethods.SECURITY_ATTRIBUTES threadSecurityAttributes = new();
-                processSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
-                threadSecurityAttributes.nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>();
+            BackendNativeMethods.STARTUP_INFO startInfo = CreateStartupInfo(redirectStreams);
+            BackendNativeMethods.SECURITY_ATTRIBUTES processSecurityAttributes = new() { nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>() };
+            BackendNativeMethods.SECURITY_ATTRIBUTES threadSecurityAttributes = new() { nLength = Marshal.SizeOf<BackendNativeMethods.SECURITY_ATTRIBUTES>() };
 
-                IntPtr environmentBlock = BuildEnvironmentBlock(nodeLaunchData.EnvironmentOverrides);
+            IntPtr environmentBlock = BuildEnvironmentBlock(nodeLaunchData.EnvironmentOverrides);
 
-                // When passing a Unicode environment block (created via Marshal.StringToHGlobalUni),
-                // we must set CREATE_UNICODE_ENVIRONMENT. Without this flag, CreateProcess interprets
-                // the block as ANSI, causing "The parameter is incorrect" (error 87).
-                uint effectiveCreationFlags = creationFlags;
+            // When passing a Unicode environment block, we must set CREATE_UNICODE_ENVIRONMENT.
+            // Without this flag, CreateProcess interprets the block as ANSI, causing error 87.
+            uint effectiveCreationFlags = creationFlags;
+            if (environmentBlock != BackendNativeMethods.NullPtr)
+            {
+                effectiveCreationFlags |= BackendNativeMethods.CREATE_UNICODE_ENVIRONMENT;
+            }
+
+            try
+            {
+                bool result = BackendNativeMethods.CreateProcess(
+                    exeName,
+                    commandLineArgs,
+                    ref processSecurityAttributes,
+                    ref threadSecurityAttributes,
+                    false,
+                    effectiveCreationFlags,
+                    environmentBlock,
+                    null,
+                    ref startInfo,
+                    out BackendNativeMethods.PROCESS_INFORMATION processInfo);
+
+                if (!result)
+                {
+                    ThrowNodeLaunchFailure(nodeLaunchData.MSBuildLocation, commandLineArgs);
+                }
+
+                CloseProcessHandles(processInfo);
+
+                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", processInfo.dwProcessId, exeName);
+                return Process.GetProcessById(processInfo.dwProcessId);
+            }
+            finally
+            {
                 if (environmentBlock != BackendNativeMethods.NullPtr)
                 {
-                    effectiveCreationFlags |= BackendNativeMethods.CREATE_UNICODE_ENVIRONMENT;
-                }
-
-                try
-                {
-                    bool result = BackendNativeMethods.CreateProcess(
-                            exeName,
-                            commandLineArgs,
-                            ref processSecurityAttributes,
-                            ref threadSecurityAttributes,
-                            false,
-                            effectiveCreationFlags,
-                            environmentBlock,
-                            null,
-                            ref startInfo,
-                            out processInfo);
-
-                    if (!result)
-                    {
-                        // Creating an instance of this exception calls GetLastWin32Error and also converts it to a user-friendly string.
-                        System.ComponentModel.Win32Exception e = new System.ComponentModel.Win32Exception();
-
-                        CommunicationsUtilities.Trace(
-                                "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {2}",
-                                nodeLaunchData.MsbuildLocation,
-                                e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
-                                e.Message,
-                                commandLineArgs);
-
-                        throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
-                    }
-
-                    int childProcessId = processInfo.dwProcessId;
-
-                    if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
-                    {
-                        NativeMethodsShared.CloseHandle(processInfo.hProcess);
-                    }
-
-                    if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
-                    {
-                        NativeMethodsShared.CloseHandle(processInfo.hThread);
-                    }
-
-                    CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", childProcessId, exeName);
-                    return Process.GetProcessById(childProcessId);
-                }
-                finally
-                {
-                    if (environmentBlock != BackendNativeMethods.NullPtr)
-                    {
-                        Marshal.FreeHGlobal(environmentBlock);
-                    }
+                    Marshal.FreeHGlobal(environmentBlock);
                 }
             }
+
+            static void CloseProcessHandles(BackendNativeMethods.PROCESS_INFORMATION processInfo)
+            {
+#if WINDOWS
+                if (processInfo.hProcess != IntPtr.Zero && processInfo.hProcess != NativeMethods.InvalidHandle)
+                {
+                    NativeMethodsShared.CloseHandle(processInfo.hProcess);
+                }
+
+                if (processInfo.hThread != IntPtr.Zero && processInfo.hThread != NativeMethods.InvalidHandle)
+                {
+                    NativeMethodsShared.CloseHandle(processInfo.hThread);
+                }
+#endif
+            }
+        }
+
+        private static BackendNativeMethods.STARTUP_INFO CreateStartupInfo(bool redirectStreams)
+        {
+            var startInfo = new BackendNativeMethods.STARTUP_INFO
+            {
+                cb = Marshal.SizeOf<BackendNativeMethods.STARTUP_INFO>(),
+            };
+
+            if (redirectStreams)
+            {
+                startInfo.hStdError = BackendNativeMethods.InvalidHandle;
+                startInfo.hStdInput = BackendNativeMethods.InvalidHandle;
+                startInfo.hStdOutput = BackendNativeMethods.InvalidHandle;
+                startInfo.dwFlags = BackendNativeMethods.STARTFUSESTDHANDLES;
+            }
+
+            return startInfo;
+        }
+
+        private static void ThrowNodeLaunchFailure(string msbuildLocation, string commandLineArgs)
+        {
+            var e = new System.ComponentModel.Win32Exception();
+
+            CommunicationsUtilities.Trace(
+                "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {3}",
+                msbuildLocation,
+                e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
+                e.Message,
+                commandLineArgs);
+
+            throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
         }
 
         /// <summary>

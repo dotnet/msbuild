@@ -9,7 +9,7 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// Represents the configuration data needed to launch a node process.
     /// </summary>
-    /// <param name="MsbuildLocation">The path to the executable to launch (e.g., MSBuild.exe or dotnet.exe).</param>
+    /// <param name="MSBuildLocation">The path to the executable to launch (e.g., MSBuild.exe or dotnet.exe).</param>
     /// <param name="CommandLineArgs">The command line arguments to pass to the executable.</param>
     /// <param name="EnvironmentOverrides">
     /// Optional environment variable overrides for the process.
@@ -19,7 +19,7 @@ namespace Microsoft.Build.BackEnd
     /// over DOTNET_ROOT when launching an app host.
     /// </param>
     internal readonly record struct NodeLaunchData(
-        string MsbuildLocation,
+        string MSBuildLocation,
         string CommandLineArgs,
         IDictionary<string, string>? EnvironmentOverrides = null);
 

@@ -207,7 +207,7 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            var msbuildLocation = nodeLaunchData.MsbuildLocation;
+            var msbuildLocation = nodeLaunchData.MSBuildLocation;
             if (String.IsNullOrEmpty(msbuildLocation))
             {
                 msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;

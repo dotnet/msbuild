@@ -663,12 +663,12 @@ namespace Microsoft.Build.BackEnd
 
             (NodeLaunchData nodeLaunchData, Handshake handshake) = ResolveNodeLaunchConfiguration(hostContext, taskHostParameters);
 
-            if (nodeLaunchData.MsbuildLocation == null)
+            if (nodeLaunchData.MSBuildLocation == null)
             {
                 return false;
             }
 
-            CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext, nodeLaunchData.MsbuildLocation);
+            CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext, nodeLaunchData.MSBuildLocation);
 
             IList<NodeContext> nodeContexts = GetNodes(
                 nodeLaunchData,

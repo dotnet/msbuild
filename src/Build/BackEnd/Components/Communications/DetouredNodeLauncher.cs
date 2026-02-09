@@ -54,22 +54,22 @@ namespace Microsoft.Build.BackEnd
         public Process Start(NodeLaunchData launchData, int nodeId)
         {
             // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(launchData.MsbuildLocation, nameof(launchData.MsbuildLocation));
+            ErrorUtilities.VerifyThrowInternalLength(launchData.MSBuildLocation, nameof(launchData.MSBuildLocation));
 
             ErrorUtilities.VerifyThrowInternalNull(_fileAccessManager, nameof(_fileAccessManager));
 
-            if (!FileSystems.Default.FileExists(launchData.MsbuildLocation))
+            if (!FileSystems.Default.FileExists(launchData.MSBuildLocation))
             {
-                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", launchData.MsbuildLocation));
+                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", launchData.MSBuildLocation));
             }
 
             // Repeat the executable name as the first token of the command line because the command line
             // parser logic expects it and will otherwise skip the first argument
-            var commandLineArgs = $"\"{launchData.MsbuildLocation}\" {launchData.CommandLineArgs}";
+            var commandLineArgs = $"\"{launchData.MSBuildLocation}\" {launchData.CommandLineArgs}";
 
-            CommunicationsUtilities.Trace("Launching node from {0}", launchData.MsbuildLocation);
+            CommunicationsUtilities.Trace("Launching node from {0}", launchData.MSBuildLocation);
 
-            string exeName = launchData.MsbuildLocation;
+            string exeName = launchData.MSBuildLocation;
 
 #if RUNTIME_TYPE_NETCORE
             // Run the child process with the same host as the currently-running process.
