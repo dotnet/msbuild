@@ -1845,11 +1845,6 @@
         <target state="new">Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</target>
         <note>LOCALIZATION: {0} is the name of the task output parameter, {1} is the count of null elements filtered.</note>
       </trans-unit>
-      <trans-unit id="TaskHostCallbackConnectionLost">
-        <source>MSB5027: TaskHost lost connection to parent process during callback. The build may have been cancelled.</source>
-        <target state="new">MSB5027: TaskHost lost connection to parent process during callback. The build may have been cancelled.</target>
-        <note>{StrBegin="MSB5027: "}</note>
-      </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
         <source>Terminal Logger was not used because it was detected that the build is running in an automated environment.</source>
         <target state="translated">ビルドが自動化された環境で実行されていることが検出されたため、ターミナル ロガーは使用されませんでした。</target>

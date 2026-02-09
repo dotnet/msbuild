@@ -835,8 +835,10 @@ namespace Microsoft.Build.CommandLine
                     // Timeout - check connection status (no WaitHandle available for this)
                     if (_nodeEndpoint.LinkStatus != LinkStatus.Active)
                     {
+                        // Connection lost - no way to log this since the pipe is broken.
+                        // This is extremely rare (parent killed without killing TaskHost).
                         throw new InvalidOperationException(
-                            ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskHostCallbackConnectionLost"));
+                            "TaskHost lost connection to parent process during callback.");
                     }
                 }
 
