@@ -63,6 +63,11 @@ namespace Microsoft.Build.Tasks
         // '^' before _any_ character escapes that character, don't escape it.
         private static readonly char[] _charactersToEscape = { '(', ')', '=', ';', '!', ',', '&', ' ' };
 
+#if NET
+        // Characters that require quoting in Windows cmd.exe
+        private static readonly char[] _windowsSpecialChars = [' ', '\t', '"', '&', '|', '<', '>', '^', '%', '(', ')', '!', '=', ';', ','];
+#endif
+
         #endregion
 
         #region Properties
@@ -227,28 +232,22 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static string EscapeArgumentForWindowsCore(string argument)
         {
-            // Characters that require quoting in Windows cmd.exe
-            ReadOnlySpan<char> specialChars = [' ', '\t', '"', '&', '|', '<', '>', '^', '%', '(', ')', '!', '=', ';', ','];
-            
             ReadOnlySpan<char> argSpan = argument.AsSpan();
             
             // Fast path: check if any special characters exist
-            bool needsQuoting = argSpan.IndexOfAny(specialChars) >= 0;
+            bool needsQuoting = argSpan.IndexOfAny(_windowsSpecialChars.AsSpan()) >= 0;
             
             if (!needsQuoting)
             {
                 return argument;
             }
 
-            // Calculate required capacity
-            int extraChars = 2; // Opening and closing quotes
-            foreach (char c in argSpan)
-            {
-                if (c == '"' || c == '%')
-                {
-                    extraChars++; // Need to double these characters
-                }
-            }
+            // Find all indexes of characters that need escaping (doubled)
+            int doubleQuoteCount = argSpan.Count('"');
+            int percentCount = argSpan.Count('%');
+            
+            // Calculate required capacity: original length + 2 quotes + extra chars for doubling
+            int extraChars = 2 + doubleQuoteCount + percentCount;
 
             // Use string.Create for efficient string building
             return string.Create(argument.Length + extraChars, argument, (span, arg) =>
@@ -256,22 +255,33 @@ namespace Microsoft.Build.Tasks
                 int pos = 0;
                 span[pos++] = '"';
 
-                foreach (char c in arg)
+                ReadOnlySpan<char> remaining = arg.AsSpan();
+                int nextQuote = remaining.IndexOfAny('"', '%');
+                
+                while (nextQuote >= 0)
                 {
-                    if (c == '"')
+                    // Copy everything before the special char
+                    if (nextQuote > 0)
                     {
-                        span[pos++] = '"';
-                        span[pos++] = '"';
+                        remaining.Slice(0, nextQuote).CopyTo(span.Slice(pos));
+                        pos += nextQuote;
                     }
-                    else if (c == '%')
-                    {
-                        span[pos++] = '%';
-                        span[pos++] = '%';
-                    }
-                    else
-                    {
-                        span[pos++] = c;
-                    }
+                    
+                    // Double the special character
+                    char specialChar = remaining[nextQuote];
+                    span[pos++] = specialChar;
+                    span[pos++] = specialChar;
+                    
+                    // Move to next segment
+                    remaining = remaining.Slice(nextQuote + 1);
+                    nextQuote = remaining.IndexOfAny('"', '%');
+                }
+                
+                // Copy remaining characters
+                if (remaining.Length > 0)
+                {
+                    remaining.CopyTo(span.Slice(pos));
+                    pos += remaining.Length;
                 }
 
                 span[pos] = '"';
@@ -377,15 +387,8 @@ namespace Microsoft.Build.Tasks
                 });
             }
 
-            // Count single quotes for capacity calculation
-            int singleQuoteCount = 0;
-            foreach (char c in argSpan)
-            {
-                if (c == '\'')
-                {
-                    singleQuoteCount++;
-                }
-            }
+            // Count single quotes using Count for efficiency
+            int singleQuoteCount = argSpan.Count('\'');
 
             // Each single quote becomes '\'' (4 chars), plus opening and closing quotes
             int capacity = argument.Length + 2 + (singleQuoteCount * 3);
@@ -395,20 +398,34 @@ namespace Microsoft.Build.Tasks
                 int pos = 0;
                 span[pos++] = '\'';
 
-                foreach (char c in arg)
+                ReadOnlySpan<char> remaining = arg.AsSpan();
+                int nextQuote = remaining.IndexOf('\'');
+                
+                while (nextQuote >= 0)
                 {
-                    if (c == '\'')
+                    // Copy everything before the quote
+                    if (nextQuote > 0)
                     {
-                        // End current quote, add escaped quote, start new quote: '\''
-                        span[pos++] = '\'';
-                        span[pos++] = '\\';
-                        span[pos++] = '\'';
-                        span[pos++] = '\'';
+                        remaining.Slice(0, nextQuote).CopyTo(span.Slice(pos));
+                        pos += nextQuote;
                     }
-                    else
-                    {
-                        span[pos++] = c;
-                    }
+                    
+                    // Replace ' with '\''
+                    span[pos++] = '\'';
+                    span[pos++] = '\\';
+                    span[pos++] = '\'';
+                    span[pos++] = '\'';
+                    
+                    // Move to next segment
+                    remaining = remaining.Slice(nextQuote + 1);
+                    nextQuote = remaining.IndexOf('\'');
+                }
+                
+                // Copy remaining characters
+                if (remaining.Length > 0)
+                {
+                    remaining.CopyTo(span.Slice(pos));
+                    pos += remaining.Length;
                 }
 
                 span[pos] = '\'';
