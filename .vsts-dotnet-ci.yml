@@ -65,7 +65,12 @@ jobs:
     coverageReportName: WindowsFullFrameworkCoverage
   displayName: "Windows Full"
   pool:
-    vmImage: 'windows-2022'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      name: VSEng-MicroBuildVSStable
+      demands: agent.os -equals Windows_NT
   timeoutInMinutes: 120
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
@@ -172,7 +177,12 @@ jobs:
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
     coverageReportName: WindowsCoreCoverage
   pool:
-    vmImage: 'windows-2022'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      name: VSEng-MicroBuildVSStable
+      demands: agent.os -equals Windows_NT
   timeoutInMinutes: 120
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
@@ -244,6 +254,36 @@ jobs:
       ArtifactName: 'CoreOnWindows test logs'
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
+
+- job: BootstrapMSBuildWithMTMode
+  displayName: "Linux Core Multithreaded Mode"
+  pool:
+    vmImage: 'ubuntu-latest'
+  timeoutInMinutes: 120
+  steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: Bash@3
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
+        arguments: $(Build.SourcesDirectory)/NuGet.config $Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
+  - bash: sudo apt-get update
+  - bash: sudo apt-get install -y libxml2
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged) --skipTests --stage2Properties '/mt'
+    displayName: 'Build with bootstrapped MSBuild and -mt mode'
+    condition: eq(variables.onlyDocChanged, 0)
+    env:
+      MSBUILDUSESERVER: "1"
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'MTModeOnLinux build logs'
+    continueOnError: true
+    condition: always()
 
 - job: FullReleaseOnWindows
   displayName: "Windows Full Release (no bootstrap)"
@@ -337,7 +377,11 @@ jobs:
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
   pool:
-    vmImage: 'ubuntu-latest'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      vmImage: 'ubuntu-latest'
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
@@ -523,7 +567,12 @@ jobs:
   variables:
     onlyDocChanged: $[ dependencies.BootstrapMSBuildOnFullFrameworkWindows.outputs['CheckDocumentationOnlyChange.onlyDocChanged'] ]
   pool:
-    vmImage: 'windows-2022'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      name: VSEng-MicroBuildVSStable
+      demands: agent.os -equals Windows_NT
   steps:
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: DownloadPipelineArtifact@2

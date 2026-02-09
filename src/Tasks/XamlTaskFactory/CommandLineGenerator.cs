@@ -7,6 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
+#if NETFRAMEWORK
+using Microsoft.IO;
+#endif
+
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.XamlTypes;
 using Microsoft.Build.Shared;

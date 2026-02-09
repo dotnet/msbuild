@@ -119,7 +119,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <inheritdoc/>
-            public byte NegotiatedPacketVersion { get; set; }
+            public byte? NegotiatedPacketVersion { get; set; }
 
             /// <summary>
             /// Translates a boolean.
@@ -1006,7 +1006,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <inheritdoc/>
-            public byte NegotiatedPacketVersion { get; set; }
+            public byte? NegotiatedPacketVersion { get; set; }
 
             /// <summary>
             /// Translates a boolean.

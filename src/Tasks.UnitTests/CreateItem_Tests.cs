@@ -215,6 +215,70 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Verifies that %(RecursiveDir) metadata is preserved when items cross the TaskHost
+        /// process boundary. The CreateItem task is forced to run in TaskHost via TaskHostFactory,
+        /// so items with RecursiveDir are wrapped in TaskParameterTaskItem for serialization.
+        /// Without the fix in TaskParameterTaskItem, RecursiveDir is lost during serialization,
+        /// causing directory flattening in scenarios like dotnet pack.
+        /// See https://github.com/dotnet/msbuild/issues/3121 and https://github.com/dotnet/msbuild/issues/13140
+        /// </summary>
+        [Fact]
+        public void RecursiveDirPreservedAcrossTaskHostBoundary()
+        {
+            using var env = TestEnvironment.Create(_testOutput);
+
+            ObjectModelHelpers.DeleteTempProjectDirectory();
+
+            // Get the path to Microsoft.Build.Tasks.Core.dll for the UsingTask with TaskHostFactory
+            string tasksCoreAssembly = typeof(Copy).Assembly.Location;
+
+            // The wildcard expansion happens in an <ItemGroup> (engine side) which sets RecursiveDir
+            // as built-in metadata. These pre-expanded items are then passed to CreateItem running
+            // in an external TaskHost. Without the fix, RecursiveDir is lost when items are wrapped
+            // in TaskParameterTaskItem for cross-process serialization, because built-in metadata
+            // is not included in CloneCustomMetadataEscaped().
+            string projectFileFullPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("Myapp.proj",
+                ObjectModelHelpers.CleanupFileContents($@"
+                <Project xmlns=`msbuildnamespace`>
+                  <UsingTask TaskName=`Microsoft.Build.Tasks.CreateItem` AssemblyFile=`{tasksCoreAssembly}` TaskFactory=`TaskHostFactory` />
+                  <ItemGroup>
+                    <Source Include=`**\*.txt` />
+                  </ItemGroup>
+                  <Target Name=`Repro` Returns=`@(Result)`>
+                    <CreateItem Include=`@(Source)`>
+                      <Output TaskParameter=`Include` ItemName=`Result`/>
+                    </CreateItem>
+                  </Target>
+                </Project>
+                "));
+
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine("Subdir", "Bar.txt"), "bar");
+            ObjectModelHelpers.CreateFileInTempProjectDirectory(Path.Combine("Subdir", "Deep", "Baz.txt"), "baz");
+
+            BuildRequestData data = new BuildRequestData(projectFileFullPath, new Dictionary<string, string>(), null, new string[] { "Repro" }, null);
+            BuildParameters parameters = new BuildParameters
+            {
+                EnableNodeReuse = false,
+                Loggers = new ILogger[] { new MockLogger(_testOutput) },
+            };
+            BuildResult result = BuildManager.DefaultBuildManager.Build(parameters, data);
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            ITaskItem[] items = result.ResultsByTarget["Repro"].Items;
+
+            // Without the fix, RecursiveDir is lost during TaskParameterTaskItem serialization
+            // when items cross the TaskHost process boundary. Items produced by wildcard expansion
+            // would have empty RecursiveDir instead of the expected subdirectory path.
+            ITaskItem subdirItem = Array.Find(items, i => i.ItemSpec.EndsWith("Bar.txt", StringComparison.OrdinalIgnoreCase));
+            subdirItem.ShouldNotBeNull();
+            subdirItem.GetMetadata("RecursiveDir").ShouldBe("Subdir" + Path.DirectorySeparatorChar);
+
+            ITaskItem deepItem = Array.Find(items, i => i.ItemSpec.EndsWith("Baz.txt", StringComparison.OrdinalIgnoreCase));
+            deepItem.ShouldNotBeNull();
+            deepItem.GetMetadata("RecursiveDir").ShouldBe("Subdir" + Path.DirectorySeparatorChar + "Deep" + Path.DirectorySeparatorChar);
+        }
+
+        /// <summary>
         /// CreateItem should add additional metadata when instructed
         /// </summary>
         [Fact]
