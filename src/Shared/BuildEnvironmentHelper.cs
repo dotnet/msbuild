@@ -197,15 +197,8 @@ namespace Microsoft.Build.Shared
                 return null;
             }
 
-            var msBuildExecutableCandidateName =
-#if NETCOREAPP
-               "MSBuild.dll";
-#else
-               "MSBuild.exe";
-#endif
-
-            // Check for MSBuild.[exe|dll] next to the current assembly
-            var msBuildExecutableCandidate = Path.Combine(Path.GetDirectoryName(buildAssembly), msBuildExecutableCandidateName);
+            // Check for MSBuild.[exe] next to the current assembly
+            var msBuildExecutableCandidate = Path.Combine(Path.GetDirectoryName(buildAssembly), "MSBuild.exe");
 
             // First check if we're in a VS installation
             var environment = TryFromMSBuildExeUnderVisualStudio(msBuildExecutableCandidate);
