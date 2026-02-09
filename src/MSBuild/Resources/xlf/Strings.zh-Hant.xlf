@@ -1842,7 +1842,7 @@
       </trans-unit>
       <trans-unit id="TaskHostAcquired_NullsFiltered">
         <source>Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</source>
-        <target state="new">Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</target>
+        <target state="translated">工作輸出參數 "{0}" 包含 {1} 個空元素，已遭篩選。</target>
         <note>LOCALIZATION: {0} is the name of the task output parameter, {1} is the count of null elements filtered.</note>
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
