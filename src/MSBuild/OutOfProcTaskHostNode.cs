@@ -774,10 +774,15 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void HandleCallbackResponse(INodePacket packet)
         {
-            // Silent no-op if packet doesn't implement ITaskHostCallbackPacket or request ID unknown.
-            // Unknown ID can occur if request was cancelled/abandoned before response arrived.
-            if (packet is ITaskHostCallbackPacket callbackPacket
-                && _pendingCallbackRequests.TryRemove(callbackPacket.RequestId, out TaskCompletionSource<INodePacket> tcs))
+            if (packet is not ITaskHostCallbackPacket callbackPacket)
+            {
+                ErrorUtilities.ThrowInternalError("HandleCallbackResponse called with non-callback packet type: {0}", packet.GetType().Name);
+                return;
+            }
+
+            // Request ID not found is expected if the request was cancelled before response arrived.
+            // The task thread already threw BuildAbortedException and cleaned up.
+            if (_pendingCallbackRequests.TryRemove(callbackPacket.RequestId, out TaskCompletionSource<INodePacket> tcs))
             {
                 tcs.TrySetResult(packet);
             }
