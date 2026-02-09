@@ -1139,11 +1139,9 @@ namespace Microsoft.Build.UnitTests
 
         [Theory]
         [InlineData(null, null, true)] // Default: colors enabled
-        [InlineData("", null, false)] // NO_COLOR="" (empty string) means colors disabled (variable is set)
         [InlineData("1", null, false)] // NO_COLOR set, colors disabled
         [InlineData("1", "1", false)] // NO_COLOR supersedes FORCE_COLOR
         [InlineData(null, "1", true)] // FORCE_COLOR set, colors enabled
-        [InlineData(null, "", true)] // FORCE_COLOR="" (empty string) means colors enabled (variable is set)
         public void ColorEnvironmentVariables(string? noColor, string? forceColor, bool shouldUseColor)
         {
             using (var env = TestEnvironment.Create())
@@ -1163,6 +1161,32 @@ namespace Microsoft.Build.UnitTests
                 logger.ShouldUseColor().ShouldBe(shouldUseColor);
             }
         }
+
+#if NET
+        // On .NET, empty string environment variables are supported and different from null
+        [Theory]
+        [InlineData("", null, false)] // NO_COLOR="" (empty string) means colors disabled (variable is set)
+        [InlineData(null, "", true)] // FORCE_COLOR="" (empty string) means colors enabled (variable is set)
+        public void ColorEnvironmentVariables_EmptyString(string? noColor, string? forceColor, bool shouldUseColor)
+        {
+            using (var env = TestEnvironment.Create())
+            {
+                if (noColor is not null)
+                {
+                    env.SetEnvironmentVariable("NO_COLOR", noColor);
+                }
+                if (forceColor is not null)
+                {
+                    env.SetEnvironmentVariable("FORCE_COLOR", forceColor);
+                }
+
+                TerminalLogger logger = new TerminalLogger();
+                logger.Initialize(_centralNodeEventSource);
+
+                logger.ShouldUseColor().ShouldBe(shouldUseColor);
+            }
+        }
+#endif
 
         [Theory]
         [InlineData("true", true)]

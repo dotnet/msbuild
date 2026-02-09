@@ -1965,7 +1965,6 @@ namespace Microsoft.Build.UnitTests
 
         [Theory]
         [InlineData(null, null)] // Default: colors enabled
-        [InlineData("", null)] // NO_COLOR="" (empty string) means colors disabled (variable is set)
         [InlineData("1", null)] // NO_COLOR set, colors disabled
         [InlineData("1", "1")] // NO_COLOR supersedes FORCE_COLOR
         public void ColorEnvironmentVariables_DisablesColor(string noColor, string forceColor)
@@ -2011,9 +2010,38 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+#if NET
+        // On .NET, empty string environment variables are supported
+        [Theory]
+        [InlineData("")] // NO_COLOR="" (empty string) means colors disabled (variable is set)
+        public void ColorEnvironmentVariables_DisablesColor_EmptyString(string noColor)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                env.SetEnvironmentVariable("NO_COLOR", noColor);
+
+                EventSourceSink es = new EventSourceSink();
+                SimulatedConsole sc = new SimulatedConsole();
+                ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, sc.SetColor, sc.ResetColor);
+                logger.Initialize(es);
+
+                // Log an error
+                es.Consume(new BuildStartedEventArgs("Build started", null));
+                BuildEventContext context = new BuildEventContext(1, 1, 1, 1);
+                BuildErrorEventArgs errorArgs = new BuildErrorEventArgs(null, "ERR001", "file.cs", 1, 1, 0, 0, "Test error", null, null);
+                errorArgs.BuildEventContext = context;
+                es.Consume(errorArgs);
+                
+                string log = sc.ToString();
+                log.ShouldNotContain("<red>");
+                log.ShouldNotContain("<yellow>");
+                log.ShouldNotContain("<green>");
+            }
+        }
+#endif
+
         [Theory]
         [InlineData("1")] // FORCE_COLOR set, colors enabled (will use ANSI codes)
-        [InlineData("")] // FORCE_COLOR="" (empty string) means colors enabled (variable is set)
         public void ColorEnvironmentVariables_ForcesColor(string forceColor)
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -2041,6 +2069,36 @@ namespace Microsoft.Build.UnitTests
                 sc.ToString().ShouldNotBeNull();
             }
         }
+
+#if NET
+        [Theory]
+        [InlineData("")] // FORCE_COLOR="" (empty string) means colors enabled (variable is set)
+        public void ColorEnvironmentVariables_ForcesColor_EmptyString(string forceColor)
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                if (forceColor is not null)
+                {
+                    env.SetEnvironmentVariable("FORCE_COLOR", forceColor);
+                }
+
+                EventSourceSink es = new EventSourceSink();
+                SimulatedConsole sc = new SimulatedConsole();
+                ConsoleLogger logger = new ConsoleLogger(LoggerVerbosity.Normal, sc.Write, sc.SetColor, sc.ResetColor);
+                logger.Initialize(es);
+
+                // When FORCE_COLOR is set, logger uses ANSI codes which write directly to Console.Out
+                es.Consume(new BuildStartedEventArgs("Build started", null));
+                BuildEventContext context = new BuildEventContext(1, 1, 1, 1);
+                BuildErrorEventArgs errorArgs = new BuildErrorEventArgs(null, "ERR001", "file.cs", 1, 1, 0, 0, "Test error", null, null);
+                errorArgs.BuildEventContext = context;
+                es.Consume(errorArgs);
+                
+                // Just verify no crash
+                sc.ToString().ShouldNotBeNull();
+            }
+        }
+#endif
 
         [Theory]
         [InlineData("false")]
