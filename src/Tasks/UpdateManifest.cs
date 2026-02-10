@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks
 #else
 
     [MSBuildMultiThreadableTask]
-    public sealed class UpdateManifest : TaskRequiresFramework, IUpdateManifestTaskContract, IMultiThreadableTask
+    public sealed class UpdateManifest : TaskRequiresFramework, IUpdateManifestTaskContract
     {
         public UpdateManifest()
             : base(nameof(UpdateManifest))
@@ -71,9 +71,6 @@ namespace Microsoft.Build.Tasks
 
         [Output]
         public ITaskItem OutputManifest { get; set; }
-
-        /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
 
         #endregion
     }

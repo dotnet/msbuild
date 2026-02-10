@@ -511,8 +511,8 @@ namespace Microsoft.Build.Tasks
             var fileMap = new FileMap();
 
             // Dictionary used to look up any content output files that are also in References
-            // Use Path.GetFullPath to canonicalize paths (resolve .., normalize slashes) for reliable matching
-            var outputAssembliesMap = outputAssemblies.ToDictionary(p => Path.GetFullPath(TaskEnvironment.GetAbsolutePath(p.ItemSpec)), StringComparer.OrdinalIgnoreCase);
+            // Use GetCanonicalForm to canonicalize paths (resolve .., normalize slashes) for reliable matching
+            var outputAssembliesMap = outputAssemblies.ToDictionary(p => (string)TaskEnvironment.GetAbsolutePath(p.ItemSpec).GetCanonicalForm(), StringComparer.OrdinalIgnoreCase);
 
             // Add all input Files to the FileMap, flagging them to be published by default...
             if (Files != null)
@@ -524,7 +524,7 @@ namespace Microsoft.Build.Tasks
                     // Lookup full path of the File in outputAssembliesMap and skip the
                     // file if the target/destination path is the same.
                     //
-                    string key = Path.GetFullPath(TaskEnvironment.GetAbsolutePath(item.ItemSpec));
+                    string key = (string)TaskEnvironment.GetAbsolutePath(item.ItemSpec).GetCanonicalForm();
                     outputAssembliesMap.TryGetValue(key, out var assembly);
                     if (assembly != null)
                     {

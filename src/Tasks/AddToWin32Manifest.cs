@@ -90,7 +90,7 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = null!;
 
-        private string? GetManifestPath()
+        private AbsolutePath? GetManifestPath()
         {
             if (ApplicationManifest != null)
             {
@@ -112,23 +112,22 @@ namespace Microsoft.Build.Tasks
 
             string? defaultManifestPath = ToolLocationHelper.GetPathToDotNetFrameworkFile(DefaultManifestName, TargetDotNetFrameworkVersion.Version46);
 
-            return defaultManifestPath;
+            return defaultManifestPath is null ? null : new AbsolutePath(defaultManifestPath);
         }
 
-        private Stream? GetManifestStream(string? path)
+        private Stream? GetManifestStream(AbsolutePath? path)
         {
             // The logic for getting default manifest is similar to the one from Roslyn:
             // If Roslyn logic returns null, we fall back to reading embedded manifest.
             return path is null
                     ? typeof(AddToWin32Manifest).Assembly.GetManifestResourceStream($"Microsoft.Build.Tasks.Resources.{DefaultManifestName}")
-                    : File.OpenRead(path);
+                    : File.OpenRead(path.Value);
         }
 
         public override bool Execute()
         {
-            string? manifestPath = GetManifestPath();
-            // Use original user-provided path for error messages to match pre-migration behavior
-            string? manifestDisplayPath = ApplicationManifest?.ItemSpec ?? manifestPath;
+            AbsolutePath? manifestPath = GetManifestPath();
+            string? manifestDisplayPath = manifestPath?.OriginalValue;
             try
             {
                 using Stream? stream = GetManifestStream(manifestPath);
