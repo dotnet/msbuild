@@ -36,7 +36,7 @@ internal class ConcurrentDictionary<TKey, TValue>
     }
 
     private volatile Tables _tables; // Internal tables of the dictionary
-    private IEqualityComparer<TKey> _comparer; // Key equality comparer
+    private readonly IEqualityComparer<TKey> _comparer; // Key equality comparer
     private readonly bool _growLockArray; // Whether to dynamically increase the size of the striped lock
     private int _budget; // The maximum number of elements per lock before a resize operation is triggered
 

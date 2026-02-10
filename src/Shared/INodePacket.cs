@@ -19,7 +19,7 @@ namespace Microsoft.Build.BackEnd
     /// Several of these values must be kept in sync with MSBuildTaskHost's NodePacketType.
     /// The values shared with MSBuildTaskHost are <see cref="LogMessage"/>,
     /// <see cref="NodeBuildComplete"/>, <see cref="NodeShutdown"/>, <see cref="TaskHostConfiguration"/>,
-    /// <see cref="TaskHostTaskCancelled"/>, and <see cref="TaskHostTaskComplete"/>."/>.
+    /// <see cref="TaskHostTaskCancelled"/>, and <see cref="TaskHostTaskComplete"/>.
     /// </remarks>
     internal enum NodePacketType : byte
     {

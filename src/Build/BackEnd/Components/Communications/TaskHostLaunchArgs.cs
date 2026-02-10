@@ -77,7 +77,6 @@ internal sealed class TaskHostLaunchArgs
         }
 
 #if FEATURE_NET35_TASKHOST
-
         if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2))
         {
             // The .NET 3.5 task host uses the directory of its EXE when calculating salt for the handshake.
@@ -94,10 +93,8 @@ internal sealed class TaskHostLaunchArgs
 
         nodeReuse = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NodeReuse);
 
-        // If the runtime host path is null it means we don't have MSBuild.dll path resolved and
-        // there is no need to include it in the command line arguments.
         commandLineArgs = $"""
-            "" /nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuse.ToString().ToLower()} /low:{buildParameters.LowPriority.ToString().ToLower()} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} 
+            /nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuse.ToString().ToLower()} /low:{buildParameters.LowPriority.ToString().ToLower()} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} 
             """;
 
         handshake = new Handshake(hostContext);

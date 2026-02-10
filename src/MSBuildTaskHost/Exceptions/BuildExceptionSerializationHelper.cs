@@ -8,7 +8,7 @@ namespace Microsoft.Build.TaskHost.Exceptions;
 
 internal static class BuildExceptionSerializationHelper
 {
-    private static Dictionary<string, Func<string, Exception?, BuildExceptionBase>> s_exceptionFactories = new()
+    private static readonly Dictionary<string, Func<string, Exception?, BuildExceptionBase>> s_exceptionFactories = new()
     {
         { GetSerializationKey<InternalErrorException>(), InternalErrorException.CreateFromRemote }
     };
@@ -25,7 +25,7 @@ internal static class BuildExceptionSerializationHelper
 
     public static BuildExceptionBase DeserializeException(string serializationType, string message, Exception? innerException)
     {
-        if (s_exceptionFactories.TryGetValue(serializationType, out var factory))
+        if (!s_exceptionFactories.TryGetValue(serializationType, out var factory))
         {
             factory = s_defaultFactory;
         }

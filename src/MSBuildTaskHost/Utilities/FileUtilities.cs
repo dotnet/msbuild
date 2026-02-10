@@ -275,13 +275,10 @@ internal static partial class FileUtilities
             fullPath = EscapingUtilities.Escape(fullPath);
         }
 
-        if (!EndsWithSlash(fullPath))
+        if (!EndsWithSlash(fullPath) && (IsDrivePattern(fileSpec) || IsUncPattern(fullPath)))
         {
-            if (IsDrivePattern(fileSpec) || IsUncPattern(fullPath))
-            {
-                // append trailing slash if Path.GetFullPath failed to (this happens with drive-specs and UNC shares)
-                fullPath += Path.DirectorySeparatorChar;
-            }
+            // append trailing slash if Path.GetFullPath failed to (this happens with drive-specs and UNC shares)
+            fullPath += Path.DirectorySeparatorChar;
         }
 
         return fullPath;

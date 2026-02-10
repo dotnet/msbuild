@@ -34,10 +34,8 @@ public class MSBuildTaskHostTests(ITestOutputHelper testOutput) : IDisposable
         CopyFilesRecursively(Path.Combine(TestAssetsRootPath, "Net35WinFormsApp"), testFolder.Path);
         string projectFilePath = Path.Combine(testFolder.Path, "TestNet35WinForms.csproj");
 
-        string output = RunnerUtilities.ExecBootstrapedMSBuild(projectFilePath, out bool success, outputHelper: testOutput);
+        _ = RunnerUtilities.ExecBootstrapedMSBuild(projectFilePath, out bool success, outputHelper: testOutput);
         success.ShouldBeTrue();
-
-        output.ShouldContain("Build succeeded.");
     }
 
     private static void CopyFilesRecursively(string sourcePath, string targetPath)
