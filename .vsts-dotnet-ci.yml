@@ -148,6 +148,14 @@ jobs:
       ArtifactName: 'FullOnWindows test logs'
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
+  # Publish COM traces for debugging node communication issues
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: CommTraces'
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)\artifacts\bin\CommTraces'
+      ArtifactName: 'FullOnWindows CommTraces'
+    continueOnError: true
+    condition: always()
   - task: CopyFiles@2
     condition: eq(variables['publishverify'], 'Yes')
     continueOnError: true
@@ -244,6 +252,15 @@ jobs:
       ArtifactName: 'CoreOnWindows test logs'
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
+
+  # Publish COM traces for debugging node communication issues
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: CommTraces'
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)\artifacts\bin\CommTraces'
+      ArtifactName: 'CoreOnWindows CommTraces'
+    continueOnError: true
+    condition: always()
 
 - job: BootstrapMSBuildWithMTMode
   displayName: "Linux Core Multithreaded Mode"
@@ -363,6 +380,14 @@ jobs:
       ArtifactName: 'FullOnWindows Release test logs'
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
+  # Publish COM traces for debugging node communication issues
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: CommTraces'
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)\artifacts\bin\CommTraces'
+      ArtifactName: 'FullOnWindows Release CommTraces'
+    continueOnError: true
+    condition: always()
 
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
@@ -436,6 +461,14 @@ jobs:
       ArtifactName: 'CoreOnLinux test logs'
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
+  # Publish COM traces for debugging node communication issues
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: CommTraces'
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CommTraces'
+      ArtifactName: 'CoreOnLinux CommTraces'
+    continueOnError: true
+    condition: always()
   - task: CopyFiles@2
     condition: eq(variables['publishverify'], 'Yes')
     continueOnError: true
@@ -524,6 +557,14 @@ jobs:
       ArtifactName: 'CoreOnMac test logs'
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
+  # Publish COM traces for debugging node communication issues
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: CommTraces'
+    inputs:
+      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CommTraces'
+      ArtifactName: 'CoreOnMac CommTraces'
+    continueOnError: true
+    condition: always()
   - task: CopyFiles@2
     condition: eq(variables['publishverify'], 'Yes')
     continueOnError: true

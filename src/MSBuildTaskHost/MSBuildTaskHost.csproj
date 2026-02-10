@@ -46,6 +46,9 @@
     <Compile Include="..\Framework\BuildEnvironmentState.cs">
       <Link>BuildEnvironmentState.cs</Link>
     </Compile>
+    <Compile Include="..\Framework\Constants.cs">
+      <Link>Constants.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\AssemblyNameComparer.cs">
       <Link>AssemblyNameComparer.cs</Link>
     </Compile>

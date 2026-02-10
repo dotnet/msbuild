@@ -33,13 +33,6 @@ namespace Microsoft.Build.BackEnd
         internal const uint CREATENOWINDOW = 0x08000000;
 
         /// <summary>
-        /// Indicates that the environment block pointed to by lpEnvironment uses Unicode characters.
-        /// If this flag is not set, the environment block is assumed to be ANSI.
-        /// Required when passing a custom Unicode environment block to CreateProcess.
-        /// </summary>
-        internal const uint CREATE_UNICODE_ENVIRONMENT = 0x00000400;
-
-        /// <summary>
         /// Use the standard handles
         /// </summary>
         internal const Int32 STARTFUSESTDHANDLES = 0x00000100;
@@ -48,6 +41,11 @@ namespace Microsoft.Build.BackEnd
         /// Create a new console.
         /// </summary>
         internal const Int32 CREATE_NEW_CONSOLE = 0x00000010;
+
+        /// <summary>
+        /// Indicates that the environment block uses Unicode characters.
+        /// </summary>
+        internal const uint CREATE_UNICODE_ENVIRONMENT = 0x00000400;
 
         /// <summary>
         /// Create a new process

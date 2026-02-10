@@ -240,9 +240,7 @@ namespace Microsoft.Build.CommandLine
         public static int Main(string[] args)
         {
             // When running on CoreCLR(.NET), insert the command executable path as the first element of the args array.
-            // This is needed because on .NET the first element of Environment.CommandLine is the dotnet executable path
-            // and not the msbuild executable path. CoreCLR version didn't support Environment.CommandLine initially, so
-            // workaround was needed.
+            // Use the native process path if available.
 #if NET
             args = [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, .. args];
 #else

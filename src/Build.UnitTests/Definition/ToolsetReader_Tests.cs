@@ -20,6 +20,7 @@ using RegistryException = Microsoft.Build.Exceptions.RegistryException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using Xunit;
+using Microsoft.Build.Framework;
 
 #nullable disable
 

@@ -16,12 +16,7 @@ namespace Microsoft.Build.UnitTests.Shared
 {
     public static class RunnerUtilities
     {
-        public static string PathToCurrentlyRunningMsBuildExe =>
-#if NET
-            Path.Combine(BootstrapMsBuildBinaryLocation, "sdk", BootstrapLocationAttribute.BootstrapSdkVersion, Constants.MSBuildExecutableName);
-#else
-            Path.Combine(BootstrapMsBuildBinaryLocation, Constants.MSBuildExecutableName);
-#endif
+        public static string PathToCurrentlyRunningMsBuildExe => BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
 
         public static ArtifactsLocationAttribute ArtifactsLocationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<ArtifactsLocationAttribute>()
                                                    ?? throw new InvalidOperationException("This test assembly does not have the ArtifactsLocationAttribute");
@@ -31,6 +26,8 @@ namespace Microsoft.Build.UnitTests.Shared
         public static string BootstrapSdkVersion => BootstrapLocationAttribute.BootstrapSdkVersion;
 
         public static string BootstrapRootPath => BootstrapLocationAttribute.BootstrapRoot;
+
+        public static string ArtifactsDir => BootstrapLocationAttribute.ArtifactsDir;
 
         public static string LatestDotNetCoreForMSBuild => BootstrapLocationAttribute.LatestDotNetCoreForMSBuild;
 
@@ -51,15 +48,19 @@ namespace Microsoft.Build.UnitTests.Shared
         /// Invoke the currently running msbuild and return the stdout, stderr, and process exit status.
         /// This method may invoke msbuild via other runtimes.
         /// </summary>
-        public static string ExecMSBuild(string msbuildParameters, out bool successfulExit, ITestOutputHelper outputHelper = null) =>
-            ExecMSBuild(PathToCurrentlyRunningMsBuildExe, msbuildParameters, out successfulExit, outputHelper: outputHelper);
+        public static string ExecMSBuild(string msbuildParameters, out bool successfulExit, ITestOutputHelper outputHelper = null)
+        {
+            return ExecMSBuild(PathToCurrentlyRunningMsBuildExe, msbuildParameters, out successfulExit, outputHelper: outputHelper);
+        }
 
         /// <summary>
         /// Invoke msbuild.exe with the given parameters and return the stdout, stderr, and process exit status.
         /// This method may invoke msbuild via other runtimes.
         /// </summary>
         public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
-            => RunProcessAndGetOutput(pathToMsBuildExe, msbuildParameters, out successfulExit, shellExecute, outputHelper);
+        {
+            return RunProcessAndGetOutput(pathToMsBuildExe, msbuildParameters, out successfulExit, shellExecute, outputHelper);
+        }
 
         public static string ExecBootstrapedMSBuild(
             string msbuildParameters,
@@ -67,7 +68,15 @@ namespace Microsoft.Build.UnitTests.Shared
             bool shellExecute = false,
             ITestOutputHelper outputHelper = null,
             bool attachProcessId = true,
-            int timeoutMilliseconds = 30_000) => RunProcessAndGetOutput(PathToCurrentlyRunningMsBuildExe, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds);
+            int timeoutMilliseconds = 30_000)
+        {
+#if NET
+            string pathToExecutable = Path.Combine(BootstrapMsBuildBinaryLocation, "sdk", BootstrapLocationAttribute.BootstrapSdkVersion, Constants.MSBuildExecutableName);
+#else
+            string pathToExecutable = Path.Combine(BootstrapMsBuildBinaryLocation, Constants.MSBuildExecutableName);
+#endif
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds);
+        }
 
         private static void AdjustForShellExecution(ref string pathToExecutable, ref string arguments)
         {

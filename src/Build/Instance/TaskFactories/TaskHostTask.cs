@@ -404,9 +404,9 @@ namespace Microsoft.Build.BackEnd
                     LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null);
                 }
             }
-            catch (BuildAbortedException)
+            catch (BuildAbortedException ex)
             {
-                LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null);
+                LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, ex);
             }
             catch (NodeFailedToLaunchException e)
             {
@@ -652,7 +652,7 @@ namespace Microsoft.Build.BackEnd
         /// Since we log that we weren't able to connect to the task host in a couple of different places,
         /// extract it out into a separate method.
         /// </summary>
-        private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, NodeFailedToLaunchException e)
+        private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, Exception e)
         {
             string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext);
 #if NETFRAMEWORK
@@ -668,13 +668,27 @@ namespace Microsoft.Build.BackEnd
                 ? "MSBuildTaskHost.exe" 
                 : NodeProviderOutOfProcTaskHost.GetTaskHostNameFromHostContext(requiredContext));
 
+            bool nodeReuseEnabled = _buildComponentHost.BuildParameters.EnableNodeReuse && _useSidecarTaskHost;
+            string handshakeOptions = requiredContext.ToString();
+
             if (e == null)
             {
-                _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskHostAcquireFailed", _taskType.Type.Name, runtime, architecture, msbuildLocation);
+                _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskHostAcquireFailed", _taskType.Type.Name, runtime, architecture, msbuildLocation, _scheduledNodeId, nodeReuseEnabled, handshakeOptions);
             }
             else
             {
-                _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskHostNodeFailedToLaunch", _taskType.Type.Name, runtime, architecture, msbuildLocation, e.ErrorCode, e.Message);
+                _taskLoggingContext.LogError(
+                    new BuildEventFileInfo(_taskLocation),
+                    "TaskHostNodeFailedToLaunch",
+                    _taskType.Type.Name,
+                    runtime,
+                    architecture,
+                    msbuildLocation,
+                    e is NodeFailedToLaunchException nodeFailedExc ? nodeFailedExc.ErrorCode : string.Empty,
+                    e.Message,
+                    _scheduledNodeId,
+                    nodeReuseEnabled,
+                    handshakeOptions);
             }
         }
     }

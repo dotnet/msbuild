@@ -34,11 +34,6 @@ namespace Microsoft.Build.Shared
         private static readonly string[] s_msBuildProcess = { "MSBUILD", "MSBUILDTASKHOST" };
 
         /// <summary>
-        /// Name of MSBuild executable files.
-        /// </summary>
-        private static readonly string[] s_msBuildExeNames = { "MSBuild.exe", "MSBuild.dll" };
-
-        /// <summary>
         /// Gets the cached Build Environment instance.
         /// </summary>
         public static BuildEnvironment Instance
@@ -130,7 +125,7 @@ namespace Microsoft.Build.Shared
 
             return msBuildExePath == null
                 ? null
-                : TryFromMSBuildExeUnderVisualStudio(msBuildExePath, allowLegacyToolsVersion: true) ?? TryFromStandaloneMSBuildExe(msBuildExePath);
+                : TryFromMSBuildExeUnderVisualStudio(msBuildExePath, allowLegacyToolsVersion: true) ?? TryFromStandaloneMSBuildExecutable(msBuildExePath);
         }
 
         private static BuildEnvironment TryFromVisualStudioProcess()
@@ -198,7 +193,7 @@ namespace Microsoft.Build.Shared
             }
 
             // Check for MSBuild.[exe] next to the current assembly
-            var msBuildExecutableCandidate = Path.Combine(Path.GetDirectoryName(buildAssembly), "MSBuild.exe");
+            var msBuildExecutableCandidate = Path.Combine(Path.GetDirectoryName(buildAssembly), Constants.MSBuildExecutableName);
 
             // First check if we're in a VS installation
             var environment = TryFromMSBuildExeUnderVisualStudio(msBuildExecutableCandidate);
@@ -325,13 +320,13 @@ namespace Microsoft.Build.Shared
                 return null;
             }
 
-            // Look for possible MSBuild exe names in the AppContextBaseDirectory
-            return s_msBuildExeNames
-                .Select((name) => TryFromStandaloneMSBuildExe(Path.Combine(appContextBaseDirectory, name)))
-                .FirstOrDefault(env => env != null);
+            // Prioritize MSBuild[.exe] over MSBuild.dll
+            return TryFromStandaloneMSBuildExecutable(Path.Combine(appContextBaseDirectory, Constants.MSBuildExecutableName))
+                // Fall back to MSBuild.dll
+                ?? TryFromStandaloneMSBuildExecutable(Path.Combine(appContextBaseDirectory, Constants.MSBuildAssemblyName));
         }
 
-        private static BuildEnvironment TryFromStandaloneMSBuildExe(string msBuildExePath)
+        private static BuildEnvironment TryFromStandaloneMSBuildExecutable(string msBuildExePath)
         {
             if (!string.IsNullOrEmpty(msBuildExePath) && FileSystems.Default.FileExists(msBuildExePath))
             {
@@ -367,7 +362,7 @@ namespace Microsoft.Build.Shared
                 "Bin",
                 NativeMethodsShared.ProcessorArchitecture == Framework.NativeMethods.ProcessorArchitectures.X64 ? "amd64" :
                 NativeMethodsShared.ProcessorArchitecture == Framework.NativeMethods.ProcessorArchitectures.ARM64 ? "arm64" : string.Empty,
-                "MSBuild.exe");
+                Constants.MSBuildExecutableName);
         }
 
         private static bool? _runningTests;
@@ -421,19 +416,18 @@ namespace Microsoft.Build.Shared
         private static string GetProcessFromRunningProcess()
         {
 #if RUNTIME_TYPE_NETCORE
-            // The EntryAssembly property can return null when a managed assembly has been loaded from
-            // an unmanaged application (for example, using custom CLR hosting).
-            if (AssemblyUtilities.EntryAssembly == null)
-            {
-                return EnvironmentUtilities.ProcessPath;
-            }
 
-            return AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
+            // Respect the case when app host isn't avaialble yet and we still in dotnet MSBuild.dll environment
+            string processName = EnvironmentUtilities.ProcessPath;
+            return !string.IsNullOrEmpty(processName) && processName.EndsWith(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase)
+                 ? processName
+                 : AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
 #else
 
             return EnvironmentUtilities.ProcessPath;
 #endif
         }
+
 
         private static string GetExecutingAssemblyPath()
         {

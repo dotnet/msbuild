@@ -46,6 +46,12 @@ jobs:
       ArtifactName: logs
       condition: always()
 
+    # Publish COM traces for debugging node communication issues
+    - output: buildArtifacts
+      PathtoPublish: '$(Build.SourcesDirectory)\artifacts\bin\CommTraces'
+      ArtifactName: CommTraces
+      condition: always()
+
     # Publish test configuration for OptProf data collection
     - output: buildArtifacts
       PathtoPublish: '$(Build.SourcesDirectory)\artifacts\official\VSSetup\$(BuildConfiguration)'
@@ -210,9 +216,9 @@ jobs:
         "xsd"
       )
 
-      if ("${{ parameters.enableOptProf }}" -eq "true") {  
-        $paths += "OptProf/$(BuildConfiguration)/Data"  
-        $paths += "VSSetup/$(BuildConfiguration)"  
+      if ("${{ parameters.enableOptProf }}" -eq "true") {
+        $paths += "OptProf/$(BuildConfiguration)/Data"
+        $paths += "VSSetup/$(BuildConfiguration)"
       }
 
       $allpresent = $true

@@ -62,7 +62,18 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             bool? expectedNodeReuse = DetermineExpectedNodeReuse(runtimeToUse, taskFactoryToUse);
 
-            using TestEnvironment env = TestEnvironment.Create(_output, setupDotnetEnvVars: true);
+            // TaskHostFactory with app host requires DOTNET_HOST_PATH to be set to find the correct runtime
+            using TestEnvironment env = TestEnvironment.Create(_output, setupDotnetEnvVars: taskFactoryToUse == TaskHostFactory);
+
+            // Enable COM tracing to help diagnose node communication issues on CI
+            // Traces will be written to artifacts/CommTraces folder
+            string commTracesPath = Path.Combine(RunnerUtilities.ArtifactsDir, "CommTraces");
+            if (!Directory.Exists(commTracesPath))
+            {
+                Directory.CreateDirectory(commTracesPath);
+            }
+            env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
+            env.SetEnvironmentVariable("MSBUILDDEBUGPATH", commTracesPath);
 
             string buildOutput = ExecuteBuildWithTaskHost(runtimeToUse, taskFactoryToUse);
 
@@ -99,7 +110,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 out bool success,
                 outputHelper: _output);
 
-            success.ShouldBeTrue("Build should succeed");
+            success.ShouldBeTrue($"Build should succeed, BUT failed with: {Environment.NewLine} {output}");
 
             return output;
         }

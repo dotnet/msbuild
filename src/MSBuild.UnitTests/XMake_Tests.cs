@@ -75,8 +75,6 @@ namespace Microsoft.Build.UnitTests
                 + "</Project>");
         }
 
-        private string MSBuildExeName = NativeMethodsShared.IsWindows ? "MSBuild.exe" : "MSBuild";
-
         private readonly ITestOutputHelper _output;
         private readonly TestEnvironment _env;
 
@@ -1461,7 +1459,7 @@ namespace Microsoft.Build.UnitTests
                 string rspPath = Path.Combine(directory, AutoResponseFileName);
 
                 exeDirectory = CopyMSBuild();
-                string exePath = Path.Combine(exeDirectory, MSBuildExeName);
+                string exePath = Path.Combine(exeDirectory, Constants.MSBuildExecutableName);
                 string mainRspPath = Path.Combine(exeDirectory, AutoResponseFileName);
 
                 Directory.CreateDirectory(exeDirectory);
@@ -1501,7 +1499,7 @@ namespace Microsoft.Build.UnitTests
                 directory = CopyMSBuild();
                 string projectPath = Path.Combine(directory, "my.proj");
                 string rspPath = Path.Combine(directory, AutoResponseFileName);
-                string exePath = Path.Combine(directory, MSBuildExeName);
+                string exePath = Path.Combine(directory, Constants.MSBuildExecutableName);
 
                 string content = ObjectModelHelpers.CleanupFileContents("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'><Target Name='t'><Warning Text='[A=$(A)]'/></Target></Project>");
                 File.WriteAllText(projectPath, content);

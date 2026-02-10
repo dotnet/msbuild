@@ -6,7 +6,7 @@ global using NativeMethodsShared = Microsoft.Build.Framework.NativeMethods;
 namespace Microsoft.Build.UnitTests.Shared;
 
 [System.AttributeUsage(System.AttributeTargets.Assembly)]
-internal sealed class BootstrapLocationAttribute(string bootstrapRoot, string bootstrapMsBuildBinaryLocation, string bootstrapSdkVersion, string latestDotNetCoreForMSBuild) : System.Attribute
+internal sealed class BootstrapLocationAttribute(string bootstrapRoot, string bootstrapMsBuildBinaryLocation, string bootstrapSdkVersion, string latestDotNetCoreForMSBuild, string artifactsDir) : System.Attribute
 {
     /// <summary>
     /// Path to the root of the bootstrap MSBuild (in artifacts folder).
@@ -14,7 +14,7 @@ internal sealed class BootstrapLocationAttribute(string bootstrapRoot, string bo
     public string BootstrapRoot { get; } = bootstrapRoot;
 
     /// <summary>
-    /// Resolves path to MSBuild.exe or MSBuild.dll, depending on the runtime.
+    /// Resolves path to MSBuild[.exe] or MSBuild.dll, depending on the runtime and OS.
     /// </summary>
     public string BootstrapMsBuildBinaryLocation { get; } = bootstrapMsBuildBinaryLocation;
 
@@ -27,4 +27,9 @@ internal sealed class BootstrapLocationAttribute(string bootstrapRoot, string bo
     /// The latest .NET target framework setup in MSBuild.
     /// </summary>
     public string LatestDotNetCoreForMSBuild { get; } = latestDotNetCoreForMSBuild;
+
+    /// <summary>
+    /// The path to artifacts folder.
+    /// </summary>
+    public string ArtifactsDir { get; } = artifactsDir;
 }

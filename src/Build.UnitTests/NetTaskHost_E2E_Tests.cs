@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -71,7 +72,7 @@ namespace Microsoft.Build.Engine.UnitTests
             testTaskOutput.ShouldContain("The task is executed in process: MSBuild");
 
             // The process path should point to MSBuild.exe, not dotnet.exe
-            testTaskOutput.ShouldContain("MSBuild.exe", customMessage: "Expected MSBuild.exe app host to be used");
+            testTaskOutput.ShouldContain(Constants.MSBuildExecutableName, customMessage: "Expected MSBuild.exe app host to be used");
             testTaskOutput.ShouldNotContain("Process path: " + Path.Combine(env.GetEnvironmentVariable("DOTNET_ROOT") ?? "", "dotnet.exe"));
         }
 

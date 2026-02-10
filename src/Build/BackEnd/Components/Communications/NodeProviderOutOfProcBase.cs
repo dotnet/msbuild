@@ -272,7 +272,9 @@ namespace Microsoft.Build.BackEnd
             });
             if (!exceptions.IsEmpty)
             {
-                ErrorUtilities.ThrowInternalError("Cannot acquire required number of nodes.", new AggregateException(exceptions.ToArray()));
+                ErrorUtilities.ThrowInternalError(
+                    $"Cannot acquire required number of nodes. MSBuildLocation: '{msbuildLocation}', CommandLineArgs: '{commandLineArgs}', NumberOfNodesToCreate: {numberOfNodesToCreate}, NextNodeId: {nextNodeId}.",
+                    new AggregateException(exceptions.ToArray()));
             }
 
             return nodeContexts.ToList();

@@ -21,7 +21,6 @@ using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Internal;
 using Microsoft.Build.BackEnd.Logging;
 
 #nullable disable

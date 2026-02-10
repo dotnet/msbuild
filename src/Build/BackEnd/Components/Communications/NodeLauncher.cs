@@ -80,7 +80,7 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        private static string ResolveExecutableName(string msbuildLocation, out bool isNativeAppHost)
+        private string ResolveExecutableName(string msbuildLocation, out bool isNativeAppHost)
         {
             isNativeAppHost = false;
 
@@ -97,7 +97,7 @@ namespace Microsoft.Build.BackEnd
             return msbuildLocation;
         }
 
-        private static uint GetCreationFlags(out bool redirectStreams)
+        private uint GetCreationFlags(out bool redirectStreams)
         {
             bool ensureStdOut = Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout;
             bool showNodeWindow = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDNODEWINDOW"));
@@ -115,7 +115,7 @@ namespace Microsoft.Build.BackEnd
             return flags;
         }
 
-        private static Process StartProcessUnix(NodeLaunchData nodeLaunchData, string exeName, string commandLineArgs, uint creationFlags, bool redirectStreams)
+        private Process StartProcessUnix(NodeLaunchData nodeLaunchData, string exeName, string commandLineArgs, uint creationFlags, bool redirectStreams)
         {
             var processStartInfo = new ProcessStartInfo
             {
@@ -151,8 +151,7 @@ namespace Microsoft.Build.BackEnd
         private static Process StartProcessWindows(NodeLaunchData nodeLaunchData, string exeName, string commandLineArgs, uint creationFlags, bool redirectStreams, bool isNativeAppHost)
         {
 #if RUNTIME_TYPE_NETCORE
-            // When using native app host, repeat the executable name in the args for CreateProcess
-            if (isNativeAppHost)
+            if (!isNativeAppHost)
             {
                 commandLineArgs = $"\"{exeName}\" {commandLineArgs}";
             }
@@ -188,7 +187,16 @@ namespace Microsoft.Build.BackEnd
 
                 if (!result)
                 {
-                    ThrowNodeLaunchFailure(nodeLaunchData.MSBuildLocation, commandLineArgs);
+                    var e = new System.ComponentModel.Win32Exception();
+
+                    CommunicationsUtilities.Trace(
+                        "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {3}",
+                        nodeLaunchData.MSBuildLocation,
+                        e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
+                        e.Message,
+                        commandLineArgs);
+
+                    throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
                 }
 
                 CloseProcessHandles(processInfo);
@@ -236,20 +244,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             return startInfo;
-        }
-
-        private static void ThrowNodeLaunchFailure(string msbuildLocation, string commandLineArgs)
-        {
-            var e = new System.ComponentModel.Win32Exception();
-
-            CommunicationsUtilities.Trace(
-                "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {3}",
-                msbuildLocation,
-                e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
-                e.Message,
-                commandLineArgs);
-
-            throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
         }
 
         /// <summary>

@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             toolsetProperties.ShouldContainKey("MSBuildSDKsPath");
             toolsetProperties.ShouldContainKey("RoslynTargetsPath");
-            toolsetProperties["MSBuildSDKsPath"].ShouldNotBeNullOrEmpty();
+            toolsetProperties["MSBuildSDKsPath"].ShouldNotBeNullOrEmpty($"MSBuildSDKsPath value was null or empty. Available keys: {string.Join(", ", toolsetProperties.Keys)}");
             toolsetProperties["RoslynTargetsPath"].ShouldNotBeNullOrEmpty();
 
             toolsetProperties.ShouldNotContainKey("VCTargetsPath");

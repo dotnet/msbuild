@@ -317,11 +317,14 @@
   </Target>
 
   <!-- Add MSBuild.exe.config for the app host on .NET Core (SDK only generates MSBuild.dll.config) -->
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
-    <AppConfigWithTargetPath Include="$(AppConfig)" Condition="'$(AppConfig)' != ''">
-      <TargetPath>$(AssemblyName).exe.config</TargetPath>
-    </AppConfigWithTargetPath>
-  </ItemGroup>
+  <PropertyGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
+    <_AppHostExtension Condition="$([MSBuild]::IsOSPlatform('windows'))">.exe</_AppHostExtension>
+    <_AppHostExtension Condition="!$([MSBuild]::IsOSPlatform('windows'))"></_AppHostExtension>
+  </PropertyGroup>
+
+  <Target Name="CopyDllConfigToAppHostConfig" AfterTargets="_CopyAppConfigFile" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">    
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll.config" DestinationFiles="$(OutputPath)$(AssemblyName)$(_AppHostExtension).config" SkipUnchangedFiles="true" Condition="Exists('$(OutputPath)$(AssemblyName).dll.config')" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll.config" DestinationFiles="$(ArtifactsDir)bin\Microsoft.Build.Engine.UnitTests\$(Configuration)\$(TargetFramework)\$(AssemblyName).dll.config" SkipUnchangedFiles="true" Condition="Exists('$(OutputPath)$(AssemblyName).dll.config')" />
+  </Target>
 
 </Project>
- 

@@ -45,6 +45,7 @@
       <_Parameter2>$(TestBootstrapBinaryDestination)</_Parameter2>
       <_Parameter3>$(BootstrapSdkVersion)</_Parameter3>
       <_Parameter4>$(LatestDotNetCoreForMSBuild)</_Parameter4>
+      <_Parameter5>$(ArtifactsBinDir)</_Parameter5>
     </AssemblyAttribute>
 
     <AssemblyAttribute Include="Microsoft.Build.UnitTests.Shared.ArtifactsLocationAttribute">
