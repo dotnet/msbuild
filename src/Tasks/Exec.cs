@@ -573,25 +573,26 @@ namespace Microsoft.Build.Tasks
             string responseFileSwitch)
         {
             // Get the base ProcessStartInfo with all ToolTask settings (command line, redirections, encodings, etc.)
+            // This also applies EnvironmentVariables overrides from the task property.
             ProcessStartInfo startInfo = base.GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
 
-            // In multithreaded mode, the base ProcessStartInfo inherits from the shared process environment,
-            // but we need the virtualized environment from TaskEnvironment. Replace the environment with
-            // TaskEnvironment's environment, then re-apply any explicit EnvironmentVariables overrides.
+            // Replace the inherited process environment with the virtualized one from TaskEnvironment.
+            // TaskEnvironment.GetProcessStartInfo() already configures env vars and working directory correctly
+            // for both multithreaded (virtualized) and multi-process (inherited) modes.
+            ProcessStartInfo taskEnvStartInfo = TaskEnvironment.GetProcessStartInfo();
             startInfo.Environment.Clear();
-            foreach (var kvp in TaskEnvironment.GetEnvironmentVariables())
+            foreach (var kvp in taskEnvStartInfo.Environment)
             {
                 startInfo.Environment[kvp.Key] = kvp.Value;
             }
 
-            // Re-apply EnvironmentVariables property overrides (these should take precedence over TaskEnvironment).
-            // The base class already validated and applied these, but we cleared the environment above,
-            // so we need to re-apply them.
+            // Re-apply EnvironmentVariables property overrides — they should take precedence over TaskEnvironment.
+            // The base class already applied these, but we cleared the environment above.
             if (EnvironmentVariables != null)
             {
                 foreach (string entry in EnvironmentVariables)
                 {
-                    string[] nameValuePair = entry.Split(new[] { '=' }, 2);
+                    string[] nameValuePair = entry.Split(['='], 2);
                     if (nameValuePair.Length == 2 && nameValuePair[0].Length > 0)
                     {
                         startInfo.Environment[nameValuePair[0]] = nameValuePair[1];
