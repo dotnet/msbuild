@@ -661,9 +661,6 @@ namespace Microsoft.Build.BackEnd
 
             HandshakeOptions hostContext = nodeKey.HandshakeOptions;
 
-            // If runtime host path is null it means we don't have MSBuild.dll path resolved and there is no need to include it in the command line arguments.
-            string commandLineArgsPlaceholder = "\"{0}\" /nologo /nodemode:2 /nodereuse:{1} /low:{2} /parentpacketversion:{3} ";
-
             // Generate a unique node ID for communication purposes using atomic increment.
             int communicationNodeId = Interlocked.Increment(ref _nextNodeId);
 
@@ -682,10 +679,12 @@ namespace Microsoft.Build.BackEnd
 
                 var handshake = new Handshake(hostContext, predefinedToolsDirectory: msbuildAssemblyPath);
 
+                string commandLineArgs = $"\"{Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName)}\" /nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{NodeReuseIsEnabled(hostContext).ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion}";
+
                 // There is always one task host per host context so we always create just 1 one task host node here.      
                 nodeContexts = GetNodes(
                     runtimeHostPath,
-                    string.Format(commandLineArgsPlaceholder, Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName), NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority, NodePacketTypeExtensions.PacketVersion),
+                    commandLineArgs,
                     communicationNodeId,
                     this,
                     handshake,
@@ -707,9 +706,11 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext.ToString(), msbuildLocation ?? Constants.MSBuildExecutableName);
 
+            string nonNetCommandLineArgs = $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{NodeReuseIsEnabled(hostContext).ToString().ToLower()} /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion}";
+
             nodeContexts = GetNodes(
                 msbuildLocation,
-                string.Format(commandLineArgsPlaceholder, string.Empty, NodeReuseIsEnabled(hostContext), ComponentHost.BuildParameters.LowPriority, NodePacketTypeExtensions.PacketVersion),
+                nonNetCommandLineArgs,
                 communicationNodeId,
                 this,
                 new Handshake(hostContext),

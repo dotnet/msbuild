@@ -8,7 +8,6 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
-#nullable disable
 
 namespace Microsoft.Build.Shared.FileSystem
 {
@@ -66,7 +65,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public override bool FileExists(string path)
         {
-#if FEATURE_MSIOREDIST
+#if NETFRAMEWORK
             return Microsoft.IO.File.Exists(path);
 #else
             return File.Exists(path);
