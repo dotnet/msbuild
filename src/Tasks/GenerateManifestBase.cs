@@ -617,14 +617,14 @@ namespace Microsoft.Build.Tasks
             }
 
             int t1 = Environment.TickCount;
+            AbsolutePath outputManifestPath = TaskEnvironment.GetAbsolutePath(OutputManifest.ItemSpec);
             try
             {
-                AbsolutePath outputManifestPath = TaskEnvironment.GetAbsolutePath(OutputManifest.ItemSpec);
                 ManifestWriter.WriteManifest(_manifest, outputManifestPath, TargetFrameworkVersion);
             }
             catch (Exception ex)
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(OutputManifest.ItemSpec);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(outputManifestPath);
                 Log.LogErrorWithCodeFromResources("GenerateManifest.WriteOutputManifestFailed", OutputManifest.ItemSpec, ex.Message, lockedFileMessage);
 
                 return false;

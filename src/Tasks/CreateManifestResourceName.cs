@@ -194,7 +194,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        AbsolutePath dependentPath = TaskEnvironment.GetAbsolutePath(Path.Combine(Path.GetDirectoryName(fileName) ?? string.Empty, conventionDependentUpon));
+                        AbsolutePath dependentPath = TaskEnvironment.GetAbsolutePath(Path.Combine(Path.GetDirectoryName(fileName), conventionDependentUpon));
                         if (FileSystems.Default.FileExists(dependentPath))
                         {
                             dependentUpon = conventionDependentUpon;
@@ -219,7 +219,7 @@ namespace Microsoft.Build.Tasks
 
                     if (isDependentOnSourceFile)
                     {
-                        AbsolutePath pathToDependent = TaskEnvironment.GetAbsolutePath(Path.Combine(Path.GetDirectoryName(fileName) ?? string.Empty, dependentUpon));
+                        AbsolutePath pathToDependent = TaskEnvironment.GetAbsolutePath(Path.Combine(Path.GetDirectoryName(fileName), dependentUpon));
                         binaryStream = createFileStream(pathToDependent, FileMode.Open, FileAccess.Read);
                     }
 

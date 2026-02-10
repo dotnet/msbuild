@@ -127,13 +127,15 @@ namespace Microsoft.Build.Tasks
         public override bool Execute()
         {
             string? manifestPath = GetManifestPath();
+            // Use original user-provided path for error messages to match pre-migration behavior
+            string? manifestDisplayPath = ApplicationManifest?.ItemSpec ?? manifestPath;
             try
             {
                 using Stream? stream = GetManifestStream(manifestPath);
 
                 if (stream is null)
                 {
-                    Log.LogErrorWithCodeFromResources(null, manifestPath, 0, 0, 0, 0, "AddToWin32Manifest.ManifestCanNotBeOpened");
+                    Log.LogErrorWithCodeFromResources(null, manifestDisplayPath, 0, 0, 0, 0, "AddToWin32Manifest.ManifestCanNotBeOpened");
 
                     return !Log.HasLoggedErrors;
                 }
@@ -141,7 +143,7 @@ namespace Microsoft.Build.Tasks
                 XmlDocument document = LoadManifest(stream);
                 XmlNamespaceManager xmlNamespaceManager = XmlNamespaces.GetNamespaceManager(document.NameTable);
 
-                ManifestValidationResult validationResult = ValidateManifest(manifestPath, document, xmlNamespaceManager);
+                ManifestValidationResult validationResult = ValidateManifest(manifestDisplayPath, document, xmlNamespaceManager);
 
                 switch (validationResult)
                 {
@@ -159,7 +161,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogErrorWithCodeFromResources(null, manifestPath, 0, 0, 0, 0, "AddToWin32Manifest.ManifestCanNotBeOpenedWithException", ex.Message);
+                Log.LogErrorWithCodeFromResources(null, manifestDisplayPath, 0, 0, 0, 0, "AddToWin32Manifest.ManifestCanNotBeOpenedWithException", ex.Message);
 
                 return !Log.HasLoggedErrors;
             }
@@ -179,8 +181,9 @@ namespace Microsoft.Build.Tasks
 
         private void SaveManifest(XmlDocument document, string manifestName)
         {
-            AbsolutePath outputPath = TaskEnvironment.GetAbsolutePath(Path.Combine(OutputDirectory, manifestName));
-            ManifestPath = outputPath;
+            string originalPath = Path.Combine(OutputDirectory, manifestName);
+            AbsolutePath outputPath = TaskEnvironment.GetAbsolutePath(originalPath);
+            ManifestPath = originalPath;
             using (var xmlWriter = new XmlTextWriter(outputPath, Encoding.UTF8))
             {
                 xmlWriter.Formatting = Formatting.Indented;
