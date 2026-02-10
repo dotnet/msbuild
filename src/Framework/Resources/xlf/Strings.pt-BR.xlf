@@ -4,12 +4,12 @@
     <body>
       <trans-unit id="PathMustBeRooted">
         <source>Path must be rooted.</source>
-        <target state="new">Path must be rooted.</target>
+        <target state="translated">Caminho deve ter raiz.</target>
         <note />
       </trans-unit>
       <trans-unit id="PathMustNotBeNullOrEmpty">
         <source>Path must not be null or empty.</source>
-        <target state="new">Path must not be null or empty.</target>
+        <target state="translated">O caminho não deve ser nulo ou vazio.</target>
         <note />
       </trans-unit>
     </body>
