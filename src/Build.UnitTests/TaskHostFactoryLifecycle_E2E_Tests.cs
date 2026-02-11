@@ -62,18 +62,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             bool? expectedNodeReuse = DetermineExpectedNodeReuse(runtimeToUse, taskFactoryToUse);
 
-            // TaskHostFactory with app host requires DOTNET_HOST_PATH to be set to find the correct runtime
-            using TestEnvironment env = TestEnvironment.Create(_output, setupDotnetEnvVars: taskFactoryToUse == TaskHostFactory);
-
-            // Enable COM tracing to help diagnose node communication issues on CI
-            // Traces will be written to artifacts/CommTraces folder
-            string commTracesPath = Path.Combine(RunnerUtilities.ArtifactsDir, "CommTraces");
-            if (!Directory.Exists(commTracesPath))
-            {
-                Directory.CreateDirectory(commTracesPath);
-            }
-            env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
-            env.SetEnvironmentVariable("MSBUILDDEBUGPATH", commTracesPath);
+            using TestEnvironment env = TestEnvironment.Create(_output, setupDotnetHostPath: taskFactoryToUse == TaskHostFactory);
 
             string buildOutput = ExecuteBuildWithTaskHost(runtimeToUse, taskFactoryToUse);
 

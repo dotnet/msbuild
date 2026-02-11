@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Linq;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests;
@@ -140,7 +141,7 @@ namespace Microsoft.Build.UnitTests
                             dotnetPath += ".exe";
                         }
 
-                        testEnvironment.SetEnvironmentVariable("DOTNET_HOST_PATH", dotnetPath);
+                        testEnvironment.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, dotnetPath);
                     }
 
                     break;

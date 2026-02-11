@@ -13,6 +13,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
 
@@ -661,7 +662,7 @@ namespace Microsoft.Build.BackEnd
             // Create callbacks that capture the TaskHostNodeKey
             void OnNodeContextCreated(NodeContext context) => NodeContextCreated(context, nodeKey);
 
-            (NodeLaunchData nodeLaunchData, Handshake handshake) = ResolveNodeLaunchConfiguration(hostContext, taskHostParameters);
+            NodeLaunchData nodeLaunchData = ResolveNodeLaunchConfiguration(hostContext, taskHostParameters);
 
             if (nodeLaunchData.MSBuildLocation == null)
             {
@@ -674,37 +675,34 @@ namespace Microsoft.Build.BackEnd
                 nodeLaunchData,
                 communicationNodeId,
                 this,
-                handshake,
                 OnNodeContextCreated,
                 NodeContextTerminated,
                 1);
 
             return nodeContexts.Count == 1;
-        }
 
-        /// <summary>
-        /// Resolves the node launch configuration based on the host context.
-        /// </summary>
-        private (NodeLaunchData LaunchData, Handshake Handshake) ResolveNodeLaunchConfiguration(HandshakeOptions hostContext, in TaskHostParameters taskHostParameters)
-        {
-            bool nodeReuseEnabled = IsNodeReuseEnabled(hostContext);
-            NodeLaunchData nodeLaunchData;
-
-            // Handle .NET task host context
-            if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
+            // Resolves the node launch configuration based on the host context.
+            NodeLaunchData ResolveNodeLaunchConfiguration(HandshakeOptions hostContext, in TaskHostParameters taskHostParameters)
             {
-                string msbuildAssemblyPath = GetMSBuildExecutablePath(taskHostParameters);
-                nodeLaunchData = ResolveAppHostOrFallback(
-                    msbuildAssemblyPath,
-                    taskHostParameters.DotnetHostPath,
-                    hostContext,
-                    nodeReuseEnabled);
+                NodeLaunchData nodeLaunchData;
 
-                return (nodeLaunchData, new Handshake(hostContext, predefinedToolsDirectory: msbuildAssemblyPath));
+                // Handle .NET task host context
+                if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
+                {
+                    string msbuildAssemblyPath = GetMSBuildExecutablePath(taskHostParameters);
+                    nodeLaunchData = ResolveAppHostOrFallback(
+                        msbuildAssemblyPath,
+                        taskHostParameters.DotnetHostPath,
+                        hostContext,
+                        IsNodeReuseEnabled(hostContext));
+
+                    return nodeLaunchData;
+                }
+
+                nodeLaunchData = new NodeLaunchData(GetMSBuildExecutablePathForNonNETRuntimes(hostContext), BuildCommandLineArgs(IsNodeReuseEnabled(hostContext)), new Handshake(hostContext));
+
+                return nodeLaunchData;
             }
-
-            nodeLaunchData = new NodeLaunchData(GetMSBuildExecutablePathForNonNETRuntimes(hostContext), BuildCommandLineArgs(nodeReuseEnabled));
-            return (nodeLaunchData, new Handshake(hostContext));
         }
 
         /// <summary>
@@ -735,14 +733,15 @@ namespace Microsoft.Build.BackEnd
             {
                 CommunicationsUtilities.Trace("For a host context of {0}, using app host from {1}.", hostContext, appHostPath);
 
-                IDictionary<string, string> dotnetOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides();
+                IDictionary<string, string> dotnetOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(dotnetHostPath);
 
-                return dotnetOverrides != null
-                    ? new NodeLaunchData(
-                        appHostPath,
-                        commandLineArgs,
-                        dotnetOverrides)
-                    : throw new InvalidProjectFileException(ResourceUtilities.GetResourceString("DotnetHostPathNotSet"));
+                return dotnetOverrides == null
+                    ? throw new NodeFailedToLaunchException(errorCode: null, ResourceUtilities.GetResourceString("DotnetHostPathNotSet"))
+                    : new NodeLaunchData(
+                    appHostPath,
+                    commandLineArgs,
+                    new Handshake(hostContext, predefinedToolsDirectory: msbuildAssemblyPath),
+                    dotnetOverrides);
             }
 
             string msbuildDllPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName);
@@ -750,7 +749,8 @@ namespace Microsoft.Build.BackEnd
 
             return new NodeLaunchData(
                 dotnetHostPath,
-                $"\"{msbuildDllPath}\" {commandLineArgs}");
+                $"\"{msbuildDllPath}\" {commandLineArgs}",
+                new Handshake(hostContext, predefinedToolsDirectory: msbuildAssemblyPath));
         }
 
         private string BuildCommandLineArgs(bool nodeReuseEnabled) => $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuseEnabled} /low:{ComponentHost.BuildParameters.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";

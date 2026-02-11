@@ -324,7 +324,7 @@
 
   <Target Name="CopyDllConfigToAppHostConfig" AfterTargets="_CopyAppConfigFile" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">    
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll.config" DestinationFiles="$(OutputPath)$(AssemblyName)$(_AppHostExtension).config" SkipUnchangedFiles="true" Condition="Exists('$(OutputPath)$(AssemblyName).dll.config')" />
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll.config" DestinationFiles="$(ArtifactsDir)bin\Microsoft.Build.Engine.UnitTests\$(Configuration)\$(TargetFramework)\$(AssemblyName).dll.config" SkipUnchangedFiles="true" Condition="Exists('$(OutputPath)$(AssemblyName).dll.config')" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll.config" DestinationFiles="$(ArtifactsDir)bin\Microsoft.Build.Engine.UnitTests\$(Configuration)\$(TargetFramework)\$(AssemblyName)$(_AppHostExtension).config" SkipUnchangedFiles="true" Condition="Exists('$(OutputPath)$(AssemblyName).dll.config')" />
   </Target>
 
 </Project>

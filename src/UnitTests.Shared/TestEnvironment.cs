@@ -58,15 +58,14 @@ namespace Microsoft.Build.UnitTests
         /// (MSBuild_*.txt) in the temp directory and treats their presence as test failures.
         /// Set to true to disable this monitoring for tests that expect build failures.
         /// </param>
-        /// <param name="setupDotnetEnvVars">
-        /// When true, configures .NET environment variables (PATH, DOTNET_ROOT, DOTNET_HOST_PATH)
-        /// to point to the bootstrap core directory. This enables tests to use the locally built
-        /// MSBuild and .NET SDK. Defaults to false. It's useful to set when it's necessary to test app host/dotnet execution.
+        /// <param name="setupDotnetHostPath">
+        /// When true, configures .NET environment variable DOTNET_HOST_PATH to point to the bootstrap core directory.
+        /// It's necessary for the tests that rely on app host execution and need to find the correct .NET runtime.
         /// </param>
         /// <returns>
         /// A configured TestEnvironment instance with the specified settings applied.
         /// </returns>
-        public static TestEnvironment Create(ITestOutputHelper output = null, bool ignoreBuildErrorFiles = false, bool setupDotnetEnvVars = false)
+        public static TestEnvironment Create(ITestOutputHelper output = null, bool ignoreBuildErrorFiles = false, bool setupDotnetHostPath = false)
         {
             var env = new TestEnvironment(output ?? new DefaultOutput());
 
@@ -76,9 +75,11 @@ namespace Microsoft.Build.UnitTests
                 env.WithInvariant(new BuildFailureLogInvariant());
             }
 
-            if (setupDotnetEnvVars)
+            if (setupDotnetHostPath)
             {
-                SetupDotnetEnvironmentVariables();
+                var bootstrapCorePath = Path.Combine(Path.Combine(RunnerUtilities.BootstrapRootPath, "core"), Constants.DotnetProcessName);
+
+                _ = env.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, bootstrapCorePath);
             }
 
             // Clear these two environment variables first in case pre-setting affects the test.
@@ -87,16 +88,6 @@ namespace Microsoft.Build.UnitTests
             env.SetEnvironmentVariable("MSBUILDUSESERVER", null);
 
             return env;
-
-            void SetupDotnetEnvironmentVariables()
-            {
-                var coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
-                var bootstrapCorePath = Path.Combine(coreDirectory, Constants.DotnetProcessName);
-
-                _ = env.SetEnvironmentVariable("PATH", $"{coreDirectory}{Path.PathSeparator}{Environment.GetEnvironmentVariable("PATH")}");
-                _ = env.SetEnvironmentVariable("DOTNET_ROOT", coreDirectory);
-                _ = env.SetEnvironmentVariable("DOTNET_HOST_PATH", bootstrapCorePath);
-            }
         }
 
         private TestEnvironment(ITestOutputHelper output)

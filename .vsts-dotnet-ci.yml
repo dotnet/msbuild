@@ -65,7 +65,12 @@ jobs:
     coverageReportName: WindowsFullFrameworkCoverage
   displayName: "Windows Full"
   pool:
-    vmImage: 'windows-2022'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      name: VSEng-MicroBuildVSStable
+      demands: agent.os -equals Windows_NT
   timeoutInMinutes: 120
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
@@ -148,14 +153,6 @@ jobs:
       ArtifactName: 'FullOnWindows test logs'
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  # Publish COM traces for debugging node communication issues
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: CommTraces'
-    inputs:
-      PathtoPublish: '$(Build.SourcesDirectory)\artifacts\bin\CommTraces'
-      ArtifactName: 'FullOnWindows CommTraces'
-    continueOnError: true
-    condition: always()
   - task: CopyFiles@2
     condition: eq(variables['publishverify'], 'Yes')
     continueOnError: true
@@ -180,7 +177,12 @@ jobs:
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
     coverageReportName: WindowsCoreCoverage
   pool:
-    vmImage: 'windows-2022'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      name: VSEng-MicroBuildVSStable
+      demands: agent.os -equals Windows_NT
   timeoutInMinutes: 120
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
@@ -252,15 +254,6 @@ jobs:
       ArtifactName: 'CoreOnWindows test logs'
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-
-  # Publish COM traces for debugging node communication issues
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: CommTraces'
-    inputs:
-      PathtoPublish: '$(Build.SourcesDirectory)\artifacts\bin\CommTraces'
-      ArtifactName: 'CoreOnWindows CommTraces'
-    continueOnError: true
-    condition: always()
 
 - job: BootstrapMSBuildWithMTMode
   displayName: "Linux Core Multithreaded Mode"
@@ -380,19 +373,15 @@ jobs:
       ArtifactName: 'FullOnWindows Release test logs'
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  # Publish COM traces for debugging node communication issues
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: CommTraces'
-    inputs:
-      PathtoPublish: '$(Build.SourcesDirectory)\artifacts\bin\CommTraces'
-      ArtifactName: 'FullOnWindows Release CommTraces'
-    continueOnError: true
-    condition: always()
 
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
   pool:
-    vmImage: 'ubuntu-latest'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      vmImage: 'ubuntu-latest'
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
@@ -461,14 +450,6 @@ jobs:
       ArtifactName: 'CoreOnLinux test logs'
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  # Publish COM traces for debugging node communication issues
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: CommTraces'
-    inputs:
-      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CommTraces'
-      ArtifactName: 'CoreOnLinux CommTraces'
-    continueOnError: true
-    condition: always()
   - task: CopyFiles@2
     condition: eq(variables['publishverify'], 'Yes')
     continueOnError: true
@@ -557,14 +538,6 @@ jobs:
       ArtifactName: 'CoreOnMac test logs'
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
-  # Publish COM traces for debugging node communication issues
-  - task: PublishBuildArtifacts@1
-    displayName: 'Publish Artifact: CommTraces'
-    inputs:
-      PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CommTraces'
-      ArtifactName: 'CoreOnMac CommTraces'
-    continueOnError: true
-    condition: always()
   - task: CopyFiles@2
     condition: eq(variables['publishverify'], 'Yes')
     continueOnError: true
@@ -594,7 +567,12 @@ jobs:
   variables:
     onlyDocChanged: $[ dependencies.BootstrapMSBuildOnFullFrameworkWindows.outputs['CheckDocumentationOnlyChange.onlyDocChanged'] ]
   pool:
-    vmImage: 'windows-2022'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      name: VSEng-MicroBuildVSStable
+      demands: agent.os -equals Windows_NT
   steps:
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: DownloadPipelineArtifact@2

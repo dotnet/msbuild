@@ -2403,13 +2403,13 @@ Errors: {3}</source>
         <note />
       </trans-unit>
       <trans-unit id="TaskHostAcquireFailed">
-        <source>MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}" at the MSBuild location "{3}". Scheduled node ID: {4}, Node reuse enabled: {5}, Handshake options: {6}.</source>
-        <target state="new">MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}" at the MSBuild location "{3}". Scheduled node ID: {4}, Node reuse enabled: {5}, Handshake options: {6}.</target>
+        <source>MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</source>
+        <target state="new">MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</target>
         <note>{StrBegin="MSB4216: "}</note>
       </trans-unit>
       <trans-unit id="TaskHostNodeFailedToLaunch">
-        <source>MSB4221: Could not run the "{0}"because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}" at the MSBuild location "{3}". Error code: {4}. Error message: {5}. Scheduled node ID: {6}, Node reuse enabled: {7}, Handshake options: {8}.</source>
-        <target state="new">MSB4221: Could not run the "{0}"because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}" at the MSBuild location "{3}". Error code: {4}. Error message: {5}. Scheduled node ID: {6}, Node reuse enabled: {7}, Handshake options: {8}.</target>
+        <source>MSB4221: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. Error {4} {5}.</source>
+        <target state="new">MSB4221: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. Error {4} {5}.</target>
         <note>{StrBegin="MSB4221: "}</note>
       </trans-unit>
       <trans-unit id="TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled">

@@ -76,7 +76,7 @@ namespace Microsoft.Build.Shared
                 TryFromEnvironmentVariable,
                 TryFromVisualStudioProcess,
                 TryFromMSBuildProcess,
-                TryFromMSBuildAssembly,
+                TryFromMSBuildAppHost,
                 TryFromDevConsole,
                 TryFromSetupApi,
                 TryFromAppContextBaseDirectory
@@ -125,7 +125,7 @@ namespace Microsoft.Build.Shared
 
             return msBuildExePath == null
                 ? null
-                : TryFromMSBuildExeUnderVisualStudio(msBuildExePath, allowLegacyToolsVersion: true) ?? TryFromStandaloneMSBuildExecutable(msBuildExePath);
+                : TryFromMSBuildExeUnderVisualStudio(msBuildExePath, allowLegacyToolsVersion: true) ?? TryFromStandaloneMSBuildExe(msBuildExePath);
         }
 
         private static BuildEnvironment TryFromVisualStudioProcess()
@@ -155,36 +155,42 @@ namespace Microsoft.Build.Shared
 
         private static BuildEnvironment TryFromMSBuildProcess()
         {
-            var msBuildExe = s_getProcessFromRunningProcess();
-            if (!IsProcessInList(msBuildExe, s_msBuildProcess))
+            var processName = s_getProcessFromRunningProcess();
+            if (!IsProcessInList(processName, s_msBuildProcess))
             {
                 return null;
             }
 
             // First check if we're in a VS installation
             if (NativeMethodsShared.IsWindows &&
-                Regex.IsMatch(msBuildExe, $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*MSBuild(?:TaskHost)?\.exe", RegexOptions.IgnoreCase))
+                Regex.IsMatch(processName, $@".*\\MSBuild\\{CurrentToolsVersion}\\Bin\\.*MSBuild(?:TaskHost)?\.exe", RegexOptions.IgnoreCase))
             {
                 return new BuildEnvironment(
                     BuildEnvironmentMode.VisualStudio,
-                    msBuildExe,
+                    processName,
                     runningTests: false,
                     runningInMSBuildExe: true,
                     runningInVisualStudio: false,
-                    visualStudioPath: GetVsRootFromMSBuildAssembly(msBuildExe));
+                    visualStudioPath: GetVsRootFromMSBuildAssembly(processName));
             }
 
-            // Standalone mode running in MSBuild.exe
+            // Standalone mode - may be running in MSBuild.exe app host or dotnet MSBuild.dll
             return new BuildEnvironment(
                 BuildEnvironmentMode.Standalone,
-                msBuildExe,
+                processName,
                 runningTests: false,
-                runningInMSBuildExe: true,
+                runningInMSBuildExe: IsRunningInMSBuildExe(processName),
                 runningInVisualStudio: false,
                 visualStudioPath: null);
         }
 
-        private static BuildEnvironment TryFromMSBuildAssembly()
+        // Check if we're actually running from MSBuild.exe app host (not dotnet MSBuild.dll).
+        // GetProcessFromRunningProcess returns the entry assembly location (MSBuild.dll) when
+        // running via dotnet, so we need to check the actual process path to distinguish.
+        private static bool IsRunningInMSBuildExe(string processPath) =>
+            !string.IsNullOrEmpty(processPath) && processPath.EndsWith(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
+
+        private static BuildEnvironment TryFromMSBuildAppHost()
         {
             var buildAssembly = s_getExecutingAssemblyPath();
             if (buildAssembly == null)
@@ -321,12 +327,12 @@ namespace Microsoft.Build.Shared
             }
 
             // Prioritize MSBuild[.exe] over MSBuild.dll
-            return TryFromStandaloneMSBuildExecutable(Path.Combine(appContextBaseDirectory, Constants.MSBuildExecutableName))
+            return TryFromStandaloneMSBuildExe(Path.Combine(appContextBaseDirectory, Constants.MSBuildExecutableName))
                 // Fall back to MSBuild.dll
-                ?? TryFromStandaloneMSBuildExecutable(Path.Combine(appContextBaseDirectory, Constants.MSBuildAssemblyName));
+                ?? TryFromStandaloneMSBuildExe(Path.Combine(appContextBaseDirectory, Constants.MSBuildAssemblyName));
         }
 
-        private static BuildEnvironment TryFromStandaloneMSBuildExecutable(string msBuildExePath)
+        private static BuildEnvironment TryFromStandaloneMSBuildExe(string msBuildExePath)
         {
             if (!string.IsNullOrEmpty(msBuildExePath) && FileSystems.Default.FileExists(msBuildExePath))
             {
@@ -419,7 +425,7 @@ namespace Microsoft.Build.Shared
 
             // Respect the case when app host isn't avaialble yet and we still in dotnet MSBuild.dll environment
             string processName = EnvironmentUtilities.ProcessPath;
-            return !string.IsNullOrEmpty(processName) && processName.EndsWith(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase)
+            return IsRunningInMSBuildExe(processName)
                  ? processName
                  : AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
 #else
@@ -427,7 +433,6 @@ namespace Microsoft.Build.Shared
             return EnvironmentUtilities.ProcessPath;
 #endif
         }
-
 
         private static string GetExecutingAssemblyPath()
         {

@@ -68,10 +68,12 @@ bootstrapRoot="$Stage1Dir/bin/bootstrap"
 
 if [ $host_type = "core" ]
 then
-  # Use dotnet msbuild to invoke MSBuild through the CLI, not directly via MSBuild executable
-  # This matches how users should invoke MSBuild in the bootstrapped environment
+  script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+  props_file="$script_dir/Versions.props"
+  sdk_version=$(grep -A1 "BootstrapSdkVersion" "$props_file" | grep -o ">.*<" | sed 's/[><]//g')
+
   _InitializeBuildTool="${bootstrapRoot}/core/dotnet"
-  _InitializeBuildToolCommand="msbuild"
+  _InitializeBuildToolCommand="${bootstrapRoot}/core/sdk/${sdk_version}/MSBuild.dll"
   _InitializeBuildToolFramework="net10.0"
 
   export DOTNET_ROOT="${bootstrapRoot}/core"

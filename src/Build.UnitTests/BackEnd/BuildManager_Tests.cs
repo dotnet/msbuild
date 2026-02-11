@@ -26,6 +26,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
+using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
 
@@ -83,7 +84,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager = new BuildManager();
             _projectCollection = new ProjectCollection(globalProperties: null, _parameters.Loggers, ToolsetDefinitionLocations.Default);
 
-            _env = TestEnvironment.Create(output);
+            _env = TestEnvironment.Create(output, setupDotnetHostPath: true);
             _inProcEnvCheckTransientEnvironmentVariable = _env.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");
         }
 
@@ -3490,7 +3491,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void DotnetHostPathDirectoryWarning()
         {
-            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", Path.GetTempPath());
+            _env.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, Path.GetTempPath());
 
             BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
             _buildManager.Build(_parameters, data);
@@ -3505,7 +3506,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void DotnetHostPathFileNoWarning()
         {
             TransientTestFile tempFile = _env.CreateFile("dotnet.exe", "");
-            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", tempFile.Path);
+            _env.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, tempFile.Path);
 
             BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
             _buildManager.Build(_parameters, data);
@@ -3519,7 +3520,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void DotnetHostPathNotSetNoWarning()
         {
-            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", null);
+            _env.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, null);
 
             BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
             _buildManager.Build(_parameters, data);
@@ -4436,7 +4437,9 @@ $@"<Project InitialTargets=`Sleep`>
         [InlineData("TaskHostFactory", true)] // OOP task host, input logging enabled
         public void TaskInputLoggingIsExposedToTasks(string taskFactory, bool taskInputLoggingEnabled)
         {
-            string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
+            using (TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true))
+            {
+                string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
 
   <UsingTask
     TaskName=""" + typeof(LogTaskInputsCheckingTask).FullName + @"""
@@ -4450,15 +4453,16 @@ $@"<Project InitialTargets=`Sleep`>
 
 </Project>");
 
-            _parameters.LogTaskInputs = taskInputLoggingEnabled;
+                _parameters.LogTaskInputs = taskInputLoggingEnabled;
 
-            Project project = CreateProject(projectContents, MSBuildDefaultToolsVersion, _projectCollection, true);
-            ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
-            _buildManager.BeginBuild(_parameters);
-            BuildResult result = _buildManager.BuildRequest(new BuildRequestData(instance, new[] { "target1" }));
-            _buildManager.EndBuild();
+                Project project = CreateProject(projectContents, MSBuildDefaultToolsVersion, _projectCollection, true);
+                ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
+                _buildManager.BeginBuild(_parameters);
+                BuildResult result = _buildManager.BuildRequest(new BuildRequestData(instance, new[] { "target1" }));
+                _buildManager.EndBuild();
 
-            Assert.Equal(BuildResultCode.Success, result.OverallResult);
+                Assert.Equal(BuildResultCode.Success, result.OverallResult);
+            }
         }
 
         [Fact]

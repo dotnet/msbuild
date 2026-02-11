@@ -143,7 +143,6 @@ if ($runtime -eq "Desktop") {
 } else {
     $runtimeSpecificFiles = @(
         FileToCopy "$bootstrapBinDirectory\MSBuild.dll"
-        FileToCopy "$bootstrapBinDirectory\MSBuild.exe"
     )
 }
 

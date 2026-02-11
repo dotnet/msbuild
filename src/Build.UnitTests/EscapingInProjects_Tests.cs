@@ -109,19 +109,22 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         [Fact]
         public void SemicolonInPropertyPassedIntoStringParam_UsingTaskHost()
         {
-            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
-                    <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
-                    <PropertyGroup>
-                        <MyPropertyWithSemicolons>abc %3b def %3b ghi</MyPropertyWithSemicolons>
-                    </PropertyGroup>
-                    <Target Name=`Build`>
-                        <Message Text=`Property value is '$(MyPropertyWithSemicolons)'` />
-                    </Target>
-                </Project>
-                ", logger: new MockLogger(_output));
+            using (TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true))
+            {
+                MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                        <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
+                        <PropertyGroup>
+                            <MyPropertyWithSemicolons>abc %3b def %3b ghi</MyPropertyWithSemicolons>
+                        </PropertyGroup>
+                        <Target Name=`Build`>
+                            <Message Text=`Property value is '$(MyPropertyWithSemicolons)'` />
+                        </Target>
+                    </Project>
+                    ", logger: new MockLogger(_output));
 
-            logger.AssertLogContains("Property value is 'abc ; def ; ghi'");
+                logger.AssertLogContains("Property value is 'abc ; def ; ghi'");
+            }
         }
 
 #if FEATURE_ASSEMBLY_LOCATION
@@ -606,6 +609,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         [Fact]
         public void ItemTransformContainingSemicolon_InTaskHost()
         {
+            using TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true);
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
 
                 <Project ToolsVersion=`msbuilddefaulttoolsversion`>
@@ -733,6 +737,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         [Fact]
         public void EscapedWildcardsShouldNotBeExpanded_InTaskHost()
         {
+            using TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true);
             MockLogger logger = new();
 
             try

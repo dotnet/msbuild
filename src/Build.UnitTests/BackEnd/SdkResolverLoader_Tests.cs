@@ -412,9 +412,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
                 try
                 {
-                    // Setup BuildEnvironment based on test scenario
-                    // needsFallback = true: Mode = Standalone && RunningInMSBuildExe = false (API/dotnet CLI)
-                    // needsFallback = false: Mode = Standalone && RunningInMSBuildExe = true (MSBuild.exe direct usage)
+                    // Setup BuildEnvironment based on test scenario.
+                    // The needsFallback logic is: Mode == Standalone && !RunningInMSBuildExe
+                    // RunningInMSBuildExe is true only when the actual process is MSBuild.exe (app host).
+                    // In test environment, process is testhost.exe/dotnet.exe, so RunningInMSBuildExe = false.
                     // Note: We use Standalone mode for both cases to avoid VisualStudio mode requiring VisualStudioInstallRootDirectory
                     BuildEnvironmentMode mode = BuildEnvironmentMode.Standalone;
                     bool runningInMSBuildExe = !needsFallback;
@@ -486,10 +487,11 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     }
                     else
                     {
-                        // Should throw InvalidProjectFileException because:
-                        // 1. needsFallback = false → no fallback, uses Assembly.Load directly
-                        // 2. Assembly.Load fails on invalid assembly
-                        // 3. No fallback → exception propagates
+                        // Note: This test scenario may not accurately test the no-fallback path in actual code
+                        // because in test environment, RunningInMSBuildExe will be false (process is testhost/dotnet).
+                        // We override RunningInMSBuildExe=true via ResetInstance_ForUnitTestsOnly to simulate the
+                        // MSBuild.exe app host scenario. The test validates that Assembly.Load (no fallback) would
+                        // fail on an invalid assembly. In practice, this path is only taken when running MSBuild.exe.
                         var exception = Should.Throw<InvalidProjectFileException>(() =>
                             loader.LoadAllResolvers(new MockElementLocation("file")));
 

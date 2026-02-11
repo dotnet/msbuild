@@ -6,7 +6,7 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// Constants used by the Engine.
+    /// Constants used solution wide.
     /// </summary>
     internal static class Constants
     {

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.Framework;
 
 #if NET
 using System.Runtime.InteropServices;
@@ -115,7 +116,7 @@ namespace Microsoft.Build.Internal
 
         private static string? ResolveDotnetRoot(string? dotnetHostPath)
         {
-            dotnetHostPath ??= Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+            dotnetHostPath ??= Environment.GetEnvironmentVariable(Constants.DotnetHostPathEnvVarName);
 
             if (!string.IsNullOrEmpty(dotnetHostPath))
             {

@@ -12,6 +12,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
+using Constants = Microsoft.Build.Framework.Constants;
 
 #if FEATURE_WIN32_REGISTRY
 using RegistryKeyWrapper = Microsoft.Build.Internal.RegistryKeyWrapper;

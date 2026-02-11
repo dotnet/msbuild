@@ -293,6 +293,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         [Fact]
         public void Escaping2()
         {
+            using TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true);
             string content = ObjectModelHelpers.CleanupFileContents(@"
            <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <UsingTask TaskName='CreateItem' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' TaskFactory='TaskHostFactory' />
@@ -348,6 +349,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         [Fact]
         public void Escaping3()
         {
+            using TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true);
             string content = ObjectModelHelpers.CleanupFileContents(@"
            <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
                   <UsingTask TaskName='AssignCulture' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' TaskFactory='TaskHostFactory' />

@@ -45,7 +45,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [InlineData(true)]
         public void InlineTaskWithAssemblyPlatformAgnostic(bool forceOutOfProc)
         {
-            using (TestEnvironment env = TestEnvironment.Create())
+            using (TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true))
             {
                 if (forceOutOfProc)
                 {
@@ -93,7 +93,7 @@ Log.LogError(Alpha.GetString());
         [SkipOnPlatform(TestPlatforms.AnyUnix, ".NETFramework 4.0 isn't on unix machines.")]
         public void InlineTaskWithAssembly(bool forceOutOfProc)
         {
-            using (TestEnvironment env = TestEnvironment.Create())
+            using (TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true))
             {
                 if (forceOutOfProc)
                 {
@@ -213,7 +213,7 @@ Log.LogError(Class1.ToPrint());
 
 </Project>";
 
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(setupDotnetHostPath: forceOutOfProc);
             if (forceOutOfProc)
             {
                 env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
@@ -772,7 +772,7 @@ namespace InlineTask
   </Target>
 </Project>";
 
-            using (TestEnvironment env = TestEnvironment.Create())
+            using (TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: forceOutOfProc))
             {
                 if (forceOutOfProc)
                 {
@@ -892,14 +892,14 @@ namespace InlineTask
 
 </Project>";
 
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(setupDotnetHostPath: forceOutOfProc);
             if (forceOutOfProc)
             {
                 env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
             }
 
             RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(env);
-            var dotnetPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+            var dotnetPath = Environment.GetEnvironmentVariable(Constants.DotnetHostPathEnvVarName);
 
             var project = env.CreateTestProjectWithFiles("p1.proj", text);
             var logger = project.BuildProjectExpectSuccess();
@@ -1101,7 +1101,7 @@ namespace InlineTask
         [Fact]
         public void MultiThreadedBuildExecutesInlineTasksSuccessfully()
         {
-            using (TestEnvironment env = TestEnvironment.Create())
+            using (TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true))
             {
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
                 
@@ -1171,7 +1171,7 @@ namespace InlineTask
         [InlineData(true)]
         public void SourceCodeFromRelativeFilePath_ResolvesRelativeToProjectFile(bool forceOutOfProc)
         {
-            using (TestEnvironment env = TestEnvironment.Create())
+            using (TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true))
             {
                 if (forceOutOfProc)
                 {

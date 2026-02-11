@@ -668,12 +668,9 @@ namespace Microsoft.Build.BackEnd
                 ? "MSBuildTaskHost.exe" 
                 : NodeProviderOutOfProcTaskHost.GetTaskHostNameFromHostContext(requiredContext));
 
-            bool nodeReuseEnabled = _buildComponentHost.BuildParameters.EnableNodeReuse && _useSidecarTaskHost;
-            string handshakeOptions = requiredContext.ToString();
-
             if (e == null)
             {
-                _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskHostAcquireFailed", _taskType.Type.Name, runtime, architecture, msbuildLocation, _scheduledNodeId, nodeReuseEnabled, handshakeOptions);
+                _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskHostAcquireFailed", _taskType.Type.Name, runtime, architecture, msbuildLocation);
             }
             else
             {
@@ -685,10 +682,7 @@ namespace Microsoft.Build.BackEnd
                     architecture,
                     msbuildLocation,
                     e is NodeFailedToLaunchException nodeFailedExc ? nodeFailedExc.ErrorCode : string.Empty,
-                    e.Message,
-                    _scheduledNodeId,
-                    nodeReuseEnabled,
-                    handshakeOptions);
+                    e.Message);
             }
         }
     }

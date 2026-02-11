@@ -47,7 +47,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [InlineData(true, true)]
         public void TaskNodesDieAfterBuild(bool taskHostFactorySpecified, bool envVariableSpecified)
         {
-            using (TestEnvironment env = TestEnvironment.Create())
+            using (TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true))
             {
                 string taskFactory = taskHostFactorySpecified ? "TaskHostFactory" : "AssemblyTaskFactory";
                 string pidTaskProject = $@"
@@ -154,7 +154,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void TransientAndSidecarNodeCanCoexist()
         {
-            using (TestEnvironment env = TestEnvironment.Create(_output))
+            using (TestEnvironment env = TestEnvironment.Create(_output, setupDotnetHostPath: true))
             {
                 string pidTaskProject = $@"
 <Project>
@@ -221,7 +221,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost()
         {
-            using TestEnvironment env = TestEnvironment.Create(_output);
+            using TestEnvironment env = TestEnvironment.Create(_output, setupDotnetHostPath: true);
 
             string boolParam = "True";
             string boolArrayParam = "False;True;False";
@@ -372,7 +372,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void StringArrayWithNullsDoesNotCrashTaskHost()
         {
-            using TestEnvironment env = TestEnvironment.Create();
+            using TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true);
 
             string projectContents = $@"
 <Project>

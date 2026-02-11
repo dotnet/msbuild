@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void RecursiveDirPreservedAcrossTaskHostBoundary()
         {
-            using var env = TestEnvironment.Create(_testOutput);
+            using var env = TestEnvironment.Create(_testOutput, setupDotnetHostPath: true);
 
             ObjectModelHelpers.DeleteTempProjectDirectory();
 
