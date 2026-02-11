@@ -65,6 +65,52 @@ namespace Microsoft.Build.Shared
         internal static string CurrentThreadWorkingDirectory = null;
 #endif
 
+        /// <summary>
+        /// If <see cref="CurrentThreadWorkingDirectory"/> is set and <paramref name="path"/> is relative,
+        /// resolves it to an <see cref="AbsolutePath"/> using the thread-local working directory as base.
+        /// Returns <c>null</c> when the path does not need resolution (no thread working directory,
+        /// empty path, or already fully qualified).
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// FixFilePath is called internally BEFORE path resolution because on Linux, backslash is a
+        /// valid filename character — Path.Combine/GetFullPath won't recognize ..\segments unless
+        /// backslashes are first normalized to forward slashes.
+        /// </para>
+        /// <para>
+        /// NormalizePath (which uses Path.GetFullPath) can throw for inputs with illegal path characters
+        /// (e.g., wildcards). In that case we fall back to a simple Path.Combine, which preserves the
+        /// non-throwing behavior of APIs like File.Exists and Directory.Exists.
+        /// </para>
+        /// </remarks>
+        internal static AbsolutePath? MakeFullPathFromThreadWorkingDirectory(string path)
+        {
+            string workingDir = CurrentThreadWorkingDirectory;
+            if (string.IsNullOrEmpty(workingDir) || string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+
+            path = FrameworkFileUtilities.FixFilePath(path);
+
+            if (Path.IsPathRooted(path))
+            {
+                return null;
+            }
+
+            AbsolutePath combined = new AbsolutePath(path, new AbsolutePath(workingDir));
+            try
+            {
+                return FrameworkFileUtilities.NormalizePath(combined);
+            }
+            catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+            {
+                // For invalid paths (e.g., wildcards) fall back to the simple combination,
+                // preserving the non-throwing behavior of File.Exists/Directory.Exists.
+                return combined;
+            }
+        }
+
 #if CLR2COMPATIBILITY
         internal static string TempFileDirectory => Path.GetTempPath();
 #endif
