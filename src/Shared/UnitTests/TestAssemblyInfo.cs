@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests
                     currentBuildEnvironment.VisualStudioInstallRootDirectory));
 
             // Note: build error files will be initialized in test environments for particular tests, also we don't have output to report error files into anyway...
-            _testEnvironment = TestEnvironment.Create(output: null, ignoreBuildErrorFiles: true);
+            _testEnvironment = TestEnvironment.Create(output: null, ignoreBuildErrorFiles: true, setupDotnetHostPath: true);
 
             _testEnvironment.DoNotLaunchDebugger();
 
@@ -72,8 +72,6 @@ namespace Microsoft.Build.UnitTests
             // Prevent test assemblies from logging any performance info.
             // https://github.com/dotnet/msbuild/pull/6274
             _testEnvironment.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", null);
-
-            SetDotnetHostPath(_testEnvironment);
 
             // Use a project-specific temporary path
             //  This is so multiple test projects can be run in parallel without sharing the same temp directory
@@ -108,49 +106,7 @@ namespace Microsoft.Build.UnitTests
                 fileName: "Directory.Build.targets",
                 contents: "<Project />");
         }
-
-        /// <summary>
-        /// Find correct version of "dotnet", and set DOTNET_HOST_PATH so that the Roslyn tasks will use the right host
-        /// </summary>
-        /// <param name="testEnvironment"></param>
-        private static void SetDotnetHostPath(TestEnvironment testEnvironment)
-        {
-            var currentFolder = AppContext.BaseDirectory;
-
-            while (currentFolder != null)
-            {
-                string potentialVersionsPropsPath = Path.Combine(currentFolder, "build", "Versions.props");
-                if (FileSystems.Default.FileExists(potentialVersionsPropsPath))
-                {
-                    XDocument doc = null;
-                    var xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true, IgnoreWhitespace = true };
-                    using (XmlReader xr = XmlReader.Create(File.OpenRead(potentialVersionsPropsPath), xrs))
-                    {
-                        doc = XDocument.Load(xr);
-                    }
-
-                    var ns = doc.Root.Name.Namespace;
-                    var cliVersionElement = doc.Root.Elements(ns + "PropertyGroup").Elements(ns + "DotNetCliVersion").FirstOrDefault();
-                    if (cliVersionElement != null)
-                    {
-                        string cliVersion = cliVersionElement.Value;
-                        string dotnetPath = Path.Combine(currentFolder, "artifacts", ".dotnet", cliVersion, "dotnet");
-
-                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                        {
-                            dotnetPath += ".exe";
-                        }
-
-                        testEnvironment.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, dotnetPath);
-                    }
-
-                    break;
-                }
-
-                currentFolder = Directory.GetParent(currentFolder)?.FullName;
-            }
-        }
-
+ 
         public void Dispose()
         {
             if (!_disposed)

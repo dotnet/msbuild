@@ -423,7 +423,7 @@ namespace Microsoft.Build.Shared
         {
 #if RUNTIME_TYPE_NETCORE
 
-            // Respect the case when app host isn't avaialble yet and we still in dotnet MSBuild.dll environment
+            // Respect the case when app host isn't available yet and we still in dotnet MSBuild.dll environment
             string processName = EnvironmentUtilities.ProcessPath;
             return IsRunningInMSBuildExe(processName)
                  ? processName
