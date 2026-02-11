@@ -5317,5 +5317,625 @@ $(
             // The chained WithMetadataValue should return empty, so the condition should be true and EmptyResult should be set
             log.AssertLogContains("EmptyResult=TRUE");
         }
+
+        #region System.IO.File/Directory relative path resolution in -mt mode
+
+        /// <summary>
+        /// TransientTestState that saves/restores <see cref="FileUtilities.CurrentThreadWorkingDirectory"/>.
+        /// </summary>
+        private sealed class TransientThreadWorkingDirectory : TransientTestState
+        {
+            private readonly string _originalValue;
+
+            public TransientThreadWorkingDirectory(string newWorkingDirectory)
+            {
+                _originalValue = FileUtilities.CurrentThreadWorkingDirectory;
+                FileUtilities.CurrentThreadWorkingDirectory = newWorkingDirectory;
+            }
+
+            public override void Revert()
+            {
+                FileUtilities.CurrentThreadWorkingDirectory = _originalValue;
+            }
+        }
+
+        /// <summary>
+        /// Helper: expand a property function expression with CurrentThreadWorkingDirectory set,
+        /// simulating -mt mode where Environment.CurrentDirectory may point elsewhere.
+        /// </summary>
+        private static string ExpandWithThreadWorkingDirectory(TestEnvironment env, string expression, string workingDir, string wrongDir = null)
+        {
+            env.WithTransientTestState(new TransientThreadWorkingDirectory(workingDir));
+            if (wrongDir != null)
+            {
+                env.SetCurrentDirectory(wrongDir);
+            }
+
+            var pg = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+            return expander.ExpandIntoStringLeaveEscaped(expression, ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
+        }
+
+        // =====================================================================
+        // Category A: -mt mode tests for default-allowed File methods
+        // =====================================================================
+
+        [Fact]
+        public void FileReadAllText_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            File.WriteAllText(Path.Combine(correctDir.Path, "notes.txt"), "correct content");
+            File.WriteAllText(Path.Combine(wrongDir.Path, "notes.txt"), "wrong content");
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::ReadAllText('notes.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe("correct content");
+        }
+
+        [Fact]
+        public void FileExists_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            File.WriteAllText(Path.Combine(correctDir.Path, "exists.txt"), "data");
+            // Do NOT create the file in wrongDir
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::Exists('exists.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe("True");
+        }
+
+        [Fact]
+        public void FileGetAttributes_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string filePath = Path.Combine(correctDir.Path, "attrs.txt");
+            File.WriteAllText(filePath, "data");
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                @"$([MSBuild]::BitwiseAnd(32,$([System.IO.File]::GetAttributes('attrs.txt'))))",
+                correctDir.Path, wrongDir.Path);
+
+            // FileAttributes.Archive = 32
+            result.ShouldBe("32");
+        }
+
+        [Fact]
+        public void FileGetCreationTime_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string filePath = Path.Combine(correctDir.Path, "time.txt");
+            File.WriteAllText(filePath, "data");
+            DateTime expected = File.GetCreationTime(filePath);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::GetCreationTime('time.txt'))", correctDir.Path, wrongDir.Path);
+
+            DateTime.Parse(result).ShouldBe(expected, TimeSpan.FromSeconds(1));
+        }
+
+        [Fact]
+        public void FileGetLastWriteTime_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string filePath = Path.Combine(correctDir.Path, "time.txt");
+            File.WriteAllText(filePath, "data");
+            DateTime expected = File.GetLastWriteTime(filePath);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::GetLastWriteTime('time.txt'))", correctDir.Path, wrongDir.Path);
+
+            DateTime.Parse(result).ShouldBe(expected, TimeSpan.FromSeconds(1));
+        }
+
+        [Fact]
+        public void FileGetLastAccessTime_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string filePath = Path.Combine(correctDir.Path, "time.txt");
+            File.WriteAllText(filePath, "data");
+            DateTime expected = File.GetLastAccessTime(filePath);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::GetLastAccessTime('time.txt'))", correctDir.Path, wrongDir.Path);
+
+            DateTime.Parse(result).ShouldBe(expected, TimeSpan.FromSeconds(1));
+        }
+
+        // =====================================================================
+        // Category A: -mt mode tests for default-allowed Directory methods
+        // =====================================================================
+
+        [Fact]
+        public void DirectoryExists_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            Directory.CreateDirectory(Path.Combine(correctDir.Path, "subdir"));
+            // Do NOT create subdir in wrongDir
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.Directory]::Exists('subdir'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldBe("True");
+        }
+
+        [Fact]
+        public void DirectoryGetParent_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            Directory.CreateDirectory(Path.Combine(correctDir.Path, "parent", "child"));
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                @"$([System.IO.Directory]::GetParent('parent\child'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldNotBeNullOrEmpty();
+            Path.GetFileName(result).ShouldBe("parent");
+        }
+
+        [Fact]
+        public void DirectoryGetFiles_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string subDir = Path.Combine(correctDir.Path, "sub");
+            Directory.CreateDirectory(subDir);
+            File.WriteAllText(Path.Combine(subDir, "a.txt"), "data");
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.Directory]::GetFiles('sub'))", correctDir.Path, wrongDir.Path);
+
+            // GetFiles returns string[], which MSBuild converts to a semicolon-separated string
+            result.ShouldContain("a.txt");
+        }
+
+        [Fact]
+        public void DirectoryGetDirectories_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            Directory.CreateDirectory(Path.Combine(correctDir.Path, "parent", "child"));
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.Directory]::GetDirectories('parent'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldContain("child");
+        }
+
+        [Fact]
+        public void DirectoryGetLastWriteTime_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string subDir = Path.Combine(correctDir.Path, "sub");
+            Directory.CreateDirectory(subDir);
+            DateTime expected = Directory.GetLastWriteTime(subDir);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.Directory]::GetLastWriteTime('sub'))", correctDir.Path, wrongDir.Path);
+
+            DateTime.Parse(result).ShouldBe(expected, TimeSpan.FromSeconds(1));
+        }
+
+        [Fact]
+        public void DirectoryGetLastAccessTime_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string subDir = Path.Combine(correctDir.Path, "sub");
+            Directory.CreateDirectory(subDir);
+            DateTime expected = Directory.GetLastAccessTime(subDir);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.Directory]::GetLastAccessTime('sub'))", correctDir.Path, wrongDir.Path);
+
+            DateTime.Parse(result).ShouldBe(expected, TimeSpan.FromSeconds(1));
+        }
+
+        // =====================================================================
+        // Category A+: Extended File methods (MSBUILDENABLEALLPROPERTYFUNCTIONS)
+        // =====================================================================
+
+        [Fact]
+        public void FileReadAllLines_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            File.WriteAllText(Path.Combine(correctDir.Path, "lines.txt"), "line1\nline2");
+            File.WriteAllText(Path.Combine(wrongDir.Path, "lines.txt"), "wrong");
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::ReadAllLines('lines.txt'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldContain("line1");
+        }
+
+        [Fact]
+        public void FileReadAllBytes_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            File.WriteAllBytes(Path.Combine(correctDir.Path, "data.bin"), [0x42]);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::ReadAllBytes('data.bin'))", correctDir.Path, wrongDir.Path);
+
+            result.ShouldNotBeNullOrEmpty();
+        }
+
+        [Fact]
+        public void FileWriteAllText_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::WriteAllText('output.txt', 'hello'))", correctDir.Path, wrongDir.Path);
+
+            File.Exists(Path.Combine(correctDir.Path, "output.txt")).ShouldBeTrue();
+            File.ReadAllText(Path.Combine(correctDir.Path, "output.txt")).ShouldBe("hello");
+            File.Exists(Path.Combine(wrongDir.Path, "output.txt")).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void FileAppendAllText_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            File.WriteAllText(Path.Combine(correctDir.Path, "append.txt"), "base");
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::AppendAllText('append.txt', ' added'))", correctDir.Path, wrongDir.Path);
+
+            File.ReadAllText(Path.Combine(correctDir.Path, "append.txt")).ShouldBe("base added");
+        }
+
+        [Fact]
+        public void FileDelete_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string correctFile = Path.Combine(correctDir.Path, "todelete.txt");
+            string wrongFile = Path.Combine(wrongDir.Path, "todelete.txt");
+            File.WriteAllText(correctFile, "data");
+            File.WriteAllText(wrongFile, "data");
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::Delete('todelete.txt'))", correctDir.Path, wrongDir.Path);
+
+            File.Exists(correctFile).ShouldBeFalse();
+            File.Exists(wrongFile).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void FileGetCreationTimeUtc_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string filePath = Path.Combine(correctDir.Path, "utc.txt");
+            File.WriteAllText(filePath, "data");
+            DateTime expected = File.GetCreationTimeUtc(filePath);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::GetCreationTimeUtc('utc.txt'))", correctDir.Path, wrongDir.Path);
+
+            DateTime.Parse(result).ShouldBe(expected, TimeSpan.FromSeconds(1));
+        }
+
+        [Fact]
+        public void FileGetLastWriteTimeUtc_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string filePath = Path.Combine(correctDir.Path, "utc.txt");
+            File.WriteAllText(filePath, "data");
+            DateTime expected = File.GetLastWriteTimeUtc(filePath);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::GetLastWriteTimeUtc('utc.txt'))", correctDir.Path, wrongDir.Path);
+
+            DateTime.Parse(result).ShouldBe(expected, TimeSpan.FromSeconds(1));
+        }
+
+        [Fact]
+        public void FileGetLastAccessTimeUtc_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string filePath = Path.Combine(correctDir.Path, "utc.txt");
+            File.WriteAllText(filePath, "data");
+            DateTime expected = File.GetLastAccessTimeUtc(filePath);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::GetLastAccessTimeUtc('utc.txt'))", correctDir.Path, wrongDir.Path);
+
+            DateTime.Parse(result).ShouldBe(expected, TimeSpan.FromSeconds(1));
+        }
+
+        // =====================================================================
+        // Category A+: Extended Directory methods (MSBUILDENABLEALLPROPERTYFUNCTIONS)
+        // =====================================================================
+
+        [Fact]
+        public void DirectoryCreateDirectory_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.Directory]::CreateDirectory('newdir'))", correctDir.Path, wrongDir.Path);
+
+            Directory.Exists(Path.Combine(correctDir.Path, "newdir")).ShouldBeTrue();
+            Directory.Exists(Path.Combine(wrongDir.Path, "newdir")).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void DirectoryDelete_RelativePath_ResolvesFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            Directory.CreateDirectory(Path.Combine(correctDir.Path, "todel"));
+            Directory.CreateDirectory(Path.Combine(wrongDir.Path, "todel"));
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.Directory]::Delete('todel'))", correctDir.Path, wrongDir.Path);
+
+            Directory.Exists(Path.Combine(correctDir.Path, "todel")).ShouldBeFalse();
+            Directory.Exists(Path.Combine(wrongDir.Path, "todel")).ShouldBeTrue();
+        }
+
+        // =====================================================================
+        // Category B: Regular mode (CurrentThreadWorkingDirectory = null)
+        // =====================================================================
+
+        [Fact]
+        public void FileReadAllText_AbsolutePath_WorksWithoutThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var dir = env.CreateFolder(createFolder: true);
+
+            string filePath = Path.Combine(dir.Path, "abs.txt");
+            File.WriteAllText(filePath, "absolute content");
+
+            // CurrentThreadWorkingDirectory is null (regular mode)
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([System.IO.File]::ReadAllText('{filePath}'))", null);
+
+            result.ShouldBe("absolute content");
+        }
+
+        [Fact]
+        public void FileExists_AbsolutePath_WorksWithoutThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var dir = env.CreateFolder(createFolder: true);
+
+            string filePath = Path.Combine(dir.Path, "abs.txt");
+            File.WriteAllText(filePath, "data");
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([System.IO.File]::Exists('{filePath}'))", null);
+
+            result.ShouldBe("True");
+        }
+
+        [Fact]
+        public void DirectoryExists_AbsolutePath_WorksWithoutThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var dir = env.CreateFolder(createFolder: true);
+
+            string subDir = Path.Combine(dir.Path, "subdir");
+            Directory.CreateDirectory(subDir);
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([System.IO.Directory]::Exists('{subDir}'))", null);
+
+            result.ShouldBe("True");
+        }
+
+        // =====================================================================
+        // Category C: Absolute path passthrough (not mangled by resolution)
+        // =====================================================================
+
+        [Fact]
+        public void FileReadAllText_AbsolutePath_NotMangledByThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var correctDir = env.CreateFolder(createFolder: true);
+            var otherDir = env.CreateFolder(createFolder: true);
+
+            string absFile = Path.Combine(otherDir.Path, "abs.txt");
+            File.WriteAllText(absFile, "absolute content");
+
+            // Even though CurrentThreadWorkingDirectory is set, absolute paths should pass through unchanged
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([System.IO.File]::ReadAllText('{absFile}'))", correctDir.Path);
+
+            result.ShouldBe("absolute content");
+        }
+
+        [Fact]
+        public void FileExists_AbsolutePath_NotMangledByThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            var correctDir = env.CreateFolder(createFolder: true);
+            var otherDir = env.CreateFolder(createFolder: true);
+
+            string absFile = Path.Combine(otherDir.Path, "abs.txt");
+            File.WriteAllText(absFile, "data");
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                $"$([System.IO.File]::Exists('{absFile}'))", correctDir.Path);
+
+            result.ShouldBe("True");
+        }
+
+        // =====================================================================
+        // Category D: Multi-path method tests (Copy, Move with two relative paths)
+        // =====================================================================
+
+        [Fact]
+        public void FileCopy_TwoRelativePaths_BothResolveFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            File.WriteAllText(Path.Combine(correctDir.Path, "source.txt"), "copy me");
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::Copy('source.txt', 'dest.txt'))", correctDir.Path, wrongDir.Path);
+
+            File.Exists(Path.Combine(correctDir.Path, "dest.txt")).ShouldBeTrue();
+            File.ReadAllText(Path.Combine(correctDir.Path, "dest.txt")).ShouldBe("copy me");
+            File.Exists(Path.Combine(wrongDir.Path, "dest.txt")).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void FileMove_TwoRelativePaths_BothResolveFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            File.WriteAllText(Path.Combine(correctDir.Path, "movesrc.txt"), "move me");
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.File]::Move('movesrc.txt', 'movedst.txt'))", correctDir.Path, wrongDir.Path);
+
+            File.Exists(Path.Combine(correctDir.Path, "movesrc.txt")).ShouldBeFalse();
+            File.Exists(Path.Combine(correctDir.Path, "movedst.txt")).ShouldBeTrue();
+            File.ReadAllText(Path.Combine(correctDir.Path, "movedst.txt")).ShouldBe("move me");
+        }
+
+        [Fact]
+        public void DirectoryMove_TwoRelativePaths_BothResolveFromThreadWorkingDirectory()
+        {
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            var correctDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            Directory.CreateDirectory(Path.Combine(correctDir.Path, "dirsrc"));
+
+            ExpandWithThreadWorkingDirectory(env,
+                "$([System.IO.Directory]::Move('dirsrc', 'dirdst'))", correctDir.Path, wrongDir.Path);
+
+            Directory.Exists(Path.Combine(correctDir.Path, "dirsrc")).ShouldBeFalse();
+            Directory.Exists(Path.Combine(correctDir.Path, "dirdst")).ShouldBeTrue();
+        }
+
+        // =====================================================================
+        // Category E: Parent traversal test (../ relative paths)
+        // =====================================================================
+
+        [Fact]
+        public void FileReadAllText_ParentTraversal_ResolvesCorrectly()
+        {
+            using var env = TestEnvironment.Create();
+            var rootDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            // Create structure: rootDir/sibling/file.txt, and set working dir to rootDir/subdir
+            string siblingDir = Path.Combine(rootDir.Path, "sibling");
+            string subDir = Path.Combine(rootDir.Path, "subdir");
+            Directory.CreateDirectory(siblingDir);
+            Directory.CreateDirectory(subDir);
+            File.WriteAllText(Path.Combine(siblingDir, "file.txt"), "traversal works");
+
+            string result = ExpandWithThreadWorkingDirectory(env,
+                @"$([System.IO.File]::ReadAllText('../sibling/file.txt'))", subDir, wrongDir.Path);
+
+            result.ShouldBe("traversal works");
+        }
+
+        // =====================================================================
+        // Category F: FixFilePath ordering test (backslash parent traversal)
+        // =====================================================================
+
+        [Fact]
+        public void FileReadAllText_BackslashParentTraversal_ResolvesCorrectly()
+        {
+            using var env = TestEnvironment.Create();
+            var rootDir = env.CreateFolder(createFolder: true);
+            var wrongDir = env.CreateFolder(createFolder: true);
+
+            string siblingDir = Path.Combine(rootDir.Path, "sibling");
+            string subDir = Path.Combine(rootDir.Path, "subdir");
+            Directory.CreateDirectory(siblingDir);
+            Directory.CreateDirectory(subDir);
+            File.WriteAllText(Path.Combine(siblingDir, "file.txt"), "backslash traversal works");
+
+            // Use backslash separators (Windows-style) — FixFilePath must normalize before resolution
+            string result = ExpandWithThreadWorkingDirectory(env,
+                @"$([System.IO.File]::ReadAllText('..\\sibling\\file.txt'))", subDir, wrongDir.Path);
+
+            result.ShouldBe("backslash traversal works");
+        }
+
+        #endregion
     }
 }
