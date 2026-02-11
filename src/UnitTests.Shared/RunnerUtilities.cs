@@ -9,6 +9,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Xunit.Abstractions;
+using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
 
@@ -38,7 +39,7 @@ namespace Microsoft.Build.UnitTests.Shared
         public static void ApplyDotnetHostPathEnvironmentVariable(TestEnvironment testEnvironment)
         {
             // Built msbuild.dll executed by dotnet.exe needs this environment variable for msbuild tasks such as RoslynCodeTaskFactory.
-            testEnvironment.SetEnvironmentVariable("DOTNET_HOST_PATH", s_dotnetExePath);
+            testEnvironment.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, s_dotnetExePath);
         }
 #endif
 
