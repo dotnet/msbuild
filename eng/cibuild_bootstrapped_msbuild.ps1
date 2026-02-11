@@ -85,9 +85,7 @@ try {
   else
   {
     $buildToolPath = "$bootstrapRoot\core\dotnet.exe"
-    $propsFile = Join-Path $PSScriptRoot "Versions.props"
-    $bootstrapSdkVersion = ([xml](Get-Content $propsFile)).SelectSingleNode("//PropertyGroup/BootstrapSdkVersion").InnerText
-    $buildToolCommand = "$bootstrapRoot\core\sdk\$bootstrapSdkVersion\MSBuild.dll"
+    $buildToolCommand = "msbuild"
     $buildToolFramework = "net"
 
     $env:DOTNET_ROOT="$bootstrapRoot\core"
