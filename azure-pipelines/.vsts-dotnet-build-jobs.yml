@@ -159,6 +159,9 @@ jobs:
       channelName: $(VisualStudio.ChannelName)
       manifests: $(VisualStudio.SetupManifestList)
       outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
+      ConnectedServiceName: 'VSEng-VSDrop-MI'
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
     displayName: 'OptProf - Build VS bootstrapper'
     condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
