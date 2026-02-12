@@ -4,6 +4,10 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+#if NET
+using System;
+using System.Runtime.InteropServices;
+#endif
 
 #nullable disable
 
@@ -11,6 +15,53 @@ namespace Microsoft.Build.Shared
 {
     internal static class ProcessExtensions
     {
+#if NET
+        // P/Invoke declarations for getting process command line on Windows (.NET Core)
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool CloseHandle(IntPtr hObject);
+
+        [DllImport("ntdll.dll")]
+        private static extern int NtQueryInformationProcess(
+            IntPtr processHandle,
+            int processInformationClass,
+            ref PROCESS_BASIC_INFORMATION processInformation,
+            int processInformationLength,
+            out int returnLength);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool ReadProcessMemory(
+            IntPtr hProcess,
+            IntPtr lpBaseAddress,
+            [Out] byte[] lpBuffer,
+            int dwSize,
+            out int lpNumberOfBytesRead);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct PROCESS_BASIC_INFORMATION
+        {
+            public IntPtr Reserved1;
+            public IntPtr PebBaseAddress;
+            public IntPtr Reserved2_0;
+            public IntPtr Reserved2_1;
+            public IntPtr UniqueProcessId;
+            public IntPtr InheritedFromUniqueProcessId;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct UNICODE_STRING
+        {
+            public ushort Length;
+            public ushort MaximumLength;
+            public IntPtr Buffer;
+        }
+
+        private const int PROCESS_QUERY_INFORMATION = 0x0400;
+        private const int PROCESS_VM_READ = 0x0010;
+#endif
+
         public static void KillTree(this Process process, int timeoutMilliseconds)
         {
 #if NET
@@ -85,7 +136,9 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Retrieves the command line on Windows using WMI.
+        /// Retrieves the command line on Windows.
+        /// On .NET Framework: Uses WMI (System.Management).
+        /// On .NET Core+: Uses Windows API P/Invoke to read from PEB.
         /// </summary>
         private static string GetCommandLineWindows(Process process)
         {
@@ -108,12 +161,112 @@ namespace Microsoft.Build.Shared
             }
             return null;
 #else
-            // On .NET Core/5+, WMI via System.Management requires a separate package.
-            // For now, we'll use an alternative approach or return null.
-            // TODO: Consider using native Windows API calls or System.Management package
-            return null;
+            // On .NET Core/5+, use native Windows API to read command line from process PEB
+            try
+            {
+                return GetCommandLineWindowsNative(process.Id);
+            }
+            catch
+            {
+                // Native API calls failed
+                return null;
+            }
 #endif
         }
+
+#if NET
+        /// <summary>
+        /// Retrieves the command line for a Windows process using native APIs.
+        /// This reads the command line from the Process Environment Block (PEB).
+        /// </summary>
+        private static string GetCommandLineWindowsNative(int processId)
+        {
+            IntPtr hProcess = IntPtr.Zero;
+            try
+            {
+                // Open the process with query and read permissions
+                hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, processId);
+                if (hProcess == IntPtr.Zero)
+                {
+                    return null;
+                }
+
+                // Get process basic information to locate PEB
+                PROCESS_BASIC_INFORMATION pbi = new PROCESS_BASIC_INFORMATION();
+                int returnLength;
+                int status = NtQueryInformationProcess(hProcess, 0, ref pbi, Marshal.SizeOf(pbi), out returnLength);
+                if (status != 0 || pbi.PebBaseAddress == IntPtr.Zero)
+                {
+                    return null;
+                }
+
+                // Read the PEB to get the ProcessParameters pointer
+                // In 64-bit: PEB + 0x20 = ProcessParameters
+                // In 32-bit: PEB + 0x10 = ProcessParameters
+                int processParametersOffset = IntPtr.Size == 8 ? 0x20 : 0x10;
+                IntPtr processParametersPtr = IntPtr.Zero;
+                
+                byte[] ptrBuffer = new byte[IntPtr.Size];
+                if (!ReadProcessMemory(hProcess, IntPtr.Add(pbi.PebBaseAddress, processParametersOffset), ptrBuffer, ptrBuffer.Length, out _))
+                {
+                    return null;
+                }
+                processParametersPtr = IntPtr.Size == 8 
+                    ? new IntPtr(BitConverter.ToInt64(ptrBuffer, 0))
+                    : new IntPtr(BitConverter.ToInt32(ptrBuffer, 0));
+
+                if (processParametersPtr == IntPtr.Zero)
+                {
+                    return null;
+                }
+
+                // Read the CommandLine UNICODE_STRING from ProcessParameters
+                // CommandLine is at offset 0x70 in 64-bit and 0x40 in 32-bit
+                int commandLineOffset = IntPtr.Size == 8 ? 0x70 : 0x40;
+                byte[] unicodeStringBuffer = new byte[Marshal.SizeOf(typeof(UNICODE_STRING))];
+                if (!ReadProcessMemory(hProcess, IntPtr.Add(processParametersPtr, commandLineOffset), unicodeStringBuffer, unicodeStringBuffer.Length, out _))
+                {
+                    return null;
+                }
+
+                // Parse UNICODE_STRING structure
+                UNICODE_STRING commandLineUnicode = new UNICODE_STRING
+                {
+                    Length = BitConverter.ToUInt16(unicodeStringBuffer, 0),
+                    MaximumLength = BitConverter.ToUInt16(unicodeStringBuffer, 2),
+                    Buffer = IntPtr.Size == 8
+                        ? new IntPtr(BitConverter.ToInt64(unicodeStringBuffer, 4 + (IntPtr.Size - 4)))  // Account for padding
+                        : new IntPtr(BitConverter.ToInt32(unicodeStringBuffer, 4))
+                };
+
+                if (commandLineUnicode.Buffer == IntPtr.Zero || commandLineUnicode.Length == 0)
+                {
+                    return null;
+                }
+
+                // Read the actual command line string
+                byte[] commandLineBuffer = new byte[commandLineUnicode.Length];
+                if (!ReadProcessMemory(hProcess, commandLineUnicode.Buffer, commandLineBuffer, commandLineBuffer.Length, out _))
+                {
+                    return null;
+                }
+
+                return Encoding.Unicode.GetString(commandLineBuffer);
+            }
+            catch
+            {
+                return null;
+            }
+            finally
+            {
+                if (hProcess != IntPtr.Zero)
+                {
+                    CloseHandle(hProcess);
+                }
+            }
+        }
+#endif
+
 
         /// <summary>
         /// Retrieves the command line on Unix/Linux by reading /proc/{pid}/cmdline.

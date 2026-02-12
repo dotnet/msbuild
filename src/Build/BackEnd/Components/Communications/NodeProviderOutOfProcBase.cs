@@ -400,7 +400,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Extracts the NodeMode from a command line string.
+        /// Extracts the NodeMode from a command line string using regex pattern matching.
         /// </summary>
         /// <param name="commandLine">The command line to parse</param>
         /// <returns>The NodeMode if found, otherwise null</returns>
@@ -411,33 +411,19 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
-            // Look for /nodemode: or /nodemode=
-            int nodeModeIndex = commandLine.IndexOf("/nodemode:", StringComparison.OrdinalIgnoreCase);
-            if (nodeModeIndex < 0)
-            {
-                nodeModeIndex = commandLine.IndexOf("/nodemode=", StringComparison.OrdinalIgnoreCase);
-            }
+            // Use regex pattern matching similar to DebugUtils.ScanNodeMode
+            // Pattern: /nodemode:<digits> followed by whitespace or end of string
+            var match = System.Text.RegularExpressions.Regex.Match(
+                commandLine, 
+                @"/nodemode:(?<nodemode>[1-9]\d*)(\s|$)", 
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
-            if (nodeModeIndex < 0)
-            {
-                return null;
-            }
-
-            // Skip past "/nodemode:" or "/nodemode="
-            int valueStart = nodeModeIndex + "/nodemode:".Length;
-            if (valueStart >= commandLine.Length)
+            if (!match.Success)
             {
                 return null;
             }
 
-            // Find the end of the value (next space or end of string)
-            int valueEnd = commandLine.IndexOf(' ', valueStart);
-            if (valueEnd < 0)
-            {
-                valueEnd = commandLine.Length;
-            }
-
-            string nodeModeValue = commandLine.Substring(valueStart, valueEnd - valueStart).Trim();
+            string nodeModeValue = match.Groups["nodemode"].Value;
             
             if (NodeModeHelper.TryParse(nodeModeValue, out NodeMode? nodeMode))
             {
