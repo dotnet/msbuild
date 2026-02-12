@@ -10,6 +10,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsShipping>false</IsShipping>
     <IsTestProject>false</IsTestProject><!-- while this project references xunit it isn't itself a test -->
+    <UseFrozenMaintenancePackageVersions>false</UseFrozenMaintenancePackageVersions>
   </PropertyGroup>
   <ItemGroup>
     <!-- xUnit v3 extensibility package (not xunit.v3.core, which requires OutputType=Exe) -->
