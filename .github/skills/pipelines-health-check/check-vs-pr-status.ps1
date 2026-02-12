@@ -49,7 +49,7 @@ $script:RequiredCheckGenres = @(
 )
 
 function Get-AzDoToken {
-    // Entra app ID
+    # Entra app ID
     return (az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query accessToken -o tsv).Trim()
 }
 
