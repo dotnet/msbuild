@@ -20,6 +20,27 @@ This skill checks the health of MSBuild's CI pipelines and the status of inserti
 - `az` CLI must be installed and authenticated (`az login` with access to the DevDiv organization)
 - PowerShell 5.1+ or PowerShell Core
 
+### Optional: WorkIQ (for infrastructure issue investigation)
+
+[WorkIQ](https://www.npmjs.com/package/@microsoft/workiq) is an MCP server / CLI that can query Microsoft 365 data (people, emails, Teams, documents) to find **service ownership, contacts, and incident context** when pipeline failures are caused by infrastructure issues outside MSBuild's control.
+
+**Check availability:**
+```powershell
+workiq version
+# Expected: 0.2.x or later
+```
+
+**If not installed**, set it up:
+```powershell
+# Install globally (use --registry if your .npmrc redirects @microsoft scope to GitHub Packages)
+npm install -g @microsoft/workiq --registry https://registry.npmjs.org
+
+# Accept the EULA (required once)
+workiq accept-eula
+```
+
+WorkIQ is not required for the core health check. If unavailable, the skill will still work — it will simply skip the ownership lookup and suggest manual investigation or offer to help install WorkIQ.
+
 ## Reference Information
 
 ### Pipelines
@@ -142,9 +163,20 @@ Tasks:
 4. If build error: 
   - Check the `For build errors` section below on how to investigate build errors with binlogs
   - identify which component/task is failing and check recent commits to main to try to identify offedning one.
-5. If infrastructure issues - try to distile exact reason for the issue, check if there are other failing pipelines with the same issue or any open bugs for the issue. Put together conscise overview of the issue, along with the links to the failure messages. Suggest whom to contact for the further investigation
+5. If infrastructure issues:
+  - Try to distill the exact reason for the issue, check if there are other failing pipelines with the same issue or any open bugs for the issue.
+  - **Use WorkIQ** to find the owning team and contacts. Check if `workiq` CLI is available (`workiq version`).
+    - If available, run: `workiq ask -q "Who owns the {failing service/task name} service in Microsoft DevDiv? Who should be contacted about {brief error description}?"`
+    - Include the WorkIQ response in your findings — it typically returns team names, distribution lists, contact people, and escalation paths.
+    - You can also ask WorkIQ about known outages: `workiq ask -q "Are there any known outages or incidents for {service name} in Azure DevOps?"`
+    - If WorkIQ is NOT available, note this in your report and suggest the user install it:
+      ```
+      npm install -g @microsoft/workiq --registry https://registry.npmjs.org
+      workiq accept-eula
+      ```
+  - Put together a concise overview of the issue, along with links to the failure messages, the owning team/contacts from WorkIQ, and suggested next steps.
 
-Return: A comprehensive root cause analysis with category, explanation, links to failure messages and recommended action.
+Return: A comprehensive root cause analysis with category, explanation, links to failure messages, ownership info (from WorkIQ if available), and recommended action.
 ```
 
 #### For PR check failures
@@ -216,6 +248,7 @@ After all subagent results return, present the findings below the overview table
 ### Problem: {brief title}
 **Category:** {INFRA | BUILD | CONFIG | PR_CHECKS | STALE_INSERTION}
 **Details:** {subagent's explanation}
+**Ownership:** {owning team, contacts, DL from WorkIQ — include only for INFRA/CONFIG issues}
 **Recommended Action:** {subagent's recommendation}
 ```
 
@@ -235,3 +268,17 @@ This is normal for newly created PRs. The checks take time to queue and run. If 
 
 ### Timeout or rate limiting
 If the scripts take a long time or fail with 429 errors, Azure DevOps may be rate-limiting. Wait a minute and retry.
+
+### WorkIQ not found or EULA not accepted
+If `workiq version` fails, install it:
+```powershell
+npm install -g @microsoft/workiq --registry https://registry.npmjs.org
+workiq accept-eula
+```
+Note: If your `.npmrc` redirects the `@microsoft` scope to GitHub Packages, use `--registry https://registry.npmjs.org` to override, or pass `--userconfig` pointing to a clean `.npmrc`.
+
+### WorkIQ returns empty or unhelpful results
+WorkIQ queries Microsoft 365 data (Outlook, Teams, SharePoint). Results depend on your account's access and the data available in your tenant. Try rephrasing the question or being more specific about the service name. Example queries that work well:
+- `workiq ask -q "Who owns the MicroBuild service in Microsoft?"`
+- `workiq ask -q "Who owns the CloudBuild signing service in DevDiv?"`
+- `workiq ask -q "Who should I contact about NuGet feed authentication failures in Azure DevOps?"`
