@@ -2866,30 +2866,32 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Parses a node mode value from a string, supporting both integer values and enum names (case-insensitive).
+        /// </summary>
+        /// <param name="value">The value to parse (can be an integer or enum name)</param>
+        /// <returns>The parsed NodeMode value</returns>
+        internal static NodeMode ParseNodeMode(string value)
+        {
+            if (!NodeModeHelper.TryParse(value, out NodeMode? nodeMode))
+            {
+                CommandLineSwitchException.Throw("InvalidNodeNumberValue", value);
+            }
+
+            return nodeMode.Value;
+        }
+
+        /// <summary>
         /// Uses the input from thinNodeMode switch to start a local node server
         /// </summary>
         /// <param name="commandLineSwitches"></param>
         private static void StartLocalNode(CommandLineSwitches commandLineSwitches, bool lowpriority)
         {
             string[] input = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeMode];
-            int nodeModeNumber = 0;
+            NodeMode nodeMode = NodeMode.OutOfProcNode; // Default value
 
             if (input.Length > 0)
             {
-                try
-                {
-                    nodeModeNumber = int.Parse(input[0], CultureInfo.InvariantCulture);
-                }
-                catch (FormatException ex)
-                {
-                    CommandLineSwitchException.Throw("InvalidNodeNumberValue", input[0], ex.Message);
-                }
-                catch (OverflowException ex)
-                {
-                    CommandLineSwitchException.Throw("InvalidNodeNumberValue", input[0], ex.Message);
-                }
-
-                CommandLineSwitchException.VerifyThrow(nodeModeNumber >= 0, "InvalidNodeNumberValueIsNegative", input[0]);
+                nodeMode = ParseNodeMode(input[0]);
             }
 
             bool restart = true;
@@ -2898,72 +2900,73 @@ namespace Microsoft.Build.CommandLine
                 Exception nodeException = null;
                 NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
 
-                // normal OOP node case
-                if (nodeModeNumber == 1)
+                switch (nodeMode)
                 {
-                    // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
-                    bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                    OutOfProcNode node = new OutOfProcNode();
-                    shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
+                    case NodeMode.OutOfProcNode:
+                        // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
+                        bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+                        OutOfProcNode node = new OutOfProcNode();
+                        shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
 
-                    FileUtilities.ClearCacheDirectory();
-                }
-                else if (nodeModeNumber == 2)
-                {
-                    // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
-                    bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                    byte parentPacketVersion = ProcessParentPacketVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ParentPacketVersion]);
-                    OutOfProcTaskHostNode node = new();
-                    shutdownReason = node.Run(out nodeException, nodeReuse, parentPacketVersion);
-                }
-                else if (nodeModeNumber == 3)
-                {
-                    // The RAR service persists between builds, and will continue to process requests until terminated.
-                    OutOfProcRarNode rarNode = new();
-                    RarNodeShutdownReason rarShutdownReason = rarNode.Run(out nodeException, s_buildCancellationSource.Token);
+                        FileUtilities.ClearCacheDirectory();
+                        break;
 
-                    shutdownReason = rarShutdownReason switch
-                    {
-                        RarNodeShutdownReason.Complete => NodeEngineShutdownReason.BuildComplete,
-                        RarNodeShutdownReason.Error => NodeEngineShutdownReason.Error,
-                        RarNodeShutdownReason.AlreadyRunning => NodeEngineShutdownReason.Error,
-                        RarNodeShutdownReason.ConnectionTimedOut => NodeEngineShutdownReason.ConnectionFailed,
-                        _ => throw new ArgumentOutOfRangeException(nameof(rarShutdownReason), $"Unexpected value: {rarShutdownReason}"),
-                    };
-                }
-                else if (nodeModeNumber == 8)
-                {
-                    // Since build function has to reuse code from *this* class and OutOfProcServerNode is in different assembly
-                    // we have to pass down xmake build invocation to avoid circular dependency
-                    OutOfProcServerNode.BuildCallback buildFunction = (commandLine) =>
-                    {
-                        int exitCode;
-                        ExitType exitType;
+                    case NodeMode.OutOfProcTaskHostNode:
+                        // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
+                        bool taskHostNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+                        byte parentPacketVersion = ProcessParentPacketVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ParentPacketVersion]);
+                        OutOfProcTaskHostNode taskHostNode = new();
+                        shutdownReason = taskHostNode.Run(out nodeException, taskHostNodeReuse, parentPacketVersion);
+                        break;
 
-                        if (!s_initialized)
+                    case NodeMode.OutOfProcRarNode:
+                        // The RAR service persists between builds, and will continue to process requests until terminated.
+                        OutOfProcRarNode rarNode = new();
+                        RarNodeShutdownReason rarShutdownReason = rarNode.Run(out nodeException, s_buildCancellationSource.Token);
+
+                        shutdownReason = rarShutdownReason switch
                         {
-                            exitType = ExitType.InitializationError;
-                        }
-                        else
+                            RarNodeShutdownReason.Complete => NodeEngineShutdownReason.BuildComplete,
+                            RarNodeShutdownReason.Error => NodeEngineShutdownReason.Error,
+                            RarNodeShutdownReason.AlreadyRunning => NodeEngineShutdownReason.Error,
+                            RarNodeShutdownReason.ConnectionTimedOut => NodeEngineShutdownReason.ConnectionFailed,
+                            _ => throw new ArgumentOutOfRangeException(nameof(rarShutdownReason), $"Unexpected value: {rarShutdownReason}"),
+                        };
+                        break;
+
+                    case NodeMode.OutOfProcServerNode:
+                        // Since build function has to reuse code from *this* class and OutOfProcServerNode is in different assembly
+                        // we have to pass down xmake build invocation to avoid circular dependency
+                        OutOfProcServerNode.BuildCallback buildFunction = (commandLine) =>
                         {
-                            exitType = Execute(commandLine);
-                        }
+                            int exitCode;
+                            ExitType exitType;
 
-                        exitCode = exitType == ExitType.Success ? 0 : 1;
+                            if (!s_initialized)
+                            {
+                                exitType = ExitType.InitializationError;
+                            }
+                            else
+                            {
+                                exitType = Execute(commandLine);
+                            }
 
-                        return (exitCode, exitType.ToString());
-                    };
+                            exitCode = exitType == ExitType.Success ? 0 : 1;
 
-                    OutOfProcServerNode node = new(buildFunction);
+                            return (exitCode, exitType.ToString());
+                        };
 
-                    s_isServerNode = true;
-                    shutdownReason = node.Run(out nodeException);
+                        OutOfProcServerNode serverNode = new(buildFunction);
 
-                    FileUtilities.ClearCacheDirectory();
-                }
-                else
-                {
-                    CommandLineSwitchException.Throw("InvalidNodeNumberValue", nodeModeNumber.ToString());
+                        s_isServerNode = true;
+                        shutdownReason = serverNode.Run(out nodeException);
+
+                        FileUtilities.ClearCacheDirectory();
+                        break;
+
+                    default:
+                        CommandLineSwitchException.Throw("InvalidNodeNumberValue", nodeMode.ToString());
+                        break;
                 }
 
                 if (shutdownReason == NodeEngineShutdownReason.Error)
