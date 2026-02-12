@@ -11,6 +11,7 @@ namespace Xunit
         {
             if (conditionMemberNames.Length > 0)
             {
+                Skip = $"Condition '{conditionMemberNames[0]}' not met";
                 SkipUnless = conditionMemberNames[0];
             }
         }
