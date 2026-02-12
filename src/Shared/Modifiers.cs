@@ -198,10 +198,12 @@ namespace Microsoft.Build.Shared
                             return fullPath;
                         }
 
-                        if (currentDirectory == null)
-                        {
-                            currentDirectory = FileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
-                        }
+                        currentDirectory ??=
+#if !TASKHOST
+                            FrameworkFileUtilities.CurrentThreadWorkingDirectory ?? string.Empty;
+#else
+                            string.Empty;
+#endif
 
                         modifiedItemSpec = GetFullPath(itemSpec, currentDirectory);
                         fullPath = modifiedItemSpec;
