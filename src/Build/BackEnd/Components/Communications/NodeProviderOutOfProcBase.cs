@@ -218,6 +218,10 @@ namespace Microsoft.Build.BackEnd
             }
 
             bool nodeReuseRequested = Handshake.IsHandshakeOptionEnabled(hostHandshake.HandshakeOptions, HandshakeOptions.NodeReuse);
+            
+            // Extract the expected NodeMode from the command line arguments
+            NodeMode? expectedNodeMode = ExtractNodeModeFromCommandLine(commandLineArgs);
+            
             // Get all process of possible running node processes for reuse and put them into ConcurrentQueue.
             // Processes from this queue will be concurrently consumed by TryReusePossibleRunningNodes while
             //    trying to connect to them and reuse them. When queue is empty, no process to reuse left
@@ -229,7 +233,7 @@ namespace Microsoft.Build.BackEnd
             if (nodeReuseRequested)
             {
                 IList<Process> possibleRunningNodesList;
-                (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation);
+                (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation, expectedNodeMode);
                 possibleRunningNodes = new ConcurrentQueue<Process>(possibleRunningNodesList);
 
                 if (possibleRunningNodesList.Count > 0)
@@ -396,14 +400,65 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Finds processes named after either msbuild or msbuildtaskhost.
+        /// Extracts the NodeMode from a command line string.
         /// </summary>
-        /// <param name="msbuildLocation"></param>
+        /// <param name="commandLine">The command line to parse</param>
+        /// <returns>The NodeMode if found, otherwise null</returns>
+        private static NodeMode? ExtractNodeModeFromCommandLine(string commandLine)
+        {
+            if (string.IsNullOrWhiteSpace(commandLine))
+            {
+                return null;
+            }
+
+            // Look for /nodemode: or /nodemode=
+            int nodeModeIndex = commandLine.IndexOf("/nodemode:", StringComparison.OrdinalIgnoreCase);
+            if (nodeModeIndex < 0)
+            {
+                nodeModeIndex = commandLine.IndexOf("/nodemode=", StringComparison.OrdinalIgnoreCase);
+            }
+
+            if (nodeModeIndex < 0)
+            {
+                return null;
+            }
+
+            // Skip past "/nodemode:" or "/nodemode="
+            int valueStart = nodeModeIndex + "/nodemode:".Length;
+            if (valueStart >= commandLine.Length)
+            {
+                return null;
+            }
+
+            // Find the end of the value (next space or end of string)
+            int valueEnd = commandLine.IndexOf(' ', valueStart);
+            if (valueEnd < 0)
+            {
+                valueEnd = commandLine.Length;
+            }
+
+            string nodeModeValue = commandLine.Substring(valueStart, valueEnd - valueStart).Trim();
+            
+            if (NodeModeHelper.TryParse(nodeModeValue, out NodeMode? nodeMode))
+            {
+                return nodeMode;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Finds processes that could be reusable MSBuild nodes.
+        /// Discovers both msbuild.exe processes and dotnet processes hosting MSBuild.dll.
+        /// Filters candidates by NodeMode when available.
+        /// </summary>
+        /// <param name="msbuildLocation">The location of the MSBuild executable</param>
+        /// <param name="expectedNodeMode">The NodeMode to filter for, or null to include all</param>
         /// <returns>
-        /// Item 1 is the name of the process being searched for.
-        /// Item 2 is the ConcurrentQueue of ordered processes themselves.
+        /// Item 1 is a descriptive name of the processes being searched for.
+        /// Item 2 is the list of matching processes, sorted by ID.
         /// </returns>
-        private (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(string msbuildLocation = null)
+        private (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(string msbuildLocation = null, NodeMode? expectedNodeMode = null)
         {
             if (String.IsNullOrEmpty(msbuildLocation))
             {
@@ -411,11 +466,90 @@ namespace Microsoft.Build.BackEnd
             }
 
             var expectedProcessName = Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost() ?? msbuildLocation);
+            List<Process> candidateProcesses = [];
 
-            var processes = Process.GetProcessesByName(expectedProcessName);
-            Array.Sort(processes, (left, right) => left.Id.CompareTo(right.Id));
+            // First, get all processes with the expected MSBuild executable name
+            try
+            {
+                var msbuildProcesses = Process.GetProcessesByName(expectedProcessName);
+                candidateProcesses.AddRange(msbuildProcesses);
+            }
+            catch
+            {
+                // Process enumeration failed, continue with empty list
+            }
 
-            return (expectedProcessName, processes);
+            // Also get all dotnet processes that might be hosting MSBuild.dll
+            try
+            {
+                var dotnetProcesses = Process.GetProcessesByName("dotnet");
+                candidateProcesses.AddRange(dotnetProcesses);
+            }
+            catch
+            {
+                // Process enumeration failed for dotnet, continue
+            }
+
+            // Filter processes by NodeMode if we have an expected value
+            List<Process> filteredProcesses = [];
+            foreach (var process in candidateProcesses)
+            {
+                try
+                {
+                    string? commandLine = process.GetCommandLine();
+                    if (commandLine is null)
+                    {
+                        // If we can't get the command line, skip this process
+                        continue;
+                    }
+
+                    // Check if this is an MSBuild process
+                    // For dotnet processes, check if they're hosting MSBuild.dll
+                    if (process.ProcessName.Equals("dotnet", StringComparison.OrdinalIgnoreCase))
+                    {
+                        // Check if command line contains MSBuild.dll
+                        if (!commandLine.Contains("MSBuild.dll", StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+                    }
+
+                    // Extract NodeMode from command line
+                    NodeMode? processNodeMode = ExtractNodeModeFromCommandLine(commandLine);
+                    
+                    // If we have an expected NodeMode, only include processes that match
+                    if (expectedNodeMode.HasValue)
+                    {
+                        if (!processNodeMode.HasValue || processNodeMode.Value != expectedNodeMode.Value)
+                        {
+                            // NodeMode doesn't match or couldn't be determined, skip
+                            continue;
+                        }
+                    }
+                    else if (!processNodeMode.HasValue)
+                    {
+                        // No expected NodeMode, but couldn't determine this process's NodeMode, skip it
+                        continue;
+                    }
+
+                    // This process is a valid candidate
+                    filteredProcesses.Add(process);
+                }
+                catch
+                {
+                    // If we encounter any error processing this process, skip it
+                    continue;
+                }
+            }
+
+            // Sort by process ID for consistent ordering
+            filteredProcesses.Sort((left, right) => left.Id.CompareTo(right.Id));
+
+            string description = expectedNodeMode.HasValue 
+                ? $"{expectedProcessName} or dotnet (NodeMode={expectedNodeMode.Value})"
+                : $"{expectedProcessName} or dotnet";
+
+            return (description, filteredProcesses);
         }
 
         /// <summary>

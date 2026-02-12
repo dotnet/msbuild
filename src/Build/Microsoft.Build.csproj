@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Management" />
     <PackageReference Include="System.Memory" />
     <PackageReference Include="System.Security.Principal.Windows" />
     <PackageReference Include="System.Text.Json" />
