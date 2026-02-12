@@ -128,29 +128,52 @@ namespace Microsoft.Build.Shared
                     return null;
                 }
 
-                // Read the cmdline file. Arguments are separated by null characters
+                // Read the cmdline file. Arguments are separated by null characters.
+                // The file is typically encoded in the system's default encoding (usually UTF-8 on modern Linux).
                 byte[] cmdlineBytes = File.ReadAllBytes(cmdlinePath);
                 if (cmdlineBytes.Length == 0)
                 {
                     return null;
                 }
 
-                // Replace null terminators with spaces to reconstruct the command line
+                // Convert bytes to string, replacing null terminators with spaces.
+                // We need to handle null bytes specially since they're argument separators in /proc/pid/cmdline.
                 StringBuilder sb = new(cmdlineBytes.Length);
-                foreach (byte b in cmdlineBytes)
+                
+                int start = 0;
+                for (int i = 0; i < cmdlineBytes.Length; i++)
                 {
-                    if (b == 0)
+                    if (cmdlineBytes[i] == 0)
                     {
-                        sb.Append(' ');
+                        if (i > start)
+                        {
+                            // Decode the argument using UTF-8 encoding
+                            string arg = System.Text.Encoding.UTF8.GetString(cmdlineBytes, start, i - start);
+                            if (sb.Length > 0)
+                            {
+                                sb.Append(' ');
+                            }
+                            sb.Append(arg);
+                        }
+                        start = i + 1;
                     }
-                    else
+                }
+                
+                // Handle any remaining bytes after the last null terminator
+                if (start < cmdlineBytes.Length)
+                {
+                    string arg = System.Text.Encoding.UTF8.GetString(cmdlineBytes, start, cmdlineBytes.Length - start);
+                    if (arg.Length > 0)
                     {
-                        sb.Append((char)b);
+                        if (sb.Length > 0)
+                        {
+                            sb.Append(' ');
+                        }
+                        sb.Append(arg);
                     }
                 }
 
-                // Trim trailing spaces (from trailing null terminators)
-                return sb.ToString().TrimEnd();
+                return sb.ToString();
             }
             catch
             {

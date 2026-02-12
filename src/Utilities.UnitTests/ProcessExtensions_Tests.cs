@@ -86,8 +86,8 @@ namespace Microsoft.Build.UnitTests
         [WindowsOnlyFact]
         public void GetCommandLine_ReturnsNullForExitedProcess()
         {
-            // Start and immediately exit a process
-            var psi = new ProcessStartInfo("cmd.exe", "/c exit 0")
+            // Start a process with a brief delay before exit
+            var psi = new ProcessStartInfo("cmd.exe", "/c timeout /t 1 /nobreak >nul")
             {
                 UseShellExecute = false
             };
