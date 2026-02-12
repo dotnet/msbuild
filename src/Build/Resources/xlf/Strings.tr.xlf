@@ -2404,12 +2404,12 @@ Hatalar: {3}</target>
       </trans-unit>
       <trans-unit id="TaskHostAcquireFailed">
         <source>MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</source>
-        <target state="new">MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</target>
+        <target state="translated">MSB4216: MSBuild "{1}" çalışma zamanı ve "{2}" mimarisi ile bir görev oluşturmadığından veya görev konağına bağlanamadığından "{0}" görevi çalıştırılamadı.  Lütfen (1) istenen çalışma zamanı ve/veya mimarinin makinede kullanılabildiğinden ve (2) gerekli yürütülebilir "{3}" öğesinin mevcut ve çalıştırılabilir olduğundan emin olun.</target>
         <note>{StrBegin="MSB4216: "}</note>
       </trans-unit>
       <trans-unit id="TaskHostNodeFailedToLaunch">
         <source>MSB4221: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. Error {4} {5}.</source>
-        <target state="new">MSB4221: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. Error {4} {5}.</target>
+        <target state="translated">MSB4221: MSBuild "{1}" çalışma zamanı ve "{2}" mimarisi ile bir görev oluşturmadığından veya görev konağına bağlanamadığından "{0}" görevi çalıştırılamadı.  Lütfen (1) istenen çalışma zamanı ve/veya mimarinin makinede kullanılabildiğinden ve (2) gerekli yürütülebilir "{3}" öğesinin mevcut ve çalıştırılabilir olduğundan emin olun. Hata {4} {5}.</target>
         <note>{StrBegin="MSB4221: "}</note>
       </trans-unit>
       <trans-unit id="TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled">

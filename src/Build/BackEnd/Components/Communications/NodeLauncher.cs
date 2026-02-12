@@ -267,12 +267,16 @@ namespace Microsoft.Build.BackEnd
             DotnetHostEnvironmentHelper.ApplyEnvironmentOverrides(environment, environmentOverrides);
 
             // Build the environment block: "key=value\0key=value\0\0"
+            // Windows CreateProcess requires the environment block to be sorted alphabetically by name (case-insensitive).
+            var sortedKeys = new List<string>(environment.Keys);
+            sortedKeys.Sort(StringComparer.OrdinalIgnoreCase);
+
             var sb = new StringBuilder();
-            foreach (var kvp in environment)
+            foreach (string key in sortedKeys)
             {
-                sb.Append(kvp.Key);
+                sb.Append(key);
                 sb.Append('=');
-                sb.Append(kvp.Value);
+                sb.Append(environment[key]);
                 sb.Append('\0');
             }
 

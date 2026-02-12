@@ -471,16 +471,16 @@ namespace Microsoft.Build.BackEnd
         /// <returns>
         /// A tuple containing:
         /// - RuntimeHostPath: The path to the dotnet executable that will host the .NET runtime
-        /// - MSBuildExecutablePath: The full path to MSBuild.dll that will be loaded by the dotnet host.
+        /// - MSBuildPath: The path to MSBuild.dll/MSBuild app host.
         /// </returns>
-        internal static (string RuntimeHostPath, string MSBuildExecutablePath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, TaskHostParameters taskHostParameters)
+        internal static (string RuntimeHostPath, string MSBuildPath) GetMSBuildLocationForNETRuntime(HandshakeOptions hostContext, TaskHostParameters taskHostParameters)
         {
             ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
-            return (taskHostParameters.DotnetHostPath, GetMSBuildExecutablePath(taskHostParameters));
+            return (taskHostParameters.DotnetHostPath, GetMSBuildPath(taskHostParameters));
         }
 
-        private static string GetMSBuildExecutablePath(in TaskHostParameters taskHostParameters)
+        private static string GetMSBuildPath(in TaskHostParameters taskHostParameters)
         {
             if (taskHostParameters.MSBuildExecutablePath != null)
             {
@@ -490,7 +490,7 @@ namespace Microsoft.Build.BackEnd
             }
 
 #if NET
-            // In .NET we attempt to resolve path to app host based on tools directory
+            // In .NET we resolve the full path based on the tools directory that points to the directory with App Host
             return BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
 #else
             throw new InvalidProjectFileException(ResourceUtilities.GetResourceString("NETHostTaskLoad_Failed"));
@@ -522,7 +522,7 @@ namespace Microsoft.Build.BackEnd
         /// Extracts the major version number from an SDK directory path by parsing the last directory name.
         /// </summary>
         /// <param name="path">
-        /// The full path to an SDK directory. 
+        /// The full path to an SDK directory.
         /// Example: "C:\Program Files\dotnet\sdk\10.0.100-preview.7.25322.101".
         /// </param>
         /// <returns>
@@ -534,8 +534,8 @@ namespace Microsoft.Build.BackEnd
         /// 1. Extracting the last directory name from the path (e.g., "10.0.100-preview.7.25322.101")
         /// 2. Finding the first dot in that directory name
         /// 3. Parsing the substring before the first dot as an integer (the major version)
-        /// 
-        /// Returns null if the path is invalid, the last directory name is empty, 
+        ///
+        /// Returns null if the path is invalid, the last directory name is empty,
         /// there's no dot in the directory name, or the major version cannot be parsed as an integer.
         /// </remarks>
         private static int? ExtractSdkVersionFromPath(string path)
@@ -689,9 +689,8 @@ namespace Microsoft.Build.BackEnd
                 // Handle .NET task host context
                 if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
                 {
-                    string msbuildAssemblyPath = GetMSBuildExecutablePath(taskHostParameters);
                     nodeLaunchData = ResolveAppHostOrFallback(
-                        msbuildAssemblyPath,
+                        GetMSBuildPath(taskHostParameters),
                         taskHostParameters.DotnetHostPath,
                         hostContext,
                         IsNodeReuseEnabled(hostContext));
@@ -715,7 +714,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Resolves whether to use the MSBuild app host or fall back to dotnet.exe.
         /// </summary>
-        /// <param name="msbuildAssemblyPath">Path to the MSBuild assembly directory.</param>
+        /// <param name="msbuildAssemblyPath">Path to the MSBuild assembly/app host directory.</param>
         /// <param name="dotnetHostPath">Path to the dotnet executable.</param>
         /// <param name="hostContext">The handshake options for the host context.</param>
         /// <param name="nodeReuseEnabled">Whether node reuse is enabled.</param>
@@ -738,18 +737,17 @@ namespace Microsoft.Build.BackEnd
                 return dotnetOverrides == null
                     ? throw new NodeFailedToLaunchException(errorCode: null, ResourceUtilities.GetResourceString("DotnetHostPathNotSet"))
                     : new NodeLaunchData(
-                    appHostPath,
-                    commandLineArgs,
-                    new Handshake(hostContext, predefinedToolsDirectory: msbuildAssemblyPath),
-                    dotnetOverrides);
+                        appHostPath,
+                        commandLineArgs,
+                        new Handshake(hostContext, predefinedToolsDirectory: msbuildAssemblyPath),
+                        dotnetOverrides);
             }
 
-            string msbuildDllPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName);
             CommunicationsUtilities.Trace("For a host context of {0}, app host not found at {1}, falling back to dotnet.exe from {2}.", hostContext, appHostPath, dotnetHostPath);
 
             return new NodeLaunchData(
                 dotnetHostPath,
-                $"\"{msbuildDllPath}\" {commandLineArgs}",
+                $"\"{Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName)}\" {commandLineArgs}",
                 new Handshake(hostContext, predefinedToolsDirectory: msbuildAssemblyPath));
         }
 

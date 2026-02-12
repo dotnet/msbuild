@@ -2404,12 +2404,12 @@ Errori: {3}</target>
       </trans-unit>
       <trans-unit id="TaskHostAcquireFailed">
         <source>MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</source>
-        <target state="new">MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</target>
+        <target state="translated">MSB4216: non è stato possibile eseguire l'attività "{0}" perché MSBuild non è riuscito a creare o connettersi a un host attività con runtime "{1}" e architettura "{2}". Assicurarsi che (1) il runtime e/o l'architettura richiesti siano disponibili nel computer e (2) che l'eseguibile richiesto "{3}" esista e possa essere eseguito.</target>
         <note>{StrBegin="MSB4216: "}</note>
       </trans-unit>
       <trans-unit id="TaskHostNodeFailedToLaunch">
         <source>MSB4221: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. Error {4} {5}.</source>
-        <target state="new">MSB4221: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. Error {4} {5}.</target>
+        <target state="translated">MSB4221: non è stato possibile eseguire l'attività "{0}" perché MSBuild non è riuscito a creare o connettersi a un host attività con runtime "{1}" e architettura "{2}". Assicurarsi che (1) il runtime e/o l'architettura richiesti siano disponibili nel computer e (2) che l'eseguibile richiesto "{3}" esista e possa essere eseguito. Errore {4} {5}.</target>
         <note>{StrBegin="MSB4221: "}</note>
       </trans-unit>
       <trans-unit id="TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled">

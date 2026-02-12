@@ -2404,12 +2404,12 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="TaskHostAcquireFailed">
         <source>MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</source>
-        <target state="new">MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</target>
+        <target state="translated">MSB4216: MSBuild がランタイム "{1}" とアーキテクチャ "{2}" を持つタスク ホストを作成できなかった、またはこのホストに接続できなかったため、"{0}" タスクを実行できませんでした。次のことを確認してください。(1) 要求されたランタイムとアーキテクチャの両方またはいずれかがコンピューター上にあること。(2) 必要な実行可能ファイル "{3}" が存在し、実行可能であること。</target>
         <note>{StrBegin="MSB4216: "}</note>
       </trans-unit>
       <trans-unit id="TaskHostNodeFailedToLaunch">
         <source>MSB4221: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. Error {4} {5}.</source>
-        <target state="new">MSB4221: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. Error {4} {5}.</target>
+        <target state="translated">MSB4221: MSBuild がランタイム "{1}" とアーキテクチャ "{2}" を持つタスク ホストを作成できなかった、またはこのホストに接続できなかったため、"{0}" タスクを実行できませんでした。次のことを確認してください。(1) 要求されたランタイムとアーキテクチャの両方またはいずれかがコンピューター上にあること。(2) 必要な実行可能ファイル "{3}" が存在し、実行可能であること。エラー {4} {5}。</target>
         <note>{StrBegin="MSB4221: "}</note>
       </trans-unit>
       <trans-unit id="TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled">

@@ -425,9 +425,16 @@ namespace Microsoft.Build.Shared
 
             // Respect the case when app host isn't available yet and we still in dotnet MSBuild.dll environment
             string processName = EnvironmentUtilities.ProcessPath;
-            return IsRunningInMSBuildExe(processName)
-                 ? processName
-                 : AssemblyUtilities.GetAssemblyLocation(AssemblyUtilities.EntryAssembly);
+            if (IsRunningInMSBuildExe(processName))
+            {
+                return processName;
+            }
+
+            // EntryAssembly can be null in some hosting scenarios (e.g., when loaded as a library)
+            var entryAssembly = AssemblyUtilities.EntryAssembly;
+            return entryAssembly != null
+                ? AssemblyUtilities.GetAssemblyLocation(entryAssembly)
+                : processName;
 #else
 
             return EnvironmentUtilities.ProcessPath;
