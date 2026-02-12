@@ -20,9 +20,6 @@
 .PARAMETER ReviewerId
     MSBuild team reviewer GUID.
 
-.PARAMETER ProjectId
-    DevDiv project GUID (used for constructing PR URLs).
-
 .EXAMPLE
     .\check-vs-pr-status.ps1
 #>
@@ -31,8 +28,7 @@ param(
     [string]$Organization = "https://dev.azure.com/devdiv",
     [string]$Project = "DevDiv",
     [string]$RepositoryId = "a290117c-5a8a-40f7-bc2c-f14dbe3acf6d",
-    [string]$ReviewerId = "66cc9d27-aef7-4399-ba2c-3dccb4489098",
-    [string]$ProjectId = "0bdbc590-a062-4c3f-b0f6-9383f67865ee"
+    [string]$ReviewerId = "66cc9d27-aef7-4399-ba2c-3dccb4489098"
 )
 
 $ErrorActionPreference = "Stop"
@@ -139,7 +135,7 @@ function Build-PRCheckSummary {
         }
     })
 
-    $hasFailedRequired = ($failedChecks | Where-Object { $_.isRequired }) -ne $null
+    $hasFailedRequired = @($failedChecks | Where-Object { $_.isRequired }).Count -gt 0
 
     return [ordered]@{
         total          = $deduped.Count

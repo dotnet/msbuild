@@ -18,6 +18,7 @@ This skill checks the health of MSBuild's CI pipelines and the status of inserti
 ## Prerequisites
 
 - `az` CLI must be installed and authenticated (`az login` with access to the DevDiv organization)
+- Azure DevOps extension for `az` must be installed: `az extension add --name azure-devops`
 - PowerShell 5.1+ or PowerShell Core
 
 ### Optional: WorkIQ (for infrastructure issue investigation)
@@ -64,18 +65,18 @@ Run these two scripts from the repository root. They output JSON to stdout.
 
 ```powershell
 # Pipeline health (checks both MSBuild and MSBuild-OptProf)
-$pipelineJson = & .\.github\skills\pipeline-health-check\check-pipeline-health.ps1
+$pipelineJson = & .\.github\skills\pipelines-health-check\check-pipeline-health.ps1
 
 # VS PR status (checks active non-Experimental PRs and last merged PR)
-$prJson = & .\.github\skills\pipeline-health-check\check-vs-pr-status.ps1
+$prJson = & .\.github\skills\pipelines-health-check\check-vs-pr-status.ps1
 ```
 
 Both scripts use `az account get-access-token` internally — no token management needed.
 
 ### Step 2: Present the overview table IMMEDIATELY
 
-Parse the JSON outputs and render a status overview tables to the user **before** doing any deeper investigation. This gives the user instant visibility.
-Presnet ALL tables - for both pipelines and for the VS insertion PRs. Do not omit any of those unless explicitly asked by user just for some specific overview.
+Parse the JSON outputs and render status overview tables to the user **before** doing any deeper investigation. This gives the user instant visibility.
+Present ALL tables - for both pipelines and for the VS insertion PRs. Do not omit any of those unless explicitly asked by user just for some specific overview.
 
 #### Pipeline Health Table
 
@@ -157,12 +158,12 @@ Tasks:
 1. Categorize each failure as one of:
    - BUILD ERROR: compilation failures, test failures, task execution errors in MSBuild code
    - CONFIG/PERMISSION: signing errors, NuGet authentication, certificate issues, feed access
-   - INFRA/TRANSIENT: errors indicating inavailability or outage of services or resources
+   - INFRA/TRANSIENT: errors indicating unavailability or outage of services or resources
 2. Check if all recent failures share the same root cause or if there are different issues
 3. If infra/transient: suggest retrying the pipeline (provide the pipeline URL)
 4. If build error: 
   - Check the `For build errors` section below on how to investigate build errors with binlogs
-  - identify which component/task is failing and check recent commits to main to try to identify offedning one.
+  - identify which component/task is failing and check recent commits to main to try to identify offending one.
 5. If infrastructure issues:
   - Try to distill the exact reason for the issue, check if there are other failing pipelines with the same issue or any open bugs for the issue.
   - **Use WorkIQ** to find the owning team and contacts. Check if `workiq` CLI is available (`workiq version`).
@@ -201,7 +202,7 @@ Tasks:
 4. Recommend specific actions: retry checks, investigate pipeline, or wait
 5. If check is failing - try to traverse the chain of called pipelines to the actual error, then: 
   - Check the `For build errors` section below on how to investigate build errors with binlogs
-  - identify which component/task is failing and check recent commits to msbuild main to try to identify offedning one.
+  - identify which component/task is failing and check recent commits to msbuild main to try to identify offending one.
 
 Return: Which checks need attention, likely cause, and recommended action.
 ```
@@ -235,8 +236,8 @@ Return: Explanation of why insertion appears stuck and what to do about it.
 
 Tasks:
 1. Try to find a .binlog file(s) in the build or step artifacts and fetch it
-2. Ensure to acquire the (binlog-failure-analysis skill)[https://github.com/ViktorHofer/dotnet-skills/blob/main/msbuild-skills/skills/binlog-failure-analysis/SKILL.md] together with the binlog-mcp (spawn via `dnx -y baronfel.binlog.mcp@0.0.13`)
-3. Use the binlog analysis skill and mcp to anlyse the binlog(s) you found and analyse problems from those
+2. Ensure to acquire the [binlog-failure-analysis skill](https://github.com/ViktorHofer/dotnet-skills/blob/main/msbuild-skills/skills/binlog-failure-analysis/SKILL.md) together with the binlog-mcp (spawn via `dnx -y baronfel.binlog.mcp@0.0.13`)
+3. Use the binlog analysis skill and mcp to analyse the binlog(s) you found and analyse problems from those
 
 </subagent>
 
