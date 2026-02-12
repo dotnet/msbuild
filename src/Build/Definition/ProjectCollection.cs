@@ -19,6 +19,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
+using Constants = Microsoft.Build.Framework.Constants;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
