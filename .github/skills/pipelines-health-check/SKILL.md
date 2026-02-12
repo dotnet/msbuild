@@ -71,7 +71,7 @@ $pipelineJson = & .\.github\skills\pipelines-health-check\check-pipeline-health.
 $prJson = & .\.github\skills\pipelines-health-check\check-vs-pr-status.ps1
 ```
 
-Both scripts use `az account get-access-token` internally — no token management needed.
+Both scripts rely on the `az` CLI (and the Azure DevOps extension) to handle authentication and token acquisition — no manual token management needed.
 
 ### Step 2: Present the overview table IMMEDIATELY
 

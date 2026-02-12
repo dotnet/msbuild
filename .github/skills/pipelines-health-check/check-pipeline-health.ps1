@@ -43,7 +43,12 @@ $script:AzDoResource = "499b84ac-1321-427f-aa17-267ca6975798"
 
 function Get-PipelineName {
     param([int]$PipelineId)
-    $info = az pipelines show --id $PipelineId --organization $Organization --project $Project --query "{name:name}" -o json 2>$null | ConvertFrom-Json
+    $rawJson = az pipelines show --id $PipelineId --organization $Organization --project $Project --query "{name:name}" -o json 2>$null
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($rawJson)) {
+        Write-Warning "Failed to resolve name for pipeline $PipelineId (exit code: $LASTEXITCODE). Is 'az extension add --name azure-devops' installed and 'az login' done?"
+        return "Pipeline-$PipelineId"
+    }
+    $info = $rawJson | ConvertFrom-Json
     return $info.name
 }
 
@@ -56,6 +61,10 @@ function Get-RecentRuns {
         --branch $Branch `
         --top $Top `
         -o json 2>$null
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($runsJson)) {
+        Write-Warning "Failed to list runs for pipeline $PipelineId (exit code: $LASTEXITCODE)."
+        return @()
+    }
     return $runsJson | ConvertFrom-Json
 }
 
@@ -69,6 +78,10 @@ function Get-LastSuccessfulRun {
         --result succeeded `
         --top 1 `
         -o json 2>$null
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($runsJson)) {
+        Write-Warning "Failed to query last successful run for pipeline $PipelineId (exit code: $LASTEXITCODE)."
+        return $null
+    }
     $runs = $runsJson | ConvertFrom-Json
     if ($runs.Count -eq 0) { return $null }
     return $runs[0]

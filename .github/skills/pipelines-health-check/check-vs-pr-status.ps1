@@ -56,6 +56,10 @@ function Get-ActivePRs {
         --organization $Organization `
         --project $Project `
         -o json 2>$null
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($json)) {
+        Write-Warning "Failed to list active PRs (exit code: $LASTEXITCODE). Is 'az extension add --name azure-devops' installed and 'az login' done?"
+        return @()
+    }
     return $json | ConvertFrom-Json
 }
 
@@ -70,6 +74,10 @@ function Get-CompletedPRs {
         --organization $Organization `
         --project $Project `
         -o json 2>$null
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($json)) {
+        Write-Warning "Failed to list completed PRs (exit code: $LASTEXITCODE)."
+        return @()
+    }
     return $json | ConvertFrom-Json
 }
 
@@ -78,6 +86,10 @@ function Get-PRStatuses {
     $url = "$Organization/$Project/_apis/git/repositories/$RepositoryId/pullrequests/$PullRequestId/statuses" +
            "?api-version=7.1"
     $json = az rest --method get --url $url --resource $script:AzDoResource 2>$null
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($json)) {
+        Write-Warning "Failed to get statuses for PR $PullRequestId (exit code: $LASTEXITCODE)."
+        return @()
+    }
     $resp = $json | ConvertFrom-Json
     return $resp.value
 }
