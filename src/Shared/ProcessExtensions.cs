@@ -1,10 +1,11 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -44,7 +45,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="process">The process to get the command line for</param>
         /// <returns>The command line string, or null if it cannot be retrieved</returns>
-        public static string? GetCommandLine(this Process process)
+        public static string GetCommandLine(this Process process)
         {
             if (process is null)
             {
@@ -86,7 +87,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Retrieves the command line on Windows using WMI.
         /// </summary>
-        private static string? GetCommandLineWindows(Process process)
+        private static string GetCommandLineWindows(Process process)
         {
 #if NETFRAMEWORK
             try
@@ -117,7 +118,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Retrieves the command line on Unix/Linux by reading /proc/{pid}/cmdline.
         /// </summary>
-        private static string? GetCommandLineUnix(int processId)
+        private static string GetCommandLineUnix(int processId)
         {
             try
             {

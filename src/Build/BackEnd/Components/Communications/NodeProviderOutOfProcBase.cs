@@ -496,7 +496,7 @@ namespace Microsoft.Build.BackEnd
             {
                 try
                 {
-                    string? commandLine = process.GetCommandLine();
+                    string commandLine = process.GetCommandLine();
                     if (commandLine is null)
                     {
                         // If we can't get the command line, skip this process

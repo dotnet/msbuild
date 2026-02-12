@@ -32,5 +32,101 @@ namespace Microsoft.Build.UnitTests
             p.HasExited.ShouldBe(true);
             p.ExitCode.ShouldNotBe(0);
         }
+
+        [Fact]
+        public void GetCommandLine_ReturnsNullForNullProcess()
+        {
+            Process process = null;
+            string commandLine = process.GetCommandLine();
+            commandLine.ShouldBeNull();
+        }
+
+        [Fact]
+        public async Task GetCommandLine_ReturnsCommandLineForRunningProcess()
+        {
+            // Start a simple process that will run for a bit
+            var psi = NativeMethodsShared.IsWindows
+                ? new ProcessStartInfo("cmd.exe", "/c timeout 10")
+                : new ProcessStartInfo("sleep", "10");
+            
+            psi.UseShellExecute = false;
+
+            using Process p = Process.Start(psi);
+            try
+            {
+                // Give the process time to start
+                await Task.Delay(500);
+
+                string commandLine = p.GetCommandLine();
+
+                // On some platforms/configurations, we might not be able to get the command line
+                // (e.g., .NET Core on Windows without WMI package)
+                // So we just verify it doesn't throw and returns either a string or null
+                if (commandLine != null)
+                {
+                    commandLine.ShouldNotBeEmpty();
+                    
+                    // On Unix, we should be able to get the command line from /proc
+                    if (!NativeMethodsShared.IsWindows)
+                    {
+                        commandLine.ShouldContain("sleep");
+                    }
+                }
+            }
+            finally
+            {
+                // Clean up
+                if (!p.HasExited)
+                {
+                    p.KillTree(5000);
+                }
+            }
+        }
+
+        [WindowsOnlyFact]
+        public void GetCommandLine_ReturnsNullForExitedProcess()
+        {
+            // Start and immediately exit a process
+            var psi = new ProcessStartInfo("cmd.exe", "/c exit 0")
+            {
+                UseShellExecute = false
+            };
+
+            using Process p = Process.Start(psi);
+            p.WaitForExit(5000);
+
+            string commandLine = p.GetCommandLine();
+            
+            // Command line should be null for an exited process
+            commandLine.ShouldBeNull();
+        }
+
+        [UnixOnlyFact]
+        public async Task GetCommandLine_WorksOnUnix()
+        {
+            // On Unix, we should be able to read from /proc
+            var psi = new ProcessStartInfo("sleep", "10")
+            {
+                UseShellExecute = false
+            };
+
+            using Process p = Process.Start(psi);
+            try
+            {
+                await Task.Delay(500);
+
+                string commandLine = p.GetCommandLine();
+                commandLine.ShouldNotBeNull();
+                commandLine.ShouldNotBeEmpty();
+                commandLine.ShouldContain("sleep");
+            }
+            finally
+            {
+                if (!p.HasExited)
+                {
+                    p.KillTree(5000);
+                }
+            }
+        }
     }
 }
