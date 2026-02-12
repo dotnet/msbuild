@@ -48,47 +48,41 @@ $script:RequiredCheckGenres = @(
     "msbuild retail validation - pr"
 )
 
-function Get-AzDoToken {
-    # Entra app ID
-    return (az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query accessToken -o tsv).Trim()
-}
-
-function Get-AuthHeaders {
-    param([string]$Token)
-    return @{ Authorization = "Bearer $Token" }
-}
+# Azure DevOps first-party Entra app ID (used by az rest --resource)
+$script:AzDoResource = "499b84ac-1321-427f-aa17-267ca6975798"
 
 function Get-ActivePRs {
-    param([string]$Token)
-    $headers = Get-AuthHeaders -Token $Token
-    $url = "$Organization/$Project/_apis/git/repositories/$RepositoryId/pullrequests" +
-           "?searchCriteria.status=active" +
-           "&searchCriteria.reviewerId=$ReviewerId" +
-           "&`$top=25" +
-           "&api-version=7.1"
-    $resp = Invoke-RestMethod -Uri $url -Headers $headers
-    return $resp.value
+    $json = az repos pr list `
+        --repository $RepositoryId `
+        --status active `
+        --reviewer $ReviewerId `
+        --top 25 `
+        --organization $Organization `
+        --project $Project `
+        -o json 2>$null
+    return $json | ConvertFrom-Json
 }
 
 function Get-CompletedPRs {
-    param([string]$Token, [int]$Top = 10)
-    $headers = Get-AuthHeaders -Token $Token
-    $url = "$Organization/$Project/_apis/git/repositories/$RepositoryId/pullrequests" +
-           "?searchCriteria.status=completed" +
-           "&searchCriteria.reviewerId=$ReviewerId" +
-           "&searchCriteria.targetRefName=refs/heads/main" +
-           "&`$top=$Top" +
-           "&api-version=7.1"
-    $resp = Invoke-RestMethod -Uri $url -Headers $headers
-    return $resp.value
+    param([int]$Top = 10)
+    $json = az repos pr list `
+        --repository $RepositoryId `
+        --status completed `
+        --reviewer $ReviewerId `
+        --target-branch main `
+        --top $Top `
+        --organization $Organization `
+        --project $Project `
+        -o json 2>$null
+    return $json | ConvertFrom-Json
 }
 
 function Get-PRStatuses {
-    param([string]$Token, [int]$PullRequestId)
-    $headers = Get-AuthHeaders -Token $Token
+    param([int]$PullRequestId)
     $url = "$Organization/$Project/_apis/git/repositories/$RepositoryId/pullrequests/$PullRequestId/statuses" +
            "?api-version=7.1"
-    $resp = Invoke-RestMethod -Uri $url -Headers $headers
+    $json = az rest --method get --url $url --resource $script:AzDoResource 2>$null
+    $resp = $json | ConvertFrom-Json
     return $resp.value
 }
 
@@ -161,18 +155,17 @@ function Build-PRCheckSummary {
 
 # --- Main ---
 
-$token = Get-AzDoToken
 $now = [DateTimeOffset]::UtcNow
 $prBaseUrl = "$Organization/$Project/_git/VS/pullrequest"
 
 # Get active PRs and filter out Experimental
-$activePRs = Get-ActivePRs -Token $token
+$activePRs = Get-ActivePRs
 $nonExperimentalPRs = @($activePRs | Where-Object { -not (Test-IsExperimental -Title $_.title) })
 
 # Build status info for each non-experimental PR
 $prResults = @()
 foreach ($pr in $nonExperimentalPRs) {
-    $statuses = Get-PRStatuses -Token $token -PullRequestId $pr.pullRequestId
+    $statuses = Get-PRStatuses -PullRequestId $pr.pullRequestId
     $checkSummary = Build-PRCheckSummary -Statuses $statuses
 
     $createdDate = [DateTimeOffset]::Parse($pr.creationDate)
@@ -192,7 +185,7 @@ foreach ($pr in $nonExperimentalPRs) {
 }
 
 # Get last merged non-Experimental PR into main
-$completedPRs = Get-CompletedPRs -Token $token
+$completedPRs = Get-CompletedPRs
 $lastMergedPr = $null
 foreach ($pr in $completedPRs) {
     if (-not (Test-IsExperimental -Title $pr.title)) {

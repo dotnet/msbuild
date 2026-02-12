@@ -38,10 +38,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-function Get-AzDoToken {
-    # Entra app ID
-    return (az account get-access-token --resource 499b84ac-1321-427f-aa17-267ca6975798 --query accessToken -o tsv).Trim()
-}
+# Azure DevOps first-party Entra app ID (used by az rest --resource)
+$script:AzDoResource = "499b84ac-1321-427f-aa17-267ca6975798"
 
 function Get-PipelineName {
     param([int]$PipelineId)
@@ -77,14 +75,11 @@ function Get-LastSuccessfulRun {
 }
 
 function Get-FailedTasksFromTimeline {
-    param(
-        [int]$BuildId,
-        [string]$Token
-    )
-    $headers = @{ Authorization = "Bearer $Token" }
+    param([int]$BuildId)
     $url = "$Organization/$Project/_apis/build/builds/$BuildId/timeline?api-version=7.1"
     try {
-        $timeline = Invoke-RestMethod -Uri $url -Headers $headers -ErrorAction Stop
+        $timelineJson = az rest --method get --url $url --resource $script:AzDoResource 2>$null
+        $timeline = $timelineJson | ConvertFrom-Json
     }
     catch {
         return @()
@@ -107,7 +102,6 @@ function Get-FailedTasksFromTimeline {
 
 # --- Main ---
 
-$token = Get-AzDoToken
 $now = [DateTimeOffset]::UtcNow
 $allResults = @()
 
@@ -130,7 +124,7 @@ foreach ($pipelineId in $PipelineIds) {
 
         # Get failure details for failed runs
         if ($run.result -eq "failed") {
-            $failedTasks = Get-FailedTasksFromTimeline -BuildId $run.id -Token $token
+            $failedTasks = Get-FailedTasksFromTimeline -BuildId $run.id
             $runObj.failedTasks = @($failedTasks | ForEach-Object {
                 [ordered]@{
                     name   = $_.name

@@ -155,9 +155,9 @@ URL: {lastSuccessfulRun.url}
 
 Tasks:
 1. Categorize each failure as one of:
-   - INFRA/TRANSIENT: errors like 503, "Server Unavailable", "pool not available", timeout, "service unavailable", agent issues
    - BUILD ERROR: compilation failures, test failures, task execution errors in MSBuild code
    - CONFIG/PERMISSION: signing errors, NuGet authentication, certificate issues, feed access
+   - INFRA/TRANSIENT: errors indicating inavailability or outage of services or resources
 2. Check if all recent failures share the same root cause or if there are different issues
 3. If infra/transient: suggest retrying the pipeline (provide the pipeline URL)
 4. If build error: 
