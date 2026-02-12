@@ -27,6 +27,8 @@ Instructions for GitHub Copilot and other AI coding agents working with the MSBu
 
 ## Code Review Instructions
 
+Official builds treat all warnings as errors, so do not introduce new warnings.
+
 ### Performance Considerations
 
 When reviewing pull requests:
@@ -120,7 +122,7 @@ Build individual projects with `dotnet msbuild {path/to/project.csproj} -v:q`.
 
 ### Bootstrap Environment Setup
 
-After building the whole repo, to use the just-built MSBuild to build things use the bootstrap environment (described in `skills/use-bootstrap-msbuild`).
+After building the whole repo, to use the just-built MSBuild to build things use the bootstrap environment (described in [`skills/use-bootstrap-msbuild](.github/skills/use-bootstrap-msbuild/SKILL.md)).
 
 ### Build Troubleshooting
 
@@ -233,9 +235,6 @@ When reviewing PRs, always consider whether the behavior change could be experie
 2. Run the full build (WAIT for completion - takes 2-3 minutes):
    - Windows: `.\build.cmd -v quiet`
    - macOS/Linux: `./build.sh -v quiet`
-3. Set up environment:
-   - Windows: `artifacts\msbuild-build-env.bat`
-   - macOS/Linux: `source artifacts/sdk-build-env.sh`
 4. Test your changes end-to-end using the bootstrap output: `dotnet build src/Samples/Dependency/Dependency.csproj`
 5. Run relevant individual tests, not the full test suite
 6. Commit your changes
