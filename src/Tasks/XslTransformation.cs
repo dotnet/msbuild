@@ -23,9 +23,13 @@ namespace Microsoft.Build.Tasks
     /// A task that transforms a XML input with an XSLT or Compiled XSLT
     /// and outputs to screen or specified file.
     /// </summary>
-    public class XslTransformation : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class XslTransformation : TaskExtension, IMultiThreadableTask
     {
         #region Members
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// The output files.
@@ -105,8 +109,13 @@ namespace Microsoft.Build.Tasks
             // Load XmlInput, XsltInput parameters
             try
             {
-                xmlinput = new XmlInput(XmlInputPaths, XmlContent);
-                xsltinput = new XsltInput(XslInputPath, XslContent, XslCompiledDllPath, Log, PreserveWhitespace);
+                AbsolutePath[] absoluteXmlInputPaths = XmlInputPaths != null
+                    ? Array.ConvertAll(XmlInputPaths, item => TaskEnvironment.GetAbsolutePath(item.ItemSpec))
+                    : null;
+                xmlinput = new XmlInput(absoluteXmlInputPaths, XmlContent);
+
+                AbsolutePath? absoluteXslInputPath = XslInputPath != null ? TaskEnvironment.GetAbsolutePath(XslInputPath.ItemSpec) : null;
+                xsltinput = new XsltInput(absoluteXslInputPath, XslContent, XslCompiledDllPath?.ItemSpec, TaskEnvironment, Log, PreserveWhitespace);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -169,7 +178,7 @@ namespace Microsoft.Build.Tasks
 
                 for (int i = 0; i < xmlinput.Count; i++)
                 {
-                    using (XmlWriter xmlWriter = XmlWriter.Create(_outputPaths[i].ItemSpec, xslct.OutputSettings))
+                    using (XmlWriter xmlWriter = XmlWriter.Create(TaskEnvironment.GetAbsolutePath(_outputPaths[i].ItemSpec), xslct.OutputSettings))
                     {
                         using (XmlReader xr = xmlinput.CreateReader(i))
                         {
@@ -260,40 +269,41 @@ namespace Microsoft.Build.Tasks
         internal class XmlInput
         {
             /// <summary>
-            /// This either contains the raw Xml or the path to Xml file.
+            /// This contains the absolute paths to Xml files when in XmlFile mode.
             /// </summary>
-            private readonly string[] _data;
+            private readonly AbsolutePath[] _filePaths;
+
+            /// <summary>
+            /// This contains the raw Xml content when in Xml mode.
+            /// </summary>
+            private readonly string _xmlContent;
 
             /// <summary>
             /// Constructor.
             /// Only one parameter should be non null or will throw ArgumentException.
             /// </summary>
-            /// <param name="xmlFile">The path to XML file or null.</param>
+            /// <param name="xmlFilePaths">The absolute paths to XML files or null.</param>
             /// <param name="xml">The raw XML.</param>
-            public XmlInput(ITaskItem[] xmlFile, string xml)
+            public XmlInput(AbsolutePath[] xmlFilePaths, string xml)
             {
-                if (xmlFile != null && xml != null)
+                if (xmlFilePaths != null && xml != null)
                 {
                     throw new ArgumentException(ResourceUtilities.GetResourceString("XslTransform.XmlInput.TooMany"));
                 }
-                else if (xmlFile == null && xml == null)
+                else if (xmlFilePaths == null && xml == null)
                 {
                     throw new ArgumentException(ResourceUtilities.GetResourceString("XslTransform.XmlInput.TooFew"));
                 }
 
-                if (xmlFile != null)
+                if (xmlFilePaths != null)
                 {
                     XmlMode = XmlModes.XmlFile;
-                    _data = new string[xmlFile.Length];
-                    for (int i = 0; i < xmlFile.Length; i++)
-                    {
-                        _data[i] = xmlFile[i].ItemSpec;
-                    }
+                    _filePaths = xmlFilePaths;
                 }
                 else
                 {
                     XmlMode = XmlModes.Xml;
-                    _data = [xml];
+                    _xmlContent = xml;
                 }
             }
 
@@ -316,7 +326,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Returns the count of Xml Inputs
             /// </summary>
-            public int Count => _data.Length;
+            public int Count => XmlMode == XmlModes.XmlFile ? _filePaths.Length : 1;
 
             /// <summary>
             /// Returns the current mode of the XmlInput
@@ -331,11 +341,11 @@ namespace Microsoft.Build.Tasks
             {
                 if (XmlMode == XmlModes.XmlFile)
                 {
-                    return XmlReader.Create(new StreamReader(_data[itemPos]), new XmlReaderSettings { CloseInput = true }, _data[itemPos]);
+                    return XmlReader.Create(new StreamReader(_filePaths[itemPos]), new XmlReaderSettings { CloseInput = true }, _filePaths[itemPos]);
                 }
                 else // xmlModes.Xml
                 {
-                    return XmlReader.Create(new StringReader(_data[itemPos]));
+                    return XmlReader.Create(new StringReader(_xmlContent));
                 }
             }
         }
@@ -351,11 +361,21 @@ namespace Microsoft.Build.Tasks
             private readonly XslModes _xslMode;
 
             /// <summary>
-            /// Contains the raw XSLT
-            /// or the path to XSLT file
-            /// or the path to compiled XSLT dll.
+            /// Contains the absolute path to XSLT file when in XsltFile mode.
+            /// </summary>
+            private readonly AbsolutePath? _filePath;
+
+            /// <summary>
+            /// Contains the raw XSLT content (Xslt mode) or compiled DLL specification (XsltCompiledDll mode).
             /// </summary>
             private readonly string _data;
+
+#if FEATURE_COMPILED_XSL
+            /// <summary>
+            /// Task environment for resolving paths.
+            /// </summary>
+            private readonly TaskEnvironment _taskEnvironment;
+#endif
 
             /// <summary>
             /// Flag to preserve whitespaces in the XSLT file.
@@ -371,29 +391,33 @@ namespace Microsoft.Build.Tasks
             /// Constructer.
             /// Only one parameter should be non null or will throw ArgumentException.
             /// </summary>
-            /// <param name="xsltFile">The path to XSLT file or null.</param>
+            /// <param name="xsltFilePath">The absolute path to XSLT file or null.</param>
             /// <param name="xslt">The raw to XSLT or null.</param>
-            /// <param name="xsltCompiledDll">The path to compiled XSLT file or null.</param>
+            /// <param name="xsltCompiledDllSpec">The compiled XSLT DLL specification (assembly_path[;type_name]) or null.</param>
+            /// <param name="taskEnvironment">Task environment for resolving paths.</param>
             /// <param name="logTool">Log helper.</param>
             /// <param name="preserveWhitespace">Flag for xslt whitespace option.</param>
-            public XsltInput(ITaskItem xsltFile, string xslt, ITaskItem xsltCompiledDll, TaskLoggingHelper logTool, bool preserveWhitespace)
+            public XsltInput(AbsolutePath? xsltFilePath, string xslt, string xsltCompiledDllSpec, TaskEnvironment taskEnvironment, TaskLoggingHelper logTool, bool preserveWhitespace)
             {
                 _log = logTool;
-                if ((xsltFile != null && xslt != null) ||
-                    (xsltFile != null && xsltCompiledDll != null) ||
-                    (xslt != null && xsltCompiledDll != null))
+#if FEATURE_COMPILED_XSL
+                _taskEnvironment = taskEnvironment;
+#endif
+                if ((xsltFilePath != null && xslt != null) ||
+                    (xsltFilePath != null && xsltCompiledDllSpec != null) ||
+                    (xslt != null && xsltCompiledDllSpec != null))
                 {
                     throw new ArgumentException(ResourceUtilities.GetResourceString("XslTransform.XsltInput.TooMany"));
                 }
-                else if (xsltFile == null && xslt == null && xsltCompiledDll == null)
+                else if (xsltFilePath == null && xslt == null && xsltCompiledDllSpec == null)
                 {
                     throw new ArgumentException(ResourceUtilities.GetResourceString("XslTransform.XsltInput.TooFew"));
                 }
 
-                if (xsltFile != null)
+                if (xsltFilePath != null)
                 {
                     _xslMode = XslModes.XsltFile;
-                    _data = xsltFile.ItemSpec;
+                    _filePath = xsltFilePath;
                 }
                 else if (xslt != null)
                 {
@@ -403,7 +427,7 @@ namespace Microsoft.Build.Tasks
                 else
                 {
                     _xslMode = XslModes.XsltCompiledDll;
-                    _data = xsltCompiledDll.ItemSpec;
+                    _data = xsltCompiledDllSpec;
                 }
 
                 _preserveWhitespace = preserveWhitespace;
@@ -465,10 +489,10 @@ namespace Microsoft.Build.Tasks
                         }
                         else
                         {
-                            _log.LogMessageFromResources(MessageImportance.Low, "XslTransform.UseTrustedSettings", _data);
+                            _log.LogMessageFromResources(MessageImportance.Low, "XslTransform.UseTrustedSettings", _filePath.Value.OriginalValue);
                         }
 
-                        using (XmlReader reader = XmlReader.Create(new StreamReader(_data), new XmlReaderSettings { CloseInput = true }, _data))
+                        using (XmlReader reader = XmlReader.Create(new StreamReader(_filePath.Value), new XmlReaderSettings { CloseInput = true }, _filePath.Value))
                         {
                             XmlSpace xmlSpaceOption = _preserveWhitespace ? XmlSpace.Preserve : XmlSpace.Default;
                             xslct.Load(new XPathDocument(reader, xmlSpaceOption), settings, new XmlUrlResolver());
@@ -477,9 +501,8 @@ namespace Microsoft.Build.Tasks
                     case XslModes.XsltCompiledDll:
 #if FEATURE_COMPILED_XSL
                         // We accept type in format: assembly_name[;type_name]. type_name may be omitted if assembly has just one type defined
-                        string dll = _data;
-                        string[] pair = dll.Split(MSBuildConstants.SemicolonChar);
-                        string assemblyPath = pair[0];
+                        string[] pair = _data.Split(MSBuildConstants.SemicolonChar);
+                        string assemblyPath = _taskEnvironment.GetAbsolutePath(pair[0]);
                         string typeName = (pair.Length == 2) ? pair[1] : null;
 
                         Type t = FindType(assemblyPath, typeName);
