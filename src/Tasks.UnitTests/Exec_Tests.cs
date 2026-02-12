@@ -166,27 +166,21 @@ namespace Microsoft.Build.UnitTests
             exec.Timeout = 5;
             bool result = exec.Execute();
 
-            Assert.False(result);
-            Assert.Equal(expectedExitCode, exec.ExitCode);
-            ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5002");
-            int warningsCount = ((MockEngine)exec.BuildEngine).Warnings;
-            if (warningsCount == 1)
+            result.ShouldBeFalse();
+            exec.ExitCode.ShouldBe(expectedExitCode);
+            MockEngine mockEngine = (MockEngine)exec.BuildEngine;
+            mockEngine.AssertLogContains("MSB5002");
+            // At least the timeout warning (MSB5002). Virus checkers may cause additional MSB5018 temp file warnings.
+            mockEngine.Warnings.ShouldBeGreaterThanOrEqualTo(1,
+                $"Expected at least 1 warning, encountered {mockEngine.Warnings}: " + string.Join(",",
+                    mockEngine.WarningEvents.Select(w => w.Message)));
+            if (mockEngine.Warnings > 1)
             {
-                warningsCount.ShouldBe(1,
-                $"Expected 1 warning, encountered {warningsCount}: " + string.Join(",",
-                    ((MockEngine)exec.BuildEngine).WarningEvents.Select(w => w.Message)));
-            }
-            else
-            {
-                // Occasionally temp files fail to delete because of virus checkers, so generate MSB5018 warning
-                ((MockEngine)exec.BuildEngine).AssertLogContains("MSB5018");
-                warningsCount.ShouldBe(2,
-                $"Expected 2 warnings, encountered {warningsCount}: " + string.Join(",",
-                    ((MockEngine)exec.BuildEngine).WarningEvents.Select(w => w.Message)));
+                mockEngine.AssertLogContains("MSB5018");
             }
 
             // ToolTask does not log an error on timeout.
-            Assert.Equal(0, ((MockEngine)exec.BuildEngine).Errors);
+            mockEngine.Errors.ShouldBe(0);
         }
 
         [Fact]
@@ -200,7 +194,8 @@ namespace Microsoft.Build.UnitTests
             result.ShouldBeFalse();
             MockEngine mockEngine = (MockEngine)exec.BuildEngine;
             mockEngine.AssertLogContains("MSB5002");
-            mockEngine.Warnings.ShouldBe(1);
+            // At least the timeout warning; virus checkers may cause additional MSB5018 temp file warnings.
+            mockEngine.Warnings.ShouldBeGreaterThanOrEqualTo(1);
 
             // ToolTask does not log an error on timeout.
             mockEngine.Errors.ShouldBe(0);

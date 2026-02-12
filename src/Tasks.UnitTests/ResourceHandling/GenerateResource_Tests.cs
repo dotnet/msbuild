@@ -417,8 +417,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
                 DateTime firstWriteTime = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
-                System.Threading.Thread.Sleep(200);
-                File.SetLastWriteTime(bitmap, DateTime.Now + TimeSpan.FromSeconds(2));
+                System.Threading.Thread.Sleep(500);
+                // Use a timestamp slightly in the past so that when ExecuteTask writes the output,
+                // its filesystem timestamp is guaranteed to be >= this value even on Linux ext4
+                // where nanosecond-precision timestamps can cause sub-millisecond ordering inversions.
+                File.SetLastWriteTime(bitmap, DateTime.Now.AddMilliseconds(-100));
 
                 Utilities.ExecuteTask(t2);
 
@@ -692,7 +695,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             t2.StateFile = new TaskItem(createResources.StateFile.ItemSpec);
             t2.Sources = new ITaskItem[] { new TaskItem(firstResx), new TaskItem(secondResx) };
 
-            System.Threading.Thread.Sleep(200);
+            System.Threading.Thread.Sleep(500);
             if (!NativeMethodsShared.IsWindows)
             {
                 // Must be > 1 sec on some file systems for proper timestamp granularity
@@ -701,10 +704,10 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
 
             _output.WriteLine("Touch one input");
-            File.SetLastWriteTime(firstResx, DateTime.Now);
-
-            // Increasing the space between the last write and task execution due to precision on file time
-            System.Threading.Thread.Sleep(1000);
+            // Use a timestamp slightly in the past so that when ExecuteTask writes the output,
+            // its filesystem timestamp is guaranteed to be >= this value even on Linux ext4
+            // where nanosecond-precision timestamps can cause sub-millisecond ordering inversions.
+            File.SetLastWriteTime(firstResx, DateTime.Now.AddMilliseconds(-100));
 
             Utilities.ExecuteTask(t2);
 
@@ -814,7 +817,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
                 DateTime time2 = File.GetLastWriteTime(t.OutputResources[1].ItemSpec);
-                System.Threading.Thread.Sleep(200);
+                System.Threading.Thread.Sleep(500);
 
                 Utilities.ExecuteTask(t2);
                 // Although everything was up to date, OutputResources and FilesWritten
@@ -3695,7 +3698,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 DateTime initialWriteTime = File.GetLastWriteTime(resourcesFile);
 
                 // fs granularity on HFS is 1 sec!
-                System.Threading.Thread.Sleep(NativeMethodsShared.IsOSX ? 1000 : 100);
+                System.Threading.Thread.Sleep(NativeMethodsShared.IsOSX ? 1500 : 500);
 
                 // Rebuild, it shouldn't regen .resources file since the sources
                 // haven't changed

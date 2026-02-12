@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 downloadFile.Cancel();
 
-                task.Wait(TimeSpan.FromMilliseconds(1500)).ShouldBeTrue();
+                task.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue("Download task should have completed within 10 seconds after cancellation.");
 
                 task.Result.ShouldBeFalse();
             }

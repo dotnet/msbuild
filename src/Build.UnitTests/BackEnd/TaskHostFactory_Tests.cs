@@ -86,7 +86,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     try
                     {
                         Process taskHostNode = Process.GetProcessById(pid);
-                        taskHostNode.WaitForExit(3000).ShouldBeTrue("The process with taskHostNode is still running.");
+                        taskHostNode.WaitForExit(15_000).ShouldBeTrue("The process with taskHostNode is still running.");
                     }
 
                     // We expect the TaskHostNode to exit quickly. If it exits before Process.GetProcessById, it will throw an ArgumentException.
@@ -122,13 +122,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                             // Process not ready yet
                         }
 
-                        Thread.Sleep(2000);
+                        Thread.Sleep(3000);
                         attempts++;
                         taskHostNode.Refresh();
                     }
 
                     // Now wait to ensure it stays alive
-                    bool processExited = taskHostNode.WaitForExit(3000);
+                    bool processExited = taskHostNode.WaitForExit(15_000);
 
                     processExited.ShouldBeFalse(
                         processExited

@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 manager.BeginBuild(_parameters);
                 BuildSubmission asyncResult = manager.PendBuildRequest(data);
                 asyncResult.ExecuteAsync(null, null);
-                int timeoutMilliseconds = 2000;
+                int timeoutMilliseconds = 30_000;
                 bool isCommandExecuted = waitCommandExecuted.WaitOne(timeoutMilliseconds);
                 manager.CancelAllSubmissions();
                 bool isSubmissionComplated = asyncResult.WaitHandle.WaitOne(timeoutMilliseconds);

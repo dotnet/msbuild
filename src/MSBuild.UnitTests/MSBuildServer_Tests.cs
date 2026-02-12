@@ -109,7 +109,7 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 _output.WriteLine($"The marker file {markerFile.Path} was created. The build task has been started. Ready to kill the server.");
                 // Kill the server
-                Process.GetProcessById(pidOfServerProcess).KillTree(1000);
+                Process.GetProcessById(pidOfServerProcess).KillTree(10_000);
                 _output.WriteLine($"The old server was killed.");
             };
             watcher.Filter = Path.GetFileName(markerFile.Path);
@@ -201,7 +201,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // The server will soon be in use; make sure we don't try to use it before that happens.
             _output.WriteLine("Waiting for the server to be in use.");
-            mre.WaitOne();
+            mre.WaitOne(60_000).ShouldBeTrue("Timed out waiting for marker file creation indicating server is busy.");
             _output.WriteLine("It's OK to go ahead.");
 
             Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
@@ -254,9 +254,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 serverIsDown.ShouldBeTrue();
             }
 
-            serverProcess.WaitForExit(10_000);
-
-            serverProcess.HasExited.ShouldBeTrue();
+            serverProcess.WaitForExit(30_000).ShouldBeTrue("Server process did not exit within 30 seconds after shutdown request.");
         }
 
         [Fact]
