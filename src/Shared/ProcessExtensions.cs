@@ -148,12 +148,12 @@ namespace Microsoft.Build.Shared
                         if (i > start)
                         {
                             // Decode the argument using UTF-8 encoding
-                            string arg = System.Text.Encoding.UTF8.GetString(cmdlineBytes, start, i - start);
+                            string currentArg = System.Text.Encoding.UTF8.GetString(cmdlineBytes, start, i - start);
                             if (sb.Length > 0)
                             {
                                 sb.Append(' ');
                             }
-                            sb.Append(arg);
+                            sb.Append(currentArg);
                         }
                         start = i + 1;
                     }
@@ -162,14 +162,14 @@ namespace Microsoft.Build.Shared
                 // Handle any remaining bytes after the last null terminator
                 if (start < cmdlineBytes.Length)
                 {
-                    string arg = System.Text.Encoding.UTF8.GetString(cmdlineBytes, start, cmdlineBytes.Length - start);
-                    if (arg.Length > 0)
+                    string remainingArg = System.Text.Encoding.UTF8.GetString(cmdlineBytes, start, cmdlineBytes.Length - start);
+                    if (remainingArg.Length > 0)
                     {
                         if (sb.Length > 0)
                         {
                             sb.Append(' ');
                         }
-                        sb.Append(arg);
+                        sb.Append(remainingArg);
                     }
                 }
 
