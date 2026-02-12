@@ -1,6 +1,10 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if !TASKHOST
+using System.Threading;
+#endif
+
 #if NETFRAMEWORK && !TASKHOST
 using Path = Microsoft.IO.Path;
 #else
@@ -22,6 +26,21 @@ namespace Microsoft.Build.Framework
         private const char WindowsDirectorySeparator = '\\';
 
         internal static readonly char[] Slashes = [UnixDirectorySeparator, WindowsDirectorySeparator];
+
+#if !TASKHOST
+        /// <summary>
+        /// AsyncLocal working directory for use during property/item expansion in multithreaded mode.
+        /// Set by MultiThreadedTaskEnvironmentDriver when building projects. null in multi-process mode.
+        /// Using AsyncLocal ensures the value flows to child threads/tasks spawned during execution of tasks.
+        /// </summary>
+        private static readonly AsyncLocal<string?> s_currentThreadWorkingDirectory = new();
+
+        internal static string? CurrentThreadWorkingDirectory
+        {
+            get => s_currentThreadWorkingDirectory.Value;
+            set => s_currentThreadWorkingDirectory.Value = value;
+        }
+#endif
 
         /// <summary>
         /// Indicates if the given character is a slash in current OS.
@@ -134,8 +153,8 @@ namespace Microsoft.Build.Framework
                 return path;
             }
 
-            return new AbsolutePath(EnsureTrailingSlash(path.Value), 
-                original: path.OriginalValue, 
+            return new AbsolutePath(EnsureTrailingSlash(path.Value),
+                original: path.OriginalValue,
                 ignoreRootedCheck: true);
         }
 
@@ -163,7 +182,7 @@ namespace Microsoft.Build.Framework
             }
 
             return new AbsolutePath(EnsureNoTrailingSlash(path.Value),
-                original: path.OriginalValue, 
+                original: path.OriginalValue,
                 ignoreRootedCheck: true);
         }
 
@@ -183,8 +202,8 @@ namespace Microsoft.Build.Framework
                 return path;
             }
 
-            if (!MayHaveRelativeSegment(path.Value) && 
-                !HasWindowsDirectorySeparatorOnUnix(path.Value) && 
+            if (!MayHaveRelativeSegment(path.Value) &&
+                !HasWindowsDirectorySeparatorOnUnix(path.Value) &&
                 !HasUnixDirectorySeparatorOnWindows(path.Value))
             {
                 return path;
@@ -211,8 +230,8 @@ namespace Microsoft.Build.Framework
                 return path;
             }
 
-            return new AbsolutePath(Path.GetFullPath(path.Value), 
-                original: path.OriginalValue, 
+            return new AbsolutePath(Path.GetFullPath(path.Value),
+                original: path.OriginalValue,
                 ignoreRootedCheck: true);
         }
 
@@ -227,7 +246,7 @@ namespace Microsoft.Build.Framework
             }
 
             return new AbsolutePath(FixFilePath(path.Value),
-                original: path.OriginalValue, 
+                original: path.OriginalValue,
                 ignoreRootedCheck: true);
         }
 #endif
