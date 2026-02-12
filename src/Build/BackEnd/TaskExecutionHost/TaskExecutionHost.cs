@@ -1502,8 +1502,7 @@ namespace Microsoft.Build.BackEnd
                             {
                                 // The common case -- all items involved are Microsoft.Build.Execution.ProjectItemInstance.TaskItems.
                                 // Furthermore, because that is true, we know by definition that they also implement ITaskItem2.
-                                // Use the constructor that preserves includeBeforeWildcardExpansionEscaped for RecursiveDir support.
-                                newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsProjectItem.IncludeEscaped, outputAsProjectItem.IncludeBeforeWildcardExpansionEscaped, parameterLocationEscaped);
+                                newItem = new ProjectItemInstance(_projectInstance, outputTargetName, outputAsProjectItem.IncludeEscaped, parameterLocationEscaped);
 
                                 newItem.SetMetadata(outputAsProjectItem.MetadataCollection); // copy-on-write!
                             }
