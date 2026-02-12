@@ -892,7 +892,6 @@ namespace Microsoft.Build.Execution
             {
                 _includeEscaped = source._includeEscaped;
                 _includeBeforeWildcardExpansionEscaped = source._includeBeforeWildcardExpansionEscaped;
-                _projectDirectory = source._projectDirectory;
                 source.CopyMetadataTo(this, addOriginalItemSpec);
                 _fullPath = source._fullPath;
                 _definingFileEscaped = source._definingFileEscaped;
@@ -1666,7 +1665,6 @@ namespace Microsoft.Build.Execution
                 translator.Translate(ref _includeBeforeWildcardExpansionEscaped);
                 translator.Translate(ref _isImmutable);
                 translator.Translate(ref _definingFileEscaped);
-                translator.Translate(ref _projectDirectory);
 
                 TranslatorHelpers.Translate(
                     translator,
@@ -1890,7 +1888,6 @@ namespace Microsoft.Build.Execution
                 {
                     WriteInternString(translator, interner, ref _includeBeforeWildcardExpansionEscaped);
                     WriteInternString(translator, interner, ref _definingFileEscaped);
-                    WriteInternString(translator, interner, ref _projectDirectory);
 
                     ImmutableDictionary<string, string> temp = MetadataCollection;
 
@@ -1912,7 +1909,6 @@ namespace Microsoft.Build.Execution
                 {
                     ReadInternString(translator, interner, ref _includeBeforeWildcardExpansionEscaped);
                     ReadInternString(translator, interner, ref _definingFileEscaped);
-                    ReadInternString(translator, interner, ref _projectDirectory);
                     if (translator.TranslateNullable(_directMetadata))
                     {
                         int count = translator.Reader.ReadInt32();
@@ -2460,21 +2456,7 @@ namespace Microsoft.Build.Execution
                 /// </summary>
                 public TaskItem CreateItem(string includeEscaped, string includeBeforeWildcardExpansionEscaped, string definingProject)
                 {
-                    // Derive projectDirectory from definingProject if available, as it's needed for RecursiveDir computation.
-                    string projectDirectory = null;
-                    if (!string.IsNullOrEmpty(definingProject))
-                    {
-                        projectDirectory = Path.GetDirectoryName(definingProject);
-                    }
-
-                    return new TaskItem(
-                        includeEscaped,
-                        includeBeforeWildcardExpansionEscaped,
-                        null,  // directMetadata
-                        null,  // itemDefinitions
-                        projectDirectory,
-                        false, // immutable
-                        definingProject);
+                    return CreateItem(includeEscaped, definingProject);
                 }
 
                 /// <summary>
