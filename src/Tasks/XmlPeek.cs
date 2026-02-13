@@ -227,7 +227,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// Contains the raw Xml content when in Xml mode.
             /// </summary>
-            private readonly string? _xmlContent;
+            private readonly string _xmlContent;
 
             /// <summary>
             /// FileStream used to read XML.
