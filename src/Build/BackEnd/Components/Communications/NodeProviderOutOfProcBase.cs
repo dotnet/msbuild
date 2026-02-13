@@ -484,7 +484,6 @@ namespace Microsoft.Build.BackEnd
             List<Process> filteredProcesses = [];
             foreach (var process in candidateProcesses)
             {
-                bool shouldKeep = false;
                 try
                 {
                     string commandLine = process.GetCommandLine();
@@ -523,19 +522,11 @@ namespace Microsoft.Build.BackEnd
 
                     // This process is a valid candidate
                     filteredProcesses.Add(process);
-                    shouldKeep = true;
                 }
                 catch
                 {
                     // If we encounter any error processing this process, skip it
-                }
-                finally
-                {
-                    // Dispose processes that we're not keeping to prevent resource leaks
-                    if (!shouldKeep)
-                    {
-                        process?.Dispose();
-                    }
+                    continue;
                 }
             }
 
