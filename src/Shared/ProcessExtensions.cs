@@ -230,13 +230,14 @@ namespace Microsoft.Build.Shared
                 }
 
                 // Parse UNICODE_STRING structure
+                // Layout: ushort Length (2 bytes), ushort MaximumLength (2 bytes), [4 bytes padding on 64-bit], IntPtr Buffer
                 UNICODE_STRING commandLineUnicode = new UNICODE_STRING
                 {
                     Length = BitConverter.ToUInt16(unicodeStringBuffer, 0),
                     MaximumLength = BitConverter.ToUInt16(unicodeStringBuffer, 2),
                     Buffer = IntPtr.Size == 8
-                        ? new IntPtr(BitConverter.ToInt64(unicodeStringBuffer, 4 + (IntPtr.Size - 4)))  // Account for padding
-                        : new IntPtr(BitConverter.ToInt32(unicodeStringBuffer, 4))
+                        ? new IntPtr(BitConverter.ToInt64(unicodeStringBuffer, 8))  // 4 bytes for ushorts + 4 bytes padding
+                        : new IntPtr(BitConverter.ToInt32(unicodeStringBuffer, 4))  // 4 bytes for ushorts, no padding
                 };
 
                 if (commandLineUnicode.Buffer == IntPtr.Zero || commandLineUnicode.Length == 0)
