@@ -109,12 +109,12 @@ namespace Microsoft.Build.Tasks
             // Load XmlInput, XsltInput parameters
             try
             {
-                AbsolutePath[] absoluteXmlInputPaths = XmlInputPaths != null
-                    ? Array.ConvertAll(XmlInputPaths, item => TaskEnvironment.GetAbsolutePath(item.ItemSpec))
+                AbsolutePath?[] absoluteXmlInputPaths = XmlInputPaths != null
+                    ? Array.ConvertAll(XmlInputPaths, item => item.ItemSpec != null ? TaskEnvironment.GetAbsolutePath(item.ItemSpec) : (AbsolutePath?)null)
                     : null;
                 xmlinput = new XmlInput(absoluteXmlInputPaths, XmlContent);
 
-                AbsolutePath? absoluteXslInputPath = XslInputPath != null ? TaskEnvironment.GetAbsolutePath(XslInputPath.ItemSpec) : null;
+                AbsolutePath? absoluteXslInputPath = XslInputPath?.ItemSpec != null ? TaskEnvironment.GetAbsolutePath(XslInputPath.ItemSpec) : null;
                 xsltinput = new XsltInput(absoluteXslInputPath, XslContent, XslCompiledDllPath?.ItemSpec, TaskEnvironment, Log, PreserveWhitespace);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
@@ -271,7 +271,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// This contains the absolute paths to Xml files when in XmlFile mode.
             /// </summary>
-            private readonly AbsolutePath[] _filePaths;
+            private readonly AbsolutePath?[] _filePaths;
 
             /// <summary>
             /// This contains the raw Xml content when in Xml mode.
@@ -284,7 +284,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             /// <param name="xmlFilePaths">The absolute paths to XML files or null.</param>
             /// <param name="xml">The raw XML.</param>
-            public XmlInput(AbsolutePath[] xmlFilePaths, string xml)
+            public XmlInput(AbsolutePath?[] xmlFilePaths, string xml)
             {
                 if (xmlFilePaths != null && xml != null)
                 {
