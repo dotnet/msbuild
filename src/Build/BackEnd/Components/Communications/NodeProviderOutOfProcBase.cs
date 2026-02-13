@@ -473,6 +473,8 @@ namespace Microsoft.Build.BackEnd
             if (expectedNodeMode.HasValue)
             {
                 List<Process> filteredProcesses = [];
+                bool isDotnetProcess = expectedProcessName.Equals("dotnet", StringComparison.OrdinalIgnoreCase);
+                
                 foreach (var process in processes)
                 {
                     try
@@ -481,6 +483,12 @@ namespace Microsoft.Build.BackEnd
                         if (commandLine is null)
                         {
                             // If we can't get the command line, skip this process
+                            continue;
+                        }
+
+                        // If expected process is dotnet, filter to only those hosting MSBuild.dll
+                        if (isDotnetProcess && !commandLine.Contains("MSBuild.dll", StringComparison.OrdinalIgnoreCase))
+                        {
                             continue;
                         }
 
