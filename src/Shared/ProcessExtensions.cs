@@ -1,20 +1,17 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics;
 using System.IO;
-using System.Text;
-#if NET
-using System;
 using System.Runtime.InteropServices;
-#endif
+using System.Text;
 
 namespace Microsoft.Build.Shared
 {
     internal static class ProcessExtensions
     {
-#if NET
-        // P/Invoke declarations for getting process command line on Windows (.NET Core)
+        // P/Invoke declarations for getting process command line on Windows
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
 
@@ -59,6 +56,7 @@ namespace Microsoft.Build.Shared
         private const int PROCESS_QUERY_INFORMATION = 0x0400;
         private const int PROCESS_VM_READ = 0x0010;
 
+#if NET
         // P/Invoke declarations for getting process command line on macOS
         [DllImport("libc", SetLastError = true)]
         private static extern int sysctl(
@@ -144,35 +142,11 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Retrieves the command line on Windows.
-        /// On .NET Framework: Uses WMI (System.Management).
-        /// On .NET Core+: Uses Windows API P/Invoke to read from PEB.
+        /// Retrieves the command line on Windows using native Windows APIs.
+        /// Reads the command line from the Process Environment Block (PEB).
         /// </summary>
         private static string? GetCommandLineWindows(Process process)
         {
-#if NETFRAMEWORK
-            try
-            {
-                // On .NET Framework, we can use WMI via System.Management
-                using var searcher = new System.Management.ManagementObjectSearcher(
-                    $"SELECT CommandLine FROM Win32_Process WHERE ProcessId = {process.Id}");
-                
-                using System.Management.ManagementObjectCollection objects = searcher.Get();
-                foreach (System.Management.ManagementBaseObject obj in objects)
-                {
-                    using (obj)
-                    {
-                        return obj["CommandLine"]?.ToString();
-                    }
-                }
-            }
-            catch
-            {
-                // WMI query failed, fall through to return null
-            }
-            return null;
-#else
-            // On .NET Core/5+, use native Windows API to read command line from process PEB
             try
             {
                 return GetCommandLineWindowsNative(process.Id);
@@ -182,10 +156,8 @@ namespace Microsoft.Build.Shared
                 // Native API calls failed
                 return null;
             }
-#endif
         }
 
-#if NET
         /// <summary>
         /// Retrieves the command line for a Windows process using native APIs.
         /// This reads the command line from the Process Environment Block (PEB).
@@ -277,7 +249,6 @@ namespace Microsoft.Build.Shared
                 }
             }
         }
-#endif
 
 
         /// <summary>

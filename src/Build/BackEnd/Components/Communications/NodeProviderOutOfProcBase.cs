@@ -456,88 +456,58 @@ namespace Microsoft.Build.BackEnd
             }
 
             var expectedProcessName = Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost() ?? msbuildLocation);
-            List<Process> candidateProcesses = [];
-
-            // First, get all processes with the expected MSBuild executable name
+            
+            // Get all processes with the expected MSBuild executable name
+            Process[] processes;
             try
             {
-                var msbuildProcesses = Process.GetProcessesByName(expectedProcessName);
-                candidateProcesses.AddRange(msbuildProcesses);
+                processes = Process.GetProcessesByName(expectedProcessName);
             }
             catch
             {
-                // Process enumeration failed, continue with empty list
+                // Process enumeration failed, return empty list
+                return (expectedProcessName, Array.Empty<Process>());
             }
 
-            // Also get all dotnet processes that might be hosting MSBuild.dll
-            try
+            // If we have an expected NodeMode, filter by command line parsing
+            if (expectedNodeMode.HasValue)
             {
-                var dotnetProcesses = Process.GetProcessesByName("dotnet");
-                candidateProcesses.AddRange(dotnetProcesses);
-            }
-            catch
-            {
-                // Process enumeration failed for dotnet, continue
-            }
-
-            // Filter processes by NodeMode if we have an expected value
-            List<Process> filteredProcesses = [];
-            foreach (var process in candidateProcesses)
-            {
-                try
+                List<Process> filteredProcesses = [];
+                foreach (var process in processes)
                 {
-                    string commandLine = process.GetCommandLine();
-                    if (commandLine is null)
+                    try
                     {
-                        // If we can't get the command line, skip this process
-                        continue;
-                    }
-
-                    // Check if this is an MSBuild process
-                    // For dotnet processes, check if they're hosting MSBuild.dll
-                    if (process.ProcessName.Equals("dotnet", StringComparison.OrdinalIgnoreCase) &&
-                        !commandLine.Contains("MSBuild.dll", StringComparison.OrdinalIgnoreCase))
-                    {
-                        // Not hosting MSBuild.dll, skip
-                        continue;
-                    }
-
-                    // Extract NodeMode from command line
-                    NodeMode? processNodeMode = ExtractNodeModeFromCommandLine(commandLine);
-                    
-                    // If we have an expected NodeMode, only include processes that match
-                    if (expectedNodeMode.HasValue)
-                    {
-                        if (!processNodeMode.HasValue || processNodeMode.Value != expectedNodeMode.Value)
+                        string commandLine = process.GetCommandLine();
+                        if (commandLine is null)
                         {
-                            // NodeMode doesn't match or couldn't be determined, skip
+                            // If we can't get the command line, skip this process
                             continue;
                         }
+
+                        // Extract NodeMode from command line
+                        NodeMode? processNodeMode = ExtractNodeModeFromCommandLine(commandLine);
+                        
+                        // Only include processes that match the expected NodeMode
+                        if (processNodeMode.HasValue && processNodeMode.Value == expectedNodeMode.Value)
+                        {
+                            filteredProcesses.Add(process);
+                        }
                     }
-                    else if (!processNodeMode.HasValue)
+                    catch
                     {
-                        // No expected NodeMode, but couldn't determine this process's NodeMode, skip it
+                        // If we encounter any error processing this process, skip it
                         continue;
                     }
+                }
 
-                    // This process is a valid candidate
-                    filteredProcesses.Add(process);
-                }
-                catch
-                {
-                    // If we encounter any error processing this process, skip it
-                    continue;
-                }
+                // Sort by process ID for consistent ordering
+                filteredProcesses.Sort((left, right) => left.Id.CompareTo(right.Id));
+                return (expectedProcessName, filteredProcesses);
             }
 
-            // Sort by process ID for consistent ordering
-            filteredProcesses.Sort((left, right) => left.Id.CompareTo(right.Id));
-
-            string description = expectedNodeMode.HasValue 
-                ? $"{expectedProcessName} or dotnet (NodeMode={expectedNodeMode.Value})"
-                : $"{expectedProcessName} or dotnet";
-
-            return (description, filteredProcesses);
+            // No NodeMode filtering, return all processes sorted by ID
+            Array.Sort(processes, (left, right) => left.Id.CompareTo(right.Id));
+            return (expectedProcessName, processes);
         }
 
         /// <summary>
