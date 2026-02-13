@@ -20,7 +20,7 @@ namespace Microsoft.Build.Internal
     internal static class DotnetHostEnvironmentHelper
     {
         private static string? _cachedDotnetHostPath;
-        private static IDictionary<string, string>? _cachedOverrides;
+        private static IDictionary<string, string?>? _cachedOverrides;
 
         // Environment variable name for .NET runtime root directory.
         private const string DotnetRootEnvVarName = "DOTNET_ROOT";
@@ -69,14 +69,14 @@ namespace Microsoft.Build.Internal
         /// </summary>
         /// <param name="dotnetHostPath">Path to the dotnet executable.</param>
         /// <returns>Dictionary of environment variable overrides, or null if dotnetHostPath is empty.</returns>
-        internal static IDictionary<string, string>? CreateDotnetRootEnvironmentOverrides(string? dotnetHostPath = null)
+        internal static IDictionary<string, string?>? CreateDotnetRootEnvironmentOverrides(string? dotnetHostPath = null)
         {
             string? resolvedPath = dotnetHostPath ?? Environment.GetEnvironmentVariable(Constants.DotnetHostPathEnvVarName);
 
             // Return cached result if the input hasn't changed.
             // Race conditions are benign here: the computation is idempotent, so the worst case is a redundant allocation.
             string? cachedPath = _cachedDotnetHostPath;
-            IDictionary<string, string>? cachedResult = _cachedOverrides;
+            IDictionary<string, string?>? cachedResult = _cachedOverrides;
             if (string.Equals(cachedPath, resolvedPath, StringComparison.Ordinal) && (cachedPath is not null || cachedResult is not null))
             {
                 return cachedResult;
@@ -104,6 +104,7 @@ namespace Microsoft.Build.Internal
 
             _cachedOverrides = overrides;
             _cachedDotnetHostPath = resolvedPath;
+
             return overrides;
         }
 
