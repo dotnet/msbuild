@@ -60,6 +60,19 @@ namespace Microsoft.Build.Shared
 
         private const int PROCESS_QUERY_INFORMATION = 0x0400;
         private const int PROCESS_VM_READ = 0x0010;
+
+        // P/Invoke declarations for getting process command line on macOS
+        [DllImport("libc", SetLastError = true)]
+        private static extern int sysctl(
+            [In] int[] name,
+            uint namelen,
+            IntPtr oldp,
+            ref ulong oldlenp,
+            IntPtr newp,
+            ulong newlen);
+
+        private const int CTL_KERN = 1;
+        private const int KERN_PROCARGS2 = 49;
 #endif
 
         public static void KillTree(this Process process, int timeoutMilliseconds)
@@ -123,9 +136,15 @@ namespace Microsoft.Build.Shared
                 {
                     return GetCommandLineWindows(process);
                 }
+#if NET
+                else if (NativeMethodsShared.IsOSX)
+                {
+                    return GetCommandLineMacOS(process.Id);
+                }
+#endif
                 else
                 {
-                    return GetCommandLineUnix(process.Id);
+                    return GetCommandLineLinux(process.Id);
                 }
             }
             catch
@@ -270,9 +289,9 @@ namespace Microsoft.Build.Shared
 
 
         /// <summary>
-        /// Retrieves the command line on Unix/Linux by reading /proc/{pid}/cmdline.
+        /// Retrieves the command line on Linux by reading /proc/{pid}/cmdline.
         /// </summary>
-        private static string GetCommandLineUnix(int processId)
+        private static string GetCommandLineLinux(int processId)
         {
             try
             {
@@ -334,5 +353,95 @@ namespace Microsoft.Build.Shared
                 return null;
             }
         }
+
+#if NET
+        /// <summary>
+        /// Retrieves the command line on macOS using sysctl with KERN_PROCARGS2.
+        /// </summary>
+        private static string GetCommandLineMacOS(int processId)
+        {
+            try
+            {
+                // Use sysctl with CTL_KERN, KERN_PROCARGS2 to get process arguments
+                int[] mib = [CTL_KERN, KERN_PROCARGS2, processId];
+                ulong size = 0;
+
+                // First call to get the size of the buffer needed
+                if (sysctl(mib, (uint)mib.Length, IntPtr.Zero, ref size, IntPtr.Zero, 0) != 0)
+                {
+                    return null;
+                }
+
+                if (size == 0)
+                {
+                    return null;
+                }
+
+                // Allocate buffer and get the actual data
+                IntPtr buffer = Marshal.AllocHGlobal((int)size);
+                try
+                {
+                    if (sysctl(mib, (uint)mib.Length, buffer, ref size, IntPtr.Zero, 0) != 0)
+                    {
+                        return null;
+                    }
+
+                    // The buffer format is:
+                    // - int argc (number of arguments)
+                    // - executable path (null-terminated)
+                    // - arguments (null-terminated strings)
+                    
+                    // Read argc
+                    int argc = Marshal.ReadInt32(buffer);
+                    if (argc <= 0)
+                    {
+                        return null;
+                    }
+
+                    // Copy the buffer to a byte array for easier parsing
+                    byte[] data = new byte[size];
+                    Marshal.Copy(buffer, data, 0, (int)size);
+
+                    // Skip the argc (4 bytes) and parse null-terminated strings
+                    StringBuilder sb = new();
+                    int offset = sizeof(int);
+                    
+                    // Parse all arguments (executable + arguments)
+                    for (int argIndex = 0; argIndex < argc && offset < data.Length; argIndex++)
+                    {
+                        // Find the next null terminator
+                        int nullIndex = offset;
+                        while (nullIndex < data.Length && data[nullIndex] != 0)
+                        {
+                            nullIndex++;
+                        }
+
+                        if (nullIndex > offset)
+                        {
+                            string arg = System.Text.Encoding.UTF8.GetString(data, offset, nullIndex - offset);
+                            if (sb.Length > 0)
+                            {
+                                sb.Append(' ');
+                            }
+                            sb.Append(arg);
+                        }
+
+                        // Move past the null terminator
+                        offset = nullIndex + 1;
+                    }
+
+                    return sb.ToString();
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(buffer);
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+#endif
     }
 }
