@@ -19,6 +19,9 @@ namespace Microsoft.Build.Internal
     /// </summary>
     internal static class DotnetHostEnvironmentHelper
     {
+        private static string? _cachedDotnetHostPath;
+        private static IDictionary<string, string>? _cachedOverrides;
+
         // Environment variable name for .NET runtime root directory.
         private const string DotnetRootEnvVarName = "DOTNET_ROOT";
 
@@ -62,21 +65,35 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Creates environment variable overrides for app host.
         /// Sets DOTNET_ROOT derived from the specified dotnet host path.
+        /// Results are cached so repeated calls with the same path avoid allocations.
         /// </summary>
         /// <param name="dotnetHostPath">Path to the dotnet executable.</param>
         /// <returns>Dictionary of environment variable overrides, or null if dotnetHostPath is empty.</returns>
         internal static IDictionary<string, string>? CreateDotnetRootEnvironmentOverrides(string? dotnetHostPath = null)
         {
+            string? resolvedPath = dotnetHostPath ?? Environment.GetEnvironmentVariable(Constants.DotnetHostPathEnvVarName);
+
+            // Return cached result if the input hasn't changed.
+            // Race conditions are benign here: the computation is idempotent, so the worst case is a redundant allocation.
+            string? cachedPath = _cachedDotnetHostPath;
+            IDictionary<string, string>? cachedResult = _cachedOverrides;
+            if (string.Equals(cachedPath, resolvedPath, StringComparison.Ordinal) && (cachedPath is not null || cachedResult is not null))
+            {
+                return cachedResult;
+            }
+
             string? dotnetRoot = ResolveDotnetRoot(dotnetHostPath);
 
             if (string.IsNullOrEmpty(dotnetRoot))
             {
+                _cachedOverrides = null;
+                _cachedDotnetHostPath = resolvedPath;
                 return null;
             }
 
-            var overrides = new Dictionary<string, string>
+            var overrides = new Dictionary<string, string?>
             {
-                [DotnetRootEnvVarName] = dotnetRoot!,
+                [DotnetRootEnvVarName] = dotnetRoot,
             };
 
             // Clear architecture-specific overrides that would take precedence over DOTNET_ROOT
@@ -85,6 +102,8 @@ namespace Microsoft.Build.Internal
                 overrides[varName] = null!;
             }
 
+            _cachedOverrides = overrides;
+            _cachedDotnetHostPath = resolvedPath;
             return overrides;
         }
 

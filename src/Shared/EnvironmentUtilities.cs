@@ -25,7 +25,7 @@ namespace Microsoft.Build.Shared
 #if NETCOREAPP
                 return Environment.ProcessId;
 #else
-                // copied from Environment.ProcessId
+                // copied from Environment.ProcessPath
                 int processId = s_processId;
                 if (processId == 0)
                 {
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Shared
 #if NETCOREAPP
                 return Environment.ProcessPath;
 #else
-                // copied from Environment.ProcessId
+                // copied from Environment.ProcessPath
                 string? processPath = s_processPath;
                 if (processPath == null)
                 {

@@ -313,9 +313,6 @@ jobs:
     inputs:
       filename: 'eng/cibuild.cmd'
       arguments: '-configuration Release -test'
-  - pwsh: Get-MpComputerStatus
-
-  - pwsh: Set-MpPreference -DisableRealtimeMonitoring $true
 
     condition: eq(variables.onlyDocChanged, 0)
   - task: BatchScript@1

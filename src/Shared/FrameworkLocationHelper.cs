@@ -1434,7 +1434,7 @@ namespace Microsoft.Build.Shared
                 // Rollback see https://developercommunity.visualstudio.com/t/Unable-to-locate-MSBuild-path-with-Lates/10824132 
                 if (this._hasMsBuild &&
                     generatedPathToDotNetFramework != null &&
-                    (!FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, NativeMethodsShared.IsWindows ? Constants.MSBuildExecutableName : "mcs.exe")) &&
+                    (!FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, Constants.MSBuildExecutableName)) &&
                      !FileSystems.Default.FileExists(Path.Combine(generatedPathToDotNetFramework, "Microsoft.Build.dll"))))
                 {
                     return null;

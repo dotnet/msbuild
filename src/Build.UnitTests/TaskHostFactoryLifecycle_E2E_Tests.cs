@@ -99,7 +99,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 out bool success,
                 outputHelper: _output);
 
-            success.ShouldBeTrue($"Build should succeed, BUT failed with: {Environment.NewLine} {output}");
+            success.ShouldBeTrue("Build should succeed");
 
             return output;
         }

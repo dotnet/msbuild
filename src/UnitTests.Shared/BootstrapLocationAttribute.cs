@@ -14,7 +14,7 @@ internal sealed class BootstrapLocationAttribute(string bootstrapRoot, string bo
     public string BootstrapRoot { get; } = bootstrapRoot;
 
     /// <summary>
-    /// Resolves path to MSBuild[.exe] or MSBuild.dll, depending on the runtime and OS.
+    /// Resolves path to MSBuild[.exe], depending on the runtime and OS.
     /// </summary>
     public string BootstrapMsBuildBinaryLocation { get; } = bootstrapMsBuildBinaryLocation;
 
