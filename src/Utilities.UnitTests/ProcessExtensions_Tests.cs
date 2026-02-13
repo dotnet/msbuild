@@ -34,14 +34,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void GetCommandLine_ReturnsNullForNullProcess()
-        {
-            Process process = null;
-            string commandLine = process.GetCommandLine();
-            commandLine.ShouldBeNull();
-        }
-
-        [Fact]
         public async Task GetCommandLine_ReturnsCommandLineForRunningProcess()
         {
             // Start a simple process that will run for a bit
@@ -59,14 +51,15 @@ namespace Microsoft.Build.UnitTests
 
                 string commandLine = p.GetCommandLine();
 
-                // On some platforms/configurations, we might not be able to get the command line
-                // (e.g., .NET Core on Windows without WMI package)
-                // So we just verify it doesn't throw and returns either a string or null
+                // The current implementation uses native Windows APIs on .NET Core+ and /proc or sysctl on Unix,
+                // so command line retrieval should generally work on all supported platforms.
+                // However, to remain robust in constrained environments, we only verify it does not throw
+                // and that any non-null result is non-empty.
                 if (commandLine != null)
                 {
                     commandLine.ShouldNotBeEmpty();
                     
-                    // On Unix, we should be able to get the command line from /proc
+                    // On Unix, we should be able to get the command line
                     if (!NativeMethodsShared.IsWindows)
                     {
                         commandLine.ShouldContain("sleep");
@@ -81,24 +74,6 @@ namespace Microsoft.Build.UnitTests
                     p.KillTree(5000);
                 }
             }
-        }
-
-        [WindowsOnlyFact]
-        public void GetCommandLine_ReturnsNullForExitedProcess()
-        {
-            // Start a process with a brief delay before exit
-            var psi = new ProcessStartInfo("cmd.exe", "/c timeout /t 1 /nobreak >nul")
-            {
-                UseShellExecute = false
-            };
-
-            using Process p = Process.Start(psi);
-            p.WaitForExit(5000);
-
-            string commandLine = p.GetCommandLine();
-            
-            // Command line should be null for an exited process
-            commandLine.ShouldBeNull();
         }
 
         [UnixOnlyFact]

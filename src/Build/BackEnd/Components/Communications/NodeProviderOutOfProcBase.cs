@@ -54,6 +54,14 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private const int TimeoutForWaitForExit = 30000;
 
+        /// <summary>
+        /// Regex pattern for extracting /nodemode parameter from command lines.
+        /// Uses the same pattern as DebugUtils.ScanNodeMode for consistency.
+        /// </summary>
+        private static readonly System.Text.RegularExpressions.Regex NodeModeRegex = new(
+            @"/nodemode:(?<nodemode>[1-9]\d*)(\s|$)", 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Compiled);
+
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         private static readonly WindowsIdentity s_currentWindowsIdentity = WindowsIdentity.GetCurrent();
 #endif
@@ -411,12 +419,8 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
-            // Use regex pattern matching similar to DebugUtils.ScanNodeMode
-            // Pattern: /nodemode:<digits> followed by whitespace or end of string
-            var match = System.Text.RegularExpressions.Regex.Match(
-                commandLine, 
-                @"/nodemode:(?<nodemode>[1-9]\d*)(\s|$)", 
-                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            // Use static compiled regex for better performance
+            var match = NodeModeRegex.Match(commandLine);
 
             if (!match.Success)
             {
@@ -480,6 +484,7 @@ namespace Microsoft.Build.BackEnd
             List<Process> filteredProcesses = [];
             foreach (var process in candidateProcesses)
             {
+                bool shouldKeep = false;
                 try
                 {
                     string commandLine = process.GetCommandLine();
@@ -491,13 +496,11 @@ namespace Microsoft.Build.BackEnd
 
                     // Check if this is an MSBuild process
                     // For dotnet processes, check if they're hosting MSBuild.dll
-                    if (process.ProcessName.Equals("dotnet", StringComparison.OrdinalIgnoreCase))
+                    if (process.ProcessName.Equals("dotnet", StringComparison.OrdinalIgnoreCase) &&
+                        !commandLine.Contains("MSBuild.dll", StringComparison.OrdinalIgnoreCase))
                     {
-                        // Check if command line contains MSBuild.dll
-                        if (!commandLine.Contains("MSBuild.dll", StringComparison.OrdinalIgnoreCase))
-                        {
-                            continue;
-                        }
+                        // Not hosting MSBuild.dll, skip
+                        continue;
                     }
 
                     // Extract NodeMode from command line
@@ -520,11 +523,19 @@ namespace Microsoft.Build.BackEnd
 
                     // This process is a valid candidate
                     filteredProcesses.Add(process);
+                    shouldKeep = true;
                 }
                 catch
                 {
                     // If we encounter any error processing this process, skip it
-                    continue;
+                }
+                finally
+                {
+                    // Dispose processes that we're not keeping to prevent resource leaks
+                    if (!shouldKeep)
+                    {
+                        process?.Dispose();
+                    }
                 }
             }
 

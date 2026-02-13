@@ -9,8 +9,6 @@ using System;
 using System.Runtime.InteropServices;
 #endif
 
-#nullable disable
-
 namespace Microsoft.Build.Shared
 {
     internal static class ProcessExtensions
@@ -109,7 +107,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="process">The process to get the command line for</param>
         /// <returns>The command line string, or null if it cannot be retrieved</returns>
-        public static string GetCommandLine(this Process process)
+        public static string? GetCommandLine(this Process? process)
         {
             if (process is null)
             {
@@ -132,20 +130,11 @@ namespace Microsoft.Build.Shared
 
             try
             {
-                if (NativeMethodsShared.IsWindows)
-                {
-                    return GetCommandLineWindows(process);
-                }
+                return NativeMethodsShared.IsWindows ? GetCommandLineWindows(process) :
 #if NET
-                else if (NativeMethodsShared.IsOSX)
-                {
-                    return GetCommandLineMacOS(process.Id);
-                }
+                       NativeMethodsShared.IsOSX ? GetCommandLineMacOS(process.Id) :
 #endif
-                else
-                {
-                    return GetCommandLineLinux(process.Id);
-                }
+                       GetCommandLineLinux(process.Id);
             }
             catch
             {
@@ -159,7 +148,7 @@ namespace Microsoft.Build.Shared
         /// On .NET Framework: Uses WMI (System.Management).
         /// On .NET Core+: Uses Windows API P/Invoke to read from PEB.
         /// </summary>
-        private static string GetCommandLineWindows(Process process)
+        private static string? GetCommandLineWindows(Process process)
         {
 #if NETFRAMEWORK
             try
@@ -171,7 +160,10 @@ namespace Microsoft.Build.Shared
                 using System.Management.ManagementObjectCollection objects = searcher.Get();
                 foreach (System.Management.ManagementBaseObject obj in objects)
                 {
-                    return obj["CommandLine"]?.ToString();
+                    using (obj)
+                    {
+                        return obj["CommandLine"]?.ToString();
+                    }
                 }
             }
             catch
@@ -198,7 +190,7 @@ namespace Microsoft.Build.Shared
         /// Retrieves the command line for a Windows process using native APIs.
         /// This reads the command line from the Process Environment Block (PEB).
         /// </summary>
-        private static string GetCommandLineWindowsNative(int processId)
+        private static string? GetCommandLineWindowsNative(int processId)
         {
             IntPtr hProcess = IntPtr.Zero;
             try
@@ -291,7 +283,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Retrieves the command line on Linux by reading /proc/{pid}/cmdline.
         /// </summary>
-        private static string GetCommandLineLinux(int processId)
+        private static string? GetCommandLineLinux(int processId)
         {
             try
             {
@@ -358,7 +350,7 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Retrieves the command line on macOS using sysctl with KERN_PROCARGS2.
         /// </summary>
-        private static string GetCommandLineMacOS(int processId)
+        private static string? GetCommandLineMacOS(int processId)
         {
             try
             {
@@ -387,9 +379,9 @@ namespace Microsoft.Build.Shared
                     }
 
                     // The buffer format is:
-                    // - int argc (number of arguments)
-                    // - executable path (null-terminated)
-                    // - arguments (null-terminated strings)
+                    // - int argc (number of arguments, including the executable path as argv[0])
+                    // - argv[0] (executable path, null-terminated)
+                    // - argv[1] .. argv[argc-1] (arguments, each a null-terminated string)
                     
                     // Read argc
                     int argc = Marshal.ReadInt32(buffer);
