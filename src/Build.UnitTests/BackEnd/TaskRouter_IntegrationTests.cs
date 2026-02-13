@@ -34,7 +34,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public TaskRouter_IntegrationTests(ITestOutputHelper output)
         {
             _output = output;
-            _env = TestEnvironment.Create(output, setupDotnetHostPath: true);
+            _env = TestEnvironment.Create(output);
 
             // Create directory for test projects
             _testProjectsDir = _env.CreateFolder().Path;

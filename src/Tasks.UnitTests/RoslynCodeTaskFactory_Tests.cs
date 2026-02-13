@@ -213,7 +213,7 @@ Log.LogError(Class1.ToPrint());
 
 </Project>";
 
-            using var env = TestEnvironment.Create(setupDotnetHostPath: forceOutOfProc);
+            using var env = TestEnvironment.Create();
             if (forceOutOfProc)
             {
                 env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
@@ -772,7 +772,7 @@ namespace InlineTask
   </Target>
 </Project>";
 
-            using (TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: forceOutOfProc))
+            using (TestEnvironment env = TestEnvironment.Create())
             {
                 if (forceOutOfProc)
                 {
@@ -892,7 +892,7 @@ namespace InlineTask
 
 </Project>";
 
-            using var env = TestEnvironment.Create(setupDotnetHostPath: forceOutOfProc);
+            using var env = TestEnvironment.Create();
             if (forceOutOfProc)
             {
                 env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");

@@ -313,7 +313,6 @@ jobs:
     inputs:
       filename: 'eng/cibuild.cmd'
       arguments: '-configuration Release -test'
-
     condition: eq(variables.onlyDocChanged, 0)
   - task: BatchScript@1
     displayName: cibuild.cmd without test

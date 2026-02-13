@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager = new BuildManager();
             _projectCollection = new ProjectCollection(globalProperties: null, _parameters.Loggers, ToolsetDefinitionLocations.Default);
 
-            _env = TestEnvironment.Create(output, setupDotnetHostPath: true);
+            _env = TestEnvironment.Create(output);
             _inProcEnvCheckTransientEnvironmentVariable = _env.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");
         }
 
@@ -4437,9 +4437,7 @@ $@"<Project InitialTargets=`Sleep`>
         [InlineData("TaskHostFactory", true)] // OOP task host, input logging enabled
         public void TaskInputLoggingIsExposedToTasks(string taskFactory, bool taskInputLoggingEnabled)
         {
-            using (TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true))
-            {
-                string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
+            string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
 
   <UsingTask
     TaskName=""" + typeof(LogTaskInputsCheckingTask).FullName + @"""
@@ -4453,16 +4451,15 @@ $@"<Project InitialTargets=`Sleep`>
 
 </Project>");
 
-                _parameters.LogTaskInputs = taskInputLoggingEnabled;
+            _parameters.LogTaskInputs = taskInputLoggingEnabled;
 
-                Project project = CreateProject(projectContents, MSBuildDefaultToolsVersion, _projectCollection, true);
-                ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
-                _buildManager.BeginBuild(_parameters);
-                BuildResult result = _buildManager.BuildRequest(new BuildRequestData(instance, new[] { "target1" }));
-                _buildManager.EndBuild();
+            Project project = CreateProject(projectContents, MSBuildDefaultToolsVersion, _projectCollection, true);
+            ProjectInstance instance = _buildManager.GetProjectInstanceForBuild(project);
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result = _buildManager.BuildRequest(new BuildRequestData(instance, new[] { "target1" }));
+            _buildManager.EndBuild();
 
-                Assert.Equal(BuildResultCode.Success, result.OverallResult);
-            }
+            Assert.Equal(BuildResultCode.Success, result.OverallResult);
         }
 
         [Fact]
