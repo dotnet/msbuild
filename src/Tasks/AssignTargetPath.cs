@@ -56,19 +56,44 @@ namespace Microsoft.Build.Tasks
 
             if (Files.Length > 0)
             {
-                // Compose a file in the root folder.
-                // NOTE: at this point fullRootPath may or may not have a trailing slash
-                // Ensure trailing slash otherwise c:\bin appears to match part of c:\bin2\foo
-                // Also ensure that relative segments in the path are resolved.
-                AbsolutePath fullRootPath = 
-                    TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(RootFolder)).GetCanonicalForm();
+                AbsolutePath fullRootPath = default;
+                string fullRootPathString = null;
+                bool isRootFolderSameAsCurrentDirectory;
 
-                // Ensure trailing slash for comparison - AbsolutePath handles OS-aware case sensitivity
-                AbsolutePath currentDirectory = 
-                    new AbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory), ignoreRootedCheck: true).GetCanonicalForm();
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+                {
+                    // Compose a file in the root folder.
+                    // NOTE: at this point fullRootPath may or may not have a trailing slash
+                    // Ensure trailing slash otherwise c:\bin appears to match part of c:\bin2\foo
+                    // Also ensure that relative segments in the path are resolved.
+                    fullRootPath =
+                        TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(RootFolder)).GetCanonicalForm();
 
-                // check if the root folder is the same as the current directory
-                bool isRootFolderSameAsCurrentDirectory = fullRootPath == currentDirectory;
+                    // Ensure trailing slash for comparison - AbsolutePath handles OS-aware case sensitivity
+                    AbsolutePath currentDirectory =
+                        new AbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory), ignoreRootedCheck: true).GetCanonicalForm();
+
+                    // Check if the root folder is the same as the current directory
+                    isRootFolderSameAsCurrentDirectory = fullRootPath == currentDirectory;
+                }
+                else
+                {
+                    // Compose a file in the root folder.
+                    // NOTE: at this point fullRootPath may or may not have a trailing slash
+                    // Ensure trailing slash otherwise c:\bin appears to match part of c:\bin2\foo
+                    // Also ensure that relative segments in the path are resolved and throw on illegal characters in Path.GetFullPath to preserve pre-existing behavior.
+                    fullRootPathString = 
+                        Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(RootFolder)));
+
+                    // Ensure trailing slash for easier comparison.
+                    AbsolutePath currentDirectory = 
+                        new AbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory), ignoreRootedCheck: true).GetCanonicalForm();
+
+                    // Check if the root folder is the same as the current directory. 
+                    // Perform a case-insensitive comparison to match Path.GetFullPath behavior on Windows, even on case-sensitive file systems, 
+                    // since that's what we're using to determine whether to preserve relative paths or not.
+                    isRootFolderSameAsCurrentDirectory = String.Compare(fullRootPathString, currentDirectory, StringComparison.OrdinalIgnoreCase) == 0;
+                }
 
                 for (int i = 0; i < Files.Length; ++i)
                 {
@@ -94,26 +119,44 @@ namespace Microsoft.Build.Tasks
                             isRootFolderSameAsCurrentDirectory)
                         {
                             // then just use the file path as-is
-                            // PERF NOTE: we do this to avoid calling Path.GetFullPath() below 
-                            // (which is called by RemoveRelativeSegments method),
-                            // because that method consumes a lot of memory, esp. when we have
-                            // a lot of items coming through this task
+                            // PERF NOTE: we do this to avoid calling Path.GetFullPath() below (which is called by GetCanonicalForm method),
+                            // because that method consumes a lot of memory, esp. when we have a lot of items coming through this task
                             targetPath = Files[i].ItemSpec;
                         }
                         else
                         {
-                            AbsolutePath itemSpecFullFileNamePath = 
-                                TaskEnvironment.GetAbsolutePath(Files[i].ItemSpec).GetCanonicalForm();
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6)) 
+                            {
+                                AbsolutePath itemSpecFullFileNamePath = 
+                                    TaskEnvironment.GetAbsolutePath(Files[i].ItemSpec).GetCanonicalForm();
 
-                            if (itemSpecFullFileNamePath.Value.StartsWith(fullRootPath.Value, StringComparison.OrdinalIgnoreCase))
-                            {
-                                // The item spec file is in the "cone" of the RootFolder. Return the relative path from the cone root.
-                                targetPath = itemSpecFullFileNamePath.Value.Substring(fullRootPath.Value.Length);
+
+                                if (itemSpecFullFileNamePath.Value.StartsWith(fullRootPath.Value, FileUtilities.PathComparison))
+                                {
+                                    // The item spec file is in the "cone" of the RootFolder. Return the relative path from the cone root.
+                                    targetPath = itemSpecFullFileNamePath.Value.Substring(fullRootPath.Value.Length);
+                                }
+                                else
+                                {
+                                    // The item spec file is not in the "cone" of the RootFolder. Return the filename only.
+                                    targetPath = Path.GetFileName(Files[i].ItemSpec);
+                                }
                             }
-                            else
+                            else 
                             {
-                                // The item spec file is not in the "cone" of the RootFolder. Return the filename only.
-                                targetPath = Path.GetFileName(Files[i].ItemSpec);
+                                string itemSpecFullFileNamePath = 
+                                    Path.GetFullPath(TaskEnvironment.GetAbsolutePath(Files[i].ItemSpec));
+
+                                if (String.Compare(fullRootPathString, 0, itemSpecFullFileNamePath, 0, fullRootPathString.Length, StringComparison.CurrentCultureIgnoreCase) == 0)
+                                {
+                                    // The item spec file is in the "cone" of the RootFolder. Return the relative path from the cone root.
+                                    targetPath = itemSpecFullFileNamePath.Substring(fullRootPathString.Length);
+                                }
+                                else
+                                {
+                                    // The item spec file is not in the "cone" of the RootFolder. Return the filename only.
+                                    targetPath = Path.GetFileName(Files[i].ItemSpec);
+                                }
                             }
                         }
                     }
