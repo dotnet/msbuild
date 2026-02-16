@@ -37,9 +37,19 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(FrameworkFileUtilities.FixFilePath(@"C:\SomeoneElsesProject\File2.txt"), t.OutOfPath[0].ItemSpec);
         }
 
+        /// <summary>
+        /// Tests that invalid file path characters cause the task to fail.
+        /// This only applies when Wave18_6 is disabled, as the new behavior doesn't throw on invalid path characters.
+        /// </summary>
         [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. On Unix there is no invalid file name characters.")]
         public void InvalidFile()
         {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            // TODO: Remove test when Wave18_6 rotates out - new behavior doesn't throw on invalid path characters
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_6.ToString());
+
             FindUnderPath t = new FindUnderPath();
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
@@ -50,6 +60,8 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.False(success);
+
+            ChangeWaves.ResetStateForTests();
 
             // Don't crash
         }
