@@ -71,7 +71,7 @@ namespace Microsoft.Build.Tasks
 
                     // Ensure trailing slash for comparison - AbsolutePath handles OS-aware case sensitivity
                     AbsolutePath currentDirectory =
-                        new AbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory), ignoreRootedCheck: true).GetCanonicalForm();
+                        FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory).GetCanonicalForm();
 
                     // Check if the root folder is the same as the current directory
                     isRootFolderSameAsCurrentDirectory = fullRootPath == currentDirectory;
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Tasks
 
                     // Ensure trailing slash for easier comparison.
                     AbsolutePath currentDirectory = 
-                        new AbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory), ignoreRootedCheck: true).GetCanonicalForm();
+                        FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory).GetCanonicalForm();
 
                     // Check if the root folder is the same as the current directory. 
                     // Perform a case-insensitive comparison to match Path.GetFullPath behavior on Windows, even on case-sensitive file systems, 
