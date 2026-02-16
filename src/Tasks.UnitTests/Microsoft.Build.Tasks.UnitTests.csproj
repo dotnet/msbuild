@@ -53,6 +53,10 @@
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\Shared\QuotingUtilities.cs" />
     <Compile Include="..\Shared\ProcessExtensions.cs" />
+    <Compile Include="..\UnitTests.Shared\EnvironmentProvider.cs" />
+    <Compile Include="..\UnitTests.Shared\RunnerUtilities.cs" />
+    <Compile Include="..\UnitTests.Shared\RequiresSymbolicLinksFactAttribute.cs" />
+    <Compile Include="..\UnitTests.Shared\RequiresSymbolicLinksTheoryAttribute.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <EmbeddedResource Include="SampleResx" />
