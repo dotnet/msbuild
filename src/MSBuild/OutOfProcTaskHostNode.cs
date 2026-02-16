@@ -198,6 +198,26 @@ namespace Microsoft.Build.CommandLine
         /// Key is the request ID, value is the TaskCompletionSource to signal when response arrives.
         /// </summary>
         private readonly ConcurrentDictionary<int, TaskCompletionSource<INodePacket>> _pendingCallbackRequests = new();
+
+        /// <summary>
+        /// The packet version negotiated with the parent process.
+        /// Used to determine if the parent supports callback packets.
+        /// </summary>
+        private byte _parentPacketVersion;
+
+        /// <summary>
+        /// Minimum packet version required for IBuildEngine callback support.
+        /// When all callback stages are complete, PacketVersion will be bumped to this value.
+        /// </summary>
+        private const byte CallbacksMinPacketVersion = 3;
+
+        /// <summary>
+        /// Whether the parent supports IBuildEngine callbacks.
+        /// True if the parent's packet version is high enough, or if the feature is force-enabled via env var.
+        /// </summary>
+        private bool CallbacksSupported =>
+            _parentPacketVersion >= CallbacksMinPacketVersion
+            || Traits.Instance.EnableTaskHostCallbacks;
 #endif
 
         /// <summary>
@@ -292,6 +312,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Implementation of IBuildEngine2.IsRunningMultipleNodes.
         /// Queries the parent process and returns the actual value.
+        /// Returns false if the parent doesn't support callbacks (cross-version scenario).
         /// </summary>
         public bool IsRunningMultipleNodes
         {
@@ -301,6 +322,11 @@ namespace Microsoft.Build.CommandLine
                 LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
                 return false;
 #else
+                if (!CallbacksSupported)
+                {
+                    return false;
+                }
+
                 var request = new TaskHostQueryRequest(TaskHostQueryRequest.QueryType.IsRunningMultipleNodes);
                 var response = SendCallbackRequestAndWaitForResponse<TaskHostQueryResponse>(request);
                 return response.BoolResult;
@@ -680,6 +706,7 @@ namespace Microsoft.Build.CommandLine
         {
 #if !CLR2COMPATIBILITY
             _registeredTaskObjectCache = new RegisteredTaskObjectCacheBase();
+            _parentPacketVersion = parentPacketVersion;
 #endif
             shutdownException = null;
 

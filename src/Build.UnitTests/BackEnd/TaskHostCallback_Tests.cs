@@ -75,6 +75,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void IsRunningMultipleNodes_WorksWithExplicitTaskHostFactory(int maxNodeCount, bool expectedResult)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
 
             string projectContents = $@"
 <Project>
@@ -106,6 +107,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void IsRunningMultipleNodes_WorksWhenAutoEjectedInMultiThreadedMode(int maxNodeCount, bool expectedResult)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
             string testDir = env.CreateFolder().Path;
 
             // IsRunningMultipleNodesTask lacks MSBuildMultiThreadableTask attribute, so it's auto-ejected to TaskHost in MT mode
@@ -140,6 +142,40 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Verify callback returned correct value
             logger.FullLog.ShouldContain($"IsRunningMultipleNodes = {expectedResult}");
+        }
+
+        /// <summary>
+        /// Verifies IsRunningMultipleNodes returns false (safe default) when callbacks are not enabled.
+        /// This simulates the cross-version scenario where a new TaskHost connects to an old parent.
+        /// </summary>
+        [Fact]
+        public void IsRunningMultipleNodes_ReturnsFalseWhenCallbacksNotSupported()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            // Explicitly do NOT set MSBUILDENABLETASKHOSTCALLBACKS — callbacks should be disabled
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(IsRunningMultipleNodesTask)}"" AssemblyFile=""{typeof(IsRunningMultipleNodesTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""Test"">
+        <{nameof(IsRunningMultipleNodesTask)}>
+            <Output PropertyName=""Result"" TaskParameter=""IsRunningMultipleNodes"" />
+        </{nameof(IsRunningMultipleNodesTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters { MaxNodeCount = 4, EnableNodeReuse = false },
+                new BuildRequestData(projectInstance, targetsToBuild: ["Test"]));
+
+            // Build should succeed — callbacks gracefully return safe defaults
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // IsRunningMultipleNodes should return false (safe default) even though MaxNodeCount=4
+            bool.Parse(projectInstance.GetPropertyValue("Result")).ShouldBe(false);
         }
 
         #endregion

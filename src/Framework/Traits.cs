@@ -131,6 +131,12 @@ namespace Microsoft.Build.Framework
         public readonly bool EnableRarNode = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildRarNode"));
 
         /// <summary>
+        /// Enable IBuildEngine callbacks in the TaskHost process.
+        /// Temporary escape hatch until all callback stages are complete and PacketVersion is bumped to 3.
+        /// </summary>
+        public readonly bool EnableTaskHostCallbacks = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS"));
+
+        /// <summary>
         /// Name of environment variables used to enable MSBuild server.
         /// </summary>
         public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
