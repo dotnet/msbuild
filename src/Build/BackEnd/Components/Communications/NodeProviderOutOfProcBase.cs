@@ -405,12 +405,12 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Finds processes named after either msbuild or msbuildtaskhost.
+        /// Finds processes that could be running MSBuild nodes, based on the resolved executable name.
         /// </summary>
-        /// <param name="msbuildLocation"></param>
+        /// <param name="msbuildLocation">The MSBuild executable location used to determine the process name to search for.</param>
         /// <returns>
         /// Item 1 is the name of the process being searched for.
-        /// Item 2 is the ConcurrentQueue of ordered processes themselves.
+        /// Item 2 is the list of matching processes, ordered by process ID.
         /// </returns>
         private (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(string msbuildLocation = null)
         {
@@ -419,7 +419,14 @@ namespace Microsoft.Build.BackEnd
                 msbuildLocation = Constants.MSBuildExecutableName;
             }
 
-            var expectedProcessName = Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost() ?? msbuildLocation);
+            // When the MSBuild location is a native app host (e.g., MSBuild.exe on Windows, MSBuild on Linux),
+            // nodes run under that executable name directly. Otherwise (e.g., MSBuild.dll on .NET Core),
+            // nodes are launched via the dotnet host. CurrentHost.GetCurrentHost() returns null on .NET Framework,
+            // which is correct because Framework nodes always run as the msbuildLocation executable itself.
+            var expectedProcessName = Path.GetFileNameWithoutExtension(
+                Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase)
+                    ? msbuildLocation
+                    : (CurrentHost.GetCurrentHost() ?? msbuildLocation));
 
             var processes = Process.GetProcessesByName(expectedProcessName);
             Array.Sort(processes, (left, right) => left.Id.CompareTo(right.Id));

@@ -45,7 +45,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         [InlineData(true)]
         public void InlineTaskWithAssemblyPlatformAgnostic(bool forceOutOfProc)
         {
-            using (TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true))
+            using (TestEnvironment env = TestEnvironment.Create())
             {
                 if (forceOutOfProc)
                 {
@@ -93,7 +93,7 @@ Log.LogError(Alpha.GetString());
         [SkipOnPlatform(TestPlatforms.AnyUnix, ".NETFramework 4.0 isn't on unix machines.")]
         public void InlineTaskWithAssembly(bool forceOutOfProc)
         {
-            using (TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true))
+            using (TestEnvironment env = TestEnvironment.Create())
             {
                 if (forceOutOfProc)
                 {
@@ -1101,7 +1101,7 @@ namespace InlineTask
         [Fact]
         public void MultiThreadedBuildExecutesInlineTasksSuccessfully()
         {
-            using (TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true))
+            using (TestEnvironment env = TestEnvironment.Create())
             {
                 TransientTestFolder folder = env.CreateFolder(createFolder: true);
                 
@@ -1171,7 +1171,7 @@ namespace InlineTask
         [InlineData(true)]
         public void SourceCodeFromRelativeFilePath_ResolvesRelativeToProjectFile(bool forceOutOfProc)
         {
-            using (TestEnvironment env = TestEnvironment.Create(setupDotnetHostPath: true))
+            using (TestEnvironment env = TestEnvironment.Create())
             {
                 if (forceOutOfProc)
                 {
