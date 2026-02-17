@@ -47,19 +47,17 @@ The [`AbsolutePath`](https://github.com/dotnet/msbuild/blob/main/src/Framework/P
 
 ### Step 3: Replace Environment Variable APIs
 
-```csharp
-// BEFORE (UNSAFE)                              // AFTER (SAFE)
-Environment.GetEnvironmentVariable("VAR");      TaskEnvironment.GetEnvironmentVariable("VAR");
-Environment.SetEnvironmentVariable("VAR", "v"); TaskEnvironment.SetEnvironmentVariable("VAR", "v");
-```
+| BEFORE (UNSAFE)                                  | AFTER (SAFE)                                       |
+|--------------------------------------------------|----------------------------------------------------|
+| `Environment.GetEnvironmentVariable("VAR");`       | `TaskEnvironment.GetEnvironmentVariable("VAR");`     |
+| `Environment.SetEnvironmentVariable("VAR", "v");`  | `TaskEnvironment.SetEnvironmentVariable("VAR", "v");` |
 
 ### Step 4: Replace Process Start APIs
 
-```csharp
-// BEFORE (UNSAFE)                        // AFTER (SAFE)
-var psi = new ProcessStartInfo("tool");   var psi = TaskEnvironment.GetProcessStartInfo();
-                                          psi.FileName = "tool";
-```
+| BEFORE (UNSAFE - inherits process state)           | AFTER (SAFE - uses task's isolated environment)     |
+|----------------------------------------------------|-----------------------------------------------------|
+| `var psi = new ProcessStartInfo("tool.exe");`      | `var psi = TaskEnvironment.GetProcessStartInfo();`  |
+|                                                    | `psi.FileName = "tool.exe";`                        |
 
 ## Updating Unit Tests
 
@@ -71,14 +69,14 @@ Every test creating a task instance must set `TaskEnvironment = TaskEnvironmentH
 |---|---|---|
 | **Forbidden** | `Environment.Exit`, `FailFast`, `Process.Kill`, `ThreadPool.SetMin/MaxThreads`, `Console.*` | Return false, throw, or use `Log` |
 | **Use TaskEnvironment** | `Environment.CurrentDirectory`, `Get/SetEnvironmentVariable`, `Path.GetFullPath`, `ProcessStartInfo` | See Steps 2-4 |
-| **Need absolute paths** | `File.*`, `Directory.*`, `FileInfo`, `DirectoryInfo`, `FileStream`, `StreamReader/Writer` | Absolutize first |
+| **Need absolute paths** | `File.*`, `Directory.*`, `FileInfo`, `DirectoryInfo`, `FileStream`, `StreamReader/Writer` | Absolutize first (File System APIs) |
 | **Review required** | `Assembly.Load*`, `Activator.CreateInstance*` | Check for version conflicts |
 
 ## Practical Notes
 
 ### CRITICAL: Trace All Path String Usage
 
-Trace every path string through all method calls and assignments to find all places it flows into file system operations — including helper methods that may internally use File APIs.
+Trace every path string through all method calls and assignments to find all places it flows into file system operations — including helper methods that may internally use File System APIs.
 
 1. Find every path string (e.g., `item.ItemSpec`, function parameters)
 2. Trace downstream through all method calls
@@ -100,7 +98,7 @@ foreach (ITaskItem item in SourceFiles)
     }
     catch (ArgumentException ex)
     {
-        Log.LogError($"Invalid path '{item.ItemSpec}': {ex.Message}");
+        Log.LogError("Invalid path '{0}': {1}", item.ItemSpec, ex.Message);
         success = false;
     }
 }
