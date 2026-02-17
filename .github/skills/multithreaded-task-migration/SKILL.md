@@ -173,7 +173,7 @@ Adding `?? ""` silently swallows an exception the old code relied on for error h
 
 ```csharp
 // BEFORE: Path.GetDirectoryName("C:\") → null → Path.Combine(null, x) → ArgumentNullException
-//   → caught by IsIoRelatedException → error logged → Execute() returns false
+//   → task fails with an exception / error logged → Execute() returns false
 
 // BROKEN: ?? "" added "for safety"
 string dir = Path.GetDirectoryName(fileName) ?? string.Empty;
