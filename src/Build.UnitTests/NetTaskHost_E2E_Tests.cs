@@ -136,6 +136,33 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_CallbackIsRunningMultipleNodesTest()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+
+            // Point dotnet resolution to the bootstrap layout so the .NET Core TaskHost
+            // uses the locally-built MSBuild.dll (with callback support) instead of the system SDK.
+            string bootstrapCorePath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
+            string bootstrapDotnet = Path.Combine(bootstrapCorePath, "dotnet.exe");
+            env.SetEnvironmentVariable("DOTNET_HOST_PATH", bootstrapDotnet);
+            env.SetEnvironmentVariable("DOTNET_ROOT", bootstrapCorePath);
+            env.SetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", bootstrapCorePath);
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskCallback", "TestNetTaskCallback.csproj");
+
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
+
+            if (!successTestTask)
+            {
+                _output.WriteLine(testTaskOutput);
+            }
+
+            successTestTask.ShouldBeTrue();
+            testTaskOutput.ShouldContain("CallbackResult: IsRunningMultipleNodes = False");
+        }
+
+        [WindowsFullFrameworkOnlyFact]
         public void NetTaskWithImplicitHostParamsTest()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);

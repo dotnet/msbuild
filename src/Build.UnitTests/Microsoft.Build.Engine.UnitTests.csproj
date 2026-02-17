@@ -145,6 +145,9 @@
     <EmbeddedResource Include="TestAssets\ExampleNetTask\TestNetTask\global.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
+    <EmbeddedResource Include="TestAssets\ExampleNetTask\TestNetTaskCallback\global.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
   <ItemGroup>
