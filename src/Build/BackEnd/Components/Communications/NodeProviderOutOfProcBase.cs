@@ -443,11 +443,18 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        string commandLine = process.GetCommandLine();
-                        if (commandLine is null)
+                        if (!process.TryGetCommandLine(out string commandLine))
                         {
                             // If we can't get the command line, skip this process
                             CommunicationsUtilities.Trace("Skipping process {0} - unable to retrieve command line", process.Id);
+                            continue;
+                        }
+
+                        if (commandLine is null)
+                        {
+                            // If we can't get the command line, then allow it as a candidate. This allows reuse to work on platforms where command line retrieval isn't supported, but still filters by NodeMode on platforms where it is supported.
+                            CommunicationsUtilities.Trace("Skipping process {0} - command line is null, unsupported platform", process.Id);
+                            filteredProcesses.Add(process);
                             continue;
                         }
 

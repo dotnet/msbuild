@@ -47,29 +47,33 @@ namespace Microsoft.Build.Shared
         /// Retrieves the full command line for a process in a cross-platform manner.
         /// </summary>
         /// <param name="process">The process to get the command line for.</param>
-        /// <returns>The command line string, or null if it cannot be retrieved.</returns>
-        public static string? GetCommandLine(this Process? process)
+        /// <param name="commandLine">The command line string, or null if it cannot be retrieved.</param>
+        /// <returns>True if the command line was successfully retrieved or the current platform doesn't support retrieving command lines, false if there was an error retrieving the command line.</returns>
+        public static bool TryGetCommandLine(this Process? process, out string? commandLine)
         {
-            // Check if process is null or has exited
+            commandLine = null;
+
             if (process?.HasExited != false)
             {
-                return null;
+                return false;
             }
 
             try
             {
 #if NET
-                return NativeMethodsShared.IsWindows ? Windows.GetCommandLine(process.Id) :
+                commandLine = NativeMethodsShared.IsWindows ? Windows.GetCommandLine(process.Id) :
                        NativeMethodsShared.IsOSX ? MacOS.GetCommandLine(process.Id) :
-                       NativeMethodsShared.IsLinux ? Linux.GetCommandLine(process.Id) : 
-                       throw new NotSupportedException();
+                       NativeMethodsShared.IsLinux ? Linux.GetCommandLine(process.Id) :
+                       null; // If we don't have a platform-specific implementation, just return true with a null command line, since the caller should be able to handle that case.
+                return true;
 #else
-                return Windows.GetCommandLine(process.Id);
+                commandLine = Windows.GetCommandLine(process.Id);
+                return true;
 #endif
             }
             catch
             {
-                return null;
+                return false;
             }
         }
 

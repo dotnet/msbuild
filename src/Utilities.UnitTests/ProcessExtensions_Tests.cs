@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests
                 // Give the process time to start
                 await Task.Delay(500);
 
-                string commandLine = p.GetCommandLine();
+                p.TryGetCommandLine(out string commandLine).ShouldBeTrue();
 
                 // Command line retrieval should work on all platforms
                 commandLine.ShouldNotBeNull();
