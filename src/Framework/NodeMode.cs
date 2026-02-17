@@ -127,24 +127,18 @@ namespace Microsoft.Build.Framework
             {
                 return null;
             }
-#if NET
-            // Use compiled regex for better performance on .NET
-            var match = CommandLineNodeModeRegex().Match(commandLine);
-#else
-            var match = CommandLineNodeModeRegexInstance.Match(commandLine);
-#endif
+
+            var match = CommandLineNodeModeRegex.Match(commandLine);
 
             if (!match.Success)
             {
                 return null;
             }
 
-            string nodeModeValue = match.Groups["nodemode"].Value;
-
 #if NET
-            if (TryParse(nodeModeValue.AsSpan(), out NodeMode? nodeMode))
+            if (TryParse(match.Groups["nodemode"].ValueSpan, out NodeMode? nodeMode))
 #else
-            if (TryParse(nodeModeValue, out NodeMode? nodeMode))
+            if (TryParse(match.Groups["nodemode"].Value, out NodeMode? nodeMode))
 #endif
             {
                 return nodeMode;
@@ -153,12 +147,14 @@ namespace Microsoft.Build.Framework
             return null;
         }
 
+        private const string CommandLineNodeModePattern = @"/nodemode:(?<nodemode>[a-zA-Z0-9]+)(?:\s|$)";
+
 #if NET
-        [System.Text.RegularExpressions.GeneratedRegex(@"/nodemode:(?<nodemode>[a-zA-Z0-9]+)(?:\s|$)", System.Text.RegularExpressions.RegexOptions.IgnoreCase)]
-        private static partial System.Text.RegularExpressions.Regex CommandLineNodeModeRegex();
+        [System.Text.RegularExpressions.GeneratedRegex(CommandLineNodeModePattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase)]
+        private static partial System.Text.RegularExpressions.Regex CommandLineNodeModeRegex { get; }
 #else
-        private static readonly System.Text.RegularExpressions.Regex CommandLineNodeModeRegexInstance = new(
-            @"/nodemode:(?<nodemode>[a-zA-Z0-9]+)(?:\s|$)", 
+        private static System.Text.RegularExpressions.Regex CommandLineNodeModeRegex { get; } = new(
+            CommandLineNodeModePattern, 
             System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Compiled);
 #endif
     }

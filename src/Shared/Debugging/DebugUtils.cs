@@ -55,7 +55,7 @@ namespace Microsoft.Build.Shared.Debugging
         }
 
         private static readonly Lazy<NodeMode?> ProcessNodeMode = new(
-        () => NodeModeHelper.ExtractFromCommandLine(Environment.CommandLine));
+            () => NodeModeHelper.ExtractFromCommandLine(Environment.CommandLine));
 
         private static bool CurrentProcessMatchesDebugName()
         {
