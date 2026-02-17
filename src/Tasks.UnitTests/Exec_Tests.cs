@@ -1140,6 +1140,9 @@ echo line 3"" />
                     // This is the key difference from before - if the task incorrectly used process CWD,
                     // it would list decoyfile.txt instead of projectfile.txt
                     Directory.SetCurrentDirectory(differentCwd.Path);
+                    // Re-read CWD after setting it — on macOS /var is a symlink to /private/var,
+                    // so GetCurrentDirectory() returns the resolved path.
+                    string resolvedCwd = Directory.GetCurrentDirectory();
 
                     // Create task with MultiThreadedTaskEnvironmentDriver pointing to projectDir
                     taskEnvironment = TaskEnvironmentHelper.CreateMultithreadedForTest(projectDir.Path);
@@ -1159,7 +1162,7 @@ echo line 3"" />
                     ((MockEngine)exec.BuildEngine).AssertLogDoesntContain("decoyfile.txt");
 
                     // Verify process CWD was NOT changed
-                    Directory.GetCurrentDirectory().ShouldBe(differentCwd.Path);
+                    Directory.GetCurrentDirectory().ShouldBe(resolvedCwd);
                 }
                 finally
                 {
@@ -1232,6 +1235,9 @@ echo line 3"" />
                     // Set process CWD to a DIFFERENT directory than the project directory
                     // This simulates multithreaded mode where the global CWD is not the project's directory
                     Directory.SetCurrentDirectory(differentCwd.Path);
+                    // Re-read CWD after setting it — on macOS /var is a symlink to /private/var,
+                    // so GetCurrentDirectory() returns the resolved path.
+                    string resolvedCwd = Directory.GetCurrentDirectory();
 
                     // Create task with MultiThreadedTaskEnvironmentDriver which virtualizes the project directory
                     // This is the key difference - the driver's ProjectDirectory is set to projectDir.Path,
@@ -1250,7 +1256,7 @@ echo line 3"" />
                     ((MockEngine)exec.BuildEngine).AssertLogContains("multithreaded.txt");
 
                     // Verify process CWD was NOT changed (multithreaded mode should not modify global state)
-                    Directory.GetCurrentDirectory().ShouldBe(differentCwd.Path);
+                    Directory.GetCurrentDirectory().ShouldBe(resolvedCwd);
                 }
                 finally
                 {
