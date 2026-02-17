@@ -1256,8 +1256,113 @@ namespace Microsoft.Build.UnitTests
 
             asmBldr.Save(Path.GetFileName(outputFile), PortableExecutableKinds.ILOnly, ImageFileMachine.I386);
         }
-
 #endif
+
+        /// <summary>
+        /// Test that XmlInputPaths with null ItemSpec fails appropriately.
+        /// The null ItemSpec should be the second item to verify first item processing succeeded.
+        /// </summary>
+        [Fact]
+        public void XmlInputPathsWithNullItemSpec()
+        {
+            string dir = Path.Combine(Path.GetTempPath(), DateTime.Now.Ticks.ToString());
+            Directory.CreateDirectory(dir);
+            MockEngine engine = new MockEngine();
+
+            try
+            {
+                // Create first and third valid XML files
+                string xmlPath1 = Path.Combine(dir, "doc1.xml");
+                using (StreamWriter sw = new StreamWriter(xmlPath1, false))
+                {
+                    sw.Write(_xmlDocument);
+                    sw.Close();
+                }
+
+                string xmlPath3 = Path.Combine(dir, "doc3.xml");
+                using (StreamWriter sw = new StreamWriter(xmlPath3, false))
+                {
+                    sw.Write(_xmlDocument2);
+                    sw.Close();
+                }
+
+                // Create XSL file
+                string xslPath = Path.Combine(dir, "doc.xslt");
+                using (StreamWriter sw = new StreamWriter(xslPath, false))
+                {
+                    sw.Write(_xslDocument);
+                    sw.Close();
+                }
+
+                // Set up output paths
+                string outputPath1 = Path.Combine(dir, "testout1.xml");
+                string outputPath2 = Path.Combine(dir, "testout2.xml");
+                string outputPath3 = Path.Combine(dir, "testout3.xml");
+
+                // Test with array that includes null ItemSpec as second item
+                ITaskItem[] xmlPathsWithNull = new ITaskItem[3];
+                xmlPathsWithNull[0] = new TaskItem(xmlPath1); // First item valid
+                xmlPathsWithNull[1] = new TestTaskItemWithNullSpec(); // Second item has null ItemSpec
+                xmlPathsWithNull[2] = new TaskItem(xmlPath3); // Third item valid but should not be processed
+
+                TaskItem[] outputPaths = new TaskItem[3];
+                outputPaths[0] = new TaskItem(outputPath1);
+                outputPaths[1] = new TaskItem(outputPath2);
+                outputPaths[2] = new TaskItem(outputPath3);
+
+                // Test that transformation fails when processing second item with null ItemSpec
+                XslTransformation t2 = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                t2.BuildEngine = engine;
+                t2.XmlInputPaths = xmlPathsWithNull;
+                t2.XslInputPath = new TaskItem(xslPath);
+                t2.OutputPaths = outputPaths;
+
+                t2.Execute().ShouldBeFalse(); // Should fail due to null ItemSpec on second item
+                engine.Log.ShouldContain("MSB3703"); // Should contain transformation error code
+
+                // Verify that first item was processed successfully before failure
+                File.Exists(outputPath1).ShouldBeTrue("First output file should exist - first item should be processed successfully");
+                
+                // Verify that third items was not processed due to failure on second item
+                File.Exists(outputPath3).ShouldBeFalse("Third output file should not exist - processing should stop at second item failure");
+            }
+            finally
+            {
+                try
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(dir, true);
+                }
+                catch { }
+            }
+        }
+
+        /// <summary>
+        /// Test implementation of ITaskItem that allows null ItemSpec
+        /// </summary>
+        private class TestTaskItemWithNullSpec : ITaskItem
+        {
+            public string ItemSpec { get; set; } = null;
+
+            public System.Collections.IDictionary CloneCustomMetadata() =>
+                throw new NotImplementedException();
+
+            public void CopyMetadataTo(ITaskItem destinationItem) =>
+                throw new NotImplementedException();
+
+            public string GetMetadata(string metadataName) =>
+                throw new NotImplementedException();
+
+            public void RemoveMetadata(string metadataName) =>
+                throw new NotImplementedException();
+
+            public void SetMetadata(string metadataName, string metadataValue) =>
+                throw new NotImplementedException();
+
+            public int MetadataCount => throw new NotImplementedException();
+
+            public System.Collections.ICollection MetadataNames => throw new NotImplementedException();
+        }
+
         #endregion
     }
 }
