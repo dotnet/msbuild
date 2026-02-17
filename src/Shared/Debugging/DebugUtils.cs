@@ -57,32 +57,7 @@ namespace Microsoft.Build.Shared.Debugging
         }
 
         private static readonly Lazy<NodeMode?> ProcessNodeMode = new(
-        () =>
-        {
-            return ScanNodeMode(Environment.CommandLine);
-
-            NodeMode? ScanNodeMode(string input)
-            {
-                var match = Regex.Match(input, @"/nodemode:(?<nodemode>[1-9]\d*)(\s|$)", RegexOptions.IgnoreCase);
-
-                if (!match.Success)
-                {
-                    return null; // Central/main process (not running as a node)
-                }
-                var nodeMode = match.Groups["nodemode"].Value;
-
-                Trace.Assert(!string.IsNullOrEmpty(nodeMode));
-
-                // Try to parse using the shared NodeModeHelper
-                if (NodeModeHelper.TryParse(nodeMode, out NodeMode? parsedMode))
-                {
-                    return parsedMode;
-                }
-
-                // If parsing fails, this is an unknown/unsupported node mode
-                return null;
-            }
-        });
+        () => NodeModeHelper.ExtractFromCommandLine(Environment.CommandLine);
 
         private static bool CurrentProcessMatchesDebugName()
         {

@@ -36,7 +36,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Helper methods for the NodeMode enum.
     /// </summary>
-    internal static class NodeModeHelper
+    internal static partial class NodeModeHelper
     {
         /// <summary>
         /// Converts a NodeMode value to a command line argument string.
@@ -115,5 +115,51 @@ namespace Microsoft.Build.Framework
 
             return false;
         }
+
+        /// <summary>
+        /// Extracts the NodeMode from a command line string using regex pattern matching.
+        /// </summary>
+        /// <param name="commandLine">The command line to parse. Note that this can't be a span because generated regex don't have a Span Match overload</param>
+        /// <returns>The NodeMode if found, otherwise null</returns>
+        public static NodeMode? ExtractFromCommandLine(string commandLine)
+        {
+            if (string.IsNullOrWhiteSpace(commandLine))
+            {
+                return null;
+            }
+#if NET
+            // Use compiled regex for better performance on .NET
+            var match = CommandLineNodeModeRegex().Match(commandLine);
+#else
+            var match = CommandLineNodeModeRegexInstance.Match(commandLine);
+#endif
+
+            if (!match.Success)
+            {
+                return null;
+            }
+
+            string nodeModeValue = match.Groups["nodemode"].Value;
+
+#if NET
+            if (TryParse(nodeModeValue.AsSpan(), out NodeMode? nodeMode))
+#else
+            if (TryParse(nodeModeValue, out NodeMode? nodeMode))
+#endif
+            {
+                return nodeMode;
+            }
+
+            return null;
+        }
+
+#if NET
+        [System.Text.RegularExpressions.GeneratedRegex(@"/nodemode:(?<nodemode>[a-zA-Z0-9]+)(?:\s|$)", System.Text.RegularExpressions.RegexOptions.IgnoreCase)]
+        private static partial System.Text.RegularExpressions.Regex CommandLineNodeModeRegex();
+#else
+        private static readonly System.Text.RegularExpressions.Regex CommandLineNodeModeRegexInstance = new(
+            @"/nodemode:(?<nodemode>[a-zA-Z0-9]+)(?:\s|$)", 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Compiled);
+#endif
     }
 }

@@ -55,20 +55,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private const int TimeoutForWaitForExit = 30000;
 
-        /// <summary>
-        /// Regex pattern for extracting /nodemode parameter from command lines.
-        /// Uses the same pattern as DebugUtils.ScanNodeMode for consistency.
-        /// Non-capturing group for whitespace/end-of-string to avoid unnecessary captures.
-        /// </summary>
-#if NET
-        [GeneratedRegex(@"/nodemode:(?<nodemode>[1-9]\d*)(?:\s|$)", RegexOptions.IgnoreCase)]
-        private static partial Regex NodeModeRegex();
-#else
-        private static Regex NodeModeRegex() => NodeModeRegexInstance;
-        private static readonly Regex NodeModeRegexInstance = new(
-            @"/nodemode:(?<nodemode>[1-9]\d*)(?:\s|$)", 
-            RegexOptions.IgnoreCase | RegexOptions.Compiled);
-#endif
+
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         private static readonly WindowsIdentity s_currentWindowsIdentity = WindowsIdentity.GetCurrent();
@@ -422,27 +409,7 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The NodeMode if found, otherwise null</returns>
         private static NodeMode? ExtractNodeModeFromCommandLine(string commandLine)
         {
-            if (string.IsNullOrWhiteSpace(commandLine))
-            {
-                return null;
-            }
-
-            // Use regex to extract nodemode parameter
-            var match = NodeModeRegex().Match(commandLine);
-
-            if (!match.Success)
-            {
-                return null;
-            }
-
-            string nodeModeValue = match.Groups["nodemode"].Value;
-            
-            if (NodeModeHelper.TryParse(nodeModeValue, out NodeMode? nodeMode))
-            {
-                return nodeMode;
-            }
-
-            return null;
+            return NodeModeHelper.ExtractFromCommandLine(commandLine);
         }
 
         /// <summary>
