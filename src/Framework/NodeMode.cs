@@ -53,12 +53,45 @@ namespace Microsoft.Build.Framework
         /// <returns>True if parsing succeeded, false otherwise</returns>
         public static bool TryParse(string value, [NotNullWhen(true)] out NodeMode? nodeMode)
         {
+#if NET
+            return TryParseCore(value.AsSpan(), out nodeMode);
+#else
+            return TryParseCore(value, out nodeMode);
+#endif
+        }
+
+#if NET
+        /// <summary>
+        /// Tries to parse a node mode value from a span, supporting both integer values and enum names (case-insensitive).
+        /// </summary>
+        /// <param name="value">The value to parse (can be an integer or enum name)</param>
+        /// <param name="nodeMode">The parsed NodeMode value if successful</param>
+        /// <returns>True if parsing succeeded, false otherwise</returns>
+        public static bool TryParse(ReadOnlySpan<char> value, [NotNullWhen(true)] out NodeMode? nodeMode)
+        {
+            return TryParseCore(value, out nodeMode);
+        }
+#endif
+
+#if NET
+        private static bool TryParseCore(ReadOnlySpan<char> value, [NotNullWhen(true)] out NodeMode? nodeMode)
+#else
+        private static bool TryParseCore(string value, [NotNullWhen(true)] out NodeMode? nodeMode)
+#endif
+        {
             nodeMode = null;
 
+#if NET
+            if (value.IsEmpty || value.IsWhiteSpace())
+            {
+                return false;
+            }
+#else
             if (string.IsNullOrWhiteSpace(value))
             {
                 return false;
             }
+#endif
 
             // First try to parse as an integer for backward compatibility
             if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int intValue))
@@ -69,7 +102,7 @@ namespace Microsoft.Build.Framework
                     nodeMode = (NodeMode)intValue;
                     return true;
                 }
-                
+
                 return false;
             }
 
