@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -57,7 +55,7 @@ namespace Microsoft.Build.Shared.Debugging
         }
 
         private static readonly Lazy<NodeMode?> ProcessNodeMode = new(
-        () => NodeModeHelper.ExtractFromCommandLine(Environment.CommandLine);
+        () => NodeModeHelper.ExtractFromCommandLine(Environment.CommandLine));
 
         private static bool CurrentProcessMatchesDebugName()
         {

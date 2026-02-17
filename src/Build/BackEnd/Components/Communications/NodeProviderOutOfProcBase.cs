@@ -10,7 +10,6 @@ using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
@@ -221,7 +220,7 @@ namespace Microsoft.Build.BackEnd
             bool nodeReuseRequested = Handshake.IsHandshakeOptionEnabled(hostHandshake.HandshakeOptions, HandshakeOptions.NodeReuse);
             
             // Extract the expected NodeMode from the command line arguments
-            NodeMode? expectedNodeMode = ExtractNodeModeFromCommandLine(commandLineArgs);
+            NodeMode? expectedNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLineArgs);
             
             // Get all process of possible running node processes for reuse and put them into ConcurrentQueue.
             // Processes from this queue will be concurrently consumed by TryReusePossibleRunningNodes while
@@ -433,7 +432,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // If we have an expected NodeMode, filter by command line parsing
-            if (expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4))
+            if (expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
             {
                 List<Process> filteredProcesses = [];
                 bool isDotnetProcess = expectedProcessName.Equals(Path.GetFileNameWithoutExtension(Constants.DotnetProcessName), StringComparison.OrdinalIgnoreCase);
@@ -456,7 +455,7 @@ namespace Microsoft.Build.BackEnd
                         }
 
                         // Extract NodeMode from command line
-                        NodeMode? processNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLine)
+                        NodeMode? processNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLine);
                         
                         // Only include processes that match the expected NodeMode
                         if (processNodeMode.HasValue && processNodeMode.Value == expectedNodeMode.Value)
