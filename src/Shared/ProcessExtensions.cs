@@ -50,21 +50,9 @@ namespace Microsoft.Build.Shared
         /// <returns>The command line string, or null if it cannot be retrieved.</returns>
         public static string? GetCommandLine(this Process? process)
         {
-            if (process is null)
+            // Check if process is null or has exited
+            if (process?.HasExited != false)
             {
-                return null;
-            }
-
-            try
-            {
-                if (process.HasExited)
-                {
-                    return null;
-                }
-            }
-            catch
-            {
-                // Process might have exited between null check and HasExited check.
                 return null;
             }
 
@@ -315,11 +303,6 @@ namespace Microsoft.Build.Shared
                 try
                 {
                     string cmdlinePath = $"/proc/{processId}/cmdline";
-                    if (!File.Exists(cmdlinePath))
-                    {
-                        return null;
-                    }
-
                     byte[] cmdlineBytes = File.ReadAllBytes(cmdlinePath);
                     if (cmdlineBytes.Length == 0)
                     {

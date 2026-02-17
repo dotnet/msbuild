@@ -4,6 +4,7 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Build.Shared;
+using Microsoft.DotNet.XUnitExtensions;
 using Shouldly;
 using Xunit;
 
@@ -51,81 +52,24 @@ namespace Microsoft.Build.UnitTests
 
                 string commandLine = p.GetCommandLine();
 
-                // The current implementation uses native Windows APIs on .NET Core+ and /proc or sysctl on Unix,
-                // so command line retrieval should generally work on all supported platforms.
-                // However, to remain robust in constrained environments, we only verify it does not throw
-                // and that any non-null result is non-empty.
-                if (commandLine != null)
+                // Command line retrieval should work on all platforms
+                commandLine.ShouldNotBeNull();
+                commandLine.ShouldNotBeEmpty();
+                
+                // Verify we get the expected process name
+                if (NativeMethodsShared.IsWindows)
                 {
-                    commandLine.ShouldNotBeEmpty();
-                    
-                    // On Unix, we should be able to get the command line
-                    if (!NativeMethodsShared.IsWindows)
-                    {
-                        commandLine.ShouldContain("sleep");
-                    }
+                    commandLine.ShouldContain("cmd");
+                }
+                else
+                {
+                    commandLine.ShouldContain("sleep");
+                    commandLine.ShouldContain("10");
                 }
             }
             finally
             {
                 // Clean up
-                if (!p.HasExited)
-                {
-                    p.KillTree(5000);
-                }
-            }
-        }
-
-        [UnixOnlyFact]
-        public async Task GetCommandLine_WorksOnUnix()
-        {
-            // On Unix (Linux and macOS), we should be able to read command lines
-            var psi = new ProcessStartInfo("sleep", "10")
-            {
-                UseShellExecute = false
-            };
-
-            using Process p = Process.Start(psi);
-            try
-            {
-                await Task.Delay(500);
-
-                string commandLine = p.GetCommandLine();
-                commandLine.ShouldNotBeNull();
-                commandLine.ShouldNotBeEmpty();
-                commandLine.ShouldContain("sleep");
-            }
-            finally
-            {
-                if (!p.HasExited)
-                {
-                    p.KillTree(5000);
-                }
-            }
-        }
-
-        [OSXOnlyFact]
-        public async Task GetCommandLine_WorksOnMacOS()
-        {
-            // On macOS, verify that sysctl-based command line retrieval works
-            var psi = new ProcessStartInfo("sleep", "15")
-            {
-                UseShellExecute = false
-            };
-
-            using Process p = Process.Start(psi);
-            try
-            {
-                await Task.Delay(500);
-
-                string commandLine = p.GetCommandLine();
-                commandLine.ShouldNotBeNull();
-                commandLine.ShouldNotBeEmpty();
-                commandLine.ShouldContain("sleep");
-                commandLine.ShouldContain("15");
-            }
-            finally
-            {
                 if (!p.HasExited)
                 {
                     p.KillTree(5000);

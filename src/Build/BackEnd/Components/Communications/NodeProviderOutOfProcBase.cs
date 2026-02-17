@@ -10,6 +10,7 @@ using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
@@ -32,7 +33,7 @@ namespace Microsoft.Build.BackEnd
     /// Contains the shared pieces of code from NodeProviderOutOfProc
     /// and NodeProviderOutOfProcTaskHost.
     /// </summary>
-    internal abstract class NodeProviderOutOfProcBase
+    internal abstract partial class NodeProviderOutOfProcBase
     {
         /// <summary>
         /// The maximum number of bytes to write
@@ -57,10 +58,17 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Regex pattern for extracting /nodemode parameter from command lines.
         /// Uses the same pattern as DebugUtils.ScanNodeMode for consistency.
+        /// Non-capturing group for whitespace/end-of-string to avoid unnecessary captures.
         /// </summary>
-        private static readonly System.Text.RegularExpressions.Regex NodeModeRegex = new(
-            @"/nodemode:(?<nodemode>[1-9]\d*)(\s|$)", 
-            System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Compiled);
+#if NET
+        [GeneratedRegex(@"/nodemode:(?<nodemode>[1-9]\d*)(?:\s|$)", RegexOptions.IgnoreCase)]
+        private static partial Regex NodeModeRegex();
+#else
+        private static Regex NodeModeRegex() => NodeModeRegexInstance;
+        private static readonly Regex NodeModeRegexInstance = new(
+            @"/nodemode:(?<nodemode>[1-9]\d*)(?:\s|$)", 
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
+#endif
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         private static readonly WindowsIdentity s_currentWindowsIdentity = WindowsIdentity.GetCurrent();
@@ -419,8 +427,8 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
-            // Use static compiled regex for better performance
-            var match = NodeModeRegex.Match(commandLine);
+            // Use regex to extract nodemode parameter
+            var match = NodeModeRegex().Match(commandLine);
 
             if (!match.Success)
             {
@@ -470,10 +478,10 @@ namespace Microsoft.Build.BackEnd
             }
 
             // If we have an expected NodeMode, filter by command line parsing
-            if (expectedNodeMode.HasValue)
+            if (expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_4))
             {
                 List<Process> filteredProcesses = [];
-                bool isDotnetProcess = expectedProcessName.Equals("dotnet", StringComparison.OrdinalIgnoreCase);
+                bool isDotnetProcess = expectedProcessName.Equals(Path.GetFileNameWithoutExtension(Constants.DotnetProcessName), StringComparison.OrdinalIgnoreCase);
                 
                 foreach (var process in processes)
                 {
@@ -501,9 +509,10 @@ namespace Microsoft.Build.BackEnd
                             filteredProcesses.Add(process);
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        // If we encounter any error processing this process, skip it
+                        // If we encounter any error processing this process, skip it but log
+                        CommunicationsUtilities.Trace("Failed to get command line for process {0}: {1}", process.Id, ex.Message);
                         continue;
                     }
                 }
