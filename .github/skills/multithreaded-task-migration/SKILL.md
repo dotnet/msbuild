@@ -11,7 +11,7 @@ MSBuild's multithreaded execution model requires tasks to avoid global process s
 
 ### Step 1: Update Task Class Declaration
 
-a. Add the attribute.
+a. Ensure the task implementing class is decorated with the `MSBuildMultiThreadableTask` attribute.
 b. Implement `IMultiThreadableTask` **only if** the task needs `TaskEnvironment` APIs (path absolutization, env vars, process start). If the task has no file/environment operations (e.g., a stub class), the attribute alone is sufficient.
 
 ```csharp
