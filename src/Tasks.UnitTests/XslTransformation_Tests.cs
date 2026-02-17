@@ -1339,7 +1339,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test implementation of ITaskItem that allows null ItemSpec
         /// </summary>
-        private class TestTaskItemWithNullSpec : ITaskItem
+        private sealed class TestTaskItemWithNullSpec : ITaskItem
         {
             public string ItemSpec { get; set; } = null;
 
