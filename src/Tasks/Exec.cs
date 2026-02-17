@@ -586,8 +586,20 @@ namespace Microsoft.Build.Tasks
                 startInfo.Environment[kvp.Key] = kvp.Value;
             }
 
-            // Re-apply EnvironmentVariables property overrides — they should take precedence over TaskEnvironment.
-            // The base class already applied these, but we cleared the environment above.
+            // Re-apply obsolete EnvironmentOverride and EnvironmentVariables property overrides —
+            // they should take precedence over TaskEnvironment. The base class already applied these,
+            // but we cleared the environment above, so we need to re-apply them.
+#pragma warning disable 0618 // obsolete
+            Dictionary<string, string> envOverrides = EnvironmentOverride;
+            if (envOverrides != null)
+            {
+                foreach (KeyValuePair<string, string> entry in envOverrides)
+                {
+                    startInfo.Environment[entry.Key] = entry.Value;
+                }
+            }
+#pragma warning restore 0618
+
             if (EnvironmentVariables != null)
             {
                 foreach (string entry in EnvironmentVariables)
