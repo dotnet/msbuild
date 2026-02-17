@@ -55,8 +55,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private const int TimeoutForWaitForExit = 30000;
 
-
-
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         private static readonly WindowsIdentity s_currentWindowsIdentity = WindowsIdentity.GetCurrent();
 #endif
@@ -403,16 +401,6 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Extracts the NodeMode from a command line string using regex pattern matching.
-        /// </summary>
-        /// <param name="commandLine">The command line to parse</param>
-        /// <returns>The NodeMode if found, otherwise null</returns>
-        private static NodeMode? ExtractNodeModeFromCommandLine(string commandLine)
-        {
-            return NodeModeHelper.ExtractFromCommandLine(commandLine);
-        }
-
-        /// <summary>
         /// Finds processes that could be reusable MSBuild nodes.
         /// Discovers both msbuild.exe processes and dotnet processes hosting MSBuild.dll.
         /// Filters candidates by NodeMode when available.
@@ -468,7 +456,7 @@ namespace Microsoft.Build.BackEnd
                         }
 
                         // Extract NodeMode from command line
-                        NodeMode? processNodeMode = ExtractNodeModeFromCommandLine(commandLine);
+                        NodeMode? processNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLine)
                         
                         // Only include processes that match the expected NodeMode
                         if (processNodeMode.HasValue && processNodeMode.Value == expectedNodeMode.Value)
