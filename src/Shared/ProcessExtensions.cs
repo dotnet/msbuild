@@ -351,8 +351,11 @@ namespace Microsoft.Build.Shared
 
                     // The buffer format is:
                     // - int argc (number of arguments, including the executable path as argv[0])
-                    // - argv[0] (executable path, null-terminated)
-                    // - argv[1] .. argv[argc-1] (arguments, each a null-terminated string)
+                    // - executable path (null-terminated, full path like /bin/sleep)
+                    // - padding null bytes
+                    // - argv[0] (executable name, e.g., "sleep")
+                    // - argv[1] .. argv[argc-1] (arguments, each null-terminated)
+                    // - environment variables (null-terminated strings, not needed)
                     
                     // Read argc
                     int argc = Marshal.ReadInt32(buffer);
@@ -365,23 +368,35 @@ namespace Microsoft.Build.Shared
                     byte[] data = new byte[size];
                     Marshal.Copy(buffer, data, 0, (int)size);
 
-                    // Skip the argc (4 bytes) and parse null-terminated strings
-                    StringBuilder sb = new();
+                    // Skip the argc (4 bytes) and find the executable path
                     int offset = sizeof(int);
                     
-                    // Parse all arguments (executable + arguments)
+                    // Skip past the executable path (ends at first null)
+                    while (offset < data.Length && data[offset] != 0)
+                    {
+                        offset++;
+                    }
+                    
+                    // Skip all padding null bytes to reach the actual arguments
+                    while (offset < data.Length && data[offset] == 0)
+                    {
+                        offset++;
+                    }
+                    
+                    // Now parse argc null-terminated argument strings
+                    StringBuilder sb = new();
                     for (int argIndex = 0; argIndex < argc && offset < data.Length; argIndex++)
                     {
                         // Find the next null terminator
-                        int nullIndex = offset;
-                        while (nullIndex < data.Length && data[nullIndex] != 0)
+                        int start = offset;
+                        while (offset < data.Length && data[offset] != 0)
                         {
-                            nullIndex++;
+                            offset++;
                         }
 
-                        if (nullIndex > offset)
+                        if (offset > start)
                         {
-                            string arg = System.Text.Encoding.UTF8.GetString(data, offset, nullIndex - offset);
+                            string arg = System.Text.Encoding.UTF8.GetString(data, start, offset - start);
                             if (sb.Length > 0)
                             {
                                 sb.Append(' ');
@@ -390,7 +405,7 @@ namespace Microsoft.Build.Shared
                         }
 
                         // Move past the null terminator
-                        offset = nullIndex + 1;
+                        offset++;
                     }
 
                     return sb.ToString();
