@@ -3,74 +3,18 @@
 
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
+
+#if NET
+using System.IO;
+#endif
 
 namespace Microsoft.Build.Shared
 {
-    internal static class ProcessExtensions
+    internal static partial class ProcessExtensions
     {
-        // P/Invoke declarations for getting process command line on Windows
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool CloseHandle(IntPtr hObject);
-
-        [DllImport("ntdll.dll")]
-        private static extern int NtQueryInformationProcess(
-            IntPtr processHandle,
-            int processInformationClass,
-            ref PROCESS_BASIC_INFORMATION processInformation,
-            int processInformationLength,
-            out int returnLength);
-
-        [DllImport("kernel32.dll", SetLastError = true)]
-        private static extern bool ReadProcessMemory(
-            IntPtr hProcess,
-            IntPtr lpBaseAddress,
-            [Out] byte[] lpBuffer,
-            int dwSize,
-            out int lpNumberOfBytesRead);
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct PROCESS_BASIC_INFORMATION
-        {
-            public IntPtr Reserved1;
-            public IntPtr PebBaseAddress;
-            public IntPtr Reserved2_0;
-            public IntPtr Reserved2_1;
-            public IntPtr UniqueProcessId;
-            public IntPtr InheritedFromUniqueProcessId;
-        }
-
-        [StructLayout(LayoutKind.Sequential)]
-        private struct UNICODE_STRING
-        {
-            public ushort Length;
-            public ushort MaximumLength;
-            public IntPtr Buffer;
-        }
-
-        private const int PROCESS_QUERY_INFORMATION = 0x0400;
-        private const int PROCESS_VM_READ = 0x0010;
-
-#if NET
-        // P/Invoke declarations for getting process command line on macOS
-        [DllImport("libc", SetLastError = true)]
-        private static extern int sysctl(
-            [In] int[] name,
-            uint namelen,
-            IntPtr oldp,
-            ref ulong oldlenp,
-            IntPtr newp,
-            ulong newlen);
-
-        private const int CTL_KERN = 1;
-        private const int KERN_PROCARGS2 = 49;
-#endif
-
         public static void KillTree(this Process process, int timeoutMilliseconds)
         {
 #if NET
@@ -80,10 +24,9 @@ namespace Microsoft.Build.Shared
             {
                 try
                 {
-                    // issue the kill command
                     NativeMethodsShared.KillTree(process.Id);
                 }
-                catch (System.InvalidOperationException)
+                catch (InvalidOperationException)
                 {
                     // The process already exited, which is fine,
                     // just continue.
@@ -91,11 +34,11 @@ namespace Microsoft.Build.Shared
             }
             else
             {
-                throw new System.NotSupportedException();
+                throw new NotSupportedException();
             }
 #endif
-            // wait until the process finishes exiting/getting killed.
-            // We don't want to wait forever here because the task is already supposed to be dieing, we just want to give it long enough
+            // Wait until the process finishes exiting/getting killed.
+            // We don't want to wait forever here because the task is already supposed to be dying, we just want to give it long enough
             // to try and flush what it can and stop. If it cannot do that in a reasonable time frame then we will just ignore it.
             process.WaitForExit(timeoutMilliseconds);
         }
@@ -103,8 +46,8 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Retrieves the full command line for a process in a cross-platform manner.
         /// </summary>
-        /// <param name="process">The process to get the command line for</param>
-        /// <returns>The command line string, or null if it cannot be retrieved</returns>
+        /// <param name="process">The process to get the command line for.</param>
+        /// <returns>The command line string, or null if it cannot be retrieved.</returns>
         public static string? GetCommandLine(this Process? process)
         {
             if (process is null)
@@ -114,7 +57,6 @@ namespace Microsoft.Build.Shared
 
             try
             {
-                // Check if the process has exited
                 if (process.HasExited)
                 {
                     return null;
@@ -122,194 +64,20 @@ namespace Microsoft.Build.Shared
             }
             catch
             {
-                // Process might have exited between null check and HasExited check
+                // Process might have exited between null check and HasExited check.
                 return null;
             }
 
             try
             {
-                return NativeMethodsShared.IsWindows ? GetCommandLineWindows(process) :
 #if NET
-                       NativeMethodsShared.IsOSX ? GetCommandLineMacOS(process.Id) :
+                return NativeMethodsShared.IsWindows ? Windows.GetCommandLine(process.Id) :
+                       NativeMethodsShared.IsOSX ? MacOS.GetCommandLine(process.Id) :
+                       NativeMethodsShared.IsLinux ? Linux.GetCommandLine(process.Id) : 
+                       throw new NotSupportedException();
+#else
+                return Windows.GetCommandLine(process.Id);
 #endif
-                       GetCommandLineLinux(process.Id);
-            }
-            catch
-            {
-                // If we can't retrieve the command line, return null
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Retrieves the command line on Windows using native Windows APIs.
-        /// Reads the command line from the Process Environment Block (PEB).
-        /// </summary>
-        private static string? GetCommandLineWindows(Process process)
-        {
-            try
-            {
-                return GetCommandLineWindowsNative(process.Id);
-            }
-            catch
-            {
-                // Native API calls failed
-                return null;
-            }
-        }
-
-        /// <summary>
-        /// Retrieves the command line for a Windows process using native APIs.
-        /// This reads the command line from the Process Environment Block (PEB).
-        /// </summary>
-        private static string? GetCommandLineWindowsNative(int processId)
-        {
-            IntPtr hProcess = IntPtr.Zero;
-            try
-            {
-                // Open the process with query and read permissions
-                hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, processId);
-                if (hProcess == IntPtr.Zero)
-                {
-                    return null;
-                }
-
-                // Get process basic information to locate PEB
-                PROCESS_BASIC_INFORMATION pbi = new PROCESS_BASIC_INFORMATION();
-                int returnLength;
-                int status = NtQueryInformationProcess(hProcess, 0, ref pbi, Marshal.SizeOf(pbi), out returnLength);
-                if (status != 0 || pbi.PebBaseAddress == IntPtr.Zero)
-                {
-                    return null;
-                }
-
-                // Read the PEB to get the ProcessParameters pointer
-                // In 64-bit: PEB + 0x20 = ProcessParameters
-                // In 32-bit: PEB + 0x10 = ProcessParameters
-                int processParametersOffset = IntPtr.Size == 8 ? 0x20 : 0x10;
-                IntPtr processParametersPtr = IntPtr.Zero;
-                
-                byte[] ptrBuffer = new byte[IntPtr.Size];
-                if (!ReadProcessMemory(hProcess, IntPtr.Add(pbi.PebBaseAddress, processParametersOffset), ptrBuffer, ptrBuffer.Length, out _))
-                {
-                    return null;
-                }
-                processParametersPtr = IntPtr.Size == 8 
-                    ? new IntPtr(BitConverter.ToInt64(ptrBuffer, 0))
-                    : new IntPtr(BitConverter.ToInt32(ptrBuffer, 0));
-
-                if (processParametersPtr == IntPtr.Zero)
-                {
-                    return null;
-                }
-
-                // Read the CommandLine UNICODE_STRING from ProcessParameters
-                // CommandLine is at offset 0x70 in 64-bit and 0x40 in 32-bit
-                int commandLineOffset = IntPtr.Size == 8 ? 0x70 : 0x40;
-                byte[] unicodeStringBuffer = new byte[Marshal.SizeOf(typeof(UNICODE_STRING))];
-                if (!ReadProcessMemory(hProcess, IntPtr.Add(processParametersPtr, commandLineOffset), unicodeStringBuffer, unicodeStringBuffer.Length, out _))
-                {
-                    return null;
-                }
-
-                // Parse UNICODE_STRING structure
-                // Layout: ushort Length (2 bytes), ushort MaximumLength (2 bytes), [4 bytes padding on 64-bit], IntPtr Buffer
-                UNICODE_STRING commandLineUnicode = new UNICODE_STRING
-                {
-                    Length = BitConverter.ToUInt16(unicodeStringBuffer, 0),
-                    MaximumLength = BitConverter.ToUInt16(unicodeStringBuffer, 2),
-                    Buffer = IntPtr.Size == 8
-                        ? new IntPtr(BitConverter.ToInt64(unicodeStringBuffer, 8))  // 4 bytes for ushorts + 4 bytes padding
-                        : new IntPtr(BitConverter.ToInt32(unicodeStringBuffer, 4))  // 4 bytes for ushorts, no padding
-                };
-
-                if (commandLineUnicode.Buffer == IntPtr.Zero || commandLineUnicode.Length == 0)
-                {
-                    return null;
-                }
-
-                // Read the actual command line string
-                byte[] commandLineBuffer = new byte[commandLineUnicode.Length];
-                if (!ReadProcessMemory(hProcess, commandLineUnicode.Buffer, commandLineBuffer, commandLineBuffer.Length, out _))
-                {
-                    return null;
-                }
-
-                return Encoding.Unicode.GetString(commandLineBuffer);
-            }
-            catch
-            {
-                return null;
-            }
-            finally
-            {
-                if (hProcess != IntPtr.Zero)
-                {
-                    CloseHandle(hProcess);
-                }
-            }
-        }
-
-
-        /// <summary>
-        /// Retrieves the command line on Linux by reading /proc/{pid}/cmdline.
-        /// </summary>
-        private static string? GetCommandLineLinux(int processId)
-        {
-            try
-            {
-                string cmdlinePath = $"/proc/{processId}/cmdline";
-                if (!File.Exists(cmdlinePath))
-                {
-                    return null;
-                }
-
-                // Read the cmdline file. Arguments are separated by null characters.
-                // The file is typically encoded in the system's default encoding (usually UTF-8 on modern Linux).
-                byte[] cmdlineBytes = File.ReadAllBytes(cmdlinePath);
-                if (cmdlineBytes.Length == 0)
-                {
-                    return null;
-                }
-
-                // Convert bytes to string, replacing null terminators with spaces.
-                // We need to handle null bytes specially since they're argument separators in /proc/pid/cmdline.
-                StringBuilder sb = new(cmdlineBytes.Length);
-                
-                int start = 0;
-                for (int i = 0; i < cmdlineBytes.Length; i++)
-                {
-                    if (cmdlineBytes[i] == 0)
-                    {
-                        if (i > start)
-                        {
-                            // Decode the argument using UTF-8 encoding
-                            string currentArg = System.Text.Encoding.UTF8.GetString(cmdlineBytes, start, i - start);
-                            if (sb.Length > 0)
-                            {
-                                sb.Append(' ');
-                            }
-                            sb.Append(currentArg);
-                        }
-                        start = i + 1;
-                    }
-                }
-                
-                // Handle any remaining bytes after the last null terminator
-                if (start < cmdlineBytes.Length)
-                {
-                    string remainingArg = System.Text.Encoding.UTF8.GetString(cmdlineBytes, start, cmdlineBytes.Length - start);
-                    if (remainingArg.Length > 0)
-                    {
-                        if (sb.Length > 0)
-                        {
-                            sb.Append(' ');
-                        }
-                        sb.Append(remainingArg);
-                    }
-                }
-
-                return sb.ToString();
             }
             catch
             {
@@ -319,105 +87,347 @@ namespace Microsoft.Build.Shared
 
 #if NET
         /// <summary>
-        /// Retrieves the command line on macOS using sysctl with KERN_PROCARGS2.
+        /// Parses a null-separated byte buffer into a space-joined argument string using span-based slicing.
+        /// Used by both Linux (/proc/pid/cmdline) and macOS (sysctl KERN_PROCARGS2) parsing.
         /// </summary>
-        private static string? GetCommandLineMacOS(int processId)
+        private static string ParseNullSeparatedArguments(ReadOnlySpan<byte> data, int maxArgs = int.MaxValue)
         {
-            try
+            StringBuilder sb = new(data.Length);
+            int argsFound = 0;
+
+            while (!data.IsEmpty && argsFound < maxArgs)
             {
-                // Use sysctl with CTL_KERN, KERN_PROCARGS2 to get process arguments
-                int[] mib = [CTL_KERN, KERN_PROCARGS2, processId];
-                ulong size = 0;
+                int nullIndex = data.IndexOf((byte)0);
+                ReadOnlySpan<byte> segment = nullIndex >= 0 ? data.Slice(0, nullIndex) : data;
 
-                // First call to get the size of the buffer needed
-                if (sysctl(mib, (uint)mib.Length, IntPtr.Zero, ref size, IntPtr.Zero, 0) != 0)
+                if (!segment.IsEmpty)
                 {
-                    return null;
+                    if (sb.Length > 0)
+                    {
+                        sb.Append(' ');
+                    }
+
+                    sb.Append(Encoding.UTF8.GetString(segment));
+                    argsFound++;
                 }
 
-                if (size == 0)
+                if (nullIndex < 0)
                 {
-                    return null;
+                    break;
                 }
 
-                // Allocate buffer and get the actual data
-                IntPtr buffer = Marshal.AllocHGlobal((int)size);
+                data = data.Slice(nullIndex + 1);
+            }
+
+            return sb.ToString();
+        }
+#endif
+
+        /// <summary>
+        /// Windows-specific P/Invoke bindings and command line retrieval via the Process Environment Block (PEB).
+        /// </summary>
+        [SupportedOSPlatform("windows")]
+        private static partial class Windows
+        {
+#if NET
+            [LibraryImport("kernel32.dll", SetLastError = true)]
+            private static partial IntPtr OpenProcess(int dwDesiredAccess, [MarshalAs(UnmanagedType.Bool)] bool bInheritHandle, int dwProcessId);
+
+            [LibraryImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            private static partial bool CloseHandle(IntPtr hObject);
+
+            [LibraryImport("ntdll.dll")]
+            private static partial int NtQueryInformationProcess(
+                IntPtr processHandle,
+                int processInformationClass,
+                ref PROCESS_BASIC_INFORMATION processInformation,
+                int processInformationLength,
+                out int returnLength);
+
+            [LibraryImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            private static partial bool ReadProcessMemory(
+                IntPtr hProcess,
+                IntPtr lpBaseAddress,
+                out IntPtr lpBuffer,
+                int dwSize,
+                out int lpNumberOfBytesRead);
+
+            [LibraryImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            private static partial bool ReadProcessMemory(
+                IntPtr hProcess,
+                IntPtr lpBaseAddress,
+                out UNICODE_STRING lpBuffer,
+                int dwSize,
+                out int lpNumberOfBytesRead);
+
+            [LibraryImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
+            private static partial bool ReadProcessMemory(
+                IntPtr hProcess,
+                IntPtr lpBaseAddress,
+                Span<byte> lpBuffer,
+                int dwSize,
+                out int lpNumberOfBytesRead);
+#else
+            [DllImport("kernel32.dll", SetLastError = true)]
+            private static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            private static extern bool CloseHandle(IntPtr hObject);
+
+            [DllImport("ntdll.dll")]
+            private static extern int NtQueryInformationProcess(
+                IntPtr processHandle,
+                int processInformationClass,
+                ref PROCESS_BASIC_INFORMATION processInformation,
+                int processInformationLength,
+                out int returnLength);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            private static extern bool ReadProcessMemory(
+                IntPtr hProcess,
+                IntPtr lpBaseAddress,
+                out IntPtr lpBuffer,
+                int dwSize,
+                out int lpNumberOfBytesRead);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            private static extern bool ReadProcessMemory(
+                IntPtr hProcess,
+                IntPtr lpBaseAddress,
+                out UNICODE_STRING lpBuffer,
+                int dwSize,
+                out int lpNumberOfBytesRead);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            private static extern bool ReadProcessMemory(
+                IntPtr hProcess,
+                IntPtr lpBaseAddress,
+                [Out] byte[] lpBuffer,
+                int dwSize,
+                out int lpNumberOfBytesRead);
+#endif
+
+            [StructLayout(LayoutKind.Sequential)]
+            private struct PROCESS_BASIC_INFORMATION
+            {
+                public IntPtr Reserved1;
+                public IntPtr PebBaseAddress;
+                public IntPtr Reserved2_0;
+                public IntPtr Reserved2_1;
+                public IntPtr UniqueProcessId;
+                public IntPtr InheritedFromUniqueProcessId;
+            }
+
+            [StructLayout(LayoutKind.Sequential)]
+            private struct UNICODE_STRING
+            {
+                public ushort Length;
+                public ushort MaximumLength;
+                public IntPtr Buffer;
+            }
+
+            private const int PROCESS_QUERY_INFORMATION = 0x0400;
+            private const int PROCESS_VM_READ = 0x0010;
+
+            /// <summary>
+            /// Reads the command line from the Process Environment Block (PEB) of a Windows process.
+            /// Uses typed ReadProcessMemory overloads to read structured data directly,
+            /// avoiding manual byte[] allocation and BitConverter deserialization.
+            /// </summary>
+            internal static string? GetCommandLine(int processId)
+            {
+                IntPtr hProcess = IntPtr.Zero;
                 try
                 {
-                    if (sysctl(mib, (uint)mib.Length, buffer, ref size, IntPtr.Zero, 0) != 0)
+                    hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, processId);
+                    if (hProcess == IntPtr.Zero)
                     {
                         return null;
                     }
 
-                    // The buffer format is:
-                    // - int argc (number of arguments, including the executable path as argv[0])
-                    // - executable path (null-terminated, full path like /bin/sleep)
-                    // - padding null bytes
-                    // - argv[0] (executable name, e.g., "sleep")
-                    // - argv[1] .. argv[argc-1] (arguments, each null-terminated)
-                    // - environment variables (null-terminated strings, not needed)
-                    
-                    // Read argc
-                    int argc = Marshal.ReadInt32(buffer);
+                    PROCESS_BASIC_INFORMATION pbi = default;
+                    int status = NtQueryInformationProcess(hProcess, 0, ref pbi, Marshal.SizeOf<PROCESS_BASIC_INFORMATION>(), out _);
+                    if (status != 0 || pbi.PebBaseAddress == IntPtr.Zero)
+                    {
+                        return null;
+                    }
+
+                    // Read the ProcessParameters pointer directly from PEB.
+                    // Offset: 0x20 on 64-bit, 0x10 on 32-bit.
+                    int processParametersOffset = IntPtr.Size == 8 ? 0x20 : 0x10;
+                    if (!ReadProcessMemory(hProcess, IntPtr.Add(pbi.PebBaseAddress, processParametersOffset), out IntPtr processParametersPtr, IntPtr.Size, out _)
+                        || processParametersPtr == IntPtr.Zero)
+                    {
+                        return null;
+                    }
+
+                    // Read the CommandLine UNICODE_STRING struct directly from ProcessParameters.
+                    // Offset: 0x70 on 64-bit, 0x40 on 32-bit.
+                    // The CLR handles struct alignment (including 4-byte padding on 64-bit) automatically
+                    // via [StructLayout(LayoutKind.Sequential)], so no manual layout parsing is needed.
+                    int commandLineOffset = IntPtr.Size == 8 ? 0x70 : 0x40;
+                    if (!ReadProcessMemory(hProcess, IntPtr.Add(processParametersPtr, commandLineOffset), out UNICODE_STRING commandLineUnicode, Marshal.SizeOf<UNICODE_STRING>(), out _)
+                        || commandLineUnicode.Buffer == IntPtr.Zero
+                        || commandLineUnicode.Length == 0)
+                    {
+                        return null;
+                    }
+
+                    byte[] commandLineBuffer = new byte[commandLineUnicode.Length];
+                    if (!ReadProcessMemory(hProcess, commandLineUnicode.Buffer, commandLineBuffer, commandLineBuffer.Length, out _))
+                    {
+                        return null;
+                    }
+
+                    return Encoding.Unicode.GetString(commandLineBuffer);
+                }
+                catch
+                {
+                    return null;
+                }
+                finally
+                {
+                    if (hProcess != IntPtr.Zero)
+                    {
+                        CloseHandle(hProcess);
+                    }
+                }
+            }
+        }
+
+#if NET
+        /// <summary>
+        /// Linux-specific command line retrieval via /proc/{pid}/cmdline.
+        /// </summary>
+        [SupportedOSPlatform("linux")]
+        private static class Linux
+        {
+            /// <summary>
+            /// Reads /proc/{pid}/cmdline where arguments are null-byte separated,
+            /// and joins them with spaces.
+            /// </summary>
+            internal static string? GetCommandLine(int processId)
+            {
+                try
+                {
+                    string cmdlinePath = $"/proc/{processId}/cmdline";
+                    if (!File.Exists(cmdlinePath))
+                    {
+                        return null;
+                    }
+
+                    byte[] cmdlineBytes = File.ReadAllBytes(cmdlinePath);
+                    if (cmdlineBytes.Length == 0)
+                    {
+                        return null;
+                    }
+
+                    return ParseNullSeparatedArguments(cmdlineBytes);
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
+
+        /// <summary>
+        /// macOS-specific P/Invoke bindings and command line retrieval via sysctl KERN_PROCARGS2.
+        /// </summary>
+        [SupportedOSPlatform("macos")]
+        private static partial class MacOS
+        {
+            [LibraryImport("libc", SetLastError = true)]
+            private static partial int sysctl(
+                ReadOnlySpan<int> name,
+                uint namelen,
+                Span<byte> oldp,
+                ref nuint oldlenp,
+                ReadOnlySpan<byte> newp,
+                nuint newlen);
+
+            /// <summary>
+            /// Wrapper over the raw sysctl P/Invoke that is optimized for reading values, not writing.
+            /// </summary>
+            private static int Sysctl(ReadOnlySpan<int> name, Span<byte> oldp, ref nuint oldlenp)
+                => sysctl(name, (uint)name.Length, oldp, ref oldlenp, ReadOnlySpan<byte>.Empty, 0);
+
+            private const int CTL_KERN = 1;
+            private const int KERN_PROCARGS2 = 49;
+
+            /// <summary>
+            /// Uses sysctl with KERN_PROCARGS2 to read the process arguments,
+            /// then parses the null-separated buffer using span-based slicing.
+            /// </summary>
+            internal static string? GetCommandLine(int processId)
+            {
+                try
+                {
+                    ReadOnlySpan<int> mib = [CTL_KERN, KERN_PROCARGS2, processId];
+                    nuint size = 0;
+
+                    if (Sysctl(mib, Span<byte>.Empty, ref size) != 0)
+                    {
+                        return null;
+                    }
+
+                    if (size == 0)
+                    {
+                        return null;
+                    }
+
+                    byte[] buffer = new byte[size];
+                    if (Sysctl(mib, buffer, ref size) != 0)
+                    {
+                        return null;
+                    }
+
+                    // Buffer format:
+                    //   int argc
+                    //   fully-qualified executable path (null-terminated)
+                    //   padding null bytes
+                    //   argv[0] .. argv[argc-1] (each null-terminated)
+                    //   environment variables (not needed)
+                    ReadOnlySpan<byte> data = buffer.AsSpan(0, (int)size);
+
+                    if (data.Length < sizeof(int))
+                    {
+                        return null;
+                    }
+
+                    int argc = MemoryMarshal.Read<int>(data);
                     if (argc <= 0)
                     {
                         return null;
                     }
 
-                    // Copy the buffer to a byte array for easier parsing
-                    byte[] data = new byte[size];
-                    Marshal.Copy(buffer, data, 0, (int)size);
+                    data = data.Slice(sizeof(int));
 
-                    // Skip the argc (4 bytes) and find the executable path
-                    int offset = sizeof(int);
-                    
-                    // Skip past the executable path (ends at first null)
-                    while (offset < data.Length && data[offset] != 0)
+                    // Skip past the executable path (first null terminator)
+                    int nullIndex = data.IndexOf((byte)0);
+                    if (nullIndex < 0)
                     {
-                        offset++;
-                    }
-                    
-                    // Skip all padding null bytes to reach the actual arguments
-                    while (offset < data.Length && data[offset] == 0)
-                    {
-                        offset++;
-                    }
-                    
-                    // Now parse argc null-terminated argument strings
-                    StringBuilder sb = new();
-                    for (int argIndex = 0; argIndex < argc && offset < data.Length; argIndex++)
-                    {
-                        // Find the next null terminator
-                        int start = offset;
-                        while (offset < data.Length && data[offset] != 0)
-                        {
-                            offset++;
-                        }
-
-                        if (offset > start)
-                        {
-                            string arg = System.Text.Encoding.UTF8.GetString(data, start, offset - start);
-                            if (sb.Length > 0)
-                            {
-                                sb.Append(' ');
-                            }
-                            sb.Append(arg);
-                        }
-
-                        // Move past the null terminator
-                        offset++;
+                        return null;
                     }
 
-                    return sb.ToString();
+                    data = data.Slice(nullIndex + 1);
+
+                    // Skip padding null bytes between executable path and argv[0]
+                    while (!data.IsEmpty && data[0] == 0)
+                    {
+                        data = data.Slice(1);
+                    }
+
+                    return ParseNullSeparatedArguments(data, argc);
                 }
-                finally
+                catch
                 {
-                    Marshal.FreeHGlobal(buffer);
+                    return null;
                 }
-            }
-            catch
-            {
-                return null;
             }
         }
 #endif

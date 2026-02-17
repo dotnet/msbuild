@@ -813,6 +813,7 @@ internal static class NativeMethods
     /// <summary>
     /// Gets a flag indicating if we are running under Mac OSX
     /// </summary>
+    [SupportedOSPlatformGuard("macos")]
     internal static bool IsOSX
     {
 #if CLR2COMPATIBILITY
