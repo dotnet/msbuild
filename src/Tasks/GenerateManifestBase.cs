@@ -7,6 +7,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
+using Constants = Microsoft.Build.Tasks.Deployment.ManifestUtilities.Constants;
 
 #nullable disable
 
