@@ -434,6 +434,8 @@ namespace Microsoft.Build.BackEnd
             // If we have an expected NodeMode, filter by command line parsing
             if (expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
             {
+                CommunicationsUtilities.Trace("Filtering {0} candidate processes by NodeMode {1} for process name '{2}'", 
+                    processes.Length, expectedNodeMode.Value, expectedProcessName);
                 List<Process> filteredProcesses = [];
                 bool isDotnetProcess = expectedProcessName.Equals(Path.GetFileNameWithoutExtension(Constants.DotnetProcessName), StringComparison.OrdinalIgnoreCase);
                 
@@ -445,12 +447,14 @@ namespace Microsoft.Build.BackEnd
                         if (commandLine is null)
                         {
                             // If we can't get the command line, skip this process
+                            CommunicationsUtilities.Trace("Skipping process {0} - unable to retrieve command line", process.Id);
                             continue;
                         }
 
                         // If expected process is dotnet, filter to only those hosting MSBuild.dll
                         if (isDotnetProcess && !commandLine.Contains("MSBuild.dll", StringComparison.OrdinalIgnoreCase))
                         {
+                            CommunicationsUtilities.Trace("Skipping dotnet process {0} - not hosting MSBuild.dll. Command line: {1}", process.Id, commandLine);
                             continue;
                         }
 
@@ -460,7 +464,13 @@ namespace Microsoft.Build.BackEnd
                         // Only include processes that match the expected NodeMode
                         if (processNodeMode.HasValue && processNodeMode.Value == expectedNodeMode.Value)
                         {
+                            CommunicationsUtilities.Trace("Including process {0} with matching NodeMode {1}", process.Id, processNodeMode.Value);
                             filteredProcesses.Add(process);
+                        }
+                        else
+                        {
+                            CommunicationsUtilities.Trace("Skipping process {0} - NodeMode mismatch. Expected: {1}, Found: {2}. Command line: {3}", 
+                                process.Id, expectedNodeMode.Value, processNodeMode?.ToString() ?? "<null>", commandLine);
                         }
                     }
                     catch (Exception ex)
@@ -473,6 +483,7 @@ namespace Microsoft.Build.BackEnd
 
                 // Sort by process ID for consistent ordering
                 filteredProcesses.Sort((left, right) => left.Id.CompareTo(right.Id));
+                CommunicationsUtilities.Trace("Filtered to {0} processes matching NodeMode {1}", filteredProcesses.Count, expectedNodeMode.Value);
                 return (expectedProcessName, filteredProcesses);
             }
 
