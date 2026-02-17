@@ -215,27 +215,6 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Resolves relative segments like "." and "..". Fixes directory separators on Windows like Path.GetFullPath does.
-        /// ASSUMES INPUT IS ALREADY UNESCAPED.
-        /// </summary>
-        internal static AbsolutePath RemoveRelativeSegments(AbsolutePath path)
-        {
-            if (string.IsNullOrEmpty(path.Value))
-            {
-                return path;
-            }
-
-            if (!MayHaveRelativeSegment(path.Value) && !HasUnixDirectorySeparatorOnWindows(path.Value))
-            {
-                return path;
-            }
-
-            return new AbsolutePath(Path.GetFullPath(path.Value),
-                original: path.OriginalValue,
-                ignoreRootedCheck: true);
-        }
-
-        /// <summary>
         /// Fixes file path separators for the current platform.
         /// </summary>
         internal static AbsolutePath FixFilePath(AbsolutePath path)
