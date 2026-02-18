@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <PropertyGroup>
+    <TestProperty>Test</TestProperty>
+    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
+    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
+    <OutputPath>bin\$(Configuration)\</OutputPath>
+    <TargetFramework>net8.0</TargetFramework>
+    <OutputType>Library</OutputType>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <TestItem Include="Test" />
+    <Compile Include="Class1.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+
+  <!-- Simple targets to demonstrate MSBuild functionality -->
+  <Target Name="Target1">
+    <Message Text="MessageOutputText"/>
+    <Message Text="[$(MSBuildThisFileFullPath)]"/>
+    <CreateProperty Value="$(TestProperty)_Modified">
+      <Output PropertyName="ModifiedProperty" TaskParameter="Value"/>
+    </CreateProperty>
+  </Target>
+
+  <Target Name="Target2" AfterTargets="Target1">
+    <Exec Command="echo Building Target2"/>
+    <ItemGroup>
+      <GeneratedItem Include="Generated1" />
+      <GeneratedItem Include="Generated2" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="Target3" AfterTargets="Target2">
+    <!-- Recursive MSBuild calls to test nested projects -->
+    <MSBuild Projects="$(MSBuildThisFileFullPath)" Properties="GP=a" Targets="InnerTarget1"/>
+    <MSBuild Projects="$(MSBuildThisFileFullPath)" Properties="GP=b" Targets="InnerTarget1"/>
+    <MSBuild Projects="$(MSBuildThisFileFullPath)" Properties="GP=a" Targets="InnerTarget2"/>
+    <MSBuild Projects="$(MSBuildThisFileFullPath)" Properties="GP=a" Targets="InnerTarget2"/>
+  </Target>
+
+  <Target Name="InnerTarget1">
+    <Message Text="inner target 1 with GP=$(GP)"/>
+    <CreateItem Include="$(GP)_item">
+      <Output ItemName="CreatedItems" TaskParameter="Include"/>
+    </CreateItem>
+  </Target>
+
+  <Target Name="InnerTarget2">
+    <Message Text="inner target 2 with GP=$(GP)"/>
+    <Warning Text="Test warning message" Condition="'$(GP)' == 'a'"/>
+  </Target>
+
+  <!-- Build target that includes common build tasks -->
+  <Target Name="Build" DependsOnTargets="Target1;Target2;Target3">
+    <Message Text="Build completed successfully"/>
+  </Target>
+
+  <!-- Copy task to demonstrate file operations -->
+  <Target Name="CopyFiles" DependsOnTargets="Build">
+    <ItemGroup>
+      <SourceFiles Include="$(MSBuildThisFileFullPath)" />
+    </ItemGroup>
+    <Copy SourceFiles="@(SourceFiles)" DestinationFolder="$(OutputPath)" />
+  </Target>
+
+</Project>
