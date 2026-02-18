@@ -603,36 +603,92 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <returns>The count of active node processes</returns>
         protected virtual int CountSystemWideActiveNodes()
+            => CountActiveNodesWithMode(NodeMode.OutOfProcNode);
+
+        /// <summary>
+        /// Counts the number of active MSBuild processes running with the specified <see cref="NodeMode"/>.
+        /// Includes the current process in the count if it matches.
+        /// Used by out-of-proc nodes (e.g., server node) to detect over-provisioning at build completion.
+        /// </summary>
+        /// <param name="nodeMode">The node mode to filter for.</param>
+        /// <returns>The number of matching processes, or 0 if enumeration fails or the feature wave is disabled.</returns>
+        internal static int CountActiveNodesWithMode(NodeMode nodeMode)
         {
             try
             {
-                // Use the improved node detection logic from PR #13256
-                // Filter for OutOfProcNode (worker nodes) to get accurate count
-                (string expectedProcessName, IList<Process> nodeProcesses) = GetPossibleRunningNodes(
-                    msbuildLocation: null, 
-                    expectedNodeMode: NodeMode.OutOfProcNode);
-                
-                // Count only worker nodes (filtered by NodeMode)
-                // This automatically handles:
-                // - Filtering dotnet processes to those hosting MSBuild.dll
-                // - Extracting and matching NodeMode from command line
-                // - Cross-platform process command line retrieval
+                (_, IList<Process> nodeProcesses) = GetPossibleRunningNodes(nodeMode);
                 int count = nodeProcesses.Count;
-                
-                // Dispose the process objects
                 foreach (var process in nodeProcesses)
                 {
                     process?.Dispose();
                 }
-                
                 return count;
             }
             catch (Exception ex)
             {
-                // If we can't enumerate processes, be conservative and don't terminate nodes
-                CommunicationsUtilities.Trace("Error counting system-wide nodes: {0}", ex.Message);
+                CommunicationsUtilities.Trace("Error counting system-wide nodes with mode {0}: {1}", nodeMode, ex.Message);
                 return 0;
             }
+        }
+
+        private static (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(NodeMode? expectedNodeMode)
+        {
+            string msbuildLocation = Constants.MSBuildExecutableName;
+            var expectedProcessName = Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost() ?? msbuildLocation);
+
+            Process[] processes;
+            try
+            {
+                processes = Process.GetProcessesByName(expectedProcessName);
+            }
+            catch
+            {
+                return (expectedProcessName, Array.Empty<Process>());
+            }
+
+            if (expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+            {
+                List<Process> filteredProcesses = [];
+                bool isDotnetProcess = expectedProcessName.Equals(Path.GetFileNameWithoutExtension(Constants.DotnetProcessName), StringComparison.OrdinalIgnoreCase);
+
+                foreach (var process in processes)
+                {
+                    try
+                    {
+                        if (!process.TryGetCommandLine(out string commandLine))
+                        {
+                            continue;
+                        }
+
+                        if (commandLine is null)
+                        {
+                            filteredProcesses.Add(process);
+                            continue;
+                        }
+
+                        if (isDotnetProcess && !commandLine.Contains("MSBuild.dll", StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
+                        NodeMode? processNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLine);
+                        if (processNodeMode.HasValue && processNodeMode.Value == expectedNodeMode.Value)
+                        {
+                            filteredProcesses.Add(process);
+                        }
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+
+                filteredProcesses.Sort((left, right) => left.Id.CompareTo(right.Id));
+                return (expectedProcessName, filteredProcesses);
+            }
+
+            Array.Sort(processes, (left, right) => left.Id.CompareTo(right.Id));
+            return (expectedProcessName, processes);
         }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
