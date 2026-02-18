@@ -563,8 +563,13 @@ namespace Microsoft.Build.Shared
                 currentToolsDirectory = currentMSBuildExeFile.Directory;
 
                 CurrentMSBuildToolsDirectory = currentMSBuildExeFile.DirectoryName;
-                CurrentMSBuildConfigurationFile = string.Concat(currentMSBuildExePath, ".config");
-                MSBuildToolsDirectory32 = CurrentMSBuildToolsDirectory;
+                const string configFileExtension =
+#if NET
+                    ".dll.config"; // Compat with what we looked for before 18.5
+#else
+                    ".exe.config";
+#endif
+                CurrentMSBuildConfigurationFile = Path.ChangeExtension(currentMSBuildExePath, configFileExtension); MSBuildToolsDirectory32 = CurrentMSBuildToolsDirectory;
                 MSBuildToolsDirectory64 = CurrentMSBuildToolsDirectory;
                 MSBuildToolsDirectoryRoot = CurrentMSBuildToolsDirectory;
             }
