@@ -62,13 +62,14 @@ namespace Microsoft.Build.Engine.UnitTests
         public void NetTaskHostTest_AppHostUsedWhenAvailable()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
+
+            // Set the .NET SDK's SDK resolver override to point to our bootstrap, which is guaranteed to have the apphost.
             var coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
-            env.SetEnvironmentVariable("PATH", $"{coreDirectory}{Path.PathSeparator}{Environment.GetEnvironmentVariable("PATH")}");
-            env.SetEnvironmentVariable("DOTNET_ROOT", coreDirectory);
+            env.SetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", coreDirectory);
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestNetTask.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask, outputHelper: _output);
 
             successTestTask.ShouldBeTrue();
 
