@@ -165,10 +165,10 @@
     <Content Include="MSBuild.rsp" Pack="false">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <!-- Only include XSDs for .NET Framework (VS Setup and schema validation). -->
-    <XsdsForVS Include="**\*.xsd" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-    <XsdsForVS Include="Update-MSBuildXsds.ps1" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-    <None Include="@(XsdsForVS)">
+    <!-- Only include XSDs for .NET Framework (they don't ship in the .NET SDK). -->
+    <XsdsForVS Include="**\*.xsd" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
+    <XsdsForVS Include="Update-MSBuildXsds.ps1" />
+    <None Include="@(XsdsForVS)" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
