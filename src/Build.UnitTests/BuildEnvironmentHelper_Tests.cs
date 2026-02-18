@@ -38,7 +38,12 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 var path = env.BuildDirectory;
                 var msBuildPath = Path.Combine(path, Constants.MSBuildExecutableName);
-                var msBuildConfig = Path.Combine(path, $"{Constants.MSBuildExecutableName}.config");
+                var msBuildConfig = Path.Combine(path,
+#if NET
+                                        "MSBuild.dll.config");
+#else
+                                        "MSBuild.exe.config");
+#endif
 
                 env.WithEnvironment("MSBUILD_EXE_PATH", env.MSBuildExePath);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
