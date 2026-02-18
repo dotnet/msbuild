@@ -23,5 +23,12 @@ namespace System.Runtime.Versioning
         {
         }
     }
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Class)]
+    internal class UnsupportedOSPlatform : Attribute
+    {
+        internal UnsupportedOSPlatform(string platformName)
+        {
+        }
+    }
 }
 #endif
