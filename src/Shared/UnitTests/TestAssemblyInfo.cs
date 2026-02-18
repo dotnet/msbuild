@@ -68,10 +68,10 @@ namespace Microsoft.Build.UnitTests
             var bootstrapCorePath = Path.Combine(Path.Combine(RunnerUtilities.BootstrapRootPath, "core"), Constants.DotnetProcessName);
             _testEnvironment.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, bootstrapCorePath);
 
-        // Reset the VisualStudioVersion environment variable.  This will be set if tests are run from a VS command prompt.  However,
-        //  if the environment variable is set, it will interfere with tests which set the SubToolsetVersion
-        //  (VerifySubToolsetVersionSetByConstructorOverridable), as the environment variable would take precedence.
-        _testEnvironment.SetEnvironmentVariable("VisualStudioVersion", null);
+            // Reset the VisualStudioVersion environment variable.  This will be set if tests are run from a VS command prompt.  However,
+            //  if the environment variable is set, it will interfere with tests which set the SubToolsetVersion
+            //  (VerifySubToolsetVersionSetByConstructorOverridable), as the environment variable would take precedence.
+            _testEnvironment.SetEnvironmentVariable("VisualStudioVersion", null);
 
             // Prevent test assemblies from logging any performance info.
             // https://github.com/dotnet/msbuild/pull/6274
