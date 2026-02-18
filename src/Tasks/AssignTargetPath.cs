@@ -69,11 +69,10 @@ namespace Microsoft.Build.Tasks
                     fullRootPath =
                         TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(RootFolder)).GetCanonicalForm();
 
-                    // Ensure trailing slash for comparison - AbsolutePath handles OS-aware case sensitivity
-                    AbsolutePath currentDirectory =
-                        FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory).GetCanonicalForm();
+                    // Ensure trailing slash for comparison. Current directory is already canonical, so we don't need to call GetCanonicalForm on it.
+                    AbsolutePath currentDirectory = FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory);
 
-                    // Check if the root folder is the same as the current directory
+                    // Check if the root folder is the same as the current directory - AbsolutePath handles OS-aware case sensitivity.
                     isRootFolderSameAsCurrentDirectory = fullRootPath == currentDirectory;
                 }
                 else
@@ -85,9 +84,8 @@ namespace Microsoft.Build.Tasks
                     fullRootPathString = 
                         Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(RootFolder)));
 
-                    // Ensure trailing slash for easier comparison.
-                    AbsolutePath currentDirectory = 
-                        FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory).GetCanonicalForm();
+                    // Ensure trailing slash for comparison. Current directory is already canonical, so we don't need to call GetCanonicalForm on it.
+                    AbsolutePath currentDirectory = FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory);
 
                     // Check if the root folder is the same as the current directory. 
                     // Perform a case-insensitive comparison to match Path.GetFullPath behavior on Windows, even on case-sensitive file systems, 
