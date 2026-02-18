@@ -11,6 +11,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Win32;
+using Constants = Microsoft.Build.Framework.Constants;
 
 using Xunit;
 using Xunit.NetCore.Extensions;
