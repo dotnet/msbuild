@@ -658,19 +658,6 @@ namespace Microsoft.Build.Construction
 
             if (projectConfiguration == null)
             {
-                if (project.ProjectType == SolutionProjectType.WebProject)
-                {
-                    // Sometimes web projects won't have the configuration we need (Release typically.)  But they should still build if there is
-                    // a solution configuration for it
-                    foreach (SolutionConfigurationInSolution configuration in solutionFile.SolutionConfigurations)
-                    {
-                        if (String.Equals(configuration.FullName, selectedSolutionConfiguration, StringComparison.OrdinalIgnoreCase))
-                        {
-                            return true;
-                        }
-                    }
-                }
-
                 // No configuration, so it can't build.
                 return false;
             }
