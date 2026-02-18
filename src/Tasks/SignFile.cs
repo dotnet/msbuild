@@ -10,6 +10,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
+using Constants = Microsoft.Build.Tasks.Deployment.ManifestUtilities.Constants;
 
 #nullable disable
 
@@ -72,7 +73,8 @@ namespace Microsoft.Build.Tasks
                     signingTargetPath,
                     TargetFrameworkVersion,
                     TargetFrameworkIdentifier,
-                    DisallowMansignTimestampFallback);
+                    DisallowMansignTimestampFallback,
+                    TaskEnvironment);
                 return true;
             }
             catch (ArgumentException ex) when (ex.ParamName.Equals("certThumbprint"))
