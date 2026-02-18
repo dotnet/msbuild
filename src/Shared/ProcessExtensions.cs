@@ -127,6 +127,13 @@ namespace Microsoft.Build.Shared
 
             [LibraryImport("kernel32.dll", SetLastError = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
+            private static partial bool IsWow64Process2(
+                IntPtr hProcess,
+                out ushort processMachine,
+                out ushort nativeMachine);
+
+            [LibraryImport("kernel32.dll", SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.Bool)]
             private static partial bool CloseHandle(IntPtr hObject);
 
             [LibraryImport("ntdll.dll")]
@@ -148,6 +155,12 @@ namespace Microsoft.Build.Shared
 #else
             [DllImport("kernel32.dll", SetLastError = true)]
             private static extern IntPtr OpenProcess(int dwDesiredAccess, bool bInheritHandle, int dwProcessId);
+
+            [DllImport("kernel32.dll", SetLastError = true)]
+            private static extern bool IsWow64Process2(
+                IntPtr hProcess,
+                out ushort processMachine,
+                out ushort nativeMachine);
 
             [DllImport("kernel32.dll", SetLastError = true)]
             private static extern bool CloseHandle(IntPtr hObject);
@@ -192,6 +205,15 @@ namespace Microsoft.Build.Shared
             private const int PROCESS_VM_READ = 0x0010;
 
             /// <summary>
+            /// The process is the same architecture as the executing host (e.g. 64-bit process on 64-bit Windows or 32-bit process on 32-bit Windows).
+            /// </summary>
+            private const int IMAGE_FILE_MACHINE_UNKNOWN = 0x0000;
+            /// <summary>
+            /// The process is a 32-bit process running under WOW64 on 64-bit Windows.
+            /// </summary>
+            private const int IMAGE_FILE_MACHINE_I386 = 0x014c;
+
+            /// <summary>
             /// Reads the command line from the Process Environment Block (PEB) of a Windows process.
             /// Uses typed ReadProcessMemory overloads to read structured data directly,
             /// avoiding manual byte[] allocation and BitConverter deserialization.
@@ -199,89 +221,98 @@ namespace Microsoft.Build.Shared
             internal static string? GetCommandLine(int processId)
             {
                 IntPtr hProcess = IntPtr.Zero;
-            try
-            {
-                // Open the process with query and read permissions
-                hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, processId);
-                if (hProcess == IntPtr.Zero)
+                try
+                {
+                    // Open the process with query and read permissions
+                    hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, false, processId);
+                    if (hProcess == IntPtr.Zero)
+                    {
+                        return null;
+                    }
+
+                    // Get process basic information to locate PEB
+                    PROCESS_BASIC_INFORMATION pbi = new PROCESS_BASIC_INFORMATION();
+                    int returnLength;
+                    int status = NtQueryInformationProcess(hProcess, 0, ref pbi, Marshal.SizeOf(pbi), out returnLength);
+                    if (status != 0 || pbi.PebBaseAddress == IntPtr.Zero)
+                    {
+                        return null;
+                    }
+
+                    bool is64BitProcess = true;
+                    if (IsWow64Process2(hProcess, out ushort processMachine, out ushort nativeMachine))
+                    {
+                        if (processMachine == IMAGE_FILE_MACHINE_I386 || (IntPtr.Size == 4 && processMachine == IMAGE_FILE_MACHINE_UNKNOWN))
+                        {
+                            is64BitProcess = false;
+                        }
+                    }
+
+                    // Read the PEB to get the ProcessParameters pointer
+                    // In 64-bit: PEB + 0x20 = ProcessParameters
+                    // In 32-bit: PEB + 0x10 = ProcessParameters
+                    int processParametersOffset = is64BitProcess ? 0x20 : 0x10;
+                    IntPtr processParametersPtr = IntPtr.Zero;
+
+                    byte[] ptrBuffer = new byte[IntPtr.Size];
+                    if (!ReadProcessMemory(hProcess, IntPtr.Add(pbi.PebBaseAddress, processParametersOffset), ptrBuffer, ptrBuffer.Length, out _))
+                    {
+                        return null;
+                    }
+                    processParametersPtr = is64BitProcess
+                        ? new IntPtr(BitConverter.ToInt64(ptrBuffer, 0))
+                        : new IntPtr(BitConverter.ToInt32(ptrBuffer, 0));
+
+                    if (processParametersPtr == IntPtr.Zero)
+                    {
+                        return null;
+                    }
+
+                    // Read the CommandLine UNICODE_STRING from ProcessParameters
+                    // CommandLine is at offset 0x70 in 64-bit and 0x40 in 32-bit
+                    int commandLineOffset = is64BitProcess ? 0x70 : 0x40;
+                    byte[] unicodeStringBuffer = new byte[Marshal.SizeOf(typeof(UNICODE_STRING))];
+                    if (!ReadProcessMemory(hProcess, IntPtr.Add(processParametersPtr, commandLineOffset), unicodeStringBuffer, unicodeStringBuffer.Length, out _))
+                    {
+                        return null;
+                    }
+
+                    // Parse UNICODE_STRING structure
+                    // Layout: ushort Length (2 bytes), ushort MaximumLength (2 bytes), [4 bytes padding on 64-bit], IntPtr Buffer
+                    UNICODE_STRING commandLineUnicode = new UNICODE_STRING
+                    {
+                        Length = BitConverter.ToUInt16(unicodeStringBuffer, 0),
+                        MaximumLength = BitConverter.ToUInt16(unicodeStringBuffer, 2),
+                        Buffer = is64BitProcess
+                            ? new IntPtr(BitConverter.ToInt64(unicodeStringBuffer, 8))  // 4 bytes for ushorts + 4 bytes padding
+                            : new IntPtr(BitConverter.ToInt32(unicodeStringBuffer, 4))  // 4 bytes for ushorts, no padding
+                    };
+
+                    if (commandLineUnicode.Buffer == IntPtr.Zero || commandLineUnicode.Length == 0)
+                    {
+                        return null;
+                    }
+
+                    // Read the actual command line string
+                    byte[] commandLineBuffer = new byte[commandLineUnicode.Length];
+                    if (!ReadProcessMemory(hProcess, commandLineUnicode.Buffer, commandLineBuffer, commandLineBuffer.Length, out _))
+                    {
+                        return null;
+                    }
+
+                    return Encoding.Unicode.GetString(commandLineBuffer);
+                }
+                catch
                 {
                     return null;
                 }
-
-                // Get process basic information to locate PEB
-                PROCESS_BASIC_INFORMATION pbi = new PROCESS_BASIC_INFORMATION();
-                int returnLength;
-                int status = NtQueryInformationProcess(hProcess, 0, ref pbi, Marshal.SizeOf(pbi), out returnLength);
-                if (status != 0 || pbi.PebBaseAddress == IntPtr.Zero)
+                finally
                 {
-                    return null;
+                    if (hProcess != IntPtr.Zero)
+                    {
+                        CloseHandle(hProcess);
+                    }
                 }
-
-                // Read the PEB to get the ProcessParameters pointer
-                // In 64-bit: PEB + 0x20 = ProcessParameters
-                // In 32-bit: PEB + 0x10 = ProcessParameters
-                int processParametersOffset = IntPtr.Size == 8 ? 0x20 : 0x10;
-                IntPtr processParametersPtr = IntPtr.Zero;
-                
-                byte[] ptrBuffer = new byte[IntPtr.Size];
-                if (!ReadProcessMemory(hProcess, IntPtr.Add(pbi.PebBaseAddress, processParametersOffset), ptrBuffer, ptrBuffer.Length, out _))
-                {
-                    return null;
-                }
-                processParametersPtr = IntPtr.Size == 8 
-                    ? new IntPtr(BitConverter.ToInt64(ptrBuffer, 0))
-                    : new IntPtr(BitConverter.ToInt32(ptrBuffer, 0));
-
-                if (processParametersPtr == IntPtr.Zero)
-                {
-                    return null;
-                }
-
-                // Read the CommandLine UNICODE_STRING from ProcessParameters
-                // CommandLine is at offset 0x70 in 64-bit and 0x40 in 32-bit
-                int commandLineOffset = IntPtr.Size == 8 ? 0x70 : 0x40;
-                byte[] unicodeStringBuffer = new byte[Marshal.SizeOf(typeof(UNICODE_STRING))];
-                if (!ReadProcessMemory(hProcess, IntPtr.Add(processParametersPtr, commandLineOffset), unicodeStringBuffer, unicodeStringBuffer.Length, out _))
-                {
-                    return null;
-                }
-
-                // Parse UNICODE_STRING structure
-                // Layout: ushort Length (2 bytes), ushort MaximumLength (2 bytes), [4 bytes padding on 64-bit], IntPtr Buffer
-                UNICODE_STRING commandLineUnicode = new UNICODE_STRING
-                {
-                    Length = BitConverter.ToUInt16(unicodeStringBuffer, 0),
-                    MaximumLength = BitConverter.ToUInt16(unicodeStringBuffer, 2),
-                    Buffer = IntPtr.Size == 8
-                        ? new IntPtr(BitConverter.ToInt64(unicodeStringBuffer, 8))  // 4 bytes for ushorts + 4 bytes padding
-                        : new IntPtr(BitConverter.ToInt32(unicodeStringBuffer, 4))  // 4 bytes for ushorts, no padding
-                };
-
-                if (commandLineUnicode.Buffer == IntPtr.Zero || commandLineUnicode.Length == 0)
-                {
-                    return null;
-                }
-
-                // Read the actual command line string
-                byte[] commandLineBuffer = new byte[commandLineUnicode.Length];
-                if (!ReadProcessMemory(hProcess, commandLineUnicode.Buffer, commandLineBuffer, commandLineBuffer.Length, out _))
-                {
-                    return null;
-                }
-
-                return Encoding.Unicode.GetString(commandLineBuffer);
-            }
-            catch
-            {
-                return null;
-            }
-            finally
-            {
-                if (hProcess != IntPtr.Zero)
-                {
-                    CloseHandle(hProcess);
-                }
-            }
             }
         }
 
