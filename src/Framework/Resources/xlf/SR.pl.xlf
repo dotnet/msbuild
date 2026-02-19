@@ -62,11 +62,6 @@
         <target state="translated">Ścieżka musi zaczynać się od katalogu głównego.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathMustNotBeNullOrEmpty">
-        <source>Path must not be null or empty.</source>
-        <target state="translated">Ścieżka nie może mieć wartości null ani być pusta.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

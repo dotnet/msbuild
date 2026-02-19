@@ -62,11 +62,6 @@
         <target state="translated">Cesta musí začínat kořenem.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathMustNotBeNullOrEmpty">
-        <source>Path must not be null or empty.</source>
-        <target state="translated">Cesta nesmí být null ani prázdná.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

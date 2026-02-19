@@ -62,11 +62,6 @@
         <target state="translated">루트 경로로 지정해야 합니다.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathMustNotBeNullOrEmpty">
-        <source>Path must not be null or empty.</source>
-        <target state="translated">경로는 null이거나 비워 둘 수 없습니다.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

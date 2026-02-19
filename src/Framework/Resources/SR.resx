@@ -150,9 +150,6 @@
   <data name="ArgumentOutOfRange_Generic_MustBeNotEqual" xml:space="preserve">
     <value>{0} ('{1}') must not be equal to '{2}'.</value>
   </data>
-  <data name="PathMustNotBeNullOrEmpty" xml:space="preserve">
-    <value>Path must not be null or empty.</value>
-  </data>
   <data name="PathMustBeRooted" xml:space="preserve">
     <value>Path must be rooted.</value>
   </data>

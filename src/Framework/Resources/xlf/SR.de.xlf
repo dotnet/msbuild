@@ -62,11 +62,6 @@
         <target state="translated">Der Pfad muss einen Stamm besitzen.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathMustNotBeNullOrEmpty">
-        <source>Path must not be null or empty.</source>
-        <target state="translated">Der Pfad darf nicht null oder leer sein.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

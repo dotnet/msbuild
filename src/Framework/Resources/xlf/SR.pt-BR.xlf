@@ -62,11 +62,6 @@
         <target state="translated">Caminho deve ter raiz.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathMustNotBeNullOrEmpty">
-        <source>Path must not be null or empty.</source>
-        <target state="translated">O caminho não deve ser nulo ou vazio.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

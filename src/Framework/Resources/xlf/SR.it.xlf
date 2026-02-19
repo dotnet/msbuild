@@ -62,11 +62,6 @@
         <target state="translated">Il percorso deve contenere una radice.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathMustNotBeNullOrEmpty">
-        <source>Path must not be null or empty.</source>
-        <target state="translated">Il percorso non può essere Null o vuoto.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

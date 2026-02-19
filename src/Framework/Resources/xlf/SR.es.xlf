@@ -62,11 +62,6 @@
         <target state="translated">Debe ser una ruta de acceso raíz.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathMustNotBeNullOrEmpty">
-        <source>Path must not be null or empty.</source>
-        <target state="translated">La ruta de acceso no debe ser nula ni estar vacía.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -62,11 +62,6 @@
         <target state="translated">路径必须是根路径。</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathMustNotBeNullOrEmpty">
-        <source>Path must not be null or empty.</source>
-        <target state="translated">路径不能为 null 或为空。</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

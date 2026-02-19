@@ -62,11 +62,6 @@
         <target state="translated">Yol kökü belirtilmelidir.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathMustNotBeNullOrEmpty">
-        <source>Path must not be null or empty.</source>
-        <target state="translated">Yol null veya boş olamaz.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

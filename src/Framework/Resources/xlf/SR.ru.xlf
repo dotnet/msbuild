@@ -62,11 +62,6 @@
         <target state="translated">Путь должен иметь корень.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathMustNotBeNullOrEmpty">
-        <source>Path must not be null or empty.</source>
-        <target state="translated">Путь не должен быть пустым или равным null.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

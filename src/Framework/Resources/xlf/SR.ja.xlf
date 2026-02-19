@@ -62,11 +62,6 @@
         <target state="translated">パスはルート指定パスである必要があります。</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathMustNotBeNullOrEmpty">
-        <source>Path must not be null or empty.</source>
-        <target state="translated">パスを null または空にすることはできません。</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>

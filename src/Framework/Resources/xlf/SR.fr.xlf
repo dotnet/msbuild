@@ -62,11 +62,6 @@
         <target state="translated">Le chemin doit être associé à une racine.</target>
         <note />
       </trans-unit>
-      <trans-unit id="PathMustNotBeNullOrEmpty">
-        <source>Path must not be null or empty.</source>
-        <target state="translated">Le chemin d’accès ne peut pas être null ou vide.</target>
-        <note />
-      </trans-unit>
     </body>
   </file>
 </xliff>
