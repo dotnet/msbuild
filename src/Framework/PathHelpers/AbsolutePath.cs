@@ -86,7 +86,7 @@ namespace Microsoft.Build.Framework
         {
             if (string.IsNullOrEmpty(path))
             {
-                throw new ArgumentException(FrameworkResources.GetString("PathMustNotBeNullOrEmpty"), nameof(path));
+                throw new ArgumentException(SR.PathMustNotBeNullOrEmpty, nameof(path));
             }
 
             // Path.IsPathFullyQualified is not available in .NET Standard 2.0
@@ -94,7 +94,7 @@ namespace Microsoft.Build.Framework
 #if NETFRAMEWORK || NET
             if (!Path.IsPathFullyQualified(path))
             {
-                throw new ArgumentException(FrameworkResources.GetString("PathMustBeRooted"), nameof(path));
+                throw new ArgumentException(SR.PathMustBeRooted, nameof(path));
             }
 #endif
         }
@@ -109,7 +109,7 @@ namespace Microsoft.Build.Framework
         {
             if (string.IsNullOrEmpty(path))
             {
-                throw new ArgumentException(FrameworkResources.GetString("PathMustNotBeNullOrEmpty"), nameof(path));
+                throw new ArgumentException(SR.PathMustNotBeNullOrEmpty, nameof(path));
             }
 
             // This function should not throw when path has illegal characters.
