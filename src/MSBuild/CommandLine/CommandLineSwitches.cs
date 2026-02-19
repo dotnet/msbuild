@@ -268,9 +268,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             // To not break existing use, keep supporting live logger switches
             new ParameterizedSwitchInfo(  ["livelogger", "ll", "terminallogger", "tl"], ParameterizedSwitch.TerminalLogger,      null,                           true,           null,                                  true,   true,    "HelpMessage_47_TerminalLoggerSwitch"),
             new ParameterizedSwitchInfo(  ["terminalloggerparameters", "tlp"],  ParameterizedSwitch.TerminalLoggerParameters,   null,                           false,          "MissingTerminalLoggerParameterError", true,   false,   "HelpMessage_48_TerminalLoggerParametersSwitch"),
-#if FEATURE_NODE_REUSE
             new ParameterizedSwitchInfo(  ["nodereuse", "nr"],                  ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true,   false,   "HelpMessage_24_NodeReuse"),
-#endif
             new ParameterizedSwitchInfo(  ["preprocess", "pp"],                 ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true,   false,   "HelpMessage_25_PreprocessSwitch"),
             new ParameterizedSwitchInfo(  ["targets", "ts"],                    ParameterizedSwitch.Targets,                    null,                           false,          null,                                  true,   false,   "HelpMessage_38_TargetsSwitch"),
             new ParameterizedSwitchInfo(  ["warnaserror", "err"],               ParameterizedSwitch.WarningsAsErrors,           null,                           true,           null,                                  true,   true,    "HelpMessage_28_WarnAsErrorSwitch"),

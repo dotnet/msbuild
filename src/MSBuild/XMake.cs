@@ -658,11 +658,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                 int cpuCount = 1;
                 bool multiThreaded = false;
-#if FEATURE_NODE_REUSE
                 bool enableNodeReuse = true;
-#else
-                bool enableNodeReuse = false;
-#endif
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
                 ISet<string> warningsNotAsErrors = null;
@@ -2172,7 +2168,6 @@ namespace Microsoft.Build.CommandLine
                     multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
                     // figure out if we should reuse nodes
-                    // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
 
                     // determine what if any writer to preprocess to
@@ -2667,12 +2662,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         internal static bool ProcessNodeReuseSwitch(string[] parameters)
         {
-            bool enableNodeReuse;
-#if FEATURE_NODE_REUSE
-            enableNodeReuse = true;
-#else
-            enableNodeReuse = false;
-#endif
+            bool enableNodeReuse = true;
 
             if (Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1") // For example to disable node reuse in a gated checkin, without using the flag
             {
@@ -2695,11 +2685,6 @@ namespace Microsoft.Build.CommandLine
                     CommandLineSwitchException.Throw("InvalidNodeReuseValue", parameters[parameters.Length - 1], ex.Message);
                 }
             }
-
-#if !FEATURE_NODE_REUSE
-            if (enableNodeReuse) // Only allowed to pass False on the command line for this switch if the feature is disabled for this installation
-                CommandLineSwitchException.Throw("InvalidNodeReuseTrueValue", parameters[parameters.Length - 1]);
-#endif
 
             return enableNodeReuse;
         }
@@ -2903,7 +2888,6 @@ namespace Microsoft.Build.CommandLine
                 switch (nodeMode)
                 {
                     case NodeMode.OutOfProcNode:
-                        // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                         bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
                         OutOfProcNode node = new OutOfProcNode();
                         shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);

@@ -60,7 +60,6 @@
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_ABORT</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_THREAD_CULTURE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_MULTIPLE_TOOLSETS</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_NET35_TASKHOST</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XAML_TYPES</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_XAMLTASKFACTORY</DefineConstants>
@@ -93,7 +92,6 @@
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' or '$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">
     <DefineConstants>$(DefineConstants);FEATURE_PIPEOPTIONS_CURRENTUSERONLY</DefineConstants>
-    <DefineConstants>$(DefineConstants);FEATURE_NODE_REUSE</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' != 'true'">
