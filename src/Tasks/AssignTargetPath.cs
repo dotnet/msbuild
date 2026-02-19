@@ -60,7 +60,7 @@ namespace Microsoft.Build.Tasks
                 string fullRootPathString = null;
                 bool isRootFolderSameAsCurrentDirectory;
 
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
                 {
                     // Compose a file in the root folder.
                     // NOTE: at this point fullRootPath may or may not have a trailing slash
@@ -123,7 +123,7 @@ namespace Microsoft.Build.Tasks
                         }
                         else
                         {
-                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6)) 
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5)) 
                             {
                                 AbsolutePath itemSpecFullFileNamePath = 
                                     TaskEnvironment.GetAbsolutePath(Files[i].ItemSpec).GetCanonicalForm();

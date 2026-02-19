@@ -63,7 +63,7 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
                 {
                     conePath =
                         Strings.WeakIntern(
@@ -94,7 +94,7 @@ namespace Microsoft.Build.Tasks
                 string fullPath;
                 try
                 {
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
                     {
                         fullPath =
                             Strings.WeakIntern(
