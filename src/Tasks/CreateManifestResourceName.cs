@@ -122,7 +122,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="mode">File mode</param>
         /// <param name="access">Access type</param>
         /// <returns>The FileStream</returns>
-        private static Stream CreateFileStreamOverNewFileStream(string path, FileMode mode, FileAccess access)
+        private static Stream CreateFileStreamOverNewFileStream(AbsolutePath path, FileMode mode, FileAccess access)
         {
             return new FileStream(path, mode, access);
         }

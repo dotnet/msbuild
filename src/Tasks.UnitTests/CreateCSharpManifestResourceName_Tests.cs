@@ -782,7 +782,7 @@ namespace ClassLibrary3
         /// <param name="mode">File mode</param>
         /// <param name="access">Access type</param>
         /// <returns>The Stream</returns>
-        private Stream CreateFileStream(string path, FileMode mode, FileAccess access)
+        private Stream CreateFileStream(AbsolutePath path, FileMode mode, FileAccess access)
         {
             if (String.Equals(path, "SR1.strings", StringComparison.OrdinalIgnoreCase))
             {
