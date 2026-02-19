@@ -682,26 +682,12 @@ namespace Microsoft.Build.BackEnd
             return nodeContexts.Count == 1;
 
             // Resolves the node launch configuration based on the host context.
-            NodeLaunchData ResolveNodeLaunchConfiguration(HandshakeOptions hostContext, in TaskHostParameters taskHostParameters)
-            {
-                NodeLaunchData nodeLaunchData;
+            NodeLaunchData ResolveNodeLaunchConfiguration(HandshakeOptions hostContext, in TaskHostParameters taskHostParameters) =>
 
                 // Handle .NET task host context
-                if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
-                {
-                    nodeLaunchData = ResolveAppHostOrFallback(
-                        GetMSBuildPath(taskHostParameters),
-                        taskHostParameters.DotnetHostPath,
-                        hostContext,
-                        IsNodeReuseEnabled(hostContext));
-
-                    return nodeLaunchData;
-                }
-
-                nodeLaunchData = new NodeLaunchData(GetMSBuildExecutablePathForNonNETRuntimes(hostContext), BuildCommandLineArgs(IsNodeReuseEnabled(hostContext)), new Handshake(hostContext));
-
-                return nodeLaunchData;
-            }
+                Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET)
+                    ? ResolveAppHostOrFallback(GetMSBuildPath(taskHostParameters), taskHostParameters.DotnetHostPath, hostContext, IsNodeReuseEnabled(hostContext))
+                    : new NodeLaunchData(GetMSBuildExecutablePathForNonNETRuntimes(hostContext), BuildCommandLineArgs(IsNodeReuseEnabled(hostContext)), new Handshake(hostContext));
         }
 
         /// <summary>

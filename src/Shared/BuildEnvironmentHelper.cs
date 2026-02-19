@@ -539,8 +539,13 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal sealed class BuildEnvironment
     {
-        public BuildEnvironment(BuildEnvironmentMode mode, string currentMSBuildExePath, bool runningTests, bool runningInMSBuildExe, bool runningInVisualStudio,
-                string visualStudioPath)
+        public BuildEnvironment(
+            BuildEnvironmentMode mode,
+            string currentMSBuildExePath,
+            bool runningTests,
+            bool runningInMSBuildExe,
+            bool runningInVisualStudio,
+            string visualStudioPath)
         {
             FileInfo currentMSBuildExeFile = null;
             DirectoryInfo currentToolsDirectory = null;
@@ -569,7 +574,8 @@ namespace Microsoft.Build.Shared
 #else
                     ".exe.config";
 #endif
-                CurrentMSBuildConfigurationFile = Path.ChangeExtension(currentMSBuildExePath, configFileExtension); MSBuildToolsDirectory32 = CurrentMSBuildToolsDirectory;
+                CurrentMSBuildConfigurationFile = Path.ChangeExtension(currentMSBuildExePath, configFileExtension);
+                MSBuildToolsDirectory32 = CurrentMSBuildToolsDirectory;
                 MSBuildToolsDirectory64 = CurrentMSBuildToolsDirectory;
                 MSBuildToolsDirectoryRoot = CurrentMSBuildToolsDirectory;
             }
