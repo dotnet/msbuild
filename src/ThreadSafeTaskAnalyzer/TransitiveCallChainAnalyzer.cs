@@ -382,7 +382,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 || paramName.IndexOf("dest", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
-        private static bool IsWrappedSafely(
+         private static bool IsWrappedSafely(
             IOperation operation,
             INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? absolutePathType,
@@ -391,12 +391,23 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             while (operation is IConversionOperation conversion)
             {
                 if (absolutePathType is not null &&
-                    SymbolEqualityComparer.Default.Equals(conversion.Operand.Type, absolutePathType))
+                    IsAbsolutePathType(conversion.Operand.Type, absolutePathType))
                 {
                     return true;
                 }
 
                 operation = conversion.Operand;
+            }
+
+            // Null literals and default values are safe
+            if (operation is ILiteralOperation lit && lit.ConstantValue.HasValue && lit.ConstantValue.Value is null)
+            {
+                return true;
+            }
+
+            if (operation is IDefaultValueOperation)
+            {
+                return true;
             }
 
             if (operation is IInvocationOperation invocation)

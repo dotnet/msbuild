@@ -291,6 +291,17 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 operation = conversion.Operand;
             }
 
+            // Null literals and default values are safe — they don't represent relative paths
+            if (operation is ILiteralOperation lit && lit.ConstantValue.HasValue && lit.ConstantValue.Value is null)
+            {
+                return true;
+            }
+
+            if (operation is IDefaultValueOperation)
+            {
+                return true;
+            }
+
             // Check: TaskEnvironment.GetAbsolutePath(...)
             if (operation is IInvocationOperation invocation)
             {
