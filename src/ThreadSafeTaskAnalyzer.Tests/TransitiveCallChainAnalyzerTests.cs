@@ -745,5 +745,72 @@ public class TransitiveCallChainAnalyzerTests
         transitive.ShouldNotBeEmpty("Should detect Environment.Exit in constructor via IL");
     }
 
+    [Fact]
+    public async Task CrossAssembly_InstanceMethodChain_DetectedViaIL()
+    {
+        // Test that a library method calling Path.GetFullPath is detected
+        var librarySource = """
+            namespace MyLib
+            {
+                public class Processor
+                {
+                    public string Process(string input)
+                    {
+                        return System.IO.Path.GetFullPath(input);
+                    }
+                }
+            }
+            """;
+
+        var taskSource = """
+            using MyLib;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var p = new Processor();
+                    p.Process("test");
+                    return true;
+                }
+            }
+            """;
+
+        var diags = await GetCrossAssemblyDiagnosticsAsync(librarySource, taskSource);
+        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
+        transitive.ShouldNotBeEmpty("Should detect Path.GetFullPath in library method");
+    }
+
+    [Fact]
+    public async Task CrossAssembly_NoUnsafeCode_NoDiagnostics()
+    {
+        // Library that has no unsafe code should produce no violations
+        var librarySource = """
+            namespace MyLib
+            {
+                public static class MathHelper
+                {
+                    public static int Add(int a, int b) => a + b;
+                    public static int Multiply(int a, int b) => a * b;
+                }
+            }
+            """;
+
+        var taskSource = """
+            using MyLib;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    int result = MathHelper.Add(1, 2);
+                    return result > 0;
+                }
+            }
+            """;
+
+        var diags = await GetCrossAssemblyDiagnosticsAsync(librarySource, taskSource);
+        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
+        transitive.ShouldBeEmpty("Pure math helper should not produce any violations");
+    }
+
     #endregion
 }
