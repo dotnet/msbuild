@@ -28,7 +28,7 @@ namespace Microsoft.Build.Engine.UnitTests
             configFilePath.ShouldBe($"{actualMSBuildPath}.config");
 #else
             // Even after app host introduction we still use MSBuild.dll.config as a source of tool paths.
-            configFilePath.ShouldBe($"{Path.GetDirectoryName(actualMSBuildPath)}{Path.DirectorySeparatorChar}{Constants.MSBuildAssemblyName}.config");
+            configFilePath.ShouldBe($"{Path.GetDirectoryName(actualMSBuildPath)}{Path.DirectorySeparatorChar}{Constants.MSBuildAssemblyName.ToLowerInvariant()}.config");
 #endif
             actualMSBuildPath.ShouldBe(expectedMSBuildPath);
             Path.GetDirectoryName(expectedMSBuildPath).ShouldBe(toolsDirectoryPath);
