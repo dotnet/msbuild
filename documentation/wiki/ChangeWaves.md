@@ -24,8 +24,8 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 
 ## Current Rotation of Change Waves
 
-### 18.4
-- [Start throwing on null or empty paths in MultiProcess and MultiThreaded Task Environment Drivers.](https://github.com/dotnet/msbuild/pull/12914)
+### 18.5
+- [Fix ASP.NET WebSite projects to resolve netstandard2.0 dependencies](https://github.com/dotnet/msbuild/pull/13058) - Pass TargetFrameworkVersion to RAR task and copy netstandard.dll facade for .NET Framework 4.7.1+ web projects.
 
 ### 18.3
 - [Replace Transactional property with ChangeWave control, implement atomic file replacement with retry logic, and update tests.](https://github.com/dotnet/msbuild/pull/12627)
