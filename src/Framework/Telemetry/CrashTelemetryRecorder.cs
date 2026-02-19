@@ -60,6 +60,9 @@ internal static class CrashTelemetryRecorder
         {
             CrashTelemetry crashTelemetry = CreateCrashTelemetry(exception, exitType, isUnhandled, isCritical);
 
+            // Initialize here because the process is about to die — this may be
+            // the only chance to set up telemetry (e.g., crash before Main() init,
+            // or in a task AppDomain with separate static state).
             TelemetryManager.Instance?.Initialize(isStandalone: false);
 
             using IActivity? activity = TelemetryManager.Instance

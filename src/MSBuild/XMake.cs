@@ -1060,25 +1060,32 @@ namespace Microsoft.Build.CommandLine
             return exitType;
         }
 
+        private static string GetHostName()
+        {
+            if (BuildEnvironmentState.s_runningInVisualStudio)
+            {
+                return "VS";
+            }
+
+            string msbuildHostName = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
+            if (!string.IsNullOrEmpty(msbuildHostName))
+            {
+                return msbuildHostName;
+            }
+
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
+            {
+                return "VSCode";
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Records crash telemetry data for later emission.
         /// </summary>
         private static void RecordCrashTelemetry(Exception exception, ExitType exitType, bool isUnhandled = false)
         {
-            string host = null;
-            if (BuildEnvironmentState.s_runningInVisualStudio)
-            {
-                host = "VS";
-            }
-            else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME")))
-            {
-                host = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
-            }
-            else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
-            {
-                host = "VSCode";
-            }
-
             CrashTelemetryRecorder.RecordCrashTelemetry(
                 exception,
                 exitType.ToString(),
@@ -1086,7 +1093,7 @@ namespace Microsoft.Build.CommandLine
                 ExceptionHandling.IsCriticalException(exception),
                 ProjectCollection.Version?.ToString(),
                 NativeMethodsShared.FrameworkName,
-                host);
+                GetHostName());
         }
 
         private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project, TextWriter outputStream)

@@ -1230,14 +1230,37 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void RecordCrashTelemetry(Exception exception, bool isUnhandled)
         {
+            string? host = _buildTelemetry?.BuildEngineHost ?? GetHostName();
+
             CrashTelemetryRecorder.RecordCrashTelemetry(
                 exception,
-                isUnhandled ? "UnhandledException" : exception.GetType().Name,
+                isUnhandled ? "UnhandledException" : "EndBuildFailure",
                 isUnhandled,
                 ExceptionHandling.IsCriticalException(exception),
                 ProjectCollection.Version?.ToString(),
                 NativeMethodsShared.FrameworkName,
-                _buildTelemetry?.BuildEngineHost);
+                host);
+        }
+
+        private static string? GetHostName()
+        {
+            if (BuildEnvironmentState.s_runningInVisualStudio)
+            {
+                return "VS";
+            }
+
+            string? msbuildHostName = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
+            if (!string.IsNullOrEmpty(msbuildHostName))
+            {
+                return msbuildHostName;
+            }
+
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
+            {
+                return "VSCode";
+            }
+
+            return null;
         }
 
         /// <summary>

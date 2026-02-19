@@ -193,6 +193,39 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         // Get the first line of the stack trace (the top frame).
         int newLineIndex = stackTrace.IndexOf('\n');
         string topFrame = newLineIndex >= 0 ? stackTrace.Substring(0, newLineIndex) : stackTrace;
-        return topFrame.Trim();
+        return SanitizeStackFrame(topFrame.Trim());
+    }
+
+    /// <summary>
+    /// Redacts file paths from a stack frame to avoid leaking PII (e.g. usernames in paths).
+    /// Preserves the method signature and line number.
+    /// </summary>
+    private static string SanitizeStackFrame(string frame)
+    {
+        if (string.IsNullOrEmpty(frame))
+        {
+            return frame;
+        }
+
+        // Typical .NET stack frame:
+        //   at Namespace.Type.Method() in C:\Users\username\path\file.cs:line 123
+        const string inToken = " in ";
+        const string lineToken = ":line ";
+
+        int inIndex = frame.IndexOf(inToken, StringComparison.Ordinal);
+        if (inIndex < 0)
+        {
+            return frame;
+        }
+
+        int lineIndex = frame.IndexOf(lineToken, inIndex, StringComparison.Ordinal);
+        if (lineIndex < 0)
+        {
+            return frame.Substring(0, inIndex + inToken.Length) + "<redacted>";
+        }
+
+        string prefix = frame.Substring(0, inIndex + inToken.Length);
+        string lineSuffix = frame.Substring(lineIndex);
+        return prefix + "<redacted>" + lineSuffix;
     }
 }
