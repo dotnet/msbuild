@@ -78,9 +78,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             OperationKind.FieldReference);
 
             // Phase 2: At compilation end, compute transitive closure from task methods
+            // Phase 1.5 (IL-based cross-assembly analysis) is integrated into BFS
             compilationContext.RegisterCompilationEndAction(endCtx =>
             {
-                AnalyzeTransitiveViolations(endCtx, callGraph, directViolations, iTaskType);
+                AnalyzeTransitiveViolations(endCtx, callGraph, directViolations, iTaskType,
+                    bannedApiLookup, filePathTypes, taskEnvironmentType, absolutePathType, iTaskItemType, consoleType);
             });
         }
 
@@ -147,6 +149,19 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 var calleeKey = calleeMethod.OriginalDefinition;
                 callGraph.GetOrAdd(callerKey, _ => new ConcurrentBag<ISymbol>()).Add(calleeKey);
             }
+            else if (referencedSymbol is IPropertySymbol property)
+            {
+                // Record edges to property getter and setter methods
+                if (property.GetMethod is not null)
+                {
+                    callGraph.GetOrAdd(callerKey, _ => new ConcurrentBag<ISymbol>()).Add(property.GetMethod.OriginalDefinition);
+                }
+
+                if (property.SetMethod is not null)
+                {
+                    callGraph.GetOrAdd(callerKey, _ => new ConcurrentBag<ISymbol>()).Add(property.SetMethod.OriginalDefinition);
+                }
+            }
 
             // Only record violations for NON-task methods
             // Task methods get direct analysis from MultiThreadableTaskAnalyzer
@@ -199,16 +214,32 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>
         /// Phase 2: For each task type, BFS the call graph from its methods to find transitive violations.
+        /// Phase 1.5 (IL analysis) is integrated: when BFS hits an external method, we read its IL
+        /// to discover call edges and violations in referenced assemblies.
         /// </summary>
         private static void AnalyzeTransitiveViolations(
             CompilationAnalysisContext context,
             ConcurrentDictionary<ISymbol, ConcurrentBag<ISymbol>> callGraph,
             ConcurrentDictionary<ISymbol, ConcurrentBag<ViolationInfo>> directViolations,
-            INamedTypeSymbol iTaskType)
+            INamedTypeSymbol iTaskType,
+            Dictionary<ISymbol, BannedApiEntry> bannedApiLookup,
+            ImmutableHashSet<INamedTypeSymbol> filePathTypes,
+            INamedTypeSymbol? taskEnvironmentType,
+            INamedTypeSymbol? absolutePathType,
+            INamedTypeSymbol? iTaskItemType,
+            INamedTypeSymbol? consoleType)
         {
             // Find all task types in the compilation
             var taskTypes = new List<INamedTypeSymbol>();
             FindTaskTypes(context.Compilation.GlobalNamespace, iTaskType, taskTypes);
+
+            if (taskTypes.Count == 0)
+            {
+                return;
+            }
+
+            // Phase 1.5: Create IL extender for cross-assembly analysis
+            using var ilExtender = new ILCallGraphExtender(context.Compilation);
 
             foreach (var taskType in taskTypes)
             {
@@ -248,34 +279,23 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     {
                         var (current, chain) = queue.Dequeue();
 
-                        // Check if this method has direct violations
+                        // Check if this method has direct violations (from source scan)
                         if (directViolations.TryGetValue(current, out var violations))
                         {
                             foreach (var v in violations)
                             {
-                                // Build the full chain string: TaskMethod → A → B → UnsafeApi
-                                var chainWithApi = new List<string>(chain) { v.ApiDisplayName };
-                                var chainStr = string.Join(" → ", chainWithApi);
-
-                                // Deduplicate by chain + api
-                                var dedupeKey = $"{v.ApiDisplayName}|{chainStr}";
-                                if (!reportedViolations.Add(dedupeKey))
-                                {
-                                    continue;
-                                }
-
-                                var location = method.Locations.Length > 0 ? method.Locations[0] : Location.None;
-                                context.ReportDiagnostic(Diagnostic.Create(
-                                    DiagnosticDescriptors.TransitiveUnsafeCall,
-                                    location,
-                                    FormatMethodFull(method),
-                                    v.ApiDisplayName,
-                                    chainStr));
+                                ReportTransitiveViolation(context, method, v, chain, reportedViolations);
                             }
                         }
 
-                        // Continue BFS if within depth limit
-                        if (chain.Count < MaxCallChainDepth && callGraph.TryGetValue(current, out var callees))
+                        if (chain.Count >= MaxCallChainDepth)
+                        {
+                            continue;
+                        }
+
+                        // Try source-level call graph first
+                        bool hasSourceEdges = callGraph.TryGetValue(current, out var callees);
+                        if (hasSourceEdges)
                         {
                             foreach (var callee in callees)
                             {
@@ -286,7 +306,163 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                                 }
                             }
                         }
+
+                        // Phase 1.5: If no source edges and method is external, analyze via IL
+                        if (!hasSourceEdges && current is IMethodSymbol currentMethod && ILCallGraphExtender.IsExternalMethod(currentMethod))
+                        {
+                            // Skip BCL assemblies
+                            if (ILCallGraphExtender.IsInBclAssembly(currentMethod))
+                            {
+                                continue;
+                            }
+
+                            // Skip methods in safe types (their internals are trusted)
+                            if (ILCallGraphExtender.IsInSafeType(currentMethod))
+                            {
+                                continue;
+                            }
+
+                            // Read IL to discover call targets
+                            var ilTargets = ilExtender.GetCallTargets(currentMethod);
+
+                            foreach (var target in ilTargets)
+                            {
+                                var calleeKey = target.Method.OriginalDefinition;
+
+                                // Check if the IL-discovered callee is itself a banned API
+                                CheckILDiscoveredViolation(
+                                    calleeKey, chain, bannedApiLookup, filePathTypes, consoleType,
+                                    context, method, reportedViolations, directViolations);
+
+                                // Add to BFS queue for further traversal
+                                if (visited.Add(calleeKey))
+                                {
+                                    var newChain = new List<string>(chain) { FormatSymbolShort(calleeKey) };
+                                    queue.Enqueue((calleeKey, newChain));
+                                }
+                            }
+                        }
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reports a transitive violation with deduplication.
+        /// </summary>
+        private static void ReportTransitiveViolation(
+            CompilationAnalysisContext context,
+            IMethodSymbol taskMethod,
+            ViolationInfo violation,
+            List<string> chain,
+            HashSet<string> reportedViolations)
+        {
+            var chainWithApi = new List<string>(chain) { violation.ApiDisplayName };
+            var chainStr = string.Join(" → ", chainWithApi);
+
+            var dedupeKey = $"{violation.ApiDisplayName}|{chainStr}";
+            if (!reportedViolations.Add(dedupeKey))
+            {
+                return;
+            }
+
+            var location = taskMethod.Locations.Length > 0 ? taskMethod.Locations[0] : Location.None;
+            context.ReportDiagnostic(Diagnostic.Create(
+                DiagnosticDescriptors.TransitiveUnsafeCall,
+                location,
+                FormatMethodFull(taskMethod),
+                violation.ApiDisplayName,
+                chainStr));
+        }
+
+        /// <summary>
+        /// Checks if an IL-discovered callee is a banned API and records the violation.
+        /// This is needed because IL-discovered calls don't go through Phase 1 source scanning.
+        /// </summary>
+        private static void CheckILDiscoveredViolation(
+            ISymbol calleeSymbol,
+            List<string> currentChain,
+            Dictionary<ISymbol, BannedApiEntry> bannedApiLookup,
+            ImmutableHashSet<INamedTypeSymbol> filePathTypes,
+            INamedTypeSymbol? consoleType,
+            CompilationAnalysisContext context,
+            IMethodSymbol taskMethod,
+            HashSet<string> reportedViolations,
+            ConcurrentDictionary<ISymbol, ConcurrentBag<ViolationInfo>> directViolations)
+        {
+            // Check if the callee itself is a banned API
+            BannedApiEntry entry;
+            bool found = bannedApiLookup.TryGetValue(calleeSymbol, out entry);
+
+            // For property accessors (get_X/set_X), also check the associated property symbol
+            if (!found && calleeSymbol is IMethodSymbol methodSym && methodSym.AssociatedSymbol is IPropertySymbol prop)
+            {
+                found = bannedApiLookup.TryGetValue(prop, out entry);
+            }
+
+            if (found)
+            {
+                var displayName = calleeSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
+                var violation = new ViolationInfo(entry.Category.ToString(), displayName, entry.Message);
+
+                // Record in directViolations so it's found when BFS reaches this node
+                directViolations.GetOrAdd(calleeSymbol, _ => new ConcurrentBag<ViolationInfo>()).Add(violation);
+
+                // Also report immediately with current chain
+                var chainWithApi = new List<string>(currentChain) { displayName };
+                var chainStr = string.Join(" → ", chainWithApi);
+                var dedupeKey = $"{displayName}|{chainStr}";
+                if (reportedViolations.Add(dedupeKey))
+                {
+                    var location = taskMethod.Locations.Length > 0 ? taskMethod.Locations[0] : Location.None;
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        DiagnosticDescriptors.TransitiveUnsafeCall,
+                        location,
+                        FormatMethodFull(taskMethod),
+                        displayName,
+                        chainStr));
+                }
+                return;
+            }
+
+            // Check Console type-level ban
+            if (consoleType is not null && calleeSymbol.ContainingType is not null)
+            {
+                if (SymbolEqualityComparer.Default.Equals(calleeSymbol.ContainingType, consoleType))
+                {
+                    var displayName = calleeSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
+                    string message = calleeSymbol.Name.StartsWith("Read", StringComparison.Ordinal)
+                        ? "may cause deadlocks in automated builds"
+                        : "interferes with build logging; use Log.LogMessage instead";
+                    var violation = new ViolationInfo("CriticalError", displayName, message);
+                    directViolations.GetOrAdd(calleeSymbol, _ => new ConcurrentBag<ViolationInfo>()).Add(violation);
+                    return;
+                }
+            }
+
+            // Check file-path APIs (constructors/methods on File, FileStream, etc. with path params)
+            if (calleeSymbol is IMethodSymbol calledMethod &&
+                calledMethod.ContainingType is not null &&
+                filePathTypes.Contains(calledMethod.ContainingType))
+            {
+                // IL-discovered calls don't have argument values, so we can't check IsWrappedSafely.
+                // We check if the method has any path-like parameters.
+                bool hasPathParam = false;
+                foreach (var param in calledMethod.Parameters)
+                {
+                    if (param.Type.SpecialType == SpecialType.System_String && IsPathParameterName(param.Name))
+                    {
+                        hasPathParam = true;
+                        break;
+                    }
+                }
+
+                if (hasPathParam)
+                {
+                    var displayName = calleeSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
+                    var violation = new ViolationInfo("FilePathRequiresAbsolute", displayName,
+                        "may resolve relative paths against the process working directory");
+                    directViolations.GetOrAdd(calleeSymbol, _ => new ConcurrentBag<ViolationInfo>()).Add(violation);
                 }
             }
         }

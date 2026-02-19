@@ -91,6 +91,11 @@ internal static class TestHelpers
     private static readonly MetadataReference[] s_coreReferences = CreateCoreReferences();
 
     /// <summary>
+    /// Returns the core runtime references used by test compilations.
+    /// </summary>
+    public static MetadataReference[] GetCoreReferences() => s_coreReferences;
+
+    /// <summary>
     /// Runs the MultiThreadableTaskAnalyzer on the given source code and returns analyzer diagnostics.
     /// Source is combined with framework stubs automatically.
     /// </summary>
@@ -162,9 +167,23 @@ internal static class TestHelpers
             typeof(System.Runtime.InteropServices.GuidAttribute).Assembly, // System.Runtime
         };
 
-        return assemblies
+        var locations = assemblies
             .Select(a => a.Location)
             .Distinct()
+            .ToList();
+
+        // Ensure System.Runtime is included (needed for Emit on .NET 10+)
+        var runtimeDir = System.IO.Path.GetDirectoryName(typeof(object).Assembly.Location);
+        if (runtimeDir is not null)
+        {
+            var systemRuntime = System.IO.Path.Combine(runtimeDir, "System.Runtime.dll");
+            if (System.IO.File.Exists(systemRuntime) && !locations.Contains(systemRuntime))
+            {
+                locations.Add(systemRuntime);
+            }
+        }
+
+        return locations
             .Select(loc => (MetadataReference)MetadataReference.CreateFromFile(loc))
             .ToArray();
     }
