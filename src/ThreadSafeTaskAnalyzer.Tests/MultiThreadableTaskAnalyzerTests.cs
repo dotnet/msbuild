@@ -589,6 +589,211 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
+    // ═══════════════════════════════════════════════════════════════════════
+    // Safe wrapper recognition: Path.GetDirectoryName, Path.Combine, Path.GetFullPath
+    // ═══════════════════════════════════════════════════════════════════════
+
+    [Fact]
+    public async Task DirectoryCreate_WithGetDirectoryNameOfAbsolutePath_NoDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    AbsolutePath filePath = TaskEnvironment.GetAbsolutePath("file.txt");
+                    string dir = Path.GetDirectoryName(filePath);
+                    Directory.CreateDirectory(dir);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task DirectoryCreate_WithGetDirectoryNameOfString_ProducesDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    string dir = Path.GetDirectoryName("relative/file.txt");
+                    Directory.CreateDirectory(dir);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task FileInfo_WithPathCombineSafeBase_NoDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    AbsolutePath baseDir = TaskEnvironment.GetAbsolutePath("dir");
+                    string combined = Path.Combine(baseDir, "sub", "file.txt");
+                    var fi = new FileInfo(combined);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task FileInfo_WithPathCombineUnsafeBase_ProducesDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    string combined = Path.Combine("relative", "file.txt");
+                    var fi = new FileInfo(combined);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task FileInfo_WithGetFullPathOfAbsolutePath_NoDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    AbsolutePath basePath = TaskEnvironment.GetAbsolutePath("dir");
+                    string fullPath = Path.GetFullPath(basePath);
+                    var fi = new FileInfo(fullPath);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task FileInfo_WithGetFullPathOfRelative_ProducesDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    string fullPath = Path.GetFullPath("relative.txt");
+                    var fi = new FileInfo(fullPath);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task FileWriteAllText_WithNestedPathCombineGetDirectoryName_NoDiagnostic()
+    {
+        // Simulates WriteLinesToFile pattern: Path.Combine(Path.GetDirectoryName(AbsolutePath), random)
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    AbsolutePath filePath = TaskEnvironment.GetAbsolutePath("file.txt");
+                    string dir = Path.GetDirectoryName(filePath);
+                    string tempPath = Path.Combine(dir, Path.GetRandomFileName() + "~");
+                    File.WriteAllText(tempPath, "contents");
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task FileInfo_WithPathCombineOfFullName_NoDiagnostic()
+    {
+        // Simulates DownloadFile pattern: Path.Combine(DirectoryInfo.FullName, filename)
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    AbsolutePath dirPath = TaskEnvironment.GetAbsolutePath("dir");
+                    DirectoryInfo di = new DirectoryInfo(dirPath);
+                    string combined = Path.Combine(di.FullName, "file.txt");
+                    var fi = new FileInfo(combined);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task FileInfo_WithGetFullPathOfPathCombineSafe_NoDiagnostic()
+    {
+        // Simulates Unzip pattern: Path.GetFullPath(Path.Combine(DirectoryInfo.FullName, entry))
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    AbsolutePath dirPath = TaskEnvironment.GetAbsolutePath("dir");
+                    DirectoryInfo di = new DirectoryInfo(dirPath);
+                    string fullPath = Path.GetFullPath(Path.Combine(di.FullName, "sub/entry"));
+                    var fi = new FileInfo(fullPath);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
     [Fact]
     public async Task FileApi_InRegularTask_NoDiagnostic()
     {

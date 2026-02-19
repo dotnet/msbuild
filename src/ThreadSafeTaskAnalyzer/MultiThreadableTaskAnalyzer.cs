@@ -318,6 +318,35 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         }
                     }
                 }
+
+                // Check: Path.GetDirectoryName(safe) — directory of an absolute path is absolute
+                if (invocation.TargetMethod.Name == "GetDirectoryName" &&
+                    invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+                    invocation.Arguments.Length >= 1 &&
+                    IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                {
+                    return true;
+                }
+
+                // Check: Path.Combine(safe, ...) — result is absolute when first arg is absolute
+                if (invocation.TargetMethod.Name == "Combine" &&
+                    invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+                    invocation.Arguments.Length >= 2 &&
+                    IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                {
+                    return true;
+                }
+
+                // Check: Path.GetFullPath(safe) — safe only when input is already absolute.
+                // If input is relative, GetFullPath resolves against CWD (wrong in MT).
+                // The GetFullPath call itself is still flagged by MSBuildTask0002 regardless.
+                if (invocation.TargetMethod.Name == "GetFullPath" &&
+                    invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+                    invocation.Arguments.Length >= 1 &&
+                    IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                {
+                    return true;
+                }
             }
 
             // Check: .FullName property (FileSystemInfo.FullName - base class of FileInfo/DirectoryInfo)
@@ -340,6 +369,27 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 IsAbsolutePathType(operation.Type, absolutePathType))
             {
                 return true;
+            }
+
+            // Trace through local variable assignments: if `string dir = Path.GetDirectoryName(abs);`
+            // then `dir` is safe because its initializer is safe.
+            if (operation is ILocalReferenceOperation localRef)
+            {
+                var local = localRef.Local;
+                if (local.DeclaringSyntaxReferences.Length == 1)
+                {
+                    var syntax = local.DeclaringSyntaxReferences[0].GetSyntax();
+                    var semanticModel = operation.SemanticModel;
+                    if (semanticModel is not null)
+                    {
+                        var declOp = semanticModel.GetOperation(syntax);
+                        if (declOp is IVariableDeclaratorOperation declarator &&
+                            declarator.Initializer?.Value is IOperation initValue)
+                        {
+                            return IsWrappedSafely(initValue, taskEnvironmentType, absolutePathType, iTaskItemType);
+                        }
+                    }
+                }
             }
 
             return false;

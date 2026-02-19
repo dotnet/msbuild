@@ -423,6 +423,33 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         }
                     }
                 }
+
+                // Path.GetDirectoryName(safe) — directory of an absolute path is absolute
+                if (invocation.TargetMethod.Name == "GetDirectoryName" &&
+                    invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+                    invocation.Arguments.Length >= 1 &&
+                    IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                {
+                    return true;
+                }
+
+                // Path.Combine(safe, ...) — result is absolute when first arg is absolute
+                if (invocation.TargetMethod.Name == "Combine" &&
+                    invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+                    invocation.Arguments.Length >= 2 &&
+                    IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                {
+                    return true;
+                }
+
+                // Path.GetFullPath(safe) — safe only when input is already absolute
+                if (invocation.TargetMethod.Name == "GetFullPath" &&
+                    invocation.TargetMethod.ContainingType?.ToDisplayString() == "System.IO.Path" &&
+                    invocation.Arguments.Length >= 1 &&
+                    IsWrappedSafely(invocation.Arguments[0].Value, taskEnvironmentType, absolutePathType, iTaskItemType))
+                {
+                    return true;
+                }
             }
 
             if (operation is IPropertyReferenceOperation propRef && propRef.Property.Name == "FullName")
@@ -436,7 +463,53 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             if (absolutePathType is not null &&
                 operation.Type is not null &&
-                SymbolEqualityComparer.Default.Equals(operation.Type, absolutePathType))
+                IsAbsolutePathType(operation.Type, absolutePathType))
+            {
+                return true;
+            }
+
+            // Trace through local variable assignments
+            if (operation is ILocalReferenceOperation localRef)
+            {
+                var local = localRef.Local;
+                if (local.DeclaringSyntaxReferences.Length == 1)
+                {
+                    var syntax = local.DeclaringSyntaxReferences[0].GetSyntax();
+                    var semanticModel = operation.SemanticModel;
+                    if (semanticModel is not null)
+                    {
+                        var declOp = semanticModel.GetOperation(syntax);
+                        if (declOp is IVariableDeclaratorOperation declarator &&
+                            declarator.Initializer?.Value is IOperation initValue)
+                        {
+                            return IsWrappedSafely(initValue, taskEnvironmentType, absolutePathType, iTaskItemType);
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if a type is AbsolutePath or Nullable&lt;AbsolutePath&gt;.
+        /// </summary>
+        private static bool IsAbsolutePathType(ITypeSymbol? type, INamedTypeSymbol absolutePathType)
+        {
+            if (type is null)
+            {
+                return false;
+            }
+
+            if (SymbolEqualityComparer.Default.Equals(type, absolutePathType))
+            {
+                return true;
+            }
+
+            if (type is INamedTypeSymbol namedType &&
+                namedType.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T &&
+                namedType.TypeArguments.Length == 1 &&
+                SymbolEqualityComparer.Default.Equals(namedType.TypeArguments[0], absolutePathType))
             {
                 return true;
             }
