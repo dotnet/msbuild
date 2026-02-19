@@ -773,7 +773,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 case 0xB3: case 0xB4: case 0xB5: case 0xB6: // conv.ovf.i1.un..u2.un
                 case 0xB7: case 0xB8: case 0xB9: case 0xBA: // conv.ovf.i4.un..u8.un
                 case 0xC3: // ckfinite
-                case 0xC6: // mkrefany — actually InlineType (4 bytes)
                 case 0xD1: case 0xD2: case 0xD3: // conv.u2, conv.u1, conv.i
                 case 0xDC: // endfinally
                 case 0xE0: // (prefix — treated as 0 operand)
@@ -849,6 +848,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 case 0xA4: // stelem
                 case 0xA5: // unbox.any
                 case 0xC2: // refanyval
+                case 0xC6: // mkrefany
                 case 0xD0: // ldtoken
                     return 4;
 
