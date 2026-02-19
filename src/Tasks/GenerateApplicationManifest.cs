@@ -42,7 +42,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] Dependencies
         {
             get => _dependencies;
-            set => _dependencies = Util.SortItems(value);
+            set => _dependencies = value;
         }
 
         public string ErrorReportUrl { get; set; }
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] Files
         {
             get => _files;
-            set => _files = Util.SortItems(value);
+            set => _files = value;
         }
 
         public bool HostInBrowser { get; set; }
@@ -74,7 +74,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] IsolatedComReferences
         {
             get => _isolatedComReferences;
-            set => _isolatedComReferences = Util.SortItems(value);
+            set => _isolatedComReferences = value;
         }
 
         public string ManifestType { get; set; }
@@ -143,6 +143,10 @@ namespace Microsoft.Build.Tasks
 
         private bool BuildApplicationManifest(ApplicationManifest manifest)
         {
+            _dependencies = Util.SortItems(_dependencies, TaskEnvironment);
+            _files = Util.SortItems(_files, TaskEnvironment);
+            _isolatedComReferences = Util.SortItems(_isolatedComReferences, TaskEnvironment);
+
             if (Dependencies != null)
             {
                 foreach (ITaskItem item in Dependencies)

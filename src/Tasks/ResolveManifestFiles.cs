@@ -69,25 +69,25 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] ExtraFiles
         {
             get => _extraFiles;
-            set => _extraFiles = Util.SortItems(value);
+            set => _extraFiles = value;
         }
 
         public ITaskItem[] Files
         {
             get => _files;
-            set => _files = Util.SortItems(value);
+            set => _files = value;
         }
 
         public ITaskItem[] ManagedAssemblies
         {
             get => _managedAssemblies;
-            set => _managedAssemblies = Util.SortItems(value);
+            set => _managedAssemblies = value;
         }
 
         public ITaskItem[] NativeAssemblies
         {
             get => _nativeAssemblies;
-            set => _nativeAssemblies = Util.SortItems(value);
+            set => _nativeAssemblies = value;
         }
 
         // Runtime assets for self-contained deployment from .NETCore runtime pack
@@ -114,13 +114,13 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] PublishFiles
         {
             get => _publishFiles;
-            set => _publishFiles = Util.SortItems(value);
+            set => _publishFiles = value;
         }
 
         public ITaskItem[] SatelliteAssemblies
         {
             get => _satelliteAssemblies;
-            set => _satelliteAssemblies = Util.SortItems(value);
+            set => _satelliteAssemblies = value;
         }
 
         public string TargetCulture { get; set; }
@@ -164,6 +164,13 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
+            _extraFiles = Util.SortItems(_extraFiles, TaskEnvironment);
+            _files = Util.SortItems(_files, TaskEnvironment);
+            _managedAssemblies = Util.SortItems(_managedAssemblies, TaskEnvironment);
+            _nativeAssemblies = Util.SortItems(_nativeAssemblies, TaskEnvironment);
+            _publishFiles = Util.SortItems(_publishFiles, TaskEnvironment);
+            _satelliteAssemblies = Util.SortItems(_satelliteAssemblies, TaskEnvironment);
+
             if (!ValidateInputs())
             {
                 return false;
