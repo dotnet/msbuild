@@ -16,7 +16,6 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Base class for all manifest generation tasks.
     /// </summary>
-    [MSBuildMultiThreadableTask]
     public abstract class GenerateManifestBase : Task, IMultiThreadableTask
     {
         private enum AssemblyType
