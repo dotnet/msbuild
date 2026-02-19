@@ -19,9 +19,13 @@ namespace Microsoft.Build.Tasks
     /// A task that returns values as specified by XPath Query
     /// from an XML file.
     /// </summary>
-    public class XmlPeek : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class XmlPeek : TaskExtension, IMultiThreadableTask
     {
         #region Properties
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// The XPath Query.
@@ -67,7 +71,8 @@ namespace Microsoft.Build.Tasks
             XmlInput xmlinput;
             try
             {
-                xmlinput = new XmlInput(XmlInputPath, XmlContent);
+                AbsolutePath? absoluteInputPath = XmlInputPath != null ? TaskEnvironment.GetAbsolutePath(XmlInputPath.ItemSpec) : null;
+                xmlinput = new XmlInput(absoluteInputPath, XmlContent);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
@@ -215,9 +220,14 @@ namespace Microsoft.Build.Tasks
         private sealed class XmlInput
         {
             /// <summary>
-            /// This either contains the raw Xml or the path to Xml file.
+            /// Contains the absolute path to Xml file when in XmlFile mode.
             /// </summary>
-            private readonly string _data;
+            private readonly AbsolutePath? _filePath;
+
+            /// <summary>
+            /// Contains the raw Xml content when in Xml mode.
+            /// </summary>
+            private readonly string _xmlContent;
 
             /// <summary>
             /// FileStream used to read XML.
@@ -228,9 +238,9 @@ namespace Microsoft.Build.Tasks
             /// Constructor.
             /// Only one parameter should be non null or will throw ArgumentException.
             /// </summary>
-            /// <param name="xmlInputPath">The path to XML file or null.</param>
+            /// <param name="xmlInputPath">The absolute path to XML file or null.</param>
             /// <param name="xmlContent">The raw XML.</param>
-            public XmlInput(ITaskItem xmlInputPath, string xmlContent)
+            public XmlInput(AbsolutePath? xmlInputPath, string xmlContent)
             {
                 if (xmlInputPath != null && xmlContent != null)
                 {
@@ -245,12 +255,12 @@ namespace Microsoft.Build.Tasks
                 if (xmlInputPath != null)
                 {
                     XmlMode = XmlModes.XmlFile;
-                    _data = xmlInputPath.ItemSpec;
+                    _filePath = xmlInputPath;
                 }
                 else
                 {
                     XmlMode = XmlModes.Xml;
-                    _data = xmlContent;
+                    _xmlContent = xmlContent;
                 }
             }
 
@@ -287,12 +297,12 @@ namespace Microsoft.Build.Tasks
                 };
                 if (XmlMode == XmlModes.XmlFile)
                 {
-                    _fs = new FileStream(_data, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                    _fs = new FileStream(_filePath.Value, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                     return XmlReader.Create(_fs, settings: settings);
                 }
                 else // xmlModes.Xml
                 {
-                    return XmlReader.Create(new StringReader(_data), settings: settings);
+                    return XmlReader.Create(new StringReader(_xmlContent), settings: settings);
                 }
             }
 

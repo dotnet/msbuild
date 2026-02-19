@@ -30,8 +30,11 @@ namespace Microsoft.Build.Tasks
     /// <comment>
     /// Currently only supports writing .NET attributes.
     /// </comment>
-    public class WriteCodeFragment : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class WriteCodeFragment : TaskExtension, IMultiThreadableTask
     {
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
         private const string TypeNameSuffix = "_TypeName";
         private const string IsLiteralSuffix = "_IsLiteral";
         private static readonly string[] NamespaceImports = ["System", "System.Reflection"];
@@ -104,6 +107,7 @@ namespace Microsoft.Build.Tasks
                 return true;
             }
 
+            AbsolutePath outputFilePath = default;
             try
             {
                 if (OutputFile != null && OutputDirectory != null && !Path.IsPathRooted(OutputFile.ItemSpec))
@@ -111,16 +115,25 @@ namespace Microsoft.Build.Tasks
                     OutputFile = new TaskItem(Path.Combine(OutputDirectory.ItemSpec, OutputFile.ItemSpec));
                 }
 
-                OutputFile ??= new TaskItem(FileUtilities.GetTemporaryFile(OutputDirectory.ItemSpec, null, extension));
+                if (OutputFile != null)
+                {
+                    outputFilePath = TaskEnvironment.GetAbsolutePath(OutputFile.ItemSpec);
+                }
+                else
+                {
+                    AbsolutePath outputDirectoryPath = TaskEnvironment.GetAbsolutePath(OutputDirectory.ItemSpec);
+                    outputFilePath = new AbsolutePath(FileUtilities.GetTemporaryFile(outputDirectoryPath, null, extension));
+                    OutputFile = new TaskItem(Path.Combine(OutputDirectory.ItemSpec, Path.GetFileName(outputFilePath.Value)));
+                }
 
-                FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(OutputFile.ItemSpec));
+                FileUtilities.EnsureDirectoryExists(Path.GetDirectoryName(outputFilePath));
 
-                File.WriteAllText(OutputFile.ItemSpec, code); // Overwrites file if it already exists (and can be overwritten)
+                File.WriteAllText(outputFilePath, code); // Overwrites file if it already exists (and can be overwritten)
             }
             catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
             {
                 string itemSpec = OutputFile?.ItemSpec ?? String.Empty;
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(itemSpec);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(outputFilePath.Value ?? itemSpec);
                 Log.LogErrorWithCodeFromResources("WriteCodeFragment.CouldNotWriteOutput", itemSpec, ex.Message, lockedFileMessage);
                 return false;
             }
