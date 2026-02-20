@@ -22,7 +22,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         public static readonly DiagnosticDescriptor TaskEnvironmentRequired = new(
             id: DiagnosticIds.TaskEnvironmentRequired,
-            title: "API requires TaskEnvironment alternative in IMultiThreadableTask",
+            title: "API requires TaskEnvironment alternative in MSBuild tasks",
             messageFormat: "'{0}' should use TaskEnvironment alternative: {1}",
             category: "MSBuild.TaskAuthoring",
             defaultSeverity: DiagnosticSeverity.Warning,
@@ -31,7 +31,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         public static readonly DiagnosticDescriptor FilePathRequiresAbsolute = new(
             id: DiagnosticIds.FilePathRequiresAbsolute,
-            title: "File system API requires absolute path in IMultiThreadableTask",
+            title: "File system API requires absolute path in MSBuild tasks",
             messageFormat: "'{0}' may resolve relative paths against the process working directory: {1}",
             category: "MSBuild.TaskAuthoring",
             defaultSeverity: DiagnosticSeverity.Warning,

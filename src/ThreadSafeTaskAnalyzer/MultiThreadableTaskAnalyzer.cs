@@ -158,12 +158,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // Check banned API lookup (handles MSBuildTask0001, 0002, 0004)
             if (bannedApiLookup.TryGetValue(referencedSymbol, out var entry))
             {
-                // MSBuildTask0001 and MSBuildTask0004 apply to ALL tasks
-                // MSBuildTask0002 only applies to IMultiThreadableTask
-                if (entry.Category == BannedApiDefinitions.ApiCategory.TaskEnvironment && !isMultiThreadableTask)
-                {
-                    return;
-                }
+                // All rules apply to all ITask implementations
 
                 var descriptor = GetDescriptor(entry.Category);
                 var displayName = referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
@@ -191,8 +186,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
             }
 
-            // Check file path APIs (MSBuildTask0003) - only for IMultiThreadableTask
-            if (isMultiThreadableTask && !arguments.IsDefaultOrEmpty)
+            // Check file path APIs (MSBuildTask0003) - applies to all tasks
+            if (!arguments.IsDefaultOrEmpty)
             {
                 var method = referencedSymbol as IMethodSymbol;
                 if (method is not null)

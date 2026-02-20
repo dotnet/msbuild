@@ -334,7 +334,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task EnvironmentGetEnvVar_InRegularTask_NoDiagnostic()
+    public async Task EnvironmentGetEnvVar_InRegularTask_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -348,7 +348,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldBeEmpty();
+        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
     [Fact]
@@ -795,7 +795,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task FileApi_InRegularTask_NoDiagnostic()
+    public async Task FileApi_InRegularTask_ProducesDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
@@ -809,7 +809,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldBeEmpty();
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
     [Fact]
@@ -1203,7 +1203,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task MSBuildTask0002_NotFiredForRegularTask()
+    public async Task MSBuildTask0002_FiredForRegularTask()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -1222,12 +1222,12 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        // MSBuildTask0002 should NOT fire for non-IMultiThreadableTask
-        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
+        // MSBuildTask0002 now fires for all ITask implementations
+        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
     [Fact]
-    public async Task MSBuildTask0003_NotFiredForRegularTask()
+    public async Task MSBuildTask0003_FiredForRegularTask()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
@@ -1242,7 +1242,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldBeEmpty();
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -1827,9 +1827,9 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task Task_WithoutMultiThreadableAttribute_OnlyGetsUniversalRules()
+    public async Task Task_WithoutMultiThreadableAttribute_GetsAllRules()
     {
-        // A regular task without the attribute gets only MSBuildTask0001 and MSBuildTask0004
+        // All rules now fire on all ITask implementations
         var diags = await GetDiagnosticsAsync("""
             using System;
             using System.IO;
@@ -1844,8 +1844,8 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldBeEmpty();
-        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
     [Fact]
