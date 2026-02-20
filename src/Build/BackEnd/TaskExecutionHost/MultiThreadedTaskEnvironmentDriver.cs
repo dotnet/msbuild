@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -42,14 +43,13 @@ namespace Microsoft.Build.BackEnd
         /// Throws if the variable is one that MSBuild assumes should remain constant.
         /// </summary>
         /// <param name="name">The name of the environment variable to check.</param>
-        /// <exception cref="ArgumentException">Thrown when attempting to modify an immutable environment variable.</exception>
+        /// <exception cref="InvalidOperationException">Thrown when attempting to modify an immutable environment variable.</exception>
         private void EnsureVariableCanBeModified(string name)
         {
             if (EnvironmentVariableClassifier.Instance.IsImmutable(name))
             {
-                throw new ArgumentException(
-                    $"Task cannot modify environment variable '{name}' because MSBuild assumes it should remain constant.",
-                    nameof(name));
+                throw new InvalidOperationException(
+                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskCannotModifyImmutableEnvironmentVariable", name));
             }
         }
 
