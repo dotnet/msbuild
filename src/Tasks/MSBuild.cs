@@ -280,7 +280,8 @@ namespace Microsoft.Build.Tasks
             {
                 ITaskItem project = Projects[i];
 
-                AbsolutePath projectPath = TaskEnvironment.GetAbsolutePath(FileUtilities.AttemptToShortenPath(project.ItemSpec));
+                AbsolutePath projectPath = FrameworkFileUtilities.FixFilePath(
+                    TaskEnvironment.GetAbsolutePath(project.ItemSpec).GetCanonicalForm());
 
                 if (StopOnFirstFailure && !success)
                 {
