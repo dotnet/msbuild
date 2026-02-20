@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="2293c4c42809d258d5246ecaca1e986514cb425c" BarId="301941" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="4c0aa722933ea491006247bbc0a484fa3c28cd14" BarId="302348" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="10.0.2">
@@ -106,21 +106,21 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26110.1">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="10.0.0-beta.26119.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>4bf37ce670528cf2aef4d9b1cd892554b1b02d9d</Sha>
+      <Sha>062ea8ab27da7dbb7d4f630bd50aeab94c9ffb93</Sha>
     </Dependency>
     <Dependency Name="NuGet.Build.Tasks" Version="7.5.0-rc.18">
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>a527f9edd5b4b5b573f004609434b726ad324510</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.5.0-2.26105.1">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.5.0-2.26114.2">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>da86ec644af82dcb8575ff0c22ac6afdcd6b5066</Sha>
+      <Sha>017cb895903426b1afd549f40e382d48dd044917</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="10.0.0-beta.26110.1">
+    <Dependency Name="Microsoft.DotNet.XUnitExtensions" Version="10.0.0-beta.26119.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>4bf37ce670528cf2aef4d9b1cd892554b1b02d9d</Sha>
+      <Sha>062ea8ab27da7dbb7d4f630bd50aeab94c9ffb93</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>

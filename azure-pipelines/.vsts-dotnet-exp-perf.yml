@@ -67,7 +67,7 @@ extends:
     featureFlags:
       autoBaseline: true
     pool:
-      name: VSEngSS-MicroBuild2022-1ES
+      name: VSEng-MicroBuildVSStable
       os: windows
     sdl:
       policheck:
