@@ -500,12 +500,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal static string? GetCommandLine(int processId)
             {
-                // Step 1: Initialize COM. RPC_E_CHANGED_MODE means COM is already initialized
-                // with a different threading model by the host — not fatal, we can proceed.
-                int hr = 0;
-
-                // Step 2: Set general COM security levels.
-                hr = CoInitializeSecurity(
+                int hr = CoInitializeSecurity(
                     IntPtr.Zero,
                     -1,
                     IntPtr.Zero,
@@ -522,7 +517,6 @@ namespace Microsoft.Build.Shared
                         $"WMI CoInitializeSecurity failed for PID {processId}. HRESULT: 0x{hr:X8}");
                 }
 
-                // Step 3: Obtain the initial locator to WMI.
                 Guid clsid = CLSID_WbemLocator;
                 Guid iid = IID_IWbemLocator;
                 hr = CoCreateInstance(ref clsid, IntPtr.Zero, CLSCTX_INPROC_SERVER, ref iid, out IWbemLocator locator);
@@ -532,7 +526,6 @@ namespace Microsoft.Build.Shared
                         $"WMI CoCreateInstance failed for PID {processId}. HRESULT: 0x{hr:X8}");
                 }
 
-                // Step 4: Connect to ROOT\CIMV2.
                 hr = locator.ConnectServer(
                     @"ROOT\CIMV2",
                     strUser: null, strPassword: null, strLocale: null,
@@ -545,7 +538,6 @@ namespace Microsoft.Build.Shared
                         $"WMI ConnectServer failed for PID {processId}. HRESULT: 0x{hr:X8}");
                 }
 
-                // Step 5: Set proxy security so the WMI service can impersonate the client.
                 hr = CoSetProxyBlanket(
                     services,
                     RPC_C_AUTHN_WINNT,
@@ -561,7 +553,6 @@ namespace Microsoft.Build.Shared
                         $"WMI CoSetProxyBlanket failed for PID {processId}. HRESULT: 0x{hr:X8}");
                 }
 
-                // Step 6: Execute the WQL query.
                 string query = $"SELECT CommandLine FROM Win32_Process WHERE ProcessId='{processId}'";
                 hr = services.ExecQuery(
                     "WQL",
@@ -575,7 +566,6 @@ namespace Microsoft.Build.Shared
                         $"WMI ExecQuery failed for PID {processId}. HRESULT: 0x{hr:X8}");
                 }
 
-                // Step 7: Retrieve the result.
                 hr = enumerator.Next(WBEM_INFINITE, 1, out IWbemClassObject obj, out uint returned);
                 if (hr == WBEM_S_FALSE || returned == 0)
                 {
