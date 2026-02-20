@@ -766,8 +766,8 @@ namespace Microsoft.Build.Shared
         private static bool CheckForFrameworkInstallation(string registryEntryToCheckInstall, string registryValueToCheckInstall)
         {
             // Get the complus install root and version
-            string complusInstallRoot = Environment.GetEnvironmentVariable("COMPLUS_INSTALLROOT");
-            string complusVersion = Environment.GetEnvironmentVariable("COMPLUS_VERSION");
+            string complusInstallRoot = Environment.GetEnvironmentVariable(EnvironmentVariablesNames.ComplusInstallRoot);
+            string complusVersion = Environment.GetEnvironmentVariable(EnvironmentVariablesNames.ComplusVersion);
 
             // Complus is not set we need to make sure the framework we are targeting is installed. Check the registry key before trying to find the directory.
             // If complus is set then we will return that directory as the framework directory, there is no need to check the registry value for the framework and it may not even be installed.
@@ -818,8 +818,8 @@ namespace Microsoft.Build.Shared
             }
 
             // If the COMPLUS variables are set, they override everything -- that's the directory we want.
-            string complusInstallRoot = Environment.GetEnvironmentVariable("COMPLUS_INSTALLROOT");
-            string complusVersion = Environment.GetEnvironmentVariable("COMPLUS_VERSION");
+            string complusInstallRoot = Environment.GetEnvironmentVariable(EnvironmentVariablesNames.ComplusInstallRoot);
+            string complusVersion = Environment.GetEnvironmentVariable(EnvironmentVariablesNames.ComplusVersion);
 
             if (!String.IsNullOrEmpty(complusInstallRoot) && !String.IsNullOrEmpty(complusVersion))
             {
@@ -935,7 +935,7 @@ namespace Microsoft.Build.Shared
                 // either we're in a 32-bit window, or we're on a 32-bit machine.
                 // if we're on a 32-bit machine, ProgramW6432 won't exist
                 // if we're on a 64-bit machine, ProgramW6432 will point to the correct Program Files.
-                programFilesX64 = Environment.GetEnvironmentVariable("ProgramW6432");
+                programFilesX64 = Environment.GetEnvironmentVariable(EnvironmentVariablesNames.ProgramW6432);
             }
             else
             {
@@ -953,7 +953,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string GenerateProgramFilesReferenceAssemblyRoot()
         {
-            string combinedPath = Environment.GetEnvironmentVariable("ReferenceAssemblyRoot");
+            string combinedPath = Environment.GetEnvironmentVariable(EnvironmentVariablesNames.ReferenceAssemblyRoot);
             if (!String.IsNullOrEmpty(combinedPath))
             {
                 combinedPath = Path.GetFullPath(combinedPath);

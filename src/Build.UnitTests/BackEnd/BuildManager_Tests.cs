@@ -3491,7 +3491,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void DotnetHostPathDirectoryWarning()
         {
-            _env.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, Path.GetTempPath());
+            _env.SetEnvironmentVariable(EnvironmentVariablesNames.DotnetHostPath, Path.GetTempPath());
 
             BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
             _buildManager.Build(_parameters, data);
@@ -3506,7 +3506,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void DotnetHostPathFileNoWarning()
         {
             TransientTestFile tempFile = _env.CreateFile("dotnet.exe", "");
-            _env.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, tempFile.Path);
+            _env.SetEnvironmentVariable(EnvironmentVariablesNames.DotnetHostPath, tempFile.Path);
 
             BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
             _buildManager.Build(_parameters, data);
@@ -3520,7 +3520,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void DotnetHostPathNotSetNoWarning()
         {
-            _env.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, null);
+            _env.SetEnvironmentVariable(EnvironmentVariablesNames.DotnetHostPath, null);
 
             BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
             _buildManager.Build(_parameters, data);

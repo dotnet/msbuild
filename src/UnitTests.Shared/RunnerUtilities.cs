@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.Shared
         public static void ApplyDotnetHostPathEnvironmentVariable(TestEnvironment testEnvironment)
         {
             // Built msbuild.dll executed by dotnet.exe needs this environment variable for msbuild tasks such as RoslynCodeTaskFactory.
-            testEnvironment.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, s_dotnetExePath);
+            testEnvironment.SetEnvironmentVariable(EnvironmentVariablesNames.DotnetHostPath, s_dotnetExePath);
         }
 #endif
 
