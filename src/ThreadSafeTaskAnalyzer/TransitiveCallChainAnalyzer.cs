@@ -54,6 +54,20 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
+            // Read scope option from .editorconfig
+            bool analyzeAllTasks = true;
+            if (compilationContext.Options.AnalyzerConfigOptionsProvider
+                    .GlobalOptions.TryGetValue($"build_property.{MultiThreadableTaskAnalyzer.ScopeOptionKey}", out var scopeValue) ||
+                compilationContext.Options.AnalyzerConfigOptionsProvider
+                    .GlobalOptions.TryGetValue(MultiThreadableTaskAnalyzer.ScopeOptionKey, out scopeValue))
+            {
+                analyzeAllTasks = !string.Equals(scopeValue, MultiThreadableTaskAnalyzer.ScopeMultiThreadableOnly, StringComparison.OrdinalIgnoreCase);
+            }
+
+            var iMultiThreadableTaskType = analyzeAllTasks ? null : compilationContext.Compilation.GetTypeByMetadataName("Microsoft.Build.Framework.IMultiThreadableTask");
+            var multiThreadableTaskAttributeType = analyzeAllTasks ? null : compilationContext.Compilation.GetTypeByMetadataName("Microsoft.Build.Framework.MSBuildMultiThreadableTaskAttribute");
+            var analyzedAttributeType = analyzeAllTasks ? null : compilationContext.Compilation.GetTypeByMetadataName("Microsoft.Build.Framework.MSBuildMultiThreadableTaskAnalyzedAttribute");
+
             var taskEnvironmentType = compilationContext.Compilation.GetTypeByMetadataName(TaskEnvironmentFullName);
             var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(AbsolutePathFullName);
             var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(ITaskItemFullName);
@@ -82,7 +96,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             compilationContext.RegisterCompilationEndAction(endCtx =>
             {
                 AnalyzeTransitiveViolations(endCtx, callGraph, directViolations, iTaskType,
-                    bannedApiLookup, filePathTypes, taskEnvironmentType, absolutePathType, iTaskItemType, consoleType);
+                    bannedApiLookup, filePathTypes, taskEnvironmentType, absolutePathType, iTaskItemType, consoleType,
+                    analyzeAllTasks, iMultiThreadableTaskType, multiThreadableTaskAttributeType, analyzedAttributeType);
             });
         }
 
@@ -227,7 +242,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? iTaskItemType,
-            INamedTypeSymbol? consoleType)
+            INamedTypeSymbol? consoleType,
+            bool analyzeAllTasks,
+            INamedTypeSymbol? iMultiThreadableTaskType,
+            INamedTypeSymbol? multiThreadableTaskAttributeType,
+            INamedTypeSymbol? analyzedAttributeType)
         {
             // Find all task types in the compilation
             var taskTypes = new List<INamedTypeSymbol>();
@@ -236,6 +255,21 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             if (taskTypes.Count == 0)
             {
                 return;
+            }
+
+            // When scope is "multithreadable_only", filter to only multithreadable tasks
+            if (!analyzeAllTasks)
+            {
+                taskTypes = taskTypes.Where(t =>
+                    (iMultiThreadableTaskType is not null && t.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, iMultiThreadableTaskType))) ||
+                    (multiThreadableTaskAttributeType is not null && t.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, multiThreadableTaskAttributeType))) ||
+                    (analyzedAttributeType is not null && t.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, analyzedAttributeType)))
+                ).ToList();
+
+                if (taskTypes.Count == 0)
+                {
+                    return;
+                }
             }
 
             // Phase 1.5: Create IL extender for cross-assembly analysis
