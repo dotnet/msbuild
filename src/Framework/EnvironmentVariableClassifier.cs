@@ -35,9 +35,9 @@ namespace Microsoft.Build.Framework
         private readonly FrozenSet<string> _immutableVariables;
 
         /// <summary>
-        /// Array of prefixes that identify immutable environment variables.
+        /// List of prefixes that identify immutable environment variables.
         /// </summary>
-        private readonly string[] _immutablePrefixes;
+        private readonly IReadOnlyList<string> _immutablePrefixes;
 
         /// <summary>
         /// Initializse a new instance with the default set of immutable environment variables and prefixes.
@@ -52,7 +52,9 @@ namespace Microsoft.Build.Framework
                 EnvironmentVariablesNames.ProgramW6432
             ], FrameworkFileUtilities.EnvironmentVariableComparer);
             
-            _immutablePrefixes = ["MSBUILD"];
+            // On case-sensitive systems, both "MSBUILD" and "MSBuild" prefixes are used
+            var prefixSet = new HashSet<string>(FrameworkFileUtilities.EnvironmentVariableComparer) { "MSBUILD", "MSBuild" };
+            _immutablePrefixes = new List<string>(prefixSet);
         }
 
         /// <summary>
