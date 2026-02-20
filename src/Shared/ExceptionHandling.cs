@@ -22,6 +22,7 @@ using System.Xml.Schema;
 using System.Runtime.Serialization;
 #if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.Framework.Telemetry;
 #endif
 using Microsoft.Build.Framework;
 
@@ -349,7 +350,26 @@ namespace Microsoft.Build.Shared
         {
             Exception ex = (Exception)e.ExceptionObject;
             DumpExceptionToFile(ex);
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+            RecordCrashTelemetryForUnhandledException(ex);
+#endif
         }
+
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+        /// <summary>
+        /// Records and immediately flushes crash telemetry for an unhandled exception.
+        /// Best effort - must never throw, as the process is already crashing.
+        /// </summary>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        private static void RecordCrashTelemetryForUnhandledException(Exception ex)
+        {
+            CrashTelemetryRecorder.RecordAndFlushCrashTelemetry(
+                ex,
+                exitType: "UnhandledException",
+                isUnhandled: true,
+                isCritical: IsCriticalException(ex));
+        }
+#endif
 
         /// <summary>
         /// Dump the exception information to a file

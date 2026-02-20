@@ -1096,6 +1096,7 @@ namespace Microsoft.Build.Execution
             catch (Exception e)
             {
                 exceptionsThrownInEndBuild = true;
+                RecordCrashTelemetry(e, isUnhandled: false);
 
                 if (e is AggregateException ae && ae.InnerExceptions.Count == 1)
                 {
@@ -1180,6 +1181,13 @@ namespace Microsoft.Build.Execution
 
                     MSBuildEventSource.Log.BuildStop();
 
+                    if (_threadException is not null)
+                    {
+                        RecordCrashTelemetry(_threadException.SourceException, isUnhandled: true);
+                    }
+
+                    CrashTelemetryRecorder.FlushCrashTelemetry();
+
                     _threadException?.Throw();
 
                     if (BuildParameters.DumpOpportunisticInternStats)
@@ -1215,6 +1223,44 @@ namespace Microsoft.Build.Execution
                 ?.SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
                         includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
                         includeTargetDetails: false));
+        }
+
+        /// <summary>
+        /// Records crash telemetry data for later emission via <see cref="CrashTelemetryRecorder.FlushCrashTelemetry"/>.
+        /// </summary>
+        private void RecordCrashTelemetry(Exception exception, bool isUnhandled)
+        {
+            string? host = _buildTelemetry?.BuildEngineHost ?? GetHostName();
+
+            CrashTelemetryRecorder.RecordCrashTelemetry(
+                exception,
+                isUnhandled ? "UnhandledException" : "EndBuildFailure",
+                isUnhandled,
+                ExceptionHandling.IsCriticalException(exception),
+                ProjectCollection.Version?.ToString(),
+                NativeMethodsShared.FrameworkName,
+                host);
+        }
+
+        private static string? GetHostName()
+        {
+            if (BuildEnvironmentState.s_runningInVisualStudio)
+            {
+                return "VS";
+            }
+
+            string? msbuildHostName = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
+            if (!string.IsNullOrEmpty(msbuildHostName))
+            {
+                return msbuildHostName;
+            }
+
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
+            {
+                return "VSCode";
+            }
+
+            return null;
         }
 
         /// <summary>
