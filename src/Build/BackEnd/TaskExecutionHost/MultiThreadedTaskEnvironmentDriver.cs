@@ -45,7 +45,7 @@ namespace Microsoft.Build.BackEnd
         /// <exception cref="ArgumentException">Thrown when attempting to modify an immutable environment variable.</exception>
         private void EnsureVariableCanBeModified(string name)
         {
-            if (EnvironmentVariableClassifier.IsImmutable(name))
+            if (EnvironmentVariableClassifier.Instance.IsImmutable(name))
             {
                 throw new ArgumentException(
                     $"Task cannot modify environment variable '{name}' because MSBuild assumes it should remain constant.",
