@@ -32,7 +32,13 @@ namespace Microsoft.Build.UnitTests
             return environmentType switch
             {
                 StubEnvironmentName => TaskEnvironmentHelper.CreateForTest(),
-                MultithreadedEnvironmentName => new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(GetResolvedTempPath())),
+                MultithreadedEnvironmentName => new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(
+                    GetResolvedTempPath(),
+                    new Dictionary<string, string>
+                    {
+                        ["env_var_1"] = "env_var_1_value",
+                        ["env_var_2"] = "env_var_2_value"
+                    })),
                 _ => throw new ArgumentException($"Unknown environment type: {environmentType}")
             };
         }
