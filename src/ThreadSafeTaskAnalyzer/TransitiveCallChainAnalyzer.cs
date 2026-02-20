@@ -292,7 +292,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     var methodKey = method.OriginalDefinition;
                     if (callGraph.TryGetValue(methodKey, out var directCallees))
                     {
-                        foreach (var callee in directCallees)
+                        // Snapshot ConcurrentBag to avoid thread-local enumeration issues
+                        foreach (var callee in directCallees.ToArray())
                         {
                             if (visited.Add(callee))
                             {
@@ -329,9 +330,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                         // Try source-level call graph first
                         bool hasSourceEdges = callGraph.TryGetValue(current, out var callees);
+
                         if (hasSourceEdges)
                         {
-                            foreach (var callee in callees)
+                            // Snapshot ConcurrentBag to avoid thread-local enumeration issues
+                            foreach (var callee in callees.ToArray())
                             {
                                 if (visited.Add(callee))
                                 {

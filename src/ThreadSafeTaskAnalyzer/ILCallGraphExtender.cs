@@ -280,6 +280,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             string? typeName = null;
             string? methodName = null;
             string? assemblyName = null;
+            int paramCount = -1; // -1 means unknown
 
             switch (handle.Kind)
             {
@@ -290,6 +291,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     var declaringType = reader.GetTypeDefinition(methodDef.GetDeclaringType());
                     typeName = GetFullTypeName(reader, declaringType);
                     assemblyName = containingAssembly.Identity.Name;
+                    // Count parameters from PE metadata
+                    paramCount = CountMethodDefParams(reader, methodDef);
                     break;
                 }
 
@@ -298,6 +301,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     var memberRef = reader.GetMemberReference((MemberReferenceHandle)handle);
                     methodName = reader.GetString(memberRef.Name);
                     (typeName, assemblyName) = ResolveMemberRefParent(reader, memberRef.Parent, containingAssembly);
+                    // Extract parameter count from MemberRef signature blob
+                    paramCount = GetParamCountFromSignature(reader, memberRef.Signature);
                     break;
                 }
 
@@ -318,13 +323,46 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             // Resolve to IMethodSymbol via the compilation
-            var resolvedSymbol = ResolveToMethodSymbol(typeName, methodName, assemblyName);
+            var resolvedSymbol = ResolveToMethodSymbol(typeName, methodName, assemblyName, paramCount);
             if (resolvedSymbol is null)
             {
                 return null;
             }
 
             return new ILCallTarget(resolvedSymbol);
+        }
+
+        /// <summary>
+        /// Counts the parameters of a MethodDefinition, excluding the return type pseudo-parameter.
+        /// </summary>
+        private static int CountMethodDefParams(MetadataReader reader, MethodDefinition methodDef)
+        {
+            // Read param count from the method signature blob to avoid the return-type
+            // pseudo-parameter issue in GetParameters()
+            return GetParamCountFromSignature(reader, methodDef.Signature);
+        }
+
+        /// <summary>
+        /// Extracts the parameter count from a method signature blob (ECMA-335 II.23.2.1/II.23.2.2).
+        /// Format: CallingConvention GenParamCount? ParamCount RetType Param*
+        /// </summary>
+        private static int GetParamCountFromSignature(MetadataReader reader, BlobHandle signatureHandle)
+        {
+            try
+            {
+                var blobReader = reader.GetBlobReader(signatureHandle);
+                byte callingConvention = blobReader.ReadByte();
+                // Check for generic method — if so, skip GenParamCount
+                if ((callingConvention & 0x10) != 0) // IMAGE_CEE_CS_CALLCONV_GENERIC
+                {
+                    blobReader.ReadCompressedInteger(); // GenParamCount
+                }
+                return blobReader.ReadCompressedInteger(); // ParamCount
+            }
+            catch
+            {
+                return -1;
+            }
         }
 
         private (string? typeName, string? assemblyName) ResolveMemberRefParent(
@@ -398,7 +436,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// <summary>
         /// Resolves a type+method name to an IMethodSymbol via the Compilation.
         /// </summary>
-        private IMethodSymbol? ResolveToMethodSymbol(string typeName, string methodName, string? assemblyName)
+        private IMethodSymbol? ResolveToMethodSymbol(string typeName, string methodName, string? assemblyName, int paramCount = -1)
         {
             // First try to find the type in the compilation
             var type = _compilation.GetTypeByMetadataName(typeName);
@@ -417,14 +455,25 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return null;
             }
 
-            // Find the method by name — return the first match
-            // (we can't easily match parameter types from IL metadata alone)
+            // Find the method by name, using parameter count for disambiguation when available
+            IMethodSymbol? firstMatch = null;
             foreach (var member in type.GetMembers(methodName))
             {
                 if (member is IMethodSymbol method)
                 {
-                    return method.OriginalDefinition;
+                    if (paramCount >= 0 && method.Parameters.Length == paramCount)
+                    {
+                        return method.OriginalDefinition; // exact param count match
+                    }
+
+                    firstMatch ??= method;
                 }
+            }
+
+            // If no exact param match, return first match (fallback)
+            if (firstMatch is not null)
+            {
+                return firstMatch.OriginalDefinition;
             }
 
             // Check for constructors
