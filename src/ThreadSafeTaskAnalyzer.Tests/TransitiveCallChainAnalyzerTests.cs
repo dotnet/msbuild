@@ -1092,5 +1092,70 @@ public class TransitiveCallChainAnalyzerTests
         transitive.Where(d => d.GetMessage().Contains("SafeHelper.Add")).ShouldBeEmpty();
     }
 
+    /// <summary>
+    /// Tests the pattern where a source-level helper class (in the same compilation as the task)
+    /// calls an external library method that performs unsafe file I/O.
+    /// This matches the SDK pattern: Task → LockFileCache (source) → NuGet.ProjectModel (external) → File.Open
+    /// </summary>
+    [Fact]
+    public async Task SourceHelper_CallingExternalLib_DetectedViaIL()
+    {
+        // External library (simulating NuGet.ProjectModel)
+        var libraries = new (string source, string assemblyName)[]
+        {
+            ("""
+                using System;
+                using System.IO;
+                namespace NuGetShim
+                {
+                    public static class LockFileUtilities
+                    {
+                        public static string GetLockFile(string path, object logger)
+                        {
+                            using var s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read);
+                            return path;
+                        }
+                    }
+                }
+                """, "NuGet.ProjectModel"),
+        };
+
+        // Task source includes BOTH the task AND a source-level helper
+        var taskSource = """
+            namespace TestNs
+            {
+                internal class LockFileCache
+                {
+                    public string GetLockFile(string path)
+                    {
+                        return LoadLockFile(path);
+                    }
+                    private string LoadLockFile(string path)
+                    {
+                        return NuGetShim.LockFileUtilities.GetLockFile(path, null);
+                    }
+                }
+
+                public class CheckTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool Execute()
+                    {
+                        var cache = new LockFileCache();
+                        cache.GetLockFile("test.json");
+                        return true;
+                    }
+                }
+            }
+            """;
+
+        var diags = await GetMultiAssemblyDiagnosticsAsync(libraries, taskSource);
+        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
+        transitive.ShouldNotBeEmpty("Should detect File.Open through source helper → external NuGet lib");
+        // The chain should include both the source helper and the external library method
+        var msg = string.Join("; ", transitive.Select(d => d.GetMessage()));
+        msg.ShouldContain("LockFileCache");
+        msg.ShouldContain("LockFileUtilities");
+    }
+
     #endregion
 }
