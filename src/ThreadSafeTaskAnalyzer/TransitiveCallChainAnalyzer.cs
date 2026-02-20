@@ -479,15 +479,48 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 calledMethod.ContainingType is not null &&
                 filePathTypes.Contains(calledMethod.ContainingType))
             {
-                // IL-discovered calls don't have argument values, so we can't check IsWrappedSafely.
-                // We check if the method has any path-like parameters.
+                // Check ALL overloads of this method name for path-like parameters,
+                // not just the single overload that was resolved from IL (which may be wrong
+                // due to overload resolution limitations — we match by name, not signature).
                 bool hasPathParam = false;
-                foreach (var param in calledMethod.Parameters)
+                foreach (var member in calledMethod.ContainingType.GetMembers(calledMethod.Name))
                 {
-                    if (param.Type.SpecialType == SpecialType.System_String && IsPathParameterName(param.Name))
+                    if (member is IMethodSymbol overload)
                     {
-                        hasPathParam = true;
-                        break;
+                        foreach (var param in overload.Parameters)
+                        {
+                            if (param.Type.SpecialType == SpecialType.System_String && IsPathParameterName(param.Name))
+                            {
+                                hasPathParam = true;
+                                break;
+                            }
+                        }
+
+                        if (hasPathParam)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                // Also check constructors if the resolved method is a constructor
+                if (!hasPathParam && calledMethod.MethodKind == MethodKind.Constructor)
+                {
+                    foreach (var ctor in calledMethod.ContainingType.Constructors)
+                    {
+                        foreach (var param in ctor.Parameters)
+                        {
+                            if (param.Type.SpecialType == SpecialType.System_String && IsPathParameterName(param.Name))
+                            {
+                                hasPathParam = true;
+                                break;
+                            }
+                        }
+
+                        if (hasPathParam)
+                        {
+                            break;
+                        }
                     }
                 }
 

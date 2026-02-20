@@ -813,4 +813,284 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     #endregion
+
+    #region Multi-Assembly (nested package hierarchy) Tests
+
+    /// <summary>
+    /// Compiles a chain of library assemblies (each referencing the previous), then
+    /// compiles a task assembly referencing the first library. Runs the transitive analyzer.
+    /// Libraries are ordered bottom-up: libraries[0] has no deps, libraries[1] refs libraries[0], etc.
+    /// The task references only the last library.
+    /// </summary>
+    private static async Task<ImmutableArray<Diagnostic>> GetMultiAssemblyDiagnosticsAsync(
+        (string source, string assemblyName)[] libraries,
+        string taskSource)
+    {
+        var coreRefs = GetCoreReferences();
+        var stubTree = CSharpSyntaxTree.ParseText(FrameworkStubs, path: "Stubs.cs");
+        var tempFiles = new System.Collections.Generic.List<string>();
+        var libReferences = new System.Collections.Generic.List<MetadataReference>();
+
+        try
+        {
+            // Compile libraries in order — each one can reference all previously compiled ones
+            foreach (var (source, assemblyName) in libraries)
+            {
+                var syntaxTree = CSharpSyntaxTree.ParseText(source, path: $"{assemblyName}.cs");
+                var refs = coreRefs.Concat(libReferences).Append(MetadataReference.CreateFromFile(typeof(object).Assembly.Location));
+                var allRefs = coreRefs.Concat(libReferences).ToArray();
+
+                var compilation = CSharpCompilation.Create(
+                    assemblyName,
+                    [syntaxTree, stubTree],
+                    allRefs,
+                    new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+                        .WithNullableContextOptions(NullableContextOptions.Enable));
+
+                using var stream = new System.IO.MemoryStream();
+                var emitResult = compilation.Emit(stream);
+                emitResult.Success.ShouldBeTrue(
+                    $"Library '{assemblyName}' compilation failed: {string.Join(", ", emitResult.Diagnostics.Where(d => d.Severity == DiagnosticSeverity.Error))}");
+
+                var tempPath = System.IO.Path.Combine(
+                    System.IO.Path.GetTempPath(),
+                    $"{assemblyName}_{System.Guid.NewGuid():N}.dll");
+                System.IO.File.WriteAllBytes(tempPath, stream.ToArray());
+                tempFiles.Add(tempPath);
+                libReferences.Add(MetadataReference.CreateFromFile(tempPath));
+            }
+
+            // Compile task assembly referencing all libraries
+            var taskSyntaxTree = CSharpSyntaxTree.ParseText(taskSource, path: "Task.cs");
+            var taskStubTree = CSharpSyntaxTree.ParseText(FrameworkStubs, path: "TaskStubs.cs");
+
+            var taskCompilation = CSharpCompilation.Create(
+                "TaskAssembly",
+                [taskSyntaxTree, taskStubTree],
+                coreRefs.Concat(libReferences).ToArray(),
+                new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+                    .WithNullableContextOptions(NullableContextOptions.Enable));
+
+            var analyzer = new TransitiveCallChainAnalyzer();
+            var compilationWithAnalyzers = taskCompilation.WithAnalyzers(
+                ImmutableArray.Create<DiagnosticAnalyzer>(analyzer));
+
+            return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        }
+        finally
+        {
+            foreach (var f in tempFiles)
+            {
+                try { System.IO.File.Delete(f); } catch { }
+            }
+        }
+    }
+
+    [Fact]
+    public async Task MultiAssembly_TwoLibraries_FileOpenDetected()
+    {
+        // LibBase: has File.Open
+        // LibMiddle: calls LibBase
+        // Task: calls LibMiddle
+        // Expected: Task → LibMiddle.Process → LibBase.ReadData → File.Open detected
+
+        var libraries = new (string source, string assemblyName)[]
+        {
+            ("""
+                using System.IO;
+                namespace LibBase
+                {
+                    public static class DataReader
+                    {
+                        public static string ReadData(string path)
+                        {
+                            using var fs = File.OpenRead(path);
+                            using var sr = new StreamReader(fs);
+                            return sr.ReadToEnd();
+                        }
+                    }
+                }
+                """, "LibBase"),
+            ("""
+                namespace LibMiddle
+                {
+                    public static class Processor
+                    {
+                        public static string Process(string filePath)
+                        {
+                            return LibBase.DataReader.ReadData(filePath);
+                        }
+                    }
+                }
+                """, "LibMiddle"),
+        };
+
+        var taskSource = """
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    LibMiddle.Processor.Process("data.json");
+                    return true;
+                }
+            }
+            """;
+
+        var diags = await GetMultiAssemblyDiagnosticsAsync(libraries, taskSource);
+        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
+        transitive.ShouldNotBeEmpty("Should detect File.OpenRead through 2-library chain");
+        var msg = transitive[0].GetMessage();
+        msg.ShouldContain("→");
+    }
+
+    [Fact]
+    public async Task MultiAssembly_ThreeLibraries_EnvironmentExitDetected()
+    {
+        // LibC: calls Environment.Exit
+        // LibB: calls LibC
+        // LibA: calls LibB
+        // Task: calls LibA
+
+        var libraries = new (string source, string assemblyName)[]
+        {
+            ("""
+                using System;
+                namespace LibC
+                {
+                    public static class Terminator
+                    {
+                        public static void Terminate() { Environment.Exit(1); }
+                    }
+                }
+                """, "LibC"),
+            ("""
+                namespace LibB
+                {
+                    public static class Gateway
+                    {
+                        public static void Check(bool fail)
+                        {
+                            if (fail) LibC.Terminator.Terminate();
+                        }
+                    }
+                }
+                """, "LibB"),
+            ("""
+                namespace LibA
+                {
+                    public static class Facade
+                    {
+                        public static void Run()
+                        {
+                            LibB.Gateway.Check(false);
+                        }
+                    }
+                }
+                """, "LibA"),
+        };
+
+        var taskSource = """
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    LibA.Facade.Run();
+                    return true;
+                }
+            }
+            """;
+
+        var diags = await GetMultiAssemblyDiagnosticsAsync(libraries, taskSource);
+        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
+        transitive.ShouldNotBeEmpty("Should detect Environment.Exit through 3-library chain");
+        var msg = transitive[0].GetMessage();
+        msg.ShouldContain("Exit");
+    }
+
+    [Fact]
+    public async Task MultiAssembly_XDocumentSave_DetectedThroughLibrary()
+    {
+        // Simulates the SDK pattern: Task → LockFileCache → LockFileUtilities (File.Open)
+        var libraries = new (string source, string assemblyName)[]
+        {
+            ("""
+                using System.Xml.Linq;
+                namespace ConfigLib
+                {
+                    public static class ConfigWriter
+                    {
+                        public static void Write(XDocument doc, string outputPath)
+                        {
+                            doc.Save(outputPath);
+                        }
+                    }
+                }
+                """, "ConfigLib"),
+        };
+
+        var taskSource = """
+            using System.Xml.Linq;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var doc = new XDocument();
+                    ConfigLib.ConfigWriter.Write(doc, "output.xml");
+                    return true;
+                }
+            }
+            """;
+
+        var diags = await GetMultiAssemblyDiagnosticsAsync(libraries, taskSource);
+        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
+        transitive.ShouldNotBeEmpty("Should detect XDocument.Save through library wrapper");
+    }
+
+    [Fact]
+    public async Task MultiAssembly_MixedCleanAndDirty_OnlyDirtyFlagged()
+    {
+        var libraries = new (string source, string assemblyName)[]
+        {
+            ("""
+                using System;
+                using System.IO;
+                namespace MixedLib
+                {
+                    public static class SafeHelper
+                    {
+                        public static int Add(int a, int b) => a + b;
+                    }
+                    public static class UnsafeHelper
+                    {
+                        public static string LoadFile(string path) => File.ReadAllText(path);
+                    }
+                }
+                """, "MixedLib"),
+        };
+
+        var taskSource = """
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var sum = MixedLib.SafeHelper.Add(1, 2);
+                    var text = MixedLib.UnsafeHelper.LoadFile("data.txt");
+                    return true;
+                }
+            }
+            """;
+
+        var diags = await GetMultiAssemblyDiagnosticsAsync(libraries, taskSource);
+        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
+        transitive.ShouldNotBeEmpty("Should detect File.ReadAllText through UnsafeHelper");
+        // All violations should trace through UnsafeHelper, not through SafeHelper.Add
+        foreach (var d in transitive)
+        {
+            d.GetMessage().ShouldContain("UnsafeHelper");
+        }
+        // SafeHelper.Add should not appear as a standalone chain element
+        transitive.Where(d => d.GetMessage().Contains("SafeHelper.Add")).ShouldBeEmpty();
+    }
+
+    #endregion
 }
