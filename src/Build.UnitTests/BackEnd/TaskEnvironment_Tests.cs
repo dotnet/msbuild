@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests
         public void TaskEnvironment_SetAndGetEnvironmentVariable_ShouldWork(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
-            string testVarName = $"MSBUILD_TEST_VAR_{environmentType}_{Guid.NewGuid():N}";
+            string testVarName = $"TEST_ENV_VAR_{environmentType}_{Guid.NewGuid():N}";
             string testVarValue = $"test_value_{environmentType}";
 
             try
@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests
         public void TaskEnvironment_SetEnvironmentVariableToNull_ShouldRemoveVariable(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
-            string testVarName = $"MSBUILD_REMOVE_TEST_{environmentType}_{Guid.NewGuid():N}";
+            string testVarName = $"TEST_ENV_VAR_REMOVE_{environmentType}_{Guid.NewGuid():N}";
             string testVarValue = "value_to_remove";
 
             try
@@ -138,7 +138,7 @@ namespace Microsoft.Build.UnitTests
         public void TaskEnvironment_SetEnvironment_ShouldReplaceAllVariables(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
-            string prefix = $"MSBUILD_SET_ENV_TEST_{environmentType}_{Guid.NewGuid():N}";
+            string prefix = $"TEST_ENV_VAR_SET_{environmentType}_{Guid.NewGuid():N}";
             string var1Name = $"{prefix}_VAR1";
             string var2Name = $"{prefix}_VAR2";
             string var3Name = $"{prefix}_VAR3";
@@ -265,7 +265,7 @@ namespace Microsoft.Build.UnitTests
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
             string testDirectory = GetResolvedTempPath();
-            string testVarName = $"MSBUILD_PROCESS_TEST_{environmentType}_{Guid.NewGuid():N}";
+            string testVarName = $"TEST_ENV_VAR_PROCESS_{environmentType}_{Guid.NewGuid():N}";
             string testVarValue = "process_test_value";
             string originalDirectory = Directory.GetCurrentDirectory();
 
@@ -303,7 +303,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TaskEnvironment_StubEnvironment_ShouldAffectSystemEnvironment()
         {
-            string testVarName = $"MSBUILD_STUB_ISOLATION_TEST_{Guid.NewGuid():N}";
+            string testVarName = $"TEST_ENV_VAR_STUB_ISOLATION_{Guid.NewGuid():N}";
             string testVarValue = "stub_test_value";
 
             var stubEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -333,7 +333,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TaskEnvironment_MultithreadedEnvironment_ShouldBeIsolatedFromSystem()
         {
-            string testVarName = $"MSBUILD_MULTITHREADED_ISOLATION_TEST_{Guid.NewGuid():N}";
+            string testVarName = $"TEST_ENV_VAR_MULTITHREADED_ISOLATION_{Guid.NewGuid():N}";
             string testVarValue = "multithreaded_test_value";
 
             using var driver = new MultiThreadedTaskEnvironmentDriver(
