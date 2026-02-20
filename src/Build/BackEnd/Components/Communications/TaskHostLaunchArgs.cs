@@ -60,7 +60,7 @@ internal sealed class TaskHostLaunchArgs
                 "{msbuildLocation}" /nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuse.ToString().ToLower()} /low:{buildParameters.LowPriority.ToString().ToLower()} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} 
                 """;
 
-            handshake = new Handshake(hostContext, predefinedToolsDirectory: msbuildAssemblyDirectory);
+            handshake = new Handshake(hostContext, toolsDirectory: msbuildAssemblyDirectory);
 
             result = new TaskHostLaunchArgs(runtimeHostPath, commandLineArgs, handshake, usingDotNetExe: true);
             return true;
