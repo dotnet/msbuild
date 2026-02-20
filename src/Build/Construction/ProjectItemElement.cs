@@ -286,6 +286,11 @@ namespace Microsoft.Build.Construction
         public ICollection<ProjectMetadataElement> Metadata => GetChildrenOfType<ProjectMetadataElement>();
 
         /// <summary>
+        /// Use this instead of <see cref="Metadata"/> to avoid boxing the struct enumerator.
+        /// </summary>
+        internal ProjectElementSiblingSubTypeCollection<ProjectMetadataElement> MetadataEnumerable => GetChildrenOfType<ProjectMetadataElement>();
+
+        /// <summary>
         /// Location of the include attribute
         /// </summary>
         public ElementLocation IncludeLocation => GetAttributeLocation(XMakeAttributes.include);
