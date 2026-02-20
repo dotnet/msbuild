@@ -658,11 +658,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                 int cpuCount = 1;
                 bool multiThreaded = false;
-#if FEATURE_NODE_REUSE
                 bool enableNodeReuse = true;
-#else
-                bool enableNodeReuse = false;
-#endif
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
                 ISet<string> warningsNotAsErrors = null;
@@ -905,6 +901,7 @@ namespace Microsoft.Build.CommandLine
                 ShowHelpPrompt();
 
                 exitType = ExitType.SwitchError;
+                RecordCrashTelemetry(e, exitType);
             }
             // handle configuration exceptions: problems reading toolset information from msbuild.exe.config or the registry
             catch (InvalidToolsetDefinitionException e)
@@ -913,6 +910,7 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ConfigurationFailurePrefixNoErrorCode", e.ErrorCode, e.Message));
 
                 exitType = ExitType.InitializationError;
+                RecordCrashTelemetry(e, exitType);
             }
             // handle initialization failures
             catch (InitializationException e)
@@ -920,6 +918,7 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine(e.Message);
 
                 exitType = ExitType.InitializationError;
+                RecordCrashTelemetry(e, exitType);
             }
             // handle polite logger failures: don't dump the stack or trigger watson for these
             catch (LoggerException e)
@@ -945,6 +944,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 exitType = ExitType.LoggerAbort;
+                RecordCrashTelemetry(e, exitType);
             }
             // handle logger failures (logger bugs)
             catch (InternalLoggerException e)
@@ -968,6 +968,8 @@ namespace Microsoft.Build.CommandLine
                         $"MSBUILD : error {e.ErrorCode}: {e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : "")}");
                     exitType = ExitType.InitializationError;
                 }
+
+                RecordCrashTelemetry(e, exitType);
             }
 #pragma warning disable CS0618 // Microsoft.Build.Experimental.ProjectCache.ProjectCacheException is obsolete, but we need to support both namespaces for now
             catch (Exception e) when (e is ProjectCacheException || e is Microsoft.Build.Experimental.ProjectCache.ProjectCacheException)
@@ -991,6 +993,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 exitType = ExitType.ProjectCacheFailure;
+                RecordCrashTelemetry(e, exitType);
             }
 #pragma warning restore CS0618 // Type is obsolete
             catch (BuildAbortedException e)
@@ -999,6 +1002,7 @@ namespace Microsoft.Build.CommandLine
                     $"MSBUILD : error {e.ErrorCode}: {e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : string.Empty)}");
 
                 exitType = ExitType.Unexpected;
+                RecordCrashTelemetry(e, exitType);
             }
             catch (PathTooLongException e)
             {
@@ -1006,6 +1010,7 @@ namespace Microsoft.Build.CommandLine
                     $"{e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : string.Empty)}");
 
                 exitType = ExitType.Unexpected;
+                RecordCrashTelemetry(e, exitType);
             }
             // handle fatal errors
             catch (Exception e)
@@ -1015,6 +1020,8 @@ namespace Microsoft.Build.CommandLine
 #if DEBUG
                 Console.WriteLine("This is an unhandled exception in MSBuild Engine -- PLEASE OPEN A BUG AGAINST THE MSBUILD TEAM.\r\n{0}", e.ToString());
 #endif
+                RecordCrashTelemetry(e, ExitType.Unexpected, isUnhandled: true);
+
                 // rethrow, in case Watson is enabled on the machine -- if not, the CLR will write out exception details
                 // allow the build lab to set an env var to avoid jamming the build
                 if (Environment.GetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER") != "1")
@@ -1024,6 +1031,8 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
+                CrashTelemetryRecorder.FlushCrashTelemetry();
+
                 s_buildComplete.Set();
                 Console.CancelKeyPress -= cancelHandler;
 
@@ -1045,6 +1054,42 @@ namespace Microsoft.Build.CommandLine
              *********************************************************************************************************************/
 
             return exitType;
+        }
+
+        private static string GetHostName()
+        {
+            if (BuildEnvironmentState.s_runningInVisualStudio)
+            {
+                return "VS";
+            }
+
+            string msbuildHostName = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
+            if (!string.IsNullOrEmpty(msbuildHostName))
+            {
+                return msbuildHostName;
+            }
+
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
+            {
+                return "VSCode";
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Records crash telemetry data for later emission.
+        /// </summary>
+        private static void RecordCrashTelemetry(Exception exception, ExitType exitType, bool isUnhandled = false)
+        {
+            CrashTelemetryRecorder.RecordCrashTelemetry(
+                exception,
+                exitType.ToString(),
+                isUnhandled,
+                ExceptionHandling.IsCriticalException(exception),
+                ProjectCollection.Version?.ToString(),
+                NativeMethodsShared.FrameworkName,
+                GetHostName());
         }
 
         private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project, TextWriter outputStream)
@@ -2172,7 +2217,6 @@ namespace Microsoft.Build.CommandLine
                     multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
                     // figure out if we should reuse nodes
-                    // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
 
                     // determine what if any writer to preprocess to
@@ -2667,12 +2711,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         internal static bool ProcessNodeReuseSwitch(string[] parameters)
         {
-            bool enableNodeReuse;
-#if FEATURE_NODE_REUSE
-            enableNodeReuse = true;
-#else
-            enableNodeReuse = false;
-#endif
+            bool enableNodeReuse = true;
 
             if (Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1") // For example to disable node reuse in a gated checkin, without using the flag
             {
@@ -2695,11 +2734,6 @@ namespace Microsoft.Build.CommandLine
                     CommandLineSwitchException.Throw("InvalidNodeReuseValue", parameters[parameters.Length - 1], ex.Message);
                 }
             }
-
-#if !FEATURE_NODE_REUSE
-            if (enableNodeReuse) // Only allowed to pass False on the command line for this switch if the feature is disabled for this installation
-                CommandLineSwitchException.Throw("InvalidNodeReuseTrueValue", parameters[parameters.Length - 1]);
-#endif
 
             return enableNodeReuse;
         }
@@ -2903,7 +2937,6 @@ namespace Microsoft.Build.CommandLine
                 switch (nodeMode)
                 {
                     case NodeMode.OutOfProcNode:
-                        // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                         bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
                         OutOfProcNode node = new OutOfProcNode();
                         shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
