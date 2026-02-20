@@ -7,7 +7,11 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+#if NET
 using System.IO;
+#else
+using Microsoft.IO;
+#endif
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -29,11 +33,6 @@ using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
-
-#if FEATURE_MSIOREDIST
-using Directory = Microsoft.IO.Directory;
-using Path = Microsoft.IO.Path;
-#endif
 
 #nullable disable
 
@@ -2553,7 +2552,7 @@ namespace Microsoft.Build.Evaluation
                             // 1. in multiprocess mode we're safe to get the current directory as we'll be running on TaskItems which
                             // only exist within a target where we can trust the current directory
                             // 2. in single process mode we get the project directory set for the thread
-                            string directoryToUse = item.Value.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory();
+                            string directoryToUse = item.Value.ProjectDirectory ?? FrameworkFileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory();
                             string definingProjectEscaped = item.Value.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
 
                             result = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, item.Key, definingProjectEscaped, functionName);
@@ -2611,7 +2610,7 @@ namespace Microsoft.Build.Evaluation
                                 // 1. in multiprocess mode we're safe to get the current directory as we'll be running on TaskItems which
                                 // only exist within a target where we can trust the current directory
                                 // 2. in single process mode we get the project directory set for the thread
-                                string baseDirectoryToUse = item.Value.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
+                                string baseDirectoryToUse = item.Value.ProjectDirectory ?? FrameworkFileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
                                 rootedPath = Path.Combine(baseDirectoryToUse, unescapedPath);
                             }
                         }
@@ -2691,7 +2690,7 @@ namespace Microsoft.Build.Evaluation
                                 // 1. in multiprocess mode we're safe to get the current directory as we'll be running on TaskItems which
                                 // only exist within a target where we can trust the current directory
                                 // 2. in single process mode we get the project directory set for the thread
-                                string baseDirectoryToUse = item.Value.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
+                                string baseDirectoryToUse = item.Value.ProjectDirectory ?? FrameworkFileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
                                 rootedPath = Path.Combine(baseDirectoryToUse, unescapedPath);
                             }
 
@@ -2770,7 +2769,7 @@ namespace Microsoft.Build.Evaluation
                                     // 1. in multiprocess mode we're safe to get the current directory as we'll be running on TaskItems which
                                     // only exist within a target where we can trust the current directory
                                     // 2. in single process mode we get the project directory set for the thread
-                                    string baseDirectoryToUse = item.Value.ProjectDirectory  ?? FileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
+                                    string baseDirectoryToUse = item.Value.ProjectDirectory ?? FrameworkFileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
                                     rootedPath = Path.Combine(baseDirectoryToUse, unescapedPath);
                                 }
 
@@ -3321,7 +3320,7 @@ namespace Microsoft.Build.Evaluation
                             // 1. in multiprocess mode we're safe to get the current directory as we'll be running on TaskItems which
                             // only exist within a target where we can trust the current directory
                             // 2. in single process mode we get the project directory set for the thread
-                            string directoryToUse = sourceOfMetadata.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory();
+                            string directoryToUse = sourceOfMetadata.ProjectDirectory ?? FrameworkFileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory();
                             string definingProjectEscaped = sourceOfMetadata.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
 
                             value = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, itemSpec, definingProjectEscaped, match.Name);

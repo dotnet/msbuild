@@ -1,0 +1,40 @@
+# MSBuild VMR source-build validation pipeline.
+#
+# Builds the VMR in source-build mode to validate MSBuild changes.
+# Supports passing extra MSBuild properties to stage 2 builds (e.g., -mt mode).
+#
+# Trigger: Manual only (queue from Azure DevOps UI)
+# Uses the same pattern as runtime's vmr-build-pr.yml.
+
+trigger: none
+pr: none
+
+parameters:
+- name: extraPropertiesStage2
+  displayName: 'Extra MSBuild properties for stage 2 (e.g., /p:DotNetBuildMT=true)'
+  type: string
+  default: '/p:DotNetBuildMT=true /p:MSBuildMTExcludedReposOverride=arcade%3Bruntime%3Broslyn%3Baspnetcore%3Bsdk%3Befcore%3Bwinforms%3Bwpf%3Brazor%3Bsource-build-reference-packages'
+
+variables:
+- template: /eng/common/templates/variables/pool-providers.yml@self
+
+- name: skipComponentGovernanceDetection
+  value: true
+
+- name: Codeql.Enabled
+  value: false
+
+resources:
+  repositories:
+  - repository: vmr
+    type: github
+    name: dotnet/dotnet
+    endpoint: dotnet
+
+stages:
+- template: /eng/pipelines/templates/stages/vmr-build.yml@vmr
+  parameters:
+    isBuiltFromVmr: false
+    scope: lite
+    verifications: [ "source-build-stage1", "source-build-stage2" ]
+    extraPropertiesStage2: ${{ parameters.extraPropertiesStage2 }}

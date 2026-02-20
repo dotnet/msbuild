@@ -455,7 +455,7 @@ namespace Microsoft.Build.Experimental
                 string[] msBuildServerOptions =
                 [
                     "/nologo",
-                    "/nodemode:8"
+                    NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcServerNode)
                 ];
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
