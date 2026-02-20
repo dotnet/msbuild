@@ -10,10 +10,7 @@ Opt-out is a better approach for us because we'd likely get limited feedback whe
 The opt-out comes in the form of setting the environment variable `MSBUILDDISABLEFEATURESFROMVERSION` to the Change Wave (or version) that contains the feature you want **disabled**. This version happens to be the version of MSBuild that the features were developed for. See the mapping of change waves to features below.
 
 ## Choosing a Change Wave for a New Feature
-This is determined on a case by case basis and should be discussed with the MSBuild team. A safe bet would be to check our [currently active Change Waves](ChangeWaves.md#change-waves-&-associated-features) and pick the version after the latest MSBuild version. This version corresponds to the latest version of Visual Studio.
-
-### Change Wave Versioning
-Change Wave features should match the LTS version of VS they were released with. Any feature requiring a changewave during a non-LTS release of VS should use the **NEXT** version number.
+Use the changewave for the currently-in-development version of MSBuild, as specified in `eng\Versions.props`. This version corresponds to the latest version of Visual Studio. Create a new change wave if there isn't one for this version of MSBuild yet. For example, if you're developing a feature for MSBuild 18.6, you should use `Wave18_6` or create it if it doesn't exist.
 
 # Developing With Change Waves in Mind
 For the purpose of providing an example, the rest of this document assumes we're developing a feature for MSBuild version **17.3**.
@@ -32,13 +29,13 @@ The Process:
 ```c#
 public static readonly Version Wave17_4 = new Version(17, 4);
 ```
-3. You may need to delete the lowest wave as new waves get added.
-4. Update the AllWaves array appropriately.
+3. Update the AllWaves array appropriately.
 ```c#
 public static readonly Version[] AllWaves = { Wave17_0, Wave17_2, Wave17_4 };
 ```
 
 ## Condition Your Feature On A Change Wave
+
 Surround your feature with the following:
 ```c#
     // If you pass an incorrectly formatted change wave, this will throw.
@@ -95,8 +92,10 @@ using (TestEnvironment env = TestEnvironment.Create())
 ```
 
 ## Change Wave 'End-of-Lifespan' Procedure
+
 These features will eventually become standard functionality. When a change wave rotates out, do the following:
 1. Start by deleting the readonly `Wave17_4` that was created in [Creating a Change Wave](#creating-a-change-wave).
 2. Remove `ChangeWave.AreFeaturesEnabled` or `[MSBuild]::AreFeaturesEnabled` conditions surrounding features that were assigned that change wave.
 3. Remove tests associated with ensuring features would not run if this wave were set.
 4. Clear all other issues that arose from deleting the version.
+5. Inspect for dead code that can be removed now that the change wave is deleted.

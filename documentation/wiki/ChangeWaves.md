@@ -5,11 +5,16 @@ A Change Wave is a set of risky features developed under the same opt-out flag. 
 Opt-out is a better approach for us because we'd likely get limited feedback when a feature impacts customer builds. When a feature does impact a customer negatively, it's a quick switch to disable and allows time to adapt. The key aspect to Change Waves is that it smooths the transition for customers adapting to risky changes that the MSBuild team feels strongly enough to take.
 
 ## How do they work?
+
 The opt-out comes in the form of setting the environment variable `MSBUILDDISABLEFEATURESFROMVERSION` to the Change Wave (or version) that contains the feature you want **disabled**. This version happens to be the version of MSBuild that the features were developed for. See the mapping of change waves to features below.
+
 The opt-out should be just a *temporary* workaround for a problem - as the feature will anyways become permanent eventually. For this reason - **please make sure to create or upvote a bug describing the issue making you opt-out**.
 
 ## When do they become permanent?
-A wave of features is set to "rotate out" (i.e. become standard functionality) two bands after its release. For example, wave 16.8 stayed opt-out through wave 16.10, becoming standard functionality when wave 17.0 is introduced.
+
+A wave of features is eligible to "rotate out" (i.e. become standard functionality) six months after its release. For example, wave 16.8 stayed opt-out through wave 16.10, becoming standard functionality when wave 17.0 is introduced.
+
+Changewave checks around features will be removed in the release that accompanies a new major version of .NET (for example, .NET 11, .NET 12).
 
 ## MSBUILDDISABLEFEATURESFROMVERSION Values & Outcomes
 | `MSBUILDDISABLEFEATURESFROMVERSION` Value                         | Result        | Receive Warning? |
@@ -26,6 +31,8 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 
 ### 18.4
 - [Start throwing on null or empty paths in MultiProcess and MultiThreaded Task Environment Drivers.](https://github.com/dotnet/msbuild/pull/12914)
+
+## Change waves that will be removed in the release accompanying .NET 11
 
 ### 18.3
 - [Replace Transactional property with ChangeWave control, implement atomic file replacement with retry logic, and update tests.](https://github.com/dotnet/msbuild/pull/12627)
@@ -57,6 +64,7 @@ A wave of features is set to "rotate out" (i.e. become standard functionality) t
 - [Keep the encoding of standard output & error consistent with the console code page for ToolTask](https://github.com/dotnet/msbuild/pull/9539)
 
 ## Change Waves No Longer In Rotation
+
 ### 16.8
 - [Enable NoWarn](https://github.com/dotnet/msbuild/pull/5671)
 - [Truncate Target/Task skipped log messages to 1024 chars](https://github.com/dotnet/msbuild/pull/5553)
