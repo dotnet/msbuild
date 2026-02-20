@@ -4,9 +4,9 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Build.Shared;
-using Microsoft.DotNet.XUnitExtensions;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 #nullable disable
 
@@ -14,6 +14,22 @@ namespace Microsoft.Build.UnitTests
 {
     public class ProcessExtensions_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public ProcessExtensions_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
+        private static Process StartLongRunningProcess()
+        {
+            var psi = NativeMethodsShared.IsWindows
+                ? new ProcessStartInfo("cmd.exe", "/c timeout /t 30 /nobreak")
+                : new ProcessStartInfo("sleep", "30");
+            psi.UseShellExecute = false;
+            return Process.Start(psi);
+        }
+
         [Fact]
         public async Task KillTree()
         {
@@ -35,41 +51,59 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public async Task GetCommandLine_ReturnsCommandLineForRunningProcess()
+        public async Task TryGetCommandLine_RunningProcess_ContainsExpectedExecutable()
         {
-            // Start a simple process that will run for a bit
-            var psi = NativeMethodsShared.IsWindows
-                ? new ProcessStartInfo("cmd.exe", "/c timeout 10")
-                : new ProcessStartInfo("sleep", "10");
-            
-            psi.UseShellExecute = false;
-
-            using Process p = Process.Start(psi);
+            using Process p = StartLongRunningProcess();
             try
             {
-                // Give the process time to start
-                await Task.Delay(500);
-
+                await Task.Delay(300);
+                var sw = Stopwatch.StartNew();
                 p.TryGetCommandLine(out string commandLine).ShouldBeTrue();
+                sw.Stop();
+                _output.WriteLine($"TryGetCommandLine elapsed: {sw.Elapsed.TotalMilliseconds:F2} ms");
 
-                // Command line retrieval should work on all platforms
-                commandLine.ShouldNotBeNull();
-                commandLine.ShouldNotBeEmpty();
-                
-                // Verify we get the expected process name
                 if (NativeMethodsShared.IsWindows)
                 {
-                    commandLine.ShouldContain("cmd");
+                    commandLine.ShouldContain("cmd", Case.Insensitive);
                 }
                 else
                 {
                     commandLine.ShouldContain("sleep");
-                    commandLine.ShouldContain("10");
                 }
             }
             finally
             {
-                // Clean up
+                if (!p.HasExited)
+                {
+                    p.KillTree(5000);
+                }
+            }
+        }
+
+        [Fact]
+        public async Task TryGetCommandLine_RunningProcess_ContainsArguments()
+        {
+            using Process p = StartLongRunningProcess();
+            try
+            {
+                await Task.Delay(300);
+                var sw = Stopwatch.StartNew();
+                p.TryGetCommandLine(out string commandLine);
+                sw.Stop();
+                _output.WriteLine($"TryGetCommandLine elapsed: {sw.Elapsed.TotalMilliseconds:F2} ms");
+
+                if (NativeMethodsShared.IsWindows)
+                {
+                    // cmd /c timeout /t 30 /nobreak – at minimum "timeout" or "30" should appear
+                    commandLine.ShouldMatch(@"(timeout|30)");
+                }
+                else
+                {
+                    commandLine.ShouldContain("30");
+                }
+            }
+            finally
+            {
                 if (!p.HasExited)
                 {
                     p.KillTree(5000);
