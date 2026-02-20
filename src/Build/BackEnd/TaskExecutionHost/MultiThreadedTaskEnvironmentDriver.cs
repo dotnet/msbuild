@@ -38,6 +38,22 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Validates that the specified environment variable can be modified.
+        /// Throws if the variable is one that MSBuild assumes should remain constant.
+        /// </summary>
+        /// <param name="name">The name of the environment variable to check.</param>
+        /// <exception cref="ArgumentException">Thrown when attempting to modify an immutable environment variable.</exception>
+        private void EnsureVariableCanBeModified(string name)
+        {
+            if (EnvironmentVariableClassifier.IsImmutable(name))
+            {
+                throw new ArgumentException(
+                    $"Task cannot modify environment variable '{name}' because MSBuild assumes it should remain constant.",
+                    nameof(name));
+            }
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="MultiThreadedTaskEnvironmentDriver"/> class
         /// with the specified working directory and environment variables from the current process.
         /// </summary>
@@ -88,6 +104,13 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public void SetEnvironmentVariable(string name, string? value)
         {
+            // Only validate if we're actually changing the value
+            _environmentVariables.TryGetValue(name, out string? currentValue);
+            if (!CommunicationsUtilities.EnvironmentVariableComparer.Equals(currentValue, value))
+            {
+                EnsureVariableCanBeModified(name);
+            }
+            
             if (value == null)
             {
                 _environmentVariables.Remove(name);
@@ -101,6 +124,27 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public void SetEnvironment(IDictionary<string, string> newEnvironment)
         {
+            // Check for variables being removed (exist in current but not in new environment)
+            foreach (string currentVar in _environmentVariables.Keys)
+            {
+                if (!newEnvironment.ContainsKey(currentVar))
+                {
+                    EnsureVariableCanBeModified(currentVar);
+                }
+            }
+            
+            // Check for variables being added or modified
+            foreach (KeyValuePair<string, string> entry in newEnvironment)
+            {
+                _environmentVariables.TryGetValue(entry.Key, out string? currentValue);
+                
+                // Only validate if we're actually changing the value
+                if (!CommunicationsUtilities.EnvironmentVariableComparer.Equals(currentValue, entry.Value))
+                {
+                    EnsureVariableCanBeModified(entry.Key);
+                }
+            }
+
             // Simply replace the entire environment dictionary
             _environmentVariables.Clear();
             foreach (KeyValuePair<string, string> entry in newEnvironment)
