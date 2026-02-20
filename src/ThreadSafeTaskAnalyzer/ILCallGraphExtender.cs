@@ -632,7 +632,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 || paramName.IndexOf("dir", StringComparison.OrdinalIgnoreCase) >= 0
                 || paramName.IndexOf("folder", StringComparison.OrdinalIgnoreCase) >= 0
                 || paramName.IndexOf("source", StringComparison.OrdinalIgnoreCase) >= 0
-                || paramName.IndexOf("dest", StringComparison.OrdinalIgnoreCase) >= 0;
+                || paramName.IndexOf("dest", StringComparison.OrdinalIgnoreCase) >= 0
+                || paramName.IndexOf("uri", StringComparison.OrdinalIgnoreCase) >= 0
+                || paramName.IndexOf("url", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         private static string GetFullTypeName(MetadataReader reader, TypeDefinition typeDef)

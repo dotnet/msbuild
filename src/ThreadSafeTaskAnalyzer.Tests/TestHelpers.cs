@@ -165,6 +165,10 @@ internal static class TestHelpers
             typeof(System.Linq.Enumerable).Assembly,          // System.Linq
             typeof(System.Threading.Tasks.Task).Assembly,     // System.Threading.Tasks
             typeof(System.Runtime.InteropServices.GuidAttribute).Assembly, // System.Runtime
+            typeof(System.Xml.Linq.XDocument).Assembly,       // System.Xml.Linq
+            typeof(System.Xml.XmlReader).Assembly,            // System.Xml.ReaderWriter
+            typeof(System.IO.Compression.ZipFile).Assembly,   // System.IO.Compression.ZipFile
+            typeof(System.IO.Compression.ZipArchive).Assembly, // System.IO.Compression
         };
 
         var locations = assemblies

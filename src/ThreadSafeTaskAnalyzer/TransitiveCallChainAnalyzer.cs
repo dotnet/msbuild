@@ -738,6 +738,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         {
             var typeNames = new[]
             {
+                // Core System.IO file/directory types
                 "System.IO.File",
                 "System.IO.Directory",
                 "System.IO.FileInfo",
@@ -746,6 +747,40 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 "System.IO.StreamReader",
                 "System.IO.StreamWriter",
                 "System.IO.FileSystemWatcher",
+                "System.IO.BinaryReader",
+                "System.IO.BinaryWriter",
+
+                // XML types that accept file paths in Load/Save/Create
+                "System.Xml.Linq.XDocument",
+                "System.Xml.Linq.XElement",
+                "System.Xml.XmlDocument",
+                "System.Xml.XmlReader",
+                "System.Xml.XmlWriter",
+                "System.Xml.XmlTextReader",
+                "System.Xml.XmlTextWriter",
+                "System.Xml.Xsl.XslCompiledTransform",
+                "System.Xml.Schema.XmlSchema",
+
+                // Compression types that accept file paths
+                "System.IO.Compression.ZipFile",
+
+                // Memory-mapped files
+                "System.IO.MemoryMappedFiles.MemoryMappedFile",
+
+                // Security / certificates
+                "System.Security.Cryptography.X509Certificates.X509Certificate",
+                "System.Security.Cryptography.X509Certificates.X509Certificate2",
+
+                // Diagnostics
+                "System.Diagnostics.FileVersionInfo",
+                "System.Diagnostics.TextWriterTraceListener",
+
+                // Resources
+                "System.Resources.ResourceReader",
+                "System.Resources.ResourceWriter",
+
+                // Assembly loading (supplements the banned-API list for path-based overloads)
+                "System.Runtime.Loader.AssemblyLoadContext",
             };
 
             var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);

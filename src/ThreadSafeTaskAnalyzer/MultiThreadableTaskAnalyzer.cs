@@ -255,13 +255,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// </summary>
         private static bool IsPathParameterName(string paramName)
         {
-            // Common path parameter names in System.IO APIs
+            // Common path parameter names in System.IO, System.Xml, and other BCL APIs
             return paramName.IndexOf("path", StringComparison.OrdinalIgnoreCase) >= 0
                 || paramName.IndexOf("file", StringComparison.OrdinalIgnoreCase) >= 0
                 || paramName.IndexOf("dir", StringComparison.OrdinalIgnoreCase) >= 0
                 || paramName.IndexOf("folder", StringComparison.OrdinalIgnoreCase) >= 0
                 || paramName.IndexOf("source", StringComparison.OrdinalIgnoreCase) >= 0
-                || paramName.IndexOf("dest", StringComparison.OrdinalIgnoreCase) >= 0;
+                || paramName.IndexOf("dest", StringComparison.OrdinalIgnoreCase) >= 0
+                || paramName.IndexOf("uri", StringComparison.OrdinalIgnoreCase) >= 0
+                || paramName.IndexOf("url", StringComparison.OrdinalIgnoreCase) >= 0;
         }
 
         /// <summary>
@@ -469,6 +471,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         {
             var typeNames = new[]
             {
+                // Core System.IO file/directory types
                 "System.IO.File",
                 "System.IO.Directory",
                 "System.IO.FileInfo",
@@ -477,6 +480,40 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 "System.IO.StreamReader",
                 "System.IO.StreamWriter",
                 "System.IO.FileSystemWatcher",
+                "System.IO.BinaryReader",
+                "System.IO.BinaryWriter",
+
+                // XML types that accept file paths in Load/Save/Create
+                "System.Xml.Linq.XDocument",
+                "System.Xml.Linq.XElement",
+                "System.Xml.XmlDocument",
+                "System.Xml.XmlReader",
+                "System.Xml.XmlWriter",
+                "System.Xml.XmlTextReader",
+                "System.Xml.XmlTextWriter",
+                "System.Xml.Xsl.XslCompiledTransform",
+                "System.Xml.Schema.XmlSchema",
+
+                // Compression types that accept file paths
+                "System.IO.Compression.ZipFile",
+
+                // Memory-mapped files
+                "System.IO.MemoryMappedFiles.MemoryMappedFile",
+
+                // Security / certificates
+                "System.Security.Cryptography.X509Certificates.X509Certificate",
+                "System.Security.Cryptography.X509Certificates.X509Certificate2",
+
+                // Diagnostics
+                "System.Diagnostics.FileVersionInfo",
+                "System.Diagnostics.TextWriterTraceListener",
+
+                // Resources
+                "System.Resources.ResourceReader",
+                "System.Resources.ResourceWriter",
+
+                // Assembly loading (supplements the banned-API list for path-based overloads)
+                "System.Runtime.Loader.AssemblyLoadContext",
             };
 
             var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);

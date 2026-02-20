@@ -1245,6 +1245,61 @@ public class MultiThreadableTaskAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
     }
 
+    [Fact]
+    public async Task XDocumentSave_WithStringPath_ProducesDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.Xml.Linq;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var doc = new XDocument();
+                    doc.Save("output.xml");
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task XmlReaderCreate_WithStringPath_ProducesDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.Xml;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    using var reader = XmlReader.Create("input.xml");
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task ZipFileOpenRead_WithStringPath_ProducesDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO.Compression;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    using var archive = ZipFile.OpenRead("archive.zip");
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
     // ═══════════════════════════════════════════════════════════════════════
     // Iteration 9-13: New APIs and features
     // ═══════════════════════════════════════════════════════════════════════
