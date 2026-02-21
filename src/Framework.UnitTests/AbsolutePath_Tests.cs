@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void AbsolutePath_NullOrEmptyyWithBasePath_ShouldThrowOnNull()
+        public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrowOnNull()
         {
             string? path = null;
             var basePath = GetTestBasePath();
@@ -73,7 +73,7 @@ namespace Microsoft.Build.UnitTests
 
         [Fact]
         [UseInvariantCulture]
-        public void AbsolutePath_NullOrEmptyyWithBasePath_ShouldThrowOnEmpty()
+        public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrowOnEmpty()
         {
             string path = "";
             var basePath = GetTestBasePath();
