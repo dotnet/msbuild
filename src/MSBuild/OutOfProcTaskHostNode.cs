@@ -833,6 +833,9 @@ namespace Microsoft.Build.CommandLine
         /// cancellation state. The parent continues processing callback requests even after
         /// sending TaskHostTaskCancelled, so the response will arrive. Cancellation is handled
         /// cooperatively via ICancelableTask.Cancel() on the task itself.
+        ///
+        /// Connection loss is handled by OnLinkStatusChanged, which fails all pending TCS
+        /// with InvalidOperationException, causing this method to throw immediately.
         /// </remarks>
         private TResponse SendCallbackRequestAndWaitForResponse<TResponse>(ITaskHostCallbackPacket request)
             where TResponse : class, INodePacket
@@ -840,10 +843,7 @@ namespace Microsoft.Build.CommandLine
             int requestId = Interlocked.Increment(ref _nextCallbackRequestId);
             request.RequestId = requestId;
 
-            // Use ManualResetEvent to bridge TaskCompletionSource to WaitHandle
-            using var responseEvent = new ManualResetEvent(false);
             var tcs = new TaskCompletionSource<INodePacket>(TaskCreationOptions.RunContinuationsAsynchronously);
-            tcs.Task.ContinueWith(_ => responseEvent.Set(), TaskContinuationOptions.ExecuteSynchronously);
             _pendingCallbackRequests[requestId] = tcs;
 
             try
@@ -851,29 +851,10 @@ namespace Microsoft.Build.CommandLine
                 // Send the request packet to the parent
                 _nodeEndpoint.SendData(request);
 
-                // Wait for the response or connection loss.
+                // Block until the response arrives (via HandleCallbackResponse → TCS.SetResult)
+                // or the connection is lost (via OnLinkStatusChanged → TCS.TrySetException).
                 // No timeout - callbacks like BuildProjectFile can legitimately take hours.
-                while (true)
-                {
-                    int signaledIndex = WaitHandle.WaitAny([responseEvent], millisecondsTimeout: 1000);
-
-                    if (signaledIndex == 0)
-                    {
-                        // Response received
-                        break;
-                    }
-
-                    // Timeout - check connection status (no WaitHandle available for this)
-                    if (_nodeEndpoint.LinkStatus != LinkStatus.Active)
-                    {
-                        // Connection lost - no way to log this since the pipe is broken.
-                        // This is extremely rare (parent killed without killing TaskHost).
-                        throw new InvalidOperationException(
-                            "TaskHost lost connection to parent process during callback.");
-                    }
-                }
-
-                INodePacket response = tcs.Task.Result;
+                INodePacket response = tcs.Task.GetAwaiter().GetResult();
 
                 if (response is TResponse typedResponse)
                 {
@@ -1057,6 +1038,20 @@ namespace Microsoft.Build.CommandLine
                 case LinkStatus.ConnectionFailed:
                 case LinkStatus.Failed:
                     _shutdownReason = NodeEngineShutdownReason.ConnectionFailed;
+
+#if !CLR2COMPATIBILITY
+                    // Fail all pending callback requests so task threads unblock immediately
+                    // instead of waiting indefinitely for responses that will never arrive.
+                    foreach (var kvp in _pendingCallbackRequests)
+                    {
+                        if (_pendingCallbackRequests.TryRemove(kvp.Key, out TaskCompletionSource<INodePacket> tcs))
+                        {
+                            tcs.TrySetException(new InvalidOperationException(
+                                ResourceUtilities.GetResourceString("TaskHostCallbackConnectionLost")));
+                        }
+                    }
+#endif
+
                     _shutdownEvent.Set();
                     break;
 

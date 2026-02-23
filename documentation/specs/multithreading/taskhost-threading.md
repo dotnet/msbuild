@@ -64,8 +64,8 @@ sequenceDiagram
    - Assigns a unique request ID
    - Registers a `TaskCompletionSource` in `_pendingCallbackRequests`
    - Sends the request packet via `_nodeEndpoint.SendData()`
-   - Blocks on a `ManualResetEvent` bridged to the TCS, polling every 1000ms for connection loss
-3. **Main thread** receives the response packet from the parent, looks up the TCS by request ID, and calls `TrySetResult()`, which signals the event.
+   - Blocks on `tcs.Task.GetAwaiter().GetResult()` until the TCS is completed
+3. **Main thread** receives the response packet from the parent, looks up the TCS by request ID, and calls `TrySetResult()`.
 4. **Task thread** wakes up, retrieves the typed response, and returns it to the caller.
 
 ### Cancellation Semantics
@@ -77,7 +77,7 @@ The callback wait intentionally does **not** check `_taskCancelledEvent`. This a
 
 Cancellation is handled cooperatively: after the callback returns, the task checks its cancellation state (set by `ICancelableTask.Cancel()`) and exits.
 
-The only exception path is connection loss (parent process killed), detected by polling `_nodeEndpoint.LinkStatus` every 1000ms. This throws `InvalidOperationException`.
+The only exception path is connection loss (parent process killed), detected by `OnLinkStatusChanged` which fails all pending `TaskCompletionSource` entries with `InvalidOperationException`. This unblocks task threads immediately.
 
 ### Response Guarantee (Why the Callback Cannot Deadlock)
 
