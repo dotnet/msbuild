@@ -33,7 +33,6 @@ namespace Microsoft.Build.CommandLine.Experimental
             Invalid = -1,
             Help = 0,
             Version,
-            NoLogo,
             NoAutoResponse,
             NoConsoleLogger,
             FileLogger,
@@ -121,6 +120,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             FeatureAvailability,
             MultiThreaded,
             ParentPacketVersion,
+            NoLogo,
             // This has to be kept as last enum value
             NumberOfParameterizedSwitches,
         }
@@ -216,7 +216,6 @@ namespace Microsoft.Build.CommandLine.Experimental
             //----------------------------------------------------------------------------------------------------------------------------------------------------------
             new ParameterlessSwitchInfo(  ["help", "h", "?"],                        ParameterlessSwitch.Help,                  null,       "HelpMessage_4_HelpSwitch"),
             new ParameterlessSwitchInfo(  ["version", "ver"],                        ParameterlessSwitch.Version,               null,       "HelpMessage_6_VersionSwitch"),
-            new ParameterlessSwitchInfo(  ["nologo"],                                ParameterlessSwitch.NoLogo,                null,       "HelpMessage_5_NoLogoSwitch"),
             new ParameterlessSwitchInfo(  ["noautoresponse", "noautorsp"],           ParameterlessSwitch.NoAutoResponse,        null,       "HelpMessage_8_NoAutoResponseSwitch"),
             new ParameterlessSwitchInfo(  ["noconsolelogger", "noconlog"],           ParameterlessSwitch.NoConsoleLogger,       null,       "HelpMessage_14_NoConsoleLoggerSwitch"),
             new ParameterlessSwitchInfo(  ["filelogger", "fl"],                      ParameterlessSwitch.FileLogger,            null,       "HelpMessage_20_FileLoggerSwitch"),
@@ -269,9 +268,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             // To not break existing use, keep supporting live logger switches
             new ParameterizedSwitchInfo(  ["livelogger", "ll", "terminallogger", "tl"], ParameterizedSwitch.TerminalLogger,      null,                           true,           null,                                  true,   true,    "HelpMessage_47_TerminalLoggerSwitch"),
             new ParameterizedSwitchInfo(  ["terminalloggerparameters", "tlp"],  ParameterizedSwitch.TerminalLoggerParameters,   null,                           false,          "MissingTerminalLoggerParameterError", true,   false,   "HelpMessage_48_TerminalLoggerParametersSwitch"),
-#if FEATURE_NODE_REUSE
             new ParameterizedSwitchInfo(  ["nodereuse", "nr"],                  ParameterizedSwitch.NodeReuse,                  null,                           false,          "MissingNodeReuseParameterError",      true,   false,   "HelpMessage_24_NodeReuse"),
-#endif
             new ParameterizedSwitchInfo(  ["preprocess", "pp"],                 ParameterizedSwitch.Preprocess,                 null,                           false,          null,                                  true,   false,   "HelpMessage_25_PreprocessSwitch"),
             new ParameterizedSwitchInfo(  ["targets", "ts"],                    ParameterizedSwitch.Targets,                    null,                           false,          null,                                  true,   false,   "HelpMessage_38_TargetsSwitch"),
             new ParameterizedSwitchInfo(  ["warnaserror", "err"],               ParameterizedSwitch.WarningsAsErrors,           null,                           true,           null,                                  true,   true,    "HelpMessage_28_WarnAsErrorSwitch"),
@@ -300,6 +297,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             new ParameterizedSwitchInfo(  ["featureAvailability", "fa"],        ParameterizedSwitch.FeatureAvailability,        null,                           true,           "MissingFeatureAvailabilityError",     true,   false,   "HelpMessage_46_FeatureAvailabilitySwitch"),
             new ParameterizedSwitchInfo(  ["multithreaded", "mt"],              ParameterizedSwitch.MultiThreaded,              null,                           false,          null,                                  true,   false,   "HelpMessage_49_MultiThreadedSwitch"),
             new ParameterizedSwitchInfo(  ["parentpacketversion"],              ParameterizedSwitch.ParentPacketVersion,        null,                           false,          null,                                  false,  false,   null),
+            new ParameterizedSwitchInfo(  ["nologo"],                           ParameterizedSwitch.NoLogo,                     null,                           false,          null,                                  true,   false,   "HelpMessage_5_NoLogoSwitch")
             // Add to ParameterizedSwitch enum (before NumberOfParameterizedSwitches):
         };
 

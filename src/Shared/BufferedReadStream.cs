@@ -10,7 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 #endif
 
-#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {

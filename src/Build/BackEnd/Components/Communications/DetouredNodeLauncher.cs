@@ -14,6 +14,9 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using static BuildXL.Processes.FileAccessManifest;
+#if RUNTIME_TYPE_NETCORE
+using Constants = Microsoft.Build.Framework.Constants;
+#endif
 
 #nullable disable
 

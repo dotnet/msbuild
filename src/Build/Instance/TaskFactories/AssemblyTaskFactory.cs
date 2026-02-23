@@ -11,9 +11,8 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-#if FEATURE_MSIOREDIST
-using Path = Microsoft.IO.Path;
+#if NETFRAMEWORK
+using Microsoft.IO;
 #else
 using System.IO;
 #endif
@@ -22,8 +21,8 @@ using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Internal;
 using Microsoft.Build.BackEnd.Logging;
+using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
 
@@ -656,20 +655,30 @@ namespace Microsoft.Build.BackEnd
             }
 
             string dotnetHostPath = getProperty(Constants.DotnetHostPathEnvVarName)?.EvaluatedValue;
-            string ridGraphPath = getProperty(Constants.RuntimeIdentifierGraphPath)?.EvaluatedValue;
+            string netCoreSdkRoot = getProperty(Constants.NetCoreSdkRoot)?.EvaluatedValue?.TrimEnd('/', '\\');
 
-            if (string.IsNullOrEmpty(dotnetHostPath) || string.IsNullOrEmpty(ridGraphPath))
+            // The NetCoreSdkRoot property got added with .NET 11, so for earlier SDKs we fall back to the RID graph path
+            if (string.IsNullOrEmpty(netCoreSdkRoot))
+            {
+                string ridGraphPath = getProperty(Constants.RuntimeIdentifierGraphPath)?.EvaluatedValue;
+                if (!string.IsNullOrEmpty(ridGraphPath))
+                {
+                    netCoreSdkRoot = Path.GetDirectoryName(ridGraphPath);
+                }
+            }
+
+            // Both DOTNET_HOST_PATH and NetCoreSdkRoot are required to launch .NET task host.
+            // If both are not present, return the original parameters.
+            if (string.IsNullOrEmpty(dotnetHostPath) || string.IsNullOrEmpty(netCoreSdkRoot))
             {
                 return currentParams;
             }
-
-            string msBuildAssemblyPath = Path.GetDirectoryName(ridGraphPath) ?? string.Empty;
 
             return new TaskHostParameters(
                 runtime: currentParams.Runtime,
                 architecture: currentParams.Architecture,
                 dotnetHostPath: dotnetHostPath,
-                msBuildAssemblyPath: msBuildAssemblyPath);
+                msBuildAssemblyPath: netCoreSdkRoot);
         }
 
         /// <summary>

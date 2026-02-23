@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Xunit;
 
@@ -21,6 +22,7 @@ namespace Microsoft.Build.UnitTests
         public void BasicFilter()
         {
             FindUnderPath t = new FindUnderPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 
             t.Path = new TaskItem(@"C:\MyProject");
@@ -35,10 +37,21 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(FrameworkFileUtilities.FixFilePath(@"C:\SomeoneElsesProject\File2.txt"), t.OutOfPath[0].ItemSpec);
         }
 
+        /// <summary>
+        /// Tests that invalid file path characters cause the task to fail.
+        /// This only applies when Wave18_5 is disabled, as the new behavior doesn't throw on invalid path characters.
+        /// </summary>
         [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. On Unix there is no invalid file name characters.")]
         public void InvalidFile()
         {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            // TODO: Remove test when Wave18_5 rotates out - new behavior doesn't throw on invalid path characters
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_5.ToString());
+
             FindUnderPath t = new FindUnderPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 
             t.Path = new TaskItem(@"C:\MyProject");
@@ -48,13 +61,26 @@ namespace Microsoft.Build.UnitTests
 
             Assert.False(success);
 
+            ChangeWaves.ResetStateForTests();
+
             // Don't crash
         }
 
+        /// <summary>
+        /// Tests that invalid path characters cause the task to fail.
+        /// This only applies when Wave18_5 is disabled, as the new behavior doesn't throw on invalid path characters.
+        /// </summary>
         [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486. On Unix there is no invalid file name characters.")]
         public void InvalidPath()
         {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            // TODO: Remove test when Wave18_5 rotates out - new behavior doesn't throw on invalid path characters
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_5.ToString());
+
             FindUnderPath t = new FindUnderPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 
             t.Path = new TaskItem(@"||::||");
@@ -63,6 +89,8 @@ namespace Microsoft.Build.UnitTests
             bool success = t.Execute();
 
             Assert.False(success);
+
+            ChangeWaves.ResetStateForTests();
 
             // Don't crash
         }
@@ -96,6 +124,7 @@ namespace Microsoft.Build.UnitTests
         public void VerifyFullPath()
         {
             FindUnderPath t = new FindUnderPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 
             t.UpdateToAbsolutePaths = true;
@@ -118,6 +147,7 @@ namespace Microsoft.Build.UnitTests
         public void VerifyFullPathNegative()
         {
             FindUnderPath t = new FindUnderPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 
             t.UpdateToAbsolutePaths = false;

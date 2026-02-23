@@ -130,7 +130,7 @@ extends:
     settings:
       networkIsolationPolicy: Permissive,CFSClean
     pool:
-      name: VSEngSS-MicroBuild2022-1ES
+      name: VSEng-MicroBuildVSStable
     customBuildTags:
     - ES365AIMigrationTooling-Release
     stages:

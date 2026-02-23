@@ -45,10 +45,11 @@ using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 using SimpleErrorLogger = Microsoft.Build.Logging.SimpleErrorLogger.SimpleErrorLogger;
 using TerminalLogger = Microsoft.Build.Logging.TerminalLogger;
 
-#if FEATURE_MSIOREDIST
+#if NETFRAMEWORK
 // Use I/O operations from Microsoft.IO.Redist which is generally higher perf
 // and also works around https://github.com/dotnet/msbuild/issues/10540.
 // Unnecessary on .NET 6+ because the perf improvements are in-box there.
+using Microsoft.IO;
 using Directory = Microsoft.IO.Directory;
 using File = Microsoft.IO.File;
 using FileInfo = Microsoft.IO.FileInfo;
@@ -657,11 +658,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                 int cpuCount = 1;
                 bool multiThreaded = false;
-#if FEATURE_NODE_REUSE
                 bool enableNodeReuse = true;
-#else
-                bool enableNodeReuse = false;
-#endif
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
                 ISet<string> warningsNotAsErrors = null;
@@ -904,6 +901,7 @@ namespace Microsoft.Build.CommandLine
                 ShowHelpPrompt();
 
                 exitType = ExitType.SwitchError;
+                RecordCrashTelemetry(e, exitType);
             }
             // handle configuration exceptions: problems reading toolset information from msbuild.exe.config or the registry
             catch (InvalidToolsetDefinitionException e)
@@ -912,6 +910,7 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ConfigurationFailurePrefixNoErrorCode", e.ErrorCode, e.Message));
 
                 exitType = ExitType.InitializationError;
+                RecordCrashTelemetry(e, exitType);
             }
             // handle initialization failures
             catch (InitializationException e)
@@ -919,6 +918,7 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine(e.Message);
 
                 exitType = ExitType.InitializationError;
+                RecordCrashTelemetry(e, exitType);
             }
             // handle polite logger failures: don't dump the stack or trigger watson for these
             catch (LoggerException e)
@@ -944,6 +944,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 exitType = ExitType.LoggerAbort;
+                RecordCrashTelemetry(e, exitType);
             }
             // handle logger failures (logger bugs)
             catch (InternalLoggerException e)
@@ -967,6 +968,8 @@ namespace Microsoft.Build.CommandLine
                         $"MSBUILD : error {e.ErrorCode}: {e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : "")}");
                     exitType = ExitType.InitializationError;
                 }
+
+                RecordCrashTelemetry(e, exitType);
             }
 #pragma warning disable CS0618 // Microsoft.Build.Experimental.ProjectCache.ProjectCacheException is obsolete, but we need to support both namespaces for now
             catch (Exception e) when (e is ProjectCacheException || e is Microsoft.Build.Experimental.ProjectCache.ProjectCacheException)
@@ -990,6 +993,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 exitType = ExitType.ProjectCacheFailure;
+                RecordCrashTelemetry(e, exitType);
             }
 #pragma warning restore CS0618 // Type is obsolete
             catch (BuildAbortedException e)
@@ -998,6 +1002,7 @@ namespace Microsoft.Build.CommandLine
                     $"MSBUILD : error {e.ErrorCode}: {e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : string.Empty)}");
 
                 exitType = ExitType.Unexpected;
+                RecordCrashTelemetry(e, exitType);
             }
             catch (PathTooLongException e)
             {
@@ -1005,6 +1010,7 @@ namespace Microsoft.Build.CommandLine
                     $"{e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : string.Empty)}");
 
                 exitType = ExitType.Unexpected;
+                RecordCrashTelemetry(e, exitType);
             }
             // handle fatal errors
             catch (Exception e)
@@ -1014,6 +1020,8 @@ namespace Microsoft.Build.CommandLine
 #if DEBUG
                 Console.WriteLine("This is an unhandled exception in MSBuild Engine -- PLEASE OPEN A BUG AGAINST THE MSBUILD TEAM.\r\n{0}", e.ToString());
 #endif
+                RecordCrashTelemetry(e, ExitType.Unexpected, isUnhandled: true);
+
                 // rethrow, in case Watson is enabled on the machine -- if not, the CLR will write out exception details
                 // allow the build lab to set an env var to avoid jamming the build
                 if (Environment.GetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER") != "1")
@@ -1023,6 +1031,8 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
+                CrashTelemetryRecorder.FlushCrashTelemetry();
+
                 s_buildComplete.Set();
                 Console.CancelKeyPress -= cancelHandler;
 
@@ -1044,6 +1054,42 @@ namespace Microsoft.Build.CommandLine
              *********************************************************************************************************************/
 
             return exitType;
+        }
+
+        private static string GetHostName()
+        {
+            if (BuildEnvironmentState.s_runningInVisualStudio)
+            {
+                return "VS";
+            }
+
+            string msbuildHostName = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
+            if (!string.IsNullOrEmpty(msbuildHostName))
+            {
+                return msbuildHostName;
+            }
+
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
+            {
+                return "VSCode";
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Records crash telemetry data for later emission.
+        /// </summary>
+        private static void RecordCrashTelemetry(Exception exception, ExitType exitType, bool isUnhandled = false)
+        {
+            CrashTelemetryRecorder.RecordCrashTelemetry(
+                exception,
+                exitType.ToString(),
+                isUnhandled,
+                ExceptionHandling.IsCriticalException(exception),
+                ProjectCollection.Version?.ToString(),
+                NativeMethodsShared.FrameworkName,
+                GetHostName());
         }
 
         private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project, TextWriter outputStream)
@@ -2009,11 +2055,18 @@ namespace Microsoft.Build.CommandLine
 
             bool useTerminalLogger = ProcessTerminalLoggerConfiguration(commandLineSwitches, out string aggregatedTerminalLoggerParameters);
 
+            // Process nologo switch early so it can be used in DisplayVersionMessageIfNeeded
+            bool noLogo = false;
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NoLogo))
+            {
+                noLogo = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NoLogo], defaultValue: true, resourceName: "InvalidNoLogoValue");
+            }
+
             // This is temporary until we can remove the need for the environment variable.
             // DO NOT use this environment variable for any new features as it will be removed without further notice.
             Environment.SetEnvironmentVariable("_MSBUILDTLENABLED", useTerminalLogger ? "1" : "0");
 
-            DisplayVersionMessageIfNeeded(recursing, useTerminalLogger, commandLineSwitches);
+            DisplayVersionMessageIfNeeded(recursing, useTerminalLogger, noLogo, commandLineSwitches);
 
             // Idle priority would prevent the build from proceeding as the user does normal actions.
             // This switch is processed early to capture both the command line case (main node should
@@ -2164,7 +2217,6 @@ namespace Microsoft.Build.CommandLine
                     multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
                     // figure out if we should reuse nodes
-                    // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
 
                     // determine what if any writer to preprocess to
@@ -2659,12 +2711,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         internal static bool ProcessNodeReuseSwitch(string[] parameters)
         {
-            bool enableNodeReuse;
-#if FEATURE_NODE_REUSE
-            enableNodeReuse = true;
-#else
-            enableNodeReuse = false;
-#endif
+            bool enableNodeReuse = true;
 
             if (Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1") // For example to disable node reuse in a gated checkin, without using the flag
             {
@@ -2687,11 +2734,6 @@ namespace Microsoft.Build.CommandLine
                     CommandLineSwitchException.Throw("InvalidNodeReuseValue", parameters[parameters.Length - 1], ex.Message);
                 }
             }
-
-#if !FEATURE_NODE_REUSE
-            if (enableNodeReuse) // Only allowed to pass False on the command line for this switch if the feature is disabled for this installation
-                CommandLineSwitchException.Throw("InvalidNodeReuseTrueValue", parameters[parameters.Length - 1]);
-#endif
 
             return enableNodeReuse;
         }
@@ -2858,30 +2900,32 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Parses a node mode value from a string, supporting both integer values and enum names (case-insensitive).
+        /// </summary>
+        /// <param name="value">The value to parse (can be an integer or enum name)</param>
+        /// <returns>The parsed NodeMode value</returns>
+        internal static NodeMode ParseNodeMode(string value)
+        {
+            if (!NodeModeHelper.TryParse(value, out NodeMode? nodeMode))
+            {
+                CommandLineSwitchException.Throw("InvalidNodeNumberValue", value);
+            }
+
+            return nodeMode.Value;
+        }
+
+        /// <summary>
         /// Uses the input from thinNodeMode switch to start a local node server
         /// </summary>
         /// <param name="commandLineSwitches"></param>
         private static void StartLocalNode(CommandLineSwitches commandLineSwitches, bool lowpriority)
         {
             string[] input = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeMode];
-            int nodeModeNumber = 0;
+            NodeMode nodeMode = NodeMode.OutOfProcNode; // Default value
 
             if (input.Length > 0)
             {
-                try
-                {
-                    nodeModeNumber = int.Parse(input[0], CultureInfo.InvariantCulture);
-                }
-                catch (FormatException ex)
-                {
-                    CommandLineSwitchException.Throw("InvalidNodeNumberValue", input[0], ex.Message);
-                }
-                catch (OverflowException ex)
-                {
-                    CommandLineSwitchException.Throw("InvalidNodeNumberValue", input[0], ex.Message);
-                }
-
-                CommandLineSwitchException.VerifyThrow(nodeModeNumber >= 0, "InvalidNodeNumberValueIsNegative", input[0]);
+                nodeMode = ParseNodeMode(input[0]);
             }
 
             bool restart = true;
@@ -2890,72 +2934,72 @@ namespace Microsoft.Build.CommandLine
                 Exception nodeException = null;
                 NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
 
-                // normal OOP node case
-                if (nodeModeNumber == 1)
+                switch (nodeMode)
                 {
-                    // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
-                    bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                    OutOfProcNode node = new OutOfProcNode();
-                    shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
+                    case NodeMode.OutOfProcNode:
+                        bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+                        OutOfProcNode node = new OutOfProcNode();
+                        shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
 
-                    FileUtilities.ClearCacheDirectory();
-                }
-                else if (nodeModeNumber == 2)
-                {
-                    // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
-                    bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                    byte parentPacketVersion = ProcessParentPacketVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ParentPacketVersion]);
-                    OutOfProcTaskHostNode node = new();
-                    shutdownReason = node.Run(out nodeException, nodeReuse, parentPacketVersion);
-                }
-                else if (nodeModeNumber == 3)
-                {
-                    // The RAR service persists between builds, and will continue to process requests until terminated.
-                    OutOfProcRarNode rarNode = new();
-                    RarNodeShutdownReason rarShutdownReason = rarNode.Run(out nodeException, s_buildCancellationSource.Token);
+                        FileUtilities.ClearCacheDirectory();
+                        break;
 
-                    shutdownReason = rarShutdownReason switch
-                    {
-                        RarNodeShutdownReason.Complete => NodeEngineShutdownReason.BuildComplete,
-                        RarNodeShutdownReason.Error => NodeEngineShutdownReason.Error,
-                        RarNodeShutdownReason.AlreadyRunning => NodeEngineShutdownReason.Error,
-                        RarNodeShutdownReason.ConnectionTimedOut => NodeEngineShutdownReason.ConnectionFailed,
-                        _ => throw new ArgumentOutOfRangeException(nameof(rarShutdownReason), $"Unexpected value: {rarShutdownReason}"),
-                    };
-                }
-                else if (nodeModeNumber == 8)
-                {
-                    // Since build function has to reuse code from *this* class and OutOfProcServerNode is in different assembly
-                    // we have to pass down xmake build invocation to avoid circular dependency
-                    OutOfProcServerNode.BuildCallback buildFunction = (commandLine) =>
-                    {
-                        int exitCode;
-                        ExitType exitType;
+                    case NodeMode.OutOfProcTaskHostNode:
+                        // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
+                        bool taskHostNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+                        byte parentPacketVersion = ProcessParentPacketVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ParentPacketVersion]);
+                        OutOfProcTaskHostNode taskHostNode = new();
+                        shutdownReason = taskHostNode.Run(out nodeException, taskHostNodeReuse, parentPacketVersion);
+                        break;
 
-                        if (!s_initialized)
+                    case NodeMode.OutOfProcRarNode:
+                        // The RAR service persists between builds, and will continue to process requests until terminated.
+                        OutOfProcRarNode rarNode = new();
+                        RarNodeShutdownReason rarShutdownReason = rarNode.Run(out nodeException, s_buildCancellationSource.Token);
+
+                        shutdownReason = rarShutdownReason switch
                         {
-                            exitType = ExitType.InitializationError;
-                        }
-                        else
+                            RarNodeShutdownReason.Complete => NodeEngineShutdownReason.BuildComplete,
+                            RarNodeShutdownReason.Error => NodeEngineShutdownReason.Error,
+                            RarNodeShutdownReason.AlreadyRunning => NodeEngineShutdownReason.Error,
+                            RarNodeShutdownReason.ConnectionTimedOut => NodeEngineShutdownReason.ConnectionFailed,
+                            _ => throw new ArgumentOutOfRangeException(nameof(rarShutdownReason), $"Unexpected value: {rarShutdownReason}"),
+                        };
+                        break;
+
+                    case NodeMode.OutOfProcServerNode:
+                        // Since build function has to reuse code from *this* class and OutOfProcServerNode is in different assembly
+                        // we have to pass down xmake build invocation to avoid circular dependency
+                        OutOfProcServerNode.BuildCallback buildFunction = (commandLine) =>
                         {
-                            exitType = Execute(commandLine);
-                        }
+                            int exitCode;
+                            ExitType exitType;
 
-                        exitCode = exitType == ExitType.Success ? 0 : 1;
+                            if (!s_initialized)
+                            {
+                                exitType = ExitType.InitializationError;
+                            }
+                            else
+                            {
+                                exitType = Execute(commandLine);
+                            }
 
-                        return (exitCode, exitType.ToString());
-                    };
+                            exitCode = exitType == ExitType.Success ? 0 : 1;
 
-                    OutOfProcServerNode node = new(buildFunction);
+                            return (exitCode, exitType.ToString());
+                        };
 
-                    s_isServerNode = true;
-                    shutdownReason = node.Run(out nodeException);
+                        OutOfProcServerNode serverNode = new(buildFunction);
 
-                    FileUtilities.ClearCacheDirectory();
-                }
-                else
-                {
-                    CommandLineSwitchException.Throw("InvalidNodeNumberValue", nodeModeNumber.ToString());
+                        s_isServerNode = true;
+                        shutdownReason = serverNode.Run(out nodeException);
+
+                        FileUtilities.ClearCacheDirectory();
+                        break;
+
+                    default:
+                        CommandLineSwitchException.Throw("InvalidNodeNumberValue", nodeMode.ToString());
+                        break;
                 }
 
                 if (shutdownReason == NodeEngineShutdownReason.Error)
@@ -4069,7 +4113,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Displays the application version message/logo.
         /// </summary>
-        private static void DisplayVersionMessageIfNeeded(bool recursing, bool useTerminalLogger, CommandLineSwitches commandLineSwitches)
+        private static void DisplayVersionMessageIfNeeded(bool recursing, bool useTerminalLogger, bool noLogo, CommandLineSwitches commandLineSwitches)
         {
             if (recursing)
             {
@@ -4080,7 +4124,7 @@ namespace Microsoft.Build.CommandLine
             //  where it is not appropriate to show the versioning information (information querying mode that can be plugged into CLI scripts,
             //  terminal logger mode, where we want to display only the most relevant info, while output is not meant for investigation).
             // NOTE: response files are not reflected in this check. So enabling TL in response file will lead to version message still being shown.
-            bool shouldShowLogo = !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoLogo] &&
+            bool shouldShowLogo = !noLogo &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess) &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetProperty) &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetItem) &&

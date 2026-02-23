@@ -488,9 +488,10 @@ namespace Microsoft.Build.Tasks.UnitTests
                 }
 
                 // Build using ProjectCollection as recommended by Change Waves documentation
+                var logger = new MockLogger(_output);
                 using (var collection = new ProjectCollection(
                     globalProperties: null,
-                    loggers: null,
+                    loggers: [logger],
                     remoteLoggers: null,
                     toolsetDefinitionLocations: ToolsetDefinitionLocations.Default,
                     maxNodeCount: Environment.ProcessorCount,
