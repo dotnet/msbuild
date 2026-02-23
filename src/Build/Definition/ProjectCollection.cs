@@ -27,10 +27,6 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
 using ObjectModel = System.Collections.ObjectModel;
 
-#if !NET
-using Lock = System.Object;
-#endif
-
 #nullable disable
 
 namespace Microsoft.Build.Evaluation
@@ -129,7 +125,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Locks used to serialize concurrent loads for the same project path.
         /// </summary>
-        private readonly ConcurrentDictionary<string, Lock> _loadProjectLocks = new(StringComparer.OrdinalIgnoreCase);
+        private readonly ConcurrentDictionary<string, LockType> _loadProjectLocks = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// External projects support
@@ -1233,7 +1229,7 @@ namespace Microsoft.Build.Evaluation
 
             // Serialize loads for the same project path to avoid races where multiple threads create equivalent
             // projects concurrently. Loads for different paths can proceed in parallel.
-            Lock pathLock = _loadProjectLocks.GetOrAdd(fileName, static _ => new());
+            LockType pathLock = _loadProjectLocks.GetOrAdd(fileName, static _ => new());
             lock (pathLock)
             {
                 if (globalProperties == null)
