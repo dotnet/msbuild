@@ -14,7 +14,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 
      <!-- Suppression in needed to build ExampleTaskX86 that targets x86 architecture. -->
-    <NoWarn>$(NoWarn);MSB3270</NoWarn>
+    <NoWarn>$(NoWarn);MSB3270;CS0436</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -127,7 +127,7 @@
   </ItemDefinitionGroup>
   
   <ItemGroup Label="TestAssests" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
-    <ProjectReference Include=".\TestAssets\ExampleNetTask\ExampleTask\ExampleTask.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include=".\TestAssets\ExampleNetTask\ExampleTask\ExampleTask.csproj" />
   </ItemGroup>
 
   <ItemGroup Label="TestAssests" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
