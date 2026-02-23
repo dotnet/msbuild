@@ -106,7 +106,7 @@ namespace Microsoft.Build.BackEnd
         {
             // Only validate if we're actually changing the value
             _environmentVariables.TryGetValue(name, out string? currentValue);
-            if (!CommunicationsUtilities.EnvironmentVariableComparer.Equals(currentValue, value))
+            if (!string.Equals(currentValue, value, StringComparison.Ordinal))
             {
                 EnsureVariableCanBeModified(name);
             }
@@ -139,7 +139,7 @@ namespace Microsoft.Build.BackEnd
                 _environmentVariables.TryGetValue(entry.Key, out string? currentValue);
                 
                 // Only validate if we're actually changing the value
-                if (!CommunicationsUtilities.EnvironmentVariableComparer.Equals(currentValue, entry.Value))
+                if (!string.Equals(currentValue, entry.Value, StringComparison.Ordinal))
                 {
                     EnsureVariableCanBeModified(entry.Key);
                 }

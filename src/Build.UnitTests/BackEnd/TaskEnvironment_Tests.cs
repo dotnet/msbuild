@@ -17,6 +17,8 @@ namespace Microsoft.Build.UnitTests
     {
         private const string StubEnvironmentName = "Stub";
         private const string MultithreadedEnvironmentName = "Multithreaded";
+        private const string ImmutableTestVar = "MSBUILDTESTVAR";
+        private const string TestValue = "value";
 
         public static TheoryData<string> EnvironmentTypes =>
             new TheoryData<string>
@@ -389,6 +391,89 @@ namespace Microsoft.Build.UnitTests
             {
                 DisposeTaskEnvironment(taskEnvironment);
             }
+        }
+
+        [Fact]
+        public void MultiThreadedTaskEnvironmentDriver_SetEnvironmentVariable_ThrowsOnCaseChangeOfImmutableValue()
+        {
+            // Changing just the case of an immutable variable's value should throw because
+            // value comparison must be case-sensitive (StringComparison.Ordinal).
+            // If we incorrectly used case-insensitive comparison, this would not throw.
+            using var driver = new MultiThreadedTaskEnvironmentDriver(
+                GetResolvedTempPath(),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [ImmutableTestVar] = TestValue
+                });
+            var taskEnvironment = new TaskEnvironment(driver);
+
+            // Changing "value" to "VALUE" is a modification (case-sensitive) and should throw
+            Should.Throw<InvalidOperationException>(() =>
+                taskEnvironment.SetEnvironmentVariable(ImmutableTestVar, TestValue.ToUpperInvariant()));
+        }
+
+        [Fact]
+        public void MultiThreadedTaskEnvironmentDriver_SetEnvironmentVariable_ThrowsOnImmutableVariable()
+        {
+            // MSBuild-prefixed variables are immutable and should throw when adding
+            using var driver = new MultiThreadedTaskEnvironmentDriver(
+                GetResolvedTempPath(),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+            var taskEnvironment = new TaskEnvironment(driver);
+
+            Should.Throw<InvalidOperationException>(() =>
+                taskEnvironment.SetEnvironmentVariable(ImmutableTestVar, TestValue));
+        }
+
+        [Fact]
+        public void MultiThreadedTaskEnvironmentDriver_SetEnvironmentVariable_AllowsSettingSameValue()
+        {
+            // Setting an immutable variable to its current value should not throw
+            using var driver = new MultiThreadedTaskEnvironmentDriver(
+                GetResolvedTempPath(),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [ImmutableTestVar] = TestValue
+                });
+            var taskEnvironment = new TaskEnvironment(driver);
+
+            Should.NotThrow(() =>
+                taskEnvironment.SetEnvironmentVariable(ImmutableTestVar, TestValue));
+        }
+
+        [Fact]
+        public void MultiThreadedTaskEnvironmentDriver_SetEnvironment_ThrowsOnImmutableVariableRemoval()
+        {
+            // Removing an immutable variable via SetEnvironment should throw
+            using var driver = new MultiThreadedTaskEnvironmentDriver(
+                GetResolvedTempPath(),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [ImmutableTestVar] = TestValue
+                });
+            var taskEnvironment = new TaskEnvironment(driver);
+
+            // New environment without the immutable variable - this is a removal
+            var newEnvironment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            Should.Throw<InvalidOperationException>(() =>
+                taskEnvironment.SetEnvironment(newEnvironment));
+        }
+
+        [Fact]
+        public void MultiThreadedTaskEnvironmentDriver_SetEnvironmentVariable_ThrowsOnImmutableVariableRemoval()
+        {
+            // Removing an immutable variable by setting to null should throw
+            using var driver = new MultiThreadedTaskEnvironmentDriver(
+                GetResolvedTempPath(),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [ImmutableTestVar] = TestValue
+                });
+            var taskEnvironment = new TaskEnvironment(driver);
+
+            Should.Throw<InvalidOperationException>(() =>
+                taskEnvironment.SetEnvironmentVariable(ImmutableTestVar, null));
         }
     }
 }
