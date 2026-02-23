@@ -38,18 +38,23 @@ Before callback support, the two threads had a simple lifecycle: the main thread
 
 With callback support, the task can query the parent for information it doesn't have locally (e.g., `IsRunningMultipleNodes`, and in future stages: `RequestCores`, `BuildProjectFile`). This introduces **bidirectional IPC** between the threads:
 
-```
-Task Runner Thread                    Main Thread                         Parent Process
-      |                                   |                                    |
-      |-- IBuildEngine.Foo() ------------>|                                    |
-      |   (sends request packet)          |-- request packet ----------------->|
-      |   (blocks on responseEvent)       |                                    |
-      |                                   |                (processes request) |
-      |                                   |<-- response packet ----------------|
-      |                                   |-- HandleCallbackResponse()         |
-      |                                   |   (sets TCS result)                |
-      |<-- responseEvent signaled --------|                                    |
-      |   (callback returns)              |                                    |
+```mermaid
+sequenceDiagram
+    participant TR as Task Runner Thread
+    participant MT as Main Thread
+    participant PP as Scheduler Process
+
+    TR->>MT: IBuildEngine.Foo()<br/>(sends request packet, blocks)
+    activate TR
+
+    MT->>PP: request packet
+    Note over PP: (processes request)
+
+    PP-->>MT: response packet
+    MT->>MT: HandleCallbackResponse()<br/>(sets TCS result)
+
+    MT-->>TR: responseEvent signaled
+    deactivate TR
 ```
 
 ### How It Works
