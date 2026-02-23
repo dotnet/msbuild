@@ -92,3 +92,45 @@ Worker node sends callback response
 ```
 
 The worker node cannot exit its packet loop without first receiving `TaskHostTaskComplete`. But `TaskHostTaskComplete` cannot be sent until the task finishes. And the task cannot finish while it is blocked waiting for a callback response. Therefore, the worker node **must** process the callback request and send the response before it can ever stop.
+
+## TaskHost Lifecycle
+
+The TaskHost process can execute multiple tasks sequentially. After finishing one task, it returns to an idle state and waits for either a new task or a shutdown signal.
+
+### Event Loop Cycle
+
+```mermaid
+stateDiagram-v2
+    [*] --> Idle: Process starts, endpoint connects
+    Idle --> Running: TaskHostConfiguration packet arrives
+    Running --> Idle: CompleteTask() sends result, clears config
+    Idle --> Shutdown: NodeBuildComplete or connection loss
+    Running --> Shutdown: _taskCancelledEvent during idle transition
+    Shutdown --> [*]: HandleShutdown() exits
+```
+
+1. **Idle**: `WaitAny()` blocks on the four wait handles. No task thread exists. `_currentConfiguration` is null.
+2. **TaskHostConfiguration arrives**: `HandleTaskHostConfiguration()` stores the config and spawns `_taskRunnerThread` to call `RunTask()`. The main thread immediately returns to `WaitAny()`.
+3. **Task executes**: `RunTask()` sets up the environment, loads the task assembly, calls `task.Execute()`, collects output parameters, and packages the result into `_taskCompletePacket`. On completion (success or failure), it signals `_taskCompleteEvent`.
+4. **CompleteTask()**: The main thread wakes on index 2, sends `_taskCompletePacket` to the owning worker node, and sets `_currentConfiguration = null`. The node is now idle again.
+5. **Back to step 1**: The main thread loops back to `WaitAny()`, ready for another `TaskHostConfiguration` or a `NodeBuildComplete`.
+
+### State Between Tasks
+
+Each new `TaskHostConfiguration` carries a full environment snapshot, task parameters, and warning settings. The task runner thread resets per-task state at the start of `RunTask()`:
+
+**Reset per task:** `_isTaskExecuting`, `_currentConfiguration`, `_debugCommunications`, `_updateEnvironment`, `WarningsAsErrors`/`WarningsNotAsErrors`/`WarningsAsMessages`, `_fileAccessData`
+
+**Persists across tasks:**
+- `s_mismatchedEnvironmentValues` (static) — environment variable fixups for bitness differences, computed once
+- `_registeredTaskObjectCache` — task object cache with `Build` lifetime scope, disposed only at shutdown
+- `_pendingCallbackRequests` / `_nextCallbackRequestId` — callback tracking (should be empty between tasks)
+
+### Shutdown vs. Reuse
+
+When the owning worker node sends `NodeBuildComplete`, `HandleNodeBuildComplete()` decides whether to exit or stay alive:
+
+- **Sidecar TaskHost** (`_nodeReuse = true`): Always sets `BuildCompleteReuse`. The sidecar process persists across builds, re-entering the `Run()` outer loop to accept new connections.
+- **Regular TaskHost** (`_nodeReuse = false`): Sets `BuildCompleteReuse` only if `buildComplete.PrepareForReuse` is true **and** `Traits.Instance.EscapeHatches.ReuseTaskHostNodes` is enabled. Otherwise sets `BuildComplete` and the process exits. This avoids holding assembly locks on custom task DLLs between builds.
+
+There is **no idle timeout**. The `WaitAny()` call has no timeout parameter — the TaskHost waits indefinitely until it receives a shutdown signal or the connection drops.
