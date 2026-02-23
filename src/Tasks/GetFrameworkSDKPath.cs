@@ -31,7 +31,7 @@ namespace Microsoft.Build.Tasks
         private static volatile string s_version451Path;
         private static volatile string s_version46Path;
         private static volatile string s_version461Path;
-        private static readonly LockType s_lockObject = new ();
+        private static readonly LockType s_lockObject = new();
 
         /// <summary>
         /// The path to the latest .NET SDK if it could be found. It will be String.Empty if the SDK was not found.
