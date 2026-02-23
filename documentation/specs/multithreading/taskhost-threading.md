@@ -121,9 +121,9 @@ Each new `TaskHostConfiguration` carries a full environment snapshot, task param
 
 **Reset per task:** `_isTaskExecuting`, `_currentConfiguration`, `_debugCommunications`, `_updateEnvironment`, `WarningsAsErrors`/`WarningsNotAsErrors`/`WarningsAsMessages`, `_fileAccessData`
 
-**Persists across tasks:**
-- `s_mismatchedEnvironmentValues` (static) — environment variable fixups for bitness differences, computed once
-- `_registeredTaskObjectCache` — task object cache with `Build` lifetime scope, disposed only at shutdown
+**Persists across tasks (within a single build):**
+- `s_mismatchedEnvironmentValues` (static) — environment variable fixups for bitness differences, computed once per process
+- `_registeredTaskObjectCache` — task object cache with `Build` lifetime scope, disposed at end of each build (in `HandleShutdown()`), recreated fresh on the next `Run()` call
 - `_pendingCallbackRequests` / `_nextCallbackRequestId` — callback tracking (should be empty between tasks)
 
 ### Shutdown vs. Reuse
