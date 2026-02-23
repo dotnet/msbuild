@@ -13,8 +13,9 @@ using Xunit.Abstractions;
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
-    /// Tests for IBuildEngine callback support in TaskHost.
-    /// Covers packet serialization and end-to-end integration tests.
+    /// Integration tests for IBuildEngine callback support in TaskHost.
+    /// These tests use BuildManager to run real builds with TaskHostFactory.
+    /// For packet serialization tests, see <see cref="TaskHostCallbackPacket_Tests"/>.
     /// </summary>
     public class TaskHostCallback_Tests
     {
@@ -24,47 +25,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             _output = output;
         }
-
-        #region Packet Serialization Tests
-
-        [Fact]
-        public void TaskHostQueryRequest_RoundTrip_Serialization()
-        {
-            var request = new TaskHostQueryRequest(TaskHostQueryRequest.QueryType.IsRunningMultipleNodes);
-            request.RequestId = 42;
-
-            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
-            request.Translate(writeTranslator);
-
-            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
-            var deserialized = (TaskHostQueryRequest)TaskHostQueryRequest.FactoryForDeserialization(readTranslator);
-
-            deserialized.Query.ShouldBe(TaskHostQueryRequest.QueryType.IsRunningMultipleNodes);
-            deserialized.RequestId.ShouldBe(42);
-            deserialized.Type.ShouldBe(NodePacketType.TaskHostQueryRequest);
-        }
-
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public void TaskHostQueryResponse_RoundTrip_Serialization(bool boolResult)
-        {
-            var response = new TaskHostQueryResponse(123, boolResult);
-
-            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
-            response.Translate(writeTranslator);
-
-            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
-            var deserialized = (TaskHostQueryResponse)TaskHostQueryResponse.FactoryForDeserialization(readTranslator);
-
-            deserialized.RequestId.ShouldBe(123);
-            deserialized.BoolResult.ShouldBe(boolResult);
-            deserialized.Type.ShouldBe(NodePacketType.TaskHostQueryResponse);
-        }
-
-        #endregion
-
-        #region IsRunningMultipleNodes Callback Tests
 
         /// <summary>
         /// Verifies IsRunningMultipleNodes callback works when task is explicitly run in TaskHost via TaskHostFactory.
@@ -177,7 +137,5 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // IsRunningMultipleNodes should return false (safe default) even though MaxNodeCount=4
             bool.Parse(projectInstance.GetPropertyValue("Result")).ShouldBe(false);
         }
-
-        #endregion
     }
 }
