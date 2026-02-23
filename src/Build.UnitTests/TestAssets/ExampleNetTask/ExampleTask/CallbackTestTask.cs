@@ -7,7 +7,10 @@ namespace NetTask
 {
     /// <summary>
     /// A simple task that queries IsRunningMultipleNodes via IBuildEngine2 callback.
-    /// Used to test that TaskHost callbacks work in the .NET Core TaskHost spawned from .NET Framework parent.
+    /// Used by NetTaskHost_E2E_Tests to test callbacks in the .NET Core TaskHost
+    /// spawned from a .NET Framework parent.
+    /// Functionally identical to IsRunningMultipleNodesTask in the test DLL, but must
+    /// be a separate assembly targeting .NET Core for cross-runtime E2E testing.
     /// </summary>
     public class CallbackTestTask : Microsoft.Build.Utilities.Task
     {

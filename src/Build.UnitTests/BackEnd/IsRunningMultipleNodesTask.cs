@@ -8,7 +8,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// A simple task that queries IsRunningMultipleNodes from the build engine.
-    /// Used to test that IBuildEngine2 callbacks work correctly in the task host.
+    /// Used by TaskHostCallback_Tests for in-process integration tests.
+    /// See also CallbackTestTask in ExampleNetTask for cross-runtime E2E tests.
     /// </summary>
     public class IsRunningMultipleNodesTask : Task
     {
