@@ -324,6 +324,7 @@ namespace Microsoft.Build.CommandLine
 #else
                 if (!CallbacksSupported)
                 {
+                    LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
                     return false;
                 }
 
