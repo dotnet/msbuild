@@ -1047,7 +1047,7 @@ namespace Microsoft.Build.CommandLine
                         if (_pendingCallbackRequests.TryRemove(kvp.Key, out TaskCompletionSource<INodePacket> tcs))
                         {
                             tcs.TrySetException(new InvalidOperationException(
-                                ResourceUtilities.GetResourceString("TaskHostCallbackConnectionLost")));
+                                "TaskHost lost connection to parent process during callback."));
                         }
                     }
 #endif
