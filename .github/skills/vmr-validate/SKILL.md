@@ -27,12 +27,12 @@ $branch = git rev-parse --abbrev-ref HEAD
 # 2. Check branch exists on upstream (dotnet/msbuild)
 $upstreamUrl = git remote get-url upstream 2>$null
 if ($upstreamUrl -and $upstreamUrl -notmatch 'dotnet/msbuild') {
-    # upstream is not dotnet/msbuild — warn user
+    # upstream is not dotnet/msbuild -- warn user
 }
 $refCheck = git ls-remote --heads upstream $branch 2>$null
 if (-not $refCheck) {
     Write-Host "Branch '$branch' not found on dotnet/msbuild. Push it first: git push upstream $branch"
-    # Stop here — the pipeline will fail if the branch doesn't exist on dotnet/msbuild
+    # Stop here -- the pipeline will fail if the branch doesn't exist on dotnet/msbuild
 }
 
 # 3. Queue the pipeline
