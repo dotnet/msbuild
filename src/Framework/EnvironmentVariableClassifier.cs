@@ -8,8 +8,7 @@ using System.Collections.Generic;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// Classifies environment variables to prevent modification of those that MSBuild assumes remain constant.
-    /// These variables should not be modified during the build process.
+    /// Classifies environment variables as immutable or mutable.
     /// </summary>
     /// <remarks>
     /// Used in multithreaded build scenarios to prevent tasks from modifying environment variables that could affect other concurrently building projects. 
@@ -20,27 +19,28 @@ namespace Microsoft.Build.Framework
         /// Shared instance used by MSBuild for environment variable classification.
         /// </summary>
         /// <remarks>
-        /// Deferred creation avoids overhead in multiprocess builds where this is not to be used.
+        /// Deferred creation avoids overhead in multi-process builds where environment virtualization is not used.
         /// </remarks>
         private static readonly Lazy<EnvironmentVariableClassifier> s_instance = new(() => new EnvironmentVariableClassifier());
 
         /// <summary>
-        /// Shared instance used by MSBuild for production environment variable classification.
+        /// Gets the shared singleton instance used for classifying environment variables during builds.
         /// </summary>
         internal static EnvironmentVariableClassifier Instance => s_instance.Value;
 
         /// <summary>
-        /// Set of specific environment variable names that MSBuild assumes should not be modified.
+        /// Set of specific environment variable names that are classified as immutable.
         /// </summary>
         private readonly FrozenSet<string> _immutableVariables;
 
         /// <summary>
-        /// List of prefixes that identify immutable environment variables.
+        /// Prefixes that identify immutable environment variables.
+        /// Any variable starting with one of these prefixes is considered immutable.
         /// </summary>
         private readonly IReadOnlyList<string> _immutablePrefixes;
 
         /// <summary>
-        /// Initializse a new instance with the default set of immutable environment variables and prefixes.
+        /// Initializes a new instance with the default set of immutable environment variables and prefixes.
         /// </summary>
         private EnvironmentVariableClassifier()
         {
@@ -59,10 +59,12 @@ namespace Microsoft.Build.Framework
 
         /// <summary>
         /// Initializes a new instance with a custom set of immutable environment variables and prefixes.
-        /// Used primarily for testing scenarios.
         /// </summary>
-        /// <param name="immutableVariables">Custom set of environment variable names to treat as immutable.</param>
-        /// <param name="immutablePrefixes">Array of prefixes that identify immutable environment variables. If null or empty, no prefix matching is performed.</param>
+        /// <param name="immutableVariables">Set of environment variable names to treat as immutable.</param>
+        /// <param name="immutablePrefixes">Prefixes that identify immutable environment variables. If null or empty, no prefix matching is performed.</param>
+        /// <remarks>
+        /// This constructor is primarily intended for testing scenarios where custom immutability rules are needed.
+        /// </remarks>
         internal EnvironmentVariableClassifier(IEnumerable<string> immutableVariables, string[] immutablePrefixes)
         {
             _immutableVariables = FrozenSet.ToFrozenSet(immutableVariables, FrameworkFileUtilities.EnvironmentVariableComparer);
@@ -70,7 +72,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Gets whether the specified environment variable is one that MSBuild assumes should not be modified.
+        /// Determines whether the specified environment variable is classified as immutable.
         /// </summary>
         /// <param name="name">The environment variable name to check.</param>
         /// <returns>True if the variable is immutable, false otherwise.</returns>
