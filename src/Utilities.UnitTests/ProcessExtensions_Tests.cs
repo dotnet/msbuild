@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests
         private static Process StartLongRunningProcess()
         {
             var psi = NativeMethodsShared.IsWindows
-                ? new ProcessStartInfo("cmd.exe", "/c timeout /t 30 /nobreak")
+                ? new ProcessStartInfo("ping", "-n 31 127.0.0.1")
                 : new ProcessStartInfo("sleep", "30");
             psi.UseShellExecute = false;
             return Process.Start(psi);
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
 
                 if (NativeMethodsShared.IsWindows)
                 {
-                    commandLine.ShouldContain("cmd", Case.Insensitive);
+                    commandLine.ShouldContain("ping", Case.Insensitive);
                 }
                 else
                 {
@@ -74,8 +74,8 @@ namespace Microsoft.Build.UnitTests
 
                 if (NativeMethodsShared.IsWindows)
                 {
-                    // cmd /c timeout /t 30 /nobreak – at minimum "timeout" or "30" should appear
-                    commandLine.ShouldMatch(@"(timeout|30)");
+                    // ping -n 31 127.0.0.1 – at minimum "127.0.0.1" or "31" should appear
+                    commandLine.ShouldMatch(@"(127\.0\.0\.1|31)");
                 }
                 else
                 {

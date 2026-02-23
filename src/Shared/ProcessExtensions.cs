@@ -198,6 +198,19 @@ namespace Microsoft.Build.Shared
                 IntPtr pAuthInfo,
                 int dwCapabilities);
 
+#if !NET
+            [DllImport("ole32.dll", EntryPoint = "CoSetProxyBlanket")]
+            private static extern int CoSetProxyBlanketPtr(
+                IntPtr pProxy,
+                int dwAuthnSvc,
+                int dwAuthzSvc,
+                IntPtr pServerPrincName,
+                int dwAuthnLevel,
+                int dwImpLevel,
+                IntPtr pAuthInfo,
+                int dwCapabilities);
+#endif
+
             [ComImport]
             [Guid("DC12A687-737F-11CF-884D-00AA004B2E24")]
             [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -510,6 +523,54 @@ namespace Microsoft.Build.Shared
                 int GetMethodOrigin([MarshalAs(UnmanagedType.LPWStr)] string wszMethodName, [MarshalAs(UnmanagedType.BStr)] out string pstrClassName);
             }
 
+#if !NET
+            /// <summary>
+            /// Sets the proxy blanket on a COM proxy via raw interface pointers.
+            /// On .NET Framework, the RCW caches separate proxy stubs for IUnknown and each
+            /// specific COM interface. CoSetProxyBlanket must be called on both the IUnknown
+            /// pointer and the specific interface pointer, otherwise WMI calls fail with
+            /// WBEM_E_ACCESS_DENIED (0x80041003).
+            /// </summary>
+            private static void SetProxyBlanketForNetFx<T>(object comProxy)
+            {
+                IntPtr pUnk = Marshal.GetIUnknownForObject(comProxy);
+                try
+                {
+                    CoSetProxyBlanketPtr(
+                        pUnk,
+                        RPC_C_AUTHN_WINNT,
+                        RPC_C_AUTHZ_NONE,
+                        IntPtr.Zero,
+                        RPC_C_AUTHN_LEVEL_CALL,
+                        RPC_C_IMP_LEVEL_IMPERSONATE,
+                        IntPtr.Zero,
+                        EOAC_NONE);
+                }
+                finally
+                {
+                    Marshal.Release(pUnk);
+                }
+
+                IntPtr pInterface = Marshal.GetComInterfaceForObject(comProxy, typeof(T));
+                try
+                {
+                    CoSetProxyBlanketPtr(
+                        pInterface,
+                        RPC_C_AUTHN_WINNT,
+                        RPC_C_AUTHZ_NONE,
+                        IntPtr.Zero,
+                        RPC_C_AUTHN_LEVEL_CALL,
+                        RPC_C_IMP_LEVEL_IMPERSONATE,
+                        IntPtr.Zero,
+                        EOAC_NONE);
+                }
+                finally
+                {
+                    Marshal.Release(pInterface);
+                }
+            }
+#endif
+
             /// <summary>
             /// Retrieves the command line for a process by querying WMI Win32_Process via COM.
             /// Runs: SELECT CommandLine FROM Win32_Process WHERE ProcessId='<paramref name="processId"/>'
@@ -554,6 +615,7 @@ namespace Microsoft.Build.Shared
                         $"WMI ConnectServer failed for PID {processId}. HRESULT: 0x{hr:X8}");
                 }
 
+#if NET
                 hr = CoSetProxyBlanket(
                     services,
                     RPC_C_AUTHN_WINNT,
@@ -568,6 +630,13 @@ namespace Microsoft.Build.Shared
                     throw new InvalidOperationException(
                         $"WMI CoSetProxyBlanket failed for PID {processId}. HRESULT: 0x{hr:X8}");
                 }
+#else
+                // On .NET Framework, the RCW caches separate proxy stubs for IUnknown and
+                // each specific COM interface. CoSetProxyBlanket must be called on BOTH
+                // the IUnknown pointer AND the specific interface pointer, because the
+                // blanket set on IUnknown doesn't propagate to the specific interface's proxy.
+                SetProxyBlanketForNetFx<IWbemServices>(services);
+#endif
 
                 string query = $"SELECT CommandLine FROM Win32_Process WHERE ProcessId='{processId}'";
                 hr = services.ExecQuery(
@@ -581,6 +650,11 @@ namespace Microsoft.Build.Shared
                     throw new InvalidOperationException(
                         $"WMI ExecQuery failed for PID {processId}. HRESULT: 0x{hr:X8}");
                 }
+
+#if !NET
+                // The enumerator is a separate COM proxy that also needs its security blanket set.
+                SetProxyBlanketForNetFx<IEnumWbemClassObject>(enumerator);
+#endif
 
                 hr = enumerator.Next(WBEM_INFINITE, 1, out IWbemClassObject obj, out uint returned);
                 if (hr == WBEM_S_FALSE || returned == 0)
