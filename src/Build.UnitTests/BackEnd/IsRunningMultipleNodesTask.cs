@@ -8,8 +8,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// A simple task that queries IsRunningMultipleNodes from the build engine.
-    /// Used by TaskHostCallback_Tests for in-process integration tests.
-    /// See also CallbackTestTask in ExampleNetTask for cross-runtime E2E tests.
+    /// Used by TaskHostCallback_Tests (in-process) and NetTaskHost_E2E_Tests (cross-runtime).
+    /// The E2E project includes this file via linked compile to avoid duplication.
     /// </summary>
     public class IsRunningMultipleNodesTask : Task
     {

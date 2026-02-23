@@ -10,15 +10,15 @@
   </PropertyGroup>
 
   <UsingTask
-      TaskName="CallbackTestTask"
+      TaskName="Microsoft.Build.UnitTests.BackEnd.IsRunningMultipleNodesTask"
       AssemblyFile="$(ExampleTaskPath)"
       TaskFactory="TaskHostFactory"
       Runtime="NET"/>
 
   <Target Name="TestTask" BeforeTargets="Build">
-    <CallbackTestTask>
+    <Microsoft.Build.UnitTests.BackEnd.IsRunningMultipleNodesTask>
       <Output PropertyName="IsMultiNode" TaskParameter="IsRunningMultipleNodes" />
-    </CallbackTestTask>
+    </Microsoft.Build.UnitTests.BackEnd.IsRunningMultipleNodesTask>
     <Message Text="CallbackResult: IsRunningMultipleNodes = $(IsMultiNode)" Importance="high" />
   </Target>
 

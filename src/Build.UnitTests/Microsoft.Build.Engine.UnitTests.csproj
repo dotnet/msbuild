@@ -127,7 +127,7 @@
   </ItemDefinitionGroup>
   
   <ItemGroup Label="TestAssests" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
-    <ProjectReference Include=".\TestAssets\ExampleNetTask\ExampleTask\ExampleTask.csproj" />
+    <ProjectReference Include=".\TestAssets\ExampleNetTask\ExampleTask\ExampleTask.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup Label="TestAssests" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
@@ -143,9 +143,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
     <EmbeddedResource Include="TestAssets\ExampleNetTask\TestNetTask\global.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </EmbeddedResource>
-    <EmbeddedResource Include="TestAssets\ExampleNetTask\TestNetTaskCallback\global.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </EmbeddedResource>
   </ItemGroup>
