@@ -61,11 +61,27 @@ namespace Microsoft.Build.Shared
             try
             {
 #if NET
-                commandLine = NativeMethodsShared.IsWindows ? Windows.GetCommandLine(process.Id) :
-                       NativeMethodsShared.IsOSX ? MacOS.GetCommandLine(process.Id) :
-                       NativeMethodsShared.IsLinux ? Linux.GetCommandLine(process.Id) :
-                       null; // If we don't have a platform-specific implementation, just return true with a null command line, since the caller should be able to handle that case.
-                return true;
+                if (NativeMethodsShared.IsWindows)
+                {
+                    commandLine = Windows.GetCommandLine(process.Id);
+                    return true;
+                }
+                else if (NativeMethodsShared.IsOSX)
+                {
+                    commandLine = MacOS.GetCommandLine(process.Id);
+                    return true;
+                }
+                else if (NativeMethodsShared.IsLinux)
+                {
+                    commandLine = Linux.GetCommandLine(process.Id);
+                    return true;
+                }
+                else
+                {
+                    // Unsupported OS (e.g., BSD) - return false to fall back to prior behavior
+                    commandLine = null;
+                    return false;
+                }
 #else
                 commandLine = Windows.GetCommandLine(process.Id);
                 return true;
