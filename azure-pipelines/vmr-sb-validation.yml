@@ -3,7 +3,7 @@
 # Builds the VMR in source-build mode to validate MSBuild changes.
 # Supports passing extra MSBuild properties to stage 2 builds (e.g., -mt mode).
 #
-# Trigger: Manual only (queue from Azure DevOps UI)
+# Trigger: Manual only (queue from Azure DevOps UI or Copilot CLI /vmr-validate skill)
 # Uses the same pattern as runtime's vmr-build-pr.yml.
 
 trigger: none
