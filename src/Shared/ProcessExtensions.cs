@@ -7,6 +7,7 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
 #if NET
+using System.Buffers;
 using System.Text;
 using System.IO;
 #endif
@@ -66,9 +67,13 @@ namespace Microsoft.Build.Shared
                     commandLine = Windows.GetCommandLine(process.Id);
                     return true;
                 }
-                else if (NativeMethodsShared.IsOSX)
+                else if (NativeMethodsShared.IsOSX || NativeMethodsShared.IsBSD)
                 {
+                    // macOS and BSD both support sysctl with KERN_PROCARGS2
+                    // Suppress CA1416 because we check IsBSD at runtime but the method is marked [SupportedOSPlatform("macos")]
+                    #pragma warning disable CA1416
                     commandLine = MacOS.GetCommandLine(process.Id);
+                    #pragma warning restore CA1416
                     return true;
                 }
                 else if (NativeMethodsShared.IsLinux)
@@ -78,7 +83,7 @@ namespace Microsoft.Build.Shared
                 }
                 else
                 {
-                    // Unsupported OS (e.g., BSD) - return false to fall back to prior behavior
+                    // Unsupported OS - return false to fall back to prior behavior
                     commandLine = null;
                     return false;
                 }
@@ -96,38 +101,67 @@ namespace Microsoft.Build.Shared
 #if NET
         /// <summary>
         /// Parses a null-separated byte buffer into a space-joined argument string using span-based slicing.
-        /// Used by both Linux (/proc/pid/cmdline) and macOS (sysctl KERN_PROCARGS2) parsing.
+        /// Used by both Linux (/proc/pid/cmdline) and macOS/BSD (sysctl KERN_PROCARGS2) parsing.
+        /// Uses ArrayPool to rent char buffers for efficient UTF-8 decoding without intermediate string allocations.
         /// </summary>
         private static string ParseNullSeparatedArguments(ReadOnlySpan<byte> data, int maxArgs = int.MaxValue)
         {
-            StringBuilder sb = new(data.Length);
-            int argsFound = 0;
-
-            while (!data.IsEmpty && argsFound < maxArgs)
+            if (data.IsEmpty)
             {
-                int nullIndex = data.IndexOf((byte)0);
-                ReadOnlySpan<byte> segment = nullIndex >= 0 ? data.Slice(0, nullIndex) : data;
-
-                if (!segment.IsEmpty)
-                {
-                    if (sb.Length > 0)
-                    {
-                        sb.Append(' ');
-                    }
-
-                    sb.Append(Encoding.UTF8.GetString(segment));
-                    argsFound++;
-                }
-
-                if (nullIndex < 0)
-                {
-                    break;
-                }
-
-                data = data.Slice(nullIndex + 1);
+                return string.Empty;
             }
 
-            return sb.ToString();
+            // Rent a char buffer for UTF-8 decoding (max char count equals byte count for ASCII-like content)
+            char[] charBuffer = ArrayPool<char>.Shared.Rent(data.Length);
+            try
+            {
+                int totalChars = 0;
+                int argsFound = 0;
+
+                while (!data.IsEmpty && argsFound < maxArgs)
+                {
+                    int nullIndex = data.IndexOf((byte)0);
+                    ReadOnlySpan<byte> segment = nullIndex >= 0 ? data.Slice(0, nullIndex) : data;
+
+                    if (!segment.IsEmpty)
+                    {
+                        // Add space separator between arguments
+                        if (totalChars > 0)
+                        {
+                            charBuffer[totalChars++] = ' ';
+                        }
+
+                        // Decode UTF-8 directly into the char buffer
+                        int charsWritten = Encoding.UTF8.GetChars(segment, charBuffer.AsSpan(totalChars));
+                        
+                        // UTF-8 decoder converts null bytes to null chars - replace them with spaces for safety
+                        Span<char> decodedChars = charBuffer.AsSpan(totalChars, charsWritten);
+                        for (int i = 0; i < decodedChars.Length; i++)
+                        {
+                            if (decodedChars[i] == '\0')
+                            {
+                                decodedChars[i] = ' ';
+                            }
+                        }
+
+                        totalChars += charsWritten;
+                        argsFound++;
+                    }
+
+                    if (nullIndex < 0)
+                    {
+                        break;
+                    }
+
+                    data = data.Slice(nullIndex + 1);
+                }
+
+                return new string(charBuffer, 0, totalChars);
+            }
+            finally
+            {
+                ArrayPool<char>.Shared.Return(charBuffer);
+            }
         }
 #endif
 
@@ -712,9 +746,10 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// macOS-specific P/Invoke bindings and command line retrieval via sysctl KERN_PROCARGS2.
+        /// macOS/BSD-specific P/Invoke bindings and command line retrieval via sysctl KERN_PROCARGS2.
         /// </summary>
         [SupportedOSPlatform("macos")]
+        [SupportedOSPlatform("freebsd")]
         private static partial class MacOS
         {
             [LibraryImport("libc", SetLastError = true)]
@@ -737,33 +772,31 @@ namespace Microsoft.Build.Shared
 
             /// <summary>
             /// Uses sysctl with KERN_PROCARGS2 to read the process arguments,
-            /// then parses the null-separated buffer using span-based slicing.
+            /// then parses the null-separated buffer using span-based slicing with ArrayPool for efficient memory management.
+            /// Related: https://github.com/dotnet/runtime/issues/101837
             /// </summary>
             internal static string? GetCommandLine(int processId)
             {
+                ReadOnlySpan<int> mib = [CTL_KERN, KERN_PROCARGS2, processId];
+                nuint size = 0;
+
+                // Get the required buffer size
+                if (Sysctl(mib, Span<byte>.Empty, ref size) != 0 || size == 0)
+                {
+                    return null;
+                }
+
+                // Rent a buffer from ArrayPool and pin it for sysctl
+                byte[] buffer = ArrayPool<byte>.Shared.Rent((int)size);
                 try
                 {
-                    ReadOnlySpan<int> mib = [CTL_KERN, KERN_PROCARGS2, processId];
-                    nuint size = 0;
-
-                    if (Sysctl(mib, Span<byte>.Empty, ref size) != 0)
+                    if (Sysctl(mib, buffer.AsSpan(0, (int)size), ref size) != 0)
                     {
                         return null;
                     }
 
-                    if (size == 0)
-                    {
-                        return null;
-                    }
-
-                    byte[] buffer = new byte[size];
-                    if (Sysctl(mib, buffer, ref size) != 0)
-                    {
-                        return null;
-                    }
-
-                    // Buffer format:
-                    //   int argc
+                    // Buffer format (KERN_PROCARGS2):
+                    //   int argc (number of arguments including executable)
                     //   fully-qualified executable path (null-terminated)
                     //   padding null bytes
                     //   argv[0] .. argv[argc-1] (each null-terminated)
@@ -784,13 +817,13 @@ namespace Microsoft.Build.Shared
                     data = data.Slice(sizeof(int));
 
                     // Skip past the executable path (first null terminator)
-                    int nullIndex = data.IndexOf((byte)0);
-                    if (nullIndex < 0)
+                    int execPathEnd = data.IndexOf((byte)0);
+                    if (execPathEnd < 0)
                     {
                         return null;
                     }
 
-                    data = data.Slice(nullIndex + 1);
+                    data = data.Slice(execPathEnd + 1);
 
                     // Skip padding null bytes between executable path and argv[0]
                     while (!data.IsEmpty && data[0] == 0)
@@ -800,9 +833,9 @@ namespace Microsoft.Build.Shared
 
                     return ParseNullSeparatedArguments(data, argc);
                 }
-                catch
+                finally
                 {
-                    return null;
+                    ArrayPool<byte>.Shared.Return(buffer);
                 }
             }
         }
