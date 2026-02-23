@@ -107,11 +107,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verifies IsRunningMultipleNodes returns false (safe default) when callbacks are not enabled.
-        /// This simulates the cross-version scenario where a new TaskHost connects to an old worker node.
+        /// Verifies that accessing IsRunningMultipleNodes when callbacks are disabled
+        /// logs error MSB5022 (BuildEngineCallbacksInTaskHostUnsupported).
+        /// This preserves the pre-callback behavior where unsupported IBuildEngine
+        /// methods in TaskHost log an error.
         /// </summary>
         [Fact]
-        public void IsRunningMultipleNodes_ReturnsFalseWhenCallbacksNotSupported()
+        public void IsRunningMultipleNodes_LogsErrorWhenCallbacksNotSupported()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
@@ -129,15 +131,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
             ProjectInstance projectInstance = new(project.ProjectFile);
 
+            var logger = new MockLogger(_output);
             BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
-                new BuildParameters { MaxNodeCount = 4, EnableNodeReuse = false },
+                new BuildParameters { MaxNodeCount = 4, EnableNodeReuse = false, Loggers = [logger] },
                 new BuildRequestData(projectInstance, targetsToBuild: ["Test"]));
 
-            // Build should succeed — callbacks gracefully return safe defaults
-            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
-
-            // IsRunningMultipleNodes should return false (safe default) even though MaxNodeCount=4
-            bool.Parse(projectInstance.GetPropertyValue("Result")).ShouldBe(false);
+            // MSB5022 error should be logged — the callback was not forwarded
+            logger.ErrorCount.ShouldBeGreaterThan(0);
+            logger.FullLog.ShouldContain("MSB5022");
         }
     }
 }
