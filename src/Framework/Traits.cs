@@ -259,6 +259,13 @@ namespace Microsoft.Build.Framework
         public readonly bool AlwaysDoImmutableFilesUpToDateCheck = Environment.GetEnvironmentVariable("MSBUILDDONOTCACHEMODIFICATIONTIME") == "1";
 
         /// <summary>
+        /// Disables the check that prevents tasks from modifying immutable environment variables (e.g., MSBUILD* variables)
+        /// in multithreaded build mode. This escape hatch should only be used for compatibility with tasks that need to
+        /// modify these variables and understand the risks of doing so in a concurrent build environment.
+        /// </summary>
+        public readonly bool DisableImmutableEnvironmentVariableCheck = Environment.GetEnvironmentVariable("MSBUILDDISABLEIMMUTABLEENVIRONMENTVARIABLECHECK") == "1";
+
+        /// <summary>
         /// When copying over an existing file, copy directly into the existing file rather than deleting and recreating.
         /// </summary>
         public readonly bool CopyWithoutDelete = Environment.GetEnvironmentVariable("MSBUILDCOPYWITHOUTDELETE") == "1";

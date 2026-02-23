@@ -475,5 +475,24 @@ namespace Microsoft.Build.UnitTests
             Should.Throw<InvalidOperationException>(() =>
                 taskEnvironment.SetEnvironmentVariable(ImmutableTestVar, null));
         }
+
+        [Fact]
+        public void MultiThreadedTaskEnvironmentDriver_EscapeHatch_DisablesImmutableVariableCheck()
+        {
+            // When the escape hatch is set, modifying immutable variables should not throw
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEIMMUTABLEENVIRONMENTVARIABLECHECK", "1");
+
+            using var driver = new MultiThreadedTaskEnvironmentDriver(
+                GetResolvedTempPath(),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+            var taskEnvironment = new TaskEnvironment(driver);
+
+            // With escape hatch enabled, setting an MSBUILD-prefixed variable should not throw
+            Should.NotThrow(() =>
+                taskEnvironment.SetEnvironmentVariable(ImmutableTestVar, TestValue));
+
+            taskEnvironment.GetEnvironmentVariable(ImmutableTestVar).ShouldBe(TestValue);
+        }
     }
 }
