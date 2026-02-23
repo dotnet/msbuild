@@ -28,10 +28,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// Verifies IsRunningMultipleNodes callback works when task is explicitly run in TaskHost via TaskHostFactory.
+        /// IsRunningMultipleNodes is configuration-based (MaxNodeCount > 1), not based on actual running nodes.
+        /// See TaskHost.IsRunningMultipleNodes: returns _host.BuildParameters.MaxNodeCount > 1 || _disableInprocNode.
         /// </summary>
         [Theory]
-        [InlineData(1, false)]  // Single node build
-        [InlineData(4, true)]   // Multi-node build
+        [InlineData(1, false)]  // MaxNodeCount=1 → IsRunningMultipleNodes=false
+        [InlineData(4, true)]   // MaxNodeCount=4 → IsRunningMultipleNodes=true (even with one project)
         public void IsRunningMultipleNodes_WorksWithExplicitTaskHostFactory(int maxNodeCount, bool expectedResult)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
