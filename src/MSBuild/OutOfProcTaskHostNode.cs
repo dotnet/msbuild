@@ -55,10 +55,10 @@ namespace Microsoft.Build.CommandLine
         /// process.  Those are the variables that this dictionary should store.
         ///
         /// - The key into the dictionary is the name of the environment variable.
-        /// - The Key of the KeyValuePair is the value of the variable in the parent process -- the value that we
+        /// - The Key of the KeyValuePair is the value of the variable in the owning worker node process -- the value that we
         ///   wish to ensure is replaced by whatever the correct value in our current process is.
         /// - The Value of the KeyValuePair is the value of the variable in the current process -- the value that
-        ///   we wish to replay the Key value with in the environment that we receive from the parent before
+        ///   we wish to replay the Key value with in the environment that we receive from the owning worker node before
         ///   applying it to the current process.
         ///
         /// Note that either value in the KeyValuePair can be null, as it is completely possible to have an
@@ -194,14 +194,14 @@ namespace Microsoft.Build.CommandLine
         private int _nextCallbackRequestId;
 
         /// <summary>
-        /// Pending callback requests awaiting responses from the parent.
+        /// Pending callback requests awaiting responses from the owning worker node.
         /// Key is the request ID, value is the TaskCompletionSource to signal when response arrives.
         /// </summary>
         private readonly ConcurrentDictionary<int, TaskCompletionSource<INodePacket>> _pendingCallbackRequests = new();
 
         /// <summary>
-        /// The packet version negotiated with the parent process.
-        /// Used to determine if the parent supports callback packets.
+        /// The packet version negotiated with the owning worker node.
+        /// Used to determine if the worker node supports callback packets.
         /// </summary>
         private byte _parentPacketVersion;
 
@@ -212,8 +212,8 @@ namespace Microsoft.Build.CommandLine
         private const byte CallbacksMinPacketVersion = 3;
 
         /// <summary>
-        /// Whether the parent supports IBuildEngine callbacks.
-        /// True if the parent's packet version is high enough, or if the feature is force-enabled via env var.
+        /// Whether the owning worker node supports IBuildEngine callbacks.
+        /// True if the worker node's packet version is high enough, or if the feature is force-enabled via env var.
         /// </summary>
         private bool CallbacksSupported =>
             _parentPacketVersion >= CallbacksMinPacketVersion
@@ -311,8 +311,8 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// Implementation of IBuildEngine2.IsRunningMultipleNodes.
-        /// Queries the parent process and returns the actual value.
-        /// Returns false if the parent doesn't support callbacks (cross-version scenario).
+        /// Queries the owning worker node and returns the actual value.
+        /// Returns false if the worker node doesn't support callbacks (cross-version scenario).
         /// </summary>
         public bool IsRunningMultipleNodes
         {
@@ -376,9 +376,9 @@ namespace Microsoft.Build.CommandLine
         #region IBuildEngine Implementation (Methods)
 
         /// <summary>
-        /// Sends the provided error back to the parent node to be logged, tagging it with
-        /// the parent node's ID so that, as far as anyone is concerned, it might as well have
-        /// just come from the parent node to begin with.
+        /// Sends the provided error back to the owning worker node to be logged, tagging it with
+        /// the worker node's ID so that, as far as anyone is concerned, it might as well have
+        /// just come from the worker node to begin with.
         /// </summary>
         public void LogErrorEvent(BuildErrorEventArgs e)
         {
@@ -386,9 +386,9 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Sends the provided warning back to the parent node to be logged, tagging it with
-        /// the parent node's ID so that, as far as anyone is concerned, it might as well have
-        /// just come from the parent node to begin with.
+        /// Sends the provided warning back to the owning worker node to be logged, tagging it with
+        /// the worker node's ID so that, as far as anyone is concerned, it might as well have
+        /// just come from the worker node to begin with.
         /// </summary>
         public void LogWarningEvent(BuildWarningEventArgs e)
         {
@@ -396,9 +396,9 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Sends the provided message back to the parent node to be logged, tagging it with
-        /// the parent node's ID so that, as far as anyone is concerned, it might as well have
-        /// just come from the parent node to begin with.
+        /// Sends the provided message back to the owning worker node to be logged, tagging it with
+        /// the worker node's ID so that, as far as anyone is concerned, it might as well have
+        /// just come from the worker node to begin with.
         /// </summary>
         public void LogMessageEvent(BuildMessageEventArgs e)
         {
@@ -406,9 +406,9 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Sends the provided custom event back to the parent node to be logged, tagging it with
-        /// the parent node's ID so that, as far as anyone is concerned, it might as well have
-        /// just come from the parent node to begin with.
+        /// Sends the provided custom event back to the owning worker node to be logged, tagging it with
+        /// the worker node's ID so that, as far as anyone is concerned, it might as well have
+        /// just come from the worker node to begin with.
         /// </summary>
         public void LogCustomEvent(CustomBuildEventArgs e)
         {
@@ -817,7 +817,7 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Sends a callback request packet to the parent and waits for the corresponding response.
+        /// Sends a callback request packet to the owning worker node and waits for the corresponding response.
         /// This is called from task threads and blocks until the response arrives on the main thread.
         /// </summary>
         /// <typeparam name="TResponse">The expected response packet type.</typeparam>
@@ -830,7 +830,7 @@ namespace Microsoft.Build.CommandLine
         ///
         /// We intentionally do NOT check _taskCancelledEvent here. This aligns with in-process
         /// mode where IBuildEngine callbacks are direct method calls that complete regardless of
-        /// cancellation state. The parent continues processing callback requests even after
+        /// cancellation state. The owning worker node continues processing callback requests even after
         /// sending TaskHostTaskCancelled, so the response will arrive. Cancellation is handled
         /// cooperatively via ICancelableTask.Cancel() on the task itself.
         ///
@@ -848,7 +848,7 @@ namespace Microsoft.Build.CommandLine
 
             try
             {
-                // Send the request packet to the parent
+                // Send the request packet to the owning worker node
                 _nodeEndpoint.SendData(request);
 
                 // Block until the response arrives (via HandleCallbackResponse → TCS.SetResult)
@@ -1047,7 +1047,7 @@ namespace Microsoft.Build.CommandLine
                         if (_pendingCallbackRequests.TryRemove(kvp.Key, out TaskCompletionSource<INodePacket> tcs))
                         {
                             tcs.TrySetException(new InvalidOperationException(
-                                "TaskHost lost connection to parent process during callback."));
+                                "TaskHost lost connection to owning worker node during callback."));
                         }
                     }
 #endif
@@ -1073,7 +1073,7 @@ namespace Microsoft.Build.CommandLine
             TaskHostConfiguration taskConfiguration = state as TaskHostConfiguration;
             IDictionary<string, TaskParameter> taskParams = taskConfiguration.TaskParameters;
 
-            // We only really know the values of these variables for sure once we see what we received from our parent
+            // We only really know the values of these variables for sure once we see what we received from the owning worker node
             // environment -- otherwise if this was a completely new build, we could lose out on expected environment
             // variables.
             _debugCommunications = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBUILDDEBUGCOMM", "1", StringComparison.OrdinalIgnoreCase);
@@ -1197,7 +1197,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Set the environment for the task host -- includes possibly munging the given
         /// environment somewhat to account for expected environment differences between,
-        /// e.g. parent processes and task hosts of different bitnesses.
+        /// e.g. worker node processes and task hosts of different bitnesses.
         /// </summary>
         private void SetTaskHostEnvironment(IDictionary<string, string> environment)
         {
@@ -1271,9 +1271,9 @@ namespace Microsoft.Build.CommandLine
             {
                 foreach (KeyValuePair<string, KeyValuePair<string, string>> variable in s_mismatchedEnvironmentValues)
                 {
-                    // Since this is munging the property list for returning to the parent process,
+                    // Since this is munging the property list for returning to the owning worker node process,
                     // then the value we wish to replace is the one that is in this process, and the
-                    // replacement value is the one that originally came from the parent process,
+                    // replacement value is the one that originally came from the worker node process,
                     // instead of the other way around.
                     string oldValue = variable.Value.Value;
                     string newValue = variable.Value.Key;

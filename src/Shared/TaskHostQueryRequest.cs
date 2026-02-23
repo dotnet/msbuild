@@ -4,7 +4,7 @@
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// Packet sent from TaskHost to parent to query simple build engine state.
+    /// Packet sent from TaskHost to owning worker node to query simple build engine state.
     /// </summary>
     internal class TaskHostQueryRequest : INodePacket, ITaskHostCallbackPacket
     {

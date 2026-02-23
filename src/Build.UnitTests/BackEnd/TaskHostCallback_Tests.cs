@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         /// <summary>
         /// Verifies IsRunningMultipleNodes returns false (safe default) when callbacks are not enabled.
-        /// This simulates the cross-version scenario where a new TaskHost connects to an old parent.
+        /// This simulates the cross-version scenario where a new TaskHost connects to an old worker node.
         /// </summary>
         [Fact]
         public void IsRunningMultipleNodes_ReturnsFalseWhenCallbacksNotSupported()

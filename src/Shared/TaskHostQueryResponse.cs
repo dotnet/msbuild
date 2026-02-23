@@ -4,7 +4,7 @@
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// Response packet from parent to TaskHost for query requests.
+    /// Response packet from owning worker node to TaskHost for query requests.
     /// </summary>
     internal class TaskHostQueryResponse : INodePacket, ITaskHostCallbackPacket
     {
