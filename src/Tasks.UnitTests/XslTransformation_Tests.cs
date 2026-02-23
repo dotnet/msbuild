@@ -10,6 +10,7 @@ using System.Reflection.Emit;
 using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Xsl;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
@@ -109,7 +110,7 @@ namespace Microsoft.Build.UnitTests
             {
                 for (int xsi = 0; xsi < xslInputs.Count; xsi++)
                 {
-                    XslTransformation t = new XslTransformation();
+                    XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                     t.BuildEngine = engine;
                     t.OutputPaths = outputPaths;
                     XslTransformation.XmlInput.XmlModes xmlKey = xmlInputs[xmi].Key;
@@ -172,7 +173,7 @@ namespace Microsoft.Build.UnitTests
             // test Xsl missing.
             for (int xmi = 0; xmi < xmlInputs.Count; xmi++)
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
 
@@ -218,7 +219,7 @@ namespace Microsoft.Build.UnitTests
             // Test Xml missing.
             for (int xsi = 0; xsi < xslInputs.Count; xsi++)
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
 
@@ -267,7 +268,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test both missing.
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
 
@@ -297,7 +298,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test too many Xml.
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -331,7 +332,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test too many Xsl.
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -365,7 +366,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test Out
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.XmlContent = _xmlDocument;
                 t.XslContent = _xslDocument;
@@ -402,7 +403,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test Correct Xslt Parameters
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -450,7 +451,7 @@ namespace Microsoft.Build.UnitTests
                         }
                     }
 
-                    XslTransformation t = new XslTransformation();
+                    XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                     t.BuildEngine = engine;
                     t.OutputPaths = outputPaths;
                     t.XmlContent = _xmlDocument;
@@ -492,7 +493,7 @@ namespace Microsoft.Build.UnitTests
 
             // load empty parameters
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlInputPaths = xmlPaths;
@@ -522,7 +523,7 @@ namespace Microsoft.Build.UnitTests
 
             // with type specified.
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -551,7 +552,7 @@ namespace Microsoft.Build.UnitTests
 
             // without type specified.
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -578,7 +579,7 @@ namespace Microsoft.Build.UnitTests
 
             // load bad xslt
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -617,7 +618,7 @@ namespace Microsoft.Build.UnitTests
 
                 // load missing xml
                 {
-                    XslTransformation t = new XslTransformation();
+                    XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                     t.BuildEngine = engine;
                     t.XmlInputPaths = xmlPaths;
                     t.XslInputPath = xslPath;
@@ -643,7 +644,7 @@ namespace Microsoft.Build.UnitTests
 
             // load missing xml
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 xmlPaths[0].ItemSpec += "bad";
@@ -672,7 +673,7 @@ namespace Microsoft.Build.UnitTests
 
             // load missing xsl
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlInputPaths = xmlPaths;
@@ -701,7 +702,7 @@ namespace Microsoft.Build.UnitTests
 
             // missing xsltCompiledDll
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -728,7 +729,7 @@ namespace Microsoft.Build.UnitTests
 
             // load bad xml on parameters
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -761,7 +762,7 @@ namespace Microsoft.Build.UnitTests
 
             // load bad output
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -796,7 +797,7 @@ namespace Microsoft.Build.UnitTests
 
             // Test with files
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.XmlInputPaths = xmlPaths;
                 t.XslInputPath = xslPath;
@@ -827,7 +828,7 @@ namespace Microsoft.Build.UnitTests
 
             // load error xslDocument
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.OutputPaths = outputPaths;
                 t.XmlContent = _xmlDocument;
@@ -867,7 +868,7 @@ namespace Microsoft.Build.UnitTests
 
             // load transformed xsl and assert it is well formatted
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
                 t.BuildEngine = engine;
                 t.XslInputPath = xslPath;
@@ -960,7 +961,7 @@ namespace Microsoft.Build.UnitTests
             TaskItem[] outputMultiPaths = new TaskItem[] { new TaskItem(outputPaths[0].ItemSpec + ".1.xml"),
                 new TaskItem(outputPaths[0].ItemSpec + ".2.xml"), new TaskItem(outputPaths[0].ItemSpec + ".3.xml"), new TaskItem(outputPaths[0].ItemSpec + ".4.xml") };
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.XslInputPath = xslPath;
                 t.XmlInputPaths = xmlMultiPaths;
@@ -1011,7 +1012,7 @@ namespace Microsoft.Build.UnitTests
                 new TaskItem(outputPaths[0].ItemSpec + ".5.xml") };
             // Short version.
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.XslInputPath = xslPath;
                 t.XmlInputPaths = xmlMultiPaths;
@@ -1023,7 +1024,7 @@ namespace Microsoft.Build.UnitTests
 
             // Long version
             {
-                XslTransformation t = new XslTransformation();
+                XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 t.BuildEngine = engine;
                 t.XslInputPath = xslPath;
                 t.XmlInputPaths = xmlMultiPaths;
@@ -1069,7 +1070,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             // Validate that execution passes when UseTrustedSettings is true
-            XslTransformation t = new XslTransformation();
+            XslTransformation t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             t.BuildEngine = engine;
             t.OutputPaths = outputPaths;
             t.XmlInputPaths = new TaskItem[] { myXmlPath1 };
@@ -1079,7 +1080,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(t.Execute()); // "Test should have passed and allowed the use of the document() function within the xslt file"
 
             // Validate that execution fails when UseTrustedSettings is false
-            t = new XslTransformation();
+            t = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             t.BuildEngine = engine;
             t.OutputPaths = outputPaths;
             t.XmlInputPaths = new TaskItem[] { myXmlPath1 };
@@ -1255,8 +1256,113 @@ namespace Microsoft.Build.UnitTests
 
             asmBldr.Save(Path.GetFileName(outputFile), PortableExecutableKinds.ILOnly, ImageFileMachine.I386);
         }
-
 #endif
+
+        /// <summary>
+        /// Test that XmlInputPaths with null ItemSpec fails appropriately.
+        /// The null ItemSpec should be the second item to verify first item processing succeeded.
+        /// </summary>
+        [Fact]
+        public void XmlInputPathsWithNullItemSpec()
+        {
+            string dir = Path.Combine(Path.GetTempPath(), DateTime.Now.Ticks.ToString());
+            Directory.CreateDirectory(dir);
+            MockEngine engine = new MockEngine();
+
+            try
+            {
+                // Create first and third valid XML files
+                string xmlPath1 = Path.Combine(dir, "doc1.xml");
+                using (StreamWriter sw = new StreamWriter(xmlPath1, false))
+                {
+                    sw.Write(_xmlDocument);
+                    sw.Close();
+                }
+
+                string xmlPath3 = Path.Combine(dir, "doc3.xml");
+                using (StreamWriter sw = new StreamWriter(xmlPath3, false))
+                {
+                    sw.Write(_xmlDocument2);
+                    sw.Close();
+                }
+
+                // Create XSL file
+                string xslPath = Path.Combine(dir, "doc.xslt");
+                using (StreamWriter sw = new StreamWriter(xslPath, false))
+                {
+                    sw.Write(_xslDocument);
+                    sw.Close();
+                }
+
+                // Set up output paths
+                string outputPath1 = Path.Combine(dir, "testout1.xml");
+                string outputPath2 = Path.Combine(dir, "testout2.xml");
+                string outputPath3 = Path.Combine(dir, "testout3.xml");
+
+                // Test with array that includes null ItemSpec as second item
+                ITaskItem[] xmlPathsWithNull = new ITaskItem[3];
+                xmlPathsWithNull[0] = new TaskItem(xmlPath1); // First item valid
+                xmlPathsWithNull[1] = new TestTaskItemWithNullSpec(); // Second item has null ItemSpec
+                xmlPathsWithNull[2] = new TaskItem(xmlPath3); // Third item valid but should not be processed
+
+                TaskItem[] outputPaths = new TaskItem[3];
+                outputPaths[0] = new TaskItem(outputPath1);
+                outputPaths[1] = new TaskItem(outputPath2);
+                outputPaths[2] = new TaskItem(outputPath3);
+
+                // Test that transformation fails when processing second item with null ItemSpec
+                XslTransformation t2 = new XslTransformation() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                t2.BuildEngine = engine;
+                t2.XmlInputPaths = xmlPathsWithNull;
+                t2.XslInputPath = new TaskItem(xslPath);
+                t2.OutputPaths = outputPaths;
+
+                t2.Execute().ShouldBeFalse(); // Should fail due to null ItemSpec on second item
+                engine.Log.ShouldContain("MSB3703"); // Should contain transformation error code
+
+                // Verify that first item was processed successfully before failure
+                File.Exists(outputPath1).ShouldBeTrue("First output file should exist - first item should be processed successfully");
+                
+                // Verify that third items was not processed due to failure on second item
+                File.Exists(outputPath3).ShouldBeFalse("Third output file should not exist - processing should stop at second item failure");
+            }
+            finally
+            {
+                try
+                {
+                    FileUtilities.DeleteWithoutTrailingBackslash(dir, true);
+                }
+                catch { }
+            }
+        }
+
+        /// <summary>
+        /// Test implementation of ITaskItem that allows null ItemSpec
+        /// </summary>
+        private sealed class TestTaskItemWithNullSpec : ITaskItem
+        {
+            public string ItemSpec { get; set; } = null;
+
+            public System.Collections.IDictionary CloneCustomMetadata() =>
+                throw new NotImplementedException();
+
+            public void CopyMetadataTo(ITaskItem destinationItem) =>
+                throw new NotImplementedException();
+
+            public string GetMetadata(string metadataName) =>
+                throw new NotImplementedException();
+
+            public void RemoveMetadata(string metadataName) =>
+                throw new NotImplementedException();
+
+            public void SetMetadata(string metadataName, string metadataValue) =>
+                throw new NotImplementedException();
+
+            public int MetadataCount => throw new NotImplementedException();
+
+            public System.Collections.ICollection MetadataNames => throw new NotImplementedException();
+        }
+
         #endregion
     }
 }
