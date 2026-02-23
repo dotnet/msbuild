@@ -834,6 +834,11 @@ namespace Microsoft.Build.CommandLine
         /// sending TaskHostTaskCancelled, so the response will arrive. Cancellation is handled
         /// cooperatively via ICancelableTask.Cancel() on the task itself.
         ///
+        /// NOTE: Unlike in-process mode, the IPC mechanism here *could* support cancellation-aware
+        /// callbacks by failing the TCS when _taskCancelledEvent is signaled. This is a future
+        /// opportunity if we need to abort long-running callbacks (e.g. BuildProjectFile) immediately
+        /// on cancellation rather than waiting for the worker node to respond.
+        ///
         /// Connection loss is handled by OnLinkStatusChanged, which fails all pending TCS
         /// with InvalidOperationException, causing this method to throw immediately.
         /// </remarks>

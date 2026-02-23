@@ -77,6 +77,8 @@ The callback wait intentionally does **not** check `_taskCancelledEvent`. This a
 
 Cancellation is handled cooperatively: after the callback returns, the task checks its cancellation state (set by `ICancelableTask.Cancel()`) and exits.
 
+> **Future opportunity:** Unlike in-process mode where callbacks are direct method calls that cannot be interrupted, the IPC-based callback mechanism *could* support cancellation-aware callbacks — for example, by failing the pending `TaskCompletionSource` when `_taskCancelledEvent` is signaled. This would let long-running callbacks like `BuildProjectFile` abort immediately on cancellation rather than waiting for the worker node to process and respond. This is not implemented today for consistency with in-process behavior, but the mechanism is in place if needed.
+
 The only exception path is connection loss (owning worker node killed), detected by `OnLinkStatusChanged` which fails all pending `TaskCompletionSource` entries with `InvalidOperationException`. This unblocks task threads immediately.
 
 ### Response Guarantee (Why the Callback Cannot Deadlock)
