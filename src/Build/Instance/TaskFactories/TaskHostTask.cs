@@ -203,7 +203,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
-            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostQueryRequest, TaskHostQueryRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
 
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
@@ -510,8 +510,8 @@ namespace Microsoft.Build.BackEnd
                 case NodePacketType.LogMessage:
                     HandleLoggedMessage(packet as LogMessagePacket);
                     break;
-                case NodePacketType.TaskHostQueryRequest:
-                    HandleQueryRequest(packet as TaskHostQueryRequest);
+                case NodePacketType.TaskHostIsRunningMultipleNodesRequest:
+                    HandleIsRunningMultipleNodesRequest(packet as TaskHostIsRunningMultipleNodesRequest);
                     break;
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
@@ -653,18 +653,12 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Handle query requests from the TaskHost for simple build engine state.
+        /// Handle IsRunningMultipleNodes request from the TaskHost.
         /// </summary>
-        private void HandleQueryRequest(TaskHostQueryRequest request)
+        private void HandleIsRunningMultipleNodesRequest(TaskHostIsRunningMultipleNodesRequest request)
         {
-            bool result = request.Query switch
-            {
-                TaskHostQueryRequest.QueryType.IsRunningMultipleNodes
-                    => _buildEngine is IBuildEngine2 engine2 && engine2.IsRunningMultipleNodes,
-                _ => throw new InternalErrorException($"Unknown TaskHost query type: {request.Query}")
-            };
-
-            var response = new TaskHostQueryResponse(request.RequestId, result);
+            bool result = _buildEngine is IBuildEngine2 engine2 && engine2.IsRunningMultipleNodes;
+            var response = new TaskHostIsRunningMultipleNodesResponse(request.RequestId, result);
             _taskHostProvider.SendData(_taskHostNodeKey, response);
         }
 

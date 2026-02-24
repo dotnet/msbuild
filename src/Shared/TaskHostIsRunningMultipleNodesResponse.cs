@@ -4,24 +4,24 @@
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// Response packet from owning worker node to TaskHost for query requests.
+    /// Response packet from owning worker node to TaskHost with the IsRunningMultipleNodes value.
     /// </summary>
-    internal class TaskHostQueryResponse : INodePacket, ITaskHostCallbackPacket
+    internal class TaskHostIsRunningMultipleNodesResponse : INodePacket, ITaskHostCallbackPacket
     {
         private int _requestId;
-        private bool _boolResult;
+        private bool _isRunningMultipleNodes;
 
-        public TaskHostQueryResponse()
+        public TaskHostIsRunningMultipleNodesResponse()
         {
         }
 
-        public TaskHostQueryResponse(int requestId, bool boolResult)
+        public TaskHostIsRunningMultipleNodesResponse(int requestId, bool isRunningMultipleNodes)
         {
             _requestId = requestId;
-            _boolResult = boolResult;
+            _isRunningMultipleNodes = isRunningMultipleNodes;
         }
 
-        public NodePacketType Type => NodePacketType.TaskHostQueryResponse;
+        public NodePacketType Type => NodePacketType.TaskHostIsRunningMultipleNodesResponse;
 
         public int RequestId
         {
@@ -29,17 +29,17 @@ namespace Microsoft.Build.BackEnd
             set => _requestId = value;
         }
 
-        public bool BoolResult => _boolResult;
+        public bool IsRunningMultipleNodes => _isRunningMultipleNodes;
 
         public void Translate(ITranslator translator)
         {
             translator.Translate(ref _requestId);
-            translator.Translate(ref _boolResult);
+            translator.Translate(ref _isRunningMultipleNodes);
         }
 
         internal static INodePacket FactoryForDeserialization(ITranslator translator)
         {
-            var packet = new TaskHostQueryResponse();
+            var packet = new TaskHostIsRunningMultipleNodesResponse();
             packet.Translate(translator);
             return packet;
         }

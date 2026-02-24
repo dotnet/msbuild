@@ -254,14 +254,14 @@ namespace Microsoft.Build.BackEnd
         TaskHostResourceResponse = 0x23,
 
         /// <summary>
-        /// Request from TaskHost to parent for simple queries (e.g., IsRunningMultipleNodes).
+        /// Request from TaskHost to owning worker node for IsRunningMultipleNodes.
         /// </summary>
-        TaskHostQueryRequest = 0x24,
+        TaskHostIsRunningMultipleNodesRequest = 0x24,
 
         /// <summary>
-        /// Response from parent to TaskHost with query result.
+        /// Response from owning worker node to TaskHost with IsRunningMultipleNodes value.
         /// </summary>
-        TaskHostQueryResponse = 0x25,
+        TaskHostIsRunningMultipleNodesResponse = 0x25,
 
         /// <summary>
         /// Request from TaskHost to parent for Yield/Reacquire operations.

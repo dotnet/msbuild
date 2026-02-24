@@ -4,23 +4,17 @@
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// Packet sent from TaskHost to owning worker node to query simple build engine state.
+    /// Packet sent from TaskHost to owning worker node to query IsRunningMultipleNodes.
     /// </summary>
-    internal class TaskHostQueryRequest : INodePacket, ITaskHostCallbackPacket
+    internal class TaskHostIsRunningMultipleNodesRequest : INodePacket, ITaskHostCallbackPacket
     {
-        private QueryType _queryType;
         private int _requestId;
 
-        public TaskHostQueryRequest()
+        public TaskHostIsRunningMultipleNodesRequest()
         {
         }
 
-        public TaskHostQueryRequest(QueryType queryType)
-        {
-            _queryType = queryType;
-        }
-
-        public NodePacketType Type => NodePacketType.TaskHostQueryRequest;
+        public NodePacketType Type => NodePacketType.TaskHostIsRunningMultipleNodesRequest;
 
         public int RequestId
         {
@@ -28,24 +22,16 @@ namespace Microsoft.Build.BackEnd
             set => _requestId = value;
         }
 
-        public QueryType Query => _queryType;
-
         public void Translate(ITranslator translator)
         {
-            translator.TranslateEnum(ref _queryType, (int)_queryType);
             translator.Translate(ref _requestId);
         }
 
         internal static INodePacket FactoryForDeserialization(ITranslator translator)
         {
-            var packet = new TaskHostQueryRequest();
+            var packet = new TaskHostIsRunningMultipleNodesRequest();
             packet.Translate(translator);
             return packet;
-        }
-
-        internal enum QueryType
-        {
-            IsRunningMultipleNodes = 0,
         }
     }
 }

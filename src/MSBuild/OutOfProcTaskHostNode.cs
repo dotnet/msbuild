@@ -247,7 +247,7 @@ namespace Microsoft.Build.CommandLine
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
 
 #if !CLR2COMPATIBILITY
-            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostQueryResponse, TaskHostQueryResponse.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesResponse, TaskHostIsRunningMultipleNodesResponse.FactoryForDeserialization, this);
 #endif
 
 #if !CLR2COMPATIBILITY
@@ -328,9 +328,9 @@ namespace Microsoft.Build.CommandLine
                     return false;
                 }
 
-                var request = new TaskHostQueryRequest(TaskHostQueryRequest.QueryType.IsRunningMultipleNodes);
-                var response = SendCallbackRequestAndWaitForResponse<TaskHostQueryResponse>(request);
-                return response.BoolResult;
+                var request = new TaskHostIsRunningMultipleNodesRequest();
+                var response = SendCallbackRequestAndWaitForResponse<TaskHostIsRunningMultipleNodesResponse>(request);
+                return response.IsRunningMultipleNodes;
 #endif
             }
         }
@@ -788,7 +788,7 @@ namespace Microsoft.Build.CommandLine
 
 #if !CLR2COMPATIBILITY
                 // Callback response packet - route to pending request
-                case NodePacketType.TaskHostQueryResponse:
+                case NodePacketType.TaskHostIsRunningMultipleNodesResponse:
                     HandleCallbackResponse(packet);
                     break;
 #endif

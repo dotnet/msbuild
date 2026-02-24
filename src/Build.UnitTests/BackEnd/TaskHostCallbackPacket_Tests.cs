@@ -14,38 +14,37 @@ namespace Microsoft.Build.UnitTests.BackEnd
     public class TaskHostCallbackPacket_Tests
     {
         [Fact]
-        public void TaskHostQueryRequest_RoundTrip_Serialization()
+        public void TaskHostIsRunningMultipleNodesRequest_RoundTrip_Serialization()
         {
-            var request = new TaskHostQueryRequest(TaskHostQueryRequest.QueryType.IsRunningMultipleNodes);
+            var request = new TaskHostIsRunningMultipleNodesRequest();
             request.RequestId = 42;
 
             ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
             request.Translate(writeTranslator);
 
             ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
-            var deserialized = (TaskHostQueryRequest)TaskHostQueryRequest.FactoryForDeserialization(readTranslator);
+            var deserialized = (TaskHostIsRunningMultipleNodesRequest)TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization(readTranslator);
 
-            deserialized.Query.ShouldBe(TaskHostQueryRequest.QueryType.IsRunningMultipleNodes);
             deserialized.RequestId.ShouldBe(42);
-            deserialized.Type.ShouldBe(NodePacketType.TaskHostQueryRequest);
+            deserialized.Type.ShouldBe(NodePacketType.TaskHostIsRunningMultipleNodesRequest);
         }
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public void TaskHostQueryResponse_RoundTrip_Serialization(bool boolResult)
+        public void TaskHostIsRunningMultipleNodesResponse_RoundTrip_Serialization(bool isRunningMultipleNodes)
         {
-            var response = new TaskHostQueryResponse(123, boolResult);
+            var response = new TaskHostIsRunningMultipleNodesResponse(123, isRunningMultipleNodes);
 
             ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
             response.Translate(writeTranslator);
 
             ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
-            var deserialized = (TaskHostQueryResponse)TaskHostQueryResponse.FactoryForDeserialization(readTranslator);
+            var deserialized = (TaskHostIsRunningMultipleNodesResponse)TaskHostIsRunningMultipleNodesResponse.FactoryForDeserialization(readTranslator);
 
             deserialized.RequestId.ShouldBe(123);
-            deserialized.BoolResult.ShouldBe(boolResult);
-            deserialized.Type.ShouldBe(NodePacketType.TaskHostQueryResponse);
+            deserialized.IsRunningMultipleNodes.ShouldBe(isRunningMultipleNodes);
+            deserialized.Type.ShouldBe(NodePacketType.TaskHostIsRunningMultipleNodesResponse);
         }
     }
 }
