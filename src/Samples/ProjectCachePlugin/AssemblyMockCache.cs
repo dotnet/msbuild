@@ -9,7 +9,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.ProjectCache;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
-using Shouldly;
 
 #nullable disable
 
@@ -47,7 +46,10 @@ namespace MockCacheFromAssembly
         {
             logger.LogMessage($"{nameof(AssemblyMockCache)}: GetCacheResultAsync for {buildRequest.ProjectFullPath}", MessageImportance.High);
 
-            buildRequest.ProjectInstance.ShouldNotBeNull("The cache plugin expects evaluated projects.");
+            if (buildRequest.ProjectInstance is null)
+            {
+                throw new InvalidOperationException("The cache plugin expects evaluated projects.");
+            }
 
             ErrorFrom(nameof(GetCacheResultAsync), logger);
 
