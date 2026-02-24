@@ -259,8 +259,8 @@ public class CrashTelemetry_Tests
         }
 
         telemetry.CrashOrigin.ShouldBe(CrashOriginKind.MSBuild);
-        telemetry.CrashOriginAssembly.ShouldNotBeNull();
-        telemetry.CrashOriginAssembly.ShouldStartWith("Microsoft.Build");
+        telemetry.CrashOriginNamespace.ShouldNotBeNull();
+        telemetry.CrashOriginNamespace.ShouldStartWith("Microsoft.Build");
     }
 
     [Theory]
@@ -313,13 +313,13 @@ public class CrashTelemetry_Tests
             ExceptionType = "System.TypeInitializationException",
             IsUnhandled = true,
             CrashOrigin = CrashOriginKind.MSBuild,
-            CrashOriginAssembly = "Microsoft.Build.BackEnd",
+            CrashOriginNamespace = "Microsoft.Build.BackEnd",
             InnermostExceptionType = "System.IO.IOException",
         };
 
         IDictionary<string, string> props = telemetry.GetProperties();
         props[nameof(CrashTelemetry.CrashOrigin)].ShouldBe("MSBuild");
-        props[nameof(CrashTelemetry.CrashOriginAssembly)].ShouldBe("Microsoft.Build.BackEnd");
+        props[nameof(CrashTelemetry.CrashOriginNamespace)].ShouldBe("Microsoft.Build.BackEnd");
         props[nameof(CrashTelemetry.InnermostExceptionType)].ShouldBe("System.IO.IOException");
     }
 
@@ -331,13 +331,13 @@ public class CrashTelemetry_Tests
             ExceptionType = "System.OutOfMemoryException",
             IsUnhandled = true,
             CrashOrigin = CrashOriginKind.ThirdParty,
-            CrashOriginAssembly = "Microsoft.VisualStudio.RemoteControl",
+            CrashOriginNamespace = "Microsoft.VisualStudio.RemoteControl",
             InnermostExceptionType = "System.OutOfMemoryException",
         };
 
         Dictionary<string, object> props = telemetry.GetActivityProperties();
         props[nameof(CrashTelemetry.CrashOrigin)].ShouldBe("ThirdParty");
-        props[nameof(CrashTelemetry.CrashOriginAssembly)].ShouldBe("Microsoft.VisualStudio.RemoteControl");
+        props[nameof(CrashTelemetry.CrashOriginNamespace)].ShouldBe("Microsoft.VisualStudio.RemoteControl");
         props[nameof(CrashTelemetry.InnermostExceptionType)].ShouldBe("System.OutOfMemoryException");
     }
 

@@ -119,8 +119,11 @@ internal static class CrashTelemetryRecorder
     /// Posts a <c>FaultEvent</c> to the VS telemetry session so that crashes
     /// appear in Prism fault dashboards alongside other VS component faults.
     /// Only available on .NET Framework where the VS Telemetry SDK is loaded.
+    /// See https://devdiv.visualstudio.com/DevDiv/_wiki/wikis/DevDiv.wiki/635/Fault-Events-for-VS-Telemetry
     /// </summary>
+#if NETFRAMEWORK
     [MethodImpl(MethodImplOptions.NoInlining)]
+#endif
     private static void PostFaultEvent(CrashTelemetry crashTelemetry)
     {
 #if NETFRAMEWORK
@@ -138,9 +141,9 @@ internal static class CrashTelemetryRecorder
             faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}ExitType"] = crashTelemetry.ExitType.ToString();
             faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}CrashOrigin"] = crashTelemetry.CrashOrigin.ToString();
 
-            if (crashTelemetry.CrashOriginAssembly is not null)
+            if (crashTelemetry.CrashOriginNamespace is not null)
             {
-                faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}CrashOriginAssembly"] = crashTelemetry.CrashOriginAssembly;
+                faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}CrashOriginNamespace"] = crashTelemetry.CrashOriginNamespace;
             }
 
             if (crashTelemetry.StackHash is not null)

@@ -159,7 +159,7 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     /// The top-level namespace from the faulting stack frame (e.g., "Microsoft.Build",
     /// "Microsoft.VisualStudio.RemoteControl"). Useful for triage without revealing PII.
     /// </summary>
-    public string? CrashOriginAssembly { get; set; }
+    public string? CrashOriginNamespace { get; set; }
 
     /// <summary>
     /// The deepest inner exception type in the exception chain.
@@ -199,8 +199,8 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         HResult = exception.HResult;
         StackHash = ComputeStackHash(exception);
         StackTop = ExtractStackTop(exception);
-        CrashOriginAssembly = ExtractOriginNamespace(exception);
-        CrashOrigin = ClassifyOrigin(CrashOriginAssembly);
+        CrashOriginNamespace = ExtractOriginNamespace(exception);
+        CrashOrigin = ClassifyOrigin(CrashOriginNamespace);
         PopulateMemoryStats();
     }
 
@@ -229,6 +229,10 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
                 MemoryLoadPercent = (int)memoryStatus.MemoryLoad;
             }
 #else
+            // On .NET Core, GC.GetGCMemoryInfo() provides the total available memory
+            // to the GC, which we use to compute an approximate memory load percentage.
+            // This helps diagnose OOM and memory-pressure crashes on Linux/macOS where
+            // GlobalMemoryStatusEx is not available.
             GCMemoryInfo gcMemInfo = System.GC.GetGCMemoryInfo();
             long totalAvailable = gcMemInfo.TotalAvailableMemoryBytes;
             if (totalAvailable > 0)
@@ -269,7 +273,7 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         {
             telemetryItems.Add(nameof(CrashOrigin), CrashOrigin.ToString());
         }
-        AddIfNotNull(CrashOriginAssembly);
+        AddIfNotNull(CrashOriginNamespace);
         AddIfNotNull(InnermostExceptionType);
         AddIfNotNull(ProcessWorkingSetMB);
         AddIfNotNull(MemoryLoadPercent);
@@ -307,7 +311,7 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         {
             AddIfNotNull(CrashOrigin.ToString(), nameof(CrashOrigin));
         }
-        AddIfNotNull(CrashOriginAssembly);
+        AddIfNotNull(CrashOriginNamespace);
         AddIfNotNull(InnermostExceptionType);
         AddIfNotNull(ProcessWorkingSetMB?.ToString(), nameof(ProcessWorkingSetMB));
         AddIfNotNull(MemoryLoadPercent?.ToString(), nameof(MemoryLoadPercent));
@@ -328,7 +332,7 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     /// </summary>
     private static readonly string[] s_msBuildNamespacePrefixes =
     [
-        "Microsoft.Build.",
+        "Microsoft.Build",
     ];
 
     /// <summary>
@@ -360,6 +364,7 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     /// <summary>
     /// Extracts the top-level namespace from the first stack frame of the exception.
     /// Returns null if the stack trace is unavailable or cannot be parsed.
+    /// Uses index-based parsing to avoid intermediate string allocations.
     /// </summary>
     internal static string? ExtractOriginNamespace(Exception exception)
     {
@@ -369,38 +374,90 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
             return null;
         }
 
-        // Get first line: "   at Namespace.Type.Method(...) in path:line N"
-        int newLineIndex = stackTrace.IndexOf('\n');
-        string topFrame = (newLineIndex >= 0 ? stackTrace.Substring(0, newLineIndex) : stackTrace).Trim();
-
-        if (topFrame.StartsWith("at ", StringComparison.Ordinal))
+        // Get first line boundaries: "   at Namespace.Type.Method(...) in path:line N"
+        int lineEnd = stackTrace.IndexOf('\n');
+        if (lineEnd < 0)
         {
-            topFrame = topFrame.Substring(3);
+            lineEnd = stackTrace.Length;
         }
 
-        // Extract the qualified name before '(' and before " in ".
-        int parenIndex = topFrame.IndexOf('(');
+        // Find start of qualified name (skip leading whitespace and "at ")
+        int start = 0;
+        while (start < lineEnd && char.IsWhiteSpace(stackTrace[start]))
+        {
+            start++;
+        }
+
+        if (start + 3 <= lineEnd &&
+            stackTrace[start] == 'a' && stackTrace[start + 1] == 't' && stackTrace[start + 2] == ' ')
+        {
+            start += 3;
+        }
+
+        // Find end of qualified name: stop at '(' or " in "
+        int end = lineEnd;
+        int parenIndex = stackTrace.IndexOf('(', start, end - start);
         if (parenIndex >= 0)
         {
-            topFrame = topFrame.Substring(0, parenIndex);
+            end = parenIndex;
         }
 
-        int inIndex = topFrame.IndexOf(" in ", StringComparison.Ordinal);
+        int inIndex = stackTrace.IndexOf(" in ", start, end - start, StringComparison.Ordinal);
         if (inIndex >= 0)
         {
-            topFrame = topFrame.Substring(0, inIndex);
+            end = inIndex;
         }
 
-        // "Namespace.Sub.Type.Method" → split and take up to 3 namespace segments,
-        // always excluding the last 2 (Type + Method).
-        string[] parts = topFrame.Trim().Split('.');
-        if (parts.Length < 2)
+        // Trim trailing whitespace
+        while (end > start && char.IsWhiteSpace(stackTrace[end - 1]))
         {
-            return parts[0].Length > 0 ? parts[0] : null;
+            end--;
         }
 
-        int take = Math.Min(3, parts.Length - 2);
-        return take > 0 ? string.Join(".", parts, 0, take) : parts[0];
+        if (end <= start)
+        {
+            return null;
+        }
+
+        // "Namespace.Sub.Type.Method" → count dots to determine segment count,
+        // then take up to 3 segments excluding the last one (Method).
+        int dotCount = 0;
+        for (int i = start; i < end; i++)
+        {
+            if (stackTrace[i] == '.')
+            {
+                dotCount++;
+            }
+        }
+
+        if (dotCount < 2)
+        {
+            // Not enough segments — return first segment (or the whole thing if no dots)
+            int firstDot = stackTrace.IndexOf('.', start, end - start);
+            return firstDot >= 0
+                ? stackTrace.Substring(start, firstDot - start)
+                : stackTrace.Substring(start, end - start);
+        }
+
+        // Walk forward to find the end of the Nth namespace segment (up to 3,
+        // but at most dotCount - 2 to exclude Type.Method).
+        int take = Math.Min(3, dotCount - 1); // -1 because last segment after last dot is Method
+        int dotsFound = 0;
+        int cutoff = start;
+        for (int i = start; i < end; i++)
+        {
+            if (stackTrace[i] == '.')
+            {
+                dotsFound++;
+                if (dotsFound == take)
+                {
+                    cutoff = i;
+                    break;
+                }
+            }
+        }
+
+        return cutoff > start ? stackTrace.Substring(start, cutoff - start) : null;
     }
 
     /// <summary>
@@ -418,8 +475,10 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
 
         foreach (string prefix in s_msBuildNamespacePrefixes)
         {
-            if (originNamespace!.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
-                || originNamespace.Equals("Microsoft.Build", StringComparison.OrdinalIgnoreCase))
+            if (originNamespace!.Equals(prefix, StringComparison.OrdinalIgnoreCase)
+                || (originNamespace.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                    && originNamespace.Length > prefix.Length
+                    && originNamespace[prefix.Length] == '.'))
             {
                 return CrashOriginKind.MSBuild;
             }

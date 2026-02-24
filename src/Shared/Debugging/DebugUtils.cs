@@ -38,7 +38,7 @@ namespace Microsoft.Build.Shared.Debugging
                 //   .NET Framework without long-path support.
                 try
                 {
-                    Console.Error.WriteLine("MSBuild debug path initialization failed: " + ex.Message);
+                    Console.Error.WriteLine("MSBuild debug path initialization failed: " + ex);
                 }
                 catch
                 {

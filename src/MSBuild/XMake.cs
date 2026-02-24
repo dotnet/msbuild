@@ -255,7 +255,7 @@ namespace Microsoft.Build.CommandLine
 
             try
             {
-                Console.Error.WriteLine("MSBuild could not start: " + ex.Message);
+                Console.Error.WriteLine("MSBuild could not start: " + ex);
             }
             catch
             {
