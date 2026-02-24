@@ -119,7 +119,7 @@ internal static class CrashTelemetryRecorder
     /// Posts a <c>FaultEvent</c> to the VS telemetry session so that crashes
     /// appear in Prism fault dashboards alongside other VS component faults.
     /// Only available on .NET Framework where the VS Telemetry SDK is loaded.
-    /// See https://devdiv.visualstudio.com/DevDiv/_wiki/wikis/DevDiv.wiki/635/Fault-Events-for-VS-Telemetry
+    /// See https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/1022/FaultEvent-instrumentation-guide
     /// </summary>
 #if NETFRAMEWORK
     [MethodImpl(MethodImplOptions.NoInlining)]
