@@ -303,6 +303,7 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
             AddIfNotNull(CrashOrigin.ToString(), nameof(CrashOrigin));
         }
         AddIfNotNull(CrashOriginAssembly);
+        AddIfNotNull(InnermostExceptionType);
         AddIfNotNull(ProcessWorkingSetMB?.ToString(), nameof(ProcessWorkingSetMB));
         AddIfNotNull(MemoryLoadPercent?.ToString(), nameof(MemoryLoadPercent));
 
