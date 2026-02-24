@@ -530,6 +530,11 @@
         <target state="translated">MSB3094: "{2}" ссылается на следующее число элементов: {0}, а "{3}" — на {1}. Число элементов должно быть одинаковым.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="HighMemoryPressure">
+        <source>The build process is using approximately {0:N0} MB out of {1:N0} MB of available physical memory ({2}%). This may lead to out-of-memory errors. Consider reducing build parallelism with /maxcpucount:N, closing other applications, or increasing system memory.</source>
+        <target state="new">The build process is using approximately {0:N0} MB out of {1:N0} MB of available physical memory ({2}%). This may lead to out-of-memory errors. Consider reducing build parallelism with /maxcpucount:N, closing other applications, or increasing system memory.</target>
+        <note>This message is logged when MSBuild detects that memory usage is high during a build. {0} is the working set in MB, {1} is total physical memory in MB, {2} is the percentage of physical memory in use.</note>
+      </trans-unit>
       <trans-unit id="HostObjectFailure">
         <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
         <target state="translated">Задаче "{0}" не удалось получить объект узла. {1} Обратитесь к автору задачи, чтобы сообщить об этой проблеме.</target>

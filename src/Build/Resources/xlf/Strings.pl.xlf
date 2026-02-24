@@ -530,6 +530,11 @@
         <target state="translated">MSB3094: „{2}” odwołuje się do następującej liczby elementów: {0}, a „{3}” odwołuje się do następującej liczby elementów: {1}. Liczba tych elementów musi być taka sama.</target>
         <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
+      <trans-unit id="HighMemoryPressure">
+        <source>The build process is using approximately {0:N0} MB out of {1:N0} MB of available physical memory ({2}%). This may lead to out-of-memory errors. Consider reducing build parallelism with /maxcpucount:N, closing other applications, or increasing system memory.</source>
+        <target state="new">The build process is using approximately {0:N0} MB out of {1:N0} MB of available physical memory ({2}%). This may lead to out-of-memory errors. Consider reducing build parallelism with /maxcpucount:N, closing other applications, or increasing system memory.</target>
+        <note>This message is logged when MSBuild detects that memory usage is high during a build. {0} is the working set in MB, {1} is total physical memory in MB, {2} is the percentage of physical memory in use.</note>
+      </trans-unit>
       <trans-unit id="HostObjectFailure">
         <source>The task "{0}" failed to acquire its host object. {1} Contact the author of the task to report this problem.</source>
         <target state="translated">Zadanie „{0}” nie może uzyskać obiektu hosta. {1} Skontaktuj się z autorem zadania, aby zgłosić ten problem.</target>
