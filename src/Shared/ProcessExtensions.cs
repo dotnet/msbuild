@@ -69,11 +69,7 @@ namespace Microsoft.Build.Shared
                 }
                 else if (NativeMethodsShared.IsOSX || NativeMethodsShared.IsBSD)
                 {
-                    // macOS and BSD both support sysctl with KERN_PROCARGS2
-                    // Suppress CA1416 because we check IsBSD at runtime but the method is marked [SupportedOSPlatform("macos")]
-                    #pragma warning disable CA1416
-                    commandLine = MacOS.GetCommandLine(process.Id);
-                    #pragma warning restore CA1416
+                    commandLine = BSD.GetCommandLine(process.Id);
                     return true;
                 }
                 else if (NativeMethodsShared.IsLinux)
@@ -85,7 +81,7 @@ namespace Microsoft.Build.Shared
                 {
                     // Unsupported OS - return false to fall back to prior behavior
                     commandLine = null;
-                    return false;
+                    return true;
                 }
 #else
                 commandLine = Windows.GetCommandLine(process.Id);
@@ -750,7 +746,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         [SupportedOSPlatform("macos")]
         [SupportedOSPlatform("freebsd")]
-        private static partial class MacOS
+        private static partial class BSD
         {
             [LibraryImport("libc", SetLastError = true)]
             private static partial int sysctl(

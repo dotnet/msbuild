@@ -431,7 +431,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // If we have an expected NodeMode, filter by command line parsing
-            if (expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+            if (expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
             {
                 CommunicationsUtilities.Trace("Filtering {0} candidate processes by NodeMode {1} for process name '{2}'", 
                     processes.Length, expectedNodeMode.Value, expectedProcessName);
@@ -452,7 +452,7 @@ namespace Microsoft.Build.BackEnd
                         if (commandLine is null)
                         {
                             // If we can't get the command line, then allow it as a candidate. This allows reuse to work on platforms where command line retrieval isn't supported, but still filters by NodeMode on platforms where it is supported.
-                            CommunicationsUtilities.Trace("Skipping process {0} - command line is null, unsupported platform", process.Id);
+                            CommunicationsUtilities.Trace("Including process {0} with unknown NodeMode because command line retrieval is not supported on this platform", process.Id);
                             filteredProcesses.Add(process);
                             continue;
                         }

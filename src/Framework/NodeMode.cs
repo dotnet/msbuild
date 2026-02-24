@@ -54,9 +54,9 @@ namespace Microsoft.Build.Framework
         public static bool TryParse(string value, [NotNullWhen(true)] out NodeMode? nodeMode)
         {
 #if NET
-            return TryParseCore(value.AsSpan(), out nodeMode);
+            return TryParseImpl(value.AsSpan(), out nodeMode);
 #else
-            return TryParseCore(value, out nodeMode);
+            return TryParseImpl(value, out nodeMode);
 #endif
         }
 
@@ -69,14 +69,14 @@ namespace Microsoft.Build.Framework
         /// <returns>True if parsing succeeded, false otherwise</returns>
         public static bool TryParse(ReadOnlySpan<char> value, [NotNullWhen(true)] out NodeMode? nodeMode)
         {
-            return TryParseCore(value, out nodeMode);
+            return TryParseImpl(value, out nodeMode);
         }
 #endif
 
 #if NET
-        private static bool TryParseCore(ReadOnlySpan<char> value, [NotNullWhen(true)] out NodeMode? nodeMode)
+        private static bool TryParseImpl(ReadOnlySpan<char> value, [NotNullWhen(true)] out NodeMode? nodeMode)
 #else
-        private static bool TryParseCore(string value, [NotNullWhen(true)] out NodeMode? nodeMode)
+        private static bool TryParseImpl(string value, [NotNullWhen(true)] out NodeMode? nodeMode)
 #endif
         {
             nodeMode = null;

@@ -772,6 +772,7 @@ internal static class NativeMethods
     /// <summary>
     /// Gets a flag indicating if we are running under flavor of BSD (NetBSD, OpenBSD, FreeBSD)
     /// </summary>
+    [SupportedOSPlatformGuard("freebsd")]
     internal static bool IsBSD
     {
 #if CLR2COMPATIBILITY
