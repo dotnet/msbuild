@@ -27,6 +27,8 @@ Instructions for GitHub Copilot and other AI coding agents working with the MSBu
 
 ## Code Review Instructions
 
+Official builds treat all warnings as errors, so do not introduce new warnings.
+
 ### Performance Considerations
 
 When reviewing pull requests:
@@ -103,9 +105,15 @@ ImmutableDictionary<string, int> lookup = ...;
 
 ## Building
 
-**CRITICAL**: Never build with just `dotnet build MSBuild.slnx` or `dotnet build src/.../Project.csproj`. Always use the build scripts.
+NEVER pipe MSBuild output to a file. If you want a list of errors, add `-flp:"v=q;LogFile=ErrorsAndWarnings.log"` to the arguments.
 
-### Build Commands - NEVER CANCEL
+When considering a subset of build errors, always look at the BEGINNING of the set, not the end.
+
+## Individual projects
+
+Build individual projects with `dotnet msbuild {path/to/project.csproj} -v:q`.
+
+### Whole-repo Build Commands
 
 | Platform | Command | Timeout |
 |----------|---------|---------|
@@ -114,24 +122,7 @@ ImmutableDictionary<string, int> lookup = ...;
 
 ### Bootstrap Environment Setup
 
-After building, activate the bootstrap environment before any `dotnet` commands:
-
-**Windows:**
-```cmd
-artifacts\msbuild-build-env.bat
-```
-
-**macOS/Linux:**
-```bash
-source artifacts/sdk-build-env.sh
-```
-
-### Verify Environment
-
-```bash
-dotnet --version
-# Should show something like: 10.0.100-preview.7.25372.107
-```
+After building the whole repo, to use the just-built MSBuild to build things use the bootstrap environment (described in [`skills/use-bootstrap-msbuild](.github/skills/use-bootstrap-msbuild/SKILL.md)).
 
 ### Build Troubleshooting
 
@@ -139,13 +130,6 @@ dotnet --version
 * Verify `dotnet --version` shows the preview/internal version
 * Use repository sample projects for testing, not external projects
 * Build artifacts go to `./artifacts/` directory
-
-## Testing
-
-* We use xUnit with Shouldly assertions
-* Use Shouldly assertions for all assertions in modified code
-* Do not emit "Act", "Arrange" or "Assert" comments
-* Copy existing style in nearby files for test method names
 
 ### Running Tests
 
@@ -155,7 +139,6 @@ dotnet --version
 .\build.cmd -test
 
 # Individual test project (recommended):
-artifacts\msbuild-build-env.bat
 dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
 ```
 
@@ -165,9 +148,10 @@ dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
 ./build.sh --test
 
 # Individual test project (recommended):
-source artifacts/sdk-build-env.sh
 dotnet test src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj
 ```
+
+You can run a single unit test with `--filter {methodname}`, for example `dotnet test src/Framework.UnitTests/ --filter ExerciseBuildEventContext`.
 
 ### Test Verification
 
@@ -251,10 +235,7 @@ When reviewing PRs, always consider whether the behavior change could be experie
 2. Run the full build (WAIT for completion - takes 2-3 minutes):
    - Windows: `.\build.cmd -v quiet`
    - macOS/Linux: `./build.sh -v quiet`
-3. Set up environment:
-   - Windows: `artifacts\msbuild-build-env.bat`
-   - macOS/Linux: `source artifacts/sdk-build-env.sh`
-4. Test your changes: `dotnet build src/Samples/Dependency/Dependency.csproj`
+4. Test your changes end-to-end using the bootstrap output: `dotnet build src/Samples/Dependency/Dependency.csproj`
 5. Run relevant individual tests, not the full test suite
 6. Commit your changes
 

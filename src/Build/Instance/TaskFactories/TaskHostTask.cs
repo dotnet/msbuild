@@ -203,6 +203,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
 
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
@@ -509,6 +510,9 @@ namespace Microsoft.Build.BackEnd
                 case NodePacketType.LogMessage:
                     HandleLoggedMessage(packet as LogMessagePacket);
                     break;
+                case NodePacketType.TaskHostIsRunningMultipleNodesRequest:
+                    HandleIsRunningMultipleNodesRequest(packet as TaskHostIsRunningMultipleNodesRequest);
+                    break;
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     break;
@@ -646,6 +650,16 @@ namespace Microsoft.Build.BackEnd
 
                     break;
             }
+        }
+
+        /// <summary>
+        /// Handle IsRunningMultipleNodes request from the TaskHost.
+        /// </summary>
+        private void HandleIsRunningMultipleNodesRequest(TaskHostIsRunningMultipleNodesRequest request)
+        {
+            bool result = _buildEngine is IBuildEngine2 engine2 && engine2.IsRunningMultipleNodes;
+            var response = new TaskHostIsRunningMultipleNodesResponse(request.RequestId, result);
+            _taskHostProvider.SendData(_taskHostNodeKey, response);
         }
 
         /// <summary>
