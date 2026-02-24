@@ -27,15 +27,23 @@ namespace Microsoft.Build.Framework
                 return "VS";
             }
 
-            string? msbuildHostName = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
-            if (!string.IsNullOrEmpty(msbuildHostName))
+            try
             {
-                return msbuildHostName;
-            }
+                string? msbuildHostName = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
+                if (!string.IsNullOrEmpty(msbuildHostName))
+                {
+                    return msbuildHostName;
+                }
 
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
+                if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD"))
+                    || string.Equals(Environment.GetEnvironmentVariable("TERM_PROGRAM"), "vscode", StringComparison.OrdinalIgnoreCase))
+                {
+                    return "VSCode";
+                }
+            }
+            catch
             {
-                return "VSCode";
+                // Host detection is best-effort; ignore environment access failures.
             }
 
             return null;

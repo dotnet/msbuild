@@ -164,6 +164,19 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     public string? InnermostExceptionType { get; set; }
 
     /// <summary>
+    /// Working set of the MSBuild process at crash time, in MB.
+    /// Helps diagnose OOM and memory-pressure crashes.
+    /// </summary>
+    public long? ProcessWorkingSetMB { get; set; }
+
+    /// <summary>
+    /// Approximate percentage of physical memory in use at crash time (0-100).
+    /// Available on Windows (.NET Framework via GlobalMemoryStatusEx) and
+    /// .NET Core (via GC.GetGCMemoryInfo).
+    /// </summary>
+    public int? MemoryLoadPercent { get; set; }
+
+    /// <summary>
     /// The original exception, kept for passing to <c>FaultEvent</c>.
     /// Not serialized to telemetry properties.
     /// </summary>
@@ -183,6 +196,47 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         StackTop = ExtractStackTop(exception);
         CrashOriginAssembly = ExtractOriginNamespace(exception);
         CrashOrigin = ClassifyOrigin(CrashOriginAssembly);
+        PopulateMemoryStats();
+    }
+
+    /// <summary>
+    /// Captures memory usage stats at the time of the crash.
+    /// Best-effort: failures are silently ignored.
+    /// </summary>
+    private void PopulateMemoryStats()
+    {
+        try
+        {
+            using var process = System.Diagnostics.Process.GetCurrentProcess();
+            ProcessWorkingSetMB = process.WorkingSet64 / (1024 * 1024);
+        }
+        catch
+        {
+            // Best effort.
+        }
+
+        try
+        {
+#if NETFRAMEWORK
+            NativeMethods.MemoryStatus? memoryStatus = NativeMethods.GetMemoryStatus();
+            if (memoryStatus != null)
+            {
+                MemoryLoadPercent = (int)memoryStatus.MemoryLoad;
+            }
+#else
+            GCMemoryInfo gcMemInfo = System.GC.GetGCMemoryInfo();
+            long totalAvailable = gcMemInfo.TotalAvailableMemoryBytes;
+            if (totalAvailable > 0)
+            {
+                using var process = System.Diagnostics.Process.GetCurrentProcess();
+                MemoryLoadPercent = (int)(((double)process.WorkingSet64 / totalAvailable) * 100);
+            }
+#endif
+        }
+        catch
+        {
+            // Best effort.
+        }
     }
 
     /// <summary>
@@ -194,7 +248,10 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
 
         AddIfNotNull(ExceptionType);
         AddIfNotNull(InnerExceptionType);
-        telemetryItems.Add(nameof(ExitType), ExitType.ToString());
+        if (ExitType != CrashExitType.Unknown)
+        {
+            telemetryItems.Add(nameof(ExitType), ExitType.ToString());
+        }
         AddIfNotNull(IsCritical);
         AddIfNotNull(IsUnhandled);
         AddIfNotNull(StackHash);
@@ -203,9 +260,14 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(BuildEngineVersion);
         AddIfNotNull(BuildEngineFrameworkName);
         AddIfNotNull(BuildEngineHost);
-        telemetryItems.Add(nameof(CrashOrigin), CrashOrigin.ToString());
+        if (CrashOrigin != CrashOriginKind.Unknown)
+        {
+            telemetryItems.Add(nameof(CrashOrigin), CrashOrigin.ToString());
+        }
         AddIfNotNull(CrashOriginAssembly);
         AddIfNotNull(InnermostExceptionType);
+        AddIfNotNull(ProcessWorkingSetMB);
+        AddIfNotNull(MemoryLoadPercent);
 
         return telemetryItems;
 
@@ -224,7 +286,10 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
 
         AddIfNotNull(ExceptionType);
         AddIfNotNull(InnerExceptionType);
-        AddIfNotNull(ExitType.ToString(), nameof(ExitType));
+        if (ExitType != CrashExitType.Unknown)
+        {
+            AddIfNotNull(ExitType.ToString(), nameof(ExitType));
+        }
         AddIfNotNull(IsCritical?.ToString(), nameof(IsCritical));
         AddIfNotNull(IsUnhandled.ToString(), nameof(IsUnhandled));
         AddIfNotNull(StackHash);
@@ -233,8 +298,13 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(BuildEngineVersion);
         AddIfNotNull(BuildEngineFrameworkName);
         AddIfNotNull(BuildEngineHost);
-        AddIfNotNull(CrashOrigin.ToString(), nameof(CrashOrigin));
+        if (CrashOrigin != CrashOriginKind.Unknown)
+        {
+            AddIfNotNull(CrashOrigin.ToString(), nameof(CrashOrigin));
+        }
         AddIfNotNull(CrashOriginAssembly);
+        AddIfNotNull(ProcessWorkingSetMB?.ToString(), nameof(ProcessWorkingSetMB));
+        AddIfNotNull(MemoryLoadPercent?.ToString(), nameof(MemoryLoadPercent));
 
         return properties;
 
@@ -342,7 +412,7 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
 
         foreach (string prefix in s_msBuildNamespacePrefixes)
         {
-            if (originNamespace.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+            if (originNamespace!.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
                 || originNamespace.Equals("Microsoft.Build", StringComparison.OrdinalIgnoreCase))
             {
                 return CrashOriginKind.MSBuild;

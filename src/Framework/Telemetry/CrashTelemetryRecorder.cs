@@ -126,6 +126,11 @@ internal static class CrashTelemetryRecorder
 #if NETFRAMEWORK
         try
         {
+            if (crashTelemetry.Exception is null || TelemetryManager.IsOptOut())
+            {
+                return;
+            }
+
             string eventName = $"{TelemetryConstants.EventPrefix}{TelemetryConstants.Crash}";
             string description = $"{crashTelemetry.ExitType}: {crashTelemetry.ExceptionType}";
             var faultEvent = new FaultEvent(eventName, description, crashTelemetry.Exception);
@@ -143,7 +148,7 @@ internal static class CrashTelemetryRecorder
                 faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}StackHash"] = crashTelemetry.StackHash;
             }
 
-            TelemetryService.DefaultSession.PostEvent(faultEvent);
+            TelemetryService.DefaultSession?.PostEvent(faultEvent);
         }
         catch
         {

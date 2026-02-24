@@ -282,18 +282,18 @@ public class CrashTelemetry_Tests
     }
 
     [Theory]
-    [InlineData("Microsoft.Build.BackEnd", CrashOriginKind.MSBuild)]
-    [InlineData("Microsoft.Build.Evaluation", CrashOriginKind.MSBuild)]
-    [InlineData("Microsoft.Build", CrashOriginKind.MSBuild)]
-    [InlineData("Microsoft.VisualStudio.RemoteControl", CrashOriginKind.ThirdParty)]
-    [InlineData("System.IO", CrashOriginKind.ThirdParty)]
-    [InlineData("Newtonsoft.Json", CrashOriginKind.ThirdParty)]
-    [InlineData(null, CrashOriginKind.Unknown)]
-    [InlineData("", CrashOriginKind.Unknown)]
-    public void ClassifyOrigin_ReturnsCorrectCategory(string? originNamespace, CrashOriginKind expectedOrigin)
+    [InlineData("Microsoft.Build.BackEnd", "MSBuild")]
+    [InlineData("Microsoft.Build.Evaluation", "MSBuild")]
+    [InlineData("Microsoft.Build", "MSBuild")]
+    [InlineData("Microsoft.VisualStudio.RemoteControl", "ThirdParty")]
+    [InlineData("System.IO", "ThirdParty")]
+    [InlineData("Newtonsoft.Json", "ThirdParty")]
+    [InlineData(null, "Unknown")]
+    [InlineData("", "Unknown")]
+    public void ClassifyOrigin_ReturnsCorrectCategory(string? originNamespace, string expectedOrigin)
     {
         CrashOriginKind result = CrashTelemetry.ClassifyOrigin(originNamespace);
-        result.ShouldBe(expectedOrigin);
+        result.ToString().ShouldBe(expectedOrigin);
     }
 
     [Fact]
