@@ -10,7 +10,7 @@ Opt-out is a better approach for us because we'd likely get limited feedback whe
 The opt-out comes in the form of setting the environment variable `MSBUILDDISABLEFEATURESFROMVERSION` to the Change Wave (or version) that contains the feature you want **disabled**. This version happens to be the version of MSBuild that the features were developed for. See the mapping of change waves to features below.
 
 ## Choosing a Change Wave for a New Feature
-Use the changewave for the currently-in-development version of MSBuild, as specified in `eng\Versions.props`. This version corresponds to the latest version of Visual Studio. Create a new change wave if there isn't one for this version of MSBuild yet. For example, if you're developing a feature for MSBuild 18.6, you should use `Wave18_6` or create it if it doesn't exist.
+Use the change wave for the currently-in-development version of MSBuild, as specified in `eng/Versions.props`. This version corresponds to the latest version of Visual Studio. Create a new change wave if there isn't one for this version of MSBuild yet. For example, if you're developing a feature for MSBuild 18.6, you should use `Wave18_6` or create it if it doesn't exist.
 
 # Developing With Change Waves in Mind
 For the purpose of providing an example, the rest of this document assumes we're developing a feature for MSBuild version **17.3**.

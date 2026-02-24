@@ -40,11 +40,11 @@ Look up the current MSBuild version. If a wave already exists for that version i
 
 C# and MSBuild examples are in [ChangeWaves-Dev.md](../../../documentation/wiki/ChangeWaves-Dev.md). Prefer to put checks inline rather than abstracting out a method to host the check.
 
-## Step 4: Write Tests
+## Step 3: Write Tests
 
 Write normal tests for the new behavior. Then add at least one test that verifies the old behavior is **preserved** when the wave is opted out.
 
-## Step 5: Document the Feature
+## Step 4: Document the Feature
 
 Add an entry to the **Current Rotation of Change Waves** section in [ChangeWaves.md](../../../documentation/wiki/ChangeWaves.md).
 

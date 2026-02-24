@@ -14,7 +14,7 @@ The opt-out should be just a *temporary* workaround for a problem - as the featu
 
 A wave of features is eligible to "rotate out" (i.e. become standard functionality) six months after its release. For example, wave 16.8 stayed opt-out through wave 16.10, becoming standard functionality when wave 17.0 is introduced.
 
-Changewave checks around features will be removed in the release that accompanies a new major version of .NET (for example, .NET 11, .NET 12).
+Change wave checks around features will be removed in the release that accompanies a new major version of .NET (for example, .NET 11, .NET 12).
 
 ## MSBUILDDISABLEFEATURESFROMVERSION Values & Outcomes
 | `MSBUILDDISABLEFEATURESFROMVERSION` Value                         | Result        | Receive Warning? |
