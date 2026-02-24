@@ -29,6 +29,8 @@ namespace Microsoft.Build.Shared
             "Microsoft.Build.Utilities.Core",
         ];
 
+        private static readonly bool IsRunningOnMsBuildExecutable = Assembly.GetEntryAssembly()?.GetName().Name is "MSBuild";
+
         public MSBuildLoadContext(string assemblyPath)
             : base($"MSBuild plugin {assemblyPath}")
         {
@@ -100,7 +102,11 @@ namespace Microsoft.Build.Shared
 
             if (FileSystems.Default.FileExists(assemblyNameInExecutableDirectory))
             {
-                return AssemblyLoadContext.Default.LoadFromAssemblyPath(assemblyNameInExecutableDirectory);
+                // If we are not running on MSBuild.exe (e.g. on an app using MSBuildLocator), we cannot load
+                // the assembly in the default ALC, because it might interfere with the app's own dependencies.
+                // In that case, load it in the plugin's isolated ALC.
+                AssemblyLoadContext alcToLoadSharedDependency = IsRunningOnMsBuildExecutable ? Default : this;
+                return alcToLoadSharedDependency.LoadFromAssemblyPath(assemblyNameInExecutableDirectory);
             }
 
             return null;
