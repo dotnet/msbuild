@@ -20,7 +20,7 @@ namespace Microsoft.Build.Shared.Debugging
             {
                 SetDebugPath();
             }
-            catch
+            catch (Exception ex)
             {
                 // A failure in SetDebugPath must not prevent MSBuild from starting.
                 // DebugPath will remain null — debugging/logging features will be
@@ -36,6 +36,14 @@ namespace Microsoft.Build.Shared.Debugging
                 //   illegal path characters (e.g., '<', '>', '|').
                 // - PathTooLongException when the resolved path exceeds MAX_PATH on
                 //   .NET Framework without long-path support.
+                try
+                {
+                    Console.Error.WriteLine("MSBuild debug path initialization failed: " + ex.Message);
+                }
+                catch
+                {
+                    // Console may not be available.
+                }
             }
         }
 

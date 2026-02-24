@@ -79,6 +79,11 @@ internal enum CrashExitType
     /// An exception occurred during EndBuild in BuildManager.
     /// </summary>
     EndBuildFailure,
+
+    /// <summary>
+    /// An OutOfMemoryException occurred.
+    /// </summary>
+    OutOfMemory,
 }
 
 /// <summary>
