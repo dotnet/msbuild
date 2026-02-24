@@ -18,6 +18,7 @@ namespace Microsoft.Build.UnitTests
         public void Regress314791()
         {
             AssignTargetPath t = new AssignTargetPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
             t.Files = new ITaskItem[]
                           { new TaskItem(NativeMethodsShared.IsWindows ? @"c:\bin2\abc.efg" : "/bin2/abc.efg") };
@@ -33,6 +34,7 @@ namespace Microsoft.Build.UnitTests
         public void AtConeRoot()
         {
             AssignTargetPath t = new AssignTargetPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
             t.Files = new ITaskItem[]
                           { new TaskItem(NativeMethodsShared.IsWindows ? @"c:\f1\f2\file.txt" : "/f1/f2/file.txt") };
@@ -47,6 +49,7 @@ namespace Microsoft.Build.UnitTests
         public void OutOfCone()
         {
             AssignTargetPath t = new AssignTargetPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
             t.Files = new ITaskItem[]
                           {
@@ -68,6 +71,7 @@ namespace Microsoft.Build.UnitTests
         public void InConeButAbsolute()
         {
             AssignTargetPath t = new AssignTargetPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
             t.Files = new ITaskItem[]
                           {
@@ -90,6 +94,7 @@ namespace Microsoft.Build.UnitTests
         public void TargetPathAlreadySet(string targetPath)
         {
             AssignTargetPath t = new AssignTargetPath();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
             Dictionary<string, string> metaData = new Dictionary<string, string>();
             metaData.Add("TargetPath", targetPath);

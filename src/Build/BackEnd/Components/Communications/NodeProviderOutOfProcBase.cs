@@ -22,6 +22,7 @@ using System.Security.Principal;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
 
@@ -223,7 +224,7 @@ namespace Microsoft.Build.BackEnd
             //    new node process will be started.
             string expectedProcessName = null;
             ConcurrentQueue<Process> possibleRunningNodes = null;
-#if FEATURE_NODE_REUSE
+
             // Try to connect to idle nodes if node reuse is enabled.
             if (nodeReuseRequested)
             {
@@ -236,7 +237,6 @@ namespace Microsoft.Build.BackEnd
                     CommunicationsUtilities.Trace("Attempting to connect to {1} existing processes '{0}'...", expectedProcessName, possibleRunningNodesList.Count);
                 }
             }
-#endif
 
             ConcurrentQueue<NodeContext> nodeContexts = new();
             ConcurrentQueue<Exception> exceptions = new();

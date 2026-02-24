@@ -718,6 +718,65 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void ValidNodeModeSwitch_Integers()
+        {
+            MSBuildApp.ParseNodeMode("1").ShouldBe(NodeMode.OutOfProcNode);
+            MSBuildApp.ParseNodeMode("2").ShouldBe(NodeMode.OutOfProcTaskHostNode);
+            MSBuildApp.ParseNodeMode("3").ShouldBe(NodeMode.OutOfProcRarNode);
+            MSBuildApp.ParseNodeMode("8").ShouldBe(NodeMode.OutOfProcServerNode);
+        }
+
+        [Fact]
+        public void ValidNodeModeSwitch_EnumNames()
+        {
+            MSBuildApp.ParseNodeMode("OutOfProcNode").ShouldBe(NodeMode.OutOfProcNode);
+            MSBuildApp.ParseNodeMode("outofprocnode").ShouldBe(NodeMode.OutOfProcNode);
+            MSBuildApp.ParseNodeMode("OUTOFPROCNODE").ShouldBe(NodeMode.OutOfProcNode);
+            MSBuildApp.ParseNodeMode("OutOfProcTaskHostNode").ShouldBe(NodeMode.OutOfProcTaskHostNode);
+            MSBuildApp.ParseNodeMode("outofproctaskhostnode").ShouldBe(NodeMode.OutOfProcTaskHostNode);
+            MSBuildApp.ParseNodeMode("OutOfProcRarNode").ShouldBe(NodeMode.OutOfProcRarNode);
+            MSBuildApp.ParseNodeMode("outofprocrarnode").ShouldBe(NodeMode.OutOfProcRarNode);
+            MSBuildApp.ParseNodeMode("OutOfProcServerNode").ShouldBe(NodeMode.OutOfProcServerNode);
+            MSBuildApp.ParseNodeMode("outofprocservernode").ShouldBe(NodeMode.OutOfProcServerNode);
+        }
+
+        [Fact]
+        public void InvalidNodeModeSwitch_InvalidInteger()
+        {
+            Should.Throw<CommandLineSwitchException>(() =>
+            {
+                MSBuildApp.ParseNodeMode("4");
+            });
+        }
+
+        [Fact]
+        public void InvalidNodeModeSwitch_NegativeInteger()
+        {
+            Should.Throw<CommandLineSwitchException>(() =>
+            {
+                MSBuildApp.ParseNodeMode("-1");
+            });
+        }
+
+        [Fact]
+        public void InvalidNodeModeSwitch_InvalidString()
+        {
+            Should.Throw<CommandLineSwitchException>(() =>
+            {
+                MSBuildApp.ParseNodeMode("InvalidMode");
+            });
+        }
+
+        [Fact]
+        public void InvalidNodeModeSwitch_EmptyString()
+        {
+            Should.Throw<CommandLineSwitchException>(() =>
+            {
+                MSBuildApp.ParseNodeMode("");
+            });
+        }
+
+        [Fact]
         public void InvalidMaxCPUCountSwitch4()
         {
             Should.Throw<CommandLineSwitchException>(() =>
