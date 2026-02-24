@@ -100,6 +100,7 @@ extends:
         - job: fail_exp_perf_branches
           displayName: Fail for exp/ or perf/ branches
           steps:
+          - checkout: none
           - powershell: |
               $branch = "$(Build.SourceBranch)"
               Write-Host "##vso[task.logissue type=error]Experimental and performance branches are not supported in this pipeline, use dedicated pipeline for experimental or performance branches."
