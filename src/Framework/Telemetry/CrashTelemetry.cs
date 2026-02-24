@@ -10,6 +10,83 @@ using System.Text;
 namespace Microsoft.Build.Framework.Telemetry;
 
 /// <summary>
+/// Classifies where a crash originated.
+/// </summary>
+internal enum CrashOriginKind
+{
+    /// <summary>
+    /// The origin could not be determined (e.g., no stack trace available).
+    /// </summary>
+    Unknown,
+
+    /// <summary>
+    /// The crash originated in MSBuild's own code (Microsoft.Build.* namespaces).
+    /// </summary>
+    MSBuild,
+
+    /// <summary>
+    /// The crash originated in third-party or other Microsoft code running
+    /// in the MSBuild process (e.g., VS telemetry SDK, NuGet, Roslyn).
+    /// </summary>
+    ThirdParty,
+}
+
+/// <summary>
+/// Classifies the exit type / category of the crash for telemetry.
+/// Maps to <c>MSBuildApp.ExitType</c> values plus additional categories
+/// used by the unhandled exception handler and BuildManager.
+/// </summary>
+internal enum CrashExitType
+{
+    /// <summary>
+    /// Default / unknown exit type.
+    /// </summary>
+    Unknown,
+
+    /// <summary>
+    /// A logger aborted the build.
+    /// </summary>
+    LoggerAbort,
+
+    /// <summary>
+    /// A logger failed unexpectedly.
+    /// </summary>
+    LoggerFailure,
+
+    /// <summary>
+    /// The build stopped unexpectedly, for example,
+    /// because a child died or hung.
+    /// </summary>
+    Unexpected,
+
+    /// <summary>
+    /// A project cache failed unexpectedly.
+    /// </summary>
+    ProjectCacheFailure,
+
+    /// <summary>
+    /// The client for MSBuild server failed unexpectedly, for example,
+    /// because the server process died or hung.
+    /// </summary>
+    MSBuildClientFailure,
+
+    /// <summary>
+    /// An exception reached the unhandled exception handler.
+    /// </summary>
+    UnhandledException,
+
+    /// <summary>
+    /// An exception occurred during EndBuild in BuildManager.
+    /// </summary>
+    EndBuildFailure,
+
+    /// <summary>
+    /// An OutOfMemoryException occurred.
+    /// </summary>
+    OutOfMemory,
+}
+
+/// <summary>
 /// Telemetry data for MSBuild crashes and unhandled exceptions.
 /// </summary>
 internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
@@ -27,9 +104,9 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     public string? InnerExceptionType { get; set; }
 
     /// <summary>
-    /// The exit type / category of the crash (e.g., "LoggerFailure", "Unexpected", "UnhandledException").
+    /// The exit type / category of the crash.
     /// </summary>
-    public string? ExitType { get; set; }
+    public CrashExitType ExitType { get; set; }
 
     /// <summary>
     /// Whether the exception is classified as critical (OOM, StackOverflow, AccessViolation, etc.).
@@ -72,21 +149,103 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     public string? BuildEngineHost { get; set; }
 
     /// <summary>
-    /// Timestamp when the crash occurred.
+    /// The origin classification of the crash.
+    /// Helps distinguish crashes in MSBuild's own code from crashes in dependencies
+    /// that happen to run in the MSBuild process.
     /// </summary>
-    public DateTime? CrashTimestamp { get; set; }
+    public CrashOriginKind CrashOrigin { get; set; }
+
+    /// <summary>
+    /// The top-level namespace from the faulting stack frame (e.g., "Microsoft.Build",
+    /// "Microsoft.VisualStudio.RemoteControl"). Useful for triage without revealing PII.
+    /// </summary>
+    public string? CrashOriginNamespace { get; set; }
+
+    /// <summary>
+    /// The deepest inner exception type in the exception chain.
+    /// For wrapper exceptions like <see cref="System.TypeInitializationException"/>,
+    /// this reveals the actual root cause exception type.
+    /// </summary>
+    public string? InnermostExceptionType { get; set; }
+
+    /// <summary>
+    /// Working set of the MSBuild process at crash time, in MB.
+    /// Helps diagnose OOM and memory-pressure crashes.
+    /// </summary>
+    public long? ProcessWorkingSetMB { get; set; }
+
+    /// <summary>
+    /// Approximate percentage of physical memory in use at crash time (0-100).
+    /// Available on Windows (.NET Framework via GlobalMemoryStatusEx) and
+    /// .NET Core (via GC.GetGCMemoryInfo).
+    /// </summary>
+    public int? MemoryLoadPercent { get; set; }
+
+    /// <summary>
+    /// The original exception, kept for passing to <c>FaultEvent</c>.
+    /// Not serialized to telemetry properties.
+    /// </summary>
+    internal Exception? Exception { get; set; }
 
     /// <summary>
     /// Populates this instance from an exception.
     /// </summary>
     public void PopulateFromException(Exception exception)
     {
+        Exception = exception;
         ExceptionType = exception.GetType().FullName;
         InnerExceptionType = exception.InnerException?.GetType().FullName;
+        InnermostExceptionType = GetInnermostException(exception)?.GetType().FullName;
         HResult = exception.HResult;
-        CrashTimestamp = DateTime.UtcNow;
         StackHash = ComputeStackHash(exception);
         StackTop = ExtractStackTop(exception);
+        CrashOriginNamespace = ExtractOriginNamespace(exception);
+        CrashOrigin = ClassifyOrigin(CrashOriginNamespace);
+        PopulateMemoryStats();
+    }
+
+    /// <summary>
+    /// Captures memory usage stats at the time of the crash.
+    /// Best-effort: failures are silently ignored.
+    /// </summary>
+    private void PopulateMemoryStats()
+    {
+        try
+        {
+            using var process = System.Diagnostics.Process.GetCurrentProcess();
+            ProcessWorkingSetMB = process.WorkingSet64 / (1024 * 1024);
+        }
+        catch
+        {
+            // Best effort.
+        }
+
+        try
+        {
+#if NETFRAMEWORK
+            NativeMethods.MemoryStatus? memoryStatus = NativeMethods.GetMemoryStatus();
+            if (memoryStatus != null)
+            {
+                MemoryLoadPercent = (int)memoryStatus.MemoryLoad;
+            }
+#else
+            // On .NET Core, GC.GetGCMemoryInfo() provides the total available memory
+            // to the GC, which we use to compute an approximate memory load percentage.
+            // This helps diagnose OOM and memory-pressure crashes on Linux/macOS where
+            // GlobalMemoryStatusEx is not available.
+            GCMemoryInfo gcMemInfo = System.GC.GetGCMemoryInfo();
+            long totalAvailable = gcMemInfo.TotalAvailableMemoryBytes;
+            if (totalAvailable > 0)
+            {
+                using var process = System.Diagnostics.Process.GetCurrentProcess();
+                MemoryLoadPercent = (int)(((double)process.WorkingSet64 / totalAvailable) * 100);
+            }
+#endif
+        }
+        catch
+        {
+            // Best effort.
+        }
     }
 
     /// <summary>
@@ -98,7 +257,10 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
 
         AddIfNotNull(ExceptionType);
         AddIfNotNull(InnerExceptionType);
-        AddIfNotNull(ExitType);
+        if (ExitType != CrashExitType.Unknown)
+        {
+            telemetryItems.Add(nameof(ExitType), ExitType.ToString());
+        }
         AddIfNotNull(IsCritical);
         AddIfNotNull(IsUnhandled);
         AddIfNotNull(StackHash);
@@ -107,11 +269,14 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(BuildEngineVersion);
         AddIfNotNull(BuildEngineFrameworkName);
         AddIfNotNull(BuildEngineHost);
-
-        if (CrashTimestamp.HasValue)
+        if (CrashOrigin != CrashOriginKind.Unknown)
         {
-            telemetryItems.Add(nameof(CrashTimestamp), CrashTimestamp.Value.ToString("O"));
+            telemetryItems.Add(nameof(CrashOrigin), CrashOrigin.ToString());
         }
+        AddIfNotNull(CrashOriginNamespace);
+        AddIfNotNull(InnermostExceptionType);
+        AddIfNotNull(ProcessWorkingSetMB);
+        AddIfNotNull(MemoryLoadPercent);
 
         return telemetryItems;
 
@@ -130,7 +295,10 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
 
         AddIfNotNull(ExceptionType);
         AddIfNotNull(InnerExceptionType);
-        AddIfNotNull(ExitType);
+        if (ExitType != CrashExitType.Unknown)
+        {
+            AddIfNotNull(ExitType.ToString(), nameof(ExitType));
+        }
         AddIfNotNull(IsCritical?.ToString(), nameof(IsCritical));
         AddIfNotNull(IsUnhandled.ToString(), nameof(IsUnhandled));
         AddIfNotNull(StackHash);
@@ -139,7 +307,14 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(BuildEngineVersion);
         AddIfNotNull(BuildEngineFrameworkName);
         AddIfNotNull(BuildEngineHost);
-        AddIfNotNull(CrashTimestamp?.ToString("O"), nameof(CrashTimestamp));
+        if (CrashOrigin != CrashOriginKind.Unknown)
+        {
+            AddIfNotNull(CrashOrigin.ToString(), nameof(CrashOrigin));
+        }
+        AddIfNotNull(CrashOriginNamespace);
+        AddIfNotNull(InnermostExceptionType);
+        AddIfNotNull(ProcessWorkingSetMB?.ToString(), nameof(ProcessWorkingSetMB));
+        AddIfNotNull(MemoryLoadPercent?.ToString(), nameof(MemoryLoadPercent));
 
         return properties;
 
@@ -150,6 +325,166 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
                 properties[key] = value;
             }
         }
+    }
+
+    /// <summary>
+    /// Known namespace prefixes that indicate the crash originated in MSBuild code.
+    /// </summary>
+    private static readonly string[] s_msBuildNamespacePrefixes =
+    [
+        "Microsoft.Build",
+    ];
+
+    /// <summary>
+    /// Walks the inner exception chain and returns the deepest (innermost) exception.
+    /// Returns null if the exception has no inner exception.
+    /// Guards against circular references with a depth limit.
+    /// </summary>
+    private static Exception? GetInnermostException(Exception exception)
+    {
+        Exception? inner = exception.InnerException;
+        if (inner is null)
+        {
+            return null;
+        }
+
+        // Guard against circular references — 20 levels is more than enough
+        // for any real exception chain.
+        const int maxDepth = 20;
+        int depth = 0;
+        while (inner.InnerException is not null && depth < maxDepth)
+        {
+            inner = inner.InnerException;
+            depth++;
+        }
+
+        return inner;
+    }
+
+    /// <summary>
+    /// Extracts the top-level namespace from the first stack frame of the exception.
+    /// Returns null if the stack trace is unavailable or cannot be parsed.
+    /// Uses index-based parsing to avoid intermediate string allocations.
+    /// </summary>
+    internal static string? ExtractOriginNamespace(Exception exception)
+    {
+        string? stackTrace = exception.StackTrace;
+        if (stackTrace is null)
+        {
+            return null;
+        }
+
+        // Get first line boundaries: "   at Namespace.Type.Method(...) in path:line N"
+        int lineEnd = stackTrace.IndexOf('\n');
+        if (lineEnd < 0)
+        {
+            lineEnd = stackTrace.Length;
+        }
+
+        // Find start of qualified name (skip leading whitespace and "at ")
+        int start = 0;
+        while (start < lineEnd && char.IsWhiteSpace(stackTrace[start]))
+        {
+            start++;
+        }
+
+        if (start + 3 <= lineEnd &&
+            stackTrace[start] == 'a' && stackTrace[start + 1] == 't' && stackTrace[start + 2] == ' ')
+        {
+            start += 3;
+        }
+
+        // Find end of qualified name: stop at '(' or " in "
+        int end = lineEnd;
+        int parenIndex = stackTrace.IndexOf('(', start, end - start);
+        if (parenIndex >= 0)
+        {
+            end = parenIndex;
+        }
+
+        int inIndex = stackTrace.IndexOf(" in ", start, end - start, StringComparison.Ordinal);
+        if (inIndex >= 0)
+        {
+            end = inIndex;
+        }
+
+        // Trim trailing whitespace
+        while (end > start && char.IsWhiteSpace(stackTrace[end - 1]))
+        {
+            end--;
+        }
+
+        if (end <= start)
+        {
+            return null;
+        }
+
+        // "Namespace.Sub.Type.Method" → count dots to determine segment count,
+        // then take up to 3 segments excluding the last one (Method).
+        int dotCount = 0;
+        for (int i = start; i < end; i++)
+        {
+            if (stackTrace[i] == '.')
+            {
+                dotCount++;
+            }
+        }
+
+        if (dotCount < 2)
+        {
+            // Not enough segments — return first segment (or the whole thing if no dots)
+            int firstDot = stackTrace.IndexOf('.', start, end - start);
+            return firstDot >= 0
+                ? stackTrace.Substring(start, firstDot - start)
+                : stackTrace.Substring(start, end - start);
+        }
+
+        // Walk forward to find the end of the Nth namespace segment (up to 3,
+        // but at most dotCount - 2 to exclude Type.Method).
+        int take = Math.Min(3, dotCount - 1); // -1 because last segment after last dot is Method
+        int dotsFound = 0;
+        int cutoff = start;
+        for (int i = start; i < end; i++)
+        {
+            if (stackTrace[i] == '.')
+            {
+                dotsFound++;
+                if (dotsFound == take)
+                {
+                    cutoff = i;
+                    break;
+                }
+            }
+        }
+
+        return cutoff > start ? stackTrace.Substring(start, cutoff - start) : null;
+    }
+
+    /// <summary>
+    /// Classifies the crash origin based on the faulting namespace.
+    /// Returns <see cref="CrashOriginKind.MSBuild"/> if the namespace starts with a known MSBuild prefix,
+    /// <see cref="CrashOriginKind.ThirdParty"/> if it doesn't, or <see cref="CrashOriginKind.Unknown"/>
+    /// if no namespace could be determined.
+    /// </summary>
+    internal static CrashOriginKind ClassifyOrigin(string? originNamespace)
+    {
+        if (string.IsNullOrEmpty(originNamespace))
+        {
+            return CrashOriginKind.Unknown;
+        }
+
+        foreach (string prefix in s_msBuildNamespacePrefixes)
+        {
+            if (originNamespace!.Equals(prefix, StringComparison.OrdinalIgnoreCase)
+                || (originNamespace.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                    && originNamespace.Length > prefix.Length
+                    && originNamespace[prefix.Length] == '.'))
+            {
+                return CrashOriginKind.MSBuild;
+            }
+        }
+
+        return CrashOriginKind.ThirdParty;
     }
 
     /// <summary>
