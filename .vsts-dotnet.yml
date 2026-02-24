@@ -138,7 +138,11 @@ extends:
 
     - stage: build
       displayName: Build
-      dependsOn: [] # empty dependency list to enable parallelization with localization stage
+      dependsOn: 
+      - ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/'), startsWith(variables['Build.SourceBranch'], 'refs/heads/perf/')) }}:
+        - branch_validation
+      - ${{ else }}:
+        - [] # empty dependency list to enable parallelization with localization stage
       jobs:
       - template: /azure-pipelines/.vsts-dotnet-build-jobs.yml@self
         parameters:
