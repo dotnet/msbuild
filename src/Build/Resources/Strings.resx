@@ -2459,10 +2459,6 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
     <value>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</value>
     <comment>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</comment>
   </data>
-  <data name="HighMemoryPressure" xml:space="preserve">
-    <value>The build process is using approximately {0:N0} MB out of {1:N0} MB of available physical memory ({2}%). This may lead to out-of-memory errors. Consider reducing build parallelism with /maxcpucount:N, closing other applications, or increasing system memory.</value>
-    <comment>This message is logged when MSBuild detects that memory usage is high during a build. {0} is the working set in MB, {1} is total physical memory in MB, {2} is the percentage of physical memory in use.</comment>
-  </data>
   <!--
         The Build message bucket is: MSB4000 - MSB4999
 

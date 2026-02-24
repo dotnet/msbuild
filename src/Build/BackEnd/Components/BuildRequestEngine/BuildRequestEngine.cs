@@ -126,11 +126,6 @@ namespace Microsoft.Build.BackEnd
         private readonly bool _debugForceCaching;
 
         /// <summary>
-        /// Whether we've already logged a high memory pressure message for this build.
-        /// </summary>
-        private bool _memoryPressureMessageLogged;
-
-        /// <summary>
         /// Constructor
         /// </summary>
         internal BuildRequestEngine()
@@ -866,11 +861,9 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Check the amount of memory we are using and, if we exceed the threshold, unload cacheable items.
-        /// Also emits a high-importance message when memory pressure is detected, to help users diagnose
-        /// potential out-of-memory conditions.
         /// </summary>
         /// <remarks>
-        /// The cache eviction path causes synchronous I/O and a stop-the-world GC, so it can be very expensive. If
+        /// Since this causes synchronous I/O and a stop-the-world GC, it can be very expensive. If
         /// something other than build results is taking up the bulk of the memory space, it may not
         /// free any space. That's caused customer reports of VS hangs resulting from build requests
         /// that are very slow because something in VS is taking all of the memory, but every
@@ -882,14 +875,6 @@ namespace Microsoft.Build.BackEnd
         [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods", MessageId = "System.GC.Collect", Justification = "We're trying to get rid of memory because we're running low, so we need to collect NOW in order to free it up ASAP")]
         private void CheckMemoryUsage()
         {
-            // Cross-platform: Emit a high-importance message when memory pressure is detected.
-            // This runs on all platforms and in VS — it's cheap (no GC, no I/O) and helps users
-            // understand OOM crashes before they happen. Only logged once per build.
-            if (!_memoryPressureMessageLogged)
-            {
-                LogHighMemoryPressureIfNeeded();
-            }
-
             if (!NativeMethodsShared.IsWindows || BuildEnvironmentHelper.Instance.RunningInVisualStudio)
             {
                 // Since this causes synchronous I/O and a stop-the-world GC, it can be very expensive. If
@@ -953,67 +938,6 @@ namespace Microsoft.Build.BackEnd
                         new BuildEventFileInfo(Construction.ElementLocation.EmptyLocation));
                     throw new BuildAbortedException(e.Message, e);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Checks system memory usage and logs a high-importance message if memory pressure is detected.
-        /// This is cross-platform and safe to call in any context (no GC, no I/O).
-        /// Only logs once per build to avoid spamming the log.
-        /// </summary>
-        private void LogHighMemoryPressureIfNeeded()
-        {
-            const double HighMemoryThresholdPercent = 90.0;
-
-            try
-            {
-                using var currentProcess = System.Diagnostics.Process.GetCurrentProcess();
-                long workingSetBytes = currentProcess.WorkingSet64;
-                double workingSetMB = workingSetBytes / (1024.0 * 1024.0);
-
-#if NETFRAMEWORK
-                NativeMethodsShared.MemoryStatus memoryStatus = NativeMethodsShared.GetMemoryStatus();
-                if (memoryStatus != null && memoryStatus.TotalPhysical > 0)
-                {
-                    double totalPhysicalMB = memoryStatus.TotalPhysical / (1024.0 * 1024.0);
-                    double percentUsed = memoryStatus.MemoryLoad;
-
-                    if (percentUsed >= HighMemoryThresholdPercent)
-                    {
-                        _memoryPressureMessageLogged = true;
-                        _nodeLoggingContext.LogComment(
-                            MessageImportance.High,
-                            "HighMemoryPressure",
-                            workingSetMB,
-                            totalPhysicalMB,
-                            (int)percentUsed);
-                    }
-                }
-#else
-                GCMemoryInfo gcMemInfo = GC.GetGCMemoryInfo();
-                long totalAvailable = gcMemInfo.TotalAvailableMemoryBytes;
-
-                if (totalAvailable > 0)
-                {
-                    double totalMB = totalAvailable / (1024.0 * 1024.0);
-                    double percentUsed = ((double)workingSetBytes / totalAvailable) * 100.0;
-
-                    if (percentUsed >= HighMemoryThresholdPercent)
-                    {
-                        _memoryPressureMessageLogged = true;
-                        _nodeLoggingContext.LogComment(
-                            MessageImportance.High,
-                            "HighMemoryPressure",
-                            workingSetMB,
-                            totalMB,
-                            (int)percentUsed);
-                    }
-                }
-#endif
-            }
-            catch
-            {
-                // Best effort — never fail a build because memory detection failed.
             }
         }
 
