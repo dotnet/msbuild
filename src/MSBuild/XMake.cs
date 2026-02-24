@@ -901,7 +901,6 @@ namespace Microsoft.Build.CommandLine
                 ShowHelpPrompt();
 
                 exitType = ExitType.SwitchError;
-                RecordCrashTelemetry(e, exitType);
             }
             // handle configuration exceptions: problems reading toolset information from msbuild.exe.config or the registry
             catch (InvalidToolsetDefinitionException e)
@@ -910,7 +909,6 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ConfigurationFailurePrefixNoErrorCode", e.ErrorCode, e.Message));
 
                 exitType = ExitType.InitializationError;
-                RecordCrashTelemetry(e, exitType);
             }
             // handle initialization failures
             catch (InitializationException e)
@@ -918,7 +916,6 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine(e.Message);
 
                 exitType = ExitType.InitializationError;
-                RecordCrashTelemetry(e, exitType);
             }
             // handle polite logger failures: don't dump the stack or trigger watson for these
             catch (LoggerException e)
@@ -1056,40 +1053,25 @@ namespace Microsoft.Build.CommandLine
             return exitType;
         }
 
-        private static string GetHostName()
-        {
-            if (BuildEnvironmentState.s_runningInVisualStudio)
-            {
-                return "VS";
-            }
-
-            string msbuildHostName = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
-            if (!string.IsNullOrEmpty(msbuildHostName))
-            {
-                return msbuildHostName;
-            }
-
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
-            {
-                return "VSCode";
-            }
-
-            return null;
-        }
-
         /// <summary>
         /// Records crash telemetry data for later emission.
         /// </summary>
         private static void RecordCrashTelemetry(Exception exception, ExitType exitType, bool isUnhandled = false)
         {
+            // Convert from MSBuildApp.ExitType to CrashExitType (names match).
+            if (!Enum.TryParse<CrashExitType>(exitType.ToString(), out CrashExitType crashExitType))
+            {
+                crashExitType = CrashExitType.Unknown;
+            }
+
             CrashTelemetryRecorder.RecordCrashTelemetry(
                 exception,
-                exitType.ToString(),
+                crashExitType,
                 isUnhandled,
                 ExceptionHandling.IsCriticalException(exception),
                 ProjectCollection.Version?.ToString(),
                 NativeMethodsShared.FrameworkName,
-                GetHostName());
+                BuildEnvironmentState.GetHostName());
         }
 
         private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project, TextWriter outputStream)

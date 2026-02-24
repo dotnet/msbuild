@@ -33,7 +33,6 @@ public class CrashTelemetry_Tests
         telemetry.ExceptionType.ShouldBe("System.InvalidOperationException");
         telemetry.InnerExceptionType.ShouldBe("System.ArgumentException");
         telemetry.HResult.ShouldNotBeNull();
-        telemetry.CrashTimestamp.ShouldNotBeNull();
         telemetry.StackHash.ShouldNotBeNull();
         telemetry.StackTop.ShouldNotBeNull();
     }
@@ -103,7 +102,7 @@ public class CrashTelemetry_Tests
         {
             ExceptionType = "System.InvalidOperationException",
             InnerExceptionType = "System.ArgumentException",
-            ExitType = "Unexpected",
+            ExitType = CrashExitType.Unexpected,
             IsCritical = false,
             IsUnhandled = true,
             StackHash = "ABC123",
@@ -112,7 +111,6 @@ public class CrashTelemetry_Tests
             BuildEngineVersion = "17.0.0",
             BuildEngineFrameworkName = ".NET 10.0",
             BuildEngineHost = "VS",
-            CrashTimestamp = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc),
         };
 
         IDictionary<string, string> props = telemetry.GetProperties();
@@ -127,7 +125,6 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.BuildEngineVersion)].ShouldBe("17.0.0");
         props[nameof(CrashTelemetry.BuildEngineFrameworkName)].ShouldBe(".NET 10.0");
         props[nameof(CrashTelemetry.BuildEngineHost)].ShouldBe("VS");
-        props[nameof(CrashTelemetry.CrashTimestamp)].ShouldBe("2025-01-01T00:00:00.0000000Z");
     }
 
     [Fact]
@@ -153,7 +150,7 @@ public class CrashTelemetry_Tests
         CrashTelemetry telemetry = new()
         {
             ExceptionType = "System.InvalidOperationException",
-            ExitType = "Unexpected",
+            ExitType = CrashExitType.Unexpected,
             IsCritical = true,
             IsUnhandled = false,
             StackHash = "DEF456",
@@ -162,7 +159,6 @@ public class CrashTelemetry_Tests
             BuildEngineVersion = "17.0.0",
             BuildEngineFrameworkName = ".NET 10.0",
             BuildEngineHost = "CLI",
-            CrashTimestamp = new DateTime(2025, 6, 15, 12, 30, 0, DateTimeKind.Utc),
         };
 
         Dictionary<string, object> props = telemetry.GetActivityProperties();
@@ -176,7 +172,6 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.BuildEngineVersion)].ShouldBe("17.0.0");
         props[nameof(CrashTelemetry.BuildEngineFrameworkName)].ShouldBe(".NET 10.0");
         props[nameof(CrashTelemetry.BuildEngineHost)].ShouldBe("CLI");
-        props[nameof(CrashTelemetry.CrashTimestamp)].ShouldBe("2025-06-15T12:30:00.0000000Z");
     }
 
     [Fact]
@@ -184,5 +179,185 @@ public class CrashTelemetry_Tests
     {
         CrashTelemetry telemetry = new();
         telemetry.EventName.ShouldBe("crash");
+    }
+
+    [Fact]
+    public void PopulateFromException_SetsInnermostExceptionType_ForNestedExceptions()
+    {
+        var root = new IOException("root cause");
+        var mid = new InvalidOperationException("mid", root);
+        var outer = new TypeInitializationException("SomeType", mid);
+
+        CrashTelemetry telemetry = new();
+
+        try
+        {
+            throw outer;
+        }
+        catch (Exception ex)
+        {
+            telemetry.PopulateFromException(ex);
+        }
+
+        telemetry.ExceptionType.ShouldBe("System.TypeInitializationException");
+        telemetry.InnerExceptionType.ShouldBe("System.InvalidOperationException");
+        telemetry.InnermostExceptionType.ShouldBe("System.IO.IOException");
+    }
+
+    [Fact]
+    public void PopulateFromException_InnermostExceptionType_IsNull_WhenNoInnerException()
+    {
+        CrashTelemetry telemetry = new();
+
+        try
+        {
+            throw new ArgumentException("no inner");
+        }
+        catch (Exception ex)
+        {
+            telemetry.PopulateFromException(ex);
+        }
+
+        telemetry.InnermostExceptionType.ShouldBeNull();
+    }
+
+    [Fact]
+    public void PopulateFromException_InnermostExceptionType_EqualsInner_WhenSingleInner()
+    {
+        var inner = new ArgumentException("inner");
+        var outer = new InvalidOperationException("outer", inner);
+
+        CrashTelemetry telemetry = new();
+
+        try
+        {
+            throw outer;
+        }
+        catch (Exception ex)
+        {
+            telemetry.PopulateFromException(ex);
+        }
+
+        // When there's only one inner, InnermostExceptionType should equal InnerExceptionType.
+        telemetry.InnerExceptionType.ShouldBe("System.ArgumentException");
+        telemetry.InnermostExceptionType.ShouldBe("System.ArgumentException");
+    }
+
+    [Fact]
+    public void PopulateFromException_SetsCrashOriginToMSBuild_WhenExceptionFromMSBuildCode()
+    {
+        CrashTelemetry telemetry = new();
+
+        // Throw from this test, which lives in a Microsoft.Build.* namespace.
+        try
+        {
+            throw new InvalidOperationException("test");
+        }
+        catch (Exception ex)
+        {
+            telemetry.PopulateFromException(ex);
+        }
+
+        telemetry.CrashOrigin.ShouldBe(CrashOriginKind.MSBuild);
+        telemetry.CrashOriginAssembly.ShouldNotBeNull();
+        telemetry.CrashOriginAssembly.ShouldStartWith("Microsoft.Build");
+    }
+
+    [Theory]
+    [InlineData("Microsoft.Build.BackEnd.SomeClass.Method", "Microsoft.Build.BackEnd")]
+    [InlineData("Microsoft.Build.Evaluation.ProjectParser.Parse", "Microsoft.Build.Evaluation")]
+    [InlineData("Microsoft.Build.Execution.BuildManager.Build", "Microsoft.Build.Execution")]
+    [InlineData("Microsoft.VisualStudio.RemoteControl.RemoteControlClient.GetFileAsync", "Microsoft.VisualStudio.RemoteControl")]
+    [InlineData("System.IO.File.ReadAllText", "System.IO")]
+    [InlineData("Newtonsoft.Json.JsonConvert.DeserializeObject", "Newtonsoft.Json")]
+    public void ExtractOriginNamespace_ExtractsCorrectNamespace(string qualifiedMethod, string expectedNamespace)
+    {
+        // Build a fake stack trace with the given qualified method.
+        string fakeStack = $"   at {qualifiedMethod}(String arg)";
+        Exception ex = CreateExceptionWithStack(fakeStack);
+
+        string? result = CrashTelemetry.ExtractOriginNamespace(ex);
+
+        result.ShouldBe(expectedNamespace);
+    }
+
+    [Theory]
+    [InlineData("Microsoft.Build.BackEnd", CrashOriginKind.MSBuild)]
+    [InlineData("Microsoft.Build.Evaluation", CrashOriginKind.MSBuild)]
+    [InlineData("Microsoft.Build", CrashOriginKind.MSBuild)]
+    [InlineData("Microsoft.VisualStudio.RemoteControl", CrashOriginKind.ThirdParty)]
+    [InlineData("System.IO", CrashOriginKind.ThirdParty)]
+    [InlineData("Newtonsoft.Json", CrashOriginKind.ThirdParty)]
+    [InlineData(null, CrashOriginKind.Unknown)]
+    [InlineData("", CrashOriginKind.Unknown)]
+    public void ClassifyOrigin_ReturnsCorrectCategory(string? originNamespace, CrashOriginKind expectedOrigin)
+    {
+        CrashOriginKind result = CrashTelemetry.ClassifyOrigin(originNamespace);
+        result.ShouldBe(expectedOrigin);
+    }
+
+    [Fact]
+    public void ExtractOriginNamespace_ReturnsNull_WhenNoStackTrace()
+    {
+        // An exception that was never thrown has no stack trace.
+        Exception ex = new Exception("no stack");
+        string? result = CrashTelemetry.ExtractOriginNamespace(ex);
+        result.ShouldBeNull();
+    }
+
+    [Fact]
+    public void GetProperties_IncludesNewFields()
+    {
+        CrashTelemetry telemetry = new()
+        {
+            ExceptionType = "System.TypeInitializationException",
+            IsUnhandled = true,
+            CrashOrigin = CrashOriginKind.MSBuild,
+            CrashOriginAssembly = "Microsoft.Build.BackEnd",
+            InnermostExceptionType = "System.IO.IOException",
+        };
+
+        IDictionary<string, string> props = telemetry.GetProperties();
+        props[nameof(CrashTelemetry.CrashOrigin)].ShouldBe("MSBuild");
+        props[nameof(CrashTelemetry.CrashOriginAssembly)].ShouldBe("Microsoft.Build.BackEnd");
+        props[nameof(CrashTelemetry.InnermostExceptionType)].ShouldBe("System.IO.IOException");
+    }
+
+    [Fact]
+    public void GetActivityProperties_IncludesNewFields()
+    {
+        CrashTelemetry telemetry = new()
+        {
+            ExceptionType = "System.OutOfMemoryException",
+            IsUnhandled = true,
+            CrashOrigin = CrashOriginKind.ThirdParty,
+            CrashOriginAssembly = "Microsoft.VisualStudio.RemoteControl",
+            InnermostExceptionType = "System.OutOfMemoryException",
+        };
+
+        Dictionary<string, object> props = telemetry.GetActivityProperties();
+        props[nameof(CrashTelemetry.CrashOrigin)].ShouldBe("ThirdParty");
+        props[nameof(CrashTelemetry.CrashOriginAssembly)].ShouldBe("Microsoft.VisualStudio.RemoteControl");
+        props[nameof(CrashTelemetry.InnermostExceptionType)].ShouldBe("System.OutOfMemoryException");
+    }
+
+    /// <summary>
+    /// Creates an exception whose StackTrace property returns the given fake stack string.
+    /// </summary>
+    private static Exception CreateExceptionWithStack(string fakeStack)
+    {
+        return new ExceptionWithFakeStack(fakeStack);
+    }
+
+    private sealed class ExceptionWithFakeStack : Exception
+    {
+        private readonly string _stack;
+
+        public ExceptionWithFakeStack(string stack) : base("fake")
+        {
+            _stack = stack;
+        }
+
+        public override string? StackTrace => _stack;
     }
 }

@@ -3,6 +3,9 @@
 
 using System;
 using System.Runtime.CompilerServices;
+#if NETFRAMEWORK
+using Microsoft.VisualStudio.Telemetry;
+#endif
 
 namespace Microsoft.Build.Framework.Telemetry;
 
@@ -16,7 +19,7 @@ internal static class CrashTelemetryRecorder
     /// Records crash telemetry data for later emission via <see cref="FlushCrashTelemetry"/>.
     /// </summary>
     /// <param name="exception">The exception that caused the crash.</param>
-    /// <param name="exitType">Exit type classification (e.g. "LoggerFailure", "Unexpected").</param>
+    /// <param name="exitType">Exit type classification.</param>
     /// <param name="isUnhandled">True if the exception was not caught by any catch block.</param>
     /// <param name="isCritical">Whether the exception is classified as critical (OOM, StackOverflow, etc.).</param>
     /// <param name="buildEngineVersion">MSBuild version string, if available.</param>
@@ -24,7 +27,7 @@ internal static class CrashTelemetryRecorder
     /// <param name="buildEngineHost">Host name (VS, VSCode, CLI, etc.), if available.</param>
     public static void RecordCrashTelemetry(
         Exception exception,
-        string exitType,
+        CrashExitType exitType,
         bool isUnhandled,
         bool isCritical,
         string? buildEngineVersion = null,
@@ -52,7 +55,7 @@ internal static class CrashTelemetryRecorder
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void RecordAndFlushCrashTelemetry(
         Exception exception,
-        string exitType,
+        CrashExitType exitType,
         bool isUnhandled,
         bool isCritical)
     {
@@ -69,6 +72,8 @@ internal static class CrashTelemetryRecorder
                 ?.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Crash);
             activity?.SetTags(crashTelemetry);
+
+            PostFaultEvent(crashTelemetry);
         }
         catch
         {
@@ -101,6 +106,8 @@ internal static class CrashTelemetryRecorder
                 ?.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Crash);
             activity?.SetTags(crashTelemetry);
+
+            PostFaultEvent(crashTelemetry);
         }
         catch
         {
@@ -108,9 +115,46 @@ internal static class CrashTelemetryRecorder
         }
     }
 
+    /// <summary>
+    /// Posts a <c>FaultEvent</c> to the VS telemetry session so that crashes
+    /// appear in Prism fault dashboards alongside other VS component faults.
+    /// Only available on .NET Framework where the VS Telemetry SDK is loaded.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    private static void PostFaultEvent(CrashTelemetry crashTelemetry)
+    {
+#if NETFRAMEWORK
+        try
+        {
+            string eventName = $"{TelemetryConstants.EventPrefix}{TelemetryConstants.Crash}";
+            string description = $"{crashTelemetry.ExitType}: {crashTelemetry.ExceptionType}";
+            var faultEvent = new FaultEvent(eventName, description, crashTelemetry.Exception);
+
+            faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}ExitType"] = crashTelemetry.ExitType.ToString();
+            faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}CrashOrigin"] = crashTelemetry.CrashOrigin.ToString();
+
+            if (crashTelemetry.CrashOriginAssembly is not null)
+            {
+                faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}CrashOriginAssembly"] = crashTelemetry.CrashOriginAssembly;
+            }
+
+            if (crashTelemetry.StackHash is not null)
+            {
+                faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}StackHash"] = crashTelemetry.StackHash;
+            }
+
+            TelemetryService.DefaultSession.PostEvent(faultEvent);
+        }
+        catch
+        {
+            // Best effort: fault telemetry must never cause a secondary failure.
+        }
+#endif
+    }
+
     private static CrashTelemetry CreateCrashTelemetry(
         Exception exception,
-        string exitType,
+        CrashExitType exitType,
         bool isUnhandled,
         bool isCritical)
     {
