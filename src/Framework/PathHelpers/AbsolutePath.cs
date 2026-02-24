@@ -32,7 +32,7 @@ namespace Microsoft.Build.Framework
         /// The normalized string representation of this path.
         /// </summary>
         public string Value { get; }
-        
+
         /// <summary>
         /// The original string used to create this path.
         /// </summary>
@@ -84,17 +84,14 @@ namespace Microsoft.Build.Framework
         /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null, empty, or not a rooted path.</exception>
         private static void ValidatePath(string path)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentException(FrameworkResources.GetString("PathMustNotBeNullOrEmpty"), nameof(path));
-            }
+            ArgumentException.ThrowIfNullOrEmpty(path);
 
             // Path.IsPathFullyQualified is not available in .NET Standard 2.0
             // in .NET Framework it's provided by package and in .NET it's built-in
 #if NETFRAMEWORK || NET
             if (!Path.IsPathFullyQualified(path))
             {
-                throw new ArgumentException(FrameworkResources.GetString("PathMustBeRooted"), nameof(path));
+                throw new ArgumentException(SR.PathMustBeRooted, nameof(path));
             }
 #endif
         }
@@ -107,10 +104,7 @@ namespace Microsoft.Build.Framework
         /// <exception cref="ArgumentException">Thrown if <paramref name="path"/> is null or empty.</exception>
         public AbsolutePath(string path, AbsolutePath basePath)
         {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentException(FrameworkResources.GetString("PathMustNotBeNullOrEmpty"), nameof(path));
-            }
+            ArgumentException.ThrowIfNullOrEmpty(path);
 
             // This function should not throw when path has illegal characters.
             // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine to achieve it.
