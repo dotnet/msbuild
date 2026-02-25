@@ -14,4 +14,8 @@
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.14.28" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Include="..\..\..\BackEnd\IsRunningMultipleNodesTask.cs" Link="IsRunningMultipleNodesTask.cs" />
+  </ItemGroup>
+
 </Project>

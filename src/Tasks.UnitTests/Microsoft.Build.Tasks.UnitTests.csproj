@@ -52,7 +52,6 @@
     </Compile>
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\Shared\QuotingUtilities.cs" />
-    <Compile Include="..\Shared\ProcessExtensions.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <EmbeddedResource Include="SampleResx" />

@@ -1096,6 +1096,7 @@ namespace Microsoft.Build.Execution
             catch (Exception e)
             {
                 exceptionsThrownInEndBuild = true;
+                RecordCrashTelemetry(e, isUnhandled: false);
 
                 if (e is AggregateException ae && ae.InnerExceptions.Count == 1)
                 {
@@ -1135,19 +1136,7 @@ namespace Microsoft.Build.Execution
                                 loggingService.PopulateBuildTelemetryWithErrors(_buildTelemetry);
                             }
 
-                            string? host = null;
-                            if (BuildEnvironmentState.s_runningInVisualStudio)
-                            {
-                                host = "VS";
-                            }
-                            else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME")))
-                            {
-                                host = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
-                            }
-                            else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
-                            {
-                                host = "VSCode";
-                            }
+                            string? host = BuildEnvironmentState.GetHostName();
 
                             _buildTelemetry.BuildEngineHost = host;
 
@@ -1179,6 +1168,13 @@ namespace Microsoft.Build.Execution
                     _buildManagerState = BuildManagerState.Idle;
 
                     MSBuildEventSource.Log.BuildStop();
+
+                    if (_threadException is not null)
+                    {
+                        RecordCrashTelemetry(_threadException.SourceException, isUnhandled: true);
+                    }
+
+                    CrashTelemetryRecorder.FlushCrashTelemetry();
 
                     _threadException?.Throw();
 
@@ -1216,6 +1212,24 @@ namespace Microsoft.Build.Execution
                         includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
                         includeTargetDetails: false));
         }
+
+        /// <summary>
+        /// Records crash telemetry data for later emission via <see cref="CrashTelemetryRecorder.FlushCrashTelemetry"/>.
+        /// </summary>
+        private void RecordCrashTelemetry(Exception exception, bool isUnhandled)
+        {
+            string? host = _buildTelemetry?.BuildEngineHost ??  BuildEnvironmentState.GetHostName();
+
+            CrashTelemetryRecorder.RecordCrashTelemetry(
+                exception,
+                isUnhandled ? CrashExitType.UnhandledException : CrashExitType.EndBuildFailure,
+                isUnhandled,
+                ExceptionHandling.IsCriticalException(exception),
+                ProjectCollection.Version?.ToString(),
+                NativeMethodsShared.FrameworkName,
+                host);
+        }
+
 
         /// <summary>
         /// Convenience method.  Submits a lone build request and blocks until results are available.
