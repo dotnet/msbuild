@@ -8,6 +8,7 @@ using System.Linq;
 using System.Xml;
 
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 
@@ -182,6 +183,7 @@ namespace Microsoft.Build.UnitTests
 
             XmlPoke task = new()
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = engine,
                 XmlInputPath = new TaskItem(xmlInputPath),
                 Query = "//variable/@Name",
@@ -224,7 +226,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileWithNs, out xmlInputPath);
 
-            XmlPoke p = new XmlPoke();
+            XmlPoke p = new XmlPoke() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//s:variable/@Name";
@@ -243,7 +245,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileNoNs, out xmlInputPath);
 
-            XmlPoke p = new XmlPoke();
+            XmlPoke p = new XmlPoke() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
 
             p.XmlInputPath = new TaskItem(xmlInputPath);
@@ -271,7 +273,7 @@ namespace Microsoft.Build.UnitTests
                         res += attrs[k] + " ";
                     }
                 }
-                XmlPoke p = new XmlPoke();
+                XmlPoke p = new XmlPoke() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 p.BuildEngine = engine;
                 p.XmlInputPath = new TaskItem(xmlInputPath);
                 p.Query = "//s:variable/@Name";
@@ -352,6 +354,7 @@ namespace Microsoft.Build.UnitTests
 
             XmlPoke p = new XmlPoke
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = engine,
                 XmlInputPath = new TaskItem(xmlInputPath),
                 Query = query,

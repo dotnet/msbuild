@@ -68,7 +68,8 @@
       <Link>IExtendedBuildEventArgs.cs</Link>
     </Compile>
     <Compile Include="..\Framework\AssemblyUtilities.cs" />
-    <Compile Include="..\Framework\Polyfills\*.cs" />
+    <Compile Include="..\Framework\Polyfills\CallerArgumentExpressionAttribute.cs" />
+    <Compile Include="..\Framework\Polyfills\StringSyntaxAttribute.cs" />
     <Compile Include="..\Framework\ResponseFileUsedEventArgs.cs" />
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CollectionHelpers.cs" />

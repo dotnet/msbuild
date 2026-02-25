@@ -16,7 +16,7 @@ parameters:
 jobs:
 - job: Windows_NT
   pool:
-    name: VSEngSS-MicroBuild2022-1ES
+    name: VSEng-MicroBuildVSStable
     demands:
     - agent.os -equals Windows_NT
 

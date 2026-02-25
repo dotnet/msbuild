@@ -25,4 +25,10 @@ internal static class KnownTelemetry
     /// Describes if and how BuildCheck was used.
     /// </summary>
     public static BuildCheckTelemetry BuildCheckTelemetry { get; } = new BuildCheckTelemetry();
+
+    /// <summary>
+    /// Partial Telemetry for crash/failure reporting.
+    /// This is set when a crash occurs and emitted before the process exits.
+    /// </summary>
+    public static CrashTelemetry? CrashTelemetry { get; set; }
 }
