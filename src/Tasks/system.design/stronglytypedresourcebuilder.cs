@@ -789,28 +789,19 @@ namespace Microsoft.Build.Tasks
                     // There was a case-insensitive conflict between two keys.
                     // Or possibly one key was fixed up in a way that conflicts
                     // with another key (ie, "A B" and "A_B").
-                    string existingOriginalKey;
-                    if (reverseFixupTable.TryGetValue(key, out string fixedUp))
+                    if (reverseFixupTable.TryGetValue(key, out string alreadyAddedOriginalName))
                     {
-                        existingOriginalKey = fixedUp;
-                        if (!errors.Exists(e => e.key == fixedUp))
+                        if (!errors.Exists(e => e.key == alreadyAddedOriginalName))
                         {
-                            errors.Add((fixedUp, "GenerateResource.STRPropertySkippedNameCollision", entry.Key));
+                            errors.Add((alreadyAddedOriginalName, "GenerateResource.STRPropertySkippedNameCollision", entry.Key));
                         }
                         reverseFixupTable.Remove(key);
                     }
-                    else
-                    {
-                        // Pure case-insensitive collision — retrieve the actual stored key.
-                        int idx = cleanedResourceList.IndexOfKey(key);
-                        existingOriginalKey = cleanedResourceList.Keys[idx];
-                        if (!errors.Exists(e => e.key == existingOriginalKey))
-                        {
-                            errors.Add((existingOriginalKey, "GenerateResource.STRPropertySkippedNameCollision", entry.Key));
-                        }
-                    }
 
-                    errors.Add((entry.Key, "GenerateResource.STRPropertySkippedNameCollision", existingOriginalKey));
+                    // Warn about the current entry.
+                    errors.Add((entry.Key, "GenerateResource.STRPropertySkippedNameCollision", alreadyAddedOriginalName ?? key));
+
+                    // Remove the first entry — neither can safely generate a property.
                     cleanedResourceList.Remove(key);
                 }
             }
