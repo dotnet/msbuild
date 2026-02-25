@@ -646,7 +646,7 @@ namespace Microsoft.Build.BackEnd
                 return (expectedProcessName, Array.Empty<Process>());
             }
 
-            if (expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+            if (expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
             {
                 List<Process> filteredProcesses = [];
                 bool isDotnetProcess = expectedProcessName.Equals(Path.GetFileNameWithoutExtension(Constants.DotnetProcessName), StringComparison.OrdinalIgnoreCase);
