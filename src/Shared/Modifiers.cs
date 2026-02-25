@@ -185,11 +185,7 @@ namespace Microsoft.Build.Shared
 
                         if (currentDirectory == null)
                         {
-#if !TASKHOST
                             currentDirectory = FrameworkFileUtilities.CurrentThreadWorkingDirectory ?? string.Empty;
-#else
-                            currentDirectory = string.Empty;
-#endif
                         }
 
                         modifiedItemSpec = GetFullPath(itemSpec, currentDirectory);

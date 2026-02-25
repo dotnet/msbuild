@@ -5,14 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework;
-
-#if !TASKHOST
-using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Experimental.BuildCheck;
-#endif
+using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 
 #nullable disable
 
@@ -263,14 +259,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private static readonly int s_defaultPacketVersion = (Environment.Version.Major * 10) + Environment.Version.Minor;
 
-#if TASKHOST
-        /// <summary>
-        /// Dictionary of methods used to read BuildEventArgs.
-        /// </summary>
-        private static readonly Dictionary<LoggingEventType, MethodInfo> s_readMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
-
-#endif
-        /// <summary>
+       /// <summary>
         /// Dictionary of methods used to write BuildEventArgs.
         /// </summary>
         private static readonly Dictionary<LoggingEventType, MethodInfo> s_writeMethodCache = new Dictionary<LoggingEventType, MethodInfo>();
@@ -444,26 +433,7 @@ namespace Microsoft.Build.Shared
 
             if (eventCanSerializeItself)
             {
-
-#if TASKHOST
-                MethodInfo methodInfo = null;
-                lock (s_readMethodCache)
-                {
-                    if (!s_readMethodCache.TryGetValue(_eventType, out methodInfo))
-                    {
-                        Type eventDerivedType = _buildEvent.GetType();
-                        methodInfo = eventDerivedType.GetMethod("CreateFromStream", BindingFlags.NonPublic | BindingFlags.Instance);
-                        s_readMethodCache.Add(_eventType, methodInfo);
-                    }
-                }
-
-                ArgsReaderDelegate readerMethod = (ArgsReaderDelegate)CreateDelegateRobust(typeof(ArgsReaderDelegate), _buildEvent, methodInfo);
-
-                readerMethod(translator.Reader, packetVersion);
-
-#else
                 _buildEvent.CreateFromStream(translator.Reader, packetVersion);
-#endif
 
                 TranslateAdditionalProperties(translator, _eventType, _buildEvent);
             }
@@ -544,8 +514,6 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.TaskFinishedEvent => new TaskFinishedEventArgs(null, null, null, null, null, false),
                 LoggingEventType.TaskCommandLineEvent => new TaskCommandLineEventArgs(null, null, MessageImportance.Normal),
                 LoggingEventType.ResponseFileUsedEvent => new ResponseFileUsedEventArgs(null),
-
-#if !TASKHOST // MSBuildTaskHost is targeting Microsoft.Build.Framework.dll 3.5
                 LoggingEventType.AssemblyLoadEvent => new AssemblyLoadBuildEventArgs(),
                 LoggingEventType.TaskParameterEvent => new TaskParameterEventArgs(0, null, null, true, default),
                 LoggingEventType.ProjectEvaluationStartedEvent => new ProjectEvaluationStartedEventArgs(),
@@ -575,7 +543,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(),
                 LoggingEventType.BuildCanceledEvent => new BuildCanceledEventArgs("Build canceled."),
                 LoggingEventType.WorkerNodeTelemetryEvent => new WorkerNodeTelemetryEventArgs(),
-#endif
+
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
         }
@@ -598,12 +566,10 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.TaskCommandLineEvent;
             }
-#if !TASKHOST
             else if (eventType == typeof(TaskParameterEventArgs))
             {
                 return LoggingEventType.TaskParameterEvent;
             }
-#endif
             else if (eventType == typeof(ProjectFinishedEventArgs))
             {
                 return LoggingEventType.ProjectFinishedEvent;
@@ -620,8 +586,6 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.ExternalProjectFinishedEvent;
             }
-
-#if !TASKHOST
             else if (eventType == typeof(ProjectEvaluationFinishedEventArgs))
             {
                 return LoggingEventType.ProjectEvaluationFinishedEvent;
@@ -726,7 +690,6 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.WorkerNodeTelemetryEvent;
             }
-#endif
             else if (eventType == typeof(TargetStartedEventArgs))
             {
                 return LoggingEventType.TargetStartedEvent;

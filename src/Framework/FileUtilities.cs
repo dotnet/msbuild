@@ -1,11 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if !TASKHOST
 using System.Threading;
-#endif
 
-#if NETFRAMEWORK && !TASKHOST
+#if NETFRAMEWORK
 using Path = Microsoft.IO.Path;
 #else
 using System.IO;
@@ -27,7 +25,6 @@ namespace Microsoft.Build.Framework
 
         internal static readonly char[] Slashes = [UnixDirectorySeparator, WindowsDirectorySeparator];
 
-#if !TASKHOST
         /// <summary>
         /// AsyncLocal working directory for use during property/item expansion in multithreaded mode.
         /// Set by MultiThreadedTaskEnvironmentDriver when building projects. null in multi-process mode.
@@ -40,7 +37,6 @@ namespace Microsoft.Build.Framework
             get => s_currentThreadWorkingDirectory.Value;
             set => s_currentThreadWorkingDirectory.Value = value;
         }
-#endif
 
         /// <summary>
         /// Indicates if the given character is a slash in current OS.
@@ -104,7 +100,6 @@ namespace Microsoft.Build.Framework
             return path;
         }
 
-#if !TASKHOST
         /// <summary>
         /// Checks if the path contains backslashes on Unix.
         /// </summary>
@@ -228,6 +223,5 @@ namespace Microsoft.Build.Framework
                 original: path.OriginalValue,
                 ignoreRootedCheck: true);
         }
-#endif
     }
 }

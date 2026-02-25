@@ -107,9 +107,7 @@ namespace Microsoft.Build.Shared
              || e is ThreadAbortException
              || e is ThreadInterruptedException
              || e is AccessViolationException
-#if !TASKHOST
              || e is CriticalTaskException
-#endif
 #if !BUILDINGAPPXTASKS
              || e is InternalErrorException
 #endif

@@ -8,13 +8,10 @@ using System.IO.Pipes;
 using System.Security.AccessControl;
 using System.Security.Principal;
 #endif
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
-
-#if !TASKHOST
 using System.Threading;
 using System.Threading.Tasks;
-#endif
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Internal
 {
@@ -80,11 +77,7 @@ namespace Microsoft.Build.Internal
 
         protected override PipeStream NodeStream => _pipeServer;
 
-#if TASKHOST
-        internal LinkStatus WaitForConnection()
-#else
         internal async Task<LinkStatus> WaitForConnectionAsync(CancellationToken cancellationToken)
-#endif
         {
             DateTime originalWaitStartTime = DateTime.UtcNow;
             bool gotValidConnection = false;
@@ -102,12 +95,6 @@ namespace Microsoft.Build.Internal
                 try
                 {
                     // Wait for a connection
-#if TASKHOST
-                    IAsyncResult resultForConnection = _pipeServer.BeginWaitForConnection(null, null);
-                    CommunicationsUtilities.Trace("Waiting for connection {0} ms...", waitTimeRemaining);
-                    bool connected = resultForConnection.AsyncWaitHandle.WaitOne(waitTimeRemaining, false);
-                    _pipeServer.EndWaitForConnection(resultForConnection);
-#else
                     using CancellationTokenSource cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
                     cts.CancelAfter(waitTimeRemaining);
                     bool connected = false;
@@ -121,7 +108,7 @@ namespace Microsoft.Build.Internal
                     {
                         connected = false;
                     }
-#endif
+
                     if (!connected)
                     {
                         CommunicationsUtilities.Trace("Connection timed out waiting a host to contact us.  Exiting comm thread.");
