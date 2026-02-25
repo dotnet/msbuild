@@ -111,7 +111,7 @@ namespace Microsoft.Build.Tasks
             internal String ValueAsString { get; }
         }
 
-        internal static CodeCompileUnit Create(Dictionary<string, IResource> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
+        internal static CodeCompileUnit Create(Dictionary<string, IResource> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out (string key, string reason, string extraArg)[] unmatchable)
         {
             if (resourceList == null)
             {
@@ -133,7 +133,7 @@ namespace Microsoft.Build.Tasks
             return InternalCreate(resourceTypes, baseName, generatedCodeNamespace, resourcesNamespace, codeProvider, internalClass, out unmatchable);
         }
 
-        private static CodeCompileUnit InternalCreate(Dictionary<String, ResourceData> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
+        private static CodeCompileUnit InternalCreate(Dictionary<String, ResourceData> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out (string key, string reason, string extraArg)[] unmatchable)
         {
             if (baseName == null)
             {
@@ -148,7 +148,7 @@ namespace Microsoft.Build.Tasks
             // fixed up (like "4"), as well as listing all duplicate resources that
             // were fixed up to the same name (like "A B" and "A-B" both going to
             // "A_B").
-            var errors = new List<string>();
+            var errors = new List<(string key, string reason, string extraArg)>();
 
             // Verify the resource names are valid property names, and they don't
             // conflict.  This includes checking for language-specific keywords,
@@ -246,7 +246,7 @@ namespace Microsoft.Build.Tasks
                 bool r = DefineResourceFetchingProperty(propertyName, resourceName, entry.Value, srClass, internalClass, useStatic);
                 if (!r)
                 {
-                    errors.Add(propertyName);
+                    errors.Add((propertyName, "GenerateResource.CodeDomError", null));
                 }
             }
 
@@ -258,13 +258,13 @@ namespace Microsoft.Build.Tasks
             return ccu;
         }
 
-        internal static CodeCompileUnit Create(String resxFile, String baseName, String generatedCodeNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
+        internal static CodeCompileUnit Create(String resxFile, String baseName, String generatedCodeNamespace, CodeDomProvider codeProvider, bool internalClass, out (string key, string reason, string extraArg)[] unmatchable)
         {
             return Create(resxFile, baseName, generatedCodeNamespace, null, codeProvider, internalClass, out unmatchable);
         }
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
-        internal static CodeCompileUnit Create(String resxFile, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out String[] unmatchable)
+        internal static CodeCompileUnit Create(String resxFile, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out (string key, string reason, string extraArg)[] unmatchable)
         {
             if (resxFile == null)
             {
@@ -714,7 +714,7 @@ namespace Microsoft.Build.Tasks
         private static SortedList<string, ResourceData> VerifyResourceNames(
             Dictionary<String, ResourceData> resourceList,
             CodeDomProvider codeProvider,
-            List<string> errors,
+            List<(string key, string reason, string extraArg)> errors,
             out Dictionary<string, string> reverseFixupTable)
         {
             reverseFixupTable = new Dictionary<string, string>(0, StringComparer.InvariantCultureIgnoreCase);
@@ -731,11 +731,15 @@ namespace Microsoft.Build.Tasks
                 // Disallow a property named ResourceManager or Culture - we add
                 // those.  (Any other properties we add also must be listed here)
                 // Also disallow resource values of type Void.
-                if (String.Equals(key, ResMgrPropertyName) ||
-                    String.Equals(key, CultureInfoPropertyName) ||
-                    typeof(void) == entry.Value.Type)
+                string reservedNames = String.Join(", ", ResMgrPropertyName, CultureInfoPropertyName);
+                if (String.Equals(key, ResMgrPropertyName) || String.Equals(key, CultureInfoPropertyName))
                 {
-                    errors.Add(key);
+                    errors.Add((key, "GenerateResource.STRPropertySkippedReservedName", reservedNames));
+                    continue;
+                }
+                if (typeof(void) == entry.Value.Type)
+                {
+                    errors.Add((key, "GenerateResource.STRPropertySkippedVoidType", null));
                     continue;
                 }
 
@@ -754,7 +758,7 @@ namespace Microsoft.Build.Tasks
                     String newKey = VerifyResourceName(key, codeProvider, false);
                     if (newKey == null)
                     {
-                        errors.Add(key);
+                        errors.Add((key, "GenerateResource.STRPropertySkippedInvalidIdentifier", null));
                         continue;
                     }
 
@@ -764,12 +768,12 @@ namespace Microsoft.Build.Tasks
                     {
                         // We can't handle this key nor the previous one.
                         // Remove the old one.
-                        if (!errors.Contains(oldDuplicateKey))
+                        if (!errors.Exists(e => e.key == oldDuplicateKey))
                         {
-                            errors.Add(oldDuplicateKey);
+                            errors.Add((oldDuplicateKey, "GenerateResource.STRPropertySkippedNameCollision", key));
                         }
                         cleanedResourceList.Remove(newKey);
-                        errors.Add(key);
+                        errors.Add((key, "GenerateResource.STRPropertySkippedNameCollision", oldDuplicateKey));
                         continue;
                     }
                     reverseFixupTable[newKey] = key;
@@ -785,15 +789,28 @@ namespace Microsoft.Build.Tasks
                     // There was a case-insensitive conflict between two keys.
                     // Or possibly one key was fixed up in a way that conflicts
                     // with another key (ie, "A B" and "A_B").
+                    string existingOriginalKey;
                     if (reverseFixupTable.TryGetValue(key, out string fixedUp))
                     {
-                        if (!errors.Contains(fixedUp))
+                        existingOriginalKey = fixedUp;
+                        if (!errors.Exists(e => e.key == fixedUp))
                         {
-                            errors.Add(fixedUp);
+                            errors.Add((fixedUp, "GenerateResource.STRPropertySkippedNameCollision", entry.Key));
                         }
                         reverseFixupTable.Remove(key);
                     }
-                    errors.Add(entry.Key);
+                    else
+                    {
+                        // Pure case-insensitive collision — retrieve the actual stored key.
+                        int idx = cleanedResourceList.IndexOfKey(key);
+                        existingOriginalKey = cleanedResourceList.Keys[idx];
+                        if (!errors.Exists(e => e.key == existingOriginalKey))
+                        {
+                            errors.Add((existingOriginalKey, "GenerateResource.STRPropertySkippedNameCollision", entry.Key));
+                        }
+                    }
+
+                    errors.Add((entry.Key, "GenerateResource.STRPropertySkippedNameCollision", existingOriginalKey));
                     cleanedResourceList.Remove(key);
                 }
             }
