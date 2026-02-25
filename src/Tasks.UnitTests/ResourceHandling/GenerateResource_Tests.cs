@@ -1766,7 +1766,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
                 Utilities.AssertLogContainsResource(t, "GenerateResource.STRPropertySkippedInvalidIdentifier", "=");
                 Utilities.AssertLogContainsResource(t, "GenerateResource.STRPropertySkippedInvalidIdentifier", "`");
 
-                // Exactly 1 warning, no errors.
+                // Exactly 2 warnings, no errors.
                 ((MockEngine)t.BuildEngine).Warnings.ShouldBe(2);
                 ((MockEngine)t.BuildEngine).Errors.ShouldBe(0);
             }
