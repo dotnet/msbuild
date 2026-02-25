@@ -49,7 +49,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <param name="process">The process to get the command line for.</param>
         /// <param name="commandLine">The command line string, or null if it cannot be retrieved.</param>
-        /// <returns>True if the command line was successfully retrieved or the current platform doesn't support retrieving command lines, false if there was an error retrieving the command line.</returns>
+        /// <returns>True if the command line was successfully retrieved, false if there was an error or the platform doesn't support command line retrieval.</returns>
         public static bool TryGetCommandLine(this Process? process, out string? commandLine)
         {
             commandLine = null;
