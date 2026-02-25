@@ -996,9 +996,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     null,
 #endif
-#if !NET35
                     null,
-#endif
                     false,
                     CancellationToken.None,
                     TaskEnvironmentHelper.CreateForTest());
@@ -1029,9 +1027,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                 null,
 #endif
-#if !NET35
                 null,
-#endif
                 false,
                 CancellationToken.None,
                 TaskEnvironmentHelper.CreateForTest());
@@ -1277,9 +1273,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                 null,
 #endif
-#if !NET35
                 null,
-#endif
                 false,
                 CancellationToken.None,
                 TaskEnvironmentHelper.CreateForTest());

@@ -1109,9 +1109,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                     taskConfiguration.AppDomainSetup,
 #endif
-#if !NET35
                     taskConfiguration.HostServices,
-#endif
                     taskParams);
             }
             catch (ThreadAbortException)
