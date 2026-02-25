@@ -229,15 +229,60 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         RarNodeExecuteResponse, // 0x15
 
-        // Reserve space for future core packet types (0x16-0x3B available for expansion)
-
-        // Server command packets placed at end of safe range to maintain separation from core packets
-        #region ServerNode enums 
-
         /// <summary>
         /// A batch of log events emitted while the RAR task is executing.
         /// </summary>
-        RarNodeBufferedLogEvents,
+        RarNodeBufferedLogEvents, // 0x16
+
+        // Packet types 0x17-0x1F reserved for future core functionality
+
+        #region TaskHost callback packets (0x20-0x27)
+        // These support bidirectional callbacks from TaskHost to parent for IBuildEngine implementations
+
+        /// <summary>
+        /// Request from TaskHost to parent to execute BuildProjectFile* callbacks.
+        /// </summary>
+        TaskHostBuildRequest = 0x20,
+
+        /// <summary>
+        /// Response from parent to TaskHost with BuildProjectFile* results.
+        /// </summary>
+        TaskHostBuildResponse = 0x21,
+
+        /// <summary>
+        /// Request from TaskHost to parent for RequestCores/ReleaseCores.
+        /// </summary>
+        TaskHostResourceRequest = 0x22,
+
+        /// <summary>
+        /// Response from parent to TaskHost with resource allocation result.
+        /// </summary>
+        TaskHostResourceResponse = 0x23,
+
+        /// <summary>
+        /// Request from TaskHost to owning worker node for IsRunningMultipleNodes.
+        /// </summary>
+        TaskHostIsRunningMultipleNodesRequest = 0x24,
+
+        /// <summary>
+        /// Response from owning worker node to TaskHost with IsRunningMultipleNodes value.
+        /// </summary>
+        TaskHostIsRunningMultipleNodesResponse = 0x25,
+
+        /// <summary>
+        /// Request from TaskHost to parent for Yield/Reacquire operations.
+        /// </summary>
+        TaskHostYieldRequest = 0x26,
+
+        /// <summary>
+        /// Response from parent to TaskHost acknowledging yield/reacquire.
+        /// </summary>
+        TaskHostYieldResponse = 0x27,
+
+        #endregion
+
+        // Server command packets placed at end of safe range to maintain separation from core packets
+        #region ServerNode enums
 
         /// <summary>
         /// Command in form of MSBuild command line for server node - MSBuild Server.

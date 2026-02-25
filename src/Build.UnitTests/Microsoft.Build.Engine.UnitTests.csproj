@@ -14,7 +14,7 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 
     <!-- Suppression in needed to build ExampleTaskX86 that targets x86 architecture. -->
-    <NoWarn>$(NoWarn);MSB3270</NoWarn>
+    <NoWarn>$(NoWarn);MSB3270;CS0436</NoWarn>
 
     <AppConfig>..\Shared\UnitTests\App.config</AppConfig>
   </PropertyGroup>
