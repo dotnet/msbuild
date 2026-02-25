@@ -147,7 +147,7 @@
     </source>
         <target state="translated">  -featureAvailability:featureName,...
                      Проверьте доступность функции. Результатом является одна из 
-                     строк "Неопределено", "Доступно", "Недоступно" и 
+                     строк "Не определено", "Доступно", "Недоступно" и 
                      "Предварительный просмотр". 
                      - Не определено — доступность функции не определена 
                      (имя функции неизвестно средству проверки доступности 
@@ -220,18 +220,18 @@
                      Доступные параметры. 
                         по умолчанию — определяет поведение логгера 
                         терминала. Требуется одно из следующих значений: 
-                           - `on`, `true` заставляет использовать TerminalLogger даже 
+                           - "on", "true" заставляет использовать TerminalLogger даже 
                             когда он будет отключен. 
-                           - `off`, `false` запрещает использование TerminalLogger 
+                           - "off", "false" запрещает использование TerminalLogger 
                             даже если бы он был включен. 
-                           - `auto` включает TerminalLogger, когда терминал 
+                           - "auto" включает TerminalLogger, когда терминал 
                             поддерживает это, и в сеансе нет перенаправления
                             stdout/stderr
                         verbosity – Переопределить параметр -verbosity для этого 
                         терминала 
                         showCommandLine — Показать сообщения TaskCommandLineEvent 
 
-                      Пример: 
+                      Пример:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
@@ -261,8 +261,8 @@
                      Этот параметр не поддерживается.
                      Максимальное количество используемых потоков определяется
                      параметром -maxCpuCount.
-                     Если многопоточный режим включён
-                     и MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     Если многопоточный режим включен
+                     и MSBUILDFORCEALLTASKSOUTOFPROC=1,
                      maxCpuCount не может быть больше 256.
                      (Краткая форма: -mt)
     </target>
@@ -316,7 +316,7 @@
       </trans-unit>
       <trans-unit id="InvalidNoLogoValue">
         <source>MSBUILD : error MSB1071: NoLogo value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1071: значение NoLogo является недопустимым. {0}</target>
+        <target state="new">MSBUILD : error MSB1071: NoLogo value is not valid. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1071: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -326,7 +326,7 @@
       </trans-unit>
       <trans-unit id="InvalidTerminalLoggerValue">
         <source>MSBUILD : error MSB1065: Terminal logger value is not valid. It should be one of 'auto', 'true', or 'false'. {0}</source>
-        <target state="translated">MSBUILD : error MSB1065: недопустимое значение регистратора терминала. Это должно быть одно из значений: "auto", "true" или "false". {0}</target>
+        <target state="translated">MSBUILD : error MSB1065: Недопустимое значение средства ведения журнала терминала. Это должно быть одно из следующих значений: "auto", "ИСТИНА" или "ЛОЖЬ". {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1065: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -665,8 +665,8 @@
         <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
                        Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="translated">  -noLogo[:true|false] Не отображать баннер запуска и сообщение об авторских правах.
-                       Укажите -nologo:false, чтобы явно показать логотип.
+        <target state="new">  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -889,8 +889,8 @@
         <target state="translated">  -consoleLoggerParameters:&lt;параметры&gt;
                      Параметры журнала консоли. (Краткая форма: -clp)
                      Доступны следующие параметры:
-                        PerformanceSummary--выводить время, затраченное на выполнение задач, целевых объектов
-                            и проектов.
+                        PerformanceSummary--выводить время, затраченное на выполнение задач,
+                            целевых объектов и проектов.
                         Summary--выводить сводку ошибок и предупреждений по завершении работы.
                         NoSummary--не выводить сводку ошибок и предупреждений по
                             завершении работы.
@@ -1571,7 +1571,7 @@
       </trans-unit>
       <trans-unit id="MissingGetResultFileError">
         <source>MSBUILD : error MSB1068: Must provide a file for the getResultOutputFile switch.</source>
-        <target state="translated">MSBUILD : error MSB1068: необходимо указать файл для параметра getResultOutputFile.</target>
+        <target state="translated">MSBUILD : error MSB1068: необходимо предоставить файл для переключателя getResultOutputFile.</target>
         <note>
       {StrBegin="MSBUILD : error MSB1068: "}UE: This happens if the user does something like "msbuild.exe -getResultOutputFile". The user must pass in an actual file
       following the switch, as in "msbuild.exe -getTargetResult:blah -getResultOutputFile:blah.txt".
@@ -1840,7 +1840,7 @@
       </trans-unit>
       <trans-unit id="TaskHostAcquired_NullsFiltered">
         <source>Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</source>
-        <target state="translated">Выходной параметр задачи "{0}" содержал элементы null ({1}), которые были отфильтрованы.</target>
+        <target state="new">Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</target>
         <note>LOCALIZATION: {0} is the name of the task output parameter, {1} is the count of null elements filtered.</note>
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
@@ -2127,13 +2127,13 @@
                       ProjectImports=Embed    — внедрять импортированные файлы проекта в
                                                 файл журнала.
                       ProjectImports=ZipFile  — сохранять файлы проекта в
-                                                вывод.projectimports.zip,
-                                                где вывод — это то же имя,
+                                                output.projectimports.zip,
+                                                где output — это то же имя,
                                                 что и у двоичного файла журнала.
 
                      Значение по умолчанию для ProjectImports — Embed.
                      Примечание: средство ведения журнала не собирает исходные файлы, не от MSBuild,
-                     например с расширениями CS, CPP и др.
+                     например с расширениями CS, CPP и т. д.
 
                      BINLOG-файл можно "воспроизвести", передав его в
                      msbuild.exe в качестве аргумента вместо проекта или решения.

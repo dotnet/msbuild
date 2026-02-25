@@ -85,11 +85,11 @@
                      used, write out the values after the build.
     </source>
         <target state="translated">  -getProperty:propertyName,...
-                    於評估後，寫出一或多個指定屬性的值，以及
-                    但不執行建置；如有使用
-                    -targets 選項或 -getTargetResult 選項，
-                    便於建置之後，再寫出這些值。
-   </target>
+                     於評估後，寫出一或多個指定屬性的值，以及
+                     但不執行建置；如有使用
+                     -targets 選項或 -getTargetResult 選項，
+                     便於建置之後，再寫出這些值。
+    </target>
         <note>
       LOCALIZATION: "-getProperty", "-targets" and "-getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -104,12 +104,12 @@
                      the values after the build.
     </source>
         <target state="translated">  -getItem:itemName,...
-                    於評估後，寫出一或多個指定項目的值，以及
-                    其相關的中繼資料，但不
-                    執行建置；如有使用 -targets 選項
-                    或 -getTargetResult 選項，
-                    便於建置之後，再寫出這些值。
-   </target>
+                     於評估後，寫出一或多個指定項目的值，以及
+                     其相關的中繼資料，但不
+                     執行建置；如有使用 -targets 選項
+                     或 -getTargetResult 選項，
+                     便於建置之後，再寫出這些值。
+    </target>
         <note>
       LOCALIZATION: "-getItem", "targets" and "getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -121,9 +121,9 @@
                      the specified targets will be executed.
     </source>
         <target state="translated">  -getTargetResult:targetName,...
-                    寫出一或多個目標的輸出值，然後
-                    執行指定的目標。
-   </target>
+                     寫出一或多個目標的輸出值，然後
+                     執行指定的目標。
+    </target>
         <note>
       LOCALIZATION: "-getTargetResult" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -146,20 +146,20 @@
                      (Short form: -fa)
     </source>
         <target state="translated">  -featureAvailability:featureName,...
-                    檢查功能可用性。結果會是下列其中一個字串:
-                    “Undefined”、“Available”、“NotAvailable” 和
-                    "Preview"。
-                    - Undefined - 功能的可用性未定義
-                    (功能可用性檢查程式不知道
-                    該功能名稱)
-                    - NotAvailable - 此功能無法使用 (不同於
-                    Undefined，功能可用性檢查程式知道該功能名稱，
-                    並知道功能目前的
-                    MSBuild 引擎不支援該功能)
-                    - Available - 此功能可以使用
-                    - Preview - 此功能目前為預覽狀態 (不穩定)
-                    (簡短形式: -fa)
-   </target>
+                     檢查功能可用性。結果會是下列其中一個字串:
+                     “Undefined”、“Available”、“NotAvailable” 和
+                     "Preview"。
+                     - Undefined - 功能的可用性未定義
+                     (功能可用性檢查程式不知道
+                     該功能名稱)
+                     - NotAvailable - 此功能無法使用 (不同於
+                     Undefined，功能可用性檢查程式知道該功能名稱，
+                     並知道功能目前的
+                     MSBuild 引擎不支援該功能)
+                     - Available - 此功能可以使用
+                     - Preview - 此功能目前為預覽狀態 (不穩定)
+                     (簡短形式: -fa)
+    </target>
         <note>
       LOCALIZATION: "-featureAvailability", "-fa", "Undefined", "Available" "NotAvailable" and "Preview"should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -179,17 +179,17 @@
                      (Short form: -tl)
     </source>
         <target state="translated">  -terminalLogger[:auto,on,off]
-                    啟用或停用終端機記錄器。終端機記錄器
-                    會即時在主機上，提供更進一步的組建輸出，
-                    並依照專案的邏輯編排，並會醒目提示
-                    可採取動作的資訊。指定自動 (或只使用選項，
-                    不使用引數) 只在使用標準輸出
-                    未重新導向時，才使用終端機記錄器。不剖析輸出，
-                    或以其他方式據此在
-                    未來的版本中保持不變。此選項可在 MSBuild 17.8 和
-                    更新版本中使用。
-                    (簡短形式: -tl)
-   </target>
+                     啟用或停用終端機記錄器。終端機記錄器
+                     會即時在主機上，提供更進一步的組建輸出，
+                     並依照專案的邏輯編排，並會醒目提示
+                     可採取動作的資訊。指定自動 (或只使用選項，
+                     不使用引數) 只在使用標準輸出
+                     未重新導向時，才使用終端機記錄器。不剖析輸出，
+                     或以其他方式據此在
+                     未來的版本中保持不變。此選項可在 MSBuild 17.8 和
+                     更新版本中使用。
+                     (簡短形式: -tl)
+    </target>
         <note>
       LOCALIZATION: "-terminalLogger", "-tl", and "auto" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -216,24 +216,24 @@
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                    終端機記錄器的參數。(簡短形式: -tlp)
-                    可用的參數。
-                       default -- 指定終端機記錄器的預設值。
-                       其需要下列其中一值: 
+                     終端機記錄器的參數。(簡短形式: -tlp)
+                     可用的參數。
+                        default -- 指定終端機記錄器的預設值
+                        。其需要下列其中一值: 
 。
-                          - 'on'、'true' 會強制使用 TerminalLogger，即使
-                           其之後可能會停用。
-                          - 'off'、'false' 會強制使用 TerminalLogger，即使
-                           其之後可能會啟用。
-                          - `auto` 會啟用 terminalLogger，但終端機必須能夠
-                           提供支援，且工作階段未經重新導向
-                           stdout/stderr
-                       verbosity -- 覆寫上記錄器的
-                       -verbosity
-                       showCommandLine -- 顯示 TaskCommandLineEvent 訊息
+                           - 'on'、'true' 會強制使用 TerminalLogger，即使
+                            其之後可能會停用。
+                           - 'off'、'false' 會強制使用 TerminalLogger，即使
+                            其之後可能會啟用。
+                           - `auto` 會啟用 terminalLogger，但終端機必須能夠
+                            提供支援，且工作階段未經重新導向
+                            stdout/stderr
+                        verbosity -- 覆寫上記錄器的
+                        -verbosity
+                        showCommandLine -- 顯示 TaskCommandLineEvent 訊息
 
-                     範例: 
-                       -tlp:default=auto;verbosity=diag;shownCommandLine
+                      範例: 
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
       LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
@@ -261,7 +261,7 @@
                      而不是使用多個處理序。
                      不支援此選項。
                      使用的執行緒數量上限由
-                     -maxCpuCount 切換開關決定。
+                     -maxCpuCount 切換決定。
                      若啟用多執行緒模式
                      且 MSBUILDFORCEALLTASKSOUTOFPROC=1，
                      maxCpuCount 不得超過 256。
@@ -278,12 +278,12 @@
                      This writes the value of property Bar into Biz.txt.
     </source>
         <target state="translated">  -getResultOutputFile:file
-                    將輸出從 get* 重新導向至檔案。
+                     將輸出從 get* 重新導向至檔案。
 
-                    範例: 
-                    -getProperty:Bar -getResultOutputFile:Biz.txt
-                    這會將屬性列的值寫入 Biz.txt。
-   </target>
+                     範例: 
+                     -getProperty:Bar -getResultOutputFile:Biz.txt
+                     這會將屬性列的值寫入 Biz.txt。
+    </target>
         <note>
       LOCALIZATION: "-getResultOutputFile", "get*" and "-getProperty" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.
@@ -317,7 +317,7 @@
       </trans-unit>
       <trans-unit id="InvalidNoLogoValue">
         <source>MSBUILD : error MSB1071: NoLogo value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1071: NoLogo 值無效。{0}</target>
+        <target state="new">MSBUILD : error MSB1071: NoLogo value is not valid. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1071: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -667,8 +667,8 @@
         <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
                        Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="translated">  -noLogo[:true|false] 不顯示啟動橫幅和著作權訊息。
-                       指定 -nologo:false 以明確顯示標誌。
+        <target state="new">  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -802,11 +802,11 @@
         <target state="translated">  -logger:&lt;記錄器&gt;   使用此記錄器可記錄 MSBuild 的事件。
                      若要指定多個記錄器，請各別指定每個記錄器。
                      &lt;記錄器&gt; 語法為:
-                       [&lt;類別&gt;,]&lt;組件&gt;[,&lt;選項&gt;][;&lt;參數&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      &lt;記錄器類別&gt; 語法為:
                        [&lt;一部分或完整的命名空間&gt;.]&lt;記錄器類別名稱&gt;
                      &lt;記錄器組件&gt; 語法為:
-                       {&lt;組件名稱&gt;[,&lt;strong name&gt;] | &lt;組件檔案&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      記錄器選項會指定 MSBuild 建立記錄器的方式。
                      &lt;記錄器參數&gt; 是選擇性參數，其會依您輸入的內容，
                      完全一樣地傳遞到記錄器。(簡短形式: -l)
@@ -891,33 +891,33 @@
         <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
                      主控台記錄器的參數。(簡短形式: -clp)
                      可用的參數為:
-                        PerformanceSummary--顯示工作、目標
-                            及專案所花費的時間。
+                        PerformanceSummary--顯示在工作、目標
+                            及專案中所耗費的時間。
                         Summary--結束時顯示錯誤與警告摘要。
                         NoSummary--結束時不顯示錯誤
                             與警告摘要。
                         ErrorsOnly--只顯示錯誤。
                         WarningsOnly--只顯示警告。
-                        NoItemAndPropertyList--不在每個專案開始建置時，
-                            顯示專案與屬性清單。
+                        NoItemAndPropertyList--不在每個專案開始建置時
+                            顯示項目與屬性清單。
                         ShowCommandLine--顯示 TaskCommandLineEvent 訊息
-                        ShowTimestamp--在所有訊息開頭顯示
-                            時間戳記。
-                        ShowEventId--顯示已開始之事件、已完成之事件
+                        ShowTimestamp--將時間戳記顯示為任何
+                            訊息的前置詞。
+                        ShowEventId--顯示已開始、已完成事件
                             以及訊息的事件識別碼
                         ForceNoAlign--不將文字調整成主控台
                             緩衝區的大小
-                        DisableConsoleColor--為所有記錄訊息使用預設的
+                        DisableConsoleColor--針對所有記錄訊息使用預設的
                             主控台色彩。
-                        EnableMPLogging--在非多處理器模式下執行時，
-                            啟用多處理器記錄樣式。
-                            此記錄樣式預設為啟用。
-                        ForceConsoleColor--即使主控台不支援 ANSI 主控台色彩，
-                            也一律使用該色彩
-                        PreferConsoleColor--僅在目標主控台目標確實支援 ANSI 主控台色彩時
-                            才使用它
+                        EnableMPLogging--即使在非多處理器模式下
+                            執行時，也啟用多處理器記錄樣式
+                            。此記錄樣式預設為啟用。
+                        ForceConsoleColor--即使主控台不支援，
+                            也使用 ANSI 主控台色彩
+                        PreferConsoleColor--只有在目標主控台
+                            確實支援時，才使用 ANSI 主控台色彩
                      Verbosity--覆寫此記錄器的 -verbosity
-                             設定。
+                            設定。
                      範例:
                         -consoleLoggerParameters:PerformanceSummary;NoSummary;
                                                  Verbosity=minimal
@@ -1078,11 +1078,11 @@
                      若要指定多個記錄器，請各別指定每個記錄器。
                      (簡短形式 -dl)
                      &lt;記錄器&gt; 語法為:
-                       [&lt;類別&gt;,]&lt;組件&gt;[,&lt;選項&gt;][;&lt;參數&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      &lt;記錄器類別&gt; 語法為:
                        [&lt;一部分或完整的命名空間&gt;.]&lt;記錄器類別名稱&gt;
                      &lt;記錄器組件&gt; 語法為:
-                       {&lt;組件名稱&gt;[,&lt;strong name&gt;] | &lt;組件檔案&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      記錄器選項會指定 MSBuild 建立記錄器的方式。
                      &lt;記錄器參數&gt; 是選擇性參數，其會依您輸入的內容，
                      完全一樣地傳遞到記錄器。(簡短形式: -l)
@@ -1783,7 +1783,7 @@
       </trans-unit>
       <trans-unit id="SAC_Evaluation">
         <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
-        <target state="translated">2: 評估中。建議關閉開發環境中的智慧型手機應用程式控制件，否則效能可能會受到影響</target>
+        <target state="translated">2: 評估中。建議關閉開發環境中的智慧型應用程式控制，否則效能可能會受到影響</target>
         <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Off">
@@ -1842,7 +1842,7 @@
       </trans-unit>
       <trans-unit id="TaskHostAcquired_NullsFiltered">
         <source>Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</source>
-        <target state="translated">工作輸出參數 "{0}" 包含 {1} 個空元素，已遭篩選。</target>
+        <target state="new">Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</target>
         <note>LOCALIZATION: {0} is the name of the task output parameter, {1} is the count of null elements filtered.</note>
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
@@ -2100,45 +2100,45 @@
                        -binaryLogger
     </source>
         <target state="translated">  -binaryLogger[:[LogFile=]output.binlog[;ProjectImports={None,Embed,ZipFile}]]
-                     將所有組建活動序列化為壓縮的二進位檔案。
+                     將所有組建事件序列化為壓縮的二進位檔案。
                      根據預設，檔案位於目前的目錄中，且名為
-                     "msbuild.binlog"。二進位記錄檔是詳細描述
-                     說明建組程序，這稍後可用來重新建構
-                     文字記錄檔，並用於其他分析工具。二進位記錄檔
-                     通常比最詳細文字診斷層級記錄檔小 10-20x
+                     "msbuild.binlog"。二進位記錄檔是建置處理序的
+                     詳細描述，稍後可用來重新建構
+                     文字記錄檔，並供其他分析工具使用。二進位記錄檔
+                     通常比最詳細文字診斷層級記錄檔小 10-20 倍
                      ，但它包含更多資訊。
                      (簡短形式: -bl)
 
                      選擇性的 LogFile 會指定儲存
-                     二進位記錄檔位置的路徑。若要針對每個組建，產生不同的記錄檔
-                     ，可以將權杖 "{}" 新增至
+                     二進位記錄檔位置的路徑。若要針對每個組建產生不同的
+                     記錄檔，可以將權杖 "{}" 新增至
                      路徑，例如: LogFile=output-{}-log.binlog。記錄檔路徑中的
-                     每個 "{}" 會使用時間戳記，取代為唯一字串
-                     執行程序識別碼和隨機
-                     字串戳記。
+                     每個 "{}" 會使用時間戳記、
+                     執行中處理序識別碼和隨機字串戳記
+                     取代為唯一的字串。
 
-                     二進位記錄程式預設會收集專案檔案的來源文字
-                     ，包括組建期間所發生的所有匯入的專案和目標
-                     檔案。選擇性
+                     二進位記錄程式預設會收集專案檔案的
+                     來源文字，包括建置期間所發生的所有
+                     匯入的專案和目標檔案。選用的
                      ProjectImports 切換可控制此行為:
 
                       ProjectImports=None     - 不要收集專案
                                                 匯入。
-                      ProjectImports=Embed    - 記錄檔中的
+                      ProjectImports=Embed    - 在記錄檔中
                                                 內嵌專案匯入。
                       ProjectImports=ZipFile  - 將專案檔案儲存至
                                                 output.projectimports.zip
-                                                其中輸出與二進位檔案名稱具有
+                                                其中的輸出為與二進位檔案名稱
                                                 相同的名稱。
 
-                     ProjectImports 的預設設定為 [內嵌]。
+                     ProjectImports 的預設設定為 Embed。
                      注意: 記錄程式不會收集非 MSBuild 來源檔案
                      例如 .cs、.cpp 等。
 
                      .binlog 檔案可以藉由將其傳遞至
-                     msbuild.exe 作為引數 (而不是專案/解決方案) 來 "回放"。
+                     msbuild.exe 作為引數 (而不是專案/解決方案) 來「重播」。
                      其他記錄程式將會收到記錄檔中包含的資訊，
-                     就像發生原始組建那樣。
+                     就像正在發生原始建置一般。
                      您可以在以下位置閱讀更多關於二進位記錄及其使用方式:
                      https://aka.ms/msbuild/binlog
 

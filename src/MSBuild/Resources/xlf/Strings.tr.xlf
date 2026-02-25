@@ -253,7 +253,7 @@
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -çok iş parçacıklı
+        <target state="translated">  -multithreaded
                      MSBuild’de DENEYSEL çok iş parçacıklı modu etkinleştirir.
                      Bu, MSBuild’in
                      projeleri işlemek için birden çok iş parçacığı kullanacağı,
@@ -295,9 +295,9 @@
                      of the build. For more info see https://aka.ms/buildcheck
 	</source>
         <target state="translated">  -check
-                     Derleme sırasında BuildChecks'i sağlar.
-                     BuildCheck, özelliklerin güvenliğini sağlamak için kuralların değerlendirilmesini sağlar
-                     kuralların değerlendirilmesini sağlar. Daha fazla bilgi için bkz. https://aka.ms/buildcheck
+                     Derleme sırasında BuildChecks seçeneğini etkinleştirir.
+                     BuildCheck, derleme özelliklerini sağlamak için kuralların
+                     değerlendirilmesini sağlar. Daha fazla bilgi için bkz. https://aka.ms/buildcheck
 	</target>
         <note>
     {Locked="-check"}{Locked="BuildChecks"}{Locked="BuildCheck"}
@@ -316,7 +316,7 @@
       </trans-unit>
       <trans-unit id="InvalidNoLogoValue">
         <source>MSBUILD : error MSB1071: NoLogo value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1071: NoLogo değeri geçerli değil. {0}</target>
+        <target state="new">MSBUILD : error MSB1071: NoLogo value is not valid. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1071: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -666,8 +666,8 @@
         <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
                        Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="translated">  -noLogo[:true|false] Başlangıç başlığını ve telif hakkı iletisini görüntüleme.
-                       Logoyu açıkça göstermek için -nologo:false değerini belirtin.
+        <target state="new">  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -801,13 +801,13 @@
         <target state="translated">  -logger:&lt;günlükçü&gt;   MSBuild'deki olayları günlüğe almak için bu günlükçüyü kullanın. Birden fazla
                      günlükçü belirtmek için her günlükçüyü ayrı ayrı belirtin.
                      &lt;günlükçü&gt; söz dizimi şöyledir:
-                       [&lt;sınıf&gt;,]&lt;derleme&gt;[,&lt;seçenekler&gt;][;&lt;parametreler&gt;]
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
                      &lt;günlükçü sınıfı &gt; söz dizimi şöyledir:
                        [&lt;kısmi veya tam ad alanı &gt;.]&lt;günlükçü sınıfı adı&gt;
                      &lt;günlükçü derlemesi&gt; söz dizimi şöyledir:
-                       {&lt;derleme adı&gt;[,&lt;strong name&gt;] | &lt;derleme dosyası&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Günlükçü seçenekleri, MSBuild'in günlükçüyü oluşturma biçimini belirtir.
-                     &lt;günlükçü parametreleri &gt; isteğe bağlıdır ve tam olarak 
+                     &lt;günlükçü parametreleri &gt; isteğe bağlıdır ve tam olarak
                      yazdığınız şekliyle günlükçüye geçirilir. (Kısa biçim: -l)
                      Örnekler:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
@@ -888,29 +888,29 @@
                                                  Verbosity=minimal
 </source>
         <target state="translated">  -consoleLoggerParameters:&lt;parameters&gt;
-                     Konsol günlüğüne parametreler. (Kısa form: -clp)
+                     Konsol günlükçüsüne giden parametreler. (Kısa form: -clp)
                      Kullanılabilir parametreler şunlardır:
-                        PerformanceSummary--Harcanan süreyi göster, görevler
-                            ve projeler.
-                        Summary--Sonunda hata ve uyarı özetini göster.
-                        NoSummary--Hata ve uyarı özetini
-                            sonunda gösterme.
+                        PerformanceSummary--Görevlerde, hedeflerde ve 
+                            projelerde harcanan süreyi göster.
+                        Summary--Sonda hata ve uyarı özetini göster.
+                        NoSummary--Sonda hata ve uyarı özetini
+                            gösterme.
                         ErrorsOnly--Yalnızca hataları göster.
                         WarningsOnly--Yalnızca uyarıları göster.
                         NoItemAndPropertyList--Öğe ve özelliklerin listesini
                             her proje derlemesinin başında gösterme.
-                        ShowCommandLine--TaskCommandLineEvent mesajlarını göster
-                        ShowTimestamp--Zaman damgasını herhangi bir
-                            mesajın başına önek olarak göster.
+                        ShowCommandLine--TaskCommandLineEvent iletilerini göster
+                        ShowTimestamp--Zaman damgasını her
+                            iletinin başında önek olarak göster.
                         ShowEventId--Başlatılan olaylar, tamamlanan olaylar
-                            ve mesajlar için olay kimliğini göster
-                        ForceNoAlign--Metni konsol arabelleğinin
-                            boyutuna hizalama yapmaz
-                        DisableConsoleColor--Tüm günlük mesajları için
-                            varsayılan konsol renklerini kullanın.
+                            ve iletiler için olay kimliğini göster
+                        ForceNoAlign--Metni konsol arabelleğinin boyutuna göre
+                            uyarlama
+                        DisableConsoleColor--Tüm günlük iletileri için
+                            varsayılan konsol renklerini kullan.
                         EnableMPLogging--Çok işlemcili modda olmayan sistemlerde bile
                             çok işlemcili günlük kaydı stilini
-                            etkinleştirir. Bu günlük kaydı stili varsayılan olarak açıktır.
+                            etkinleştir. Bu günlük kaydı stili varsayılan olarak açıktır.
                         ForceConsoleColor--Konsol desteklemiyor olsa bile
                             ANSI konsol renklerini kullan
                         PreferConsoleColor--Hedef konsol destekliyorsa
@@ -1077,11 +1077,11 @@
                      günlükçü belirtmek için her günlükçüyü ayrı ayrı belirtin.
                      (Kısa biçim -dl)
                      &lt;günlükçü&gt; söz dizimi şöyledir:
-                       [&lt;sınıf&gt;,]&lt;derleme&gt;[,&lt;seçenekler&gt;][;&lt;parametreler&gt;]
+                       [&lt;sınıf&gt;,]&lt;assembly&gt;[,&lt;seçenekler&gt;][;&lt;parametreler&gt;]
                      &lt;günlükçü sınıfı&gt; söz dizimi şöyledir:
                        [&lt;kısmi veya tam ad alanı&gt;.]&lt;günlükçü sınıfı adı&gt;
                      &lt;günlükçü derlemesi&gt; söz dizimi şöyledir:
-                       {&lt;derleme adı&gt;[,&lt;strong name&gt;] | &lt;derleme dosyası&gt;}
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Günlükçü seçenekleri, MSBuild'in günlükçüyü oluşturma biçimini belirtir.
                      &lt;günlükçü parametreleri&gt; isteğe bağlıdır ve tam olarak
                      yazdığınız şekliyle günlükçüye geçirilir. (Kısa biçim: -l)
@@ -1108,10 +1108,9 @@
                        -ignoreProjectExtensions:.sln
     </source>
         <target state="translated">  -ignoreProjectExtensions:&lt;uzantılar&gt;
-                     Hangi proje dosyasının oluşturulacağı belirlenirken 
-                     yoksayılacak uzantıların listesi. Birden çok uzantıyı 
-                     birbirinden ayırmak için noktalı virgül veya 
-                     virgül kullanın.
+                     Hangi proje dosyasının oluşturulacağı belirlenirken
+                     yoksayılacak uzantıların listesi. Birden çok uzantıyı
+                     birbirinden ayırmak için noktalı virgül veya virgül kullanın.
                      (Kısa biçim: -ignore)
                      Örnek:
                        -ignoreProjectExtensions:.sln
@@ -1201,7 +1200,6 @@
                      Dosyaların konumu ve fileLogger'ın diğer parametreleri 
                      "/fileLoggerParameters" anahtarının eklenmesi yoluyla
                      belirtilebilir.
-
                      Günlük dosyası adı fileLoggerParameters anahtarı
                      aracılığıyla ayarlanırsa dağıtılmış günlükçü fileName 
                      değerini şablon olarak kullanıp her düğümün günlük dosyasını
@@ -1248,32 +1246,31 @@
     </source>
         <target state="translated">  -fileLoggerParameters[n]:&lt;parametreler&gt;
                      Dosya günlükçüleri için ek parametreler sağlar.
-                     Bu anahtarın olması karşılık gelen -fileLogger[n] 
+                     Bu anahtarın olması karşılık gelen -fileLogger[n]
                      anahtarının olduğu anlamına gelir.
                      "n" varsa, 1-9 arasında bir rakam olabilir.
-                     Dağıtılmış dosya günlükçüleri varsa -fileLoggerParameters 
-                     bunlar tarafından da kullanılır; -distributedFileLogger 
-                     açıklamasına bakın.
+                     Dağıtılmış dosya günlükçüleri varsa -fileLoggerParameters
+                     bunlar tarafından da kullanılır; -distributedFileLogger açıklamasına bakın.
                      (Kısa biçim: -flp[n])
-                     Konsol günlükçüsü için listelenenlerle aynı parametreler 
+                     Konsol günlükçüsü için listelenenlerle aynı parametreler
                      kullanılabilir. Kullanılabilecek bazı ek parametreler:
-                        LogFile--Oluşturma günlüğünün yazılacağı günlük 
+                        LogFile--Oluşturma günlüğünün yazılacağı günlük
                             dosyasının yolu.
-                        Append--Derleme günlüğünün gün dosyasının sonuna mı 
-                            ekleneceğini yoksa üzerine mi yazılacağını 
-                            belirler. Anahtar ayarlandığında oluşturma günlüğü 
-                            dosyanın sonuna eklenir. Anahtar ayarlanmadığında 
-                            varolan günlük dosyasının üzerine yazılır. 
+                        Append--Derleme günlüğünün gün dosyasının sonuna mı
+                            ekleneceğini yoksa üzerine mi yazılacağını
+                            belirler. Anahtar ayarlandığında oluşturma günlüğü
+                            dosyanın sonuna eklenir. Anahtar ayarlanmadığında
+                            varolan günlük dosyasının üzerine yazılır.
                             Varsayılan: günlük dosyasının sonuna eklenmez.
-                        Encoding--Dosyanın kodlamasını belirtir; örneğin, 
+                        Encoding--Dosyanın kodlamasını belirtir; örneğin,
                             UTF-8, Unicode veya ASCII
                      Varsayılan ayrıntı düzeyi ayarı Detailed'dır.
                      Örnekler:
                        -fileLoggerParameters:LogFile=MyLog.log;Append;
                                            Verbosity=diagnostic;Encoding=UTF-8
 
-                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       -flp1:warningsonly;logfile=msbuild.wrn 
+                       -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum
+                       -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1297,8 +1294,7 @@
                        -nr:true
     </source>
         <target state="translated">  -nodeReuse:&lt;parametreler&gt;
-                     MSBuild düğümlerinin yeniden kullanımını etkinleştirir
-                     veya devre dışı bırakır.
+                     MSBuild düğümlerinin yeniden kullanımını etkinleştirir veya devre dışı bırakır.
                      Parametreler:
                      True --Derleme tamamlandıktan sonra düğümler kalır ve
                             izleyen derlemelerde yeniden kullanılır (varsayılan)
@@ -1647,7 +1643,7 @@
       </trans-unit>
       <trans-unit id="MissingTerminalLoggerParameterError">
         <source>MSBUILD : error MSB1066: Specify one or more parameters for the terminal logger if using the -terminalLoggerParameters switch</source>
-        <target state="translated">MSBUILD : error MSB1066: -terminalLoggerParameters anahtarı kullanılıyorsa terminal günlükçüsü için bir veya birden çok parametre belirtin</target>
+        <target state="translated">MSBUILD : error MSB1066: terminalLoggerParameters anahtarı kullanılıyorsa terminal günlükçüsü için bir veya birden çok parametre belirtin</target>
         <note>
       {StrBegin="MSBUILD : error MSB1066: "}
       UE: This happens if the user does something like "msbuild.exe -terminalLoggerParameters:". The user must pass in one or more parameters
@@ -1786,7 +1782,7 @@
       </trans-unit>
       <trans-unit id="SAC_Evaluation">
         <source>2: in evaluation. It is recommended to turn off Smart App Control in development environemnt as otherwise performance might be impacted</source>
-        <target state="translated">2: değerlendirmede. Aksi takdirde performansın etkilenebileceği için geliştirme ortamında Akıllı Uygulama Denetimi’nin kapatılması önerilir</target>
+        <target state="translated">2: değerlendirmede. Aksi takdirde performans etkilenebileceği için geliştirme ortamında Akıllı Uygulama Denetiminin kapatılması önerilir</target>
         <note>Smart App Control, "VerifiedAndReputablePolicyState" should not be localized</note>
       </trans-unit>
       <trans-unit id="SAC_Off">
@@ -1845,7 +1841,7 @@
       </trans-unit>
       <trans-unit id="TaskHostAcquired_NullsFiltered">
         <source>Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</source>
-        <target state="translated">Görev çıkış parametresi "{0}" {1} null öğe içeriyordu ve bunlar filtrelendi.</target>
+        <target state="new">Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</target>
         <note>LOCALIZATION: {0} is the name of the task output parameter, {1} is the count of null elements filtered.</note>
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
