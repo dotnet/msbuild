@@ -3443,7 +3443,7 @@ namespace Microsoft.Build.Tasks
                 _logger.LogMessageFromResources("GenerateResource.CreatingSTR", _stronglyTypedFilename);
 
                 // Generate the STR class
-                (string key, string reason, string extraArg)[] warnings;
+                StronglyTypedResourceBuilder.ResourceWarning[] warnings;
                 bool generateInternalClass = !_stronglyTypedClassIsPublic;
                 // StronglyTypedResourcesNamespace can be null and this is ok.
                 // If it is null then the default namespace (=stronglyTypedNamespace) is used.
@@ -3464,9 +3464,18 @@ namespace Microsoft.Build.Tasks
 
                 // The STR class file was generated (possibly with some properties skipped).
                 // Log warnings for any skipped resources and mark the file as successfully created.
-                foreach ((string key, string reason, string extraArg) in warnings)
+                foreach (StronglyTypedResourceBuilder.ResourceWarning warning in warnings)
                 {
-                        _logger.LogWarningWithCodeFromResources(reason, key, extraArg);
+                    string messageKey = warning.Reason switch
+                    {
+                        StronglyTypedResourceBuilder.ResourceWarningReason.CodeDomError => "GenerateResource.CodeDomError",
+                        StronglyTypedResourceBuilder.ResourceWarningReason.ReservedName => "GenerateResource.STRPropertySkippedReservedName",
+                        StronglyTypedResourceBuilder.ResourceWarningReason.VoidType => "GenerateResource.STRPropertySkippedVoidType",
+                        StronglyTypedResourceBuilder.ResourceWarningReason.InvalidIdentifier => "GenerateResource.STRPropertySkippedInvalidIdentifier",
+                        StronglyTypedResourceBuilder.ResourceWarningReason.NameCollision => "GenerateResource.STRPropertySkippedNameCollision",
+                        _ => throw new InvalidOperationException(),
+                    };
+                    _logger.LogWarningWithCodeFromResources(messageKey, warning.Key, warning.ExtraArg);
                 }
 
                 _stronglyTypedResourceSuccessfullyCreated = true;

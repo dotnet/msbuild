@@ -68,6 +68,7 @@ namespace Microsoft.Build.Tasks
         private const String ResMgrPropertyName = "ResourceManager";
         private const String CultureInfoFieldName = "resourceCulture";
         private const String CultureInfoPropertyName = "Culture";
+        private static readonly String reservedNames = String.Join(", ", ResMgrPropertyName, CultureInfoPropertyName);
 
         // When fixing up identifiers, we will replace all these chars with
         // a single char that is valid in identifiers, such as '_'.
@@ -82,6 +83,34 @@ namespace Microsoft.Build.Tasks
 
         // Maximum size of a String resource to show in the doc comment for its property
         private const int DocCommentLengthThreshold = 512;
+
+        // Describes a resource key that could not be converted to a valid STR property.
+        internal enum ResourceWarningReason
+        {
+            CodeDomError,
+            ReservedName,
+            VoidType,
+            InvalidIdentifier,
+            NameCollision,
+        }
+
+        internal sealed record ResourceWarning(string Key, ResourceWarningReason Reason, string ExtraArg);
+
+        internal sealed class ResourceWarningList
+        {
+            private readonly List<ResourceWarning> _warnings = [];
+            private readonly HashSet<string> _warnedKeys = new(StringComparer.InvariantCultureIgnoreCase);
+
+            internal void Add(ResourceWarning warning)
+            {
+                _warnings.Add(warning);
+                _warnedKeys.Add(warning.Key);
+            }
+
+            internal bool Contains(string key) => _warnedKeys.Contains(key);
+
+            internal ResourceWarning[] ToArray() => [.. _warnings];
+        }
 
         // Save the strings for better doc comments.
         internal sealed class ResourceData
@@ -111,7 +140,7 @@ namespace Microsoft.Build.Tasks
             internal String ValueAsString { get; }
         }
 
-        internal static CodeCompileUnit Create(Dictionary<string, IResource> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out (string key, string reason, string extraArg)[] unmatchable)
+        internal static CodeCompileUnit Create(Dictionary<string, IResource> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out ResourceWarning[] unmatchable)
         {
             if (resourceList == null)
             {
@@ -133,7 +162,7 @@ namespace Microsoft.Build.Tasks
             return InternalCreate(resourceTypes, baseName, generatedCodeNamespace, resourcesNamespace, codeProvider, internalClass, out unmatchable);
         }
 
-        private static CodeCompileUnit InternalCreate(Dictionary<String, ResourceData> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out (string key, string reason, string extraArg)[] unmatchable)
+        private static CodeCompileUnit InternalCreate(Dictionary<String, ResourceData> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out ResourceWarning[] unmatchable)
         {
             if (baseName == null)
             {
@@ -148,12 +177,12 @@ namespace Microsoft.Build.Tasks
             // fixed up (like "4"), as well as listing all duplicate resources that
             // were fixed up to the same name (like "A B" and "A-B" both going to
             // "A_B").
-            var errors = new List<(string key, string reason, string extraArg)>();
+            var warnings = new ResourceWarningList();
 
             // Verify the resource names are valid property names, and they don't
             // conflict.  This includes checking for language-specific keywords,
             // translating spaces to underscores, etc.
-            SortedList<string, ResourceData> cleanedResourceList = VerifyResourceNames(resourceList, codeProvider, errors, out Dictionary<string, string> reverseFixupTable);
+            SortedList<string, ResourceData> cleanedResourceList = VerifyResourceNames(resourceList, codeProvider, warnings, out Dictionary<string, string> reverseFixupTable);
 
             // Verify the class name is legal.
             String className = baseName;
@@ -246,11 +275,11 @@ namespace Microsoft.Build.Tasks
                 bool r = DefineResourceFetchingProperty(propertyName, resourceName, entry.Value, srClass, internalClass, useStatic);
                 if (!r)
                 {
-                    errors.Add((propertyName, "GenerateResource.CodeDomError", null));
+                    warnings.Add(new ResourceWarning(propertyName, ResourceWarningReason.CodeDomError, null));
                 }
             }
 
-            unmatchable = errors.ToArray();
+            unmatchable = warnings.ToArray();
 
             // Validate the generated class now
             CodeGenerator.ValidateIdentifiers(ccu);
@@ -258,13 +287,13 @@ namespace Microsoft.Build.Tasks
             return ccu;
         }
 
-        internal static CodeCompileUnit Create(String resxFile, String baseName, String generatedCodeNamespace, CodeDomProvider codeProvider, bool internalClass, out (string key, string reason, string extraArg)[] unmatchable)
+        internal static CodeCompileUnit Create(String resxFile, String baseName, String generatedCodeNamespace, CodeDomProvider codeProvider, bool internalClass, out ResourceWarning[] unmatchable)
         {
             return Create(resxFile, baseName, generatedCodeNamespace, null, codeProvider, internalClass, out unmatchable);
         }
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
-        internal static CodeCompileUnit Create(String resxFile, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out (string key, string reason, string extraArg)[] unmatchable)
+        internal static CodeCompileUnit Create(String resxFile, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out ResourceWarning[] unmatchable)
         {
             if (resxFile == null)
             {
@@ -714,7 +743,7 @@ namespace Microsoft.Build.Tasks
         private static SortedList<string, ResourceData> VerifyResourceNames(
             Dictionary<String, ResourceData> resourceList,
             CodeDomProvider codeProvider,
-            List<(string key, string reason, string extraArg)> errors,
+            ResourceWarningList warnings,
             out Dictionary<string, string> reverseFixupTable)
         {
             reverseFixupTable = new Dictionary<string, string>(0, StringComparer.InvariantCultureIgnoreCase);
@@ -731,15 +760,15 @@ namespace Microsoft.Build.Tasks
                 // Disallow a property named ResourceManager or Culture - we add
                 // those.  (Any other properties we add also must be listed here)
                 // Also disallow resource values of type Void.
-                string reservedNames = String.Join(", ", ResMgrPropertyName, CultureInfoPropertyName);
                 if (String.Equals(key, ResMgrPropertyName) || String.Equals(key, CultureInfoPropertyName))
                 {
-                    errors.Add((key, "GenerateResource.STRPropertySkippedReservedName", reservedNames));
+                    warnings.Add(new ResourceWarning(key, ResourceWarningReason.ReservedName, reservedNames));
                     continue;
                 }
+
                 if (typeof(void) == entry.Value.Type)
                 {
-                    errors.Add((key, "GenerateResource.STRPropertySkippedVoidType", null));
+                    warnings.Add(new ResourceWarning(key, ResourceWarningReason.VoidType, null));
                     continue;
                 }
 
@@ -758,7 +787,7 @@ namespace Microsoft.Build.Tasks
                     String newKey = VerifyResourceName(key, codeProvider, false);
                     if (newKey == null)
                     {
-                        errors.Add((key, "GenerateResource.STRPropertySkippedInvalidIdentifier", null));
+                        warnings.Add(new ResourceWarning(key, ResourceWarningReason.InvalidIdentifier, null));
                         continue;
                     }
 
@@ -768,17 +797,20 @@ namespace Microsoft.Build.Tasks
                     {
                         // We can't handle this key nor the previous one.
                         // Remove the old one.
-                        if (!errors.Exists(e => e.key == oldDuplicateKey))
+                        if (!warnings.Contains(oldDuplicateKey))
                         {
-                            errors.Add((oldDuplicateKey, "GenerateResource.STRPropertySkippedNameCollision", key));
+                            warnings.Add(new ResourceWarning(oldDuplicateKey, ResourceWarningReason.NameCollision, key));
                         }
+
                         cleanedResourceList.Remove(newKey);
-                        errors.Add((key, "GenerateResource.STRPropertySkippedNameCollision", oldDuplicateKey));
+                        warnings.Add(new ResourceWarning(key, ResourceWarningReason.NameCollision, oldDuplicateKey));
                         continue;
                     }
+
                     reverseFixupTable[newKey] = key;
                     key = newKey;
                 }
+
                 ResourceData value = entry.Value;
                 if (!cleanedResourceList.ContainsKey(key))
                 {
@@ -791,20 +823,22 @@ namespace Microsoft.Build.Tasks
                     // with another key (ie, "A B" and "A_B").
                     if (reverseFixupTable.TryGetValue(key, out string alreadyAddedOriginalName))
                     {
-                        if (!errors.Exists(e => e.key == alreadyAddedOriginalName))
+                        if (!warnings.Contains(alreadyAddedOriginalName))
                         {
-                            errors.Add((alreadyAddedOriginalName, "GenerateResource.STRPropertySkippedNameCollision", entry.Key));
+                            warnings.Add(new ResourceWarning(alreadyAddedOriginalName, ResourceWarningReason.NameCollision, entry.Key));
                         }
+
                         reverseFixupTable.Remove(key);
                     }
 
                     // Warn about the current entry.
-                    errors.Add((entry.Key, "GenerateResource.STRPropertySkippedNameCollision", alreadyAddedOriginalName ?? key));
+                    warnings.Add(new ResourceWarning(entry.Key, ResourceWarningReason.NameCollision, alreadyAddedOriginalName));
 
                     // Remove the first entry — neither can safely generate a property.
                     cleanedResourceList.Remove(key);
                 }
             }
+
             return cleanedResourceList;
         }
     }
