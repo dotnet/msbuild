@@ -165,20 +165,28 @@ namespace Microsoft.Build.CommandLine
 
                 s_initialized = true;
             }
-            catch (TypeInitializationException ex) when (ex.InnerException is not null
-#if FEATURE_SYSTEM_CONFIGURATION
-            && ex.InnerException is ConfigurationErrorsException
-#endif
-            )
-            {
-                HandleConfigurationException(ex);
-            }
 #if FEATURE_SYSTEM_CONFIGURATION
             catch (ConfigurationException ex)
             {
                 HandleConfigurationException(ex);
             }
 #endif
+            catch (Exception ex)
+            {
+                // Last line of defense: if any type initializer in the startup chain fails
+                // (e.g., DebugUtils → FileUtilities → EscapingUtilities), the CLR caches
+                // the failure as a TypeInitializationException and re-throws it at every
+                // subsequent access. By the time we see it here, the original cause may be
+                // buried under multiple TypeInitializationException wrappers or even lost
+                // entirely (InnerException == null).
+                //
+                // Instead of crashing the process with no diagnostics, we:
+                //   1. Record crash telemetry (including InnermostExceptionType) so the
+                //      root cause is visible in Kusto/Prism.
+                //   2. Write a message to stderr so the user sees something.
+                //   3. Set s_initialized = false so Main() returns exit code 1 gracefully.
+                HandleStaticConstructorException(ex);
+            }
         }
 
         /// <summary>
@@ -189,6 +197,7 @@ namespace Microsoft.Build.CommandLine
         {
         }
 
+#if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Dump any exceptions reading the configuration file, nicely
         /// </summary>
@@ -217,6 +226,41 @@ namespace Microsoft.Build.CommandLine
             while (exception != null);
 
             Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidConfigurationFile", builder.ToString()));
+
+            s_initialized = false;
+        }
+#endif
+
+        /// <summary>
+        /// Handles an unexpected exception from the MSBuildApp static constructor.
+        /// Records crash telemetry, writes a diagnostic message, and prevents the
+        /// process from crashing by setting <see cref="s_initialized"/> to false.
+        /// </summary>
+        private static void HandleStaticConstructorException(Exception ex)
+        {
+            try
+            {
+                // Record and flush immediately — the process may not survive past
+                // this point, and TelemetryManager may not be initialized yet.
+                CrashTelemetryRecorder.RecordAndFlushCrashTelemetry(
+                    ex,
+                    CrashExitType.UnhandledException,
+                    isUnhandled: false,
+                    isCritical: ExceptionHandling.IsCriticalException(ex));
+            }
+            catch
+            {
+                // Telemetry must never cause a secondary failure.
+            }
+
+            try
+            {
+                Console.Error.WriteLine("MSBuild could not start: " + ex);
+            }
+            catch
+            {
+                // Console may not be available (e.g. redirected to a broken pipe).
+            }
 
             s_initialized = false;
         }
@@ -901,7 +945,6 @@ namespace Microsoft.Build.CommandLine
                 ShowHelpPrompt();
 
                 exitType = ExitType.SwitchError;
-                RecordCrashTelemetry(e, exitType);
             }
             // handle configuration exceptions: problems reading toolset information from msbuild.exe.config or the registry
             catch (InvalidToolsetDefinitionException e)
@@ -910,7 +953,6 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("ConfigurationFailurePrefixNoErrorCode", e.ErrorCode, e.Message));
 
                 exitType = ExitType.InitializationError;
-                RecordCrashTelemetry(e, exitType);
             }
             // handle initialization failures
             catch (InitializationException e)
@@ -918,7 +960,6 @@ namespace Microsoft.Build.CommandLine
                 Console.WriteLine(e.Message);
 
                 exitType = ExitType.InitializationError;
-                RecordCrashTelemetry(e, exitType);
             }
             // handle polite logger failures: don't dump the stack or trigger watson for these
             catch (LoggerException e)
@@ -1056,40 +1097,25 @@ namespace Microsoft.Build.CommandLine
             return exitType;
         }
 
-        private static string GetHostName()
-        {
-            if (BuildEnvironmentState.s_runningInVisualStudio)
-            {
-                return "VS";
-            }
-
-            string msbuildHostName = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
-            if (!string.IsNullOrEmpty(msbuildHostName))
-            {
-                return msbuildHostName;
-            }
-
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
-            {
-                return "VSCode";
-            }
-
-            return null;
-        }
-
         /// <summary>
         /// Records crash telemetry data for later emission.
         /// </summary>
         private static void RecordCrashTelemetry(Exception exception, ExitType exitType, bool isUnhandled = false)
         {
+            // Convert from MSBuildApp.ExitType to CrashExitType (names match).
+            if (!Enum.TryParse<CrashExitType>(exitType.ToString(), out CrashExitType crashExitType))
+            {
+                crashExitType = CrashExitType.Unknown;
+            }
+
             CrashTelemetryRecorder.RecordCrashTelemetry(
                 exception,
-                exitType.ToString(),
+                crashExitType,
                 isUnhandled,
                 ExceptionHandling.IsCriticalException(exception),
                 ProjectCollection.Version?.ToString(),
                 NativeMethodsShared.FrameworkName,
-                GetHostName());
+                BuildEnvironmentState.GetHostName());
         }
 
         private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project, TextWriter outputStream)

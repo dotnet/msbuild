@@ -47,7 +47,7 @@ namespace Microsoft.Build.BackEnd
     }
 
     /// <summary>
-    /// TaskHostTaskComplete contains all the information the parent node
+    /// TaskHostTaskComplete contains all the information the owning worker node
     /// needs from the task host on completion of task execution.
     /// </summary>
     internal class TaskHostTaskComplete : INodePacket
