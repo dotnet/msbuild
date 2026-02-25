@@ -36,7 +36,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestNetTask.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
+            string testTaskOutput = EndToEndTestUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n -p:LatestDotNetCoreForMSBuild={EndToEndTestUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
 
             if (!successTestTask)
             {
@@ -52,7 +52,7 @@ namespace Microsoft.Build.Engine.UnitTests
                "TaskAssemblyLocationMismatch",
 
                // Microsoft.Build.dll represents TaskHostTask wrapper for the custom task here.
-               Path.Combine(RunnerUtilities.BootstrapRootPath, "net472", "MSBuild", "Current", "Bin", "Microsoft.Build.dll"),
+               Path.Combine(EndToEndTestUtilities.BootstrapRootPath, "net472", "MSBuild", "Current", "Bin", "Microsoft.Build.dll"),
                customTaskAssemblyLocation);
             testTaskOutput.ShouldNotContain(resource);
         }
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Engine.UnitTests
             using TestEnvironment env = TestEnvironment.Create(_output);
             var dotnetPath = env.GetEnvironmentVariable("DOTNET_ROOT");
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestNetTask.csproj");
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
+            string testTaskOutput = EndToEndTestUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n -p:LatestDotNetCoreForMSBuild={EndToEndTestUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
 
             if (!successTestTask)
             {
@@ -124,7 +124,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestMSBuildTaskInNet", "TestMSBuildTaskInNet.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore  -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
+            string testTaskOutput = EndToEndTestUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore  -v:n -p:LatestDotNetCoreForMSBuild={EndToEndTestUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
 
             if (!successTestTask)
             {
@@ -143,7 +143,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // Point dotnet resolution to the bootstrap layout so the .NET Core TaskHost
             // uses the locally-built MSBuild.dll (with callback support) instead of the system SDK.
-            string bootstrapCorePath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
+            string bootstrapCorePath = Path.Combine(EndToEndTestUtilities.BootstrapRootPath, "core");
             string bootstrapDotnet = Path.Combine(bootstrapCorePath, "dotnet.exe");
             env.SetEnvironmentVariable("DOTNET_HOST_PATH", bootstrapDotnet);
             env.SetEnvironmentVariable("DOTNET_ROOT", bootstrapCorePath);
@@ -151,7 +151,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskCallback", "TestNetTaskCallback.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -t:TestTask", out bool successTestTask);
+            string testTaskOutput = EndToEndTestUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -v:n -p:LatestDotNetCoreForMSBuild={EndToEndTestUtilities.LatestDotNetCoreForMSBuild} -t:TestTask", out bool successTestTask);
 
             if (!successTestTask)
             {
@@ -170,7 +170,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskWithImplicitParams", "TestNetTaskWithImplicitParams.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore  -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
+            string testTaskOutput = EndToEndTestUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore  -v:n -p:LatestDotNetCoreForMSBuild={EndToEndTestUtilities.LatestDotNetCoreForMSBuild}", out bool successTestTask);
 
             if (!successTestTask)
             {

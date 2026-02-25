@@ -23,6 +23,7 @@
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
+    <ProjectReference Include="..\EndToEndTestSupport\Microsoft.Build.EndToEndTestSupport.csproj" />
     
     <!-- Tasks are needed for some tests -->
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
