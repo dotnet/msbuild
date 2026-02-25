@@ -2933,9 +2933,7 @@ namespace Microsoft.Build.Execution
                     _buildParameters?.ProjectRootElementCache?.Clear();
 
                     FileMatcher.ClearCaches();
-#if !CLR2COMPATIBILITY
                     FileUtilities.ClearFileExistenceCache();
-#endif
                 }
 
                 _noActiveSubmissionsEvent?.Set();

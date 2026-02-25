@@ -70,22 +70,12 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Gets empty collection
         /// </summary>
-        public ICollection<K> Keys =>
-#if CLR2COMPATIBILITY
-            new K[0];
-#else
-            Array.Empty<K>();
-#endif
+        public ICollection<K> Keys => Array.Empty<K>();
 
         /// <summary>
         /// Gets empty collection
         /// </summary>
-        public ICollection<V> Values =>
-#if CLR2COMPATIBILITY
-            new V[0];
-#else
-            Array.Empty<V>();
-#endif
+        public ICollection<V> Values => Array.Empty<V>();
 
         /// <summary>
         /// Is it fixed size

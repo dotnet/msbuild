@@ -448,11 +448,7 @@ namespace Microsoft.Build.Shared
 
         private static string GetAppContextBaseDirectory()
         {
-#if !CLR2COMPATIBILITY // Assemblies compiled against anything older than .NET 4.0 won't have a System.AppContext
             return AppContext.BaseDirectory;
-#else
-            return null;
-#endif
         }
 
         private static string GetEnvironmentVariable(string variable)

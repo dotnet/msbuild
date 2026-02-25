@@ -6,11 +6,7 @@ using System;
 using System.Collections.Frozen;
 #endif
 using System.Diagnostics.CodeAnalysis;
-#if CLR2COMPATIBILITY
-using Microsoft.Build.Shared.Concurrent;
-#else
 using System.Collections.Concurrent;
-#endif
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -137,7 +133,7 @@ namespace Microsoft.Build.BackEnd
             nameof(HandshakeComponents.FileVersionPrivate)];
 #endif
 
-#endregion
+        #endregion
 
         #region INodeEndpoint Events
 
@@ -318,11 +314,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(_packetPump.ManagedThreadId != Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
             _terminatePacketPump.Set();
             _packetPump.Join();
-#if CLR2COMPATIBILITY
-            _terminatePacketPump.Close();
-#else
             _terminatePacketPump.Dispose();
-#endif
             _pipeServer.Dispose();
             _packetPump = null;
             ChangeLinkStatus(LinkStatus.Inactive);
@@ -421,7 +413,7 @@ namespace Microsoft.Build.BackEnd
                         int index = 0;
                         foreach (var component in handshakeComponents.EnumerateComponents())
                         {
-                           
+
                             if (!_pipeServer.TryReadIntForHandshake(
                                 byteToAccept: index == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null, /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1_OR_GREATER
@@ -812,8 +804,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-#endregion
+        #endregion
 
-#endregion
+        #endregion
     }
 }
