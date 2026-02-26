@@ -68,7 +68,7 @@ namespace Microsoft.Build.Tasks
         private const String ResMgrPropertyName = "ResourceManager";
         private const String CultureInfoFieldName = "resourceCulture";
         private const String CultureInfoPropertyName = "Culture";
-        private static readonly String reservedNames = String.Join(", ", ResMgrPropertyName, CultureInfoPropertyName);
+        private const String reservedNames = $"{ResMgrPropertyName}, {CultureInfoPropertyName}";
 
         // When fixing up identifiers, we will replace all these chars with
         // a single char that is valid in identifiers, such as '_'.
@@ -85,7 +85,7 @@ namespace Microsoft.Build.Tasks
         private const int DocCommentLengthThreshold = 512;
 
         // Describes a resource key that could not be converted to a valid STR property.
-        internal enum ResourceWarningReason
+        internal enum SkipReason
         {
             CodeDomError,
             ReservedName,
@@ -94,22 +94,22 @@ namespace Microsoft.Build.Tasks
             NameCollision,
         }
 
-        internal sealed record ResourceWarning(string Key, ResourceWarningReason Reason, string ExtraArg);
+        internal sealed record SkippedResource(string Key, SkipReason Reason, string[] AdditionalMessageArgs);
 
-        internal sealed class ResourceWarningList
+        internal sealed class SkippedResourceList
         {
-            private readonly List<ResourceWarning> _warnings = [];
-            private readonly HashSet<string> _warnedKeys = new(StringComparer.InvariantCultureIgnoreCase);
+            private readonly List<SkippedResource> _skippedResources = [];
+            private readonly HashSet<string> _skippedKeys = new(StringComparer.InvariantCultureIgnoreCase);
 
-            internal void Add(ResourceWarning warning)
+            internal void Add(SkippedResource skippedResource)
             {
-                _warnings.Add(warning);
-                _warnedKeys.Add(warning.Key);
+                _skippedResources.Add(skippedResource);
+                _skippedKeys.Add(skippedResource.Key);
             }
 
-            internal bool Contains(string key) => _warnedKeys.Contains(key);
+            internal bool Contains(string key) => _skippedKeys.Contains(key);
 
-            internal ResourceWarning[] ToArray() => [.. _warnings];
+            internal SkippedResource[] ToArray() => [.. _skippedResources];
         }
 
         // Save the strings for better doc comments.
@@ -140,7 +140,7 @@ namespace Microsoft.Build.Tasks
             internal String ValueAsString { get; }
         }
 
-        internal static CodeCompileUnit Create(Dictionary<string, IResource> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out ResourceWarning[] unmatchable)
+        internal static CodeCompileUnit Create(Dictionary<string, IResource> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out SkippedResource[] unmatchable)
         {
             if (resourceList == null)
             {
@@ -162,7 +162,7 @@ namespace Microsoft.Build.Tasks
             return InternalCreate(resourceTypes, baseName, generatedCodeNamespace, resourcesNamespace, codeProvider, internalClass, out unmatchable);
         }
 
-        private static CodeCompileUnit InternalCreate(Dictionary<String, ResourceData> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out ResourceWarning[] unmatchable)
+        private static CodeCompileUnit InternalCreate(Dictionary<String, ResourceData> resourceList, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out SkippedResource[] unmatchable)
         {
             if (baseName == null)
             {
@@ -173,16 +173,16 @@ namespace Microsoft.Build.Tasks
                 throw new ArgumentNullException(nameof(codeProvider));
             }
 
-            // Keep a list of errors describing known strings that couldn't be
-            // fixed up (like "4"), as well as listing all duplicate resources that
-            // were fixed up to the same name (like "A B" and "A-B" both going to
-            // "A_B").
-            var warnings = new ResourceWarningList();
+            // Keep a list of resources that couldn't be converted to valid
+            // STR properties (like "4"), as well as listing all duplicate resources
+            // that were fixed up to the same name (like "A B" and "A-B" both going
+            // to "A_B").
+            var skippedResources = new SkippedResourceList();
 
             // Verify the resource names are valid property names, and they don't
             // conflict.  This includes checking for language-specific keywords,
             // translating spaces to underscores, etc.
-            SortedList<string, ResourceData> cleanedResourceList = VerifyResourceNames(resourceList, codeProvider, warnings, out Dictionary<string, string> reverseFixupTable);
+            SortedList<string, ResourceData> cleanedResourceList = VerifyResourceNames(resourceList, codeProvider, skippedResources, out Dictionary<string, string> reverseFixupTable);
 
             // Verify the class name is legal.
             String className = baseName;
@@ -275,11 +275,11 @@ namespace Microsoft.Build.Tasks
                 bool r = DefineResourceFetchingProperty(propertyName, resourceName, entry.Value, srClass, internalClass, useStatic);
                 if (!r)
                 {
-                    warnings.Add(new ResourceWarning(propertyName, ResourceWarningReason.CodeDomError, null));
+                    skippedResources.Add(new SkippedResource(propertyName, SkipReason.CodeDomError, []));
                 }
             }
 
-            unmatchable = warnings.ToArray();
+            unmatchable = skippedResources.ToArray();
 
             // Validate the generated class now
             CodeGenerator.ValidateIdentifiers(ccu);
@@ -287,13 +287,13 @@ namespace Microsoft.Build.Tasks
             return ccu;
         }
 
-        internal static CodeCompileUnit Create(String resxFile, String baseName, String generatedCodeNamespace, CodeDomProvider codeProvider, bool internalClass, out ResourceWarning[] unmatchable)
+        internal static CodeCompileUnit Create(String resxFile, String baseName, String generatedCodeNamespace, CodeDomProvider codeProvider, bool internalClass, out SkippedResource[] unmatchable)
         {
             return Create(resxFile, baseName, generatedCodeNamespace, null, codeProvider, internalClass, out unmatchable);
         }
 
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly")]
-        internal static CodeCompileUnit Create(String resxFile, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out ResourceWarning[] unmatchable)
+        internal static CodeCompileUnit Create(String resxFile, String baseName, String generatedCodeNamespace, String resourcesNamespace, CodeDomProvider codeProvider, bool internalClass, out SkippedResource[] unmatchable)
         {
             if (resxFile == null)
             {
@@ -743,7 +743,7 @@ namespace Microsoft.Build.Tasks
         private static SortedList<string, ResourceData> VerifyResourceNames(
             Dictionary<String, ResourceData> resourceList,
             CodeDomProvider codeProvider,
-            ResourceWarningList warnings,
+            SkippedResourceList skippedResources,
             out Dictionary<string, string> reverseFixupTable)
         {
             reverseFixupTable = new Dictionary<string, string>(0, StringComparer.InvariantCultureIgnoreCase);
@@ -762,13 +762,13 @@ namespace Microsoft.Build.Tasks
                 // Also disallow resource values of type Void.
                 if (String.Equals(key, ResMgrPropertyName) || String.Equals(key, CultureInfoPropertyName))
                 {
-                    warnings.Add(new ResourceWarning(key, ResourceWarningReason.ReservedName, reservedNames));
+                    skippedResources.Add(new SkippedResource(key, SkipReason.ReservedName, [reservedNames]));
                     continue;
                 }
 
                 if (typeof(void) == entry.Value.Type)
                 {
-                    warnings.Add(new ResourceWarning(key, ResourceWarningReason.VoidType, null));
+                    skippedResources.Add(new SkippedResource(key, SkipReason.VoidType, []));
                     continue;
                 }
 
@@ -787,7 +787,7 @@ namespace Microsoft.Build.Tasks
                     String newKey = VerifyResourceName(key, codeProvider, false);
                     if (newKey == null)
                     {
-                        warnings.Add(new ResourceWarning(key, ResourceWarningReason.InvalidIdentifier, null));
+                        skippedResources.Add(new SkippedResource(key, SkipReason.InvalidIdentifier, []));
                         continue;
                     }
 
@@ -797,13 +797,13 @@ namespace Microsoft.Build.Tasks
                     {
                         // We can't handle this key nor the previous one.
                         // Remove the old one.
-                        if (!warnings.Contains(oldDuplicateKey))
+                        if (!skippedResources.Contains(oldDuplicateKey))
                         {
-                            warnings.Add(new ResourceWarning(oldDuplicateKey, ResourceWarningReason.NameCollision, key));
+                            skippedResources.Add(new SkippedResource(oldDuplicateKey, SkipReason.NameCollision, [key]));
                         }
 
                         cleanedResourceList.Remove(newKey);
-                        warnings.Add(new ResourceWarning(key, ResourceWarningReason.NameCollision, oldDuplicateKey));
+                        skippedResources.Add(new SkippedResource(key, SkipReason.NameCollision, [oldDuplicateKey]));
                         continue;
                     }
 
@@ -823,16 +823,16 @@ namespace Microsoft.Build.Tasks
                     // with another key (ie, "A B" and "A_B").
                     if (reverseFixupTable.TryGetValue(key, out string alreadyAddedOriginalName))
                     {
-                        if (!warnings.Contains(alreadyAddedOriginalName))
+                        if (!skippedResources.Contains(alreadyAddedOriginalName))
                         {
-                            warnings.Add(new ResourceWarning(alreadyAddedOriginalName, ResourceWarningReason.NameCollision, entry.Key));
+                            skippedResources.Add(new SkippedResource(alreadyAddedOriginalName, SkipReason.NameCollision, [entry.Key]));
                         }
 
                         reverseFixupTable.Remove(key);
                     }
 
                     // Warn about the current entry.
-                    warnings.Add(new ResourceWarning(entry.Key, ResourceWarningReason.NameCollision, alreadyAddedOriginalName));
+                    skippedResources.Add(new SkippedResource(entry.Key, SkipReason.NameCollision, [alreadyAddedOriginalName]));
 
                     // Remove the first entry — neither can safely generate a property.
                     cleanedResourceList.Remove(key);

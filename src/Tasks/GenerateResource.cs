@@ -3443,7 +3443,7 @@ namespace Microsoft.Build.Tasks
                 _logger.LogMessageFromResources("GenerateResource.CreatingSTR", _stronglyTypedFilename);
 
                 // Generate the STR class
-                StronglyTypedResourceBuilder.ResourceWarning[] warnings;
+                StronglyTypedResourceBuilder.SkippedResource[] skippedResources;
                 bool generateInternalClass = !_stronglyTypedClassIsPublic;
                 // StronglyTypedResourcesNamespace can be null and this is ok.
                 // If it is null then the default namespace (=stronglyTypedNamespace) is used.
@@ -3454,7 +3454,7 @@ namespace Microsoft.Build.Tasks
                         _stronglyTypedResourcesNamespace,
                         provider,
                         generateInternalClass,
-                        out warnings);
+                        out skippedResources);
 
                 CodeGeneratorOptions codeGenOptions = new CodeGeneratorOptions();
                 using (TextWriter output = new StreamWriter(_stronglyTypedFilename))
@@ -3464,18 +3464,18 @@ namespace Microsoft.Build.Tasks
 
                 // The STR class file was generated (possibly with some properties skipped).
                 // Log warnings for any skipped resources and mark the file as successfully created.
-                foreach (StronglyTypedResourceBuilder.ResourceWarning warning in warnings)
+                foreach (StronglyTypedResourceBuilder.SkippedResource skipped in skippedResources)
                 {
-                    string messageKey = warning.Reason switch
+                    string messageKey = skipped.Reason switch
                     {
-                        StronglyTypedResourceBuilder.ResourceWarningReason.CodeDomError => "GenerateResource.CodeDomError",
-                        StronglyTypedResourceBuilder.ResourceWarningReason.ReservedName => "GenerateResource.STRPropertySkippedReservedName",
-                        StronglyTypedResourceBuilder.ResourceWarningReason.VoidType => "GenerateResource.STRPropertySkippedVoidType",
-                        StronglyTypedResourceBuilder.ResourceWarningReason.InvalidIdentifier => "GenerateResource.STRPropertySkippedInvalidIdentifier",
-                        StronglyTypedResourceBuilder.ResourceWarningReason.NameCollision => "GenerateResource.STRPropertySkippedNameCollision",
-                        _ => throw new InvalidOperationException(),
+                        StronglyTypedResourceBuilder.SkipReason.CodeDomError => "GenerateResource.CodeDomError",
+                        StronglyTypedResourceBuilder.SkipReason.ReservedName => "GenerateResource.STRPropertySkippedReservedName",
+                        StronglyTypedResourceBuilder.SkipReason.VoidType => "GenerateResource.STRPropertySkippedVoidType",
+                        StronglyTypedResourceBuilder.SkipReason.InvalidIdentifier => "GenerateResource.STRPropertySkippedInvalidIdentifier",
+                        StronglyTypedResourceBuilder.SkipReason.NameCollision => "GenerateResource.STRPropertySkippedNameCollision",
+                        _ => throw new InvalidOperationException($"Unknown SkipReason {skipped.Reason}"),
                     };
-                    _logger.LogWarningWithCodeFromResources(messageKey, warning.Key, warning.ExtraArg);
+                    _logger.LogWarningWithCodeFromResources(messageKey, [skipped.Key, .. skipped.AdditionalMessageArgs]);
                 }
 
                 _stronglyTypedResourceSuccessfullyCreated = true;
