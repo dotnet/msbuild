@@ -4,8 +4,8 @@
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using System;
-#if !RUNTIME_TYPE_NETCORE
 using Microsoft.Build.Framework;
+#if !RUNTIME_TYPE_NETCORE
 using System.Collections.Generic;
 #endif
 using System.ComponentModel;
@@ -51,6 +51,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private const string Custom = "Custom";
 #endif
         private const string ToolName = "signtool.exe";
+
+#if RUNTIME_TYPE_NETCORE
+        // Lock to serialize SetDllDirectoryW calls during manifest signing on .NET Core.
+        // SetDllDirectoryW is a process-global Win32 API, so concurrent manifest signing
+        // must be serialized to prevent interference between threads.
+        private static readonly object s_manifestSigningLock = new object();
+#endif
 #if !RUNTIME_TYPE_NETCORE
         private const int Fx2MajorVersion = 2;
         private const int Fx3MajorVersion = 3;
@@ -556,6 +563,24 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                     string targetFrameworkIdentifier,
                                     bool disallowMansignTimestampFallback)
         {
+            SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion, targetFrameworkIdentifier, disallowMansignTimestampFallback, taskEnvironment: null);
+        }
+
+        /// <summary>
+        /// Thread-safe overload for multithreaded task execution.
+        /// Uses <paramref name="taskEnvironment"/> for process start and tool discovery
+        /// instead of process-global state.
+        /// When <paramref name="taskEnvironment"/> is null, falls back to process-global state.
+        /// </summary>
+        [SupportedOSPlatform("windows")]
+        internal static void SignFile(string certThumbprint,
+                                    Uri timestampUrl,
+                                    string path,
+                                    string targetFrameworkVersion,
+                                    string targetFrameworkIdentifier,
+                                    bool disallowMansignTimestampFallback,
+                                    TaskEnvironment taskEnvironment)
+        {
             System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
 
             if (String.IsNullOrEmpty(certThumbprint))
@@ -582,19 +607,17 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 if (String.IsNullOrEmpty(targetFrameworkIdentifier) ||
                     targetFrameworkIdentifier.Equals(Constants.DotNetFrameworkIdentifier, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    // SHA-256 digest can be parsed only with .NET 4.5 or higher.
                     isTargetFrameworkSha256Supported = targetVersion.CompareTo(s_dotNet45Version) >= 0;
                 }
                 else if (targetFrameworkIdentifier.Equals(Constants.DotNetCoreAppIdentifier, StringComparison.InvariantCultureIgnoreCase))
                 {
-                    // Use SHA-256 digest for .NET Core apps
                     isTargetFrameworkSha256Supported = true;
                 }
-                SignFileInternal(cert, timestampUrl, path, isTargetFrameworkSha256Supported, resources, disallowMansignTimestampFallback);
+                SignFileInternal(cert, timestampUrl, path, isTargetFrameworkSha256Supported, resources, disallowMansignTimestampFallback, taskEnvironment);
             }
             else
             {
-                SignFile(cert, timestampUrl, path);
+                SignFileInternal(cert, timestampUrl, path, true, resources, false, taskEnvironment);
             }
         }
 
@@ -637,16 +660,22 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             // setup resources
             System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
-            SignFileInternal(cert, timestampUrl, path, targetFrameworkSupportsSha256: true, resources);
+            SignFileInternal(cert, timestampUrl, path, true, resources, false, null);
         }
 
+        /// <summary>
+        /// Core signing implementation. When <paramref name="taskEnvironment"/> is non-null,
+        /// uses it instead of process-global state for tool discovery, process working directory,
+        /// and serializes SetDllDirectoryW with a lock for thread safety.
+        /// </summary>
         [SupportedOSPlatform("windows")]
         private static void SignFileInternal(X509Certificate2 cert,
                                             Uri timestampUrl,
                                             string path,
                                             bool targetFrameworkSupportsSha256,
                                             System.Resources.ResourceManager resources,
-                                            bool disallowMansignTimestampFallback = false)
+                                            bool disallowMansignTimestampFallback,
+                                            TaskEnvironment taskEnvironment)
         {
             if (cert == null)
             {
@@ -669,7 +698,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             {
                 if (IsCertInStore(cert))
                 {
-                    SignPEFile(cert, timestampUrl, path, resources, useSha256);
+                    SignPEFile(cert, timestampUrl, path, resources, useSha256, taskEnvironment);
                 }
                 else
                 {
@@ -716,27 +745,41 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         }
 
 #if RUNTIME_TYPE_NETCORE
-                        // Manifest signing uses .NET FX APIs, implemented in clr.dll.
-                        // Load the library explicitly.
+                        // SetDllDirectoryW is process-global; serialize concurrent manifest signing.
+                        lock (s_manifestSigningLock)
+                        {
+                            string clrDllDir = Path.Combine(
+                                    Environment.GetFolderPath(Environment.SpecialFolder.Windows),
+                                    "Microsoft.NET",
+                                    Environment.Is64BitProcess ? "Framework64" : "Framework",
+                                    "v4.0.30319");
 
-                        string clrDllDir = Path.Combine(
-                                Environment.GetFolderPath(Environment.SpecialFolder.Windows),
-                                "Microsoft.NET",
-                                Environment.Is64BitProcess ? "Framework64" : "Framework",
-                                "v4.0.30319");
-
-                        NativeMethods.SetDllDirectoryW(clrDllDir);
-                        hModule = NativeMethods.LoadLibraryExW(Path.Combine(clrDllDir, "clr.dll"), IntPtr.Zero, NativeMethods.LOAD_LIBRARY_AS_DATAFILE);
-                        // No need to check hModule - Sign() method will quickly fail if we did not load clr.dll
+                            try
+                            {
+                                NativeMethods.SetDllDirectoryW(clrDllDir);
+                                hModule = NativeMethods.LoadLibraryExW(Path.Combine(clrDllDir, "clr.dll"), IntPtr.Zero, NativeMethods.LOAD_LIBRARY_AS_DATAFILE);
 #endif
-                        if (timestampUrl == null)
-                        {
-                            manifest.Sign(signer);
+                                if (timestampUrl == null)
+                                {
+                                    manifest.Sign(signer);
+                                }
+                                else
+                                {
+                                    manifest.Sign(signer, timestampUrl.ToString(), disallowMansignTimestampFallback);
+                                }
+#if RUNTIME_TYPE_NETCORE
+                            }
+                            finally
+                            {
+                                if (hModule != IntPtr.Zero)
+                                {
+                                    NativeMethods.FreeLibrary(hModule);
+                                }
+
+                                NativeMethods.SetDllDirectoryW(null);
+                            }
                         }
-                        else
-                        {
-                            manifest.Sign(signer, timestampUrl.ToString(), disallowMansignTimestampFallback);
-                        }
+#endif
 
                         doc.Save(path);
                     }
@@ -749,48 +792,35 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         }
                         throw new ApplicationException(ex.Message, ex);
                     }
-#if RUNTIME_TYPE_NETCORE
-                    finally
-                    {
-                        if (hModule != IntPtr.Zero)
-                        {
-                            NativeMethods.FreeLibrary(hModule);
-                        }
-
-                        NativeMethods.SetDllDirectoryW(null);
-                    }
-#endif
                 }
             }
         }
 
-        private static void SignPEFile(X509Certificate2 cert, Uri timestampUrl, string path, System.Resources.ResourceManager resources, bool useSha256)
+        private static void SignPEFile(X509Certificate2 cert, Uri timestampUrl, string path, System.Resources.ResourceManager resources, bool useSha256, TaskEnvironment taskEnvironment)
         {
             try
             {
-                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, true);
+                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, true, taskEnvironment);
             }
             catch (ApplicationException) when (timestampUrl != null)
             {
-                // error, retry with signtool /t if timestamp url was given
-                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, false);
+                SignPEFileInternal(cert, timestampUrl, path, resources, useSha256, false, taskEnvironment);
                 return;
             }
         }
 
         private static void SignPEFileInternal(X509Certificate2 cert, Uri timestampUrl,
                                                string path, System.Resources.ResourceManager resources,
-                                               bool useSha256, bool useRFC3161Timestamp)
+                                               bool useSha256, bool useRFC3161Timestamp, TaskEnvironment taskEnvironment)
         {
-            var startInfo = new ProcessStartInfo(
-                GetPathToTool(resources),
-                GetCommandLineParameters(cert.Thumbprint, timestampUrl, path, useSha256, useRFC3161Timestamp))
-            {
-                CreateNoWindow = true,
-                UseShellExecute = false,
-                RedirectStandardError = true,
-                RedirectStandardOutput = true
-            };
+            string fallbackDir = taskEnvironment?.ProjectDirectory.Value ?? Directory.GetCurrentDirectory();
+            var startInfo = taskEnvironment?.GetProcessStartInfo() ?? new ProcessStartInfo();
+            startInfo.FileName = GetPathToTool(resources, fallbackDir);
+            startInfo.Arguments = GetCommandLineParameters(cert.Thumbprint, timestampUrl, path, useSha256, useRFC3161Timestamp);
+            startInfo.CreateNoWindow = true;
+            startInfo.UseShellExecute = false;
+            startInfo.RedirectStandardError = true;
+            startInfo.RedirectStandardOutput = true;
 
             Process signTool = null;
 
@@ -851,6 +881,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         internal static string GetPathToTool(System.Resources.ResourceManager resources)
         {
+            return GetPathToTool(resources, Directory.GetCurrentDirectory());
+        }
+
+        internal static string GetPathToTool(System.Resources.ResourceManager resources, string fallbackDirectory)
+        {
 #pragma warning disable 618 // Disabling warning on using internal ToolLocationHelper API. At some point we should migrate this.
             string toolPath = ToolLocationHelper.GetPathToWindowsSdkFile(ToolName, TargetDotNetFrameworkVersion.VersionLatest, VisualStudioVersion.VersionLatest);
             if (toolPath == null || !FileSystems.Default.FileExists(toolPath))
@@ -872,7 +907,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             if (toolPath == null || !FileSystems.Default.FileExists(toolPath))
             {
-                toolPath = Path.Combine(Directory.GetCurrentDirectory(), ToolName);
+                toolPath = Path.Combine(fallbackDirectory, ToolName);
             }
             if (!FileSystems.Default.FileExists(toolPath))
             {
