@@ -291,7 +291,11 @@ namespace Microsoft.Build.Tasks.Xaml
             }
 
             // We don't want to use ToolTask's implementation because it doesn't report the command line that failed.
-            if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
+            if (ExitCodeOverriddenToIndicateErrors)
+            {
+                _logPrivate.LogErrorWithCodeFromResources("Xaml.CommandFailedDueToStderr", CommandLine);
+            }
+            else if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
             {
                 _logPrivate.LogErrorWithCodeFromResources("Xaml.CommandFailedAccessDenied", CommandLine, ExitCode);
             }

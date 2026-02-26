@@ -119,7 +119,7 @@
     </data>
     <data name="General.ToolCommandFailedNoErrorCode">
         <value>The command exited with code {0}.</value>
-    </data>
+    </data> 
     <data name="PlatformManifest.MissingPlatformXml" UESanitized="false" Visibility="Private_OM">
         <value>MSB6010: Could not find platform manifest file at "{0}".</value>
         <comment>{StrBegin="MSB6010: "}</comment>
@@ -296,10 +296,14 @@
   <data name="LockCheck.FileLocked">
     <value>The file is locked by: "{0}"</value>
   </data>
+  <data name="ToolTask.ToolCommandFailedDueToStderr" xml:space="preserve">
+    <value>MSB6013: "{0}" exited with return value 0. Setting task ExitCode to -1 due to log output to STDERR.</value>
+    <comment>{StrBegin="MSB6013: "}</comment>
+</data>
   <!--
         The Utilities message bucket is: MSB6001 - MSB6200
 
-        Next message code should be MSB6013
+        Next message code should be MSB6014
 
         Some unused codes which can also be reused (because their messages were deleted, and UE hasn't indexed the codes yet):
             <none>

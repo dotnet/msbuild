@@ -408,6 +408,10 @@
   <data name="Exec.CommandFailedNoErrorCode">
     <value>The command "{0}" exited with code {1}.</value>
   </data>
+  <data name="Exec.CommandFailedDueToStderr">
+    <value>MSB3077: The command "{0}" exited with code 0, but the task logged errors. ExitCode was set to -1.</value>
+    <comment>{StrBegin="MSB3077: "}</comment>
+  </data>
   <data name="Exec.InvalidRegex">
     <value>MSB3076: The regular expression "{0}" that was supplied is invalid. {1}</value>
     <comment>{StrBegin="MSB3076: "}</comment>
@@ -2293,6 +2297,10 @@
   <data name="Xaml.CommandFailedAccessDenied">
     <value>MSB3722: The command "{0}" exited with code {1}. Please verify that you have sufficient rights to run this command.</value>
     <comment>{StrBegin="MSB3722: "}</comment>
+  </data>
+  <data name="Xaml.CommandFailedDueToStderr">
+    <value>MSB3725: The command "{0}" exited with code 0, but the task logged errors. ExitCode was set to -1.</value>
+    <comment>{StrBegin="MSB3725: "}</comment>
   </data>
   <data name="Xaml.MissingRequiredArgument">
     <value>MSB3723: The parameter "{0}" requires missing parameter "{1}" to be set.</value>

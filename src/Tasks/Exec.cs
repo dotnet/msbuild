@@ -321,7 +321,11 @@ namespace Microsoft.Build.Tasks
 
             // Don't emit expanded form of Command when EchoOff is set.
             string commandForLog = EchoOff ? "..." : Command;
-            if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
+            if (ExitCodeOverriddenToIndicateErrors)
+            {
+                Log.LogErrorWithCodeFromResources("Exec.CommandFailedDueToStderr", commandForLog);
+            }
+            else if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
             {
                 Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", commandForLog, ExitCode);
             }
