@@ -1101,7 +1101,7 @@ namespace Microsoft.Build.CommandLine
                 // Clean up the temporary project file created when project content was piped via stdin.
                 if (s_stdinProject != null)
                 {
-                    File.Delete(s_stdinProject);
+                    FileUtilities.DeleteNoThrow(s_stdinProject);
                     s_stdinProject = null;
                 }
 
