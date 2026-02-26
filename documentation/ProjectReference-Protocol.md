@@ -1,12 +1,12 @@
 # The `ProjectReference` Protocol
 
-The MSBuild engine doesn't have a notion of a “project reference”—it only provides the [`MSBuild` task](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-task) to allow cross-project communication.
+The MSBuild engine doesn't have a notion of a “project reference”—it only provides the [`MSBuild` task](https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-task) to allow cross-project communication.
 
 That's a powerful tool, but no one would want to have to specify how to build every single reference in every single project. The common targets introduce an item, `ProjectReference`, and a default process for building references declared via that item.
 
 Default protocol implementation:
-- https://github.com/dotnet/msbuild/blob/main/src/Tasks/Microsoft.Common.CurrentVersion.targets
-- https://github.com/dotnet/msbuild/blob/main/src/Tasks/Microsoft.Common.CrossTargeting.targets
+- [Microsoft.Common.CurrentVersion.targets](../src/Tasks/Microsoft.Common.CurrentVersion.targets)
+- [Microsoft.Common.CrossTargeting.targets](../src/Tasks/Microsoft.Common.CrossTargeting.targets)
 
 ## Projects that have references
 
@@ -74,7 +74,7 @@ If implementing a project with an “outer” (determine what properties to pass
 * `GetTargetPath` should return the path of the project's output, but _not_ build that output.
   * **Conditions**: this is used for builds inside Visual Studio, but not on the command line.
   * It's also used when the property `BuildProjectReferences` is `false`, manually indicating that all `ProjectReferences` are up to date and shouldn't be (re)built.
-  * This should return a single item that is the primary output of the project, with metadata describing that output. See [`TargetPathWithTargetPlatformMoniker`](https://github.com/dotnet/msbuild/blob/080ef976a428f6ff7bf53ca5dd4ee637b3fe949c/src/Tasks/Microsoft.Common.CurrentVersion.targets#L1834-L1842) for the default metadata.
+  * This should return a single item that is the primary output of the project, with metadata describing that output. See `TargetPathWithTargetPlatformMoniker` in the `GetTargetPath` target of [Microsoft.Common.CurrentVersion.targets](../src/Tasks/Microsoft.Common.CurrentVersion.targets) for the default metadata.
 * **Default** targets should do the full build and return an assembly to be referenced.
   * **Conditions**: this is _not_ called when building inside Visual Studio. Instead, Visual Studio builds each project in isolation but in order, so the path returned from `GetTargetPath` can be assumed to exist at consumption time.
   * If the `ProjectReference` defines the `Targets` metadata, it is used. If not, no target is passed, and the default target of the reference (usually `Build`) is built.
@@ -87,7 +87,7 @@ If implementing a project with an “outer” (determine what properties to pass
   * It is not called during a normal build, only during "Clean" and "Rebuild".
 
 ### Targets Marked With `SkipNonexistentTargets='true'` Metadatum
-`GetTargetFrameworks` and `GetTargetFrameworksWithPlatformForSingleTargetFramework` are skippable if nonexistent since some project types (for example, `wixproj` projects) may not define them. See [this comment](https://github.com/dotnet/msbuild/blob/cc55017f88688cbe3f9aa810cdf44273adea76ea/src/Tasks/Microsoft.Managed.After.targets#L74-L77) for more details.
+`GetTargetFrameworks` and `GetTargetFrameworksWithPlatformForSingleTargetFramework` are skippable if nonexistent since some project types (for example, `wixproj` projects) may not define them. See [this comment](../src/Tasks/Microsoft.Common.CurrentVersion.targets) in the `ProjectReferenceTargets for Static Graph` section for more details.
 
 ## Other protocol requirements
 
