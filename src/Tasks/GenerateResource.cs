@@ -3475,7 +3475,7 @@ namespace Microsoft.Build.Tasks
                         StronglyTypedResourceBuilder.SkipReason.NameCollision => "GenerateResource.STRPropertySkippedNameCollision",
                         _ => throw new InvalidOperationException($"Unknown SkipReason {skipped.Reason}"),
                     };
-                    _logger.LogWarningWithCodeFromResources(null, inputFileName, 0, 0, 0, 0, messageKey, [skipped.Key, .. skipped.AdditionalMessageArgs]);
+                    _logger.LogWarningWithCodeFromResources(null, Path.GetFullPath(inputFileName), 0, 0, 0, 0, messageKey, [skipped.Key, .. skipped.AdditionalMessageArgs]);
                 }
 
                 _stronglyTypedResourceSuccessfullyCreated = true;
