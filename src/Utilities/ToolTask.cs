@@ -445,12 +445,12 @@ namespace Microsoft.Build.Utilities
             {
                 if (ExitCodeOverriddenToIndicateErrors)
                 {
-                    // The tool returned 0 but errors were logged, causing ExitCode to be set to -1.
-                    LogPrivate.LogErrorWithCodeFromResources("ToolTask.ToolCommandFailedDueToStderr", ToolExe);
+                    // The tool finished with a zero exit code but errors were logged, causing ExitCode to be set to -1.
+                    LogPrivate.LogMessageFromResources(MessageImportance.Low, "ToolTask.ToolCommandExitedZeroWithErrors");
                 }
                 else
                 {
-                    // Emit a message.
+                    // The tool failed with a non-zero exit code and already logged its own errors.
                     LogPrivate.LogMessageFromResources(MessageImportance.Low, "General.ToolCommandFailedNoErrorCode", ExitCode);
                 }
             }

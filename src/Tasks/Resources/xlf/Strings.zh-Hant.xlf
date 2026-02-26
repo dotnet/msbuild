@@ -494,6 +494,11 @@
         <target state="translated">MSB3071: 從 A: 到 Z: 的所有磁碟機代號目前都在使用中。由於工作目錄 "{0}" 是 UNC 路徑，因此 "Exec" 工作需要有可用的磁碟機代號以便對應 UNC 路徑。請先中斷一或多個共用資源的連線以釋放磁碟機代號，或指定本機工作目錄，再嘗試重新執行這個命令。</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="Exec.CommandExitedZeroWithErrors">
+        <source>MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="new">MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <note>{StrBegin="MSB3077: "}</note>
+      </trans-unit>
       <trans-unit id="Exec.CommandFailed">
         <source>MSB3073: The command "{0}" exited with code {1}.</source>
         <target state="translated">MSB3073: "{0}" 命令以返回碼 {1} 結束。</target>
@@ -2896,6 +2901,11 @@
         <source>Using transactional mode to write to file "{0}".</source>
         <target state="translated">使用交易模式寫入檔案 "{0}"。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Xaml.CommandExitedZeroWithErrors">
+        <source>MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="new">MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <note>{StrBegin="MSB3725: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
         <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>

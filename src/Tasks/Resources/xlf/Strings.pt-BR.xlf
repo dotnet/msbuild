@@ -494,6 +494,11 @@
         <target state="translated">MSB3071: Todas as letras de unidade de A: a Z: estão em uso no momento. Como o diretório de trabalho "{0}" é um caminho UNC, a tarefa "Exec" precisa de uma letra da unidade livre na qual mapear o caminho UNC. Desconecte um ou mais recursos compartilhados para liberar algumas letras da unidade ou especifique um diretório de trabalho local antes de tentar usar esse comando novamente.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="Exec.CommandExitedZeroWithErrors">
+        <source>MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="new">MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <note>{StrBegin="MSB3077: "}</note>
+      </trans-unit>
       <trans-unit id="Exec.CommandFailed">
         <source>MSB3073: The command "{0}" exited with code {1}.</source>
         <target state="translated">MSB3073: O comando "{0}" foi encerrado com o código {1}.</target>
@@ -2896,6 +2901,11 @@
         <source>Using transactional mode to write to file "{0}".</source>
         <target state="translated">Usando o modo transacional para gravar no arquivo "{0}".</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Xaml.CommandExitedZeroWithErrors">
+        <source>MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="new">MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <note>{StrBegin="MSB3725: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
         <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>

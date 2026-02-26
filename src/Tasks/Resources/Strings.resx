@@ -408,8 +408,8 @@
   <data name="Exec.CommandFailedNoErrorCode">
     <value>The command "{0}" exited with code {1}.</value>
   </data>
-  <data name="Exec.CommandFailedDueToStderr">
-    <value>MSB3077: The command "{0}" exited with code 0, but the task logged errors. ExitCode was set to -1.</value>
+  <data name="Exec.CommandExitedZeroWithErrors">
+    <value>MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</value>
     <comment>{StrBegin="MSB3077: "}</comment>
   </data>
   <data name="Exec.InvalidRegex">
@@ -2298,8 +2298,8 @@
     <value>MSB3722: The command "{0}" exited with code {1}. Please verify that you have sufficient rights to run this command.</value>
     <comment>{StrBegin="MSB3722: "}</comment>
   </data>
-  <data name="Xaml.CommandFailedDueToStderr">
-    <value>MSB3725: The command "{0}" exited with code 0, but the task logged errors. ExitCode was set to -1.</value>
+  <data name="Xaml.CommandExitedZeroWithErrors">
+    <value>MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</value>
     <comment>{StrBegin="MSB3725: "}</comment>
   </data>
   <data name="Xaml.MissingRequiredArgument">

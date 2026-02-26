@@ -223,6 +223,7 @@ namespace Microsoft.Build.UnitTests
                 engine.AssertLogDoesntContain("MSB6006");
                 engine.AssertLogContains("CS0168");
                 engine.AssertLogContains("The variable 'foo' is declared but never used");
+                engine.AssertLogContains("ExitCode was set to -1");
                 t.ExitCode.ShouldBe(-1);
                 engine.Errors.ShouldBe(1);
             }
@@ -344,7 +345,38 @@ namespace Microsoft.Build.UnitTests
 
                 engine.AssertLogDoesntContain("MSB3073");
                 engine.AssertLogContains("Who made you king anyways");
+                engine.AssertLogContains("ExitCode was set to -1");
                 t.ExitCode.ShouldBe(-1);
+                engine.Errors.ShouldBe(1);
+            }
+        }
+
+        /// <summary>
+        /// When the tool exits with a non-zero exit code and has already logged its own errors,
+        /// ToolTask should log the "command exited with code" message (not MSB6006) as a low-importance
+        /// diagnostic rather than a duplicate error.
+        /// </summary>
+        [Fact]
+        public void HandleExecutionErrorsWhenToolLogsErrorAndExitsNonZero()
+        {
+            using (MyTool t = new MyTool())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+                // MyTool.LogEventsFromTextOutput logs an error when output contains "BADTHINGHAPPENED".
+                // "exit /b 1" (Windows) or "exit 1" (Unix) ensures a non-zero exit code.
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                                                ? "/C echo BADTHINGHAPPENED && exit /b 1"
+                                                : @"-c ""echo BADTHINGHAPPENED; exit 1""";
+
+                t.Execute().ShouldBeFalse();
+
+                // The tool logged its own error and exited non-zero, so ToolTask should not
+                // emit MSB6006. Instead it logs a low-importance "exited with code" message.
+                engine.AssertLogDoesntContain("MSB6006");
+                engine.AssertLogContains("BADTHINGHAPPENED");
+                engine.AssertLogContains("The command exited with code 1");
+                t.ExitCode.ShouldBe(1);
                 engine.Errors.ShouldBe(1);
             }
         }

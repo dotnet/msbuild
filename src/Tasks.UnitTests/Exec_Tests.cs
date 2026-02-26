@@ -246,7 +246,8 @@ namespace Microsoft.Build.UnitTests
             Assert.False(result);
             // Exitcode is set to -1
             Assert.Equal(-1, exec.ExitCode);
-            ((MockEngine)exec.BuildEngine).AssertLogContains("MSB3073");
+            ((MockEngine)exec.BuildEngine).AssertLogContains("MSB3077");
+            ((MockEngine)exec.BuildEngine).Errors.ShouldBe(2);
         }
 
         [Fact]
