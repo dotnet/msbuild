@@ -420,7 +420,7 @@ namespace Microsoft.Build.BackEnd
             string msbuildLocation = null,
             NodeMode? expectedNodeMode = null)
         {
-            bool isNativeHost = Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
+            bool isNativeHost = msbuildLocation != null && Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
             string expectedProcessName = Path.GetFileNameWithoutExtension(isNativeHost ? msbuildLocation : (CurrentHost.GetCurrentHost() ?? msbuildLocation));
 
             Process[] processes;
