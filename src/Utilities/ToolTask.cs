@@ -1567,6 +1567,7 @@ namespace Microsoft.Build.Utilities
                     LogToolCommand(pathToTool + commandLineCommands + " " + responseFileCommands);
                 }
                 ExitCode = 0;
+                ExitCodeOverriddenToIndicateErrors = false;
 
                 if (nextAction == HostObjectInitializationStatus.UseHostObjectToExecute)
                 {
