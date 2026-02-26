@@ -3154,6 +3154,70 @@ EndGlobal
             MSBuildApp.Execute([@"c:\bin\msbuild.exe", project, "/m:257 /mt"]).ShouldBe(MSBuildApp.ExitType.SwitchError);
         }
 
+        [Fact]
+        public void BuildProjectPipedViaStdin()
+        {
+            string projectContent = """
+                <Project>
+                  <Target Name="Build">
+                    <Message Text="Hello from stdin!" Importance="High" />
+                  </Target>
+                </Project>
+                """;
+
+            string msbuildExe = RunnerUtilities.PathToCurrentlyRunningMsBuildExe;
+#if FEATURE_RUN_EXE_IN_TESTS
+            string executable = msbuildExe;
+            string arguments = "-nologo -noautoresponse -tl:off";
+#else
+            string executable = EnvironmentProvider.GetDotnetExePath();
+            string arguments = $"\"{msbuildExe}\" -nologo -noautoresponse -tl:off";
+#endif
+
+            using var testEnvironment = TestEnvironment.Create(_output);
+            testEnvironment.SetCurrentDirectory(testEnvironment.CreateFolder().Path);
+
+            var psi = new ProcessStartInfo(executable, arguments)
+            {
+                CreateNoWindow = true,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+            };
+
+            string output = string.Empty;
+            bool success = false;
+
+            using (var p = new Process { EnableRaisingEvents = true, StartInfo = psi })
+            {
+                p.OutputDataReceived += (_, args) => { if (args.Data != null) { output += args.Data + "\n"; } };
+                p.ErrorDataReceived += (_, args) => { if (args.Data != null) { output += args.Data + "\n"; } };
+
+                p.Start();
+                p.BeginOutputReadLine();
+                p.BeginErrorReadLine();
+
+                p.StandardInput.Write(projectContent);
+                p.StandardInput.Dispose();
+
+                bool exited = p.WaitForExit(30_000);
+                if (!exited)
+                {
+                    p.Kill();
+                    throw new TimeoutException($"MSBuild process did not exit within 30 seconds when reading project from stdin.");
+                }
+                // Wait for output/error streams to be fully processed.
+                p.WaitForExit();
+
+                success = p.ExitCode == 0;
+            }
+
+            _output.WriteLine(output);
+            success.ShouldBeTrue(output);
+            output.ShouldContain("Hello from stdin!");
+        }
+
         private string CopyMSBuild()
         {
             string dest = null;

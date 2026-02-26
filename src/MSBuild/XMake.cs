@@ -118,6 +118,12 @@ namespace Microsoft.Build.CommandLine
         private static bool s_initialized;
 
         /// <summary>
+        /// Temporary project file created when project content is piped to MSBuild via stdin.
+        /// This file is created in the current directory to ensure relative paths in the project work correctly.
+        /// </summary>
+        private static string s_stdinProject = null;
+
+        /// <summary>
         /// The object used to synchronize access to shared build state
         /// </summary>
         private static readonly LockType s_buildLock = new LockType();
@@ -347,6 +353,13 @@ namespace Microsoft.Build.CommandLine
         /// </remarks>
         private static bool CanRunServerBasedOnCommandLineSwitches(string[] commandLine)
         {
+            // MSBuild server runs in a different process and cannot read the client's stdin.
+            // If stdin is redirected, we must use the in-process path to support piped project content.
+            if (Console.IsInputRedirected)
+            {
+                return false;
+            }
+
             bool canRunServer = true;
             try
             {
@@ -1084,6 +1097,13 @@ namespace Microsoft.Build.CommandLine
 
                 preprocessWriter?.Dispose();
                 targetsWriter?.Dispose();
+
+                // Clean up the temporary project file created when project content was piped via stdin.
+                if (s_stdinProject != null)
+                {
+                    File.Delete(s_stdinProject);
+                    s_stdinProject = null;
+                }
 
                 if (MSBuildEventSource.Log.IsEnabled())
                 {
@@ -2208,7 +2228,23 @@ namespace Microsoft.Build.CommandLine
                                                            commandLine);
                     }
 
-                    projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
+                    string[] projectParameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project];
+
+                    // If no project was specified on the command line and stdin is redirected (piped),
+                    // read the project content from stdin and write it to a temporary file.
+                    if (projectParameters.Length == 0 && Console.IsInputRedirected)
+                    {
+                        string stdinContent = Console.In.ReadToEnd();
+                        if (!string.IsNullOrWhiteSpace(stdinContent))
+                        {
+                            // Write to the current directory so relative paths in the project resolve correctly.
+                            s_stdinProject = Path.Combine(Directory.GetCurrentDirectory(), $"stdin_{Path.GetRandomFileName()}.proj");
+                            File.WriteAllText(s_stdinProject, stdinContent);
+                            projectParameters = [s_stdinProject];
+                        }
+                    }
+
+                    projectFile = ProcessProjectSwitch(projectParameters, commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
 
                     // figure out which targets we are building
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
