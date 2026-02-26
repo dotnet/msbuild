@@ -67,8 +67,9 @@
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -reportFileAccesses[:True|False]
-                     Faz com que o MSBuild relate acessos a arquivos para qualquer plug-in
-                     de cache de projeto configurado.
+                     Faz com que o MSBuild relate acessos a arquivos a qualquer
+ configurado
+                     plug-ins de cache do projeto.
 
                      Este sinalizador é experimental e pode não funcionar conforme o esperado.
     </target>
@@ -254,13 +255,13 @@
                      (Short form: -mt)
     </source>
         <target state="translated">  -multithreaded
-                     Habilita o modo multithread EXPERIMENTAL no MSBuild.
+                     Habilita o modo multithreaded EXPERIMENTAL no MSBuild.
                      Isso significa que o MSBuild usará vários threads
                      para criar projetos em paralelo,
                      em vez de vários processos.
                      Essa opção não tem suporte.
                      O número máximo de threads usados é determinado pela
-                     opção -maxCpuCount.
+                     opção de linha de comando -maxCpuCount.
                      No caso do modo multithread em
                      e MSBUILDFORCEALLTASKSOUTOFPROC=1
                      maxCpuCount não pode ser maior que 256.
@@ -276,7 +277,7 @@
                      -getProperty:Bar -getResultOutputFile:Biz.txt
                      This writes the value of property Bar into Biz.txt.
     </source>
-        <target state="translated">  -getResultOutputFile:file
+        <target state="translated">  -getResultOutputFile:arquivo
                      Redirecionar a saída de get* para um arquivo.
 
                      Exemplo:
@@ -316,7 +317,7 @@
       </trans-unit>
       <trans-unit id="InvalidNoLogoValue">
         <source>MSBUILD : error MSB1071: NoLogo value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1071: O valor NoLogo não é válido. {0}</target>
+        <target state="new">MSBUILD : error MSB1071: NoLogo value is not valid. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1071: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -667,8 +668,8 @@ arquivo de resposta.
         <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
                        Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="translated">  -noLogo[:true|false] Não exibir a barra de notificação e a mensagem de direitos autorais.
-                       Especifique -nologo:false para mostrar explicitamente o logotipo.
+        <target state="new">  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -903,7 +904,7 @@ arquivo de resposta.
                         ShowCommandLine--Mostrar mensagens do TaskCommandLineEvent
                         ShowTimestamp--Exibir o Timestamp como prefixo de qualquer
                             mensagem.
-                        ShowEventId--Mostrar eventId para eventos iniciados,
+                        ShowEventId--Mostrar eventId para eventos iniciados
                             eventos concluídos e mensagens
                         ForceNoAlign--Não alinha o texto ao tamanho do
                             buffer do console
@@ -1842,7 +1843,7 @@ arquivo de resposta.
       </trans-unit>
       <trans-unit id="TaskHostAcquired_NullsFiltered">
         <source>Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</source>
-        <target state="translated">O parâmetro de saída "{0}" continha {1} elemento(s) nulo(s) que foram filtrados.</target>
+        <target state="new">Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</target>
         <note>LOCALIZATION: {0} is the name of the task output parameter, {1} is the count of null elements filtered.</note>
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">

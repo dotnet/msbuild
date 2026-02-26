@@ -59,7 +59,7 @@
       </trans-unit>
       <trans-unit id="PathMustBeRooted">
         <source>Path must be rooted.</source>
-        <target state="translated">パスはルート指定パスである必要があります。</target>
+        <target state="new">Path must be rooted.</target>
         <note />
       </trans-unit>
     </body>

@@ -296,7 +296,7 @@
                      of the build. For more info see https://aka.ms/buildcheck
 	</source>
         <target state="translated">  -check
-                     Povolí během sestavování BuildChecks.
+                     Povolí během sestavení BuildChecks.
                      BuildCheck umožňuje vyhodnocovat pravidla, aby se zajistily vlastnosti
                      sestavení. Další informace najdete na https://aka.ms/buildcheck
 	</target>
@@ -317,7 +317,7 @@
       </trans-unit>
       <trans-unit id="InvalidNoLogoValue">
         <source>MSBUILD : error MSB1071: NoLogo value is not valid. {0}</source>
-        <target state="translated">MSBUILD : error MSB1071: Hodnota NoLogo není platná. {0}</target>
+        <target state="new">MSBUILD : error MSB1071: NoLogo value is not valid. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1071: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -671,8 +671,8 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
         <source>  -noLogo[:true|false] Do not display the startup banner and copyright message.
                        Specify -nologo:false to explicitly show the logo.
 </source>
-        <target state="translated">  -noLogo[:true|false] Nezobrazovat úvodní banner a zprávu o autorských právech.
-                       Pokud chcete logo explicitně zobrazit, zadejte -nologo:false.
+        <target state="new">  -noLogo[:true|false] Do not display the startup banner and copyright message.
+                       Specify -nologo:false to explicitly show the logo.
 </target>
         <note>
       LOCALIZATION: The following should not be localized:
@@ -803,20 +803,17 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
 </source>
-        <target state="translated">  -logger:&lt;protok_nást&gt;   Použít daný protokolovací nástroj k protokolování
-                     událostí nástroje MSBuild. Chcete-li zadat více protokolovacích.
-                     nástrojů, musíte je zadat jednotlivě.
-                     Syntaxe hodnoty &lt;protok_nást&gt;:
-                        [&lt;třída_protok_nást&gt;,]&lt;sestavení_protok_nást&gt;
-                        [;&lt;param_protok_nást&gt;]
-                     Syntaxe hodnoty &lt;třída_protok_nást&gt;:
-                        [&lt;část/úpl_obor_názvů&gt;.]&lt;náz_tř_protok_nást&gt;
-                     Syntaxe hodnoty &lt;sestavení_protok_nást&gt;:
-                        {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
+        <target state="translated">  -logger:&lt;logger&gt;   Použít daný protokolovací nástroj k protokolování událostí nástroje MSBuild. Pokud chcete zadat 
+                     více protokolovacích nástrojů, musíte je zadat jednotlivě.
+                     Syntaxe hodnoty &lt;logger&gt; je:
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
+                     Syntaxe hodnoty &lt;logger class&gt; je:
+                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
+                     Syntaxe hodnoty &lt;logger assembly&gt; je:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
-                     Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se 
-                     protokolovacímu nástroji přesně v tom tvaru, v jakém
-                     byly zadány. (Krátký tvar: -l)
+                     Parametry &lt;logger parameters&gt; jsou volitelné a předávají se
+                     protokolovacímu nástroji přesně v tom tvaru, v jakém byly zadány. (Krátký tvar: -l)
                      Příklady:
                        -logger:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -logger:XMLLogger,C:\Loggers\MyLogger.dll;OutputAsHTML
@@ -1079,23 +1076,20 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
 </source>
-        <target state="translated">  -distributedlogger:&lt;centr_protok_nást&gt;*&lt;předáv_protok_nást&gt;                     
-                     Použít zadaný protokolovací nástroj pro protokolování událostí
-                     z nástroje MSBuild; ke každému uzlu připojit jinou instanci 
-                     protokolovacího nástroje. Chcete-li zadat více 
-                     protokolovacích nástrojů, uveďte je jednotlivě. 
+        <target state="translated">  -distributedLogger:&lt;central logger&gt;*&lt;forwarding logger&gt;
+                     Použít zadaný protokolovací nástroj pro protokolování událostí z nástroje MSBuild; ke každému uzlu připojit
+                     jinou instanci protokolovacího nástroje. Pokud chcete zadat více
+                     protokolovacích nástrojů, uveďte je jednotlivě.
                      (Krátký tvar: -dl)
-                     Syntaxe hodnoty &lt;protok_nást&gt;:
-                        [&lt;třída_protok_nást&gt;,]&lt;sestav_protok_nást&gt;
-                        [;&lt;param_protok_nást&gt;]
-                     Syntaxe hodnoty &lt;třída_protok_nást&gt;:
-                        [&lt;část/úpl_obor_názvů&gt;.]&lt;náz_tř_protok_nást&gt;
-                     Syntaxe hodnoty &lt;sestav_protok_nást&gt;:
-                        {&lt;název_sestavení&gt;[,&lt;strong name&gt;] | &lt;soubor_sestavení&gt;}
+                     Syntaxe hodnoty &lt;logger&gt; je:
+                       [&lt;class&gt;,]&lt;assembly&gt;[,&lt;options&gt;][;&lt;parameters&gt;]
+                     Syntaxe hodnoty &lt;logger class&gt; je:
+                       [&lt;partial or full namespace&gt;.]&lt;logger class name&gt;
+                     Syntaxe hodnoty &lt;logger assembly&gt; je:
+                       {&lt;assembly name&gt;[,&lt;strong name&gt;] | &lt;assembly file&gt;}
                      Parametry protokolovacího nástroje určují, jak MSBuild vytvoří protokolovací nástroj.
                      Parametry &lt;param_protok_nást&gt; jsou volitelné a předávají se
-                     protokolovacímu nástroji přesně v zadaném tvaru.
-                     (Krátký tvar: -l)
+                     protokolovacímu nástroji přesně v zadaném tvaru. (Krátký tvar: -l)
                      Příklady:
                        -dl:XMLLogger,MyLogger,Version=1.0.2,Culture=neutral
                        -dl:MyLogger,C:\My.dll*ForwardingLogger,C:\Logger.dll
@@ -1283,7 +1277,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                                              Verbosity=diagnostic;Encoding=UTF-8
 
                        -flp:Summary;Verbosity=minimal;LogFile=msbuild.sum 
-                       -flp1:warningsonly;logfile=msbuild.wrn 
+                       -flp1:warningsonly;logfile=msbuild.wrn
                        -flp2:errorsonly;logfile=msbuild.err
     </target>
         <note>
@@ -1854,7 +1848,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
       </trans-unit>
       <trans-unit id="TaskHostAcquired_NullsFiltered">
         <source>Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</source>
-        <target state="translated">Výstupní parametr úlohy {0} obsahoval elementy null (celkem {1}), které byly odfiltrovány.</target>
+        <target state="new">Task output parameter "{0}" contained {1} null element(s) which have been filtered out.</target>
         <note>LOCALIZATION: {0} is the name of the task output parameter, {1} is the count of null elements filtered.</note>
       </trans-unit>
       <trans-unit id="TerminalLoggerNotUsedAutomated">
@@ -2134,17 +2128,17 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
                      souborů, ke kterým došlo během sestavení. Nepovinný
                      přepínač ProjectImports řídí toto chování:
 
-                      ProjectImports=None     – Neshromažďovat importy projektu
+                      ProjectImports=None     – neshromažďovat importy projektu
                                                 .
-                      ProjectImports=Embed    – Vložit importy projektu do
+                      ProjectImports=Embed    – vložit importy projektu do
                                                 souboru protokolu.
-                      ProjectImports=ZipFile  – Uložit soubory projektu do
+                      ProjectImports=ZipFile  – uložit soubory projektu do
                                                 output.projectimports.zip
                                                 kde výstup má stejný název
                                                 jako je název binárního souboru protokolu.
 
                      Výchozí nastavení pro ProjectImports je Embed.
-                     Poznámka: protokolovací nástroj neshromažďuje zdrojové soubory, které nepocházejí z nástroje MSBuild,
+                     Poznámka: Protokolovací nástroj neshromažďuje zdrojové soubory, které nepocházejí z nástroje MSBuild,
                      jako například .cs, .cpp atd.
 
                      Soubor .binlog se dá přehrát předáním do
