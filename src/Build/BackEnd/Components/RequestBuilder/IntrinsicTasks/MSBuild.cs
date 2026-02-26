@@ -316,8 +316,9 @@ namespace Microsoft.Build.BackEnd
             {
                 ITaskItem project = Projects[i];
 
-                AbsolutePath projectPath = TaskEnvironment.GetAbsolutePath(FileUtilities.AttemptToShortenPath(project.ItemSpec));
-
+                AbsolutePath projectPath = FrameworkFileUtilities.FixFilePath(
+                    TaskEnvironment.GetAbsolutePath(project.ItemSpec).GetCanonicalForm());
+                    
                 if (StopOnFirstFailure && !success)
                 {
                     // Inform the user that we skipped the remaining projects because StopOnFirstFailure=true.
