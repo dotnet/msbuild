@@ -1,10 +1,10 @@
-<Project>
+﻿<Project>
 
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.5.0</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind>
-    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
+    <VersionPrefix>18.5.0</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind><!-- Keep next to VersionPrefix to create a conflict in forward-flow -->
+    <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
     <PackageValidationBaselineVersion>18.0.2</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
