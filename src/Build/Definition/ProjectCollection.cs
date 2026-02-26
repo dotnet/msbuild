@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -121,6 +122,11 @@ namespace Microsoft.Build.Evaluation
         /// The projects loaded into this collection.
         /// </summary>
         private readonly LoadedProjectCollection _loadedProjects;
+
+        /// <summary>
+        /// Locks used to serialize concurrent loads for the same project path.
+        /// </summary>
+        private readonly ConcurrentDictionary<string, LockType> _loadProjectLocks = new(StringComparer.OrdinalIgnoreCase);
 
         /// <summary>
         /// External projects support
@@ -1222,7 +1228,10 @@ namespace Microsoft.Build.Evaluation
             ErrorUtilities.VerifyThrowArgumentLength(fileName);
             fileName = FileUtilities.NormalizePath(fileName);
 
-            using (_locker.EnterDisposableWriteLock())
+            // Serialize loads for the same project path to avoid races where multiple threads create equivalent
+            // projects concurrently. Loads for different paths can proceed in parallel.
+            LockType pathLock = _loadProjectLocks.GetOrAdd(fileName, static _ => new());
+            lock (pathLock)
             {
                 if (globalProperties == null)
                 {
@@ -1234,11 +1243,15 @@ namespace Microsoft.Build.Evaluation
                     // otherwise we might end up declaring "not matching" a project that actually does ... and then throw
                     // an exception when we go to actually add the newly created project to the ProjectCollection.
                     // BUT remember that project global properties win -- don't override a property that already exists.
-                    foreach (KeyValuePair<string, string> globalProperty in GlobalProperties)
+                    using (_locker.EnterDisposableReadLock())
                     {
-                        if (!globalProperties.ContainsKey(globalProperty.Key))
+                        foreach (ProjectPropertyInstance globalProperty in _globalProperties)
                         {
-                            globalProperties.Add(globalProperty);
+                            string name = globalProperty.Name;
+                            if (!globalProperties.ContainsKey(name))
+                            {
+                                globalProperties.Add(name, ((IProperty)globalProperty).EvaluatedValueEscaped);
+                            }
                         }
                     }
                 }
@@ -1256,12 +1269,12 @@ namespace Microsoft.Build.Evaluation
                     // Either way, no time wasted.
                     try
                     {
-                        ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(fileName, globalProperties, toolsVersion, ProjectRootElementCache, true /*explicitlyloaded*/);
+                        ProjectRootElement xml = ProjectRootElement.OpenProjectOrSolution(fileName, globalProperties, toolsVersion, ProjectRootElementCache, isExplicitlyLoaded: true);
                         toolsVersionFromProject = (xml.ToolsVersion.Length > 0) ? xml.ToolsVersion : DefaultToolsVersion;
                     }
                     catch (InvalidProjectFileException ex)
                     {
-                        var buildEventContext = new BuildEventContext(0 /* node ID */, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+                        var buildEventContext = new BuildEventContext(nodeId: 0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
                         LoggingService.LogInvalidProjectFileError(buildEventContext, ex);
                         throw;
                     }
@@ -1270,12 +1283,8 @@ namespace Microsoft.Build.Evaluation
                 string effectiveToolsVersion = Utilities.GenerateToolsVersionToUse(toolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion, out _);
                 Project project = _loadedProjects.GetMatchingProjectIfAny(fileName, globalProperties, effectiveToolsVersion);
 
-                if (project == null)
-                {
-                    // The Project constructor adds itself to our collection,
-                    // it is not done by us
-                    project = new Project(fileName, globalProperties, effectiveToolsVersion, this);
-                }
+                // The Project constructor adds itself to our collection, it is not done by us
+                project ??= new Project(fileName, globalProperties, effectiveToolsVersion, this);
 
                 return project;
             }
