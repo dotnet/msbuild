@@ -193,6 +193,32 @@ Copyright (C) Microsoft Corporation. All rights reserved.
   <Target Name="Rebuild" DependsOnTargets="Clean;Build" />
 
   <!--
+    ============================================================
+                                        ProjectReferenceTargets for Static Graph (Cross-Targeting)
+
+    Define the project-to-project calling patterns for graph builds
+    in the cross-targeting (outer build) context.
+
+    The outer build dispatches to inner builds:
+      - Build (via DispatchToInnerBuilds) calls the default targets on inner builds
+      - Clean calls Clean on inner builds
+      - Rebuild calls Clean + Build
+
+    The inner build protocol is defined in Microsoft.Common.CurrentVersion.targets.
+    ============================================================
+  -->
+  <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
+    <ProjectReferenceTargetsForBuild>.default;$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
+    <ProjectReferenceTargetsForClean>Clean;$(ProjectReferenceTargetsForClean)</ProjectReferenceTargetsForClean>
+    <ProjectReferenceTargetsForRebuild>$(ProjectReferenceTargetsForClean);$(ProjectReferenceTargetsForBuild);$(ProjectReferenceTargetsForRebuild)</ProjectReferenceTargetsForRebuild>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
+    <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
+    <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)" Condition=" '$(ProjectReferenceTargetsForClean)' != '' " />
+    <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
+  </ItemGroup>
+
+  <!--
     This will import NuGet restore targets. We need restore to work before any package assets are available.
   -->
   <PropertyGroup>
