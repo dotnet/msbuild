@@ -12,6 +12,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Returns the paths to the various frameworks versions.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class GetFrameworkPath : TaskExtension
     {
         #region ITask Members
