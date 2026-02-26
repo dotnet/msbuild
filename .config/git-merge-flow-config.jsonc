@@ -6,10 +6,6 @@
         "vs16.11": {
             "MergeToBranch": "vs17.8"
         },
-        // Automate opening PRs to merge msbuild's vs17.8 (SDK 8.0.1xx) into vs17.10 (SDK 8.0.3xx, VS until 1/2026)
-        "vs17.8": {
-            "MergeToBranch": "vs17.10"
-        },
         // Automate opening PRs to merge msbuild's vs17.10 (SDK 8.0.3xx) into vs17.11 (SDK 8.0.4xx)
         "vs17.10": {
             "MergeToBranch": "vs17.11"
@@ -34,8 +30,12 @@
         "vs18.3": {
             "MergeToBranch": "vs18.4"
         },
-        // Automate opening PRs to merge msbuild's vs18.4 (VS) into main (VS canary, SDK main & next-feature-band)
+        // Automate opening PRs to merge msbuild's vs18.4 (VS) into vs18.5 (VS)
         "vs18.4": {
+            "MergeToBranch": "vs18.5"
+        },
+        // Automate opening PRs to merge msbuild's vs18.5 (VS) into main (VS canary, SDK main & next-feature-band)
+        "vs18.5": {
             "MergeToBranch": "main"
         }
     }
