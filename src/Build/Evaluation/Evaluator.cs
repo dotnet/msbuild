@@ -1904,7 +1904,7 @@ namespace Microsoft.Build.Evaluation
                     string dotnetExe = Path.Combine(FileUtilities.GetFolderAbove(sdkResult.Path, 5), Constants.DotnetProcessName);
                     if (FileSystems.Default.FileExists(dotnetExe))
                     {
-                        _data.AddSdkResolvedEnvironmentVariable(Constants.DotnetHostPathEnvVarName, dotnetExe);
+                        _data.AddSdkResolvedEnvironmentVariable(EnvironmentVariablesNames.DotnetHostPath, dotnetExe);
                     }
                 }
 

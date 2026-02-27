@@ -11,11 +11,6 @@ namespace Microsoft.Build.Framework
     internal static class Constants
     {
         /// <summary>
-        /// Defines the name of dotnet host path environment variable (e.g  DOTNET_HOST_PATH = C:\msbuild\.dotnet\dotnet.exe).
-        /// </summary>
-        internal const string DotnetHostPathEnvVarName = "DOTNET_HOST_PATH";
-
-        /// <summary>
         /// The project property name used to get the path to the MSBuild assembly.
         /// </summary>
         internal const string RuntimeIdentifierGraphPath = nameof(RuntimeIdentifierGraphPath);
@@ -93,5 +88,52 @@ namespace Microsoft.Build.Framework
         internal const string MSBuildAllProjectsPropertyName = "MSBuildAllProjects";
 
         internal const string TaskHostExplicitlyRequested = "TaskHostExplicitlyRequested";
+    }
+
+    /// <summary>
+    /// Environment variable names used by MSBuild for immutable variable classification.
+    /// These constants are excluded from TASKHOST context to avoid validation overhead.
+    /// </summary>
+    internal static class EnvironmentVariablesNames
+    {
+        /// <summary>
+        /// Name of the environment variable that points to 64-bit program files directory.
+        /// </summary>
+        internal const string ProgramW6432 = "ProgramW6432";
+
+        /// <summary>
+        /// Name of the environment variable that points to program files directory.
+        /// </summary>
+        internal const string ProgramFiles = "ProgramFiles";
+
+        /// <summary>
+        /// Name of the environment variable for .NET Framework installation root.
+        /// </summary>
+        internal const string ComplusInstallRoot = "COMPLUS_INSTALLROOT";
+
+        /// <summary>
+        /// Name of the environment variable for .NET Framework version override.
+        /// </summary>
+        internal const string ComplusVersion = "COMPLUS_VERSION";
+
+        /// <summary>
+        /// Name of the environment variable for reference assembly root path.
+        /// </summary>
+        internal const string ReferenceAssemblyRoot = "ReferenceAssemblyRoot";
+
+        /// <summary>
+        /// Name of the environment variable for .NET Framework installation root (alternate casing).
+        /// </summary>
+        internal const string ComplusInstallRootAlt = "COMPLUS_InstallRoot";
+
+        /// <summary>
+        /// Name of the environment variable for .NET Framework version (alternate casing).
+        /// </summary>
+        internal const string ComplusVersionAlt = "COMPLUS_Version";
+
+        /// <summary>
+        /// Defines the name of dotnet host path environment variable.
+        /// </summary>
+        internal const string DotnetHostPath = "DOTNET_HOST_PATH";
     }
 }

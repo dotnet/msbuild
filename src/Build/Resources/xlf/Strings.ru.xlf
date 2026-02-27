@@ -1002,6 +1002,11 @@ Errors: {3}</source>
         <target state="translated">Сборка задачи была загружена из "{0}", а нужное расположение — "{1}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskCannotModifyImmutableEnvironmentVariable">
+        <source>Cannot modify environment variable '{0}': variable is immutable and must remain constant during the build.</source>
+        <target state="new">Cannot modify environment variable '{0}': variable is immutable and must remain constant during the build.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">Задача "{0}" освободила указанное число ядер ({1}). Теперь общее число ядер, которыми располагает задача, равно {2}.</target>

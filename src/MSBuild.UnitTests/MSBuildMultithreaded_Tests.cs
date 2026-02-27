@@ -62,7 +62,7 @@ namespace Microsoft.Build.Engine.UnitTests
         private bool TestEnvironmentIsolation()
         {
             string mode = IsMultithreadedMode ? "MultiThreaded" : "MultiProcess";
-            string envVarName = $"MSBUILD_MULTITHREADED_TEST_VAR_{Guid.NewGuid():N}";
+            string envVarName = $"TEST_ENV_VAR_MULTITHREADED_{Guid.NewGuid():N}";
             string envVarValue = "TestValue";
 
             // Set environment variable using TaskEnvironment

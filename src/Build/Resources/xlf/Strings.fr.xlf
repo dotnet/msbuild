@@ -1002,6 +1002,11 @@ Erreurs : {3}</target>
         <target state="translated">L’assembly de tâche a été chargé à partir de « {0} » alors que l’emplacement souhaité était « {1} ».</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskCannotModifyImmutableEnvironmentVariable">
+        <source>Cannot modify environment variable '{0}': variable is immutable and must remain constant during the build.</source>
+        <target state="new">Cannot modify environment variable '{0}': variable is immutable and must remain constant during the build.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">La tâche "{0}" a libéré {1} cœur. Elle détient désormais {2} cœurs au total.</target>

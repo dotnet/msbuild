@@ -6,7 +6,6 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Constants = Microsoft.Build.Framework.Constants;
 
 namespace Microsoft.Build.Execution
 {
@@ -32,7 +31,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private static void ValidateDotnetHostPath(ILoggingService loggingService)
         {
-            string? dotnetHostPath = Environment.GetEnvironmentVariable(Constants.DotnetHostPathEnvVarName);
+            string? dotnetHostPath = Environment.GetEnvironmentVariable(EnvironmentVariablesNames.DotnetHostPath);
             if (string.IsNullOrEmpty(dotnetHostPath))
             {
                 return;
