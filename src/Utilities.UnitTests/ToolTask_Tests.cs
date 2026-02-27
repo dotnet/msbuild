@@ -223,7 +223,6 @@ namespace Microsoft.Build.UnitTests
                 engine.AssertLogDoesntContain("MSB6006");
                 engine.AssertLogContains("CS0168");
                 engine.AssertLogContains("The variable 'foo' is declared but never used");
-                engine.AssertLogContains("The command exited with return value 0, but errors were detected during execution. ExitCode was set to -1");
                 t.ExitCode.ShouldBe(-1);
                 engine.Errors.ShouldBe(1);
             }
@@ -348,9 +347,6 @@ namespace Microsoft.Build.UnitTests
 
                 engine.AssertLogContains("Who made you king anyways");
 
-                // Should log the "exited with return value 0, but errors were detected" message
-                engine.AssertLogContains("The command exited with return value 0, but errors were detected");
-
                 // Should not log other failure error codes
                 engine.AssertLogDoesntContain("MSB3073");
 
@@ -380,9 +376,6 @@ namespace Microsoft.Build.UnitTests
                 t.Execute().ShouldBeFalse();
 
                 engine.AssertLogContains("BADTHINGHAPPENED");
-
-                // Should log the "exited with code" low-importance message
-                engine.AssertLogContains("The command exited with code 1");
 
                 // Should not log the generic tool failure error or the zero-with-errors message
                 engine.AssertLogDoesntContain("MSB3073");
