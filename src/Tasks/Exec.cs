@@ -56,6 +56,7 @@ namespace Microsoft.Build.Tasks
         private Encoding _standardErrorEncoding;
         private Encoding _standardOutputEncoding;
         private string _command;
+        private string[] _commandArguments;
 
         // '^' before _any_ character escapes that character, don't escape it.
         private static readonly char[] _charactersToEscape = { '(', ')', '=', ';', '!', ',', '&', ' ' };
@@ -64,7 +65,6 @@ namespace Microsoft.Build.Tasks
 
         #region Properties
 
-        [Required]
         public string Command
         {
             get => _command;
@@ -79,6 +79,16 @@ namespace Microsoft.Build.Tasks
         }
 
         public string WorkingDirectory { get; set; }
+
+        /// <summary>
+        /// Array of command-line arguments to append to the Command.
+        /// Each argument will be properly escaped for the target shell.
+        /// </summary>
+        public string[] CommandArguments
+        {
+            get => _commandArguments;
+            set => _commandArguments = value;
+        }
 
         public bool IgnoreExitCode { get; set; }
 
@@ -191,12 +201,18 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region Methods
+
         /// <summary>
         /// Write out a temporary batch file with the user-specified command in it.
         /// </summary>
         private void CreateTemporaryBatchFile()
         {
-            var encoding = EncodingUtilities.BatchFileEncoding(Command + WorkingDirectory, UseUtf8Encoding);
+            string contentForEncoding = Command + WorkingDirectory;
+            if (CommandArguments != null)
+            {
+                contentForEncoding += string.Join(" ", CommandArguments);
+            }
+            var encoding = EncodingUtilities.BatchFileEncoding(contentForEncoding, UseUtf8Encoding);
 
             // Temporary file with the extension .Exec.bat
             _batchFile = FileUtilities.GetTemporaryFileName(".exec.cmd");
@@ -253,7 +269,56 @@ namespace Microsoft.Build.Tasks
                     sw.WriteLine("#!/bin/sh");
                 }
 
-                sw.WriteLine(Command);
+                // Write the command if provided
+                if (!string.IsNullOrWhiteSpace(Command))
+                {
+                    sw.Write(Command);
+
+                    // Append command arguments if provided
+                    if (CommandArguments != null && CommandArguments.Length > 0)
+                    {
+                        foreach (string arg in CommandArguments)
+                        {
+                            sw.Write(' ');
+                            if (NativeMethodsShared.IsUnixLike)
+                            {
+                                sw.Write(ShellEscapingUtilities.EscapeArgumentForUnix(arg));
+                            }
+                            else
+                            {
+                                sw.Write(ShellEscapingUtilities.EscapeArgumentForWindows(arg));
+                            }
+                        }
+                    }
+                }
+                else if (CommandArguments != null && CommandArguments.Length > 0)
+                {
+                    // If no Command but we have CommandArguments, treat the first argument as the command
+                    // and the rest as arguments. Escape the command if it contains special characters.
+                    if (NativeMethodsShared.IsUnixLike)
+                    {
+                        sw.Write(ShellEscapingUtilities.EscapeArgumentForUnix(CommandArguments[0]));
+                    }
+                    else
+                    {
+                        sw.Write(ShellEscapingUtilities.EscapeArgumentForWindows(CommandArguments[0]));
+                    }
+
+                    for (int i = 1; i < CommandArguments.Length; i++)
+                    {
+                        sw.Write(' ');
+                        if (NativeMethodsShared.IsUnixLike)
+                        {
+                            sw.Write(ShellEscapingUtilities.EscapeArgumentForUnix(CommandArguments[i]));
+                        }
+                        else
+                        {
+                            sw.Write(ShellEscapingUtilities.EscapeArgumentForWindows(CommandArguments[i]));
+                        }
+                    }
+                }
+
+                sw.WriteLine(); // End the command line
 
                 if (!NativeMethodsShared.IsUnixLike)
                 {
@@ -309,18 +374,24 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         protected override bool HandleTaskExecutionErrors()
         {
+            string fullCommand = Command ?? string.Empty;
+            if (CommandArguments != null && CommandArguments.Length > 0)
+            {
+                fullCommand += " " + string.Join(" ", CommandArguments);
+            }
+
             if (IgnoreExitCode)
             {
                 // Don't log when EchoOff and IgnoreExitCode.
                 if (!EchoOff)
                 {
-                    Log.LogMessageFromResources(MessageImportance.Normal, "Exec.CommandFailedNoErrorCode", Command, ExitCode);
+                    Log.LogMessageFromResources(MessageImportance.Normal, "Exec.CommandFailedNoErrorCode", fullCommand, ExitCode);
                 }
                 return true;
             }
 
             // Don't emit expanded form of Command when EchoOff is set.
-            string commandForLog = EchoOff ? "..." : Command;
+            string commandForLog = EchoOff ? "..." : fullCommand;
             if (ExitCode == NativeMethods.SE_ERR_ACCESSDENIED)
             {
                 Log.LogErrorWithCodeFromResources("Exec.CommandFailedAccessDenied", commandForLog, ExitCode);
@@ -355,7 +426,12 @@ namespace Microsoft.Build.Tasks
             // Dont print the command line if Echo is Off.
             if (!EchoOff)
             {
-                base.LogToolCommand(Command);
+                string commandToLog = Command ?? string.Empty;
+                if (CommandArguments != null && CommandArguments.Length > 0)
+                {
+                    commandToLog += " " + string.Join(" ", CommandArguments);
+                }
+                base.LogToolCommand(commandToLog);
             }
         }
 
@@ -445,8 +521,8 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            // Make sure that at least the Command property was set
-            if (Command.Trim().Length == 0)
+            // Make sure that at least the Command property was set, unless CommandArguments is provided
+            if (string.IsNullOrWhiteSpace(Command) && (CommandArguments == null || CommandArguments.Length == 0))
             {
                 Log.LogErrorWithCodeFromResources("Exec.MissingCommandError");
                 return false;

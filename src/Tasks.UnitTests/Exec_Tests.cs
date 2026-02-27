@@ -1058,6 +1058,134 @@ echo line 3"" />
                 exec.ConsoleOutput[0].ItemSpec.ShouldBe(lineWithLeadingWhitespace);
             }
         }
+
+        [Fact]
+        public void CommandArgumentsBasic()
+        {
+            Exec exec = PrepareExec("echo");
+            exec.CommandArguments = new[] { "Hello", "World" };
+            bool result = exec.Execute();
+
+            result.ShouldBeTrue();
+            ((MockEngine)exec.BuildEngine).AssertLogContains("Hello");
+            ((MockEngine)exec.BuildEngine).AssertLogContains("World");
+        }
+
+        [Fact]
+        public void CommandArgumentsWithSpaces()
+        {
+            Exec exec = PrepareExec("echo");
+            exec.CommandArguments = new[] { "Hello World", "Test Message" };
+            bool result = exec.Execute();
+
+            result.ShouldBeTrue();
+            ((MockEngine)exec.BuildEngine).AssertLogContains("Hello World");
+            ((MockEngine)exec.BuildEngine).AssertLogContains("Test Message");
+        }
+
+        [Fact]
+        public void CommandArgumentsWithSpecialCharacters()
+        {
+            string arg = NativeMethodsShared.IsWindows ? "test&echo" : "test;echo";
+            Exec exec = PrepareExec("echo");
+            exec.CommandArguments = new[] { arg };
+            bool result = exec.Execute();
+
+            result.ShouldBeTrue();
+            ((MockEngine)exec.BuildEngine).AssertLogContains(arg);
+        }
+
+        [Fact]
+        public void CommandArgumentsWithQuotes()
+        {
+            Exec exec = PrepareExec("echo");
+            exec.CommandArguments = new[] { "test\"quote" };
+            bool result = exec.Execute();
+
+            result.ShouldBeTrue();
+            ((MockEngine)exec.BuildEngine).AssertLogContains("quote");
+        }
+
+        [Fact]
+        public void CommandArgumentsOnly()
+        {
+            Exec exec = PrepareExec("");
+            exec.CommandArguments = new[] { "echo", "Hello" };
+            bool result = exec.Execute();
+
+            result.ShouldBeTrue();
+            ((MockEngine)exec.BuildEngine).AssertLogContains("Hello");
+        }
+
+        [Fact]
+        public void CommandArgumentsEmpty()
+        {
+            Exec exec = PrepareExec("echo");
+            exec.CommandArguments = new[] { "" };
+            bool result = exec.Execute();
+
+            result.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void CommandArgumentsWithPercent()
+        {
+            if (NativeMethodsShared.IsWindows)
+            {
+                Exec exec = PrepareExec("echo");
+                exec.CommandArguments = new[] { "test%PATH%" };
+                bool result = exec.Execute();
+
+                result.ShouldBeTrue();
+                ((MockEngine)exec.BuildEngine).AssertLogContains("test%PATH%");
+            }
+        }
+
+        [UnixOnlyFact]
+        public void CommandArgumentsWithSingleQuoteUnix()
+        {
+            Exec exec = PrepareExec("echo");
+            exec.CommandArguments = new[] { "test'quote" };
+            bool result = exec.Execute();
+
+            result.ShouldBeTrue();
+            ((MockEngine)exec.BuildEngine).AssertLogContains("test'quote");
+        }
+
+        [Fact]
+        public void CommandArgumentsCombinedWithCommand()
+        {
+            Exec exec = PrepareExec("echo Start");
+            exec.CommandArguments = new[] { "Middle", "End" };
+            bool result = exec.Execute();
+
+            result.ShouldBeTrue();
+            ((MockEngine)exec.BuildEngine).AssertLogContains("Start");
+            ((MockEngine)exec.BuildEngine).AssertLogContains("Middle");
+            ((MockEngine)exec.BuildEngine).AssertLogContains("End");
+        }
+
+        [WindowsOnlyFact]
+        public void CommandArgumentsWithParentheses()
+        {
+            Exec exec = PrepareExec("echo");
+            exec.CommandArguments = new[] { "test(with)parens" };
+            bool result = exec.Execute();
+
+            result.ShouldBeTrue();
+            ((MockEngine)exec.BuildEngine).AssertLogContains("test(with)parens");
+        }
+
+        [Fact]
+        public void NoCommandNoArgumentsShouldFail()
+        {
+            Exec exec = PrepareExec("");
+            exec.CommandArguments = Array.Empty<string>();
+            bool result = exec.Execute();
+
+            result.ShouldBeFalse();
+            ((MockEngine)exec.BuildEngine).AssertLogContains("MSB3072");
+        }
     }
 
     internal sealed class ExecWrapper : Exec
