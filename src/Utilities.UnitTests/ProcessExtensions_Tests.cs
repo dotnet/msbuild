@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests
             {
                 await Task.Delay(300);
                 var sw = Stopwatch.StartNew();
-                p.TryGetCommandLine(out string commandLine);
+                p.TryGetCommandLine(out string commandLine).ShouldBeTrue();
                 sw.Stop();
                 _output.WriteLine($"TryGetCommandLine elapsed: {sw.Elapsed.TotalMilliseconds:F2} ms");
 
