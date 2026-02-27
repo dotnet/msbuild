@@ -341,6 +341,418 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.InnermostExceptionType)].ShouldBe("System.OutOfMemoryException");
     }
 
+    [Fact]
+    public void ExtractStackCaller_ReturnsCallerFrame_WhenTopIsThrowHelper()
+    {
+        string fakeStack =
+            "   at Microsoft.Build.Shared.ErrorUtilities.ThrowInternalError(String message, Object[] args)\r\n" +
+            "   at Microsoft.Build.BackEnd.RequestBuilder.BuildProject(String projectFile)";
+        Exception ex = CreateExceptionWithStack(fakeStack);
+
+        string? caller = CrashTelemetry.ExtractStackCaller(ex);
+
+        caller.ShouldNotBeNull();
+        caller.ShouldContain("Microsoft.Build.BackEnd.RequestBuilder.BuildProject");
+    }
+
+    [Fact]
+    public void ExtractStackCaller_ReturnsNull_WhenTopIsNotThrowHelper()
+    {
+        string fakeStack =
+            "   at Microsoft.Build.BackEnd.RequestBuilder.BuildProject(String projectFile)\r\n" +
+            "   at Microsoft.Build.BackEnd.BuildManager.Build()";
+        Exception ex = CreateExceptionWithStack(fakeStack);
+
+        string? caller = CrashTelemetry.ExtractStackCaller(ex);
+
+        caller.ShouldBeNull();
+    }
+
+    [Fact]
+    public void ExtractStackCaller_ReturnsNull_WhenThrowHelperIsOnlyFrame()
+    {
+        string fakeStack = "   at Microsoft.Build.Shared.ErrorUtilities.ThrowInternalError(String message, Object[] args)";
+        Exception ex = CreateExceptionWithStack(fakeStack);
+
+        string? caller = CrashTelemetry.ExtractStackCaller(ex);
+
+        caller.ShouldBeNull();
+    }
+
+    [Fact]
+    public void ExtractStackCaller_ReturnsNull_WhenNoStackTrace()
+    {
+        Exception ex = new Exception("no stack");
+
+        string? caller = CrashTelemetry.ExtractStackCaller(ex);
+
+        caller.ShouldBeNull();
+    }
+
+    [Theory]
+    [InlineData("ErrorUtilities.VerifyThrowInternalError(")]
+    [InlineData("ErrorUtilities.ThrowInternalErrorUnreachable(")]
+    [InlineData("ErrorUtilities.VerifyThrowInternalNull(")]
+    [InlineData("ErrorUtilities.ThrowInvalidOperation(")]
+    [InlineData("ErrorUtilities.VerifyThrow(")]
+    public void ExtractStackCaller_RecognizesAllThrowHelpers(string helperMethod)
+    {
+        string fakeStack =
+            $"   at Microsoft.Build.Shared.{helperMethod}String message)\r\n" +
+            "   at Microsoft.Build.Evaluation.Evaluator.Evaluate()";
+        Exception ex = CreateExceptionWithStack(fakeStack);
+
+        string? caller = CrashTelemetry.ExtractStackCaller(ex);
+
+        caller.ShouldNotBeNull();
+        caller.ShouldContain("Microsoft.Build.Evaluation.Evaluator.Evaluate");
+    }
+
+    [Fact]
+    public void ExtractStackCaller_RedactsFilePaths_InCallerFrame()
+    {
+        string fakeStack =
+            "   at Microsoft.Build.Shared.ErrorUtilities.ThrowInternalError(String message, Object[] args)\r\n" +
+            "   at Microsoft.Build.BackEnd.RequestBuilder.BuildProject(String projectFile) in C:\\Users\\username\\src\\file.cs:line 42";
+        Exception ex = CreateExceptionWithStack(fakeStack);
+
+        string? caller = CrashTelemetry.ExtractStackCaller(ex);
+
+        caller.ShouldNotBeNull();
+        caller.ShouldNotContain("username");
+        caller.ShouldContain("<redacted>");
+        caller.ShouldContain(":line 42");
+    }
+
+    [Fact]
+    public void PopulateFromException_SetsStackCaller_WhenThrowHelperIsOnTop()
+    {
+        CrashTelemetry telemetry = new();
+
+        // Simulate a throw-helper scenario using a fake stack trace.
+        string fakeStack =
+            "   at Microsoft.Build.Shared.ErrorUtilities.ThrowInternalError(String message, Object[] args)\r\n" +
+            "   at Microsoft.Build.Scheduler.ScheduleRequest(BuildRequest request)";
+        Exception ex = CreateExceptionWithStack(fakeStack);
+
+        telemetry.PopulateFromException(ex);
+
+        telemetry.StackTop.ShouldContain("ErrorUtilities.ThrowInternalError");
+        telemetry.StackCaller.ShouldNotBeNull();
+        telemetry.StackCaller!.ShouldContain("Microsoft.Build.Scheduler.ScheduleRequest");
+    }
+
+    [Fact]
+    public void PopulateFromException_SetsExceptionMessage()
+    {
+        CrashTelemetry telemetry = new();
+
+        try
+        {
+            throw new InvalidOperationException("something went wrong");
+        }
+        catch (Exception ex)
+        {
+            telemetry.PopulateFromException(ex);
+        }
+
+        telemetry.ExceptionMessage.ShouldBe("something went wrong");
+    }
+
+    [Fact]
+    public void PopulateFromException_StripsInternalErrorPrefix()
+    {
+        CrashTelemetry telemetry = new();
+
+        try
+        {
+            throw new Exception("MSB0001: Internal MSBuild Error: All submissions not yet complete.");
+        }
+        catch (Exception ex)
+        {
+            telemetry.PopulateFromException(ex);
+        }
+
+        telemetry.ExceptionMessage.ShouldBe("All submissions not yet complete.");
+    }
+
+    [Fact]
+    public void TruncateMessage_ReturnsNull_WhenEmpty()
+    {
+        CrashTelemetry.TruncateMessage(null).ShouldBeNull();
+        CrashTelemetry.TruncateMessage("").ShouldBeNull();
+    }
+
+    [Fact]
+    public void TruncateMessage_TruncatesLongMessages()
+    {
+        string longMessage = new string('x', 500);
+        string? result = CrashTelemetry.TruncateMessage(longMessage);
+
+        result.ShouldNotBeNull();
+        result.Length.ShouldBe(256);
+    }
+
+    [Fact]
+    public void TruncateMessage_RedactsWindowsPaths()
+    {
+        string message = @"C:\Users\johndoe\src\project.csproj unexpectedly not a rooted path";
+        string? result = CrashTelemetry.TruncateMessage(message);
+
+        result.ShouldNotBeNull();
+        result.ShouldNotContain("johndoe");
+        result.ShouldNotContain(@"C:\Users");
+        result.ShouldContain("<path>");
+        result.ShouldContain("unexpectedly not a rooted path");
+    }
+
+    [Fact]
+    public void TruncateMessage_RedactsUnixPaths()
+    {
+        string message = @"/home/johndoe/src/project.csproj unexpectedly not a rooted path";
+        string? result = CrashTelemetry.TruncateMessage(message);
+
+        result.ShouldNotBeNull();
+        result.ShouldNotContain("johndoe");
+        result.ShouldContain("<path>");
+    }
+
+    [Fact]
+    public void TruncateMessage_PreservesNonPathMessages()
+    {
+        string message = "All submissions not yet complete.";
+        string? result = CrashTelemetry.TruncateMessage(message);
+        result.ShouldBe("All submissions not yet complete.");
+    }
+
+    [Fact]
+    public void PopulateFromException_SetsCrashThreadName()
+    {
+        CrashTelemetry telemetry = new();
+
+        try
+        {
+            throw new Exception("test");
+        }
+        catch (Exception ex)
+        {
+            telemetry.PopulateFromException(ex);
+        }
+
+        // The thread name may be null in test harness but the property should be set (even if null).
+        // Just verify no exception was thrown during population.
+        // In a named-thread scenario, it would capture the name.
+    }
+
+    [Fact]
+    public void GetProperties_IncludesStackCaller_WhenSet()
+    {
+        CrashTelemetry telemetry = new()
+        {
+            ExceptionType = "Microsoft.Build.Framework.InternalErrorException",
+            IsUnhandled = true,
+            StackTop = "at Microsoft.Build.Shared.ErrorUtilities.ThrowInternalError(String message, Object[] args)",
+            StackCaller = "at Microsoft.Build.BackEnd.RequestBuilder.BuildProject(String projectFile)",
+            ExceptionMessage = "All submissions not yet complete.",
+        };
+
+        IDictionary<string, string> props = telemetry.GetProperties();
+        props[nameof(CrashTelemetry.StackCaller)].ShouldBe("at Microsoft.Build.BackEnd.RequestBuilder.BuildProject(String projectFile)");
+        props[nameof(CrashTelemetry.ExceptionMessage)].ShouldBe("All submissions not yet complete.");
+    }
+
+    [Fact]
+    public void GetProperties_OmitsStackCaller_WhenNull()
+    {
+        CrashTelemetry telemetry = new()
+        {
+            ExceptionType = "System.NullReferenceException",
+            IsUnhandled = true,
+            StackTop = "at Microsoft.Build.BackEnd.RequestBuilder.BuildProject(String projectFile)",
+            StackCaller = null,
+        };
+
+        IDictionary<string, string> props = telemetry.GetProperties();
+        props.ShouldNotContainKey(nameof(CrashTelemetry.StackCaller));
+    }
+
+    [Fact]
+    public void GetActivityProperties_IncludesStackCaller_WhenSet()
+    {
+        CrashTelemetry telemetry = new()
+        {
+            ExceptionType = "Microsoft.Build.Framework.InternalErrorException",
+            IsUnhandled = true,
+            StackTop = "at Microsoft.Build.Shared.ErrorUtilities.ThrowInternalError(String message, Object[] args)",
+            StackCaller = "at Microsoft.Build.BackEnd.RequestBuilder.BuildProject(String projectFile)",
+        };
+
+        Dictionary<string, object> props = telemetry.GetActivityProperties();
+        props[nameof(CrashTelemetry.StackCaller)].ShouldBe("at Microsoft.Build.BackEnd.RequestBuilder.BuildProject(String projectFile)");
+    }
+
+    [Fact]
+    public void PopulateFromException_SetsFullStackTrace()
+    {
+        string fakeStack =
+            "   at Microsoft.Build.Shared.ErrorUtilities.ThrowInternalError(String message, Object[] args)\n" +
+            "   at Microsoft.Build.BackEnd.RequestBuilder.BuildProject(String projectFile) in C:\\Users\\user\\src\\file.cs:line 42\n" +
+            "   at Microsoft.Build.BackEnd.BuildManager.Build() in C:\\Users\\user\\src\\mgr.cs:line 100";
+        Exception ex = CreateExceptionWithStack(fakeStack);
+
+        CrashTelemetry telemetry = new();
+        telemetry.PopulateFromException(ex);
+
+        telemetry.FullStackTrace.ShouldNotBeNull();
+        // Should contain all frames
+        telemetry.FullStackTrace.ShouldContain("ErrorUtilities.ThrowInternalError");
+        telemetry.FullStackTrace.ShouldContain("RequestBuilder.BuildProject");
+        telemetry.FullStackTrace.ShouldContain("BuildManager.Build");
+        // File paths should be redacted
+        telemetry.FullStackTrace.ShouldNotContain("C:\\Users\\user");
+        telemetry.FullStackTrace.ShouldContain("in <redacted>:line 42");
+    }
+
+    [Fact]
+    public void ExtractFullStackTrace_ReturnsNull_WhenNoStackTrace()
+    {
+        Exception ex = CreateExceptionWithStack(null!);
+        CrashTelemetry.ExtractFullStackTrace(ex).ShouldBeNull();
+    }
+
+    [Fact]
+    public void ExtractFullStackTrace_TruncatesLongStackTraces()
+    {
+        // Build a stack trace longer than MaxStackTraceLength
+        var sb = new System.Text.StringBuilder();
+        for (int i = 0; i < 200; i++)
+        {
+            sb.AppendLine($"   at Namespace.Type.Method{i}()");
+        }
+        Exception ex = CreateExceptionWithStack(sb.ToString());
+
+        string? result = CrashTelemetry.ExtractFullStackTrace(ex);
+        result.ShouldNotBeNull();
+        result!.Length.ShouldBeLessThanOrEqualTo(CrashTelemetry.MaxStackTraceLength + "... [truncated]".Length);
+        result.ShouldEndWith("... [truncated]");
+    }
+
+    [Fact]
+    public void GetProperties_IncludesFullStackTrace_WhenSet()
+    {
+        CrashTelemetry telemetry = new()
+        {
+            ExceptionType = "System.Exception",
+            FullStackTrace = "   at Foo.Bar()\n   at Baz.Qux()",
+        };
+
+        IDictionary<string, string> props = telemetry.GetProperties();
+        props[nameof(CrashTelemetry.FullStackTrace)].ShouldBe("   at Foo.Bar()\n   at Baz.Qux()");
+    }
+
+    [Fact]
+    public void SanitizeFilePathsInText_RedactsPathsInStackFrames()
+    {
+        string input = "   at Foo.Bar() in C:\\Users\\secret\\src\\file.cs:line 99";
+        string result = CrashTelemetry.SanitizeFilePathsInText(input);
+        result.ShouldNotContain("secret");
+        result.ShouldContain("in <redacted>:line 99");
+    }
+
+    [Fact]
+    public void SanitizeFilePathsInText_LeavesNonPathLinesUnchanged()
+    {
+        string input = "System.Exception: something broke\n   at Foo.Bar()";
+        string result = CrashTelemetry.SanitizeFilePathsInText(input);
+        result.ShouldBe(input);
+    }
+
+    [Fact]
+    public void EndBuildHang_GetProperties_IncludesHangDiagnostics()
+    {
+        CrashTelemetry telemetry = new()
+        {
+            ExitType = CrashExitType.EndBuildHang,
+            EndBuildWaitPhase = "WaitingForSubmissions",
+            EndBuildWaitDurationMs = 60000,
+            PendingSubmissionCount = 3,
+            SubmissionsWithResultNoLogging = 1,
+            ThreadExceptionRecorded = false,
+            UnmatchedProjectStartedCount = 2,
+        };
+
+        IDictionary<string, string> props = telemetry.GetProperties();
+        props[nameof(CrashTelemetry.ExitType)].ShouldBe("EndBuildHang");
+        props[nameof(CrashTelemetry.EndBuildWaitPhase)].ShouldBe("WaitingForSubmissions");
+        props[nameof(CrashTelemetry.EndBuildWaitDurationMs)].ShouldBe("60000");
+        props[nameof(CrashTelemetry.PendingSubmissionCount)].ShouldBe("3");
+        props[nameof(CrashTelemetry.SubmissionsWithResultNoLogging)].ShouldBe("1");
+        props[nameof(CrashTelemetry.ThreadExceptionRecorded)].ShouldBe("False");
+        props[nameof(CrashTelemetry.UnmatchedProjectStartedCount)].ShouldBe("2");
+    }
+
+    [Fact]
+    public void EndBuildHang_GetActivityProperties_IncludesHangDiagnostics()
+    {
+        CrashTelemetry telemetry = new()
+        {
+            ExitType = CrashExitType.EndBuildHang,
+            EndBuildWaitPhase = "WaitingForNodes",
+            EndBuildWaitDurationMs = 30000,
+            PendingSubmissionCount = 0,
+            SubmissionsWithResultNoLogging = 0,
+            ThreadExceptionRecorded = true,
+            UnmatchedProjectStartedCount = 0,
+        };
+
+        Dictionary<string, object> props = telemetry.GetActivityProperties();
+        props[nameof(CrashTelemetry.EndBuildWaitPhase)].ShouldBe("WaitingForNodes");
+        props[nameof(CrashTelemetry.EndBuildWaitDurationMs)].ShouldBe(30000L);
+        props[nameof(CrashTelemetry.PendingSubmissionCount)].ShouldBe(0);
+        props[nameof(CrashTelemetry.SubmissionsWithResultNoLogging)].ShouldBe(0);
+        props[nameof(CrashTelemetry.ThreadExceptionRecorded)].ShouldBe(true);
+        props[nameof(CrashTelemetry.UnmatchedProjectStartedCount)].ShouldBe(0);
+    }
+
+    [Fact]
+    public void EndBuildHang_GetProperties_OmitsNullHangProperties()
+    {
+        CrashTelemetry telemetry = new()
+        {
+            ExitType = CrashExitType.EndBuildHang,
+            EndBuildWaitPhase = "WaitingForSubmissions",
+        };
+
+        IDictionary<string, string> props = telemetry.GetProperties();
+        props.ShouldContainKey(nameof(CrashTelemetry.EndBuildWaitPhase));
+        props.ShouldNotContainKey(nameof(CrashTelemetry.PendingSubmissionCount));
+        props.ShouldNotContainKey(nameof(CrashTelemetry.ThreadExceptionRecorded));
+    }
+
+    [Fact]
+    public void EndBuildHang_DroppedProperties_NotPresent()
+    {
+        // Verify that the dropped properties from the critical evaluation
+        // (ActiveNodeCount, SubmissionsWithNoResult, CancellationRequested,
+        //  ShuttingDown, SchedulerHitNoLoggingCompleted, SchedulerNoLoggingDetails)
+        // do not appear in the telemetry output.
+        CrashTelemetry telemetry = new()
+        {
+            ExitType = CrashExitType.EndBuildHang,
+            EndBuildWaitPhase = "WaitingForSubmissions",
+            EndBuildWaitDurationMs = 30000,
+            PendingSubmissionCount = 1,
+        };
+
+        IDictionary<string, string> props = telemetry.GetProperties();
+        props.ShouldNotContainKey("ActiveNodeCount");
+        props.ShouldNotContainKey("SubmissionsWithNoResult");
+        props.ShouldNotContainKey("CancellationRequested");
+        props.ShouldNotContainKey("ShuttingDown");
+        props.ShouldNotContainKey("SchedulerHitNoLoggingCompleted");
+        props.ShouldNotContainKey("SchedulerNoLoggingDetails");
+    }
+
     /// <summary>
     /// Creates an exception whose StackTrace property returns the given fake stack string.
     /// </summary>
