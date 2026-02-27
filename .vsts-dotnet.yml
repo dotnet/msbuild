@@ -92,6 +92,23 @@ extends:
         suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
 
     stages:
+    # Fail early if experimental or performance branches are detected
+    - ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/'), startsWith(variables['Build.SourceBranch'], 'refs/heads/perf/')) }}:
+      - stage: branch_validation
+        displayName: Branch Validation
+        jobs:
+        - job: fail_exp_perf_branches
+          displayName: Fail for exp/ or perf/ branches
+          steps:
+          - checkout: none
+          - powershell: |
+              $branch = "$(Build.SourceBranch)"
+              Write-Host "##vso[task.logissue type=error]Experimental and performance branches are not supported in this pipeline, use dedicated pipeline for experimental or performance branches."
+              Write-Host "##vso[task.logissue type=error]Current branch: $branch"
+              Write-Host "##vso[task.complete result=Failed;]Pipeline execution stopped for unsupported branch."
+              exit 1
+            displayName: 'Validate branch type'
+
     - ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/vs'), eq(variables['Build.SourceBranch'], 'refs/heads/main')) }}:
       - stage: localization
         displayName: Localization
@@ -122,7 +139,11 @@ extends:
 
     - stage: build
       displayName: Build
-      dependsOn: [] # empty dependency list to enable parallelization with localization stage
+      dependsOn: 
+      - ${{ if or(startsWith(variables['Build.SourceBranch'], 'refs/heads/exp/'), startsWith(variables['Build.SourceBranch'], 'refs/heads/perf/')) }}:
+        - branch_validation
+      - ${{ else }}:
+        - [] # empty dependency list to enable parallelization with localization stage
       jobs:
       - template: /azure-pipelines/.vsts-dotnet-build-jobs.yml@self
         parameters:
