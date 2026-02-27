@@ -820,6 +820,15 @@
       LOCALIZATION:  Do not localize the following words: ProjectGraph, ProjectReference, ToolsVersion.
     </note>
       </trans-unit>
+      <trans-unit id="ProjectGraphProjectFileCannotBeLoadedWithReferrers">
+        <source>Referenced by: {0}. {1}</source>
+        <target state="new">Referenced by: {0}. {1}</target>
+        <note>
+      This message is prepended to the original error when a referenced project file cannot be loaded during static graph construction.
+      {0} is a comma-separated list of projects that reference the failed project
+      {1} is the complete original error message
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectImportSkippedExpressionEvaluatedToEmpty">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the expression evaluating to an empty string.</source>
         <target state="translated">因為運算式評估為空字串，所以專案 "{0}" 未在 ({2},{3}) 由 "{1}" 匯入。</target>
