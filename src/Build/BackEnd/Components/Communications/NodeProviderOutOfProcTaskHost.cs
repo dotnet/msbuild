@@ -441,15 +441,16 @@ namespace Microsoft.Build.BackEnd
             bool isArm64 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64);
             bool isCLR2 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2);
 
-            // Unsupported combinations
-            if (isArm64 && isCLR2)
-            {
-                ErrorUtilities.ThrowInternalError("ARM64 CLR2 task hosts are not supported.");
-            }
-
             if (isCLR2)
             {
-                return isX64 ? Path.Combine(GetOrInitializeX64Clr2Path(toolName), toolName) : Path.Combine(GetOrInitializeX32Clr2Path(toolName), toolName);
+                if (isArm64)
+                {
+                    ErrorUtilities.ThrowInternalError("ARM64 CLR2 task hosts are not supported.");
+                }
+
+                return isX64
+                    ? Path.Combine(GetOrInitializeX64Clr2Path(toolName), toolName)
+                    : Path.Combine(GetOrInitializeX32Clr2Path(toolName), toolName);
             }
 
             if (isX64)
@@ -666,7 +667,7 @@ namespace Microsoft.Build.BackEnd
 
             if (nodeLaunchData.MSBuildLocation == null)
             {
-                return false;
+                return default;
             }
 
             CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext, nodeLaunchData.MSBuildLocation);
@@ -725,7 +726,7 @@ namespace Microsoft.Build.BackEnd
                     : new NodeLaunchData(
                         appHostPath,
                         commandLineArgs,
-                        new Handshake(hostContext, predefinedToolsDirectory: msbuildAssemblyPath),
+                        new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath),
                         dotnetOverrides);
             }
 
@@ -734,7 +735,7 @@ namespace Microsoft.Build.BackEnd
             return new NodeLaunchData(
                 dotnetHostPath,
                 $"\"{Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName)}\" {commandLineArgs}",
-                new Handshake(hostContext, predefinedToolsDirectory: msbuildAssemblyPath));
+                new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath));
         }
 
         private string BuildCommandLineArgs(bool nodeReuseEnabled) => $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuseEnabled} /low:{ComponentHost.BuildParameters.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";

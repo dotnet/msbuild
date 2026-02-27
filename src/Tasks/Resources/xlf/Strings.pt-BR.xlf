@@ -1264,6 +1264,26 @@
         <target state="translated">MSB3557: Erro(s) ao gerar recursos fortemente tipados para o arquivo "{0}".</target>
         <note>{StrBegin="MSB3557: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedInvalidIdentifier">
+        <source>MSB3828: Skipping strongly typed resource property generation for resource "{0}": the name cannot be converted to a valid identifier.</source>
+        <target state="new">MSB3828: Skipping strongly typed resource property generation for resource "{0}": the name cannot be converted to a valid identifier.</target>
+        <note>{StrBegin="MSB3828: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedNameCollision">
+        <source>MSB3829: Skipping strongly typed resource property generation for resource "{0}": a name collision exists with resource "{1}" after identifier normalization.</source>
+        <target state="new">MSB3829: Skipping strongly typed resource property generation for resource "{0}": a name collision exists with resource "{1}" after identifier normalization.</target>
+        <note>{StrBegin="MSB3829: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedReservedName">
+        <source>MSB3827: Skipping strongly typed resource property generation for resource "{0}": the name conflicts with a reserved name. Reserved names: {1}.</source>
+        <target state="new">MSB3827: Skipping strongly typed resource property generation for resource "{0}": the name conflicts with a reserved name. Reserved names: {1}.</target>
+        <note>{StrBegin="MSB3827: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedVoidType">
+        <source>MSB3830: Skipping strongly typed resource property generation for resource "{0}": the resource value type is void, which cannot be used as a property type.</source>
+        <target state="new">MSB3830: Skipping strongly typed resource property generation for resource "{0}": the resource value type is void, which cannot be used as a property type.</target>
+        <note>{StrBegin="MSB3830: "}</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.UnknownFileExtension">
         <source>MSB3558: Unsupported file extension "{0}" on file "{1}".</source>
         <target state="translated">MSB3558: Não há suporte para a extensão de arquivo "{0}" no arquivo "{1}".</target>

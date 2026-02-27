@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+
 using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.BackEnd
