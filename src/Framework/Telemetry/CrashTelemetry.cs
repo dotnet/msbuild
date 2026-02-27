@@ -700,7 +700,8 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
 
         if (sanitized.Length > MaxStackTraceLength)
         {
-            sanitized = sanitized.Substring(0, MaxStackTraceLength) + "... [truncated]";
+            const string truncationSuffix = "... [truncated]";
+            sanitized = sanitized.Substring(0, MaxStackTraceLength - truncationSuffix.Length) + truncationSuffix;
         }
 
         return sanitized;

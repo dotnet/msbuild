@@ -633,7 +633,7 @@ public class CrashTelemetry_Tests
 
         string? result = CrashTelemetry.ExtractFullStackTrace(ex);
         result.ShouldNotBeNull();
-        result!.Length.ShouldBeLessThanOrEqualTo(CrashTelemetry.MaxStackTraceLength + "... [truncated]".Length);
+        result!.Length.ShouldBeLessThanOrEqualTo(CrashTelemetry.MaxStackTraceLength);
         result.ShouldEndWith("... [truncated]");
     }
 
