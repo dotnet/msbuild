@@ -3165,13 +3165,70 @@ EndGlobal
                 </Project>
                 """;
 
+            (bool success, string output) = RunMSBuildWithStdinProject(projectContent, "-nologo -noautoresponse -tl:off");
+
+            _output.WriteLine(output);
+            success.ShouldBeTrue(output);
+            output.ShouldContain("Hello from stdin!");
+        }
+
+        [Fact]
+        public void BuildProjectPipedViaStdin_WithRestore()
+        {
+            // A project with a custom Restore target followed by a Build target.
+            // This verifies that -restore works with stdin projects: restore clears the
+            // ProjectRootElementCache but the project must still be findable for the
+            // subsequent default build (Build target).
+            string projectContent = """
+                <Project DefaultTargets="Build">
+                  <Target Name="Restore">
+                    <Message Text="Restore ran!" Importance="High" />
+                  </Target>
+                  <Target Name="Build">
+                    <Message Text="Build ran!" Importance="High" />
+                  </Target>
+                </Project>
+                """;
+
+            (bool success, string output) = RunMSBuildWithStdinProject(projectContent, "-nologo -noautoresponse -tl:off -restore");
+
+            _output.WriteLine(output);
+            success.ShouldBeTrue(output);
+            output.ShouldContain("Restore ran!");
+            output.ShouldContain("Build ran!");
+        }
+
+        [Fact]
+        public void BuildProjectPipedViaStdin_SpecificTarget()
+        {
+            string projectContent = """
+                <Project>
+                  <Target Name="Greet">
+                    <Message Text="Greetings from stdin!" Importance="High" />
+                  </Target>
+                </Project>
+                """;
+
+            (bool success, string output) = RunMSBuildWithStdinProject(projectContent, "-nologo -noautoresponse -tl:off -t:Greet");
+
+            _output.WriteLine(output);
+            success.ShouldBeTrue(output);
+            output.ShouldContain("Greetings from stdin!");
+        }
+
+        /// <summary>
+        /// Spawns MSBuild as a subprocess and pipes <paramref name="projectContent"/> to its stdin.
+        /// Returns the exit success flag and combined stdout+stderr output.
+        /// </summary>
+        private (bool success, string output) RunMSBuildWithStdinProject(string projectContent, string extraArguments)
+        {
             string msbuildExe = RunnerUtilities.PathToCurrentlyRunningMsBuildExe;
 #if FEATURE_RUN_EXE_IN_TESTS
             string executable = msbuildExe;
-            string arguments = "-nologo -noautoresponse -tl:off";
+            string arguments = extraArguments;
 #else
             string executable = EnvironmentProvider.GetDotnetExePath();
-            string arguments = $"\"{msbuildExe}\" -nologo -noautoresponse -tl:off";
+            string arguments = $"\"{msbuildExe}\" {extraArguments}";
 #endif
 
             using var testEnvironment = TestEnvironment.Create(_output);
@@ -3207,15 +3264,14 @@ EndGlobal
                     p.Kill();
                     throw new TimeoutException($"MSBuild process did not exit within 30 seconds when reading project from stdin.");
                 }
+
                 // Wait for output/error streams to be fully processed.
                 p.WaitForExit();
 
                 success = p.ExitCode == 0;
             }
 
-            _output.WriteLine(output);
-            success.ShouldBeTrue(output);
-            output.ShouldContain("Hello from stdin!");
+            return (success, output);
         }
 
         private string CopyMSBuild()

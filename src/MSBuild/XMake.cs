@@ -846,16 +846,12 @@ namespace Microsoft.Build.CommandLine
                                 Project project;
                                 if (s_stdinProjectContent != null)
                                 {
-                                    using StringReader stringReader = new StringReader(s_stdinProjectContent);
-                                    using XmlReader xmlReader = XmlReader.Create(stringReader);
                                     // update global property and restore property state to work with streamed project content
                                     restoreProperties.Add("_BuildNonexistentProjectsByDefault", bool.TrueString);
                                     restoreProperties.Add("RestoreUseSkipNonexistentTargets", bool.FalseString);
                                     collection.SetGlobalProperty("_BuildNonexistentProjectsByDefault", bool.TrueString);
                                     collection.SetGlobalProperty("RestoreUseSkipNonexistentTargets", bool.FalseString);
-                                    project = collection.LoadProject(xmlReader);
-                                    // need to name the project to make it available to the rest of the build
-                                    project.FullPath = projectFile;
+                                    (project, _) = LoadStdinProject(collection, projectFile);
                                 }
                                 else
                                 {
@@ -1370,8 +1366,9 @@ namespace Microsoft.Build.CommandLine
             bool success = true;
 
             ProjectCollection projectCollection = null;
-            // Holds a strong reference to the in-memory ProjectRootElement for stdin input, ensuring the
+            // Holds a strong reference to the in-memory Project for stdin input, ensuring the
             // weak-reference cache in ProjectCollection does not lose the entry during the build.
+            Project stdinProject = null;
             Construction.ProjectRootElement stdinXml = null;
             bool onlyLogCriticalEvents = false;
 
@@ -1478,20 +1475,16 @@ namespace Microsoft.Build.CommandLine
                 // and register it in the project collection's cache under the synthetic display path.
                 // All subsequent code that loads the project by path will find the cached entry and
                 // will never attempt to read a file from disk.
+                // The stdinProject reference prevents the weak-cache entry from being GC'd during the build.
                 if (s_stdinProjectContent != null)
                 {
-                    using StringReader stringReader = new StringReader(s_stdinProjectContent);
-                    using XmlReader xmlReader = XmlReader.Create(stringReader);
+                    (stdinProject, stdinXml) = LoadStdinProject(projectCollection, projectFile);
+
                     // update the global property and restore property state to work with streamed project content
                     restoreProperties.Add("_BuildNonexistentProjectsByDefault", bool.TrueString);
                     restoreProperties.Add("RestoreUseSkipNonexistentTargets", bool.FalseString);
                     projectCollection.SetGlobalProperty("_BuildNonexistentProjectsByDefault", bool.TrueString);
                     projectCollection.SetGlobalProperty("RestoreUseSkipNonexistentTargets", bool.FalseString);
-                    var project = projectCollection.LoadProject(xmlReader);
-                    // Setting FullPath registers the element in the cache and sets its directory to the
-                    // directory portion of the path (i.e., the current working directory).
-                    project.FullPath = projectFile;
-                    stdinXml = project.Xml;
                 }
 
                 bool isSolution = FileUtilities.IsSolutionFilename(projectFile);
@@ -1623,6 +1616,15 @@ namespace Microsoft.Build.CommandLine
                         parameters.EnableRarNode = true;
                     }
 
+                    // Ensure the virtual (in-memory) stdin project always builds on the central/InProc node.
+                    // Worker nodes run in separate processes and cannot access the in-memory ProjectRootElement
+                    // from this process's ProjectRootElementCache, so affinity must be InProc.
+                    if (s_stdinProjectContent != null)
+                    {
+                        parameters.HostServices ??= new HostServices();
+                        parameters.HostServices.SetNodeAffinity(projectFile, NodeAffinity.InProc);
+                    }
+
                     List<BuildManager.DeferredBuildMessage> messagesToLogInBuildLoggers = new();
 
                     BuildManager buildManager = BuildManager.DefaultBuildManager;
@@ -1699,6 +1701,16 @@ namespace Microsoft.Build.CommandLine
                                 else
                                 {
                                     success = result.OverallResult == BuildResultCode.Success;
+                                }
+
+                                // ExecuteRestore uses ClearCachesAfterBuild which clears the entire
+                                // ProjectRootElementCache. For in-memory stdin projects there is no
+                                // file on disk to reload, so we must re-register the project in the
+                                // (now-empty) cache before the subsequent build can find it.
+                                if (s_stdinProjectContent != null && !restoreOnly)
+                                {
+                                    projectCollection.UnloadProject(stdinProject);
+                                    (stdinProject, stdinXml) = LoadStdinProject(projectCollection, projectFile);
                                 }
                             }
 
@@ -1794,9 +1806,10 @@ namespace Microsoft.Build.CommandLine
                 projectCollection?.Dispose();
                 FileUtilities.ClearCacheDirectory();
 
-                // Keep the in-memory stdin project root element alive until the project collection
-                // is disposed; the collection's cache uses a WeakReference whose target this local
-                // variable holds strongly.
+                // Keep the in-memory stdin project alive until the project collection
+                // is disposed; the collection's cache uses a WeakReference whose target
+                // these local variables hold strongly.
+                GC.KeepAlive(stdinProject);
                 GC.KeepAlive(stdinXml);
 
                 // Build manager shall be reused for all build sessions.
@@ -1810,6 +1823,25 @@ namespace Microsoft.Build.CommandLine
             }
 
             return success;
+        }
+
+        /// <summary>
+        /// Loads the piped-stdin project XML into an in-memory <see cref="Project"/> and registers
+        /// it in <paramref name="projectCollection"/>'s cache under the synthetic
+        /// <paramref name="projectFile"/> path.  Returns the project and its underlying
+        /// <see cref="Construction.ProjectRootElement"/> so callers can keep strong references.
+        /// </summary>
+        private static (Project project, Construction.ProjectRootElement xml) LoadStdinProject(
+            ProjectCollection projectCollection,
+            string projectFile)
+        {
+            using StringReader stringReader = new StringReader(s_stdinProjectContent);
+            using XmlReader xmlReader = XmlReader.Create(stringReader);
+            Project project = projectCollection.LoadProject(xmlReader);
+            // Setting FullPath registers the element in the cache under the synthetic path,
+            // so subsequent LoadProject(projectFile) calls find the in-memory entry.
+            project.FullPath = projectFile;
+            return (project, project.Xml);
         }
 
         private static bool PrintTargets(string projectFile, string toolsVersion, TextWriter targetsWriter, ProjectCollection projectCollection)
