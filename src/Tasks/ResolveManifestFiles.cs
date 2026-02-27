@@ -37,7 +37,8 @@ namespace Microsoft.Build.Tasks
     ///    Apply Group and Optional attributes from PublishFile items to built items
     ///    (8) Insure all output items have a TargetPath, and if in a Group that IsOptional is set
     /// </comment>
-    public sealed class ResolveManifestFiles : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public sealed class ResolveManifestFiles : TaskExtension, IMultiThreadableTask
     {
         #region Fields
 
@@ -68,25 +69,25 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] ExtraFiles
         {
             get => _extraFiles;
-            set => _extraFiles = Util.SortItems(value);
+            set => _extraFiles = value;
         }
 
         public ITaskItem[] Files
         {
             get => _files;
-            set => _files = Util.SortItems(value);
+            set => _files = value;
         }
 
         public ITaskItem[] ManagedAssemblies
         {
             get => _managedAssemblies;
-            set => _managedAssemblies = Util.SortItems(value);
+            set => _managedAssemblies = value;
         }
 
         public ITaskItem[] NativeAssemblies
         {
             get => _nativeAssemblies;
-            set => _nativeAssemblies = Util.SortItems(value);
+            set => _nativeAssemblies = value;
         }
 
         // Runtime assets for self-contained deployment from .NETCore runtime pack
@@ -113,13 +114,13 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] PublishFiles
         {
             get => _publishFiles;
-            set => _publishFiles = Util.SortItems(value);
+            set => _publishFiles = value;
         }
 
         public ITaskItem[] SatelliteAssemblies
         {
             get => _satelliteAssemblies;
-            set => _satelliteAssemblies = Util.SortItems(value);
+            set => _satelliteAssemblies = value;
         }
 
         public string TargetCulture { get; set; }
@@ -156,10 +157,20 @@ namespace Microsoft.Build.Tasks
             set => _targetFrameworkIdentifier = value;
         }
 
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
+
         #endregion
 
         public override bool Execute()
         {
+            _extraFiles = Util.SortItems(_extraFiles, TaskEnvironment);
+            _files = Util.SortItems(_files, TaskEnvironment);
+            _managedAssemblies = Util.SortItems(_managedAssemblies, TaskEnvironment);
+            _nativeAssemblies = Util.SortItems(_nativeAssemblies, TaskEnvironment);
+            _publishFiles = Util.SortItems(_publishFiles, TaskEnvironment);
+            _satelliteAssemblies = Util.SortItems(_satelliteAssemblies, TaskEnvironment);
+
             if (!ValidateInputs())
             {
                 return false;
@@ -508,7 +519,8 @@ namespace Microsoft.Build.Tasks
             var fileMap = new FileMap();
 
             // Dictionary used to look up any content output files that are also in References
-            var outputAssembliesMap = outputAssemblies.ToDictionary(p => Path.GetFullPath(p.ItemSpec), StringComparer.OrdinalIgnoreCase);
+            // Use GetCanonicalForm to canonicalize paths (resolve .., normalize slashes) for reliable matching
+            var outputAssembliesMap = outputAssemblies.ToDictionary(p => (string)TaskEnvironment.GetAbsolutePath(p.ItemSpec).GetCanonicalForm(), StringComparer.OrdinalIgnoreCase);
 
             // Add all input Files to the FileMap, flagging them to be published by default...
             if (Files != null)
@@ -520,7 +532,7 @@ namespace Microsoft.Build.Tasks
                     // Lookup full path of the File in outputAssembliesMap and skip the
                     // file if the target/destination path is the same.
                     //
-                    string key = Path.GetFullPath(item.ItemSpec);
+                    string key = (string)TaskEnvironment.GetAbsolutePath(item.ItemSpec).GetCanonicalForm();
                     outputAssembliesMap.TryGetValue(key, out var assembly);
                     if (assembly != null)
                     {

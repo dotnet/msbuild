@@ -17,7 +17,8 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Generates an application manifest or adds an entry to the existing one when PreferNativeArm64 property is true.
     /// </summary>
-    public sealed class AddToWin32Manifest : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public sealed class AddToWin32Manifest : TaskExtension, IMultiThreadableTask
     {
         private const string supportedArchitectures = "supportedArchitectures";
         private const string windowsSettings = "windowsSettings";
@@ -86,43 +87,54 @@ namespace Microsoft.Build.Tasks
             private set => _generatedManifestFullPath = value;
         }
 
-        private string? GetManifestPath()
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+        private AbsolutePath? GetManifestPath()
         {
             if (ApplicationManifest != null)
             {
-                if (string.IsNullOrEmpty(ApplicationManifest.ItemSpec) || !FileSystems.Default.FileExists(ApplicationManifest?.ItemSpec))
+                if (string.IsNullOrEmpty(ApplicationManifest.ItemSpec))
                 {
-                    Log.LogErrorWithCodeFromResources(null, ApplicationManifest?.ItemSpec, 0, 0, 0, 0, "AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound");
+                    Log.LogErrorWithCodeFromResources(null, ApplicationManifest.ItemSpec, 0, 0, 0, 0, "AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound");
                     return null;
                 }
 
-                return ApplicationManifest!.ItemSpec;
+                AbsolutePath absolutePath = TaskEnvironment.GetAbsolutePath(ApplicationManifest.ItemSpec);
+                if (!FileSystems.Default.FileExists(absolutePath))
+                {
+                    Log.LogErrorWithCodeFromResources(null, ApplicationManifest.ItemSpec, 0, 0, 0, 0, "AddToWin32Manifest.SpecifiedApplicationManifestCanNotBeFound");
+                    return null;
+                }
+
+                return absolutePath;
             }
 
             string? defaultManifestPath = ToolLocationHelper.GetPathToDotNetFrameworkFile(DefaultManifestName, TargetDotNetFrameworkVersion.Version46);
 
-            return defaultManifestPath;
+            return defaultManifestPath is null ? null : new AbsolutePath(defaultManifestPath);
         }
 
-        private Stream? GetManifestStream(string? path)
+        private Stream? GetManifestStream(AbsolutePath? path)
         {
             // The logic for getting default manifest is similar to the one from Roslyn:
             // If Roslyn logic returns null, we fall back to reading embedded manifest.
             return path is null
                     ? typeof(AddToWin32Manifest).Assembly.GetManifestResourceStream($"Microsoft.Build.Tasks.Resources.{DefaultManifestName}")
-                    : File.OpenRead(path);
+                    : File.OpenRead(path.Value);
         }
 
         public override bool Execute()
         {
-            string? manifestPath = GetManifestPath();
+            AbsolutePath? manifestPath = GetManifestPath();
+            string? manifestDisplayPath = manifestPath?.OriginalValue;
             try
             {
                 using Stream? stream = GetManifestStream(manifestPath);
 
                 if (stream is null)
                 {
-                    Log.LogErrorWithCodeFromResources(null, manifestPath, 0, 0, 0, 0, "AddToWin32Manifest.ManifestCanNotBeOpened");
+                    Log.LogErrorWithCodeFromResources(null, manifestDisplayPath, 0, 0, 0, 0, "AddToWin32Manifest.ManifestCanNotBeOpened");
 
                     return !Log.HasLoggedErrors;
                 }
@@ -130,7 +142,7 @@ namespace Microsoft.Build.Tasks
                 XmlDocument document = LoadManifest(stream);
                 XmlNamespaceManager xmlNamespaceManager = XmlNamespaces.GetNamespaceManager(document.NameTable);
 
-                ManifestValidationResult validationResult = ValidateManifest(manifestPath, document, xmlNamespaceManager);
+                ManifestValidationResult validationResult = ValidateManifest(manifestDisplayPath, document, xmlNamespaceManager);
 
                 switch (validationResult)
                 {
@@ -148,7 +160,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception ex)
             {
-                Log.LogErrorWithCodeFromResources(null, manifestPath, 0, 0, 0, 0, "AddToWin32Manifest.ManifestCanNotBeOpenedWithException", ex.Message);
+                Log.LogErrorWithCodeFromResources(null, manifestDisplayPath, 0, 0, 0, 0, "AddToWin32Manifest.ManifestCanNotBeOpenedWithException", ex.Message);
 
                 return !Log.HasLoggedErrors;
             }
@@ -168,8 +180,10 @@ namespace Microsoft.Build.Tasks
 
         private void SaveManifest(XmlDocument document, string manifestName)
         {
-            ManifestPath = Path.Combine(OutputDirectory, manifestName);
-            using (var xmlWriter = new XmlTextWriter(ManifestPath, Encoding.UTF8))
+            string originalPath = Path.Combine(OutputDirectory, manifestName);
+            AbsolutePath outputPath = TaskEnvironment.GetAbsolutePath(originalPath);
+            ManifestPath = originalPath;
+            using (var xmlWriter = new XmlTextWriter(outputPath, Encoding.UTF8))
             {
                 xmlWriter.Formatting = Formatting.Indented;
                 xmlWriter.Indentation = 4;

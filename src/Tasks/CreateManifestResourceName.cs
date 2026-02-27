@@ -20,7 +20,7 @@ namespace Microsoft.Build.Tasks
     /// Base class for task that determines the appropriate manifest resource name to
     /// assign to a given resx or other resource.
     /// </summary>
-    public abstract class CreateManifestResourceName : TaskExtension
+    public abstract class CreateManifestResourceName : TaskExtension, IMultiThreadableTask
     {
         #region Properties
         internal const string resxFileExtension = ".resx";
@@ -86,6 +86,9 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] ResourceFilesWithManifestResourceNames { get; set; }
 
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
+
         #endregion
 
         /// <summary>
@@ -119,7 +122,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="mode">File mode</param>
         /// <param name="access">Access type</param>
         /// <returns>The FileStream</returns>
-        private static Stream CreateFileStreamOverNewFileStream(string path, FileMode mode, FileAccess access)
+        private static Stream CreateFileStreamOverNewFileStream(AbsolutePath path, FileMode mode, FileAccess access)
         {
             return new FileStream(path, mode, access);
         }
@@ -190,7 +193,8 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        if (FileSystems.Default.FileExists(Path.Combine(Path.GetDirectoryName(fileName), conventionDependentUpon)))
+                        AbsolutePath dependentPath = TaskEnvironment.GetAbsolutePath(Path.Combine(Path.GetDirectoryName(fileName), conventionDependentUpon));
+                        if (FileSystems.Default.FileExists(dependentPath))
                         {
                             dependentUpon = conventionDependentUpon;
                         }
@@ -214,7 +218,7 @@ namespace Microsoft.Build.Tasks
 
                     if (isDependentOnSourceFile)
                     {
-                        string pathToDependent = Path.Combine(Path.GetDirectoryName(fileName), dependentUpon);
+                        AbsolutePath pathToDependent = TaskEnvironment.GetAbsolutePath(Path.Combine(Path.GetDirectoryName(fileName), dependentUpon));
                         binaryStream = createFileStream(pathToDependent, FileMode.Open, FileAccess.Read);
                     }
 
