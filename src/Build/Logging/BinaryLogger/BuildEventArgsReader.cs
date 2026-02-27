@@ -1475,14 +1475,12 @@ namespace Microsoft.Build.Logging
                 evaluationId = ReadInt32();
             }
 
-            var result = new BuildEventContext(
-                submissionId,
-                nodeId,
-                evaluationId,
-                projectInstanceId,
-                projectContextId,
-                targetId,
-                taskId);
+            var result = BuildEventContext.CreateInitial(submissionId, nodeId)
+                .WithEvaluationId(evaluationId)
+                .WithProjectInstanceId(projectInstanceId)
+                .WithProjectContextId(projectContextId)
+                .WithTargetId(targetId)
+                .WithTaskId(taskId);
             return result;
         }
 

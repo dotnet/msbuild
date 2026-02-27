@@ -249,14 +249,12 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private BuildEventContext MakeBuildEventContext(int evalId = 1, int projectContextId = 1, int nodeId = 1)
         {
-            return new BuildEventContext(
-            submissionId: -1,
-            nodeId: nodeId,
-            evaluationId: evalId,
-            projectInstanceId: -1,
-            projectContextId: projectContextId,
-            targetId: 1,
-            taskId: 1);
+            return BuildEventContext.CreateInitial(-1, nodeId)
+                .WithEvaluationId(evalId)
+                .WithProjectInstanceId(-1)
+                .WithProjectContextId(projectContextId)
+                .WithTargetId(1)
+                .WithTaskId(1);
         }
 
         private BuildStartedEventArgs MakeBuildStartedEventArgs(BuildEventContext? buildEventContext = null)
@@ -722,7 +720,7 @@ namespace Microsoft.Build.UnitTests
                     "MSB0001", "EvaluationError", "MSBUILD", 0, 0, 0, 0,
                     "An error occurred during evaluation.", null, null)
                 {
-                    BuildEventContext = new BuildEventContext(1, -1, -1, -1) // context that belongs to no project
+                    BuildEventContext = BuildEventContext.CreateInitial(1, -1).WithEvaluationId(-1).WithProjectInstanceId(-1) // context that belongs to no project
                 });
             });
 

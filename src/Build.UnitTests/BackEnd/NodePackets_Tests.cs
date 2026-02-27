@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private static BuildEventContext CreateBuildEventContext()
         {
-            return new BuildEventContext(1, 2, 3, 4, 5, 6, 7);
+            return BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTargetId(6).WithTaskId(7);
         }
 
         private static ProjectEvaluationStartedEventArgs CreateProjectEvaluationStarted()
@@ -262,7 +262,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     new ResponseFileUsedEventArgs("path"),
                     new UninitializedPropertyReadEventArgs("prop", "message", "help", "sender", MessageImportance.Normal),
-                    new EnvironmentVariableReadEventArgs("env", "message", "file", 0, 0) { BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6) },
+                    new EnvironmentVariableReadEventArgs("env", "message", "file", 0, 0) { BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTargetId(6) },
                     new PropertyReassignmentEventArgs("prop", "prevValue", "newValue", "loc", "message", "help", "sender", MessageImportance.Normal),
                     new PropertyInitialValueSetEventArgs("prop", "val", "propsource", "message", "help", "sender", MessageImportance.Normal),
                     new MetaprojectGeneratedEventArgs("metaName", "path", "message"),
@@ -294,31 +294,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     {
                         ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
-                        BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
+                        BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTaskId(6).WithTargetId(7)
                     },
                     new ExtendedBuildWarningEventArgs("extWarn", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", DateTime.UtcNow, "arg1")
                     {
                         ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
-                        BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
+                        BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTaskId(6).WithTargetId(7)
                     },
                     new ExtendedBuildMessageEventArgs("extWarn", "SubCategoryForSchemaValidationErrors", "MSB4000", "file", 1, 2, 3, 4, "message", "help", "sender", MessageImportance.Normal, DateTime.UtcNow, "arg1")
                     {
                         ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
-                        BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
+                        BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTaskId(6).WithTargetId(7)
                     },
                     new ExtendedCustomBuildEventArgs("extCustom", "message", "help", "sender", DateTime.UtcNow, "arg1")
                     {
                         ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
-                        BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
+                        BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTaskId(6).WithTargetId(7)
                     },
                     new ExtendedCriticalBuildMessageEventArgs("extCritMsg", "Subcategory", "Code", "File", 1, 2, 3, 4, "{0}", "HelpKeyword", "Sender", DateTime.Now, "arg1")
                     {
                         ExtendedData = /*lang=json*/ "{'long-json':'mostly-strings'}",
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
-                        BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
+                        BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTaskId(6).WithTargetId(7)
                     },
                     new GeneratedFileUsedEventArgs("path", "some content"),
                 };

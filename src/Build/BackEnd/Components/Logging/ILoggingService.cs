@@ -503,20 +503,17 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <summary>
         /// Create an evaluation context, by generating a new evaluation id.
         /// </summary>
-        /// <param name="nodeId">The node id</param>
-        /// <param name="submissionId">The submission id</param>
+        /// <param name="parentContext">The parent context to derive the new evaluation context from</param>
         /// <returns></returns>
-        BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId);
+        BuildEventContext CreateEvaluationBuildEventContext(BuildEventContext parentContext);
 
         /// <summary>
-        /// Create a project cache context, by generating a new project context id.
+        /// Create a project-level build event context, by generating a new project context id and applying it to a parent context scope.
         /// </summary>
-        /// <param name="submissionId">The submission id</param>
-        /// <param name="evaluationId">The evaluation id</param>
-        /// <param name="projectInstanceId">The project instance id</param>
+        /// <param name="parentBuildEventContext">The parent context to derive the new project cache context from</param>
         /// <param name="projectFile">Project file being built</param>
         /// <returns></returns>
-        BuildEventContext CreateProjectCacheBuildEventContext(int submissionId, int evaluationId, int projectInstanceId, string projectFile);
+        BuildEventContext CreateProjectCacheBuildEventContext(BuildEventContext parentBuildEventContext, string projectFile);
 
         /// <summary>
         /// Logs that a project evaluation has started
@@ -544,45 +541,58 @@ namespace Microsoft.Build.BackEnd.Logging
             IEnumerable items,
             ProfilerResult? profilerResult);
 
-        /// <summary>
-        /// Log that a project has started
-        /// </summary>
-        /// <param name="nodeBuildEventContext">The logging context of the node which is building this project.</param>
-        /// <param name="submissionId">The id of the build submission.</param>
-        /// <param name="configurationId">The id of the project configuration which is about to start</param>
-        /// <param name="parentBuildEventContext">The build context of the parent project which asked this project to build</param>
-        /// <param name="projectFile">The project file path of the project about to be built</param>
-        /// <param name="targetNames">The entrypoint target names for this project</param>
-        /// <param name="properties">The initial properties of the project</param>
-        /// <param name="items">The initial items of the project</param>
-        /// <param name="evaluationId">EvaluationId of the project instance</param>
-        /// <param name="projectContextId">The project context id</param>
-        /// <returns>The BuildEventContext to use for this project.</returns>
-        BuildEventContext LogProjectStarted(
-            BuildEventContext nodeBuildEventContext,
-            int submissionId,
-            int configurationId,
-            BuildEventContext parentBuildEventContext,
-            string projectFile,
-            string targetNames,
-            IEnumerable<DictionaryEntry> properties,
-            IEnumerable<DictionaryEntry> items,
-            int evaluationId = BuildEventContext.InvalidEvaluationId,
-            int projectContextId = BuildEventContext.InvalidProjectContextId);
-
         void LogProjectStarted(ProjectStartedEventArgs args);
 
-        ProjectStartedEventArgs CreateProjectStarted(
-            BuildEventContext nodeBuildEventContext,
-            int submissionId,
-            int configurationId,
+        /// <summary>
+        /// Creates a ProjectStartedEventArgs for a locally-building project - 
+        /// meaning one that is not served from cache and is building on the current node.
+        /// </summary>
+        /// <param name="parentBuildEventContext">The parent build event context for the project that is starting.</param>
+        /// <param name="configurationId">The configuration ID of the project that is starting.</param>
+        /// <param name="projectFile">The project file path of the project that is starting.</param>
+        /// <param name="targetNames">The target names that are being built.</param>
+        /// <param name="globalProperties">The global properties for the project instance.</param>
+        /// <param name="properties">The initial properties for the project instance, if any.</param>
+        /// <param name="items">The initial items for the project instance, if any.</param>
+        /// <param name="toolsVersion">The tools version for the project instance.</param>
+        /// <remarks>
+        /// We _could_ pass in BuildRequest/BuildRequestConfiguration for most of this data, but that makes layering/dependency
+        /// tracking of the namespaces more complex, and we don't really need the full objects here.
+        /// </remarks>
+        ProjectStartedEventArgs CreateProjectStartedForLocalProject(
             BuildEventContext parentBuildEventContext,
+            int configurationId,
             string projectFile,
             string targetNames,
+            IDictionary<string, string> globalProperties,
             IEnumerable<DictionaryEntry> properties,
             IEnumerable<DictionaryEntry> items,
-            int evaluationId = BuildEventContext.InvalidEvaluationId,
-            int projectContextId = BuildEventContext.InvalidProjectContextId);
+            string toolsVersion);
+
+        /// <summary>
+        /// Creates a ProjectStartedEventArgs for a project that was already built on another node, so
+        /// is being served from cache. Unlike the local-build case, we don't have properties/items
+        /// because they were not deserialized from the cache.
+        /// </summary>
+        /// <param name="currentNodeBuildEventContext">The build event context on the current node.</param>
+        /// <param name="remoteNodeEvaluationBuildEventContext">The complete evaluation build event context on the remote node.</param>
+        /// <param name="parentBuildEventContext">The parent build event context for the project that is already built.</param>
+        /// <param name="globalProperties">The global properties for the project instance, from the configuration.</param>
+        /// <param name="projectFile">The project file path of the project that is already built.</param>
+        /// <param name="targetNames">The target names that were built.</param>
+        /// <param name="toolsVersion">The tools version for the project instance.</param>
+        /// <remarks>
+        /// We _could_ pass in BuildRequest/BuildRequestConfiguration for most of this data, but that makes layering/dependency
+        /// tracking of the namespaces more complex, and we don't really need the full objects here.
+        /// </remarks>
+        ProjectStartedEventArgs CreateProjectStartedForCachedProject(
+            BuildEventContext currentNodeBuildEventContext,
+            BuildEventContext remoteNodeEvaluationBuildEventContext,
+            BuildEventContext parentBuildEventContext,
+            IDictionary<string, string> globalProperties,
+            string projectFile,
+            string targetNames,
+            string toolsVersion);
 
         /// <summary>
         /// Log that the project has finished

@@ -182,9 +182,5 @@ internal class BuildCheckBuildEventHandler
         => title + Environment.NewLine + String.Join(Environment.NewLine, rowData.Select(a => $"{a.Key},{a.Value}")) + Environment.NewLine;
 
     private BuildEventContext GetBuildEventContext(BuildEventArgs e) => e.BuildEventContext
-        ?? new BuildEventContext(
-                BuildEventContext.InvalidNodeId,
-                BuildEventContext.InvalidTargetId,
-                BuildEventContext.InvalidProjectContextId,
-                BuildEventContext.InvalidTaskId);
+        ?? BuildEventContext.Invalid;
 }

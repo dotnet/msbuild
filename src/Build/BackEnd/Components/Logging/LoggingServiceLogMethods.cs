@@ -401,14 +401,12 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <inheritdoc />
-        public BuildEventContext CreateEvaluationBuildEventContext(int nodeId, int submissionId)
-            => new BuildEventContext(submissionId, nodeId, NextEvaluationId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+        public BuildEventContext CreateEvaluationBuildEventContext(BuildEventContext parentContext)
+            => parentContext.WithEvaluationId(NextEvaluationId);
 
         /// <inheritdoc />
         public BuildEventContext CreateProjectCacheBuildEventContext(
-            int submissionId,
-            int evaluationId,
-            int projectInstanceId,
+            BuildEventContext parentBuildEventContext,
             string projectFile)
         {
             int projectContextId = NextProjectId;
@@ -416,11 +414,8 @@ namespace Microsoft.Build.BackEnd.Logging
             // In the future if some LogProjectCacheStarted event is created, move this there to align with evaluation and build execution.
             _projectFileMap[projectContextId] = projectFile;
 
-            // Because the project cache runs in the BuildManager, it makes some sense to associate logging with the in-proc node.
-            // If a invalid node id is used the messages become deferred in the console logger and spit out at the end.
-            int nodeId = Scheduler.InProcNodeId;
-
-            return new BuildEventContext(submissionId, nodeId, evaluationId, projectInstanceId, projectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+            return parentBuildEventContext
+                .WithProjectContextId(projectContextId);
         }
 
         /// <inheritdoc />
@@ -470,115 +465,28 @@ namespace Microsoft.Build.BackEnd.Logging
             ProcessLoggingEvent(buildEvent);
         }
 
-        /// <summary>
-        /// Logs that a project build has started
-        /// </summary>
-        /// <param name="nodeBuildEventContext">The event context of the node which is spawning this project.</param>
-        /// <param name="submissionId">The id of the submission.</param>
-        /// <param name="configurationId">The id of the project configuration which is about to start</param>
-        /// <param name="parentBuildEventContext">BuildEventContext of the project who is requesting "projectFile" to build</param>
-        /// <param name="projectFile">Project file to build</param>
-        /// <param name="targetNames">Target names to build</param>
-        /// <param name="properties">Initial property list</param>
-        /// <param name="items">Initial items list</param>
-        /// <param name="evaluationId">EvaluationId of the project instance</param>
-        /// <param name="projectContextId">The project context id</param>
-        /// <returns>The build event context for the project.</returns>
-        /// <exception cref="InternalErrorException">parentBuildEventContext is null</exception>
-        /// <exception cref="InternalErrorException">projectBuildEventContext is null</exception>
-        public BuildEventContext LogProjectStarted(
-            BuildEventContext nodeBuildEventContext,
-            int submissionId,
-            int configurationId,
-            BuildEventContext parentBuildEventContext,
-            string projectFile,
-            string targetNames,
-            IEnumerable<DictionaryEntry> properties,
-            IEnumerable<DictionaryEntry> items,
-            int evaluationId = BuildEventContext.InvalidEvaluationId,
-            int projectContextId = BuildEventContext.InvalidProjectContextId)
-        {
-            var args = CreateProjectStarted(nodeBuildEventContext,
-                submissionId,
-                configurationId,
-                parentBuildEventContext,
-                projectFile,
-                targetNames,
-                properties,
-                items,
-                evaluationId,
-                projectContextId);
-
-            this.LogProjectStarted(args);
-
-            return args.BuildEventContext;
-        }
-
         public void LogProjectStarted(ProjectStartedEventArgs buildEvent)
         {
             ProcessLoggingEvent(buildEvent);
         }
 
-        public ProjectStartedEventArgs CreateProjectStarted(
-            BuildEventContext nodeBuildEventContext,
-            int submissionId,
-            int configurationId,
+        /// <inheritdoc />
+        public ProjectStartedEventArgs CreateProjectStartedForLocalProject(
             BuildEventContext parentBuildEventContext,
+            int configurationId,
             string projectFile,
             string targetNames,
+            IDictionary<string, string> globalProperties,
             IEnumerable<DictionaryEntry> properties,
             IEnumerable<DictionaryEntry> items,
-            int evaluationId = BuildEventContext.InvalidEvaluationId,
-            int projectContextId = BuildEventContext.InvalidProjectContextId)
+            string toolsVersion)
         {
-            ErrorUtilities.VerifyThrow(nodeBuildEventContext != null, "Need a nodeBuildEventContext");
-
-            if (projectContextId == BuildEventContext.InvalidProjectContextId)
-            {
-                projectContextId = NextProjectId;
-
-                // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
-                if (_projectFileMap.ContainsKey(projectContextId))
-                {
-                    ErrorUtilities.ThrowInternalError("ContextID {0} for project {1} should not already be in the ID-to-file mapping!", projectContextId, projectFile);
-                }
-
-                _projectFileMap[projectContextId] = projectFile;
-            }
-            else
-            {
-                // A projectContextId was provided, so use it with some sanity checks
-                if (_projectFileMap.TryGetValue(projectContextId, out string existingProjectFile))
-                {
-                    if (!projectFile.Equals(existingProjectFile, StringComparison.OrdinalIgnoreCase))
-                    {
-                        ErrorUtilities.ThrowInternalError("ContextID {0} was already in the ID-to-project file mapping but the project file {1} did not match the provided one {2}!", projectContextId, existingProjectFile, projectFile);
-                    }
-                }
-                else
-                {
-                    // Currently, an existing projectContextId can only be provided in the project cache scenario, which runs on the in-proc node.
-                    // If there was a cache miss and the build was scheduled on a worker node, it may not have seen this projectContextId yet.
-                    // So we only need this sanity check for the in-proc node.
-                    if (nodeBuildEventContext.NodeId == Scheduler.InProcNodeId)
-                    {
-                        ErrorUtilities.ThrowInternalError("ContextID {0} should have been in the ID-to-project file mapping but wasn't!", projectContextId);
-                    }
-
-                    _projectFileMap[projectContextId] = projectFile;
-                }
-            }
-
-            BuildEventContext projectBuildEventContext = new BuildEventContext(submissionId, nodeBuildEventContext.NodeId, evaluationId, configurationId, projectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
+            var projectContextId = GenerateNewProjectContextId(projectFile);
 
             ErrorUtilities.VerifyThrow(parentBuildEventContext != null, "Need a parentBuildEventContext");
-
-            ErrorUtilities.VerifyThrow(_configCache.Value.HasConfiguration(configurationId), "Cannot find the project configuration while injecting non-serialized data from out-of-proc node.");
-            var buildRequestConfiguration = _configCache.Value[configurationId];
-
-            // Always log GlobalProperties on ProjectStarted
-            // See https://github.com/dotnet/msbuild/issues/6341 for details
-            IDictionary<string, string> globalProperties = buildRequestConfiguration.GlobalProperties.ToDictionary();
+            BuildEventContext projectBuildEventContext = parentBuildEventContext
+                .WithProjectInstanceId(configurationId)
+                .WithProjectContextId(projectContextId);
 
             var buildEvent = new ProjectStartedEventArgs(
                     configurationId,
@@ -590,8 +498,112 @@ namespace Microsoft.Build.BackEnd.Logging
                     items,
                     parentBuildEventContext,
                     globalProperties,
-                    buildRequestConfiguration.ToolsVersion);
+                    toolsVersion);
             buildEvent.BuildEventContext = projectBuildEventContext;
+
+            return buildEvent;
+        }
+
+        /// <summary>
+        /// Ensures that the projectContextId is valid and updates the project file map to track which contexts apply to which project files.
+        /// </summary>
+        /// <param name="projectFile">The project file path to be associated with this project context ID.</param>
+        /// <returns>The project context ID to use (either the provided one or a newly generated one).</returns>
+        private int GenerateNewProjectContextId(string projectFile)
+        {
+            var generatedProjectContextId = NextProjectId;
+
+            // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
+            if (_projectFileMap.ContainsKey(generatedProjectContextId))
+            {
+                ErrorUtilities.ThrowInternalError("ContextID {0} for project {1} should not already be in the ID-to-file mapping!", generatedProjectContextId, projectFile);
+            }
+
+            _projectFileMap[generatedProjectContextId] = projectFile;
+            return generatedProjectContextId;
+        }
+
+        /// <summary>
+        /// Validates that a preexisting projectContextId is valid and updates the project file map to track which contexts apply to which project files.
+        /// </summary>
+        /// <param name="remoteNodeEvaluationContext">The remote node evaluation context containing the project context ID to validate.</param>
+        /// <param name="projectFile">The project file path to be associated with this project context ID.</param>
+        /// <param name="currentNodeId">The node ID of the current node - used to validate that only the in-proc scheduler node is re-using cached project context IDs.</param>
+        /// <returns>Either the same context, if the projectContextId exists in the map already, or a new context with a generated projectContextId if it did not.</returns>
+        private BuildEventContext ValidatePreexistingProjectContextId(BuildEventContext remoteNodeEvaluationContext, string projectFile, int currentNodeId)
+        {
+            if (remoteNodeEvaluationContext.ProjectContextId == BuildEventContext.InvalidProjectContextId)
+            {
+                // No projectContextId was provided, so generate a new one to represent this invocation of the project
+                int newProjectContextId = GenerateNewProjectContextId(projectFile);
+                return remoteNodeEvaluationContext.WithProjectContextId(newProjectContextId);
+            }
+
+            // A projectContextId was provided, so use it with some sanity checks
+            else if (_projectFileMap.TryGetValue(remoteNodeEvaluationContext.ProjectContextId, out string existingProjectFile))
+            {
+                if (!projectFile.Equals(existingProjectFile, StringComparison.OrdinalIgnoreCase))
+                {
+                    ErrorUtilities.ThrowInternalError("ContextID {0} was already in the ID-to-project file mapping but the project file {1} did not match the provided one {2}!", remoteNodeEvaluationContext.ProjectContextId, existingProjectFile, projectFile);
+                }
+                return remoteNodeEvaluationContext;
+            }
+            else
+            {
+                // Currently, an existing projectContextId can only be provided in the project cache scenario, which runs on the in-proc node.
+                // If there was a cache miss and the build was scheduled on a worker node, it may not have seen this projectContextId yet.
+                // So we only need this sanity check for the in-proc node.
+                if (currentNodeId == Scheduler.InProcNodeId)
+                {
+                    ErrorUtilities.ThrowInternalError("ContextID {0} should have been in the ID-to-project file mapping but wasn't!", remoteNodeEvaluationContext.ProjectContextId);
+                }
+
+                _projectFileMap[remoteNodeEvaluationContext.ProjectContextId] = projectFile;
+                return remoteNodeEvaluationContext;
+            }
+        }
+
+        /// <inheritdoc />
+        public ProjectStartedEventArgs CreateProjectStartedForCachedProject(
+            BuildEventContext currentNodeBuildEventContext,
+            BuildEventContext remoteNodeEvaluationBuildEventContext,
+            BuildEventContext parentBuildEventContext,
+            IDictionary<string, string> globalProperties,
+            string projectFile,
+            string targetNames,
+            string toolsVersion)
+        {
+            // Cached project events can be logged from either:
+            // 1. The scheduler's virtual node (when the scheduler serves a request from cache)
+            // 2. A worker node (when BuildRequestEngine satisfies a request from its local cache)
+            BuildEventContext validatedRemoteNodeEvaluationBuildContext = ValidatePreexistingProjectContextId(
+                remoteNodeEvaluationBuildEventContext,
+                projectFile,
+                currentNodeBuildEventContext.NodeId);
+
+            int configurationId = remoteNodeEvaluationBuildEventContext.ProjectInstanceId;
+
+            // we need to be a valid BuildEventContext for a ProjectLoggingContext out of this, so we need to make sure
+            // we have ProjectContextId set.
+            BuildEventContextBuilder thisEventBuildEventContext = parentBuildEventContext
+                .WithProjectInstanceId(configurationId)
+                .WithProjectContextId(validatedRemoteNodeEvaluationBuildContext.ProjectContextId);
+
+            ProjectStartedEventArgs buildEvent = new(
+                projectId: configurationId,
+                message: null,
+                helpKeyword: null,
+                projectFile: projectFile,
+                targetNames: targetNames,
+                properties: null, // Do not log properties on cached project builds - callers must look up from the 'real' ProjectStartedEventArgs if needed
+                items: null,     // Do not log items on cached project builds - callers must look up from the 'real' ProjectStartedEventArgs if needed
+                parentBuildEventContext: parentBuildEventContext,
+                globalProperties: globalProperties,
+                toolsVersion: toolsVersion,
+                originalBuildEventContext: validatedRemoteNodeEvaluationBuildContext)
+            {
+                BuildEventContext = thisEventBuildEventContext,
+            };
 
             return buildEvent;
         }
@@ -641,13 +653,7 @@ namespace Microsoft.Build.BackEnd.Logging
         public BuildEventContext LogTargetStarted(BuildEventContext projectBuildEventContext, string targetName, string projectFile, string projectFileOfTargetElement, string parentTargetName, TargetBuiltReason buildReason)
         {
             ErrorUtilities.VerifyThrow(projectBuildEventContext != null, "projectBuildEventContext is null");
-            BuildEventContext targetBuildEventContext = new BuildEventContext(
-                    projectBuildEventContext.SubmissionId,
-                    projectBuildEventContext.NodeId,
-                    projectBuildEventContext.ProjectInstanceId,
-                    projectBuildEventContext.ProjectContextId,
-                    NextTargetId,
-                    BuildEventContext.InvalidTaskId);
+            BuildEventContext targetBuildEventContext = projectBuildEventContext.WithTargetId(NextTargetId);
 
             if (!OnlyLogCriticalEvents)
             {
@@ -738,13 +744,7 @@ namespace Microsoft.Build.BackEnd.Logging
         public BuildEventContext LogTaskStarted2(BuildEventContext targetBuildEventContext, string taskName, string projectFile, string projectFileOfTaskNode, int line, int column, string taskAssemblyLocation)
         {
             ErrorUtilities.VerifyThrow(targetBuildEventContext != null, "targetBuildEventContext is null");
-            BuildEventContext taskBuildEventContext = new BuildEventContext(
-                    targetBuildEventContext.SubmissionId,
-                    targetBuildEventContext.NodeId,
-                    targetBuildEventContext.ProjectInstanceId,
-                    targetBuildEventContext.ProjectContextId,
-                    targetBuildEventContext.TargetId,
-                    NextTaskId);
+            BuildEventContext taskBuildEventContext = targetBuildEventContext.WithTaskId(NextTaskId);
 
             if (!OnlyLogCriticalEvents)
             {

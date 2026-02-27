@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
         private string _originalVisualStudioVersion = null;
 
-        private static readonly BuildEventContext _buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
+        private static readonly BuildEventContext _buildEventContext = BuildEventContext.CreateInitial(0, 0).WithProjectContextId(BuildEventContext.InvalidProjectContextId);
 
         private const string _longLineString = "a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-";
 

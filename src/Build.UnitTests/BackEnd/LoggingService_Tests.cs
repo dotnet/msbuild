@@ -788,13 +788,15 @@ namespace Microsoft.Build.UnitTests.Logging
         [Fact]
         public void VerifyWarningsPromotedToErrorsAreCounted()
         {
-            ILoggingService ls = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            var submissionId = 1;
+            var nodeId = 1;
+            ILoggingService ls = LoggingService.CreateLoggingService(LoggerMode.Synchronous, nodeId);
             ls.WarningsAsErrors = new HashSet<string>();
             ls.WarningsAsErrors.Add("FOR123");
             BuildWarningEventArgs warningArgs = new("abc", "FOR123", "", 0, 0, 0, 0, "warning message", "keyword", "sender");
-            warningArgs.BuildEventContext = new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidProjectContextId, 5, 6);
+            warningArgs.BuildEventContext = BuildEventContext.Invalid.WithSubmissionId(submissionId).WithNodeId(nodeId);
             ls.LogBuildEvent(warningArgs);
-            ls.HasBuildSubmissionLoggedErrors(1).ShouldBeTrue();
+            ls.HasBuildSubmissionLoggedErrors(submissionId).ShouldBeTrue();
         }
 
         /// <summary>
@@ -952,13 +954,11 @@ namespace Microsoft.Build.UnitTests.Logging
         {
             IBuildComponentHost host = new MockHost();
 
-            BuildEventContext buildEventContext = new BuildEventContext(
-                submissionId: 0,
-                nodeId: 1,
-                projectInstanceId: 2,
-                projectContextId: -1,
-                targetId: -1,
-                taskId: -1);
+            BuildEventContext buildEventContext = BuildEventContext.CreateInitial(0, 1)
+                .WithProjectInstanceId(2)
+                .WithProjectContextId(-1)
+                .WithTargetId(-1)
+                .WithTaskId(-1);
 
             BuildRequestData buildRequestData = new BuildRequestData("projectFile", new Dictionary<string, string>(), "Current", new[] { "Build" }, null);
 
@@ -974,7 +974,9 @@ namespace Microsoft.Build.UnitTests.Logging
 
             loggingService.RegisterLogger(logger);
 
-            BuildEventContext projectStarted = loggingService.LogProjectStarted(buildEventContext, 0, buildEventContext.ProjectInstanceId, BuildEventContext.Invalid, "projectFile", "Build", Enumerable.Empty<DictionaryEntry>(), Enumerable.Empty<DictionaryEntry>());
+            var projectStartedArgs = loggingService.CreateProjectStartedForLocalProject(BuildEventContext.Invalid, buildEventContext.ProjectInstanceId, "projectFile", "Build", null, Enumerable.Empty<DictionaryEntry>(), Enumerable.Empty<DictionaryEntry>(), null);
+            loggingService.LogProjectStarted(projectStartedArgs);
+            BuildEventContext projectStarted = projectStartedArgs.BuildEventContext;
 
             if (warningsAsErrorsForProject != null)
             {

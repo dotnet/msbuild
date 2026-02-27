@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests.Definition
             using var collection = new ProjectCollection();
             Toolset t = new Toolset("toolsversionname", dir, new PropertyDictionary<ProjectPropertyInstance>(), collection, new DirectoryGetFiles(this.getFiles), new LoadXmlFromPath(this.loadXmlFromPath), overrideDir, new DirectoryExists(this.directoryExists));
 
-            LoggingContext loggingContext = TestLoggingContext.CreateTestContext(new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
+            LoggingContext loggingContext = TestLoggingContext.CreateTestContext(BuildEventContext.CreateInitial(1, 2).WithEvaluationId(BuildEventContext.InvalidProjectContextId).WithProjectInstanceId(4));
             TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(loggingContext, e.ProjectRootElementCache);
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(loggingContext, e.ProjectRootElementCache);
 
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests.Definition
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
-            LoggingContext loggingContext = new TestLoggingContext(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
+            LoggingContext loggingContext = new TestLoggingContext(service, BuildEventContext.CreateInitial(1, 2).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithTaskId(4));
 
 
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(loggingContext, e.ProjectRootElementCache);
@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests.Definition
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
-            LoggingContext loggingContext = new TestLoggingContext(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
+            LoggingContext loggingContext = new TestLoggingContext(service, BuildEventContext.CreateInitial(1, 2).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithTaskId(4));
 
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(loggingContext, e.ProjectRootElementCache);
             Assert.NotNull(taskoverrideRegistry);
@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests.Definition
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
-            LoggingContext loggingContext = new TestLoggingContext(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
+            LoggingContext loggingContext = new TestLoggingContext(service, BuildEventContext.CreateInitial(1, 2).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithTaskId(4));
 
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(loggingContext, e.ProjectRootElementCache);
             Assert.NotNull(taskoverrideRegistry);
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests.Definition
             MockLogger mockLogger = new MockLogger();
             LoggingService service = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
             service.RegisterLogger(mockLogger);
-            LoggingContext loggingContext = new TestLoggingContext(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
+            LoggingContext loggingContext = new TestLoggingContext(service, BuildEventContext.CreateInitial(1, 2).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithTaskId(4));
 
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(loggingContext, e.ProjectRootElementCache);
             Assert.NotNull(taskoverrideRegistry);
@@ -164,7 +164,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 null,
                 new DirectoryExists(this.directoryExists));
 
-            LoggingContext loggingContext = TestLoggingContext.CreateTestContext(new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
+            LoggingContext loggingContext = TestLoggingContext.CreateTestContext(BuildEventContext.CreateInitial(1, 2).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithTaskId(4));
             TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(loggingContext, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 
             string[] expectedRegisteredTasks = { "a1", "a2", "a3", "a4", "b1", "e1", "g1", "g2", "g3" };
@@ -931,7 +931,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 null,
                 new DirectoryExists(directoryExists));
 
-            LoggingContext loggingContext = TestLoggingContext.CreateTestContext(new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
+            LoggingContext loggingContext = TestLoggingContext.CreateTestContext(BuildEventContext.CreateInitial(1, 2).WithProjectContextId(BuildEventContext.InvalidProjectContextId).WithTaskId(4));
 
             TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(loggingContext, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 

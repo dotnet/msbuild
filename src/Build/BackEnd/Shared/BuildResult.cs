@@ -86,7 +86,8 @@ namespace Microsoft.Build.Execution
         /// <remarks>
         /// Allows to serialize and deserialize different versions of the build result.
         /// </remarks>
-        private int _version = Traits.Instance.EscapeHatches.DoNotVersionBuildResult ? 0 : 1;
+        private int _version = 
+            Traits.Instance.EscapeHatches.DoNotVersionBuildResult ? 0 : 2;
 
         /// <summary>
         /// The request caused a circular dependency in scheduling.
@@ -99,6 +100,11 @@ namespace Microsoft.Build.Execution
         /// an exception from a target or task.
         /// </summary>
         private Exception? _requestException;
+
+        /// <summary>
+        /// The evaluation ID of the project used for this build.
+        /// </summary>
+        private int _evaluationId = BuildEventContext.InvalidEvaluationId;
 
         /// <summary>
         /// The overall result calculated in the constructor.
@@ -496,6 +502,17 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// The evaluation ID of the project used for this build.
+        /// </summary>
+        internal int EvaluationId
+        {
+            [DebuggerStepThrough]
+            get => _evaluationId;
+            [DebuggerStepThrough]
+            set => _evaluationId = value;
+        }
+
+        /// <summary>
         /// Container used to transport errors from the scheduler (issued while computing a build result)
         /// to the TaskHost that has the proper logging context (project id, target id, task id, file location)
         /// </summary>
@@ -694,6 +711,11 @@ namespace Microsoft.Build.Execution
             if (_version > 0)
             {
                 translator.TranslateEnum(ref _buildRequestDataFlags, (int)_buildRequestDataFlags);
+            }
+                
+            if (_version >= 2)
+            {
+                translator.Translate(ref _evaluationId);
             }
         }
 
