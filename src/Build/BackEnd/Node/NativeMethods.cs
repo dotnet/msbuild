@@ -43,6 +43,11 @@ namespace Microsoft.Build.BackEnd
         internal const Int32 CREATE_NEW_CONSOLE = 0x00000010;
 
         /// <summary>
+        /// Indicates that the environment block uses Unicode characters.
+        /// </summary>
+        internal const uint CREATE_UNICODE_ENVIRONMENT = 0x00000400;
+
+        /// <summary>
         /// Create a new process
         /// </summary>
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]

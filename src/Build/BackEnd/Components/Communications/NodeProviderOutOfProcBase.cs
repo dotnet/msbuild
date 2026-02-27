@@ -182,18 +182,23 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Finds or creates a child processes which can act as a node.
+        /// Finds or creates child processes which can act as nodes using the provided launch data.
         /// </summary>
+        /// <param name="nodeLaunchData">The launch configuration containing executable path, arguments, and environment overrides.</param>
+        /// <param name="nextNodeId">The next node ID to use.</param>
+        /// <param name="factory">The packet factory for communication.</param>
+        /// <param name="createNode">Callback when a node is created.</param>
+        /// <param name="terminateNode">Callback when a node terminates.</param>
+        /// <param name="numberOfNodesToCreate">Number of nodes to create.</param>
         protected IList<NodeContext> GetNodes(
-            string msbuildLocation,
-            string commandLineArgs,
+            NodeLaunchData nodeLaunchData,
             int nextNodeId,
             INodePacketFactory factory,
-            Handshake hostHandshake,
             NodeContextCreatedDelegate createNode,
             NodeContextTerminateDelegate terminateNode,
             int numberOfNodesToCreate)
         {
+            string commandLineArgs = nodeLaunchData.CommandLineArgs;
 #if DEBUG
             if (Execution.BuildManager.WaitForDebugger)
             {
@@ -201,6 +206,7 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
+            var msbuildLocation = nodeLaunchData.MSBuildLocation;
             if (String.IsNullOrEmpty(msbuildLocation))
             {
                 msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;
@@ -217,11 +223,11 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            bool nodeReuseRequested = Handshake.IsHandshakeOptionEnabled(hostHandshake.HandshakeOptions, HandshakeOptions.NodeReuse);
-            
+            bool nodeReuseRequested = Handshake.IsHandshakeOptionEnabled(nodeLaunchData.Handshake.HandshakeOptions, HandshakeOptions.NodeReuse);
+
             // Extract the expected NodeMode from the command line arguments
             NodeMode? expectedNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLineArgs);
-            
+      
             // Get all process of possible running node processes for reuse and put them into ConcurrentQueue.
             // Processes from this queue will be concurrently consumed by TryReusePossibleRunningNodes while
             //    trying to connect to them and reuse them. When queue is empty, no process to reuse left
@@ -268,7 +274,9 @@ namespace Microsoft.Build.BackEnd
             });
             if (!exceptions.IsEmpty)
             {
-                ErrorUtilities.ThrowInternalError("Cannot acquire required number of nodes.", new AggregateException(exceptions.ToArray()));
+                ErrorUtilities.ThrowInternalError(
+                    $"Cannot acquire required number of nodes. MSBuildLocation: '{msbuildLocation}', CommandLineArgs: '{commandLineArgs}', NumberOfNodesToCreate: {numberOfNodesToCreate}, NextNodeId: {nextNodeId}.",
+                    new AggregateException(exceptions.ToArray()));
             }
 
             return nodeContexts.ToList();
@@ -284,7 +292,7 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     // Get the full context of this inspection so that we can always skip this process when we have the same taskhost context
-                    string nodeLookupKey = GetProcessesToIgnoreKey(hostHandshake, nodeToReuse.Id);
+                    string nodeLookupKey = GetProcessesToIgnoreKey(nodeLaunchData.Handshake, nodeToReuse.Id);
                     if (_processesToIgnore.ContainsKey(nodeLookupKey))
                     {
                         continue;
@@ -294,7 +302,7 @@ namespace Microsoft.Build.BackEnd
                     _processesToIgnore.TryAdd(nodeLookupKey, default);
 
                     // Attempt to connect to each process in turn.
-                    Stream nodeStream = TryConnectToProcess(nodeToReuse.Id, 0 /* poll, don't wait for connections */, hostHandshake, out HandshakeResult result);
+                    Stream nodeStream = TryConnectToProcess(nodeToReuse.Id, 0 /* poll, don't wait for connections */, nodeLaunchData.Handshake, out HandshakeResult result);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
@@ -319,7 +327,7 @@ namespace Microsoft.Build.BackEnd
                 CommunicationsUtilities.Trace("Could not connect to existing process, now creating a process...");
 
                 // We try this in a loop because it is possible that there is another MSBuild multiproc
-                // host process running somewhere which is also trying to create nodes right now.  It might
+                // host process running somewhere which is also trying to create nodes right now. It might
                 // find our newly created node and connect to it before we get a chance.
                 int retries = NodeCreationRetries;
                 while (retries-- > 0)
@@ -346,16 +354,17 @@ namespace Microsoft.Build.BackEnd
 #endif
                     // Create the node process
                     INodeLauncher nodeLauncher = (INodeLauncher)_componentHost.GetComponent(BuildComponentType.NodeLauncher);
-                    Process msbuildProcess = nodeLauncher.Start(msbuildLocation, commandLineArgs, nodeId);
+                    NodeLaunchData launchData = new(msbuildLocation, commandLineArgs, nodeLaunchData.Handshake, nodeLaunchData.EnvironmentOverrides);
+                    Process msbuildProcess = nodeLauncher.Start(launchData, nodeId);
 
-                    _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(hostHandshake, msbuildProcess.Id), default);
+                    _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(nodeLaunchData.Handshake, msbuildProcess.Id), default);
 
                     // Note, when running under IMAGEFILEEXECUTIONOPTIONS registry key to debug, the process ID
                     // gotten back from CreateProcess is that of the debugger, which causes this to try to connect
                     // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
 
                     // Now try to connect to it.
-                    Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, hostHandshake, out HandshakeResult result);
+                    Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, nodeLaunchData.Handshake, out HandshakeResult result);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
@@ -392,7 +401,7 @@ namespace Microsoft.Build.BackEnd
 
             void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream, byte negotiatedVersion)
             {
-                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, hostHandshake.HandshakeOptions);
+                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, nodeLaunchData.Handshake.HandshakeOptions);
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
@@ -400,25 +409,20 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Finds processes that could be reusable MSBuild nodes.
-        /// Discovers both msbuild.exe processes and dotnet processes hosting MSBuild.dll.
-        /// Filters candidates by NodeMode when available.
         /// </summary>
-        /// <param name="msbuildLocation">The location of the MSBuild executable</param>
-        /// <param name="expectedNodeMode">The NodeMode to filter for, or null to include all</param>
+        /// <param name="msbuildLocation">The location of the MSBuild executable used to derive the expected process name. </param>
+        /// <param name="expectedNodeMode">The NodeMode to filter for, or null to include all.</param>
         /// <returns>
         /// Item 1 is a descriptive name of the processes being searched for.
         /// Item 2 is the list of matching processes, sorted by ID.
         /// </returns>
-        private (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(string msbuildLocation = null, NodeMode? expectedNodeMode = null)
+        private (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(
+            string msbuildLocation = null,
+            NodeMode? expectedNodeMode = null)
         {
-            if (String.IsNullOrEmpty(msbuildLocation))
-            {
-                msbuildLocation = Constants.MSBuildExecutableName;
-            }
+            bool isNativeHost = msbuildLocation != null && Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
+            string expectedProcessName = Path.GetFileNameWithoutExtension(isNativeHost ? msbuildLocation : (CurrentHost.GetCurrentHost() ?? msbuildLocation));
 
-            var expectedProcessName = Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost() ?? msbuildLocation);
-            
-            // Get all processes with the expected MSBuild executable name
             Process[] processes;
             try
             {
@@ -426,90 +430,89 @@ namespace Microsoft.Build.BackEnd
             }
             catch
             {
-                // Process enumeration failed, return empty list
+                // Process enumeration can fail due to permissions or transient OS errors.
                 return (expectedProcessName, Array.Empty<Process>());
             }
 
-            // If we have an expected NodeMode, filter by command line parsing
-            if (expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
+            bool shouldFilterByNodeMode = expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5);
+            if (shouldFilterByNodeMode)
             {
-                CommunicationsUtilities.Trace("Filtering {0} candidate processes by NodeMode {1} for process name '{2}'", 
-                    processes.Length, expectedNodeMode.Value, expectedProcessName);
-                List<Process> filteredProcesses = [];
-                bool isDotnetProcess = expectedProcessName.Equals(Path.GetFileNameWithoutExtension(Constants.DotnetProcessName), StringComparison.OrdinalIgnoreCase);
-                
-                foreach (var process in processes)
-                {
-                    try
-                    {
-                        if (!process.TryGetCommandLine(out string commandLine))
-                        {
-                            // If we can't get the command line, skip this process
-                            CommunicationsUtilities.Trace("Skipping process {0} - unable to retrieve command line", process.Id);
-                            continue;
-                        }
-
-                        if (commandLine is null)
-                        {
-                            // If we can't get the command line, then allow it as a candidate. This allows reuse to work on platforms where command line retrieval isn't supported, but still filters by NodeMode on platforms where it is supported.
-                            CommunicationsUtilities.Trace("Including process {0} with unknown NodeMode because command line retrieval is not supported on this platform", process.Id);
-                            filteredProcesses.Add(process);
-                            continue;
-                        }
-
-                        // If expected process is dotnet, filter to only those hosting MSBuild.dll
-                        if (isDotnetProcess && !commandLine.Contains("MSBuild.dll", StringComparison.OrdinalIgnoreCase))
-                        {
-                            CommunicationsUtilities.Trace("Skipping dotnet process {0} - not hosting MSBuild.dll. Command line: {1}", process.Id, commandLine);
-                            continue;
-                        }
-
-                        // Extract NodeMode from command line
-                        NodeMode? processNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLine);
-                        
-                        // Only include processes that match the expected NodeMode
-                        if (processNodeMode.HasValue && processNodeMode.Value == expectedNodeMode.Value)
-                        {
-                            CommunicationsUtilities.Trace("Including process {0} with matching NodeMode {1}", process.Id, processNodeMode.Value);
-                            filteredProcesses.Add(process);
-                        }
-                        else
-                        {
-                            CommunicationsUtilities.Trace("Skipping process {0} - NodeMode mismatch. Expected: {1}, Found: {2}. Command line: {3}", 
-                                process.Id, expectedNodeMode.Value, processNodeMode?.ToString() ?? "<null>", commandLine);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        // If we encounter any error processing this process, skip it but log
-                        CommunicationsUtilities.Trace("Failed to get command line for process {0}: {1}", process.Id, ex.Message);
-                        continue;
-                    }
-                }
-
-                // Sort by process ID for consistent ordering
-                filteredProcesses.Sort((left, right) => left.Id.CompareTo(right.Id));
-                CommunicationsUtilities.Trace("Filtered to {0} processes matching NodeMode {1}", filteredProcesses.Count, expectedNodeMode.Value);
-                return (expectedProcessName, filteredProcesses);
+                return (expectedProcessName, FilterProcessesByNodeMode(processes, expectedNodeMode.Value, expectedProcessName));
             }
 
-            // No NodeMode filtering, return all processes sorted by ID
-            Array.Sort(processes, (left, right) => left.Id.CompareTo(right.Id));
+            Array.Sort(processes, static (left, right) => left.Id.CompareTo(right.Id));
+
             return (expectedProcessName, processes);
+        }
+
+        /// <summary>
+        /// Filters candidate processes whose command-line NodeMode argument matches the expected value.
+        /// Processes whose command line cannot be retrieved (unsupported platform) are included
+        /// unconditionally to preserve node reuse on those platforms.
+        /// </summary>
+        private static IList<Process> FilterProcessesByNodeMode(Process[] processes, NodeMode expectedNodeMode, string expectedProcessName)
+        {
+            CommunicationsUtilities.Trace("Filtering {0} candidate processes by NodeMode {1} for process name '{2}'", processes.Length, expectedNodeMode, expectedProcessName);
+
+            List<Process> filtered = new(capacity: processes.Length);
+
+            foreach (Process process in processes)
+            {
+                try
+                {
+                    if (!process.TryGetCommandLine(out string commandLine))
+                    {
+                        CommunicationsUtilities.Trace("Skipping process {0} - unable to retrieve command line", process.Id);
+                        continue;
+                    }
+
+                    if (commandLine is null)
+                    {
+                        // Command-line retrieval is not supported on this platform.
+                        // Include the process so that node reuse is not silently broken.
+                        CommunicationsUtilities.Trace("Including process {0} - command line retrieval not supported on this platform", process.Id);
+                        filtered.Add(process);
+                        continue;
+                    }
+
+                    NodeMode? processNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLine);
+                    if (processNodeMode.HasValue && processNodeMode.Value == expectedNodeMode)
+                    {
+                        CommunicationsUtilities.Trace("Including process {0} with matching NodeMode {1}", process.Id, processNodeMode.Value);
+                        filtered.Add(process);
+                    }
+                    else
+                    {
+                        CommunicationsUtilities.Trace(
+                            "Skipping process {0} - NodeMode mismatch. Expected: {1}, Found: {2}. Command line: {3}",
+                            process.Id, expectedNodeMode,
+                            processNodeMode?.ToString() ?? "<null>",
+                            commandLine);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    CommunicationsUtilities.Trace("Skipping process {0} - error retrieving command line: {1}", process.Id, ex.Message);
+                }
+            }
+
+            filtered.Sort(static (left, right) => left.Id.CompareTo(right.Id));
+
+            CommunicationsUtilities.Trace("Filtered to {0} processes matching NodeMode {1}", filtered.Count, expectedNodeMode);
+
+            return filtered;
         }
 
         /// <summary>
         /// Generate a string from task host context and the remote process to be used as key to lookup processes we have already
         /// attempted to connect to or are already connected to
         /// </summary>
-        private string GetProcessesToIgnoreKey(Handshake hostHandshake, int nodeProcessId)
-        {
+        private string GetProcessesToIgnoreKey(Handshake hostHandshake, int nodeProcessId) =>
 #if NET
-            return string.Create(CultureInfo.InvariantCulture, $"{hostHandshake}|{nodeProcessId}");
+            string.Create(CultureInfo.InvariantCulture, $"{hostHandshake}|{nodeProcessId}");
 #else
-            return $"{hostHandshake}|{nodeProcessId.ToString(CultureInfo.InvariantCulture)}";
+            $"{hostHandshake}|{nodeProcessId.ToString(CultureInfo.InvariantCulture)}";
 #endif
-        }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         // This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
@@ -588,7 +591,7 @@ namespace Microsoft.Build.BackEnd
         /// Connect to named pipe stream and ensure validate handshake and security.
         /// </summary>
         /// <remarks>
-        /// Reused by MSBuild server client <see cref="Microsoft.Build.Experimental.MSBuildClient"/>.
+        /// Reused by MSBuild server client <see cref="Experimental.MSBuildClient"/>.
         /// </remarks>
         internal static bool TryConnectToPipeStream(NamedPipeClientStream nodeStream, string pipeName, Handshake handshake, int timeout, out HandshakeResult result)
         {

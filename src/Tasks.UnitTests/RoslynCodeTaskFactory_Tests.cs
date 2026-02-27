@@ -899,7 +899,7 @@ namespace InlineTask
             }
 
             RunnerUtilities.ApplyDotnetHostPathEnvironmentVariable(env);
-            var dotnetPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+            var dotnetPath = Environment.GetEnvironmentVariable(Constants.DotnetHostPathEnvVarName);
 
             var project = env.CreateTestProjectWithFiles("p1.proj", text);
             var logger = project.BuildProjectExpectSuccess();

@@ -1123,12 +1123,12 @@ namespace Microsoft.Build.BackEnd
                 string runtime = value.Runtime;
                 string architecture = value.Architecture;
                 string dotnetHostPath = value.DotnetHostPath;
-                string msBuildAssemblyPath = value.MSBuildAssemblyPath;
+                string msBuildExecutablePath = value.MSBuildExecutablePath;
 
                 Translate(ref runtime);
                 Translate(ref architecture);
                 Translate(ref dotnetHostPath);
-                Translate(ref msBuildAssemblyPath);
+                Translate(ref msBuildExecutablePath);
 
                 bool hasTaskHostFactory = value.TaskHostFactoryExplicitlyRequested.HasValue;
                 _writer.Write(hasTaskHostFactory);

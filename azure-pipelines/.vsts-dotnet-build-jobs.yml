@@ -210,9 +210,9 @@ jobs:
         "xsd"
       )
 
-      if ("${{ parameters.enableOptProf }}" -eq "true") {  
-        $paths += "OptProf/$(BuildConfiguration)/Data"  
-        $paths += "VSSetup/$(BuildConfiguration)"  
+      if ("${{ parameters.enableOptProf }}" -eq "true") {
+        $paths += "OptProf/$(BuildConfiguration)/Data"
+        $paths += "VSSetup/$(BuildConfiguration)"
       }
 
       $allpresent = $true

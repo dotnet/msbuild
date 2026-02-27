@@ -466,6 +466,11 @@
         <target state="translated">MSB4280: 環境變數DOTNET_HOST_PATH 設定為目錄 ("{0}") 而不是 .NET 可執行檔的路徑。這可能會導致使用此變數的工作 (例如，Roslyn 編譯程式) 建置錯誤。取消設定該變數，或更新變數以直接指向 .NET 可執行檔 (例如 "C:\Program Files\dotnet\dotnet.exe")。</target>
         <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
       </trans-unit>
+      <trans-unit id="DotnetHostPathNotSet">
+        <source>DOTNET_HOST_PATH is not set. Cannot determine runtime location for app host bootstrap. This should always be set when running under the .NET SDK.</source>
+        <target state="new">DOTNET_HOST_PATH is not set. Cannot determine runtime location for app host bootstrap. This should always be set when running under the .NET SDK.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: 已嘗試建立相同工作的多個覆寫: {0}</target>

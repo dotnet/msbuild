@@ -209,15 +209,13 @@ namespace Microsoft.Build.CommandLine
         /// Minimum packet version required for IBuildEngine callback support.
         /// When all callback stages are complete, PacketVersion will be bumped to this value.
         /// </summary>
-        private const byte CallbacksMinPacketVersion = 3;
+        private const byte CallbacksMinPacketVersion = 4;
 
         /// <summary>
         /// Whether the owning worker node supports IBuildEngine callbacks.
         /// True if the worker node's packet version is high enough, or if the feature is force-enabled via env var.
         /// </summary>
-        private bool CallbacksSupported =>
-            _parentPacketVersion >= CallbacksMinPacketVersion
-            || Traits.Instance.EnableTaskHostCallbacks;
+        private bool CallbacksSupported => _parentPacketVersion >= CallbacksMinPacketVersion || Traits.Instance.EnableTaskHostCallbacks;
 #endif
 
         /// <summary>
@@ -1099,6 +1097,9 @@ namespace Microsoft.Build.CommandLine
 
                 // Now set the new environment
                 SetTaskHostEnvironment(taskConfiguration.BuildProcessEnvironment);
+#if !CLR2COMPATIBILITY
+                DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(taskConfiguration.BuildProcessEnvironment);
+#endif
 
                 // Set culture
                 Thread.CurrentThread.CurrentCulture = taskConfiguration.Culture;

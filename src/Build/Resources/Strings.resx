@@ -2444,6 +2444,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="SDKPathCheck_Failed" xml:space="preserve">
     <value>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</value>
   </data>
+  <data name="DotnetHostPathNotSet" xml:space="preserve">
+    <value>DOTNET_HOST_PATH is not set. Cannot determine runtime location for app host bootstrap. This should always be set when running under the .NET SDK.</value>
+  </data>
   <data name="ErrorCopyingBinaryLog" xml:space="preserve">
     <value>MSB4279: Failed to copy binary log from "{0}" to "{1}". {2}</value>
     <comment>{StrBegin="MSB4279: "}UE: This is shown when the Binary Logger fails to copy the log file to one of the specified output locations.</comment>
