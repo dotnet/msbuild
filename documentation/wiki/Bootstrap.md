@@ -20,3 +20,23 @@ The reliance on downloading the SDK from a remote source requires an internet co
 
 ## Pros
 This approach simplifies testing MSBuild as part of dotnet by providing a ready and reliable environment without needing to patch anything into a globally installed SDK, as was previously required.
+
+## ReadyToRun (R2R) Bootstrap
+
+You can optionally produce a bootstrap with ReadyToRun-compiled MSBuild binaries for startup performance testing:
+
+```
+build.cmd -c Release /p:PublishReadyToRun=true
+```
+
+This runs the normal build, then crossgen2-compiles the 16 MSBuild-specific DLLs (Microsoft.Build.dll, Framework, Tasks, Utilities, etc.) and overlays them into the bootstrap. The R2R binaries are ~2× larger but reduce JIT work at startup. The RID is auto-detected from the current platform.
+
+The R2R overlay adds ~10 seconds (pure crossgen2 time, no recompilation). SDK-owned DLLs are already R2R'd by the .NET SDK itself.
+
+To benchmark cold-start improvement, use `/nodeReuse:false` to prevent worker node reuse:
+
+```
+artifacts\bin\bootstrap\core\dotnet.exe msbuild YourProject.proj /nodeReuse:false
+```
+
+Without `/p:PublishReadyToRun=true`, the build behaves identically to before.
