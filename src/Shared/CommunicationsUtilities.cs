@@ -391,8 +391,11 @@ namespace Microsoft.Build.Internal
         internal const byte handshakeVersion = 0x01;
 
         /// <summary>
-        /// The timeout to connect to a node.
+        /// Wait time between when a node goes idle and its self-termination.
         /// </summary>
+        /// <remarks>
+        /// A longer timeout increases node reuse success but also machine resource use.
+        /// </remarks>
         private const int DefaultNodeConnectionTimeout = 900 * 1000; // 15 minutes; enough time that a dev will typically do another build in this time
 
         /// <summary>
