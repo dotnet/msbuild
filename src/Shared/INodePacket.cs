@@ -244,14 +244,14 @@ namespace Microsoft.Build.BackEnd
         TaskHostBuildResponse = 0x21,
 
         /// <summary>
-        /// Request from TaskHost to parent for RequestCores/ReleaseCores.
+        /// Request from TaskHost to owning worker node for RequestCores/ReleaseCores.
         /// </summary>
-        TaskHostResourceRequest = 0x22,
+        TaskHostCoresRequest = 0x22,
 
         /// <summary>
-        /// Response from parent to TaskHost with resource allocation result.
+        /// Response from owning worker node to TaskHost with core allocation result.
         /// </summary>
-        TaskHostResourceResponse = 0x23,
+        TaskHostCoresResponse = 0x23,
 
         /// <summary>
         /// Request from TaskHost to owning worker node for IsRunningMultipleNodes.
