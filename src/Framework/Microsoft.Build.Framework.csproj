@@ -53,6 +53,9 @@
     <Compile Include="..\Shared\Constants.cs">
       <Link>Shared\Constants.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\ValueTypeParser.cs">
+      <Link>Shared\ValueTypeParser.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\BinaryReaderExtensions.cs">
       <Link>Shared\BinaryReaderExtensions.cs</Link>
     </Compile>
