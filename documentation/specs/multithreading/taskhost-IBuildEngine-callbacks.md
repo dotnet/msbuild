@@ -27,7 +27,7 @@ If tasks in TaskHost call unsupported callbacks, the build fails with MSB5022 or
 | `BuildProjectFilesInParallel` (7 params) | IBuildEngine2 | ❌ Stage 3 — logs MSB5022, returns `false` |
 | `BuildProjectFilesInParallel` (6 params) | IBuildEngine3 | ❌ Stage 3 — logs MSB5022, returns `false` |
 | `Yield` / `Reacquire` | IBuildEngine3 | ❌ Stage 4 — silent no-op |
-| `RequestCores` / `ReleaseCores` | IBuildEngine9 | ❌ Stage 2 — throws `NotImplementedException` |
+| `RequestCores` / `ReleaseCores` | IBuildEngine9 | ✅ Stage 2 — forwards to owning worker node via `TaskHostCoresRequest`/`Response` |
 
 **Evidence:** src/MSBuild/OutOfProcTaskHostNode.cs
 
@@ -95,8 +95,8 @@ This means TaskHost must support **concurrent task execution** within a single p
 |--------|-----------|-------|---------|
 | `TaskHostIsRunningMultipleNodesRequest` | TaskHost → Worker Node | ✅ 1 | IsRunningMultipleNodes |
 | `TaskHostIsRunningMultipleNodesResponse` | Worker Node → TaskHost | ✅ 1 | IsRunningMultipleNodes result |
-| `TaskHostResourceRequest` | TaskHost → Worker Node | 2 | RequestCores/ReleaseCores |
-| `TaskHostResourceResponse` | Worker Node → TaskHost | 2 | Cores granted |
+| `TaskHostCoresRequest` | TaskHost → Worker Node | ✅ 2 | RequestCores/ReleaseCores (IsRelease bool) |
+| `TaskHostCoresResponse` | Worker Node → TaskHost | ✅ 2 | Cores granted / ack |
 | `TaskHostBuildRequest` | TaskHost → Worker Node | 3 | BuildProjectFile* calls |
 | `TaskHostBuildResponse` | Worker Node → TaskHost | 3 | Build results + outputs |
 | `TaskHostYieldRequest` | TaskHost → Worker Node | 4 | Yield/Reacquire |
@@ -114,8 +114,8 @@ public enum NodePacketType : byte
     // ... existing (0x00-0x15 in use, 0x3C-0x3F reserved for ServerNode) ...
     TaskHostBuildRequest = 0x20,              // Stage 3
     TaskHostBuildResponse = 0x21,             // Stage 3
-    TaskHostResourceRequest = 0x22,           // Stage 2
-    TaskHostResourceResponse = 0x23,          // Stage 2
+    TaskHostCoresRequest = 0x22,              // ✅ Stage 2
+    TaskHostCoresResponse = 0x23,             // ✅ Stage 2
     TaskHostIsRunningMultipleNodesRequest = 0x24,  // ✅ Stage 1
     TaskHostIsRunningMultipleNodesResponse = 0x25,  // ✅ Stage 1
     TaskHostYieldRequest = 0x26,              // Stage 4
@@ -153,7 +153,7 @@ This ensures:
 | Stage | Scope | Status | PR |
 |-------|-------|--------|-----|
 | 1 | `IsRunningMultipleNodes` + callback infrastructure | ✅ Merged | [#13149](https://github.com/dotnet/msbuild/pull/13149) |
-| 2 | `RequestCores`/`ReleaseCores` | Planned | |
+| 2 | `RequestCores`/`ReleaseCores` | ✅ Merged | [#13306](https://github.com/dotnet/msbuild/pull/13306) |
 | 3 | `BuildProjectFile*` | Planned | |
 | 4 | `Yield`/`Reacquire` | Planned | |
 
@@ -166,21 +166,27 @@ This ensures:
 - Serialization unit tests, in-process integration tests, and cross-runtime E2E tests
 - Threading and lifecycle documentation: [taskhost-threading.md](taskhost-threading.md)
 
+**Stage 2 delivered:**
+- `TaskHostCoresRequest/Response` packets — single packet pair with `IsRelease` bool for both `RequestCores` and `ReleaseCores`
+- `OutOfProcTaskHostNode`: replaced `throw NotImplementedException()` with callback forwarding, input validation matching in-process behavior
+- `TaskHostTask.HandleCoresRequest()`: forwards to in-process `IBuildEngine9` (implicit core accounting + scheduler)
+- Serialization, integration (TaskHostFactory, MT auto-ejection, fallback MSB5022), and E2E tests
+
 ---
 
 ## 6. Stage 2+ Design Considerations
 
 Issues discovered and design points clarified during Stage 1 implementation.
 
-### Stage 2: RequestCores/ReleaseCores
+### Stage 2: RequestCores/ReleaseCores (Implemented)
 
 **Complexity: Low** — Same pattern as `IsRunningMultipleNodes`.
 
-- New packet pair: `TaskHostResourceRequest`/`TaskHostResourceResponse` (enum values `0x22`/`0x23` already reserved)
-- Worker node handler: forward `RequestCores(int)` to `IBuildEngine9`, return granted count
-- `ReleaseCores` returns void — response packet only needs `RequestId` for correlation (the task thread still blocks until the owning worker node acknowledges)
-- Must gate behind `CallbacksSupported` like `IsRunningMultipleNodes`
-- When callbacks not supported: `RequestCores` returns 0, `ReleaseCores` is a no-op (matching current stubs)
+- Single packet pair `TaskHostCoresRequest`/`TaskHostCoresResponse` (0x22/0x23) with `IsRelease` bool to distinguish the two operations
+- OOP TaskHostNode is a thin proxy — validates input (`cores > 0`), sends request, blocks on TCS
+- Worker node handler (`HandleCoresRequest`) forwards to in-process `IBuildEngine9` which handles implicit core accounting and scheduler communication
+- Gated behind `CallbacksSupported`; when disabled: `RequestCores` returns 0, `ReleaseCores` is no-op (both log MSB5022)
+- Tests: packet serialization, integration (TaskHostFactory, MT auto-ejection, fallback), E2E cross-runtime
 
 ### Stage 3: BuildProjectFile
 
