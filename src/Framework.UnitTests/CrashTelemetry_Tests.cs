@@ -437,7 +437,8 @@ public class CrashTelemetry_Tests
 
         telemetry.PopulateFromException(ex);
 
-        telemetry.StackTop.ShouldContain("ErrorUtilities.ThrowInternalError");
+        telemetry.StackTop.ShouldNotBeNull();
+        telemetry.StackTop!.ShouldContain("ErrorUtilities.ThrowInternalError");
         telemetry.StackCaller.ShouldNotBeNull();
         telemetry.StackCaller!.ShouldContain("Microsoft.Build.Scheduler.ScheduleRequest");
     }
@@ -605,7 +606,7 @@ public class CrashTelemetry_Tests
 
         telemetry.FullStackTrace.ShouldNotBeNull();
         // Should contain all frames
-        telemetry.FullStackTrace.ShouldContain("ErrorUtilities.ThrowInternalError");
+        telemetry.FullStackTrace!.ShouldContain("ErrorUtilities.ThrowInternalError");
         telemetry.FullStackTrace.ShouldContain("RequestBuilder.BuildProject");
         telemetry.FullStackTrace.ShouldContain("BuildManager.Build");
         // File paths should be redacted
