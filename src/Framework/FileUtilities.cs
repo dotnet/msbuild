@@ -100,6 +100,9 @@ namespace Microsoft.Build.Framework
             return path;
         }
 
+        public static bool IsPathTooLong(string path)
+            => path.Length >= NativeMethods.MaxPath; // >= not > because MAX_PATH assumes a trailing null
+
         /// <summary>
         /// Checks if the path contains backslashes on Unix.
         /// </summary>

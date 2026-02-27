@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
+using Microsoft.Build.Framework;
 
 
 namespace Microsoft.Build.Shared.FileSystem
@@ -54,7 +55,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public override bool DirectoryExists(string path)
         {
-            if (!string.IsNullOrEmpty(path) && FileUtilities.IsPathTooLong(path))
+            if (!string.IsNullOrEmpty(path) && FrameworkFileUtilities.IsPathTooLong(path))
             {
                 // If the path is too long, we can't check if it exists on windows
                 string message = ResourceUtilities.FormatString(AssemblyResources.GetString("Shared.PathTooLong"), path, NativeMethodsShared.MaxPath);

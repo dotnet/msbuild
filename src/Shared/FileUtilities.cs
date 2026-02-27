@@ -433,7 +433,7 @@ namespace Microsoft.Build.Shared
             {
                 string uncheckedFullPath = NativeMethodsShared.GetFullPath(path);
 
-                if (IsPathTooLong(uncheckedFullPath))
+                if (FrameworkFileUtilities.IsPathTooLong(uncheckedFullPath))
                 {
                     string message = ResourceUtilities.FormatString(AssemblyResources.GetString("Shared.PathTooLong"), path, NativeMethodsShared.MaxPath);
                     throw new PathTooLongException(message);
@@ -1186,20 +1186,13 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string AttemptToShortenPath(string path)
         {
-            if (IsPathTooLong(path) || IsPathTooLongIfRooted(path))
+            if (FrameworkFileUtilities.IsPathTooLong(path) || IsPathTooLongIfRooted(path))
             {
                 // Attempt to make it shorter -- perhaps there are some \..\ elements
                 path = GetFullPathNoThrow(path);
             }
             return FrameworkFileUtilities.FixFilePath(path);
         }
-
-        public static bool IsPathTooLong(string path)
-        {
-            // >= not > because MAX_PATH assumes a trailing null
-            return path.Length >= NativeMethodsShared.MaxPath;
-        }
-
         private static bool IsPathTooLongIfRooted(string path)
         {
             bool hasMaxPath = NativeMethodsShared.HasMaxPath;
