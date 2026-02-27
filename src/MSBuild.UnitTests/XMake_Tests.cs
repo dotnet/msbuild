@@ -3217,9 +3217,15 @@ EndGlobal
         }
 
         /// <summary>
-        /// Spawns MSBuild as a subprocess and pipes <paramref name="projectContent"/> to its stdin.
-        /// Returns the exit success flag and combined stdout+stderr output.
+        /// Spawns MSBuild as a child process and pipes <paramref name="projectContent"/> to its
+        /// standard input.  Returns <c>true</c> if the process exited with code 0, together with
+        /// the combined stdout + stderr output.
         /// </summary>
+        /// <param name="projectContent">The MSBuild project XML to pipe to stdin.</param>
+        /// <param name="extraArguments">
+        /// Additional command-line arguments passed to the MSBuild executable (e.g.,
+        /// <c>"-nologo -noautoresponse -tl:off -restore"</c>).
+        /// </param>
         private (bool success, string output) RunMSBuildWithStdinProject(string projectContent, string extraArguments)
         {
             string msbuildExe = RunnerUtilities.PathToCurrentlyRunningMsBuildExe;

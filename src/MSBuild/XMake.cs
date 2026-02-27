@@ -1707,6 +1707,12 @@ namespace Microsoft.Build.CommandLine
                                 // ProjectRootElementCache. For in-memory stdin projects there is no
                                 // file on disk to reload, so we must re-register the project in the
                                 // (now-empty) cache before the subsequent build can find it.
+                                // This is only needed when there is a subsequent build (i.e., not
+                                // restore-only), since restore-only exits immediately after this block.
+                                // The global properties set on projectCollection (such as
+                                // _BuildNonexistentProjectsByDefault) were set before the initial load
+                                // and are still present on the collection, so the re-loaded project
+                                // inherits the same evaluation context as the original one.
                                 if (s_stdinProjectContent != null && !restoreOnly)
                                 {
                                     projectCollection.UnloadProject(stdinProject);
