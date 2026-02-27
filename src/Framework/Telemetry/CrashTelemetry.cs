@@ -84,6 +84,13 @@ internal enum CrashExitType
     /// An OutOfMemoryException occurred.
     /// </summary>
     OutOfMemory,
+
+    /// <summary>
+    /// EndBuild is stuck waiting for submissions or nodes to complete.
+    /// Emitted periodically during the hang so diagnostics are available
+    /// even if the hang never resolves.
+    /// </summary>
+    EndBuildHang,
 }
 
 /// <summary>
@@ -125,8 +132,39 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
 
     /// <summary>
     /// The method at the top of the call stack where the exception originated.
+    /// When the top frame is a known throw-helper (e.g., ErrorUtilities.ThrowInternalError),
+    /// this still contains that frame for backward compatibility.
     /// </summary>
     public string? StackTop { get; set; }
+
+    /// <summary>
+    /// The first meaningful caller frame, skipping known throw-helper methods.
+    /// For example, if the top frame is <c>ErrorUtilities.ThrowInternalError</c>,
+    /// this will contain the frame that called it — which is what you actually need for triage.
+    /// Null if the stack trace has no frame beyond the throw-helper, or if the top frame
+    /// is not a throw-helper (in which case <see cref="StackTop"/> already has the meaningful frame).
+    /// </summary>
+    public string? StackCaller { get; set; }
+
+    /// <summary>
+    /// The full exception stack trace with file paths sanitized to remove PII.
+    /// Each frame is preserved so that the complete call chain is visible in telemetry,
+    /// unlike <see cref="StackTop"/> which only captures one frame.
+    /// Truncated to <see cref="MaxStackTraceLength"/> characters.
+    /// </summary>
+    public string? FullStackTrace { get; set; }
+
+    /// <summary>
+    /// Maximum number of characters to include from the sanitized stack trace.
+    /// </summary>
+    internal const int MaxStackTraceLength = 4096;
+
+    /// <summary>
+    /// A prefix of the exception message, truncated and sanitized to avoid PII.
+    /// Particularly useful for <c>InternalErrorException</c> where the message text
+    /// identifies the specific assertion that failed.
+    /// </summary>
+    public string? ExceptionMessage { get; set; }
 
     /// <summary>
     /// The HResult from the exception, if available.
@@ -182,6 +220,46 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     public int? MemoryLoadPercent { get; set; }
 
     /// <summary>
+    /// The name of the thread on which the crash occurred.
+    /// Helps identify whether the crash was on the main thread, a worker thread,
+    /// a node communication thread, etc.
+    /// </summary>
+    public string? CrashThreadName { get; set; }
+
+    // --- EndBuild hang diagnostic properties (populated only for ExitType == EndBuildHang) ---
+
+    /// <summary>
+    /// Which wait point EndBuild is stuck at (e.g. "WaitingForSubmissions", "WaitingForNodes").
+    /// </summary>
+    public string? EndBuildWaitPhase { get; set; }
+
+    /// <summary>
+    /// How long EndBuild has been waiting, in milliseconds.
+    /// </summary>
+    public long? EndBuildWaitDurationMs { get; set; }
+
+    /// <summary>
+    /// Number of submissions still in the pending dictionary.
+    /// </summary>
+    public int? PendingSubmissionCount { get; set; }
+
+    /// <summary>
+    /// Number of submissions that have a BuildResult but LoggingCompleted is false.
+    /// These submissions are the ones blocking EndBuild.
+    /// </summary>
+    public int? SubmissionsWithResultNoLogging { get; set; }
+
+    /// <summary>
+    /// Whether a thread exception has been recorded on the BuildManager.
+    /// </summary>
+    public bool? ThreadExceptionRecorded { get; set; }
+
+    /// <summary>
+    /// Number of unmatched ProjectStarted events (no corresponding ProjectFinished).
+    /// </summary>
+    public int? UnmatchedProjectStartedCount { get; set; }
+
+    /// <summary>
     /// The original exception, kept for passing to <c>FaultEvent</c>.
     /// Not serialized to telemetry properties.
     /// </summary>
@@ -197,10 +275,14 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         InnerExceptionType = exception.InnerException?.GetType().FullName;
         InnermostExceptionType = GetInnermostException(exception)?.GetType().FullName;
         HResult = exception.HResult;
+        ExceptionMessage = TruncateMessage(exception.Message);
         StackHash = ComputeStackHash(exception);
         StackTop = ExtractStackTop(exception);
+        StackCaller = ExtractStackCaller(exception);
+        FullStackTrace = ExtractFullStackTrace(exception);
         CrashOriginNamespace = ExtractOriginNamespace(exception);
         CrashOrigin = ClassifyOrigin(CrashOriginNamespace);
+        CrashThreadName = System.Threading.Thread.CurrentThread.Name;
         PopulateMemoryStats();
     }
 
@@ -265,6 +347,9 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(IsUnhandled);
         AddIfNotNull(StackHash);
         AddIfNotNull(StackTop);
+        AddIfNotNull(StackCaller);
+        AddIfNotNull(FullStackTrace);
+        AddIfNotNull(ExceptionMessage);
         AddIfNotNull(HResult);
         AddIfNotNull(BuildEngineVersion);
         AddIfNotNull(BuildEngineFrameworkName);
@@ -274,9 +359,18 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
             telemetryItems.Add(nameof(CrashOrigin), CrashOrigin.ToString());
         }
         AddIfNotNull(CrashOriginNamespace);
+        AddIfNotNull(CrashThreadName);
         AddIfNotNull(InnermostExceptionType);
         AddIfNotNull(ProcessWorkingSetMB);
         AddIfNotNull(MemoryLoadPercent);
+
+        // EndBuild hang diagnostic properties
+        AddIfNotNull(EndBuildWaitPhase);
+        AddIfNotNull(EndBuildWaitDurationMs);
+        AddIfNotNull(PendingSubmissionCount);
+        AddIfNotNull(SubmissionsWithResultNoLogging);
+        AddIfNotNull(ThreadExceptionRecorded);
+        AddIfNotNull(UnmatchedProjectStartedCount);
 
         return telemetryItems;
 
@@ -303,6 +397,9 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(IsUnhandled.ToString(), nameof(IsUnhandled));
         AddIfNotNull(StackHash);
         AddIfNotNull(StackTop);
+        AddIfNotNull(StackCaller);
+        AddIfNotNull(FullStackTrace);
+        AddIfNotNull(ExceptionMessage);
         AddIfNotNull(HResult?.ToString(), nameof(HResult));
         AddIfNotNull(BuildEngineVersion);
         AddIfNotNull(BuildEngineFrameworkName);
@@ -312,9 +409,18 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
             AddIfNotNull(CrashOrigin.ToString(), nameof(CrashOrigin));
         }
         AddIfNotNull(CrashOriginNamespace);
+        AddIfNotNull(CrashThreadName);
         AddIfNotNull(InnermostExceptionType);
         AddIfNotNull(ProcessWorkingSetMB?.ToString(), nameof(ProcessWorkingSetMB));
         AddIfNotNull(MemoryLoadPercent?.ToString(), nameof(MemoryLoadPercent));
+
+        // EndBuild hang diagnostic properties
+        AddIfNotNull(EndBuildWaitPhase);
+        AddIfNotNull(PendingSubmissionCount?.ToString(), nameof(PendingSubmissionCount));
+        AddIfNotNull(SubmissionsWithResultNoLogging?.ToString(), nameof(SubmissionsWithResultNoLogging));
+        AddIfNotNull(EndBuildWaitDurationMs?.ToString(), nameof(EndBuildWaitDurationMs));
+        AddIfNotNull(ThreadExceptionRecorded?.ToString(), nameof(ThreadExceptionRecorded));
+        AddIfNotNull(UnmatchedProjectStartedCount?.ToString(), nameof(UnmatchedProjectStartedCount));
 
         return properties;
 
@@ -515,6 +621,53 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     }
 
     /// <summary>
+    /// Truncates the exception message and sanitizes file paths to avoid sending PII.
+    /// Some ThrowInternalError call sites embed file paths (e.g., project paths, SDK paths)
+    /// in the message, which may contain usernames or other PII.
+    /// </summary>
+    internal static string? TruncateMessage(string? message)
+    {
+        if (string.IsNullOrEmpty(message))
+        {
+            return null;
+        }
+
+        // Strip the "MSB0001: Internal MSBuild Error: " prefix that InternalErrorException prepends.
+        const string internalErrorPrefix = "MSB0001: Internal MSBuild Error: ";
+        if (message!.StartsWith(internalErrorPrefix, StringComparison.Ordinal))
+        {
+            message = message.Substring(internalErrorPrefix.Length);
+        }
+
+        // Redact file/directory paths that may contain PII (e.g., C:\Users\johndoe\...).
+        // Matches Windows paths (X:\...) and Unix paths (/home/...).
+        message = System.Text.RegularExpressions.Regex.Replace(
+            message,
+            @"(?:[A-Za-z]:\\|/)(?:[^\s""'<>|*?]+)",
+            "<path>");
+
+        const int maxLength = 256;
+        return message.Length <= maxLength ? message : message.Substring(0, maxLength);
+    }
+
+    /// <summary>
+    /// Known throw-helper method suffixes. When the top stack frame ends with one of
+    /// these, <see cref="ExtractStackCaller"/> will skip it and return the next frame.
+    /// These are methods that only exist to format and throw an exception — the real
+    /// bug is always in their caller.
+    /// </summary>
+    private static readonly string[] s_throwHelperSuffixes =
+    [
+        "ErrorUtilities.ThrowInternalError(",
+        "ErrorUtilities.VerifyThrowInternalError(",
+        "ErrorUtilities.ThrowInternalErrorUnreachable(",
+        "ErrorUtilities.VerifyThrowInternalErrorUnreachable(",
+        "ErrorUtilities.VerifyThrowInternalNull(",
+        "ErrorUtilities.ThrowInvalidOperation(",
+        "ErrorUtilities.VerifyThrow(",
+    ];
+
+    /// <summary>
     /// Extracts the top frame of the stack trace to identify the crash location.
     /// </summary>
     private static string? ExtractStackTop(Exception exception)
@@ -529,6 +682,77 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         int newLineIndex = stackTrace.IndexOf('\n');
         string topFrame = newLineIndex >= 0 ? stackTrace.Substring(0, newLineIndex) : stackTrace;
         return SanitizeStackFrame(topFrame.Trim());
+    }
+
+    /// <summary>
+    /// Extracts and sanitizes the full stack trace from the exception.
+    /// Each frame has file paths redacted. Truncated to <see cref="MaxStackTraceLength"/>.
+    /// </summary>
+    internal static string? ExtractFullStackTrace(Exception exception)
+    {
+        string? stackTrace = exception.StackTrace;
+        if (string.IsNullOrEmpty(stackTrace))
+        {
+            return null;
+        }
+
+        string sanitized = SanitizeFilePathsInText(stackTrace!);
+
+        if (sanitized.Length > MaxStackTraceLength)
+        {
+            const string truncationSuffix = "... [truncated]";
+            sanitized = sanitized.Substring(0, MaxStackTraceLength - truncationSuffix.Length) + truncationSuffix;
+        }
+
+        return sanitized;
+    }
+
+    /// <summary>
+    /// If the top stack frame is a known throw-helper (e.g., ErrorUtilities.ThrowInternalError),
+    /// extracts the next frame — the actual caller where the bug lives.
+    /// Returns null if the top frame is not a throw-helper or no further frames exist.
+    /// </summary>
+    internal static string? ExtractStackCaller(Exception exception)
+    {
+        string? stackTrace = exception.StackTrace;
+        if (stackTrace is null)
+        {
+            return null;
+        }
+
+        // Check if the first frame is a known throw-helper.
+        int firstNewLine = stackTrace.IndexOf('\n');
+        string firstFrame = (firstNewLine >= 0 ? stackTrace.Substring(0, firstNewLine) : stackTrace).Trim();
+
+        bool isThrowHelper = false;
+        foreach (string suffix in s_throwHelperSuffixes)
+        {
+            if (firstFrame.IndexOf(suffix, StringComparison.Ordinal) >= 0)
+            {
+                isThrowHelper = true;
+                break;
+            }
+        }
+
+        if (!isThrowHelper || firstNewLine < 0)
+        {
+            return null;
+        }
+
+        // Extract the second frame (the caller of the throw-helper).
+        int secondStart = firstNewLine + 1;
+        if (secondStart >= stackTrace.Length)
+        {
+            return null;
+        }
+
+        int secondNewLine = stackTrace.IndexOf('\n', secondStart);
+        string secondFrame = secondNewLine >= 0
+            ? stackTrace.Substring(secondStart, secondNewLine - secondStart)
+            : stackTrace.Substring(secondStart);
+
+        string trimmed = secondFrame.Trim();
+        return trimmed.Length > 0 ? SanitizeStackFrame(trimmed) : null;
     }
 
     /// <summary>
@@ -562,5 +786,41 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         string prefix = frame.Substring(0, inIndex + inToken.Length);
         string lineSuffix = frame.Substring(lineIndex);
         return prefix + "<redacted>" + lineSuffix;
+    }
+
+    /// <summary>
+    /// Sanitizes file paths embedded in multi-line text (e.g., exception dumps) to remove PII.
+    /// Each line that looks like a stack frame gets its file path redacted.
+    /// </summary>
+    internal static string SanitizeFilePathsInText(string text)
+    {
+        string[] lines = text.Split('\n');
+        for (int i = 0; i < lines.Length; i++)
+        {
+            string line = lines[i];
+
+            // Sanitize " in <path>:line N" patterns (stack frames)
+            const string inToken = " in ";
+            const string lineToken = ":line ";
+
+            int inIndex = line.IndexOf(inToken, StringComparison.Ordinal);
+            if (inIndex >= 0)
+            {
+                int lineIndex = line.IndexOf(lineToken, inIndex, StringComparison.Ordinal);
+                if (lineIndex >= 0)
+                {
+                    string prefix = line.Substring(0, inIndex + inToken.Length);
+                    string lineSuffix = line.Substring(lineIndex);
+                    lines[i] = prefix + "<redacted>" + lineSuffix;
+                }
+                else
+                {
+                    // " in <path>" without ":line N"
+                    lines[i] = line.Substring(0, inIndex + inToken.Length) + "<redacted>";
+                }
+            }
+        }
+
+        return string.Join("\n", lines);
     }
 }
