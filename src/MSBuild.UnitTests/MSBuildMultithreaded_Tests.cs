@@ -10,7 +10,6 @@ using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Microsoft.Build.Engine.UnitTests
 {

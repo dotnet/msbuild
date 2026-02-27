@@ -13,7 +13,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using FrameworkLocationHelper = Microsoft.Build.Shared.FrameworkLocationHelper;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;

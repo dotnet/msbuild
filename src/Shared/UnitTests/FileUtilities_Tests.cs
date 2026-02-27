@@ -646,13 +646,16 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        public static bool RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241()
+        public static bool RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241
         {
-            // Run these tests only when we're not on Windows
-            return !NativeMethodsShared.IsWindows ||
-            // OR we're on Windows and long paths aren't enabled
-            // https://github.com/dotnet/msbuild/issues/4241
-                   NativeMethodsShared.IsMaxPathLegacyWindows();
+            get
+            {
+                // Run these tests only when we're not on Windows
+                return !NativeMethodsShared.IsWindows ||
+                // OR we're on Windows and long paths aren't enabled
+                // https://github.com/dotnet/msbuild/issues/4241
+                       NativeMethodsShared.IsMaxPathLegacyWindows();
+            }
         }
 
         [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]

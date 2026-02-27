@@ -15,7 +15,6 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
 using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 
@@ -394,6 +393,18 @@ namespace Microsoft.Build.UnitTests
 
         private sealed class DefaultOutput : ITestOutputHelper
         {
+            public string Output => string.Empty;
+
+            public void Write(string message)
+            {
+                Console.Write(message);
+            }
+
+            public void Write(string format, params object[] args)
+            {
+                Console.Write(format, args);
+            }
+
             public void WriteLine(string message)
             {
                 Console.WriteLine(message);
