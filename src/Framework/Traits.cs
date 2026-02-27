@@ -403,6 +403,13 @@ namespace Microsoft.Build.Framework
         public readonly bool UseSingleLoadContext = Environment.GetEnvironmentVariable("MSBUILDSINGLELOADCONTEXT") == "1";
 
         /// <summary>
+        /// Use custom AssemblyLoadContext for loading dependencies found in the MSBuild tools directory.
+        /// When enabled, assemblies found in the MSBuild tools directory are loaded into the plugin's isolated context
+        /// instead of the shared default context, preventing potential version conflicts with the host application.
+        /// </summary>
+        public readonly bool UseCustomLoadContextForDependenciesInToolsDirectory = Environment.GetEnvironmentVariable("MSBUILDUSECUSTOMLOADCONTEXTFORDEPENDENCIESINTOOLSDIRECTORY") == "1";
+
+        /// <summary>
         /// Enables the user of autorun functionality in CMD.exe on Windows which is disabled by default in MSBuild.
         /// </summary>
         public readonly bool UseAutoRunWhenLaunchingProcessUnderCmd = Environment.GetEnvironmentVariable("MSBUILDUSERAUTORUNINCMD") == "1";
