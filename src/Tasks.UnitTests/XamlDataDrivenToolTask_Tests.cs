@@ -5,9 +5,14 @@ using System;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Tasks.Xaml;
+using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 #nullable disable
 
@@ -382,44 +387,66 @@ namespace Microsoft.Build.UnitTests.XamlDataDrivenToolTask_Tests
             logger.AssertLogContains("echo 13) [notaproperty]]  end");
             logger.AssertLogContains("echo 14) [[notaproperty]] end");
         }
+    }
+
+    /// <summary>
+    /// Tests for XamlDataDrivenToolTask error handling using direct task instantiation.
+    /// </summary>
+    public class ErrorHandlingTests
+    {
+        private readonly ITestOutputHelper _output;
+
+        public ErrorHandlingTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         /// <summary>
         /// Tests that when a XamlDataDrivenTask's tool exits with code 0 but canonical errors
         /// were logged during execution, the special "exited zero with errors" message (MSB3725)
         /// is used instead of the normal command failure message (MSB3721).
         /// </summary>
-        [WindowsOnlyFact]
-        public void LoggedErrorsCauseFailureDespiteExitCode0()
+        [Fact]
+        public void ExitCodeZeroWithLoggedErrors_LogsMSB3725()
         {
-            string projectFile = @"
-                      <Project ToolsVersion=`msbuilddefaulttoolsversion` DefaultTargets=`XamlTaskFactory`>
-                        <UsingTask TaskName=`TestTask` TaskFactory=`XamlTaskFactory` AssemblyName=`Microsoft.Build.Tasks.v4.0, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a`>
-                          <Task>
-                            <![CDATA[
-                              <ProjectSchemaDefinitions xmlns=`clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework` xmlns:x=`http://schemas.microsoft.com/winfx/2006/xaml` xmlns:sys=`clr-namespace:System;assembly=mscorlib` xmlns:impl=`clr-namespace:Microsoft.VisualStudio.Project.Contracts.Implementation;assembly=Microsoft.VisualStudio.Project.Contracts.Implementation`>
-                                <Rule Name=`TestTask` ToolName=`cmd.exe`>
-                                  <StringProperty Name=`test` />
-                                </Rule>
-                              </ProjectSchemaDefinitions>
-                            ]]>
-                          </Task>
-                        </UsingTask>
-                        <Target Name=`XamlTaskFactory`>
-                          <TestTask CommandLineTemplate=`/c echo myfile(88,37): error AB1234: thisisacanonicalerror` />
-                        </Target>
-                      </Project>";
+            var cmdLine = NativeMethodsShared.IsWindows
+                ? "echo myfile(88,37): error AB1234: thisisacanonicalerror"
+                : "echo \"myfile(88,37): error AB1234: thisisacanonicalerror\"";
 
-            Project p = ObjectModelHelpers.CreateInMemoryProject(projectFile);
-            MockLogger logger = new MockLogger();
+            var task = new TestableXamlDataDrivenToolTask();
+            task.BuildEngine = new MockEngine(_output);
+            task.CommandLineTemplate = cmdLine;
+            task.EchoOff = true;
 
-            bool success = p.Build(logger);
+            bool result = task.Execute();
 
-            success.ShouldBeFalse();
+            result.ShouldBeFalse();
+
+            MockEngine engine = (MockEngine)task.BuildEngine;
 
             // Should log the special "exited zero with errors" message, not the normal command failure
-            logger.AssertLogContains("MSB3725");
-            logger.AssertLogDoesntContain("MSB3721");
-            logger.AssertLogDoesntContain("MSB6006");
+            engine.AssertLogContains("MSB3725");
+
+            // Should not log other error messages related to XamlDataDrivenToolTask command failure 
+            engine.AssertLogDoesntContain("MSB3721");
+            engine.AssertLogDoesntContain("MSB3722");
+            
+            // Errors: canonical error from tool output + MSB3725 from HandleTaskExecutionErrors
+            engine.Errors.ShouldBe(2);
         }
+    }
+
+    /// <summary>
+    /// A concrete subclass of XamlDataDrivenToolTask for direct unit testing
+    /// without requiring a project file or XamlTaskFactory.
+    /// </summary>
+    internal sealed class TestableXamlDataDrivenToolTask : XamlDataDrivenToolTask
+    {
+        public TestableXamlDataDrivenToolTask()
+            : base(Array.Empty<string>(), null)
+        {
+        }
+
+        protected override string ToolName => "unused";
     }
 }

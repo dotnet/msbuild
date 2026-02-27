@@ -220,11 +220,15 @@ namespace Microsoft.Build.UnitTests
 
                 // The above command logged a canonical error message.  Therefore ToolTask should
                 // not log its own error beyond that.
-                engine.AssertLogDoesntContain("MSB6006");
                 engine.AssertLogContains("CS0168");
                 engine.AssertLogContains("The variable 'foo' is declared but never used");
                 engine.AssertLogContains("ExitCode was set to -1");
+
+                // Should not log the generic tool failure error
+                engine.AssertLogDoesntContain("MSB6006");
+
                 t.ExitCode.ShouldBe(-1);
+                // Only the canonical error from tool output (base ToolTask logs a message, not an error)
                 engine.Errors.ShouldBe(1);
             }
         }
