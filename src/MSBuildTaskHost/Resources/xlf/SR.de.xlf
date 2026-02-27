@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="de" original="../SR.resx">
+    <body>
+      <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
+        <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
+        <target state="new">MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</target>
+        <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="ConflictingTaskAssembly">
+        <source>MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</source>
+        <target state="new">MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</target>
+        <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
+      </trans-unit>
+      <trans-unit id="ExpectedEventToBeSerializable">
+        <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
+        <target state="new">Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentHeader">
+        <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
+        <target state="new">Making the following modifications to the environment received from the parent node before applying it to the task host:</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentVariable">
+        <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
+        <target state="new">  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="Shared.PathTooLong">
+        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
+        <target state="new">Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Shared.CannotChangeItemSpecModifiers">
+        <source>"{0}" is a reserved item metadata, and cannot be modified or deleted.</source>
+        <target state="new">"{0}" is a reserved item metadata, and cannot be modified or deleted.</target>
+        <note>UE: Tasks and OM users are not allowed to remove or change the value of the built-in metadata on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</note>
+      </trans-unit>
+      <trans-unit id="Shared.InvalidFilespecForTransform">
+        <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
+        <target state="new">The item metadata "%({0})" cannot be applied to the path "{1}". {2}</target>
+        <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
+      </trans-unit>
+      <trans-unit id="TaskNotMarshalByRef">
+        <source>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</source>
+        <target state="new">MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</target>
+        <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="Shared.ParameterCannotBeNull">
+        <source>Parameter "{0}" cannot be null.</source>
+        <target state="new">Parameter "{0}" cannot be null.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Shared.ParameterCannotHaveZeroLength">
+        <source>Parameter "{0}" cannot have zero length.</source>
+        <target state="new">Parameter "{0}" cannot have zero length.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>
