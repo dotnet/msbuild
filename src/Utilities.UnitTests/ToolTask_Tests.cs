@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Resources;
 using System.Text.RegularExpressions;
@@ -1064,8 +1065,8 @@ namespace Microsoft.Build.UnitTests
             /// </summary>
             protected override string GenerateCommandLineCommands() =>
                 NativeMethodsShared.IsUnixLike ?
-                string.Format(_unixSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0) :
-                string.Format(_windowsSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0);
+                string.Format(CultureInfo.InvariantCulture, _unixSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0) :
+                string.Format(CultureInfo.InvariantCulture, _windowsSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0);
 
             /// <summary>
             /// Ensures that test parameters make sense.
