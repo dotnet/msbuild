@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Resources;
 using System.Text.RegularExpressions;
@@ -1011,8 +1012,10 @@ namespace Microsoft.Build.UnitTests
         /// </remarks>
         private sealed class ToolTaskThatSleeps : ToolTask
         {
-            // Windows prompt command to sleep:
-            private readonly string _windowsSleep = "/c start /wait timeout {0}";
+            // Windows command to delay using ping to loopback (avoids interactive console requirement
+            // of the 'timeout' command and avoids 'start /wait' overhead of creating a new console window).
+            // ping -n N sends N echo requests at ~1 second intervals, so total delay is ~(N-1) seconds.
+            private readonly string _windowsSleep = "/c ping -n {0} 127.0.0.1 > nul";
 
             // UNIX command to sleep:
             private readonly string _unixSleep = "-c \"sleep {0}\"";
@@ -1062,10 +1065,19 @@ namespace Microsoft.Build.UnitTests
             /// <summary>
             /// Generates a shell command to sleep different amount of time based on repeat counter.
             /// </summary>
-            protected override string GenerateCommandLineCommands() =>
-                NativeMethodsShared.IsUnixLike ?
-                string.Format(_unixSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0) :
-                string.Format(_windowsSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0);
+            protected override string GenerateCommandLineCommands()
+            {
+                double delaySec = (RepeatCount < 2 ? InitialDelay : FollowupDelay) / 1000.0;
+                if (NativeMethodsShared.IsUnixLike)
+                {
+                    return string.Format(CultureInfo.InvariantCulture, _unixSleep, delaySec);
+                }
+
+                // ping -n N sends N echo requests; delay between requests is ~1 second,
+                // so total delay is roughly (N-1) seconds.
+                int pingCount = Math.Max(1, (int)delaySec + 1);
+                return string.Format(CultureInfo.InvariantCulture, _windowsSleep, pingCount);
+            }
 
             /// <summary>
             /// Ensures that test parameters make sense.
