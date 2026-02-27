@@ -4,57 +4,57 @@
     <body>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeEqual">
         <source>{0} ('{1}') must be equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be equal to '{2}'.</target>
+        <target state="translated">{0} („{1}“) muss gleich „{2}“ sein.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreater">
         <source>{0} ('{1}') must be greater than '{2}'.</source>
-        <target state="new">{0} ('{1}') must be greater than '{2}'.</target>
+        <target state="translated">{0} („{1}“) muss größer als „{2}“ sein.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreaterOrEqual">
         <source>{0} ('{1}') must be greater than or equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be greater than or equal to '{2}'.</target>
+        <target state="translated">{0} („{1}“) muss größer oder gleich „{2}“ sein.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeLess">
         <source>{0} ('{1}') must be less than '{2}'.</source>
-        <target state="new">{0} ('{1}') must be less than '{2}'.</target>
+        <target state="translated">{0} („{1}“) muss kleiner als „{2}“ sein.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeLessOrEqual">
         <source>{0} ('{1}') must be less than or equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be less than or equal to '{2}'.</target>
+        <target state="translated">{0} („{1}“) muss kleiner oder gleich „{2}“ sein.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegative">
         <source>{0} ('{1}') must be a non-negative value.</source>
-        <target state="new">{0} ('{1}') must be a non-negative value.</target>
+        <target state="translated">{0} („{1}“) muss ein nicht negativer Wert sein.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegativeNonZero">
         <source>{0} ('{1}') must be a non-negative and non-zero value.</source>
-        <target state="new">{0} ('{1}') must be a non-negative and non-zero value.</target>
+        <target state="translated">{0} („{1}“) muss ein nicht negativer Wert und kein Nullwert sein.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonZero">
         <source>{0} ('{1}') must be a non-zero value.</source>
-        <target state="new">{0} ('{1}') must be a non-zero value.</target>
+        <target state="translated">{0} („{1}“) muss ein Wert ungleich 0 sein.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNotEqual">
         <source>{0} ('{1}') must not be equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must not be equal to '{2}'.</target>
+        <target state="translated">{0} („{1}“) darf nicht gleich „{2}“ sein.</target>
         <note />
       </trans-unit>
       <trans-unit id="Argument_EmptyOrWhiteSpaceString">
         <source>The value cannot be an empty string or composed entirely of whitespace.</source>
-        <target state="new">The value cannot be an empty string or composed entirely of whitespace.</target>
+        <target state="translated">Der Wert darf keine leere Zeichenfolge sein oder vollständig aus Leerzeichen bestehen.</target>
         <note />
       </trans-unit>
       <trans-unit id="Argument_EmptyString">
         <source>The value cannot be an empty string.</source>
-        <target state="new">The value cannot be an empty string.</target>
+        <target state="translated">Der Wert darf keine leere Zeichenfolge sein.</target>
         <note />
       </trans-unit>
       <trans-unit id="PathMustBeRooted">
