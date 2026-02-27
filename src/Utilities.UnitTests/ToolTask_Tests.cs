@@ -220,15 +220,11 @@ namespace Microsoft.Build.UnitTests
 
                 // The above command logged a canonical error message.  Therefore ToolTask should
                 // not log its own error beyond that.
+                engine.AssertLogDoesntContain("MSB6006");
                 engine.AssertLogContains("CS0168");
                 engine.AssertLogContains("The variable 'foo' is declared but never used");
-                engine.AssertLogContains("ExitCode was set to -1");
-
-                // Should not log the generic tool failure error
-                engine.AssertLogDoesntContain("MSB6006");
-
+                engine.AssertLogContains("The command exited with return value 0, but errors were detected during execution. ExitCode was set to -1");
                 t.ExitCode.ShouldBe(-1);
-                // Only the canonical error from tool output (base ToolTask logs a message, not an error)
                 engine.Errors.ShouldBe(1);
             }
         }
@@ -331,7 +327,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// When a message is logged to the standard error stream error if LogStandardErrorAsError is true
+        /// When LogStandardErrorAsError is true and text is sent to stderr, the tool exits with
+        /// code 0 but ToolTask overrides the exit code to -1. The low-importance message
+        /// "The command exited with return value 0, but errors were detected" should be logged,
+        /// not the generic tool failure error MSB6006.
         /// </summary>
         [Fact]
         public void ErrorWhenTextSentToStandardError()
@@ -347,10 +346,16 @@ namespace Microsoft.Build.UnitTests
 
                 t.Execute().ShouldBeFalse();
 
-                engine.AssertLogDoesntContain("MSB3073");
                 engine.AssertLogContains("Who made you king anyways");
-                engine.AssertLogContains("ExitCode was set to -1");
+
+                // Should log the "exited with return value 0, but errors were detected" message
+                engine.AssertLogContains("The command exited with return value 0, but errors were detected");
+
+                // Should not log other failure error codes
+                engine.AssertLogDoesntContain("MSB3073");
+
                 t.ExitCode.ShouldBe(-1);
+                // Only the stderr-as-error from tool output
                 engine.Errors.ShouldBe(1);
             }
         }
@@ -367,20 +372,24 @@ namespace Microsoft.Build.UnitTests
             {
                 MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
-                // MyTool.LogEventsFromTextOutput logs an error when output contains "BADTHINGHAPPENED".
-                // "exit /b 1" (Windows) or "exit 1" (Unix) ensures a non-zero exit code.
+
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                                                 ? "/C echo BADTHINGHAPPENED && exit /b 1"
                                                 : @"-c ""echo BADTHINGHAPPENED; exit 1""";
 
                 t.Execute().ShouldBeFalse();
 
-                // The tool logged its own error and exited non-zero, so ToolTask should not
-                // emit MSB6006. Instead it logs a low-importance "exited with code" message.
-                engine.AssertLogDoesntContain("MSB6006");
                 engine.AssertLogContains("BADTHINGHAPPENED");
+
+                // Should log the "exited with code" low-importance message
                 engine.AssertLogContains("The command exited with code 1");
+
+                // Should not log the generic tool failure error or the zero-with-errors message
+                engine.AssertLogDoesntContain("MSB3073");
+                engine.AssertLogDoesntContain("exited with return value 0");
+
                 t.ExitCode.ShouldBe(1);
+                // Only the custom error logged by MyTool.LogEventsFromTextOutput
                 engine.Errors.ShouldBe(1);
             }
         }
