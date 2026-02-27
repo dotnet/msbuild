@@ -435,8 +435,7 @@ namespace Microsoft.Build.Shared
 
                 if (FrameworkFileUtilities.IsPathTooLong(uncheckedFullPath))
                 {
-                    string message = ResourceUtilities.FormatString(AssemblyResources.GetString("Shared.PathTooLong"), path, NativeMethodsShared.MaxPath);
-                    throw new PathTooLongException(message);
+                    throw new PathTooLongException(Framework.Resources.SR.FormatPathTooLong(path, NativeMethodsShared.MaxPath));
                 }
 
                 // We really don't care about extensions here, but Path.HasExtension provides a great way to

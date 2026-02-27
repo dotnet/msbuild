@@ -153,4 +153,7 @@
   <data name="PathMustBeRooted" xml:space="preserve">
     <value>Path must be rooted.</value>
   </data>
+  <data name="PathTooLong" xml:space="preserve">
+    <value>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</value>
+  </data>
 </root>

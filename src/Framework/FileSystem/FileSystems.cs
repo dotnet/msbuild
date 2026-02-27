@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared.FileSystem
 {
@@ -13,7 +14,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         private static IFileSystem GetFileSystem()
         {
-            if (NativeMethodsShared.IsWindows)
+            if (NativeMethods.IsWindows)
             {
                 return MSBuildOnWindowsFileSystem.Singleton();
             }

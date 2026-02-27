@@ -58,10 +58,10 @@ namespace Microsoft.Build.Shared.FileSystem
             if (!string.IsNullOrEmpty(path) && FrameworkFileUtilities.IsPathTooLong(path))
             {
                 // If the path is too long, we can't check if it exists on windows
-                string message = ResourceUtilities.FormatString(AssemblyResources.GetString("Shared.PathTooLong"), path, NativeMethodsShared.MaxPath);
-                throw new PathTooLongException(message);
+                throw new PathTooLongException(SR.FormatPathTooLong(path, NativeMethods.MaxPath));
             }
-            return NativeMethodsShared.DirectoryExistsWindows(path);
+
+            return NativeMethods.DirectoryExistsWindows(path);
         }
 
         public override bool FileExists(string path)
@@ -75,12 +75,12 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public override bool FileOrDirectoryExists(string path)
         {
-            return NativeMethodsShared.FileOrDirectoryExistsWindows(path);
+            return NativeMethods.FileOrDirectoryExistsWindows(path);
         }
 
         public override DateTime GetLastWriteTimeUtc(string path)
         {
-            var fileLastWriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(path);
+            var fileLastWriteTime = NativeMethods.GetLastWriteFileUtcTime(path);
 
             if (fileLastWriteTime != DateTime.MinValue)
             {
@@ -88,7 +88,7 @@ namespace Microsoft.Build.Shared.FileSystem
             }
             else
             {
-                NativeMethodsShared.GetLastWriteDirectoryUtcTime(path, out var directoryLastWriteTime);
+                NativeMethods.GetLastWriteDirectoryUtcTime(path, out var directoryLastWriteTime);
                 return directoryLastWriteTime;
             }
         }
