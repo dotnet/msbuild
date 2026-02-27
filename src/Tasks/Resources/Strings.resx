@@ -1183,6 +1183,23 @@
     <comment>{StrBegin="MSB3826: "}</comment>
   </data>
 
+  <data name="GenerateResource.STRPropertySkippedReservedName">
+    <value>MSB3827: Skipping strongly typed resource property generation for resource "{0}": the name conflicts with a reserved name. Reserved names: {1}.</value>
+    <comment>{StrBegin="MSB3827: "}</comment>
+  </data>
+  <data name="GenerateResource.STRPropertySkippedInvalidIdentifier">
+    <value>MSB3828: Skipping strongly typed resource property generation for resource "{0}": the name cannot be converted to a valid identifier.</value>
+    <comment>{StrBegin="MSB3828: "}</comment>
+  </data>
+  <data name="GenerateResource.STRPropertySkippedNameCollision">
+    <value>MSB3829: Skipping strongly typed resource property generation for resource "{0}": a name collision exists with resource "{1}" after identifier normalization.</value>
+    <comment>{StrBegin="MSB3829: "}</comment>
+  </data>
+  <data name="GenerateResource.STRPropertySkippedVoidType">
+    <value>MSB3830: Skipping strongly typed resource property generation for resource "{0}": the resource value type is void, which cannot be used as a property type.</value>
+    <comment>{StrBegin="MSB3830: "}</comment>
+  </data>
+
   <!--
         The GetAssemblyIdentity message bucket is: MSB3441 - MSB3450
 

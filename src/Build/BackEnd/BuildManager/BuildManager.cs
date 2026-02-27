@@ -1136,19 +1136,7 @@ namespace Microsoft.Build.Execution
                                 loggingService.PopulateBuildTelemetryWithErrors(_buildTelemetry);
                             }
 
-                            string? host = null;
-                            if (BuildEnvironmentState.s_runningInVisualStudio)
-                            {
-                                host = "VS";
-                            }
-                            else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME")))
-                            {
-                                host = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
-                            }
-                            else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
-                            {
-                                host = "VSCode";
-                            }
+                            string? host = BuildEnvironmentState.GetHostName();
 
                             _buildTelemetry.BuildEngineHost = host;
 
@@ -1230,11 +1218,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void RecordCrashTelemetry(Exception exception, bool isUnhandled)
         {
-            string? host = _buildTelemetry?.BuildEngineHost ?? GetHostName();
+            string? host = _buildTelemetry?.BuildEngineHost ??  BuildEnvironmentState.GetHostName();
 
             CrashTelemetryRecorder.RecordCrashTelemetry(
                 exception,
-                isUnhandled ? "UnhandledException" : "EndBuildFailure",
+                isUnhandled ? CrashExitType.UnhandledException : CrashExitType.EndBuildFailure,
                 isUnhandled,
                 ExceptionHandling.IsCriticalException(exception),
                 ProjectCollection.Version?.ToString(),
@@ -1242,26 +1230,6 @@ namespace Microsoft.Build.Execution
                 host);
         }
 
-        private static string? GetHostName()
-        {
-            if (BuildEnvironmentState.s_runningInVisualStudio)
-            {
-                return "VS";
-            }
-
-            string? msbuildHostName = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
-            if (!string.IsNullOrEmpty(msbuildHostName))
-            {
-                return msbuildHostName;
-            }
-
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
-            {
-                return "VSCode";
-            }
-
-            return null;
-        }
 
         /// <summary>
         /// Convenience method.  Submits a lone build request and blocks until results are available.

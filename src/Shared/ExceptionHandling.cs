@@ -365,7 +365,7 @@ namespace Microsoft.Build.Shared
         {
             CrashTelemetryRecorder.RecordAndFlushCrashTelemetry(
                 ex,
-                exitType: "UnhandledException",
+                exitType: CrashExitType.UnhandledException,
                 isUnhandled: true,
                 isCritical: IsCriticalException(ex));
         }
