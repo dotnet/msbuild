@@ -1379,6 +1379,15 @@ namespace Microsoft.Build.Logging
                 }
                 else
                 {
+#if NET9_0_OR_GREATER
+                    // Perf: This should get jitted away in the case where neither is supported
+                    if (GxHash.GxHash.IsSupported)
+                    {
+                        value = GxHash.GxHash.Hash64(System.Runtime.InteropServices.MemoryMarshal.Cast<char, byte>(text.AsSpan()));
+                        return;
+                    }
+#endif
+
                     value = FowlerNollVo1aHash.ComputeHash64Fast(text);
                 }
             }
