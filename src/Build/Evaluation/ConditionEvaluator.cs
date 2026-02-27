@@ -379,6 +379,11 @@ namespace Microsoft.Build.Evaluation
             string ExpandIntoString(string expression);
 
             /// <summary>
+            ///     Checks whether a property exists (vs. being coerced to empty string).
+            /// </summary>
+            bool PropertyExists(string propertyName);
+
+            /// <summary>
             ///     PRE cache
             /// </summary>
             ProjectRootElementCacheBase? LoadedProjectsCache { get; }
@@ -482,6 +487,16 @@ namespace Microsoft.Build.Evaluation
                 expression = _expander.ExpandIntoStringAndUnescape(expression, _expanderOptions, ElementLocation);
 
                 return expression;
+            }
+
+            /// <summary>
+            /// Checks whether a property exists (vs. being coerced to empty string).
+            /// </summary>
+            /// <param name="propertyName">The name of the property to check.</param>
+            /// <returns>True if the property exists, false otherwise.</returns>
+            public bool PropertyExists(string propertyName)
+            {
+                return _expander.PropertyExists(propertyName);
             }
         }
     }

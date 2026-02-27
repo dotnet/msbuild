@@ -5261,5 +5261,101 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 FileUtilities.DeleteWithoutTrailingBackslash(directory, true);
             }
         }
+
+        /// <summary>
+        /// Tests the PropertyExists condition function that checks if a property is defined vs coerced to empty string
+        /// </summary>
+        [Fact]
+        public void PropertyExistsFunction()
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(@"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace'>
+                    <PropertyGroup>
+                        <ExistingProperty>SomeValue</ExistingProperty>
+                        <EmptyProperty></EmptyProperty>
+                        <!-- UndefinedProperty is not defined -->
+                    </PropertyGroup>
+                    
+                    <PropertyGroup>
+                        <ResultExisting Condition=""PropertyExists('ExistingProperty')"">true</ResultExisting>
+                        <ResultExisting Condition=""!PropertyExists('ExistingProperty')"">false</ResultExisting>
+                        
+                        <ResultEmpty Condition=""PropertyExists('EmptyProperty')"">true</ResultEmpty>
+                        <ResultEmpty Condition=""!PropertyExists('EmptyProperty')"">false</ResultEmpty>
+                        
+                        <ResultUndefined Condition=""PropertyExists('UndefinedProperty')"">true</ResultUndefined>
+                        <ResultUndefined Condition=""!PropertyExists('UndefinedProperty')"">false</ResultUndefined>
+                    </PropertyGroup>
+                </Project>");
+
+            using ProjectFromString projectFromString = new(projectContents);
+            Project project = projectFromString.Project;
+
+            // Test that PropertyExists returns true for an existing property with a value
+            string resultExisting = project.GetPropertyValue("ResultExisting");
+            resultExisting.ShouldBe("true");
+
+            // Test that PropertyExists returns true for an existing property with empty value
+            string resultEmpty = project.GetPropertyValue("ResultEmpty");
+            resultEmpty.ShouldBe("true");
+
+            // Test that PropertyExists returns false for an undefined property
+            string resultUndefined = project.GetPropertyValue("ResultUndefined");
+            resultUndefined.ShouldBe("false");
+        }
+
+        /// <summary>
+        /// Tests PropertyExists function with property names that require expansion
+        /// </summary>
+        [Fact]
+        public void PropertyExistsFunctionWithExpansion()
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(@"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace'>
+                    <PropertyGroup>
+                        <PropertyName>ExistingProperty</PropertyName>
+                        <ExistingProperty>SomeValue</ExistingProperty>
+                    </PropertyGroup>
+                    
+                    <PropertyGroup>
+                        <Result Condition=""PropertyExists('$(PropertyName)')"">true</Result>
+                        <Result Condition=""!PropertyExists('$(PropertyName)')"">false</Result>
+                    </PropertyGroup>
+                </Project>");
+
+            using ProjectFromString projectFromString = new(projectContents);
+            Project project = projectFromString.Project;
+
+            // Test that PropertyExists works with expanded property names
+            string result = project.GetPropertyValue("Result");
+            result.ShouldBe("true");
+        }
+
+        /// <summary>
+        /// Tests PropertyExists function with invalid arguments
+        /// </summary>
+        [Fact]
+        public void PropertyExistsFunctionInvalidArguments()
+        {
+            // Test with no arguments
+            string projectContents1 = ObjectModelHelpers.CleanupFileContents(@"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace'>
+                    <PropertyGroup Condition=""PropertyExists()"">
+                        <ShouldNotBeSet>true</ShouldNotBeSet>
+                    </PropertyGroup>
+                </Project>");
+
+            Should.Throw<InvalidProjectFileException>(() => new ProjectFromString(projectContents1));
+
+            // Test with too many arguments
+            string projectContents2 = ObjectModelHelpers.CleanupFileContents(@"
+                <Project ToolsVersion=""msbuilddefaulttoolsversion"" xmlns='msbuildnamespace'>
+                    <PropertyGroup Condition=""PropertyExists('Prop1', 'Prop2')"">
+                        <ShouldNotBeSet>true</ShouldNotBeSet>
+                    </PropertyGroup>
+                </Project>");
+
+            Should.Throw<InvalidProjectFileException>(() => new ProjectFromString(projectContents2));
+        }
     }
 }
