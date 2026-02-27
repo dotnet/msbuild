@@ -20,14 +20,17 @@ internal sealed class TerminalNodesFrame
 
     private readonly StringBuilder _renderBuilder = new();
 
+    private readonly Func<string?, TerminalColor, string> _colorize;
+
     public int Width { get; }
     public int Height { get; }
     public int NodesCount { get; private set; }
 
-    public TerminalNodesFrame(TerminalNodeStatus?[] nodes, int width, int height)
+    public TerminalNodesFrame(TerminalNodeStatus?[] nodes, int width, int height, Func<string?, TerminalColor, string> colorize)
     {
         Width = Math.Min(width, MaxColumn);
         Height = height;
+        _colorize = colorize ?? throw new ArgumentNullException(nameof(colorize));
 
         _nodes = new (TerminalNodeStatus, int)[nodes.Length];
 
@@ -83,16 +86,16 @@ internal sealed class TerminalNodesFrame
             }
         }
 
-        var renderedTarget = !string.IsNullOrWhiteSpace(targetPrefix) ? $"{AnsiCodes.Colorize(targetPrefix, targetPrefixColor)} {target}" : target;
+        var renderedTarget = !string.IsNullOrWhiteSpace(targetPrefix) ? $"{_colorize(targetPrefix, targetPrefixColor)} {target}" : target;
         var builder = StringBuilderCache.Acquire(renderedWidth);
         builder.Append(TerminalLogger.Indentation).Append(project);
         if (!string.IsNullOrWhiteSpace(targetFramework))
         {
-            builder.Append(' ').Append(AnsiCodes.Colorize(targetFramework, TerminalLogger.TargetFrameworkColor));
+            builder.Append(' ').Append(_colorize(targetFramework, TerminalLogger.TargetFrameworkColor));
         }
         if (!string.IsNullOrWhiteSpace(runtimeIdentifier))
         {
-            builder.Append(' ').Append(AnsiCodes.Colorize(runtimeIdentifier, TerminalLogger.RuntimeIdentifierColor));
+            builder.Append(' ').Append(_colorize(runtimeIdentifier, TerminalLogger.RuntimeIdentifierColor));
         }
         builder.Append(' ').Append(AnsiCodes.SetCursorHorizontal(MaxColumn))
                .Append(AnsiCodes.MoveCursorBackward(targetWithoutAnsiLength + durationString.Length + 1))
