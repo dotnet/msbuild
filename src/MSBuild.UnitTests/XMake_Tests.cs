@@ -2680,14 +2680,14 @@ $@"<Project>
 
                 (string projectFilePath, string tempLoggerProjDir) = CopyTestAssetsToTestEnv(tempDir, projectContent, memberAccess);
 
-                string loggerBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                string loggerBuildLog = EndToEndTestUtilities.ExecBootstrapedMSBuild(
                     $"\"{Path.Combine(tempLoggerProjDir, "CustomLogger.csproj")}\" -restore -verbosity:n", out bool success);
 
                 var loggerDllPath = Path.Combine(tempLoggerProjDir, "artifacts", "bin", "netstandard2.0", expectedLoggerName);
                 var loggerSwitch = $"{loggerTemplate}\"{loggerDllPath}\"";
                 var mainBuildParameters = $"\"{projectFilePath}\" -restore {loggerSwitch} -verbosity:diagnostic";
 
-                string mainBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                string mainBuildLog = EndToEndTestUtilities.ExecBootstrapedMSBuild(
                     mainBuildParameters,
                     out bool successfulExit);
 
@@ -2707,14 +2707,14 @@ $@"<Project>
 
                 (string projectFilePath, string tempLoggerProjDir) = CopyTestAssetsToTestEnv(tempDir, projectContent, targetInvocation);
 
-                string loggerBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                string loggerBuildLog = EndToEndTestUtilities.ExecBootstrapedMSBuild(
                 $"{Path.Combine(tempLoggerProjDir, $"FaultyLogger.csproj")} -restore -verbosity:n", out bool success);
 
                 var loggerDllPath = Path.Combine(tempLoggerProjDir, "artifacts", "bin", "netstandard2.0", expectedLoggerName);
                 var loggerSwitch = $"{loggerTemplate}{loggerDllPath}";
                 var mainBuildParameters = $"{projectFilePath} -restore {loggerSwitch} -verbosity:diagnostic";
 
-                string mainBuildLog = RunnerUtilities.ExecBootstrapedMSBuild(
+                string mainBuildLog = EndToEndTestUtilities.ExecBootstrapedMSBuild(
                     mainBuildParameters,
                     out bool successfulExit);
 
@@ -3108,7 +3108,7 @@ EndGlobal
             var preprocessFile = Path.Combine(testProject.TestRoot, "Preprocess.xml");
             arguments += $" -pp:{preprocessFile}";
 
-            string output = RunnerUtilities.ExecBootstrapedMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, outputHelper: _output, attachProcessId: false);
+            string output = EndToEndTestUtilities.ExecBootstrapedMSBuild($"{arguments} \"{testProject.ProjectFile}\"", out bool success, outputHelper: _output, attachProcessId: false);
             success.ShouldBeTrue();
             File.Exists(preprocessFile).ShouldBeTrue();
         }

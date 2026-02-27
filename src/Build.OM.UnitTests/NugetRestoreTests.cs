@@ -35,7 +35,7 @@ namespace Microsoft.Build.Engine.OM.UnitTests
         private void TestNugetRestore(string msbuildSubFolder)
         {
             string currentAssemblyDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-            string bootstrapMsBuildBinaryDir = Path.Combine(RunnerUtilities.BootstrapMsBuildBinaryLocation, msbuildSubFolder);
+            string bootstrapMsBuildBinaryDir = Path.Combine(EndToEndTestUtilities.BootstrapMsBuildBinaryLocation, msbuildSubFolder);
             using TestEnvironment testEnvironment = TestEnvironment.Create();
             TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
             // The content of the solution isn't known to matter, but having a custom solution makes it easier to add requirements should they become evident.
