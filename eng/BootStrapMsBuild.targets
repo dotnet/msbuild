@@ -260,4 +260,38 @@
 
   </Target>
 
+  <!--
+    After bootstrap is created, optionally overlay ReadyToRun-compiled MSBuild binaries.
+    Runs crossgen2 on already-built DLLs (no recompilation) and copies R2R output to the bootstrap.
+    Usage: build.cmd -c Release /p:PublishReadyToRun=true
+  -->
+  <Target Name="OverlayReadyToRunBootstrap"
+          AfterTargets="BootstrapNetCore"
+          Condition="'$(PublishReadyToRun)' == 'true'">
+
+    <PropertyGroup>
+      <_R2RPublishDir>$(ArtifactsBinDir)MSBuild.ReadyToRun\</_R2RPublishDir>
+    </PropertyGroup>
+
+    <Message Text="Publishing MSBuild with ReadyToRun for $(NETCoreSdkRuntimeIdentifier)..." Importance="High" />
+
+    <!-- First, restore with the target RID so the assets file has the net10.0/rid target. -->
+    <Exec Command="&quot;$(DotNetTool)&quot; restore &quot;$(RepoRoot)src\MSBuild\MSBuild.csproj&quot; -p:TargetFramework=$(LatestDotNetCoreForMSBuild) -r $(NETCoreSdkRuntimeIdentifier)" />
+
+    <!-- Publish with no-build to skip recompilation and only run crossgen2 on already-built DLLs.
+         AppendRuntimeIdentifierToOutputPath=false lets publish find the existing non-RID build output.
+         BuildProjectReferences=false avoids rebuilding dependency projects. -->
+    <Exec Command="&quot;$(DotNetTool)&quot; publish &quot;$(RepoRoot)src\MSBuild\MSBuild.csproj&quot; -c $(Configuration) -f $(LatestDotNetCoreForMSBuild) -r $(NETCoreSdkRuntimeIdentifier) --no-build -p:PublishReadyToRun=true -p:ErrorOnDuplicatePublishOutputFiles=false -p:AppendRuntimeIdentifierToOutputPath=false -p:BuildProjectReferences=false -p:PublishDir=&quot;$(_R2RPublishDir)&quot;" />
+
+    <ItemGroup>
+      <_R2RPublishedDlls Include="$(_R2RPublishDir)*.dll" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_R2RPublishedDlls)"
+          DestinationFolder="$(InstallDir)sdk\$(BootstrapSdkVersion)\" />
+
+    <Message Text="Overlaid @(_R2RPublishedDlls->Count()) ReadyToRun assemblies into bootstrap." Importance="High" />
+
+  </Target>
+
 </Project>
