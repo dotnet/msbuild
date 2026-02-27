@@ -19,6 +19,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Xml;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
@@ -118,10 +119,9 @@ namespace Microsoft.Build.CommandLine
         private static bool s_initialized;
 
         /// <summary>
-        /// Temporary project file created when project content is piped to MSBuild via stdin.
-        /// This file is created in the current directory to ensure relative paths in the project work correctly.
+        /// Project XML content piped to MSBuild via stdin, when no project file was specified on the command line.
         /// </summary>
-        private static string s_stdinProject = null;
+        private static string s_stdinProjectContent = null;
 
         /// <summary>
         /// The object used to synchronize access to shared build state
@@ -841,7 +841,19 @@ namespace Microsoft.Build.CommandLine
                                 // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
                                 collection.PropertiesFromCommandLine = [.. globalProperties.Keys];
 
-                                Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
+                                // When project content was piped via stdin, load it from the in-memory XML content
+                                // rather than from the synthetic file path (which does not exist on disk).
+                                Project project;
+                                if (s_stdinProjectContent != null)
+                                {
+                                    using StringReader stringReader = new StringReader(s_stdinProjectContent);
+                                    using XmlReader xmlReader = XmlReader.Create(stringReader);
+                                    project = new Project(xmlReader, globalProperties, toolsVersion, collection);
+                                }
+                                else
+                                {
+                                    project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
+                                }
 
                                 if (getResultOutputFile.Length == 0)
                                 {
@@ -1098,12 +1110,8 @@ namespace Microsoft.Build.CommandLine
                 preprocessWriter?.Dispose();
                 targetsWriter?.Dispose();
 
-                // Clean up the temporary project file created when project content was piped via stdin.
-                if (s_stdinProject != null)
-                {
-                    FileUtilities.DeleteNoThrow(s_stdinProject);
-                    s_stdinProject = null;
-                }
+                // Release the in-memory stdin project content (no file to delete).
+                s_stdinProjectContent = null;
 
                 if (MSBuildEventSource.Log.IsEnabled())
                 {
@@ -1355,6 +1363,9 @@ namespace Microsoft.Build.CommandLine
             bool success = true;
 
             ProjectCollection projectCollection = null;
+            // Holds a strong reference to the in-memory ProjectRootElement for stdin input, ensuring the
+            // weak-reference cache in ProjectCollection does not lose the entry during the build.
+            Construction.ProjectRootElement stdinXml = null;
             bool onlyLogCriticalEvents = false;
 
             try
@@ -1453,6 +1464,20 @@ namespace Microsoft.Build.CommandLine
                 if (toolsVersion != null && !projectCollection.ContainsToolset(toolsVersion))
                 {
                     ThrowInvalidToolsVersionInitializationException(projectCollection.Toolsets, toolsVersion);
+                }
+
+                // When project content was piped via stdin, parse it into an in-memory ProjectRootElement
+                // and register it in the project collection's cache under the synthetic display path.
+                // All subsequent code that loads the project by path will find the cached entry and
+                // will never attempt to read a file from disk.
+                if (s_stdinProjectContent != null)
+                {
+                    using StringReader stringReader = new StringReader(s_stdinProjectContent);
+                    using XmlReader xmlReader = XmlReader.Create(stringReader);
+                    stdinXml = Construction.ProjectRootElement.Create(xmlReader, projectCollection);
+                    // Setting FullPath registers the element in the cache and sets its directory to the
+                    // directory portion of the path (i.e., the current working directory).
+                    stdinXml.FullPath = projectFile;
                 }
 
                 bool isSolution = FileUtilities.IsSolutionFilename(projectFile);
@@ -1754,6 +1779,11 @@ namespace Microsoft.Build.CommandLine
             {
                 projectCollection?.Dispose();
                 FileUtilities.ClearCacheDirectory();
+
+                // Keep the in-memory stdin project root element alive until the project collection
+                // is disposed; the collection's cache uses a WeakReference whose target this local
+                // variable holds strongly.
+                GC.KeepAlive(stdinXml);
 
                 // Build manager shall be reused for all build sessions.
                 // If, for one reason or another, this behavior needs to change in future
@@ -2231,20 +2261,24 @@ namespace Microsoft.Build.CommandLine
                     string[] projectParameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project];
 
                     // If no project was specified on the command line and stdin is redirected (piped),
-                    // read the project content from stdin and write it to a temporary file.
+                    // read the project content from stdin. The XML will be parsed into an in-memory
+                    // ProjectRootElement later (in BuildProject), so no file is written to disk.
                     if (projectParameters.Length == 0 && Console.IsInputRedirected)
                     {
                         string stdinContent = Console.In.ReadToEnd();
                         if (!string.IsNullOrWhiteSpace(stdinContent))
                         {
-                            // Write to the current directory so relative paths in the project resolve correctly.
-                            s_stdinProject = Path.Combine(Directory.GetCurrentDirectory(), $"stdin_{Path.GetRandomFileName()}.proj");
-                            File.WriteAllText(s_stdinProject, stdinContent);
-                            projectParameters = [s_stdinProject];
+                            s_stdinProjectContent = stdinContent;
+                            // Use a synthetic display path in the current directory (no file is created).
+                            // Relative paths inside the piped project content will resolve relative to the cwd.
+                            projectFile = Path.Combine(Directory.GetCurrentDirectory(), "stdin.proj");
                         }
                     }
 
-                    projectFile = ProcessProjectSwitch(projectParameters, commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
+                    if (projectFile is null)
+                    {
+                        projectFile = ProcessProjectSwitch(projectParameters, commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
+                    }
 
                     // figure out which targets we are building
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
