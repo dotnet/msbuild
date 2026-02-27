@@ -592,9 +592,8 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The threshold for node reuse</returns>
         protected virtual int GetNodeReuseThreshold()
         {
-            // Default for worker nodes: NUM_PROCS / 2
-            // Derived classes (Server, RAR) can override to return 0
-            return Math.Max(1, NativeMethodsShared.GetLogicalCoreCount() / 2);
+            // Default for worker nodes: 1.5 * NUM_PROCS - aka if there are more nodes than 1 build would create
+            return Math.Max(1, (3 * NativeMethodsShared.GetLogicalCoreCount()) / 2);
         }
 
         /// <summary>
