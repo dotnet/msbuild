@@ -848,11 +848,18 @@ namespace Microsoft.Build.CommandLine
                                 {
                                     using StringReader stringReader = new StringReader(s_stdinProjectContent);
                                     using XmlReader xmlReader = XmlReader.Create(stringReader);
-                                    project = new Project(xmlReader, globalProperties, toolsVersion, collection);
+                                    // update global property and restore property state to work with streamed project content
+                                    restoreProperties.Add("_BuildNonexistentProjectsByDefault", bool.TrueString);
+                                    restoreProperties.Add("RestoreUseSkipNonexistentTargets", bool.FalseString);
+                                    collection.SetGlobalProperty("_BuildNonexistentProjectsByDefault", bool.TrueString);
+                                    collection.SetGlobalProperty("RestoreUseSkipNonexistentTargets", bool.FalseString);
+                                    project = collection.LoadProject(xmlReader);
+                                    // need to name the project to make it available to the rest of the build
+                                    project.FullPath = projectFile;
                                 }
                                 else
                                 {
-                                    project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
+                                    project = collection.LoadProject(projectFile, null, toolsVersion);
                                 }
 
                                 if (getResultOutputFile.Length == 0)
@@ -1458,8 +1465,9 @@ namespace Microsoft.Build.CommandLine
                     useAsynchronousLogging: true,
                     reuseProjectRootElementCache: s_isServerNode);
 
-                // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
                 projectCollection.PropertiesFromCommandLine = [.. globalProperties.Keys];
+
+                // NOTE: after this point, `globalProperties` shouldn't be used ever again. All manipulation of properties should go through the ProjectCollection here.
 
                 if (toolsVersion != null && !projectCollection.ContainsToolset(toolsVersion))
                 {
@@ -1474,10 +1482,16 @@ namespace Microsoft.Build.CommandLine
                 {
                     using StringReader stringReader = new StringReader(s_stdinProjectContent);
                     using XmlReader xmlReader = XmlReader.Create(stringReader);
-                    stdinXml = Construction.ProjectRootElement.Create(xmlReader, projectCollection);
+                    // update the global property and restore property state to work with streamed project content
+                    restoreProperties.Add("_BuildNonexistentProjectsByDefault", bool.TrueString);
+                    restoreProperties.Add("RestoreUseSkipNonexistentTargets", bool.FalseString);
+                    projectCollection.SetGlobalProperty("_BuildNonexistentProjectsByDefault", bool.TrueString);
+                    projectCollection.SetGlobalProperty("RestoreUseSkipNonexistentTargets", bool.FalseString);
+                    var project = projectCollection.LoadProject(xmlReader);
                     // Setting FullPath registers the element in the cache and sets its directory to the
                     // directory portion of the path (i.e., the current working directory).
-                    stdinXml.FullPath = projectFile;
+                    project.FullPath = projectFile;
+                    stdinXml = project.Xml;
                 }
 
                 bool isSolution = FileUtilities.IsSolutionFilename(projectFile);
@@ -1486,7 +1500,7 @@ namespace Microsoft.Build.CommandLine
                 // If the user has requested that the schema be validated, do that here.
                 if (needToValidateProject && !isSolution)
                 {
-                    Microsoft.Build.Evaluation.Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+                    Microsoft.Build.Evaluation.Project project = projectCollection.LoadProject(projectFile, null, toolsVersion);
                     Microsoft.Build.Evaluation.Toolset toolset = projectCollection.GetToolset(toolsVersion ?? project.ToolsVersion);
 
                     if (toolset == null)
@@ -1513,7 +1527,7 @@ namespace Microsoft.Build.CommandLine
                     }
                     else
                     {
-                        Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+                        Project project = projectCollection.LoadProject(projectFile, null, toolsVersion);
 
                         project.SaveLogicalProject(preprocessWriter);
 
@@ -1534,7 +1548,7 @@ namespace Microsoft.Build.CommandLine
                     }
                     else
                     {
-                        success = PrintTargets(projectFile, toolsVersion, globalProperties, targetsWriter, projectCollection);
+                        success = PrintTargets(projectFile, toolsVersion, targetsWriter, projectCollection);
                     }
                 }
 
@@ -1666,17 +1680,17 @@ namespace Microsoft.Build.CommandLine
 
                                 if (graphBuildOptions != null)
                                 {
-                                    graphBuildRequest = new GraphBuildRequestData([new ProjectGraphEntryPoint(projectFile, globalProperties)], targets, null, flags, graphBuildOptions);
+                                    graphBuildRequest = new GraphBuildRequestData([new ProjectGraphEntryPoint(projectFile, projectCollection.GlobalProperties)], targets, null, flags, graphBuildOptions);
                                 }
                                 else
                                 {
-                                    buildRequest = new BuildRequestData(projectFile, globalProperties, toolsVersion, targets, null, flags);
+                                    buildRequest = new BuildRequestData(projectFile, projectCollection.GlobalProperties, toolsVersion, targets, null, flags);
                                 }
                             }
 
                             if (enableRestore || restoreOnly)
                             {
-                                result = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : globalProperties, saveProjectResult: saveProjectResult);
+                                result = ExecuteRestore(projectFile, toolsVersion, buildManager, restoreProperties.Count > 0 ? restoreProperties : projectCollection.GlobalProperties, saveProjectResult: saveProjectResult);
 
                                 if (result.OverallResult != BuildResultCode.Success)
                                 {
@@ -1798,11 +1812,11 @@ namespace Microsoft.Build.CommandLine
             return success;
         }
 
-        private static bool PrintTargets(string projectFile, string toolsVersion, Dictionary<string, string> globalProperties, TextWriter targetsWriter, ProjectCollection projectCollection)
+        private static bool PrintTargets(string projectFile, string toolsVersion, TextWriter targetsWriter, ProjectCollection projectCollection)
         {
             try
             {
-                Project project = projectCollection.LoadProject(projectFile, globalProperties, toolsVersion);
+                Project project = projectCollection.LoadProject(projectFile, null, toolsVersion);
 
                 foreach (string target in project.Targets.Keys)
                 {
@@ -1926,7 +1940,7 @@ namespace Microsoft.Build.CommandLine
             return submission.Execute();
         }
 
-        private static BuildResult ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, Dictionary<string, string> globalProperties, bool saveProjectResult = false)
+        private static BuildResult ExecuteRestore(string projectFile, string toolsVersion, BuildManager buildManager, IDictionary<string, string> globalProperties, bool saveProjectResult = false)
         {
             // Make a copy of the global properties
             Dictionary<string, string> restoreGlobalProperties = new Dictionary<string, string>(globalProperties);
