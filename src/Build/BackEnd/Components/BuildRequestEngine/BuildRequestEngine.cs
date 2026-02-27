@@ -2,10 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Diagnostics.Metrics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd.Logging;
@@ -36,6 +39,8 @@ namespace Microsoft.Build.BackEnd
     /// </remarks>
     internal class BuildRequestEngine : IBuildRequestEngine, IBuildComponent
     {
+        private static Meter s_meter = new Meter("Microsoft.Build", "1.0.0");
+
         /// <summary>
         /// The starting unresolved configuration id assigned by the engine.
         /// </summary>
@@ -71,6 +76,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private readonly Dictionary<int, BuildRequestEntry> _requestsByGlobalRequestId;
 
+#pragma warning disable IDE0052 // Remove unread private members
+        private ObservableGauge<int> _requestsGauge;
+        private ObservableGauge<int> _workQueueGauge;
+        private ObservableGauge<int> _engineStatusGauge;
+        private Histogram<double> _configurationResolutionHistogram;
+        private ObservableCounter<long> _stateTransitionsCounter;
+        private Histogram<double> _requestWaitTimeHistogram;
+#pragma warning restore IDE0052 // Remove unread private members
+
         /// <summary>
         /// The list of requests currently waiting to be submitted from RequestBuilders.
         /// </summary>
@@ -104,6 +118,26 @@ namespace Microsoft.Build.BackEnd
         /// The list of unresolved configurations by metadata.
         /// </summary>
         private Dictionary<ConfigurationMetadata, BuildRequestConfiguration> _unresolvedConfigurationsByMetadata;
+
+        /// <summary>
+        /// Tracks when configuration resolution requests were initiated, for timing metrics. Entries are removed when resolution is finished.
+        /// </summary>
+        private Dictionary<int, long> _configurationRequestTimestamps;
+
+        /// <summary>
+        /// Tracks counts of build request state transitions for metrics. Keys are a particular kind of state transition, e.g. "Waiting->Active".
+        /// </summary>
+        private readonly ConcurrentDictionary<string, long> _stateTransitionCounts;
+
+        /// <summary>
+        /// Tracks the previous state of each build request entry for transition tracking. Entries are removed when the request is completed.
+        /// </summary>
+        private readonly Dictionary<int, BuildRequestEntryState> _previousStates;
+
+        /// <summary>
+        /// Tracks when requests started waiting and the reason for waiting. Key is GlobalRequestId, value is (timestamp, reason).
+        /// </summary>
+        private readonly Dictionary<int, (long timestamp, string reason)> _requestWaitStartTimes;
 
         /// <summary>
         /// The logging context for the node
@@ -145,6 +179,9 @@ namespace Microsoft.Build.BackEnd
             _requests = new List<BuildRequestEntry>();
             _unsubmittedRequests = new Queue<PendingUnsubmittedBuildRequests>();
             _requestsByGlobalRequestId = new Dictionary<int, BuildRequestEntry>();
+            _stateTransitionCounts = new ConcurrentDictionary<string, long>();
+            _previousStates = new Dictionary<int, BuildRequestEntryState>();
+            _requestWaitStartTimes = new Dictionary<int, (long timestamp, string reason)>();
         }
 
         #region IBuildRequestEngine Members
@@ -202,11 +239,43 @@ namespace Microsoft.Build.BackEnd
 
             _nodeLoggingContext = loggingContext;
 
+            _requestsGauge = s_meter.CreateObservableGauge("build_request_engine_requests", CollectRequestStatus, "requests", "Number of active build requests in the BuildRequestEngine", tags: [new("nodeId", _nodeLoggingContext.BuildEventContext.NodeId)]);
+            _workQueueGauge = s_meter.CreateObservableGauge("build_request_engine_work_queue_length", () => _workQueue.InputCount, "items", "Number of items in the BuildRequestEngine work queue", tags: [new("nodeId", _nodeLoggingContext.BuildEventContext.NodeId)]);
+            _engineStatusGauge = s_meter.CreateObservableGauge("build_request_engine_status", () => (int)_status, "status", "Current status of the BuildRequestEngine", tags: [new("nodeId", _nodeLoggingContext.BuildEventContext.NodeId)]);
+            _configurationResolutionHistogram = s_meter.CreateHistogram<double>("msbuild_configuration_resolution_duration", unit: "ms", description: "Time taken to resolve build configurations");
+            _stateTransitionsCounter = s_meter.CreateObservableCounter(
+                "msbuild_build_request_state_transitions",
+                CollectStateTransitionCounts,
+                unit: "transitions",
+                description: "Count of build request state transitions");
+            _requestWaitTimeHistogram = s_meter.CreateHistogram<double>("msbuild_request_wait_time", unit: "ms", description: "Time requests spend waiting, categorized by blocking reason");
+
             // Create a work queue that will take an action and invoke it.  The generic parameter is the type which ActionBlock.Post() will
             // take (an Action in this case) and the parameter to this constructor is a function which takes that parameter of type Action
             // (which we have named action) and does something with it (in this case calls invoke on it.)
             _workQueue = new ActionBlock<Action>(action => action.Invoke());
             ChangeStatus(BuildRequestEngineStatus.Idle);
+        }
+
+        private IEnumerable<Measurement<int>> CollectRequestStatus()
+        {
+#if NET
+            var requestsByState = _requests.CountBy(r => r.State);
+#else
+            var requestsByState = _requests.GroupBy(r => r.State).ToDictionary(g => g.Key, g => g.Count());
+#endif
+            foreach (var kvp in requestsByState)
+            {
+                yield return new Measurement<int>(kvp.Value, new KeyValuePair<string, object>("state", kvp.Key.ToString()));
+            }
+        }
+
+        private IEnumerable<Measurement<long>> CollectStateTransitionCounts()
+        {
+            foreach (var kvp in _stateTransitionCounts)
+            {
+                yield return new Measurement<long>(kvp.Value, new KeyValuePair<string, object>("transition", kvp.Key));
+            }
         }
 
         /// <summary>
@@ -405,6 +474,9 @@ namespace Microsoft.Build.BackEnd
 
                         entry.OnStateChanged += BuildRequestEntry_StateChanged;
 
+                        // Initialize the previous state for transition tracking
+                        _previousStates[request.GlobalRequestId] = entry.State;
+
                         _requests.Add(entry);
                         _requestsByGlobalRequestId[request.GlobalRequestId] = entry;
                         ActivateBuildRequest(entry);
@@ -543,6 +615,15 @@ namespace Microsoft.Build.BackEnd
                     _ = _unresolvedConfigurationsById.Remove(response.NodeConfigurationId);
                     _ = _unresolvedConfigurationsByMetadata.Remove(new ConfigurationMetadata(config));
 
+                    // Record configuration resolution duration
+                    if (_configurationRequestTimestamps.TryGetValue(response.NodeConfigurationId, out long startTimestamp))
+                    {
+                        long endTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
+                        double durationMs = (endTimestamp - startTimestamp) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+                        _configurationResolutionHistogram.Record(durationMs);
+                        _configurationRequestTimestamps.Remove(response.NodeConfigurationId);
+                    }
+
                     // Add the configuration to the resolved cache unless it already exists there.  This will be
                     // the case in single-proc mode as we share the global cache with the Build Manager.
                     IConfigCache globalConfigurations = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
@@ -637,6 +718,7 @@ namespace Microsoft.Build.BackEnd
             // NOTE: Because we don't get this from the component host, we cannot override it.
             _unresolvedConfigurationsById = new Dictionary<int, BuildRequestConfiguration>();
             _unresolvedConfigurationsByMetadata = new Dictionary<ConfigurationMetadata, BuildRequestConfiguration>();
+            _configurationRequestTimestamps = new Dictionary<int, long>();
         }
 
         /// <summary>
@@ -668,6 +750,35 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newState">The event's new state.</param>
         private void BuildRequestEntry_StateChanged(BuildRequestEntry entry, BuildRequestEntryState newState)
         {
+            int globalRequestId = entry.Request.GlobalRequestId;
+
+            // Track the state transition for metrics
+            if (_previousStates.TryGetValue(globalRequestId, out BuildRequestEntryState oldState))
+            {
+                string transition = $"{oldState}->{newState}";
+                _stateTransitionCounts.AddOrUpdate(transition, 1, (key, oldValue) => oldValue + 1);
+
+                // Track wait time when transitioning out of Waiting state
+                if (oldState == BuildRequestEntryState.Waiting &&
+                    _requestWaitStartTimes.TryGetValue(globalRequestId, out var waitInfo))
+                {
+                    long endTimestamp = System.Diagnostics.Stopwatch.GetTimestamp();
+                    double durationMs = (endTimestamp - waitInfo.timestamp) * 1000.0 / System.Diagnostics.Stopwatch.Frequency;
+                    _requestWaitTimeHistogram.Record(durationMs, new KeyValuePair<string, object>("reason", waitInfo.reason));
+                    _requestWaitStartTimes.Remove(globalRequestId);
+                }
+
+                // Record wait start time when transitioning to Waiting state
+                if (newState == BuildRequestEntryState.Waiting)
+                {
+                    string reason = entry.WaitReason ?? "unknown";
+                    _requestWaitStartTimes[globalRequestId] = (System.Diagnostics.Stopwatch.GetTimestamp(), reason);
+                }
+            }
+
+            // Update the previous state for next transition
+            _previousStates[globalRequestId] = newState;
+
             QueueAction(() => { EvaluateRequestStates(); }, isLastTask: false);
         }
 
@@ -803,6 +914,8 @@ namespace Microsoft.Build.BackEnd
                 TraceEngine("ERS: Request {0}({1}) (nr {2}) is being removed from the requests list.", completedEntry.Request.GlobalRequestId, completedEntry.Request.ConfigurationId, completedEntry.Request.NodeRequestId);
                 _requests.Remove(completedEntry);
                 _requestsByGlobalRequestId.Remove(completedEntry.Request.GlobalRequestId);
+                _previousStates.Remove(completedEntry.Request.GlobalRequestId);
+                _requestWaitStartTimes.Remove(completedEntry.Request.GlobalRequestId);
             }
 
             // If we completed a request, that means we may be able to unload the configuration if there is memory pressure.  Further we
@@ -1190,6 +1303,7 @@ namespace Microsoft.Build.BackEnd
                             request.Config.ConfigurationId = GetNextUnresolvedConfigurationId();
                             _unresolvedConfigurationsById.Add(request.Config.ConfigurationId, request.Config);
                             _unresolvedConfigurationsByMetadata.Add(configMetadata, request.Config);
+                            _configurationRequestTimestamps[request.Config.ConfigurationId] = System.Diagnostics.Stopwatch.GetTimestamp();
                             unresolvedConfigurationsAdded ??= new HashSet<int>();
                             unresolvedConfigurationsAdded.Add(request.Config.ConfigurationId);
                         }

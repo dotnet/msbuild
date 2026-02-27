@@ -3,7 +3,9 @@
 
 using System;
 using System.Buffers;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -20,8 +22,6 @@ using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 
-#nullable disable
-
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -29,6 +29,8 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal class Scheduler : IScheduler
     {
+        private static Meter _schedulerMetrics = new("Microsoft.Build");
+
         /// <summary>
         /// The invalid node id
         /// </summary>
@@ -71,7 +73,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Content of the environment variable  MSBUILDSCHEDULINGUNLIMITED
         /// </summary>
-        private string _schedulingUnlimitedVariable;
+        private string? _schedulingUnlimitedVariable;
 
         /// <summary>
         /// If MSBUILDSCHEDULINGUNLIMITED is set, this flag will make AtSchedulingLimit() always return false
@@ -111,6 +113,24 @@ namespace Microsoft.Build.BackEnd
         /// node limit.
         /// </summary>
         private int _currentOutOfProcNodeCount = 0;
+
+#pragma warning disable IDE0052 // Remove unread private members
+        private readonly ObservableGauge<int> _schedulerNodeCountGauge;
+        private readonly ObservableCounter<long> _requestBlockerCounter;
+        private readonly ObservableCounter<long> _circularDependencyCounter;
+        private readonly ObservableGauge<int> _coresInUseGauge;
+        private readonly ObservableGauge<int> _pendingCoreRequestsGauge;
+#pragma warning restore IDE0052 // Remove unread private members
+
+        /// <summary>
+        /// Tracks counts of request blocking events by blocker type.
+        /// </summary>
+        private readonly ConcurrentDictionary<string, long> _requestBlockerCounts;
+
+        /// <summary>
+        /// Tracks counts of circular dependency detections by type.
+        /// </summary>
+        private readonly ConcurrentDictionary<string, long> _circularDependencyCounts;
 
         /// <summary>
         /// The collection of all requests currently known to the system.
@@ -172,12 +192,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The plan.
         /// </summary>
-        private SchedulingPlan _schedulingPlan;
+        private SchedulingPlan? _schedulingPlan;
 
         /// <summary>
         /// If MSBUILDCUSTOMSCHEDULER is set, contains the requested scheduling algorithm
         /// </summary>
-        private AssignUnscheduledRequestsDelegate _customRequestSchedulingAlgorithm;
+        private AssignUnscheduledRequestsDelegate? _customRequestSchedulingAlgorithm;
 
         private NodeLoggingContext _inprocNodeContext;
 
@@ -208,7 +228,9 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Constructor.
         /// </summary>
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable. Ignored because of Reset call.
         public Scheduler()
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider adding the 'required' modifier or declaring as nullable.
         {
             // Be careful moving these to Traits, changing the timing of reading environment variables has a breaking potential.
             _debugDumpState = Traits.Instance.DebugScheduler;
@@ -224,7 +246,7 @@ namespace Microsoft.Build.BackEnd
             {
                 _schedulingUnlimited = false;
 
-                string strNodeLimitOffset = Environment.GetEnvironmentVariable("MSBUILDNODELIMITOFFSET");
+                string? strNodeLimitOffset = Environment.GetEnvironmentVariable("MSBUILDNODELIMITOFFSET");
                 if (!String.IsNullOrEmpty(strNodeLimitOffset))
                 {
                     _nodeLimitOffset = Int16.Parse(strNodeLimitOffset, CultureInfo.InvariantCulture);
@@ -258,7 +280,65 @@ namespace Microsoft.Build.BackEnd
                 _debugDumpPath = FileUtilities.TempFileDirectory;
             }
 
+            // Initialize metric tracking dictionaries
+            _requestBlockerCounts = new ConcurrentDictionary<string, long>(Environment.ProcessorCount, 4);
+            _circularDependencyCounts = new ConcurrentDictionary<string, long>(Environment.ProcessorCount, 2);
+
+            // Initialize metrics
+            _schedulerNodeCountGauge = _schedulerMetrics.CreateObservableGauge(
+                "msbuild_scheduler_node_count",
+                ComputeNodeCounts,
+                description: "The current count of nodes in the scheduler",
+                unit: "nodes",
+                tags: [new("node.type", "outofproc")]);
+
+            _requestBlockerCounter = _schedulerMetrics.CreateObservableCounter(
+                "msbuild_request_blocked_events",
+                CollectRequestBlockerCounts,
+                unit: "events",
+                description: "Count of request blocking events by blocker type");
+
+            _circularDependencyCounter = _schedulerMetrics.CreateObservableCounter(
+                "msbuild_circular_dependency_errors",
+                CollectCircularDependencyCounts,
+                unit: "errors",
+                description: "Count of circular dependency detections");
+
+            _coresInUseGauge = _schedulerMetrics.CreateObservableGauge(
+                "msbuild_cores_in_use",
+                () => _schedulingData?.ExplicitlyGrantedCores ?? 0,
+                unit: "cores",
+                description: "Number of cores currently allocated to requests");
+
+            _pendingCoreRequestsGauge = _schedulerMetrics.CreateObservableGauge(
+                "msbuild_pending_core_requests",
+                () => _pendingRequestCoresCallbacks?.Count ?? 0,
+                unit: "requests",
+                description: "Number of requests waiting for core allocation");
+
             Reset();
+        }
+
+        private IEnumerable<Measurement<int>> ComputeNodeCounts()
+        {
+            yield return new Measurement<int>(_currentOutOfProcNodeCount, new KeyValuePair<string, object?>("node.type", "outofproc"));
+            yield return new Measurement<int>(_currentInProcNodeCount, new KeyValuePair<string, object?>("node.type", "inproc"));
+        }
+
+        private IEnumerable<Measurement<long>> CollectRequestBlockerCounts()
+        {
+            foreach (var kvp in _requestBlockerCounts)
+            {
+                yield return new Measurement<long>(kvp.Value, new KeyValuePair<string, object?>("blocker_type", kvp.Key));
+            }
+        }
+
+        private IEnumerable<Measurement<long>> CollectCircularDependencyCounts()
+        {
+            foreach (var kvp in _circularDependencyCounts)
+            {
+                yield return new Measurement<long>(kvp.Value, new KeyValuePair<string, object?>("error_type", kvp.Key));
+            }
         }
 
         #region Delegates
@@ -317,15 +397,15 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Retrieves the request executing on a node.
         /// </summary>
-        public BuildRequest GetExecutingRequestByNode(int nodeId)
+        public BuildRequest? GetExecutingRequestByNode(int nodeId)
         {
             if (!_schedulingData.IsNodeWorking(nodeId))
             {
                 return null;
             }
 
-            SchedulableRequest request = _schedulingData.GetExecutingRequestByNode(nodeId);
-            return request.BuildRequest;
+            SchedulableRequest? request = _schedulingData.GetExecutingRequestByNode(nodeId);
+            return request?.BuildRequest;
         }
 
         /// <summary>
@@ -337,7 +417,7 @@ namespace Microsoft.Build.BackEnd
             List<ScheduleResponse> responses = new List<ScheduleResponse>();
 
             // Get the parent, if any
-            SchedulableRequest parentRequest = null;
+            SchedulableRequest parentRequest = null!;
             if (blocker.BlockedRequestId != BuildRequest.InvalidGlobalRequestId)
             {
                 if (blocker.YieldAction == YieldAction.Reacquire)
@@ -358,12 +438,14 @@ namespace Microsoft.Build.BackEnd
                 {
                     TraceScheduler("Request {0} on node {1} is performing yield action {2}.", blocker.BlockedRequestId, nodeId, blocker.YieldAction);
                     ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
+                    _requestBlockerCounts.AddOrUpdate("yield", 1, (key, oldValue) => oldValue + 1);
                     HandleYieldAction(parentRequest, blocker);
                 }
                 else if ((blocker.BlockingRequestId == blocker.BlockedRequestId) && blocker.BlockingRequestId != BuildRequest.InvalidGlobalRequestId)
                 {
                     ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
                     // We are blocked waiting for a transfer of results.
+                    _requestBlockerCounts.AddOrUpdate("results_transfer", 1, (key, oldValue) => oldValue + 1);
                     HandleRequestBlockedOnResultsTransfer(parentRequest, responses);
                 }
                 else if (blocker.BlockingRequestId != BuildRequest.InvalidGlobalRequestId)
@@ -373,11 +455,13 @@ namespace Microsoft.Build.BackEnd
                     {
                         ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should exist");
 
+                        _requestBlockerCounts.AddOrUpdate("in_progress_target", 1, (key, oldValue) => oldValue + 1);
                         HandleRequestBlockedOnInProgressTarget(parentRequest, blocker);
                     }
                     catch (SchedulerCircularDependencyException ex)
                     {
                         TraceScheduler("Circular dependency caused by request {0}({1}) (nr {2}), parent {3}({4}) (nr {5})", ex.Request.GlobalRequestId, ex.Request.ConfigurationId, ex.Request.NodeRequestId, parentRequest.BuildRequest.GlobalRequestId, parentRequest.BuildRequest.ConfigurationId, parentRequest.BuildRequest.NodeRequestId);
+                        _circularDependencyCounts.AddOrUpdate("in_progress_target", 1, (key, oldValue) => oldValue + 1);
                         responses.Add(ScheduleResponse.CreateCircularDependencyResponse(nodeId, parentRequest.BuildRequest, ex.Request));
                     }
                 }
@@ -385,12 +469,14 @@ namespace Microsoft.Build.BackEnd
                 {
                     ErrorUtilities.VerifyThrow(string.IsNullOrEmpty(blocker.BlockingTarget), "Blocking target should be null because this is not a request blocking on a target");
                     // We are blocked by new requests, either top-level or MSBuild task.
+                    _requestBlockerCounts.AddOrUpdate("new_requests", 1, (key, oldValue) => oldValue + 1);
                     HandleRequestBlockedByNewRequests(parentRequest, blocker, responses);
                 }
             }
             catch (SchedulerCircularDependencyException ex)
             {
                 TraceScheduler("Circular dependency caused by request {0}({1}) (nr {2}), parent {3}({4}) (nr {5})", ex.Request.GlobalRequestId, ex.Request.ConfigurationId, ex.Request.NodeRequestId, parentRequest.BuildRequest.GlobalRequestId, parentRequest.BuildRequest.ConfigurationId, parentRequest.BuildRequest.NodeRequestId);
+                _circularDependencyCounts.AddOrUpdate("new_requests", 1, (key, oldValue) => oldValue + 1);
                 responses.Add(ScheduleResponse.CreateCircularDependencyResponse(nodeId, parentRequest.BuildRequest, ex.Request));
             }
 
@@ -438,7 +524,7 @@ namespace Microsoft.Build.BackEnd
 
                     // Note: In this case we do not need to log that we got the results from the cache because we are only using the cache
                     // for filtering the targets for the result instead rather than using the cache as the location where this result came from.
-                    ScheduleResponse response = TrySatisfyRequestFromCache(request.Parent.AssignedNode, request.BuildRequest, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
+                    ScheduleResponse? response = TrySatisfyRequestFromCache(request.Parent.AssignedNode, request.BuildRequest, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
 
                     // response may be null if the result was never added to the cache. This can happen if the result has an exception in it
                     // or the results could not be satisfied because the initial or default targets have been skipped. If that is the case
@@ -482,7 +568,7 @@ namespace Microsoft.Build.BackEnd
                         // its configuration and set of targets are identical -- from MSBuild's perspective, it's the same.  So since
                         // we're not going to attempt to re-execute it, if there are skipped targets in the result, that's fine. We just
                         // need to know what the target results are so that we can log them.
-                        ScheduleResponse response = TrySatisfyRequestFromCache(parentNode, unscheduledRequest.BuildRequest, skippedResultsDoNotCauseCacheMiss: true);
+                        ScheduleResponse? response = TrySatisfyRequestFromCache(parentNode, unscheduledRequest.BuildRequest, skippedResultsDoNotCauseCacheMiss: true);
 
                         // If we have a response we need to tell the loggers that we satisfied that request from the cache.
                         if (response != null)
@@ -582,7 +668,7 @@ namespace Microsoft.Build.BackEnd
             DumpConfigurations();
             DumpRequests();
             _schedulingPlan = null;
-            _schedulingData = new SchedulingData();
+            _schedulingData = new SchedulingData(_schedulerMetrics);
             _availableNodes = new Dictionary<int, NodeInfo>(8);
             _pendingRequestCoresCallbacks = new Queue<TaskCompletionSource<int>>();
             _requestBufferPool = ArrayPool<SchedulableRequest>.Create();
@@ -898,7 +984,7 @@ namespace Microsoft.Build.BackEnd
 
             if (_customRequestSchedulingAlgorithm == null)
             {
-                string customScheduler = Environment.GetEnvironmentVariable("MSBUILDCUSTOMSCHEDULER");
+                string? customScheduler = Environment.GetEnvironmentVariable("MSBUILDCUSTOMSCHEDULER");
 
                 if (!String.IsNullOrEmpty(customScheduler))
                 {
@@ -943,7 +1029,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         _customRequestSchedulingAlgorithm = AssignUnscheduledRequestsUsingCustomSchedulerForSQL;
 
-                        string multiplier = Environment.GetEnvironmentVariable("MSBUILDCUSTOMSCHEDULERFORSQLCONFIGURATIONLIMITMULTIPLIER");
+                        string? multiplier = Environment.GetEnvironmentVariable("MSBUILDCUSTOMSCHEDULERFORSQLCONFIGURATIONLIMITMULTIPLIER");
                         double convertedMultiplier = 0;
                         if (!Double.TryParse(multiplier, NumberStyles.AllowDecimalPoint | NumberStyles.AllowLeadingSign, CultureInfo.InvariantCulture.NumberFormat, out convertedMultiplier) || convertedMultiplier < 1)
                         {
@@ -980,15 +1066,15 @@ namespace Microsoft.Build.BackEnd
         {
             foreach (int idleNodeId in idleNodes)
             {
-                SchedulingPlan.PlanConfigData bestConfig = null;
-                SchedulableRequest bestRequest = null;
+                SchedulingPlan.PlanConfigData? bestConfig = null;
+                SchedulableRequest? bestRequest = null;
 
                 // Find the most expensive request in the plan to schedule from among the ones available.
                 foreach (SchedulableRequest request in _schedulingData.UnscheduledRequestsWhichCanBeScheduled)
                 {
                     if (CanScheduleRequestToNode(request, idleNodeId))
                     {
-                        SchedulingPlan.PlanConfigData configToConsider = _schedulingPlan.GetConfiguration(request.BuildRequest.ConfigurationId);
+                        SchedulingPlan.PlanConfigData? configToConsider = _schedulingPlan?.GetConfiguration(request.BuildRequest.ConfigurationId);
                         if (configToConsider is null)
                         {
                             if (bestConfig is null)
@@ -1116,7 +1202,7 @@ namespace Microsoft.Build.BackEnd
             // Assign requests with the largest file sizes.
             while (idleNodes.Count > 0 && _schedulingData.UnscheduledRequestsCount > 0)
             {
-                SchedulableRequest requestWithSmallestSourceFile = null;
+                SchedulableRequest? requestWithSmallestSourceFile = null;
                 int requestRequiredNodeId = InvalidNodeId;
                 long sizeOfSmallestSourceFile = long.MaxValue;
 
@@ -1126,7 +1212,7 @@ namespace Microsoft.Build.BackEnd
                     if (requiredNodeId == InvalidNodeId || idleNodes.Contains(requiredNodeId))
                     {
                         // Look for a request with the smallest source file
-                        System.IO.FileInfo f = new FileInfo(_configCache[unscheduledRequest.BuildRequest.ConfigurationId].ProjectFullPath);
+                        FileInfo f = new FileInfo(_configCache[unscheduledRequest.BuildRequest.ConfigurationId].ProjectFullPath);
                         if (f.Length < sizeOfSmallestSourceFile)
                         {
                             sizeOfSmallestSourceFile = f.Length;
@@ -1158,7 +1244,7 @@ namespace Microsoft.Build.BackEnd
             // Assign requests with the largest file sizes.
             while (idleNodes.Count > 0 && _schedulingData.UnscheduledRequestsCount > 0)
             {
-                SchedulableRequest requestWithLargestSourceFile = null;
+                SchedulableRequest? requestWithLargestSourceFile = null;
                 int requestRequiredNodeId = InvalidNodeId;
                 long sizeOfLargestSourceFile = 0;
 
@@ -1168,7 +1254,7 @@ namespace Microsoft.Build.BackEnd
                     if (requiredNodeId == InvalidNodeId || idleNodes.Contains(requiredNodeId))
                     {
                         // Look for a request with the largest source file
-                        System.IO.FileInfo f = new FileInfo(_configCache[unscheduledRequest.BuildRequest.ConfigurationId].ProjectFullPath);
+                        FileInfo f = new(_configCache[unscheduledRequest.BuildRequest.ConfigurationId].ProjectFullPath);
                         if (f.Length > sizeOfLargestSourceFile)
                         {
                             sizeOfLargestSourceFile = f.Length;
@@ -1201,9 +1287,9 @@ namespace Microsoft.Build.BackEnd
             foreach (int nodeId in idleNodes)
             {
                 int maxWaitingRequests = 0;
-                SchedulableRequest requestToSchedule = null;
-                SchedulableRequest requestToScheduleNoAffinity = null;
-                SchedulableRequest requestToScheduleWithAffinity = null;
+                SchedulableRequest? requestToSchedule = null;
+                SchedulableRequest? requestToScheduleNoAffinity = null;
+                SchedulableRequest? requestToScheduleWithAffinity = null;
                 foreach (SchedulableRequest currentSchedulableRequest in _schedulingData.UnscheduledRequestsWhichCanBeScheduled)
                 {
                     BuildRequest currentRequest = currentSchedulableRequest.BuildRequest;
@@ -1278,7 +1364,7 @@ namespace Microsoft.Build.BackEnd
             foreach (int nodeId in idleNodes)
             {
                 // Find the request with the most waiting requests
-                SchedulableRequest mostWaitingRequests = null;
+                SchedulableRequest? mostWaitingRequests = null;
                 foreach (SchedulableRequest unscheduledRequest in _schedulingData.UnscheduledRequestsWhichCanBeScheduled)
                 {
                     if (CanScheduleRequestToNode(unscheduledRequest, nodeId))
@@ -1546,10 +1632,12 @@ namespace Microsoft.Build.BackEnd
                 // Although this request has not been scheduled, this configuration may previously have been
                 // scheduled to an existing node.  If so, we shouldn't count it in our checks for new node
                 // creation, because it'll only eventually get assigned to its existing node anyway.
+#pragma warning disable IDE0002 // Simplify Member Access
                 if (assignedNodeForConfiguration != Scheduler.InvalidNodeId)
                 {
                     continue;
                 }
+#pragma warning restore IDE0002 // Simplify Member Access
 
                 NodeAffinity affinityRequired = GetNodeAffinityForRequest(request.BuildRequest);
 
@@ -1698,7 +1786,7 @@ namespace Microsoft.Build.BackEnd
                 blockingRequest.RequestsWeAreBlockedBy.Contains(blockedRequest))
             {
                 // if the blocking request is waiting on a target we have partial results for, preemptively break its dependency
-                if (blocker.PartialBuildResult.HasResultsForTarget(blockingRequest.BlockingTarget))
+                if (blockingRequest.BlockingTarget is not null && blocker.PartialBuildResult.HasResultsForTarget(blockingRequest.BlockingTarget))
                 {
                     blockingRequest.UnblockWithPartialResultForBlockingTarget(blocker.PartialBuildResult);
                 }
@@ -1738,7 +1826,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Marks the request as being blocked by new requests whose results we must get before we can proceed.
         /// </summary>
-        private void HandleRequestBlockedByNewRequests(SchedulableRequest parentRequest, BuildRequestBlocker blocker, List<ScheduleResponse> responses)
+        private void HandleRequestBlockedByNewRequests(SchedulableRequest? parentRequest, BuildRequestBlocker blocker, List<ScheduleResponse> responses)
         {
             ErrorUtilities.VerifyThrowArgumentNull(blocker);
             ErrorUtilities.VerifyThrowArgumentNull(responses);
@@ -1760,7 +1848,7 @@ namespace Microsoft.Build.BackEnd
                 // First, determine if we have already built this request and have results for it.  If we do, we prepare the responses for it
                 // directly here.  We COULD simply report these as blocking the parent request and let the scheduler pick them up later when the parent
                 // comes back up as schedulable, but we prefer to send the results back immediately so this request can (potentially) continue uninterrupted.
-                ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
+                ScheduleResponse? response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
                 if (response != null)
                 {
                     TraceScheduler("Request {0} (node request {1}) satisfied from the cache.", request.GlobalRequestId, request.NodeRequestId);
@@ -1786,7 +1874,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         bool affinityMismatch = false;
                         int assignedNodeId = _schedulingData.GetAssignedNodeForRequestConfiguration(request.ConfigurationId);
-                        if (assignedNodeId != Scheduler.InvalidNodeId)
+                        if (assignedNodeId != InvalidNodeId)
                         {
                             if (!_availableNodes[assignedNodeId].CanServiceRequestWithAffinity(GetNodeAffinityForRequest(request)))
                             {
@@ -1904,7 +1992,7 @@ namespace Microsoft.Build.BackEnd
             int nodeForResults = (request.Parent != null) ? request.Parent.AssignedNode : InvalidNodeId;
 
             // Do we already have results?  If so, just return them.
-            ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request.BuildRequest, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
+            ScheduleResponse? response = TrySatisfyRequestFromCache(nodeForResults, request.BuildRequest, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
             if (response != null)
             {
                 if (response.Action == ScheduleActionType.SubmissionComplete)
@@ -2007,7 +2095,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Attempts to get a result from the cache to satisfy the request, and returns the appropriate response if possible.
         /// </summary>
-        private ScheduleResponse TrySatisfyRequestFromCache(int nodeForResults, BuildRequest request, bool skippedResultsDoNotCauseCacheMiss)
+        private ScheduleResponse? TrySatisfyRequestFromCache(int nodeForResults, BuildRequest request, bool skippedResultsDoNotCauseCacheMiss)
         {
             BuildRequestConfiguration config = _configCache[request.ConfigurationId];
             ResultsCacheResponse resultsResponse = _resultsCache.SatisfyRequest(request, config.ProjectInitialTargets, config.ProjectDefaultTargets, skippedResultsDoNotCauseCacheMiss);
@@ -2389,7 +2477,7 @@ namespace Microsoft.Build.BackEnd
             // save on some instructions.
             for (int i = 0; i < numRead; i++)
             {
-                buffer[i] = null;
+                buffer[i] = null!;
             }
 
             _requestBufferPool.Return(buffer, clearArray: false);
@@ -2629,6 +2717,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
+#pragma warning disable JSON002 // Probable JSON string detected
             loggingService.LogComment(
                 context,
                 MessageImportance.Normal,
@@ -2640,6 +2729,7 @@ namespace Microsoft.Build.BackEnd
                 String.Format(CultureInfo.InvariantCulture, "{0:0.000}", request.GetTimeSpentInState(SchedulableRequestState.Executing).TotalSeconds + request.GetTimeSpentInState(SchedulableRequestState.Blocked).TotalSeconds + request.GetTimeSpentInState(SchedulableRequestState.Ready).TotalSeconds),
                 _configCache[request.BuildRequest.ConfigurationId].ProjectFullPath,
                 String.Join(", ", request.BuildRequest.Targets));
+#pragma warning restore JSON002 // Probable JSON string detected
 
             List<SchedulableRequest> childRequests = new List<SchedulableRequest>(_schedulingData.GetRequestsByHierarchy(request));
             childRequests.Sort(delegate (SchedulableRequest left, SchedulableRequest right)
@@ -2731,8 +2821,7 @@ namespace Microsoft.Build.BackEnd
                                     ? string.Format(
                                         CultureInfo.InvariantCulture,
                                         "Active ({0} executing)",
-                                        _schedulingData.GetExecutingRequestByNode(nodeId)
-                                            .BuildRequest.GlobalRequestId)
+                                        _schedulingData.GetExecutingRequestByNode(nodeId)?.BuildRequest.GlobalRequestId ?? 0)
                                     : "Idle",
                                 _schedulingData.GetScheduledRequestsCountByNode(nodeId),
                                 _schedulingData.GetConfigurationsCountByNode(nodeId, false, null));
@@ -2890,7 +2979,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Dumps the hierarchy of requests.
         /// </summary>
-        private void DumpRequestHierarchy(StreamWriter file, SchedulableRequest root, int indent)
+        private void DumpRequestHierarchy(StreamWriter file, SchedulableRequest? root, int indent)
         {
             foreach (SchedulableRequest child in _schedulingData.GetRequestsByHierarchy(root))
             {
@@ -2925,7 +3014,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Dumps detailed information about a request.
         /// </summary>
-        private void DumpRequestSpec(StreamWriter file, SchedulableRequest request, int indent, string prefix)
+        private void DumpRequestSpec(StreamWriter file, SchedulableRequest request, int indent, string? prefix)
         {
             var buildRequest = request.BuildRequest;
 
