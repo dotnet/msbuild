@@ -276,6 +276,16 @@
         <target state="translated">Папка "Загрузки" недоверена для сборки проектов.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheck_BC0303_MessageFmt">
+        <source>Private item list '{0}' created in target '{1}' should be removed at the end of the target to avoid wasting memory.</source>
+        <target state="new">Private item list '{0}' created in target '{1}' should be removed at the end of the target to avoid wasting memory.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
+      <trans-unit id="BuildCheck_BC0303_Title">
+        <source>Private item lists created inside a target should be removed at the end of the target to avoid wasting memory.</source>
+        <target state="new">Private item lists created inside a target should be removed at the end of the target to avoid wasting memory.</target>
+        <note>Terms in quotes are not to be translated.</note>
+      </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
         <target state="translated">Сборка {0} через {1} с</target>

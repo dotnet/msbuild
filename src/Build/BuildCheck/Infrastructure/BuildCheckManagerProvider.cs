@@ -155,6 +155,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
                 new BuiltInCheckFactory([TargetFrameworkConfusionCheck.SupportedRule.Id], TargetFrameworkConfusionCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<TargetFrameworkConfusionCheck>),
                 new BuiltInCheckFactory([TargetFrameworkUnexpectedCheck.SupportedRule.Id], TargetFrameworkUnexpectedCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<TargetFrameworkUnexpectedCheck>),
                 new BuiltInCheckFactory([UntrustedLocationCheck.SupportedRule.Id], UntrustedLocationCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<UntrustedLocationCheck>),
+                new BuiltInCheckFactory([ItemDisposalCheck.SupportedRule.Id], ItemDisposalCheck.SupportedRule.DefaultConfiguration.IsEnabled ?? false, Construct<ItemDisposalCheck>),
             ],
 
             // BuildCheckDataSource.Execution
