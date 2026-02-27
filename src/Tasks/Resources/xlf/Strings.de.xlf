@@ -1266,22 +1266,22 @@
       </trans-unit>
       <trans-unit id="GenerateResource.STRPropertySkippedInvalidIdentifier">
         <source>MSB3828: Skipping strongly typed resource property generation for resource "{0}": the name cannot be converted to a valid identifier.</source>
-        <target state="new">MSB3828: Skipping strongly typed resource property generation for resource "{0}": the name cannot be converted to a valid identifier.</target>
+        <target state="translated">MSB3828: Die Generierung stark typisierter Ressourceneigenschaften für die Ressource „{0}“ wird übersprungen: Der Name kann nicht in einen gültigen Bezeichner umgewandelt werden.</target>
         <note>{StrBegin="MSB3828: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.STRPropertySkippedNameCollision">
         <source>MSB3829: Skipping strongly typed resource property generation for resource "{0}": a name collision exists with resource "{1}" after identifier normalization.</source>
-        <target state="new">MSB3829: Skipping strongly typed resource property generation for resource "{0}": a name collision exists with resource "{1}" after identifier normalization.</target>
+        <target state="translated">MSB3829: Die Generierung stark typisierter Ressourceneigenschaften für die Ressource „{0}“ wird übersprungen: Nach der Normalisierung des Bezeichners besteht ein Namenskonflikt mit der Ressource „{1}“.</target>
         <note>{StrBegin="MSB3829: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.STRPropertySkippedReservedName">
         <source>MSB3827: Skipping strongly typed resource property generation for resource "{0}": the name conflicts with a reserved name. Reserved names: {1}.</source>
-        <target state="new">MSB3827: Skipping strongly typed resource property generation for resource "{0}": the name conflicts with a reserved name. Reserved names: {1}.</target>
+        <target state="translated">MSB3827: Die Generierung stark typisierter Ressourceneigenschaften für die Ressource „{0}“ wird übersprungen: Der Name steht im Konflikt mit einem reservierten Namen. Reservierte Namen: {1}.</target>
         <note>{StrBegin="MSB3827: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.STRPropertySkippedVoidType">
         <source>MSB3830: Skipping strongly typed resource property generation for resource "{0}": the resource value type is void, which cannot be used as a property type.</source>
-        <target state="new">MSB3830: Skipping strongly typed resource property generation for resource "{0}": the resource value type is void, which cannot be used as a property type.</target>
+        <target state="translated">MSB3830: Die Generierung stark typisierter Ressourceneigenschaften für die Ressource „{0}“ wird übersprungen: Der Ressourcenwerttyp ist „void“. Er kann nicht als Eigenschaftstyp verwendet werden.</target>
         <note>{StrBegin="MSB3830: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.UnknownFileExtension">
