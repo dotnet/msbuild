@@ -14,7 +14,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_DEBUG_LAUNCH</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4')) Or $(TargetFramework.StartsWith('net3'))">
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
     <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APM</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
