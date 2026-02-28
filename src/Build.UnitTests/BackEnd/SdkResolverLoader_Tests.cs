@@ -46,7 +46,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             var resolvers = loader.LoadAllResolvers(new MockElementLocation("file"));
 
-            resolvers.Select(i => i.GetType().FullName).ShouldBe(new[] { typeof(DefaultSdkResolver).FullName });
+            resolvers.Select(i => i.GetType().FullName).ShouldBe(new[] { typeof(RepoLocalSdkResolver).FullName, typeof(DefaultSdkResolver).FullName });
 
             _logger.ErrorCount.ShouldBe(0);
             _logger.WarningCount.ShouldBe(0);
