@@ -397,6 +397,10 @@
     <value>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" is a UNC path, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</value>
     <comment>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</comment>
   </data>
+  <data name="Exec.MissingCommandError">
+    <value>MSB3072: The "Exec" task needs a command to execute.</value>
+    <comment>{StrBegin="MSB3072: "}LOCALIZATION: "Exec" should not be localized.</comment>
+  </data>
   <data name="Exec.CommandFailed">
     <value>MSB3073: The command "{0}" exited with code {1}.</value>
     <comment>{StrBegin="MSB3073: "}</comment>
@@ -412,9 +416,9 @@
     <value>MSB3076: The regular expression "{0}" that was supplied is invalid. {1}</value>
     <comment>{StrBegin="MSB3076: "}</comment>
   </data>
-  <data name="Exec.MissingCommandError">
-    <value>MSB3072: The "Exec" task needs a command to execute.</value>
-    <comment>{StrBegin="MSB3072: "}LOCALIZATION: "Exec" should not be localized.</comment>
+  <data name="Exec.CommandExitedZeroWithErrors">
+    <value>MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</value>
+    <comment>{StrBegin="MSB3077: "}</comment>
   </data>
   <data name="Exec.InvalidWorkingDirectory">
     <value>The working directory "{0}" does not exist.</value>
@@ -2318,6 +2322,10 @@
   <data name="Xaml.DuplicatePropertyName" xml:space="preserve">
       <value>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</value>
     <comment>{StrBegin="MSB3724: "}</comment>
+  </data>
+  <data name="Xaml.CommandExitedZeroWithErrors">
+    <value>MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</value>
+    <comment>{StrBegin="MSB3725: "}</comment>
   </data>
 
   <!--

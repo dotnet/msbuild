@@ -494,6 +494,11 @@
         <target state="translated">MSB3071: Alle Laufwerkbuchstaben von A: bis Z: werden zurzeit verwendet. Da das Arbeitsverzeichnis "{0}" ein UNC-Pfad ist, ist für die Exec-Aufgabe ein freier Laufwerkbuchstabe für die Zuordnung des UNC-Pfads erforderlich. Trennen Sie die Verbindung mindestens einer freigegebenen Ressource, um Laufwerkbuchstaben freizugeben, oder geben Sie ein lokales Arbeitsverzeichnis an, bevor Sie diesen Befehl wiederholen.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="Exec.CommandExitedZeroWithErrors">
+        <source>MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="new">MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <note>{StrBegin="MSB3077: "}</note>
+      </trans-unit>
       <trans-unit id="Exec.CommandFailed">
         <source>MSB3073: The command "{0}" exited with code {1}.</source>
         <target state="translated">MSB3073: Der Befehl "{0}" wurde mit dem Code {1} beendet.</target>
@@ -2916,6 +2921,11 @@
         <source>Using transactional mode to write to file "{0}".</source>
         <target state="translated">Der Transaktionsmodus wird verwendet, um in die Datei „{0}“ zu schreiben.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Xaml.CommandExitedZeroWithErrors">
+        <source>MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="new">MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <note>{StrBegin="MSB3725: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
         <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>
