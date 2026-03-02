@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests
             p.ExitCode.ShouldNotBe(0);
         }
 
-        [Fact]
+        [DotNetOnlyFact]
         public async Task TryGetCommandLine_RunningProcess_ContainsExpectedExecutable()
         {
             using Process p = StartLongRunningProcess();
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [DotNetOnlyFact]
         public async Task TryGetCommandLine_RunningProcess_ContainsArguments()
         {
             using Process p = StartLongRunningProcess();
