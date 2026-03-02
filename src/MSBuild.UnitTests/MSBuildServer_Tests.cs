@@ -190,8 +190,8 @@ namespace Microsoft.Build.Engine.UnitTests
             _env.WithTransientProcess(pidOfServerProcess);
 
             string? dir = Path.GetDirectoryName(markerFile.Path);
-            using var watcher = new System.IO.FileSystemWatcher(dir!);
             using ManualResetEvent mre = new ManualResetEvent(false);
+            using var watcher = new System.IO.FileSystemWatcher(dir!);
             watcher.Created += (o, e) =>
             {
                 _output.WriteLine($"The marker file {markerFile.Path} was created. The build task has been started.");
