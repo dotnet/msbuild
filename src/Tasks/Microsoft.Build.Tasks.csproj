@@ -143,7 +143,6 @@
     <Compile Include="..\Shared\AssemblyNameExtension.cs" />
     <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\Shared\ConversionUtilities.cs" />
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
     <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="..\Shared\LanguageParser\token.cs" />
     <Compile Include="..\Shared\LanguageParser\tokenChar.cs" />

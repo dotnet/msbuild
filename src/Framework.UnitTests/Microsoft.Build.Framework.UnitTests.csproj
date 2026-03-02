@@ -28,7 +28,6 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\ResourceUtilities.cs" />
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -672,9 +672,6 @@
     </Compile>
     <Compile Include="..\Shared\TempFileUtilities.cs" />
     <Compile Include="..\Shared\Modifiers.cs" />
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
-      <Link>SharedUtilities\FileUtilitiesRegex.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\FrameworkLocationHelper.cs">
       <Link>SharedUtilities\FrameworkLocationHelper.cs</Link>
     </Compile>
