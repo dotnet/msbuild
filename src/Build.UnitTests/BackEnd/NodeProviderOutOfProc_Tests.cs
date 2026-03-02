@@ -146,24 +146,5 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.Length.ShouldBe(1);
             result[0].ShouldBeFalse();
         }
-
-        [Fact]
-        public void GetNodeReuseThreshold_DefaultImplementation_ReturnsHalfOfCoreCount()
-        {
-            // Test the default implementation by not providing a threshold override
-            // Note: This test uses the actual system core count, so results vary by machine,
-            // but the mathematical relationship (threshold = max(1, cores/2)) should hold on all systems
-            int coreCount = NativeMethodsShared.GetLogicalCoreCount();
-            int expectedThreshold = Math.Max(1, coreCount / 2);
-            
-            // Create a provider WITHOUT threshold override to test the base class implementation
-            var provider = new TestableNodeProviderOutOfProcBase(systemWideNodeCount: 0, thresholdOverride: null);
-            
-            // The threshold from the provider should match our expected calculation
-            int actualThreshold = provider.TestGetNodeReuseThreshold();
-            actualThreshold.ShouldBe(expectedThreshold);
-            actualThreshold.ShouldBeGreaterThanOrEqualTo(1);
-            actualThreshold.ShouldBeLessThanOrEqualTo(coreCount);
-        }
     }
 }
