@@ -295,10 +295,15 @@ namespace Microsoft.Build.Tasks.Xaml
             {
                 _logPrivate.LogErrorWithCodeFromResources("Xaml.CommandFailedAccessDenied", CommandLine, ExitCode);
             }
+            else if (ExitCodeOverriddenToIndicateErrors)
+            {
+                _logPrivate.LogErrorWithCodeFromResources("Xaml.CommandExitedZeroWithErrors", CommandLine);
+            }
             else
             {
                 _logPrivate.LogErrorWithCodeFromResources("Xaml.CommandFailed", CommandLine, ExitCode);
             }
+
             return false;
         }
 

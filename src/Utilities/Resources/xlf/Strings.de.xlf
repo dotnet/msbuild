@@ -77,6 +77,11 @@
         <target state="translated">MSB6006: "{0}" wurde mit dem Code {1} beendet.</target>
         <note>{StrBegin="MSB6006: "}</note>
       </trans-unit>
+      <trans-unit id="ToolTask.ToolCommandExitedZeroWithErrors">
+        <source>The command exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="new">The command exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.ToolExecutableNotFound">
         <source>MSB6004: The specified task executable location "{0}" is invalid.</source>
         <target state="translated">MSB6004: Der angegebene Speicherort der ausführbaren Datei der Aufgabe "{0}" ist ungültig.</target>

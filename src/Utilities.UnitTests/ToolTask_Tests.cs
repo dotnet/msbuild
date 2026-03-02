@@ -326,7 +326,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// When a message is logged to the standard error stream error if LogStandardErrorAsError is true
+        /// When LogStandardErrorAsError is true and text is sent to stderr, the tool exits with
+        /// code 0 but ToolTask overrides the exit code to -1. The low-importance message
+        /// "The command exited with return value 0, but errors were detected" should be logged,
+        /// not the generic tool failure error MSB6006.
         /// </summary>
         [Fact]
         public void ErrorWhenTextSentToStandardError()
@@ -342,9 +345,44 @@ namespace Microsoft.Build.UnitTests
 
                 t.Execute().ShouldBeFalse();
 
-                engine.AssertLogDoesntContain("MSB3073");
                 engine.AssertLogContains("Who made you king anyways");
+
+                // Should not log other failure error codes
+                engine.AssertLogDoesntContain("MSB3073");
+
                 t.ExitCode.ShouldBe(-1);
+                // Only the stderr-as-error from tool output
+                engine.Errors.ShouldBe(1);
+            }
+        }
+
+        /// <summary>
+        /// When the tool exits with a non-zero exit code and has already logged its own errors,
+        /// ToolTask should log the "command exited with code" message (not MSB6006) as a low-importance
+        /// diagnostic rather than a duplicate error.
+        /// </summary>
+        [Fact]
+        public void HandleExecutionErrorsWhenToolLogsErrorAndExitsNonZero()
+        {
+            using (MyTool t = new MyTool())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                                                ? "/C echo BADTHINGHAPPENED && exit /b 1"
+                                                : @"-c ""echo BADTHINGHAPPENED; exit 1""";
+
+                t.Execute().ShouldBeFalse();
+
+                engine.AssertLogContains("BADTHINGHAPPENED");
+
+                // Should not log the generic tool failure error or the zero-with-errors message
+                engine.AssertLogDoesntContain("MSB3073");
+                engine.AssertLogDoesntContain("exited with return value 0");
+
+                t.ExitCode.ShouldBe(1);
+                // Only the custom error logged by MyTool.LogEventsFromTextOutput
                 engine.Errors.ShouldBe(1);
             }
         }
