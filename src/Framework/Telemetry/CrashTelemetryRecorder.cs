@@ -16,6 +16,12 @@ namespace Microsoft.Build.Framework.Telemetry;
 internal static class CrashTelemetryRecorder
 {
     /// <summary>
+    /// Interval in milliseconds between EndBuild hang diagnostic emissions.
+    /// When EndBuild is stuck waiting for submissions or nodes, diagnostics are emitted at this interval.
+    /// </summary>
+    public const int EndBuildHangDiagnosticsIntervalMs = 30_000;
+
+    /// <summary>
     /// Records crash telemetry data for later emission via <see cref="FlushCrashTelemetry"/>.
     /// </summary>
     /// <param name="exception">The exception that caused the crash.</param>
@@ -172,5 +178,51 @@ internal static class CrashTelemetryRecorder
         crashTelemetry.IsCritical = isCritical;
         crashTelemetry.IsUnhandled = isUnhandled;
         return crashTelemetry;
+    }
+
+    /// <summary>
+    /// Collects and emits diagnostic telemetry when EndBuild is stuck waiting.
+    /// Called periodically from timed wait loops so that diagnostics are available
+    /// even if the hang never resolves (crash telemetry in the finally block would be unreachable).
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void CollectAndEmitEndBuildHangDiagnostics(
+        string waitPhase,
+        long waitDurationMs,
+        int pendingSubmissionCount,
+        int submissionsWithResultNoLogging,
+        bool threadExceptionRecorded,
+        int unmatchedProjectStartedCount,
+        string? buildEngineVersion,
+        string? buildEngineFrameworkName,
+        string? buildEngineHost)
+    {
+        try
+        {
+            var crashTelemetry = new CrashTelemetry
+            {
+                ExitType = CrashExitType.EndBuildHang,
+                BuildEngineVersion = buildEngineVersion,
+                BuildEngineFrameworkName = buildEngineFrameworkName,
+                BuildEngineHost = buildEngineHost,
+                EndBuildWaitPhase = waitPhase,
+                EndBuildWaitDurationMs = waitDurationMs,
+                PendingSubmissionCount = pendingSubmissionCount,
+                SubmissionsWithResultNoLogging = submissionsWithResultNoLogging,
+                ThreadExceptionRecorded = threadExceptionRecorded,
+                UnmatchedProjectStartedCount = unmatchedProjectStartedCount,
+            };
+
+            TelemetryManager.Instance?.Initialize(isStandalone: false);
+
+            using IActivity? activity = TelemetryManager.Instance
+                ?.DefaultActivitySource
+                ?.StartActivity(TelemetryConstants.Crash);
+            activity?.SetTags(crashTelemetry);
+        }
+        catch
+        {
+            // Best effort: diagnostic telemetry must never cause a secondary failure.
+        }
     }
 }

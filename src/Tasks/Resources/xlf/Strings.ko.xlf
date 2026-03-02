@@ -494,6 +494,11 @@
         <target state="translated">MSB3071: A:에서 Z:까지 모든 드라이브 문자가 현재 사용 중입니다. 작업 디렉터리 "{0}"이(가) UNC 경로이므로 "Exec" 작업을 수행하려면 UNC 경로를 매핑하는 데 사용할 수 있는 드라이브 문자가 필요합니다. 하나 이상의 공유 리소스에서 연결을 끊어 사용 가능한 드라이브 문자를 만들거나 로컬 작업 디렉터리를 지정한 다음 이 명령을 다시 실행하세요.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="Exec.CommandExitedZeroWithErrors">
+        <source>MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="new">MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <note>{StrBegin="MSB3077: "}</note>
+      </trans-unit>
       <trans-unit id="Exec.CommandFailed">
         <source>MSB3073: The command "{0}" exited with code {1}.</source>
         <target state="translated">MSB3073: "{0}" 명령이 종료되었습니다(코드: {1}).</target>
@@ -2916,6 +2921,11 @@
         <source>Using transactional mode to write to file "{0}".</source>
         <target state="translated">트랜잭션 모드로 "{0}" 파일에 기록하는 중입니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Xaml.CommandExitedZeroWithErrors">
+        <source>MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="new">MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <note>{StrBegin="MSB3725: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
         <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>
