@@ -79,7 +79,7 @@
       </trans-unit>
       <trans-unit id="ToolTask.ToolCommandExitedZeroWithErrors">
         <source>The command exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
-        <target state="new">The command exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <target state="translated">命令已退出，返回值为 0，但执行过程中检测到错误。ExitCode 被设置为 -1。</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolTask.ToolExecutableNotFound">
