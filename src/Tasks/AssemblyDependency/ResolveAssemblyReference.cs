@@ -181,7 +181,7 @@ namespace Microsoft.Build.Tasks
         private bool _ignoreDefaultInstalledAssemblySubsetTables = false;
         private bool _enableCustomCulture = false;
         private AbsolutePath[] _candidateAssemblyFiles = [];
-        private string[] _targetFrameworkDirectories = [];
+        private AbsolutePath[] _targetFrameworkDirectories = [];
         private string[] _nonCultureResourceDirectories = [];
         private string[] _searchPaths = [];
         private string[] _allowedAssemblyExtensions = [".winmd", ".dll", ".exe"];
@@ -424,8 +424,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] TargetFrameworkDirectories
         {
-            get { return _targetFrameworkDirectories; }
-            set { _targetFrameworkDirectories = value; }
+            get { return _targetFrameworkDirectories?.Select(path => path.OriginalValue).ToArray(); }
+            set { _targetFrameworkDirectories = value?.Select(path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path)).ToArray(); }
         }
 
         /// <summary>
@@ -2483,7 +2483,7 @@ namespace Microsoft.Build.Tasks
                         _relatedFileExtensions,
                         _candidateAssemblyFiles.Select(path => path.Value).ToArray(),
                         _resolvedSDKReferences,
-                        _targetFrameworkDirectories,
+                        _targetFrameworkDirectories?.Select(path => path.Value).ToArray(),
                         installedAssemblies,
                         processorArchitecture,
                         fileExists,
