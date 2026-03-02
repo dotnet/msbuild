@@ -685,7 +685,7 @@ namespace Microsoft.Build.Tasks
                 {
                     _appConfigFile = TaskEnvironment.GetAbsolutePath(value);
                 }
-                else if (value == string.Empty && !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
+                else if (value == string.Empty && !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
                 {
                     _appConfigValueIsEmptyString = true;
                 }
@@ -2128,7 +2128,7 @@ namespace Microsoft.Build.Tasks
             // Construct the cache only if we can't find any caches.
             if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
             {
-                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths, Log, fileExists);
+                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths, Log, fileExists, TaskEnvironment);
             }
 
             if (_cache == null)
@@ -2433,10 +2433,10 @@ namespace Microsoft.Build.Tasks
                         {
                             appConfigRemappedAssemblies = GetAssemblyRemappingsFromAppConfig();
 
-                            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5) && _appConfigValueIsEmptyString)
+                            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6) && _appConfigValueIsEmptyString)
                             {
                                 // Preserve backward compatibility for empty AppConfigFile handling.
-                                // Prior to Wave18_5, empty strings would cause TaskEnvironment.GetAbsolutePath() to throw an exception,
+                                // Prior to Wave18_6, empty strings would cause TaskEnvironment.GetAbsolutePath() to throw an exception,
                                 // which would be caught and logged as an error, stopping RAR execution.
                                 // With the new behavior, empty strings are silently ignored (treated like null).
                                 // When Wave 18.5 is disabled, we preserve the old failure behavior.
