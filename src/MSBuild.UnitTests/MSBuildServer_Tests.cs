@@ -191,7 +191,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             string? dir = Path.GetDirectoryName(markerFile.Path);
             // mre must be declared before watcher so that it is disposed after watcher.
-            // Reversing this order would allow late FileSystemWatcher callbacks to call 
+            // Reversing this order would allow late FileSystemWatcher callbacks to call
             // mre.Set() on a disposed ManualResetEvent, causing an ObjectDisposedException.
             using ManualResetEvent mre = new ManualResetEvent(false);
             using var watcher = new System.IO.FileSystemWatcher(dir!);
