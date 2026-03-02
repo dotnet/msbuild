@@ -17,17 +17,17 @@ namespace Microsoft.Build.UnitTests
     [AttributeUsage(AttributeTargets.Assembly | AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
     public class MSBuildTestEnvironmentBeforeAfterAttribute : BeforeAfterTestAttribute
     {
-        private static readonly AsyncLocal<TestEnvironment?> s_testEnvironment = new();
+        // private static readonly AsyncLocal<TestEnvironment?> s_testEnvironment = new();
 
         public override void Before(MethodInfo methodUnderTest, IXunitTest test)
         {
-            s_testEnvironment.Value = TestEnvironment.Create();
+            // s_testEnvironment.Value = TestEnvironment.Create();
         }
 
         public override void After(MethodInfo methodUnderTest, IXunitTest test)
         {
-            s_testEnvironment.Value?.Dispose();
-            s_testEnvironment.Value = null;
+            // s_testEnvironment.Value?.Dispose();
+            // s_testEnvironment.Value = null;
         }
     }
 }

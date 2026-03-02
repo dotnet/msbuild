@@ -151,7 +151,7 @@ namespace Microsoft.Build.UnitTests
         {
             if (!_disposed)
             {
-                _testEnvironment.Dispose();
+                // _testEnvironment.Dispose();
 
                 _disposed = true;
             }
