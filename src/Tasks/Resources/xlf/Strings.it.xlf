@@ -494,6 +494,11 @@
         <target state="translated">MSB3071: attualmente sono in uso tutte le lettere di unità comprese tra A: e Z:. Poiché la directory di lavoro "{0}" è un percorso UNC, per l'attività "Exec" è necessaria una lettera di unità disponibile a cui mappare il percorso UNC. Eseguire la disconnessione da una o più risorse condivise per rendere disponibili lettere di unità oppure specificare una directory di lavoro locale prima di provare a eseguire nuovamente questo comando.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="Exec.CommandExitedZeroWithErrors">
+        <source>MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="new">MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <note>{StrBegin="MSB3077: "}</note>
+      </trans-unit>
       <trans-unit id="Exec.CommandFailed">
         <source>MSB3073: The command "{0}" exited with code {1}.</source>
         <target state="translated">MSB3073: uscita dal comando "{0}" con codice {1}.</target>
@@ -2916,6 +2921,11 @@
         <source>Using transactional mode to write to file "{0}".</source>
         <target state="translated">Uso della modalità transazionale per scrivere nel file "{0}".</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Xaml.CommandExitedZeroWithErrors">
+        <source>MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="new">MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <note>{StrBegin="MSB3725: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
         <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>

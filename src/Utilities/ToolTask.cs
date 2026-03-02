@@ -119,6 +119,12 @@ namespace Microsoft.Build.Utilities
         public int ExitCode { get; private set; }
 
         /// <summary>
+        /// True when ExitCode was overridden from 0 to -1 because the task logged errors
+        /// despite the tool reporting success (exit code 0).
+        /// </summary>
+        protected bool ExitCodeOverriddenToIndicateErrors { get; private set; }
+
+        /// <summary>
         /// When set to true, this task will yield the node when its task is executing.
         /// </summary>
         public bool YieldDuringToolExecution { get; set; }
@@ -437,8 +443,16 @@ namespace Microsoft.Build.Utilities
 
             if (HasLoggedErrors)
             {
-                // Emit a message.
-                LogPrivate.LogMessageFromResources(MessageImportance.Low, "General.ToolCommandFailedNoErrorCode", ExitCode);
+                if (ExitCodeOverriddenToIndicateErrors)
+                {
+                    // The tool finished with a zero exit code but errors were logged, causing ExitCode to be set to -1.
+                    LogPrivate.LogMessageFromResources(MessageImportance.Low, "ToolTask.ToolCommandExitedZeroWithErrors");
+                }
+                else
+                {
+                    // The tool failed with a non-zero exit code and already logged its own errors.
+                    LogPrivate.LogMessageFromResources(MessageImportance.Low, "General.ToolCommandFailedNoErrorCode", ExitCode);
+                }
             }
             else
             {
@@ -812,6 +826,7 @@ namespace Microsoft.Build.Utilities
                 if (ExitCode == 0 && HasLoggedErrors)
                 {
                     ExitCode = -1;
+                    ExitCodeOverriddenToIndicateErrors = true;
                 }
 
                 // release all the OS resources
@@ -1552,6 +1567,7 @@ namespace Microsoft.Build.Utilities
                     LogToolCommand(pathToTool + commandLineCommands + " " + responseFileCommands);
                 }
                 ExitCode = 0;
+                ExitCodeOverriddenToIndicateErrors = false;
 
                 if (nextAction == HostObjectInitializationStatus.UseHostObjectToExecute)
                 {

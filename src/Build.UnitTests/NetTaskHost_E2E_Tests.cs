@@ -204,6 +204,29 @@ namespace Microsoft.Build.Engine.UnitTests
             testTaskOutput.ShouldContain("CallbackResult: IsRunningMultipleNodes = False");
         }
 
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_CallbackRequestCoresTest()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+
+           // Set the .NET SDK's SDK resolver override to point to our bootstrap, which is guaranteed to have the apphost.
+            var coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
+            env.SetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", coreDirectory);
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskResourceCallback", "TestNetTaskResourceCallback.csproj");
+
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -t:TestTask", out bool successTestTask);
+
+            if (!successTestTask)
+            {
+                _output.WriteLine(testTaskOutput);
+            }
+
+            successTestTask.ShouldBeTrue();
+            testTaskOutput.ShouldContain("CallbackResult: RequestCores(2) =");
+        }
+
         [WindowsFullFrameworkOnlyFact] // This test verifies the fallback behavior with implicit host parameters.
         public void NetTaskWithImplicitHostParamsTest_FallbackToDotnet()
         {
