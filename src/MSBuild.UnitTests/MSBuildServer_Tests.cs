@@ -195,7 +195,15 @@ namespace Microsoft.Build.Engine.UnitTests
             watcher.Created += (o, e) =>
             {
                 _output.WriteLine($"The marker file {markerFile.Path} was created. The build task has been started.");
-                mre.Set();
+                try
+                {
+                    mre.Set();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Late/duplicate FSEvents callbacks on macOS can arrive after the
+                    // ManualResetEvent has been disposed. This is benign.
+                }
             };
             watcher.Filter = Path.GetFileName(markerFile.Path);
             watcher.EnableRaisingEvents = true;
@@ -224,6 +232,8 @@ namespace Microsoft.Build.Engine.UnitTests
             ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "Process ID and Server ID should coincide.");
 
             // Clean up process and tasks
+            // Stop watching before disposing mre to minimize late callback races.
+            watcher.EnableRaisingEvents = false;
             // 1st kill registered processes
             _env.Dispose();
             // 2nd wait for sleep task which will ends as soon as the process is killed above.
