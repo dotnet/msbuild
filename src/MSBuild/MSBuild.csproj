@@ -120,6 +120,8 @@
     <Compile Include="..\Shared\ITaskHostCallbackPacket.cs" />
     <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesRequest.cs" />
     <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesResponse.cs" />
+    <Compile Include="..\Shared\TaskHostCoresRequest.cs" />
+    <Compile Include="..\Shared\TaskHostCoresResponse.cs" />
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\MSBuildLoadContext.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
     <Compile Include="..\Shared\TypeLoader.cs" />

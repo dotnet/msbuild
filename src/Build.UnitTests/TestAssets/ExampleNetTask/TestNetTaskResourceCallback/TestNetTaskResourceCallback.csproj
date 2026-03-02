@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TestProjectFolder>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine('$(MSBuildThisFileDirectory)', '..', '..', '..', '..'))'))</TestProjectFolder>
+    <ExampleTaskPath>$([System.IO.Path]::Combine('$(TestProjectFolder)', '$(TargetFramework)', 'ExampleTask.dll'))</ExampleTaskPath>
+  </PropertyGroup>
+
+  <UsingTask
+      TaskName="Microsoft.Build.UnitTests.BackEnd.RequestCoresTask"
+      AssemblyFile="$(ExampleTaskPath)"
+      TaskFactory="TaskHostFactory"
+      Runtime="NET"/>
+
+  <Target Name="TestTask" BeforeTargets="Build">
+    <Microsoft.Build.UnitTests.BackEnd.RequestCoresTask CoreCount="2" ReleaseAfter="true">
+      <Output PropertyName="Granted" TaskParameter="GrantedCores" />
+    </Microsoft.Build.UnitTests.BackEnd.RequestCoresTask>
+    <Message Text="CallbackResult: RequestCores(2) = $(Granted)" Importance="high" />
+  </Target>
+
+</Project>

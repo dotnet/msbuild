@@ -204,6 +204,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostCoresRequest, TaskHostCoresRequest.FactoryForDeserialization, this);
 
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
@@ -513,6 +514,9 @@ namespace Microsoft.Build.BackEnd
                 case NodePacketType.TaskHostIsRunningMultipleNodesRequest:
                     HandleIsRunningMultipleNodesRequest(packet as TaskHostIsRunningMultipleNodesRequest);
                     break;
+                case NodePacketType.TaskHostCoresRequest:
+                    HandleCoresRequest(packet as TaskHostCoresRequest);
+                    break;
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     break;
@@ -659,6 +663,34 @@ namespace Microsoft.Build.BackEnd
         {
             bool result = _buildEngine is IBuildEngine2 engine2 && engine2.IsRunningMultipleNodes;
             var response = new TaskHostIsRunningMultipleNodesResponse(request.RequestId, result);
+            _taskHostProvider.SendData(_taskHostNodeKey, response);
+        }
+
+        /// <summary>
+        /// Handle RequestCores/ReleaseCores request from the TaskHost.
+        /// Forwards the call to the in-process TaskHost's IBuildEngine9 implementation,
+        /// which handles implicit core accounting and scheduler communication.
+        /// </summary>
+        private void HandleCoresRequest(TaskHostCoresRequest request)
+        {
+            int grantedCores = 0;
+
+            if (request.IsRelease)
+            {
+                if (_buildEngine is IBuildEngine9 engine9)
+                {
+                    engine9.ReleaseCores(request.RequestedCores);
+                }
+            }
+            else
+            {
+                if (_buildEngine is IBuildEngine9 engine9)
+                {
+                    grantedCores = engine9.RequestCores(request.RequestedCores);
+                }
+            }
+
+            var response = new TaskHostCoresResponse(request.RequestId, grantedCores);
             _taskHostProvider.SendData(_taskHostNodeKey, response);
         }
 

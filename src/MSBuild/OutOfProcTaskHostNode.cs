@@ -248,6 +248,7 @@ namespace Microsoft.Build.CommandLine
 
 #if !CLR2COMPATIBILITY
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesResponse, TaskHostIsRunningMultipleNodesResponse.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostCoresResponse, TaskHostCoresResponse.FactoryForDeserialization, this);
 #endif
 
 #if !CLR2COMPATIBILITY
@@ -565,14 +566,41 @@ namespace Microsoft.Build.CommandLine
 
         public int RequestCores(int requestedCores)
         {
-            // No resource management in OOP nodes
-            throw new NotImplementedException();
+#if CLR2COMPATIBILITY
+            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
+            return 0;
+#else
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(requestedCores > 0, nameof(requestedCores));
+
+            if (!CallbacksSupported)
+            {
+                LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
+                return 0;
+            }
+
+            var request = new TaskHostCoresRequest(requestedCores, isRelease: false);
+            var response = SendCallbackRequestAndWaitForResponse<TaskHostCoresResponse>(request);
+            return response.GrantedCores;
+#endif
         }
 
         public void ReleaseCores(int coresToRelease)
         {
-            // No resource management in OOP nodes
-            throw new NotImplementedException();
+#if CLR2COMPATIBILITY
+            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
+            return;
+#else
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(coresToRelease > 0, nameof(coresToRelease));
+
+            if (!CallbacksSupported)
+            {
+                LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
+                return;
+            }
+
+            var request = new TaskHostCoresRequest(coresToRelease, isRelease: true);
+            SendCallbackRequestAndWaitForResponse<TaskHostCoresResponse>(request);
+#endif
         }
 
         #endregion
@@ -787,8 +815,9 @@ namespace Microsoft.Build.CommandLine
                     break;
 
 #if !CLR2COMPATIBILITY
-                // Callback response packet - route to pending request
+                // Callback response packets - route to pending request
                 case NodePacketType.TaskHostIsRunningMultipleNodesResponse:
+                case NodePacketType.TaskHostCoresResponse:
                     HandleCallbackResponse(packet);
                     break;
 #endif
