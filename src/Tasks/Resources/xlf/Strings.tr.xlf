@@ -496,7 +496,7 @@
       </trans-unit>
       <trans-unit id="Exec.CommandExitedZeroWithErrors">
         <source>MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
-        <target state="new">MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <target state="translated">MSB3077: "{0}" komutu 0 dönüş değeriyle tamamlandı ancak yürütme sırasında hatalar algılandı. ExitCode -1 olarak ayarlandı.</target>
         <note>{StrBegin="MSB3077: "}</note>
       </trans-unit>
       <trans-unit id="Exec.CommandFailed">
@@ -2924,7 +2924,7 @@
       </trans-unit>
       <trans-unit id="Xaml.CommandExitedZeroWithErrors">
         <source>MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
-        <target state="new">MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</target>
+        <target state="translated">MSB3725: "{0}" komutu 0 dönüş değeriyle tamamlandı ancak yürütme sırasında hatalar algılandı. ExitCode -1 olarak ayarlandı.</target>
         <note>{StrBegin="MSB3725: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
