@@ -215,6 +215,7 @@ namespace Microsoft.Build.Tasks
         private Version _projectTargetFramework;
 
         private AbsolutePath _stateFile = default;
+        private AbsolutePath _assemblyInformationCacheOutputPath = default;
         private string _targetProcessorArchitecture = null;
 
         private string _profileName = String.Empty;
@@ -596,7 +597,17 @@ namespace Microsoft.Build.Tasks
         /// If not null, serializes information about <see cref="AssemblyFiles" /> inputs to the named file.
         /// This overrides the usual outputs, so do not use this unless you are building an SDK with many references.
         /// </summary>
-        public string AssemblyInformationCacheOutputPath { get; set; }
+        public string AssemblyInformationCacheOutputPath
+        {
+            get => _assemblyInformationCacheOutputPath.OriginalValue;
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    _assemblyInformationCacheOutputPath = TaskEnvironment.GetAbsolutePath(value);
+                }
+            }
+        }
 
         /// <summary>
         /// If not null, uses this set of caches as inputs if RAR cannot find the usual cache in the obj folder. Typically
@@ -2142,9 +2153,9 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void WriteStateFile()
         {
-            if (!string.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
+            if (_assemblyInformationCacheOutputPath.Value is not null)
             {
-                _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log);
+                _cache.SerializePrecomputedCache(_assemblyInformationCacheOutputPath.Value, Log);
             }
             else if (_stateFile.Value is not null && (_cache.IsDirty || _cache.instanceLocalOutgoingFileStateCache.Count < _cache.instanceLocalFileStateCache.Count))
             {
