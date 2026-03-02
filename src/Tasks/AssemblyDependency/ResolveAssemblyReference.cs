@@ -2989,7 +2989,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (redistInfo != null)
                 {
-                    Log.LogMessage(MessageImportance.Low, Strings.FormattedAssemblyInfo, redistInfo.Path);
+                    Log.LogMessage(MessageImportance.Low, Strings.FormattedAssemblyInfo, redistInfo.Path.OriginalValue);
                 }
             }
 
@@ -3000,7 +3000,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if (inclusionListInfo != null)
                     {
-                        Log.LogMessage(MessageImportance.Low, Strings.FormattedAssemblyInfo, inclusionListInfo.Path);
+                        Log.LogMessage(MessageImportance.Low, Strings.FormattedAssemblyInfo, inclusionListInfo.Path.OriginalValue);
                     }
                 }
             }
@@ -3118,7 +3118,7 @@ namespace Microsoft.Build.Tasks
                     string[] listPaths = GetAssemblyListPaths(targetFrameworkDirectory);
                     foreach (string listPath in listPaths)
                     {
-                        tableMap[listPath] = new AssemblyTableInfo(listPath, targetFrameworkDirectory);
+                        tableMap[listPath] = new AssemblyTableInfo(listPath, targetFrameworkDirectory, TaskEnvironment);
                     }
                 }
             }
@@ -3142,7 +3142,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                tableMap[installedAssemblyTable.ItemSpec] = new AssemblyTableInfo(installedAssemblyTable.ItemSpec, frameworkDirectory);
+                tableMap[installedAssemblyTable.ItemSpec] = new AssemblyTableInfo(installedAssemblyTable.ItemSpec, frameworkDirectory, TaskEnvironment);
             }
 
             AssemblyTableInfo[] extensions = new AssemblyTableInfo[tableMap.Count];
