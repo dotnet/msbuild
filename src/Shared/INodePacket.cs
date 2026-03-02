@@ -15,6 +15,12 @@ namespace Microsoft.Build.BackEnd
     /// Enumeration of all of the packet types used for communication.
     /// Uses lower 6 bits for packet type (0-63), upper 2 bits reserved for flags.
     /// </summary>
+    /// <remarks>
+    /// Several of these values must be kept in sync with MSBuildTaskHost's NodePacketType.
+    /// The values shared with MSBuildTaskHost are <see cref="LogMessage"/>,
+    /// <see cref="NodeBuildComplete"/>, <see cref="NodeShutdown"/>, <see cref="TaskHostConfiguration"/>,
+    /// <see cref="TaskHostTaskCancelled"/>, and <see cref="TaskHostTaskComplete"/>.
+    /// </remarks>
     internal enum NodePacketType : byte
     {
         // Mask for extracting packet type (lower 6 bits)

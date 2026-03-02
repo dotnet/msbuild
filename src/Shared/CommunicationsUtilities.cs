@@ -223,21 +223,29 @@ namespace Microsoft.Build.Internal
         protected readonly HandshakeComponents _handshakeComponents;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Handshake"/> class with the specified node type
-        /// and optional predefined tools directory.
+        ///  Initializes a new instance of the <see cref="Handshake"/> class with the specified node type.
         /// </summary>
         /// <param name="nodeType">
-        /// The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
+        ///  The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
         /// </param>
-        /// <param name="predefinedToolsDirectory">
-        /// An optional directory path used for .NET TaskHost handshake salt calculation (only on .NET Framework).
-        /// When specified for .NET TaskHost nodes, this directory path is included in the handshake salt 
-        /// to ensure the child dotnet process connects with the expected tools directory context.
-        /// For non-.NET TaskHost nodes or on .NET Core, the MSBuildToolsDirectoryRoot is used instead.
-        /// This parameter is ignored when not running .NET TaskHost on .NET Framework.
+        public Handshake(HandshakeOptions nodeType)
+            : this(nodeType, includeSessionId: true, toolsDirectory: null)
+        {
+        }
+
+        /// <summary>
+        ///  Initializes a new instance of the <see cref="Handshake"/> class with the specified node type
+        ///  and optional predefined tools directory.
+        /// </summary>
+        /// <param name="nodeType">
+        ///  The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
         /// </param>
-        internal Handshake(HandshakeOptions nodeType, string predefinedToolsDirectory = null)
-            : this(nodeType, includeSessionId: true, predefinedToolsDirectory)
+        /// <param name="toolsDirectory">
+        ///  The directory path to use for handshake salt calculation. For some task hosts, notably the .NET TaskHost (on .NET Framework)
+        ///  and the CLR2 TaskHost, this is needed to ensure the child process connects with the expected tools directory context.
+        /// </param>
+        public Handshake(HandshakeOptions nodeType, string toolsDirectory)
+            : this(nodeType, includeSessionId: true, toolsDirectory)
         {
         }
 
@@ -247,9 +255,21 @@ namespace Microsoft.Build.Internal
         // Source options of the handshake.
         internal HandshakeOptions HandshakeOptions { get; }
 
-        protected Handshake(HandshakeOptions nodeType, bool includeSessionId, string predefinedToolsDirectory)
+        protected Handshake(HandshakeOptions nodeType, bool includeSessionId, string toolsDirectory)
         {
             HandshakeOptions = nodeType;
+
+#if NETFRAMEWORK
+            ErrorUtilities.VerifyThrow(
+                toolsDirectory is null || IsNetTaskHost || IsClr2TaskHost,
+                $"{toolsDirectory} should only be provided for .NET or CLR2 TaskHost nodes (and only when running on .NET Framework).");
+#else
+            ErrorUtilities.VerifyThrow(
+                toolsDirectory is null,
+                $"{toolsDirectory} should not have been provided.");
+#endif
+
+            toolsDirectory ??= BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
             // Build handshake options with version in upper bits
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
@@ -257,9 +277,8 @@ namespace Microsoft.Build.Internal
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
             // Calculate salt from environment and tools directory
-            bool isNetTaskHost = IsHandshakeOptionEnabled(nodeType, HandshakeOptions.NET | HandshakeOptions.TaskHost);
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
-            string toolsDirectory = GetToolsDirectory(isNetTaskHost, predefinedToolsDirectory);
+
             int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
 
             CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt);
@@ -273,20 +292,17 @@ namespace Microsoft.Build.Internal
                 sessionId = currentProcess.SessionId;
             }
 
-            _handshakeComponents = isNetTaskHost
+            _handshakeComponents = IsNetTaskHost
                 ? CreateNetTaskHostComponents(options, salt, sessionId)
                 : CreateStandardComponents(options, salt, sessionId);
         }
 
-        private string GetToolsDirectory(bool isNetTaskHost, string predefinedToolsDirectory) =>
-#if NETFRAMEWORK
-            isNetTaskHost
+        private bool IsNetTaskHost
+            => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.NET | HandshakeOptions.TaskHost);
 
-                // For .NET TaskHost assembly directory we set the expectation for the child dotnet process to connect to.
-                ? predefinedToolsDirectory
-                : BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-#else
-            BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+#if NETFRAMEWORK
+        private bool IsClr2TaskHost
+            => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.CLR2 | HandshakeOptions.TaskHost);
 #endif
 
         private static HandshakeComponents CreateNetTaskHostComponents(int options, int salt, int sessionId) => new(
@@ -336,7 +352,7 @@ namespace Microsoft.Build.Internal
         public override byte? ExpectedVersionInFirstByte => null;
 
         internal ServerNodeHandshake(HandshakeOptions nodeType)
-            : base(nodeType, includeSessionId: false, predefinedToolsDirectory: null)
+            : base(nodeType, includeSessionId: false, toolsDirectory: null)
         {
         }
 
