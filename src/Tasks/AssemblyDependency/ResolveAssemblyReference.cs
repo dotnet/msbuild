@@ -219,8 +219,8 @@ namespace Microsoft.Build.Tasks
         private string _targetProcessorArchitecture = null;
 
         private string _profileName = String.Empty;
-        private string[] _fullFrameworkFolders = [];
-        private string[] _latestTargetFrameworkDirectories = [];
+        private AbsolutePath[] _fullFrameworkFolders = [];
+        private AbsolutePath[] _latestTargetFrameworkDirectories = [];
         private bool _copyLocalDependenciesWhenParentReferenceInGac = true;
         private Dictionary<string, MessageImportance> _showAssemblyFoldersExLocations = new Dictionary<string, MessageImportance>(StringComparer.OrdinalIgnoreCase);
         private bool _logVerboseSearchResults = false;
@@ -295,12 +295,12 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return _latestTargetFrameworkDirectories;
+                return _latestTargetFrameworkDirectories?.Select(path => path.OriginalValue).ToArray();
             }
 
             set
             {
-                _latestTargetFrameworkDirectories = value;
+                _latestTargetFrameworkDirectories = value?.Select(path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path)).ToArray();
             }
         }
 
@@ -938,13 +938,13 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return _fullFrameworkFolders;
+                return _fullFrameworkFolders?.Select(path => path.OriginalValue).ToArray();
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "FullFrameworkFolders");
-                _fullFrameworkFolders = value;
+                _fullFrameworkFolders = value?.Select(path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path)).ToArray();
             }
         }
 
@@ -1664,15 +1664,15 @@ namespace Microsoft.Build.Tasks
             Log.LogMessage(importance, $"{indent}{ProfileName}");
 
             Log.LogMessage(importance, property, "FullFrameworkFolders");
-            foreach (string fullFolder in FullFrameworkFolders)
+            foreach (var fullFolder in _fullFrameworkFolders)
             {
-                Log.LogMessage(importance, $"{indent}{fullFolder}");
+                Log.LogMessage(importance, $"{indent}{fullFolder.OriginalValue}");
             }
 
             Log.LogMessage(importance, property, "LatestTargetFrameworkDirectories");
-            foreach (string latestFolder in _latestTargetFrameworkDirectories)
+            foreach (var latestFolder in _latestTargetFrameworkDirectories)
             {
-                Log.LogMessage(importance, $"{indent}{latestFolder}");
+                Log.LogMessage(importance, $"{indent}{latestFolder.OriginalValue}");
             }
 
             Log.LogMessage(importance, property, "ProfileTablesLocation");
@@ -2300,7 +2300,7 @@ namespace Microsoft.Build.Tasks
                     string subsetOrProfileName = null;
 
                     // Are we targeting a profile
-                    bool targetingProfile = !String.IsNullOrEmpty(ProfileName) && ((FullFrameworkFolders.Length > 0) || (FullFrameworkAssemblyTables.Length > 0));
+                    bool targetingProfile = !String.IsNullOrEmpty(ProfileName) && ((_fullFrameworkFolders.Length > 0) || (FullFrameworkAssemblyTables.Length > 0));
                     bool targetingSubset = false;
                     List<Exception> inclusionListErrors = new List<Exception>();
                     List<string> inclusionListErrorFilesNames = new List<string>();
@@ -2501,7 +2501,7 @@ namespace Microsoft.Build.Tasks
                         _projectTargetFramework,
                         frameworkMoniker,
                         Log,
-                        _latestTargetFrameworkDirectories,
+                        _latestTargetFrameworkDirectories?.Select(path => path.Value).ToArray(),
                         _copyLocalDependenciesWhenParentReferenceInGac,
                         DoNotCopyLocalIfInGac,
                         getAssemblyPathInGac,
@@ -2867,7 +2867,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            fullRedistAssemblyTableInfo = GetInstalledAssemblyTableInfo(false, FullFrameworkAssemblyTables, new GetListPath(RedistList.GetRedistListPathsFromDisk), FullFrameworkFolders);
+            fullRedistAssemblyTableInfo = GetInstalledAssemblyTableInfo(false, FullFrameworkAssemblyTables, new GetListPath(RedistList.GetRedistListPathsFromDisk), _fullFrameworkFolders?.Select(path => path.Value).ToArray());
             if (fullRedistAssemblyTableInfo.Length > 0)
             {
                 // Get the redist list which represents the Full framework, we need this so that we can generate the exclusion list
@@ -2956,7 +2956,7 @@ namespace Microsoft.Build.Tasks
 
             // Make sure the inputs for profiles are correct
             bool profileNameIsSet = !String.IsNullOrEmpty(ProfileName);
-            bool fullFrameworkFoldersIsSet = FullFrameworkFolders.Length > 0;
+            bool fullFrameworkFoldersIsSet = _fullFrameworkFolders.Length > 0;
             bool fullFrameworkTableLocationsIsSet = FullFrameworkAssemblyTables.Length > 0;
             bool profileIsSet = profileNameIsSet && (fullFrameworkFoldersIsSet || fullFrameworkTableLocationsIsSet);
 
