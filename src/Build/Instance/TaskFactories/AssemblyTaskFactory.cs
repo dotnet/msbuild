@@ -459,7 +459,7 @@ namespace Microsoft.Build.BackEnd
                 runtime: runtime,
                 architecture: architecture,
                 dotnetHostPath: taskHostParameters.DotnetHostPath,
-                msBuildAssemblyPath: taskHostParameters.MSBuildExecutablePath,
+                msBuildAssemblyPath: taskHostParameters.MSBuildAssemblyPath,
                 taskHostFactoryExplicitlyRequested: taskHostParameters.TaskHostFactoryExplicitlyRequested);
         }
 

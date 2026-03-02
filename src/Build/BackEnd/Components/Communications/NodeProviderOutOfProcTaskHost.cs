@@ -483,11 +483,11 @@ namespace Microsoft.Build.BackEnd
 
         private static string GetMSBuildPath(in TaskHostParameters taskHostParameters)
         {
-            if (taskHostParameters.MSBuildExecutablePath != null)
+            if (taskHostParameters.MSBuildAssemblyPath != null)
             {
-                ValidateNetHostSdkVersion(taskHostParameters.MSBuildExecutablePath);
+                ValidateNetHostSdkVersion(taskHostParameters.MSBuildAssemblyPath);
 
-                return taskHostParameters.MSBuildExecutablePath;
+                return taskHostParameters.MSBuildAssemblyPath;
             }
 
 #if NET
