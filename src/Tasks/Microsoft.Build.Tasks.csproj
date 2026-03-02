@@ -127,9 +127,6 @@
     <Compile Include="..\Shared\StringUtils.cs">
       <Link>StringUtils.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\EscapingUtilities.cs">
-      <Link>EscapingUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\FileMatcher.cs" />
     <Compile Include="..\Shared\Modifiers.cs">
       <Link>Modifiers.cs</Link>
@@ -666,7 +663,6 @@
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
-    <ProjectReference Include="..\StringTools\StringTools.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
@@ -709,7 +705,6 @@
 
   <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <ProjectReference Update="..\StringTools\StringTools.csproj" PrivateAssets="all" />
     <PackageReference Update="System.CodeDom" PrivateAssets="all" />
     <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
     <PackageReference Update="System.Resources.Extensions" PrivateAssets="all" />

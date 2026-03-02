@@ -73,6 +73,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\StringTools\StringTools.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <RCResourceFile Include="native.rc" />
   </ItemGroup>
 
@@ -81,6 +85,6 @@
       <GenerateSource>true</GenerateSource>
     </EmbeddedResource>
 
-    <Using Include="$(RootNamespace).Resources"/>
+    <Using Include="$(RootNamespace).Resources" />
   </ItemGroup>
 </Project>

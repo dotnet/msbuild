@@ -29,7 +29,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectReference Include="..\StringTools\StringTools.csproj" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
 
@@ -655,9 +654,6 @@
     </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Errors\ErrorUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\EscapingUtilities.cs">
-      <Link>SharedUtilities\EscapingUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\VersionUtilities.cs">
       <Link>SharedUtilities\VersionUtilities.cs</Link>

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
@@ -19,7 +19,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
-    <ProjectReference Include="..\StringTools\StringTools.csproj" />
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
   </ItemGroup>
 
@@ -28,7 +27,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\EscapingUtilities.cs" />
     <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
   </ItemGroup>

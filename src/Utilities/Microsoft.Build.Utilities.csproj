@@ -19,7 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectReference Include="..\StringTools\StringTools.csproj" />
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Collections.Immutable" Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'" />
@@ -32,7 +31,6 @@
 
   <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <ProjectReference Update="..\StringTools\StringTools.csproj" PrivateAssets="all" />
     <PackageReference Update="Microsoft.IO.Redist" PrivateAssets="all" />
     <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
     <PackageReference Update="System.Configuration.ConfigurationManager" PrivateAssets="all" />
@@ -70,9 +68,6 @@
     </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Shared\ErrorUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\EscapingUtilities.cs">
-      <Link>Shared\EscapingUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\EventArgsFormatting.cs">
       <Link>Shared\EventArgsFormatting.cs</Link>
