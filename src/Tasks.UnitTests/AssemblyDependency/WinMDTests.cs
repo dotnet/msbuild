@@ -149,6 +149,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.AssemblyFiles = assemblyFiles;
             t.TargetProcessorArchitecture = "X86";
             t.SearchPaths = new String[] { @"C:\WinMD", @"C:\WinMD\v4\", @"C:\WinMD\v255\" };
@@ -208,6 +209,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.AssemblyFiles = assemblyFiles;
             t.TargetProcessorArchitecture = "X86";
             t.SearchPaths = new String[] { @"C:\WinMD", @"C:\WinMD\v4\", @"C:\WinMD\v255\" };
@@ -253,6 +255,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.AssemblyFiles = assemblyFiles;
             t.SearchPaths = new String[] { @"C:\WinMD", @"C:\WinMD\v4\", @"C:\WinMD\v255\" };
             bool succeeded = Execute(t);
@@ -290,6 +293,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.AssemblyFiles = assemblyFiles;
             bool succeeded = Execute(t);
 
@@ -321,6 +325,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblyFiles;
             t.TargetProcessorArchitecture = "X86";
             t.SearchPaths = new String[] { @"C:\WinMD", @"C:\WinMD\v4\", @"C:\WinMD\v255\" };
@@ -352,6 +357,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblyFiles;
             t.SearchPaths = new String[] { @"C:\WinMD", @"C:\WinMD\v4\", @"C:\WinMD\v255\" };
             bool succeeded = Execute(t);
@@ -383,6 +389,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblyFiles;
             t.TargetProcessorArchitecture = "X86";
             t.SearchPaths = new String[] { @"C:\WinMD", @"C:\WinMD\v4\", @"C:\WinMD\v255\" };
@@ -424,6 +431,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblyFiles;
             t.SearchPaths = new String[] { "{RAWFILENAME}" };
             bool succeeded = Execute(t);
@@ -456,6 +464,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblyFiles;
             t.SearchPaths = new String[] { @"{RAWFILENAME}" };
             bool succeeded = Execute(t);
@@ -487,6 +496,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblyFiles;
             t.SearchPaths = new String[] { @"{TargetFrameworkDirectory}", @"C:\WinMD", @"C:\WinMD\v4\", @"C:\WinMD\v255\" };
             t.TargetFrameworkDirectories = new string[] { @"c:\WINNT\Microsoft.NET\Framework\v4.0.MyVersion" };
@@ -529,6 +539,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
             t.TargetProcessorArchitecture = "X86";
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblyFiles;
             t.SearchPaths = new String[] { @"C:\WinMD", @"C:\WinMD\v4\", @"C:\WinMD\v255\" };
             bool succeeded = Execute(t);
@@ -565,6 +576,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblyFiles;
             t.SearchPaths = new String[] { @"C:\WinMDArchVerification" };
             bool succeeded = Execute(t);
@@ -597,6 +609,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblyFiles;
             t.SearchPaths = new String[] { @"C:\WinMDArchVerification" };
             t.TargetProcessorArchitecture = "X86";
@@ -631,6 +644,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblyFiles;
             t.SearchPaths = new String[] { @"C:\WinMDArchVerification" };
             t.TargetProcessorArchitecture = "X86";
@@ -692,6 +706,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblyFiles;
             t.SearchPaths = new String[] { @"C:\WinMDArchVerification" };
             t.TargetProcessorArchitecture = targetProcessorArchitecture;
@@ -766,6 +781,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblyFiles;
             t.SearchPaths = new String[] { @"C:\WinMD", @"C:\WinMD\v4\", @"C:\WinMD\v255\" };
             bool succeeded = Execute(t);

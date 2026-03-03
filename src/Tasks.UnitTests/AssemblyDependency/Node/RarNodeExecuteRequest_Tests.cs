@@ -21,6 +21,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference clientRar = new()
             {
                 BuildEngine = new MockEngine(),
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 Assemblies = [new TaskItem("System"), new TaskItem("System.IO")],
                 AssemblyFiles = [],
                 AllowedAssemblyExtensions = [".dll", ".exe"],
@@ -65,6 +66,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference clientRar = new()
             {
                 BuildEngine = new MockEngine(),
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 AppConfigFile = AppConfigFileName,
                 StateFile = StateFileName,
             };
@@ -112,6 +114,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference clientRar = new()
             {
                 BuildEngine = mockEngine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 AllowOutOfProcNode = true,
             };
             RarNodeExecuteRequest request = new(clientRar);

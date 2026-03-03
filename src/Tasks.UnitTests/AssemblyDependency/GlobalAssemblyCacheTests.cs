@@ -272,6 +272,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = new MockEngine(_output);
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
@@ -341,6 +342,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = new MockEngine(_output);
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
@@ -408,6 +410,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = new MockEngine(_output);
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
@@ -474,6 +477,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = new MockEngine(_output);
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
@@ -538,6 +542,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = new MockEngine(_output);
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
@@ -602,6 +607,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = new MockEngine(_output);
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
@@ -667,6 +673,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = new MockEngine(_output);
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
@@ -732,6 +739,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = new MockEngine(_output);
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
@@ -800,6 +808,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = new MockEngine(_output);
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Assemblies = new ITaskItem[]
             {
