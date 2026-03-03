@@ -253,10 +253,17 @@ namespace SqliteLogger
             _updateEvaluation.ExecuteNonQuery();
             CheckpointTransaction();
 
-            // Properties
+            // Properties — snapshot to a list first because the in-process
+            // PropertyDictionary is a live collection that can be modified concurrently.
             if (_includeEvalProperties && e.Properties is IEnumerable properties)
             {
+                var propList = new List<object>();
                 foreach (object item in properties)
+                {
+                    propList.Add(item);
+                }
+
+                foreach (object item in propList)
                 {
                     if (TryGetPropertyNameValue(item, out string? propName, out string? propValue))
                     {
@@ -270,10 +277,17 @@ namespace SqliteLogger
                 }
             }
 
-            // Items
+            // Items — snapshot to a list first because the in-process
+            // ItemDictionary is a live collection that can be modified concurrently.
             if (_includeEvalItems && e.Items is IEnumerable items)
             {
-                EnumerateEvalItems(items, rowId);
+                var itemList = new List<object>();
+                foreach (object item in items)
+                {
+                    itemList.Add(item);
+                }
+
+                EnumerateEvalItems(itemList, rowId);
             }
         }
 
