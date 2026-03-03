@@ -60,11 +60,6 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         private readonly TaskLoggingHelper _taskLogger;
 
         /// <summary>
-        /// TaskEnvironment for thread-safe access to environment variables.
-        /// </summary>
-        private readonly TaskEnvironment _taskEnvironment;
-
-        /// <summary>
         /// Path to the assembly folder config file.
         /// </summary>
         private string _assemblyFolderConfigFile;
@@ -83,11 +78,10 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
             IBuildEngine buildEngine, TaskLoggingHelper log, TaskEnvironment taskEnvironment)
             : base(
                 searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion,
-                targetProcessorArchitecture, compareProcessorArchitecture)
+                targetProcessorArchitecture, compareProcessorArchitecture, taskEnvironment)
         {
             _buildEngine = buildEngine as IBuildEngine4;
             _taskLogger = log;
-            _taskEnvironment = taskEnvironment;
         }
 
         /// <summary>
@@ -121,7 +115,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
 
                     _wasMatch = true;
 
-                    bool useCache = _taskEnvironment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") == null;
+                    bool useCache = taskEnvironment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") == null;
                     string key = "6f7de854-47fe-4ae2-9cfe-9b33682abd91" + searchPathElement;
 
                     if (useCache && _buildEngine != null)
@@ -139,7 +133,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                         try
                         {
                             AssemblyFoldersFromConfig assemblyFolders = new AssemblyFoldersFromConfig(_assemblyFolderConfigFile, _targetRuntimeVersion, targetProcessorArchitecture);
-                            _assemblyFoldersCache = new AssemblyFoldersFromConfigCache(assemblyFolders, fileExists, _taskEnvironment);
+                            _assemblyFoldersCache = new AssemblyFoldersFromConfigCache(assemblyFolders, fileExists, taskEnvironment);
                             if (useCache)
                             {
                                 _buildEngine?.RegisterTaskObject(key, _assemblyFoldersCache, RegisteredTaskObjectLifetime.Build, true /* dispose early ok*/);

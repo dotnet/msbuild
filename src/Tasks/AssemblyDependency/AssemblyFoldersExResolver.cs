@@ -105,7 +105,7 @@ namespace Microsoft.Build.Tasks
         /// Construct.
         /// </summary>
         public AssemblyFoldersExResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetRegistrySubKeyNames getRegistrySubKeyNames, GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue, GetAssemblyRuntimeVersion getRuntimeVersion, OpenBaseKey openBaseKey, Version targetedRuntimeVesion, ProcessorArchitecture targetProcessorArchitecture, bool compareProcessorArchitecture, IBuildEngine buildEngine, TaskEnvironment taskEnvironment)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, targetProcessorArchitecture, compareProcessorArchitecture)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, targetProcessorArchitecture, compareProcessorArchitecture, taskEnvironment)
         {
             _buildEngine = buildEngine as IBuildEngine4;
             _getRegistrySubKeyNames = getRegistrySubKeyNames;
@@ -218,6 +218,7 @@ namespace Microsoft.Build.Tasks
                     {
                         foreach (AssemblyFoldersExInfo assemblyFolder in _assemblyFoldersCache.AssemblyFoldersEx)
                         {
+                            // assemblyFolder.DirectoryPath is assumed to be absolute path as it was taken from registry.
                             string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, assemblyFolder.DirectoryPath, assembliesConsideredAndRejected);
 
                             // We have a full path returned
