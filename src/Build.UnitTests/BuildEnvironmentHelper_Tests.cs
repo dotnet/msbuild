@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -14,23 +15,21 @@ namespace Microsoft.Build.Engine.UnitTests
 {
     public class BuildEnvironmentHelper_Tests
     {
-#if USE_MSBUILD_DLL_EXTN
-        private const string MSBuildExeName = "MSBuild.dll";
-#else
-        private const string MSBuildExeName = "MSBuild.exe";
-#endif
-
         [Fact]
         public void GetExecutablePath()
         {
             var msbuildPath = Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath);
-            string expectedMSBuildPath = Path.Combine(msbuildPath, MSBuildExeName).ToLowerInvariant();
+            string expectedMSBuildPath = Path.Combine(msbuildPath, Constants.MSBuildExecutableName).ToLowerInvariant();
 
             string configFilePath = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile.ToLowerInvariant();
             string toolsDirectoryPath = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory.ToLowerInvariant();
             string actualMSBuildPath = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath.ToLowerInvariant();
-
+#if NETFRAMEWORK
             configFilePath.ShouldBe($"{actualMSBuildPath}.config");
+#else
+            // Even after app host introduction we still use MSBuild.dll.config as a source of tool paths.
+            configFilePath.ShouldBe($"{Path.GetDirectoryName(actualMSBuildPath)}{Path.DirectorySeparatorChar}{Constants.MSBuildAssemblyName.ToLowerInvariant()}.config");
+#endif
             actualMSBuildPath.ShouldBe(expectedMSBuildPath);
             Path.GetDirectoryName(expectedMSBuildPath).ShouldBe(toolsDirectoryPath);
             BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.Standalone);
@@ -39,11 +38,16 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void FindBuildEnvironmentByEnvironmentVariable()
         {
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName))
+            using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName))
             {
                 var path = env.BuildDirectory;
-                var msBuildPath = Path.Combine(path, MSBuildExeName);
-                var msBuildConfig = Path.Combine(path, $"{MSBuildExeName}.config");
+                var msBuildPath = Path.Combine(path, Constants.MSBuildExecutableName);
+                var msBuildConfig = Path.Combine(path,
+#if NET
+                                        "MSBuild.dll.config");
+#else
+                                        "MSBuild.exe.config");
+#endif
 
                 env.WithEnvironment("MSBUILD_EXE_PATH", env.MSBuildExePath);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -69,8 +73,8 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 var msbuildBinDirectory = env.BuildDirectory;
 
-                var msBuildPath = Path.Combine(msbuildBinDirectory, MSBuildExeName);
-                var msBuildConfig = Path.Combine(msbuildBinDirectory, $"{MSBuildExeName}.config");
+                var msBuildPath = Path.Combine(msbuildBinDirectory, Constants.MSBuildExecutableName);
+                var msBuildConfig = Path.Combine(msbuildBinDirectory, $"{Constants.MSBuildExecutableName}.config");
                 var vsMSBuildDirectory = Path.Combine(env.TempFolderRoot, "MSBuild");
 
                 env.WithEnvironment("MSBUILD_EXE_PATH", msBuildPath);
@@ -108,7 +112,7 @@ namespace Microsoft.Build.Engine.UnitTests
         public void FindBuildEnvironmentFromCommandLineStandalone()
         {
             // Path will not be under a Visual Studio install like path.
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName))
+            using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName))
             {
                 // All we know about is path to msbuild.exe as the command-line arg[0]
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath, ReturnNull, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -141,7 +145,7 @@ namespace Microsoft.Build.Engine.UnitTests
         public void FindBuildEnvironmentFromRunningProcessStandalone()
         {
             // Path will not be under a Visual Studio install like path.
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName))
+            using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName))
             {
                 // All we know about is path to msbuild.exe as the current process
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, () => env.MSBuildExePath, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -157,8 +161,8 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void FindBuildEnvironmentFromExecutingAssemblyAsDll()
         {
-            // Ensure the correct file is found (.dll not .exe)
-            using (var env = new EmptyStandaloneEnviroment("MSBuild.dll"))
+            // Ensure the correct file is found
+            using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName))
             {
                 // All we know about is path to msbuild.exe as the current process
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, () => env.MSBuildExePath, ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -174,13 +178,13 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void FindBuildEnvironmentFromAppContextDirectory()
         {
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName))
+            using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName))
             {
                 // Only the app base directory will be available
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(ReturnNull, ReturnNull, () => env.BuildDirectory, env.VsInstanceMock, env.EnvironmentMock, () => false);
 
-                // Make sure we get the right MSBuild entry point. On .NET Core this will be MSBuild.dll, otherwise MSBuild.exe
-                Path.GetFileName(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath).ShouldBe(MSBuildExeName);
+                // Make sure we get the right MSBuild entry point.
+                Path.GetFileName(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath).ShouldBe(Constants.MSBuildExecutableName);
 
                 BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32.ShouldBe(env.BuildDirectory);
                 BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64.ShouldBe(env.BuildDirectory);
@@ -354,9 +358,9 @@ namespace Microsoft.Build.Engine.UnitTests
         [WindowsOnlyFact]
         public void BuildEnvironmentFindsAmd64RunningInAmd64NoVS()
         {
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName, writeFakeFiles: true, includeAmd64Folder: true))
+            using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName, writeFakeFiles: true, includeAmd64Folder: true))
             {
-                var msBuild64Exe = Path.Combine(env.BuildDirectory, "amd64", MSBuildExeName);
+                var msBuild64Exe = Path.Combine(env.BuildDirectory, "amd64", Constants.MSBuildExecutableName);
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => msBuild64Exe, ReturnNull, ReturnNull,
                     env.VsInstanceMock, env.EnvironmentMock, () => false);
 
@@ -371,7 +375,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/7552", TargetFrameworkMonikers.Any)]
         public void BuildEnvironmentFindsAmd64NoVS()
         {
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName, writeFakeFiles: true, includeAmd64Folder: true))
+            using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName, writeFakeFiles: true, includeAmd64Folder: true))
             {
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => env.MSBuildExePath, ReturnNull,
                     ReturnNull, env.VsInstanceMock, env.EnvironmentMock, () => false);
@@ -400,7 +404,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void BuildEnvironmentNoneWhenNotAvailable()
         {
-            using (var env = new EmptyStandaloneEnviroment(MSBuildExeName))
+            using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName))
             {
                 var entryProcess = Path.Combine(Path.GetTempPath(), "foo.exe");
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(() => entryProcess, ReturnNull, ReturnNull,
@@ -460,9 +464,10 @@ namespace Microsoft.Build.Engine.UnitTests
 
             public string BuildDirectory64 { get; }
 
-            public string MSBuildExePath64 => Path.Combine(BuildDirectory64, MSBuildExeName);
+            public string MSBuildExePath64 => Path.Combine(BuildDirectory64, Constants.MSBuildExecutableName);
 
-            public EmptyVSEnviroment(string toolsVersion = MSBuildConstants.CurrentToolsVersion) : base("MSBuild.exe", false)
+            public EmptyVSEnviroment(string toolsVersion = MSBuildConstants.CurrentToolsVersion)
+                : base(Constants.MSBuildExecutableName, false)
             {
                 try
                 {
@@ -501,9 +506,9 @@ namespace Microsoft.Build.Engine.UnitTests
 
             public string BuildDirectory { get; protected set; }
 
-            public string MSBuildExeName { get; }
+            public string MSBuildExecutableName { get; }
 
-            public string MSBuildExePath => Path.Combine(BuildDirectory, MSBuildExeName);
+            public string MSBuildExePath => Path.Combine(BuildDirectory, Constants.MSBuildExecutableName);
 
             private readonly Dictionary<string, string> _mockEnvironment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -513,7 +518,7 @@ namespace Microsoft.Build.Engine.UnitTests
             {
                 try
                 {
-                    MSBuildExeName = msBuildExeName;
+                    MSBuildExecutableName = msBuildExeName;
                     TempFolderRoot = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
                     BuildDirectory = Path.Combine(TempFolderRoot, "MSBuild");
 

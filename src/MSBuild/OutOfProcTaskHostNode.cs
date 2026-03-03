@@ -209,15 +209,13 @@ namespace Microsoft.Build.CommandLine
         /// Minimum packet version required for IBuildEngine callback support.
         /// When all callback stages are complete, PacketVersion will be bumped to this value.
         /// </summary>
-        private const byte CallbacksMinPacketVersion = 3;
+        private const byte CallbacksMinPacketVersion = 4;
 
         /// <summary>
         /// Whether the owning worker node supports IBuildEngine callbacks.
         /// True if the worker node's packet version is high enough, or if the feature is force-enabled via env var.
         /// </summary>
-        private bool CallbacksSupported =>
-            _parentPacketVersion >= CallbacksMinPacketVersion
-            || Traits.Instance.EnableTaskHostCallbacks;
+        private bool CallbacksSupported => _parentPacketVersion >= CallbacksMinPacketVersion || Traits.Instance.EnableTaskHostCallbacks;
 #endif
 
         /// <summary>
@@ -248,6 +246,7 @@ namespace Microsoft.Build.CommandLine
 
 #if !CLR2COMPATIBILITY
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesResponse, TaskHostIsRunningMultipleNodesResponse.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostCoresResponse, TaskHostCoresResponse.FactoryForDeserialization, this);
 #endif
 
 #if !CLR2COMPATIBILITY
@@ -565,14 +564,41 @@ namespace Microsoft.Build.CommandLine
 
         public int RequestCores(int requestedCores)
         {
-            // No resource management in OOP nodes
-            throw new NotImplementedException();
+#if CLR2COMPATIBILITY
+            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
+            return 0;
+#else
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(requestedCores > 0, nameof(requestedCores));
+
+            if (!CallbacksSupported)
+            {
+                LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
+                return 0;
+            }
+
+            var request = new TaskHostCoresRequest(requestedCores, isRelease: false);
+            var response = SendCallbackRequestAndWaitForResponse<TaskHostCoresResponse>(request);
+            return response.GrantedCores;
+#endif
         }
 
         public void ReleaseCores(int coresToRelease)
         {
-            // No resource management in OOP nodes
-            throw new NotImplementedException();
+#if CLR2COMPATIBILITY
+            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
+            return;
+#else
+            ErrorUtilities.VerifyThrowArgumentOutOfRange(coresToRelease > 0, nameof(coresToRelease));
+
+            if (!CallbacksSupported)
+            {
+                LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
+                return;
+            }
+
+            var request = new TaskHostCoresRequest(coresToRelease, isRelease: true);
+            SendCallbackRequestAndWaitForResponse<TaskHostCoresResponse>(request);
+#endif
         }
 
         #endregion
@@ -787,8 +813,9 @@ namespace Microsoft.Build.CommandLine
                     break;
 
 #if !CLR2COMPATIBILITY
-                // Callback response packet - route to pending request
+                // Callback response packets - route to pending request
                 case NodePacketType.TaskHostIsRunningMultipleNodesResponse:
+                case NodePacketType.TaskHostCoresResponse:
                     HandleCallbackResponse(packet);
                     break;
 #endif
@@ -1099,6 +1126,9 @@ namespace Microsoft.Build.CommandLine
 
                 // Now set the new environment
                 SetTaskHostEnvironment(taskConfiguration.BuildProcessEnvironment);
+#if !CLR2COMPATIBILITY
+                DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(taskConfiguration.BuildProcessEnvironment);
+#endif
 
                 // Set culture
                 Thread.CurrentThread.CurrentCulture = taskConfiguration.Culture;

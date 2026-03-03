@@ -423,6 +423,33 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Writes hang diagnostic information to a file so it persists on disk
+        /// for later retrieval from customer machines.
+        /// File is written to the same directory as crash dump files (<see cref="DebugDumpPath"/>).
+        /// </summary>
+        internal static void DumpHangDiagnosticsToFile(string diagnostics)
+        {
+            try
+            {
+                Directory.CreateDirectory(DebugDumpPath);
+
+                var pid = EnvironmentUtilities.CurrentProcessId;
+                string fileName = Path.Combine(DebugDumpPath, $"MSBuild_pid-{pid}.hang.txt");
+
+                using (StreamWriter writer = FileUtilities.OpenWrite(fileName, append: true))
+                {
+                    writer.WriteLine(DateTime.Now.ToString("G", CultureInfo.CurrentCulture));
+                    writer.WriteLine(diagnostics);
+                    writer.WriteLine("===================");
+                }
+            }
+            catch
+            {
+                // Best-effort: diagnostic file writing must never make things worse.
+            }
+        }
+
+        /// <summary>
         /// Returns the content of any exception dump files modified
         /// since the provided time, otherwise returns an empty string.
         /// </summary>

@@ -1038,9 +1038,22 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                _noActiveSubmissionsEvent!.WaitOne();
+                {
+                    Stopwatch hangWatch = Stopwatch.StartNew();
+                    while (!_noActiveSubmissionsEvent!.WaitOne(CrashTelemetryRecorder.EndBuildHangDiagnosticsIntervalMs))
+                    {
+                        EmitEndBuildHangDiagnostics("WaitingForSubmissions", hangWatch);
+                    }
+                }
+
                 ShutdownConnectedNodes(false /* normal termination */);
-                _noNodesActiveEvent!.WaitOne();
+                {
+                    Stopwatch hangWatch = Stopwatch.StartNew();
+                    while (!_noNodesActiveEvent!.WaitOne(CrashTelemetryRecorder.EndBuildHangDiagnosticsIntervalMs))
+                    {
+                        EmitEndBuildHangDiagnostics("WaitingForNodes", hangWatch);
+                    }
+                }
 
                 // Wait for all of the actions in the work queue to drain.
                 // _workQueue.Completion.Wait() could throw here if there was an unhandled exception in the work queue,
@@ -1225,6 +1238,53 @@ namespace Microsoft.Build.Execution
                 isUnhandled ? CrashExitType.UnhandledException : CrashExitType.EndBuildFailure,
                 isUnhandled,
                 ExceptionHandling.IsCriticalException(exception),
+                ProjectCollection.Version?.ToString(),
+                NativeMethodsShared.FrameworkName,
+                host);
+        }
+
+        /// <summary>
+        /// Extracts build state under lock and delegates to <see cref="CrashTelemetryRecorder"/>
+        /// for EndBuild hang diagnostic telemetry emission. Also writes diagnostics to disk
+        /// via <see cref="ExceptionHandling.DumpHangDiagnosticsToFile"/>.
+        /// </summary>
+        private void EmitEndBuildHangDiagnostics(string waitPhase, Stopwatch hangWatch)
+        {
+            int pendingSubmissionCount;
+            int submissionsWithResultNoLogging = 0;
+            bool threadExceptionRecorded;
+            int unmatchedProjectStartedCount;
+            string? host;
+
+            lock (_syncLock)
+            {
+                foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
+                {
+                    if (submission.BuildResultBase is not null && !submission.LoggingCompleted)
+                    {
+                        submissionsWithResultNoLogging++;
+                    }
+                }
+
+                pendingSubmissionCount = _buildSubmissions.Count;
+                threadExceptionRecorded = _threadException is not null;
+                unmatchedProjectStartedCount = _projectStartedEvents.Count;
+                host = _buildTelemetry?.BuildEngineHost ?? BuildEnvironmentState.GetHostName();
+            }
+
+            string diagnostics = $"Phase={waitPhase}, Duration={hangWatch.ElapsedMilliseconds}ms, " +
+                $"PendingSubmissions={pendingSubmissionCount}, WithResultNoLogging={submissionsWithResultNoLogging}, " +
+                $"ThreadException={threadExceptionRecorded}, UnmatchedProjectStarted={unmatchedProjectStartedCount}";
+
+            ExceptionHandling.DumpHangDiagnosticsToFile(diagnostics);
+
+            CrashTelemetryRecorder.CollectAndEmitEndBuildHangDiagnostics(
+                waitPhase,
+                hangWatch.ElapsedMilliseconds,
+                pendingSubmissionCount,
+                submissionsWithResultNoLogging,
+                threadExceptionRecorded,
+                unmatchedProjectStartedCount,
                 ProjectCollection.Version?.ToString(),
                 NativeMethodsShared.FrameworkName,
                 host);

@@ -1,0 +1,9 @@
+{
+  // This global.json exists to prevent walking up the repo tree and
+  // inheriting the repo-root SDK settings when running the E2E test
+  // from the bootstrap layout. Use the latest installed SDK instead.
+  "sdk": {
+    "allowPrerelease": true,
+    "rollForward": "latestMajor"
+  }
+}
