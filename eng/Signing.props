@@ -4,11 +4,12 @@
          and thus this file is not populated to VisualStudioSetupInsertionPath -->
     <ItemsToSign Include="$(VisualStudioSetupInsertionPath)Microsoft.Build.UnGAC.exe" Condition="'$(MSBuildRuntimeType)' != 'Core'" />
 
+    <!-- Do not include xsd to non-windows environments. -->
+    <ItemsToSign Remove="$(ArtifactsDir)\xsd\Update-MSBuildXsds.ps1" Condition="'$(MSBuildRuntimeType)' == 'Core'" />
+
     <!-- Do not include if it is test signing due to arcade issue with validation. -->
     <ItemsToSign Remove="$(VisualStudioSetupInsertionPath)Microsoft.Build.Arm64.vsix" Condition="'$(SignType)' == 'test'"/>
     <ItemsToSign Remove="$(VisualStudioSetupInsertionPath)Microsoft.Build.vsix" Condition="'$(SignType)' == 'test'"/>
-
-    <ItemsToSign Include="$(ArtifactsDir)\xsd\Update-MSBuildXsds.ps1" />
 
     <FileSignInfo Include="RuntimeContracts.dll" CertificateName="3PartySHA2" />
 
