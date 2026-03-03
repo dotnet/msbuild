@@ -120,17 +120,36 @@ CREATE INDEX IF NOT EXISTS idx_task_name     ON Tasks(Name);
 CREATE INDEX IF NOT EXISTS idx_task_duration ON Tasks(DurationMs DESC);
 CREATE INDEX IF NOT EXISTS idx_task_build    ON Tasks(BuildId);
 
+CREATE TABLE IF NOT EXISTS Strings (
+    StringId  INTEGER PRIMARY KEY,
+    Value     TEXT NOT NULL UNIQUE
+);
+
 CREATE TABLE IF NOT EXISTS TaskParameters (
     Id              INTEGER PRIMARY KEY,
     BuildId         INTEGER NOT NULL REFERENCES Build(BuildId),
     TaskId          INTEGER NOT NULL REFERENCES Tasks(TaskId),
     Kind            TEXT NOT NULL,
     ParameterName   TEXT,
-    ItemType        TEXT,
-    Items           TEXT
+    PropertyName    TEXT,
+    ItemType        TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_tp_task  ON TaskParameters(TaskId);
 CREATE INDEX IF NOT EXISTS idx_tp_build ON TaskParameters(BuildId);
+
+CREATE TABLE IF NOT EXISTS TaskParameterItems (
+    Id              INTEGER PRIMARY KEY,
+    ParameterId     INTEGER NOT NULL REFERENCES TaskParameters(Id),
+    ItemSpecId      INTEGER NOT NULL REFERENCES Strings(StringId)
+);
+CREATE INDEX IF NOT EXISTS idx_tpi_param ON TaskParameterItems(ParameterId);
+
+CREATE TABLE IF NOT EXISTS TaskParameterMetadata (
+    ItemId    INTEGER NOT NULL REFERENCES TaskParameterItems(Id),
+    KeyId     INTEGER NOT NULL REFERENCES Strings(StringId),
+    ValueId   INTEGER NOT NULL REFERENCES Strings(StringId),
+    PRIMARY KEY (ItemId, KeyId)
+) WITHOUT ROWID;
 
 CREATE TABLE IF NOT EXISTS Files (
     Id        INTEGER PRIMARY KEY,
@@ -214,6 +233,113 @@ ORDER BY BuildId, NodeId, StartTimeMs;
 CREATE VIEW IF NOT EXISTS FilesWithContent AS
 SELECT Id, FilePath, LENGTH(Content) AS ContentLength
 FROM Files WHERE Content IS NOT NULL;
+
+-- Denormalized view: one row per task parameter item with strings resolved
+CREATE VIEW IF NOT EXISTS TaskParameterItemsView AS
+SELECT tp.Id AS ParameterId, tp.BuildId, tp.TaskId, tp.Kind, tp.ParameterName,
+       tp.ItemType, tpi.Id AS ItemId, s.Value AS ItemSpec
+FROM TaskParameters tp
+JOIN TaskParameterItems tpi ON tpi.ParameterId = tp.Id
+JOIN Strings s ON tpi.ItemSpecId = s.StringId;
+
+-- Denormalized view: one row per metadata entry with all strings resolved
+CREATE VIEW IF NOT EXISTS TaskParameterMetadataView AS
+SELECT tpm.ItemId, sk.Value AS MetadataName, sv.Value AS MetadataValue
+FROM TaskParameterMetadata tpm
+JOIN Strings sk ON tpm.KeyId = sk.StringId
+JOIN Strings sv ON tpm.ValueId = sv.StringId;
+
+-- Full denormalized view: items joined with metadata as semicolon-delimited pairs
+CREATE VIEW IF NOT EXISTS TaskParametersView AS
+SELECT tp.Id AS ParameterId, tp.BuildId, tp.TaskId, tp.Kind, tp.ParameterName,
+       tp.ItemType, si.Value AS ItemSpec,
+       (SELECT GROUP_CONCAT(sk.Value || '=' || sv.Value, '; ')
+        FROM TaskParameterMetadata tpm
+        JOIN Strings sk ON tpm.KeyId = sk.StringId
+        JOIN Strings sv ON tpm.ValueId = sv.StringId
+        WHERE tpm.ItemId = tpi.Id
+       ) AS Metadata
+FROM TaskParameters tp
+JOIN TaskParameterItems tpi ON tpi.ParameterId = tp.Id
+JOIN Strings si ON tpi.ItemSpecId = si.StringId;
+
+-- Timeline view: every item that exists or changes during a project's execution
+CREATE VIEW IF NOT EXISTS ProjectItemTimeline AS
+SELECT
+    p.ProjectId,
+    p.BuildId,
+    e.EndTimeMs AS TimestampMs,
+    'Evaluation' AS Source,
+    NULL AS TargetName,
+    NULL AS TaskName,
+    ei.ItemType,
+    ei.ItemSpec,
+    ei.Metadata
+FROM Projects p
+JOIN Evaluations e ON e.EvaluationId = p.EvaluationId
+JOIN EvaluationItems ei ON ei.EvaluationId = p.EvaluationId
+
+UNION ALL
+
+SELECT
+    tsk.ProjectId,
+    tp.BuildId,
+    tsk.StartTimeMs AS TimestampMs,
+    tp.Kind AS Source,
+    tgt.Name AS TargetName,
+    tsk.Name AS TaskName,
+    tp.ItemType,
+    si.Value AS ItemSpec,
+    (SELECT GROUP_CONCAT(sk.Value || '=' || sv.Value, '; ')
+     FROM TaskParameterMetadata tpm
+     JOIN Strings sk ON tpm.KeyId = sk.StringId
+     JOIN Strings sv ON tpm.ValueId = sv.StringId
+     WHERE tpm.ItemId = tpi.Id
+    ) AS Metadata
+FROM TaskParameters tp
+JOIN TaskParameterItems tpi ON tpi.ParameterId = tp.Id
+JOIN Strings si ON tpi.ItemSpecId = si.StringId
+JOIN Tasks tsk ON tp.TaskId = tsk.TaskId
+JOIN Targets tgt ON tsk.TargetId = tgt.TargetId
+WHERE tp.Kind IN ('AddItem', 'RemoveItem')
+   OR (tp.Kind = 'TaskOutput' AND tp.PropertyName IS NULL)
+
+ORDER BY TimestampMs, Source;
+
+-- Timeline view: every property value set during a project's lifecycle
+CREATE VIEW IF NOT EXISTS ProjectPropertyTimeline AS
+SELECT
+    p.ProjectId,
+    p.BuildId,
+    e.EndTimeMs AS TimestampMs,
+    'Evaluation' AS Source,
+    NULL AS TargetName,
+    NULL AS TaskName,
+    ep.Name AS PropertyName,
+    ep.Value AS PropertyValue
+FROM Projects p
+JOIN Evaluations e ON e.EvaluationId = p.EvaluationId
+JOIN EvaluationProperties ep ON ep.EvaluationId = p.EvaluationId
+
+UNION ALL
+
+SELECT
+    tsk.ProjectId,
+    tp.BuildId,
+    tsk.StartTimeMs AS TimestampMs,
+    tp.Kind AS Source,
+    tgt.Name AS TargetName,
+    tsk.Name AS TaskName,
+    tp.PropertyName,
+    si.Value AS PropertyValue
+FROM TaskParameters tp
+JOIN TaskParameterItems tpi ON tpi.ParameterId = tp.Id
+JOIN Strings si ON tpi.ItemSpecId = si.StringId
+JOIN Tasks tsk ON tp.TaskId = tsk.TaskId
+JOIN Targets tgt ON tsk.TargetId = tgt.TargetId
+WHERE tp.Kind = 'TaskOutput' AND tp.PropertyName IS NOT NULL
+
+ORDER BY TimestampMs;
 ";
     }
 }

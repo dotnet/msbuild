@@ -33,6 +33,9 @@ namespace SqliteLogger
         private readonly Dictionary<(int ctx, int taskId), long> _tasksByContext = new Dictionary<(int, int), long>();
         private readonly Dictionary<int, long> _evaluationsById = new Dictionary<int, long>();
 
+        // String interning cache: string value -> Strings.StringId
+        private readonly Dictionary<string, long> _stringCache = new Dictionary<string, long>();
+
         // File deduplication: tracks which file paths have already been stored
         private readonly HashSet<string> _seenFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
@@ -58,7 +61,11 @@ namespace SqliteLogger
         private readonly SqliteCommand _updateTarget;
         private readonly SqliteCommand _insertTask;
         private readonly SqliteCommand _updateTask;
+        private readonly SqliteCommand _insertString;
+        private readonly SqliteCommand _selectStringId;
         private readonly SqliteCommand _insertTaskParameter;
+        private readonly SqliteCommand _insertTaskParamItem;
+        private readonly SqliteCommand _insertTaskParamMeta;
         private readonly SqliteCommand _insertFile;
         private readonly SqliteCommand _insertDiagnostic;
         private readonly SqliteCommand _insertMessage;
@@ -129,9 +136,25 @@ namespace SqliteLogger
                 "UPDATE Tasks SET EndTimeMs=@end, Succeeded=@ok WHERE TaskId=@id",
                 "@end", "@ok", "@id");
 
+            _insertString = PrepareCommand(
+                "INSERT OR IGNORE INTO Strings (Value) VALUES (@val)",
+                "@val");
+
+            _selectStringId = PrepareCommand(
+                "SELECT StringId FROM Strings WHERE Value=@val",
+                "@val");
+
             _insertTaskParameter = PrepareCommand(
-                "INSERT INTO TaskParameters (BuildId, TaskId, Kind, ParameterName, ItemType, Items) VALUES (@bid, @tid, @kind, @pname, @itype, @items)",
-                "@bid", "@tid", "@kind", "@pname", "@itype", "@items");
+                "INSERT INTO TaskParameters (BuildId, TaskId, Kind, ParameterName, PropertyName, ItemType) VALUES (@bid, @tid, @kind, @pname, @propname, @itype); SELECT last_insert_rowid();",
+                "@bid", "@tid", "@kind", "@pname", "@propname", "@itype");
+
+            _insertTaskParamItem = PrepareCommand(
+                "INSERT INTO TaskParameterItems (ParameterId, ItemSpecId) VALUES (@pid, @specid); SELECT last_insert_rowid();",
+                "@pid", "@specid");
+
+            _insertTaskParamMeta = PrepareCommand(
+                "INSERT INTO TaskParameterMetadata (ItemId, KeyId, ValueId) VALUES (@iid, @kid, @vid)",
+                "@iid", "@kid", "@vid");
 
             _insertFile = PrepareCommand(
                 "INSERT OR IGNORE INTO Files (FilePath, Content) VALUES (@path, @content)",
@@ -235,12 +258,12 @@ namespace SqliteLogger
             {
                 foreach (object item in properties)
                 {
-                    if (item is DictionaryEntry entry)
+                    if (TryGetPropertyNameValue(item, out string? propName, out string? propValue))
                     {
                         SetParam(_insertEvalProperty, "@eid", rowId);
                         SetParam(_insertEvalProperty, "@bid", _buildId);
-                        SetParam(_insertEvalProperty, "@name", entry.Key?.ToString() ?? string.Empty);
-                        SetParam(_insertEvalProperty, "@val", DbValue(entry.Value?.ToString()));
+                        SetParam(_insertEvalProperty, "@name", propName ?? string.Empty);
+                        SetParam(_insertEvalProperty, "@val", DbValue(propValue));
                         _insertEvalProperty.ExecuteNonQuery();
                         CheckpointTransaction();
                     }
@@ -250,20 +273,7 @@ namespace SqliteLogger
             // Items
             if (_includeEvalItems && e.Items is IEnumerable items)
             {
-                foreach (object item in items)
-                {
-                    if (item is DictionaryEntry entry && entry.Value is ITaskItem taskItem)
-                    {
-                        string? metadata = GetTaskItemMetadataJson(taskItem);
-                        SetParam(_insertEvalItem, "@eid", rowId);
-                        SetParam(_insertEvalItem, "@bid", _buildId);
-                        SetParam(_insertEvalItem, "@type", entry.Key?.ToString() ?? string.Empty);
-                        SetParam(_insertEvalItem, "@spec", taskItem.ItemSpec);
-                        SetParam(_insertEvalItem, "@meta", DbValue(metadata));
-                        _insertEvalItem.ExecuteNonQuery();
-                        CheckpointTransaction();
-                    }
-                }
+                EnumerateEvalItems(items, rowId);
             }
         }
 
@@ -461,15 +471,64 @@ namespace SqliteLogger
                 return;
             }
 
-            string? itemsJson = SerializeTaskParameterItems(e.Items);
+            IList? items = e.Items;
+            if (items is null || items.Count == 0)
+            {
+                return;
+            }
 
+            // Insert header row
             SetParam(_insertTaskParameter, "@bid", _buildId);
             SetParam(_insertTaskParameter, "@tid", taskRowId);
             SetParam(_insertTaskParameter, "@kind", e.Kind.ToString());
             SetParam(_insertTaskParameter, "@pname", DbValue(e.ParameterName));
+            SetParam(_insertTaskParameter, "@propname", DbValue(e.PropertyName));
             SetParam(_insertTaskParameter, "@itype", DbValue(e.ItemType));
-            SetParam(_insertTaskParameter, "@items", DbValue(itemsJson));
-            _insertTaskParameter.ExecuteNonQuery();
+            long paramRowId = (long)_insertTaskParameter.ExecuteScalar()!;
+
+            // Insert each item
+            foreach (object? item in items)
+            {
+                if (item is null)
+                {
+                    continue;
+                }
+
+                if (item is ITaskItem taskItem)
+                {
+                    long itemSpecId = InternString(taskItem.ItemSpec);
+                    SetParam(_insertTaskParamItem, "@pid", paramRowId);
+                    SetParam(_insertTaskParamItem, "@specid", itemSpecId);
+                    long itemRowId = (long)_insertTaskParamItem.ExecuteScalar()!;
+
+                    ICollection metadataNames = taskItem.MetadataNames;
+                    if (metadataNames is { Count: > 0 })
+                    {
+                        foreach (string name in metadataNames)
+                        {
+                            if (BuiltinFileMetadata.Contains(name))
+                            {
+                                continue;
+                            }
+
+                            long keyId = InternString(name);
+                            long valueId = InternString(taskItem.GetMetadata(name));
+                            SetParam(_insertTaskParamMeta, "@iid", itemRowId);
+                            SetParam(_insertTaskParamMeta, "@kid", keyId);
+                            SetParam(_insertTaskParamMeta, "@vid", valueId);
+                            _insertTaskParamMeta.ExecuteNonQuery();
+                        }
+                    }
+                }
+                else
+                {
+                    long itemSpecId = InternString(item.ToString()!);
+                    SetParam(_insertTaskParamItem, "@pid", paramRowId);
+                    SetParam(_insertTaskParamItem, "@specid", itemSpecId);
+                    _insertTaskParamItem.ExecuteScalar();
+                }
+            }
+
             CheckpointTransaction();
         }
 
@@ -623,7 +682,11 @@ namespace SqliteLogger
             _updateTarget.Dispose();
             _insertTask.Dispose();
             _updateTask.Dispose();
+            _insertString.Dispose();
+            _selectStringId.Dispose();
             _insertTaskParameter.Dispose();
+            _insertTaskParamItem.Dispose();
+            _insertTaskParamMeta.Dispose();
             _insertFile.Dispose();
             _insertDiagnostic.Dispose();
             _insertMessage.Dispose();
@@ -649,6 +712,100 @@ namespace SqliteLogger
         private static void SetParam(SqliteCommand cmd, string name, object value)
         {
             cmd.Parameters[name].Value = value;
+        }
+
+        /// <summary>
+        /// Extracts a property name and value from an evaluation property object.
+        /// In-process, properties are ProjectPropertyInstance (Name, EvaluatedValue).
+        /// Post-serialization, properties are DictionaryEntry (Key=name, Value=value).
+        /// </summary>
+        private static bool TryGetPropertyNameValue(object item, out string? name, out string? value)
+        {
+            if (item is DictionaryEntry entry)
+            {
+                name = entry.Key?.ToString();
+                value = entry.Value?.ToString();
+                return true;
+            }
+
+            if (item is KeyValuePair<string, string> kvp)
+            {
+                name = kvp.Key;
+                value = kvp.Value;
+                return true;
+            }
+
+            // In-process: ProjectPropertyInstance has Name and EvaluatedValue
+            Type t = item.GetType();
+            var nameProp = t.GetProperty("Name");
+            var valueProp = t.GetProperty("EvaluatedValue");
+            if (nameProp is not null && valueProp is not null)
+            {
+                name = nameProp.GetValue(item) as string;
+                value = valueProp.GetValue(item) as string;
+                return true;
+            }
+
+            name = null;
+            value = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Enumerates evaluation items, handling both in-process types (ItemDictionary)
+        /// and post-serialization types (DictionaryEntry wrapping ITaskItem).
+        /// </summary>
+        private void EnumerateEvalItems(IEnumerable items, long evalRowId)
+        {
+            foreach (object item in items)
+            {
+                if (item is DictionaryEntry entry)
+                {
+                    // Post-serialization: Key=ItemType, Value=ITaskItem or List
+                    if (entry.Value is ITaskItem taskItem)
+                    {
+                        InsertEvalItem(evalRowId, entry.Key?.ToString() ?? string.Empty, taskItem);
+                    }
+                }
+                else if (item is ITaskItem directTaskItem)
+                {
+                    // Some enumeration paths yield ITaskItem directly
+                    InsertEvalItem(evalRowId, directTaskItem.GetMetadata("ItemType") ?? string.Empty, directTaskItem);
+                }
+                else
+                {
+                    // In-process: ItemDictionary enumerates as KeyValuePair<string, LinkedList<T>>
+                    // where T implements ITaskItem. Use reflection to crack it open.
+                    Type t = item.GetType();
+                    if (t.IsGenericType && t.GetGenericTypeDefinition() == typeof(KeyValuePair<,>))
+                    {
+                        string? itemType = t.GetProperty("Key")?.GetValue(item) as string;
+                        object? listValue = t.GetProperty("Value")?.GetValue(item);
+                        if (itemType is not null && listValue is IEnumerable innerItems)
+                        {
+                            foreach (object? innerItem in innerItems)
+                            {
+                                if (innerItem is ITaskItem ti)
+                                {
+                                    InsertEvalItem(evalRowId, itemType, ti);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        private void InsertEvalItem(long evalRowId, string itemType, ITaskItem taskItem)
+        {
+            string? metadata = GetTaskItemMetadataJson(taskItem);
+            SetParam(_insertEvalItem, "@eid", evalRowId);
+            SetParam(_insertEvalItem, "@bid", _buildId);
+            SetParam(_insertEvalItem, "@type", itemType);
+            SetParam(_insertEvalItem, "@spec", taskItem.ItemSpec);
+            SetParam(_insertEvalItem, "@meta", DbValue(metadata));
+            _insertEvalItem.ExecuteNonQuery();
+            CheckpointTransaction();
         }
 
         private static string? SerializeGlobalProperties(IDictionary<string, string>? properties)
@@ -717,90 +874,20 @@ namespace SqliteLogger
 #endif
         }
 
-        private static string? SerializeTaskParameterItems(IList? items)
+        private long InternString(string value)
         {
-            if (items is null || items.Count == 0)
+            if (_stringCache.TryGetValue(value, out long id))
             {
-                return null;
+                return id;
             }
 
-#if NET
-            var list = new List<Dictionary<string, object>>();
-            foreach (object? item in items)
-            {
-                if (item is ITaskItem ti)
-                {
-                    var dict = new Dictionary<string, object> { ["ItemSpec"] = ti.ItemSpec };
-                    ICollection metadataNames = ti.MetadataNames;
-                    if (metadataNames is { Count: > 0 })
-                    {
-                        var meta = new Dictionary<string, string>();
-                        foreach (string name in metadataNames)
-                        {
-                            if (!BuiltinFileMetadata.Contains(name))
-                            {
-                                meta[name] = ti.GetMetadata(name);
-                            }
-                        }
-                        if (meta.Count > 0)
-                        {
-                            dict["Metadata"] = meta;
-                        }
-                    }
-                    list.Add(dict);
-                }
-                else if (item is not null)
-                {
-                    list.Add(new Dictionary<string, object> { ["ItemSpec"] = item.ToString()! });
-                }
-            }
-            return JsonSerializer.Serialize(list);
-#else
-            var sb = new System.Text.StringBuilder("[");
-            bool first = true;
-            foreach (object item in items)
-            {
-                if (!first)
-                {
-                    sb.Append(',');
-                }
-                first = false;
-                if (item is ITaskItem ti)
-                {
-                    sb.Append("{\"ItemSpec\":\"").Append(EscapeJsonString(ti.ItemSpec)).Append('"');
-                    ICollection metadataNames = ti.MetadataNames;
-                    if (metadataNames is { Count: > 0 })
-                    {
-                        var metaSb = new System.Text.StringBuilder();
-                        bool mFirst = true;
-                        foreach (string name in metadataNames)
-                        {
-                            if (BuiltinFileMetadata.Contains(name))
-                            {
-                                continue;
-                            }
-                            if (!mFirst)
-                            {
-                                metaSb.Append(',');
-                            }
-                            mFirst = false;
-                            metaSb.Append('"').Append(EscapeJsonString(name)).Append("\":\"").Append(EscapeJsonString(ti.GetMetadata(name))).Append('"');
-                        }
-                        if (metaSb.Length > 0)
-                        {
-                            sb.Append(",\"Metadata\":{").Append(metaSb).Append('}');
-                        }
-                    }
-                    sb.Append('}');
-                }
-                else if (item is not null)
-                {
-                    sb.Append("{\"ItemSpec\":\"").Append(EscapeJsonString(item.ToString())).Append("\"}");
-                }
-            }
-            sb.Append(']');
-            return sb.ToString();
-#endif
+            SetParam(_insertString, "@val", value);
+            _insertString.ExecuteNonQuery();
+
+            SetParam(_selectStringId, "@val", value);
+            id = (long)_selectStringId.ExecuteScalar()!;
+            _stringCache[value] = id;
+            return id;
         }
 
         /// <summary>
