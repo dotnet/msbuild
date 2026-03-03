@@ -472,6 +472,42 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("c1)d1", foo2.GetMetadataValueEscaped("b"));
         }
 
+        /// <summary>
+        /// Verifies that RecursiveDir metadata survives TaskParameter serialization.
+        /// RecursiveDir is a built-in metadata that is non-derivable (cannot be computed
+        /// from just the item spec). When items cross the TaskHost process boundary
+        /// (e.g., in -mt mode), RecursiveDir must be explicitly preserved as custom metadata.
+        /// See https://github.com/dotnet/msbuild/issues/13140
+        /// </summary>
+        [Fact]
+        public void RecursiveDirSurvivesTaskParameterSerialization()
+        {
+            TaskItem baseItem = new TaskItem("folder" + System.IO.Path.DirectorySeparatorChar + "sub1" + System.IO.Path.DirectorySeparatorChar + "sub2" + System.IO.Path.DirectorySeparatorChar + "file.txt");
+            baseItem.SetMetadata("RecursiveDir", "sub1" + System.IO.Path.DirectorySeparatorChar + "sub2" + System.IO.Path.DirectorySeparatorChar);
+            baseItem.SetMetadata("CustomMeta", "value1");
+
+            TaskParameter t = new TaskParameter(baseItem);
+
+            Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
+
+            ITaskItem item = t.WrappedParameter as ITaskItem;
+            Assert.NotNull(item);
+            Assert.Equal("sub1" + System.IO.Path.DirectorySeparatorChar + "sub2" + System.IO.Path.DirectorySeparatorChar, item.GetMetadata("RecursiveDir"));
+            Assert.Equal("value1", item.GetMetadata("CustomMeta"));
+
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
+
+            ITaskItem deserializedItem = t2.WrappedParameter as ITaskItem;
+            Assert.NotNull(deserializedItem);
+
+            // RecursiveDir should survive serialization
+            Assert.Equal("sub1" + System.IO.Path.DirectorySeparatorChar + "sub2" + System.IO.Path.DirectorySeparatorChar, deserializedItem.GetMetadata("RecursiveDir"));
+            Assert.Equal("value1", deserializedItem.GetMetadata("CustomMeta"));
+        }
+
 #if FEATURE_APPDOMAIN
         private sealed class RemoteTaskItemFactory : MarshalByRefObject
         {
