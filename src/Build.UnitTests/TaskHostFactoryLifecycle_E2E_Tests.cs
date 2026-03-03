@@ -94,8 +94,8 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             string testProjectPath = Path.Combine(TestAssetsRootPath, "TaskHostLifecycleTestApp.csproj");
 
-            string output = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{testProjectPath} -v:n -restore /p:RuntimeToUse={runtimeToUse} /p:TaskFactoryToUse={taskFactoryToUse} /p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}",
+            string output = EndToEndTestUtilities.ExecBootstrapedMSBuild(
+                $"{testProjectPath} -v:n -restore /p:RuntimeToUse={runtimeToUse} /p:TaskFactoryToUse={taskFactoryToUse} /p:LatestDotNetCoreForMSBuild={EndToEndTestUtilities.LatestDotNetCoreForMSBuild}",
                 out bool success,
                 outputHelper: _output);
 

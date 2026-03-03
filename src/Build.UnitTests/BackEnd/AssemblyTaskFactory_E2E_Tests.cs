@@ -32,7 +32,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleFrameworkTask", "TestTask", "TestTask.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
+            string testTaskOutput = EndToEndTestUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
 
             if (!successTestTask)
             {
@@ -53,7 +53,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleFrameworkTask", "TestTask", "TestTask.csproj");
 
-            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
+            string testTaskOutput = EndToEndTestUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -restore -v:n", out bool successTestTask);
 
             if (!successTestTask)
             {

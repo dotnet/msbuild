@@ -63,7 +63,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 CopyTestAsset(testAssetsPath, "Test.euy.resx", solutionPath);
 
                 env.SetCurrentDirectory(projectBFolder);
-                var output = RunnerUtilities.ExecBootstrapedMSBuild("-restore", out bool buildSucceeded);
+                var output = EndToEndTestUtilities.ExecBootstrapedMSBuild("-restore", out bool buildSucceeded);
 
                 if (!buildSucceeded)
                 {

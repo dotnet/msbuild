@@ -30,7 +30,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 {
     public class ProjectCacheTests : IDisposable
     {
-        private static string s_currentTargetNETFramework = $"net{RunnerUtilities.BootstrapSdkVersion.Split('.')?.FirstOrDefault()}.0";
+        private static string s_currentTargetNETFramework = $"net{EndToEndTestUtilities.BootstrapSdkVersion.Split('.')?.FirstOrDefault()}.0";
 
         public ProjectCacheTests(ITestOutputHelper output)
         {
@@ -1730,9 +1730,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             var file2 = directory.CreateFile("File2.txt", "B=1");
 
             // Build and run the project
-            string output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath} -restore", out bool success);
+            string output = EndToEndTestUtilities.ExecBootstrapedMSBuild($"{projectPath} -restore", out bool success);
             success.ShouldBeTrue(output);
-            string bootstrapCorePath = Path.Combine(RunnerUtilities.BootstrapRootPath, "core", Constants.DotnetProcessName);
+            string bootstrapCorePath = Path.Combine(EndToEndTestUtilities.BootstrapRootPath, "core", Constants.DotnetProcessName);
 
             // Use dotnet exec instead of running the exe directly to ensure using the bootstrap's runtime (which may be newer than the installed one)
             string appDllPath = Path.Combine(directory.Path, $"bin/{s_currentTargetNETFramework}/app.dll");
@@ -1742,7 +1742,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
             // Delete a file and build
             FileUtilities.DeleteNoThrow(file1.Path);
-            output = RunnerUtilities.ExecBootstrapedMSBuild($"{projectPath}", out success);
+            output = EndToEndTestUtilities.ExecBootstrapedMSBuild($"{projectPath}", out success);
             success.ShouldBeTrue(output);
 
             output = RunnerUtilities.RunProcessAndGetOutput(bootstrapCorePath, $"exec \"{appDllPath}\"", out success, false, _output);
