@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -58,14 +59,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// </summary>
         public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
         {
-#if FEATURE_RUN_EXE_IN_TESTS
-            var pathToExecutable = pathToMsBuildExe;
-#else
-            var pathToExecutable = s_dotnetExePath;
-            msbuildParameters = FileUtilities.EnsureDoubleQuotes(pathToMsBuildExe) + " " + msbuildParameters;
-#endif
-
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper);
+            return RunProcessAndGetOutput(pathToMsBuildExe, msbuildParameters, out successfulExit, shellExecute, outputHelper, environmentVariables: GetMSBuildEnvironmentVariables());
         }
 
         public static string ExecBootstrapedMSBuild(
@@ -77,12 +71,28 @@ namespace Microsoft.Build.UnitTests.Shared
             int timeoutMilliseconds = 30_000)
         {
 #if NET
-            string pathToExecutable = EnvironmentProvider.GetDotnetExePathFromFolder(BootstrapMsBuildBinaryLocation);
-            msbuildParameters = Path.Combine(BootstrapMsBuildBinaryLocation, "sdk", BootstrapLocationAttribute.BootstrapSdkVersion, Constants.MSBuildAssemblyName) + " " + msbuildParameters;
+            string pathToExecutable = Path.Combine(BootstrapMsBuildBinaryLocation, "sdk", BootstrapLocationAttribute.BootstrapSdkVersion, Constants.MSBuildExecutableName);
 #else
             string pathToExecutable = Path.Combine(BootstrapMsBuildBinaryLocation, Constants.MSBuildExecutableName);
 #endif
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds);
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds, environmentVariables: GetMSBuildEnvironmentVariables());
+        }
+
+        /// <summary>
+        /// Returns environment variables that should be set when launching MSBuild as a child process.
+        /// On .NET Core, this includes DOTNET_HOST_PATH so that tasks like RoslynCodeTaskFactory
+        /// can locate the dotnet host even when MSBuild runs as a native app host.
+        /// </summary>
+        private static Dictionary<string, string> GetMSBuildEnvironmentVariables()
+        {
+#if !FEATURE_RUN_EXE_IN_TESTS
+            return new Dictionary<string, string>
+            {
+                [Constants.DotnetHostPathEnvVarName] = s_dotnetExePath,
+            };
+#else
+            return null;
+#endif
         }
 
         private static void AdjustForShellExecution(ref string pathToExecutable, ref string arguments)
@@ -111,7 +121,8 @@ namespace Microsoft.Build.UnitTests.Shared
             bool shellExecute = false,
             ITestOutputHelper outputHelper = null,
             bool attachProcessId = true,
-            int timeoutMilliseconds = 30_000)
+            int timeoutMilliseconds = 30_000,
+            Dictionary<string, string> environmentVariables = null)
         {
             if (shellExecute)
             {
@@ -128,6 +139,14 @@ namespace Microsoft.Build.UnitTests.Shared
                 UseShellExecute = false,
                 Arguments = parameters
             };
+
+            if (environmentVariables != null)
+            {
+                foreach (var kvp in environmentVariables)
+                {
+                    psi.Environment[kvp.Key] = kvp.Value;
+                }
+            }
             string output = string.Empty;
             int pid = -1;
 
