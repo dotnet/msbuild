@@ -40,6 +40,7 @@ namespace Microsoft.Build.BackEnd.Logging
         // Telemetry for non-sealed subclasses of Microsoft-owned MSBuild tasks
         // Maps Microsoft task names to counts of their non-sealed usage
         private readonly Dictionary<string, int> _msbuildTaskSubclassUsage = new();
+        private readonly object _subclassUsageLock = new();
 
         /// <summary>
         /// Adds a task execution to the telemetry data.
@@ -107,8 +108,11 @@ namespace Microsoft.Build.BackEnd.Logging
                     // Track it only if it's NOT itself Microsoft-owned (i.e., user-authored subclass)
                     if (!isMicrosoftOwned)
                     {
-                        _msbuildTaskSubclassUsage.TryGetValue(baseTypeName, out int count);
-                        _msbuildTaskSubclassUsage[baseTypeName] = count + 1;
+                        lock (_subclassUsageLock)
+                        {
+                            _msbuildTaskSubclassUsage.TryGetValue(baseTypeName, out int count);
+                            _msbuildTaskSubclassUsage[baseTypeName] = count + 1;
+                        }
                     }
                     // Stop at the first Microsoft-owned base class we find
                     break;
@@ -171,7 +175,10 @@ namespace Microsoft.Build.BackEnd.Logging
 
             _taskHostTasksExecutedCount = 0;
 
-            _msbuildTaskSubclassUsage.Clear();
+            lock (_subclassUsageLock)
+            {
+                _msbuildTaskSubclassUsage.Clear();
+            }
         }
 
         private static void AddCountIfNonZero(Dictionary<string, string> properties, string propertyName, int count)
@@ -217,12 +224,15 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             Dictionary<string, string> properties = new();
 
-            // Add each Microsoft task name with its non-sealed subclass usage count
-            foreach (var kvp in _msbuildTaskSubclassUsage)
+            lock (_subclassUsageLock)
             {
-                // Use a sanitized property name (replace dots with underscores for telemetry)
-                string propertyName = kvp.Key.Replace(".", "_");
-                properties[propertyName] = kvp.Value.ToString(CultureInfo.InvariantCulture);
+                // Add each Microsoft task name with its non-sealed subclass usage count
+                foreach (var kvp in _msbuildTaskSubclassUsage)
+                {
+                    // Use a sanitized property name (replace dots with underscores for telemetry)
+                    string propertyName = kvp.Key.Replace(".", "_");
+                    properties[propertyName] = kvp.Value.ToString(CultureInfo.InvariantCulture);
+                }
             }
 
             return properties;

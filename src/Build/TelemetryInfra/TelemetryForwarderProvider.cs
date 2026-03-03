@@ -78,6 +78,11 @@ internal class TelemetryForwarderProvider : IBuildComponent
             { BuildEventContext = loggingContext.BuildEventContext };
             loggingContext.LogBuildEvent(telemetryArgs);
         }
+
+        public void MergeWorkerData(IWorkerNodeTelemetryData data)
+        {
+            _workerNodeTelemetryData.Add(data);
+        }
     }
 
     public class NullTelemetryForwarder : ITelemetryForwarder
@@ -87,6 +92,8 @@ internal class TelemetryForwarderProvider : IBuildComponent
         public void AddTask(string name, TimeSpan cumulativeExecutionTime, short executionsCount, long totalMemoryConsumed, bool isCustom, bool isFromNugetCache, string? taskFactoryName, string? taskHostRuntime) { }
 
         public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isMetaproj, bool isFromNugetCache, TargetSkipReason skipReason = TargetSkipReason.None) { }
+
+        public void MergeWorkerData(IWorkerNodeTelemetryData data) { }
 
         public void FinalizeProcessing(LoggingContext loggingContext) { }
     }

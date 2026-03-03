@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 
 namespace Microsoft.Build.TelemetryInfra;
 
@@ -35,6 +36,13 @@ internal interface ITelemetryForwarder
     /// <param name="isFromNugetCache">Whether the target is from a NuGet package.</param>
     /// <param name="skipReason">The reason the target was skipped, if applicable.</param>
     void AddTarget(string name, bool wasExecuted, bool isCustom, bool isMetaproj, bool isFromNugetCache, TargetSkipReason skipReason = TargetSkipReason.None);
+
+    /// <summary>
+    /// Merges pre-accumulated per-project telemetry data into the shared node-level telemetry.
+    /// This is the preferred path — accumulate locally (no contention),
+    /// then merge once under a single lock acquisition, mirroring how OOP nodes merge into the main node.
+    /// </summary>
+    void MergeWorkerData(IWorkerNodeTelemetryData data);
 
     void FinalizeProcessing(LoggingContext loggingContext);
 }
