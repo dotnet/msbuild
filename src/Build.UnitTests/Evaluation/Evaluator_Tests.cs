@@ -2626,7 +2626,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             if (!String.IsNullOrEmpty(programFiles32))
             {
                 // only set in 32-bit windows on 64-bit machines
-                expected = Environment.GetEnvironmentVariable("ProgramW6432");
+                expected = Environment.GetEnvironmentVariable(EnvironmentVariablesNames.ProgramW6432);
 
                 if (string.IsNullOrEmpty(expected))
                 {

@@ -654,7 +654,7 @@ namespace Microsoft.Build.BackEnd
                 return currentParams;
             }
 
-            string dotnetHostPath = getProperty(Constants.DotnetHostPathEnvVarName)?.EvaluatedValue;
+            string dotnetHostPath = getProperty(EnvironmentVariablesNames.DotnetHostPath)?.EvaluatedValue;
             string netCoreSdkRoot = getProperty(Constants.NetCoreSdkRoot)?.EvaluatedValue?.TrimEnd('/', '\\');
 
             // The NetCoreSdkRoot property got added with .NET 11, so for earlier SDKs we fall back to the RID graph path

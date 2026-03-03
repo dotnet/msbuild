@@ -17,6 +17,8 @@ namespace Microsoft.Build.UnitTests
     {
         private const string StubEnvironmentName = "Stub";
         private const string MultithreadedEnvironmentName = "Multithreaded";
+        private const string ImmutableTestVar = "MSBUILDTESTVAR";
+        private const string TestValue = "value";
 
         public static TheoryData<string> EnvironmentTypes =>
             new TheoryData<string>
@@ -32,7 +34,13 @@ namespace Microsoft.Build.UnitTests
             return environmentType switch
             {
                 StubEnvironmentName => TaskEnvironmentHelper.CreateForTest(),
-                MultithreadedEnvironmentName => new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(GetResolvedTempPath())),
+                MultithreadedEnvironmentName => new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(
+                    GetResolvedTempPath(),
+                    new Dictionary<string, string>
+                    {
+                        ["env_var_1"] = "env_var_1_value",
+                        ["env_var_2"] = "env_var_2_value"
+                    })),
                 _ => throw new ArgumentException($"Unknown environment type: {environmentType}")
             };
         }
@@ -86,7 +94,7 @@ namespace Microsoft.Build.UnitTests
         public void TaskEnvironment_SetAndGetEnvironmentVariable_ShouldWork(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
-            string testVarName = $"MSBUILD_TEST_VAR_{environmentType}_{Guid.NewGuid():N}";
+            string testVarName = $"TEST_ENV_VAR_{environmentType}_{Guid.NewGuid():N}";
             string testVarValue = $"test_value_{environmentType}";
 
             try
@@ -112,7 +120,7 @@ namespace Microsoft.Build.UnitTests
         public void TaskEnvironment_SetEnvironmentVariableToNull_ShouldRemoveVariable(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
-            string testVarName = $"MSBUILD_REMOVE_TEST_{environmentType}_{Guid.NewGuid():N}";
+            string testVarName = $"TEST_ENV_VAR_REMOVE_{environmentType}_{Guid.NewGuid():N}";
             string testVarValue = "value_to_remove";
 
             try
@@ -138,7 +146,7 @@ namespace Microsoft.Build.UnitTests
         public void TaskEnvironment_SetEnvironment_ShouldReplaceAllVariables(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
-            string prefix = $"MSBUILD_SET_ENV_TEST_{environmentType}_{Guid.NewGuid():N}";
+            string prefix = $"TEST_ENV_VAR_SET_{environmentType}_{Guid.NewGuid():N}";
             string var1Name = $"{prefix}_VAR1";
             string var2Name = $"{prefix}_VAR2";
             string var3Name = $"{prefix}_VAR3";
@@ -265,7 +273,7 @@ namespace Microsoft.Build.UnitTests
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
             string testDirectory = GetResolvedTempPath();
-            string testVarName = $"MSBUILD_PROCESS_TEST_{environmentType}_{Guid.NewGuid():N}";
+            string testVarName = $"TEST_ENV_VAR_PROCESS_{environmentType}_{Guid.NewGuid():N}";
             string testVarValue = "process_test_value";
             string originalDirectory = Directory.GetCurrentDirectory();
 
@@ -303,7 +311,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TaskEnvironment_StubEnvironment_ShouldAffectSystemEnvironment()
         {
-            string testVarName = $"MSBUILD_STUB_ISOLATION_TEST_{Guid.NewGuid():N}";
+            string testVarName = $"TEST_ENV_VAR_STUB_ISOLATION_{Guid.NewGuid():N}";
             string testVarValue = "stub_test_value";
 
             var stubEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -333,7 +341,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TaskEnvironment_MultithreadedEnvironment_ShouldBeIsolatedFromSystem()
         {
-            string testVarName = $"MSBUILD_MULTITHREADED_ISOLATION_TEST_{Guid.NewGuid():N}";
+            string testVarName = $"TEST_ENV_VAR_MULTITHREADED_ISOLATION_{Guid.NewGuid():N}";
             string testVarValue = "multithreaded_test_value";
 
             using var driver = new MultiThreadedTaskEnvironmentDriver(
@@ -383,6 +391,108 @@ namespace Microsoft.Build.UnitTests
             {
                 DisposeTaskEnvironment(taskEnvironment);
             }
+        }
+
+        [Fact]
+        public void MultiThreadedTaskEnvironmentDriver_SetEnvironmentVariable_ThrowsOnCaseChangeOfImmutableValue()
+        {
+            // Changing just the case of an immutable variable's value should throw because
+            // value comparison must be case-sensitive (StringComparison.Ordinal).
+            // If we incorrectly used case-insensitive comparison, this would not throw.
+            using var driver = new MultiThreadedTaskEnvironmentDriver(
+                GetResolvedTempPath(),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [ImmutableTestVar] = TestValue
+                });
+            var taskEnvironment = new TaskEnvironment(driver);
+
+            // Changing "value" to "VALUE" is a modification (case-sensitive) and should throw
+            Should.Throw<InvalidOperationException>(() =>
+                taskEnvironment.SetEnvironmentVariable(ImmutableTestVar, TestValue.ToUpperInvariant()));
+        }
+
+        [Fact]
+        public void MultiThreadedTaskEnvironmentDriver_SetEnvironmentVariable_ThrowsOnImmutableVariable()
+        {
+            // MSBuild-prefixed variables are immutable and should throw when adding
+            using var driver = new MultiThreadedTaskEnvironmentDriver(
+                GetResolvedTempPath(),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+            var taskEnvironment = new TaskEnvironment(driver);
+
+            Should.Throw<InvalidOperationException>(() =>
+                taskEnvironment.SetEnvironmentVariable(ImmutableTestVar, TestValue));
+        }
+
+        [Fact]
+        public void MultiThreadedTaskEnvironmentDriver_SetEnvironmentVariable_AllowsSettingSameValue()
+        {
+            // Setting an immutable variable to its current value should not throw
+            using var driver = new MultiThreadedTaskEnvironmentDriver(
+                GetResolvedTempPath(),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [ImmutableTestVar] = TestValue
+                });
+            var taskEnvironment = new TaskEnvironment(driver);
+
+            Should.NotThrow(() =>
+                taskEnvironment.SetEnvironmentVariable(ImmutableTestVar, TestValue));
+        }
+
+        [Fact]
+        public void MultiThreadedTaskEnvironmentDriver_SetEnvironment_ThrowsOnImmutableVariableRemoval()
+        {
+            // Removing an immutable variable via SetEnvironment should throw
+            using var driver = new MultiThreadedTaskEnvironmentDriver(
+                GetResolvedTempPath(),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [ImmutableTestVar] = TestValue
+                });
+            var taskEnvironment = new TaskEnvironment(driver);
+
+            // New environment without the immutable variable - this is a removal
+            var newEnvironment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            Should.Throw<InvalidOperationException>(() =>
+                taskEnvironment.SetEnvironment(newEnvironment));
+        }
+
+        [Fact]
+        public void MultiThreadedTaskEnvironmentDriver_SetEnvironmentVariable_ThrowsOnImmutableVariableRemoval()
+        {
+            // Removing an immutable variable by setting to null should throw
+            using var driver = new MultiThreadedTaskEnvironmentDriver(
+                GetResolvedTempPath(),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                {
+                    [ImmutableTestVar] = TestValue
+                });
+            var taskEnvironment = new TaskEnvironment(driver);
+
+            Should.Throw<InvalidOperationException>(() =>
+                taskEnvironment.SetEnvironmentVariable(ImmutableTestVar, null));
+        }
+
+        [Fact]
+        public void MultiThreadedTaskEnvironmentDriver_EscapeHatch_DisablesImmutableVariableCheck()
+        {
+            // When the escape hatch is set, modifying immutable variables should not throw
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEIMMUTABLEENVIRONMENTVARIABLECHECK", "1");
+
+            using var driver = new MultiThreadedTaskEnvironmentDriver(
+                GetResolvedTempPath(),
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+            var taskEnvironment = new TaskEnvironment(driver);
+
+            // With escape hatch enabled, setting an MSBUILD-prefixed variable should not throw
+            Should.NotThrow(() =>
+                taskEnvironment.SetEnvironmentVariable(ImmutableTestVar, TestValue));
+
+            taskEnvironment.GetEnvironmentVariable(ImmutableTestVar).ShouldBe(TestValue);
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -35,6 +36,21 @@ namespace Microsoft.Build.BackEnd
         {
             _environmentVariables = new Dictionary<string, string>(environmentVariables, CommunicationsUtilities.EnvironmentVariableComparer);
             ProjectDirectory = new AbsolutePath(currentDirectoryFullPath, ignoreRootedCheck: true);
+        }
+
+        /// <summary>
+        /// Validates that the specified environment variable can be modified.
+        /// Throws if the variable is one that MSBuild assumes should remain constant.
+        /// </summary>
+        /// <param name="name">The name of the environment variable to check.</param>
+        /// <exception cref="InvalidOperationException">Thrown when attempting to modify an immutable environment variable.</exception>
+        private static void EnsureVariableCanBeModified(string name)
+        {
+            if (EnvironmentVariableClassifier.Instance.IsImmutable(name))
+            {
+                throw new InvalidOperationException(
+                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskCannotModifyImmutableEnvironmentVariable", name));
+            }
         }
 
         /// <summary>
@@ -88,6 +104,16 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public void SetEnvironmentVariable(string name, string? value)
         {
+            if (!Traits.Instance.EscapeHatches.DisableImmutableEnvironmentVariableCheck)
+            {
+                // Only validate if we're actually changing the value
+                _environmentVariables.TryGetValue(name, out string? currentValue);
+                if (!string.Equals(currentValue, value, StringComparison.Ordinal))
+                {
+                    EnsureVariableCanBeModified(name);
+                }
+            }
+            
             if (value == null)
             {
                 _environmentVariables.Remove(name);
@@ -101,6 +127,30 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public void SetEnvironment(IDictionary<string, string> newEnvironment)
         {
+            if (!Traits.Instance.EscapeHatches.DisableImmutableEnvironmentVariableCheck)
+            {
+                // Check for variables being removed (exist in current but not in new environment)
+                foreach (string currentVar in _environmentVariables.Keys)
+                {
+                    if (!newEnvironment.ContainsKey(currentVar))
+                    {
+                        EnsureVariableCanBeModified(currentVar);
+                    }
+                }
+
+                // Check for variables being added or modified
+                foreach (KeyValuePair<string, string> entry in newEnvironment)
+                {
+                    _environmentVariables.TryGetValue(entry.Key, out string? currentValue);
+
+                    // Only validate if we're actually changing the value
+                    if (!string.Equals(currentValue, entry.Value, StringComparison.Ordinal))
+                    {
+                        EnsureVariableCanBeModified(entry.Key);
+                    }
+                }
+            }
+
             // Simply replace the entire environment dictionary
             _environmentVariables.Clear();
             foreach (KeyValuePair<string, string> entry in newEnvironment)

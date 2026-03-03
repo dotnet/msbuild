@@ -1002,6 +1002,11 @@ Errores: {3}</target>
         <target state="translated">El ensamblado de tarea se cargó desde "{0}" mientras que la ubicación deseada era "{1}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskCannotModifyImmutableEnvironmentVariable">
+        <source>Cannot modify environment variable '{0}': variable is immutable and must remain constant during the build.</source>
+        <target state="new">Cannot modify environment variable '{0}': variable is immutable and must remain constant during the build.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">La tarea "{0}" liberó {1} núcleos y ahora retiene un total de {2} núcleos.</target>

@@ -1,6 +1,8 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+
 #if !TASKHOST
 using System.Threading;
 #endif
@@ -26,6 +28,18 @@ namespace Microsoft.Build.Framework
         private const char WindowsDirectorySeparator = '\\';
 
         internal static readonly char[] Slashes = [UnixDirectorySeparator, WindowsDirectorySeparator];
+
+        /// <summary>
+        /// The string comparison to use for environment variable name comparisons, based on OS environment variable handling.
+        /// Windows: case-insensitive, Unix/Linux: case-sensitive.
+        /// </summary>
+        internal static readonly StringComparison EnvironmentVariableComparison = NativeMethods.IsWindows ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
+
+        /// <summary>
+        /// The string comparer to use for environment variable name comparisons, based on OS environment variable handling.
+        /// Windows: case-insensitive, Unix/Linux: case-sensitive.
+        /// </summary>
+        internal static readonly StringComparer EnvironmentVariableComparer = NativeMethods.IsWindows ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
 
 #if !TASKHOST
         /// <summary>
