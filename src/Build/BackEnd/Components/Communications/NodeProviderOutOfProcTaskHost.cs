@@ -730,10 +730,19 @@ namespace Microsoft.Build.BackEnd
                         dotnetOverrides);
             }
 
-            CommunicationsUtilities.Trace("For a host context of {0}, app host not found at {1}, falling back to dotnet.exe from {2}.", hostContext, appHostPath, dotnetHostPath);
+            // Auto-discover dotnet host path when not explicitly provided.
+            string resolvedDotnetHostPath = dotnetHostPath;
+#if RUNTIME_TYPE_NETCORE
+            if (string.IsNullOrEmpty(resolvedDotnetHostPath))
+            {
+                resolvedDotnetHostPath = CurrentHost.GetCurrentHost();
+            }
+#endif
+
+            CommunicationsUtilities.Trace("For a host context of {0}, app host not found at {1}, falling back to dotnet.exe from {2}.", hostContext, appHostPath, resolvedDotnetHostPath);
 
             return new NodeLaunchData(
-                dotnetHostPath,
+                resolvedDotnetHostPath,
                 $"\"{Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName)}\" {commandLineArgs}",
                 new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath));
         }
