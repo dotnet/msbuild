@@ -43,13 +43,27 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Build GitHub API headers, using GITHUB_TOKEN for authentication if available
-$githubHeaders = @{
-    "Accept"     = "application/vnd.github+json"
-    "User-Agent" = "msbuild-health-check"
+# Verify gh CLI is available and authenticated
+if (-not (Get-Command gh -ErrorAction SilentlyContinue)) {
+    throw "gh CLI is required but not found. Install from https://cli.github.com/"
 }
-if ($env:GITHUB_TOKEN) {
-    $githubHeaders["Authorization"] = "Bearer $env:GITHUB_TOKEN"
+$ghStatus = gh auth status 2>&1
+if ($LASTEXITCODE -ne 0) {
+    throw "gh CLI is not authenticated. Run 'gh auth login' first."
+}
+
+function Invoke-GitHubApi {
+    <#
+    .SYNOPSIS
+        Calls the GitHub REST API via gh cli, returning parsed JSON.
+    #>
+    param([string]$Endpoint)
+
+    $json = gh api $Endpoint 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        throw "gh api call failed for '$Endpoint': $json"
+    }
+    return $json | ConvertFrom-Json
 }
 
 function Get-OpenCodeflowPRs {
@@ -58,10 +72,10 @@ function Get-OpenCodeflowPRs {
         Finds open codeflow PRs from the source repo in the VMR.
     #>
     $searchQuery = "repo:$GitHubOwner/$GitHubRepo is:pr is:open `"Source code updates from $SourceRepo`" in:title"
-    $url = "https://api.github.com/search/issues?q=$([Uri]::EscapeDataString($searchQuery))&per_page=10&sort=updated&order=desc"
+    $endpoint = "search/issues?q=$([Uri]::EscapeDataString($searchQuery))&per_page=10&sort=updated&order=desc"
 
     try {
-        $resp = Invoke-RestMethod -Uri $url -Headers $githubHeaders -ErrorAction Stop
+        $resp = Invoke-GitHubApi -Endpoint $endpoint
     }
     catch {
         Write-Warning "Failed to search GitHub PRs: $($_.Exception.Message)"
@@ -70,9 +84,8 @@ function Get-OpenCodeflowPRs {
 
     $prs = @()
     foreach ($issue in $resp.items) {
-        # Get full PR details (issue search doesn't include head branch)
         try {
-            $prDetail = Invoke-RestMethod -Uri "https://api.github.com/repos/$GitHubOwner/$GitHubRepo/pulls/$($issue.number)" -Headers $githubHeaders -ErrorAction Stop
+            $prDetail = Invoke-GitHubApi -Endpoint "repos/$GitHubOwner/$GitHubRepo/pulls/$($issue.number)"
         }
         catch {
             Write-Warning "Failed to get PR #$($issue.number) details: $($_.Exception.Message)"
@@ -92,12 +105,12 @@ function Get-IncludedUpstreamPRs {
     #>
     param([int]$PullNumber)
 
-    $url = "https://api.github.com/repos/$GitHubOwner/$GitHubRepo/issues/$PullNumber/comments?per_page=50"
+    $endpoint = "repos/$GitHubOwner/$GitHubRepo/issues/$PullNumber/comments?per_page=50"
     try {
-        $comments = Invoke-RestMethod -Uri $url -Headers $githubHeaders -ErrorAction Stop
+        $comments = Invoke-GitHubApi -Endpoint $endpoint
     }
     catch {
-        Write-Warning "Failed to get comments for PR #$PullNumber"
+        Write-Warning "Failed to get comments for PR #${PullNumber}: $($_.Exception.Message)"
         return @()
     }
 
@@ -137,7 +150,7 @@ function Get-UpstreamPRDetails {
     param([int]$PullNumber)
 
     try {
-        $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/$SourceRepo/pulls/$PullNumber" -Headers $githubHeaders -ErrorAction Stop
+        $pr = Invoke-GitHubApi -Endpoint "repos/$SourceRepo/pulls/$PullNumber"
         return [ordered]@{
             number = $PullNumber
             title  = $pr.title

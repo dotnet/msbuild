@@ -78,7 +78,7 @@ $prJson = & .\.github\skills\pipelines-health-check\check-vs-pr-status.ps1
 $vmrJson = & .\.github\skills\pipelines-health-check\check-vmr-codeflow.ps1
 ```
 
-The pipeline and VS PR scripts rely on the `az` CLI for authentication. The VMR codeflow script uses unauthenticated GitHub API (rate-limited to 60 req/hr) and unauthenticated Azure DevOps REST API for the public dnceng-public org — no credentials needed for basic checks.
+The pipeline and VS PR scripts rely on the `az` CLI for authentication. The VMR codeflow script uses `gh` CLI for authenticated GitHub API access and unauthenticated Azure DevOps REST API for the public dnceng-public org.
 
 ### Step 2: Present the overview table IMMEDIATELY
 
@@ -373,7 +373,7 @@ WorkIQ queries Microsoft 365 data (Outlook, Teams, SharePoint). Results depend o
 
 ### VMR codeflow script returns no PRs
 - Verify there are actually open codeflow PRs: check `https://github.com/dotnet/dotnet/pulls?q=is:pr+is:open+"Source+code+updates+from+dotnet/msbuild"`
-- GitHub unauthenticated API is rate-limited to 60 requests/hour. If rate-limited, wait or set a `GITHUB_TOKEN` environment variable (the script will use it as a Bearer token for higher rate limits)
+- Verify `gh` CLI is authenticated: run `gh auth status`
 
 ### VMR pipeline runs not found
 - The dotnet-unified-build pipeline runs in `dnceng-public/public`, which is publicly accessible
