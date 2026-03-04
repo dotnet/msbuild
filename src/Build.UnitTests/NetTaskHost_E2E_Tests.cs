@@ -274,5 +274,74 @@ namespace Microsoft.Build.Engine.UnitTests
             testTaskOutput.ShouldContain("The task is executed in process: MSBuild");
             testTaskOutput.ShouldContain("/nodereuse:True");
         }
+
+        /// <summary>
+        /// Verifies that building a .NET Framework 3.5 project with embedded resources succeeds.
+        /// This exercises the CLR2 task host path (MSBuildTaskHost.exe) because GenerateResource
+        /// requires the CLR2 runtime for .NET 3.5 targets. Regression test for the apphost changes
+        /// that incorrectly routed MSBuildTaskHost.exe through dotnet.exe (which cannot host CLR2).
+        /// </summary>
+        [WindowsNet35OnlyFact]
+        public void CLR2TaskHost_Net35ProjectWithResources_BuildSucceeds()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            TransientTestFolder testFolder = env.CreateFolder(createFolder: true);
+            CopyFilesRecursively(Path.Combine(TestAssetsRootPath, "Net35WinFormsApp"), testFolder.Path);
+
+            string projectFilePath = Path.Combine(testFolder.Path, "TestNet35WinForms.csproj");
+
+            string testOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{projectFilePath} -v:n",
+                out bool success,
+                outputHelper: _output);
+
+            _output.WriteLine(testOutput);
+
+            success.ShouldBeTrue(customMessage: "Building .NET 3.5 project with resources should succeed via CLR2 task host");
+
+            // The build must not fail with MSB4216 (unable to create/connect to task host).
+            // This was the specific regression: MSBuildTaskHost.exe was incorrectly routed
+            // through dotnet.exe instead of being launched directly.
+            testOutput.ShouldNotContain("MSB4216", customMessage: "CLR2 task host (MSBuildTaskHost.exe) should launch directly, not through dotnet.exe");
+        }
+
+        /// <summary>
+        /// Verifies that the CLR2 task host (MSBuildTaskHost.exe) is launched directly as a native
+        /// executable, not routed through dotnet.exe. This uses the ExampleFrameworkTask with explicit
+        /// TaskHostFactory to force out-of-proc execution via the Framework task host.
+        /// </summary>
+        [WindowsFullFrameworkOnlyFact]
+        public void CLR2TaskHost_FrameworkTaskWithTaskHostFactory_UsesCorrectProcess()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleFrameworkTask", "TestTask", "TestTask.csproj");
+
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                $"{testProjectPath} -v:n -t:TestTask",
+                out bool successTestTask,
+                outputHelper: _output);
+
+            _output.WriteLine(testTaskOutput);
+
+            successTestTask.ShouldBeTrue(customMessage: "Framework task with TaskHostFactory should execute successfully");
+
+            // Verify no task host connection errors occurred.
+            testTaskOutput.ShouldNotContain("MSB4216", customMessage: "Framework task host should not produce MSB4216 errors");
+        }
+
+        private static void CopyFilesRecursively(string sourcePath, string targetPath)
+        {
+            foreach (string dirPath in Directory.GetDirectories(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                Directory.CreateDirectory(dirPath.Replace(sourcePath, targetPath));
+            }
+
+            foreach (string newPath in Directory.GetFiles(sourcePath, "*", SearchOption.AllDirectories))
+            {
+                File.Copy(newPath, newPath.Replace(sourcePath, targetPath), overwrite: true);
+            }
+        }
     }
 }
