@@ -142,6 +142,15 @@ namespace Microsoft.Build.Framework
         public const string UseMSBuildServerEnvVarName = "MSBUILDUSESERVER";
 
         /// <summary>
+        /// Enable MSBuild multithreaded mode via environment variable.
+        /// </summary>  
+        /// <remarks>
+        /// This environment variable is used for easier opt-in to multithreaded mode for testing and dogfooding purposes. 
+        /// It is not intended to be a long-term escape hatch, and it should be removed once multithreaded mode is stable.
+        /// </remarks>
+        public readonly bool UseMultiThreadedMode = Environment.GetEnvironmentVariable("MSBUILDUSEMULTITHREADEDMODE") == "1";
+
+        /// <summary>
         /// Name of environment variable for logging arguments (e.g., -bl, -check).
         /// </summary>
         public const string MSBuildLoggingArgsEnvVarName = "MSBUILD_LOGGING_ARGS";
