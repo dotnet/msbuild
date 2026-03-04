@@ -59,7 +59,7 @@ WorkIQ is not required for the core health check. If unavailable, the skill will
 - OptProf pipeline: `https://devdiv.visualstudio.com/DevDiv/_build?definitionId=17389`
 - VS PRs assigned to MSBuild: `https://dev.azure.com/devdiv/DevDiv/_git/VS/pullrequests?_a=active&assignedTo=66cc9d27-aef7-4399-ba2c-3dccb4489098`
 - VMR codeflow PRs: `https://github.com/dotnet/dotnet/pulls?q=is:pr+is:open+"Source+code+updates+from+dotnet/msbuild"`
-- dotnet-unified-build (public): `https://dev.azure.com/dnceng-public/public/_build?definitionId=dotnet-unified-build`
+- dotnet-unified-build (public): `https://dev.azure.com/dnceng-public/public/_build`
 
 ## Phase 1: Collect Data & Present Overview Table
 
@@ -373,7 +373,7 @@ WorkIQ queries Microsoft 365 data (Outlook, Teams, SharePoint). Results depend o
 
 ### VMR codeflow script returns no PRs
 - Verify there are actually open codeflow PRs: check `https://github.com/dotnet/dotnet/pulls?q=is:pr+is:open+"Source+code+updates+from+dotnet/msbuild"`
-- GitHub unauthenticated API is rate-limited to 60 requests/hour. If rate-limited, wait or set a `GITHUB_TOKEN` environment variable
+- GitHub unauthenticated API is rate-limited to 60 requests/hour. If rate-limited, wait or set a `GITHUB_TOKEN` environment variable (the script will use it as a Bearer token for higher rate limits)
 
 ### VMR pipeline runs not found
 - The dotnet-unified-build pipeline runs in `dnceng-public/public`, which is publicly accessible

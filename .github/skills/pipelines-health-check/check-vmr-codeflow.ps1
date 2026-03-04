@@ -43,6 +43,15 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+# Build GitHub API headers, using GITHUB_TOKEN for authentication if available
+$githubHeaders = @{
+    "Accept"     = "application/vnd.github+json"
+    "User-Agent" = "msbuild-health-check"
+}
+if ($env:GITHUB_TOKEN) {
+    $githubHeaders["Authorization"] = "Bearer $env:GITHUB_TOKEN"
+}
+
 function Get-OpenCodeflowPRs {
     <#
     .SYNOPSIS
@@ -52,10 +61,7 @@ function Get-OpenCodeflowPRs {
     $url = "https://api.github.com/search/issues?q=$([Uri]::EscapeDataString($searchQuery))&per_page=10&sort=updated&order=desc"
 
     try {
-        $resp = Invoke-RestMethod -Uri $url -Headers @{
-            "Accept" = "application/vnd.github+json"
-            "User-Agent" = "msbuild-health-check"
-        } -ErrorAction Stop
+        $resp = Invoke-RestMethod -Uri $url -Headers $githubHeaders -ErrorAction Stop
     }
     catch {
         Write-Warning "Failed to search GitHub PRs: $($_.Exception.Message)"
@@ -66,10 +72,7 @@ function Get-OpenCodeflowPRs {
     foreach ($issue in $resp.items) {
         # Get full PR details (issue search doesn't include head branch)
         try {
-            $prDetail = Invoke-RestMethod -Uri "https://api.github.com/repos/$GitHubOwner/$GitHubRepo/pulls/$($issue.number)" -Headers @{
-                "Accept" = "application/vnd.github+json"
-                "User-Agent" = "msbuild-health-check"
-            } -ErrorAction Stop
+            $prDetail = Invoke-RestMethod -Uri "https://api.github.com/repos/$GitHubOwner/$GitHubRepo/pulls/$($issue.number)" -Headers $githubHeaders -ErrorAction Stop
         }
         catch {
             Write-Warning "Failed to get PR #$($issue.number) details: $($_.Exception.Message)"
@@ -91,10 +94,7 @@ function Get-IncludedUpstreamPRs {
 
     $url = "https://api.github.com/repos/$GitHubOwner/$GitHubRepo/issues/$PullNumber/comments?per_page=50"
     try {
-        $comments = Invoke-RestMethod -Uri $url -Headers @{
-            "Accept" = "application/vnd.github+json"
-            "User-Agent" = "msbuild-health-check"
-        } -ErrorAction Stop
+        $comments = Invoke-RestMethod -Uri $url -Headers $githubHeaders -ErrorAction Stop
     }
     catch {
         Write-Warning "Failed to get comments for PR #$PullNumber"
@@ -103,9 +103,19 @@ function Get-IncludedUpstreamPRs {
 
     $upstreamPRs = @()
     foreach ($comment in $comments) {
-        # Match patterns like "https://github.com/dotnet/msbuild/pull/13175" or "msbuild#13175"
-        $matches = [regex]::Matches($comment.body, "https://github\.com/$([regex]::Escape($SourceRepo))/pull/(\d+)")
-        foreach ($m in $matches) {
+        # Match full GitHub URL patterns like "https://github.com/dotnet/msbuild/pull/13175"
+        $regexMatches = [regex]::Matches($comment.body, "https://github\.com/$([regex]::Escape($SourceRepo))/pull/(\d+)")
+        foreach ($m in $regexMatches) {
+            $prNum = [int]$m.Groups[1].Value
+            if ($upstreamPRs -notcontains $prNum) {
+                $upstreamPRs += $prNum
+            }
+        }
+
+        # Match short reference patterns like "msbuild#13175"
+        $repoName = ($SourceRepo -split '/')[-1]
+        $shortMatches = [regex]::Matches($comment.body, "$([regex]::Escape($repoName))#(\d+)")
+        foreach ($m in $shortMatches) {
             $prNum = [int]$m.Groups[1].Value
             if ($upstreamPRs -notcontains $prNum) {
                 $upstreamPRs += $prNum
@@ -127,10 +137,7 @@ function Get-UpstreamPRDetails {
     param([int]$PullNumber)
 
     try {
-        $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/$SourceRepo/pulls/$PullNumber" -Headers @{
-            "Accept" = "application/vnd.github+json"
-            "User-Agent" = "msbuild-health-check"
-        } -ErrorAction Stop
+        $pr = Invoke-RestMethod -Uri "https://api.github.com/repos/$SourceRepo/pulls/$PullNumber" -Headers $githubHeaders -ErrorAction Stop
         return [ordered]@{
             number = $PullNumber
             title  = $pr.title
@@ -155,10 +162,17 @@ function Get-PipelineRunsForPR {
     .SYNOPSIS
         Gets dotnet-unified-build pipeline runs for a specific PR branch.
     #>
-    param([int]$PullNumber)
+    param(
+        [int]$PullNumber,
+        [int]$DefinitionId
+    )
 
     $branchName = "refs/pull/$PullNumber/merge"
     $url = "$Organization/$Project/_apis/build/builds?branchName=$([Uri]::EscapeDataString($branchName))&api-version=7.1&`$top=$Top&queryOrder=startTimeDescending"
+
+    if ($DefinitionId) {
+        $url += "&definitions=$DefinitionId"
+    }
 
     try {
         $resp = Invoke-RestMethod -Uri $url -ErrorAction Stop
@@ -251,11 +265,11 @@ function Get-FailureCategory {
     param([string[]]$ErrorMessages)
 
     foreach ($msg in $ErrorMessages) {
+        if ($msg -match "error MSB4216.*BinaryToolTask") { return "SOURCE_BUILD_TASK_HOST" }
         if ($msg -match "MSB4216.*task host") { return "TASK_HOST" }
         if ($msg -match "MSB4027.*MetadataLoadContext.*disposed") { return "TASK_HOST" }
         if ($msg -match "error CS\d+") { return "COMPILATION" }
         if ($msg -match "error MSB3073.*exited with code") { return "BUILD_COMMAND" }
-        if ($msg -match "error MSB4216.*BinaryToolTask") { return "SOURCE_BUILD_TASK_HOST" }
         if ($msg -match "NuGet|401|feed|authentication") { return "NUGET_AUTH" }
         if ($msg -match "signing|certificate|CodeSign") { return "SIGNING" }
         if ($msg -match "timeout|Timeout|TIMEOUT") { return "TIMEOUT" }
