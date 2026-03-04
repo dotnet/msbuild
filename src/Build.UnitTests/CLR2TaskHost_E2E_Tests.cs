@@ -64,7 +64,6 @@ public class CLR2TaskHost_E2E_Tests
             out bool success,
             outputHelper: _output);
 
-        _output.WriteLine(testOutput);
 
         // MSB4216 occurs when the parent can't connect to MSBuildTaskHost.exe —
         // either due to handshake salt mismatch (missing toolsDirectory) or wrong process routing.
