@@ -8,7 +8,7 @@ using System.Resources.Extensions;
 
 namespace Microsoft.Build.Tasks.ResourceHandling
 {
-    internal class FileStreamResource : IResource
+    internal class FileStreamResource : ILinkedFileResource
     {
         public string Name { get; }
 
@@ -16,7 +16,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
         public string OriginatingFile { get; }
 
-        public string FileName { get; }
+        public string LinkedFilePath { get; }
 
         public string TypeFullName => NameUtilities.FullNameFromAssemblyQualifiedName(TypeAssemblyQualifiedName);
 
@@ -31,7 +31,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
         {
             Name = name;
             TypeAssemblyQualifiedName = assemblyQualifiedTypeName;
-            FileName = fileName;
+            LinkedFilePath = fileName;
             OriginatingFile = originatingFile;
         }
 
@@ -40,7 +40,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             if (writer is PreserializedResourceWriter preserializedResourceWriter)
             {
 #pragma warning disable CA2000 // Dispose objects before losing scope the stream is expected to be disposed by the PreserializedResourceWriter.ResourceDataRecord
-                FileStream fileStream = new FileStream(FileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                FileStream fileStream = new FileStream(LinkedFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
 #pragma warning restore CA2000 // Dispose objects before losing scope
 
                 preserializedResourceWriter.AddActivatorResource(Name, fileStream, TypeAssemblyQualifiedName, closeAfterWrite: true);
