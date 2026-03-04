@@ -87,10 +87,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 MinimumMessageImportance = MessageImportance.Normal,
                 SetIsTaskInputLoggingEnabled = false,
             };
-            ResolveAssemblyReference clientRar = new() { BuildEngine = mockEngine };
+            ResolveAssemblyReference clientRar = new() { BuildEngine = mockEngine, TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             RarNodeExecuteRequest request = new(clientRar);
 
-            ResolveAssemblyReference nodeRar = new();
+            ResolveAssemblyReference nodeRar = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             request.SetTaskInputs(nodeRar, CreateBuildEngine());
 
             Assert.Equal(mockEngine.LineNumberOfTaskNode, nodeRar.BuildEngine.LineNumberOfTaskNode);

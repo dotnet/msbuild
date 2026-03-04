@@ -142,6 +142,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                                    "</FileList >";
 
             ResolveAssemblyReference t1 = new ResolveAssemblyReference();
+            t1.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t1.TargetFrameworkVersion = "v4.5";
             t1.TargetFrameworkDirectories = new string[] { actualFrameworkDirectory };
             ExecuteRAROnItemsAndRedist(t1, e, items, redistString1, true, new List<string>() { "{RawFileName}" });
@@ -154,6 +155,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                                    "</FileList >";
 
             ResolveAssemblyReference t2 = new ResolveAssemblyReference();
+            t2.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t2.TargetFrameworkVersion = "v4.5";
             t2.TargetFrameworkDirectories = new string[] { actualFrameworkDirectory };
             ExecuteRAROnItemsAndRedist(t2, e, items, redistString2, true, new List<string>() { "{RawFileName}" });
@@ -166,6 +168,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                                    "</FileList >";
 
             ResolveAssemblyReference t3 = new ResolveAssemblyReference();
+            t3.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t3.TargetFrameworkVersion = "v4.5";
             t3.TargetFrameworkDirectories = new string[] { alternativeFrameworkDirectory };
             ExecuteRAROnItemsAndRedist(t3, e, items, redistString3, true, new List<string>() { "{RawFileName}" });
@@ -178,6 +181,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                                    "</FileList >";
 
             ResolveAssemblyReference t4 = new ResolveAssemblyReference();
+            t4.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t4.TargetFrameworkVersion = "v4.5";
             t4.TargetFrameworkDirectories = new string[] { alternativeFrameworkDirectory };
             ExecuteRAROnItemsAndRedist(t4, e, items, redistString4, true, new List<string>() { "{RawFileName}" });

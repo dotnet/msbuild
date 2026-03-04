@@ -8545,6 +8545,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 GenerateRedistAndProfileXmlLocations(fullRedistListContentsErrors, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };

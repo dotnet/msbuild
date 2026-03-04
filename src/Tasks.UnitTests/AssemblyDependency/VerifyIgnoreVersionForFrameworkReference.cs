@@ -67,6 +67,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                            "</FileList >";
 
             t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
@@ -121,6 +122,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                            "</FileList >";
 
             t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
