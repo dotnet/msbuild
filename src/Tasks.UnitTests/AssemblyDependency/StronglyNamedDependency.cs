@@ -61,6 +61,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
@@ -111,6 +112,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
