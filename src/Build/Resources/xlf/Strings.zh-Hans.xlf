@@ -466,6 +466,11 @@
         <target state="translated">MSB4280: 环境变量 DOTNET_HOST_PATH 设置为目录(“{0}”)，而不是指向 dotnet 可执行文件的路径。这可能导致使用该变量的任务(如 Roslyn 编译器)出现构建错误。请取消设置该变量，或将其更新为直接指向 dotnet 可执行文件的路径(例如 "C:\Program Files\dotnet\dotnet.exe")。</target>
         <note>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</note>
       </trans-unit>
+      <trans-unit id="DotnetHostPathNotSet">
+        <source>DOTNET_HOST_PATH is not set. Cannot determine runtime location for app host bootstrap. This should always be set when running under the .NET SDK.</source>
+        <target state="new">DOTNET_HOST_PATH is not set. Cannot determine runtime location for app host bootstrap. This should always be set when running under the .NET SDK.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">
         <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
         <target state="translated">MSB4275: 已尝试创建同一任务的多个重写: {0}</target>
@@ -2399,12 +2404,12 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="TaskHostAcquireFailed">
         <source>MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</source>
-        <target state="translated">MSB4216: 无法运行“{0}”任务，因为 MSBuild 无法创建或连接到运行时为“{1}”、体系结构为“{2}”的任务宿主。请确保 (1) 请求的运行时和/或体系结构在计算机上可用，以及 (2) 所需的可执行文件“{3}”存在，且可以运行。</target>
+        <target state="translated">MSB4216: 无法运行"{0}"任务，因为 MSBuild 无法创建或连接到运行时为"{1}"、体系结构为"{2}"的任务宿主。请确保 (1) 请求的运行时和/或体系结构在计算机上可用，以及 (2) 所需的可执行文件"{3}"存在，且可以运行。</target>
         <note>{StrBegin="MSB4216: "}</note>
       </trans-unit>
       <trans-unit id="TaskHostNodeFailedToLaunch">
         <source>MSB4221: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. Error {4} {5}.</source>
-        <target state="translated">MSB4221: 无法运行“{0}”任务，因为 MSBuild 无法创建或连接到运行时为“{1}”、体系结构为“{2}”的任务宿主。请确保 (1) 请求的运行时和/或体系结构在计算机上可用，以及 (2) 所需的可执行文件“{3}”存在，且可以运行。错误 {4} {5}。</target>
+        <target state="translated">MSB4221: 无法运行"{0}"任务，因为 MSBuild 无法创建或连接到运行时为"{1}"、体系结构为"{2}"的任务宿主。请确保 (1) 请求的运行时和/或体系结构在计算机上可用，以及 (2) 所需的可执行文件"{3}"存在，且可以运行。错误 {4} {5}。</target>
         <note>{StrBegin="MSB4221: "}</note>
       </trans-unit>
       <trans-unit id="TaskHostNodeFailedToLaunchErrorCodeNet35NotInstalled">

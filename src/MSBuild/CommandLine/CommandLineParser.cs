@@ -104,18 +104,7 @@ namespace Microsoft.Build.CommandLine.Experimental
 
             // discard the first piece, because that's the path to the executable -- the rest are args
             commandLineArgs = commandLineArgs.Skip(1);
-
             exeName = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-
-#if USE_MSBUILD_DLL_EXTN
-            var msbuildExtn = ".dll";
-#else
-            var msbuildExtn = ".exe";
-#endif
-            if (!exeName.EndsWith(msbuildExtn, StringComparison.OrdinalIgnoreCase))
-            {
-                exeName += msbuildExtn;
-            }
 
             fullCommandLine = $"'{string.Join(" ", commandLineArgs)}'";
 

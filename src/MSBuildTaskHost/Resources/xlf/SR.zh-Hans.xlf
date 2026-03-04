@@ -1,0 +1,62 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="zh-Hans" original="../SR.resx">
+    <body>
+      <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
+        <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
+        <target state="translated">MSB5022: MSBuild 任务宿主不支持运行执行 IBuildEngine 回调的任务。如果需要执行这些操作，请改为在核心 MSBuild 进程中运行您的任务。如果 UsingTask 已用“Runtime”或“Architecture”值特性化，或者任务调用已用“MSBuildRuntime”或“MSBuildArchitecture”值(与 MSBuild 的当前运行时或体系结构不匹配)特性化，则将自动在任务宿主中执行任务。</target>
+        <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="ConflictingTaskAssembly">
+        <source>MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</source>
+        <target state="translated">MSB4008: 在“{1}”处发现了与任务程序集“{0}”冲突的程序集。</target>
+        <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
+      </trans-unit>
+      <trans-unit id="ExpectedEventToBeSerializable">
+        <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
+        <target state="translated">事件类型“{0}”应可以使用 .NET 序列化程序进行序列化。此事件不可序列化，已忽略它。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentHeader">
+        <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
+        <target state="translated">先对从父节点收到的环境进行以下修改，然后再将其应用于任务宿主:</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentVariable">
+        <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
+        <target state="translated">  将“{0}”设置为“{1}”，而不是父环境的值“{2}”。</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="Shared.PathTooLong">
+        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
+        <target state="translated">路径: {0} 超过 OS 最大路径限制。完全限定的文件名必须少于 {1} 个字符。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Shared.CannotChangeItemSpecModifiers">
+        <source>"{0}" is a reserved item metadata, and cannot be modified or deleted.</source>
+        <target state="translated">“{0}”是保留的项元数据，不能修改或删除。</target>
+        <note>UE: Tasks and OM users are not allowed to remove or change the value of the built-in metadata on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</note>
+      </trans-unit>
+      <trans-unit id="Shared.InvalidFilespecForTransform">
+        <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
+        <target state="translated">无法将项元数据“%({0})”应用于路径“{1}”。{2}</target>
+        <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
+      </trans-unit>
+      <trans-unit id="TaskNotMarshalByRef">
+        <source>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</source>
+        <target state="translated">MSB4077: “{0}”任务已标记为 LoadInSeparateAppDomain 特性，但未派生自 MarshalByRefObject。请检查该任务是派生自 MarshalByRefObject 还是 AppDomainIsolatedTask。</target>
+        <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="Shared.ParameterCannotBeNull">
+        <source>Parameter "{0}" cannot be null.</source>
+        <target state="translated">参数“{0}”不能为 null。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Shared.ParameterCannotHaveZeroLength">
+        <source>Parameter "{0}" cannot have zero length.</source>
+        <target state="translated">参数“{0}”的长度不能为零。</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

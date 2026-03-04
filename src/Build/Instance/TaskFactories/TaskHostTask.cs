@@ -203,6 +203,8 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostCoresRequest, TaskHostCoresRequest.FactoryForDeserialization, this);
 
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
@@ -404,9 +406,9 @@ namespace Microsoft.Build.BackEnd
                     LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null);
                 }
             }
-            catch (BuildAbortedException)
+            catch (BuildAbortedException ex)
             {
-                LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, null);
+                LogErrorUnableToCreateTaskHost(_requiredContext, _taskHostParameters.Runtime, _taskHostParameters.Architecture, ex);
             }
             catch (NodeFailedToLaunchException e)
             {
@@ -508,6 +510,12 @@ namespace Microsoft.Build.BackEnd
                     break;
                 case NodePacketType.LogMessage:
                     HandleLoggedMessage(packet as LogMessagePacket);
+                    break;
+                case NodePacketType.TaskHostIsRunningMultipleNodesRequest:
+                    HandleIsRunningMultipleNodesRequest(packet as TaskHostIsRunningMultipleNodesRequest);
+                    break;
+                case NodePacketType.TaskHostCoresRequest:
+                    HandleCoresRequest(packet as TaskHostCoresRequest);
                     break;
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
@@ -649,16 +657,54 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Handle IsRunningMultipleNodes request from the TaskHost.
+        /// </summary>
+        private void HandleIsRunningMultipleNodesRequest(TaskHostIsRunningMultipleNodesRequest request)
+        {
+            bool result = _buildEngine is IBuildEngine2 engine2 && engine2.IsRunningMultipleNodes;
+            var response = new TaskHostIsRunningMultipleNodesResponse(request.RequestId, result);
+            _taskHostProvider.SendData(_taskHostNodeKey, response);
+        }
+
+        /// <summary>
+        /// Handle RequestCores/ReleaseCores request from the TaskHost.
+        /// Forwards the call to the in-process TaskHost's IBuildEngine9 implementation,
+        /// which handles implicit core accounting and scheduler communication.
+        /// </summary>
+        private void HandleCoresRequest(TaskHostCoresRequest request)
+        {
+            int grantedCores = 0;
+
+            if (request.IsRelease)
+            {
+                if (_buildEngine is IBuildEngine9 engine9)
+                {
+                    engine9.ReleaseCores(request.RequestedCores);
+                }
+            }
+            else
+            {
+                if (_buildEngine is IBuildEngine9 engine9)
+                {
+                    grantedCores = engine9.RequestCores(request.RequestedCores);
+                }
+            }
+
+            var response = new TaskHostCoresResponse(request.RequestId, grantedCores);
+            _taskHostProvider.SendData(_taskHostNodeKey, response);
+        }
+
+        /// <summary>
         /// Since we log that we weren't able to connect to the task host in a couple of different places,
         /// extract it out into a separate method.
         /// </summary>
-        private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, NodeFailedToLaunchException e)
+        private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, Exception e)
         {
             string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext);
 #if NETFRAMEWORK
             if (Handshake.IsHandshakeOptionEnabled(requiredContext, HandshakeOptions.NET))
             {
-                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(requiredContext, _taskHostParameters).MSBuildAssemblyPath;
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(requiredContext, _taskHostParameters).MSBuildPath;
             }
 #endif
             string msbuildLocation = taskHostLocation ??
@@ -674,7 +720,15 @@ namespace Microsoft.Build.BackEnd
             }
             else
             {
-                _taskLoggingContext.LogError(new BuildEventFileInfo(_taskLocation), "TaskHostNodeFailedToLaunch", _taskType.Type.Name, runtime, architecture, msbuildLocation, e.ErrorCode, e.Message);
+                _taskLoggingContext.LogError(
+                    new BuildEventFileInfo(_taskLocation),
+                    "TaskHostNodeFailedToLaunch",
+                    _taskType.Type.Name,
+                    runtime,
+                    architecture,
+                    msbuildLocation,
+                    e is NodeFailedToLaunchException nodeFailedExc ? nodeFailedExc.ErrorCode : string.Empty,
+                    e.Message);
             }
         }
     }

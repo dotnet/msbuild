@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
 using System.IO;
-using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -16,7 +14,35 @@ namespace Microsoft.Build.Shared.Debugging
     {
         static DebugUtils()
         {
-            SetDebugPath();
+            try
+            {
+                SetDebugPath();
+            }
+            catch (Exception ex)
+            {
+                // A failure in SetDebugPath must not prevent MSBuild from starting.
+                // DebugPath will remain null — debugging/logging features will be
+                // unavailable for this session, but the build can still proceed.
+                //
+                // Known failure scenarios:
+                // - Directory.GetCurrentDirectory() throws DirectoryNotFoundException
+                //   if the working directory was deleted before MSBuild started.
+                // - FileUtilities.EnsureDirectoryExists() throws UnauthorizedAccessException
+                //   or IOException when the target path is on a read-only volume or an
+                //   offline network share.
+                // - Path.Combine() throws ArgumentException when MSBUILDDEBUGPATH contains
+                //   illegal path characters (e.g., '<', '>', '|').
+                // - PathTooLongException when the resolved path exceeds MAX_PATH on
+                //   .NET Framework without long-path support.
+                try
+                {
+                    Console.Error.WriteLine("MSBuild debug path initialization failed: " + ex);
+                }
+                catch
+                {
+                    // Console may not be available.
+                }
+            }
         }
 
         // DebugUtils are initialized early on by the test runner - during preparing data for DataMemeberAttribute of some test,
@@ -57,32 +83,7 @@ namespace Microsoft.Build.Shared.Debugging
         }
 
         private static readonly Lazy<NodeMode?> ProcessNodeMode = new(
-        () =>
-        {
-            return ScanNodeMode(Environment.CommandLine);
-
-            NodeMode? ScanNodeMode(string input)
-            {
-                var match = Regex.Match(input, @"/nodemode:(?<nodemode>[1-9]\d*)(\s|$)", RegexOptions.IgnoreCase);
-
-                if (!match.Success)
-                {
-                    return null; // Central/main process (not running as a node)
-                }
-                var nodeMode = match.Groups["nodemode"].Value;
-
-                Trace.Assert(!string.IsNullOrEmpty(nodeMode));
-
-                // Try to parse using the shared NodeModeHelper
-                if (NodeModeHelper.TryParse(nodeMode, out NodeMode? parsedMode))
-                {
-                    return parsedMode;
-                }
-
-                // If parsing fails, this is an unknown/unsupported node mode
-                return null;
-            }
-        });
+            () => NodeModeHelper.ExtractFromCommandLine(Environment.CommandLine));
 
         private static bool CurrentProcessMatchesDebugName()
         {
