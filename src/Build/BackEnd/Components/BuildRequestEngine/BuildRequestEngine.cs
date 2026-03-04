@@ -394,7 +394,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             string projectDirectoryFullPath = Path.GetDirectoryName(config.ProjectFullPath);
                             var environmentVariables = new Dictionary<string, string>(_componentHost.BuildParameters.BuildProcessEnvironmentInternal);
-                            taskEnvironment = new TaskEnvironment(new Framework.MultiThreadedTaskEnvironmentDriver(projectDirectoryFullPath, environmentVariables));
+                            taskEnvironment = new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(projectDirectoryFullPath, environmentVariables));
                         }
                         else
                         {
