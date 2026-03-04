@@ -270,7 +270,11 @@ jobs:
 - job: BootstrapMSBuildWithMTMode
   displayName: "Linux Core Multithreaded Mode"
   pool:
-    vmImage: 'ubuntu-latest'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: $(DncEngPublicBuildPool)
+      demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      vmImage: 'ubuntu-latest'
   timeoutInMinutes: 120
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
