@@ -87,6 +87,31 @@ function Get-LastSuccessfulRun {
     return $runs[0]
 }
 
+function Sanitize-ErrorString {
+    <#
+    .SYNOPSIS
+        Cleans an error string for safe JSON serialization: strips control
+        characters and truncates to a reasonable length.
+    #>
+    param(
+        [string]$Text,
+        [int]$MaxLength = 500
+    )
+
+    if ([string]::IsNullOrEmpty($Text)) { return "" }
+
+    # Strip control characters (0x00-0x1F) except common whitespace (\n \r \t)
+    $cleaned = $Text -replace '[\x00-\x08\x0B\x0C\x0E-\x1F]', ''
+    # Collapse runs of whitespace (newlines, tabs, spaces) into a single space
+    $cleaned = $cleaned -replace '\s+', ' '
+    $cleaned = $cleaned.Trim()
+
+    if ($cleaned.Length -gt $MaxLength) {
+        $cleaned = $cleaned.Substring(0, $MaxLength) + "..."
+    }
+    return $cleaned
+}
+
 function Get-FailedTasksFromTimeline {
     param([int]$BuildId)
     $url = "$Organization/$Project/_apis/build/builds/$BuildId/timeline?api-version=7.1"
@@ -103,7 +128,9 @@ function Get-FailedTasksFromTimeline {
     foreach ($task in $failedTasks) {
         $errors = @()
         if ($task.issues) {
-            $errors = @($task.issues | Where-Object { $_.type -eq "error" } | ForEach-Object { $_.message })
+            $errors = @($task.issues | Where-Object { $_.type -eq "error" } | ForEach-Object {
+                Sanitize-ErrorString -Text $_.message
+            })
         }
         $results += [PSCustomObject]@{
             name   = $task.name
