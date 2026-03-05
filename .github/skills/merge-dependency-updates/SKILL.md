@@ -26,16 +26,16 @@ This skill triages all open bot PRs in the MSBuild repo, produces a review dashb
 
 ### Step 1: Gather All Bot PRs
 
-Run **three searches in parallel** to find all open bot PRs:
+Run **two searches in parallel** to find all open bot PRs:
 
 1. **Dependency updates + Codeflow:**
    ```
-   Search: is:open author:app/dotnet-maestro in repo dotnet/msbuild
+   Search: is:open author:app/dotnet-maestro repo:dotnet/msbuild
    ```
 
 2. **OneLoc localization:**
    ```
-   Search: is:open "OneLocBuild" OR "Localized file check-in" in repo dotnet/msbuild
+   Search: is:open author:dotnet-bot repo:dotnet/msbuild ("OneLocBuild" OR "Localized file check-in")
    ```
 
 ### Step 2: Analyze Each PR (in parallel)
@@ -68,7 +68,7 @@ gh api graphql -f query='
             author { login }
           }
         }
-        reviewThreads(first: 5) {
+        reviewThreads(first: 20) {
           nodes {
             isResolved
             comments(first: 1) {
@@ -87,11 +87,11 @@ gh api graphql -f query='
 ```
 
 From the response, extract:
-- **CI status**: from `statusCheckRollup.state` — `SUCCESS`, `FAILURE`, `PENDING`, or `null`
+- **CI status**: from `statusCheckRollup.state` — `SUCCESS`, `FAILURE`, `PENDING`, `ERROR`, `EXPECTED`, or `null`. Map `ERROR` to failure (❌) and `EXPECTED` to neutral (⚪) in the dashboard.
 - **Review decision**: `APPROVED`, `REVIEW_REQUIRED`, `CHANGES_REQUESTED`
 - **Approvals**: count and list of `APPROVED` reviews
-- **Review comments**: any unresolved threads (especially `CHANGES_REQUESTED`)
-- **Files changed**: total count and list of paths
+- **Review comments**: any unresolved threads from the first 20 results (especially `CHANGES_REQUESTED`)
+- **Files changed**: use `totalCount` for the file count; use the first 50 file paths from `files.nodes` for suspicious file detection
 - **Suspicious flag**: check if any file paths are outside expected patterns (see below)
 
 #### Suspicious File Detection
@@ -169,7 +169,7 @@ Format:
 ```
 
 Status icons:
-- CI: ✅ SUCCESS, ❌ FAILURE, ⏳ PENDING, ⚪ None
+- CI: ✅ SUCCESS, ❌ FAILURE/ERROR, ⏳ PENDING, ⚪ None/EXPECTED
 - Review: ✅ APPROVED, 🔶 REVIEW_REQUIRED, ⛔ CHANGES_REQUESTED
 - Suspicious: ✅ Clean, ⚠️ with description
 
