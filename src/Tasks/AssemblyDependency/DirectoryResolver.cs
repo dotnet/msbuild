@@ -32,7 +32,7 @@ namespace Microsoft.Build.Tasks
             : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false, taskEnvironment)
         {
             this.parentAssembly = parentAssembly;
-            _fullSearchPath = string.IsNullOrEmpty(searchPathElement) ? searchPathElement : taskEnvironment.GetAbsolutePath(searchPathElement).Value;
+            _fullSearchPath = string.IsNullOrEmpty(searchPathElement) ? searchPathElement : taskEnvironment.GetAbsolutePath(searchPathElement).GetCanonicalForm().Value;
         }
 
         /// <inheritdoc/>
