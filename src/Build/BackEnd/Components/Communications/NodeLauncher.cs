@@ -83,14 +83,17 @@ namespace Microsoft.Build.BackEnd
             isNativeAppHost = false;
 
 #if RUNTIME_TYPE_NETCORE
-            // If msbuildLocation is a native app host (e.g., MSBuild.exe on Windows, MSBuild on Linux), run it directly.
-            // Otherwise, use dotnet.exe to run the managed assembly (e.g., MSBuild.dll).
             string fileName = Path.GetFileName(msbuildLocation);
-            isNativeAppHost = fileName.Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
-            if (!isNativeAppHost)
+
+            // Only managed assemblies (.dll) need dotnet.exe as a host.
+            // All native executables — MSBuild app host, MSBuildTaskHost.exe, etc. — run directly.
+            if (fileName.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
             {
                 return CurrentHost.GetCurrentHost();
             }
+
+            // Any .exe or extensionless binary (Linux app host) is a native executable.
+            isNativeAppHost = true;
 #endif
             return msbuildLocation;
         }
