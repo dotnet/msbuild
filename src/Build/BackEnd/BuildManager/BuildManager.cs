@@ -1257,8 +1257,7 @@ namespace Microsoft.Build.Execution
 
         /// <summary>
         /// Extracts build state under lock and delegates to <see cref="CrashTelemetryRecorder"/>
-        /// for EndBuild hang diagnostic telemetry emission. Also writes diagnostics to disk
-        /// via <see cref="ExceptionHandling.DumpHangDiagnosticsToFile"/>.
+        /// for EndBuild hang diagnostic telemetry emission.
         /// </summary>
         private void EmitEndBuildHangDiagnostics(string waitPhase, Stopwatch hangWatch)
         {
