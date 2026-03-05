@@ -17,13 +17,20 @@ using Xunit.Abstractions;
 
 namespace Microsoft.Build.UnitTests
 {
-    public sealed class ResGenDependencies_Tests
+    public sealed class ResGenDependencies_Tests : IDisposable
     {
+        private readonly TestEnvironment _env;
         private readonly ITestOutputHelper _output;
 
         public ResGenDependencies_Tests(ITestOutputHelper output)
         {
+            _env = TestEnvironment.Create(output);
             _output = output;
+        }
+
+        public void Dispose()
+        {
+            _env.Dispose();
         }
 
         [Theory]
@@ -106,9 +113,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LinkedFilesTrackedForAllResourceTypes()
         {
-            using TestEnvironment env = TestEnvironment.Create(_output);
-
-            var folder = env.CreateFolder(createFolder: true);
+            var folder = _env.CreateFolder(createFolder: true);
 
             // Create four linked files representing each code path in AddLinkedResource.
             var textFile = folder.CreateFile("linked.txt", "hello");
