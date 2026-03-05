@@ -13,13 +13,10 @@ parameters:
 - name: extraPropertiesStage2
   displayName: 'Extra MSBuild properties for stage 2 (e.g., /p:DotNetBuildMT=true)'
   type: string
-  # RecursiveDir fix (PR #13318) enables -mt for repos that were excluded due to
-  # TaskHost serialization losing RecursiveDir metadata.
-  # Remaining exclusions:
-  #   razor - WinFX GenerateTemporaryTargetAssembly uses IBuildEngine callbacks (MSB5022)
-  #   winforms, wpf - not validated yet (blocked by roslyn/razor in local testing)
-  #   source-build-reference-packages - not validated yet
-  default: '/p:DotNetBuildMT=true /p:MSBuildMTExcludedReposOverride=razor%3Bwinforms%3Bwpf%3Bsource-build-reference-packages'
+  # RecursiveDir fix (PR #13318) enables -mt for arcade, which was previously
+  # excluded due to TaskHost serialization losing RecursiveDir metadata.
+  # All other exclusions remain from the VMR default list until validated in CI.
+  default: '/p:DotNetBuildMT=true /p:MSBuildMTExcludedReposOverride=runtime%3Broslyn%3Baspnetcore%3Bsdk%3Befcore%3Bwinforms%3Bwpf%3Brazor%3Bsource-build-reference-packages'
 
 variables:
 - template: /eng/common/templates/variables/pool-providers.yml@self
