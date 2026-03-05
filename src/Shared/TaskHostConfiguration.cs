@@ -19,7 +19,7 @@ namespace Microsoft.Build.BackEnd
     internal class TaskHostConfiguration : INodePacket
     {
         /// <summary>
-        /// The node id (of the parent node, to make the logging work out)
+        /// The node id (of the owning worker node, to make the logging work out)
         /// </summary>
         private int _nodeId;
 

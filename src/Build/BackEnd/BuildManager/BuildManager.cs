@@ -1038,9 +1038,22 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                _noActiveSubmissionsEvent!.WaitOne();
+                {
+                    Stopwatch hangWatch = Stopwatch.StartNew();
+                    while (!_noActiveSubmissionsEvent!.WaitOne(CrashTelemetryRecorder.EndBuildHangDiagnosticsIntervalMs))
+                    {
+                        EmitEndBuildHangDiagnostics("WaitingForSubmissions", hangWatch);
+                    }
+                }
+
                 ShutdownConnectedNodes(false /* normal termination */);
-                _noNodesActiveEvent!.WaitOne();
+                {
+                    Stopwatch hangWatch = Stopwatch.StartNew();
+                    while (!_noNodesActiveEvent!.WaitOne(CrashTelemetryRecorder.EndBuildHangDiagnosticsIntervalMs))
+                    {
+                        EmitEndBuildHangDiagnostics("WaitingForNodes", hangWatch);
+                    }
+                }
 
                 // Wait for all of the actions in the work queue to drain.
                 // _workQueue.Completion.Wait() could throw here if there was an unhandled exception in the work queue,
@@ -1136,19 +1149,7 @@ namespace Microsoft.Build.Execution
                                 loggingService.PopulateBuildTelemetryWithErrors(_buildTelemetry);
                             }
 
-                            string? host = null;
-                            if (BuildEnvironmentState.s_runningInVisualStudio)
-                            {
-                                host = "VS";
-                            }
-                            else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME")))
-                            {
-                                host = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
-                            }
-                            else if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
-                            {
-                                host = "VSCode";
-                            }
+                            string? host = BuildEnvironmentState.GetHostName();
 
                             _buildTelemetry.BuildEngineHost = host;
 
@@ -1230,11 +1231,11 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void RecordCrashTelemetry(Exception exception, bool isUnhandled)
         {
-            string? host = _buildTelemetry?.BuildEngineHost ?? GetHostName();
+            string? host = _buildTelemetry?.BuildEngineHost ??  BuildEnvironmentState.GetHostName();
 
             CrashTelemetryRecorder.RecordCrashTelemetry(
                 exception,
-                isUnhandled ? "UnhandledException" : "EndBuildFailure",
+                isUnhandled ? CrashExitType.UnhandledException : CrashExitType.EndBuildFailure,
                 isUnhandled,
                 ExceptionHandling.IsCriticalException(exception),
                 ProjectCollection.Version?.ToString(),
@@ -1242,26 +1243,53 @@ namespace Microsoft.Build.Execution
                 host);
         }
 
-        private static string? GetHostName()
+        /// <summary>
+        /// Extracts build state under lock and delegates to <see cref="CrashTelemetryRecorder"/>
+        /// for EndBuild hang diagnostic telemetry emission. Also writes diagnostics to disk
+        /// via <see cref="ExceptionHandling.DumpHangDiagnosticsToFile"/>.
+        /// </summary>
+        private void EmitEndBuildHangDiagnostics(string waitPhase, Stopwatch hangWatch)
         {
-            if (BuildEnvironmentState.s_runningInVisualStudio)
+            int pendingSubmissionCount;
+            int submissionsWithResultNoLogging = 0;
+            bool threadExceptionRecorded;
+            int unmatchedProjectStartedCount;
+            string? host;
+
+            lock (_syncLock)
             {
-                return "VS";
+                foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
+                {
+                    if (submission.BuildResultBase is not null && !submission.LoggingCompleted)
+                    {
+                        submissionsWithResultNoLogging++;
+                    }
+                }
+
+                pendingSubmissionCount = _buildSubmissions.Count;
+                threadExceptionRecorded = _threadException is not null;
+                unmatchedProjectStartedCount = _projectStartedEvents.Count;
+                host = _buildTelemetry?.BuildEngineHost ?? BuildEnvironmentState.GetHostName();
             }
 
-            string? msbuildHostName = Environment.GetEnvironmentVariable("MSBUILD_HOST_NAME");
-            if (!string.IsNullOrEmpty(msbuildHostName))
-            {
-                return msbuildHostName;
-            }
+            string diagnostics = $"Phase={waitPhase}, Duration={hangWatch.ElapsedMilliseconds}ms, " +
+                $"PendingSubmissions={pendingSubmissionCount}, WithResultNoLogging={submissionsWithResultNoLogging}, " +
+                $"ThreadException={threadExceptionRecorded}, UnmatchedProjectStarted={unmatchedProjectStartedCount}";
 
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VSCODE_CWD")) || Environment.GetEnvironmentVariable("TERM_PROGRAM") == "vscode")
-            {
-                return "VSCode";
-            }
+            ExceptionHandling.DumpHangDiagnosticsToFile(diagnostics);
 
-            return null;
+            CrashTelemetryRecorder.CollectAndEmitEndBuildHangDiagnostics(
+                waitPhase,
+                hangWatch.ElapsedMilliseconds,
+                pendingSubmissionCount,
+                submissionsWithResultNoLogging,
+                threadExceptionRecorded,
+                unmatchedProjectStartedCount,
+                ProjectCollection.Version?.ToString(),
+                NativeMethodsShared.FrameworkName,
+                host);
         }
+
 
         /// <summary>
         /// Convenience method.  Submits a lone build request and blocks until results are available.

@@ -3,6 +3,9 @@
 
 using System;
 using System.Runtime.CompilerServices;
+#if NETFRAMEWORK
+using Microsoft.VisualStudio.Telemetry;
+#endif
 
 namespace Microsoft.Build.Framework.Telemetry;
 
@@ -13,10 +16,16 @@ namespace Microsoft.Build.Framework.Telemetry;
 internal static class CrashTelemetryRecorder
 {
     /// <summary>
+    /// Interval in milliseconds between EndBuild hang diagnostic emissions.
+    /// When EndBuild is stuck waiting for submissions or nodes, diagnostics are emitted at this interval.
+    /// </summary>
+    public const int EndBuildHangDiagnosticsIntervalMs = 30_000;
+
+    /// <summary>
     /// Records crash telemetry data for later emission via <see cref="FlushCrashTelemetry"/>.
     /// </summary>
     /// <param name="exception">The exception that caused the crash.</param>
-    /// <param name="exitType">Exit type classification (e.g. "LoggerFailure", "Unexpected").</param>
+    /// <param name="exitType">Exit type classification.</param>
     /// <param name="isUnhandled">True if the exception was not caught by any catch block.</param>
     /// <param name="isCritical">Whether the exception is classified as critical (OOM, StackOverflow, etc.).</param>
     /// <param name="buildEngineVersion">MSBuild version string, if available.</param>
@@ -24,7 +33,7 @@ internal static class CrashTelemetryRecorder
     /// <param name="buildEngineHost">Host name (VS, VSCode, CLI, etc.), if available.</param>
     public static void RecordCrashTelemetry(
         Exception exception,
-        string exitType,
+        CrashExitType exitType,
         bool isUnhandled,
         bool isCritical,
         string? buildEngineVersion = null,
@@ -52,7 +61,7 @@ internal static class CrashTelemetryRecorder
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void RecordAndFlushCrashTelemetry(
         Exception exception,
-        string exitType,
+        CrashExitType exitType,
         bool isUnhandled,
         bool isCritical)
     {
@@ -69,6 +78,8 @@ internal static class CrashTelemetryRecorder
                 ?.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Crash);
             activity?.SetTags(crashTelemetry);
+
+            PostFaultEvent(crashTelemetry);
         }
         catch
         {
@@ -101,6 +112,8 @@ internal static class CrashTelemetryRecorder
                 ?.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Crash);
             activity?.SetTags(crashTelemetry);
+
+            PostFaultEvent(crashTelemetry);
         }
         catch
         {
@@ -108,9 +121,54 @@ internal static class CrashTelemetryRecorder
         }
     }
 
+    /// <summary>
+    /// Posts a <c>FaultEvent</c> to the VS telemetry session so that crashes
+    /// appear in Prism fault dashboards alongside other VS component faults.
+    /// Only available on .NET Framework where the VS Telemetry SDK is loaded.
+    /// See https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/1022/FaultEvent-instrumentation-guide
+    /// </summary>
+#if NETFRAMEWORK
+    [MethodImpl(MethodImplOptions.NoInlining)]
+#endif
+    private static void PostFaultEvent(CrashTelemetry crashTelemetry)
+    {
+#if NETFRAMEWORK
+        try
+        {
+            if (crashTelemetry.Exception is null || TelemetryManager.IsOptOut())
+            {
+                return;
+            }
+
+            string eventName = $"{TelemetryConstants.EventPrefix}{TelemetryConstants.Crash}";
+            string description = $"{crashTelemetry.ExitType}: {crashTelemetry.ExceptionType}";
+            var faultEvent = new FaultEvent(eventName, description, crashTelemetry.Exception);
+
+            faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}ExitType"] = crashTelemetry.ExitType.ToString();
+            faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}CrashOrigin"] = crashTelemetry.CrashOrigin.ToString();
+
+            if (crashTelemetry.CrashOriginNamespace is not null)
+            {
+                faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}CrashOriginNamespace"] = crashTelemetry.CrashOriginNamespace;
+            }
+
+            if (crashTelemetry.StackHash is not null)
+            {
+                faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}StackHash"] = crashTelemetry.StackHash;
+            }
+
+            TelemetryService.DefaultSession?.PostEvent(faultEvent);
+        }
+        catch
+        {
+            // Best effort: fault telemetry must never cause a secondary failure.
+        }
+#endif
+    }
+
     private static CrashTelemetry CreateCrashTelemetry(
         Exception exception,
-        string exitType,
+        CrashExitType exitType,
         bool isUnhandled,
         bool isCritical)
     {
@@ -120,5 +178,51 @@ internal static class CrashTelemetryRecorder
         crashTelemetry.IsCritical = isCritical;
         crashTelemetry.IsUnhandled = isUnhandled;
         return crashTelemetry;
+    }
+
+    /// <summary>
+    /// Collects and emits diagnostic telemetry when EndBuild is stuck waiting.
+    /// Called periodically from timed wait loops so that diagnostics are available
+    /// even if the hang never resolves (crash telemetry in the finally block would be unreachable).
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void CollectAndEmitEndBuildHangDiagnostics(
+        string waitPhase,
+        long waitDurationMs,
+        int pendingSubmissionCount,
+        int submissionsWithResultNoLogging,
+        bool threadExceptionRecorded,
+        int unmatchedProjectStartedCount,
+        string? buildEngineVersion,
+        string? buildEngineFrameworkName,
+        string? buildEngineHost)
+    {
+        try
+        {
+            var crashTelemetry = new CrashTelemetry
+            {
+                ExitType = CrashExitType.EndBuildHang,
+                BuildEngineVersion = buildEngineVersion,
+                BuildEngineFrameworkName = buildEngineFrameworkName,
+                BuildEngineHost = buildEngineHost,
+                EndBuildWaitPhase = waitPhase,
+                EndBuildWaitDurationMs = waitDurationMs,
+                PendingSubmissionCount = pendingSubmissionCount,
+                SubmissionsWithResultNoLogging = submissionsWithResultNoLogging,
+                ThreadExceptionRecorded = threadExceptionRecorded,
+                UnmatchedProjectStartedCount = unmatchedProjectStartedCount,
+            };
+
+            TelemetryManager.Instance?.Initialize(isStandalone: false);
+
+            using IActivity? activity = TelemetryManager.Instance
+                ?.DefaultActivitySource
+                ?.StartActivity(TelemetryConstants.Crash);
+            activity?.SetTags(crashTelemetry);
+        }
+        catch
+        {
+            // Best effort: diagnostic telemetry must never cause a secondary failure.
+        }
     }
 }
