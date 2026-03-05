@@ -1,0 +1,11 @@
+﻿]9;4;3;\[?25l[1F
+  project [120G[14DTesting (0.2s)
+[?25h[?25l[2F
+[J[?25h[?25l[1F
+  project [120G[14DTesting (0.3s)
+[?25h[2F
+[J  project test [32;1msucceeded[m (0.3s)
+[?25l[1F
+[?25h
+Build [32;1msucceeded[m in 5.0s
+]9;4;0;\

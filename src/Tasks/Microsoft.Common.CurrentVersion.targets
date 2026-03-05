@@ -666,7 +666,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <!-- Users familiar with how some other repos work try to use NoWarn with MSBuild in place of MSBuildWarningsAsMessages. -->
   <PropertyGroup>
-    <MSBuildWarningsAsMessages Condition="'$(MSBuildWarningsAsMessages)'==''">$(NoWarn)</MSBuildWarningsAsMessages>
+    <MSBuildWarningsAsMessages>$(MSBuildWarningsAsMessages);$(NoWarn)</MSBuildWarningsAsMessages>
     <MSBuildWarningsAsErrors Condition="'$(MSBuildWarningsAsErrors)'==''">$(WarningsAsErrors)</MSBuildWarningsAsErrors>
     <MSBuildWarningsNotAsErrors Condition="'$(MSBuildWarningsNotAsErrors)'==''">$(WarningsNotAsErrors)</MSBuildWarningsNotAsErrors>
   </PropertyGroup>
@@ -1735,12 +1735,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          that can't multiplatform.  -->
     <ItemGroup Condition="'@(_ProjectsWithPlatformAssignment)' != ''">
       <ProjectsWithNearestPlatform Include="@(_ProjectsWithPlatformAssignment)"/>
-      <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
+      <ProjectsWithNearestPlatform Condition="'%(ProjectsWithNearestPlatform.Identity)' != '' and '%(ProjectsWithNearestPlatform.NearestPlatform)' != ''">
         <SetPlatform>Platform=%(ProjectsWithNearestPlatform.NearestPlatform)</SetPlatform>
       </ProjectsWithNearestPlatform>
 
       <!-- When GetCompatiblePlatform fails to assign NearestPlatform (or determines it's identical to default for the referenced project), undefine Platform and let that project build "on its own" -->
-      <ProjectsWithNearestPlatform Condition="'@(ProjectsWithNearestPlatform)' == '%(Identity)' and '%(ProjectsWithNearestPlatform.NearestPlatform)' == ''">
+      <ProjectsWithNearestPlatform Condition="'%(ProjectsWithNearestPlatform.Identity)' != '' and '%(ProjectsWithNearestPlatform.NearestPlatform)' == ''">
         <UndefineProperties>%(ProjectsWithNearestPlatform.UndefineProperties);Platform</UndefineProperties>
       </ProjectsWithNearestPlatform>
 
@@ -1883,7 +1883,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- For each reference, get closest match -->
 
-    <!-- Pass the CurrentProjectTargetPlatform parameter to the task only if GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter is true.  This means
+    <!-- Pass the CurrentProjectTargetFrameworkProperty parameter to the task only if GetReferenceNearestTargetFrameworkTaskSupportsTargetFrameworkPropertyParameter is true.  This means
+         that we are using a version of NuGet which supports that parameter on this task. -->
+
+    <GetReferenceNearestTargetFrameworkTask AnnotatedProjectReferences="@(_ProjectReferenceTargetFrameworkPossibilities)"
+                                            CurrentProjectTargetFramework="$(ReferringTargetFrameworkForProjectReferences)"
+                                            CurrentProjectTargetPlatform="$(TargetPlatformMoniker)"
+                                            CurrentProjectTargetFrameworkProperty="$(TargetFramework)"
+                                            CurrentProjectName="$(MSBuildProjectName)"
+                                            FallbackTargetFrameworks="$(AssetTargetFallback)"
+                                            Condition="'@(_ProjectReferenceTargetFrameworkPossibilities)' != '' and '$(ReferringTargetFrameworkForProjectReferences)' != ''
+                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetFrameworkPropertyParameter)' == 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' != 'true'">
+      <Output ItemName="AnnotatedProjects" TaskParameter="AssignedProjects" />
+    </GetReferenceNearestTargetFrameworkTask>
+
+    <!-- Pass the CurrentProjectTargetPlatform parameter to the task only if GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter is true and GetReferenceNearestTargetFrameworkTaskSupportsTargetFrameworkPropertyParameter is not true.  This means
          that we are using a version of NuGet which supports that parameter on this task. -->
 
     <GetReferenceNearestTargetFrameworkTask AnnotatedProjectReferences="@(_ProjectReferenceTargetFrameworkPossibilities)"
@@ -1892,7 +1906,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
                                             CurrentProjectName="$(MSBuildProjectName)"
                                             FallbackTargetFrameworks="$(AssetTargetFallback)"
                                             Condition="'@(_ProjectReferenceTargetFrameworkPossibilities)' != '' and '$(ReferringTargetFrameworkForProjectReferences)' != ''
-                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter)' == 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' != 'true'">
+                                                        And '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetPlatformParameter)' == 'true' and '$(GetReferenceNearestTargetFrameworkTaskSupportsTargetFrameworkPropertyParameter)' != 'true' and '%(_ProjectReferenceTargetFrameworkPossibilities.IsVcxOrNativeProj)' != 'true'">
       <Output ItemName="AnnotatedProjects" TaskParameter="AssignedProjects" />
     </GetReferenceNearestTargetFrameworkTask>
 
@@ -1933,7 +1947,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <UpdatedAnnotatedProjects Remove="@(UpdatedAnnotatedProjects)" />
 
       <!-- If the NearestTargetFramework property was set and the project multi-targets, SetTargetFramework must be set. -->
-      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.NearestTargetFramework)' != '' and '%(AnnotatedProjects.HasSingleTargetFramework)' != 'true'">
+      <AnnotatedProjects Condition="'%(AnnotatedProjects.Identity)' != '' and '%(AnnotatedProjects.NearestTargetFramework)' != '' and '%(AnnotatedProjects.HasSingleTargetFramework)' != 'true'">
         <SetTargetFramework>TargetFramework=%(AnnotatedProjects.NearestTargetFramework)</SetTargetFramework>
       </AnnotatedProjects>
 
@@ -1941,13 +1955,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
          If the NearestTargetFramework property was not set or the project has a single TargetFramework, we need to Undefine
          TargetFramework to avoid another project evaluation.
       -->
-      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and ('%(AnnotatedProjects.NearestTargetFramework)' == '' or '%(AnnotatedProjects.HasSingleTargetFramework)' == 'true')">
+      <AnnotatedProjects Condition="'%(AnnotatedProjects.Identity)' != '' and ('%(AnnotatedProjects.NearestTargetFramework)' == '' or '%(AnnotatedProjects.HasSingleTargetFramework)' == 'true')">
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);TargetFramework</UndefineProperties>
       </AnnotatedProjects>
 
       <!-- Add RuntimeIdentifier and SelfContained to the list of global properties that should not flow to the referenced project,
            unless the project is expecting those properties to flow. -->
-      <AnnotatedProjects Condition="'@(AnnotatedProjects)' == '%(Identity)' and '%(AnnotatedProjects.IsRidAgnostic)' != 'false'">
+      <AnnotatedProjects Condition="'%(AnnotatedProjects.Identity)' != '' and '%(AnnotatedProjects.IsRidAgnostic)' != 'false'">
         <UndefineProperties>%(AnnotatedProjects.UndefineProperties);RuntimeIdentifier;SelfContained</UndefineProperties>
       </AnnotatedProjects>
 
@@ -5761,27 +5775,46 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_CleanPriorFileWrites Include="@(_CleanUnfilteredPriorFileWrites)" Exclude="@(_ResolveAssemblyReferenceResolvedFilesAbsolute)"/>
     </ItemGroup>
+    
+    <PropertyGroup>
     <!--
         Of shareable files, keep only those that are in the project's directory.
         We never clean shareable files outside of the project directory because
         the build may be to a common output directory and other projects may need
         them.
 
-        Only subtract the outputs from ResolveAssemblyReferences target because that's the
-        only "Resolve" target that tries to resolve assemblies directly from the output
-        directory.
-        -->
-    <FindUnderPath Path="$(MSBuildProjectDirectory)" Files="@(FileWritesShareable)" UpdateToAbsolutePaths="true">
+        The default layout of projects is that everything particular to the project is
+        located under the MSBuildProjectDirectory, so it's considered safe to track/delete those.
+        The assumption was that anything outside the project's directory is shared between multiple projects
+        and should not be deleted by the Clean target.
+
+        However, this is not always the case. The .NET SDK has a feature called Artifacts Layout
+        where project outputs are tracked in _project-specific_ locations under a root that is
+        outside of the project directory. In such cases, we need to be able to track FileWritesShareable
+        even from those locations.
+      -->
+      <TrackFileWritesShareableOutsideOfProjectDirectory Condition=" '$(TrackFileWritesShareableOutsideOfProjectDirectory)' == '' ">false</TrackFileWritesShareableOutsideOfProjectDirectory>
+    </PropertyGroup>
+    
+    <!-- Even if we don't allow cleaning filewrites from outside of the project bubble, we should still include FileWritesShareable that are inside the bubble -->
+    <FindUnderPath Condition="!$(TrackFileWritesShareableOutsideOfProjectDirectory)" Path="$(MSBuildProjectDirectory)" Files="@(FileWritesShareable)" UpdateToAbsolutePaths="true">
       <Output TaskParameter="InPath" ItemName="FileWrites"/>
     </FindUnderPath>
 
-    <!-- Find all files in the final output directory. -->
-    <FindUnderPath Path="$(OutDir)" Files="@(FileWrites)" UpdateToAbsolutePaths="true">
+    <!-- Find all files in the final output directory. Use separate item includes for Files based on condition so we don't create a whole new
+         item list unnecessarily -->
+    <FindUnderPath Path="$(OutDir)" Files="@(FileWrites)" UpdateToAbsolutePaths="true" Condition="!$(TrackFileWritesShareableOutsideOfProjectDirectory)">
+      <Output TaskParameter="InPath" ItemName="_CleanCurrentFileWritesInOutput"/>
+    </FindUnderPath>
+    <FindUnderPath Path="$(OutDir)" Files="@(FileWrites);@(FileWritesShareable)" UpdateToAbsolutePaths="true" Condition="$(TrackFileWritesShareableOutsideOfProjectDirectory)">
       <Output TaskParameter="InPath" ItemName="_CleanCurrentFileWritesInOutput"/>
     </FindUnderPath>
 
-    <!-- Find all files in the intermediate output directory. -->
-    <FindUnderPath Path="$(IntermediateOutputPath)" Files="@(FileWrites)" UpdateToAbsolutePaths="true">
+    <!-- Find all files in the intermediate output directory. Same as above, use Conditions to prevent new item list writes -->
+    <FindUnderPath Path="$(IntermediateOutputPath)" Files="@(FileWrites)" UpdateToAbsolutePaths="true" Condition="!$(TrackFileWritesShareableOutsideOfProjectDirectory)">
+      <Output TaskParameter="InPath" ItemName="_CleanCurrentFileWritesInIntermediate"/>
+    </FindUnderPath>
+    <FindUnderPath Path="$(IntermediateOutputPath)" Files="@(FileWrites);@(FileWritesShareable)" UpdateToAbsolutePaths="true" Condition="$(TrackFileWritesShareableOutsideOfProjectDirectory)">
       <Output TaskParameter="InPath" ItemName="_CleanCurrentFileWritesInIntermediate"/>
     </FindUnderPath>
 

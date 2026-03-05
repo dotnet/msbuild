@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-#if NET
 using System.Diagnostics.CodeAnalysis;
-#endif
 using System.IO;
 using Microsoft.Build.Shared;
 

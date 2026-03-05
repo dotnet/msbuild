@@ -108,17 +108,24 @@
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.pdb" />
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.exe.config" />
       <FreshlyBuiltBinaries Include="$(OutputPath)**\*.dll.config" />
+      <FreshlyBuiltBinaries Include="$(MSBuildTaskHostBinPath)**\Microsoft.NET.StringTools.net35.dll" />
+      <FreshlyBuiltBinaries Include="$(MSBuildTaskHostBinPath)**\*.exe" />
+      <FreshlyBuiltBinaries Include="$(MSBuildTaskHostBinPath)**\*.pdb" />
+      <FreshlyBuiltBinaries Include="$(MSBuildTaskHostBinPath)**\*.exe.config" />
+      <FreshlyBuiltBinaries Include="$(MSBuildTaskHostBinPath)**\*.dll.config" />
 
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll" />
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.exe" />
-      <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.exe" />
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.tlb" />
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.pdb" />
-      <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.pdb" />
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.exe.config" />
-      <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.exe.config" />
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll.config" />
       <FreshlyBuiltBinariesx64 Remove="$(X64BinPath)**\Microsoft.VisualStudio.SolutionPersistence.dll" />
+      <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\Microsoft.NET.StringTools.net35.dll" />
+      <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.exe" />
+      <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.pdb" />
+      <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.exe.config" />
+      <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.dll.config" />
 
       <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.Tasks.Core.dll" />
       <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.dll" />

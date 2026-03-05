@@ -3,7 +3,7 @@
 
 using System;
 using System.IO;
-
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="filename">The file name.</param>
         internal DependencyFile(string filename)
         {
-            this.filename = FileUtilities.FixFilePath(filename);
+            this.filename = FrameworkFileUtilities.FixFilePath(filename);
 
             if (FileSystems.Default.FileExists(FileName))
             {

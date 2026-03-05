@@ -22,7 +22,8 @@ namespace Microsoft.Build.Tasks
     /// but this could restriction could be lifted as MoveFileEx,
     /// which is used here, supports it.
     /// </remarks>
-    public class Move : TaskExtension, ICancelableTask, IIncrementalTask
+    [MSBuildMultiThreadableTask]
+    public class Move : TaskExtension, ICancelableTask, IIncrementalTask, IMultiThreadableTask
     {
         /// <summary>
         /// Flags for MoveFileEx.
@@ -74,6 +75,9 @@ namespace Microsoft.Build.Tasks
         /// Incrementally, it is hard to question A->B if both files are gone.
         /// In short, question will always return false and author should use target inputs/outputs.</remarks>
         public bool FailIfNotIncremental { get; set; }
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// Stop and return (in an undefined state) as soon as possible.
@@ -152,12 +156,18 @@ namespace Microsoft.Build.Tasks
             // Now that we have a list of DestinationFolder files, move from source to DestinationFolder.
             for (int i = 0; i < SourceFiles.Length && !_canceling; ++i)
             {
-                string sourceFile = SourceFiles[i].ItemSpec;
-                string destinationFile = DestinationFiles[i].ItemSpec;
+                string sourceSpec = SourceFiles[i].ItemSpec;
+                string destinationSpec = DestinationFiles[i].ItemSpec;
+
+                AbsolutePath? sourceFile = null;
+                AbsolutePath? destinationFile = null;
 
                 try
                 {
-                    if (!FailIfNotIncremental && MoveFileWithLogging(sourceFile, destinationFile))
+                    sourceFile = TaskEnvironment.GetAbsolutePath(sourceSpec);
+                    destinationFile = TaskEnvironment.GetAbsolutePath(destinationSpec);
+
+                    if (!FailIfNotIncremental && MoveFileWithLogging(sourceFile.Value, destinationFile.Value))
                     {
                         SourceFiles[i].CopyMetadataTo(DestinationFiles[i]);
                         destinationFilesSuccessfullyMoved.Add(DestinationFiles[i]);
@@ -169,8 +179,8 @@ namespace Microsoft.Build.Tasks
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    string lockedFileMessage = LockCheck.GetLockedFileMessage(sourceFile);
-                    Log.LogErrorWithCodeFromResources("Move.Error", sourceFile, destinationFile, e.Message, lockedFileMessage);
+                    string lockedFileMessage = LockCheck.GetLockedFileMessage(sourceFile?.OriginalValue ?? sourceSpec);
+                    Log.LogErrorWithCodeFromResources("Move.Error", sourceSpec, destinationSpec, e.Message, lockedFileMessage);
                     success = false;
 
                     // Continue with the rest of the list
@@ -186,7 +196,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Makes the provided file writeable if necessary.
         /// </summary>
-        private static void MakeWriteableIfReadOnly(string file)
+        private static void MakeWriteableIfReadOnly(AbsolutePath file)
         {
             var info = new FileInfo(file);
             if ((info.Attributes & FileAttributes.ReadOnly) != 0)
@@ -200,12 +210,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <throws>IO related exceptions.</throws>
         private bool MoveFileWithLogging(
-            string sourceFile,
-            string destinationFile)
+            AbsolutePath sourceFile,
+            AbsolutePath destinationFile)
         {
             if (FileSystems.Default.DirectoryExists(destinationFile))
             {
-                Log.LogErrorWithCodeFromResources("Move.DestinationIsDirectory", sourceFile, destinationFile);
+                Log.LogErrorWithCodeFromResources("Move.DestinationIsDirectory", sourceFile.OriginalValue, destinationFile.OriginalValue);
                 return false;
             }
 
@@ -214,14 +224,14 @@ namespace Microsoft.Build.Tasks
                 // If the source file passed in is actually a directory instead of a file, log a nice
                 // error telling the user so.  Otherwise, .NET Framework's File.Move method will throw
                 // an FileNotFoundException, which is not very useful to the user.
-                Log.LogErrorWithCodeFromResources("Move.SourceIsDirectory", sourceFile);
+                Log.LogErrorWithCodeFromResources("Move.SourceIsDirectory", sourceFile.OriginalValue);
                 return false;
             }
 
             // Check the source exists.
             if (!FileSystems.Default.FileExists(sourceFile))
             {
-                Log.LogErrorWithCodeFromResources("Move.SourceDoesNotExist", sourceFile);
+                Log.LogErrorWithCodeFromResources("Move.SourceDoesNotExist", sourceFile.OriginalValue);
                 return false;
             }
 
@@ -240,7 +250,7 @@ namespace Microsoft.Build.Tasks
             }
 
             // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
-            Log.LogMessageFromResources(MessageImportance.Normal, "Move.FileComment", sourceFile, destinationFile);
+            Log.LogMessageFromResources(MessageImportance.Normal, "Move.FileComment", sourceFile.OriginalValue, destinationFile.OriginalValue);
 
             // We want to always overwrite any existing destination file.
             // Unlike File.Copy, File.Move does not have an overload to overwrite the destination.

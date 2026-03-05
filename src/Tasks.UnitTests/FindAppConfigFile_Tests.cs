@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests
             f.SecondaryList = new ITaskItem[] { new TaskItem("foo\\app.config"), new TaskItem("xxx") };
             f.TargetPath = "targetpath";
             Assert.True(f.Execute());
-            Assert.Equal(FileUtilities.FixFilePath("foo\\app.config"), f.AppConfigFile.ItemSpec);
+            Assert.Equal(FrameworkFileUtilities.FixFilePath("foo\\app.config"), f.AppConfigFile.ItemSpec);
             Assert.Equal("targetpath", f.AppConfigFile.GetMetadata("TargetPath"));
         }
 
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests
             f.TargetPath = "targetpath";
             Assert.True(f.Execute());
             // Should ignore the invalid paths
-            Assert.Equal(FileUtilities.FixFilePath(@"foo\\app.config"), f.AppConfigFile.ItemSpec);
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"foo\\app.config"), f.AppConfigFile.ItemSpec);
         }
 
         // For historical reasons, we should return the last one in the list

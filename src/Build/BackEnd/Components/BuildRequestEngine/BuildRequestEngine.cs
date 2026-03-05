@@ -387,7 +387,21 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        BuildRequestEntry entry = new BuildRequestEntry(request, _configCache[request.ConfigurationId]);
+                        BuildRequestConfiguration config = _configCache[request.ConfigurationId];
+
+                        TaskEnvironment taskEnvironment;
+                        if (_componentHost.BuildParameters.MultiThreaded)
+                        {
+                            string projectDirectoryFullPath = Path.GetDirectoryName(config.ProjectFullPath);
+                            var environmentVariables = new Dictionary<string, string>(_componentHost.BuildParameters.BuildProcessEnvironmentInternal);
+                            taskEnvironment = new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(projectDirectoryFullPath, environmentVariables));
+                        }
+                        else
+                        {
+                            taskEnvironment = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+                        }
+
+                        BuildRequestEntry entry = new BuildRequestEntry(request, config, taskEnvironment);
 
                         entry.OnStateChanged += BuildRequestEntry_StateChanged;
 

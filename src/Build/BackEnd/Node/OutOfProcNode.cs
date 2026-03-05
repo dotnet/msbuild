@@ -743,6 +743,7 @@ namespace Microsoft.Build.Execution
             }
 
             Traits.UpdateFromEnvironment();
+            DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(_buildParameters.BuildProcessEnvironment);
 
             // We want to make sure the global project collection has the toolsets which were defined on the parent
             // so that any custom toolsets defined can be picked up by tasks who may use the global project collection but are

@@ -15,6 +15,7 @@ namespace Microsoft.Build.Tasks
     /// A task that finds an item with the specified itemspec, if present,
     /// in the provided list.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class FindInList : TaskExtension
     {
         private ITaskItem[] _list;
@@ -104,7 +105,7 @@ namespace Microsoft.Build.Tasks
         {
             try
             {
-                var path = FileUtilities.FixFilePath(item.ItemSpec);
+                var path = FrameworkFileUtilities.FixFilePath(item.ItemSpec);
                 string filename = (MatchFileNameOnly ? Path.GetFileName(path) : path);
 
                 if (String.Equals(filename, ItemSpecToFind, comparison))

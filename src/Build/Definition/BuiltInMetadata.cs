@@ -6,8 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using Microsoft.Build.Shared;
 
-#nullable disable
-
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

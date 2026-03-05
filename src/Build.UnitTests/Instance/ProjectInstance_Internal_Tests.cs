@@ -70,10 +70,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 ProjectInstance project = new Project(projectRootElementFromString.Project).CreateProjectInstance();
 
                 project.TaskRegistry.TaskRegistrations.Count.ShouldBe(3);
-                project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t0", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyFile.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), "af0"));
-                project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t1", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyFile.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), "af1a"));
-                project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t1", null)][1].TaskFactoryAssemblyLoadInfo.AssemblyName.ShouldBe("an1");
-                project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t2", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyName.ShouldBe("an2");
+                project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t0", TaskHostParameters.Empty)][0].TaskFactoryAssemblyLoadInfo.AssemblyFile.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), "af0"));
+                project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t1", TaskHostParameters.Empty)][0].TaskFactoryAssemblyLoadInfo.AssemblyFile.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), "af1a"));
+                project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t1", TaskHostParameters.Empty)][1].TaskFactoryAssemblyLoadInfo.AssemblyName.ShouldBe("an1");
+                project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t2", TaskHostParameters.Empty)][0].TaskFactoryAssemblyLoadInfo.AssemblyName.ShouldBe("an2");
             }
             finally
             {

@@ -1256,7 +1256,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectUsingTaskElement AddUsingTask(string name, string assemblyFile, string assemblyName)
         {
-            ProjectUsingTaskElement usingTask = CreateUsingTaskElement(name, FileUtilities.FixFilePath(assemblyFile), assemblyName);
+            ProjectUsingTaskElement usingTask = CreateUsingTaskElement(name, FrameworkFileUtilities.FixFilePath(assemblyFile), assemblyName);
             AppendChild(usingTask);
 
             return usingTask;
@@ -1994,7 +1994,7 @@ namespace Microsoft.Build.Construction
                     return false;
                 }
 
-                string contents = File.ReadAllText(path);
+                string contents = FileSystems.Default.ReadFileAllText(path);
 
                 // If the file is only whitespace or the XML declaration then it is empty
                 //

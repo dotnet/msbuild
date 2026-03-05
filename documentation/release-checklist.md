@@ -88,7 +88,7 @@ if it is not, `darc add-default-channel  --channel "VS {{THIS_RELEASE_VERSION}}"
 
 ### Final branding
 - [ ] Prepare final branding PR for `vs{{THIS_RELEASE_VERSION}}`: {{URL_OF_FINAL_BRANDING_PR}} \
-      Edit Version.props file - add `<DotNetFinalVersionKind>release</DotNetFinalVersionKind>` as a suffix (on same line! - to intentionaly make it merge conflict on flows to main) after the `VersionPrefix`  \
+      Run `scripts/Stabilize-Release.ps1` to update `eng/Versions.props` (adds `<DotNetFinalVersionKind>release</DotNetFinalVersionKind>` on same line as `VersionPrefix` and changes `PreReleaseVersionLabel` to `servicing`). Use `-DryRun` to preview changes. \
       e.g.: #11130, #10697
 - [ ]  Merge final branding to `vs{{THIS_RELEASE_VERSION}}` branch
 - [ ]  Update perfstar MSBuild insertions configuration: [example PR](https://dev.azure.com/devdiv/DevDiv/_git/dotnet-perfstar/pullrequest/522843): {{URL_OF_PERFSTAR_PR}}

@@ -14,7 +14,6 @@ function CreateBuildEnvScripts {
   $scriptContents = @"
 @echo off
 title MSBuild ($RepoRoot)
-set DOTNET_MULTILEVEL_LOOKUP=0
 REM https://aka.ms/vs/unsigned-dotnet-debugger-lib
 set VSDebugger_ValidateDotnetDebugLibSignatures=0
 
@@ -33,7 +32,6 @@ DOSKEY killdotnet=taskkill /F /IM dotnet.exe /T ^& taskkill /F /IM VSTest.Consol
   $scriptPath = Join-Path $ArtifactsDir "msbuild-build-env.ps1"
   $scriptContents = @"
 `$host.ui.RawUI.WindowTitle = "MSBuild ($RepoRoot)"
-`$env:DOTNET_MULTILEVEL_LOOKUP = 0
 # https://aka.ms/vs/unsigned-dotnet-debugger-lib
 `$env:VSDebugger_ValidateDotnetDebugLibSignatures = 0
 
@@ -72,10 +70,10 @@ function CreateVSShortcut {
   }
 
   $scriptPath = Join-Path $ArtifactsDir 'msbuild-build-env.ps1'
-  $slnPath = Join-Path $RepoRoot 'MSBuild.sln'
+  $slnPath = Join-Path $RepoRoot 'MSBuild.slnx'
   $commandToLaunch = "& '$scriptPath'; & '$devenvPath' '$slnPath'"
   $powershellPath = '%SystemRoot%\system32\WindowsPowerShell\v1.0\powershell.exe'
-  $shortcutPath = Join-Path $ArtifactsDir 'VS with MSBuild.sln.lnk'
+  $shortcutPath = Join-Path $ArtifactsDir 'VS with MSBuild.slnx.lnk'
 
   # https://stackoverflow.com/a/9701907/294804
   # https://learn.microsoft.com/en-us/troubleshoot/windows-client/admin-development/create-desktop-shortcut-with-wsh

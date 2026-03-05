@@ -284,6 +284,12 @@ namespace Microsoft.Build.BackEnd.Logging
         bool HasBuildSubmissionLoggedErrors(int submissionId);
 
         /// <summary>
+        /// Populates build telemetry with error categorization data.
+        /// </summary>
+        /// <param name="buildTelemetry">The BuildTelemetry object to populate with error data.</param>
+        void PopulateBuildTelemetryWithErrors(Framework.Telemetry.BuildTelemetry buildTelemetry);
+
+        /// <summary>
         /// Get the warnings that will be promoted to errors for the specified context.
         /// </summary>
         /// <param name="context">The build context through which warnings will be logged as errors.</param>

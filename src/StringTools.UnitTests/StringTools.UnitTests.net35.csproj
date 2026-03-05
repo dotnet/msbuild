@@ -8,7 +8,14 @@
 
     <AssemblyName>Microsoft.NET.StringTools.net35.UnitTests</AssemblyName>
     <IsTestProject>true</IsTestProject>
+    <IsUnitTestProject>true</IsUnitTestProject>
     <IsLibraryTestProject>true</IsLibraryTestProject>
+
+    <!-- Do not mangle paths for test assemblies, because Shoudly assertions want actual on-disk paths. -->
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
+
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+
     <DefineConstants>$(DefineConstants);NET35_UNITTEST</DefineConstants>
     <NoWarn>$(NoWarn);CA2000</NoWarn>
   </PropertyGroup>

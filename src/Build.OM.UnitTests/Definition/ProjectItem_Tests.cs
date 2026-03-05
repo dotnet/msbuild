@@ -3625,7 +3625,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
-        [MemberData(nameof(UpdateAndRemoveShouldWorkWithEscapedCharactersTestData))]
+        [MemberData(nameof(UpdateAndRemoveShouldWorkWithEscapedCharactersTestData), DisableDiscoveryEnumeration = true)]
         public void UpdateAndRemoveShouldWorkWithEscapedCharacters(string projectContents, string include, string update, string remove, string[] expectedInclude, Dictionary<string, string>[] expectedMetadata)
         {
             var formattedProjectContents = string.Format(projectContents, include, update, remove);

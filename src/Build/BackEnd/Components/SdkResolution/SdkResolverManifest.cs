@@ -5,6 +5,7 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Xml;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -79,7 +80,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     {
                         SdkResolverManifest manifest = ParseSdkResolverElement(reader, filePath);
 
-                        manifest.Path = FileUtilities.FixFilePath(manifest.Path);
+                        manifest.Path = FrameworkFileUtilities.FixFilePath(manifest.Path);
                         if (!System.IO.Path.IsPathRooted(manifest.Path))
                         {
                             manifest.Path = System.IO.Path.Combine(manifestFolder, manifest.Path);

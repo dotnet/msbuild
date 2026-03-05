@@ -198,7 +198,7 @@ namespace Microsoft.Build.Logging
             switch (parameterName.ToUpperInvariant())
             {
                 case "LOGFILE":
-                    _logFileName = FileUtilities.FixFilePath(parameterValue);
+                    _logFileName = FrameworkFileUtilities.FixFilePath(parameterValue);
                     break;
                 case "APPEND":
                     _append = true;

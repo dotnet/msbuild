@@ -97,13 +97,13 @@ namespace Microsoft.Build.Tasks
             bool enableCustomCulture = false)
         {
             // Use the link file name if there is one, otherwise, fall back to file name.
-            string embeddedFileName = FileUtilities.FixFilePath(linkFileName);
+            string embeddedFileName = FrameworkFileUtilities.FixFilePath(linkFileName);
             if (string.IsNullOrEmpty(embeddedFileName))
             {
-                embeddedFileName = FileUtilities.FixFilePath(fileName);
+                embeddedFileName = FrameworkFileUtilities.FixFilePath(fileName);
             }
 
-            dependentUponFileName = FileUtilities.FixFilePath(dependentUponFileName);
+            dependentUponFileName = FrameworkFileUtilities.FixFilePath(dependentUponFileName);
             Culture.ItemCultureInfo info;
 
             if (!string.IsNullOrEmpty(culture) && enableCustomCulture)

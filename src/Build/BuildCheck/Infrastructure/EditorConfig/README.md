@@ -67,8 +67,8 @@ Lifecycle of BuildCheckManager could be found [here](https://github.com/dotnet/m
 
 
 #### Custom configuration data
-CustomConfigurationData is propogated to the BuildCheck Check instance by passing the instance of [ConfigurationContext](https://github.com/dotnet/msbuild/blob/393c2fea652873416c8a2028810932a4fa94403f/src/Build/BuildCheck/API/ConfigurationContext.cs#L14)
-during the initialization of the [BuildExecutionCheck](https://github.com/dotnet/msbuild/blob/393c2fea652873416c8a2028810932a4fa94403f/src/Build/BuildCheck/API/BuildExecutionCheck.cs#L36).
+CustomConfigurationData is propagated to the BuildCheck Check instance by passing the instance of [ConfigurationContext](https://github.com/dotnet/msbuild/blob/393c2fea652873416c8a2028810932a4fa94403f/src/Build/BuildCheck/API/ConfigurationContext.cs#L14)
+during the initialization of the [Check](https://github.com/dotnet/msbuild/blob/a73379bc4af3599eb79b899a7c4c56a6c0dff9ff/src/Build/BuildCheck/API/Check.cs#L34).
 
 
 #### Example of consuming the CustomConfigurationData

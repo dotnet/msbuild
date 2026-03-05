@@ -1,0 +1,115 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="ARM64" />
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/Package/">
+    <Project Path="src/Package/DevDivPackage/DevDivPackage.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Package/Localization/Localization.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Package/Microsoft.Build.UnGAC/Microsoft.Build.UnGAC.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Package/MSBuild.VSSetup.Arm64/MSBuild.VSSetup.Arm64.csproj">
+      <Platform Solution="*|ARM64" Project="arm64" />
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Package/MSBuild.VSSetup/MSBuild.VSSetup.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/Samples/">
+    <Project Path="src/Samples/Dependency/Dependency.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Samples/PortableTask/PortableTask.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Samples/ProjectCachePlugin/ProjectCachePlugin.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Samples/TaskUsageLogger/TaskUsageLogger.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Samples/TaskWithDependency/TaskWithDependency.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Samples/XmlFileLogger/XmlFileLogger.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="NuGet.Config" />
+    <File Path="src/Shared/UnitTests/xunit.runner.json" />
+    <File Path="testenvironments.json" />
+  </Folder>
+  <Project Path="src/Build.OM.UnitTests/Microsoft.Build.Engine.OM.UnitTests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/Build.UnitTests/Microsoft.Build.Engine.UnitTests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/Build/Microsoft.Build.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/BuildCheck.UnitTests/Microsoft.Build.BuildCheck.UnitTests.csproj">
+    <Platform Solution="*|ARM64" Project="arm64" />
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/Framework/Microsoft.Build.Framework.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/MSBuild.Bootstrap/MSBuild.Bootstrap.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/MSBuild.UnitTests/Microsoft.Build.CommandLine.UnitTests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/MSBuild/MSBuild.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+    <Platform Solution="Debug|ARM64" Project="ARM64" />
+  </Project>
+  <Project Path="src/MSBuildTaskHost/MSBuildTaskHost.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/StringTools.Benchmark/StringTools.Benchmark.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/StringTools.UnitTests/StringTools.UnitTests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/StringTools.UnitTests/StringTools.UnitTests.net35.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/StringTools/StringTools.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/Tasks.UnitTests/Microsoft.Build.Tasks.UnitTests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/Tasks/Microsoft.Build.Tasks.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/UnitTests.Shared/Microsoft.Build.UnitTests.Shared.csproj">
+    <Platform Solution="*|ARM64" Project="arm64" />
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/Utilities.UnitTests/Microsoft.Build.Utilities.UnitTests.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/Utilities/Microsoft.Build.Utilities.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="src/Xunit.NetCore.Extensions/Xunit.NetCore.Extensions.csproj">
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
+  <Project Path="template_feed/Microsoft.Build.Templates.csproj" />
+</Solution>

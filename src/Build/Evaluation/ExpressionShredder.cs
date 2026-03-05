@@ -179,10 +179,12 @@ namespace Microsoft.Build.Evaluation
                             int endQuoted = currentIndex - 1;
                             if (transformExpressions == null)
                             {
-                                transformExpressions = new List<ItemExpressionCapture>();
+                                // PERF: Almost all expressions have only one capture, so optimize for that case
+                                transformExpressions = new List<ItemExpressionCapture>(1);
                             }
 
                             transformExpressions.Add(new ItemExpressionCapture(startQuoted, endQuoted - startQuoted, expression.Substring(startQuoted, endQuoted - startQuoted)));
+                            SinkWhitespace(expression, ref currentIndex);
                             continue;
                         }
 
@@ -192,10 +194,12 @@ namespace Microsoft.Build.Evaluation
                         {
                             if (transformExpressions == null)
                             {
-                                transformExpressions = new List<ItemExpressionCapture>();
+                                // PERF: Almost all expressions have only one capture, so optimize for that case
+                                transformExpressions = new List<ItemExpressionCapture>(1);
                             }
 
                             transformExpressions.Add(functionCapture.Value);
+                            SinkWhitespace(expression, ref currentIndex);
                             continue;
                         }
 
@@ -334,12 +338,14 @@ namespace Microsoft.Build.Evaluation
                         bool isQuotedTransform = SinkSingleQuotedExpression(expression, ref i, end);
                         if (isQuotedTransform)
                         {
+                            SinkWhitespace(expression, ref i);
                             continue;
                         }
 
                         ItemExpressionCapture? functionCapture = SinkItemFunctionExpression(expression, startTransform, ref i, end);
                         if (functionCapture != null)
                         {
+                            SinkWhitespace(expression, ref i);
                             continue;
                         }
 

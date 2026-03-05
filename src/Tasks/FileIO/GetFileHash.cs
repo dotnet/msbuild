@@ -18,7 +18,8 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Computes the checksum for a single file.
     /// </summary>
-    public sealed class GetFileHash : TaskExtension, ICancelableTask
+    [MSBuildMultiThreadableTask]
+    public sealed class GetFileHash : TaskExtension, ICancelableTask, IMultiThreadableTask
     {
         internal const string _defaultFileHashAlgorithm = "SHA256";
         internal const string _hashEncodingHex = "hex";
@@ -64,6 +65,9 @@ namespace Microsoft.Build.Tasks
         [Output]
         public ITaskItem[] Items { get; set; }
 
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
+
         public override bool Execute()
         {
             if (!SupportedAlgorithms.TryGetValue(Algorithm, out var algorithmFactory))
@@ -84,14 +88,15 @@ namespace Microsoft.Build.Tasks
             Parallel.For(0, Files.Length, parallelOptions, index =>
             {
                 var file = Files[index];
+                AbsolutePath filePath = TaskEnvironment.GetAbsolutePath(file.ItemSpec);
 
-                if (!FileSystems.Default.FileExists(file.ItemSpec))
+                if (!FileSystems.Default.FileExists(filePath))
                 {
                     Log.LogErrorWithCodeFromResources("FileHash.FileNotFound", file.ItemSpec);
                     return;
                 }
 
-                var hash = ComputeHash(algorithmFactory, file.ItemSpec, _cancellationTokenSource.Token);
+                var hash = ComputeHash(algorithmFactory, filePath, _cancellationTokenSource.Token);
                 var encodedHash = EncodeHash(encoding, hash);
 
                 lock (writeLock)

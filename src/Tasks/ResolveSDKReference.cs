@@ -916,7 +916,7 @@ namespace Microsoft.Build.Tasks
                     _prefer32BitFromProject = prefer32Bit;
 
                     // There must be a trailing slash or else the ExpandSDKReferenceAssemblies will not work.
-                    ResolvedPath = FileUtilities.EnsureTrailingSlash(sdk.ItemSpec);
+                    ResolvedPath = FrameworkFileUtilities.EnsureTrailingSlash(sdk.ItemSpec);
 
                     System.Version.TryParse(sdk.GetMetadata(SDKPlatformVersion), out Version targetPlatformVersionFromItem);
 

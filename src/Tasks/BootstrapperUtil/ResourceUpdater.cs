@@ -9,7 +9,6 @@ using System.Runtime.InteropServices;
 using System.Threading;
 using Microsoft.Build.Shared;
 
-#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {

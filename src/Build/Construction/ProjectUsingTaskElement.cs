@@ -3,7 +3,7 @@
 
 using System;
 using System.Diagnostics;
-
+using Microsoft.Build.Framework;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
 
@@ -48,14 +48,14 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string AssemblyFile
         {
-            get => FileUtilities.FixFilePath(
+            get => FrameworkFileUtilities.FixFilePath(
                 GetAttributeValue(XMakeAttributes.assemblyFile));
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.assemblyName);
                 ErrorUtilities.VerifyThrowInvalidOperation(String.IsNullOrEmpty(AssemblyName), "OM_EitherAttributeButNotBoth", ElementName, XMakeAttributes.assemblyFile, XMakeAttributes.assemblyName);
-                value = FileUtilities.FixFilePath(value);
+                value = FrameworkFileUtilities.FixFilePath(value);
                 SetOrRemoveAttribute(XMakeAttributes.assemblyFile, value, "Set usingtask AssemblyFile {0}", value);
             }
         }
@@ -249,7 +249,7 @@ namespace Microsoft.Build.Construction
 
             if (!String.IsNullOrEmpty(assemblyFile))
             {
-                usingTask.AssemblyFile = FileUtilities.FixFilePath(assemblyFile);
+                usingTask.AssemblyFile = FrameworkFileUtilities.FixFilePath(assemblyFile);
             }
             else
             {

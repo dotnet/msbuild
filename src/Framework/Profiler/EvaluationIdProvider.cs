@@ -4,8 +4,6 @@
 using System.Threading;
 using Microsoft.Build.Shared;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework.Profiler
 {
     /// <summary>

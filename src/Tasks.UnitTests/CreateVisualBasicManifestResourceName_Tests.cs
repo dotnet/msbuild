@@ -217,7 +217,7 @@ End Namespace
         {
             string result =
                 CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
-                    fileName: FileUtilities.FixFilePath(@"SubFolder\MyForm.en-GB.ResX"),
+                    fileName: FrameworkFileUtilities.FixFilePath(@"SubFolder\MyForm.en-GB.ResX"),
                     linkFileName: null,
                     // Link file name
                     prependCultureAsDirectory:
@@ -283,7 +283,7 @@ End Namespace
         {
             string result =
                 CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
-                    fileName: FileUtilities.FixFilePath(@"SubFolder\SplashScreen.bmp"),
+                    fileName: FrameworkFileUtilities.FixFilePath(@"SubFolder\SplashScreen.bmp"),
                     linkFileName: null,             // Link file name
                     prependCultureAsDirectory: true,
                     rootNamespace: "RootNamespace", // Root namespace
@@ -303,7 +303,7 @@ End Namespace
         {
             string result =
                 CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
-                    fileName: FileUtilities.FixFilePath(@"SubFolder\SplashScreen.fr.bmp"),
+                    fileName: FrameworkFileUtilities.FixFilePath(@"SubFolder\SplashScreen.fr.bmp"),
                     linkFileName: null,             // Link file name
                     prependCultureAsDirectory: true,
                     rootNamespace: "RootNamespace",  // Root namespace
@@ -312,7 +312,7 @@ End Namespace
                     binaryStream: null,
                     log: null);
 
-            Assert.Equal(FileUtilities.FixFilePath(@"fr\RootNamespace.SplashScreen.bmp"), result);
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"fr\RootNamespace.SplashScreen.bmp"), result);
         }
 
         /// <summary>
@@ -323,7 +323,7 @@ End Namespace
         {
             string result =
                 CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
-                    fileName: FileUtilities.FixFilePath(@"SubFolder\SplashScreen.fr.bmp"),
+                    fileName: FrameworkFileUtilities.FixFilePath(@"SubFolder\SplashScreen.fr.bmp"),
                     linkFileName: null,             // Link file name
                     prependCultureAsDirectory: false,
                     rootNamespace: "RootNamespace",  // Root namespace
@@ -614,7 +614,7 @@ End Namespace
         {
             string result =
                 CreateVisualBasicManifestResourceName.CreateManifestNameImpl(
-                    fileName: FileUtilities.FixFilePath(@"SubFolder\MyResource.fr.resources"),
+                    fileName: FrameworkFileUtilities.FixFilePath(@"SubFolder\MyResource.fr.resources"),
                     linkFileName: null,             // Link file name
                     prependCultureAsDirectory: false,
                     rootNamespace: "RootNamespace",  // Root namespace

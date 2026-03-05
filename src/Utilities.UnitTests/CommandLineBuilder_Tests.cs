@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
@@ -107,11 +108,11 @@ namespace Microsoft.Build.UnitTests
         public void AppendTwoStringsEnsureNoSpace()
         {
             CommandLineBuilder c = new CommandLineBuilder();
-            c.AppendFileNamesIfNotNull(new[] { "Form1.resx", FileUtilities.FixFilePath("built\\Form1.resources") }, ",");
+            c.AppendFileNamesIfNotNull(new[] { "Form1.resx", FrameworkFileUtilities.FixFilePath("built\\Form1.resources") }, ",");
 
             // There shouldn't be a space before or after the comma
             // Tools like resgen require comma-delimited lists to be bumped up next to each other.
-            c.ShouldBe(FileUtilities.FixFilePath(@"Form1.resx,built\Form1.resources"));
+            c.ShouldBe(FrameworkFileUtilities.FixFilePath(@"Form1.resx,built\Form1.resources"));
         }
 
         /*

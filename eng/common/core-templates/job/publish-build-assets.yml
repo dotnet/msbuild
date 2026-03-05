@@ -40,6 +40,8 @@ parameters:
 
   repositoryAlias: self
 
+  officialBuildId: ''
+
 jobs:
 - job: Asset_Registry_Publish
 
@@ -62,6 +64,11 @@ jobs:
       value: false
     # unconditional - needed for logs publishing (redactor tool version)
     - template: /eng/common/core-templates/post-build/common-variables.yml
+  - name: OfficialBuildId
+    ${{ if ne(parameters.officialBuildId, '') }}:
+      value: ${{ parameters.officialBuildId }}
+    ${{ else }}:
+      value: $(Build.BuildNumber)
 
   pool:
     # We don't use the collection uri here because it might vary (.visualstudio.com vs. dev.azure.com)
@@ -73,7 +80,7 @@ jobs:
     # If it's not devdiv, it's dnceng
     ${{ if ne(variables['System.TeamProject'], 'DevDiv') }}:
       name: NetCore1ESPool-Publishing-Internal
-      image: windows.vs2019.amd64
+      image: windows.vs2022.amd64
       os: windows
   steps:
   - ${{ if eq(parameters.is1ESPipeline, '') }}:
@@ -113,6 +120,14 @@ jobs:
     
     - task: NuGetAuthenticate@1
 
+    # Populate internal runtime variables.
+    - template: /eng/common/templates/steps/enable-internal-sources.yml
+      ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+        parameters:
+            legacyCredential: $(dn-bot-dnceng-artifact-feeds-rw)
+    
+    - template: /eng/common/templates/steps/enable-internal-runtimes.yml
+
     - task: AzureCLI@2
       displayName: Publish Build Assets
       inputs:
@@ -124,7 +139,10 @@ jobs:
           /p:ManifestsPath='$(Build.StagingDirectory)/AssetManifests'
           /p:IsAssetlessBuild=${{ parameters.isAssetlessBuild }}
           /p:MaestroApiEndpoint=https://maestro.dot.net
-          /p:OfficialBuildId=$(Build.BuildNumber)
+          /p:OfficialBuildId=$(OfficialBuildId)
+          -runtimeSourceFeed https://ci.dot.net/internal
+          -runtimeSourceFeedKey '$(dotnetbuilds-internal-container-read-token-base64)'
+
       condition: ${{ parameters.condition }}
       continueOnError: ${{ parameters.continueOnError }}
     
@@ -173,6 +191,11 @@ jobs:
           PromoteToChannelIds: ${{ parameters.PromoteToChannelIds }}
           is1ESPipeline: ${{ parameters.is1ESPipeline }}
 
+      # Darc is targeting 8.0, so make sure it's installed
+      - task: UseDotNet@2
+        inputs:
+          version: 8.0.x
+
       - task: AzureCLI@2
         displayName: Publish Using Darc
         inputs:
@@ -188,6 +211,8 @@ jobs:
             -ArtifactsPublishingAdditionalParameters '${{ parameters.artifactsPublishingAdditionalParameters }}'
             -SymbolPublishingAdditionalParameters '${{ parameters.symbolPublishingAdditionalParameters }}'
             -SkipAssetsPublishing '${{ parameters.isAssetlessBuild }}'
+            -runtimeSourceFeed https://ci.dot.net/internal
+            -runtimeSourceFeedKey '$(dotnetbuilds-internal-container-read-token-base64)'
 
     - ${{ if eq(parameters.enablePublishBuildArtifacts, 'true') }}:
       - template: /eng/common/core-templates/steps/publish-logs.yml

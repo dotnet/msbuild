@@ -52,7 +52,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Project
         {
-            get => FileUtilities.FixFilePath(GetAttributeValue(XMakeAttributes.project));
+            get => FrameworkFileUtilities.FixFilePath(GetAttributeValue(XMakeAttributes.project));
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.project);
@@ -71,7 +71,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public string Sdk
         {
-            get => FileUtilities.FixFilePath(GetAttributeValue(XMakeAttributes.sdk));
+            get => FrameworkFileUtilities.FixFilePath(GetAttributeValue(XMakeAttributes.sdk));
             set
             {
                 ErrorUtilities.VerifyThrowArgumentLength(value, XMakeAttributes.sdk);

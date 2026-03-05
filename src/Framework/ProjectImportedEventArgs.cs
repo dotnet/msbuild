@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-#if NET
 using System.Diagnostics.CodeAnalysis;
-#endif
 using System.IO;
 using Microsoft.Build.Shared;
 

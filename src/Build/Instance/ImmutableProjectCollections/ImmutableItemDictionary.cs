@@ -21,7 +21,6 @@ namespace Microsoft.Build.Instance
         private readonly IDictionary<string, ICollection<TCached>> _itemsByType;
         private readonly ICollection<TCached> _allCachedItems;
         private readonly Func<TCached, T?> _getInstance;
-        private readonly Func<T, string?> _getItemType;
 
         public ImmutableItemDictionary(
             ICollection<TCached> allItems,
@@ -37,7 +36,6 @@ namespace Microsoft.Build.Instance
             _allCachedItems = allItems;
             _itemsByType = itemsByType ?? throw new ArgumentNullException(nameof(itemsByType));
             _getInstance = getInstance;
-            _getItemType = getItemType;
         }
 
         /// <inheritdoc />
@@ -64,31 +62,7 @@ namespace Microsoft.Build.Instance
         public void Add(T projectItem) => throw new NotSupportedException();
 
         /// <inheritdoc />
-        public void AddEmptyMarker(string itemType) => throw new NotSupportedException();
-
-        /// <inheritdoc />
-        public void AddRange(IEnumerable<T> projectItems) => throw new NotSupportedException();
-
-        /// <inheritdoc />
         public void Clear() => throw new NotSupportedException();
-
-        /// <inheritdoc />
-        public bool Contains(T projectItem)
-        {
-            if (projectItem == null)
-            {
-                return false;
-            }
-
-            string? itemType = _getItemType(projectItem);
-            if (itemType == null)
-            {
-                return false;
-            }
-
-            ICollection<T> items = GetItems(itemType);
-            return items.Contains(projectItem);
-        }
 
         /// <inheritdoc />
         public void EnumerateItemsPerType(Action<string, IEnumerable<T>> itemTypeCallback)
@@ -156,9 +130,6 @@ namespace Microsoft.Build.Instance
         }
 
         /// <inheritdoc />
-        public bool HasEmptyMarker(string itemType) => _itemsByType.Values.Any(list => list.Count == 0);
-
-        /// <inheritdoc />
         public void ImportItems(IEnumerable<T> other) => throw new NotSupportedException();
 
         /// <inheritdoc />
@@ -168,10 +139,7 @@ namespace Microsoft.Build.Instance
         public bool Remove(T projectItem) => throw new NotSupportedException();
 
         /// <inheritdoc />
-        public void RemoveItems(IEnumerable<T> other) => throw new NotSupportedException();
-
-        /// <inheritdoc />
-        public void Replace(T existingItem, T newItem) => throw new NotSupportedException();
+        public void RemoveItemsOfType(string itemType, IEnumerable<T> other) => throw new NotSupportedException();
 
         private sealed class ListConverter : ICollection<T>
         {

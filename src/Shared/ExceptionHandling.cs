@@ -22,6 +22,7 @@ using System.Xml.Schema;
 using System.Runtime.Serialization;
 #if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.Framework.Telemetry;
 #endif
 using Microsoft.Build.Framework;
 
@@ -73,10 +74,32 @@ namespace Microsoft.Build.Shared
                     : FileUtilities.TempFileDirectory;
         }
 
+        private static string s_debugDumpPathInRunningTests = GetDebugDumpPath();
+        internal static bool ResetDebugDumpPathInRunningTests = false;
+
         /// <summary>
         /// The directory used for diagnostic log files.
         /// </summary>
-        internal static string DebugDumpPath => s_debugDumpPath;
+        internal static string DebugDumpPath
+        {
+            get
+            {
+                if (BuildEnvironmentHelper.Instance.RunningTests)
+                {
+                    if (ResetDebugDumpPathInRunningTests)
+                    {
+                        s_debugDumpPathInRunningTests = GetDebugDumpPath();
+                        // reset dump file name so new one is created in new path
+                        s_dumpFileName = null;
+                        ResetDebugDumpPathInRunningTests = false;
+                    }
+
+                    return s_debugDumpPathInRunningTests;
+                }
+
+                return s_debugDumpPath;
+            }
+        }
 
         /// <summary>
         /// The file used for diagnostic log files.
@@ -327,7 +350,26 @@ namespace Microsoft.Build.Shared
         {
             Exception ex = (Exception)e.ExceptionObject;
             DumpExceptionToFile(ex);
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+            RecordCrashTelemetryForUnhandledException(ex);
+#endif
         }
+
+#if !CLR2COMPATIBILITY && !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
+        /// <summary>
+        /// Records and immediately flushes crash telemetry for an unhandled exception.
+        /// Best effort - must never throw, as the process is already crashing.
+        /// </summary>
+        [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        private static void RecordCrashTelemetryForUnhandledException(Exception ex)
+        {
+            CrashTelemetryRecorder.RecordAndFlushCrashTelemetry(
+                ex,
+                exitType: CrashExitType.UnhandledException,
+                isUnhandled: true,
+                isCritical: IsCriticalException(ex));
+        }
+#endif
 
         /// <summary>
         /// Dump the exception information to a file
@@ -381,6 +423,33 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Writes hang diagnostic information to a file so it persists on disk
+        /// for later retrieval from customer machines.
+        /// File is written to the same directory as crash dump files (<see cref="DebugDumpPath"/>).
+        /// </summary>
+        internal static void DumpHangDiagnosticsToFile(string diagnostics)
+        {
+            try
+            {
+                Directory.CreateDirectory(DebugDumpPath);
+
+                var pid = EnvironmentUtilities.CurrentProcessId;
+                string fileName = Path.Combine(DebugDumpPath, $"MSBuild_pid-{pid}.hang.txt");
+
+                using (StreamWriter writer = FileUtilities.OpenWrite(fileName, append: true))
+                {
+                    writer.WriteLine(DateTime.Now.ToString("G", CultureInfo.CurrentCulture));
+                    writer.WriteLine(diagnostics);
+                    writer.WriteLine("===================");
+                }
+            }
+            catch
+            {
+                // Best-effort: diagnostic file writing must never make things worse.
+            }
+        }
+
+        /// <summary>
         /// Returns the content of any exception dump files modified
         /// since the provided time, otherwise returns an empty string.
         /// </summary>
@@ -391,13 +460,13 @@ namespace Microsoft.Build.Shared
 
             foreach (string file in files)
             {
-                if (File.GetLastWriteTimeUtc(file) >= fromTimeUtc)
+                if (FileSystems.Default.GetLastWriteTimeUtc(file) >= fromTimeUtc)
                 {
                     builder.Append(Environment.NewLine);
                     builder.Append(file);
                     builder.Append(':');
                     builder.Append(Environment.NewLine);
-                    builder.Append(File.ReadAllText(file));
+                    builder.Append(FileSystems.Default.ReadFileAllText(file));
                     builder.Append(Environment.NewLine);
                 }
             }

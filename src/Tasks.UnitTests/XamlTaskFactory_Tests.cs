@@ -12,6 +12,9 @@ using System.Xaml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Xaml;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.CSharp;
 using Shouldly;
 using Xunit;
@@ -444,6 +447,40 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
 
     public class CompilationTests
     {
+    [Fact]
+    public void OutOfProcXamlTaskFactoryProvidesAssemblyPath()
+    {
+      try
+      {
+        const string taskElementContents = @"<ProjectSchemaDefinitions xmlns=""clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"">
+  <Rule Name=""FakeTask"">
+  <BoolProperty Name=""Always"" Switch=""/always"" />
+  </Rule>
+</ProjectSchemaDefinitions>";
+
+        var factory = new Microsoft.Build.Tasks.XamlTaskFactory();
+        var loggingHost = new MockEngine { ForceOutOfProcessExecution = true };
+        bool initialized = factory.Initialize(
+          "FakeTask",
+          new Dictionary<string, TaskPropertyInfo>(StringComparer.OrdinalIgnoreCase),
+          taskElementContents,
+          loggingHost);
+        initialized.ShouldBeTrue(loggingHost.Log);
+
+        ITask task = factory.CreateTask(loggingHost);
+        task.ShouldNotBeNull();
+
+        string assemblyPath = factory.GetAssemblyPath();
+        assemblyPath.ShouldNotBeNullOrEmpty();
+        File.Exists(assemblyPath).ShouldBeTrue();
+
+        factory.CleanupTask(task);
+      }
+      finally
+      {
+      }
+    }
+
         /// <summary>
         /// Tests to see if the generated stream compiles
         /// Code must be compilable on its own.
@@ -830,6 +867,131 @@ namespace Microsoft.Build.UnitTests.XamlTaskFactory_Tests
             Assert.NotNull(switchList);
             string CommandLineToolSwitchOutput = switchList["BasicInteger"].SwitchValue + switchList["BasicInteger"].Separator + switchList["BasicInteger"].Number;
             Assert.Equal("/Bi1", CommandLineToolSwitchOutput);
+        }
+
+        /// <summary>
+        /// Verifies that ITaskFactoryBuildParameterProvider.IsMultiThreadedBuild triggers out-of-process compilation
+        /// </summary>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MultiThreadedBuildTriggersOutOfProcCompilation(bool isMultiThreaded)
+        {
+            MockEngine buildEngine = new MockEngine { IsMultiThreadedBuild = isMultiThreaded };
+
+            XamlTaskFactory factory = new XamlTaskFactory();
+
+            // XamlTaskFactory uses ProjectSchemaDefinitions format
+            string taskBody = @"
+<ProjectSchemaDefinitions xmlns=""clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" xmlns:sys=""clr-namespace:System;assembly=mscorlib"">
+  <Rule Name=""TestXamlTask"" ToolName=""cmd.exe"">
+    <StringProperty Name=""TestArg"" Switch=""/c echo "" />
+  </Rule>
+</ProjectSchemaDefinitions>";
+
+            bool success = factory.Initialize("TestXamlTask", new Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+            success.ShouldBeTrue();
+
+            // Get assembly path - should be non-null when compiled for out-of-proc
+            string assemblyPath = factory.GetAssemblyPath();
+
+            if (isMultiThreaded)
+            {
+                assemblyPath.ShouldNotBeNullOrEmpty("Assembly should be compiled to disk in multi-threaded mode");
+                File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
+            }
+            else
+            {
+                assemblyPath.ShouldBeNullOrEmpty("In-memory compilation should not have a persistent assembly path");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that ForceOutOfProcessExecution property triggers out-of-proc compilation
+        /// </summary>
+        [Fact]
+        public void ForceOutOfProcessExecutionTriggersOutOfProcCompilation()
+        {
+            MockEngine buildEngine = new MockEngine 
+            { 
+                ForceOutOfProcessExecution = true,
+                IsMultiThreadedBuild = false 
+            };
+
+            XamlTaskFactory factory = new XamlTaskFactory();
+
+            // XamlTaskFactory uses ProjectSchemaDefinitions format
+            string taskBody = @"
+<ProjectSchemaDefinitions xmlns=""clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" xmlns:sys=""clr-namespace:System;assembly=mscorlib"">
+  <Rule Name=""TestXamlTaskForced"" ToolName=""cmd.exe"">
+    <StringProperty Name=""TestArg"" Switch=""/c echo "" />
+  </Rule>
+</ProjectSchemaDefinitions>";
+
+            bool success = factory.Initialize("TestXamlTaskForced", new Dictionary<string, TaskPropertyInfo>(), taskBody, buildEngine);
+            success.ShouldBeTrue();
+
+            string assemblyPath = factory.GetAssemblyPath();
+            assemblyPath.ShouldNotBeNullOrEmpty("ForceOutOfProcessExecution should trigger out-of-proc compilation");
+            File.Exists(assemblyPath).ShouldBeTrue("Assembly file should exist on disk");
+        }
+
+        /// <summary>
+        /// End-to-end test that verifies inline tasks execute successfully when /mt is used.
+        /// This confirms the inline task factory compiles for out-of-process execution and the task runs correctly.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedBuildExecutesInlineTasksSuccessfully()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                
+                // Create a project with an inline task using XamlTaskFactory
+                // XamlTaskFactory is a data-driven tool task, so we use a simple tool (cmd.exe) for testing
+                TransientTestFile projectFile = env.CreateFile(folder, "test.proj", @"
+<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"" ToolsVersion=""msbuilddefaulttoolsversion"" DefaultTargets=""Build"">
+  
+  <!-- Define an inline task using XamlTaskFactory -->
+  <UsingTask TaskName=""MyXamlTask"" TaskFactory=""XamlTaskFactory"" AssemblyName=""Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a"">
+    <Task>
+      <![CDATA[
+        <ProjectSchemaDefinitions xmlns=""clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework"" xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" xmlns:sys=""clr-namespace:System;assembly=mscorlib"">
+          <Rule Name=""MyXamlTask"" ToolName=""cmd.exe"">
+            <StringProperty Name=""Args"" Switch=""/c echo "" />
+          </Rule>
+        </ProjectSchemaDefinitions>
+      ]]>
+    </Task>
+  </UsingTask>
+
+  <Target Name=""Build"">
+    <Message Text=""Starting xaml task test..."" Importance=""High"" />
+    <MyXamlTask Args=""XamlTask executed from multi-threaded build"" />
+    <Message Text=""Xaml task completed"" Importance=""High"" />
+  </Target>
+
+</Project>");
+
+                // Build with /mt flag with detailed verbosity to see task launching details
+                string output = RunnerUtilities.ExecMSBuild(
+                    projectFile.Path + " /t:Build /mt /v:detailed", 
+                    out bool success);
+
+                success.ShouldBeTrue(customMessage: "Build with /mt should succeed with inline xaml task");
+                output.ShouldContain("Starting xaml task test",
+                    customMessage: "Build should start");
+                output.ShouldContain("Xaml task completed",
+                    customMessage: "Xaml task should complete successfully");
+                output.ShouldContain("XamlTask executed from multi-threaded build",
+                    customMessage: "Xaml task should execute and output message via cmd.exe");
+                
+                // Verify the inline task was launched from a temporary assembly (out-of-process execution)
+                output.ShouldContain(".inline_task.dll",
+                    customMessage: "Xaml task should be compiled to temporary assembly for out-of-process execution");
+                output.ShouldContain("external task host",
+                    customMessage: "Xaml task should be launched in external task host");
+            }
         }
 
         #endregion

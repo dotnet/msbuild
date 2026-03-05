@@ -118,11 +118,7 @@ namespace Microsoft.Build.Execution
         /// Flag indicating whether node reuse should be enabled.
         /// By default, it is enabled.
         /// </summary>
-#if FEATURE_NODE_REUSE
         private bool _enableNodeReuse = true;
-#else
-        private bool _enableNodeReuse = false;
-#endif
 
         private bool _enableRarNode;
 
@@ -226,6 +222,11 @@ namespace Microsoft.Build.Execution
         private ProjectLoadSettings _projectLoadSettings = ProjectLoadSettings.Default;
 
         private bool _interactive;
+
+        /// <summary>
+        /// When true, enables running build in multiple in-proc nodes.
+        /// </summary>
+        private bool _multiThreaded;
 
         private ProjectIsolationMode _projectIsolationMode;
 
@@ -552,7 +553,11 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Enables running build in multiple in-proc nodes.
         /// </summary>
-        public bool MultiThreaded { get; set; }
+        public bool MultiThreaded
+        {
+            get => _multiThreaded;
+            set => _multiThreaded = value;
+        }
 
         /// <summary>
         /// The amount of memory the build should limit itself to using, in megabytes.
@@ -974,6 +979,7 @@ namespace Microsoft.Build.Execution
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
             translator.Translate(ref _reportFileAccesses);
             translator.Translate(ref _enableTargetOutputLogging);
+            translator.Translate(ref _multiThreaded);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

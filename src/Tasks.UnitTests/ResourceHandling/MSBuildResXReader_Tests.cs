@@ -145,7 +145,7 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
     <value>ResourceHandling\TextFile1.txt;{stringType};utf-8</value>
   </data>"), null, false);
 
-            AssertSingleStringResource(resxWithLinkedString, "TextFile1", "Contents of TextFile1");
+            AssertSingleStringResourceFromFile(resxWithLinkedString, "TextFile1", "Contents of TextFile1");
         }
 
         [Fact]
@@ -179,7 +179,7 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
                     Path.Combine(baseDir.Path, nameof(LoadsStringFromFileRefAsStringWithShiftJISEncoding) + ".resx"),
                     useRelativePath: true);
 
-                AssertSingleStringResource(resxWithLinkedString, "TextFile1", JapaneseString);
+                AssertSingleStringResourceFromFile(resxWithLinkedString, "TextFile1", JapaneseString);
             }
         }
 
@@ -190,6 +190,16 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
             resources[0].Name.ShouldBe(name);
 
             resources[0].ShouldBeOfType<StringResource>()
+                .Value.ShouldBe(value);
+        }
+
+        private static void AssertSingleStringResourceFromFile(IReadOnlyList<IResource> resources, string name, string value)
+        {
+            resources.ShouldHaveSingleItem();
+
+            resources[0].Name.ShouldBe(name);
+
+            resources[0].ShouldBeAssignableTo<LinkedStringResource>()
                 .Value.ShouldBe(value);
         }
 
@@ -306,7 +316,7 @@ $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Form
 "), null, false);
 
             var resource = resources.ShouldHaveSingleItem()
-                .ShouldBeOfType<LiveObjectResource>();
+                .ShouldBeOfType<LinkedLiveObjectResource>();
             resource.Name.ShouldBe("Image1");
 
             byte[] bytes = new byte[4];
@@ -331,6 +341,37 @@ $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Form
             resource.Name.ShouldBe("Color1");
             resource.TypeAssemblyQualifiedName.ShouldBe("System.Drawing.Color, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a");
             resource.StringRepresentation.ShouldBe("Blue");
+        }
+
+        [Fact]
+        public void InlineStringIsNotLinkedFileResource()
+        {
+            var resources = MSBuildResXReader.GetResourcesFromString(
+                ResXHelper.SurroundWithBoilerplate(
+                    @"<data name=""StringResource"" xml:space=""preserve"">
+    <value>StringValue</value>
+  </data>"), null, false);
+
+            resources.ShouldHaveSingleItem();
+            resources[0].ShouldBeOfType<StringResource>();
+        }
+
+        [Fact]
+        public void FileRefStringIsLinkedFileResource()
+        {
+            File.Exists(Path.Combine("ResourceHandling", "TextFile1.txt")).ShouldBeTrue("Test deployment is missing None files");
+
+            var resources = MSBuildResXReader.GetResourcesFromString(
+                ResXHelper.SurroundWithBoilerplate(
+$@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
+  <data name=""TextFile1"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
+    <value>ResourceHandling\TextFile1.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>"), null, false);
+
+            resources.ShouldHaveSingleItem();
+            resources[0].ShouldBeOfType<LinkedStringResource>();
+            resources[0].ShouldBeAssignableTo<ILinkedFileResource>()
+                .LinkedFilePath.ShouldNotBeNull();
         }
 
         // TODO: invalid resx xml

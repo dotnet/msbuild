@@ -779,6 +779,57 @@ namespace Microsoft.Build.UnitTests
                 e => TranslationHelpers.GetMultiItemsString(e.Items));
         }
 
+        /// <summary>
+        /// Tests that items implementing IItemData (like ProjectItem) are properly serialized in binary logs.
+        /// This regression test ensures that -getitem properly logs item values instead of type names.
+        /// </summary>
+        [Fact]
+        public void RoundtripProjectEvaluationFinishedEventArgsWithIItemData()
+        {
+            var itemDataWithMetadata = new TestItemData(
+                "TestItemSpec",
+                new Dictionary<string, string> { { "MetadataKey", "MetadataValue" }, { "Another", "Data" } });
+            var args = new ProjectEvaluationFinishedEventArgs(
+                ResourceUtilities.GetResourceString("EvaluationFinished"),
+                @"C:\foo\bar.proj")
+            {
+                BuildEventContext = BuildEventContext.Invalid,
+                ProjectFile = @"C:\foo\bar.proj",
+                GlobalProperties = new Dictionary<string, string>() { { "GlobalKey", "GlobalValue" } },
+                Properties = new List<DictionaryEntry>() { new DictionaryEntry("Key", "Value") },
+                Items = new List<DictionaryEntry>() { new DictionaryEntry("ItemType", itemDataWithMetadata) }
+            };
+
+            Roundtrip(args,
+                e => e.Message,
+                e => e.ProjectFile,
+                e => TranslationHelpers.GetPropertiesString(e.GlobalProperties),
+                e => TranslationHelpers.GetPropertiesString(e.Properties),
+                e => TranslationHelpers.GetMultiItemsString(e.Items));
+        }
+
+        /// <summary>
+        /// Test implementation of IItemData for testing serialization of non-ITaskItem items.
+        /// This simulates how ProjectItem (which implements IItemData but not ITaskItem) is serialized.
+        /// </summary>
+        private sealed class TestItemData : IItemData
+        {
+            private readonly string _evaluatedInclude;
+            private readonly Dictionary<string, string> _metadata;
+
+            public TestItemData(string evaluatedInclude, Dictionary<string, string> metadata = null)
+            {
+                _evaluatedInclude = evaluatedInclude;
+                _metadata = metadata ?? new Dictionary<string, string>();
+            }
+
+            /// <inheritdoc />
+            public string EvaluatedInclude => _evaluatedInclude;
+
+            /// <inheritdoc />
+            public IEnumerable<KeyValuePair<string, string>> EnumerateMetadata() => _metadata;
+        }
+
         [Fact]
         public void RoundtripProjectEvaluationFinishedEventArgsWithProfileData()
         {

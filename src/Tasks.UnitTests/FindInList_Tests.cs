@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests
             f.MatchFileNameOnly = true;
             f.List = new ITaskItem[] { new TaskItem(@"c:\foo\a.cs"), new TaskItem("b.cs") };
             Assert.True(f.Execute());
-            Assert.Equal(FileUtilities.FixFilePath(@"c:\foo\a.cs"), f.ItemFound.ItemSpec);
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"c:\foo\a.cs"), f.ItemFound.ItemSpec);
         }
 
         [Fact]
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests
             Assert.True(f.Execute());
             Console.WriteLine(e.Log);
             // Should ignore the invalid paths
-            Assert.Equal(FileUtilities.FixFilePath(@"foo\a.cs"), f.ItemFound.ItemSpec);
+            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"foo\a.cs"), f.ItemFound.ItemSpec);
         }
     }
 }

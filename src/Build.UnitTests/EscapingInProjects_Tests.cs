@@ -110,16 +110,16 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         public void SemicolonInPropertyPassedIntoStringParam_UsingTaskHost()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
-                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
-                    <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
-                    <PropertyGroup>
-                        <MyPropertyWithSemicolons>abc %3b def %3b ghi</MyPropertyWithSemicolons>
-                    </PropertyGroup>
-                    <Target Name=`Build`>
-                        <Message Text=`Property value is '$(MyPropertyWithSemicolons)'` />
-                    </Target>
-                </Project>
-                ", logger: new MockLogger(_output));
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                        <UsingTask TaskName=`Message` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll` TaskFactory=`TaskHostFactory` />
+                        <PropertyGroup>
+                            <MyPropertyWithSemicolons>abc %3b def %3b ghi</MyPropertyWithSemicolons>
+                        </PropertyGroup>
+                        <Target Name=`Build`>
+                            <Message Text=`Property value is '$(MyPropertyWithSemicolons)'` />
+                        </Target>
+                    </Project>
+                    ", logger: new MockLogger(_output));
 
             logger.AssertLogContains("Property value is 'abc ; def ; ghi'");
         }
