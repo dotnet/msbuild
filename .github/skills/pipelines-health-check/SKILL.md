@@ -1,16 +1,17 @@
 ---
 name: pipelines-health-check
-description: Check health of MSBuild CI pipelines and VS repo PR insertion statuses. Use when asked about pipeline health, build failures, infrastructure issues, CI status, insertion PR status, or for periodic health monitoring.
+description: Check health of MSBuild CI pipelines, VS repo PR insertion statuses, and VMR codeflow PRs. Use when asked about pipeline health, build failures, infrastructure issues, CI status, insertion PR status, VMR codeflow status, or for periodic health monitoring.
 ---
 
 # Pipelines & PR Health Check
 
-This skill checks the health of MSBuild's CI pipelines and the status of insertion PRs in the VS repository.
+This skill checks the health of MSBuild's CI pipelines, the status of insertion PRs in the VS repository, and the health of VMR codeflow PRs that flow MSBuild source into the dotnet/dotnet unified repository.
 
 ## When to Use
 
 - User asks about MSBuild pipeline health, CI status, or build failures
 - User asks about VS insertion PR status or whether insertions are going through
+- User asks about VMR codeflow PRs, dotnet/dotnet PR status, or dotnet-unified-build pipeline
 - User asks to check if there are failing checks on PRs
 - User asks for a health check or status overview
 - Periodic monitoring requests
@@ -46,22 +47,25 @@ WorkIQ is not required for the core health check. If unavailable, the skill will
 
 ### Pipelines
 
-| Pipeline | ID | Purpose |
-|----------|----|---------|
-| MSBuild | 9434 | Main CI pipeline — builds and tests on every commit to main |
-| MSBuild-OptProf | 17389 | Optimization/profiling pipeline — runs on schedule |
+| Pipeline | Org/Project | ID | Purpose |
+|----------|-------------|----|---------|
+| MSBuild | devdiv/DevDiv | 9434 | Main CI pipeline — builds and tests on every commit to main |
+| MSBuild-OptProf | devdiv/DevDiv | 17389 | Optimization/profiling pipeline — runs on schedule |
+| dotnet-unified-build | dnceng-public/public | — | VMR build pipeline — runs on codeflow PRs in dotnet/dotnet |
 
 ### Key URLs
 
 - MSBuild pipeline: `https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434`
 - OptProf pipeline: `https://devdiv.visualstudio.com/DevDiv/_build?definitionId=17389`
 - VS PRs assigned to MSBuild: `https://dev.azure.com/devdiv/DevDiv/_git/VS/pullrequests?_a=active&assignedTo=66cc9d27-aef7-4399-ba2c-3dccb4489098`
+- VMR codeflow PRs: `https://github.com/dotnet/dotnet/pulls?q=is:pr+is:open+"Source+code+updates+from+dotnet/msbuild"`
+- dotnet-unified-build (public): `https://dev.azure.com/dnceng-public/public/_build`
 
 ## Phase 1: Collect Data & Present Overview Table
 
-### Step 1: Run both data collection scripts
+### Step 1: Run all data collection scripts
 
-Run these two scripts from the repository root. They output JSON to stdout.
+Run these three scripts from the repository root **in parallel**. They output JSON to stdout. Each script may take 1–3 minutes depending on the number of PRs and pipeline runs to fetch, so use an `initial_wait` of **120 seconds** or higher.
 
 ```powershell
 # Pipeline health (checks both MSBuild and MSBuild-OptProf)
@@ -69,9 +73,14 @@ $pipelineJson = & .\.github\skills\pipelines-health-check\check-pipeline-health.
 
 # VS PR status (checks active non-Experimental PRs and last merged PR)
 $prJson = & .\.github\skills\pipelines-health-check\check-vs-pr-status.ps1
+
+# VMR codeflow status (checks open codeflow PRs from msbuild and their dotnet-unified-build runs)
+$vmrJson = & .\.github\skills\pipelines-health-check\check-vmr-codeflow.ps1
 ```
 
-Both scripts rely on the `az` CLI (and the Azure DevOps extension) to handle authentication and token acquisition — no manual token management needed.
+All scripts write progress messages to stderr (`Write-Host`) and the JSON result to stdout.
+
+The scripts sanitize error messages (stripping control characters, truncating to 500 chars) so the JSON output can be parsed directly with `ConvertFrom-Json` without additional cleanup.
 
 ### Step 2: Present the overview table IMMEDIATELY
 
@@ -124,6 +133,39 @@ For each PR in the `prs` array:
 
 **Note on weekends:** When computing business-day age, be aware that weekends inflate the hour count. If today is Monday and the last merge was Friday, that's ~72h but only 1 business day. Mention this nuance to the user if the age seems borderline.
 
+#### VMR Codeflow PRs Table
+
+For each codeflow PR in the `codeflowPRs` array from `$vmrJson`:
+
+| Codeflow PR | Age | Pipeline Runs | Upstream PRs | Status |
+|-------------|-----|---------------|--------------|--------|
+| [#{prNumber}](prUrl) | {prAge}h | emoji sequence from pipelineRuns | count | status emoji + label |
+
+**Pipeline Runs column:** Show an emoji for each run in `pipelineRuns` (newest first):
+- `✅` for `result == "succeeded"`
+- `❌` for `result == "failed"`
+- `⏳` for `status == "inProgress"`
+- `⚪` for other/no runs
+
+**Status column** — derive from `healthSummary`:
+- `✅ HEALTHY` — healthSummary starts with "HEALTHY"
+- `🔄 IN PROGRESS` — healthSummary starts with "IN_PROGRESS" or "RETRYING"
+- `🔴 FAILING` — healthSummary starts with "UNHEALTHY"
+- `⚠️ MIXED` — healthSummary starts with "MIXED"
+- `❓ UNKNOWN` — no pipeline runs found
+
+**If a PR has failures**, also render a failure details sub-table:
+
+| Failed Job | Failed Task | Error Category | Related Upstream PRs |
+|------------|------------|----------------|---------------------|
+| {job.name} | {task.name} | {category} | PR links from failureCorrelation |
+
+The `failureCorrelation` array maps each failed build to error categories and potentially related upstream PRs (matched by title keywords). This helps quickly identify which msbuild change likely caused a VMR build failure.
+
+**Upstream PRs list:** For each codeflow PR, list the included upstream msbuild PRs:
+
+> **Included changes:** [#13175](url) Add App Host Support, [#13306](url) IBuildEngine callbacks, ...
+
 ### Step 3: Identify problems
 
 After rendering the table, build a list of distinct problems. A "problem" is any of:
@@ -132,8 +174,10 @@ After rendering the table, build a list of distinct problems. A "problem" is any
 2. **PR check failure** — An active non-Experimental PR that has `actionNeeded: true` (failed required checks)
 3. **Stale insertion** — `lastMergedPr.ageHours > 48` (no successful insertion in >2 business days)
 4. **All checks pending** — A PR where all checks are still pending/queued (may indicate a stuck pipeline or queue issue)
+5. **VMR codeflow failure** — A codeflow PR whose `healthSummary` starts with "UNHEALTHY" (dotnet-unified-build failing)
+6. **VMR codeflow stale** — A codeflow PR older than 48 hours with no successful pipeline run
 
-If there are **no problems**, report `✅ ALL CLEAR — pipelines healthy, PRs on track, insertions flowing` and stop. Do not proceed to Phase 2.
+If there are **no problems**, report `✅ ALL CLEAR — pipelines healthy, PRs on track, insertions flowing, VMR codeflow green` and stop. Do not proceed to Phase 2.
 
 ## Phase 2: Investigate Problems via Subagents
 
@@ -232,6 +276,51 @@ Tasks:
 Return: Explanation of why insertion appears stuck and what to do about it.
 ```
 
+#### For VMR codeflow failures
+
+```
+Investigate failing dotnet-unified-build pipeline for VMR codeflow PR #{prNumber}: "{prTitle}"
+PR URL: {prUrl}
+PR Branch: {prBranch}
+
+This is a codeflow PR that brings MSBuild source changes into the dotnet/dotnet VMR (Virtual Monolithic Repository).
+The dotnet-unified-build pipeline runs in the dnceng-public/public Azure DevOps org.
+
+Failed pipeline runs:
+{for each failed run in pipelineRuns: buildId, buildNumber, URL, stages, failedJobs with their failedTasks and errors}
+
+Failure categories detected: {failureCorrelation[].categories}
+
+Upstream MSBuild PRs included in this codeflow:
+{for each PR in upstreamPRs: number, title, url, merged status}
+
+Failure-to-change correlation (from script):
+{for each item in failureCorrelation: buildId, categories, relatedUpstreamPRs}
+
+Tasks:
+1. For each failed job, examine the error messages and categorize:
+   - TASK_HOST: MSB4216 errors about MSBuild not finding the task host executable — typically caused by changes to MSBuild's app host, node launching, or SDK layout
+   - SOURCE_BUILD_TASK_HOST: Same as TASK_HOST but in the source-only build (CentOS offline) — the previously-source-built SDK doesn't have the expected MSBuild executable
+   - COMPILATION: CS/VB/FS compilation errors — a code change broke the build
+   - BUILD_COMMAND: MSB3073 "exited with code N" — a build script or test failed
+   - NUGET_AUTH/SIGNING/TIMEOUT/RESOURCE: Infrastructure issues
+2. Use the failure-to-change correlation to identify which upstream MSBuild PR most likely caused each failure:
+   - Check if the error is in an area touched by one of the upstream PRs
+   - If TASK_HOST errors: look for PRs touching NodeLauncher, NodeProvider, task host, app host, or BuildEnvironmentHelper
+   - If COMPILATION errors: check which files the upstream PRs modified and whether any could cause the compilation break
+   - If test failures: identify which test is failing and which upstream PR likely affects that code path
+3. Check if there is an in-progress retry build that might resolve the issue
+4. If the failure appears to be an infrastructure issue (not caused by MSBuild changes), note that
+5. For build errors, check the `For build errors` section on how to investigate with binlogs
+6. Recommend specific actions:
+   - If an upstream PR is clearly at fault, suggest reverting it or filing a fix
+   - If a VMR-side fix is needed (e.g., SDK layout change), describe what needs to change
+   - If a retry might help (transient infra), suggest re-running the pipeline
+   - If the issue is already being retried (in-progress build), suggest waiting
+
+Return: Root cause analysis mapping each failure to the likely upstream PR, with explanation, links, and recommended action.
+```
+
 #### For build errors
 
 Tasks:
@@ -247,7 +336,7 @@ After all subagent results return, present the findings below the overview table
 
 ```markdown
 ### Problem: {brief title}
-**Category:** {INFRA | BUILD | CONFIG | PR_CHECKS | STALE_INSERTION}
+**Category:** {INFRA | BUILD | CONFIG | PR_CHECKS | STALE_INSERTION | VMR_CODEFLOW}
 **Details:** {subagent's explanation}
 **Ownership:** {owning team, contacts, DL from WorkIQ — include only for INFRA/CONFIG issues}
 **Recommended Action:** {subagent's recommendation}
@@ -283,3 +372,17 @@ WorkIQ queries Microsoft 365 data (Outlook, Teams, SharePoint). Results depend o
 - `workiq ask -q "Who owns the MicroBuild service in Microsoft?"`
 - `workiq ask -q "Who owns the CloudBuild signing service in DevDiv?"`
 - `workiq ask -q "Who should I contact about NuGet feed authentication failures in Azure DevOps?"`
+
+### VMR codeflow script returns no PRs
+- Verify there are actually open codeflow PRs: check `https://github.com/dotnet/dotnet/pulls?q=is:pr+is:open+"Source+code+updates+from+dotnet/msbuild"`
+- Verify `gh` CLI is authenticated: run `gh auth status`
+
+### VMR pipeline runs not found
+- The dotnet-unified-build pipeline runs in `dnceng-public/public`, which is publicly accessible
+- If no runs appear, the pipeline may not have been triggered yet for that PR
+- Codeflow PRs may take a few minutes after creation before CI triggers
+
+### JSON output too large or contains unexpected characters
+- Error messages from Azure DevOps timelines can contain Windows paths, control characters, and multi-KB stack traces
+- The scripts sanitize and truncate these to 500 characters — if you still see issues, check that you're running the latest version of the scripts
+- Use `ConvertFrom-Json` in PowerShell or `json.loads()` in Python to parse the output; avoid manual string manipulation
