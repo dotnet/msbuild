@@ -10,18 +10,16 @@ namespace Microsoft.Build.Tasks.ResourceHandling
     /// <summary>
     /// Name value resource pair to go in resources list
     /// </summary>
-    internal class LiveObjectResource : ILinkedFileResource
+    internal class LiveObjectResource : IResource
     {
-        public LiveObjectResource(string name, object value, string linkedFilePath)
+        public LiveObjectResource(string name, object value)
         {
             Name = name;
             Value = value;
-            LinkedFilePath = linkedFilePath;
         }
 
         public string Name { get; }
         public object Value { get; }
-        public string LinkedFilePath { get; }
 
         public string TypeAssemblyQualifiedName => Value.GetType().AssemblyQualifiedName;
 

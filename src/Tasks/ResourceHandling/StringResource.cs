@@ -13,8 +13,8 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
         public new string TypeFullName => typeof(string).FullName;
 
-        public StringResource(string name, string value, string filename, string linkedFilePath = null) :
-            base(name, value, linkedFilePath)
+        public StringResource(string name, string value, string filename) :
+            base(name, value)
         {
             OriginatingFile = filename;
         }

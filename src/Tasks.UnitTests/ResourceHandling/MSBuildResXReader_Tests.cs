@@ -145,7 +145,7 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
     <value>ResourceHandling\TextFile1.txt;{stringType};utf-8</value>
   </data>"), null, false);
 
-            AssertSingleStringResource(resxWithLinkedString, "TextFile1", "Contents of TextFile1");
+            AssertSingleStringResourceFromFile(resxWithLinkedString, "TextFile1", "Contents of TextFile1");
         }
 
         [Fact]
@@ -179,7 +179,7 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
                     Path.Combine(baseDir.Path, nameof(LoadsStringFromFileRefAsStringWithShiftJISEncoding) + ".resx"),
                     useRelativePath: true);
 
-                AssertSingleStringResource(resxWithLinkedString, "TextFile1", JapaneseString);
+                AssertSingleStringResourceFromFile(resxWithLinkedString, "TextFile1", JapaneseString);
             }
         }
 
@@ -190,6 +190,16 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
             resources[0].Name.ShouldBe(name);
 
             resources[0].ShouldBeOfType<StringResource>()
+                .Value.ShouldBe(value);
+        }
+
+        private static void AssertSingleStringResourceFromFile(IReadOnlyList<IResource> resources, string name, string value)
+        {
+            resources.ShouldHaveSingleItem();
+
+            resources[0].Name.ShouldBe(name);
+
+            resources[0].ShouldBeAssignableTo<LinkedStringResource>()
                 .Value.ShouldBe(value);
         }
 
@@ -306,7 +316,7 @@ $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Form
 "), null, false);
 
             var resource = resources.ShouldHaveSingleItem()
-                .ShouldBeOfType<LiveObjectResource>();
+                .ShouldBeOfType<LinkedLiveObjectResource>();
             resource.Name.ShouldBe("Image1");
 
             byte[] bytes = new byte[4];
@@ -344,8 +354,6 @@ $@"  <data name='Image1' type='System.Resources.ResXFileRef, System.Windows.Form
 
             resources.ShouldHaveSingleItem();
             resources[0].ShouldBeOfType<StringResource>();
-            resources[0].ShouldBeAssignableTo<ILinkedFileResource>()
-                .LinkedFilePath.ShouldBeNull();
         }
 
         [Fact]
@@ -361,7 +369,7 @@ $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Versi
   </data>"), null, false);
 
             resources.ShouldHaveSingleItem();
-            resources[0].ShouldBeOfType<StringResource>();
+            resources[0].ShouldBeOfType<LinkedStringResource>();
             resources[0].ShouldBeAssignableTo<ILinkedFileResource>()
                 .LinkedFilePath.ShouldNotBeNull();
         }

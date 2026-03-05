@@ -167,7 +167,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             if (typename.StartsWith("System.Resources.ResXNullRef", StringComparison.Ordinal))
             {
-                resources.Add(new LiveObjectResource(name, value: null, linkedFilePath: null));
+                resources.Add(new LiveObjectResource(name, null));
                 return;
             }
 
@@ -180,7 +180,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                     // Handle byte[]'s, which are stored as base-64 encoded strings.
                     byte[] byteArray = Convert.FromBase64String(value);
 
-                    resources.Add(new LiveObjectResource(name, byteArray, linkedFilePath: null));
+                    resources.Add(new LiveObjectResource(name, byteArray));
                     return;
                 }
 
@@ -260,7 +260,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                     : Encoding.Default;
                 using (StreamReader sr = new StreamReader(fileName, textFileEncoding))
                 {
-                    resources.Add(new StringResource(name, sr.ReadToEnd(), resxFilename, fileName));
+                    resources.Add(new LinkedStringResource(name, sr.ReadToEnd(), resxFilename, fileName));
 
                     return;
                 }
@@ -269,7 +269,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             {
                 byte[] byteArray = FileSystems.Default.ReadFileAllBytes(fileName);
 
-                resources.Add(new LiveObjectResource(name, byteArray, fileName));
+                resources.Add(new LinkedLiveObjectResource(name, byteArray, fileName));
                 return;
             }
             else if (IsMemoryStream(fileRefType))
@@ -278,7 +278,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 // https://github.com/dotnet/winforms/blob/689cd9c69e632997bc85bf421af221d79b12ddd4/src/System.Windows.Forms/src/System/Resources/ResXFileRef.cs#L293-L297
                 byte[] byteArray = FileSystems.Default.ReadFileAllBytes(fileName);
 
-                resources.Add(new LiveObjectResource(name, new MemoryStream(byteArray), fileName));
+                resources.Add(new LinkedLiveObjectResource(name, new MemoryStream(byteArray), fileName));
                 return;
             }
 
