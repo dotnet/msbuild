@@ -260,7 +260,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                     : Encoding.Default;
                 using (StreamReader sr = new StreamReader(fileName, textFileEncoding))
                 {
-                    resources.Add(new StringResource(name, sr.ReadToEnd(), resxFilename));
+                    resources.Add(new LinkedStringResource(name, sr.ReadToEnd(), resxFilename, fileName));
 
                     return;
                 }
@@ -269,7 +269,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
             {
                 byte[] byteArray = FileSystems.Default.ReadFileAllBytes(fileName);
 
-                resources.Add(new LiveObjectResource(name, byteArray));
+                resources.Add(new LinkedLiveObjectResource(name, byteArray, fileName));
                 return;
             }
             else if (IsMemoryStream(fileRefType))
@@ -278,7 +278,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                 // https://github.com/dotnet/winforms/blob/689cd9c69e632997bc85bf421af221d79b12ddd4/src/System.Windows.Forms/src/System/Resources/ResXFileRef.cs#L293-L297
                 byte[] byteArray = FileSystems.Default.ReadFileAllBytes(fileName);
 
-                resources.Add(new LiveObjectResource(name, new MemoryStream(byteArray)));
+                resources.Add(new LinkedLiveObjectResource(name, new MemoryStream(byteArray), fileName));
                 return;
             }
 
