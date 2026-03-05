@@ -1251,8 +1251,8 @@ namespace Microsoft.Build.Execution
                 host,
                 isStandaloneExecution: _buildTelemetry?.IsStandaloneExecution ?? false,
                 maxNodeCount: _buildParameters?.MaxNodeCount,
-                activeNodeCount: activeNodeCount,
-                submissionCount: submissionCount);
+                activeNodeCount,
+                submissionCount);
         }
 
         /// <summary>
@@ -1284,25 +1284,6 @@ namespace Microsoft.Build.Execution
                 host = _buildTelemetry?.BuildEngineHost ?? BuildEnvironmentState.GetHostName();
             }
 
-            // Build a compact summary of pending submissions with their configuration IDs.
-            // This goes to the on-disk hang file only (not telemetry).
-            string pendingSubmissionDetails;
-            lock (_syncLock)
-            {
-                pendingSubmissionDetails = string.Join("; ",
-                    _buildSubmissions.Values
-                        .OfType<BuildSubmission>()
-                        .Where(s => s.BuildRequest is not null)
-                        .Select(s => $"Sub{s.SubmissionId}:Config{s.BuildRequest?.ConfigurationId ?? -1}"));
-            }
-
-            string diagnostics = $"Phase={waitPhase}, Duration={hangWatch.ElapsedMilliseconds}ms, " +
-                $"PendingSubmissions={pendingSubmissionCount}, WithResultNoLogging={submissionsWithResultNoLogging}, " +
-                $"ThreadException={threadExceptionRecorded}, UnmatchedProjectStarted={unmatchedProjectStartedCount}, " +
-                $"Submissions=[{pendingSubmissionDetails}]";
-
-            ExceptionHandling.DumpHangDiagnosticsToFile(diagnostics);
-
             CrashTelemetryRecorder.CollectAndEmitEndBuildHangDiagnostics(
                 waitPhase,
                 hangWatch.ElapsedMilliseconds,
@@ -1317,7 +1298,6 @@ namespace Microsoft.Build.Execution
                 maxNodeCount: _buildParameters?.MaxNodeCount,
                 activeNodeCount: _activeNodes?.Count);
         }
-
 
         /// <summary>
         /// Convenience method.  Submits a lone build request and blocks until results are available.

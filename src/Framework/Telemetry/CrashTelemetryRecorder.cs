@@ -208,7 +208,7 @@ internal static class CrashTelemetryRecorder
         string? buildEngineVersion,
         string? buildEngineFrameworkName,
         string? buildEngineHost,
-        bool? isStandaloneExecution = null,
+        bool isStandaloneExecution,
         int? maxNodeCount = null,
         int? activeNodeCount = null)
     {
@@ -231,7 +231,7 @@ internal static class CrashTelemetryRecorder
                 ActiveNodeCount = activeNodeCount,
             };
 
-            TelemetryManager.Instance?.Initialize(isStandalone: isStandaloneExecution ?? false);
+            TelemetryManager.Instance?.Initialize(isStandaloneExecution);
 
             using IActivity? activity = TelemetryManager.Instance
                 ?.DefaultActivitySource
