@@ -516,7 +516,7 @@ namespace Microsoft.Build.Graph
                             {
                                 targetsForOuterBuild.AddRange(targets);
                             }
-                            else if(targetsAreForInnerBuild)
+                            else if (targetsAreForInnerBuild)
                             {
                                 targetsForInnerBuild.AddRange(targets);
                             }
