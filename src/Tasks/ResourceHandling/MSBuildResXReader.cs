@@ -167,7 +167,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
 
             if (typename.StartsWith("System.Resources.ResXNullRef", StringComparison.Ordinal))
             {
-                resources.Add(new LiveObjectResource(name, null));
+                resources.Add(new LiveObjectResource(name, value: null, linkedFilePath: null));
                 return;
             }
 
@@ -180,7 +180,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
                     // Handle byte[]'s, which are stored as base-64 encoded strings.
                     byte[] byteArray = Convert.FromBase64String(value);
 
-                    resources.Add(new LiveObjectResource(name, byteArray));
+                    resources.Add(new LiveObjectResource(name, byteArray, linkedFilePath: null));
                     return;
                 }
 

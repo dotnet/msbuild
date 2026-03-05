@@ -12,7 +12,7 @@ namespace Microsoft.Build.Tasks.ResourceHandling
     /// </summary>
     internal class LiveObjectResource : ILinkedFileResource
     {
-        public LiveObjectResource(string name, object value, string linkedFilePath = null)
+        public LiveObjectResource(string name, object value, string linkedFilePath)
         {
             Name = name;
             Value = value;

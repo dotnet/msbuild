@@ -3841,7 +3841,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="linePosition">Column number for messages</param>
         private void AddResource(ReaderInfo reader, string name, object value, String inputFileName, int lineNumber, int linePosition)
         {
-            LiveObjectResource entry = new LiveObjectResource(name, value);
+            LiveObjectResource entry = new LiveObjectResource(name, value, linkedFilePath: null);
 
             AddResource(reader, entry, inputFileName, lineNumber, linePosition);
         }

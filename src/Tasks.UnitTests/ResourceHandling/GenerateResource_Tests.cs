@@ -4086,10 +4086,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         }
 
         /// <summary>
-        /// Given an array of ITaskItems, checks to make sure that at least one read tlog and at least one
-        /// write tlog exist, and that they were written to disk.  If that is not true, asserts.
-        /// </summary>
-        /// <summary>
         /// Reads a single resource value by key from a compiled .resources file.
         /// </summary>
         public static object ReadResourceValue(string resourcesFilePath, string resourceName)
@@ -4106,7 +4102,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
 
             throw new KeyNotFoundException($"Resource '{resourceName}' not found in '{resourcesFilePath}'.");
         }
-
+        
+        /// <summary>
+        /// Given an array of ITaskItems, checks to make sure that at least one read tlog and at least one
+        /// write tlog exist, and that they were written to disk.  If that is not true, asserts.
+        /// </summary>
         public static void AssertStateFileWasWritten(GenerateResource t)
         {
             Assert.NotNull(t.FilesWritten); // "The state file should have been written, but there aren't any."
