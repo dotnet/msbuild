@@ -1113,7 +1113,8 @@ namespace Microsoft.Build.CommandLine
                 ExceptionHandling.IsCriticalException(exception),
                 ProjectCollection.Version?.ToString(),
                 NativeMethodsShared.FrameworkName,
-                BuildEnvironmentState.GetHostName());
+                BuildEnvironmentState.GetHostName(),
+                isStandaloneExecution: true);
         }
 
         private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project, TextWriter outputStream)

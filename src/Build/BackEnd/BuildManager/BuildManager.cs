@@ -1233,6 +1233,14 @@ namespace Microsoft.Build.Execution
         {
             string? host = _buildTelemetry?.BuildEngineHost ??  BuildEnvironmentState.GetHostName();
 
+            int? activeNodeCount;
+            int? submissionCount;
+            lock (_syncLock)
+            {
+                activeNodeCount = _activeNodes?.Count;
+                submissionCount = _buildSubmissions?.Count;
+            }
+
             CrashTelemetryRecorder.RecordCrashTelemetry(
                 exception,
                 isUnhandled ? CrashExitType.UnhandledException : CrashExitType.EndBuildFailure,
@@ -1240,7 +1248,11 @@ namespace Microsoft.Build.Execution
                 ExceptionHandling.IsCriticalException(exception),
                 ProjectCollection.Version?.ToString(),
                 NativeMethodsShared.FrameworkName,
-                host);
+                host,
+                isStandaloneExecution: _buildTelemetry?.IsStandaloneExecution ?? false,
+                maxNodeCount: _buildParameters?.MaxNodeCount,
+                activeNodeCount: activeNodeCount,
+                submissionCount: submissionCount);
         }
 
         /// <summary>
@@ -1272,9 +1284,22 @@ namespace Microsoft.Build.Execution
                 host = _buildTelemetry?.BuildEngineHost ?? BuildEnvironmentState.GetHostName();
             }
 
+            // Build a compact summary of pending submissions with their configuration IDs.
+            // This goes to the on-disk hang file only (not telemetry).
+            string pendingSubmissionDetails;
+            lock (_syncLock)
+            {
+                pendingSubmissionDetails = string.Join("; ",
+                    _buildSubmissions.Values
+                        .OfType<BuildSubmission>()
+                        .Where(s => s.BuildRequest is not null)
+                        .Select(s => $"Sub{s.SubmissionId}:Config{s.BuildRequest?.ConfigurationId ?? -1}"));
+            }
+
             string diagnostics = $"Phase={waitPhase}, Duration={hangWatch.ElapsedMilliseconds}ms, " +
                 $"PendingSubmissions={pendingSubmissionCount}, WithResultNoLogging={submissionsWithResultNoLogging}, " +
-                $"ThreadException={threadExceptionRecorded}, UnmatchedProjectStarted={unmatchedProjectStartedCount}";
+                $"ThreadException={threadExceptionRecorded}, UnmatchedProjectStarted={unmatchedProjectStartedCount}, " +
+                $"Submissions=[{pendingSubmissionDetails}]";
 
             ExceptionHandling.DumpHangDiagnosticsToFile(diagnostics);
 
@@ -1287,7 +1312,10 @@ namespace Microsoft.Build.Execution
                 unmatchedProjectStartedCount,
                 ProjectCollection.Version?.ToString(),
                 NativeMethodsShared.FrameworkName,
-                host);
+                host,
+                isStandaloneExecution: _buildTelemetry?.IsStandaloneExecution ?? false,
+                maxNodeCount: _buildParameters?.MaxNodeCount,
+                activeNodeCount: _activeNodes?.Count);
         }
 
 
