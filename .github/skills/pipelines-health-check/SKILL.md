@@ -65,7 +65,7 @@ WorkIQ is not required for the core health check. If unavailable, the skill will
 
 ### Step 1: Run all data collection scripts
 
-Run these three scripts from the repository root. They output JSON to stdout.
+Run these three scripts from the repository root **in parallel**. They output JSON to stdout. Each script may take 1–3 minutes depending on the number of PRs and pipeline runs to fetch, so use an `initial_wait` of **120 seconds** or higher.
 
 ```powershell
 # Pipeline health (checks both MSBuild and MSBuild-OptProf)
@@ -78,7 +78,9 @@ $prJson = & .\.github\skills\pipelines-health-check\check-vs-pr-status.ps1
 $vmrJson = & .\.github\skills\pipelines-health-check\check-vmr-codeflow.ps1
 ```
 
-The pipeline and VS PR scripts rely on the `az` CLI for authentication. The VMR codeflow script uses `gh` CLI for authenticated GitHub API access and unauthenticated Azure DevOps REST API for the public dnceng-public org.
+All scripts write progress messages to stderr (`Write-Host`) and the JSON result to stdout.
+
+The scripts sanitize error messages (stripping control characters, truncating to 500 chars) so the JSON output can be parsed directly with `ConvertFrom-Json` without additional cleanup.
 
 ### Step 2: Present the overview table IMMEDIATELY
 
@@ -379,3 +381,8 @@ WorkIQ queries Microsoft 365 data (Outlook, Teams, SharePoint). Results depend o
 - The dotnet-unified-build pipeline runs in `dnceng-public/public`, which is publicly accessible
 - If no runs appear, the pipeline may not have been triggered yet for that PR
 - Codeflow PRs may take a few minutes after creation before CI triggers
+
+### JSON output too large or contains unexpected characters
+- Error messages from Azure DevOps timelines can contain Windows paths, control characters, and multi-KB stack traces
+- The scripts sanitize and truncate these to 500 characters — if you still see issues, check that you're running the latest version of the scripts
+- Use `ConvertFrom-Json` in PowerShell or `json.loads()` in Python to parse the output; avoid manual string manipulation

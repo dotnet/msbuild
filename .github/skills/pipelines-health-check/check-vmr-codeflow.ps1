@@ -227,7 +227,9 @@ function Get-FailedJobsFromTimeline {
         foreach ($task in $failedTasks) {
             $errors = @()
             if ($task.issues) {
-                $errors = @($task.issues | Where-Object { $_.type -eq "error" } | ForEach-Object { $_.message })
+                $errors = @($task.issues | Where-Object { $_.type -eq "error" } | ForEach-Object {
+                    Sanitize-ErrorString -Text $_.message
+                })
             }
             $taskDetails += [ordered]@{
                 name   = $task.name
@@ -246,28 +248,43 @@ function Get-FailedJobsFromTimeline {
         }
     }
 
-    # Also collect all stages and their results for the overview
-    $stages = @($timeline.records | Where-Object { $_.type -eq "Stage" } | ForEach-Object {
-        [ordered]@{
-            name   = $_.name
-            state  = $_.state
-            result = $_.result
-        }
-    })
-
-    $allJobs = @($timeline.records | Where-Object { $_.type -eq "Job" } | ForEach-Object {
-        [ordered]@{
-            name   = $_.name
-            state  = $_.state
-            result = $_.result
-        }
-    })
+    # Compact job summary: count by result instead of listing every job
+    $jobSummary = [ordered]@{
+        total     = @($timeline.records | Where-Object { $_.type -eq "Job" }).Count
+        succeeded = @($timeline.records | Where-Object { $_.type -eq "Job" -and $_.result -eq "succeeded" }).Count
+        failed    = @($timeline.records | Where-Object { $_.type -eq "Job" -and $_.result -eq "failed" }).Count
+        skipped   = @($timeline.records | Where-Object { $_.type -eq "Job" -and ($_.result -eq "skipped" -or $_.result -eq "canceled") }).Count
+    }
 
     return [ordered]@{
         failedJobs = $failedJobs
-        stages     = $stages
-        allJobs    = $allJobs
+        jobSummary = $jobSummary
     }
+}
+
+function Sanitize-ErrorString {
+    <#
+    .SYNOPSIS
+        Cleans an error string for safe JSON serialization: strips control
+        characters and truncates to a reasonable length.
+    #>
+    param(
+        [string]$Text,
+        [int]$MaxLength = 500
+    )
+
+    if ([string]::IsNullOrEmpty($Text)) { return "" }
+
+    # Strip control characters (0x00-0x1F) except common whitespace (\n \r \t)
+    $cleaned = $Text -replace '[\x00-\x08\x0B\x0C\x0E-\x1F]', ''
+    # Collapse runs of whitespace (newlines, tabs, spaces) into a single space
+    $cleaned = $cleaned -replace '\s+', ' '
+    $cleaned = $cleaned.Trim()
+
+    if ($cleaned.Length -gt $MaxLength) {
+        $cleaned = $cleaned.Substring(0, $MaxLength) + "..."
+    }
+    return $cleaned
 }
 
 function Get-FailureCategory {
@@ -307,7 +324,7 @@ if ($codeflowPRs.Count -eq 0) {
         codeflowPRs   = @()
         summary       = "No open codeflow PRs found from $SourceRepo."
     }
-    $output | ConvertTo-Json -Depth 8
+    $output | ConvertTo-Json -Depth 10
     return
 }
 
@@ -319,7 +336,18 @@ foreach ($pr in $codeflowPRs) {
     # Get upstream PRs included in this codeflow
     $upstreamPRNumbers = Get-IncludedUpstreamPRs -PullNumber $pr.number
     $upstreamPRDetails = @()
-    foreach ($num in $upstreamPRNumbers) {
+
+    # Fetch details for up to 30 upstream PRs to keep output manageable.
+    # For larger batches, only the first 30 get full details; the rest are
+    # listed as numbers so the agent knows they exist.
+    $maxDetailedPRs = 30
+    $detailedNumbers = $upstreamPRNumbers | Select-Object -First $maxDetailedPRs
+    $remainingNumbers = @()
+    if ($upstreamPRNumbers.Count -gt $maxDetailedPRs) {
+        $remainingNumbers = @($upstreamPRNumbers | Select-Object -Skip $maxDetailedPRs)
+        Write-Host "  Found $($upstreamPRNumbers.Count) upstream PRs; fetching details for $maxDetailedPRs, listing rest as numbers." -ForegroundColor Yellow
+    }
+    foreach ($num in $detailedNumbers) {
         $upstreamPRDetails += Get-UpstreamPRDetails -PullNumber $num
     }
 
@@ -342,8 +370,7 @@ foreach ($pr in $codeflowPRs) {
         # Get timeline details for completed builds
         if ($run.status -eq "completed") {
             $timelineInfo = Get-FailedJobsFromTimeline -BuildId $run.id
-            $runObj.stages = $timelineInfo.stages
-            $runObj.allJobs = $timelineInfo.allJobs
+            $runObj.jobSummary = $timelineInfo.jobSummary
             $runObj.failedJobs = $timelineInfo.failedJobs
 
             # Categorize failures
@@ -358,8 +385,7 @@ foreach ($pr in $codeflowPRs) {
         elseif ($run.status -eq "inProgress") {
             # Get current state of in-progress build
             $timelineInfo = Get-FailedJobsFromTimeline -BuildId $run.id
-            $runObj.stages = $timelineInfo.stages
-            $runObj.allJobs = $timelineInfo.allJobs
+            $runObj.jobSummary = $timelineInfo.jobSummary
             $runObj.failedJobs = $timelineInfo.failedJobs
         }
 
@@ -452,6 +478,8 @@ foreach ($pr in $codeflowPRs) {
         createdAt       = $pr.created_at
         updatedAt       = $pr.updated_at
         upstreamPRs     = @($upstreamPRDetails)
+        upstreamPRCount = $upstreamPRNumbers.Count
+        additionalUpstreamPRNumbers = @($remainingNumbers)
         pipelineRuns    = @($runResults)
         healthSummary   = $healthSummary
         failureCorrelation = @($failureCorrelation)
@@ -479,4 +507,4 @@ $output = [PSCustomObject][ordered]@{
     summary       = ($summaryParts -join ". ") + "."
 }
 
-$output | ConvertTo-Json -Depth 8
+$output | ConvertTo-Json -Depth 10
