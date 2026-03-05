@@ -107,6 +107,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ITaskItem xpdb = new TaskItem(Path.Combine(s_myComponentsRootPath, "X.pdb"));
             ResolveAssemblyReference t = new()
             {
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = new MockEngine(),
                 AllowedRelatedFileExtensions = new string[] { ".pdb" },
                 Assemblies = new ITaskItem[] { xpdb },
@@ -3042,6 +3043,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = new MockEngine(_output);
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             string testPath = Path.Combine(Path.GetTempPath(), @"RawFileNameRelative");
             string previousCurrentDirectory = Directory.GetCurrentDirectory();
@@ -8389,6 +8391,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 GenerateRedistAndProfileXmlLocations(_fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };
@@ -8436,6 +8439,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 GenerateRedistAndProfileXmlLocations(_fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };

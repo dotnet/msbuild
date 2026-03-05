@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
             RarNodeExecuteRequest request = new(clientRar);
 
-            ResolveAssemblyReference nodeRar = new();
+            ResolveAssemblyReference nodeRar = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             request.SetTaskInputs(nodeRar, CreateBuildEngine());
 
             Assert.Equal(Path.GetFullPath(AppConfigFileName), nodeRar.AppConfigFile);
