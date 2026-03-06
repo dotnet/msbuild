@@ -4497,7 +4497,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     Directory.GetCurrentDirectory(),
                     MockElementLocation.Instance,
                     FileSystems.Default,
-                    new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+                    new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4)));
                 Assert.Fail("Expect exception due to the value of property \"TargetOSFamily\" is not a number.");
             }
             catch (InvalidProjectFileException e)
@@ -4515,7 +4515,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Directory.GetCurrentDirectory(),
                 MockElementLocation.Instance,
                 FileSystems.Default,
-                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4))));
+                new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4))));
         }
 
         /// <summary>

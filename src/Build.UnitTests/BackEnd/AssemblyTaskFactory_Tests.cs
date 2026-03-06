@@ -824,7 +824,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 factoryParameters = factoryParameters.WithTaskHostFactoryExplicitlyRequested(true);
             }
 
-            _loadedType = _taskFactory.InitializeFactory(_loadInfo, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, factoryParameters, explicitlyLaunchTaskHost, new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)), ElementLocation.Create("NONE"), String.Empty);
+            _loadedType = _taskFactory.InitializeFactory(_loadInfo, "TaskToTestFactories", new Dictionary<string, TaskPropertyInfo>(), string.Empty, factoryParameters, explicitlyLaunchTaskHost, new TestLoggingContext(null!, BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4)), ElementLocation.Create("NONE"), String.Empty);
             Assert.True(_loadedType.Assembly.Equals(_loadInfo)); // "Expected the AssemblyLoadInfo to be equal"
         }
 

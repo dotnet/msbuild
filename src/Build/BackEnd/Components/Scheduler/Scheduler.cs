@@ -42,7 +42,7 @@ namespace Microsoft.Build.BackEnd
         internal const int ResultsTransferredId = -2;
 
         /// <summary>
-        /// The in-proc node id
+        /// The in-proc node id for the worker node that performs work the scheduler itself assigns on the same 'logical' node.
         /// </summary>
         internal const int InProcNodeId = 1;
 
@@ -57,6 +57,12 @@ namespace Microsoft.Build.BackEnd
         /// + 10%.
         /// </summary>
         private const double DefaultCustomSchedulerForSQLConfigurationLimitMultiplier = 1.1;
+
+        /// <summary>
+        /// The build event context for the scheduler node - can be used as a 'root' context for contexts' derived or needed when running scheduler operations.
+        /// </summary>
+        private static BuildEventContext s_schedulerNodeBuildEventContext = BuildEventContext.CreateForNode(VirtualNode);
+
 
         #region Scheduler Data
 
@@ -600,7 +606,7 @@ namespace Microsoft.Build.BackEnd
         public void WriteDetailedSummary(int submissionId)
         {
             ILoggingService loggingService = _componentHost.LoggingService;
-            BuildEventContext context = new BuildEventContext(submissionId, 0, 0, 0, 0, 0);
+            BuildEventContext context = s_schedulerNodeBuildEventContext.WithSubmissionId(submissionId);
             loggingService.LogComment(context, MessageImportance.Normal, "DetailedSummaryHeader");
 
             foreach (SchedulableRequest request in _schedulingData.GetRequestsByHierarchy(null))
@@ -675,7 +681,7 @@ namespace Microsoft.Build.BackEnd
             _componentHost = host;
             _resultsCache = (IResultsCache)_componentHost.GetComponent(BuildComponentType.ResultsCache);
             _configCache = (IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache);
-            _inprocNodeContext = new NodeLoggingContext(_componentHost.LoggingService, InProcNodeId, true);
+            _inprocNodeContext = new NodeLoggingContext(_componentHost.LoggingService, s_schedulerNodeBuildEventContext, InProcNodeId, true);
         }
 
         /// <summary>
@@ -2037,13 +2043,7 @@ namespace Microsoft.Build.BackEnd
                     string projectFullPath = _configCache[request.ConfigurationId].ProjectFullPath;
                     string parentProjectFullPath = GetParentConfigurationId(request, _configCache, _schedulingData).ProjectFullPath;
                     _componentHost.LoggingService.LogComment(
-                            new BuildEventContext(
-                                request.SubmissionId,
-                                1,
-                                BuildEventContext.InvalidProjectInstanceId,
-                                BuildEventContext.InvalidProjectContextId,
-                                BuildEventContext.InvalidTargetId,
-                                BuildEventContext.InvalidTaskId),
+                            s_schedulerNodeBuildEventContext.WithSubmissionId(request.SubmissionId),
                             MessageImportance.Normal,
                             "SkippedConstraintsOnRequest",
                             parentProjectFullPath,
@@ -2198,8 +2198,7 @@ namespace Microsoft.Build.BackEnd
         private void LogRequestHandledFromCache(BuildRequest request, BuildResult result)
         {
             BuildRequestConfiguration configuration = _configCache[request.ConfigurationId];
-            int nodeId = _schedulingData.GetAssignedNodeForRequestConfiguration(request.ConfigurationId);
-            NodeLoggingContext nodeContext = new NodeLoggingContext(_componentHost.LoggingService, nodeId, true);
+            NodeLoggingContext nodeContext = new NodeLoggingContext(_componentHost.LoggingService, s_schedulerNodeBuildEventContext, VirtualNode, true);
             nodeContext.LogRequestHandledFromCache(request, configuration, result);
 
             TraceScheduler(
@@ -2950,7 +2949,7 @@ namespace Microsoft.Build.BackEnd
         private void WriteSchedulingPlan(int submissionId)
         {
             SchedulingPlan plan = new SchedulingPlan(_configCache, _schedulingData);
-            plan.WritePlan(submissionId, _componentHost.LoggingService, new BuildEventContext(submissionId, 0, 0, 0, 0, 0));
+            plan.WritePlan(submissionId, _componentHost.LoggingService, s_schedulerNodeBuildEventContext.WithSubmissionId(submissionId));
         }
 
         /// <summary>
@@ -2959,7 +2958,7 @@ namespace Microsoft.Build.BackEnd
         private void ReadSchedulingPlan(int submissionId)
         {
             _schedulingPlan = new SchedulingPlan(_configCache, _schedulingData);
-            _schedulingPlan.ReadPlan(submissionId, _componentHost.LoggingService, new BuildEventContext(submissionId, 0, 0, 0, 0, 0));
+            _schedulingPlan.ReadPlan(submissionId, _componentHost.LoggingService, s_schedulerNodeBuildEventContext.WithSubmissionId(submissionId));
         }
 
         #endregion
