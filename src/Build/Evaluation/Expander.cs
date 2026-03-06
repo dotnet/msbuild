@@ -445,6 +445,15 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
+        /// Checks whether a property exists (vs. being coerced to empty string).
+        /// </summary>
+        internal bool PropertyExists(string propertyName)
+        {
+            P property = _properties.GetProperty(propertyName, 0, propertyName.Length - 1);
+            return property != null;
+        }
+
+        /// <summary>
         /// Tests to see if the expression may contain expandable expressions, i.e.
         /// contains $, % or @.
         /// </summary>
