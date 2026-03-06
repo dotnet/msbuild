@@ -1233,6 +1233,14 @@ namespace Microsoft.Build.Execution
         {
             string? host = _buildTelemetry?.BuildEngineHost ??  BuildEnvironmentState.GetHostName();
 
+            int? activeNodeCount;
+            int? submissionCount;
+            lock (_syncLock)
+            {
+                activeNodeCount = _activeNodes?.Count;
+                submissionCount = _buildSubmissions?.Count;
+            }
+
             CrashTelemetryRecorder.RecordCrashTelemetry(
                 exception,
                 isUnhandled ? CrashExitType.UnhandledException : CrashExitType.EndBuildFailure,
@@ -1240,13 +1248,16 @@ namespace Microsoft.Build.Execution
                 ExceptionHandling.IsCriticalException(exception),
                 ProjectCollection.Version?.ToString(),
                 NativeMethodsShared.FrameworkName,
-                host);
+                host,
+                isStandaloneExecution: _buildTelemetry?.IsStandaloneExecution ?? false,
+                maxNodeCount: _buildParameters?.MaxNodeCount,
+                activeNodeCount,
+                submissionCount);
         }
 
         /// <summary>
         /// Extracts build state under lock and delegates to <see cref="CrashTelemetryRecorder"/>
-        /// for EndBuild hang diagnostic telemetry emission. Also writes diagnostics to disk
-        /// via <see cref="ExceptionHandling.DumpHangDiagnosticsToFile"/>.
+        /// for EndBuild hang diagnostic telemetry emission.
         /// </summary>
         private void EmitEndBuildHangDiagnostics(string waitPhase, Stopwatch hangWatch)
         {
@@ -1272,12 +1283,6 @@ namespace Microsoft.Build.Execution
                 host = _buildTelemetry?.BuildEngineHost ?? BuildEnvironmentState.GetHostName();
             }
 
-            string diagnostics = $"Phase={waitPhase}, Duration={hangWatch.ElapsedMilliseconds}ms, " +
-                $"PendingSubmissions={pendingSubmissionCount}, WithResultNoLogging={submissionsWithResultNoLogging}, " +
-                $"ThreadException={threadExceptionRecorded}, UnmatchedProjectStarted={unmatchedProjectStartedCount}";
-
-            ExceptionHandling.DumpHangDiagnosticsToFile(diagnostics);
-
             CrashTelemetryRecorder.CollectAndEmitEndBuildHangDiagnostics(
                 waitPhase,
                 hangWatch.ElapsedMilliseconds,
@@ -1287,9 +1292,11 @@ namespace Microsoft.Build.Execution
                 unmatchedProjectStartedCount,
                 ProjectCollection.Version?.ToString(),
                 NativeMethodsShared.FrameworkName,
-                host);
+                host,
+                isStandaloneExecution: _buildTelemetry?.IsStandaloneExecution ?? false,
+                maxNodeCount: _buildParameters?.MaxNodeCount,
+                activeNodeCount: _activeNodes?.Count);
         }
-
 
         /// <summary>
         /// Convenience method.  Submits a lone build request and blocks until results are available.

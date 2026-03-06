@@ -805,8 +805,6 @@ namespace Microsoft.Build.ProjectCache
             BuildEventContext buildEventContext,
             CancellationToken cancellationToken)
         {
-            ErrorUtilities.VerifyThrowInternalNull(requestConfiguration.Project, nameof(requestConfiguration.Project));
-
             if (_projectCachePlugins.IsEmpty)
             {
                 return;
@@ -817,6 +815,10 @@ namespace Microsoft.Build.ProjectCache
             {
                 requestConfiguration.RetrieveFromCache();
             }
+
+            // Now we are sure the Project property is available, verify it's not null before proceeding.
+            // If it's null, it means the configuration is not properly loaded, which should not happen at this stage. 
+            ErrorUtilities.VerifyThrowInternalNull(requestConfiguration.Project, nameof(requestConfiguration.Project));
 
             // Filter to plugins which apply to the project, if any
             List<ProjectCacheDescriptor> projectCacheDescriptors = GetProjectCacheDescriptors(requestConfiguration.Project).ToList();

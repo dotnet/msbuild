@@ -31,6 +31,10 @@ internal static class CrashTelemetryRecorder
     /// <param name="buildEngineVersion">MSBuild version string, if available.</param>
     /// <param name="buildEngineFrameworkName">Framework name, if available.</param>
     /// <param name="buildEngineHost">Host name (VS, VSCode, CLI, etc.), if available.</param>
+    /// <param name="isStandaloneExecution">True if MSBuild runs from command line, false if hosted.</param>
+    /// <param name="maxNodeCount">Maximum number of build nodes configured.</param>
+    /// <param name="activeNodeCount">Number of currently active build nodes at crash time.</param>
+    /// <param name="submissionCount">Number of active build submissions at crash time.</param>
     public static void RecordCrashTelemetry(
         Exception exception,
         CrashExitType exitType,
@@ -38,7 +42,11 @@ internal static class CrashTelemetryRecorder
         bool isCritical,
         string? buildEngineVersion = null,
         string? buildEngineFrameworkName = null,
-        string? buildEngineHost = null)
+        string? buildEngineHost = null,
+        bool? isStandaloneExecution = null,
+        int? maxNodeCount = null,
+        int? activeNodeCount = null,
+        int? submissionCount = null)
     {
         try
         {
@@ -46,6 +54,10 @@ internal static class CrashTelemetryRecorder
             crashTelemetry.BuildEngineVersion = buildEngineVersion;
             crashTelemetry.BuildEngineFrameworkName = buildEngineFrameworkName;
             crashTelemetry.BuildEngineHost = buildEngineHost;
+            crashTelemetry.IsStandaloneExecution = isStandaloneExecution;
+            crashTelemetry.MaxNodeCount = maxNodeCount;
+            crashTelemetry.ActiveNodeCount = activeNodeCount;
+            crashTelemetry.SubmissionCount = submissionCount;
             KnownTelemetry.CrashTelemetry = crashTelemetry;
         }
         catch
@@ -195,7 +207,10 @@ internal static class CrashTelemetryRecorder
         int unmatchedProjectStartedCount,
         string? buildEngineVersion,
         string? buildEngineFrameworkName,
-        string? buildEngineHost)
+        string? buildEngineHost,
+        bool isStandaloneExecution,
+        int? maxNodeCount = null,
+        int? activeNodeCount = null)
     {
         try
         {
@@ -211,9 +226,12 @@ internal static class CrashTelemetryRecorder
                 SubmissionsWithResultNoLogging = submissionsWithResultNoLogging,
                 ThreadExceptionRecorded = threadExceptionRecorded,
                 UnmatchedProjectStartedCount = unmatchedProjectStartedCount,
+                IsStandaloneExecution = isStandaloneExecution,
+                MaxNodeCount = maxNodeCount,
+                ActiveNodeCount = activeNodeCount,
             };
 
-            TelemetryManager.Instance?.Initialize(isStandalone: false);
+            TelemetryManager.Instance?.Initialize(isStandaloneExecution);
 
             using IActivity? activity = TelemetryManager.Instance
                 ?.DefaultActivitySource

@@ -259,6 +259,29 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     /// </summary>
     public int? UnmatchedProjectStartedCount { get; set; }
 
+    // --- Build state diagnostic properties (help diagnose the context of the crash) ---
+
+    /// <summary>
+    /// Whether MSBuild is running standalone (CLI) or hosted (VS, etc.).
+    /// </summary>
+    public bool? IsStandaloneExecution { get; set; }
+
+    /// <summary>
+    /// Maximum number of build nodes configured (BuildParameters.MaxNodeCount).
+    /// Helps determine if out-of-proc nodes were in use.
+    /// </summary>
+    public int? MaxNodeCount { get; set; }
+
+    /// <summary>
+    /// Number of currently active build nodes at crash time.
+    /// </summary>
+    public int? ActiveNodeCount { get; set; }
+
+    /// <summary>
+    /// Number of active build submissions at crash time.
+    /// </summary>
+    public int? SubmissionCount { get; set; }
+
     /// <summary>
     /// The original exception, kept for passing to <c>FaultEvent</c>.
     /// Not serialized to telemetry properties.
@@ -372,6 +395,12 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(ThreadExceptionRecorded);
         AddIfNotNull(UnmatchedProjectStartedCount);
 
+        // Build state diagnostic properties
+        AddIfNotNull(IsStandaloneExecution);
+        AddIfNotNull(MaxNodeCount);
+        AddIfNotNull(ActiveNodeCount);
+        AddIfNotNull(SubmissionCount);
+
         return telemetryItems;
 
         void AddIfNotNull(object? value, [CallerArgumentExpression(nameof(value))] string key = "")
@@ -421,6 +450,12 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(EndBuildWaitDurationMs?.ToString(), nameof(EndBuildWaitDurationMs));
         AddIfNotNull(ThreadExceptionRecorded?.ToString(), nameof(ThreadExceptionRecorded));
         AddIfNotNull(UnmatchedProjectStartedCount?.ToString(), nameof(UnmatchedProjectStartedCount));
+
+        // Build state diagnostic properties
+        AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
+        AddIfNotNull(MaxNodeCount?.ToString(), nameof(MaxNodeCount));
+        AddIfNotNull(ActiveNodeCount?.ToString(), nameof(ActiveNodeCount));
+        AddIfNotNull(SubmissionCount?.ToString(), nameof(SubmissionCount));
 
         return properties;
 
