@@ -118,18 +118,24 @@
     </ItemGroup>
   </Target>
 
-  <!-- This target creates a type library for the assemblies in a package. It requires desktop msbuild to locate the tooling
-       Type libraries are still needed by Visual Studio in some cases, like the legacy C# project system.
-       It calls into msbuild via COM, and needs the type library to do so. -->
-  <Target Name="CreateTypeLib" BeforeTargets="AfterBuild" Inputs="$(TargetPath)" Outputs="$(TargetDir)$(TargetName).tlb;$(TargetDir)x64\$(TargetName).tlb" Condition="'$(BuildingInsideVisualStudio)' != 'true' and '$(CreateTlb)' == 'true' and $([MSBuild]::IsOSPlatform('windows')) and '$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' != 'Core'">
+  <!-- This target creates type libraries (.tlb) for COM interop scenarios.
+       The .tlb is shipped in both Visual Studio and the .NET SDK (Windows only).
+       Runs against the net472 build output using tlbexp.exe from the .NET Framework SDK. -->
+  <Target Name="CreateTypeLib" BeforeTargets="AfterBuild" Inputs="$(TargetPath)" Outputs="$(TargetDir)$(TargetName).tlb"
+          Condition="'$(BuildingInsideVisualStudio)' != 'true' and '$(CreateTlb)' == 'true' and $([MSBuild]::IsOSPlatform('windows')) and '$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <PropertyGroup>
+      <!-- Resolve tlbexp.exe from the .NET Framework SDK via registry, with a hardcoded fallback -->
+      <_NetFxToolsDir>$([MSBuild]::GetRegistryValueFromView('HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SDKs\NETFXSDK\4.8\WinSDK-NetFx40Tools', 'InstallationFolder', null, RegistryView.Registry32))</_NetFxToolsDir>
+      <_NetFxToolsDir Condition="'$(_NetFxToolsDir)' == ''">$(MSBuildProgramFiles32)\Microsoft SDKs\Windows\v10.0A\bin\NETFX 4.8 Tools\</_NetFxToolsDir>
       <TlbExpPath>$([Microsoft.Build.Utilities.ToolLocationHelper]::GetPathToDotNetFrameworkSdkFile('tlbexp.exe'))</TlbExpPath>
-      <!-- Provide a mechanism for turning on verbose TlbExp output for diagnosing issues -->
+      <TlbExpPath Condition="'$(TlbExpPath)' == ''">$(_NetFxToolsDir)TlbExp.exe</TlbExpPath>
       <TlbExpVerbosity Condition="'$(VerboseTlbExp)' == 'true'">/verbose</TlbExpVerbosity>
       <TlbExpVerbosity Condition="'$(VerboseTlbExp)' != 'true'">/silent</TlbExpVerbosity>
     </PropertyGroup>
 
     <ItemGroup>
+      <!-- Assembly probe paths for tlbexp dependency resolution.
+           TargetDir has the built assembly; TargetFrameworkDirectory has .NET Framework BCL (System.dll etc.) -->
       <_TlbExpAssemblyPaths Include="$(TargetDir);$(TargetFrameworkDirectory)" />
       <_TlbExpAssemblyPaths>
         <SlashlessPath>$([System.String]::Copy('%(Identity)').TrimEnd('\'))</SlashlessPath>
@@ -137,10 +143,12 @@
       <TlbExpAssemblyPaths Include="@(_TlbExpAssemblyPaths->'%(SlashlessPath)')" />
     </ItemGroup>
 
-    <Error Condition=" '$(TlbExpPath)' == '' "
-           Text="TlbExp was not found. Ensure that you have installed everything from .vsconfig. If you have, please report a bug to MSBuild." />
+    <Error Condition="!Exists('$(TlbExpPath)')"
+           Text="TlbExp was not found at '$(TlbExpPath)'. Ensure the .NET Framework SDK tools are installed." />
 
+    <!-- Generate x86 type library -->
     <Exec Command="&quot;$(TlbExpPath)&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)$(TargetName).tlb&quot;" />
+    <!-- Generate x64 type library -->
     <Exec Command="&quot;$(TlbExpPath)&quot; $(TlbExpVerbosity) /NOLOGO @(TlbExpAssemblyPaths->'/asmpath:&quot;%(Identity)&quot;', ' ') &quot;$(TargetPath)&quot; /out:&quot;$(TargetDir)x64\$(TargetName).tlb&quot; /win64" />
   </Target>
 
