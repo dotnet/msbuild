@@ -398,7 +398,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return null;
         }
 
-        private static ITaskItem[] RemoveDuplicateItems(ITaskItem[] items)
+        private static ITaskItem[] RemoveDuplicateItems(ITaskItem[] items, TaskEnvironment taskEnvironment)
         {
             if (items == null)
             {
@@ -426,7 +426,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 }
                 else
                 {
-                    key = Path.GetFullPath(item.ItemSpec).ToUpperInvariant();
+                    key = ((string)taskEnvironment.GetAbsolutePath(item.ItemSpec).GetCanonicalForm()).ToUpperInvariant();
                 }
 
                 if (!list.ContainsKey(key))
@@ -438,9 +438,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return list.Values.ToArray();
         }
 
-        public static ITaskItem[] SortItems(ITaskItem[] items)
+        public static ITaskItem[] SortItems(ITaskItem[] items, TaskEnvironment taskEnvironment)
         {
-            ITaskItem[] outputItems = RemoveDuplicateItems(items);
+            ITaskItem[] outputItems = RemoveDuplicateItems(items, taskEnvironment);
             if (outputItems != null)
             {
                 Array.Sort(outputItems, s_itemComparer);
