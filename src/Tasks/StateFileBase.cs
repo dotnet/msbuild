@@ -72,6 +72,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Reads the specified file from disk into a StateFileBase derived object.
+        /// stateFile should be absolute path to the file on disk.
         /// </summary>
         internal static T DeserializeCache<T>(string stateFile, TaskLoggingHelper log) where T : StateFileBase
         {

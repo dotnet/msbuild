@@ -4,10 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 
-namespace Microsoft.Build.BackEnd
+namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// Default implementation of <see cref="ITaskEnvironmentDriver"/> that directly interacts with the file system
@@ -33,8 +31,8 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public AbsolutePath ProjectDirectory
         {
-            get => new AbsolutePath(NativeMethodsShared.GetCurrentDirectory(), ignoreRootedCheck: true);
-            set => NativeMethodsShared.SetCurrentDirectory(value.Value);
+            get => new AbsolutePath(NativeMethods.GetCurrentDirectory(), ignoreRootedCheck: true);
+            set => NativeMethods.SetCurrentDirectory(value.Value);
         }
 
         /// <inheritdoc/>
@@ -52,19 +50,19 @@ namespace Microsoft.Build.BackEnd
         /// <inheritdoc/>
         public IReadOnlyDictionary<string, string> GetEnvironmentVariables()
         {
-            return CommunicationsUtilities.GetEnvironmentVariables();
+            return FrameworkCommunicationsUtilities.GetEnvironmentVariables();
         }
 
         /// <inheritdoc/>
         public void SetEnvironmentVariable(string name, string? value)
         {
-            CommunicationsUtilities.SetEnvironmentVariable(name, value);
+            FrameworkCommunicationsUtilities.SetEnvironmentVariable(name, value);
         }
 
         /// <inheritdoc/>
         public void SetEnvironment(IDictionary<string, string> newEnvironment)
         {
-            CommunicationsUtilities.SetEnvironment(newEnvironment);
+            FrameworkCommunicationsUtilities.SetEnvironment(newEnvironment);
         }
 
         /// <inheritdoc/>

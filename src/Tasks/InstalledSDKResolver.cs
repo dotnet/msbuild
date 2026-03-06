@@ -22,12 +22,24 @@ namespace Microsoft.Build.Tasks
         private readonly Dictionary<string, ITaskItem> _resolvedSDKs;
 
         /// <summary>
+        /// Cached absolute paths for resolved SDKs
+        /// </summary>
+        private readonly Dictionary<string, string> _resolvedSDKPaths;
+
+        /// <summary>
         /// Construct.
         /// </summary>
-        public InstalledSDKResolver(Dictionary<string, ITaskItem> resolvedSDKs, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false)
+        public InstalledSDKResolver(Dictionary<string, ITaskItem> resolvedSDKs, string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, TaskEnvironment taskEnvironment)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, System.Reflection.ProcessorArchitecture.None, false, taskEnvironment)
         {
             _resolvedSDKs = resolvedSDKs;
+            _resolvedSDKPaths = new Dictionary<string, string>(resolvedSDKs.Count);
+            
+            // Cache absolute paths to avoid repeated TaskEnvironment.GetAbsolutePath calls
+            foreach (var kvp in resolvedSDKs)
+            {
+                _resolvedSDKPaths[kvp.Key] = taskEnvironment.GetAbsolutePath(kvp.Value.ItemSpec);
+            }
         }
 
         /// <inheritdoc/>
@@ -51,9 +63,8 @@ namespace Microsoft.Build.Tasks
             if (assemblyName != null)
             {
                 // We have found a resolved SDK item that matches the one on the reference items.
-                if (_resolvedSDKs.TryGetValue(sdkName, out ITaskItem resolvedSDK))
+                if (_resolvedSDKs.TryGetValue(sdkName, out ITaskItem resolvedSDK) && _resolvedSDKPaths.TryGetValue(sdkName, out string sdkDirectory))
                 {
-                    string sdkDirectory = resolvedSDK.ItemSpec;
                     string configuration = resolvedSDK.GetMetadata("TargetedSDKConfiguration");
                     string architecture = resolvedSDK.GetMetadata("TargetedSDKArchitecture");
 

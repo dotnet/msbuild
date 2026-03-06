@@ -28,6 +28,7 @@ namespace Microsoft.Build.UnitTests
             string targetFrameworkMoniker = ".NetFramework, Version=v4.8";
             MockEngine engine = new();
             GetReferenceAssemblyPaths getReferencePaths = new();
+            getReferencePaths.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             getReferencePaths.BuildEngine = engine;
             getReferencePaths.TargetFrameworkMoniker = targetFrameworkMoniker;
             getReferencePaths.Execute();

@@ -63,6 +63,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.AssemblyFiles = assemblyFiles;
             t.SearchPaths = DefaultPaths;
             t.AppConfigFile = appConfigFile;
@@ -110,6 +111,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
 
                 t.BuildEngine = engine;
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.AssemblyFiles = assemblyFiles;
                 t.SearchPaths = DefaultPaths;
                 t.AppConfigFile = appConfigFile;
@@ -161,6 +163,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
 
                 t.BuildEngine = engine;
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.AssemblyFiles = assemblyFiles;
                 t.SearchPaths = DefaultPaths;
                 t.AppConfigFile = appConfigFile;
@@ -237,6 +240,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 t.InstalledAssemblySubsetTables = new TaskItem[] { new TaskItem(subsetListPath) };
 
                 t.BuildEngine = engine;
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.Assemblies = assemblyNames;
                 t.SearchPaths = DefaultPaths;
                 t.AppConfigFile = appConfigFile;
@@ -293,6 +297,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.AssemblyFiles = assemblyFiles;
             t.SearchPaths = DefaultPaths;
             t.AppConfigFile = appConfigFile;
@@ -344,6 +349,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.AssemblyFiles = assemblyFiles;
             t.SearchPaths = DefaultPaths;
             t.AppConfigFile = appConfigFile;
@@ -395,6 +401,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.AssemblyFiles = assemblyFiles;
             t.SearchPaths = DefaultPaths;
             t.AppConfigFile = appConfigFile;
@@ -444,6 +451,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.AssemblyFiles = assemblyFiles;
             t.SearchPaths = DefaultPaths;
             t.AppConfigFile = appConfigFile;

@@ -5,10 +5,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 
-namespace Microsoft.Build.BackEnd
+namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// Implementation of <see cref="ITaskEnvironmentDriver"/> that virtualizes environment variables and current directory
@@ -33,7 +31,7 @@ namespace Microsoft.Build.BackEnd
             string currentDirectoryFullPath,
             IDictionary<string, string> environmentVariables)
         {
-            _environmentVariables = new Dictionary<string, string>(environmentVariables, CommunicationsUtilities.EnvironmentVariableComparer);
+            _environmentVariables = new Dictionary<string, string>(environmentVariables, FrameworkCommunicationsUtilities.EnvironmentVariableComparer);
             ProjectDirectory = new AbsolutePath(currentDirectoryFullPath, ignoreRootedCheck: true);
         }
 
@@ -45,7 +43,7 @@ namespace Microsoft.Build.BackEnd
         public MultiThreadedTaskEnvironmentDriver(string currentDirectoryFullPath)
         {
             IDictionary variables = Environment.GetEnvironmentVariables();
-            _environmentVariables = new Dictionary<string, string>(variables.Count, CommunicationsUtilities.EnvironmentVariableComparer);
+            _environmentVariables = new Dictionary<string, string>(variables.Count, FrameworkCommunicationsUtilities.EnvironmentVariableComparer);
             foreach (DictionaryEntry entry in variables)
             {
                 _environmentVariables[(string)entry.Key] = (string)entry.Value!;

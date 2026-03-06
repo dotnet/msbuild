@@ -1435,7 +1435,7 @@ namespace Microsoft.Build.BackEnd
         {
             // TaskEnvironment.SetEnvironment delegates to the appropriate driver:
             // - MultiThreadedTaskEnvironmentDriver: updates virtualized environment dictionary
-            // - MultiProcessTaskEnvironmentDriver: calls CommunicationsUtilities.SetEnvironment (same as legacy behavior)
+            // - MultiProcessTaskEnvironmentDriver: uses FrameworkCommunicationsUtilities methods
             _requestEntry.TaskEnvironment.SetEnvironment(savedEnvironment);
         }
 

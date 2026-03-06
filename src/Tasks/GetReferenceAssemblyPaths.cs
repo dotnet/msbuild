@@ -18,8 +18,13 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Returns the reference assembly paths to the various frameworks
     /// </summary>
-    public class GetReferenceAssemblyPaths : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class GetReferenceAssemblyPaths : TaskExtension, IMultiThreadableTask
     {
+        /// <summary>
+        /// Task environment for thread-safe operations.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; }
         #region Data
 #if FEATURE_GAC
         /// <summary>
@@ -174,7 +179,7 @@ namespace Microsoft.Build.Tasks
                         // get an assemblyname from the string representation of the sentinel assembly name
                         var sentinelAssemblyName = new AssemblyNameExtension(NET35SP1SentinelAssemblyName);
 
-                        string path = GlobalAssemblyCache.GetLocation(sentinelAssemblyName, SystemProcessorArchitecture.MSIL, runtimeVersion => "v2.0.50727", new Version("2.0.57027"), false, new FileExists(p => FileUtilities.FileExistsNoThrow(p)), GlobalAssemblyCache.pathFromFusionName, GlobalAssemblyCache.gacEnumerator, false);
+                        string path = GlobalAssemblyCache.GetLocation(sentinelAssemblyName, SystemProcessorArchitecture.MSIL, runtimeVersion => "v2.0.50727", new Version("2.0.57027"), false, new FileExists(p => FileUtilities.FileExistsNoThrow(p)), GlobalAssemblyCache.pathFromFusionName, GlobalAssemblyCache.gacEnumerator, false, TaskEnvironment);
                         s_net35SP1SentinelAssemblyFound = !String.IsNullOrEmpty(path);
                     }
 
