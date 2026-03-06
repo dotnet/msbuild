@@ -108,6 +108,8 @@ namespace Microsoft.Build.Logging
             bool disableConsoleColor = false;
             bool forceConsoleColor = false;
             bool preferConsoleColor = false;
+            bool? useColor = null; // null means not specified by parameter
+            
             if (!string.IsNullOrEmpty(_parameters))
             {
                 string[] parameterComponents = _parameters.Split(LoggerParametersHelper.s_parameterDelimiters);
@@ -131,19 +133,82 @@ namespace Microsoft.Build.Logging
                         // Use ansi color codes if current target console do support it
                         preferConsoleColor = ConsoleConfiguration.AcceptAnsiColorCodes;
                     }
+
+                    // Check for use_color parameter
+                    if (param.StartsWith("USE_COLOR=", StringComparison.OrdinalIgnoreCase) ||
+                        param.StartsWith("USECOLOR=", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string value = param.Substring(param.IndexOf('=') + 1);
+                        if (ConversionUtilities.TryConvertStringToBool(value, out bool parsedValue))
+                        {
+                            useColor = parsedValue;
+                        }
+                    }
                 }
             }
 
-            if (forceConsoleColor || (!disableConsoleColor && preferConsoleColor))
+            // Determine final color mode based on precedence:
+            // 1. Explicit use_color parameter (highest priority)
+            // 2. NO_COLOR environment variable
+            // 3. FORCE_COLOR environment variable
+            // 4. Legacy parameters (DISABLECONSOLECOLOR, FORCECONSOLECOLOR, PREFERCONSOLECOLOR)
+            
+            bool shouldUseColor = true; // Default
+            bool shouldUseAnsi = false;
+
+            if (useColor.HasValue)
             {
-                _colorSet = BaseConsoleLogger.SetColorAnsi;
-                _colorReset = BaseConsoleLogger.ResetColorAnsi;
+                // Explicit parameter takes precedence
+                shouldUseColor = useColor.Value;
+                // When explicitly requested, use ANSI colors unconditionally (similar to FORCECONSOLECOLOR)
+                shouldUseAnsi = useColor.Value;
             }
-            else if (disableConsoleColor)
+            else
+            {
+                // Check environment variables - NO_COLOR / FORCE_COLOR are intended to apply when set to any value
+                string noColor = Environment.GetEnvironmentVariable("NO_COLOR");
+                if (noColor is not null)
+                {
+                    shouldUseColor = false;
+                    shouldUseAnsi = false;
+                }
+                else
+                {
+                    string forceColorEnv = Environment.GetEnvironmentVariable("FORCE_COLOR");
+                    if (forceColorEnv is not null)
+                    {
+                        shouldUseColor = true;
+                        // FORCE_COLOR should force ANSI color output even when AcceptAnsiColorCodes is false
+                        shouldUseAnsi = true;
+                    }
+                    else
+                    {
+                        // Fall back to legacy parameters
+                        if (disableConsoleColor)
+                        {
+                            shouldUseColor = false;
+                            shouldUseAnsi = false;
+                        }
+                        else if (forceConsoleColor || preferConsoleColor)
+                        {
+                            shouldUseColor = true;
+                            shouldUseAnsi = true;
+                        }
+                    }
+                }
+            }
+
+            if (!shouldUseColor)
             {
                 _colorSet = BaseConsoleLogger.DontSetColor;
                 _colorReset = BaseConsoleLogger.DontResetColor;
             }
+            else if (shouldUseAnsi)
+            {
+                _colorSet = BaseConsoleLogger.SetColorAnsi;
+                _colorReset = BaseConsoleLogger.ResetColorAnsi;
+            }
+            // else use default color setters from constructor
 
             _consoleLogger = new ParallelConsoleLogger(_verbosity, _write, _colorSet, _colorReset);
 
