@@ -1830,6 +1830,14 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       request a target to build itself (perhaps via a chain of other targets)
     </comment>
   </data>
+  <data name="ProjectGraphProjectFileCannotBeLoadedWithReferrers" xml:space="preserve">
+    <value>Referenced by: {0}. {1}</value>
+    <comment>
+      This message is prepended to the original error when a referenced project file cannot be loaded during static graph construction.
+      {0} is a comma-separated list of projects that reference the failed project
+      {1} is the complete original error message
+    </comment>
+  </data>
   <data name="CacheMissesNotAllowedInIsolatedGraphBuilds" xml:space="preserve">
     <value>MSB4252: Project "{0}" with global properties
     ({1})
