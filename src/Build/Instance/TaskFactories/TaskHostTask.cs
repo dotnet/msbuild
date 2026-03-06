@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
@@ -13,6 +14,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Constants = Microsoft.Build.Framework.Constants;
 #if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.FileAccesses;
@@ -700,13 +702,20 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, Exception e)
         {
-            string taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext);
-#if NETFRAMEWORK
+            string taskHostLocation;
+
             if (Handshake.IsHandshakeOptionEnabled(requiredContext, HandshakeOptions.NET))
             {
-                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(requiredContext, _taskHostParameters).MSBuildPath;
+                (_, string msbuildPath) = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(requiredContext, _taskHostParameters);
+                taskHostLocation = msbuildPath != null
+                    ? Path.Combine(msbuildPath, Constants.MSBuildExecutableName)
+                    : null;
             }
-#endif
+            else
+            {
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildExecutablePathForNonNETRuntimes(requiredContext);
+            }
+
             string msbuildLocation = taskHostLocation ??
                 // We don't know the path -- probably we're trying to get a 64-bit assembly on a
                 // 32-bit machine.  At least give them the exe name to look for, though ...

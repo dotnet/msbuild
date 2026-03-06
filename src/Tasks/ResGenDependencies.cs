@@ -265,9 +265,9 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, pathsRelativeToBasePath: baseLinkedFileDirectory == null, log, logWarningForBinaryFormatter))
                     {
-                        if (resource is FileStreamResource linkedResource)
+                        if (resource is ILinkedFileResource linked)
                         {
-                            retVal.Add(linkedResource.FileName);
+                            retVal.Add(linked.LinkedFilePath);
                         }
                     }
                 }
