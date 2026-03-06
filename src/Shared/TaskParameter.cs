@@ -609,6 +609,31 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
+                // RecursiveDir is a built-in metadata that cannot be derived from the item spec alone -
+                // it requires the original wildcard pattern (_includeBeforeWildcardExpansionEscaped).
+                // When crossing process boundaries (e.g., to TaskHost in -mt mode), built-in metadata
+                // is not included in CloneCustomMetadataEscaped(). Explicitly preserve RecursiveDir
+                // as custom metadata so it survives serialization.
+                // See https://github.com/dotnet/msbuild/issues/13140
+                if (copyFrom is ITaskItem2 copyFromForRecursiveDir)
+                {
+                    string recursiveDirEscaped = copyFromForRecursiveDir.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.RecursiveDir);
+                    if (!string.IsNullOrEmpty(recursiveDirEscaped))
+                    {
+                        _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                        _customEscapedMetadata[FileUtilities.ItemSpecModifiers.RecursiveDir] = recursiveDirEscaped;
+                    }
+                }
+                else
+                {
+                    string recursiveDir = copyFrom.GetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir);
+                    if (!string.IsNullOrEmpty(recursiveDir))
+                    {
+                        _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                        _customEscapedMetadata[FileUtilities.ItemSpecModifiers.RecursiveDir] = EscapingUtilities.Escape(recursiveDir);
+                    }
+                }
+
                 ErrorUtilities.VerifyThrowInternalNull(_escapedItemSpec);
             }
 
