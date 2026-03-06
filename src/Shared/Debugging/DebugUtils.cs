@@ -12,7 +12,9 @@ namespace Microsoft.Build.Shared.Debugging
 {
     internal static class DebugUtils
     {
+#pragma warning disable CA1810 // Intentional: static constructor catches exceptions to prevent TypeInitializationException
         static DebugUtils()
+#pragma warning restore CA1810
         {
             try
             {
@@ -121,10 +123,7 @@ namespace Microsoft.Build.Shared.Debugging
         /// that poisons the entire <see cref="DebugUtils"/> type, whereas the static constructor's
         /// try/catch lets the type initialize successfully with a safe fallback value.
         /// </summary>
-        private static string GetProcessInfoString()
-        {
-            return $"{(ProcessNodeMode.Value?.ToString() ?? "CentralNode")}_{EnvironmentUtilities.ProcessName}_PID={EnvironmentUtilities.CurrentProcessId}_x{(Environment.Is64BitProcess ? "64" : "86")}";
-        }
+        private static string GetProcessInfoString() => $"{(ProcessNodeMode.Value?.ToString() ?? "CentralNode")}_{EnvironmentUtilities.ProcessName}_PID={EnvironmentUtilities.CurrentProcessId}_x{(Environment.Is64BitProcess ? "64" : "86")}";
 
         public static readonly string ProcessInfoString;
 
