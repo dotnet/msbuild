@@ -23,7 +23,6 @@ using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFil
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 #if FEATURE_COMPILE_IN_TESTS
 using Microsoft.Build.Shared;
 #endif

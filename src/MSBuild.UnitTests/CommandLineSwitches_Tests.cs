@@ -1133,13 +1133,13 @@ namespace Microsoft.Build.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "17.10");
+                ChangeWaves.ResetStateForTests();
 
                 CommandLineSwitches switches = new CommandLineSwitches();
                 switches.SetParameterizedSwitch(CommandLineSwitches.ParameterizedSwitch.Target, "/t:Clean;Build", "\"Clean;Build\"", true, true, false);
                 switches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Target).ShouldBeTrue();
 
-                switches[CommandLineSwitches.ParameterizedSwitch.Target].Length.ShouldBe(1);
-                switches[CommandLineSwitches.ParameterizedSwitch.Target][0].ShouldBe("Clean;Build");
+                switches[CommandLineSwitches.ParameterizedSwitch.Target].ShouldBe(["Clean;Build"]);
             }
         }
 
