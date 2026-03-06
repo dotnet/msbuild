@@ -51,7 +51,6 @@
     <Compile Include="..\Shared\EscapingUtilities.cs" />
     <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
     <Compile Include="..\Shared\ExceptionHandling.cs" />
-    <Compile Include="..\Shared\ProcessExtensions.cs" />
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>

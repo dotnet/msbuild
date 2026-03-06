@@ -6,15 +6,33 @@ using System.IO;
 using System.Reflection;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.Tasks.ResourceHandling;
+using Microsoft.Build.Tasks.UnitTests.ResourceHandling;
+using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
-    public sealed class ResGenDependencies_Tests
+    public sealed class ResGenDependencies_Tests : IDisposable
     {
+        private readonly TestEnvironment _env;
+        private readonly ITestOutputHelper _output;
+
+        public ResGenDependencies_Tests(ITestOutputHelper output)
+        {
+            _env = TestEnvironment.Create(output);
+            _output = output;
+        }
+
+        public void Dispose()
+        {
+            _env.Dispose();
+        }
+
         [Theory]
         [MemberData(nameof(GenerateResource_Tests.Utilities.UsePreserializedResourceStates), MemberType = typeof(GenerateResource_Tests.Utilities))]
 
@@ -84,6 +102,60 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(resx);
                 File.Delete(stateFile);
             }
+        }
+
+        /// <summary>
+        /// When useMSBuildResXReader is true, GetResXFileInfo should track linked files
+        /// for all resource types that produce an ILinkedFileResource: System.String,
+        /// System.Byte[], System.IO.MemoryStream, and FileStreamResource types
+        /// (e.g. System.Drawing.Bitmap).
+        /// </summary>
+        [Fact]
+        public void LinkedFilesTrackedForAllResourceTypes()
+        {
+            var folder = _env.CreateFolder(createFolder: true);
+
+            // Create four linked files representing each code path in AddLinkedResource.
+            var textFile = folder.CreateFile("linked.txt", "hello");
+            var byteFile = folder.CreateFile("linked.bin", "bytes");
+            var memStreamFile = folder.CreateFile("linked.dat", "stream");
+
+            // Create a minimal bitmap file inside the managed folder.
+            string bitmapPath = Path.Combine(folder.Path, "linked.bmp");
+            byte[] bmp = new byte[66];
+            bmp[0x00] = 0x42; bmp[0x01] = 0x4D; bmp[0x02] = 0x42;
+            bmp[0x0a] = 0x3E; bmp[0x0e] = 0x28; bmp[0x12] = 0x01; bmp[0x16] = 0x01;
+            bmp[0x1a] = 0x01; bmp[0x1c] = 0x01; bmp[0x22] = 0x04;
+            bmp[0x3a] = 0xFF; bmp[0x3b] = 0xFF; bmp[0x3c] = 0xFF;
+            bmp[0x3e] = 0x80;
+            File.WriteAllBytes(bitmapPath, bmp);
+
+            string resxPath = Path.Combine(folder.Path, "test.resx");
+            File.WriteAllText(resxPath, ResXHelper.SurroundWithBoilerplate(
+        $@"  <assembly alias=""System.Windows.Forms"" name=""System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089"" />
+        <data name=""TextResource"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
+            <value>{textFile.Path};System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+        </data>
+        <data name=""ByteArrayResource"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
+            <value>{byteFile.Path};System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+        </data>
+        <data name=""MemoryStreamResource"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
+            <value>{memStreamFile.Path};System.IO.MemoryStream, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+        </data>
+        <data name=""BitmapResource"" type=""System.Resources.ResXFileRef, System.Windows.Forms"">
+            <value>{bitmapPath};System.Drawing.Bitmap, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+        </data>
+        "));
+
+            var cache = new ResGenDependencies();
+            ResGenDependencies.ResXFile resxFile = cache.GetResXFileInfo(resxPath, useMSBuildResXReader: true, log: null, logWarningForBinaryFormatter: false);
+
+            resxFile.LinkedFiles.ShouldNotBeNull();
+            resxFile.LinkedFiles.Length.ShouldBe(4);
+            resxFile.LinkedFiles.ShouldContain(textFile.Path);
+            resxFile.LinkedFiles.ShouldContain(byteFile.Path);
+            resxFile.LinkedFiles.ShouldContain(memStreamFile.Path);
+            resxFile.LinkedFiles.ShouldContain(bitmapPath);
         }
 
         /// <summary>
