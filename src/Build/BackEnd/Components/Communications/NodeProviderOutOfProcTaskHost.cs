@@ -683,12 +683,30 @@ namespace Microsoft.Build.BackEnd
             return nodeContexts.Count == 1;
 
             // Resolves the node launch configuration based on the host context.
-            NodeLaunchData ResolveNodeLaunchConfiguration(HandshakeOptions hostContext, in TaskHostParameters taskHostParameters) =>
-
+            NodeLaunchData ResolveNodeLaunchConfiguration(HandshakeOptions hostContext, in TaskHostParameters taskHostParameters)
+            {
                 // Handle .NET task host context
-                Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET)
-                    ? ResolveAppHostOrFallback(GetMSBuildPath(taskHostParameters), taskHostParameters.DotnetHostPath, hostContext, IsNodeReuseEnabled(hostContext))
-                    : new NodeLaunchData(GetMSBuildExecutablePathForNonNETRuntimes(hostContext), BuildCommandLineArgs(IsNodeReuseEnabled(hostContext)), new Handshake(hostContext));
+                if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.NET))
+                {
+                    return ResolveAppHostOrFallback(GetMSBuildPath(taskHostParameters), taskHostParameters.DotnetHostPath, hostContext, IsNodeReuseEnabled(hostContext));
+                }
+
+#if FEATURE_NET35_TASKHOST
+                // CLR2 task host (MSBuildTaskHost.exe) requires special handling:
+                // - Empty command-line args (MSBuildTaskHost.Main() takes no arguments)
+                // - Handshake with toolsDirectory set to the EXE's directory so the
+                //   salt matches what the child process computes on startup.
+                if (Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.CLR2))
+                {
+                    string msbuildLocation = GetMSBuildExecutablePathForNonNETRuntimes(hostContext);
+                    string toolsDirectory = Path.GetDirectoryName(msbuildLocation) ?? string.Empty;
+                    return new NodeLaunchData(msbuildLocation, string.Empty, new Handshake(hostContext, toolsDirectory));
+                }
+#endif
+
+                // CLR4 task host (MSBuild.exe on .NET Framework)
+                return new NodeLaunchData(GetMSBuildExecutablePathForNonNETRuntimes(hostContext), BuildCommandLineArgs(IsNodeReuseEnabled(hostContext)), new Handshake(hostContext));
+            }
         }
 
         /// <summary>
@@ -730,10 +748,19 @@ namespace Microsoft.Build.BackEnd
                         dotnetOverrides);
             }
 
-            CommunicationsUtilities.Trace("For a host context of {0}, app host not found at {1}, falling back to dotnet.exe from {2}.", hostContext, appHostPath, dotnetHostPath);
+            // Auto-discover dotnet host path when not explicitly provided.
+            string resolvedDotnetHostPath = dotnetHostPath;
+#if RUNTIME_TYPE_NETCORE
+            if (string.IsNullOrEmpty(resolvedDotnetHostPath))
+            {
+                resolvedDotnetHostPath = CurrentHost.GetCurrentHost();
+            }
+#endif
+
+            CommunicationsUtilities.Trace("For a host context of {0}, app host not found at {1}, falling back to dotnet.exe from {2}.", hostContext, appHostPath, resolvedDotnetHostPath);
 
             return new NodeLaunchData(
-                dotnetHostPath,
+                resolvedDotnetHostPath,
                 $"\"{Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName)}\" {commandLineArgs}",
                 new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath));
         }

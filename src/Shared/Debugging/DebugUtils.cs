@@ -12,7 +12,9 @@ namespace Microsoft.Build.Shared.Debugging
 {
     internal static class DebugUtils
     {
+#pragma warning disable CA1810 // Intentional: static constructor catches exceptions to prevent TypeInitializationException
         static DebugUtils()
+#pragma warning restore CA1810
         {
             try
             {
@@ -42,6 +44,22 @@ namespace Microsoft.Build.Shared.Debugging
                 {
                     // Console may not be available.
                 }
+            }
+
+            // Initialize diagnostic fields inside the static constructor so failures
+            // are caught here rather than poisoning the type with an unrecoverable
+            // TypeInitializationException. On .NET Framework, EnvironmentUtilities
+            // accesses Process.GetCurrentProcess() which can throw Win32Exception
+            // in restricted environments or when performance counters are corrupted.
+            try
+            {
+                ProcessInfoString = GetProcessInfoString();
+                ShouldDebugCurrentProcess = CurrentProcessMatchesDebugName();
+            }
+            catch
+            {
+                ProcessInfoString ??= "Unknown";
+                ShouldDebugCurrentProcess = false;
             }
         }
 
@@ -94,10 +112,22 @@ namespace Microsoft.Build.Shared.Debugging
             return thisProcessMatchesName;
         }
 
-        public static readonly string ProcessInfoString =
-            $"{(ProcessNodeMode.Value?.ToString() ?? "CentralNode")}_{EnvironmentUtilities.ProcessName}_PID={EnvironmentUtilities.CurrentProcessId}_x{(Environment.Is64BitProcess ? "64" : "86")}";
+        /// <summary>
+        /// Builds a diagnostic string identifying this process (node mode, name, PID, bitness).
+        /// Must be called from the static constructor rather than as a field initializer because
+        /// on .NET Framework, <see cref="EnvironmentUtilities.ProcessName"/> and
+        /// <see cref="EnvironmentUtilities.CurrentProcessId"/> access
+        /// <c>Process.GetCurrentProcess()</c> which can throw <see cref="System.ComponentModel.Win32Exception"/>
+        /// in restricted environments or when performance counters are corrupted.
+        /// A field-initializer failure would produce an unrecoverable <see cref="TypeInitializationException"/>
+        /// that poisons the entire <see cref="DebugUtils"/> type, whereas the static constructor's
+        /// try/catch lets the type initialize successfully with a safe fallback value.
+        /// </summary>
+        private static string GetProcessInfoString() => $"{(ProcessNodeMode.Value?.ToString() ?? "CentralNode")}_{EnvironmentUtilities.ProcessName}_PID={EnvironmentUtilities.CurrentProcessId}_x{(Environment.Is64BitProcess ? "64" : "86")}";
 
-        public static readonly bool ShouldDebugCurrentProcess = CurrentProcessMatchesDebugName();
+        public static readonly string ProcessInfoString;
+
+        public static readonly bool ShouldDebugCurrentProcess;
 
         public static string DebugPath { get; private set; }
 
