@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <OutputType>Library</OutputType>
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    <!-- Treat analyzer warnings as errors so dotnet build reports them clearly -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <!-- Prevent repo-level props from producing reference assembly (which causes double analyzer run) -->
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Reference MSBuild Framework for ITask, IMultiThreadableTask, TaskEnvironment, AbsolutePath -->
+    <ProjectReference Include="..\..\Framework\Microsoft.Build.Framework.csproj" />
+    <ProjectReference Include="..\..\Utilities\Microsoft.Build.Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Wire up the analyzer from the sibling project -->
+    <ProjectReference Include="..\ThreadSafeTaskAnalyzer.csproj"
+                      OutputItemType="Analyzer"
+                      ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+</Project>
