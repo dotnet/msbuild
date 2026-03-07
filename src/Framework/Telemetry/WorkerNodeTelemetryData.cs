@@ -8,6 +8,8 @@ namespace Microsoft.Build.Framework.Telemetry;
 
 internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
 {
+    private readonly object _lock = new();
+
     public WorkerNodeTelemetryData(Dictionary<TaskOrTargetTelemetryKey, TaskExecutionStats> tasksExecutionData, Dictionary<TaskOrTargetTelemetryKey, TargetExecutionStats> targetsExecutionData)
     {
         TasksExecutionData = tasksExecutionData;
@@ -16,21 +18,39 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
 
     public void Add(IWorkerNodeTelemetryData other)
     {
-        foreach (var task in other.TasksExecutionData)
+        lock (_lock)
         {
-            AddTask(task.Key, task.Value.CumulativeExecutionTime, task.Value.ExecutionsCount, task.Value.TotalMemoryBytes, task.Value.TaskFactoryName, task.Value.TaskHostRuntime);
-        }
+            foreach (var task in other.TasksExecutionData)
+            {
+                AddTaskUnsafe(task.Key, task.Value.CumulativeExecutionTime, task.Value.ExecutionsCount, task.Value.TotalMemoryBytes, task.Value.TaskFactoryName, task.Value.TaskHostRuntime);
+            }
 
-        foreach (var target in other.TargetsExecutionData)
-        {
-            AddTarget(target.Key, target.Value.WasExecuted, target.Value.SkipReason);
+            foreach (var target in other.TargetsExecutionData)
+            {
+                AddTargetUnsafe(target.Key, target.Value.WasExecuted, target.Value.SkipReason);
+            }
         }
     }
 
     public void AddTask(TaskOrTargetTelemetryKey task, TimeSpan cumulativeExecutionTime, int executionsCount, long totalMemoryConsumption, string? factoryName, string? taskHostRuntime)
     {
-        TaskExecutionStats? taskExecutionStats;
-        if (!TasksExecutionData.TryGetValue(task, out taskExecutionStats))
+        lock (_lock)
+        {
+            AddTaskUnsafe(task, cumulativeExecutionTime, executionsCount, totalMemoryConsumption, factoryName, taskHostRuntime);
+        }
+    }
+
+    public void AddTarget(TaskOrTargetTelemetryKey target, bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None)
+    {
+        lock (_lock)
+        {
+            AddTargetUnsafe(target, wasExecuted, skipReason);
+        }
+    }
+
+    private void AddTaskUnsafe(TaskOrTargetTelemetryKey task, TimeSpan cumulativeExecutionTime, int executionsCount, long totalMemoryConsumption, string? factoryName, string? taskHostRuntime)
+    {
+        if (!TasksExecutionData.TryGetValue(task, out TaskExecutionStats? taskExecutionStats))
         {
             taskExecutionStats = new(cumulativeExecutionTime, executionsCount, totalMemoryConsumption, factoryName, taskHostRuntime);
             TasksExecutionData[task] = taskExecutionStats;
@@ -45,7 +65,7 @@ internal class WorkerNodeTelemetryData : IWorkerNodeTelemetryData
         }
     }
 
-    public void AddTarget(TaskOrTargetTelemetryKey target, bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None)
+    private void AddTargetUnsafe(TaskOrTargetTelemetryKey target, bool wasExecuted, TargetSkipReason skipReason = TargetSkipReason.None)
     {
         if (TargetsExecutionData.TryGetValue(target, out var existingStats))
         {
