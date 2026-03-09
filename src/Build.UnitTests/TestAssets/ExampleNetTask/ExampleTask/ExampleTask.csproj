@@ -17,6 +17,7 @@
   <ItemGroup>
     <Compile Include="..\..\..\BackEnd\IsRunningMultipleNodesTask.cs" Link="IsRunningMultipleNodesTask.cs" />
     <Compile Include="..\..\..\BackEnd\RequestCoresTask.cs" Link="RequestCoresTask.cs" />
+    <Compile Include="..\..\..\BackEnd\BuildProjectFileTask.cs" Link="BuildProjectFileTask.cs" />
   </ItemGroup>
 
 </Project>
