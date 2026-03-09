@@ -1514,38 +1514,3 @@ namespace Microsoft.Build.Shared
         }
     }
 }
-
-#if !NET
-namespace System.IO
-{
-    internal static class StreamExtensions
-    {
-        internal static void ReadExactly(this Stream stream, byte[] buffer, int offset, int count)
-        {
-            if (buffer == null)
-            {
-                throw new ArgumentNullException(nameof(buffer));
-            }
-            if (offset < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(offset));
-            }
-            if ((uint)count > buffer.Length - offset)
-            {
-                throw new ArgumentOutOfRangeException(nameof(count));
-            }
-
-            while (count > 0)
-            {
-                int read = stream.Read(buffer, offset, count);
-                if (read <= 0)
-                {
-                    throw new EndOfStreamException();
-                }
-                offset += read;
-                count -= read;
-            }
-        }
-    }
-}
-#endif
