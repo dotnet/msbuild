@@ -1041,6 +1041,69 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Verifies that ToolTask does not hang when the tool process spawns a grandchild
+        /// process that inherits stdout/stderr pipe handles and outlives the tool.
+        /// This is a regression test for https://github.com/dotnet/msbuild/issues/2981.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void ToolTaskDoesNotHangWhenGrandchildInheritsPipeHandles()
+        {
+            using (MyTool t = new MyTool())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+
+                // The command:
+                // 1. Echoes "hello" to stdout (tool's own output)
+                // 2. Starts a background process (ping -n 120 localhost) that inherits pipe handles
+                // 3. The tool (cmd.exe) exits immediately after starting the background process
+                // Without the fix, WaitForProcessExit hangs because the ping process holds the pipe.
+                t.MockCommandLineCommands = "/c echo hello & start /b ping -n 120 127.0.0.1 > nul";
+
+                // Set a generous timeout - without the fix this would hang forever
+                t.Timeout = 30000;
+
+                bool result = t.Execute();
+
+                // The tool should complete without hanging.
+                // The exit code may be non-zero depending on timing, but the key thing
+                // is that Execute() returns at all rather than hanging forever.
+                _output.WriteLine(engine.Log);
+                engine.AssertLogContains("hello");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that ToolTask still captures all output from the tool process
+        /// even with the grandchild pipe fix enabled. This is a regression test for
+        /// https://github.com/dotnet/msbuild/issues/10378 where switching to
+        /// WaitForExit(int) caused output to be lost.
+        /// </summary>
+        [Fact]
+        public void ToolTaskCapturesAllOutputWithFix()
+        {
+            using (MyTool t = new MyTool())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+
+                // Echo multiple lines to verify all output is captured
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows ?
+                    "/c echo line1 & echo line2 & echo line3"
+                    : "-c \"echo line1; echo line2; echo line3\"";
+
+                bool result = t.Execute();
+
+                _output.WriteLine(engine.Log);
+
+                result.ShouldBeTrue();
+                engine.AssertLogContains("line1");
+                engine.AssertLogContains("line2");
+                engine.AssertLogContains("line3");
+            }
+        }
+
+        /// <summary>
         /// A simple implementation of <see cref="ToolTask"/> to sleep for a while.
         /// </summary>
         /// <remarks>
