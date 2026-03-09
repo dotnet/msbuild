@@ -154,7 +154,8 @@ internal static class CrashTelemetryRecorder
 
             string eventName = $"{TelemetryConstants.EventPrefix}{TelemetryConstants.Crash}";
             string description = $"{crashTelemetry.ExitType}: {crashTelemetry.ExceptionType}";
-            var faultEvent = new FaultEvent(eventName, description, crashTelemetry.Exception);
+            var sanitizedException = new SanitizedException(crashTelemetry.Exception!);
+            var faultEvent = new FaultEvent(eventName, description, sanitizedException);
 
             faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}ExitType"] = crashTelemetry.ExitType.ToString();
             faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}CrashOrigin"] = crashTelemetry.CrashOrigin.ToString();
@@ -176,6 +177,26 @@ internal static class CrashTelemetryRecorder
             // Best effort: fault telemetry must never cause a secondary failure.
         }
 #endif
+    }
+
+    /// <summary>
+    /// Exception wrapper that sanitizes message and stack trace to remove PII
+    /// before being passed to VS Telemetry's <c>FaultEvent</c>.
+    /// </summary>
+    internal sealed class SanitizedException : Exception
+    {
+        private readonly string? _sanitizedStackTrace;
+
+        public SanitizedException(Exception original)
+            : base(CrashTelemetry.TruncateMessage(original.Message) ?? original.GetType().FullName,
+                   original.InnerException is not null ? new SanitizedException(original.InnerException) : null)
+        {
+            _sanitizedStackTrace = original.StackTrace is not null
+                ? CrashTelemetry.SanitizeFilePathsInText(original.StackTrace)
+                : null;
+        }
+
+        public override string? StackTrace => _sanitizedStackTrace;
     }
 
     private static CrashTelemetry CreateCrashTelemetry(

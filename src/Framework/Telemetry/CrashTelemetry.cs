@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.Build.Framework.Telemetry;
 
@@ -158,6 +159,15 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     /// Maximum number of characters to include from the sanitized stack trace.
     /// </summary>
     internal const int MaxStackTraceLength = 4096;
+
+    /// <summary>
+    /// Compiled regex pattern for matching file/directory paths that may contain PII.
+    /// Matches Windows absolute paths (X:\...), UNC paths (\\server\share\...), and Unix paths (/...).
+    /// Shared between <see cref="TruncateMessage"/> and <see cref="SanitizeFilePathsInText"/>.
+    /// </summary>
+    private static readonly Regex FilePathPattern = new(
+        @"(?:[A-Za-z]:\\|\\\\|/)(?:[^\s""'<>|*?\r\n]+)",
+        RegexOptions.Compiled);
 
     /// <summary>
     /// A prefix of the exception message, truncated and sanitized to avoid PII.
@@ -674,12 +684,8 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
             message = message.Substring(internalErrorPrefix.Length);
         }
 
-        // Redact file/directory paths that may contain PII (e.g., C:\Users\johndoe\...).
-        // Matches Windows paths (X:\...) and Unix paths (/home/...).
-        message = System.Text.RegularExpressions.Regex.Replace(
-            message,
-            @"(?:[A-Za-z]:\\|/)(?:[^\s""'<>|*?]+)",
-            "<path>");
+        // Redact file/directory paths that may contain PII (e.g., C:\Users\useralias\...).
+        message = FilePathPattern.Replace(message, "<path>");
 
         const int maxLength = 256;
         return message.Length <= maxLength ? message : message.Substring(0, maxLength);
@@ -824,8 +830,9 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     }
 
     /// <summary>
-    /// Sanitizes file paths embedded in multi-line text (e.g., exception dumps) to remove PII.
-    /// Each line that looks like a stack frame gets its file path redacted.
+    /// Sanitizes file paths embedded in multi-line text (e.g., stack traces, exception dumps) to remove PII.
+    /// Handles both standard .NET stack frame patterns (" in path:line N") and
+    /// bare file paths (Windows absolute, UNC, Unix absolute) that may appear in exception messages.
     /// </summary>
     internal static string SanitizeFilePathsInText(string text)
     {
@@ -853,6 +860,12 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
                     // " in <path>" without ":line N"
                     lines[i] = line.Substring(0, inIndex + inToken.Length) + "<redacted>";
                 }
+            }
+            else
+            {
+                // For non-stack-frame lines (e.g., exception messages embedded in ToString()),
+                // apply general path redaction to catch paths that appear outside " in " patterns.
+                lines[i] = FilePathPattern.Replace(line, "<path>");
             }
         }
 

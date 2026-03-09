@@ -497,11 +497,11 @@ public class CrashTelemetry_Tests
     [Fact]
     public void TruncateMessage_RedactsWindowsPaths()
     {
-        string message = @"C:\Users\johndoe\src\project.csproj unexpectedly not a rooted path";
+        string message = @"C:\Users\useralias\src\project.csproj unexpectedly not a rooted path";
         string? result = CrashTelemetry.TruncateMessage(message);
 
         result.ShouldNotBeNull();
-        result.ShouldNotContain("johndoe");
+        result.ShouldNotContain("useralias");
         result.ShouldNotContain(@"C:\Users");
         result.ShouldContain("<path>");
         result.ShouldContain("unexpectedly not a rooted path");
@@ -510,11 +510,11 @@ public class CrashTelemetry_Tests
     [Fact]
     public void TruncateMessage_RedactsUnixPaths()
     {
-        string message = @"/home/johndoe/src/project.csproj unexpectedly not a rooted path";
+        string message = @"/home/useralias/src/project.csproj unexpectedly not a rooted path";
         string? result = CrashTelemetry.TruncateMessage(message);
 
         result.ShouldNotBeNull();
-        result.ShouldNotContain("johndoe");
+        result.ShouldNotContain("useralias");
         result.ShouldContain("<path>");
     }
 
@@ -760,6 +760,51 @@ public class CrashTelemetry_Tests
     private static Exception CreateExceptionWithStack(string fakeStack)
     {
         return new ExceptionWithFakeStack(fakeStack);
+    }
+
+    [Fact]
+    public void TruncateMessage_RedactsUncPaths()
+    {
+        string message = @"Could not access \\server\share\builds\project.sln during build";
+        string? result = CrashTelemetry.TruncateMessage(message);
+
+        result.ShouldNotBeNull();
+        result.ShouldNotContain("server");
+        result.ShouldNotContain("share");
+        result.ShouldContain("<path>");
+    }
+
+    [Fact]
+    public void TruncateMessage_RedactsPathsWithSpaces()
+    {
+        // Paths containing spaces are partially redacted — each non-space segment
+        // after a recognized root prefix is replaced. The PII-relevant parts
+        // (username, project name) are in non-space segments and will be redacted.
+        string message = @"Could not find C:\Users\useralias\my-project\bin\app.exe";
+        string? result = CrashTelemetry.TruncateMessage(message);
+
+        result.ShouldNotBeNull();
+        result.ShouldNotContain("useralias");
+        result.ShouldNotContain("my-project");
+        result.ShouldContain("<path>");
+    }
+
+    [Fact]
+    public void SanitizeFilePathsInText_RedactsPathsInNonStackFrameLines()
+    {
+        string input = "System.IO.FileNotFoundException: Could not find C:\\Users\\useralias\\project.csproj";
+        string result = CrashTelemetry.SanitizeFilePathsInText(input);
+        result.ShouldNotContain("useralias");
+        result.ShouldContain("<path>");
+    }
+
+    [Fact]
+    public void SanitizeFilePathsInText_RedactsUncPathsInNonStackFrameLines()
+    {
+        string input = "Failed to load assembly from \\\\server\\share\\assembly.dll";
+        string result = CrashTelemetry.SanitizeFilePathsInText(input);
+        result.ShouldNotContain("server");
+        result.ShouldContain("<path>");
     }
 
     private sealed class ExceptionWithFakeStack : Exception
