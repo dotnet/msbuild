@@ -44,8 +44,10 @@ namespace Microsoft.Build.BackEnd
 #if NETCOREAPP2_1_OR_GREATER
         /// <summary>
         /// The amount of time to wait for the client to connect to the host.
+        /// Reduced from 60s to 5s so that failed reuse probes don't block idle nodes
+        /// from reaching their connection timeout check.
         /// </summary>
-        private const int ClientConnectTimeout = 60000;
+        private const int ClientConnectTimeout = 5000;
 #endif // NETCOREAPP2_1
 
         /// <summary>

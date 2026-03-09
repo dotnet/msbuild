@@ -289,8 +289,14 @@ namespace Microsoft.Build.Internal
             int sessionId = 0;
             if (includeSessionId)
             {
-                using var currentProcess = Process.GetCurrentProcess();
-                sessionId = currentProcess.SessionId;
+                if (NativeMethodsShared.IsWindows)
+                {
+                    using var currentProcess = Process.GetCurrentProcess();
+                    sessionId = currentProcess.SessionId;
+                }
+                // On Unix, getsid() returns the session leader PID which differs per terminal,
+                // preventing cross-terminal node reuse. Use 0 since Unix doesn't need
+                // RDP-style session isolation.
             }
 
             _handshakeComponents = IsNetTaskHost
@@ -409,7 +415,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// The timeout to connect to a node.
         /// </summary>
-        private const int DefaultNodeConnectionTimeout = 900 * 1000; // 15 minutes; enough time that a dev will typically do another build in this time
+        private const int DefaultNodeConnectionTimeout = 30 * 1000; // 30 seconds
 
         /// <summary>
         /// Whether to trace communications
