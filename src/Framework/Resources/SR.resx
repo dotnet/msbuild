@@ -156,4 +156,7 @@
   <data name="PathTooLong" xml:space="preserve">
     <value>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</value>
   </data>
+  <data name="FailedCreatingTempFile" xml:space="preserve">
+    <value>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</value>
+  </data>
 </root>

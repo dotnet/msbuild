@@ -18,7 +18,7 @@ namespace Microsoft.Build.Framework
     /// This class contains utility methods for file IO.
     /// Functions from FileUtilities are transferred here as part of the effort to remove Shared files.
     /// </summary>
-    internal static class FrameworkFileUtilities
+    internal static partial class FrameworkFileUtilities
     {
         private const char UnixDirectorySeparator = '/';
         private const char WindowsDirectorySeparator = '\\';

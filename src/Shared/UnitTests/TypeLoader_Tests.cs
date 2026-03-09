@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -62,7 +63,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LoadNonExistingAssembly()
         {
-            using var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder);
+            using var dir = new FrameworkFileUtilities.TempWorkingDirectory(ProjectFileFolder);
 
             string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
 
@@ -79,7 +80,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LoadInsideAsssembly()
         {
-            using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))
+            using (var dir = new FrameworkFileUtilities.TempWorkingDirectory(ProjectFileFolder))
             {
                 string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
 
@@ -118,7 +119,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LoadOutsideAssembly()
         {
-            using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))
+            using (var dir = new FrameworkFileUtilities.TempWorkingDirectory(ProjectFileFolder))
             {
                 string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
                 string originalDLLPath = Path.Combine(dir.Path, DLLFileName);
@@ -143,7 +144,7 @@ namespace Microsoft.Build.UnitTests
         [Fact(Skip = "https://github.com/dotnet/msbuild/issues/325")]
         public void LoadInsideAssemblyWhenGivenOutsideAssemblyWithSameName()
         {
-            using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))
+            using (var dir = new FrameworkFileUtilities.TempWorkingDirectory(ProjectFileFolder))
             {
                 string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
                 string originalDLLPath = Path.Combine(dir.Path, DLLFileName);

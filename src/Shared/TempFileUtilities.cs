@@ -1,12 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.IO;
-using System.Runtime.CompilerServices;
-using System.Threading;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
 
@@ -18,227 +13,44 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static partial class FileUtilities
     {
-        private static Lazy<string> tempFileDirectory = CreateTempFileDirectoryLazy();
+        /// <inheritdoc cref="FrameworkFileUtilities.TempFileDirectory"/>
+        internal static string TempFileDirectory
+            => FrameworkFileUtilities.TempFileDirectory;
 
-        private const string msbuildTempFolderPrefix = "MSBuildTemp";
-
-        internal static string TempFileDirectory => tempFileDirectory.Value;
-
-        private static Lazy<string> CreateTempFileDirectoryLazy()
-        {
-            return new Lazy<string>(
-                () =>
-                {
-                    string path = CreateFolderUnderTemp();
-                    RegisterCleanupOnExit(path);
-                    return path;
-                },
-                LazyThreadSafetyMode.ExecutionAndPublication);
-        }
-
-        private static void RegisterCleanupOnExit(string pathToCleanup)
-        {
-            AppDomain.CurrentDomain.ProcessExit += (_, _) =>
-            {
-                try
-                {
-                    if (Directory.Exists(pathToCleanup))
-                    {
-                        Directory.Delete(pathToCleanup, recursive: true);
-                    }
-                }
-                catch
-                {
-                    // Best effort - ignore failures during cleanup
-                }
-            };
-        }
-
+        /// <inheritdoc cref="FrameworkFileUtilities.ClearTempFileDirectory"/>
         internal static void ClearTempFileDirectory()
-        {
-            tempFileDirectory = CreateTempFileDirectoryLazy();
-        }
+            => FrameworkFileUtilities.ClearTempFileDirectory();
 
-        private static string CreateFolderUnderTemp()
-        {
-            string path;
-
-#if NET
-            path = Directory.CreateTempSubdirectory(msbuildTempFolderPrefix).FullName;
-#else
-            // CreateTempSubdirectory API is not available in .NET Framework
-            path = Path.Combine(Path.GetTempPath(), $"{msbuildTempFolderPrefix}{Guid.NewGuid():N}");
-            Directory.CreateDirectory(path);
-#endif
-
-            return FrameworkFileUtilities.EnsureTrailingSlash(path);
-        }
-
-        /// <summary>
-        /// Generates a unique directory name in the temporary folder.
-        /// Caller must delete when finished.
-        /// </summary>
-        /// <param name="createDirectory"></param>
-        /// <param name="subfolder"></param>
+        /// <inheritdoc cref="FrameworkFileUtilities.GetTemporaryDirectory(bool, string)"/>
         internal static string GetTemporaryDirectory(bool createDirectory = true, string subfolder = null)
-        {
-            string temporaryDirectory = Path.Combine(TempFileDirectory, $"Temporary{Guid.NewGuid():N}", subfolder ?? string.Empty);
+            => FrameworkFileUtilities.GetTemporaryDirectory(createDirectory, subfolder);
 
-            if (createDirectory)
-            {
-                Directory.CreateDirectory(temporaryDirectory);
-            }
-
-            return temporaryDirectory;
-        }
-
-        /// <summary>
-        /// Generates a unique temporary file name with a given extension in the temporary folder.
-        /// File is guaranteed to be unique.
-        /// Extension may have an initial period.
-        /// File will NOT be created.
-        /// May throw IOException.
-        /// </summary>
+        /// <inheritdoc cref="FrameworkFileUtilities.GetTemporaryFileName()"/>
         internal static string GetTemporaryFileName()
-        {
-            return GetTemporaryFileName(".tmp");
-        }
+            => FrameworkFileUtilities.GetTemporaryFileName();
 
-        /// <summary>
-        /// Generates a unique temporary file name with a given extension in the temporary folder.
-        /// File is guaranteed to be unique.
-        /// Extension may have an initial period.
-        /// File will NOT be created.
-        /// May throw IOException.
-        /// </summary>
+        /// <inheritdoc cref="FrameworkFileUtilities.GetTemporaryFileName(string)"/>
         internal static string GetTemporaryFileName(string extension)
-        {
-            return GetTemporaryFile(null, null, extension, false);
-        }
+            => FrameworkFileUtilities.GetTemporaryFileName(extension);
 
-        /// <summary>
-        /// Generates a unique temporary file name with a given extension in the temporary folder.
-        /// If no extension is provided, uses ".tmp".
-        /// File is guaranteed to be unique.
-        /// Caller must delete it when finished.
-        /// </summary>
+        /// <inheritdoc cref="FrameworkFileUtilities.GetTemporaryFile()"/>
         internal static string GetTemporaryFile()
-        {
-            return GetTemporaryFile(".tmp");
-        }
+            => FrameworkFileUtilities.GetTemporaryFile();
 
-        /// <summary>
-        /// Generates a unique temporary file name with a given extension in the temporary folder.
-        /// File is guaranteed to be unique.
-        /// Caller must delete it when finished.
-        /// </summary>
+        /// <inheritdoc cref="FrameworkFileUtilities.GetTemporaryFile(string, string, bool)"/>
         internal static string GetTemporaryFile(string fileName, string extension, bool createFile)
-        {
-            return GetTemporaryFile(null, fileName, extension, createFile);
-        }
+            => FrameworkFileUtilities.GetTemporaryFile(fileName, extension, createFile);
 
-        /// <summary>
-        /// Generates a unique temporary file name with a given extension in the temporary folder.
-        /// File is guaranteed to be unique.
-        /// Extension may have an initial period.
-        /// Caller must delete it when finished.
-        /// May throw IOException.
-        /// </summary>
+        /// <inheritdoc cref="FrameworkFileUtilities.GetTemporaryFile(string)"/>
         internal static string GetTemporaryFile(string extension)
-        {
-            return GetTemporaryFile(null, null, extension);
-        }
+            => FrameworkFileUtilities.GetTemporaryFile(extension);
 
-        /// <summary>
-        /// Creates a file with unique temporary file name with a given extension in the specified folder.
-        /// File is guaranteed to be unique.
-        /// Extension may have an initial period.
-        /// If folder is null, the temporary folder will be used.
-        /// Caller must delete it when finished.
-        /// May throw IOException.
-        /// </summary>
+        /// <inheritdoc cref="FrameworkFileUtilities.GetTemporaryFile(string, string, string, bool)"/>
         internal static string GetTemporaryFile(string directory, string fileName, string extension, bool createFile = true)
-        {
-            ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(directory, nameof(directory));
+            => FrameworkFileUtilities.GetTemporaryFile(directory, fileName, extension, createFile);
 
-            try
-            {
-                directory ??= TempFileDirectory;
-
-                // If the extension needs a dot prepended, do so.
-                if (extension is null)
-                {
-                    extension = string.Empty;
-                }
-                else if (extension.Length > 0 && extension[0] != '.')
-                {
-                    extension = '.' + extension;
-                }
-
-                // If the fileName is null, use tmp{Guid}; otherwise use fileName.
-                if (string.IsNullOrEmpty(fileName))
-                {
-                    fileName = $"tmp{Guid.NewGuid():N}";
-                }
-
-                Directory.CreateDirectory(directory);
-
-                string file = Path.Combine(directory, $"{fileName}{extension}");
-
-                ErrorUtilities.VerifyThrow(!FileSystems.Default.FileExists(file), "Guid should be unique");
-
-                if (createFile)
-                {
-                    File.WriteAllText(file, string.Empty);
-                }
-
-                return file;
-            }
-            catch (Exception ex) when (ExceptionHandling.IsIoRelatedException(ex))
-            {
-                throw new IOException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.FailedCreatingTempFile", ex.Message), ex);
-            }
-        }
-
+        /// <inheritdoc cref="FrameworkFileUtilities.CopyDirectory(string, string)"/>
         internal static void CopyDirectory(string source, string dest)
-        {
-            Directory.CreateDirectory(dest);
-
-            DirectoryInfo sourceInfo = new DirectoryInfo(source);
-            foreach (var fileInfo in sourceInfo.GetFiles())
-            {
-                string destFile = Path.Combine(dest, fileInfo.Name);
-                fileInfo.CopyTo(destFile);
-            }
-            foreach (var subdirInfo in sourceInfo.GetDirectories())
-            {
-                string destDir = Path.Combine(dest, subdirInfo.Name);
-                CopyDirectory(subdirInfo.FullName, destDir);
-            }
-        }
-
-        public sealed class TempWorkingDirectory : IDisposable
-        {
-            public string Path { get; }
-
-            public TempWorkingDirectory(string sourcePath, [CallerMemberName] string name = null)
-            {
-                Path = name == null
-                    ? GetTemporaryDirectory()
-                    : System.IO.Path.Combine(TempFileDirectory, name);
-
-                if (FileSystems.Default.DirectoryExists(Path))
-                {
-                    Directory.Delete(Path, true);
-                }
-
-                CopyDirectory(sourcePath, Path);
-            }
-
-            public void Dispose()
-            {
-                Directory.Delete(Path, true);
-            }
-        }
+            => FrameworkFileUtilities.CopyDirectory(source, dest);
     }
 }

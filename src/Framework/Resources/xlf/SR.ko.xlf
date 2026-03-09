@@ -57,6 +57,11 @@
         <target state="new">The value cannot be an empty string.</target>
         <note />
       </trans-unit>
+      <trans-unit id="FailedCreatingTempFile">
+        <source>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
+        <target state="translated">임시 파일을 만들지 못했습니다. 임시 파일 폴더가 꽉 찼거나 경로가 올바르지 않습니다. {0}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PathMustBeRooted">
         <source>Path must be rooted.</source>
         <target state="translated">루트 경로로 지정해야 합니다.</target>
