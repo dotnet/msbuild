@@ -565,15 +565,17 @@ namespace Microsoft.Build.CommandLine
         public int RequestCores(int requestedCores)
         {
 #if CLR2COMPATIBILITY
-            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-            return 0;
+            // CLR2 task host doesn't support resource management.
+            // Callers catch NotImplementedException and fall back to their own parallelism estimate.
+            throw new NotImplementedException();
 #else
             ErrorUtilities.VerifyThrowArgumentOutOfRange(requestedCores > 0, nameof(requestedCores));
 
             if (!CallbacksSupported)
             {
-                LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-                return 0;
+                // Callbacks not available (cross-version scenario). Throw so callers' existing
+                // catch (NotImplementedException) blocks fire and fall back gracefully.
+                throw new NotImplementedException();
             }
 
             var request = new TaskHostCoresRequest(requestedCores, isRelease: false);
@@ -585,15 +587,14 @@ namespace Microsoft.Build.CommandLine
         public void ReleaseCores(int coresToRelease)
         {
 #if CLR2COMPATIBILITY
-            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-            return;
+            // CLR2 task host doesn't support resource management.
+            throw new NotImplementedException();
 #else
             ErrorUtilities.VerifyThrowArgumentOutOfRange(coresToRelease > 0, nameof(coresToRelease));
 
             if (!CallbacksSupported)
             {
-                LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-                return;
+                throw new NotImplementedException();
             }
 
             var request = new TaskHostCoresRequest(coresToRelease, isRelease: true);
