@@ -54,11 +54,6 @@ namespace Microsoft.Build.BackEnd
         void ClearPerBuildState();
 
         IEnumerable<Process> GetProcesses();
-
-        /// <summary>
-        /// Shuts down out-of-proc nodes beyond the specified limit.
-        /// </summary>
-        void ShutdownExcessNodes(int maxNodesToKeep);
         #endregion
     }
 }

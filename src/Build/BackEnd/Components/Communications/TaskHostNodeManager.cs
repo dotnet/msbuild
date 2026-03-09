@@ -184,10 +184,5 @@ namespace Microsoft.Build.BackEnd
         {
             return _outOfProcTaskHostNodeProvider.GetProcesses();
         }
-
-        void INodeManager.ShutdownExcessNodes(int maxNodesToKeep)
-        {
-            // Task host nodes are short-lived; no excess to trim.
-        }
     }
 }

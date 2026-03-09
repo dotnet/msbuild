@@ -153,26 +153,6 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Shuts down connected nodes beyond the specified limit, keeping only <paramref name="maxNodesToKeep"/> nodes.
-        /// Excess nodes are sent NodeBuildComplete with enableReuse=true so they prepare for reuse by a future build.
-        /// </summary>
-        public void ShutdownExcessNodes(int maxNodesToKeep)
-        {
-            if (_nodeContexts.Count <= maxNodesToKeep)
-            {
-                return;
-            }
-
-            int toShutdown = _nodeContexts.Count - maxNodesToKeep;
-            var excessContexts = _nodeContexts.Values.Take(toShutdown).ToList();
-
-            foreach (var context in excessContexts)
-            {
-                context.SendData(new NodeBuildComplete(true /* prepare for reuse */));
-            }
-        }
-
-        /// <summary>
         /// Shuts down all of the managed nodes permanently.
         /// </summary>
         public void ShutdownAllNodes()
