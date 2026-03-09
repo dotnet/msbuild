@@ -1007,6 +1007,13 @@ namespace Microsoft.Build.Internal
                     }
 
                     architectureFlagToSet = taskHostParameters.Architecture;
+
+                    // Resolve "*" (any) to the current architecture so both parent and child
+                    // compute identical HandshakeOptions and hash-based pipe names.
+                    if (string.Equals(architectureFlagToSet, XMakeAttributes.MSBuildArchitectureValues.any, StringComparison.OrdinalIgnoreCase))
+                    {
+                        architectureFlagToSet = XMakeAttributes.GetCurrentMSBuildArchitecture();
+                    }
                 }
             }
 
