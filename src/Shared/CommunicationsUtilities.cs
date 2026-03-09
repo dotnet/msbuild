@@ -416,7 +416,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// The timeout to connect to a node.
         /// </summary>
-        private const int DefaultNodeConnectionTimeout = 900 * 1000; // 15 minutes; enough time that a dev will typically do another build in this time
+        private const int DefaultNodeConnectionTimeout = 30 * 1000; // 30 seconds
 
         /// <summary>
         /// Whether to trace communications
