@@ -310,7 +310,17 @@ namespace Microsoft.Build.CommandLine
             }
 
             int exitCode;
+
+            // Check for coordinator mode: `dotnet msbuild --coordinator [--budget N] [--max-builds N]`
+#if NET
+            if (IsCoordinatorMode(args, out int budget, out int maxBuilds))
+            {
+                exitCode = RunCoordinator(budget, maxBuilds);
+            }
+            else if (
+#else
             if (
+#endif
                 Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
                 CanRunServerBasedOnCommandLineSwitches(args))
@@ -336,6 +346,63 @@ namespace Microsoft.Build.CommandLine
 
             return exitCode;
         }
+
+        /// <summary>
+        /// Check if the command line requests coordinator mode.
+        /// Usage: msbuild --coordinator [--budget N] [--max-builds N]
+        /// </summary>
+#if NET
+        private static bool IsCoordinatorMode(string[] args, out int budget, out int maxBuilds)
+        {
+            budget = 0;
+            maxBuilds = 2;
+
+            bool found = false;
+            for (int i = 0; i < args.Length; i++)
+            {
+                if (args[i].Equals("--coordinator", StringComparison.OrdinalIgnoreCase))
+                {
+                    found = true;
+                }
+                else if (args[i].Equals("--budget", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    int.TryParse(args[i + 1], out budget);
+                    i++;
+                }
+                else if (args[i].Equals("--max-builds", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    int.TryParse(args[i + 1], out maxBuilds);
+                    i++;
+                }
+            }
+
+            if (found && budget <= 0)
+            {
+                // Default budget: 80% of logical processors
+                budget = Math.Max(1, (int)(Environment.ProcessorCount * 0.8));
+            }
+
+            return found;
+        }
+
+        /// <summary>
+        /// Run the build coordinator as a long-lived process.
+        /// </summary>
+        private static int RunCoordinator(int budget, int maxBuilds)
+        {
+            using var coordinator = new Microsoft.Build.BackEnd.BuildCoordinator(budget, maxBuilds);
+            coordinator.Start();
+
+            Console.CancelKeyPress += (_, e) =>
+            {
+                e.Cancel = true;
+                coordinator.Stop();
+            };
+
+            coordinator.WaitForShutdown();
+            return 0;
+        }
+#endif
 
         /// <summary>
         /// Returns true if arguments allows or make sense to leverage msbuild server.
