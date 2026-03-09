@@ -247,6 +247,7 @@ namespace Microsoft.Build.CommandLine
 #if !CLR2COMPATIBILITY
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesResponse, TaskHostIsRunningMultipleNodesResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostCoresResponse, TaskHostCoresResponse.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostBuildResponse, TaskHostBuildResponse.FactoryForDeserialization, this);
 #endif
 
 #if !CLR2COMPATIBILITY
@@ -415,13 +416,11 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Stub implementation of IBuildEngine.BuildProjectFile.  The task host does not support IBuildEngine
-        /// callbacks for the purposes of building projects, so error.
+        /// Implementation of IBuildEngine.BuildProjectFile. Delegates to the 5-param overload.
         /// </summary>
         public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs)
         {
-            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-            return false;
+            return BuildProjectFile(projectFileName, targetNames, globalProperties, targetOutputs, null);
         }
 
         #endregion // IBuildEngine Implementation (Methods)
@@ -429,23 +428,44 @@ namespace Microsoft.Build.CommandLine
         #region IBuildEngine2 Implementation (Methods)
 
         /// <summary>
-        /// Stub implementation of IBuildEngine2.BuildProjectFile.  The task host does not support IBuildEngine
-        /// callbacks for the purposes of building projects, so error.
+        /// Implementation of IBuildEngine2.BuildProjectFile. Delegates to the 7-param BuildProjectFilesInParallel.
         /// </summary>
         public bool BuildProjectFile(string projectFileName, string[] targetNames, IDictionary globalProperties, IDictionary targetOutputs, string toolsVersion)
         {
-            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-            return false;
+            return BuildProjectFilesInParallel(
+                [projectFileName],
+                targetNames,
+                [globalProperties],
+                [targetOutputs],
+                [toolsVersion],
+                true,
+                false);
         }
 
         /// <summary>
-        /// Stub implementation of IBuildEngine2.BuildProjectFilesInParallel.  The task host does not support IBuildEngine
-        /// callbacks for the purposes of building projects, so error.
+        /// Implementation of IBuildEngine2.BuildProjectFilesInParallel. Delegates to the 6-param IBuildEngine3 overload.
         /// </summary>
         public bool BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IDictionary[] targetOutputsPerProject, string[] toolsVersion, bool useResultsCache, bool unloadProjectsOnCompletion)
         {
-            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-            return false;
+            bool includeTargetOutputs = targetOutputsPerProject is not null;
+
+            BuildEngineResult result = BuildProjectFilesInParallel(projectFileNames, targetNames, globalProperties, new List<string>[projectFileNames.Length], toolsVersion, includeTargetOutputs);
+
+            if (includeTargetOutputs)
+            {
+                for (int i = 0; i < targetOutputsPerProject.Length && i < result.TargetOutputsPerProject.Count; i++)
+                {
+                    if (targetOutputsPerProject[i] is not null)
+                    {
+                        foreach (KeyValuePair<string, ITaskItem[]> output in result.TargetOutputsPerProject[i])
+                        {
+                            targetOutputsPerProject[i].Add(output.Key, output.Value);
+                        }
+                    }
+                }
+            }
+
+            return result.Result;
         }
 
         #endregion // IBuildEngine2 Implementation (Methods)
@@ -453,13 +473,32 @@ namespace Microsoft.Build.CommandLine
         #region IBuildEngine3 Implementation
 
         /// <summary>
-        /// Stub implementation of IBuildEngine3.BuildProjectFilesInParallel.  The task host does not support IBuildEngine
-        /// callbacks for the purposes of building projects, so error.
+        /// Implementation of IBuildEngine3.BuildProjectFilesInParallel. This is the canonical form that
+        /// sends the request to the owning worker node and waits for the response.
         /// </summary>
         public BuildEngineResult BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<string>[] removeGlobalProperties, string[] toolsVersion, bool returnTargetOutputs)
         {
+#if CLR2COMPATIBILITY
             LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
             return new BuildEngineResult(false, null);
+#else
+            if (!CallbacksSupported)
+            {
+                LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
+                return new BuildEngineResult(false, null);
+            }
+
+            var request = new TaskHostBuildRequest(
+                projectFileNames,
+                targetNames,
+                TaskHostBuildRequest.ConvertGlobalProperties(globalProperties),
+                TaskHostBuildRequest.ConvertRemoveGlobalProperties(removeGlobalProperties),
+                toolsVersion,
+                returnTargetOutputs);
+
+            var response = SendCallbackRequestAndWaitForResponse<TaskHostBuildResponse>(request);
+            return response.ToBuildEngineResult();
+#endif
         }
 
         /// <summary>
@@ -816,6 +855,7 @@ namespace Microsoft.Build.CommandLine
                 // Callback response packets - route to pending request
                 case NodePacketType.TaskHostIsRunningMultipleNodesResponse:
                 case NodePacketType.TaskHostCoresResponse:
+                case NodePacketType.TaskHostBuildResponse:
                     HandleCallbackResponse(packet);
                     break;
 #endif
