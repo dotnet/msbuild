@@ -159,4 +159,10 @@
   <data name="FailedCreatingTempFile" xml:space="preserve">
     <value>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</value>
   </data>
+  <data name="InvalidGetPathOfFileAboveParameter" xml:space="preserve">
+    <value>The parameter '{0}' can only be a file name and cannot include a directory.</value>
+  </data>
+  <data name="DebugPathTooLong" xml:space="preserve">
+    <value>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</value>
+  </data>
 </root>

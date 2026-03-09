@@ -57,9 +57,19 @@
         <target state="new">The value cannot be an empty string.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DebugPathTooLong">
+        <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
+        <target state="translated">Le chemin d’accès "{0}" utilisé pour les journaux de débogage est trop long. Définissez-la sur une valeur plus courte à l’aide de la variable d’environnement MSBUILDDEBUGPATH ou modifiez votre configuration système pour autoriser les chemins longs.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="FailedCreatingTempFile">
         <source>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
         <target state="translated">Échec de la création d'un fichier temporaire. Le dossier de fichiers temporaires est plein ou son chemin est incorrect. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <target state="translated">Le paramètre "{0}" peut uniquement être un nom de fichier et ne peut pas inclure de répertoire.</target>
         <note />
       </trans-unit>
       <trans-unit id="PathMustBeRooted">
