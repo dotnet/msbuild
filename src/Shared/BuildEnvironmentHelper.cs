@@ -568,12 +568,14 @@ namespace Microsoft.Build.Shared
                 currentToolsDirectory = currentMSBuildExeFile.Directory;
 
                 CurrentMSBuildToolsDirectory = currentMSBuildExeFile.DirectoryName;
-                const string configFileExtension =
+                string configFileExtension =
 #if NET
-                    ".dll.config"; // Compat with what we looked for before 18.5
-#else
-                    ".exe.config";
+                    // Prior to 18.6, we looked at MSBuild.dll.config for core scenarios
+                    // EXCEPT in the force-full-framework case when we loaded the
+                    // full-framework copy of MSBuild.exe.config.
+                    !Traits.Instance.ForceEvaluateAsFullFramework ? ".dll.config" :
 #endif
+                    ".exe.config";
                 CurrentMSBuildConfigurationFile = Path.ChangeExtension(currentMSBuildExePath, configFileExtension);
                 MSBuildToolsDirectory32 = CurrentMSBuildToolsDirectory;
                 MSBuildToolsDirectory64 = CurrentMSBuildToolsDirectory;
