@@ -39,7 +39,7 @@ With the `.tlb` included in the SDK, the MSBuild apphost gains full support for:
 
 - **Remote host objects via the Running Object Table (ROT)** — IDE hosts (such as Visual Studio) can register host objects that out-of-proc MSBuild worker nodes retrieve through `IRunningObjectTable::GetObject`. This is the mechanism that allows build tasks running in separate processes to access unsaved file changes from the IDE.
 - **Registration-free COM for `ITaskHost`** — the apphost's manifest (`MSBuild.exe.manifest`) references the `.tlb` to enable COM proxy/stub generation without requiring any machine-wide registry entries. This makes the SDK's MSBuild fully portable and xcopy-deployable.
-- **Parity with Visual Studio's MSBuild** — the SDK-shipped MSBuild apphost now has the same COM interop capabilities as the VS-shipped `msbuild.exe`, ensuring consistent behavior regardless of how MSBuild is invoked.
+- **Parity with Visual Studio's MSBuild** — the SDK-shipped MSBuild apphost now has the same COM interop capabilities as the VS-shipped `msbuild.exe`, ensuring consistent behavior regardless of how MSBuild tasks are executed.
 
 ### SDK layout
 
