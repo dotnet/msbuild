@@ -278,5 +278,263 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.ErrorCount.ShouldBeGreaterThan(0);
             logger.FullLog.ShouldContain("MSB5022");
         }
+
+        /// <summary>
+        /// Verifies BuildProjectFile callback works when task is explicitly run in TaskHost via TaskHostFactory.
+        /// The child project should build and the task should return success.
+        /// </summary>
+        [Fact]
+        public void BuildProjectFile_WorksWithExplicitTaskHostFactory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+
+            string childProject = env.CreateFile("Child.proj", """
+                <Project>
+                    <Target Name="Build">
+                        <Message Text="ChildProjectBuilt" Importance="high" />
+                    </Target>
+                </Project>
+                """).Path;
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(BuildProjectFileTask)}"" AssemblyFile=""{typeof(BuildProjectFileTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""Test"">
+        <{nameof(BuildProjectFileTask)} ProjectFile=""{childProject}"" Targets=""Build"">
+            <Output PropertyName=""Result"" TaskParameter=""BuildSucceeded"" />
+        </{nameof(BuildProjectFileTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            var logger = new MockLogger(_output);
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters { MaxNodeCount = 4, EnableNodeReuse = false, Loggers = [logger] },
+                new BuildRequestData(projectInstance, targetsToBuild: ["Test"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            bool.Parse(projectInstance.GetPropertyValue("Result")).ShouldBeTrue();
+            logger.FullLog.ShouldContain("ChildProjectBuilt");
+        }
+
+        /// <summary>
+        /// Verifies BuildProjectFile forwards global properties to the child build.
+        /// </summary>
+        [Fact]
+        public void BuildProjectFile_ForwardsGlobalProperties()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+
+            string childProject = env.CreateFile("Child.proj", """
+                <Project>
+                    <Target Name="Build">
+                        <Message Text="Config=$(Configuration)" Importance="high" />
+                    </Target>
+                </Project>
+                """).Path;
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(BuildProjectFileTask)}"" AssemblyFile=""{typeof(BuildProjectFileTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""Test"">
+        <{nameof(BuildProjectFileTask)} ProjectFile=""{childProject}"" Targets=""Build"" Properties=""Configuration=Release"">
+            <Output PropertyName=""Result"" TaskParameter=""BuildSucceeded"" />
+        </{nameof(BuildProjectFileTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            var logger = new MockLogger(_output);
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters { MaxNodeCount = 4, EnableNodeReuse = false, Loggers = [logger] },
+                new BuildRequestData(projectInstance, targetsToBuild: ["Test"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            logger.FullLog.ShouldContain("Config=Release");
+        }
+
+        /// <summary>
+        /// Verifies BuildProjectFile returns ITaskItem[] target outputs through the TaskHost callback.
+        /// </summary>
+        [Fact]
+        public void BuildProjectFile_ReturnsTargetOutputs()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+
+            string childProject = env.CreateFile("Child.proj", """
+                <Project>
+                    <ItemGroup>
+                        <OutputItem Include="Output1.dll">
+                            <CustomMeta>Value1</CustomMeta>
+                        </OutputItem>
+                        <OutputItem Include="Output2.dll" />
+                    </ItemGroup>
+                    <Target Name="GetOutputs" Returns="@(OutputItem)">
+                        <Message Text="GetOutputs executed" Importance="high" />
+                    </Target>
+                </Project>
+                """).Path;
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(BuildProjectFileTask)}"" AssemblyFile=""{typeof(BuildProjectFileTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""Test"">
+        <{nameof(BuildProjectFileTask)} ProjectFile=""{childProject}"" Targets=""GetOutputs"">
+            <Output PropertyName=""Result"" TaskParameter=""BuildSucceeded"" />
+            <Output ItemName=""Items"" TaskParameter=""OutputItems"" />
+        </{nameof(BuildProjectFileTask)}>
+        <Message Text=""OutputItemCount=@(Items->Count())"" Importance=""high"" />
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            var logger = new MockLogger(_output);
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters { MaxNodeCount = 4, EnableNodeReuse = false, Loggers = [logger] },
+                new BuildRequestData(projectInstance, targetsToBuild: ["Test"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            bool.Parse(projectInstance.GetPropertyValue("Result")).ShouldBeTrue();
+            logger.FullLog.ShouldContain("OutputItemCount=2");
+        }
+
+        /// <summary>
+        /// Verifies BuildProjectFile returns false when the child project fails.
+        /// </summary>
+        [Fact]
+        public void BuildProjectFile_ChildFailure_ReturnsFalse()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+
+            string childProject = env.CreateFile("Child.proj", """
+                <Project>
+                    <Target Name="Build">
+                        <Error Text="Intentional failure" />
+                    </Target>
+                </Project>
+                """).Path;
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(BuildProjectFileTask)}"" AssemblyFile=""{typeof(BuildProjectFileTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""Test"">
+        <{nameof(BuildProjectFileTask)} ProjectFile=""{childProject}"" Targets=""Build"">
+            <Output PropertyName=""Result"" TaskParameter=""BuildSucceeded"" />
+        </{nameof(BuildProjectFileTask)}>
+        <Message Text=""ChildResult=$(Result)"" Importance=""high"" />
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            var logger = new MockLogger(_output);
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters { MaxNodeCount = 4, EnableNodeReuse = false, Loggers = [logger] },
+                new BuildRequestData(projectInstance, targetsToBuild: ["Test"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            logger.FullLog.ShouldContain("ChildResult=False");
+        }
+
+        /// <summary>
+        /// Verifies BuildProjectFile auto-ejection works in multithreaded mode.
+        /// </summary>
+        [Fact]
+        public void BuildProjectFile_WorksWhenAutoEjectedInMultiThreadedMode()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+            string testDir = env.CreateFolder().Path;
+
+            string childProject = Path.Combine(testDir, "Child.proj");
+            File.WriteAllText(childProject, """
+                <Project>
+                    <Target Name="Build">
+                        <Message Text="ChildBuiltInMT" Importance="high" />
+                    </Target>
+                </Project>
+                """);
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(BuildProjectFileTask)}"" AssemblyFile=""{typeof(BuildProjectFileTask).Assembly.Location}"" />
+    <Target Name=""Test"">
+        <{nameof(BuildProjectFileTask)} ProjectFile=""{childProject}"" Targets=""Build"">
+            <Output PropertyName=""Result"" TaskParameter=""BuildSucceeded"" />
+        </{nameof(BuildProjectFileTask)}>
+    </Target>
+</Project>";
+
+            string projectFile = Path.Combine(testDir, "Test.proj");
+            File.WriteAllText(projectFile, projectContents);
+
+            var logger = new MockLogger(_output);
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters
+                {
+                    MultiThreaded = true,
+                    MaxNodeCount = 4,
+                    Loggers = [logger],
+                    EnableNodeReuse = false
+                },
+                new BuildRequestData(projectFile, new Dictionary<string, string?>(), null, ["Test"], null));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            logger.FullLog.ShouldContain("external task host");
+            logger.FullLog.ShouldContain("ChildBuiltInMT");
+        }
+
+        /// <summary>
+        /// Verifies that BuildProjectFile when callbacks are disabled logs error MSB5022.
+        /// </summary>
+        [Fact]
+        public void BuildProjectFile_LogsErrorWhenCallbacksNotSupported()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            string childProject = env.CreateFile("Child.proj", """
+                <Project>
+                    <Target Name="Build">
+                        <Message Text="ShouldNotRun" Importance="high" />
+                    </Target>
+                </Project>
+                """).Path;
+
+            // Explicitly do NOT set MSBUILDENABLETASKHOSTCALLBACKS
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(BuildProjectFileTask)}"" AssemblyFile=""{typeof(BuildProjectFileTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""Test"">
+        <{nameof(BuildProjectFileTask)} ProjectFile=""{childProject}"" Targets=""Build"">
+            <Output PropertyName=""Result"" TaskParameter=""BuildSucceeded"" />
+        </{nameof(BuildProjectFileTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            var logger = new MockLogger(_output);
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters { MaxNodeCount = 4, EnableNodeReuse = false, Loggers = [logger] },
+                new BuildRequestData(projectInstance, targetsToBuild: ["Test"]));
+
+            // MSB5022 error should be logged
+            logger.ErrorCount.ShouldBeGreaterThan(0);
+            logger.FullLog.ShouldContain("MSB5022");
+            // Child should not have been built
+            logger.FullLog.ShouldNotContain("ShouldNotRun");
+        }
     }
 }

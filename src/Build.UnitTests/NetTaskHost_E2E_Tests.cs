@@ -227,6 +227,29 @@ namespace Microsoft.Build.Engine.UnitTests
             testTaskOutput.ShouldContain("CallbackResult: RequestCores(2) =");
         }
 
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_CallbackBuildProjectFileTest()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+
+            var coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
+            env.SetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", coreDirectory);
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskBuildCallback", "TestNetTaskBuildCallback.csproj");
+
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -t:TestTask", out bool successTestTask);
+
+            if (!successTestTask)
+            {
+                _output.WriteLine(testTaskOutput);
+            }
+
+            successTestTask.ShouldBeTrue();
+            testTaskOutput.ShouldContain("CallbackResult: BuildProjectFile = True");
+            testTaskOutput.ShouldContain("ChildProject: GetOutputs target executed");
+        }
+
         [WindowsFullFrameworkOnlyFact] // This test verifies the fallback behavior with implicit host parameters.
         public void NetTaskWithImplicitHostParamsTest_FallbackToDotnet()
         {
