@@ -1055,12 +1055,14 @@ namespace Microsoft.Build.UnitTests
 
                 // The command:
                 // 1. Echoes "hello" to stdout (tool's own output)
-                // 2. Starts a background process (ping -n 120 localhost) that inherits pipe handles
+                // 2. Starts a background process (ping -n 10 localhost) that inherits pipe handles.
+                //    10 pings (~10s) is enough to outlive the 2s EOF timeout while not lingering too
+                //    long in CI. The previous value of 120 was unnecessarily long.
                 // 3. The tool (cmd.exe) exits immediately after starting the background process
                 // Without the fix, WaitForProcessExit hangs because the ping process holds the pipe.
-                t.MockCommandLineCommands = "/c echo hello & start /b ping -n 120 127.0.0.1 > nul";
+                t.MockCommandLineCommands = "/c echo hello & start /b ping -n 10 127.0.0.1 > nul";
 
-                // Set a generous timeout - without the fix this would hang forever
+                // Set a generous timeout - without the fix this would hang for the full ping duration
                 t.Timeout = 30000;
 
                 bool result = t.Execute();
@@ -1069,7 +1071,7 @@ namespace Microsoft.Build.UnitTests
                 // The exit code may be non-zero depending on timing, but the key thing
                 // is that Execute() returns at all rather than hanging forever.
                 _output.WriteLine(engine.Log);
-                engine.AssertLogContains("hello");
+                engine.Log.ShouldContain("hello");
             }
         }
 
@@ -1097,9 +1099,9 @@ namespace Microsoft.Build.UnitTests
                 _output.WriteLine(engine.Log);
 
                 result.ShouldBeTrue();
-                engine.AssertLogContains("line1");
-                engine.AssertLogContains("line2");
-                engine.AssertLogContains("line3");
+                engine.Log.ShouldContain("line1");
+                engine.Log.ShouldContain("line2");
+                engine.Log.ShouldContain("line3");
             }
         }
 

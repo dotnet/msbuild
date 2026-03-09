@@ -1070,9 +1070,10 @@ namespace Microsoft.Build.Utilities
         /// process is still finishing up, this method waits until it is done.
         /// </summary>
         /// <remarks>
-        /// On .NET Framework, the parameterless Process.WaitForExit() waits not only for the
-        /// process to exit, but also for stdout/stderr pipe EOF via AsyncStreamReader.WaitUtilEOF().
-        /// If the tool spawned child processes that inherited the pipe handles, WaitUtilEOF() blocks
+        /// On both .NET Framework and modern .NET, the parameterless Process.WaitForExit() waits not
+        /// only for the process to exit, but also for stdout/stderr pipe EOF via
+        /// AsyncStreamReader.WaitUtilEOF() (Framework) or awaiting the EOF task (Core).
+        /// If the tool spawned child processes that inherited the pipe handles, the EOF wait blocks
         /// forever even though the tool itself has exited — causing the entire build node to hang.
         /// </remarks>
         /// <param name="proc"></param>
