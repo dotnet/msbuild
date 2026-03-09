@@ -207,6 +207,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostCoresRequest, TaskHostCoresRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
 
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
@@ -519,6 +520,9 @@ namespace Microsoft.Build.BackEnd
                 case NodePacketType.TaskHostCoresRequest:
                     HandleCoresRequest(packet as TaskHostCoresRequest);
                     break;
+                case NodePacketType.TaskHostBuildRequest:
+                    HandleBuildRequest(packet as TaskHostBuildRequest);
+                    break;
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     break;
@@ -693,6 +697,64 @@ namespace Microsoft.Build.BackEnd
             }
 
             var response = new TaskHostCoresResponse(request.RequestId, grantedCores);
+            _taskHostProvider.SendData(_taskHostNodeKey, response);
+        }
+
+        /// <summary>
+        /// Handle BuildProjectFile* request from the TaskHost.
+        /// Forwards the call to the in-process IBuildEngine3.BuildProjectFilesInParallel,
+        /// which handles project resolution, scheduler interaction, and target execution.
+        /// </summary>
+        private void HandleBuildRequest(TaskHostBuildRequest request)
+        {
+            TaskHostBuildResponse response;
+            try
+            {
+                if (_buildEngine is not IBuildEngine3 engine3)
+                {
+                    response = new TaskHostBuildResponse(request.RequestId, false, null);
+                    _taskHostProvider.SendData(_taskHostNodeKey, response);
+                    return;
+                }
+
+                // Reconstruct IDictionary[] from the serialized Dictionary<string, string>[]
+                System.Collections.IDictionary[] globalProperties = null;
+                if (request.GlobalProperties is not null)
+                {
+                    globalProperties = new System.Collections.IDictionary[request.GlobalProperties.Length];
+                    for (int i = 0; i < request.GlobalProperties.Length; i++)
+                    {
+                        globalProperties[i] = request.GlobalProperties[i];
+                    }
+                }
+
+                // Reconstruct IList<string>[] from List<string>[]
+                IList<string>[] removeGlobalProperties = null;
+                if (request.RemoveGlobalProperties is not null)
+                {
+                    removeGlobalProperties = new IList<string>[request.RemoveGlobalProperties.Length];
+                    for (int i = 0; i < request.RemoveGlobalProperties.Length; i++)
+                    {
+                        removeGlobalProperties[i] = request.RemoveGlobalProperties[i];
+                    }
+                }
+
+                BuildEngineResult result = engine3.BuildProjectFilesInParallel(
+                    request.ProjectFileNames,
+                    request.TargetNames,
+                    globalProperties,
+                    removeGlobalProperties,
+                    request.ToolsVersions,
+                    request.ReturnTargetOutputs);
+
+                response = TaskHostBuildResponse.FromBuildEngineResult(request.RequestId, result);
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                // Always send a response to prevent the OOP task from hanging.
+                response = new TaskHostBuildResponse(request.RequestId, false, null);
+            }
+
             _taskHostProvider.SendData(_taskHostNodeKey, response);
         }
 
