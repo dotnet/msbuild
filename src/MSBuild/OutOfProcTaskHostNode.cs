@@ -451,7 +451,7 @@ namespace Microsoft.Build.CommandLine
 
             BuildEngineResult result = BuildProjectFilesInParallel(projectFileNames, targetNames, globalProperties, new List<string>[projectFileNames.Length], toolsVersion, includeTargetOutputs);
 
-            if (includeTargetOutputs)
+            if (includeTargetOutputs && result.TargetOutputsPerProject is not null)
             {
                 for (int i = 0; i < targetOutputsPerProject.Length && i < result.TargetOutputsPerProject.Count; i++)
                 {
