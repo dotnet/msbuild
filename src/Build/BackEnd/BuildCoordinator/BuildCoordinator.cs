@@ -61,6 +61,7 @@ namespace Microsoft.Build.BackEnd
 
         private readonly int _totalBudget;
         private readonly int _maxConcurrentBuilds;
+        private readonly int _minBuildsForBudget;
         private readonly ConcurrentDictionary<string, BuildRegistration> _activeBuilds = new();
         private readonly List<BuildRegistration> _queuedBuilds = new();
         private readonly object _queueLock = new();
@@ -81,10 +82,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private const int StaleHeartbeatSeconds = 10;
 
-        public BuildCoordinator(int totalBudget, int maxConcurrentBuilds)
+        public BuildCoordinator(int totalBudget, int maxConcurrentBuilds, int minBuildsForBudget = 1)
         {
             _totalBudget = totalBudget;
             _maxConcurrentBuilds = maxConcurrentBuilds;
+            _minBuildsForBudget = Math.Max(1, minBuildsForBudget);
         }
 
         /// <summary>
@@ -104,6 +106,7 @@ namespace Microsoft.Build.BackEnd
             Console.WriteLine($"  Pipe: {pipeName}");
             Console.WriteLine($"  Budget: {_totalBudget} nodes");
             Console.WriteLine($"  Max concurrent builds: {_maxConcurrentBuilds}");
+            Console.WriteLine($"  Min builds for budget: {_minBuildsForBudget}");
 
             _listenTask = Task.Run(() => ListenLoop(_cts.Token));
 
@@ -538,7 +541,7 @@ namespace Microsoft.Build.BackEnd
                 pendingCount = Math.Max(0, pendingCount);
             }
 
-            int totalBuilds = activeCount + pendingCount;
+            int totalBuilds = Math.Max(_minBuildsForBudget, activeCount + pendingCount);
             int fairShare = Math.Max(1, _totalBudget / totalBuilds);
 
             // But don't exceed what the build originally requested

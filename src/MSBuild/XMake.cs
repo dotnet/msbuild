@@ -313,9 +313,9 @@ namespace Microsoft.Build.CommandLine
 
             // Check for coordinator mode: `dotnet msbuild --coordinator [--budget N] [--max-builds N]`
 #if NET
-            if (IsCoordinatorMode(args, out int budget, out int maxBuilds))
+            if (IsCoordinatorMode(args, out int budget, out int maxBuilds, out int minBuilds))
             {
-                exitCode = RunCoordinator(budget, maxBuilds);
+                exitCode = RunCoordinator(budget, maxBuilds, minBuilds);
             }
             else if (
 #else
@@ -349,13 +349,14 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// Check if the command line requests coordinator mode.
-        /// Usage: msbuild --coordinator [--budget N] [--max-builds N]
+        /// Usage: msbuild --coordinator [--budget N] [--max-builds N] [--min-builds N]
         /// </summary>
 #if NET
-        private static bool IsCoordinatorMode(string[] args, out int budget, out int maxBuilds)
+        private static bool IsCoordinatorMode(string[] args, out int budget, out int maxBuilds, out int minBuilds)
         {
             budget = 0;
             maxBuilds = 2;
+            minBuilds = 1;
 
             bool found = false;
             for (int i = 0; i < args.Length; i++)
@@ -374,6 +375,11 @@ namespace Microsoft.Build.CommandLine
                     int.TryParse(args[i + 1], out maxBuilds);
                     i++;
                 }
+                else if (args[i].Equals("--min-builds", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                {
+                    int.TryParse(args[i + 1], out minBuilds);
+                    i++;
+                }
             }
 
             if (found && budget <= 0)
@@ -388,9 +394,9 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Run the build coordinator as a long-lived process.
         /// </summary>
-        private static int RunCoordinator(int budget, int maxBuilds)
+        private static int RunCoordinator(int budget, int maxBuilds, int minBuilds)
         {
-            using var coordinator = new Microsoft.Build.BackEnd.BuildCoordinator(budget, maxBuilds);
+            using var coordinator = new Microsoft.Build.BackEnd.BuildCoordinator(budget, maxBuilds, minBuilds);
             coordinator.Start();
 
             Console.CancelKeyPress += (_, e) =>

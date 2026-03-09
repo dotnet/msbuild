@@ -23,7 +23,6 @@ namespace Microsoft.Build.BackEnd
         private int _grantedNodes;
         private Timer? _heartbeatTimer;
         private bool _registered;
-        private Action<int>? _onBudgetChanged;
 
         internal bool IsConnected => _registered;
         internal int GrantedNodes => _grantedNodes;
@@ -128,13 +127,12 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Start periodic heartbeats that update the node budget.
-        /// When the coordinator rebalances (e.g., another build starts or stops),
-        /// the callback fires with the new budget.
+        /// Start periodic heartbeats for liveness so the coordinator can detect stale builds.
+        /// Budget changes from the coordinator are acknowledged but not acted on mid-build;
+        /// rebalanced budgets take effect when the next build registers.
         /// </summary>
-        internal void StartHeartbeat(Action<int> onBudgetChanged)
+        internal void StartHeartbeat()
         {
-            _onBudgetChanged = onBudgetChanged;
             _heartbeatTimer = new Timer(HeartbeatCallback, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
         }
 
@@ -168,10 +166,9 @@ namespace Microsoft.Build.BackEnd
             string? response = SendCommand($"HEARTBEAT {_buildId}");
             if (response != null && response.StartsWith("OK ", StringComparison.Ordinal))
             {
-                if (int.TryParse(response.AsSpan(3), out int newBudget) && newBudget > 0 && newBudget != _grantedNodes)
+                if (int.TryParse(response.AsSpan(3), out int newBudget) && newBudget > 0)
                 {
                     _grantedNodes = newBudget;
-                    _onBudgetChanged?.Invoke(newBudget);
                 }
             }
         }

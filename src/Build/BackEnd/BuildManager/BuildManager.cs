@@ -2386,23 +2386,8 @@ namespace Microsoft.Build.Execution
                     Console.Error.WriteLine($"  [coordinator] Node budget: {grantedNodes} (requested {requestedNodes})");
                 }
 
-                // Start heartbeats — coordinator may adjust budget dynamically
-                client.StartHeartbeat(newBudget =>
-                {
-                    if (_buildParameters != null && newBudget != _buildParameters.MaxNodeCount)
-                    {
-                        int old = _buildParameters.MaxNodeCount;
-                        _buildParameters.MaxNodeCount = newBudget;
-
-                        // If budget decreased, shut down excess worker nodes immediately
-                        if (newBudget < old)
-                        {
-                            _nodeManager?.ShutdownExcessNodes(newBudget);
-                        }
-
-                        Console.Error.WriteLine($"  [coordinator] Budget changed: {old} → {newBudget}");
-                    }
-                });
+                // Start heartbeats for liveness so the coordinator can reap stale builds.
+                client.StartHeartbeat();
             }
             else
             {

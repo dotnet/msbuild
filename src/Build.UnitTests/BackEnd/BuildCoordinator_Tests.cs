@@ -540,23 +540,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 using var client1 = new BuildCoordinatorClient();
-                client1.TryRegister(12, out _);
+                client1.TryRegister(12, out int granted1);
+                granted1.ShouldBe(12);
 
-                int? budgetUpdate = null;
-                using var budgetChanged = new ManualResetEventSlim(false);
-
-                client1.StartHeartbeat(newBudget =>
-                {
-                    budgetUpdate = newBudget;
-                    budgetChanged.Set();
-                });
+                client1.StartHeartbeat();
 
                 // Register a second build via raw protocol to trigger rebalance
                 SendRawCommand($"REGISTER second-build 12");
-                // Heartbeat will fire every 2s and get the new budget
-                // Wait up to 10s for the budget change callback
-                budgetChanged.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue("Budget change callback should fire");
-                budgetUpdate.ShouldBe(6); // 12 / 2 = 6
+
+                // Wait for heartbeat to pick up the rebalanced budget
+                Thread.Sleep(5000);
+
+                // The client should have updated its internal granted nodes via heartbeat
+                client1.GrantedNodes.ShouldBe(6); // 12 / 2 = 6
             }
             finally
             {
@@ -601,7 +597,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 client1.TryRegister(6, out _);
 
                 // Start heartbeats so client1 acknowledges epochs
-                client1.StartHeartbeat(_ => { });
+                client1.StartHeartbeat();
 
                 // Second build should block in queue
                 var queuePositions = new List<int>();
