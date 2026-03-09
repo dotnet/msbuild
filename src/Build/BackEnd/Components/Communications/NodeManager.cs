@@ -361,5 +361,13 @@ namespace Microsoft.Build.BackEnd
         {
             return _outOfProcNodeProvider?.GetProcesses()!;
         }
+
+        public void ShutdownExcessNodes(int maxNodesToKeep)
+        {
+            if (_outOfProcNodeProvider is NodeProviderOutOfProc provider)
+            {
+                provider.ShutdownExcessNodes(maxNodesToKeep);
+            }
+        }
     }
 }
