@@ -2290,12 +2290,10 @@ namespace Microsoft.Build.Execution
                 _executionCancellationTokenSource?.Cancel();
 
                 // If we are aborting, we will NOT reuse the nodes because their state may be compromised by attempts to shut down while the build is in-progress.
-                // When a coordinator is managing builds, disable reuse so nodes exit immediately
-                // instead of lingering for 15 minutes — the coordinator handles cross-build lifecycle.
+                // When a coordinator is managing this build, disable reuse so nodes exit immediately
+                // instead of lingering — the coordinator handles cross-build node lifecycle.
 #if NET
-                bool coordinatorActive = _coordinatorClient != null || (Environment.GetEnvironmentVariable("MSBUILD_COORDINATOR_DISABLE") != "1"
-                    && System.IO.File.Exists(BuildCoordinator.GetPipeName()));
-                bool enableReuse = !abort && _buildParameters!.EnableNodeReuse && !coordinatorActive;
+                bool enableReuse = !abort && _buildParameters!.EnableNodeReuse && _coordinatorClient == null;
 #else
                 bool enableReuse = !abort && _buildParameters!.EnableNodeReuse;
 #endif
@@ -2361,12 +2359,6 @@ namespace Microsoft.Build.Execution
         private void TryRegisterWithCoordinator()
         {
             if (_buildParameters == null)
-            {
-                return;
-            }
-
-            // Allow opt-out via environment variable
-            if (Environment.GetEnvironmentVariable("MSBUILD_COORDINATOR_DISABLE") == "1")
             {
                 return;
             }
