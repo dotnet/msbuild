@@ -1045,7 +1045,7 @@ namespace Microsoft.Build.UnitTests
         /// process that inherits stdout/stderr pipe handles and outlives the tool.
         /// This is a regression test for https://github.com/dotnet/msbuild/issues/2981.
         /// </summary>
-        [WindowsOnlyFact]
+        [Fact]
         public void ToolTaskDoesNotHangWhenGrandchildInheritsPipeHandles()
         {
             using (MyTool t = new MyTool())
@@ -1053,14 +1053,11 @@ namespace Microsoft.Build.UnitTests
                 MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
 
-                // The command:
-                // 1. Echoes "hello" to stdout (tool's own output)
-                // 2. Starts a background process (ping -n 10 localhost) that inherits pipe handles.
-                //    10 pings (~10s) is enough to outlive the 2s EOF timeout while not lingering too
-                //    long in CI. The previous value of 120 was unnecessarily long.
-                // 3. The tool (cmd.exe) exits immediately after starting the background process
-                // Without the fix, WaitForProcessExit hangs because the ping process holds the pipe.
-                t.MockCommandLineCommands = "/c echo hello & start /b ping -n 10 127.0.0.1 > nul";
+                // cmd echoes "hello", then starts a background ping that inherits
+                // pipe handles. cmd exits immediately; ping outlives the 2s EOF timeout.
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                    ? "/c echo hello & start /b ping -n 10 127.0.0.1 > nul"
+                    : "-c \"echo hello; sleep 10 &\"";
 
                 // Set a generous timeout - without the fix this would hang for the full ping duration
                 t.Timeout = 30000;

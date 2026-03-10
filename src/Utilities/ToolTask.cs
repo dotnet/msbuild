@@ -745,8 +745,11 @@ namespace Microsoft.Build.Utilities
             _standardErrorDataAvailable = new ManualResetEvent(false);
             _standardOutputDataAvailable = new ManualResetEvent(false);
 
-            _standardOutputEOF = new ManualResetEvent(false);
-            _standardErrorEOF = new ManualResetEvent(false);
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+            {
+                _standardOutputEOF = new ManualResetEvent(false);
+                _standardErrorEOF = new ManualResetEvent(false);
+            }
 
             _toolExited = new ManualResetEvent(false);
             _terminatedTool = false;
@@ -841,8 +844,8 @@ namespace Microsoft.Build.Utilities
                     _standardErrorDataAvailable.Dispose();
                     _standardOutputDataAvailable.Dispose();
 
-                    _standardOutputEOF.Dispose();
-                    _standardErrorEOF.Dispose();
+                    _standardOutputEOF?.Dispose();
+                    _standardErrorEOF?.Dispose();
 
                     _toolExited.Dispose();
                     _toolTimeoutExpired.Dispose();
@@ -1082,9 +1085,8 @@ namespace Microsoft.Build.Utilities
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
             {
                 // Step 1: Wait for the process handle to be signaled.
-                // The int overload does NOT call WaitUtilEOF, so it won't hang
-                // if grandchild processes inherited stdout/stderr pipe handles.
-                proc.WaitForExit(System.Threading.Timeout.Infinite);
+                // Use int.MaxValue to avoid blocking on pipe EOF.
+                proc.WaitForExit(int.MaxValue);
 
                 // Step 2: Wait for the AsyncStreamReader to deliver all remaining data.
                 // When the pipe reaches EOF, AsyncStreamReader flushes its StringBuilder
