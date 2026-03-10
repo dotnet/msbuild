@@ -4,9 +4,9 @@
 using System.Threading;
 
 #if NETFRAMEWORK
-using Path = Microsoft.IO.Path;
+using NewPath = Microsoft.IO.Path;
 #else
-using System.IO;
+using NewPath = System.IO.Path;
 #endif
 
 namespace Microsoft.Build.Framework
@@ -45,7 +45,7 @@ namespace Microsoft.Build.Framework
         /// <returns>true, if slash</returns>
         internal static bool IsSlash(char c)
         {
-            return (c == Path.DirectorySeparatorChar) || (c == Path.AltDirectorySeparatorChar);
+            return (c == NewPath.DirectorySeparatorChar) || (c == NewPath.AltDirectorySeparatorChar);
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Microsoft.Build.Framework
         /// </summary>  
         internal static string FixFilePath(string path)
         {
-            return string.IsNullOrEmpty(path) || Path.DirectorySeparatorChar == WindowsDirectorySeparator ? path : path.Replace(WindowsDirectorySeparator, UnixDirectorySeparator);
+            return string.IsNullOrEmpty(path) || NewPath.DirectorySeparatorChar == WindowsDirectorySeparator ? path : path.Replace(WindowsDirectorySeparator, UnixDirectorySeparator);
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Microsoft.Build.Framework
             fileSpec = FixFilePath(fileSpec);
             if (fileSpec.Length > 0 && !IsSlash(fileSpec[fileSpec.Length - 1]))
             {
-                fileSpec += Path.DirectorySeparatorChar;
+                fileSpec += NewPath.DirectorySeparatorChar;
             }
 
             return fileSpec;
@@ -207,7 +207,7 @@ namespace Microsoft.Build.Framework
                 return path;
             }
 
-            return new AbsolutePath(FixFilePath(Path.GetFullPath(path.Value)),
+            return new AbsolutePath(FixFilePath(NewPath.GetFullPath(path.Value)),
                 original: path.OriginalValue,
                 ignoreRootedCheck: true);
         }
