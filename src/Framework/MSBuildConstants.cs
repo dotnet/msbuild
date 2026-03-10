@@ -7,7 +7,6 @@ using System.Buffers;
 #endif
 using System.IO;
 
-
 namespace Microsoft.Build.Shared
 {
     /// <summary>
