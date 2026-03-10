@@ -1560,6 +1560,7 @@ namespace Microsoft.Build.Construction
                 {
                     projectWriter.Initialize(XmlDocument);
                     XmlDocument.Save(projectWriter);
+                    projectWriter.WriteTrailingNewLine();
                 }
 
                 _encoding = saveEncoding;
@@ -1628,6 +1629,7 @@ namespace Microsoft.Build.Construction
             {
                 projectWriter.Initialize(XmlDocument);
                 XmlDocument.Save(projectWriter);
+                projectWriter.WriteTrailingNewLine();
             }
 
             StreamTimeUtc = DateTime.UtcNow;
