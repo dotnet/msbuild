@@ -67,6 +67,11 @@
         <target state="translated">未能创建临时文件。临时文件文件夹已满或其路径不正确。{0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidFilespecForTransform">
+        <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
+        <target state="translated">无法将项元数据“%({0})”应用于路径“{1}”。{2}</target>
+        <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
+      </trans-unit>
       <trans-unit id="InvalidGetPathOfFileAboveParameter">
         <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
         <target state="translated">参数“{0}”只能是文件名，不能包含目录。</target>
