@@ -7,7 +7,6 @@ using System.Buffers;
 #endif
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Build.Framework;
@@ -172,12 +171,6 @@ namespace Microsoft.Build.Shared
         /// <inheritdoc cref="FrameworkFileUtilities.FileTimeFormat"/>
         internal static string FileTimeFormat
             => FrameworkFileUtilities.FileTimeFormat;
-
-        /// <summary>
-        /// Get the currently executing assembly path.
-        /// </summary>
-        internal static string ExecutingAssemblyPath
-            => Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(typeof(FileUtilities).GetTypeInfo().Assembly));
 
         /// <inheritdoc cref="FrameworkFileUtilities.GetFullPath(string, string, bool)"/>
         internal static string GetFullPath(string fileSpec, string currentDirectory, bool escape = true)

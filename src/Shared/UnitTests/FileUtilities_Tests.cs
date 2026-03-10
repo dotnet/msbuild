@@ -937,7 +937,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        private static string SystemSpecificAbsolutePath => FileUtilities.ExecutingAssemblyPath;
+        private static string SystemSpecificAbsolutePath => BuildEnvironmentHelper.ExecutingAssemblyPath;
 
 
         [Fact]
