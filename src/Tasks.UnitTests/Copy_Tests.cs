@@ -3162,7 +3162,7 @@ namespace Microsoft.Build.UnitTests
         public void CopyToFileWithSameCaseInsensitiveNameAsExistingDirectoryOnUnix()
         {
             // Skip this test on case-insensitive file systems (Windows, macOS with default APFS/HFS+)
-            if (!FileUtilities.GetIsFileSystemCaseSensitive())
+            if (!FileUtilities.IsFileSystemCaseSensitive)
             {
                 return;
             }

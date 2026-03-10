@@ -67,15 +67,20 @@ namespace Microsoft.Build.Framework
             cacheDirectory = null;
         }
 
-        internal static readonly StringComparison PathComparison = GetIsFileSystemCaseSensitive() ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+        public static readonly StringComparison PathComparison = IsFileSystemCaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
 
-        internal static readonly StringComparer PathComparer = GetIsFileSystemCaseSensitive() ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
+        public static readonly StringComparer PathComparer = IsFileSystemCaseSensitive ? StringComparer.Ordinal : StringComparer.OrdinalIgnoreCase;
+
+        private static bool? s_isFileSystemCaseSensitive;
+
+        public static bool IsFileSystemCaseSensitive
+            => s_isFileSystemCaseSensitive ??= ComputeIsFileSystemCaseSensitive();
 
         /// <summary>
-        /// Determines whether the file system is case sensitive.
-        /// Copied from https://github.com/dotnet/runtime/blob/73ba11f3015216b39cb866d9fb7d3d25e93489f2/src/libraries/Common/src/System/IO/PathInternal.CaseSensitivity.cs#L41-L59
+        ///  Determines whether the file system is case sensitive.
+        ///  Copied from https://github.com/dotnet/runtime/blob/73ba11f3015216b39cb866d9fb7d3d25e93489f2/src/libraries/Common/src/System/IO/PathInternal.CaseSensitivity.cs#L41-L59.
         /// </summary>
-        public static bool GetIsFileSystemCaseSensitive()
+        private static bool ComputeIsFileSystemCaseSensitive()
         {
             try
             {
@@ -86,11 +91,11 @@ namespace Microsoft.Build.Framework
                     return !FileSystems.Default.FileExists(lowerCased);
                 }
             }
-            catch (Exception exc)
+            catch (Exception ex)
             {
                 // In case something goes terribly wrong, we don't want to fail just because
                 // of a casing test, so we assume case-insensitive-but-preserving.
-                Debug.Fail("Casing test failed: " + exc);
+                Debug.Fail($"Casing test failed: {ex}");
                 return false;
             }
         }

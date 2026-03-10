@@ -2478,7 +2478,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var project = ObjectModelHelpers.CreateInMemoryProject(content);
             var items = project.ItemsIgnoringCondition.Where(i => i.ItemType.Equals("I2"));
 
-            if (FileUtilities.GetIsFileSystemCaseSensitive())
+            if (FileUtilities.IsFileSystemCaseSensitive)
             {
                 items.Select(i => i.EvaluatedInclude).ShouldBe(new[] { "a2", "b2", "c2", "g2" });
 
