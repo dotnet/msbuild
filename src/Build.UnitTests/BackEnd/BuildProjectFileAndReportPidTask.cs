@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             if (!string.IsNullOrEmpty(ProjectFile))
             {
-                Hashtable globalProperties = null;
+                Hashtable? globalProperties = null;
                 if (!string.IsNullOrEmpty(Properties))
                 {
                     globalProperties = new Hashtable();
