@@ -287,8 +287,12 @@ namespace Microsoft.Build.Internal
 
             // Get session ID if needed (expensive call)
             int sessionId = 0;
-            if (includeSessionId)
+            if (includeSessionId && NativeMethodsShared.IsWindows)
             {
+                // On Windows, SessionId differentiates RDP sessions.
+                // On Unix, getsid() returns the session leader PID which differs per terminal,
+                // preventing cross-terminal node reuse. Use 0 since Unix doesn't need
+                // RDP-style session isolation.
                 using var currentProcess = Process.GetCurrentProcess();
                 sessionId = currentProcess.SessionId;
             }
