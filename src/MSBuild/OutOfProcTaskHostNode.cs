@@ -566,7 +566,7 @@ namespace Microsoft.Build.CommandLine
         {
 #if CLR2COMPATIBILITY
             // CLR2 task host doesn't support resource management.
-            // Callers catch NotImplementedException and fall back to their own parallelism estimate.
+            // If they somehow get here, throw.
             throw new NotImplementedException();
 #else
             ErrorUtilities.VerifyThrowArgumentOutOfRange(requestedCores > 0, nameof(requestedCores));
