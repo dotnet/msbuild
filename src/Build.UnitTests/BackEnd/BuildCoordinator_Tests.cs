@@ -229,20 +229,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 int firstGrant = int.Parse(r1!.Split(' ')[1]);
                 firstGrant.ShouldBe(12);
 
-                // Second build joins
-                SendRawCommand("REGISTER build-2 12");
+                // Second build joins — activated immediately (capacity available)
+                string? r2 = SendRawCommand("REGISTER build-2 12");
+                r2.ShouldStartWith("OK ");
+                int grant2 = int.Parse(r2!.Split(' ')[1]);
+                grant2.ShouldBe(6); // 12 / 2 builds = 6 each
 
-                // First build heartbeats — should get reduced budget (acknowledges epoch)
+                // First build heartbeats — should also see reduced budget
                 string? hb1 = SendRawCommand("HEARTBEAT build-1");
                 int newBudget = int.Parse(hb1!.Split(' ')[1]);
-                newBudget.ShouldBe(6); // 12 / 2 builds = 6 each
-
-                // Second build should now be promoted after build-1 acknowledged
-                // Heartbeat for build-2 should return OK (promoted)
-                string? hb2 = SendRawCommand("HEARTBEAT build-2");
-                hb2.ShouldStartWith("OK ");
-                int budget2 = int.Parse(hb2!.Split(' ')[1]);
-                budget2.ShouldBe(6);
+                newBudget.ShouldBe(6);
             }
             finally
             {
@@ -259,11 +255,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 SendRawCommand("REGISTER build-1 12");
-                SendRawCommand("REGISTER build-2 12");
-
-                // Acknowledge epoch so build-2 promotes
-                SendRawCommand("HEARTBEAT build-1");
-                SendRawCommand("HEARTBEAT build-2");
+                string? r2 = SendRawCommand("REGISTER build-2 12");
+                r2.ShouldStartWith("OK "); // Activated immediately
 
                 // Now unregister build-2
                 SendRawCommand("UNREGISTER build-2");
@@ -288,11 +281,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 SendRawCommand("REGISTER build-1 6");
-                SendRawCommand("REGISTER build-2 6");
-                SendRawCommand("REGISTER build-3 6"); // Will be queued
-
-                // Acknowledge so build-2 promotes
-                SendRawCommand("HEARTBEAT build-1");
+                SendRawCommand("REGISTER build-2 6"); // Activated immediately (max=2)
+                SendRawCommand("REGISTER build-3 6"); // Will be queued (at capacity)
 
                 string? status = SendRawCommand("STATUS");
                 status.ShouldNotBeNull();
@@ -355,34 +345,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void EpochGating_PreventsPromotionBeforeAcknowledgment()
-        {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.Start();
-
-            try
-            {
-                SendRawCommand("REGISTER build-1 12");
-                SendRawCommand("REGISTER build-2 12"); // Queued — epoch bumped
-
-                // build-2 heartbeats BEFORE build-1 acknowledges — should still be queued
-                string? hb2 = SendRawCommand("HEARTBEAT build-2");
-                hb2.ShouldStartWith("QUEUED ");
-
-                // Now build-1 acknowledges via heartbeat
-                SendRawCommand("HEARTBEAT build-1");
-
-                // build-2 should now be promoted
-                string? hb2After = SendRawCommand("HEARTBEAT build-2");
-                hb2After.ShouldStartWith("OK ");
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
-        }
-
-        [Fact]
         public void MaxConcurrency_EnforcesLimit()
         {
             using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 2);
@@ -391,18 +353,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 SendRawCommand("REGISTER build-1 6");
-                SendRawCommand("REGISTER build-2 6");
+                string? r2 = SendRawCommand("REGISTER build-2 6");
+                r2.ShouldStartWith("OK "); // Activated immediately (max=2)
 
-                // Acknowledge so build-2 promotes
-                SendRawCommand("HEARTBEAT build-1");
+                // Third build should be queued (at capacity)
+                string? r3 = SendRawCommand("REGISTER build-3 6");
+                r3.ShouldStartWith("QUEUED ");
 
-                // Confirm build-2 is promoted before registering build-3
-                // (the promotion happens asynchronously on the server)
-                string? hb2 = SendRawCommand("HEARTBEAT build-2");
-                hb2.ShouldStartWith("OK ");
-
-                // Third build should be queued (max=2)
-                SendRawCommand("REGISTER build-3 6");
                 string? hb3 = SendRawCommand("HEARTBEAT build-3");
                 hb3.ShouldStartWith("QUEUED ");
 
@@ -426,13 +383,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
-                // Register 3 builds and get them all active
+                // Register 3 builds — all activate immediately (max=3)
                 SendRawCommand("REGISTER build-1 12");
                 SendRawCommand("REGISTER build-2 12");
-                SendRawCommand("HEARTBEAT build-1"); // Acknowledge for build-2 promotion
                 SendRawCommand("REGISTER build-3 12");
-                SendRawCommand("HEARTBEAT build-1"); // Acknowledge for build-3
-                SendRawCommand("HEARTBEAT build-2"); // Acknowledge for build-3
 
                 // All three should get 4 nodes each (12 / 3)
                 string? hb1 = SendRawCommand("HEARTBEAT build-1");
@@ -461,10 +415,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
-                // build-1 only wants 2 nodes
+                // build-1 only wants 2 nodes, both activate immediately
                 SendRawCommand("REGISTER build-1 2");
                 SendRawCommand("REGISTER build-2 12");
-                SendRawCommand("HEARTBEAT build-1");
 
                 // build-1 should get 2 (capped at requested), build-2 gets 6 (fair share)
                 string? hb1 = SendRawCommand("HEARTBEAT build-1");
@@ -553,7 +506,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 client1.StartHeartbeat();
 
-                // Register a second build via raw protocol to trigger rebalance
+                // Register a second build — activated immediately, budget rebalances
                 SendRawCommand($"REGISTER second-build 12");
 
                 // Wait for heartbeat to pick up the rebalanced budget
@@ -604,7 +557,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 using var client1 = new BuildCoordinatorClient(_testPipeName);
                 client1.TryRegister(6, out _);
 
-                // Start heartbeats so client1 acknowledges epochs
+                // Start heartbeats for client1
                 client1.StartHeartbeat();
 
                 // Second build should block in queue

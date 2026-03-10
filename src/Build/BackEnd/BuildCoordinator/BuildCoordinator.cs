@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -16,21 +15,18 @@ namespace Microsoft.Build.BackEnd
     /// <summary>
     /// A standalone coordinator process that manages node budgets across concurrent MSBuild instances.
     ///
-    /// Key design: heartbeat-gated promotion. When a new build registers and there are already
-    /// active builds, the new build is queued. Active builds learn their reduced budget on their
-    /// next heartbeat. Only after ALL active builds have acknowledged the new epoch (via heartbeat)
-    /// is the queued build promoted. This ordering gate ensures promotions happen one-at-a-time
-    /// in a controlled sequence. Note: BuildManager applies the granted budget once at build start
-    /// and does not change MaxNodeCount mid-build — the heartbeat acknowledgment is purely for
-    /// the coordinator's internal promotion bookkeeping, not for enforcing runtime budget changes.
+    /// Simple capacity model: builds register and are activated immediately if there's capacity
+    /// (active count &lt; maxConcurrentBuilds). Otherwise they're queued FIFO and promoted when
+    /// a slot opens (via UNREGISTER or staleness reaping). Each active build is granted a fair
+    /// share of the total node budget (totalBudget / activeCount), capped at what it requested.
     ///
     /// Protocol (line-based text over named pipe):
     ///   REGISTER buildId requestedNodes
-    ///     → OK grantedNodes                    (first build — immediate)
-    ///     → QUEUED position totalQueued         (subsequent builds — wait for heartbeat gate)
+    ///     → OK grantedNodes                    (activated — has capacity)
+    ///     → QUEUED position totalQueued         (at capacity — wait for slot)
     ///
     ///   HEARTBEAT buildId
-    ///     → OK grantedNodes                    (active build — may have new budget)
+    ///     → OK grantedNodes                    (active build — current budget)
     ///     → QUEUED position totalQueued waitSec (queued build — position update)
     ///
     ///   UNREGISTER buildId
@@ -74,12 +70,6 @@ namespace Microsoft.Build.BackEnd
         private Timer? _stalenessReaper;
         private Timer? _pipeWatchdog;
         private CancellationTokenSource? _listenCycleCts;
-
-        /// <summary>
-        /// Epoch counter — bumped whenever the budget landscape changes and active builds
-        /// need to acknowledge their new budget before queued builds can be promoted.
-        /// </summary>
-        private int _rebalanceEpoch;
 
         /// <summary>
         /// If a build hasn't heartbeated in this many seconds, consider it dead.
@@ -337,28 +327,24 @@ namespace Microsoft.Build.BackEnd
 
             lock (_queueLock)
             {
-                // First build ever — activate immediately with full budget
-                if (_activeBuilds.IsEmpty)
+                // Capacity available — activate immediately
+                if (_activeBuilds.Count < _maxConcurrentBuilds)
                 {
                     _activeBuilds[buildId] = registration;
-                    registration.AcknowledgedEpoch = _rebalanceEpoch;
                     int granted = CalculateBudget(buildId);
                     registration.GrantedNodes = granted;
 
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] REGISTER {buildId}: requested={requested} granted={granted} (first build)");
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] REGISTER {buildId}: requested={requested} granted={granted} active={_activeBuilds.Count}");
                     writer.WriteLine($"OK {granted}");
                     return;
                 }
 
-                // Subsequent builds — always queue. Bump epoch so active builds must
-                // heartbeat (acknowledge reduced budget) before this build is promoted.
+                // At capacity — queue
                 _queuedBuilds.Add(registration);
-                _rebalanceEpoch++;
                 int position = _queuedBuilds.Count;
-                int totalQueued = _queuedBuilds.Count;
 
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] QUEUED {buildId}: position={position}/{totalQueued} active={_activeBuilds.Count} epoch={_rebalanceEpoch} (waiting for heartbeat gate)");
-                writer.WriteLine($"QUEUED {position} {totalQueued}");
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] QUEUED {buildId}: position={position} active={_activeBuilds.Count}");
+                writer.WriteLine($"QUEUED {position} {position}");
             }
         }
 
@@ -376,14 +362,9 @@ namespace Microsoft.Build.BackEnd
             if (_activeBuilds.TryGetValue(buildId, out var activeReg))
             {
                 activeReg.LastHeartbeat = DateTime.UtcNow;
-                activeReg.AcknowledgedEpoch = _rebalanceEpoch;
 
                 int newBudget = CalculateBudget(buildId);
                 activeReg.GrantedNodes = newBudget;
-
-                // Promote queued builds BEFORE responding, so promotions are
-                // visible to subsequent commands from any client.
-                TryPromotePending();
 
                 writer.WriteLine($"OK {newBudget}");
                 return;
@@ -435,34 +416,11 @@ namespace Microsoft.Build.BackEnd
             lock (_queueLock) { queuedCount = _queuedBuilds.Count; }
             Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] UNREGISTER {buildId}: active={_activeBuilds.Count} queued={queuedCount}");
 
-            // When a build leaves, remaining builds get MORE budget (safe direction).
-            // Promote immediately if there's a slot — the promoted build gets the correct
-            // share, and existing builds will learn their increased budget on next heartbeat.
+            // When a build leaves, promote next in queue if there's a slot.
             string? promoted = null;
-            if (wasActive && _activeBuilds.Count < _maxConcurrentBuilds)
+            if (wasActive)
             {
-                lock (_queueLock)
-                {
-                    if (_queuedBuilds.Count > 0)
-                    {
-                        var next = _queuedBuilds[0];
-                        _queuedBuilds.RemoveAt(0);
-                        next.PromotedAt = DateTime.UtcNow;
-                        next.AcknowledgedEpoch = _rebalanceEpoch;
-                        _activeBuilds[next.BuildId] = next;
-                        int granted = CalculateBudget(next.BuildId);
-                        next.GrantedNodes = granted;
-                        promoted = next.BuildId;
-
-                        Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] PROMOTED {next.BuildId}: granted={granted} waited={(next.PromotedAt.Value - next.QueuedAt):mm\\:ss} active={_activeBuilds.Count} queued={_queuedBuilds.Count}");
-
-                        // If more queued, bump epoch for next round
-                        if (_queuedBuilds.Count > 0)
-                        {
-                            _rebalanceEpoch++;
-                        }
-                    }
-                }
+                promoted = TryPromoteOne();
             }
 
             if (promoted != null)
@@ -473,48 +431,29 @@ namespace Microsoft.Build.BackEnd
             {
                 writer.WriteLine("OK");
             }
-
-            RebalanceAll();
         }
 
         /// <summary>
-        /// Promote queued builds if:
-        ///   1. There's capacity (active &lt; max concurrent)
-        ///   2. All active builds have acknowledged the current rebalance epoch
-        ///      (so they've received their reduced budget via heartbeat)
-        /// Promotes one build at a time, bumping epoch after each so the newly
-        /// promoted build must also heartbeat before the next one is promoted.
+        /// Promote the next queued build if there's capacity. Returns the promoted build ID, or null.
         /// </summary>
-        private void TryPromotePending()
+        private string? TryPromoteOne()
         {
             if (_activeBuilds.Count >= _maxConcurrentBuilds)
             {
-                return;
-            }
-
-            // Check that ALL active builds have acknowledged the current epoch
-            int currentEpoch = _rebalanceEpoch;
-            foreach (var kvp in _activeBuilds)
-            {
-                if (kvp.Value.AcknowledgedEpoch < currentEpoch)
-                {
-                    return; // Not all caught up yet
-                }
+                return null;
             }
 
             lock (_queueLock)
             {
                 if (_queuedBuilds.Count == 0)
                 {
-                    return;
+                    return null;
                 }
 
-                // Promote one build
                 var next = _queuedBuilds[0];
                 _queuedBuilds.RemoveAt(0);
 
                 next.PromotedAt = DateTime.UtcNow;
-                next.AcknowledgedEpoch = currentEpoch; // It starts caught up
                 _activeBuilds[next.BuildId] = next;
 
                 int granted = CalculateBudget(next.BuildId);
@@ -522,16 +461,8 @@ namespace Microsoft.Build.BackEnd
 
                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] PROMOTED {next.BuildId}: granted={granted} waited={(next.PromotedAt.Value - next.QueuedAt):mm\\:ss} active={_activeBuilds.Count} queued={_queuedBuilds.Count}");
 
-                // If more queued, bump epoch — existing active builds must heartbeat
-                // their new (further-reduced) budget before the next promotion
-                if (_queuedBuilds.Count > 0)
-                {
-                    _rebalanceEpoch++;
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Epoch bumped to {_rebalanceEpoch} — {_queuedBuilds.Count} still queued");
-                }
+                return next.BuildId;
             }
-
-            RebalanceAll();
         }
 
         private void HandleStatus(StreamWriter writer)
@@ -539,7 +470,7 @@ namespace Microsoft.Build.BackEnd
             int queueCount;
             lock (_queueLock) { queueCount = _queuedBuilds.Count; }
 
-            writer.WriteLine($"OK budget={_totalBudget} active={_activeBuilds.Count} queued={queueCount} max={_maxConcurrentBuilds} epoch={_rebalanceEpoch}");
+            writer.WriteLine($"OK budget={_totalBudget} active={_activeBuilds.Count} queued={queueCount} max={_maxConcurrentBuilds}");
 
             if (!_activeBuilds.IsEmpty)
             {
@@ -547,8 +478,7 @@ namespace Microsoft.Build.BackEnd
                 foreach (var kvp in _activeBuilds)
                 {
                     var reg = kvp.Value;
-                    string ack = reg.AcknowledgedEpoch >= _rebalanceEpoch ? "yes" : "no";
-                    writer.WriteLine($"  {reg.BuildId}: granted={reg.GrantedNodes} requested={reg.RequestedNodes} epoch_ack={ack} age={DateTime.UtcNow - reg.RegisteredAt:mm\\:ss}");
+                    writer.WriteLine($"  {reg.BuildId}: granted={reg.GrantedNodes} requested={reg.RequestedNodes} age={DateTime.UtcNow - reg.RegisteredAt:mm\\:ss}");
                 }
             }
 
@@ -594,20 +524,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             return fairShare;
-        }
-
-        private void RebalanceAll()
-        {
-            foreach (var kvp in _activeBuilds)
-            {
-                kvp.Value.GrantedNodes = CalculateBudget(kvp.Key);
-            }
-
-            if (!_activeBuilds.IsEmpty)
-            {
-                var summary = string.Join(", ", _activeBuilds.Select(b => $"{b.Key}={b.Value.GrantedNodes}"));
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Rebalanced: {summary}");
-            }
         }
 
         /// <summary>
@@ -671,8 +587,7 @@ namespace Microsoft.Build.BackEnd
             if (anyReaped)
             {
                 // Try to promote queued builds into newly opened slots
-                TryPromotePending();
-                RebalanceAll();
+                while (TryPromoteOne() != null) { }
             }
         }
 
@@ -717,8 +632,6 @@ namespace Microsoft.Build.BackEnd
             internal DateTime QueuedAt { get; }
             internal DateTime? PromotedAt { get; set; }
             internal DateTime LastHeartbeat { get; set; }
-            internal int AcknowledgedEpoch { get; set; }
-
             internal BuildRegistration(string buildId, int requestedNodes, DateTime registeredAt)
             {
                 BuildId = buildId;
@@ -727,7 +640,6 @@ namespace Microsoft.Build.BackEnd
                 RegisteredAt = registeredAt;
                 QueuedAt = registeredAt;
                 LastHeartbeat = registeredAt;
-                AcknowledgedEpoch = -1; // Not yet acknowledged
             }
         }
 
