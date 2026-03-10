@@ -92,14 +92,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void TaskHostBuildRequest_RoundTrip_Serialization()
         {
-            var globalProps = new Dictionary<string, string>[] { new(StringComparer.OrdinalIgnoreCase) { ["Configuration"] = "Release" }, null };
-            var removeProps = new List<string>[] { new() { "Platform" }, null };
+            Dictionary<string, string>?[] globalProps = [new(StringComparer.OrdinalIgnoreCase) { ["Configuration"] = "Release" }, null];
+            List<string>?[] removeProps = [new() { "Platform" }, null];
+            string?[] toolsVersions = ["17.0", null];
             var request = new TaskHostBuildRequest(
                 ["proj1.csproj", "proj2.csproj"],
                 ["Build", "Test"],
                 globalProps,
                 removeProps,
-                ["17.0", null],
+                toolsVersions!,
                 returnTargetOutputs: true);
             request.RequestId = 55;
 
@@ -113,13 +114,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             deserialized.Type.ShouldBe(NodePacketType.TaskHostBuildRequest);
             deserialized.ProjectFileNames.ShouldBe(["proj1.csproj", "proj2.csproj"]);
             deserialized.TargetNames.ShouldBe(["Build", "Test"]);
-            deserialized.ToolsVersions.ShouldBe(["17.0", null]);
+            deserialized.ToolsVersions.ShouldBe(toolsVersions!);
             deserialized.ReturnTargetOutputs.ShouldBeTrue();
-            deserialized.GlobalProperties.Length.ShouldBe(2);
-            deserialized.GlobalProperties[0]["Configuration"].ShouldBe("Release");
+            deserialized.GlobalProperties!.Length.ShouldBe(2);
+            deserialized.GlobalProperties![0]!["Configuration"].ShouldBe("Release");
             deserialized.GlobalProperties[1].ShouldBeNull();
-            deserialized.RemoveGlobalProperties.Length.ShouldBe(2);
-            deserialized.RemoveGlobalProperties[0].ShouldBe(["Platform"]);
+            deserialized.RemoveGlobalProperties!.Length.ShouldBe(2);
+            deserialized.RemoveGlobalProperties![0].ShouldBe(["Platform"]);
             deserialized.RemoveGlobalProperties[1].ShouldBeNull();
         }
 
