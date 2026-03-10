@@ -43,9 +43,13 @@ namespace Microsoft.Build.BackEnd
 
 #if NETCOREAPP2_1_OR_GREATER
         /// <summary>
-        /// The amount of time to wait for the client to connect to the host.
+        /// Timeout for reading each handshake component from a connected client.
+        /// Kept short so that failed or stalled handshakes don't block idle nodes
+        /// from reaching their connection timeout check and exiting.
+        /// Note: on Windows, TryReadIntForHandshake uses a blocking read so this
+        /// timeout only takes effect on Unix (where ReadAsync + Wait is used).
         /// </summary>
-        private const int ClientConnectTimeout = 60000;
+        private const int HandshakeReadTimeout = 5000;
 #endif // NETCOREAPP2_1
 
         /// <summary>
@@ -425,7 +429,7 @@ namespace Microsoft.Build.BackEnd
                             if (!_pipeServer.TryReadIntForHandshake(
                                 byteToAccept: index == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null, /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1_OR_GREATER
-                             ClientConnectTimeout, /* wait a long time for the handshake from this side */
+                             HandshakeReadTimeout, /* timeout for handshake read */
 #endif
                               out HandshakeResult result))
                             {
@@ -453,7 +457,7 @@ namespace Microsoft.Build.BackEnd
 
                             if (
 #if NETCOREAPP2_1_OR_GREATER
-                            _pipeServer.TryReadEndOfHandshakeSignal(false, ClientConnectTimeout, out HandshakeResult _)) /* wait a long time for the handshake from this side */
+                            _pipeServer.TryReadEndOfHandshakeSignal(false, HandshakeReadTimeout, out HandshakeResult _)) /* timeout for end-of-handshake signal */
 #else
                             _pipeServer.TryReadEndOfHandshakeSignal(false, out HandshakeResult _))
 #endif
