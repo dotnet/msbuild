@@ -4,9 +4,9 @@
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests
             else
             {
                 // Should throw ArgumentException for any non-absolute path
-                Should.Throw<System.ArgumentException>(() => new AbsolutePath(path, ignoreRootedCheck: false),
+                Should.Throw<ArgumentException>(() => new AbsolutePath(path, ignoreRootedCheck: false),
                     $"Path '{path}' should be rejected as it's not a true absolute path");
             }
         }
@@ -44,21 +44,42 @@ namespace Microsoft.Build.UnitTests
             Path.IsPathRooted(absolutePath.Value).ShouldBeTrue();
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        public void AbsolutePath_NullOrEmpty_ShouldThrow(string? path)
+        [Fact]
+        public void AbsolutePath_NullOrEmpty_ShouldThrowOnNull()
         {
-            Should.Throw<ArgumentException>(() => new AbsolutePath(path!));
+            string? path = null;
+
+            Should.Throw<ArgumentNullException>(() => new AbsolutePath(path!));
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrow(string? path)
+        [Fact]
+        [UseInvariantCulture]
+        public void AbsolutePath_NullOrEmpty_ShouldThrowOnEmpty()
         {
+            string path = "";
+
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path));
+            exception.Message.ShouldStartWith("The value cannot be an empty string.");
+        }
+
+        [Fact]
+        public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrowOnNull()
+        {
+            string? path = null;
             var basePath = GetTestBasePath();
-            Should.Throw<ArgumentException>(() => new AbsolutePath(path!, basePath));
+
+            Should.Throw<ArgumentNullException>(() => new AbsolutePath(path!, basePath));
+        }
+
+        [Fact]
+        [UseInvariantCulture]
+        public void AbsolutePath_NullOrEmptyWithBasePath_ShouldThrowOnEmpty()
+        {
+            string path = "";
+            var basePath = GetTestBasePath();
+
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path, basePath));
+            exception.Message.ShouldStartWith("The value cannot be an empty string.");
         }
 
         [Theory]
@@ -73,7 +94,7 @@ namespace Microsoft.Build.UnitTests
             var absolutePath = new AbsolutePath(relativePath, basePath);
 
             Path.IsPathRooted(absolutePath.Value).ShouldBeTrue();
-            
+
             string expectedPath = Path.Combine(baseDirectory, relativePath);
             absolutePath.Value.ShouldBe(expectedPath);
         }
@@ -160,7 +181,7 @@ namespace Microsoft.Build.UnitTests
         {
             if (shouldThrow)
             {
-                Should.Throw<System.ArgumentException>(() => new AbsolutePath(path, ignoreRootedCheck: ignoreRootedCheck));
+                Should.Throw<ArgumentException>(() => new AbsolutePath(path, ignoreRootedCheck: ignoreRootedCheck));
             }
             else
             {
@@ -212,6 +233,58 @@ namespace Microsoft.Build.UnitTests
         public void AbsolutePath_UnixPathValidation_ShouldAcceptOnlyTrueAbsolutePaths(string path, bool shouldBeAccepted)
         {
             ValidatePathAcceptance(path, shouldBeAccepted);
+        }
+
+        [Fact]
+        public void GetCanonicalForm_NullPath_ShouldReturnSameInstance()
+        {
+            var absolutePath = new AbsolutePath(null!, null!, ignoreRootedCheck: true);
+            var result = absolutePath.GetCanonicalForm();
+
+            // Should return the same struct values when no normalization is needed
+            result.ShouldBe(absolutePath);
+        }
+
+
+        [WindowsOnlyTheory]
+        [InlineData("C:\\foo\\.\\bar")]                    // Current directory reference
+        [InlineData("C:\\foo\\..\\bar")]                   // Parent directory reference
+        [InlineData("C:\\foo/bar")]                        // Forward slash to backslash
+        [InlineData("C:\\foo\\bar")]                       // Simple Windows path (no normalization needed)
+        public void GetCanonicalForm_WindowsPathNormalization_ShouldMatchPathGetFullPath(string inputPath)
+        {
+            ValidateGetCanonicalFormMatchesSystem(inputPath);
+        }
+
+        [UnixOnlyTheory]
+        [InlineData("/foo/./bar")]                         // Current directory reference
+        [InlineData("/foo/../bar")]                        // Parent directory reference     
+        [InlineData("/foo/bar")]                           // Simple Unix path (no normalization needed)
+        [InlineData("/foo/bar\\baz")]                      // Simple Unix path with backslash that is not a path separator (no normalization needed)
+        public void GetCanonicalForm_UnixPathNormalization_ShouldMatchPathGetFullPath(string inputPath)
+        {
+            ValidateGetCanonicalFormMatchesSystem(inputPath);
+        }
+
+        private static void ValidateGetCanonicalFormMatchesSystem(string inputPath)
+        {
+            var absolutePath = new AbsolutePath(inputPath, ignoreRootedCheck: true);
+            var result = absolutePath.GetCanonicalForm();
+            var systemResult = Path.GetFullPath(inputPath);
+
+            // Should match Path.GetFullPath behavior exactly
+            result.Value.ShouldBe(systemResult);
+
+            // Should preserve original value
+            result.OriginalValue.ShouldBe(absolutePath.OriginalValue);
+        }
+
+        [WindowsOnlyFact]
+        [UseInvariantCulture]
+        public void AbsolutePath_NotRooted_ShouldThrowWithLocalizedMessage()
+        {
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath("relative/path"));
+            exception.Message.ShouldContain("Path must be rooted");
         }
     }
 }

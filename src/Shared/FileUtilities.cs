@@ -48,23 +48,6 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static string cacheDirectory = null;
 
-#if !CLR2COMPATIBILITY
-        /// <summary>
-        /// AsyncLocal working directory for use during property/item expansion in multithreaded mode.
-        /// Set by MultiThreadedTaskEnvironmentDriver when building projects. null in multiprocess mode.
-        /// Using AsyncLocal ensures the value flows to child threads/tasks spawned during execution of tasks.
-        /// </summary>
-        private static readonly AsyncLocal<string> s_currentThreadWorkingDirectory = new();
-        internal static string CurrentThreadWorkingDirectory
-        {
-            get => s_currentThreadWorkingDirectory.Value;
-            set => s_currentThreadWorkingDirectory.Value = value;
-        }
-#else
-        // net35 taskhost does not support AsyncLocal, and the scenario is not relevant there.
-        internal static string CurrentThreadWorkingDirectory = null;
-#endif
-
 #if CLR2COMPATIBILITY
         internal static string TempFileDirectory => Path.GetTempPath();
 #endif

@@ -6,6 +6,16 @@ elementFormDefault="qualified">
     <xs:include schemaLocation="Microsoft.Build.Core.xsd"/>
 
     <!-- ======================== ITEMS =====================================-->
+    <!-- Redefine SimpleItemType to allow the "Include" property to be redefine inside our this file as much as we want without errors -->
+    <xs:redefine schemaLocation="./Microsoft.Build.Core.xsd">
+        <xs:complexType name="SimpleItemType">
+            <xs:complexContent>
+                <xs:restriction base="msb:SimpleItemType">
+                    <xs:attribute name="Include" type="xs:string" use="prohibited" />
+                </xs:restriction>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:redefine>
     <!-- Possible Types include SimpleItemType (no meta-data subelements), GenericItemType (any meta-data), or something more specific.-->
     <xs:element name="Reference" substitutionGroup="msb:Item">
         <xs:annotation>

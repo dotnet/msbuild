@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -23,7 +23,7 @@ using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using ProjectItem = Microsoft.Build.Evaluation.ProjectItem;
 using IProperty = Microsoft.Build.Evaluation.IProperty;
 
-using Constants = Microsoft.Build.Internal.Constants;
+using Constants = Microsoft.Build.Framework.Constants;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 
 #if FEATURE_ASPNET_COMPILER
@@ -453,7 +453,7 @@ namespace Microsoft.Build.Construction
             rarTask.SetParameter("FindRelatedFiles", "true");
             rarTask.SetParameter("TargetFrameworkMoniker", project.TargetFrameworkMoniker);
 
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
             {
                 // Parse the target framework version to determine if we should pass it to RAR.
                 // Only pass TargetFrameworkVersion for .NET Framework 4.7.1+ which has netstandard 2.0 support.
@@ -481,7 +481,7 @@ namespace Microsoft.Build.Construction
 
             rarTask.AddOutputItem("CopyLocalFiles", copyLocalFilesItemName, null);
 
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
             {
                 // Capture whether RAR detected a dependency on netstandard
                 rarTask.AddOutputProperty("DependsOnNETStandard", dependsOnNetStandardPropertyName, null);
@@ -496,7 +496,7 @@ namespace Microsoft.Build.Construction
                 "DestinationFiles",
                 String.Format(CultureInfo.InvariantCulture, @"@({0}->'{1}%(DestinationSubDirectory)%(Filename)%(Extension)')", copyLocalFilesItemName, destinationFolder));
 
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
             {
                 // If any references depend on netstandard, copy netstandard.dll from the Facades folder.
                 // .NET Framework 4.7.1+ has netstandard 2.0 support in the Facades folder.
@@ -1290,7 +1290,7 @@ namespace Microsoft.Build.Construction
                     project.ProjectName);
 #else
                 // Set WebConfigFileName property if web.config exists (for RAR AppConfigFile parameter)
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
                 {
                     string webConfigPath = Path.Combine(project.AbsolutePath, "web.config");
                     if (File.Exists(webConfigPath))

@@ -19,8 +19,6 @@ namespace Microsoft.Build.CommandLine.Experimental
 
         public bool? Version => GetParameterlessSwitchValue(ParameterlessSwitch.Version);
 
-        public bool? NoLogo => GetParameterlessSwitchValue(ParameterlessSwitch.NoLogo);
-
         public bool? NoAutoResponse => GetParameterlessSwitchValue(ParameterlessSwitch.NoAutoResponse);
 
         public bool? NoConsoleLogger => GetParameterlessSwitchValue(ParameterlessSwitch.NoConsoleLogger);
@@ -155,6 +153,8 @@ namespace Microsoft.Build.CommandLine.Experimental
         public string[]? FeatureAvailability => GetParameterizedSwitchValue(ParameterizedSwitch.FeatureAvailability);
 
         public string[]? MultiThreaded => GetParameterizedSwitchValue(ParameterizedSwitch.MultiThreaded);
+
+        public string[]? NoLogo => GetParameterizedSwitchValue(ParameterizedSwitch.NoLogo);
 
         private bool? GetParameterlessSwitchValue(ParameterlessSwitch switchType) => switches.IsParameterlessSwitchSet(switchType) ? switches[switchType] : null;
 

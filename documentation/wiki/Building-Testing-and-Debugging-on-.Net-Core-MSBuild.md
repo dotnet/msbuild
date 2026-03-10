@@ -30,7 +30,7 @@ If you encounter errors, see [Something's wrong in my build](Something's-wrong-i
 
 ## Tests
 
-`./build.sh --test`
+`./build.sh --test` runs all tests in the repo.
 
 # Getting .Net Core MSBuild binaries without building the code
 
@@ -53,7 +53,6 @@ For example, set `MSBUILDDEBUGONSTART` to `2`, then attach a debugger to the pro
 
 ```shell
 build.cmd # to have a full build first
-.\artifacts\msbuild-build-env.bat
 cd test\YOURTEST.Tests # cd to the test folder that contains the test csproj file
 dotnet test --filter "FullyQualifiedName~TESTNAME" # run individual test
 ```
@@ -64,7 +63,6 @@ Use developer command prompt for Visual Studio or put devenv on you PATH
 
 ```shell
 build.cmd # to have a full build first
-.\artifacts\msbuild-build-env.bat
 devenv MSBuild.slnx
 ```
 

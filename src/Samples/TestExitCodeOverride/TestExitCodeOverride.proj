@@ -1,0 +1,119 @@
+<Project>
+  <!--
+    Manual test project for ExitCodeOverriddenToIndicateErrors feature.
+    
+    Both targets run a command that exits with code 0 but produces output
+    in canonical error format, which MSBuild parses as an error. This causes
+    ExitCode to be overridden from 0 to -1 and triggers the new error messages.
+    
+    Usage (from repo root, after building with .\build.cmd):
+      artifacts\bin\bootstrap\core\dotnet.exe build src\Samples\TestExitCodeOverride\TestExitCodeOverride.proj /t:TestExec -v:diag
+      artifacts\bin\bootstrap\core\dotnet.exe build src\Samples\TestExitCodeOverride\TestExitCodeOverride.proj /t:TestToolTask -v:diag
+      artifacts\bin\bootstrap\core\dotnet.exe build src\Samples\TestExitCodeOverride\TestExitCodeOverride.proj /t:TestXamlToolTask -v:diag  (Windows only)
+      artifacts\bin\bootstrap\core\dotnet.exe build src\Samples\TestExitCodeOverride\TestExitCodeOverride.proj /t:TestAll -v:diag
+    
+    Expected results:
+      TestExec         -> MSB3077: The command "..." exited with return value 0, but errors were detected ...
+      TestToolTask     -> (low-importance) "The command exited with return value 0, but errors were detected ..."
+                          plus MSB6006 error from the base ToolTask.HandleTaskExecutionErrors
+      TestXamlToolTask -> MSB3725: The command "..." exited with return value 0, but errors were detected ...
+                          (Windows only, uses XamlTaskFactory with cmd.exe)
+  -->
+
+  <!-- ============================================================ -->
+  <!-- Test 1: Exec task                                            -->
+  <!--   The echo command outputs a canonical error and exits 0.    -->
+  <!--   Exec.HandleTaskExecutionErrors logs MSB3077.               -->
+  <!-- ============================================================ -->
+  <Target Name="TestExec">
+    <Message Text="=== Test 1: Exec task — canonical error on stdout, exit code 0 ===" Importance="high" />
+    <Exec Command="echo file.cs(1,1): error ERR001: This is a fake error from a tool that exited successfully"
+          ContinueOnError="true" />
+    <Message Text="=== Test 1 complete. Look for MSB3077 above. ===" Importance="high" />
+  </Target>
+
+  <!-- ============================================================ -->
+  <!-- Test 2: Basic ToolTask (inline task, no HandleTaskExecutionErrors override) -->
+  <!--   Uses RoslynCodeTaskFactory to define a ToolTask derivative  -->
+  <!--   that does NOT override HandleTaskExecutionErrors.           -->
+  <!--   Base class logs low-importance message + MSB6006 error.     -->
+  <!-- ============================================================ -->
+  <UsingTask TaskName="BasicToolTask"
+             TaskFactory="RoslynCodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+    <Task>
+      <Reference Include="$(MSBuildToolsPath)\Microsoft.Build.Utilities.Core.dll" />
+      <Code Type="Class" Language="cs">
+        <![CDATA[
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+
+public class BasicToolTask : ToolTask
+{
+    protected override string ToolName => 
+        System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+            System.Runtime.InteropServices.OSPlatform.Windows) ? "cmd.exe" : "sh";
+
+    protected override string GenerateFullPathToTool() =>
+        System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+            System.Runtime.InteropServices.OSPlatform.Windows)
+            ? System.IO.Path.Combine(
+                System.Environment.GetFolderPath(System.Environment.SpecialFolder.System), "cmd.exe")
+            : "/bin/sh";
+
+    protected override string GenerateCommandLineCommands() =>
+        System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(
+            System.Runtime.InteropServices.OSPlatform.Windows)
+            ? "/C echo file.cs(1,1): error ERR002: Fake error from basic ToolTask"
+            : "-c \"echo 'file.cs(1,1): error ERR002: Fake error from basic ToolTask'\"";
+}
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+  <Target Name="TestToolTask">
+    <Message Text="=== Test 2: Basic ToolTask — canonical error on stdout, exit code 0 ===" Importance="high" />
+    <BasicToolTask ContinueOnError="true" />
+    <Message Text="=== Test 2 complete. Look for MSB6006 above (and 'exited with return value 0' at -v:diag). ===" Importance="high" />
+  </Target>
+
+  <!-- ============================================================ -->
+  <!-- Test 3: XamlDataDrivenToolTask (via XamlTaskFactory)         -->
+  <!--   Uses XamlTaskFactory to define a task backed by cmd.exe.   -->
+  <!--   The command template echoes a canonical error and exits 0. -->
+  <!--   XamlDataDrivenToolTask.HandleTaskExecutionErrors logs      -->
+  <!--   MSB3725.                                                   -->
+  <!-- ============================================================ -->
+  <UsingTask TaskName="XamlToolTask"
+             TaskFactory="XamlTaskFactory"
+             AssemblyName="Microsoft.Build.Tasks.Core">
+    <Task>
+      <![CDATA[
+        <ProjectSchemaDefinitions xmlns="clr-namespace:Microsoft.Build.Framework.XamlTypes;assembly=Microsoft.Build.Framework"
+                                  xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                                  xmlns:sys="clr-namespace:System;assembly=mscorlib">
+          <Rule Name="XamlToolTask" ToolName="cmd.exe">
+            <StringProperty Name="CommandLineTemplate" />
+          </Rule>
+        </ProjectSchemaDefinitions>
+      ]]>
+    </Task>
+  </UsingTask>
+
+  <Target Name="TestXamlToolTask" Condition="'$(OS)' == 'Windows_NT'">
+    <Message Text="=== Test 3: XamlDataDrivenToolTask — canonical error on stdout, exit code 0 ===" Importance="high" />
+    <XamlToolTask CommandLineTemplate="echo file.cs(1,1): error ERR003: Fake error from XamlDataDrivenToolTask"
+                  EchoOff="true"
+                  ContinueOnError="true" />
+    <Message Text="=== Test 3 complete. Look for MSB3725 above. ===" Importance="high" />
+  </Target>
+
+  <!-- ============================================================ -->
+  <!-- Run all tests                                                -->
+  <!-- ============================================================ -->
+  <Target Name="TestAll" DependsOnTargets="TestExec;TestToolTask;TestXamlToolTask">
+    <Message Text="=== All tests complete ===" Importance="high" />
+  </Target>
+
+</Project>

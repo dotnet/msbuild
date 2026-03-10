@@ -455,11 +455,11 @@ namespace Microsoft.Build.Experimental
                 string[] msBuildServerOptions =
                 [
                     "/nologo",
-                    "/nodemode:8"
+                    NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcServerNode)
                 ];
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
-                using Process msbuildProcess = nodeLauncher.Start(_msbuildLocation, string.Join(" ", msBuildServerOptions), nodeId: 0);
+                using Process msbuildProcess = nodeLauncher.Start(new NodeLaunchData(_msbuildLocation, string.Join(" ", msBuildServerOptions)), nodeId: 0);
                 CommunicationsUtilities.Trace("Server started with PID: {0}", msbuildProcess?.Id);
             }
             catch (Exception ex)

@@ -1133,14 +1133,14 @@ namespace Microsoft.Build.Tasks
         /// canonicalization problem, so we just compare strings on the full paths.
         /// </summary>
         /// <remarks>
-        /// This method has a side effect of removing relative segments from the paths before comparison to avoid
+        /// This method has a side effect of canonicalizing the paths before comparison to avoid
         /// false negatives due to different path representations. This operation may throw in certain cases (e.g. invalid paths on Windows).
         /// TODO: refactor this task not to rely on this side effect for correct exception handling and caching
         /// </remarks>
         private static bool PathsAreIdentical(FileState source, FileState destination)
         {
-            source.Path = FrameworkFileUtilities.RemoveRelativeSegments(source.Path);
-            destination.Path = FrameworkFileUtilities.RemoveRelativeSegments(destination.Path);
+            source.Path = source.Path.GetCanonicalForm();
+            destination.Path = destination.Path.GetCanonicalForm();
             return source.Path == destination.Path;
         }
 
