@@ -393,6 +393,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 // Acknowledge so build-2 promotes
                 SendRawCommand("HEARTBEAT build-1");
 
+                // Confirm build-2 is promoted before registering build-3
+                // (the promotion happens asynchronously on the server)
+                string? hb2 = SendRawCommand("HEARTBEAT build-2");
+                hb2.ShouldStartWith("OK ");
+
                 // Third build should be queued (max=2)
                 SendRawCommand("REGISTER build-3 6");
                 string? hb3 = SendRawCommand("HEARTBEAT build-3");
