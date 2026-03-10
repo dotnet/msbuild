@@ -26,6 +26,7 @@ using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
@@ -38,8 +39,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
 {
     public class Expander_Tests
     {
+        private readonly ITestOutputHelper _output;
         private string _dateToParse = new DateTime(2010, 12, 25).ToString(CultureInfo.CurrentCulture);
         private static readonly string s_rootPathPrefix = NativeMethodsShared.IsWindows ? "C:\\" : Path.VolumeSeparatorChar.ToString();
+
+        public Expander_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         [Fact]
         public void ExpandAllIntoTaskItems0()
@@ -5321,7 +5328,7 @@ $(
         #region System.IO.File/Directory relative path resolution in -mt mode
 
         /// <summary>
-        /// TransientTestState that saves/restores <see cref="FileUtilities.CurrentThreadWorkingDirectory"/>.
+        /// TransientTestState that saves/restores <see cref="FrameworkFileUtilities.CurrentThreadWorkingDirectory"/>.
         /// </summary>
         private sealed class TransientThreadWorkingDirectory : TransientTestState
         {
@@ -5329,13 +5336,13 @@ $(
 
             public TransientThreadWorkingDirectory(string newWorkingDirectory)
             {
-                _originalValue = FileUtilities.CurrentThreadWorkingDirectory;
-                FileUtilities.CurrentThreadWorkingDirectory = newWorkingDirectory;
+                _originalValue = FrameworkFileUtilities.CurrentThreadWorkingDirectory;
+                FrameworkFileUtilities.CurrentThreadWorkingDirectory = newWorkingDirectory;
             }
 
             public override void Revert()
             {
-                FileUtilities.CurrentThreadWorkingDirectory = _originalValue;
+                FrameworkFileUtilities.CurrentThreadWorkingDirectory = _originalValue;
             }
         }
 
@@ -5343,7 +5350,7 @@ $(
         /// Helper: expand a property function expression with CurrentThreadWorkingDirectory set,
         /// simulating -mt mode where Environment.CurrentDirectory may point elsewhere.
         /// </summary>
-        private static string ExpandWithThreadWorkingDirectory(TestEnvironment env, string expression, string workingDir, string wrongDir = null)
+        private string ExpandWithThreadWorkingDirectory(TestEnvironment env, string expression, string workingDir, string wrongDir = null)
         {
             env.WithTransientTestState(new TransientThreadWorkingDirectory(workingDir));
             if (wrongDir != null)
@@ -5363,7 +5370,7 @@ $(
         [Fact]
         public void FileReadAllText_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5379,7 +5386,7 @@ $(
         [Fact]
         public void FileExists_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5392,10 +5399,10 @@ $(
             result.ShouldBe("True");
         }
 
-        [Fact]
+        [WindowsOnlyFact]
         public void FileGetAttributes_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5406,14 +5413,14 @@ $(
                 @"$([MSBuild]::BitwiseAnd(32,$([System.IO.File]::GetAttributes('attrs.txt'))))",
                 correctDir.Path, wrongDir.Path);
 
-            // FileAttributes.Archive = 32
+            // FileAttributes.Archive = 32 — Windows-specific attribute
             result.ShouldBe("32");
         }
 
         [Fact]
         public void FileGetCreationTime_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5430,7 +5437,7 @@ $(
         [Fact]
         public void FileGetLastWriteTime_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5447,7 +5454,7 @@ $(
         [Fact]
         public void FileGetLastAccessTime_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5468,7 +5475,7 @@ $(
         [Fact]
         public void DirectoryExists_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5484,7 +5491,7 @@ $(
         [Fact]
         public void DirectoryGetParent_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5500,7 +5507,7 @@ $(
         [Fact]
         public void DirectoryGetFiles_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5518,7 +5525,7 @@ $(
         [Fact]
         public void DirectoryGetDirectories_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5533,7 +5540,7 @@ $(
         [Fact]
         public void DirectoryGetLastWriteTime_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5550,7 +5557,7 @@ $(
         [Fact]
         public void DirectoryGetLastAccessTime_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5571,7 +5578,7 @@ $(
         [Fact]
         public void FileReadAllLines_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
@@ -5588,7 +5595,7 @@ $(
         [Fact]
         public void FileReadAllBytes_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
@@ -5604,7 +5611,7 @@ $(
         [Fact]
         public void FileWriteAllText_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
@@ -5620,7 +5627,7 @@ $(
         [Fact]
         public void FileAppendAllText_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
@@ -5636,7 +5643,7 @@ $(
         [Fact]
         public void FileDelete_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
@@ -5656,7 +5663,7 @@ $(
         [Fact]
         public void FileGetCreationTimeUtc_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
@@ -5674,7 +5681,7 @@ $(
         [Fact]
         public void FileGetLastWriteTimeUtc_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
@@ -5692,7 +5699,7 @@ $(
         [Fact]
         public void FileGetLastAccessTimeUtc_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
@@ -5714,7 +5721,7 @@ $(
         [Fact]
         public void DirectoryCreateDirectory_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
@@ -5729,7 +5736,7 @@ $(
         [Fact]
         public void DirectoryDelete_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
@@ -5751,7 +5758,7 @@ $(
         [Fact]
         public void FileReadAllText_AbsolutePath_WorksWithoutThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var dir = env.CreateFolder(createFolder: true);
 
             string filePath = Path.Combine(dir.Path, "abs.txt");
@@ -5767,7 +5774,7 @@ $(
         [Fact]
         public void FileExists_AbsolutePath_WorksWithoutThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var dir = env.CreateFolder(createFolder: true);
 
             string filePath = Path.Combine(dir.Path, "abs.txt");
@@ -5782,7 +5789,7 @@ $(
         [Fact]
         public void DirectoryExists_AbsolutePath_WorksWithoutThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var dir = env.CreateFolder(createFolder: true);
 
             string subDir = Path.Combine(dir.Path, "subdir");
@@ -5801,7 +5808,7 @@ $(
         [Fact]
         public void FileReadAllText_AbsolutePath_NotMangledByThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var otherDir = env.CreateFolder(createFolder: true);
 
@@ -5818,7 +5825,7 @@ $(
         [Fact]
         public void FileExists_AbsolutePath_NotMangledByThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var correctDir = env.CreateFolder(createFolder: true);
             var otherDir = env.CreateFolder(createFolder: true);
 
@@ -5838,7 +5845,7 @@ $(
         [Fact]
         public void FileCopy_TwoRelativePaths_BothResolveFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
@@ -5856,7 +5863,7 @@ $(
         [Fact]
         public void FileMove_TwoRelativePaths_BothResolveFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
@@ -5874,7 +5881,7 @@ $(
         [Fact]
         public void DirectoryMove_TwoRelativePaths_BothResolveFromThreadWorkingDirectory()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
@@ -5895,7 +5902,7 @@ $(
         [Fact]
         public void FileReadAllText_ParentTraversal_ResolvesCorrectly()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var rootDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5919,7 +5926,7 @@ $(
         [Fact]
         public void FileReadAllText_BackslashParentTraversal_ResolvesCorrectly()
         {
-            using var env = TestEnvironment.Create();
+            using var env = TestEnvironment.Create(_output);
             var rootDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 

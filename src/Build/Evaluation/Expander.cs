@@ -7,10 +7,8 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-#if NET
+#if !FEATURE_MSIOREDIST
 using System.IO;
-#else
-using Microsoft.IO;
 #endif
 using System.Linq;
 using System.Reflection;
@@ -33,6 +31,13 @@ using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
+
+#if FEATURE_MSIOREDIST
+// File is intentionally NOT aliased — all typeof() comparisons use fully-qualified
+// System.IO.File to match the types registered in AvailableStaticMethods.
+using Directory = Microsoft.IO.Directory;
+using Path = Microsoft.IO.Path;
+#endif
 
 #nullable disable
 
@@ -3955,6 +3960,8 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 // Second argument is a destination path for Copy, Move, Replace.
+                // CreateSymbolicLink is intentionally excluded — its arg1 (pathToTarget) is the
+                // symlink target and relative values are semantically meaningful (stored as-is).
                 if (argIndex == 1)
                 {
                     return string.Equals(methodName, "Copy", StringComparison.OrdinalIgnoreCase)
@@ -4045,20 +4052,24 @@ namespace Microsoft.Build.Evaluation
                                 argumentValue = FrameworkFileUtilities.FixFilePath(argumentValue);
                             }
 
+                            args[n] = EscapingUtilities.UnescapeAll(argumentValue);
+
                             // In -mt mode, resolve relative path arguments for File/Directory methods
                             // against the thread-local working directory instead of the process-global
                             // Environment.CurrentDirectory which may point to a different project's directory.
+                            // In multiprocess mode, CurrentThreadWorkingDirectory is null and
+                            // MakeFullPathFromThreadWorkingDirectory returns null — this is a no-op.
+                            // This must happen AFTER UnescapeAll so that the working directory path
+                            // (a real filesystem path) is not corrupted by MSBuild unescape processing.
                             if ((_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory))
                                 && IsFileOrDirectoryPathArgument(_methodMethodName, n))
                             {
-                                AbsolutePath? resolved = FileUtilities.MakeFullPathFromThreadWorkingDirectory(argumentValue);
+                                AbsolutePath? resolved = FrameworkFileUtilities.MakeFullPathFromThreadWorkingDirectory((string)args[n]);
                                 if (resolved.HasValue)
                                 {
-                                    argumentValue = resolved.GetValueOrDefault();
+                                    args[n] = (string)resolved.GetValueOrDefault();
                                 }
                             }
-
-                            args[n] = EscapingUtilities.UnescapeAll(argumentValue);
                         }
                         else
                         {

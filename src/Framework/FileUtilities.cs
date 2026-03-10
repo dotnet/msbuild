@@ -1,14 +1,15 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.IO;
+
 #if !TASKHOST
 using System.Threading;
 #endif
 
 #if NETFRAMEWORK && !TASKHOST
 using Path = Microsoft.IO.Path;
-#else
-using System.IO;
 #endif
 
 namespace Microsoft.Build.Framework
@@ -227,6 +228,53 @@ namespace Microsoft.Build.Framework
             return new AbsolutePath(FixFilePath(path.Value),
                 original: path.OriginalValue,
                 ignoreRootedCheck: true);
+        }
+
+        /// <summary>
+        /// If <see cref="CurrentThreadWorkingDirectory"/> is set and <paramref name="path"/> is relative,
+        /// resolves it to an <see cref="AbsolutePath"/> using the thread-local working directory as base.
+        /// Returns <c>null</c> when the path does not need resolution (no thread working directory,
+        /// empty path, or already fully qualified).
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Callers are responsible for calling <see cref="FixFilePath(string)"/>
+        /// BEFORE passing the path to this method. On Linux, backslash is a valid filename character
+        /// and Path.Combine/GetFullPath won't recognize ..\segments unless backslashes are first
+        /// normalized to forward slashes.
+        /// </para>
+        /// <para>
+        /// GetFullPath can throw for inputs with illegal path characters (e.g., wildcards).
+        /// In that case we fall back to a simple Path.Combine, which preserves the non-throwing
+        /// behavior of APIs like File.Exists and Directory.Exists.
+        /// </para>
+        /// </remarks>
+        internal static AbsolutePath? MakeFullPathFromThreadWorkingDirectory(string path)
+        {
+            string? workingDir = CurrentThreadWorkingDirectory;
+            if (string.IsNullOrEmpty(workingDir) || string.IsNullOrEmpty(path))
+            {
+                return null;
+            }
+
+            if (Path.IsPathFullyQualified(path))
+            {
+                return null;
+            }
+
+            // Use the 2-argument GetFullPath overload — it correctly handles drive-relative
+            // ("\foo") and current-directory-relative ("C:foo") paths on Windows by resolving
+            // them against the specified base directory, not the process CWD.
+            try
+            {
+                return new AbsolutePath(Path.GetFullPath(path, workingDir!));
+            }
+            catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
+            {
+                // For invalid paths (e.g., wildcards) fall back to a simple combination,
+                // preserving the non-throwing behavior of File.Exists/Directory.Exists.
+                return new AbsolutePath(path, new AbsolutePath(workingDir!));
+            }
         }
 #endif
     }
