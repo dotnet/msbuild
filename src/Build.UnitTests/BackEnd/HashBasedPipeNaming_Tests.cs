@@ -95,14 +95,9 @@ namespace Microsoft.Build.UnitTests
             pipeName.ShouldContain($"MSBuild-testhash-{currentPid}");
         }
 
-        [Fact]
+        [UnixOnlyFact]
         public void GetHashBasedPipeName_OnUnix_IsAbsolutePath()
         {
-            if (!NativeMethodsShared.IsUnixLike)
-            {
-                return;
-            }
-
             string pipeName = NamedPipeUtil.GetHashBasedPipeName("hash", 123);
             pipeName.ShouldStartWith("/tmp/");
         }
@@ -111,26 +106,16 @@ namespace Microsoft.Build.UnitTests
 
         #region FindNodesByHandshakeHash Tests
 
-        [Fact]
+        [WindowsOnlyFact]
         public void FindNodesByHandshakeHash_ReturnsEmptyOnWindows()
         {
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                return; // Only test on Windows
-            }
-
             var pids = NamedPipeUtil.FindNodesByHandshakeHash("nonexistent");
             pids.ShouldBeEmpty();
         }
 
-        [Fact]
+        [UnixOnlyFact]
         public void FindNodesByHandshakeHash_FindsMatchingPipeFiles()
         {
-            if (!NativeMethodsShared.IsUnixLike)
-            {
-                return; // Only works on Unix where pipes are files
-            }
-
             string testHash = $"test-{Guid.NewGuid():N}";
 
             // Create fake pipe files in /tmp
@@ -158,14 +143,9 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [UnixOnlyFact]
         public void FindNodesByHandshakeHash_IgnoresMalformedFileNames()
         {
-            if (!NativeMethodsShared.IsUnixLike)
-            {
-                return;
-            }
-
             string testHash = $"test-{Guid.NewGuid():N}";
             string pipeGood = $"/tmp/MSBuild-{testHash}-5555";
             string pipeBad = $"/tmp/MSBuild-{testHash}-notanumber";
@@ -187,14 +167,9 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [UnixOnlyFact]
         public void FindNodesByHandshakeHash_ReturnsEmptyWhenNoMatches()
         {
-            if (!NativeMethodsShared.IsUnixLike)
-            {
-                return;
-            }
-
             var pids = NamedPipeUtil.FindNodesByHandshakeHash($"nopipes-{Guid.NewGuid():N}");
             pids.ShouldBeEmpty();
         }

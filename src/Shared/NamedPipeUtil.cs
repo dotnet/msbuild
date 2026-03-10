@@ -54,7 +54,7 @@ namespace Microsoft.Build.Shared
 
             try
             {
-                foreach (string file in System.IO.Directory.GetFiles(pipeDir, $"MSBuild-{handshakeHash}-*"))
+                foreach (string file in System.IO.Directory.EnumerateFiles(pipeDir, $"MSBuild-{handshakeHash}-*"))
                 {
                     string fileName = Path.GetFileName(file);
                     if (fileName.StartsWith(prefix) && int.TryParse(fileName.Substring(prefix.Length), out int pid))
@@ -65,7 +65,8 @@ namespace Microsoft.Build.Shared
             }
             catch
             {
-                // Directory enumeration can fail; fall back to legacy.
+                // Directory enumeration can fail (e.g. permissions); return empty
+                // so the caller falls through to launching new nodes.
             }
 
             return pids;
