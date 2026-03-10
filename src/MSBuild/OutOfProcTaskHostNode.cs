@@ -114,9 +114,11 @@ namespace Microsoft.Build.CommandLine
         private NodeEngineShutdownReason _shutdownReason;
 
         /// <summary>
-        /// We set this flag to track a currently executing task
+        /// Count of tasks that are actively executing (not yielded).
+        /// When a task yields, this decrements. When it reacquires, this increments.
+        /// Used to determine if we can accept new TaskHostConfiguration packets.
         /// </summary>
-        private bool _isTaskExecuting;
+        private int _activeTaskCount;
 
 #if !CLR2COMPATIBILITY
         /// <summary>
@@ -204,8 +206,28 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Pending callback requests awaiting responses from the owning worker node.
         /// Key is the request ID, value is the TaskCompletionSource to signal when response arrives.
+        /// This is the fallback for backward compatibility when task context is not available.
         /// </summary>
         private readonly ConcurrentDictionary<int, TaskCompletionSource<INodePacket>> _pendingCallbackRequests = new();
+
+        /// <summary>
+        /// All active task execution contexts, keyed by task ID.
+        /// Supports concurrent task execution when tasks yield or await callbacks.
+        /// </summary>
+        private readonly ConcurrentDictionary<int, TaskExecutionContext> _taskContexts
+            = new ConcurrentDictionary<int, TaskExecutionContext>();
+
+        /// <summary>
+        /// The currently active task context for the calling thread.
+        /// Uses AsyncLocal to support concurrent task threads with proper context isolation.
+        /// </summary>
+        private readonly AsyncLocal<TaskExecutionContext> _currentTaskContext
+            = new AsyncLocal<TaskExecutionContext>();
+
+        /// <summary>
+        /// Counter for generating task IDs when configuration doesn't provide one.
+        /// </summary>
+        private int _nextLocalTaskId;
 
         /// <summary>
         /// The packet version negotiated with the owning worker node.
@@ -224,6 +246,18 @@ namespace Microsoft.Build.CommandLine
         /// True if the worker node's packet version is high enough, or if the feature is force-enabled via env var.
         /// </summary>
         private bool CallbacksSupported => _parentPacketVersion >= CallbacksMinPacketVersion || Traits.Instance.EnableTaskHostCallbacks;
+#endif
+
+        /// <summary>
+        /// Gets the effective configuration for the current task thread.
+        /// In concurrent-task mode (non-CLR2), uses the per-task context first.
+        /// Falls back to <see cref="_currentConfiguration"/>.
+        /// </summary>
+        private TaskHostConfiguration EffectiveConfiguration =>
+#if !CLR2COMPATIBILITY
+            GetCurrentConfiguration();
+#else
+            _currentConfiguration;
 #endif
 
         /// <summary>
@@ -273,8 +307,8 @@ namespace Microsoft.Build.CommandLine
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
-                return _currentConfiguration.ContinueOnError;
+                ErrorUtilities.VerifyThrow(EffectiveConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
+                return EffectiveConfiguration.ContinueOnError;
             }
         }
 
@@ -285,8 +319,8 @@ namespace Microsoft.Build.CommandLine
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
-                return _currentConfiguration.LineNumberOfTask;
+                ErrorUtilities.VerifyThrow(EffectiveConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
+                return EffectiveConfiguration.LineNumberOfTask;
             }
         }
 
@@ -297,8 +331,8 @@ namespace Microsoft.Build.CommandLine
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
-                return _currentConfiguration.ColumnNumberOfTask;
+                ErrorUtilities.VerifyThrow(EffectiveConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
+                return EffectiveConfiguration.ColumnNumberOfTask;
             }
         }
 
@@ -309,8 +343,8 @@ namespace Microsoft.Build.CommandLine
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
-                return _currentConfiguration.ProjectFileOfTask;
+                ErrorUtilities.VerifyThrow(EffectiveConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
+                return EffectiveConfiguration.ProjectFileOfTask;
             }
         }
 
@@ -635,7 +669,7 @@ namespace Microsoft.Build.CommandLine
         /// <returns>An <see cref="IReadOnlyDictionary{String, String}" /> containing the global properties of the current project.</returns>
         public IReadOnlyDictionary<string, string> GetGlobalProperties()
         {
-            return new Dictionary<string, string>(_currentConfiguration.GlobalProperties);
+            return new Dictionary<string, string>(EffectiveConfiguration.GlobalProperties);
         }
 
         #endregion
@@ -705,8 +739,8 @@ namespace Microsoft.Build.CommandLine
             {
                 get
                 {
-                    ErrorUtilities.VerifyThrow(_taskHost._currentConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
-                    return _taskHost._currentConfiguration.IsTaskInputLoggingEnabled;
+                    ErrorUtilities.VerifyThrow(_taskHost.EffectiveConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
+                    return _taskHost.EffectiveConfiguration.IsTaskInputLoggingEnabled;
                 }
             }
 
@@ -917,8 +951,16 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            // Request ID not found is expected if the connection was lost and the task thread
-            // already cleaned up via the finally block in SendCallbackRequestAndWaitForResponse.
+            // Try per-task context pending requests first, then fall back to global
+            foreach (var kvp in _taskContexts)
+            {
+                if (kvp.Value.PendingCallbackRequests.TryRemove(callbackPacket.RequestId, out TaskCompletionSource<INodePacket> tcsFromContext))
+                {
+                    tcsFromContext.TrySetResult(packet);
+                    return;
+                }
+            }
+
             if (_pendingCallbackRequests.TryRemove(callbackPacket.RequestId, out TaskCompletionSource<INodePacket> tcs))
             {
                 tcs.TrySetResult(packet);
@@ -954,14 +996,24 @@ namespace Microsoft.Build.CommandLine
         private TResponse SendCallbackRequestAndWaitForResponse<TResponse>(ITaskHostCallbackPacket request)
             where TResponse : class, INodePacket
         {
+            // Get context - use per-task pending requests if available
+            var context = GetCurrentTaskContext();
+            var pendingRequests = context?.PendingCallbackRequests ?? _pendingCallbackRequests;
+
+            // IMPORTANT: Request IDs must be globally unique across all task contexts
             int requestId = Interlocked.Increment(ref _nextCallbackRequestId);
             request.RequestId = requestId;
 
             var tcs = new TaskCompletionSource<INodePacket>(TaskCreationOptions.RunContinuationsAsynchronously);
-            _pendingCallbackRequests[requestId] = tcs;
+            pendingRequests[requestId] = tcs;
 
             try
             {
+                if (context is not null)
+                {
+                    context.State = TaskExecutionState.BlockedOnCallback;
+                }
+
                 // Send the request packet to the owning worker node
                 _nodeEndpoint.SendData(request);
 
@@ -980,25 +1032,131 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
-                _pendingCallbackRequests.TryRemove(requestId, out _);
+                pendingRequests.TryRemove(requestId, out _);
+
+                if (context is not null)
+                {
+                    context.State = TaskExecutionState.Executing;
+                }
             }
         }
 
         /// <summary>
         /// Marks this TaskHost as yielded so the scheduler can reuse it for nested tasks.
-        /// Called before sending a BuildProjectFile callback or explicit Yield.
+        /// Saves the current operating environment before yielding.
         /// </summary>
         private void YieldForCallback()
         {
+            // Save environment state before yielding
+            var context = GetCurrentTaskContext();
+            if (context is not null)
+            {
+                SaveOperatingEnvironment(context);
+            }
+
+            // Decrement active count to allow the parent to send a new TaskHostConfiguration
+            // for the nested build. The task is still running but is now "yielded" waiting
+            // for the callback response.
+            Interlocked.Decrement(ref _activeTaskCount);
             Interlocked.Increment(ref _yieldedTaskCount);
         }
 
         /// <summary>
         /// Marks this TaskHost as active again after a callback or Reacquire completes.
+        /// Restores the previously saved operating environment.
         /// </summary>
         private void ReacquireAfterCallback()
         {
             Interlocked.Decrement(ref _yieldedTaskCount);
+            Interlocked.Increment(ref _activeTaskCount);
+
+            // Restore environment state after reacquiring
+            var context = GetCurrentTaskContext();
+            if (context is not null)
+            {
+                RestoreOperatingEnvironment(context);
+            }
+        }
+
+        /// <summary>
+        /// Gets the task execution context for the current thread.
+        /// </summary>
+        private TaskExecutionContext GetCurrentTaskContext()
+        {
+            return _currentTaskContext.Value;
+        }
+
+        /// <summary>
+        /// Gets the configuration for the currently executing task on this thread.
+        /// Uses the thread-local task context if available, falling back to the global configuration.
+        /// </summary>
+        private TaskHostConfiguration GetCurrentConfiguration()
+        {
+            var context = GetCurrentTaskContext();
+            return context?.Configuration ?? _currentConfiguration;
+        }
+
+        /// <summary>
+        /// Creates a new task execution context for the given configuration.
+        /// </summary>
+        private TaskExecutionContext CreateTaskContext(TaskHostConfiguration configuration)
+        {
+            int taskId = Interlocked.Increment(ref _nextLocalTaskId);
+
+            var context = new TaskExecutionContext(taskId, configuration);
+
+            if (!_taskContexts.TryAdd(taskId, context))
+            {
+                context.Dispose();
+                throw new InvalidOperationException(
+                    $"Task ID {taskId} already exists in TaskHost.");
+            }
+
+            return context;
+        }
+
+        /// <summary>
+        /// Removes and disposes a task execution context.
+        /// </summary>
+        private void RemoveTaskContext(int taskId)
+        {
+            if (_taskContexts.TryRemove(taskId, out var context))
+            {
+                context.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Saves the current operating environment to the task context.
+        /// Called before yielding or blocking on a callback that allows other tasks to run.
+        /// </summary>
+        internal void SaveOperatingEnvironment(TaskExecutionContext context)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(context, nameof(context));
+
+            context.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
+            context.SavedEnvironment = new Dictionary<string, string>(
+                CommunicationsUtilities.GetEnvironmentVariables(),
+                StringComparer.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Restores the previously saved operating environment from the task context.
+        /// </summary>
+        internal void RestoreOperatingEnvironment(TaskExecutionContext context)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(context, nameof(context));
+
+            if (context.SavedCurrentDirectory is null || context.SavedEnvironment is null)
+            {
+                return;
+            }
+
+            CommunicationsUtilities.SetEnvironment(context.SavedEnvironment);
+            NativeMethodsShared.SetCurrentDirectory(context.SavedCurrentDirectory);
+
+            context.SavedCurrentDirectory = null;
+            context.SavedEnvironment = null;
         }
 #endif
 
@@ -1009,20 +1167,31 @@ namespace Microsoft.Build.CommandLine
         private void HandleTaskHostConfiguration(TaskHostConfiguration taskHostConfiguration)
         {
 #if !CLR2COMPATIBILITY
-            // Allow new configuration when the existing task is yielded (blocked on BuildProjectFile callback
-            // or explicit Yield). This enables nested build scenarios where the child build's tasks can run
-            // on the same TaskHost process.
-            ErrorUtilities.VerifyThrow(!_isTaskExecuting || _yieldedTaskCount > 0,
-                "Why are we getting a TaskHostConfiguration packet while a task is actively executing? yieldedTaskCount={0}",
-                _yieldedTaskCount);
+            // Allow new configuration when no task is actively executing.
+            // A task that is yielded (blocked on BuildProjectFile callback) does NOT prevent
+            // a new task from starting - this enables nested build scenarios.
+            ErrorUtilities.VerifyThrow(_activeTaskCount == 0,
+                "Why are we getting a TaskHostConfiguration packet while a task is actively executing? activeTaskCount={0}",
+                _activeTaskCount);
 #else
-            ErrorUtilities.VerifyThrow(!_isTaskExecuting, "Why are we getting a TaskHostConfiguration packet while we're still executing a task?");
+            ErrorUtilities.VerifyThrow(_activeTaskCount == 0, "Why are we getting a TaskHostConfiguration packet while we're still executing a task?");
 #endif
             _currentConfiguration = taskHostConfiguration;
+
+#if !CLR2COMPATIBILITY
+            // Create task execution context for this task
+            var context = CreateTaskContext(taskHostConfiguration);
+            context.State = TaskExecutionState.Executing;
+#endif
 
             // Kick off the task running thread.
             _taskRunnerThread = new Thread(new ParameterizedThreadStart(RunTask));
             _taskRunnerThread.Name = "Task runner for task " + taskHostConfiguration.TaskName;
+
+#if !CLR2COMPATIBILITY
+            context.ExecutingThread = _taskRunnerThread;
+#endif
+
             _taskRunnerThread.Start(taskHostConfiguration);
         }
 
@@ -1031,7 +1200,10 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void CompleteTask()
         {
-            ErrorUtilities.VerifyThrow(!_isTaskExecuting, "The task should be done executing before CompleteTask.");
+            // With multiple concurrent tasks (nested BuildProjectFile), we cannot assert
+            // that no task is executing here. The task that completed set _taskCompletePacket
+            // and signaled _taskCompleteEvent, but another task may have reacquired from yield
+            // by the time this method runs.
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
                 TaskHostTaskComplete taskCompletePacketToSend;
@@ -1046,7 +1218,16 @@ namespace Microsoft.Build.CommandLine
                 _nodeEndpoint.SendData(taskCompletePacketToSend);
             }
 
+#if !CLR2COMPATIBILITY
+            // Only clear _currentConfiguration when no tasks remain (active or yielded).
+            // A yielded task still needs the config for logging via EffectiveConfiguration.
+            if (_activeTaskCount == 0 && _yieldedTaskCount == 0)
+            {
+                _currentConfiguration = null;
+            }
+#else
             _currentConfiguration = null;
+#endif
 
             // If the task has been canceled, the event will still be set.
             // If so, now that we've completed the task, we want to shut down
@@ -1076,7 +1257,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     // Don't bother aborting the task if it has passed the actual user task Execute()
                     // It means we're already in the process of shutting down - Wait for the taskCompleteEvent to be set instead.
-                    if (_isTaskExecuting)
+                    if (_activeTaskCount > 0)
                     {
 #if FEATURE_THREAD_ABORT
                         // The thread will be terminated crudely so our environment may be trashed but it's ok since we are
@@ -1093,7 +1274,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void HandleNodeBuildComplete(NodeBuildComplete buildComplete)
         {
-            ErrorUtilities.VerifyThrow(!_isTaskExecuting, "We should never have a task in the process of executing when we receive NodeBuildComplete.");
+            ErrorUtilities.VerifyThrow(_activeTaskCount == 0, "We should never have a task in the process of executing when we receive NodeBuildComplete.");
 
             // Sidecar TaskHost will persist after the build is done.
             if (_nodeReuse)
@@ -1190,6 +1371,19 @@ namespace Microsoft.Build.CommandLine
                                 "TaskHost lost connection to owning worker node during callback."));
                         }
                     }
+
+                    // Also fail per-task context pending requests
+                    foreach (var contextKvp in _taskContexts)
+                    {
+                        foreach (var reqKvp in contextKvp.Value.PendingCallbackRequests)
+                        {
+                            if (contextKvp.Value.PendingCallbackRequests.TryRemove(reqKvp.Key, out TaskCompletionSource<INodePacket> ctxTcs))
+                            {
+                                ctxTcs.TrySetException(new InvalidOperationException(
+                                    "TaskHost lost connection to owning worker node during callback."));
+                            }
+                        }
+                    }
 #endif
 
                     _shutdownEvent.Set();
@@ -1208,9 +1402,28 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void RunTask(object state)
         {
-            _isTaskExecuting = true;
+            Interlocked.Increment(ref _activeTaskCount);
             OutOfProcTaskHostTaskResult taskResult = null;
             TaskHostConfiguration taskConfiguration = state as TaskHostConfiguration;
+
+#if !CLR2COMPATIBILITY
+            // Set the current task context for this thread
+            TaskExecutionContext taskContext = null;
+            foreach (var kvp in _taskContexts)
+            {
+                if (kvp.Value.Configuration == taskConfiguration)
+                {
+                    taskContext = kvp.Value;
+                    break;
+                }
+            }
+
+            if (taskContext is not null)
+            {
+                _currentTaskContext.Value = taskContext;
+            }
+#endif
+
             IDictionary<string, TaskParameter> taskParams = taskConfiguration.TaskParameters;
 
             // We only really know the values of these variables for sure once we see what we received from the owning worker node
@@ -1281,7 +1494,7 @@ namespace Microsoft.Build.CommandLine
             {
                 try
                 {
-                    _isTaskExecuting = false;
+                    Interlocked.Decrement(ref _activeTaskCount);
 
                     IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
@@ -1330,6 +1543,17 @@ namespace Microsoft.Build.CommandLine
 
                     // Call CleanupTask to unload any domains and other necessary cleanup in the taskWrapper
                     _taskWrapper.CleanupTask();
+
+#if !CLR2COMPATIBILITY
+                    // Mark context as completed and clean up
+                    if (taskContext is not null)
+                    {
+                        taskContext.State = TaskExecutionState.Completed;
+                        taskContext.CompletedEvent.Set();
+                        _currentTaskContext.Value = null;
+                        RemoveTaskContext(taskContext.TaskId);
+                    }
+#endif
 
                     // The task has now fully completed executing
                     _taskCompleteEvent.Set();
@@ -1525,7 +1749,7 @@ namespace Microsoft.Build.CommandLine
                     return;
                 }
 
-                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
+                LogMessagePacketBase logMessage = new(new KeyValuePair<int, BuildEventArgs>(EffectiveConfiguration.NodeId, e));
                 _nodeEndpoint.SendData(logMessage);
             }
         }
@@ -1535,13 +1759,13 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void LogMessageFromResource(MessageImportance importance, string messageResource, params object[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration when we're trying to log messages!");
+            ErrorUtilities.VerifyThrow(EffectiveConfiguration != null, "We should never have a null configuration when we're trying to log messages!");
 
             // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
             BuildMessageEventArgs message = new BuildMessageEventArgs(
                                                     ResourceUtilities.FormatString(AssemblyResources.GetString(messageResource), messageArgs),
                                                     null,
-                                                    _currentConfiguration.TaskName,
+                                                    EffectiveConfiguration.TaskName,
                                                     importance);
 
             LogMessageEvent(message);
@@ -1552,7 +1776,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void LogWarningFromResource(string messageResource, params object[] messageArgs)
         {
-            ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration when we're trying to log warnings!");
+            ErrorUtilities.VerifyThrow(EffectiveConfiguration != null, "We should never have a null configuration when we're trying to log warnings!");
 
             // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
             BuildWarningEventArgs warning = new BuildWarningEventArgs(
@@ -1565,7 +1789,7 @@ namespace Microsoft.Build.CommandLine
                                                     0,
                                                     ResourceUtilities.FormatString(AssemblyResources.GetString(messageResource), messageArgs),
                                                     null,
-                                                    _currentConfiguration.TaskName);
+                                                    EffectiveConfiguration.TaskName);
 
             LogWarningEvent(warning);
         }
@@ -1575,7 +1799,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void LogErrorFromResource(string messageResource)
         {
-            ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration when we're trying to log errors!");
+            ErrorUtilities.VerifyThrow(EffectiveConfiguration != null, "We should never have a null configuration when we're trying to log errors!");
 
             // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
             BuildErrorEventArgs error = new BuildErrorEventArgs(
@@ -1588,7 +1812,7 @@ namespace Microsoft.Build.CommandLine
                                                     0,
                                                     AssemblyResources.GetString(messageResource),
                                                     null,
-                                                    _currentConfiguration.TaskName);
+                                                    EffectiveConfiguration.TaskName);
 
             LogErrorEvent(error);
         }

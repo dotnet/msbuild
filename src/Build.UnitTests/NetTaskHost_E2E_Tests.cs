@@ -297,5 +297,39 @@ namespace Microsoft.Build.Engine.UnitTests
             testTaskOutput.ShouldContain("The task is executed in process: MSBuild");
             testTaskOutput.ShouldContain("/nodereuse:True");
         }
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHost_TaskHostProcessReuse_SameProcessForNestedBuild()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+
+            var coreDirectory = Path.Combine(RunnerUtilities.BootstrapRootPath, "core");
+            env.SetEnvironmentVariable("DOTNET_MSBUILD_SDK_RESOLVER_CLI_DIR", coreDirectory);
+
+            string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTaskHostReuse", "TestNetTaskHostReuse.csproj");
+
+            string testTaskOutput = RunnerUtilities.ExecBootstrapedMSBuild($"{testProjectPath} -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild} -t:TestTaskHostReuse", out bool successTestTask);
+
+            _output.WriteLine(testTaskOutput);
+
+            successTestTask.ShouldBeTrue();
+
+            // Both the parent task and child task should report TASKHOST_PID
+            testTaskOutput.ShouldContain("TASKHOST_PID=");
+            testTaskOutput.ShouldContain("PARENT_TASKHOST_PID=");
+            testTaskOutput.ShouldContain("CHILD_TASKHOST_PID=");
+
+            // Extract PIDs from output and verify they match (same process reused)
+            var parentPidMatch = System.Text.RegularExpressions.Regex.Match(testTaskOutput, @"PARENT_TASKHOST_PID=(\d+)");
+            var childPidMatch = System.Text.RegularExpressions.Regex.Match(testTaskOutput, @"CHILD_TASKHOST_PID=(\d+)");
+
+            parentPidMatch.Success.ShouldBeTrue("Should find PARENT_TASKHOST_PID in output");
+            childPidMatch.Success.ShouldBeTrue("Should find CHILD_TASKHOST_PID in output");
+
+            string parentPid = parentPidMatch.Groups[1].Value;
+            string childPid = childPidMatch.Groups[1].Value;
+
+            parentPid.ShouldBe(childPid, $"Parent PID ({parentPid}) and child PID ({childPid}) should match — same TaskHost process should be reused for nested build");
+        }
     }
 }

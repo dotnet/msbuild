@@ -151,6 +151,7 @@
     <Compile Include="NodeEndpointOutOfProcTaskHost.cs" />
     <Compile Include="ProjectSchemaValidationHandler.cs" />
     <Compile Include="OutOfProcTaskHostNode.cs" />
+    <Compile Include="TaskExecutionContext.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapperBase.cs" />
     <Compile Include="OutOfProcTaskAppDomainWrapper.cs" />
     <Compile Include="PerformanceLogEventListener.cs" />
