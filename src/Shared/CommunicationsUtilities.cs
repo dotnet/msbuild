@@ -460,6 +460,11 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
+        /// Gets the timeout used when connecting to a possibly-already-in-use node when pipes are implemented over sockets.
+        /// </summary>
+        internal static int BlockedNodeConnectionTimeout = GetIntegerVariableOrDefault("MSBUILDBLOCKEDNODECONNECTIONTIMEOUT", 50);
+
+        /// <summary>
         /// Get environment block.
         /// </summary>
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
@@ -880,7 +885,7 @@ namespace Microsoft.Build.Internal
                 // calling this method does not apply on UNIX domain socket-based
                 // implementations of PipeStream.
                 // https://github.com/dotnet/corefx/issues/28791
-                timeout = Math.Max(timeout, 50);
+                timeout = Math.Max(timeout, BlockedNodeConnectionTimeout);
 
                 // A legacy MSBuild.exe won't try to connect to MSBuild running
                 // in a dotnet host process, so we can read the bytes simply.
