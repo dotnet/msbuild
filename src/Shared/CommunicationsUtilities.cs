@@ -462,7 +462,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Gets the timeout used when connecting to a possibly-already-in-use node when pipes are implemented over sockets.
         /// </summary>
-        internal static int BlockedNodeConnectionTimeout = GetIntegerVariableOrDefault("MSBUILDBLOCKEDNODECONNECTIONTIMEOUT", 50);
+        internal static int BlockedNodeConnectionTimeout = GetIntegerVariableOrDefault("MSBUILDBLOCKEDNODECONNECTIONTIMEOUT", 1_000);
 
         /// <summary>
         /// Get environment block.
