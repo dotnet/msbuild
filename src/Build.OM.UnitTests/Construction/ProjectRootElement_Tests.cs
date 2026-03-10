@@ -1982,5 +1982,50 @@ true, true, true)]
         {
             Helpers.VerifyAssertLineByLine(expected, actual, false);
         }
+
+        /// <summary>
+        /// Saving a project to a file should produce a trailing newline (issue #9697).
+        /// </summary>
+        [Fact]
+        public void SaveToFileEndsWithNewline()
+        {
+            ProjectRootElement project = ProjectRootElement.Create();
+            project.AddProperty("Foo", "Bar");
+
+            string file = null;
+            try
+            {
+                file = FileUtilities.GetTemporaryFileName();
+                project.Save(file);
+
+                string content = File.ReadAllText(file);
+                Assert.True(content.EndsWith("\n"), $"Saved project file should end with a newline, but ended with: character code {(int)content[content.Length - 1]} - {content[content.Length - 1]}");
+            }
+            finally
+            {
+                if (file != null)
+                {
+                    File.Delete(file);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Saving a project to a TextWriter should produce a trailing newline (issue #9697).
+        /// </summary>
+        [Fact]
+        public void SaveToTextWriterEndsWithNewline()
+        {
+            ProjectRootElement project = ProjectRootElement.Create();
+            project.AddProperty("Foo", "Bar");
+
+            var builder = new StringBuilder();
+            using var writer = new StringWriter(builder);
+
+            project.Save(writer);
+
+            string content = builder.ToString();
+            Assert.True(content.EndsWith("\n"), $"Saved project content should end with a newline, but ended with: character code {(int)content[content.Length - 1]} - {content[content.Length - 1]}");
+        }
     }
 }
