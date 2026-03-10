@@ -382,10 +382,16 @@ namespace Microsoft.Build.CommandLine
                 }
             }
 
-            if (found && budget <= 0)
+            if (found)
             {
-                // Default budget: 80% of logical processors
-                budget = Math.Max(1, (int)(Environment.ProcessorCount * 0.8));
+                if (budget <= 0)
+                {
+                    // Default budget: 80% of logical processors
+                    budget = Math.Max(1, (int)(Environment.ProcessorCount * 0.8));
+                }
+
+                maxBuilds = Math.Max(1, maxBuilds);
+                minBuilds = Math.Max(1, minBuilds);
             }
 
             return found;

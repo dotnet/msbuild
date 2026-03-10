@@ -48,7 +48,7 @@ namespace Microsoft.Build.Execution
     /// This class is the public entry point for executing builds.
     /// </summary>
     [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Refactoring at the end of Beta1 is not appropriate.")]
-    public class BuildManager : INodePacketHandler, IBuildComponentHost, IDisposable
+    public partial class BuildManager : INodePacketHandler, IBuildComponentHost, IDisposable
     {
         // TODO: Figure out a more elegant way to do this.
         //       The rationale for this is that we can detect during design-time builds in the Evaluator (which populates this) that the project cache will be used so that we don't
@@ -267,13 +267,7 @@ namespace Microsoft.Build.Execution
 
         private bool _hasProjectCacheServiceInitializedVsScenario;
 
-#if NET
-        /// <summary>
-        /// Client for communicating with an external build coordinator process.
-        /// If a coordinator is running, it dynamically adjusts MaxNodeCount.
-        /// </summary>
-        private BuildCoordinatorClient? _coordinatorClient;
-#endif
+
 
 #if DEBUG
         /// <summary>
@@ -695,8 +689,6 @@ namespace Microsoft.Build.Execution
                 _noNodesActiveEvent!.Set();
             }
 
-            // Try to register with external build coordinator (if running).
-            // This may block if the coordinator queues this build.
 #if NET
             TryRegisterWithCoordinator();
 #endif
@@ -1040,10 +1032,8 @@ namespace Microsoft.Build.Execution
 
             var exceptionsThrownInEndBuild = false;
 
-            // Unregister from coordinator early so other builds can scale up
 #if NET
-            _coordinatorClient?.Dispose();
-            _coordinatorClient = null;
+            UnregisterFromCoordinator();
 #endif
 
             try
@@ -2290,10 +2280,8 @@ namespace Microsoft.Build.Execution
                 _executionCancellationTokenSource?.Cancel();
 
                 // If we are aborting, we will NOT reuse the nodes because their state may be compromised by attempts to shut down while the build is in-progress.
-                // When a coordinator is managing this build, disable reuse so nodes exit immediately
-                // instead of lingering — the coordinator handles cross-build node lifecycle.
 #if NET
-                bool enableReuse = !abort && _buildParameters!.EnableNodeReuse && _coordinatorClient == null;
+                bool enableReuse = !abort && _buildParameters!.EnableNodeReuse && !IsCoordinatorManaged;
 #else
                 bool enableReuse = !abort && _buildParameters!.EnableNodeReuse;
 #endif
@@ -2350,53 +2338,6 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Method called to reset the state of the system after a build.
         /// </summary>
-        /// <summary>
-        /// Attempts to register this build with an external build coordinator process.
-        /// If a coordinator is running, it may adjust MaxNodeCount or queue the build.
-        /// If no coordinator is running, does nothing and the build proceeds normally.
-        /// </summary>
-#if NET
-        private void TryRegisterWithCoordinator()
-        {
-            if (_buildParameters == null)
-            {
-                return;
-            }
-
-            var client = new BuildCoordinatorClient();
-            int requestedNodes = _buildParameters.MaxNodeCount;
-
-            bool registered = client.TryRegister(
-                requestedNodes,
-                out int grantedNodes,
-                onQueuePositionChanged: (position, total, waitSec) =>
-                {
-                    // Log queue position updates to console
-                    Console.Error.WriteLine($"  [coordinator] Queued: position {position}/{total}, waiting {waitSec}s");
-                },
-                ct: _executionCancellationTokenSource?.Token ?? CancellationToken.None);
-
-            if (registered)
-            {
-                _coordinatorClient = client;
-
-                if (grantedNodes != requestedNodes)
-                {
-                    _buildParameters.MaxNodeCount = grantedNodes;
-                    Console.Error.WriteLine($"  [coordinator] Node budget: {grantedNodes} (requested {requestedNodes})");
-                }
-
-                // Start heartbeats for liveness so the coordinator can reap stale builds.
-                client.StartHeartbeat();
-            }
-            else
-            {
-                // No coordinator found — dispose client and run normally
-                client.Dispose();
-            }
-        }
-#endif
-
         private void Reset()
         {
             _nodeManager?.UnregisterPacketHandler(NodePacketType.BuildRequestBlocker);

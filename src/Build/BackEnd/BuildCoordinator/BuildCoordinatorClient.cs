@@ -29,9 +29,17 @@ namespace Microsoft.Build.BackEnd
         internal string BuildId => _buildId;
 
         internal BuildCoordinatorClient()
+            : this(BuildCoordinator.GetPipeName())
+        {
+        }
+
+        /// <summary>
+        /// Internal constructor for tests — allows connecting to a coordinator on a custom pipe name.
+        /// </summary>
+        internal BuildCoordinatorClient(string pipeName)
         {
             _buildId = $"{Environment.ProcessId}-{DateTime.UtcNow.Ticks}";
-            _pipeName = BuildCoordinator.GetPipeName();
+            _pipeName = pipeName;
         }
 
         /// <summary>
@@ -128,8 +136,10 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Start periodic heartbeats for liveness so the coordinator can detect stale builds.
-        /// Budget changes from the coordinator are acknowledged but not acted on mid-build;
-        /// rebalanced budgets take effect when the next build registers.
+        /// The heartbeat response includes the current budget, which is stored in GrantedNodes.
+        /// The coordinator uses heartbeat acknowledgment to gate promotion of queued builds,
+        /// but BuildManager does not change MaxNodeCount mid-build — the acknowledged budget
+        /// only matters for the coordinator's internal bookkeeping.
         /// </summary>
         internal void StartHeartbeat()
         {

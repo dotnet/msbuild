@@ -24,11 +24,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
     public class BuildCoordinator_Tests : IDisposable
     {
         private readonly ITestOutputHelper _output;
+        private readonly TestEnvironment _env;
         private readonly string _testPipeName;
 
         public BuildCoordinator_Tests(ITestOutputHelper output)
         {
             _output = output;
+            _env = TestEnvironment.Create(output);
             // Use a unique pipe name per test run to avoid collisions
             _testPipeName = NativeMethodsShared.IsUnixLike
                 ? $"/tmp/MSBuild-CoordinatorTest-{Guid.NewGuid():N}"
@@ -37,6 +39,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         public void Dispose()
         {
+            _env.Dispose();
             // Clean up pipe file on Unix
             if (NativeMethodsShared.IsUnixLike && File.Exists(_testPipeName))
             {
@@ -50,7 +53,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void FirstBuild_GetsFullBudget()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
@@ -72,7 +75,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void FirstBuild_GetsCappedAtTotalBudget()
         {
-            using var coordinator = new BuildCoordinator(8, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(8, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
@@ -94,7 +97,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void SecondBuild_GetsQueued()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 1);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 1);
             coordinator.Start();
 
             try
@@ -121,7 +124,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void Heartbeat_ReturnsCurrentBudget()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
@@ -144,7 +147,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void Heartbeat_ForQueuedBuild_ReturnsQueuePosition()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 1);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 1);
             coordinator.Start();
 
             try
@@ -165,7 +168,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void Unregister_RemovesActiveBuild()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
@@ -189,7 +192,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void Unregister_PromotesQueuedBuild()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 1);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 1);
             coordinator.Start();
 
             try
@@ -216,7 +219,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void BudgetRebalances_WhenSecondBuildJoins()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
@@ -250,7 +253,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void BudgetIncreases_WhenBuildLeaves()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
@@ -279,7 +282,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void Status_ReturnsCorrectSummary()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 2);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 2);
             coordinator.Start();
 
             try
@@ -305,7 +308,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void Shutdown_StopsCoordinator()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             string? response = SendRawCommand("SHUTDOWN");
@@ -318,7 +321,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void UnknownCommand_ReturnsError()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
@@ -336,7 +339,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void Register_WithInvalidArgs_ReturnsError()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
@@ -354,7 +357,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void EpochGating_PreventsPromotionBeforeAcknowledgment()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
@@ -382,7 +385,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void MaxConcurrency_EnforcesLimit()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 2);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 2);
             coordinator.Start();
 
             try
@@ -418,7 +421,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void FairShare_DistributesBudgetEvenly()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
@@ -453,7 +456,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void FairShare_CapsAtRequestedNodes()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
@@ -517,12 +520,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void Client_RegistersWithCoordinator()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
             {
-                using var client = new BuildCoordinatorClient();
+                using var client = new BuildCoordinatorClient(_testPipeName);
                 bool registered = client.TryRegister(6, out int granted);
 
                 registered.ShouldBeTrue();
@@ -537,14 +540,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void Client_HeartbeatUpdatesbudget()
+        public void Client_HeartbeatUpdatesBudget()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
             {
-                using var client1 = new BuildCoordinatorClient();
+                using var client1 = new BuildCoordinatorClient(_testPipeName);
                 client1.TryRegister(12, out int granted1);
                 granted1.ShouldBe(12);
 
@@ -568,12 +571,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void Client_UnregisterCleansUp()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
             {
-                var client = new BuildCoordinatorClient();
+                var client = new BuildCoordinatorClient(_testPipeName);
                 client.TryRegister(6, out _);
                 client.IsConnected.ShouldBeTrue();
 
@@ -592,13 +595,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void Client_QueuedBuild_BlocksUntilPromoted()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 1);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 1);
             coordinator.Start();
 
             try
             {
                 // First build registers immediately
-                using var client1 = new BuildCoordinatorClient();
+                using var client1 = new BuildCoordinatorClient(_testPipeName);
                 client1.TryRegister(6, out _);
 
                 // Start heartbeats so client1 acknowledges epochs
@@ -606,7 +609,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 // Second build should block in queue
                 var queuePositions = new List<int>();
-                using var client2 = new BuildCoordinatorClient();
+                using var client2 = new BuildCoordinatorClient(_testPipeName);
 
                 var registerTask = Task.Run(() =>
                 {
@@ -642,16 +645,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void Client_QueuedBuild_CancellationUnregisters()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 1);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 1);
             coordinator.Start();
 
             try
             {
-                using var client1 = new BuildCoordinatorClient();
+                using var client1 = new BuildCoordinatorClient(_testPipeName);
                 client1.TryRegister(6, out _);
 
                 using var cts = new CancellationTokenSource();
-                using var client2 = new BuildCoordinatorClient();
+                using var client2 = new BuildCoordinatorClient(_testPipeName);
 
                 var registerTask = Task.Run(() =>
                     client2.TryRegister(6, out _, ct: cts.Token));
@@ -685,14 +688,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             pipeName.ShouldContain(Environment.UserName);
         }
 
-        [Fact]
+        [UnixOnlyFact]
         public void GetPipeName_OnUnix_IsAbsolutePath()
         {
-            if (!NativeMethodsShared.IsUnixLike)
-            {
-                return; // Skip on Windows
-            }
-
             string pipeName = BuildCoordinator.GetPipeName();
             pipeName.ShouldStartWith("/tmp/");
         }
@@ -704,7 +702,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void StalenessReaper_ReapsDeadBuild()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
+            coordinator.StaleHeartbeatSeconds = 2;
+            coordinator.ReaperIntervalSeconds = 1;
             coordinator.Start();
 
             try
@@ -719,9 +719,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 string? status1 = SendRawCommand("STATUS");
                 status1!.ShouldContain("active=1");
 
-                // Wait for the staleness reaper to detect it (10s stale + 5s reap interval)
-                // The reaper checks every 5s and requires heartbeat to be stale for 10s
-                Thread.Sleep(18000);
+                // Wait for the staleness reaper to detect it (2s stale + 1s reap interval + margin)
+                Thread.Sleep(5000);
 
                 // Build should have been reaped
                 string? status2 = SendRawCommand("STATUS");
@@ -736,7 +735,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void StalenessReaper_DoesNotReapLiveBuild()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 3);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
+            coordinator.StaleHeartbeatSeconds = 2;
+            coordinator.ReaperIntervalSeconds = 1;
             coordinator.Start();
 
             try
@@ -748,7 +749,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 // Wait past the stale threshold but keep heartbeating
                 for (int i = 0; i < 4; i++)
                 {
-                    Thread.Sleep(3000);
+                    Thread.Sleep(1000);
                     SendRawCommand($"HEARTBEAT {liveBuildId}");
                 }
 
@@ -765,7 +766,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void StalenessReaper_PromotesQueuedAfterReap()
         {
-            using var coordinator = new BuildCoordinator(12, maxConcurrentBuilds: 1);
+            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 1);
+            coordinator.StaleHeartbeatSeconds = 2;
+            coordinator.ReaperIntervalSeconds = 1;
             coordinator.Start();
 
             try
@@ -783,7 +786,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 status1!.ShouldContain("active=1");
 
                 // Wait for reaper to kill the dead build and promote the queued one
-                Thread.Sleep(18000);
+                Thread.Sleep(5000);
 
                 // Live build should now be active
                 string? hb = SendRawCommand($"HEARTBEAT {liveBuildId}");
@@ -805,7 +808,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void ConcurrentRegistrations_AllSucceed()
         {
-            using var coordinator = new BuildCoordinator(24, maxConcurrentBuilds: 5);
+            using var coordinator = CreateCoordinator(24, maxConcurrentBuilds: 5);
             coordinator.Start();
 
             try
@@ -840,11 +843,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
         #region Helpers
 
         /// <summary>
-        /// Send a raw command to the coordinator using the well-known pipe name.
+        /// Create a BuildCoordinator that listens on the per-test pipe name
+        /// to avoid collisions with a real coordinator or other tests.
+        /// </summary>
+        private BuildCoordinator CreateCoordinator(int totalBudget, int maxConcurrentBuilds, int minBuildsForBudget = 1)
+        {
+            return new BuildCoordinator(totalBudget, maxConcurrentBuilds, minBuildsForBudget, pipeName: _testPipeName);
+        }
+
+        /// <summary>
+        /// Send a raw command to the coordinator using the per-test pipe name.
         /// </summary>
         private string? SendRawCommand(string command)
         {
-            string pipeName = BuildCoordinator.GetPipeName();
+            string pipeName = _testPipeName;
 
             for (int attempt = 0; attempt < 3; attempt++)
             {

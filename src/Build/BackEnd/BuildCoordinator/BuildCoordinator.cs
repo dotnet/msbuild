@@ -18,8 +18,11 @@ namespace Microsoft.Build.BackEnd
     ///
     /// Key design: heartbeat-gated promotion. When a new build registers and there are already
     /// active builds, the new build is queued. Active builds learn their reduced budget on their
-    /// next heartbeat. Only after ALL active builds have acknowledged the reduction (via heartbeat)
-    /// is the new build promoted. This prevents temporarily exceeding the node budget.
+    /// next heartbeat. Only after ALL active builds have acknowledged the new epoch (via heartbeat)
+    /// is the queued build promoted. This ordering gate ensures promotions happen one-at-a-time
+    /// in a controlled sequence. Note: BuildManager applies the granted budget once at build start
+    /// and does not change MaxNodeCount mid-build — the heartbeat acknowledgment is purely for
+    /// the coordinator's internal promotion bookkeeping, not for enforcing runtime budget changes.
     ///
     /// Protocol (line-based text over named pipe):
     ///   REGISTER buildId requestedNodes
@@ -42,7 +45,7 @@ namespace Microsoft.Build.BackEnd
     public sealed class BuildCoordinator : IDisposable
     {
         /// <summary>
-        /// Well-known pipe name. All MSBuild instances for this user connect here.
+        /// Well-known pipe name scoped to the current user.
         /// On Unix: /tmp/MSBuild-Coordinator-{username}
         /// On Windows: MSBuild-Coordinator-{username}
         /// </summary>
@@ -62,6 +65,7 @@ namespace Microsoft.Build.BackEnd
         private readonly int _totalBudget;
         private readonly int _maxConcurrentBuilds;
         private readonly int _minBuildsForBudget;
+        private readonly string? _pipeNameOverride;
         private readonly ConcurrentDictionary<string, BuildRegistration> _activeBuilds = new();
         private readonly List<BuildRegistration> _queuedBuilds = new();
         private readonly object _queueLock = new();
@@ -80,25 +84,60 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// If a build hasn't heartbeated in this many seconds, consider it dead.
         /// </summary>
-        private const int StaleHeartbeatSeconds = 10;
+        internal int StaleHeartbeatSeconds { get; set; } = 10;
+
+        /// <summary>
+        /// How often the staleness reaper runs (in seconds).
+        /// </summary>
+        internal int ReaperIntervalSeconds { get; set; } = 5;
 
         public BuildCoordinator(int totalBudget, int maxConcurrentBuilds, int minBuildsForBudget = 1)
+            : this(totalBudget, maxConcurrentBuilds, minBuildsForBudget, pipeName: null)
         {
+        }
+
+        /// <summary>
+        /// Internal constructor for tests — allows overriding the pipe name to avoid
+        /// collisions with a real coordinator or other test instances.
+        /// </summary>
+        internal BuildCoordinator(int totalBudget, int maxConcurrentBuilds, int minBuildsForBudget, string? pipeName)
+        {
+            if (totalBudget <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(totalBudget), totalBudget, "Budget must be at least 1.");
+            }
+
+            if (maxConcurrentBuilds <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(maxConcurrentBuilds), maxConcurrentBuilds, "Max concurrent builds must be at least 1.");
+            }
+
             _totalBudget = totalBudget;
             _maxConcurrentBuilds = maxConcurrentBuilds;
             _minBuildsForBudget = Math.Max(1, minBuildsForBudget);
+            _pipeNameOverride = pipeName;
         }
+
+        /// <summary>
+        /// Returns the effective pipe name, preferring the override if set.
+        /// </summary>
+        internal string EffectivePipeName => _pipeNameOverride ?? GetPipeName();
 
         /// <summary>
         /// Start listening for MSBuild client connections.
         /// </summary>
         public void Start()
         {
-            string pipeName = GetPipeName();
+            string pipeName = EffectivePipeName;
 
-            // On Unix, clean up stale pipe file
+            // On Unix, clean up stale pipe file — warn if another coordinator is alive.
             if (NativeMethodsShared.IsUnixLike && File.Exists(pipeName))
             {
+                if (TryConnectToExisting(pipeName))
+                {
+                    Console.WriteLine($"WARNING: Another coordinator may be running on {pipeName}. Taking over...");
+                }
+
                 File.Delete(pipeName);
             }
 
@@ -111,7 +150,7 @@ namespace Microsoft.Build.BackEnd
             _listenTask = Task.Run(() => ListenLoop(_cts.Token));
 
             // Periodically reap builds that stopped heartbeating (crashed/killed process)
-            _stalenessReaper = new Timer(ReapStaleBuilds, null, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5));
+            _stalenessReaper = new Timer(ReapStaleBuilds, null, TimeSpan.FromSeconds(ReaperIntervalSeconds), TimeSpan.FromSeconds(ReaperIntervalSeconds));
 
             // Watch for pipe file deletion (e.g. by overzealous cleanup scripts)
             if (NativeMethodsShared.IsUnixLike)
@@ -158,10 +197,11 @@ namespace Microsoft.Build.BackEnd
         {
             while (!ct.IsCancellationRequested)
             {
-                string pipeName = GetPipeName();
+                string pipeName = EffectivePipeName;
 
                 // Create a per-cycle CTS linked to the main one.
                 // The pipe watchdog can cancel just this cycle to force socket recreation.
+                _listenCycleCts?.Dispose();
                 _listenCycleCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
                 var cycleToken = _listenCycleCts.Token;
 
@@ -225,7 +265,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void CheckPipeHealth(object? state)
         {
-            string pipeName = GetPipeName();
+            string pipeName = EffectivePipeName;
             if (!File.Exists(pipeName))
             {
                 Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] WARNING: Pipe file {pipeName} was deleted externally! Triggering recreation...");
@@ -295,23 +335,23 @@ namespace Microsoft.Build.BackEnd
 
             var registration = new BuildRegistration(buildId, requested, DateTime.UtcNow);
 
-            // First build ever — activate immediately with full budget
-            if (_activeBuilds.IsEmpty)
-            {
-                _activeBuilds[buildId] = registration;
-                registration.AcknowledgedEpoch = _rebalanceEpoch;
-                int granted = CalculateBudget(buildId);
-                registration.GrantedNodes = granted;
-
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] REGISTER {buildId}: requested={requested} granted={granted} (first build)");
-                writer.WriteLine($"OK {granted}");
-                return;
-            }
-
-            // Subsequent builds — always queue. Bump epoch so active builds must
-            // heartbeat (acknowledge reduced budget) before this build is promoted.
             lock (_queueLock)
             {
+                // First build ever — activate immediately with full budget
+                if (_activeBuilds.IsEmpty)
+                {
+                    _activeBuilds[buildId] = registration;
+                    registration.AcknowledgedEpoch = _rebalanceEpoch;
+                    int granted = CalculateBudget(buildId);
+                    registration.GrantedNodes = granted;
+
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] REGISTER {buildId}: requested={requested} granted={granted} (first build)");
+                    writer.WriteLine($"OK {granted}");
+                    return;
+                }
+
+                // Subsequent builds — always queue. Bump epoch so active builds must
+                // heartbeat (acknowledge reduced budget) before this build is promoted.
                 _queuedBuilds.Add(registration);
                 _rebalanceEpoch++;
                 int position = _queuedBuilds.Count;
@@ -340,11 +380,12 @@ namespace Microsoft.Build.BackEnd
 
                 int newBudget = CalculateBudget(buildId);
                 activeReg.GrantedNodes = newBudget;
-                writer.WriteLine($"OK {newBudget}");
 
-                // After acknowledging, check if all active builds are caught up
-                // and we can promote queued builds
+                // Promote queued builds BEFORE responding, so promotions are
+                // visible to subsequent commands from any client.
                 TryPromotePending();
+
+                writer.WriteLine($"OK {newBudget}");
                 return;
             }
 
@@ -390,7 +431,9 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] UNREGISTER {buildId}: active={_activeBuilds.Count} queued={_queuedBuilds.Count}");
+            int queuedCount;
+            lock (_queueLock) { queuedCount = _queuedBuilds.Count; }
+            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] UNREGISTER {buildId}: active={_activeBuilds.Count} queued={queuedCount}");
 
             // When a build leaves, remaining builds get MORE budget (safe direction).
             // Promote immediately if there's a slot — the promoted build gets the correct
@@ -582,7 +625,7 @@ namespace Microsoft.Build.BackEnd
                 var reg = kvp.Value;
                 double staleSec = (now - reg.LastHeartbeat).TotalSeconds;
 
-                if (staleSec < StaleHeartbeatSeconds)
+                if (staleSec < (double)StaleHeartbeatSeconds)
                 {
                     continue; // Recent heartbeat, still healthy
                 }
@@ -609,7 +652,7 @@ namespace Microsoft.Build.BackEnd
                     var reg = _queuedBuilds[i];
                     double staleSec = (now - reg.LastHeartbeat).TotalSeconds;
 
-                    if (staleSec < StaleHeartbeatSeconds)
+                    if (staleSec < (double)StaleHeartbeatSeconds)
                     {
                         continue;
                     }
@@ -685,6 +728,28 @@ namespace Microsoft.Build.BackEnd
                 QueuedAt = registeredAt;
                 LastHeartbeat = registeredAt;
                 AcknowledgedEpoch = -1; // Not yet acknowledged
+            }
+        }
+
+        /// <summary>
+        /// Check if an existing coordinator is already listening on the given pipe.
+        /// Returns true if a coordinator responded; false if the pipe is stale.
+        /// </summary>
+        private static bool TryConnectToExisting(string pipeName)
+        {
+            try
+            {
+                using var client = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, System.IO.Pipes.PipeOptions.CurrentUserOnly);
+                client.Connect(500); // 500ms timeout
+                using var writer = new StreamWriter(client, leaveOpen: true) { AutoFlush = true };
+                using var reader = new StreamReader(client, leaveOpen: true);
+                writer.WriteLine("STATUS");
+                string? response = reader.ReadLine();
+                return response != null && response.StartsWith("OK", StringComparison.Ordinal);
+            }
+            catch
+            {
+                return false;
             }
         }
     }
