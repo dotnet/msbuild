@@ -328,7 +328,7 @@ namespace Microsoft.Build.CommandLine.Experimental
         {
             try
             {
-                string responseFile = FrameworkFileUtilities.FixFilePath(unquotedCommandLineArg.Substring(1));
+                string responseFile = FileUtilities.FixFilePath(unquotedCommandLineArg.Substring(1));
 
                 if (responseFile.Length == 0)
                 {
@@ -358,7 +358,7 @@ namespace Microsoft.Build.CommandLine.Experimental
 
                     if (!isRepeatedResponseFile)
                     {
-                        var responseFileDirectory = FrameworkFileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(responseFile));
+                        var responseFileDirectory = FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(responseFile));
                         includedResponseFiles.Add(responseFile);
 
                         List<string> argsFromResponseFile;
@@ -550,7 +550,7 @@ namespace Microsoft.Build.CommandLine.Experimental
 
             if (projectSwitchParameters.Length == 1)
             {
-                var projectFile = FrameworkFileUtilities.FixFilePath(projectSwitchParameters[0]);
+                var projectFile = FileUtilities.FixFilePath(projectSwitchParameters[0]);
 
                 if (FileSystems.Default.DirectoryExists(projectFile))
                 {

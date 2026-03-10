@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LoadAssemblyAndDependency_InsideProjectFolder()
         {
-            using (var dir = new FrameworkFileUtilities.TempWorkingDirectory(ProjectFileFolder))
+            using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))
             {
                 string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
 
@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LoadAssemblyAndDependency_OutsideProjectFolder()
         {
-            using (var dir = new FrameworkFileUtilities.TempWorkingDirectory(ProjectFileFolder))
+            using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))
             {
                 string projectFilePath = Path.Combine(dir.Path, ProjectFileName);
 

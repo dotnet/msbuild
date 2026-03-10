@@ -55,7 +55,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public override bool DirectoryExists(string path)
         {
-            if (!string.IsNullOrEmpty(path) && FrameworkFileUtilities.IsPathTooLong(path))
+            if (!string.IsNullOrEmpty(path) && FileUtilities.IsPathTooLong(path))
             {
                 // If the path is too long, we can't check if it exists on windows
                 throw new PathTooLongException(SR.FormatPathTooLong(path, NativeMethods.MaxPath));

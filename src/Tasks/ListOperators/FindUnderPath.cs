@@ -67,16 +67,16 @@ namespace Microsoft.Build.Tasks
                 {
                     conePath =
                         Strings.WeakIntern(
-                            TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(Path.ItemSpec)).GetCanonicalForm());
+                            TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(Path.ItemSpec)).GetCanonicalForm());
                 }
                 else
                 {
                     conePath =
                         Strings.WeakIntern(
-                            System.IO.Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(Path.ItemSpec))));
+                            System.IO.Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(Path.ItemSpec))));
                 }
 
-                conePath = FrameworkFileUtilities.EnsureTrailingSlash(conePath);
+                conePath = FileUtilities.EnsureTrailingSlash(conePath);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
@@ -98,13 +98,13 @@ namespace Microsoft.Build.Tasks
                     {
                         fullPath =
                             Strings.WeakIntern(
-                                TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(item.ItemSpec)).GetCanonicalForm());
+                                TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(item.ItemSpec)).GetCanonicalForm());
                     }
                     else
                     {
                         fullPath =
                             Strings.WeakIntern(
-                                System.IO.Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(item.ItemSpec))));
+                                System.IO.Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(item.ItemSpec))));
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

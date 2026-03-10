@@ -177,10 +177,10 @@ internal static class ItemSpecModifiers
 
                 if (currentDirectory == null)
                 {
-                    currentDirectory = FrameworkFileUtilities.CurrentThreadWorkingDirectory ?? string.Empty;
+                    currentDirectory = FileUtilities.CurrentThreadWorkingDirectory ?? string.Empty;
                 }
 
-                modifiedItemSpec = FrameworkFileUtilities.GetFullPath(itemSpec, currentDirectory);
+                modifiedItemSpec = FileUtilities.GetFullPath(itemSpec, currentDirectory);
                 fullPath = modifiedItemSpec;
 
                 ThrowForUrl(modifiedItemSpec, itemSpec, currentDirectory);
@@ -191,7 +191,7 @@ internal static class ItemSpecModifiers
 
                 modifiedItemSpec = Path.GetPathRoot(fullPath);
 
-                if (!FrameworkFileUtilities.EndsWithSlash(modifiedItemSpec))
+                if (!FileUtilities.EndsWithSlash(modifiedItemSpec))
                 {
                     FrameworkErrorUtilities.VerifyThrow(
                         FileUtilitiesRegex.StartsWithUncPattern(modifiedItemSpec),
@@ -214,7 +214,7 @@ internal static class ItemSpecModifiers
                 else
                 {
                     // Fix path to avoid problem with Path.GetFileNameWithoutExtension when backslashes in itemSpec on Unix
-                    modifiedItemSpec = Path.GetFileNameWithoutExtension(FrameworkFileUtilities.FixFilePath(itemSpec));
+                    modifiedItemSpec = Path.GetFileNameWithoutExtension(FileUtilities.FixFilePath(itemSpec));
                 }
             }
             else if (string.Equals(modifier, Extension, StringComparison.OrdinalIgnoreCase))
@@ -233,13 +233,13 @@ internal static class ItemSpecModifiers
             }
             else if (string.Equals(modifier, RelativeDir, StringComparison.OrdinalIgnoreCase))
             {
-                modifiedItemSpec = FrameworkFileUtilities.GetDirectory(itemSpec);
+                modifiedItemSpec = FileUtilities.GetDirectory(itemSpec);
             }
             else if (string.Equals(modifier, Directory, StringComparison.OrdinalIgnoreCase))
             {
                 GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, FullPath, ref fullPath);
 
-                modifiedItemSpec = FrameworkFileUtilities.GetDirectory(fullPath);
+                modifiedItemSpec = FileUtilities.GetDirectory(fullPath);
 
                 if (NativeMethods.IsWindows)
                 {
@@ -255,7 +255,7 @@ internal static class ItemSpecModifiers
 
                     if (length != -1)
                     {
-                        FrameworkErrorUtilities.VerifyThrow((modifiedItemSpec.Length > length) && FrameworkFileUtilities.IsSlash(modifiedItemSpec[length]),
+                        FrameworkErrorUtilities.VerifyThrow((modifiedItemSpec.Length > length) && FileUtilities.IsSlash(modifiedItemSpec[length]),
                                                    "Root directory must have a trailing slash.");
 
                         modifiedItemSpec = modifiedItemSpec.Substring(length + 1);
@@ -263,7 +263,7 @@ internal static class ItemSpecModifiers
                 }
                 else
                 {
-                    FrameworkErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(modifiedItemSpec) && FrameworkFileUtilities.IsSlash(modifiedItemSpec[0]),
+                    FrameworkErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(modifiedItemSpec) && FileUtilities.IsSlash(modifiedItemSpec[0]),
                                                "Expected a full non-windows path rooted at '/'.");
 
                     // A full unix path is always rooted at
@@ -287,11 +287,11 @@ internal static class ItemSpecModifiers
                 // to unescape first.
                 string unescapedItemSpec = EscapingUtilities.UnescapeAll(itemSpec);
 
-                FileInfo info = FrameworkFileUtilities.GetFileInfoNoThrow(unescapedItemSpec);
+                FileInfo info = FileUtilities.GetFileInfoNoThrow(unescapedItemSpec);
 
                 if (info != null)
                 {
-                    modifiedItemSpec = info.LastWriteTime.ToString(FrameworkFileUtilities.FileTimeFormat, null);
+                    modifiedItemSpec = info.LastWriteTime.ToString(FileUtilities.FileTimeFormat, null);
                 }
                 else
                 {
@@ -307,7 +307,7 @@ internal static class ItemSpecModifiers
 
                 if (FileSystems.Default.FileExists(unescapedItemSpec))
                 {
-                    modifiedItemSpec = File.GetCreationTime(unescapedItemSpec).ToString(FrameworkFileUtilities.FileTimeFormat, null);
+                    modifiedItemSpec = File.GetCreationTime(unescapedItemSpec).ToString(FileUtilities.FileTimeFormat, null);
                 }
                 else
                 {
@@ -323,7 +323,7 @@ internal static class ItemSpecModifiers
 
                 if (FileSystems.Default.FileExists(unescapedItemSpec))
                 {
-                    modifiedItemSpec = File.GetLastAccessTime(unescapedItemSpec).ToString(FrameworkFileUtilities.FileTimeFormat, null);
+                    modifiedItemSpec = File.GetLastAccessTime(unescapedItemSpec).ToString(FileUtilities.FileTimeFormat, null);
                 }
                 else
                 {

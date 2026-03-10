@@ -68,9 +68,6 @@
     <Compile Include="..\Shared\FileDelegates.cs">
       <Link>FileDelegates.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>FileUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Build\Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="..\Shared\QuotingUtilities.cs" />
     <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs">
@@ -87,9 +84,6 @@
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Shared\ExceptionHandling.cs" />
     <Compile Include="..\Shared\EventArgsFormatting.cs" />
-    <Compile Include="..\Shared\TempFileUtilities.cs">
-      <Link>TempFileUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\XMakeAttributes.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />

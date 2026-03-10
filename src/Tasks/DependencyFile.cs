@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
 #nullable disable
@@ -61,7 +60,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="filename">The file name.</param>
         internal DependencyFile(string filename)
         {
-            this.filename = FrameworkFileUtilities.FixFilePath(filename);
+            this.filename = FileUtilities.FixFilePath(filename);
 
             if (FileSystems.Default.FileExists(FileName))
             {

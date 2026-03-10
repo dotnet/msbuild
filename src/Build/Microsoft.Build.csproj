@@ -667,10 +667,6 @@
     <Compile Include="..\Shared\FileMatcher.cs">
       <Link>SharedUtilities\FileMatcher.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>SharedUtilities\FileUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs" />
     <Compile Include="..\Shared\FrameworkLocationHelper.cs">
       <Link>SharedUtilities\FrameworkLocationHelper.cs</Link>
     </Compile>

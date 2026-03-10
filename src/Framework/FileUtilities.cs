@@ -28,14 +28,11 @@ using Path = System.IO.Path;
 
 namespace Microsoft.Build.Framework
 {
-    // TODO: this should be unified with Shared\FileUtilities, but it is hard to untangle everything in one go.
-    // Moved some of the methods here for now.
-
     /// <summary>
     /// This class contains utility methods for file IO.
     /// Functions from FileUtilities are transferred here as part of the effort to remove Shared files.
     /// </summary>
-    internal static partial class FrameworkFileUtilities
+    internal static partial class FileUtilities
     {
         private const char UnixDirectorySeparator = '/';
         private const char WindowsDirectorySeparator = '\\';
@@ -1457,7 +1454,7 @@ namespace Microsoft.Build.Framework
             return paths.Aggregate(root, Path.Combine);
         }
 
-        internal static string TrimTrailingSlashes(string s)
+        internal static string TrimTrailingSlashes(this string s)
         {
             return s.TrimEnd(Slashes);
         }
@@ -1465,12 +1462,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Replace all backward slashes to forward slashes
         /// </summary>
-        internal static string ToSlash(string s)
+        internal static string ToSlash(this string s)
         {
             return s.Replace('\\', '/');
         }
 
-        internal static string ToBackslash(string s)
+        internal static string ToBackslash(this string s)
         {
             return s.Replace('/', '\\');
         }
@@ -1480,20 +1477,20 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="s"></param>
         /// <returns></returns>
-        internal static string ToPlatformSlash(string s)
+        internal static string ToPlatformSlash(this string s)
         {
             var separator = Path.DirectorySeparatorChar;
 
             return s.Replace(separator == '/' ? '\\' : '/', separator);
         }
 
-        internal static string WithTrailingSlash(string s)
+        internal static string WithTrailingSlash(this string s)
         {
             return EnsureTrailingSlash(s);
         }
 
-        internal static string NormalizeForPathComparison(string s)
-            => TrimTrailingSlashes(ToPlatformSlash(s));
+        internal static string NormalizeForPathComparison(this string s)
+            => s.ToPlatformSlash().TrimTrailingSlashes();
 
         // TODO: assumption on file system case sensitivity: https://github.com/dotnet/msbuild/issues/781
         internal static bool PathsEqual(string path1, string path2)
@@ -1710,7 +1707,7 @@ namespace Microsoft.Build.Framework
             FileExistenceCache.Clear();
         }
 
-        internal static void ReadFromStream(Stream stream, byte[] content, int startIndex, int length)
+        internal static void ReadFromStream(this Stream stream, byte[] content, int startIndex, int length)
         {
             stream.ReadExactly(content, startIndex, length);
         }

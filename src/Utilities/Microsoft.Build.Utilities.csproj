@@ -75,9 +75,6 @@
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <Link>Shared\ExceptionHandling.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>Shared\FileUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\FileMatcher.cs">
       <Link>Shared\FileMatcher.cs</Link>
     </Compile>
@@ -110,9 +107,6 @@
     </Compile>
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>Shared\TaskLoggingHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs">
-      <Link>Shared\TempFileUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Tracing.cs">
       <Link>Shared\Tracing.cs</Link>

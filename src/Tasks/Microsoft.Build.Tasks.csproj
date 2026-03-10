@@ -111,7 +111,6 @@
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>TaskLoggingHelperExtension.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs" />
     <Compile Include="..\Shared\MetadataConversionUtilities.cs">
       <Link>MetadataConversionUtilities.cs</Link>
     </Compile>
@@ -120,9 +119,6 @@
     </Compile>
     <Compile Include="..\Shared\ExceptionHandling.cs">
       <Link>ExceptionHandling.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>FileUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\StringUtils.cs">
       <Link>StringUtils.cs</Link>

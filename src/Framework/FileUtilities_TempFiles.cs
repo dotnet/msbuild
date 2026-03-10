@@ -11,7 +11,7 @@ using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.Framework;
 
-internal static partial class FrameworkFileUtilities
+internal static partial class FileUtilities
 {
     private static Lazy<string> tempFileDirectory = CreateTempFileDirectoryLazy();
 
