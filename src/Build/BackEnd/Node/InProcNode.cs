@@ -11,6 +11,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 
@@ -187,7 +188,7 @@ namespace Microsoft.Build.BackEnd
                 // Dump all engine exceptions to a temp file
                 // so that we have something to go on in the
                 // event of a failure
-                ExceptionHandling.DumpExceptionToFile(e);
+                DebugUtils.DumpExceptionToFile(e);
 
                 // This is fatal: process will terminate: make sure the
                 // debugger launches

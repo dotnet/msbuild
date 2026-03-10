@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 
 namespace Microsoft.Build.Internal
 {
@@ -155,7 +156,7 @@ namespace Microsoft.Build.Internal
                         _pipeServer.Disconnect();
                     }
 
-                    ExceptionHandling.DumpExceptionToFile(e);
+                    DebugUtils.DumpExceptionToFile(e);
                     return LinkStatus.Failed;
                 }
             }

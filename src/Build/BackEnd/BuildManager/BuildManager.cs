@@ -1231,7 +1231,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void RecordCrashTelemetry(Exception exception, bool isUnhandled)
         {
-            string? host = _buildTelemetry?.BuildEngineHost ??  BuildEnvironmentState.GetHostName();
+            string? host = _buildTelemetry?.BuildEngineHost ?? BuildEnvironmentState.GetHostName();
 
             int? activeNodeCount;
             int? submissionCount;
@@ -1766,7 +1766,7 @@ namespace Microsoft.Build.Execution
             {
                 // On the off chance we get an exception from our exception handler (oh, the irony!), we want to know about it (and still not kill this block
                 // which could lead to a somewhat mysterious hang.)
-                ExceptionHandling.DumpExceptionToFile(e);
+                DebugUtils.DumpExceptionToFile(e);
             }
         }
 
@@ -2669,8 +2669,8 @@ namespace Microsoft.Build.Execution
                     foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
                         BuildEventContext buildEventContext = new BuildEventContext(submission.SubmissionId, BuildEventContext.InvalidNodeId, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
-                        string exception = ExceptionHandling.ReadAnyExceptionFromFile(_instantiationTimeUtc);
-                        loggingService?.LogError(buildEventContext, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, ExceptionHandling.DebugDumpPath, exception);
+                        string exception = DebugUtils.ReadAnyExceptionFromFile(_instantiationTimeUtc);
+                        loggingService?.LogError(buildEventContext, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, DebugUtils.DebugDumpPath, exception);
                     }
                 }
                 else if (shutdownPacket.Reason == NodeShutdownReason.Error && _buildSubmissions.Values.Count == 0)
@@ -2679,7 +2679,7 @@ namespace Microsoft.Build.Execution
                     if (shutdownPacket.Exception != null)
                     {
                         ILoggingService loggingService = ((IBuildComponentHost)this).GetComponent<ILoggingService>(BuildComponentType.LoggingService);
-                        loggingService?.LogError(BuildEventContext.Invalid, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, ExceptionHandling.DebugDumpPath, shutdownPacket.Exception.ToString());
+                        loggingService?.LogError(BuildEventContext.Invalid, new BuildEventFileInfo(string.Empty) /* no project file */, "ChildExitedPrematurely", node, DebugUtils.DebugDumpPath, shutdownPacket.Exception.ToString());
                         OnThreadException(shutdownPacket.Exception);
                     }
                 }

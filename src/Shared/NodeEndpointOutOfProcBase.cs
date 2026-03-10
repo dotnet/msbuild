@@ -7,19 +7,19 @@ using System.Collections.Frozen;
 #endif
 using System.Diagnostics.CodeAnalysis;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
+using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.IO.Pipes;
-using System.IO;
-using System.Collections.Generic;
+using Microsoft.Build.Shared.Debugging;
 
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
 #endif
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
-
 #endif
 #if NET451_OR_GREATER || NETCOREAPP
 using System.Threading.Tasks;
@@ -514,7 +514,7 @@ namespace Microsoft.Build.BackEnd
                         localPipeServer.Disconnect();
                     }
 
-                    ExceptionHandling.DumpExceptionToFile(e);
+                    DebugUtils.DumpExceptionToFile(e);
                     ChangeLinkStatus(LinkStatus.Failed);
                     return;
                 }
@@ -663,7 +663,7 @@ namespace Microsoft.Build.BackEnd
                             {
                                 // Lost communications.  Abort (but allow node reuse)
                                 CommunicationsUtilities.Trace("Exception reading from server.  {0}", e);
-                                ExceptionHandling.DumpExceptionToFile(e);
+                                DebugUtils.DumpExceptionToFile(e);
                                 ChangeLinkStatus(LinkStatus.Inactive);
                                 exitLoop = true;
                                 break;
@@ -722,7 +722,7 @@ namespace Microsoft.Build.BackEnd
                             {
                                 // Error while deserializing or handling packet.  Abort.
                                 CommunicationsUtilities.Trace("Exception while deserializing packet {0}: {1}", packetType, e);
-                                ExceptionHandling.DumpExceptionToFile(e);
+                                DebugUtils.DumpExceptionToFile(e);
                                 ChangeLinkStatus(LinkStatus.Failed);
                                 exitLoop = true;
                                 break;
@@ -781,7 +781,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             // Error while deserializing or handling packet.  Abort.
                             CommunicationsUtilities.Trace("Exception while serializing packets: {0}", e);
-                            ExceptionHandling.DumpExceptionToFile(e);
+                            DebugUtils.DumpExceptionToFile(e);
                             ChangeLinkStatus(LinkStatus.Failed);
                             exitLoop = true;
                             break;

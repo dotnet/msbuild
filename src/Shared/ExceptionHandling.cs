@@ -4,9 +4,7 @@
 #nullable disable
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared.Debugging;
 
 namespace Microsoft.Build.Shared
 {
@@ -15,19 +13,6 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal static class ExceptionHandling
     {
-        /// <inheritdoc cref="DebugUtils.ResetDebugDumpPathInRunningTests"/>
-        internal static bool ResetDebugDumpPathInRunningTests
-        {
-            get => DebugUtils.ResetDebugDumpPathInRunningTests;
-            set => DebugUtils.ResetDebugDumpPathInRunningTests = value;
-        }
-
-        /// <inheritdoc cref="DebugUtils.DebugDumpPath"/>
-        internal static string DebugDumpPath => DebugUtils.DebugDumpPath;
-
-        /// <inheritdoc cref="DebugUtils.DumpFilePath"/>
-        internal static string DumpFilePath => DebugUtils.DumpFilePath;
-
         /// <inheritdoc cref="FrameworkExceptionHandling.IsCriticalException(Exception)"/>
         internal static bool IsCriticalException(Exception e)
             => FrameworkExceptionHandling.IsCriticalException(e);
@@ -63,18 +48,5 @@ namespace Microsoft.Build.Shared
         /// <inheritdoc cref="FrameworkExceptionHandling.NotExpectedFunctionException(Exception)"/>
         internal static bool NotExpectedFunctionException(Exception e)
             => FrameworkExceptionHandling.NotExpectedFunctionException(e);
-
-        /// <inheritdoc cref="DebugUtils.UnhandledExceptionHandler"/>
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode", Justification = "It is called by the CLR")]
-        internal static void UnhandledExceptionHandler(object sender, UnhandledExceptionEventArgs e)
-            => DebugUtils.UnhandledExceptionHandler(sender, e);
-
-        /// <inheritdoc cref="DebugUtils.DumpExceptionToFile"/>
-        internal static void DumpExceptionToFile(Exception ex)
-            => DebugUtils.DumpExceptionToFile(ex);
-
-        /// <inheritdoc cref="DebugUtils.ReadAnyExceptionFromFile"/>
-        internal static string ReadAnyExceptionFromFile(DateTime fromTimeUtc)
-            => DebugUtils.ReadAnyExceptionFromFile(fromTimeUtc);
     }
 }

@@ -4,6 +4,7 @@
 using System;
 using System.Reflection;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared.Debugging;
 
 namespace Microsoft.Build.Shared
 {
@@ -115,7 +116,7 @@ namespace Microsoft.Build.Shared
                         }
 
                         // Hook up last minute dumping of any exceptions
-                        taskAppDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
+                        taskAppDomain.UnhandledException += DebugUtils.UnhandledExceptionHandler;
                         appDomainCreated?.Invoke(taskAppDomain);
                     }
                 }
