@@ -50,6 +50,12 @@ namespace Microsoft.Build.BackEnd
         private const int TimeoutForNewNodeCreation = 30000;
 
         /// <summary>
+        /// The amount of time to wait when attempting to reuse an existing idle node.
+        /// Must be long enough for a sleeping node to wake and respond to the handshake.
+        /// </summary>
+        private const int TimeoutForNodeReuse = 1000;
+
+        /// <summary>
         /// The amount of time to wait for an out-of-proc node to exit.
         /// </summary>
         private const int TimeoutForWaitForExit = 30000;
@@ -318,7 +324,7 @@ namespace Microsoft.Build.BackEnd
                     _processesToIgnore.TryAdd(nodeLookupKey, default);
 
                     // Attempt to connect to each process in turn.
-                    Stream nodeStream = TryConnectToProcess(nodeToReuse.Id, 0 /* poll, don't wait for connections */, nodeLaunchData.Handshake, out HandshakeResult result);
+                    Stream nodeStream = TryConnectToProcess(nodeToReuse.Id, TimeoutForNodeReuse, nodeLaunchData.Handshake, out HandshakeResult result);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
