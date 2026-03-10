@@ -208,6 +208,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostCoresRequest, TaskHostCoresRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostYieldRequest, TaskHostYieldRequest.FactoryForDeserialization, this);
 
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
@@ -523,6 +524,9 @@ namespace Microsoft.Build.BackEnd
                 case NodePacketType.TaskHostBuildRequest:
                     HandleBuildRequest(packet as TaskHostBuildRequest);
                     break;
+                case NodePacketType.TaskHostYieldRequest:
+                    HandleYieldRequest(packet as TaskHostYieldRequest);
+                    break;
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     break;
@@ -756,6 +760,39 @@ namespace Microsoft.Build.BackEnd
             }
 
             _taskHostProvider.SendData(_taskHostNodeKey, response);
+        }
+
+        /// <summary>
+        /// Handles Yield/Reacquire requests from the TaskHost.
+        /// <para>
+        /// Yield is fire-and-forget: forwards to <see cref="IBuildEngine3.Yield()"/>, no response sent.
+        /// Reacquire is blocking: forwards to <see cref="IBuildEngine3.Reacquire()"/> (which may block
+        /// on the scheduler), then sends <see cref="TaskHostYieldResponse"/> to unblock the TaskHost.
+        /// </para>
+        /// </summary>
+        private void HandleYieldRequest(TaskHostYieldRequest request)
+        {
+            switch (request.Operation)
+            {
+                case YieldOperation.Yield:
+                    if (_buildEngine is IBuildEngine3 engine3Yield)
+                    {
+                        engine3Yield.Yield();
+                    }
+
+                    // No response — Yield is fire-and-forget.
+                    break;
+
+                case YieldOperation.Reacquire:
+                    if (_buildEngine is IBuildEngine3 engine3Reacquire)
+                    {
+                        engine3Reacquire.Reacquire();
+                    }
+
+                    // Send acknowledgment to unblock the TaskHost.
+                    _taskHostProvider.SendData(_taskHostNodeKey, new TaskHostYieldResponse(request.RequestId));
+                    break;
+            }
         }
 
         /// <summary>

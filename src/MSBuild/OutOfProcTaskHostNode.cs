@@ -118,6 +118,14 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private bool _isTaskExecuting;
 
+#if !CLR2COMPATIBILITY
+        /// <summary>
+        /// Number of tasks currently yielded (blocked on a BuildProjectFile callback or explicit Yield).
+        /// A yielded task does NOT prevent new tasks from being scheduled to this TaskHost.
+        /// </summary>
+        private int _yieldedTaskCount;
+#endif
+
         /// <summary>
         /// The event which is set when a task has completed.
         /// </summary>
@@ -248,6 +256,7 @@ namespace Microsoft.Build.CommandLine
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesResponse, TaskHostIsRunningMultipleNodesResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostCoresResponse, TaskHostCoresResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostBuildResponse, TaskHostBuildResponse.FactoryForDeserialization, this);
+            thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostYieldResponse, TaskHostYieldResponse.FactoryForDeserialization, this);
 #endif
 
 #if !CLR2COMPATIBILITY
@@ -496,27 +505,59 @@ namespace Microsoft.Build.CommandLine
                 toolsVersion,
                 returnTargetOutputs);
 
-            var response = SendCallbackRequestAndWaitForResponse<TaskHostBuildResponse>(request);
-            return response.ToBuildEngineResult();
+            // Yield before the callback so the scheduler can reuse this TaskHost for nested tasks.
+            YieldForCallback();
+            try
+            {
+                var response = SendCallbackRequestAndWaitForResponse<TaskHostBuildResponse>(request);
+                return response.ToBuildEngineResult();
+            }
+            finally
+            {
+                ReacquireAfterCallback();
+            }
 #endif
         }
 
         /// <summary>
-        /// Stub implementation of IBuildEngine3.Yield.  The task host does not support yielding, so just go ahead and silently
-        /// return, letting the task continue.
+        /// Implementation of IBuildEngine3.Yield. Forwards to the owning worker node
+        /// so the scheduler can assign other work to this node while the task waits.
         /// </summary>
         public void Yield()
         {
-            return;
+#if !CLR2COMPATIBILITY
+            if (!CallbacksSupported)
+            {
+                return;
+            }
+
+            YieldForCallback();
+
+            // Fire-and-forget: send yield notification to parent, no response expected.
+            var request = new TaskHostYieldRequest(YieldOperation.Yield);
+            _nodeEndpoint.SendData(request);
+#endif
         }
 
         /// <summary>
-        /// Stub implementation of IBuildEngine3.Reacquire. The task host does not support yielding, so just go ahead and silently
-        /// return, letting the task continue.
+        /// Implementation of IBuildEngine3.Reacquire. Sends a reacquire request to the owning worker node
+        /// and blocks until the scheduler allows the task to continue.
         /// </summary>
         public void Reacquire()
         {
-            return;
+#if !CLR2COMPATIBILITY
+            if (!CallbacksSupported)
+            {
+                return;
+            }
+
+            // Send reacquire request and wait for response.
+            // The worker side calls engine3.Reacquire() which may block on the scheduler.
+            var request = new TaskHostYieldRequest(YieldOperation.Reacquire);
+            SendCallbackRequestAndWaitForResponse<TaskHostYieldResponse>(request);
+
+            ReacquireAfterCallback();
+#endif
         }
 
         #endregion // IBuildEngine3 Implementation
@@ -856,6 +897,7 @@ namespace Microsoft.Build.CommandLine
                 case NodePacketType.TaskHostIsRunningMultipleNodesResponse:
                 case NodePacketType.TaskHostCoresResponse:
                 case NodePacketType.TaskHostBuildResponse:
+                case NodePacketType.TaskHostYieldResponse:
                     HandleCallbackResponse(packet);
                     break;
 #endif
@@ -941,6 +983,23 @@ namespace Microsoft.Build.CommandLine
                 _pendingCallbackRequests.TryRemove(requestId, out _);
             }
         }
+
+        /// <summary>
+        /// Marks this TaskHost as yielded so the scheduler can reuse it for nested tasks.
+        /// Called before sending a BuildProjectFile callback or explicit Yield.
+        /// </summary>
+        private void YieldForCallback()
+        {
+            Interlocked.Increment(ref _yieldedTaskCount);
+        }
+
+        /// <summary>
+        /// Marks this TaskHost as active again after a callback or Reacquire completes.
+        /// </summary>
+        private void ReacquireAfterCallback()
+        {
+            Interlocked.Decrement(ref _yieldedTaskCount);
+        }
 #endif
 
         /// <summary>
@@ -949,7 +1008,16 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void HandleTaskHostConfiguration(TaskHostConfiguration taskHostConfiguration)
         {
+#if !CLR2COMPATIBILITY
+            // Allow new configuration when the existing task is yielded (blocked on BuildProjectFile callback
+            // or explicit Yield). This enables nested build scenarios where the child build's tasks can run
+            // on the same TaskHost process.
+            ErrorUtilities.VerifyThrow(!_isTaskExecuting || _yieldedTaskCount > 0,
+                "Why are we getting a TaskHostConfiguration packet while a task is actively executing? yieldedTaskCount={0}",
+                _yieldedTaskCount);
+#else
             ErrorUtilities.VerifyThrow(!_isTaskExecuting, "Why are we getting a TaskHostConfiguration packet while we're still executing a task?");
+#endif
             _currentConfiguration = taskHostConfiguration;
 
             // Kick off the task running thread.
