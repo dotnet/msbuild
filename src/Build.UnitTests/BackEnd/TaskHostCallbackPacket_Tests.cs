@@ -198,5 +198,40 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var buildEngineResult = deserialized.ToBuildEngineResult();
             buildEngineResult.Result.ShouldBeFalse();
         }
+
+        [Theory]
+        [InlineData((byte)YieldOperation.Yield)]
+        [InlineData((byte)YieldOperation.Reacquire)]
+        public void TaskHostYieldRequest_RoundTrip_Serialization(byte operationByte)
+        {
+            YieldOperation operation = (YieldOperation)operationByte;
+            var request = new TaskHostYieldRequest(operation);
+            request.RequestId = 77;
+
+            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+            request.Translate(writeTranslator);
+
+            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+            var deserialized = (TaskHostYieldRequest)TaskHostYieldRequest.FactoryForDeserialization(readTranslator);
+
+            deserialized.RequestId.ShouldBe(77);
+            deserialized.Operation.ShouldBe(operation);
+            deserialized.Type.ShouldBe(NodePacketType.TaskHostYieldRequest);
+        }
+
+        [Fact]
+        public void TaskHostYieldResponse_RoundTrip_Serialization()
+        {
+            var response = new TaskHostYieldResponse(42);
+
+            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+            response.Translate(writeTranslator);
+
+            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+            var deserialized = (TaskHostYieldResponse)TaskHostYieldResponse.FactoryForDeserialization(readTranslator);
+
+            deserialized.RequestId.ShouldBe(42);
+            deserialized.Type.ShouldBe(NodePacketType.TaskHostYieldResponse);
+        }
     }
 }
