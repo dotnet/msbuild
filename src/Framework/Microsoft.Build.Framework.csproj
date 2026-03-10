@@ -57,7 +57,6 @@
       <Link>Shared\BinaryWriterExtensions.cs</Link>
     </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
-    <Compile Include="..\Shared\EnvironmentUtilities.cs" Link="EnvironmentUtilities.cs" />
     <Compile Include="..\Shared\IMSBuildElementLocation.cs">
       <Link>Shared\IMSBuildElementLocation.cs</Link>
     </Compile>
