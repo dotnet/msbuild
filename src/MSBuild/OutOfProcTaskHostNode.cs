@@ -134,15 +134,22 @@ namespace Microsoft.Build.CommandLine
         private AutoResetEvent _taskCompleteEvent;
 
         /// <summary>
-        /// Packet containing all the information relating to the
-        /// completed state of the task.
+        /// Queue of completed task packets waiting to be sent by the main thread.
+        /// Using a queue instead of a single slot prevents lost completions when
+        /// multiple tasks finish concurrently (e.g., nested task reuse scenarios).
         /// </summary>
+#if !CLR2COMPATIBILITY
+        private readonly ConcurrentQueue<TaskHostTaskComplete> _taskCompleteQueue = new();
+#else
         private TaskHostTaskComplete _taskCompletePacket;
+#endif
 
         /// <summary>
-        /// Object used to synchronize access to taskCompletePacket
+        /// Object used to synchronize access to taskCompletePacket (CLR2 only)
         /// </summary>
+#if CLR2COMPATIBILITY
         private LockType _taskCompleteLock = new();
+#endif
 
         /// <summary>
         /// The event which is set when a task is cancelled
@@ -1052,13 +1059,15 @@ namespace Microsoft.Build.CommandLine
             if (context is not null)
             {
                 SaveOperatingEnvironment(context);
+                context.State = TaskExecutionState.Yielded;
             }
 
-            // Decrement active count to allow the parent to send a new TaskHostConfiguration
-            // for the nested build. The task is still running but is now "yielded" waiting
-            // for the callback response.
-            Interlocked.Decrement(ref _activeTaskCount);
+            // Transition from "active" to "yielded" state.
+            // Order matters: increment yielded BEFORE decrementing active so the sum
+            // (_activeTaskCount + _yieldedTaskCount) is never zero during the transition.
+            // This prevents CompleteTask from prematurely nulling _currentConfiguration.
             Interlocked.Increment(ref _yieldedTaskCount);
+            Interlocked.Decrement(ref _activeTaskCount);
         }
 
         /// <summary>
@@ -1067,8 +1076,11 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void ReacquireAfterCallback()
         {
-            Interlocked.Decrement(ref _yieldedTaskCount);
+            // Transition from "yielded" back to "active" state.
+            // Order matters: increment active BEFORE decrementing yielded so the sum
+            // (_activeTaskCount + _yieldedTaskCount) is never zero during the transition.
             Interlocked.Increment(ref _activeTaskCount);
+            Interlocked.Decrement(ref _yieldedTaskCount);
 
             // Restore environment state after reacquiring
             var context = GetCurrentTaskContext();
@@ -1138,6 +1150,11 @@ namespace Microsoft.Build.CommandLine
             context.SavedEnvironment = new Dictionary<string, string>(
                 CommunicationsUtilities.GetEnvironmentVariables(),
                 StringComparer.OrdinalIgnoreCase);
+
+            // Save warning settings that may be overwritten by a nested task
+            context.SavedWarningsAsErrors = WarningsAsErrors;
+            context.SavedWarningsNotAsErrors = WarningsNotAsErrors;
+            context.SavedWarningsAsMessages = WarningsAsMessages;
         }
 
         /// <summary>
@@ -1154,6 +1171,11 @@ namespace Microsoft.Build.CommandLine
 
             CommunicationsUtilities.SetEnvironment(context.SavedEnvironment);
             NativeMethodsShared.SetCurrentDirectory(context.SavedCurrentDirectory);
+
+            // Restore warning settings
+            WarningsAsErrors = context.SavedWarningsAsErrors;
+            WarningsNotAsErrors = context.SavedWarningsNotAsErrors;
+            WarningsAsMessages = context.SavedWarningsAsMessages;
 
             context.SavedCurrentDirectory = null;
             context.SavedEnvironment = null;
@@ -1206,6 +1228,14 @@ namespace Microsoft.Build.CommandLine
             // by the time this method runs.
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
+#if !CLR2COMPATIBILITY
+                // Drain all queued completion packets — multiple tasks may have completed
+                // before the main thread serviced the AutoResetEvent.
+                while (_taskCompleteQueue.TryDequeue(out TaskHostTaskComplete packet))
+                {
+                    _nodeEndpoint.SendData(packet);
+                }
+#else
                 TaskHostTaskComplete taskCompletePacketToSend;
 
                 lock (_taskCompleteLock)
@@ -1216,6 +1246,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 _nodeEndpoint.SendData(taskCompletePacketToSend);
+#endif
             }
 
 #if !CLR2COMPATIBILITY
@@ -1296,6 +1327,28 @@ namespace Microsoft.Build.CommandLine
         {
             // Wait for the RunTask task runner thread before shutting down so that we can cleanly dispose all WaitHandles.
             _taskRunnerThread?.Join();
+
+#if !CLR2COMPATIBILITY
+            // Also join any other task threads that may be blocked (e.g., a yielded task waiting on TCS).
+            // Fail their pending callback requests first so they can unblock.
+            foreach (var kvp in _taskContexts)
+            {
+                Thread thread = kvp.Value.ExecutingThread;
+                if (thread is not null && thread != _taskRunnerThread && thread.IsAlive)
+                {
+                    // Fail any pending callbacks so the thread can unblock
+                    foreach (var reqKvp in kvp.Value.PendingCallbackRequests)
+                    {
+                        if (kvp.Value.PendingCallbackRequests.TryRemove(reqKvp.Key, out var tcs))
+                        {
+                            tcs.TrySetException(new InvalidOperationException("TaskHost shutting down."));
+                        }
+                    }
+
+                    thread.Join(TimeSpan.FromSeconds(5));
+                }
+            }
+#endif
 
             using StreamWriter debugWriter = _debugCommunications
                     ? File.CreateText(string.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), EnvironmentUtilities.CurrentProcessId))
@@ -1435,6 +1488,7 @@ namespace Microsoft.Build.CommandLine
             WarningsAsErrors = taskConfiguration.WarningsAsErrors;
             WarningsNotAsErrors = taskConfiguration.WarningsNotAsErrors;
             WarningsAsMessages = taskConfiguration.WarningsAsMessages;
+            OutOfProcTaskAppDomainWrapper taskWrapper = null;
             try
             {
                 // Change to the startup directory
@@ -1462,9 +1516,10 @@ namespace Microsoft.Build.CommandLine
 #endif
                 // We will not create an appdomain now because of a bug
                 // As a fix, we will create the class directly without wrapping it in a domain
-                _taskWrapper = new OutOfProcTaskAppDomainWrapper();
+                taskWrapper = new OutOfProcTaskAppDomainWrapper();
+                _taskWrapper = taskWrapper;
 
-                taskResult = _taskWrapper.ExecuteTask(
+                taskResult = taskWrapper.ExecuteTask(
                     this as IBuildEngine,
                     taskName,
                     taskLocation,
@@ -1494,13 +1549,37 @@ namespace Microsoft.Build.CommandLine
             {
                 try
                 {
+#if !CLR2COMPATIBILITY
+                    // Reconcile counters: if the task is still in "yielded" state (e.g., it called Yield()
+                    // without a matching Reacquire() before exiting), fix up the counters.
+                    // The yielded count should be decremented and active count should NOT be decremented again
+                    // since YieldForCallback already did that.
+                    if (taskContext is not null && taskContext.State == TaskExecutionState.Yielded)
+                    {
+                        Interlocked.Decrement(ref _yieldedTaskCount);
+                        // Don't decrement _activeTaskCount — it was already decremented by YieldForCallback
+                    }
+                    else
+                    {
+                        Interlocked.Decrement(ref _activeTaskCount);
+                    }
+#else
                     Interlocked.Decrement(ref _activeTaskCount);
+#endif
 
                     IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
                     taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
 
+#if !CLR2COMPATIBILITY
+                    _taskCompleteQueue.Enqueue(new TaskHostTaskComplete(
+                        taskResult,
+#if FEATURE_REPORTFILEACCESSES
+                        _fileAccessData,
+#endif
+                        currentEnvironment));
+#else
                     lock (_taskCompleteLock)
                     {
                         _taskCompletePacket = new TaskHostTaskComplete(
@@ -1510,6 +1589,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                             currentEnvironment);
                     }
+#endif
 
 #if FEATURE_APPDOMAIN
                     foreach (TaskParameter param in taskParams.Values)
@@ -1524,6 +1604,15 @@ namespace Microsoft.Build.CommandLine
                 }
                 catch (Exception e)
                 {
+#if !CLR2COMPATIBILITY
+                    // Create a minimal taskCompletePacket to carry the exception so that the TaskHostTask does not hang while waiting
+                    _taskCompleteQueue.Enqueue(new TaskHostTaskComplete(
+                        new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e),
+#if FEATURE_REPORTFILEACCESSES
+                        _fileAccessData,
+#endif
+                        null));
+#else
                     lock (_taskCompleteLock)
                     {
                         // Create a minimal taskCompletePacket to carry the exception so that the TaskHostTask does not hang while waiting
@@ -1534,6 +1623,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                             null);
                     }
+#endif
                 }
                 finally
                 {
@@ -1542,7 +1632,8 @@ namespace Microsoft.Build.CommandLine
 #endif
 
                     // Call CleanupTask to unload any domains and other necessary cleanup in the taskWrapper
-                    _taskWrapper.CleanupTask();
+                    // Use local variable — _taskWrapper may have been overwritten by a nested task.
+                    taskWrapper?.CleanupTask();
 
 #if !CLR2COMPATIBILITY
                     // Mark context as completed and clean up

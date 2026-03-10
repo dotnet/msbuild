@@ -60,6 +60,18 @@ namespace Microsoft.Build.CommandLine
         public IDictionary<string, string> SavedEnvironment { get; set; }
 
         /// <summary>
+        /// Saved per-task warning/debug settings, captured from OutOfProcTaskHostNode shared fields
+        /// before yielding so they can be restored when the task resumes.
+        /// </summary>
+        public ICollection<string> SavedWarningsAsErrors { get; set; }
+
+        /// <summary>Saved WarningsNotAsErrors.</summary>
+        public ICollection<string> SavedWarningsNotAsErrors { get; set; }
+
+        /// <summary>Saved WarningsAsMessages.</summary>
+        public ICollection<string> SavedWarningsAsMessages { get; set; }
+
+        /// <summary>
         /// Pending callback requests for THIS task, keyed by request ID.
         /// Each task has isolated pending requests to prevent cross-contamination
         /// when multiple tasks are blocked on callbacks simultaneously.
