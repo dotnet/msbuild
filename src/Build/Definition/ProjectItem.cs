@@ -303,7 +303,7 @@ namespace Microsoft.Build.Evaluation
         {
             [DebuggerStepThrough]
             get
-            { return Metadata.Count + FileUtilities.ItemSpecModifiers.All.Length; }
+            { return Metadata.Count + ItemSpecModifiers.All.Length; }
         }
 
         /// <summary>
@@ -458,7 +458,7 @@ namespace Microsoft.Build.Evaluation
                 return true;
             }
 
-            if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name))
+            if (ItemSpecModifiers.IsItemSpecModifier(name))
             {
                 return true;
             }
@@ -583,7 +583,7 @@ namespace Microsoft.Build.Evaluation
             Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
 
             XmlUtilities.VerifyThrowArgumentValidElementName(name);
-            ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
+            ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
             ErrorUtilities.VerifyThrowInvalidOperation(!XMakeElements.ReservedItemNames.Contains(name), "CannotModifyReservedItemMetadata", name);
             ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
 
@@ -641,7 +641,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             ErrorUtilities.VerifyThrowArgumentLength(name);
-            ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
+            ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
             Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
             ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
 
@@ -857,7 +857,7 @@ namespace Microsoft.Build.Evaluation
         {
             string value = null;
 
-            if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name))
+            if (ItemSpecModifiers.IsItemSpecModifier(name))
             {
                 value = BuiltInMetadata.GetMetadataValueEscaped(_project.DirectoryPath, _evaluatedIncludeBeforeWildcardExpansionEscaped, _evaluatedIncludeEscaped, this.Xml.ContainingProject.FullPath, name, ref _fullPath);
             }

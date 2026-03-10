@@ -671,7 +671,6 @@
       <Link>SharedUtilities\FileUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\TempFileUtilities.cs" />
-    <Compile Include="..\Shared\Modifiers.cs" />
     <Compile Include="..\Shared\FrameworkLocationHelper.cs">
       <Link>SharedUtilities\FrameworkLocationHelper.cs</Link>
     </Compile>

@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests
     public class FileUtilities_Tests
     {
         /// <summary>
-        /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier
+        /// Exercises ItemSpecModifiers.GetItemSpecModifier
         /// </summary>
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
@@ -32,55 +32,55 @@ namespace Microsoft.Build.UnitTests
         private static void TestGetItemSpecModifier(string currentDirectory)
         {
             string cache = null;
-            string modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, "foo", String.Empty, FileUtilities.ItemSpecModifiers.RecursiveDir, ref cache);
+            string modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, "foo", String.Empty, ItemSpecModifiers.RecursiveDir, ref cache);
             Assert.Equal(String.Empty, modifier);
 
             cache = null;
-            modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, "foo", String.Empty, FileUtilities.ItemSpecModifiers.ModifiedTime, ref cache);
+            modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, "foo", String.Empty, ItemSpecModifiers.ModifiedTime, ref cache);
             Assert.Equal(String.Empty, modifier);
 
             cache = null;
-            modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, @"foo\goo", String.Empty, FileUtilities.ItemSpecModifiers.RelativeDir, ref cache);
+            modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, @"foo\goo", String.Empty, ItemSpecModifiers.RelativeDir, ref cache);
             Assert.Equal(@"foo" + Path.DirectorySeparatorChar, modifier);
 
             // confirm we get the same thing back the second time
-            modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, @"foo\goo", String.Empty, FileUtilities.ItemSpecModifiers.RelativeDir, ref cache);
+            modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, @"foo\goo", String.Empty, ItemSpecModifiers.RelativeDir, ref cache);
             Assert.Equal(@"foo" + Path.DirectorySeparatorChar, modifier);
 
             cache = null;
             string itemSpec = NativeMethodsShared.IsWindows ? @"c:\foo.txt" : "/foo.txt";
             string itemSpecDir = NativeMethodsShared.IsWindows ? @"c:\" : "/";
-            modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, FileUtilities.ItemSpecModifiers.FullPath, ref cache);
+            modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, ItemSpecModifiers.FullPath, ref cache);
             Assert.Equal(itemSpec, modifier);
             Assert.Equal(itemSpec, cache);
 
-            modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, FileUtilities.ItemSpecModifiers.RootDir, ref cache);
+            modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, ItemSpecModifiers.RootDir, ref cache);
             Assert.Equal(itemSpecDir, modifier);
 
-            modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, FileUtilities.ItemSpecModifiers.Filename, ref cache);
+            modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, ItemSpecModifiers.Filename, ref cache);
             Assert.Equal(@"foo", modifier);
 
-            modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, FileUtilities.ItemSpecModifiers.Extension, ref cache);
+            modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, ItemSpecModifiers.Extension, ref cache);
             Assert.Equal(@".txt", modifier);
 
-            modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, FileUtilities.ItemSpecModifiers.Directory, ref cache);
+            modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, ItemSpecModifiers.Directory, ref cache);
             Assert.Equal(String.Empty, modifier);
 
-            modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, FileUtilities.ItemSpecModifiers.Identity, ref cache);
+            modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, ItemSpecModifiers.Identity, ref cache);
             Assert.Equal(itemSpec, modifier);
 
             string projectPath = NativeMethodsShared.IsWindows ? @"c:\abc\goo.proj" : @"/abc/goo.proj";
             string projectPathDir = NativeMethodsShared.IsWindows ? @"c:\abc\" : @"/abc/";
-            modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, projectPath, FileUtilities.ItemSpecModifiers.DefiningProjectDirectory, ref cache);
+            modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, projectPath, ItemSpecModifiers.DefiningProjectDirectory, ref cache);
             Assert.Equal(projectPathDir, modifier);
 
-            modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, projectPath, FileUtilities.ItemSpecModifiers.DefiningProjectExtension, ref cache);
+            modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, projectPath, ItemSpecModifiers.DefiningProjectExtension, ref cache);
             Assert.Equal(@".proj", modifier);
 
-            modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, projectPath, FileUtilities.ItemSpecModifiers.DefiningProjectFullPath, ref cache);
+            modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, projectPath, ItemSpecModifiers.DefiningProjectFullPath, ref cache);
             Assert.Equal(projectPath, modifier);
 
-            modifier = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, projectPath, FileUtilities.ItemSpecModifiers.DefiningProjectName, ref cache);
+            modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, projectPath, ItemSpecModifiers.DefiningProjectName, ref cache);
             Assert.Equal(@"goo", modifier);
         }
 
@@ -148,7 +148,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
+        /// Exercises ItemSpecModifiers.GetItemSpecModifier on a bad path.
         /// </summary>
         [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void GetItemSpecModifierOnBadPath()
@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
         /// <summary>
-        /// Exercises FileUtilities.ItemSpecModifiers.GetItemSpecModifier on a bad path.
+        /// Exercises ItemSpecModifiers.GetItemSpecModifier on a bad path.
         /// </summary>
         [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
         public void GetItemSpecModifierOnBadPath2()
@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 string cache = null;
-                FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, @"http://www.microsoft.com", String.Empty, FileUtilities.ItemSpecModifiers.RootDir, ref cache);
+                ItemSpecModifiers.GetItemSpecModifier(currentDirectory, @"http://www.microsoft.com", String.Empty, ItemSpecModifiers.RootDir, ref cache);
             }
             catch (Exception e)
             {
@@ -333,80 +333,80 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Exercises FileUtilities.ItemSpecModifiers.IsItemSpecModifier
+        /// Exercises ItemSpecModifiers.IsItemSpecModifier
         /// </summary>
         [Fact]
         public void IsItemSpecModifier()
         {
             // Positive matches using exact case.
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("FullPath")); // "test 1"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("RootDir")); // "test 2"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Filename")); // "test 3"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Extension")); // "test 4"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("RelativeDir")); // "test 5"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Directory")); // "test 6"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("RecursiveDir")); // "test 7"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Identity")); // "test 8"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("ModifiedTime")); // "test 9"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("CreatedTime")); // "test 10"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("AccessedTime")); // "test 11"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("FullPath")); // "test 1"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("RootDir")); // "test 2"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("Filename")); // "test 3"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("Extension")); // "test 4"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("RelativeDir")); // "test 5"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("Directory")); // "test 6"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("RecursiveDir")); // "test 7"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("Identity")); // "test 8"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("ModifiedTime")); // "test 9"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("CreatedTime")); // "test 10"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("AccessedTime")); // "test 11"
 
             // Positive matches using different case.
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("fullPath")); // "test 21"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("rootDir")); // "test 22"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("filename")); // "test 23"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("extension")); // "test 24"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("relativeDir")); // "test 25"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("directory")); // "test 26"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("recursiveDir")); // "test 27"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("identity")); // "test 28"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("modifiedTime")); // "test 29"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("createdTime")); // "test 30"
-            Assert.True(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("accessedTime")); // "test 31"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("fullPath")); // "test 21"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("rootDir")); // "test 22"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("filename")); // "test 23"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("extension")); // "test 24"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("relativeDir")); // "test 25"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("directory")); // "test 26"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("recursiveDir")); // "test 27"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("identity")); // "test 28"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("modifiedTime")); // "test 29"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("createdTime")); // "test 30"
+            Assert.True(ItemSpecModifiers.IsItemSpecModifier("accessedTime")); // "test 31"
 
             // Negative tests to get maximum code coverage inside the many different branches
-            // of FileUtilities.ItemSpecModifiers.IsItemSpecModifier.
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("rootxxx")); // "test 41"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Rootxxx")); // "test 42"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("xxxxxxx")); // "test 43"
+            // of ItemSpecModifiers.IsItemSpecModifier.
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("rootxxx")); // "test 41"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("Rootxxx")); // "test 42"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("xxxxxxx")); // "test 43"
 
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("filexxxx")); // "test 44"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Filexxxx")); // "test 45"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("idenxxxx")); // "test 46"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Idenxxxx")); // "test 47"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("xxxxxxxx")); // "test 48"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("filexxxx")); // "test 44"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("Filexxxx")); // "test 45"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("idenxxxx")); // "test 46"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("Idenxxxx")); // "test 47"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("xxxxxxxx")); // "test 48"
 
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("extenxxxx")); // "test 49"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Extenxxxx")); // "test 50"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("direcxxxx")); // "test 51"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Direcxxxx")); // "test 52"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("xxxxxxxxx")); // "test 53"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("extenxxxx")); // "test 49"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("Extenxxxx")); // "test 50"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("direcxxxx")); // "test 51"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("Direcxxxx")); // "test 52"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("xxxxxxxxx")); // "test 53"
 
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("xxxxxxxxxx")); // "test 54"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("xxxxxxxxxx")); // "test 54"
 
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("relativexxx")); // "test 55"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Relativexxx")); // "test 56"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("createdxxxx")); // "test 57"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Createdxxxx")); // "test 58"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("xxxxxxxxxxx")); // "test 59"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("relativexxx")); // "test 55"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("Relativexxx")); // "test 56"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("createdxxxx")); // "test 57"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("Createdxxxx")); // "test 58"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("xxxxxxxxxxx")); // "test 59"
 
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("recursivexxx")); // "test 60"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Recursivexxx")); // "test 61"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("accessedxxxx")); // "test 62"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Accessedxxxx")); // "test 63"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("modifiedxxxx")); // "test 64"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("Modifiedxxxx")); // "test 65"
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier("xxxxxxxxxxxx")); // "test 66"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("recursivexxx")); // "test 60"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("Recursivexxx")); // "test 61"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("accessedxxxx")); // "test 62"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("Accessedxxxx")); // "test 63"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("modifiedxxxx")); // "test 64"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("Modifiedxxxx")); // "test 65"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier("xxxxxxxxxxxx")); // "test 66"
 
-            Assert.False(FileUtilities.ItemSpecModifiers.IsItemSpecModifier(null)); // "test 67"
+            Assert.False(ItemSpecModifiers.IsItemSpecModifier(null)); // "test 67"
         }
 
         [Fact]
         public void CheckDerivableItemSpecModifiers()
         {
-            Assert.True(FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier("Filename"));
-            Assert.False(FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier("RecursiveDir"));
-            Assert.False(FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier("recursivedir"));
+            Assert.True(ItemSpecModifiers.IsDerivableItemSpecModifier("Filename"));
+            Assert.False(ItemSpecModifiers.IsDerivableItemSpecModifier("RecursiveDir"));
+            Assert.False(ItemSpecModifiers.IsDerivableItemSpecModifier("recursivedir"));
         }
 
         [WindowsOnlyFact]
@@ -441,7 +441,7 @@ namespace Microsoft.Build.UnitTests
             string fullPath = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\a.cs";
             string cache = fullPath;
 
-            Assert.Equal(@"c:\", FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, fullPath, String.Empty, FileUtilities.ItemSpecModifiers.RootDir, ref cache));
+            Assert.Equal(@"c:\", ItemSpecModifiers.GetItemSpecModifier(currentDirectory, fullPath, String.Empty, ItemSpecModifiers.RootDir, ref cache));
         }
 
         [Fact]
