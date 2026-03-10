@@ -13,7 +13,7 @@ using System.Xml.Schema;
 
 namespace Microsoft.Build.Framework;
 
-internal static class FrameworkExceptionHandling
+internal static class ExceptionHandling
 {
     /// <summary>
     /// If the given exception is "ignorable under some circumstances" return false.

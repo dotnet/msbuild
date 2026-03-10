@@ -38,7 +38,7 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.TelemetryInfra;
 using Microsoft.NET.StringTools;
-using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
+using ExceptionHandling = Microsoft.Build.Framework.ExceptionHandling;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 

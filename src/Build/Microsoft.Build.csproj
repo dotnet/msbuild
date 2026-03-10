@@ -661,9 +661,6 @@
     <Compile Include="..\Shared\EventArgsFormatting.cs">
       <Link>SharedUtilities\EventArgsFormatting.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ExceptionHandling.cs">
-      <Link>SharedUtilities\ExceptionHandling.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\FileMatcher.cs">
       <Link>SharedUtilities\FileMatcher.cs</Link>
     </Compile>

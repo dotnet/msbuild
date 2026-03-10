@@ -4,7 +4,9 @@
 using System;
 using System.Reflection;
 using Microsoft.Build.Framework;
+#if FEATURE_APPDOMAIN
 using Microsoft.Build.Shared.Debugging;
+#endif
 
 namespace Microsoft.Build.Shared
 {

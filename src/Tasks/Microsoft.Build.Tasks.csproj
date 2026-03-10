@@ -117,9 +117,6 @@
     <Compile Include="..\Shared\LanguageParser\StreamMappedString.cs">
       <Link>StreamMappedString.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ExceptionHandling.cs">
-      <Link>ExceptionHandling.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\StringUtils.cs">
       <Link>StringUtils.cs</Link>
     </Compile>

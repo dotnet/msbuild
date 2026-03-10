@@ -11,7 +11,7 @@ using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.Debugging;
 
 namespace Microsoft.Build.Internal
