@@ -78,7 +78,6 @@
     <Compile Include="..\Shared\XMakeElements.cs" />
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
-    <Compile Include="..\Shared\IKeyed.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />

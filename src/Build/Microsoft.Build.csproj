@@ -128,7 +128,6 @@
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\NodeEngineShutdownReason.cs" />
-    <Compile Include="..\Shared\IKeyed.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
     <Compile Include="..\Shared\INodePacket.cs" />
@@ -192,6 +191,7 @@
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="BackEnd\Shared\BuildResultBase.cs" />
     <Compile Include="BuildCheck\**\*.cs" />
+    <Compile Include="Collections\IKeyed.cs" />
     <Compile Include="Collections\IValueDictionaryConverter.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableUnescapedValuedEntryHashSet.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
