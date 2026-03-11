@@ -393,7 +393,6 @@
     <Compile Include="BackEnd\TaskExecutionHost\MultiProcessTaskEnvironmentDriver.cs" />
     <Compile Include="BackEnd\TaskExecutionHost\MultiThreadedTaskEnvironmentDriver.cs" />
     <!-- #### COLLECTIONS ### -->
-    <Compile Include="..\Shared\CollectionHelpers.cs" />
     <Compile Include="Collections\ArrayDictionary.cs" />
     <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
     <Compile Include="Collections\ConcurrentStackExtensions.cs" />
