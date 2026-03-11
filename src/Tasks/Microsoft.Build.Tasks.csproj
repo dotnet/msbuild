@@ -110,9 +110,6 @@
     <Compile Include="..\Shared\LanguageParser\StreamMappedString.cs">
       <Link>StreamMappedString.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\StringUtils.cs">
-      <Link>StringUtils.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\FileMatcher.cs" />
     <Compile Include="..\Shared\Tracing.cs" />
     <Compile Include="..\Shared\VisualStudioConstants.cs">
