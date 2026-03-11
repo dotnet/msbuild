@@ -63,9 +63,6 @@
     <Compile Include="..\Shared\AssemblyFolders\Serialization\AssemblyFolderItem.cs">
       <Link>AssemblyDependency\AssemblyFoldersFromConfig\Serialization\AssemblyFolderItem.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
-      <Link>BuildEnvironmentHelper.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>CanonicalError.cs</Link>
     </Compile>

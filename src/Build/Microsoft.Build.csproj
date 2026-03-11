@@ -84,9 +84,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
-      <Link>SharedUtilities\BuildEnvironmentHelper.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
     </Compile>
