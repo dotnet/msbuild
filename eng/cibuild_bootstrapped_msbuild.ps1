@@ -65,7 +65,7 @@ try {
 
   if ($buildStage1)
   {
-    & $PSScriptRoot\Common\Build.ps1 -configuration $configuration -restore -build -ci -msbuildEngine $msbuildEngine /p:CreateBootstrap=true @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci -msbuildEngine $msbuildEngine /p:CreateBootstrap=true @properties
   }
 
   KillProcessesFromRepo
@@ -117,15 +117,14 @@ try {
   # Opt into performance logging. https://github.com/dotnet/msbuild/issues/5900
   $env:DOTNET_PERFLOG_DIR=$PerfLogDir
 
-  # Minimal stage 2 flow for the temporary pipeline experiment:
-  # - Build the bootstrap with the regular VS-backed tool selection from stage 1
-  # - Use the bootstrapped MSBuild only for the no-bootstrap pipeline's signing path
-  # - Avoid running the broader build/test/pack/publish legs since the goal is just to exercise signing
+  # When using bootstrapped MSBuild:
+  # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
+  # - Create bootstrap environment as it's required when also running tests
   if ($onlyDocChanged) {
-    & $PSScriptRoot\Common\Build.ps1 -configuration $configuration -restore -build -ci /p:CreateBootstrap=false @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties
   }
   else {
-    & $PSScriptRoot\Common\Build.ps1 -configuration $configuration -restore -build -sign -ci /p:CreateBootstrap=false @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /nr:false @properties
   }
 
   exit $lastExitCode
