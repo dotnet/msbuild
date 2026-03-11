@@ -90,9 +90,6 @@
     <Compile Include="..\Shared\AwaitExtensions.cs">
       <Link>SharedUtilities\AwaitExtensions</Link>
     </Compile>
-    <Compile Include="..\Shared\AssemblyNameReverseVersionComparer.cs">
-      <Link>SharedUtilities\AssemblyNameReverseVersionComparer.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
     </Compile>
