@@ -611,9 +611,6 @@
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Errors\ErrorUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FrameworkLocationHelper.cs">
-      <Link>SharedUtilities\FrameworkLocationHelper.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>InprocTrackingNativeMethods.cs</Link>
     </Compile>

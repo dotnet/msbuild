@@ -55,9 +55,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\FrameworkLocationHelper.cs">
-      <Link>Shared\FrameworkLocationHelper.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs">
       <Link>RegisteredTaskObjectCacheBase.cs</Link>
     </Compile>

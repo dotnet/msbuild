@@ -181,4 +181,16 @@
   <data name="GlobExpansionFailed" xml:space="preserve">
     <value>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</value>
   </data>
+  <data name="UnsupportedFrameworkVersionForWindowsSdk" xml:space="preserve">
+    <value>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</value>
+  </data>
+  <data name="UnsupportedVisualStudioVersion" xml:space="preserve">
+    <value>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</value>
+  </data>
+  <data name="UnsupportedFrameworkVersion" xml:space="preserve">
+    <value>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</value>
+  </data>
+  <data name="CouldNotGenerateReferenceAssemblyDirectory" xml:space="preserve">
+    <value>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</value>
+  </data>
 </root>

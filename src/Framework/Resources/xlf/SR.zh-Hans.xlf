@@ -67,6 +67,11 @@
         <target state="translated">此集合是只读的。</target>
         <note />
       </trans-unit>
+      <trans-unit id="CouldNotGenerateReferenceAssemblyDirectory">
+        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
+        <target state="translated">尝试从路径“{0}”和框架名字对象“{1}”生成引用程序集路径时出错。{2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">用于调试日志的路径"{0}"太长。使用 MSBUILDDEBUGPATH 环境变量将其设置为较短值，或更改系统配置以允许长路径。</target>
@@ -105,6 +110,21 @@
       <trans-unit id="PathTooLong">
         <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
         <target state="translated">路径: {0} 超过 OS 最大路径限制。完全限定的文件名必须少于 {1} 个字符。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">不支持 .NET Framework 版本“{0}”。请指定枚举 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中的某个值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
+        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
+        <target state="translated">当明确以 Windows SDK 为目标时，不支持 .NET Framework 版本“{0}”，Windows SDK 只在 .NET 4.5 及更高版本上受支持。请指定枚举 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中 Version45 或以上的值。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedVisualStudioVersion">
+        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
+        <target state="translated">不支持 Visual Studio 版本“{0}”。请指定枚举 Microsoft.Build.Utilities.VisualStudioVersion 中的某个值。</target>
         <note />
       </trans-unit>
     </body>

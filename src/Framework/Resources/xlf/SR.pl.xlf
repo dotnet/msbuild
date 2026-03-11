@@ -67,6 +67,11 @@
         <target state="translated">Ta kolekcja jest tylko do odczytu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CouldNotGenerateReferenceAssemblyDirectory">
+        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
+        <target state="translated">Wystąpił błąd podczas próby wygenerowania ścieżki zestawu odwołania ze ścieżki „{0}” i monikera struktury „{1}”. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">Ścieżka „{0}” używana w dziennikach debugowania jest za długa. Ustaw ją na krótszą wartość przy użyciu zmiennej środowiskowej MSBUILDEBUGPATH lub zmień konfigurację systemu, aby zezwolić na długie ścieżki.</target>
@@ -105,6 +110,21 @@
       <trans-unit id="PathTooLong">
         <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
         <target state="translated">Ścieżka: {0} przekracza limit maksymalnej długości ścieżki w systemie operacyjnym. W pełni kwalifikowana nazwa pliku musi się składać z mniej niż {1} znaków.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany. Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
+        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
+        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany, jeśli jawnym obiektem docelowym jest zestaw SDK systemu Windows, ponieważ taki zestaw jest obsługiwany tylko na platformie .NET w wersji 4.5 lub nowszej.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion, która wynosi co najmniej Version45.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedVisualStudioVersion">
+        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
+        <target state="translated">Program Visual Studio w wersji „{0}” nie jest obsługiwany.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.VisualStudioVersion.</target>
         <note />
       </trans-unit>
     </body>
