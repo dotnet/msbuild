@@ -85,7 +85,6 @@
     <Compile Include="..\Shared\TaskHostCoresRequest.cs" />
     <Compile Include="..\Shared\TaskHostCoresResponse.cs" />
     <Compile Include="..\Shared\TaskLoader.cs" />
-    <Compile Include="..\Shared\MSBuildLoadContext.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
     <Compile Include="..\Shared\TypeLoader.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
