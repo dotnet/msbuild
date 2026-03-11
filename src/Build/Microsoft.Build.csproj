@@ -87,9 +87,6 @@
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>SharedUtilities\BuildEnvironmentHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\EncodingStringWriter.cs">
-      <Link>SharedUtilities\EncodingStringWriter.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\AssemblyNameComparer.cs">
       <Link>SharedUtilities\AssemblyNameComparer.cs</Link>
     </Compile>
@@ -203,6 +200,7 @@
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
     <Compile Include="TelemetryInfra\ITelemetryForwarder.cs" />
     <Compile Include="TelemetryInfra\TelemetryForwarderProvider.cs" />
+    <Compile Include="Utilities\EncodingStringWriter.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
