@@ -118,7 +118,6 @@
       <Link>StringUtils.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FileMatcher.cs" />
-    <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Shared\Tracing.cs" />
     <Compile Include="..\Shared\VersionUtilities.cs">
       <Link>VersionUtilities.cs</Link>

@@ -634,9 +634,6 @@
     <Compile Include="..\Shared\AssemblyLoadInfo.cs">
       <Link>SharedUtilities\AssemblyLoadInfo.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs">
-      <Link>SharedUtilities\ReadOnlyEmptyDictionary.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\AssemblyNameExtension.cs">
       <Link>SharedUtilities\AssemblyNameExtension.cs</Link>
     </Compile>

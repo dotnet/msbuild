@@ -84,9 +84,6 @@
     <Compile Include="..\Shared\ProcessExtensions.cs">
       <Link>Shared\ProcessExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs">
-      <Link>Shared\Collections\ReadOnlyEmptyDictionary.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\RegistryDelegates.cs">
       <Link>Shared\RegistryDelegates.cs</Link>
     </Compile>
