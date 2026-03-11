@@ -83,9 +83,6 @@
     <Compile Include="..\Shared\ExtensionFoldersRegistryKey.cs">
       <Link>ExtensionFoldersRegistryKey.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FileDelegates.cs">
-      <Link>FileDelegates.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>PropertyParser.cs</Link>
     </Compile>

@@ -630,9 +630,6 @@
     <Compile Include="..\Shared\BuildEventFileInfo.cs">
       <Link>SharedUtilities\BuildEventFileInfo.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FileDelegates.cs">
-      <Link>SharedUtilities\FileDelegates.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Errors\ErrorUtilities.cs</Link>
     </Compile>

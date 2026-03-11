@@ -65,9 +65,6 @@
       <Link>AssemblyNameComparer.cs</Link>
     </Compile>
     <Compile Include="..\Shared\CollectionHelpers.cs" />
-    <Compile Include="..\Shared\FileDelegates.cs">
-      <Link>FileDelegates.cs</Link>
-    </Compile>
     <Compile Include="..\Build\Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="..\Shared\QuotingUtilities.cs" />
     <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs">
