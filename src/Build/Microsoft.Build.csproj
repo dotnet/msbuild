@@ -127,7 +127,6 @@
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
-    <Compile Include="..\Shared\ProcessExtensions.cs" />
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
     </Compile>
