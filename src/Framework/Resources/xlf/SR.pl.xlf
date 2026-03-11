@@ -57,6 +57,11 @@
         <target state="new">The value cannot be an empty string.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotConvertStringToBool">
+        <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
+        <target state="translated">Ciągu „{0}” nie można przekonwertować na wartość logiczną (prawda/fałsz).</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CollectionIsReadOnly">
         <source>This collection is read-only.</source>
         <target state="translated">Ta kolekcja jest tylko do odczytu.</target>

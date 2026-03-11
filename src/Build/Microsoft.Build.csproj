@@ -636,9 +636,6 @@
     <Compile Include="..\Shared\BuildEventFileInfo.cs">
       <Link>SharedUtilities\BuildEventFileInfo.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ConversionUtilities.cs">
-      <Link>SharedUtilities\ConversionUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\FileDelegates.cs">
       <Link>SharedUtilities\FileDelegates.cs</Link>
     </Compile>

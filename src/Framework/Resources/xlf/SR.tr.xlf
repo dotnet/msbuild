@@ -57,6 +57,11 @@
         <target state="new">The value cannot be an empty string.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotConvertStringToBool">
+        <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
+        <target state="translated">"{0}" dizesi bir boole (doğru/yanlış) değerine dönüştürülemiyor.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CollectionIsReadOnly">
         <source>This collection is read-only.</source>
         <target state="translated">Bu koleksiyon salt okunur.</target>

@@ -67,6 +67,16 @@ namespace Microsoft.Build.Framework
         /// This is only for situations that would mean that there is a bug in MSBuild itself.
         /// </summary>
         [DoesNotReturn]
+        internal static void ThrowInternalError(string message)
+        {
+            throw new InternalErrorException(message);
+        }
+
+        /// <summary>
+        /// Throws InternalErrorException.
+        /// This is only for situations that would mean that there is a bug in MSBuild itself.
+        /// </summary>
+        [DoesNotReturn]
         internal static void ThrowInternalError(string message, Exception? innerException, params object?[]? args)
         {
             throw new InternalErrorException(
