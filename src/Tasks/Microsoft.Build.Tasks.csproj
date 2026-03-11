@@ -104,9 +104,6 @@
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>TaskLoggingHelperExtension.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\MetadataConversionUtilities.cs">
-      <Link>MetadataConversionUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\LanguageParser\StreamMappedString.cs">
       <Link>StreamMappedString.cs</Link>
     </Compile>

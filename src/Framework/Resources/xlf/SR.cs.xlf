@@ -77,6 +77,11 @@
         <target state="translated">Vytvoření dočasného souboru se nepovedlo. Složka dočasných souborů je plná nebo cesta k této složce není správná. {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidAttributeMetadata">
+        <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
+        <target state="translated">Položka {0} má atribut {1} s hodnotou {2}, kterou nebylo možné převést na hodnotu {3}.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidFilespecForTransform">
         <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
         <target state="translated">Metadata položky %({0}) nelze použít na cestu {1}. {2}</target>

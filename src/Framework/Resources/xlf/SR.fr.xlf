@@ -77,6 +77,11 @@
         <target state="translated">Échec de la création d'un fichier temporaire. Le dossier de fichiers temporaires est plein ou son chemin est incorrect. {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidAttributeMetadata">
+        <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
+        <target state="translated">L'élément "{0}" a l'attribut "{1}" avec la valeur "{2}", qui n'a pas pu être convertie en "{3}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidFilespecForTransform">
         <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
         <target state="translated">Impossible d'appliquer la métadonnée d'élément "%({0})" au chemin d'accès "{1}". {2}</target>

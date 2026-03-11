@@ -77,6 +77,11 @@
         <target state="translated">не удалось создать временный файл. Папка временных файлов переполнена, или указан неверный путь. {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidAttributeMetadata">
+        <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
+        <target state="translated">У элемента "{0}" имеется атрибут "{1}" со значением "{2}", который не удалось преобразовать в "{3}".</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidFilespecForTransform">
         <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
         <target state="translated">Не удается применить метаданные элемента "%({0})" к пути "{1}". {2}</target>

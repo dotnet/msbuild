@@ -77,6 +77,11 @@
         <target state="translated">一時ファイルを作成できませんでした。一時ファイル フォルダーがいっぱいであるか、またはそのパスが正しくありません。{0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidAttributeMetadata">
+        <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
+        <target state="translated">項目 "{0}" は、"{3}" に変換できなかった値 "{2}" を伴う属性 "{1}" を含んでいます。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidFilespecForTransform">
         <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
         <target state="translated">項目メタデータ "%({0})" をパス "{1}" に適用できません。{2}</target>

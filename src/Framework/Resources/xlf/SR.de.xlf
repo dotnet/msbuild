@@ -77,6 +77,11 @@
         <target state="translated">Fehler beim Erstellen einer temporären Datei. Der Ordner für temporäre Dateien ist voll, oder der Pfad ist falsch. {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidAttributeMetadata">
+        <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
+        <target state="translated">Das Element "{0}" enthält das {1}-Attribut mit dem Wert "{2}", der nicht in "{3}" konvertiert werden konnte.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidFilespecForTransform">
         <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
         <target state="translated">Die %({0})-Elementmetadaten können nicht auf den Pfad "{1}" angewendet werden. {2}</target>

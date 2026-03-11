@@ -77,6 +77,11 @@
         <target state="translated">未能创建临时文件。临时文件文件夹已满或其路径不正确。{0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidAttributeMetadata">
+        <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
+        <target state="translated">项“{0}”具有值为“{2}”的特性“{1}”，该值未能转换为“{3}”。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidFilespecForTransform">
         <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
         <target state="translated">无法将项元数据“%({0})”应用于路径“{1}”。{2}</target>

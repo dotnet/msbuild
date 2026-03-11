@@ -175,4 +175,7 @@
   <data name="CannotConvertStringToBool" xml:space="preserve">
     <value>The string "{0}" cannot be converted to a boolean (true/false) value.</value>
   </data>
+  <data name="InvalidAttributeMetadata" xml:space="preserve">
+    <value>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</value>
+  </data>
 </root>
