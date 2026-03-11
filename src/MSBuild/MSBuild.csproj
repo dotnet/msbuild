@@ -105,7 +105,6 @@
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
     <Compile Include="..\Shared\AssemblyNameExtension.cs" />
-    <Compile Include="..\Shared\ThreadPoolExtensions.cs" />
     <Compile Include="..\Shared\StringExtensions.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyResources.cs" />
