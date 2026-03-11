@@ -87,9 +87,6 @@
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>SharedUtilities\BuildEnvironmentHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\AssemblyNameComparer.cs">
-      <Link>SharedUtilities\AssemblyNameComparer.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\AwaitExtensions.cs">
       <Link>SharedUtilities\AwaitExtensions</Link>
     </Compile>
@@ -619,9 +616,6 @@
     <Compile Include="Xml\XmlReaderExtension.cs" />
     <Compile Include="..\Shared\AssemblyLoadInfo.cs">
       <Link>SharedUtilities\AssemblyLoadInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyNameExtension.cs">
-      <Link>SharedUtilities\AssemblyNameExtension.cs</Link>
     </Compile>
     <Compile Include="..\Shared\BuildEventFileInfo.cs">
       <Link>SharedUtilities\BuildEventFileInfo.cs</Link>
