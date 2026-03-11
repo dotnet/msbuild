@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <Import Project="..\Shared\DebuggingSources.proj" />
 
@@ -76,7 +76,6 @@
     <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\Shared\XMakeElements.cs" />
-    <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\EventArgsFormatting.cs" />
