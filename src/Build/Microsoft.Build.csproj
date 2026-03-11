@@ -630,9 +630,6 @@
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Errors\ErrorUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\EventArgsFormatting.cs">
-      <Link>SharedUtilities\EventArgsFormatting.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\FrameworkLocationHelper.cs">
       <Link>SharedUtilities\FrameworkLocationHelper.cs</Link>
     </Compile>

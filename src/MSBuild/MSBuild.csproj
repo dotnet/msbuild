@@ -72,7 +72,6 @@
     <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\Shared\XMakeElements.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
-    <Compile Include="..\Shared\EventArgsFormatting.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\XMakeAttributes.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
