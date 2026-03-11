@@ -201,6 +201,7 @@
     <Compile Include="TelemetryInfra\ITelemetryForwarder.cs" />
     <Compile Include="TelemetryInfra\TelemetryForwarderProvider.cs" />
     <Compile Include="Utilities\EncodingStringWriter.cs" />
+    <Compile Include="Utilities\ProjectWriter.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
@@ -663,9 +664,6 @@
     </Compile>
     <Compile Include="..\Shared\ProjectFileErrorUtilities.cs">
       <Link>Errors\ProjectFileErrorUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ProjectWriter.cs">
-      <Link>SharedUtilities\ProjectWriter.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>SharedUtilities\ResourceUtilities.cs</Link>
