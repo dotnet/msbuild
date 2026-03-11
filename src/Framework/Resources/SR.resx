@@ -178,4 +178,7 @@
   <data name="InvalidAttributeMetadata" xml:space="preserve">
     <value>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</value>
   </data>
+  <data name="GlobExpansionFailed" xml:space="preserve">
+    <value>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</value>
+  </data>
 </root>

@@ -69,9 +69,6 @@
     <Compile Include="..\Shared\EventArgsFormatting.cs">
       <Link>Shared\EventArgsFormatting.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\FileMatcher.cs">
-      <Link>Shared\FileMatcher.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\FrameworkLocationHelper.cs">
       <Link>Shared\FrameworkLocationHelper.cs</Link>
     </Compile>

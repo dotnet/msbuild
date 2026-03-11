@@ -77,6 +77,11 @@
         <target state="translated">не удалось создать временный файл. Папка временных файлов переполнена, или указан неверный путь. {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">Возникло исключение при расширении fileSpec со стандартными масками: fileSpec: "{0}", предполагая, что это имя файла. Исключение: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidAttributeMetadata">
         <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
         <target state="translated">У элемента "{0}" имеется атрибут "{1}" со значением "{2}", который не удалось преобразовать в "{3}".</target>

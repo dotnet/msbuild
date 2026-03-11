@@ -77,6 +77,11 @@
         <target state="translated">Falha ao criar arquivo temporário. A pasta de arquivos temporários está cheia ou o caminho está incorreto. {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">Ocorreu uma exceção ao expandir um fileSpec com globs: fileSpec: "{0}", assumindo que se trata de um nome de arquivo. Exceção: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidAttributeMetadata">
         <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
         <target state="translated">O item "{0}" tem atributo "{1}" com valor "{2}" que não pôde ser convertido para "{3}".</target>

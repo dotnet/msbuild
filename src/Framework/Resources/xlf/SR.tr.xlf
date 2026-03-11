@@ -77,6 +77,11 @@
         <target state="translated">Geçici bir dosya oluşturulamadı. Geçici dosyalar klasörü dolu veya yolu hatalı. {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">globs: fileSpec: "{0}" ile bir fileSpec genişletilirken özel bir durum oluştu, bunun bir dosya adı olduğu varsayıldı. Özel Durum: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidAttributeMetadata">
         <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
         <target state="translated">"{0}" öğesinin, "{3}" değerine dönüştürülemeyen "{2}" değerine sahip "{1}" özniteliği var.</target>

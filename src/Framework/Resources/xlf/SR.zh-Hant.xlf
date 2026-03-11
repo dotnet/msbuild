@@ -77,6 +77,11 @@
         <target state="translated">無法建立暫存檔案。暫存檔案資料夾已滿或其路徑錯誤。{0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">展開具有 glob 的 fileSpec 時發生例外狀況: fileSpec: "{0}" (假設它是檔案名稱)。例外狀況: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidAttributeMetadata">
         <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
         <target state="translated">項目 "{0}" 的屬性 "{1}" 的值為 "{2}"，不能轉換為 "{3}"。</target>

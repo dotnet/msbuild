@@ -77,6 +77,11 @@
         <target state="translated">未能创建临时文件。临时文件文件夹已满或其路径不正确。{0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">使用 glob 展开 fileSpec 时发生异常: fileSpec:“{0}”，系统假定它是文件名。异常: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidAttributeMetadata">
         <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
         <target state="translated">项“{0}”具有值为“{2}”的特性“{1}”，该值未能转换为“{3}”。</target>

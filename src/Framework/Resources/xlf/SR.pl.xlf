@@ -77,6 +77,11 @@
         <target state="translated">Nie można utworzyć pliku tymczasowego. Folder plików tymczasowych jest zapełniony lub jego ścieżka jest niepoprawna. {0}</target>
         <note />
       </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">Wystąpił wyjątek podczas rozwijania elementu fileSpec za pomocą globów: fileSpec: „{0}”, przy założeniu, że jest to nazwa pliku. Wyjątek: {1}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="InvalidAttributeMetadata">
         <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
         <target state="translated">Element „{0}” ma atrybut „{1}” o wartości „{2}”, którego nie można przekonwertować na „{3}”.</target>
