@@ -635,7 +635,7 @@ namespace Microsoft.Build.BackEnd
 
         private static (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(NodeMode? expectedNodeMode)
         {
-            var expectedProcessName = Constants.MSBuildExecutableName;
+            var expectedProcessName = Constants.MSBuildAppName;
 
             Process[] processes;
             try
