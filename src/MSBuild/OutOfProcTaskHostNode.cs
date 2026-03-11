@@ -535,11 +535,6 @@ namespace Microsoft.Build.CommandLine
 
         public int RequestCores(int requestedCores)
         {
-#if CLR2COMPATIBILITY
-            // CLR2 task host doesn't support resource management.
-            // If they somehow get here, throw.
-            throw new NotImplementedException();
-#else
             ErrorUtilities.VerifyThrowArgumentOutOfRange(requestedCores > 0, nameof(requestedCores));
 
             if (!CallbacksSupported)
@@ -552,15 +547,10 @@ namespace Microsoft.Build.CommandLine
             var request = new TaskHostCoresRequest(requestedCores, isRelease: false);
             var response = SendCallbackRequestAndWaitForResponse<TaskHostCoresResponse>(request);
             return response.GrantedCores;
-#endif
         }
 
         public void ReleaseCores(int coresToRelease)
         {
-#if CLR2COMPATIBILITY
-            // CLR2 task host doesn't support resource management.
-            throw new NotImplementedException();
-#else
             ErrorUtilities.VerifyThrowArgumentOutOfRange(coresToRelease > 0, nameof(coresToRelease));
 
             if (!CallbacksSupported)
@@ -570,7 +560,6 @@ namespace Microsoft.Build.CommandLine
 
             var request = new TaskHostCoresRequest(coresToRelease, isRelease: true);
             SendCallbackRequestAndWaitForResponse<TaskHostCoresResponse>(request);
-#endif
         }
 
         #endregion
@@ -1080,9 +1069,7 @@ namespace Microsoft.Build.CommandLine
 
                 // Now set the new environment
                 SetTaskHostEnvironment(taskConfiguration.BuildProcessEnvironment);
-#if !CLR2COMPATIBILITY
                 DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(taskConfiguration.BuildProcessEnvironment);
-#endif
 
                 // Set culture
                 Thread.CurrentThread.CurrentCulture = taskConfiguration.Culture;
