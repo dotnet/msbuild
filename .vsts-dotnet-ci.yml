@@ -314,16 +314,12 @@ jobs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
       arguments: -configuration Release -onlyDocChanged $(onlyDocChanged)
     condition: eq(variables.onlyDocChanged, 0)
-    env:
-      ForceUseXCopyMSBuild: 1
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd without test (TEMPORARY)
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
       arguments: -configuration Release -onlyDocChanged 1
     condition: eq(variables.onlyDocChanged, 1)
-    env:
-      ForceUseXCopyMSBuild: 1
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
 #     displayName: Process coverage reports
