@@ -87,9 +87,6 @@
     <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
       <Link>SharedUtilities\BuildEnvironmentHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\AwaitExtensions.cs">
-      <Link>SharedUtilities\AwaitExtensions</Link>
-    </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
     </Compile>
@@ -189,6 +186,7 @@
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
     <Compile Include="TelemetryInfra\ITelemetryForwarder.cs" />
     <Compile Include="TelemetryInfra\TelemetryForwarderProvider.cs" />
+    <Compile Include="Utilities\AwaitExtensions.cs" />
     <Compile Include="Utilities\EncodingStringWriter.cs" />
     <Compile Include="Utilities\ProjectWriter.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
