@@ -87,7 +87,6 @@
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
-    <Compile Include="..\Shared\TranslatorHelpers.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\InterningBinaryReader.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
