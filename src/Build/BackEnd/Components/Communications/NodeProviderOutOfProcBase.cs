@@ -635,8 +635,7 @@ namespace Microsoft.Build.BackEnd
 
         private static (string expectedProcessName, IList<Process> nodeProcesses) GetPossibleRunningNodes(NodeMode? expectedNodeMode)
         {
-            string msbuildLocation = Constants.MSBuildExecutableName;
-            var expectedProcessName = Path.GetFileNameWithoutExtension(CurrentHost.GetCurrentHost() ?? msbuildLocation);
+            var expectedProcessName = Constants.MSBuildExecutableName;
 
             Process[] processes;
             try
@@ -651,7 +650,6 @@ namespace Microsoft.Build.BackEnd
             if (expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5))
             {
                 List<Process> filteredProcesses = [];
-                bool isDotnetProcess = expectedProcessName.Equals(Path.GetFileNameWithoutExtension(Constants.DotnetProcessName), StringComparison.OrdinalIgnoreCase);
 
                 foreach (var process in processes)
                 {
@@ -665,11 +663,6 @@ namespace Microsoft.Build.BackEnd
                         if (commandLine is null)
                         {
                             filteredProcesses.Add(process);
-                            continue;
-                        }
-
-                        if (isDotnetProcess && !commandLine.Contains("MSBuild.dll", StringComparison.OrdinalIgnoreCase))
-                        {
                             continue;
                         }
 
