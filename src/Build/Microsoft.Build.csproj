@@ -111,7 +111,6 @@
     <Compile Include="..\Shared\StringUtils.cs">
       <Link>SharedUtilities\StringUtils.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\TaskFactoryUtilities.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
