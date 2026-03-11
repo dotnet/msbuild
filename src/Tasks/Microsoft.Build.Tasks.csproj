@@ -93,9 +93,6 @@
     <Compile Include="..\Shared\PropertyParser.cs">
       <Link>PropertyParser.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
-      <Link>ReadOnlyEmptyCollection.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\RegistryDelegates.cs">
       <Link>RegistryDelegates.cs</Link>
     </Compile>

@@ -57,6 +57,11 @@
         <target state="new">The value cannot be an empty string.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CollectionIsReadOnly">
+        <source>This collection is read-only.</source>
+        <target state="translated">Tato kolekce je jen pro čtení.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">Cesta „{0}“ použitá pro protokoly ladění je příliš dlouhá. Nastavte ji na kratší hodnotu pomocí proměnné prostředí MSBUILDDEBUGPATH nebo změňte konfigurace vašeho systému, aby povolovala dlouhé cesty.</target>

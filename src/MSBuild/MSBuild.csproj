@@ -79,7 +79,6 @@
     <Compile Include="..\Shared\BufferedReadStream.cs" />
     <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
-    <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Shared\EventArgsFormatting.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
