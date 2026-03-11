@@ -638,9 +638,6 @@
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Errors\ErrorUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\VersionUtilities.cs">
-      <Link>SharedUtilities\VersionUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\EventArgsFormatting.cs">
       <Link>SharedUtilities\EventArgsFormatting.cs</Link>
     </Compile>

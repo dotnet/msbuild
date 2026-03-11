@@ -36,9 +36,6 @@
     <Compile Include="..\Shared\RegistryHelper.cs">
       <Link>RegistryHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\VersionUtilities.cs">
-      <Link>VersionUtilities.cs</Link>
-    </Compile>
 
     <EmbeddedResource Include="..\MSBuild\MSBuild\Microsoft.Build.Core.xsd">
       <Link>Microsoft.Build.Core.xsd</Link>
