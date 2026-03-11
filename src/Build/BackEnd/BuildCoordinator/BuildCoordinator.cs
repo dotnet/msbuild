@@ -327,8 +327,29 @@ namespace Microsoft.Build.BackEnd
 
             lock (_queueLock)
             {
-                // Capacity available — activate immediately
-                if (_activeBuilds.Count < _maxConcurrentBuilds)
+                // If there are already queued builds, new arrivals must queue too (FIFO).
+                // Only promote from the queue on unregister/heartbeat events.
+                if (_queuedBuilds.Count > 0)
+                {
+                    _queuedBuilds.Add(registration);
+                    int position = _queuedBuilds.Count;
+
+                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] QUEUED {buildId}: position={position} active={_activeBuilds.Count}");
+                    writer.WriteLine($"QUEUED {position} {position}");
+                    return;
+                }
+
+                // No queue — check both concurrency limit and budget headroom before admitting.
+                int currentlyGranted = 0;
+                foreach (var kvp in _activeBuilds)
+                {
+                    currentlyGranted += kvp.Value.GrantedNodes;
+                }
+
+                bool hasSlot = _activeBuilds.Count < _maxConcurrentBuilds;
+                bool hasBudget = currentlyGranted < _totalBudget;
+
+                if (hasSlot && hasBudget)
                 {
                     _activeBuilds[buildId] = registration;
                     int granted = CalculateBudget(buildId);
@@ -341,10 +362,10 @@ namespace Microsoft.Build.BackEnd
 
                 // At capacity — queue
                 _queuedBuilds.Add(registration);
-                int position = _queuedBuilds.Count;
+                int queuePosition = _queuedBuilds.Count;
 
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] QUEUED {buildId}: position={position} active={_activeBuilds.Count}");
-                writer.WriteLine($"QUEUED {position} {position}");
+                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] QUEUED {buildId}: position={queuePosition} active={_activeBuilds.Count}");
+                writer.WriteLine($"QUEUED {queuePosition} {queuePosition}");
             }
         }
 
@@ -505,17 +526,19 @@ namespace Microsoft.Build.BackEnd
                 return _totalBudget;
             }
 
-            // Account for queued builds that will be promoted soon.
-            // This way active builds pre-shrink to make room.
-            int pendingCount;
+            // When queue has items, target the full max-builds split so active builds
+            // shrink toward the desired state and make room for promotions.
+            // When queue is empty, divide among actual active builds (more generous).
+            int targetBuilds;
             lock (_queueLock)
             {
-                pendingCount = Math.Min(_queuedBuilds.Count, _maxConcurrentBuilds - activeCount);
-                pendingCount = Math.Max(0, pendingCount);
+                targetBuilds = _queuedBuilds.Count > 0
+                    ? _maxConcurrentBuilds
+                    : activeCount;
             }
 
-            int totalBuilds = Math.Max(_minBuildsForBudget, activeCount + pendingCount);
-            int fairShare = Math.Max(1, _totalBudget / totalBuilds);
+            targetBuilds = Math.Max(targetBuilds, _minBuildsForBudget);
+            int fairShare = Math.Max(1, _totalBudget / targetBuilds);
 
             // But don't exceed what the build originally requested
             if (_activeBuilds.TryGetValue(buildId, out var registration))

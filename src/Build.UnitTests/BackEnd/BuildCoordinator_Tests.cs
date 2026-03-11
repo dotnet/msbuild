@@ -224,18 +224,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
-                // First build gets full budget
-                string? r1 = SendRawCommand("REGISTER build-1 12");
+                // First build requests only 6 — leaves budget headroom for another
+                string? r1 = SendRawCommand("REGISTER build-1 6");
                 int firstGrant = int.Parse(r1!.Split(' ')[1]);
-                firstGrant.ShouldBe(12);
+                firstGrant.ShouldBe(6);
 
-                // Second build joins — activated immediately (capacity available)
+                // Second build joins — admitted because granted (6) < budget (12)
                 string? r2 = SendRawCommand("REGISTER build-2 12");
                 r2.ShouldStartWith("OK ");
                 int grant2 = int.Parse(r2!.Split(' ')[1]);
                 grant2.ShouldBe(6); // 12 / 2 builds = 6 each
 
-                // First build heartbeats — should also see reduced budget
+                // First build heartbeats — should also see reduced budget (capped at requested=6)
                 string? hb1 = SendRawCommand("HEARTBEAT build-1");
                 int newBudget = int.Parse(hb1!.Split(' ')[1]);
                 newBudget.ShouldBe(6);
@@ -254,17 +254,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
-                SendRawCommand("REGISTER build-1 12");
+                // build-1 requests 6, leaving headroom
+                SendRawCommand("REGISTER build-1 6");
                 string? r2 = SendRawCommand("REGISTER build-2 12");
-                r2.ShouldStartWith("OK "); // Activated immediately
+                r2.ShouldStartWith("OK "); // Admitted — granted(6) < budget(12)
 
                 // Now unregister build-2
                 SendRawCommand("UNREGISTER build-2");
 
-                // build-1 should get full budget back
+                // build-1 should still get its requested amount (capped at 6)
                 string? hb = SendRawCommand("HEARTBEAT build-1");
                 int budget = int.Parse(hb!.Split(' ')[1]);
-                budget.ShouldBe(12);
+                budget.ShouldBe(6);
             }
             finally
             {
@@ -378,17 +379,29 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void FairShare_DistributesBudgetEvenly()
         {
+            // Budget=12, max=3. Each build requests 4 so none consumes full budget.
             using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
             coordinator.Start();
 
             try
             {
-                // Register 3 builds — all activate immediately (max=3)
-                SendRawCommand("REGISTER build-1 12");
-                SendRawCommand("REGISTER build-2 12");
-                SendRawCommand("REGISTER build-3 12");
+                // Register 3 builds — each requests 4 (leaves headroom for next)
+                string? r1 = SendRawCommand("REGISTER build-1 4");
+                r1.ShouldStartWith("OK ");
+                int g1 = int.Parse(r1!.Split(' ')[1]);
+                g1.ShouldBe(4); // gets requested (4 < fair share of 12)
 
-                // All three should get 4 nodes each (12 / 3)
+                string? r2 = SendRawCommand("REGISTER build-2 4");
+                r2.ShouldStartWith("OK ");
+                int g2 = int.Parse(r2!.Split(' ')[1]);
+                g2.ShouldBe(4); // granted(4) < budget(12), so admitted
+
+                string? r3 = SendRawCommand("REGISTER build-3 4");
+                r3.ShouldStartWith("OK ");
+                int g3 = int.Parse(r3!.Split(' ')[1]);
+                g3.ShouldBe(4); // granted(8) < budget(12), so admitted
+
+                // All three should get 4 nodes each on heartbeat (12 / 3)
                 string? hb1 = SendRawCommand("HEARTBEAT build-1");
                 string? hb2 = SendRawCommand("HEARTBEAT build-2");
                 string? hb3 = SendRawCommand("HEARTBEAT build-3");
@@ -500,20 +513,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             try
             {
+                // Client requests 6 — leaves budget headroom for second build
                 using var client1 = new BuildCoordinatorClient(_testPipeName);
-                client1.TryRegister(12, out int granted1);
-                granted1.ShouldBe(12);
+                client1.TryRegister(6, out int granted1);
+                granted1.ShouldBe(6);
 
                 client1.StartHeartbeat();
 
-                // Register a second build — activated immediately, budget rebalances
+                // Register a second build — admitted because granted(6) < budget(12)
                 SendRawCommand($"REGISTER second-build 12");
 
                 // Wait for heartbeat to pick up the rebalanced budget
                 Thread.Sleep(5000);
 
                 // The client should have updated its internal granted nodes via heartbeat
-                client1.GrantedNodes.ShouldBe(6); // 12 / 2 = 6
+                // 12/2 = 6, but capped at requested=6
+                client1.GrantedNodes.ShouldBe(6);
             }
             finally
             {
