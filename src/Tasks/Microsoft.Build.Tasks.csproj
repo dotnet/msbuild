@@ -92,9 +92,6 @@
     <Compile Include="..\Shared\RegistryHelper.cs">
       <Link>RegistryHelper.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\StrongNameHelpers.cs">
-      <Link>StrongNameHelpers.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>TaskLoggingHelperExtension.cs</Link>
     </Compile>
@@ -269,6 +266,7 @@
     <Compile Include="ToolTaskExtension.cs" />
     <Compile Include="Touch.cs" />
     <Compile Include="Unzip.cs" />
+    <Compile Include="Utilities\StrongNameHelpers.cs" />
     <Compile Include="VisualBasicParserUtilities.cs" />
     <Compile Include="Warning.cs" />
     <Compile Include="XslTransformation.cs" />
