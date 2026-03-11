@@ -83,7 +83,6 @@
     <Compile Include="CombineTargetFrameworkInfoProperties.cs" />
     <Compile Include="CombineXmlElements.cs" />
     <Compile Include="ConvertToAbsolutePath.cs" />
-    <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
     <Compile Include="..\Shared\ExtensionFoldersRegistryKey.cs">
       <Link>ExtensionFoldersRegistryKey.cs</Link>
     </Compile>

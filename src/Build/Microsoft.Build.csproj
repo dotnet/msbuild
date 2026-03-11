@@ -406,9 +406,6 @@
     <Compile Include="Collections\ConcurrentStackExtensions.cs" />
     <Compile Include="Collections\ConvertingEnumerable.cs" />
     <Compile Include="Collections\CopyOnReadEnumerable.cs" />
-    <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
-      <Link>Collections\CopyOnWriteDictionary.cs</Link>
-    </Compile>
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
     <Compile Include="Collections\HashTableUtility.cs" />
     <Compile Include="Collections\IConstrainableDictionary.cs" />
