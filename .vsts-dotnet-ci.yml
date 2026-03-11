@@ -309,17 +309,21 @@ jobs:
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
-    displayName: cibuild.cmd
+    displayName: cibuild_bootstrapped_msbuild.cmd (TEMPORARY)
     inputs:
-      filename: 'eng/cibuild.cmd'
-      arguments: '-configuration Release -test'
+      filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
+      arguments: -configuration Release -onlyDocChanged $(onlyDocChanged)
     condition: eq(variables.onlyDocChanged, 0)
+    env:
+      ForceUseXCopyMSBuild: 1
   - task: BatchScript@1
-    displayName: cibuild.cmd without test
+    displayName: cibuild_bootstrapped_msbuild.cmd without test (TEMPORARY)
     inputs:
-      filename: 'eng/cibuild.cmd'
-      arguments: '-configuration Release'
+      filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
+      arguments: -configuration Release -onlyDocChanged 1
     condition: eq(variables.onlyDocChanged, 1)
+    env:
+      ForceUseXCopyMSBuild: 1
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
 #     displayName: Process coverage reports
