@@ -180,6 +180,7 @@
     <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableUnescapedValuedEntryHashSet.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
+    <Compile Include="Evaluation\ToolsetElement.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
     <Compile Include="FileAccess\FileAccessData.cs" />
     <Compile Include="FileAccess\FlagsAndAttributes.cs" />
@@ -458,7 +459,6 @@
     <Compile Include="Definition\SubToolset.cs" />
     <Compile Include="Definition\Toolset.cs" />
     <Compile Include="Definition\ToolsetConfigurationReader.cs" />
-    <Compile Include="..\Shared\ToolsetElement.cs" />
     <Compile Include="Definition\ToolsetPropertyDefinition.cs" />
     <Compile Include="Definition\ToolsetReader.cs" />
     <Compile Include="Definition\ToolsetRegistryReader.cs" />

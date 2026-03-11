@@ -84,9 +84,6 @@
     <Compile Include="..\Shared\Tracing.cs">
       <Link>Shared\Tracing.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ToolsetElement.cs">
-      <Link>Shared\ToolsetElement.cs</Link>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup>
