@@ -21,7 +21,6 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public ProjectStartedEventArgs_Tests()
         {
-            BuildEventContext parentBuildEventContext = new BuildEventContext(2, 3, 4, 5);
         }
 
         /// <summary>

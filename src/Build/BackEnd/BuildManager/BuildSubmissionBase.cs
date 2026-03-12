@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Execution
@@ -43,6 +44,7 @@ namespace Microsoft.Build.Execution
             CompletionEvent = new ManualResetEvent(false);
             LoggingCompleted = false;
             CompletionInvoked = 0;
+            BuildEventContext = Framework.BuildEventContext.CreateInitial(submissionId, Scheduler.VirtualNode);
         }
 
         /// <summary>
@@ -54,6 +56,11 @@ namespace Microsoft.Build.Execution
         /// An ID uniquely identifying this request from among other submissions within the same build.
         /// </summary>
         public int SubmissionId { get; }
+
+        /// <summary>
+        /// The build event context for this submission. This will have the submission ID set, and a nodeId of the scheduler's virtual node..
+        /// </summary>
+        public Framework.BuildEventContext BuildEventContext { get; }
 
         /// <summary>
         /// The asynchronous context provided to <see cref="BuildSubmission.ExecuteAsync(BuildSubmissionCompleteCallback, object)"/>, if any.

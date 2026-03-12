@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests
                 null,
                 succeeded: true,
                 eventTimestamp: DateTime.Parse("12/12/2015 06:11:56 PM"));
-            args.BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6);
+            args.BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTaskId(6);
 
             Roundtrip(args,
                 e => ToString(e.BuildEventContext),
@@ -159,10 +159,10 @@ namespace Microsoft.Build.UnitTests
                 targetNames: "Build",
                 properties: new List<DictionaryEntry>() { new DictionaryEntry("Key", "Value") },
                 items: new List<DictionaryEntry>() { new DictionaryEntry("Key", new MyTaskItem() { ItemSpec = "TestItemSpec" }) },
-                parentBuildEventContext: new BuildEventContext(7, 8, 9, 10, 11, 12),
+                parentBuildEventContext: BuildEventContext.CreateInitial(7, 8).WithEvaluationId(9).WithProjectInstanceId(10).WithProjectContextId(11).WithTaskId(12),
                 globalProperties: new Dictionary<string, string>() { { "GlobalKey", "GlobalValue" } },
                 toolsVersion: "Current");
-            args.BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6);
+            args.BuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTaskId(6);
 
             Roundtrip<ProjectStartedEventArgs>(args,
                 e => ToString(e.BuildEventContext),
@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests
         public void RoundtripEnvironmentVariableReadEventArgs()
         {
             EnvironmentVariableReadEventArgs args = new("VarName", "VarValue", "file", 10, 20);
-            args.BuildEventContext = new BuildEventContext(4, 5, 6, 7);
+            args.BuildEventContext = BuildEventContext.CreateInitial(4, 5).WithEvaluationId(6).WithProjectInstanceId(7);
             Roundtrip(args,
                 e => e.Message,
                 e => e.EnvironmentVariableName,
@@ -343,7 +343,7 @@ namespace Microsoft.Build.UnitTests
             {
                 ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
                 ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
-                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+                BuildEventContext = withOptionalData ? BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTaskId(6).WithTargetId(7) : null,
             };
 
             Roundtrip(args,
@@ -416,7 +416,7 @@ namespace Microsoft.Build.UnitTests
             {
                 ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
                 ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
-                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+                BuildEventContext = withOptionalData ? BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTaskId(6).WithTargetId(7) : null,
             };
 
             Roundtrip(args,
@@ -492,7 +492,7 @@ namespace Microsoft.Build.UnitTests
             {
                 ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
                 ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
-                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+                BuildEventContext = withOptionalData ? BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTaskId(6).WithTargetId(7) : null,
             };
 
             Roundtrip(args,
@@ -580,7 +580,7 @@ namespace Microsoft.Build.UnitTests
             {
                 ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
                 ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
-                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+                BuildEventContext = withOptionalData ? BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTaskId(6).WithTargetId(7) : null,
             };
 
 
@@ -675,7 +675,7 @@ namespace Microsoft.Build.UnitTests
             {
                 ExtendedData = withOptionalData ? /*lang=json*/ "{'long-json':'mostly-strings'}" : null,
                 ExtendedMetadata = withOptionalData ? new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } } : null,
-                BuildEventContext = withOptionalData ? new BuildEventContext(1, 2, 3, 4, 5, 6, 7) : null,
+                BuildEventContext = withOptionalData ? BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTaskId(6).WithTargetId(7) : null,
             };
 
 
@@ -902,7 +902,7 @@ namespace Microsoft.Build.UnitTests
                 SkipReason = TargetSkipReason.PreviouslyBuiltSuccessfully,
                 Condition = "$(condition) == true",
                 EvaluatedCondition = "true == true",
-                OriginalBuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7),
+                OriginalBuildEventContext = BuildEventContext.CreateInitial(1, 2).WithEvaluationId(3).WithProjectInstanceId(4).WithProjectContextId(5).WithTaskId(6).WithTargetId(7),
                 OriginallySucceeded = false,
                 TargetFile = "foo.csproj"
             };
