@@ -137,6 +137,17 @@ namespace Microsoft.Build.BackEnd.Components.RequestBuilder
 
         private void StartTracking()
         {
+#if FEATURE_APPDOMAIN
+            if (_appDomain != AppDomain.CurrentDomain)
+            {
+                // Subscribing to AssemblyLoad on a remote AppDomain causes the event handler to be
+                // invoked through a transparent proxy. AssemblyLoadEventArgs is not [Serializable],
+                // so marshaling it across the AppDomain boundary throws SerializationException.
+                // That exception propagates through ITask.Execute() and masks the real task error.
+                // Skip assembly load tracking for tasks running in separate AppDomains.
+                return;
+            }
+#endif
             _appDomain.AssemblyLoad += CurrentDomainOnAssemblyLoad;
         }
 
