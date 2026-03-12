@@ -70,6 +70,34 @@ internal static class ItemSpecModifiers
     };
 
     /// <summary>
+    ///  <para>
+    ///   Caches derivable item-spec modifier results for a single item spec.
+    ///   Stored on item instances (e.g., TaskItem, ProjectItemInstance.TaskItem)
+    ///   alongside the item spec, replacing the former <c>string _fullPath</c> field.
+    ///  </para>
+    ///  <para>
+    ///   Time-based modifiers (ModifiedTime, CreatedTime, AccessedTime) and RecursiveDir
+    ///   are intentionally excluded — time-based modifiers hit the file system and should
+    ///   not be cached, and RecursiveDir requires wildcard context that only the caller has.
+    ///  </para>
+    /// </summary>
+    internal struct Cache
+    {
+        public string? FullPath;
+        public string? RootDir;
+        public string? Filename;
+        public string? Extension;
+        public string? RelativeDir;
+        public string? Directory;
+
+        /// <summary>
+        /// Clears all cached values. Called when the item spec changes.
+        /// </summary>
+        public void Clear()
+            => this = default;
+    }
+
+    /// <summary>
     ///  Resolves a modifier name to its <see cref="ModifierKind"/> using a length+char switch
     ///  instead of a dictionary lookup. Every length bucket is unique or disambiguated by at
     ///  most two character comparisons, so misses are rejected in O(1) with no hashing.
@@ -282,17 +310,18 @@ internal static class ItemSpecModifiers
         && kind is not ModifierKind.RecursiveDir;
 
     /// <summary>
-    /// Performs path manipulations on the given item-spec as directed.
-    /// Does not cache the result.
+    ///  Performs path manipulations on the given item-spec as directed.
+    ///  Does not cache the result.
     /// </summary>
     internal static string GetItemSpecModifier(string? currentDirectory, string itemSpec, string? definingProjectEscaped, string modifier)
     {
-        string? dummy = null;
-        return GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, modifier, ref dummy);
+        Cache cache = default;
+        return GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, modifier, ref cache);
     }
 
     /// <summary>
-    /// Performs path manipulations on the given item-spec as directed.
+    /// Performs path manipulations on the given item-spec as directed, caching
+    /// derivable results in <paramref name="cache"/> for subsequent calls on the same item spec.
     ///
     /// Supported modifiers:
     ///     %(FullPath)         = full path of item
@@ -310,27 +339,26 @@ internal static class ItemSpecModifiers
     /// NOTES:
     /// 1) This method always returns an empty string for the %(RecursiveDir) modifier because it does not have enough
     ///    information to compute it -- only the BuildItem class can compute this modifier.
-    /// 2) All but the file time modifiers could be cached, but it's not worth the space. Only full path is cached, as the others are just string manipulations.
+    /// 2) Time-based modifiers are not cached — they hit the file system and may change between calls.
+    /// 3) DefiningProject* modifiers operate on <paramref name="definingProjectEscaped"/>, not <paramref name="itemSpec"/>,
+    ///    so they are not stored in the per-item-spec cache.
     /// </summary>
     /// <remarks>
-    /// Methods of the Path class "normalize" slashes and periods. For example:
-    /// 1) successive slashes are combined into 1 slash
-    /// 2) trailing periods are discarded
-    /// 3) forward slashes are changed to back-slashes
-    ///
-    /// As a result, we cannot rely on any file-spec that has passed through a Path method to remain the same. We will
-    /// therefore not bother preserving slashes and periods when file-specs are transformed.
-    ///
     /// Never returns null.
     /// </remarks>
-    /// <param name="currentDirectory">The root directory for relative item-specs. When called on the Engine thread, this is the project directory. When called as part of building a task, it is null, indicating that the current directory should be used.</param>
+    /// <param name="currentDirectory">The root directory for relative item-specs.</param>
     /// <param name="itemSpec">The item-spec to modify.</param>
     /// <param name="definingProjectEscaped">The path to the project that defined this item (may be null).</param>
     /// <param name="modifier">The modifier to apply to the item-spec.</param>
-    /// <param name="fullPath">Full path if any was previously computed, to cache.</param>
+    /// <param name="cache">Per-item cache of derivable modifier values.</param>
     /// <returns>The modified item-spec (can be empty string, but will never be null).</returns>
     /// <exception cref="InvalidOperationException">Thrown when the item-spec is not a path.</exception>
-    public static string GetItemSpecModifier(string? currentDirectory, string itemSpec, string? definingProjectEscaped, string modifier, ref string? fullPath)
+    public static string GetItemSpecModifier(
+        string? currentDirectory,
+        string itemSpec,
+        string? definingProjectEscaped,
+        string modifier,
+        ref Cache cache)
     {
         FrameworkErrorUtilities.VerifyThrow(itemSpec != null, "Need item-spec to modify.");
         FrameworkErrorUtilities.VerifyThrow(modifier != null, "Need modifier to apply to item-spec.");
@@ -342,30 +370,30 @@ internal static class ItemSpecModifiers
                 switch (modifierKind)
                 {
                     case ModifierKind.FullPath:
-                        return ComputeFullPath(currentDirectory, itemSpec, ref fullPath);
+                        return cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec);
 
                     case ModifierKind.RootDir:
-                        return ComputeRootDir(ComputeFullPath(currentDirectory, itemSpec, ref fullPath));
+                        return cache.RootDir ??= ComputeRootDir(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec));
 
                     case ModifierKind.Filename:
-                        return ComputeFilename(itemSpec);
+                        return cache.Filename ??= ComputeFilename(itemSpec);
 
                     case ModifierKind.Extension:
-                        return ComputeExtension(itemSpec);
+                        return cache.Extension ??= ComputeExtension(itemSpec);
 
                     case ModifierKind.RelativeDir:
-                        return ComputeRelativeDir(itemSpec);
+                        return cache.RelativeDir ??= ComputeRelativeDir(itemSpec);
 
                     case ModifierKind.Directory:
-                        return ComputeDirectory(ComputeFullPath(currentDirectory, itemSpec, ref fullPath));
+                        return cache.Directory ??= ComputeDirectory(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec));
 
                     case ModifierKind.RecursiveDir:
-                        // only the BuildItem class can compute this modifier -- so leave empty
                         return string.Empty;
 
                     case ModifierKind.Identity:
                         return itemSpec;
 
+                    // Time-based modifiers are NOT cached - they hit the file system.
                     case ModifierKind.ModifiedTime:
                         return ComputeModifiedTime(itemSpec);
 
@@ -376,10 +404,10 @@ internal static class ItemSpecModifiers
                         return ComputeAccessedTime(itemSpec);
                 }
 
-                // At this point, we know this must be one of the DefiningProject* modifier kinds.
+                // DefiningProject* modifiers — these operate on definingProjectEscaped, NOT itemSpec,
+                // so they do NOT use the per-item cache.
                 if (string.IsNullOrEmpty(definingProjectEscaped))
                 {
-                    // We have nothing to work with, but that's sometimes OK -- so just return String.Empty
                     return string.Empty;
                 }
 
@@ -416,9 +444,6 @@ internal static class ItemSpecModifiers
 
         throw new InternalErrorException($"\"{modifier}\" is not a valid item-spec modifier.");
     }
-
-    private static string ComputeFullPath(string? currentDirectory, string itemSpec, ref string? cachedFullPath)
-        => cachedFullPath ??= ComputeFullPath(currentDirectory, itemSpec);
 
     private static string ComputeFullPath(string? currentDirectory, string itemSpec)
     {

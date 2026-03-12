@@ -100,9 +100,9 @@ namespace Microsoft.Build.Evaluation
         private PropertyDictionary<ProjectMetadata> _directMetadata;
 
         /// <summary>
-        /// Cached value of the fullpath metadata. All other metadata are computed on demand.
+        /// Cached values of derivable item-spec modifiers. All time-based metadata are computed on demand.
         /// </summary>
-        private string _fullPath;
+        private ItemSpecModifiers.Cache _cachedModifiers;
 
         /// <summary>
         /// External projects support
@@ -700,7 +700,7 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            _fullPath = null; // Clear cached value
+            _cachedModifiers.Clear(); // Clear cached values
 
             if (_xml.Count == 0 /* no metadata */ && _project.IsSuitableExistingItemXml(_xml, name, null /* no metadata */) && !FileMatcher.HasWildcardsSemicolonItemOrPropertyReferences(name))
             {
@@ -859,7 +859,7 @@ namespace Microsoft.Build.Evaluation
 
             if (ItemSpecModifiers.IsItemSpecModifier(name))
             {
-                value = BuiltInMetadata.GetMetadataValueEscaped(_project.DirectoryPath, _evaluatedIncludeBeforeWildcardExpansionEscaped, _evaluatedIncludeEscaped, this.Xml.ContainingProject.FullPath, name, ref _fullPath);
+                value = BuiltInMetadata.GetMetadataValueEscaped(_project.DirectoryPath, _evaluatedIncludeBeforeWildcardExpansionEscaped, _evaluatedIncludeEscaped, this.Xml.ContainingProject.FullPath, name, ref _cachedModifiers);
             }
 
             return value;

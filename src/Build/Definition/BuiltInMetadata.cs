@@ -48,28 +48,28 @@ namespace Microsoft.Build.Evaluation
         /// <param name="evaluatedIncludeEscaped">The evaluated include for the item.</param>
         /// <param name="definingProjectEscaped">The path to the project that defined this item</param>
         /// <param name="name">The name of the metadata.</param>
-        /// <param name="fullPath">The generated full path, for caching</param>
+        /// <param name="cache">The generated full path, for caching</param>
         /// <returns>The unescaped metadata value.</returns>
-        internal static string GetMetadataValue(string currentDirectory, string evaluatedIncludeBeforeWildcardExpansionEscaped, string evaluatedIncludeEscaped, string definingProjectEscaped, string name, ref string? fullPath)
-        {
-            return EscapingUtilities.UnescapeAll(GetMetadataValueEscaped(currentDirectory, evaluatedIncludeBeforeWildcardExpansionEscaped, evaluatedIncludeEscaped, definingProjectEscaped, name, ref fullPath));
-        }
+        internal static string GetMetadataValue(
+            string currentDirectory,
+            string evaluatedIncludeBeforeWildcardExpansionEscaped,
+            string evaluatedIncludeEscaped,
+            string definingProjectEscaped,
+            string name,
+            ref ItemSpecModifiers.Cache cache)
+            => EscapingUtilities.UnescapeAll(GetMetadataValueEscaped(currentDirectory, evaluatedIncludeBeforeWildcardExpansionEscaped, evaluatedIncludeEscaped, definingProjectEscaped, name, ref cache));
 
         /// <summary>
-        /// Retrieves a built-in metadata value and caches it.
+        /// Retrieves a built-in metadata value, caching derivable results in the provided per-item cache.
         /// If value is not available, returns empty string.
         /// </summary>
-        /// <param name="currentDirectory">
-        /// The current directory for evaluation.  Null if this is being called from a task, otherwise
-        /// it should be the project's directory.
-        /// </param>
-        /// <param name="evaluatedIncludeBeforeWildcardExpansionEscaped">The evaluated include prior to wildcard expansion.</param>
-        /// <param name="evaluatedIncludeEscaped">The evaluated include for the item.</param>
-        /// <param name="definingProjectEscaped">The path to the project that defined this item</param>
-        /// <param name="name">The name of the metadata.</param>
-        /// <param name="fullPath">The generated full path, for caching</param>
-        /// <returns>The escaped as necessary metadata value.</returns>
-        internal static string GetMetadataValueEscaped(string currentDirectory, string evaluatedIncludeBeforeWildcardExpansionEscaped, string evaluatedIncludeEscaped, string definingProjectEscaped, string name, ref string? fullPath)
+        internal static string GetMetadataValueEscaped(
+            string currentDirectory,
+            string evaluatedIncludeBeforeWildcardExpansionEscaped,
+            string evaluatedIncludeEscaped,
+            string definingProjectEscaped,
+            string name,
+            ref ItemSpecModifiers.Cache cache)
         {
             // This is an assert, not a VerifyThrow, because the caller should already have done this check, and it's slow/hot.
             Debug.Assert(ItemSpecModifiers.IsItemSpecModifier(name));
@@ -81,7 +81,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                value = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, evaluatedIncludeEscaped, definingProjectEscaped, name, ref fullPath);
+                value = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, evaluatedIncludeEscaped, definingProjectEscaped, name, ref cache);
             }
 
             return value;
