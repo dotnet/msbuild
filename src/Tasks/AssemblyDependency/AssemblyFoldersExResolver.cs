@@ -92,6 +92,11 @@ namespace Microsoft.Build.Tasks
         private readonly IBuildEngine4 _buildEngine;
 
         /// <summary>
+        /// TaskEnvironment for thread-safe access to environment variables.
+        /// </summary>
+        private readonly TaskEnvironment _taskEnvironment;
+
+        /// <summary>
         /// If it is not initialized then just return the null object, that would mean the resolver was not called.
         /// </summary>
         internal AssemblyFoldersEx AssemblyFoldersExLocations => _assemblyFoldersCache?.AssemblyFoldersEx;
@@ -99,13 +104,14 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        public AssemblyFoldersExResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetRegistrySubKeyNames getRegistrySubKeyNames, GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue, GetAssemblyRuntimeVersion getRuntimeVersion, OpenBaseKey openBaseKey, Version targetedRuntimeVesion, ProcessorArchitecture targetProcessorArchitecture, bool compareProcessorArchitecture, IBuildEngine buildEngine)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, targetProcessorArchitecture, compareProcessorArchitecture)
+        public AssemblyFoldersExResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetRegistrySubKeyNames getRegistrySubKeyNames, GetRegistrySubKeyDefaultValue getRegistrySubKeyDefaultValue, GetAssemblyRuntimeVersion getRuntimeVersion, OpenBaseKey openBaseKey, Version targetedRuntimeVesion, ProcessorArchitecture targetProcessorArchitecture, bool compareProcessorArchitecture, IBuildEngine buildEngine, TaskEnvironment taskEnvironment)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, targetProcessorArchitecture, compareProcessorArchitecture, taskEnvironment)
         {
             _buildEngine = buildEngine as IBuildEngine4;
             _getRegistrySubKeyNames = getRegistrySubKeyNames;
             _getRegistrySubKeyDefaultValue = getRegistrySubKeyDefaultValue;
             _openBaseKey = openBaseKey;
+            _taskEnvironment = taskEnvironment;
         }
 
         /// <summary>
@@ -161,7 +167,7 @@ namespace Microsoft.Build.Tasks
                     }
                     _wasMatch = true;
 
-                    bool useCache = Environment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") == null;
+                    bool useCache = _taskEnvironment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") == null;
                     string key = "ca22615d-aa83-444b-80b9-b32f3d5db097" + this.searchPathElement;
                     if (useCache && _buildEngine != null)
                     {
@@ -171,7 +177,7 @@ namespace Microsoft.Build.Tasks
                     if (_assemblyFoldersCache == null)
                     {
                         AssemblyFoldersEx assemblyFolders = new AssemblyFoldersEx(_registryKeyRoot, _targetRuntimeVersion, _registryKeySuffix, _osVersion, _platform, _getRegistrySubKeyNames, _getRegistrySubKeyDefaultValue, this.targetProcessorArchitecture, _openBaseKey);
-                        _assemblyFoldersCache = new AssemblyFoldersExCache(assemblyFolders, fileExists);
+                        _assemblyFoldersCache = new AssemblyFoldersExCache(assemblyFolders, fileExists, _taskEnvironment);
                         if (useCache)
                         {
                             _buildEngine?.RegisterTaskObject(key, _assemblyFoldersCache, RegisteredTaskObjectLifetime.Build, true /* dispose early ok*/);
@@ -212,6 +218,7 @@ namespace Microsoft.Build.Tasks
                     {
                         foreach (AssemblyFoldersExInfo assemblyFolder in _assemblyFoldersCache.AssemblyFoldersEx)
                         {
+                            // assemblyFolder.DirectoryPath is assumed to be absolute path as it was taken from registry.
                             string candidatePath = ResolveFromDirectory(assemblyName, isPrimaryProjectReference, wantSpecificVersion, executableExtensions, assemblyFolder.DirectoryPath, assembliesConsideredAndRejected);
 
                             // We have a full path returned
@@ -280,12 +287,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Constructor
         /// </summary>
-        internal AssemblyFoldersExCache(AssemblyFoldersEx assemblyFoldersEx, FileExists fileExists)
+        internal AssemblyFoldersExCache(AssemblyFoldersEx assemblyFoldersEx, FileExists fileExists, TaskEnvironment taskEnvironment)
         {
             AssemblyFoldersEx = assemblyFoldersEx;
             _fileExists = fileExists;
 
-            if (Environment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") != null)
+            if (taskEnvironment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") != null)
             {
                 _useOriginalFileExists = true;
             }

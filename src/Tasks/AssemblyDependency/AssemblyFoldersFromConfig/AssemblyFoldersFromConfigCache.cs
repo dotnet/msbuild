@@ -35,12 +35,12 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         /// <summary>
         /// Constructor
         /// </summary>
-        internal AssemblyFoldersFromConfigCache(AssemblyFoldersFromConfig assemblyFoldersFromConfig, FileExists fileExists)
+        internal AssemblyFoldersFromConfigCache(AssemblyFoldersFromConfig assemblyFoldersFromConfig, FileExists fileExists, TaskEnvironment taskEnvironment)
         {
             AssemblyFoldersFromConfig = assemblyFoldersFromConfig;
             _fileExists = fileExists;
 
-            if (Environment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") != null)
+            if (taskEnvironment.GetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE") != null)
             {
                 _useOriginalFileExists = true;
             }
