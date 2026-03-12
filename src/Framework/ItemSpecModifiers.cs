@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -80,6 +81,11 @@ internal static class ItemSpecModifiers
     ///   are intentionally excluded — time-based modifiers hit the file system and should
     ///   not be cached, and RecursiveDir requires wildcard context that only the caller has.
     ///  </para>
+    ///  <para>
+    ///   DefiningProject* modifiers are cached separately in a static shared cache
+    ///   (<see cref="s_definingProjectCache"/>) keyed by the defining project path,
+    ///   since many items share the same defining project.
+    ///  </para>
     /// </summary>
     internal struct Cache
     {
@@ -96,6 +102,37 @@ internal static class ItemSpecModifiers
         public void Clear()
             => this = default;
     }
+
+    /// <summary>
+    /// Cached results for all four DefiningProject* modifiers, computed from a single
+    /// defining project path. Instances are shared across all items that originate from
+    /// the same project file.
+    /// </summary>
+    private sealed class DefiningProjectModifierCache
+    {
+        public readonly string FullPath;
+        public readonly string Directory;
+        public readonly string Name;
+        public readonly string Extension;
+
+        public DefiningProjectModifierCache(string? currentDirectory, string definingProjectEscaped)
+        {
+            FullPath = ComputeFullPath(currentDirectory, definingProjectEscaped);
+            string rootDir = ComputeRootDir(FullPath);
+            string directory = ComputeDirectory(FullPath);
+            Directory = Path.Combine(rootDir, directory);
+            Name = ComputeFilename(definingProjectEscaped);
+            Extension = ComputeExtension(definingProjectEscaped);
+        }
+    }
+
+    /// <summary>
+    /// Static cache of DefiningProject* results keyed by the escaped defining project path.
+    /// In a typical build there are only a handful of distinct defining projects (tens, not thousands),
+    /// so this dictionary stays very small. The cache lives for the lifetime of the process.
+    /// </summary>
+    private static readonly ConcurrentDictionary<string, DefiningProjectModifierCache> s_definingProjectCache =
+        new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
     ///  Resolves a modifier name to its <see cref="ModifierKind"/> using a length+char switch
@@ -340,8 +377,9 @@ internal static class ItemSpecModifiers
     /// 1) This method always returns an empty string for the %(RecursiveDir) modifier because it does not have enough
     ///    information to compute it -- only the BuildItem class can compute this modifier.
     /// 2) Time-based modifiers are not cached — they hit the file system and may change between calls.
-    /// 3) DefiningProject* modifiers operate on <paramref name="definingProjectEscaped"/>, not <paramref name="itemSpec"/>,
-    ///    so they are not stored in the per-item-spec cache.
+    /// 3) DefiningProject* modifiers operate on <paramref name="definingProjectEscaped"/>, not <paramref name="itemSpec"/>.
+    ///    Their results are cached in a static shared cache keyed by the defining project path, since many
+    ///    items share the same defining project and the set of distinct projects is small (typically tens).
     /// </summary>
     /// <remarks>
     /// Never returns null.
@@ -402,10 +440,13 @@ internal static class ItemSpecModifiers
 
                     case ModifierKind.AccessedTime:
                         return ComputeAccessedTime(itemSpec);
+
+                    default:
+                        break;
                 }
 
-                // DefiningProject* modifiers — these operate on definingProjectEscaped, NOT itemSpec,
-                // so they do NOT use the per-item cache.
+                // DefiningProject* modifiers — these operate on definingProjectEscaped, NOT itemSpec.
+                // Results are cached in a static shared dictionary keyed by the defining project path.
                 if (string.IsNullOrEmpty(definingProjectEscaped))
                 {
                     return string.Empty;
@@ -413,27 +454,29 @@ internal static class ItemSpecModifiers
 
                 FrameworkErrorUtilities.VerifyThrow(definingProjectEscaped != null, "How could definingProjectEscaped by null?");
 
+                // Fast path: check if we already have cached results for this defining project.
+                // This avoids any closure allocation on the hot path. The miss path only runs once per distinct defining project.
+                if (!s_definingProjectCache.TryGetValue(definingProjectEscaped, out DefiningProjectModifierCache? definingProjectModifiers))
+                {
+                    string? dir = currentDirectory;
+                    definingProjectModifiers = s_definingProjectCache.GetOrAdd(
+                        definingProjectEscaped,
+                        key => new DefiningProjectModifierCache(dir, key));
+                }
+
                 switch (modifierKind)
                 {
-                    case ModifierKind.DefiningProjectDirectory:
-                        {
-                            string definingProjectFullPath = ComputeFullPath(currentDirectory, definingProjectEscaped);
-
-                            // ItemSpecModifiers.Directory does not contain the root directory
-                            string rootDir = ComputeRootDir(definingProjectFullPath);
-                            string directory = ComputeDirectory(definingProjectFullPath);
-
-                            return Path.Combine(rootDir, directory);
-                        }
-
                     case ModifierKind.DefiningProjectFullPath:
-                        return ComputeFullPath(currentDirectory, definingProjectEscaped);
+                        return definingProjectModifiers.FullPath;
+
+                    case ModifierKind.DefiningProjectDirectory:
+                        return definingProjectModifiers.Directory;
 
                     case ModifierKind.DefiningProjectName:
-                        return ComputeFilename(definingProjectEscaped);
+                        return definingProjectModifiers.Name;
 
                     case ModifierKind.DefiningProjectExtension:
-                        return ComputeExtension(definingProjectEscaped);
+                        return definingProjectModifiers.Extension;
                 }
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
