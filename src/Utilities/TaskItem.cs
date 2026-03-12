@@ -51,8 +51,8 @@ namespace Microsoft.Build.Utilities
         // Values are stored in escaped form.
         private ImmutableDictionary<string, string> _metadata;
 
-        // cache of the fullpath value
-        private string _fullPath;
+        // cache of derivable modifier values
+        private ItemSpecModifiers.Cache _cachedModifiers;
 
         /// <summary>
         /// May be defined if we're copying this item from a pre-existing one.  Otherwise,
@@ -186,7 +186,7 @@ namespace Microsoft.Build.Utilities
                 ErrorUtilities.VerifyThrowArgumentNull(value, nameof(ItemSpec));
 
                 _itemSpec = FileUtilities.FixFilePath(value);
-                _fullPath = null;
+                _cachedModifiers.Clear();
             }
         }
 
@@ -205,7 +205,7 @@ namespace Microsoft.Build.Utilities
             set
             {
                 _itemSpec = FileUtilities.FixFilePath(value);
-                _fullPath = null;
+                _cachedModifiers.Clear();
             }
         }
 
@@ -508,7 +508,7 @@ namespace Microsoft.Build.Utilities
             {
                 // FileUtilities.GetItemSpecModifier is expecting escaped data, which we assume we already are.
                 // Passing in a null for currentDirectory indicates we are already in the correct current directory
-                metadataValue = ItemSpecModifiers.GetItemSpecModifier(null, _itemSpec, _definingProject, metadataName, ref _fullPath);
+                metadataValue = ItemSpecModifiers.GetItemSpecModifier(null, _itemSpec, _definingProject, metadataName, ref _cachedModifiers);
             }
             else
             {
