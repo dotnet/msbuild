@@ -50,26 +50,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\Constants.cs">
-      <Link>Shared\Constants.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\BinaryReaderExtensions.cs">
-      <Link>Shared\BinaryReaderExtensions.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\BinaryWriterExtensions.cs">
-      <Link>Shared\BinaryWriterExtensions.cs</Link>
-    </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
-    <Compile Include="..\Shared\EnvironmentUtilities.cs" Link="EnvironmentUtilities.cs" />
-    <Compile Include="..\Shared\IMSBuildElementLocation.cs">
-      <Link>Shared\IMSBuildElementLocation.cs</Link>
-    </Compile>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <Compile Remove="XamlTypes\**" />
     <EmbeddedResource Remove="XamlTypes\**" />
     <None Remove="XamlTypes\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\StringTools\StringTools.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -81,6 +72,6 @@
       <GenerateSource>true</GenerateSource>
     </EmbeddedResource>
 
-    <Using Include="$(RootNamespace).Resources"/>
+    <Using Include="$(RootNamespace).Resources" />
   </ItemGroup>
 </Project>

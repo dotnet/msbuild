@@ -525,7 +525,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>The specified path with a trailing slash.</returns>
         internal static string EnsureTrailingSlash(string path)
         {
-            return FrameworkFileUtilities.EnsureTrailingSlash(path);
+            return FileUtilities.EnsureTrailingSlash(path);
         }
 
         /// <summary>

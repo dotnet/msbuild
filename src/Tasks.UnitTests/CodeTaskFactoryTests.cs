@@ -1206,15 +1206,15 @@ namespace Microsoft.Build.UnitTests
             {
                 // Ensure we're getting the right temp path (%TMP% == GetTempPath())
                 Assert.Equal(
-                    FrameworkFileUtilities.EnsureTrailingSlash(Path.GetTempPath()),
-                    FrameworkFileUtilities.EnsureTrailingSlash(Path.GetFullPath(oldTempPath)));
+                    FileUtilities.EnsureTrailingSlash(Path.GetTempPath()),
+                    FileUtilities.EnsureTrailingSlash(Path.GetFullPath(oldTempPath)));
                 Assert.False(Directory.Exists(newTempPath));
 
                 Environment.SetEnvironmentVariable("TMP", newTempPath);
 
                 Assert.Equal(
-                    FrameworkFileUtilities.EnsureTrailingSlash(newTempPath),
-                    FrameworkFileUtilities.EnsureTrailingSlash(Path.GetTempPath()));
+                    FileUtilities.EnsureTrailingSlash(newTempPath),
+                    FileUtilities.EnsureTrailingSlash(Path.GetTempPath()));
 
                 MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
                 mockLogger.AssertLogContains("Hello, World!");

@@ -1439,7 +1439,7 @@ namespace Microsoft.Build.BackEnd
                                 // Dump all engine exceptions to a temp file
                                 // so that we have something to go on in the
                                 // event of a failure
-                                ExceptionHandling.DumpExceptionToFile(e);
+                                DebugUtils.DumpExceptionToFile(e);
 
                                 // Raise the exception to the host, so that it can signal termination of the build.
                                 RaiseEngineException(e);
