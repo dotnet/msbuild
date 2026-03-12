@@ -5,71 +5,82 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.IO.Pipes;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
-    /// A standalone coordinator process that manages node budgets across concurrent MSBuild instances.
+    /// Outcome of a <see cref="BuildCoordinator.Register"/> call.
+    /// </summary>
+    public enum RegisterOutcome
+    {
+        /// <summary>Build was activated immediately.</summary>
+        Granted,
+        /// <summary>Build was queued — wait for promotion.</summary>
+        Queued,
+    }
+
+    /// <summary>
+    /// Result returned from <see cref="BuildCoordinator.Register"/>.
+    /// </summary>
+    public readonly struct RegisterResult
+    {
+        public RegisterOutcome Outcome { get; }
+        public int GrantedNodes { get; }
+        public int QueuePosition { get; }
+        public int QueueTotal { get; }
+
+        private RegisterResult(RegisterOutcome outcome, int grantedNodes, int queuePosition, int queueTotal)
+        {
+            Outcome = outcome;
+            GrantedNodes = grantedNodes;
+            QueuePosition = queuePosition;
+            QueueTotal = queueTotal;
+        }
+
+        internal static RegisterResult Grant(int grantedNodes) => new(RegisterOutcome.Granted, grantedNodes, 0, 0);
+        internal static RegisterResult Queue(int position, int total) => new(RegisterOutcome.Queued, 0, position, total);
+    }
+
+    /// <summary>
+    /// Snapshot of coordinator state returned by <see cref="BuildCoordinator.GetStatus"/>.
+    /// </summary>
+    public readonly struct CoordinatorStatus
+    {
+        public int TotalBudget { get; }
+        public int ActiveCount { get; }
+        public int QueuedCount { get; }
+        public int MaxConcurrentBuilds { get; }
+
+        internal CoordinatorStatus(int totalBudget, int activeCount, int queuedCount, int maxConcurrentBuilds)
+        {
+            TotalBudget = totalBudget;
+            ActiveCount = activeCount;
+            QueuedCount = queuedCount;
+            MaxConcurrentBuilds = maxConcurrentBuilds;
+        }
+    }
+
+    /// <summary>
+    /// Pure domain coordinator that manages node budgets across concurrent MSBuild instances.
     ///
     /// Simple capacity model: builds register and are activated immediately if there's capacity
     /// (active count &lt; maxConcurrentBuilds). Otherwise they're queued FIFO and promoted when
-    /// a slot opens (via UNREGISTER or staleness reaping). Each active build is granted a fair
+    /// a slot opens (via Unregister or staleness reaping). Each active build is granted a fair
     /// share of the total node budget (totalBudget / activeCount), capped at what it requested.
     ///
-    /// Protocol (line-based text over named pipe):
-    ///   REGISTER buildId requestedNodes
-    ///     → OK grantedNodes                    (activated — has capacity)
-    ///     → QUEUED position totalQueued         (at capacity — wait for slot)
-    ///
-    ///   HEARTBEAT buildId
-    ///     → OK grantedNodes                    (active build — current budget)
-    ///     → QUEUED position totalQueued waitSec (queued build — position update)
-    ///
-    ///   UNREGISTER buildId
-    ///     → OK [promoted buildId]              (promotes next queued build if any)
-    ///
-    ///   STATUS
-    ///     → Multi-line summary of active + queued builds
-    ///
-    ///   SHUTDOWN
-    ///     → OK
+    /// This class contains NO I/O. Transport is handled by <see cref="NamedPipeCoordinatorHost"/>.
     /// </summary>
     public sealed class BuildCoordinator : IDisposable
     {
-        /// <summary>
-        /// Well-known pipe name scoped to the current user.
-        /// On Unix: /tmp/MSBuild-Coordinator-{username}
-        /// On Windows: MSBuild-Coordinator-{username}
-        /// </summary>
-        internal static string GetPipeName()
-        {
-            string user = Environment.UserName;
-            string pipeName = $"MSBuild-Coordinator-{user}";
-
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                return $"/tmp/{pipeName}";
-            }
-
-            return pipeName;
-        }
-
-        private readonly int _totalBudget;
-        private readonly int _maxConcurrentBuilds;
-        private readonly int _minBuildsForBudget;
-        private readonly string? _pipeNameOverride;
+        private readonly INodeBudgetPolicy _scheduler;
+        private readonly int _startupDelayMs;
         private readonly ConcurrentDictionary<string, BuildRegistration> _activeBuilds = new();
         private readonly List<BuildRegistration> _queuedBuilds = new();
         private readonly object _queueLock = new();
-        private readonly CancellationTokenSource _cts = new();
-        private Task? _listenTask;
         private Timer? _stalenessReaper;
-        private Timer? _pipeWatchdog;
-        private CancellationTokenSource? _listenCycleCts;
+        private bool _startupDelayActive;
+        private Timer? _startupDelayTimer;
 
         /// <summary>
         /// If a build hasn't heartbeated in this many seconds, consider it dead.
@@ -81,350 +92,93 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal int ReaperIntervalSeconds { get; set; } = 5;
 
-        public BuildCoordinator(int totalBudget, int maxConcurrentBuilds, int minBuildsForBudget = 1)
-            : this(totalBudget, maxConcurrentBuilds, minBuildsForBudget, pipeName: null)
+        /// <summary>
+        /// The budget policy used by this coordinator.
+        /// </summary>
+        internal INodeBudgetPolicy Scheduler => _scheduler;
+
+        /// <summary>
+        /// Callback invoked when a queued build is promoted to active.
+        /// The transport layer provides this at construction to receive promotion notifications.
+        /// Parameters: (buildId, grantedNodes).
+        /// </summary>
+        private readonly Action<string, int>? _onBuildPromoted;
+
+        public BuildCoordinator(INodeBudgetPolicy scheduler, int startupDelayMs = 0, Action<string, int>? onBuildPromoted = null)
         {
+            _scheduler = scheduler ?? throw new ArgumentNullException(nameof(scheduler));
+            _startupDelayMs = Math.Max(0, startupDelayMs);
+            _startupDelayActive = _startupDelayMs > 0;
+            _onBuildPromoted = onBuildPromoted;
         }
 
         /// <summary>
-        /// Internal constructor for tests — allows overriding the pipe name to avoid
-        /// collisions with a real coordinator or other test instances.
+        /// Register a build. Returns immediately with either a grant (active) or a queue position.
         /// </summary>
-        internal BuildCoordinator(int totalBudget, int maxConcurrentBuilds, int minBuildsForBudget, string? pipeName)
+        public RegisterResult Register(string buildId, int requestedNodes)
         {
-            if (totalBudget <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(totalBudget), totalBudget, "Budget must be at least 1.");
-            }
-
-            if (maxConcurrentBuilds <= 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(maxConcurrentBuilds), maxConcurrentBuilds, "Max concurrent builds must be at least 1.");
-            }
-
-            _totalBudget = totalBudget;
-            _maxConcurrentBuilds = maxConcurrentBuilds;
-            _minBuildsForBudget = Math.Max(1, minBuildsForBudget);
-            _pipeNameOverride = pipeName;
-        }
-
-        /// <summary>
-        /// Returns the effective pipe name, preferring the override if set.
-        /// </summary>
-        internal string EffectivePipeName => _pipeNameOverride ?? GetPipeName();
-
-        /// <summary>
-        /// Start listening for MSBuild client connections.
-        /// </summary>
-        public void Start()
-        {
-            string pipeName = EffectivePipeName;
-
-            // On Unix, clean up stale pipe file — warn if another coordinator is alive.
-            if (NativeMethodsShared.IsUnixLike && File.Exists(pipeName))
-            {
-                if (TryConnectToExisting(pipeName))
-                {
-                    Console.WriteLine($"WARNING: Another coordinator may be running on {pipeName}. Taking over...");
-                }
-
-                File.Delete(pipeName);
-            }
-
-            Console.WriteLine($"Build Coordinator starting");
-            Console.WriteLine($"  Pipe: {pipeName}");
-            Console.WriteLine($"  Budget: {_totalBudget} nodes");
-            Console.WriteLine($"  Max concurrent builds: {_maxConcurrentBuilds}");
-            Console.WriteLine($"  Min builds for budget: {_minBuildsForBudget}");
-
-            _listenTask = Task.Run(() => ListenLoop(_cts.Token));
-
-            // Periodically reap builds that stopped heartbeating (crashed/killed process)
-            _stalenessReaper = new Timer(ReapStaleBuilds, null, TimeSpan.FromSeconds(ReaperIntervalSeconds), TimeSpan.FromSeconds(ReaperIntervalSeconds));
-
-            // Watch for pipe file deletion (e.g. by overzealous cleanup scripts)
-            if (NativeMethodsShared.IsUnixLike)
-            {
-                _pipeWatchdog = new Timer(CheckPipeHealth, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
-            }
-        }
-
-        /// <summary>
-        /// Stop the coordinator and clean up.
-        /// </summary>
-        public void Stop()
-        {
-            _pipeWatchdog?.Dispose();
-            _pipeWatchdog = null;
-            _stalenessReaper?.Dispose();
-            _stalenessReaper = null;
-            _cts.Cancel();
-            _listenCycleCts?.Cancel();
-            _listenTask?.Wait(TimeSpan.FromSeconds(5));
-        }
-
-        public void Dispose()
-        {
-            Stop();
-            _cts.Dispose();
-        }
-
-        /// <summary>
-        /// Block until the coordinator is stopped.
-        /// </summary>
-        public void WaitForShutdown()
-        {
-            try
-            {
-                _listenTask?.Wait();
-            }
-            catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
-            {
-            }
-        }
-
-        private void ListenLoop(CancellationToken ct)
-        {
-            while (!ct.IsCancellationRequested)
-            {
-                string pipeName = EffectivePipeName;
-
-                // Create a per-cycle CTS linked to the main one.
-                // The pipe watchdog can cancel just this cycle to force socket recreation.
-                _listenCycleCts?.Dispose();
-                _listenCycleCts = CancellationTokenSource.CreateLinkedTokenSource(ct);
-                var cycleToken = _listenCycleCts.Token;
-
-                // Don't use 'using' — ownership transfers to the threadpool handler.
-#pragma warning disable CA2000 // Dispose is called in the Task.Run finally block
-                var server = new NamedPipeServerStream(
-                    pipeName,
-                    PipeDirection.InOut,
-                    NamedPipeServerStream.MaxAllowedServerInstances,
-                    PipeTransmissionMode.Byte,
-                    System.IO.Pipes.PipeOptions.CurrentUserOnly);
-#pragma warning restore CA2000
-
-                try
-                {
-                    server.WaitForConnectionAsync(cycleToken).Wait(cycleToken);
-                }
-                catch (OperationCanceledException) when (!ct.IsCancellationRequested)
-                {
-                    server.Dispose();
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Pipe file missing, recreating listener...");
-                    continue;
-                }
-                catch (OperationCanceledException)
-                {
-                    server.Dispose();
-                    break;
-                }
-                catch (AggregateException ex) when (ex.InnerException is OperationCanceledException && !ct.IsCancellationRequested)
-                {
-                    server.Dispose();
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Pipe file missing, recreating listener...");
-                    continue;
-                }
-                catch (AggregateException ex) when (ex.InnerException is OperationCanceledException)
-                {
-                    server.Dispose();
-                    break;
-                }
-
-                // Handle on threadpool — immediately loop back to accept the next client.
-                // This minimizes the gap where no listener is bound.
-                var capturedServer = server;
-                Task.Run(() =>
-                {
-                    try
-                    {
-                        HandleConnection(capturedServer);
-                    }
-                    finally
-                    {
-                        capturedServer.Dispose();
-                    }
-                }, ct);
-            }
-        }
-
-        /// <summary>
-        /// Periodic watchdog that detects if the coordinator pipe file was deleted
-        /// (e.g. by a cleanup script) and interrupts the listen loop so it recreates it.
-        /// </summary>
-        private void CheckPipeHealth(object? state)
-        {
-            string pipeName = EffectivePipeName;
-            if (!File.Exists(pipeName))
-            {
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] WARNING: Pipe file {pipeName} was deleted externally! Triggering recreation...");
-                _listenCycleCts?.Cancel();
-            }
-        }
-
-        private void HandleConnection(NamedPipeServerStream server)
-        {
-            try
-            {
-                using var reader = new StreamReader(server, leaveOpen: true);
-                using var writer = new StreamWriter(server, leaveOpen: true) { AutoFlush = true };
-
-                string? line = reader.ReadLine();
-                if (string.IsNullOrEmpty(line))
-                {
-                    return;
-                }
-
-                string[] parts = line.Split(' ');
-                string command = parts[0].ToUpperInvariant();
-
-                switch (command)
-                {
-                    case "REGISTER":
-                        HandleRegister(parts, writer);
-                        break;
-                    case "HEARTBEAT":
-                        HandleHeartbeat(parts, writer);
-                        break;
-                    case "UNREGISTER":
-                        HandleUnregister(parts, writer);
-                        break;
-                    case "STATUS":
-                        HandleStatus(writer);
-                        break;
-                    case "SHUTDOWN":
-                        writer.WriteLine("OK");
-                        _cts.Cancel();
-                        break;
-                    default:
-                        writer.WriteLine("ERR unknown command");
-                        break;
-                }
-            }
-            catch (IOException)
-            {
-                // Client disconnected
-            }
-        }
-
-        private void HandleRegister(string[] parts, StreamWriter writer)
-        {
-            if (parts.Length < 3)
-            {
-                writer.WriteLine("ERR usage: REGISTER buildId requestedNodes");
-                return;
-            }
-
-            string buildId = parts[1];
-            if (!int.TryParse(parts[2], out int requested) || requested <= 0)
-            {
-                writer.WriteLine("ERR invalid requestedNodes");
-                return;
-            }
-
-            var registration = new BuildRegistration(buildId, requested, DateTime.UtcNow);
+            var registration = new BuildRegistration(buildId, requestedNodes, DateTime.UtcNow);
 
             lock (_queueLock)
             {
-                // If there are already queued builds, new arrivals must queue too (FIFO).
-                // Only promote from the queue on unregister/heartbeat events.
-                if (_queuedBuilds.Count > 0)
+                // Startup delay: queue everything and start a one-shot timer to batch-promote.
+                if (_startupDelayActive)
                 {
                     _queuedBuilds.Add(registration);
                     int position = _queuedBuilds.Count;
 
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] QUEUED {buildId}: position={position} active={_activeBuilds.Count}");
-                    writer.WriteLine($"QUEUED {position} {position}");
-                    return;
+                    if (_startupDelayTimer == null)
+                    {
+                        _startupDelayTimer = new Timer(OnStartupDelayElapsed, null, _startupDelayMs, Timeout.Infinite);
+                    }
+
+                    return RegisterResult.Queue(position, position);
                 }
 
-                // No queue — check both concurrency limit and budget headroom before admitting.
-                int currentlyGranted = 0;
-                foreach (var kvp in _activeBuilds)
+                // If there are already queued builds, new arrivals must queue too (FIFO).
+                if (_queuedBuilds.Count > 0)
                 {
-                    currentlyGranted += kvp.Value.GrantedNodes;
+                    _queuedBuilds.Add(registration);
+                    int position = _queuedBuilds.Count;
+                    return RegisterResult.Queue(position, position);
                 }
 
-                bool hasSlot = _activeBuilds.Count < _maxConcurrentBuilds;
-                bool hasBudget = currentlyGranted < _totalBudget;
-
-                if (hasSlot && hasBudget)
+                // No queue — check concurrency limit before admitting.
+                if (_activeBuilds.Count < _scheduler.MaxConcurrentBuilds)
                 {
                     _activeBuilds[buildId] = registration;
-                    int granted = CalculateBudget(buildId);
+                    int allocated = SumAllocatedNodes();
+                    int granted = _scheduler.GetGrantedNodes(requestedNodes, _activeBuilds.Count, _queuedBuilds.Count, allocated);
                     registration.GrantedNodes = granted;
-
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] REGISTER {buildId}: requested={requested} granted={granted} active={_activeBuilds.Count}");
-                    writer.WriteLine($"OK {granted}");
-                    return;
+                    return RegisterResult.Grant(granted);
                 }
 
-                // At capacity — queue
+                // At capacity — queue.
                 _queuedBuilds.Add(registration);
                 int queuePosition = _queuedBuilds.Count;
-
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] QUEUED {buildId}: position={queuePosition} active={_activeBuilds.Count}");
-                writer.WriteLine($"QUEUED {queuePosition} {queuePosition}");
+                return RegisterResult.Queue(queuePosition, queuePosition);
             }
         }
 
-        private void HandleHeartbeat(string[] parts, StreamWriter writer)
+        /// <summary>
+        /// Record a heartbeat for the given build.
+        /// </summary>
+        public void Heartbeat(string buildId)
         {
-            if (parts.Length < 2)
+            if (_activeBuilds.TryGetValue(buildId, out var reg))
             {
-                writer.WriteLine("ERR usage: HEARTBEAT buildId");
-                return;
+                reg.LastHeartbeat = DateTime.UtcNow;
             }
-
-            string buildId = parts[1];
-
-            // Check if build is active
-            if (_activeBuilds.TryGetValue(buildId, out var activeReg))
-            {
-                activeReg.LastHeartbeat = DateTime.UtcNow;
-
-                int newBudget = CalculateBudget(buildId);
-                activeReg.GrantedNodes = newBudget;
-
-                writer.WriteLine($"OK {newBudget}");
-                return;
-            }
-
-            // Check if build is queued
-            lock (_queueLock)
-            {
-                int index = _queuedBuilds.FindIndex(b => b.BuildId == buildId);
-                if (index >= 0)
-                {
-                    var queuedReg = _queuedBuilds[index];
-                    queuedReg.LastHeartbeat = DateTime.UtcNow;
-                    int position = index + 1;
-                    int totalQueued = _queuedBuilds.Count;
-                    int waitSec = (int)(DateTime.UtcNow - queuedReg.QueuedAt).TotalSeconds;
-                    writer.WriteLine($"QUEUED {position} {totalQueued} {waitSec}");
-                    return;
-                }
-            }
-
-            // Unknown build — return full budget (fallback)
-            writer.WriteLine($"OK {_totalBudget}");
         }
 
-        private void HandleUnregister(string[] parts, StreamWriter writer)
+        /// <summary>
+        /// Unregister a build and promote queued builds into any newly opened slots.
+        /// Returns the number of builds promoted.
+        /// </summary>
+        public int Unregister(string buildId)
         {
-            if (parts.Length < 2)
-            {
-                writer.WriteLine("ERR usage: UNREGISTER buildId");
-                return;
-            }
-
-            string buildId = parts[1];
-
-            // Remove from active builds
             bool wasActive = _activeBuilds.TryRemove(buildId, out _);
 
-            // Also remove from queue in case it was queued
             if (!wasActive)
             {
                 lock (_queueLock)
@@ -433,39 +187,82 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            int queuedCount;
-            lock (_queueLock) { queuedCount = _queuedBuilds.Count; }
-            Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] UNREGISTER {buildId}: active={_activeBuilds.Count} queued={queuedCount}");
+            return wasActive ? PromoteAllPossible() : 0;
+        }
 
-            // When a build leaves, promote next in queue if there's a slot.
-            string? promoted = null;
-            if (wasActive)
+        /// <summary>
+        /// Returns a snapshot of the current coordinator state.
+        /// </summary>
+        public CoordinatorStatus GetStatus()
+        {
+            int queueCount;
+            lock (_queueLock) { queueCount = _queuedBuilds.Count; }
+            return new CoordinatorStatus(_scheduler.TotalBudget, _activeBuilds.Count, queueCount, _scheduler.MaxConcurrentBuilds);
+        }
+
+        /// <summary>
+        /// Start the periodic staleness reaper timer.
+        /// </summary>
+        public void StartReaper()
+        {
+            _stalenessReaper?.Dispose();
+            _stalenessReaper = new Timer(ReapStaleBuilds, null, TimeSpan.FromSeconds(ReaperIntervalSeconds), TimeSpan.FromSeconds(ReaperIntervalSeconds));
+        }
+
+        public void Dispose()
+        {
+            _stalenessReaper?.Dispose();
+            _stalenessReaper = null;
+            _startupDelayTimer?.Dispose();
+            _startupDelayTimer = null;
+        }
+
+        /// <summary>
+        /// Called when the startup delay timer fires. Ends the delay phase and batch-promotes
+        /// up to maxConcurrentBuilds from the queue.
+        /// </summary>
+        private void OnStartupDelayElapsed(object? state)
+        {
+            lock (_queueLock)
             {
-                promoted = TryPromoteOne();
+                _startupDelayTimer?.Dispose();
+                _startupDelayTimer = null;
+                _startupDelayActive = false;
             }
 
-            if (promoted != null)
+            PromoteAllPossible();
+        }
+
+        /// <summary>
+        /// Promote as many queued builds as capacity allows. Returns the number promoted.
+        /// </summary>
+        private int PromoteAllPossible()
+        {
+            int count = 0;
+            while (TryPromoteOne() != null)
             {
-                writer.WriteLine($"OK promoted {promoted}");
+                count++;
             }
-            else
-            {
-                writer.WriteLine("OK");
-            }
+
+            return count;
         }
 
         /// <summary>
         /// Promote the next queued build if there's capacity. Returns the promoted build ID, or null.
+        /// Invokes the promotion callback to notify the transport layer.
         /// </summary>
         private string? TryPromoteOne()
         {
-            if (_activeBuilds.Count >= _maxConcurrentBuilds)
-            {
-                return null;
-            }
+            string buildId;
+            int granted;
 
             lock (_queueLock)
             {
+                if (_activeBuilds.Count >= _scheduler.MaxConcurrentBuilds)
+                {
+                    return null;
+                }
+
                 if (_queuedBuilds.Count == 0)
                 {
                     return null;
@@ -474,144 +271,75 @@ namespace Microsoft.Build.BackEnd
                 var next = _queuedBuilds[0];
                 _queuedBuilds.RemoveAt(0);
 
-                next.PromotedAt = DateTime.UtcNow;
                 _activeBuilds[next.BuildId] = next;
 
-                int granted = CalculateBudget(next.BuildId);
+                int allocated = SumAllocatedNodes();
+                granted = _scheduler.GetGrantedNodes(next.RequestedNodes, _activeBuilds.Count, _queuedBuilds.Count, allocated);
                 next.GrantedNodes = granted;
-
-                Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] PROMOTED {next.BuildId}: granted={granted} waited={(next.PromotedAt.Value - next.QueuedAt):mm\\:ss} active={_activeBuilds.Count} queued={_queuedBuilds.Count}");
-
-                return next.BuildId;
-            }
-        }
-
-        private void HandleStatus(StreamWriter writer)
-        {
-            int queueCount;
-            lock (_queueLock) { queueCount = _queuedBuilds.Count; }
-
-            writer.WriteLine($"OK budget={_totalBudget} active={_activeBuilds.Count} queued={queueCount} max={_maxConcurrentBuilds}");
-
-            if (!_activeBuilds.IsEmpty)
-            {
-                writer.WriteLine("Active:");
-                foreach (var kvp in _activeBuilds)
-                {
-                    var reg = kvp.Value;
-                    writer.WriteLine($"  {reg.BuildId}: granted={reg.GrantedNodes} requested={reg.RequestedNodes} age={DateTime.UtcNow - reg.RegisteredAt:mm\\:ss}");
-                }
+                buildId = next.BuildId;
             }
 
-            lock (_queueLock)
-            {
-                if (_queuedBuilds.Count > 0)
-                {
-                    writer.WriteLine("Queued:");
-                    for (int i = 0; i < _queuedBuilds.Count; i++)
-                    {
-                        var reg = _queuedBuilds[i];
-                        int waitSec = (int)(DateTime.UtcNow - reg.QueuedAt).TotalSeconds;
-                        writer.WriteLine($"  #{i + 1} {reg.BuildId}: requested={reg.RequestedNodes} waiting={waitSec}s");
-                    }
-                }
-            }
-        }
-
-        private int CalculateBudget(string buildId)
-        {
-            int activeCount = _activeBuilds.Count;
-            if (activeCount == 0)
-            {
-                return _totalBudget;
-            }
-
-            // When queue has items, target the full max-builds split so active builds
-            // shrink toward the desired state and make room for promotions.
-            // When queue is empty, divide among actual active builds (more generous).
-            int targetBuilds;
-            lock (_queueLock)
-            {
-                targetBuilds = _queuedBuilds.Count > 0
-                    ? _maxConcurrentBuilds
-                    : activeCount;
-            }
-
-            targetBuilds = Math.Max(targetBuilds, _minBuildsForBudget);
-            int fairShare = Math.Max(1, _totalBudget / targetBuilds);
-
-            // But don't exceed what the build originally requested
-            if (_activeBuilds.TryGetValue(buildId, out var registration))
-            {
-                return Math.Min(fairShare, registration.RequestedNodes);
-            }
-
-            return fairShare;
+            _onBuildPromoted?.Invoke(buildId, granted);
+            return buildId;
         }
 
         /// <summary>
         /// Periodic timer callback that removes builds whose process has exited.
-        /// Only removes if heartbeat is stale AND the PID is no longer running.
+        /// Only removes active builds if heartbeat is stale AND the PID is no longer running.
+        /// Queued builds are checked by process liveness only.
         /// </summary>
         private void ReapStaleBuilds(object? state)
         {
             var now = DateTime.UtcNow;
             bool anyReaped = false;
 
-            // Check active builds
+            // Snapshot keys to avoid mutating the dictionary during iteration.
+            var staleKeys = new List<string>();
             foreach (var kvp in _activeBuilds)
             {
-                var reg = kvp.Value;
-                double staleSec = (now - reg.LastHeartbeat).TotalSeconds;
-
-                if (staleSec < (double)StaleHeartbeatSeconds)
+                double staleSec = (now - kvp.Value.LastHeartbeat).TotalSeconds;
+                if (staleSec >= (double)StaleHeartbeatSeconds && !IsProcessAlive(kvp.Key))
                 {
-                    continue; // Recent heartbeat, still healthy
+                    staleKeys.Add(kvp.Key);
                 }
+            }
 
-                // Heartbeat is stale — check if the process is actually dead
-                if (IsProcessAlive(kvp.Key))
+            foreach (var key in staleKeys)
+            {
+                if (_activeBuilds.TryRemove(key, out _))
                 {
-                    continue; // Process still running, just slow to heartbeat
-                }
-
-                // Process is dead — reap it
-                if (_activeBuilds.TryRemove(kvp.Key, out _))
-                {
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] REAPED {kvp.Key}: process dead, stale {staleSec:F0}s");
                     anyReaped = true;
                 }
             }
 
-            // Check queued builds too
             lock (_queueLock)
             {
                 for (int i = _queuedBuilds.Count - 1; i >= 0; i--)
                 {
-                    var reg = _queuedBuilds[i];
-                    double staleSec = (now - reg.LastHeartbeat).TotalSeconds;
-
-                    if (staleSec < (double)StaleHeartbeatSeconds)
+                    if (!IsProcessAlive(_queuedBuilds[i].BuildId))
                     {
-                        continue;
+                        _queuedBuilds.RemoveAt(i);
+                        anyReaped = true;
                     }
-
-                    if (IsProcessAlive(reg.BuildId))
-                    {
-                        continue;
-                    }
-
-                    Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] REAPED (queued) {reg.BuildId}: process dead, stale {staleSec:F0}s");
-                    _queuedBuilds.RemoveAt(i);
-                    anyReaped = true;
                 }
             }
 
             if (anyReaped)
             {
-                // Try to promote queued builds into newly opened slots
-                while (TryPromoteOne() != null) { }
+                PromoteAllPossible();
             }
+        }
+
+        /// <summary>Sum of GrantedNodes across all active builds (newly added build has 0).</summary>
+        private int SumAllocatedNodes()
+        {
+            int sum = 0;
+            foreach (var kvp in _activeBuilds)
+            {
+                sum += kvp.Value.GrantedNodes;
+            }
+
+            return sum;
         }
 
         /// <summary>
@@ -622,7 +350,7 @@ namespace Microsoft.Build.BackEnd
             int dashIndex = buildId.IndexOf('-');
             if (dashIndex <= 0)
             {
-                return false; // Can't parse — assume dead
+                return false;
             }
 
             if (!int.TryParse(buildId.AsSpan(0, dashIndex), out int pid))
@@ -637,7 +365,6 @@ namespace Microsoft.Build.BackEnd
             }
             catch (ArgumentException)
             {
-                // Process doesn't exist
                 return false;
             }
             catch (InvalidOperationException)
@@ -651,40 +378,14 @@ namespace Microsoft.Build.BackEnd
             internal string BuildId { get; }
             internal int RequestedNodes { get; }
             internal int GrantedNodes { get; set; }
-            internal DateTime RegisteredAt { get; }
-            internal DateTime QueuedAt { get; }
-            internal DateTime? PromotedAt { get; set; }
             internal DateTime LastHeartbeat { get; set; }
-            internal BuildRegistration(string buildId, int requestedNodes, DateTime registeredAt)
+
+            internal BuildRegistration(string buildId, int requestedNodes, DateTime now)
             {
                 BuildId = buildId;
                 RequestedNodes = requestedNodes;
-                GrantedNodes = requestedNodes;
-                RegisteredAt = registeredAt;
-                QueuedAt = registeredAt;
-                LastHeartbeat = registeredAt;
-            }
-        }
-
-        /// <summary>
-        /// Check if an existing coordinator is already listening on the given pipe.
-        /// Returns true if a coordinator responded; false if the pipe is stale.
-        /// </summary>
-        private static bool TryConnectToExisting(string pipeName)
-        {
-            try
-            {
-                using var client = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, System.IO.Pipes.PipeOptions.CurrentUserOnly);
-                client.Connect(500); // 500ms timeout
-                using var writer = new StreamWriter(client, leaveOpen: true) { AutoFlush = true };
-                using var reader = new StreamReader(client, leaveOpen: true);
-                writer.WriteLine("STATUS");
-                string? response = reader.ReadLine();
-                return response != null && response.StartsWith("OK", StringComparison.Ordinal);
-            }
-            catch
-            {
-                return false;
+                GrantedNodes = 0;
+                LastHeartbeat = now;
             }
         }
     }

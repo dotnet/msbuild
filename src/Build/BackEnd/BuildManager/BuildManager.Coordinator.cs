@@ -22,7 +22,7 @@ namespace Microsoft.Build.Execution
         /// Client for communicating with an external build coordinator process.
         /// Null unless a coordinator is running AND this build successfully registered.
         /// </summary>
-        private BuildCoordinatorClient? _coordinatorClient;
+        private ICoordinatorClient? _coordinatorClient;
 
         /// <summary>
         /// Returns true if the coordinator feature is explicitly enabled via environment variable.
@@ -48,16 +48,12 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            var client = new BuildCoordinatorClient();
+            var client = new NamedPipeCoordinatorClient();
             int requestedNodes = _buildParameters.MaxNodeCount;
 
             bool registered = client.TryRegister(
                 requestedNodes,
                 out int grantedNodes,
-                onQueuePositionChanged: (position, total, waitSec) =>
-                {
-                    Trace.WriteLine($"MSBuild coordinator: Queued position {position}/{total}, waiting {waitSec}s");
-                },
                 ct: _executionCancellationTokenSource?.Token ?? CancellationToken.None);
 
             if (registered)

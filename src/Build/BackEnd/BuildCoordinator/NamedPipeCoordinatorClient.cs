@@ -13,10 +13,10 @@ namespace Microsoft.Build.BackEnd
     /// If no coordinator is running, all operations gracefully no-op and the build runs with
     /// its original MaxNodeCount.
     ///
-    /// When the coordinator is at capacity, TryRegister will block (heartbeating for position
-    /// updates) until the build is promoted to active.
+    /// When the coordinator is at capacity, TryRegister will block on a per-build wait pipe
+    /// until the coordinator promotes it to active.
     /// </summary>
-    internal sealed class BuildCoordinatorClient : IDisposable
+    internal sealed class NamedPipeCoordinatorClient : ICoordinatorClient
     {
         private readonly string _buildId;
         private readonly string _pipeName;
@@ -24,33 +24,34 @@ namespace Microsoft.Build.BackEnd
         private Timer? _heartbeatTimer;
         private bool _registered;
 
-        internal bool IsConnected => _registered;
-        internal int GrantedNodes => _grantedNodes;
+        public bool IsConnected => _registered;
+        public int GrantedNodes => _grantedNodes;
         internal string BuildId => _buildId;
 
-        internal BuildCoordinatorClient()
-            : this(BuildCoordinator.GetPipeName())
+        internal NamedPipeCoordinatorClient()
+            : this(NamedPipeCoordinatorHost.GetPipeName())
         {
         }
 
         /// <summary>
         /// Internal constructor for tests — allows connecting to a coordinator on a custom pipe name.
         /// </summary>
-        internal BuildCoordinatorClient(string pipeName)
+        internal NamedPipeCoordinatorClient(string pipeName)
         {
             _buildId = $"{Environment.ProcessId}-{DateTime.UtcNow.Ticks}";
             _pipeName = pipeName;
         }
+
+
 
         /// <summary>
         /// Try to register with the coordinator. Returns true if a coordinator was found
         /// and the build was registered (or promoted from queue).
         ///
         /// If the coordinator has capacity, returns immediately with grantedNodes.
-        /// If queued, blocks and heartbeats until promoted, calling onQueuePositionChanged
-        /// with (position, totalQueued, waitSeconds) on each update.
+        /// If queued, blocks on a per-build wait pipe until the coordinator promotes it.
         /// </summary>
-        internal bool TryRegister(int requestedNodes, out int grantedNodes, Action<int, int, int>? onQueuePositionChanged = null, CancellationToken ct = default)
+        public bool TryRegister(int requestedNodes, out int grantedNodes, CancellationToken ct = default)
         {
             grantedNodes = requestedNodes;
 
@@ -74,74 +75,78 @@ namespace Microsoft.Build.BackEnd
                 return false;
             }
 
-            // Queued — block and heartbeat until promoted
+            // Queued — block on wait pipe until promoted
             if (response.StartsWith("QUEUED ", StringComparison.Ordinal))
             {
-                return WaitInQueue(requestedNodes, out grantedNodes, onQueuePositionChanged, ct);
+                return WaitForPromotion(out grantedNodes, ct);
             }
 
             return false;
         }
 
         /// <summary>
-        /// Block heartbeating until the coordinator promotes this build to active.
+        /// Create a per-build wait pipe and block until the coordinator writes the promotion
+        /// message. The pipe name is derived by convention from the coordinator pipe + buildId,
+        /// so neither side needs to communicate it.
         /// </summary>
-        private bool WaitInQueue(int requestedNodes, out int grantedNodes, Action<int, int, int>? onQueuePositionChanged, CancellationToken ct)
+        private bool WaitForPromotion(out int grantedNodes, CancellationToken ct)
         {
-            grantedNodes = requestedNodes;
+            grantedNodes = 0;
+            string waitPipeName = NamedPipeCoordinatorHost.GetWaitPipeName(_pipeName, _buildId);
 
-            while (!ct.IsCancellationRequested)
+            try
             {
-                Thread.Sleep(2000); // Heartbeat interval
+                using var waitPipe = new NamedPipeServerStream(
+                    waitPipeName,
+                    PipeDirection.In,
+                    1,
+                    PipeTransmissionMode.Byte,
+                    System.IO.Pipes.PipeOptions.CurrentUserOnly);
 
-                string? hbResponse = SendCommand($"HEARTBEAT {_buildId}");
-                if (hbResponse == null)
-                {
-                    // Coordinator gone — fall through with original node count
-                    return false;
-                }
+                waitPipe.WaitForConnectionAsync(ct).Wait(ct);
 
-                // Promoted to active!
-                if (hbResponse.StartsWith("OK ", StringComparison.Ordinal))
+                using var reader = new StreamReader(waitPipe);
+                string? line = reader.ReadLine();
+
+                if (line != null && line.StartsWith("OK ", StringComparison.Ordinal))
                 {
-                    if (int.TryParse(hbResponse.AsSpan(3), out int granted) && granted > 0)
+                    if (int.TryParse(line.AsSpan(3), out int granted) && granted > 0)
                     {
                         _grantedNodes = granted;
                         grantedNodes = granted;
                         _registered = true;
                         return true;
                     }
-
-                    return false;
                 }
 
-                // Still queued — parse position info: "QUEUED position totalQueued waitSec"
-                if (hbResponse.StartsWith("QUEUED ", StringComparison.Ordinal))
+                return false;
+            }
+            catch (OperationCanceledException)
+            {
+                // Build was cancelled while queued — unregister
+                SendCommand($"UNREGISTER {_buildId}");
+                return false;
+            }
+            catch (Exception)
+            {
+                // Pipe error — fall through uncoordinated
+                return false;
+            }
+            finally
+            {
+                // Clean up pipe file on Unix
+                if (!OperatingSystem.IsWindows())
                 {
-                    string[] parts = hbResponse.Split(' ');
-                    if (parts.Length >= 4
-                        && int.TryParse(parts[1], out int position)
-                        && int.TryParse(parts[2], out int totalQueued)
-                        && int.TryParse(parts[3], out int waitSec))
-                    {
-                        onQueuePositionChanged?.Invoke(position, totalQueued, waitSec);
-                    }
+                    try { File.Delete(waitPipeName); } catch { }
                 }
             }
-
-            // Cancelled — unregister
-            SendCommand($"UNREGISTER {_buildId}");
-            return false;
         }
 
         /// <summary>
-        /// Start periodic heartbeats for liveness so the coordinator can detect stale builds.
-        /// The heartbeat response includes the current budget, which is stored in GrantedNodes.
-        /// The coordinator uses heartbeat acknowledgment to gate promotion of queued builds,
-        /// but BuildManager does not change MaxNodeCount mid-build — the acknowledged budget
-        /// only matters for the coordinator's internal bookkeeping.
+        /// Start periodic heartbeats so the coordinator can detect stale builds.
+        /// Budget is fixed at registration — heartbeat is purely a liveness signal.
         /// </summary>
-        internal void StartHeartbeat()
+        public void StartHeartbeat()
         {
             _heartbeatTimer = new Timer(HeartbeatCallback, null, TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(2));
         }
@@ -149,7 +154,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Unregister from the coordinator and stop heartbeats.
         /// </summary>
-        internal void Unregister()
+        public void Unregister()
         {
             _heartbeatTimer?.Dispose();
             _heartbeatTimer = null;
@@ -173,28 +178,27 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            string? response = SendCommand($"HEARTBEAT {_buildId}");
-            if (response != null && response.StartsWith("OK ", StringComparison.Ordinal))
-            {
-                if (int.TryParse(response.AsSpan(3), out int newBudget) && newBudget > 0)
-                {
-                    _grantedNodes = newBudget;
-                }
-            }
+            // Heartbeat is purely a liveness signal — budget is fixed at registration.
+            SendCommand($"HEARTBEAT {_buildId}");
         }
 
         /// <summary>
         /// Send a command to the coordinator and return the response line, or null if connection fails.
-        /// Retries up to 3 times with 300ms delay to handle the brief gap between listener re-binds.
+        /// Retries up to 5 times with 500ms delay to handle the brief gap between listener re-binds
+        /// when many builds connect simultaneously.
         /// </summary>
         private string? SendCommand(string command)
         {
-            for (int attempt = 0; attempt < 3; attempt++)
+            const int maxAttempts = 5;
+            const int connectTimeoutMs = 5000;
+            const int retryDelayMs = 500;
+
+            for (int attempt = 0; attempt < maxAttempts; attempt++)
             {
                 try
                 {
                     using var client = new NamedPipeClientStream(".", _pipeName, PipeDirection.InOut, System.IO.Pipes.PipeOptions.CurrentUserOnly);
-                    client.Connect(1000);
+                    client.Connect(connectTimeoutMs);
 
                     using var writer = new StreamWriter(client, leaveOpen: true) { AutoFlush = true };
                     using var reader = new StreamReader(client, leaveOpen: true);
@@ -204,16 +208,16 @@ namespace Microsoft.Build.BackEnd
                 }
                 catch (TimeoutException)
                 {
-                    if (attempt < 2)
+                    if (attempt < maxAttempts - 1)
                     {
-                        Thread.Sleep(300);
+                        Thread.Sleep(retryDelayMs);
                     }
                 }
                 catch (IOException)
                 {
-                    if (attempt < 2)
+                    if (attempt < maxAttempts - 1)
                     {
-                        Thread.Sleep(300);
+                        Thread.Sleep(retryDelayMs);
                     }
                 }
             }

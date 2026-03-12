@@ -313,9 +313,9 @@ namespace Microsoft.Build.CommandLine
 
             // Check for coordinator mode: `dotnet msbuild --coordinator [--budget N] [--max-builds N]`
 #if NET
-            if (IsCoordinatorMode(args, out int budget, out int maxBuilds, out int minBuilds))
+            if (IsCoordinatorMode(args, out int budget, out int maxBuilds, out int startupDelay))
             {
-                exitCode = RunCoordinator(budget, maxBuilds, minBuilds);
+                exitCode = RunCoordinator(budget, maxBuilds, startupDelay);
             }
             else if (
 #else
@@ -349,14 +349,14 @@ namespace Microsoft.Build.CommandLine
 
         /// <summary>
         /// Check if the command line requests coordinator mode.
-        /// Usage: msbuild --coordinator [--budget N] [--max-builds N] [--min-builds N]
+        /// Usage: msbuild --coordinator [--budget N] [--max-builds N] [--startup-delay N]
         /// </summary>
 #if NET
-        private static bool IsCoordinatorMode(string[] args, out int budget, out int maxBuilds, out int minBuilds)
+        private static bool IsCoordinatorMode(string[] args, out int budget, out int maxBuilds, out int startupDelay)
         {
             budget = 0;
-            maxBuilds = 2;
-            minBuilds = 1;
+            maxBuilds = 0;
+            startupDelay = 0;
 
             bool found = false;
             for (int i = 0; i < args.Length; i++)
@@ -375,23 +375,11 @@ namespace Microsoft.Build.CommandLine
                     int.TryParse(args[i + 1], out maxBuilds);
                     i++;
                 }
-                else if (args[i].Equals("--min-builds", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
+                else if (args[i].Equals("--startup-delay", StringComparison.OrdinalIgnoreCase) && i + 1 < args.Length)
                 {
-                    int.TryParse(args[i + 1], out minBuilds);
+                    int.TryParse(args[i + 1], out startupDelay);
                     i++;
                 }
-            }
-
-            if (found)
-            {
-                if (budget <= 0)
-                {
-                    // Default budget: 80% of logical processors
-                    budget = Math.Max(1, (int)(Environment.ProcessorCount * 0.8));
-                }
-
-                maxBuilds = Math.Max(1, maxBuilds);
-                minBuilds = Math.Max(1, minBuilds);
             }
 
             return found;
@@ -400,18 +388,33 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Run the build coordinator as a long-lived process.
         /// </summary>
-        private static int RunCoordinator(int budget, int maxBuilds, int minBuilds)
+        private static int RunCoordinator(int budget, int maxBuilds, int startupDelay)
         {
-            using var coordinator = new Microsoft.Build.BackEnd.BuildCoordinator(budget, maxBuilds, minBuilds);
-            coordinator.Start();
+            // Use opinionated defaults from FairShareBudgetPolicy when args are 0
+            Microsoft.Build.BackEnd.INodeBudgetPolicy policy;
+            if (budget > 0 && maxBuilds > 0)
+            {
+                policy = new Microsoft.Build.BackEnd.FairShareBudgetPolicy(budget, maxBuilds);
+            }
+            else if (budget > 0)
+            {
+                policy = new Microsoft.Build.BackEnd.FairShareBudgetPolicy(budget);
+            }
+            else
+            {
+                policy = new Microsoft.Build.BackEnd.FairShareBudgetPolicy();
+            }
+
+            using var host = new Microsoft.Build.BackEnd.NamedPipeCoordinatorHost(policy, startupDelay);
+            host.Start();
 
             Console.CancelKeyPress += (_, e) =>
             {
                 e.Cancel = true;
-                coordinator.Stop();
+                host.Stop();
             };
 
-            coordinator.WaitForShutdown();
+            host.WaitForShutdown();
             return 0;
         }
 #endif

@@ -18,847 +18,489 @@ using Xunit.Abstractions;
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
-    /// Tests for BuildCoordinator and BuildCoordinatorClient.
-    /// These are integration tests that spin up a real coordinator over named pipes.
+    /// Pure domain tests for BuildCoordinator — no pipes, no I/O.
     /// </summary>
-    public class BuildCoordinator_Tests : IDisposable
+    public class BuildCoordinator_Tests
     {
-        private readonly ITestOutputHelper _output;
-        private readonly TestEnvironment _env;
-        private readonly string _testPipeName;
-
-        public BuildCoordinator_Tests(ITestOutputHelper output)
+        [Fact]
+        public void Register_FirstBuild_GetsGranted()
         {
-            _output = output;
-            _env = TestEnvironment.Create(output);
-            // Use a unique pipe name per test run to avoid collisions
-            _testPipeName = NativeMethodsShared.IsUnixLike
-                ? $"/tmp/MSBuild-CoordinatorTest-{Guid.NewGuid():N}"
-                : $"MSBuild-CoordinatorTest-{Guid.NewGuid():N}";
+            using var coord = new BuildCoordinator(new FairShareBudgetPolicy(12, 3));
+            var result = coord.Register("build-1", 6);
+
+            result.Outcome.ShouldBe(RegisterOutcome.Granted);
+            // remaining=12, slots=3, fairShare=4, capped at requested=6 → 4
+            result.GrantedNodes.ShouldBe(4);
+        }
+
+        [Fact]
+        public void Register_AtCapacity_GetsQueued()
+        {
+            using var coord = new BuildCoordinator(new FairShareBudgetPolicy(12, 2));
+            coord.Register("build-1", 4);
+            coord.Register("build-2", 4);
+
+            var result = coord.Register("build-3", 4);
+
+            result.Outcome.ShouldBe(RegisterOutcome.Queued);
+            result.QueuePosition.ShouldBe(1);
+            result.QueueTotal.ShouldBe(1);
+        }
+
+        [Fact]
+        public void Register_MultipleQueued_PositionsCorrect()
+        {
+            using var coord = new BuildCoordinator(new FairShareBudgetPolicy(12, 1));
+            coord.Register("build-1", 4);
+
+            var r2 = coord.Register("build-2", 4);
+            var r3 = coord.Register("build-3", 4);
+
+            r2.QueuePosition.ShouldBe(1);
+            r3.QueuePosition.ShouldBe(2);
+            r3.QueueTotal.ShouldBe(2);
+        }
+
+        [Fact]
+        public void Register_FillsToMaxConcurrent()
+        {
+            using var coord = new BuildCoordinator(new FairShareBudgetPolicy(12, 3));
+            var r1 = coord.Register("build-1", 4);
+            var r2 = coord.Register("build-2", 4);
+            var r3 = coord.Register("build-3", 4);
+
+            r1.Outcome.ShouldBe(RegisterOutcome.Granted);
+            r2.Outcome.ShouldBe(RegisterOutcome.Granted);
+            r3.Outcome.ShouldBe(RegisterOutcome.Granted);
+        }
+
+        [Fact]
+        public void Heartbeat_UpdatesLastHeartbeat()
+        {
+            using var coord = new BuildCoordinator(new FairShareBudgetPolicy(12, 3));
+            coord.Register("build-1", 6);
+
+            // Should not throw
+            coord.Heartbeat("build-1");
+
+            // Heartbeat for unknown build should also not throw
+            coord.Heartbeat("unknown-build");
+        }
+
+        [Fact]
+        public void Unregister_Active_PromotesQueued()
+        {
+            var promoted = new List<(string buildId, int granted)>();
+            using var coord = new BuildCoordinator(new FairShareBudgetPolicy(12, 2), onBuildPromoted: (id, nodes) => promoted.Add((id, nodes)));
+
+            coord.Register("build-1", 6);
+            coord.Register("build-2", 6);
+            coord.Register("build-3", 6); // queued
+
+            int promotedCount = coord.Unregister("build-1");
+
+            promotedCount.ShouldBe(1);
+            promoted.Count.ShouldBe(1);
+            promoted[0].buildId.ShouldBe("build-3");
+            promoted[0].granted.ShouldBeGreaterThan(0);
+        }
+
+        [Fact]
+        public void Unregister_Queued_NoPromotion()
+        {
+            var promoted = new List<string>();
+            using var coord = new BuildCoordinator(new FairShareBudgetPolicy(12, 2), onBuildPromoted: (id, _) => promoted.Add(id));
+
+            coord.Register("build-1", 6);
+            coord.Register("build-2", 6);
+            coord.Register("build-3", 6); // queued
+
+            int promotedCount = coord.Unregister("build-3");
+
+            promotedCount.ShouldBe(0);
+            promoted.Count.ShouldBe(0);
+        }
+
+        [Fact]
+        public void Unregister_MultipleSlotsOpen_PromotesMultiple()
+        {
+            var promoted = new List<string>();
+            using var coord = new BuildCoordinator(new FairShareBudgetPolicy(12, 3), onBuildPromoted: (id, _) => promoted.Add(id));
+
+            coord.Register("build-1", 4);
+            coord.Register("build-2", 4);
+            coord.Register("build-3", 4);
+            coord.Register("build-4", 4); // queued
+            coord.Register("build-5", 4); // queued
+
+            // Unregister build-1 → promotes build-4 (1 slot opens)
+            coord.Unregister("build-1");
+            promoted.Count.ShouldBe(1);
+            promoted[0].ShouldBe("build-4");
+        }
+
+        [Fact]
+        public void GetStatus_ReflectsState()
+        {
+            using var coord = new BuildCoordinator(new FairShareBudgetPolicy(12, 2));
+            coord.Register("build-1", 6);
+            coord.Register("build-2", 6);
+            coord.Register("build-3", 6); // queued
+
+            var status = coord.GetStatus();
+
+            status.TotalBudget.ShouldBe(12);
+            status.ActiveCount.ShouldBe(2);
+            status.QueuedCount.ShouldBe(1);
+            status.MaxConcurrentBuilds.ShouldBe(2);
+        }
+
+        [Fact]
+        public void GetStatus_AfterUnregister()
+        {
+            using var coord = new BuildCoordinator(new FairShareBudgetPolicy(12, 2));
+            coord.Register("build-1", 6);
+            coord.Register("build-2", 6);
+
+            coord.Unregister("build-1");
+
+            var status = coord.GetStatus();
+            status.ActiveCount.ShouldBe(1);
+            status.QueuedCount.ShouldBe(0);
+        }
+
+        [Fact]
+        public void StartupDelay_QueuesFirst_ThenBatchPromotes()
+        {
+            var promoted = new List<string>();
+            using var coord = new BuildCoordinator(new FairShareBudgetPolicy(12, 3), startupDelayMs: 100, onBuildPromoted: (id, _) => promoted.Add(id));
+
+            // All should be queued during startup delay
+            var r1 = coord.Register("build-1", 4);
+            var r2 = coord.Register("build-2", 4);
+            var r3 = coord.Register("build-3", 4);
+
+            r1.Outcome.ShouldBe(RegisterOutcome.Queued);
+            r2.Outcome.ShouldBe(RegisterOutcome.Queued);
+            r3.Outcome.ShouldBe(RegisterOutcome.Queued);
+
+            // Wait for startup delay to fire
+            Thread.Sleep(300);
+
+            // All 3 should be promoted (maxConcurrent=3)
+            promoted.Count.ShouldBe(3);
+
+            var status = coord.GetStatus();
+            status.ActiveCount.ShouldBe(3);
+            status.QueuedCount.ShouldBe(0);
+        }
+
+        [Fact]
+        public void StartupDelay_MoreThanCapacity_OnlyPromotesMax()
+        {
+            var promoted = new List<string>();
+            using var coord = new BuildCoordinator(new FairShareBudgetPolicy(12, 2), startupDelayMs: 100, onBuildPromoted: (id, _) => promoted.Add(id));
+
+            coord.Register("build-1", 4);
+            coord.Register("build-2", 4);
+            coord.Register("build-3", 4);
+
+            Thread.Sleep(300);
+
+            promoted.Count.ShouldBe(2);
+
+            var status = coord.GetStatus();
+            status.ActiveCount.ShouldBe(2);
+            status.QueuedCount.ShouldBe(1);
+        }
+
+        [Fact]
+        public void GrantedNodes_FairShare()
+        {
+            using var coord = new BuildCoordinator(new FairShareBudgetPolicy(12, 3));
+
+            // remaining=12, slots=3, fair=4, capped at 8 → 4
+            var r1 = coord.Register("build-1", 8);
+            r1.GrantedNodes.ShouldBe(4);
+
+            // remaining=8, slots=2, fair=4, capped at 6 → 4
+            var r2 = coord.Register("build-2", 6);
+            r2.GrantedNodes.ShouldBe(4);
+
+            // remaining=4, slots=1, fair=4, capped at 4 → 4
+            var r3 = coord.Register("build-3", 4);
+            r3.GrantedNodes.ShouldBe(4);
+        }
+    }
+
+    /// <summary>
+    /// Integration tests for NamedPipeCoordinatorHost — exercises the real pipe protocol.
+    /// </summary>
+    public class NamedPipeCoordinatorHost_Tests : IDisposable
+    {
+        private readonly NamedPipeCoordinatorHost _host;
+        private readonly string _pipeName;
+
+        public NamedPipeCoordinatorHost_Tests()
+        {
+            _pipeName = $"/tmp/MSBuild-Test-{Guid.NewGuid():N}";
+            _host = new NamedPipeCoordinatorHost(new FairShareBudgetPolicy(12, 3), pipeName: _pipeName);
+            _host.Start();
         }
 
         public void Dispose()
         {
-            _env.Dispose();
-            // Clean up pipe file on Unix
-            if (NativeMethodsShared.IsUnixLike && File.Exists(_testPipeName))
-            {
-                try { File.Delete(_testPipeName); }
-                catch { }
-            }
-        }
-
-        #region Coordinator Protocol Tests
-
-        [Fact]
-        public void FirstBuild_GetsFullBudget()
-        {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.Start();
-
-            try
-            {
-                string? response = SendRawCommand("REGISTER build-1 6");
-                response.ShouldNotBeNull();
-                response.ShouldStartWith("OK ");
-
-                // First build should get full budget (min of requested and total)
-                int granted = int.Parse(response!.Split(' ')[1]);
-                granted.ShouldBe(6);
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
+            _host.Dispose();
+            try { File.Delete(_pipeName); } catch { }
         }
 
         [Fact]
-        public void FirstBuild_GetsCappedAtTotalBudget()
+        public void Register_ReturnsGranted()
         {
-            using var coordinator = CreateCoordinator(8, maxConcurrentBuilds: 3);
-            coordinator.Start();
+            string? response = SendCommand("REGISTER test-1 4");
 
-            try
-            {
-                // Request more than total budget
-                string? response = SendRawCommand("REGISTER build-1 20");
-                response.ShouldNotBeNull();
-                response.ShouldStartWith("OK ");
-
-                int granted = int.Parse(response!.Split(' ')[1]);
-                granted.ShouldBeLessThanOrEqualTo(8);
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
+            response.ShouldNotBeNull();
+            response.ShouldStartWith("OK ");
+            int.TryParse(response.AsSpan(3), out int granted).ShouldBeTrue();
+            granted.ShouldBeGreaterThan(0);
         }
 
         [Fact]
-        public void SecondBuild_GetsQueued()
+        public void Register_AtCapacity_ReturnsQueued()
         {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 1);
-            coordinator.Start();
+            SendCommand("REGISTER test-1 4");
+            SendCommand("REGISTER test-2 4");
+            SendCommand("REGISTER test-3 4");
 
-            try
-            {
-                // First build — immediate
-                string? r1 = SendRawCommand("REGISTER build-1 6");
-                r1.ShouldStartWith("OK ");
+            string? response = SendCommand("REGISTER test-4 4");
 
-                // Second build — queued (max concurrent = 1)
-                string? r2 = SendRawCommand("REGISTER build-2 6");
-                r2.ShouldNotBeNull();
-                r2.ShouldStartWith("QUEUED ");
-
-                string[] parts = r2!.Split(' ');
-                int position = int.Parse(parts[1]);
-                position.ShouldBe(1); // First in queue
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
+            response.ShouldNotBeNull();
+            response.ShouldStartWith("QUEUED ");
         }
 
         [Fact]
-        public void Heartbeat_ReturnsCurrentBudget()
+        public void Heartbeat_ReturnsOk()
         {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.Start();
+            SendCommand("REGISTER test-1 4");
 
-            try
-            {
-                SendRawCommand("REGISTER build-1 6");
+            string? response = SendCommand("HEARTBEAT test-1");
 
-                string? hb = SendRawCommand("HEARTBEAT build-1");
-                hb.ShouldNotBeNull();
-                hb.ShouldStartWith("OK ");
-
-                int budget = int.Parse(hb!.Split(' ')[1]);
-                budget.ShouldBeGreaterThan(0);
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
+            response.ShouldBe("OK");
         }
 
         [Fact]
-        public void Heartbeat_ForQueuedBuild_ReturnsQueuePosition()
+        public void Unregister_ReturnsOk()
         {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 1);
-            coordinator.Start();
+            SendCommand("REGISTER test-1 4");
 
-            try
-            {
-                SendRawCommand("REGISTER build-1 6");
-                SendRawCommand("REGISTER build-2 6");
+            string? response = SendCommand("UNREGISTER test-1");
 
-                string? hb = SendRawCommand("HEARTBEAT build-2");
-                hb.ShouldNotBeNull();
-                hb.ShouldStartWith("QUEUED ");
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
+            response.ShouldNotBeNull();
+            response.ShouldStartWith("OK");
         }
 
         [Fact]
-        public void Unregister_RemovesActiveBuild()
+        public void Unregister_WithQueued_ReturnsPromotedCount()
         {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.Start();
+            SendCommand("REGISTER test-1 4");
+            SendCommand("REGISTER test-2 4");
+            SendCommand("REGISTER test-3 4");
 
-            try
+            // Queue one more
+            Task.Run(() =>
             {
-                SendRawCommand("REGISTER build-1 6");
-                string? unreg = SendRawCommand("UNREGISTER build-1");
-                unreg.ShouldNotBeNull();
-                unreg.ShouldStartWith("OK");
+                // Create a wait pipe for the queued build to receive promotion
+                string waitPipe = NamedPipeCoordinatorHost.GetWaitPipeName(_pipeName, "test-4");
+                using var server = new NamedPipeServerStream(waitPipe, PipeDirection.In, 1, PipeTransmissionMode.Byte, PipeOptions.CurrentUserOnly);
+                server.WaitForConnectionAsync(CancellationToken.None).Wait(TimeSpan.FromSeconds(5));
+                using var reader = new StreamReader(server);
+                reader.ReadLine();
+            });
 
-                // Status should show 0 active
-                string? status = SendRawCommand("STATUS");
-                status.ShouldNotBeNull();
-                status.ShouldContain("active=0");
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
+            SendCommand("REGISTER test-4 4");
+            Thread.Sleep(200); // Let wait pipe get set up
+
+            string? response = SendCommand("UNREGISTER test-1");
+
+            response.ShouldNotBeNull();
+            response.ShouldContain("promoted");
         }
 
         [Fact]
-        public void Unregister_PromotesQueuedBuild()
+        public void Status_ReturnsBudgetInfo()
         {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 1);
-            coordinator.Start();
+            SendCommand("REGISTER test-1 4");
 
-            try
-            {
-                SendRawCommand("REGISTER build-1 6");
-                SendRawCommand("REGISTER build-2 6");
+            string? response = SendCommand("STATUS");
 
-                // Unregister first build — should promote build-2
-                string? unreg = SendRawCommand("UNREGISTER build-1");
-                unreg.ShouldNotBeNull();
-                unreg.ShouldContain("promoted");
-                unreg.ShouldContain("build-2");
-
-                // build-2 should now get OK on heartbeat (it's active)
-                string? hb = SendRawCommand("HEARTBEAT build-2");
-                hb.ShouldStartWith("OK ");
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
+            response.ShouldNotBeNull();
+            response.ShouldStartWith("OK ");
+            response.ShouldContain("budget=12");
+            response.ShouldContain("active=1");
+            response.ShouldContain("max=3");
         }
 
         [Fact]
-        public void BudgetRebalances_WhenSecondBuildJoins()
+        public void Shutdown_StopsHost()
         {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.Start();
+            string? response = SendCommand("SHUTDOWN");
 
-            try
-            {
-                // First build requests only 6 — leaves budget headroom for another
-                string? r1 = SendRawCommand("REGISTER build-1 6");
-                int firstGrant = int.Parse(r1!.Split(' ')[1]);
-                firstGrant.ShouldBe(6);
-
-                // Second build joins — admitted because granted (6) < budget (12)
-                string? r2 = SendRawCommand("REGISTER build-2 12");
-                r2.ShouldStartWith("OK ");
-                int grant2 = int.Parse(r2!.Split(' ')[1]);
-                grant2.ShouldBe(6); // 12 / 2 builds = 6 each
-
-                // First build heartbeats — should also see reduced budget (capped at requested=6)
-                string? hb1 = SendRawCommand("HEARTBEAT build-1");
-                int newBudget = int.Parse(hb1!.Split(' ')[1]);
-                newBudget.ShouldBe(6);
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
-        }
-
-        [Fact]
-        public void BudgetIncreases_WhenBuildLeaves()
-        {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.Start();
-
-            try
-            {
-                // build-1 requests 6, leaving headroom
-                SendRawCommand("REGISTER build-1 6");
-                string? r2 = SendRawCommand("REGISTER build-2 12");
-                r2.ShouldStartWith("OK "); // Admitted — granted(6) < budget(12)
-
-                // Now unregister build-2
-                SendRawCommand("UNREGISTER build-2");
-
-                // build-1 should still get its requested amount (capped at 6)
-                string? hb = SendRawCommand("HEARTBEAT build-1");
-                int budget = int.Parse(hb!.Split(' ')[1]);
-                budget.ShouldBe(6);
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
-        }
-
-        [Fact]
-        public void Status_ReturnsCorrectSummary()
-        {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 2);
-            coordinator.Start();
-
-            try
-            {
-                SendRawCommand("REGISTER build-1 6");
-                SendRawCommand("REGISTER build-2 6"); // Activated immediately (max=2)
-                SendRawCommand("REGISTER build-3 6"); // Will be queued (at capacity)
-
-                string? status = SendRawCommand("STATUS");
-                status.ShouldNotBeNull();
-                status.ShouldContain("budget=12");
-                status.ShouldContain("max=2");
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
-        }
-
-        [Fact]
-        public void Shutdown_StopsCoordinator()
-        {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.Start();
-
-            string? response = SendRawCommand("SHUTDOWN");
             response.ShouldBe("OK");
 
-            // Coordinator should stop — WaitForShutdown should return
-            coordinator.WaitForShutdown();
+            // Should not be able to connect after shutdown
+            Thread.Sleep(200);
+            string? afterShutdown = SendCommand("STATUS");
+            afterShutdown.ShouldBeNull();
         }
 
         [Fact]
         public void UnknownCommand_ReturnsError()
         {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.Start();
+            string? response = SendCommand("FOOBAR");
 
-            try
-            {
-                string? response = SendRawCommand("INVALID_CMD");
-                response.ShouldNotBeNull();
-                response.ShouldStartWith("ERR");
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
+            response.ShouldNotBeNull();
+            response.ShouldStartWith("ERR");
         }
 
         [Fact]
-        public void Register_WithInvalidArgs_ReturnsError()
+        public void Register_InvalidArgs_ReturnsError()
         {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.Start();
+            string? response = SendCommand("REGISTER");
 
-            try
-            {
-                string? response = SendRawCommand("REGISTER");
-                response.ShouldNotBeNull();
-                response.ShouldStartWith("ERR");
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
+            response.ShouldNotBeNull();
+            response.ShouldStartWith("ERR");
         }
 
         [Fact]
-        public void MaxConcurrency_EnforcesLimit()
+        public void Register_InvalidNodeCount_ReturnsError()
         {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 2);
-            coordinator.Start();
+            string? response = SendCommand("REGISTER test-1 notanumber");
 
-            try
-            {
-                SendRawCommand("REGISTER build-1 6");
-                string? r2 = SendRawCommand("REGISTER build-2 6");
-                r2.ShouldStartWith("OK "); // Activated immediately (max=2)
-
-                // Third build should be queued (at capacity)
-                string? r3 = SendRawCommand("REGISTER build-3 6");
-                r3.ShouldStartWith("QUEUED ");
-
-                string? hb3 = SendRawCommand("HEARTBEAT build-3");
-                hb3.ShouldStartWith("QUEUED ");
-
-                // Even after all heartbeats, build-3 stays queued
-                SendRawCommand("HEARTBEAT build-1");
-                SendRawCommand("HEARTBEAT build-2");
-                hb3 = SendRawCommand("HEARTBEAT build-3");
-                hb3.ShouldStartWith("QUEUED ");
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
+            response.ShouldNotBeNull();
+            response.ShouldStartWith("ERR");
         }
 
         [Fact]
-        public void FairShare_DistributesBudgetEvenly()
+        public void Client_Register_Heartbeat_Unregister()
         {
-            // Budget=12, max=3. Each build requests 4 so none consumes full budget.
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.Start();
+            using var client = new NamedPipeCoordinatorClient(_pipeName);
 
-            try
-            {
-                // Register 3 builds — each requests 4 (leaves headroom for next)
-                string? r1 = SendRawCommand("REGISTER build-1 4");
-                r1.ShouldStartWith("OK ");
-                int g1 = int.Parse(r1!.Split(' ')[1]);
-                g1.ShouldBe(4); // gets requested (4 < fair share of 12)
+            bool registered = client.TryRegister(4, out int granted);
 
-                string? r2 = SendRawCommand("REGISTER build-2 4");
-                r2.ShouldStartWith("OK ");
-                int g2 = int.Parse(r2!.Split(' ')[1]);
-                g2.ShouldBe(4); // granted(4) < budget(12), so admitted
+            registered.ShouldBeTrue();
+            granted.ShouldBeGreaterThan(0);
+            client.IsConnected.ShouldBeTrue();
 
-                string? r3 = SendRawCommand("REGISTER build-3 4");
-                r3.ShouldStartWith("OK ");
-                int g3 = int.Parse(r3!.Split(' ')[1]);
-                g3.ShouldBe(4); // granted(8) < budget(12), so admitted
+            // Heartbeat
+            client.StartHeartbeat();
+            Thread.Sleep(500);
 
-                // All three should get 4 nodes each on heartbeat (12 / 3)
-                string? hb1 = SendRawCommand("HEARTBEAT build-1");
-                string? hb2 = SendRawCommand("HEARTBEAT build-2");
-                string? hb3 = SendRawCommand("HEARTBEAT build-3");
-
-                int b1 = int.Parse(hb1!.Split(' ')[1]);
-                int b2 = int.Parse(hb2!.Split(' ')[1]);
-                int b3 = int.Parse(hb3!.Split(' ')[1]);
-
-                b1.ShouldBe(4);
-                b2.ShouldBe(4);
-                b3.ShouldBe(4);
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
-        }
-
-        [Fact]
-        public void FairShare_CapsAtRequestedNodes()
-        {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.Start();
-
-            try
-            {
-                // build-1 only wants 2 nodes, both activate immediately
-                SendRawCommand("REGISTER build-1 2");
-                SendRawCommand("REGISTER build-2 12");
-
-                // build-1 should get 2 (capped at requested), build-2 gets 6 (fair share)
-                string? hb1 = SendRawCommand("HEARTBEAT build-1");
-                string? hb2 = SendRawCommand("HEARTBEAT build-2");
-
-                int b1 = int.Parse(hb1!.Split(' ')[1]);
-                int b2 = int.Parse(hb2!.Split(' ')[1]);
-
-                b1.ShouldBe(2);
-                b2.ShouldBe(6);
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
-        }
-
-        #endregion
-
-        #region Client Tests
-
-        [Fact]
-        public void Client_NoCoordinator_TryRegisterReturnsFalse()
-        {
-            // This test verifies that when no coordinator is listening on the expected pipe,
-            // the client gracefully returns false. We use a custom pipe name that doesn't exist.
-            // Since BuildCoordinatorClient always uses GetPipeName(), we can't easily redirect it.
-            // Instead, verify that SendCommand returns null for a nonexistent pipe by checking
-            // that a raw connection to a bogus pipe fails.
-            string bogusPipe = NativeMethodsShared.IsUnixLike
-                ? $"/tmp/MSBuild-NoPipe-{Guid.NewGuid():N}"
-                : $"MSBuild-NoPipe-{Guid.NewGuid():N}";
-
-            bool connected = false;
-            try
-            {
-                using var client = new System.IO.Pipes.NamedPipeClientStream(".", bogusPipe, PipeDirection.InOut, PipeOptions.CurrentUserOnly);
-                client.Connect(500);
-                connected = true;
-            }
-            catch (TimeoutException)
-            {
-                // Expected — no server
-            }
-            catch (IOException)
-            {
-                // Expected — no server
-            }
-
-            connected.ShouldBeFalse("Connection to nonexistent pipe should fail");
-        }
-
-        [Fact]
-        public void Client_RegistersWithCoordinator()
-        {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.Start();
-
-            try
-            {
-                using var client = new BuildCoordinatorClient(_testPipeName);
-                bool registered = client.TryRegister(6, out int granted);
-
-                registered.ShouldBeTrue();
-                client.IsConnected.ShouldBeTrue();
-                granted.ShouldBe(6);
-                client.GrantedNodes.ShouldBe(6);
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
-        }
-
-        [Fact]
-        public void Client_HeartbeatUpdatesBudget()
-        {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.Start();
-
-            try
-            {
-                // Client requests 6 — leaves budget headroom for second build
-                using var client1 = new BuildCoordinatorClient(_testPipeName);
-                client1.TryRegister(6, out int granted1);
-                granted1.ShouldBe(6);
-
-                client1.StartHeartbeat();
-
-                // Register a second build — admitted because granted(6) < budget(12)
-                SendRawCommand($"REGISTER second-build 12");
-
-                // Wait for heartbeat to pick up the rebalanced budget
-                Thread.Sleep(5000);
-
-                // The client should have updated its internal granted nodes via heartbeat
-                // 12/2 = 6, but capped at requested=6
-                client1.GrantedNodes.ShouldBe(6);
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
-        }
-
-        [Fact]
-        public void Client_UnregisterCleansUp()
-        {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.Start();
-
-            try
-            {
-                var client = new BuildCoordinatorClient(_testPipeName);
-                client.TryRegister(6, out _);
-                client.IsConnected.ShouldBeTrue();
-
-                client.Dispose(); // Triggers Unregister
-
-                // Coordinator should show 0 active
-                string? status = SendRawCommand("STATUS");
-                status!.ShouldContain("active=0");
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
+            // Unregister
+            client.Unregister();
+            client.IsConnected.ShouldBeFalse();
         }
 
         [Fact]
         public void Client_QueuedBuild_BlocksUntilPromoted()
         {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 1);
-            coordinator.Start();
+            // Fill capacity
+            SendCommand("REGISTER fill-1 4");
+            SendCommand("REGISTER fill-2 4");
+            SendCommand("REGISTER fill-3 4");
 
-            try
+            using var client = new NamedPipeCoordinatorClient(_pipeName);
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+            bool registered = false;
+            int grantedNodes = 0;
+
+            // Register client in background (will block on wait pipe)
+            var registerTask = Task.Run(() =>
             {
-                // First build registers immediately
-                using var client1 = new BuildCoordinatorClient(_testPipeName);
-                client1.TryRegister(6, out _);
+                registered = client.TryRegister(4, out grantedNodes, cts.Token);
+            });
 
-                // Start heartbeats for client1
-                client1.StartHeartbeat();
+            Thread.Sleep(500); // Let the client get queued
 
-                // Second build should block in queue
-                var queuePositions = new List<int>();
-                using var client2 = new BuildCoordinatorClient(_testPipeName);
+            // Unregister one build to open a slot
+            SendCommand("UNREGISTER fill-1");
 
-                var registerTask = Task.Run(() =>
+            registerTask.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue("Register task should complete after promotion");
+
+            registered.ShouldBeTrue();
+            grantedNodes.ShouldBeGreaterThan(0);
+        }
+
+        [Fact]
+        public void Client_QueuedBuild_CancelledWhileWaiting()
+        {
+            // Fill capacity
+            SendCommand("REGISTER fill-1 4");
+            SendCommand("REGISTER fill-2 4");
+            SendCommand("REGISTER fill-3 4");
+
+            using var client = new NamedPipeCoordinatorClient(_pipeName);
+            using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(500));
+
+            bool registered = false;
+
+            var registerTask = Task.Run(() =>
+            {
+                registered = client.TryRegister(4, out _, cts.Token);
+            });
+
+            registerTask.Wait(TimeSpan.FromSeconds(5)).ShouldBeTrue("Register task should complete after cancellation");
+            registered.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void ConcurrentRegistrations()
+        {
+            var tasks = new Task<string?>[6];
+
+            for (int i = 0; i < tasks.Length; i++)
+            {
+                int idx = i;
+                tasks[i] = Task.Run(() => SendCommand($"REGISTER concurrent-{idx} 4"));
+            }
+
+            Task.WaitAll(tasks, TimeSpan.FromSeconds(10)).ShouldBeTrue();
+
+            int granted = 0;
+            int queued = 0;
+            foreach (var task in tasks)
+            {
+                task.Result.ShouldNotBeNull();
+                if (task.Result!.StartsWith("OK ", StringComparison.Ordinal))
                 {
-                    return client2.TryRegister(6, out _, onQueuePositionChanged: (pos, total, wait) =>
-                    {
-                        _output.WriteLine($"Queue position: {pos}/{total}, waiting {wait}s");
-                        queuePositions.Add(pos);
-                    });
-                });
-
-                // Give client2 time to register and start heartbeating in queue
-                Thread.Sleep(3000);
-                registerTask.IsCompleted.ShouldBeFalse("Build should still be queued");
-
-                // Unregister first build — should promote second
-                client1.Dispose();
-
-                // Second build should complete registration
-                bool registered = registerTask.Wait(TimeSpan.FromSeconds(15))
-                    ? registerTask.Result
-                    : false;
-
-                registered.ShouldBeTrue("Queued build should be promoted after first build unregisters");
-                client2.IsConnected.ShouldBeTrue();
-                queuePositions.ShouldNotBeEmpty();
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
-        }
-
-        [Fact]
-        public void Client_QueuedBuild_CancellationUnregisters()
-        {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 1);
-            coordinator.Start();
-
-            try
-            {
-                using var client1 = new BuildCoordinatorClient(_testPipeName);
-                client1.TryRegister(6, out _);
-
-                using var cts = new CancellationTokenSource();
-                using var client2 = new BuildCoordinatorClient(_testPipeName);
-
-                var registerTask = Task.Run(() =>
-                    client2.TryRegister(6, out _, ct: cts.Token));
-
-                // Let it enter queue
-                Thread.Sleep(3000);
-
-                // Cancel
-                cts.Cancel();
-
-                bool registered = registerTask.Wait(TimeSpan.FromSeconds(10))
-                    ? registerTask.Result
-                    : true; // If timed out, fail
-
-                registered.ShouldBeFalse("Cancelled registration should return false");
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
-        }
-
-        #endregion
-
-        #region GetPipeName Tests
-
-        [Fact]
-        public void GetPipeName_ContainsUsername()
-        {
-            string pipeName = BuildCoordinator.GetPipeName();
-            pipeName.ShouldContain(Environment.UserName);
-        }
-
-        [UnixOnlyFact]
-        public void GetPipeName_OnUnix_IsAbsolutePath()
-        {
-            string pipeName = BuildCoordinator.GetPipeName();
-            pipeName.ShouldStartWith("/tmp/");
-        }
-
-        #endregion
-
-        #region Staleness Reaper Tests
-
-        [Fact]
-        public void StalenessReaper_ReapsDeadBuild()
-        {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.StaleHeartbeatSeconds = 2;
-            coordinator.ReaperIntervalSeconds = 1;
-            coordinator.Start();
-
-            try
-            {
-                // Register a build with a PID that definitely doesn't exist.
-                // Build ID format is "{PID}-{ticks}" — use PID 99999999
-                string deadBuildId = "99999999-123456789";
-                string? r = SendRawCommand($"REGISTER {deadBuildId} 6");
-                r.ShouldStartWith("OK ");
-
-                // Verify it's active
-                string? status1 = SendRawCommand("STATUS");
-                status1!.ShouldContain("active=1");
-
-                // Wait for the staleness reaper to detect it (2s stale + 1s reap interval + margin)
-                Thread.Sleep(5000);
-
-                // Build should have been reaped
-                string? status2 = SendRawCommand("STATUS");
-                status2!.ShouldContain("active=0");
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
-        }
-
-        [Fact]
-        public void StalenessReaper_DoesNotReapLiveBuild()
-        {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 3);
-            coordinator.StaleHeartbeatSeconds = 2;
-            coordinator.ReaperIntervalSeconds = 1;
-            coordinator.Start();
-
-            try
-            {
-                // Register with current PID — process is definitely alive
-                string liveBuildId = $"{Environment.ProcessId}-{DateTime.UtcNow.Ticks}";
-                SendRawCommand($"REGISTER {liveBuildId} 6");
-
-                // Wait past the stale threshold but keep heartbeating
-                for (int i = 0; i < 4; i++)
-                {
-                    Thread.Sleep(1000);
-                    SendRawCommand($"HEARTBEAT {liveBuildId}");
+                    granted++;
                 }
-
-                // Build should still be active
-                string? status = SendRawCommand("STATUS");
-                status!.ShouldContain("active=1");
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
-        }
-
-        [Fact]
-        public void StalenessReaper_PromotesQueuedAfterReap()
-        {
-            using var coordinator = CreateCoordinator(12, maxConcurrentBuilds: 1);
-            coordinator.StaleHeartbeatSeconds = 2;
-            coordinator.ReaperIntervalSeconds = 1;
-            coordinator.Start();
-
-            try
-            {
-                // First build — dead PID
-                string deadBuildId = "99999999-111111";
-                SendRawCommand($"REGISTER {deadBuildId} 6");
-
-                // Second build — queued (max concurrent = 1)
-                string liveBuildId = $"{Environment.ProcessId}-{DateTime.UtcNow.Ticks}";
-                SendRawCommand($"REGISTER {liveBuildId} 6");
-
-                // Verify: 1 active, 1 queued
-                string? status1 = SendRawCommand("STATUS");
-                status1!.ShouldContain("active=1");
-
-                // Wait for reaper to kill the dead build and promote the queued one
-                Thread.Sleep(5000);
-
-                // Live build should now be active
-                string? hb = SendRawCommand($"HEARTBEAT {liveBuildId}");
-                hb.ShouldStartWith("OK ");
-
-                string? status2 = SendRawCommand("STATUS");
-                status2!.ShouldContain("active=1");
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
-        }
-
-        #endregion
-
-        #region Concurrent Connection Tests
-
-        [Fact]
-        public void ConcurrentRegistrations_AllSucceed()
-        {
-            using var coordinator = CreateCoordinator(24, maxConcurrentBuilds: 5);
-            coordinator.Start();
-
-            try
-            {
-                int successCount = 0;
-                var tasks = new Task[5];
-
-                for (int i = 0; i < 5; i++)
+                else if (task.Result!.StartsWith("QUEUED ", StringComparison.Ordinal))
                 {
-                    int buildNum = i;
-                    tasks[i] = Task.Run(() =>
-                    {
-                        string? response = SendRawCommand($"REGISTER concurrent-{buildNum} 6");
-                        if (response != null && (response.StartsWith("OK ") || response.StartsWith("QUEUED ")))
-                        {
-                            Interlocked.Increment(ref successCount);
-                        }
-                    });
-                }
-
-                Task.WaitAll(tasks, TimeSpan.FromSeconds(15));
-                successCount.ShouldBe(5);
-            }
-            finally
-            {
-                coordinator.Stop();
-            }
-        }
-
-        #endregion
-
-        #region Helpers
-
-        /// <summary>
-        /// Create a BuildCoordinator that listens on the per-test pipe name
-        /// to avoid collisions with a real coordinator or other tests.
-        /// </summary>
-        private BuildCoordinator CreateCoordinator(int totalBudget, int maxConcurrentBuilds, int minBuildsForBudget = 1)
-        {
-            return new BuildCoordinator(totalBudget, maxConcurrentBuilds, minBuildsForBudget, pipeName: _testPipeName);
-        }
-
-        /// <summary>
-        /// Send a raw command to the coordinator using the per-test pipe name.
-        /// </summary>
-        private string? SendRawCommand(string command)
-        {
-            string pipeName = _testPipeName;
-
-            for (int attempt = 0; attempt < 3; attempt++)
-            {
-                try
-                {
-                    using var client = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.CurrentUserOnly);
-                    client.Connect(2000);
-
-                    using var writer = new StreamWriter(client, leaveOpen: true) { AutoFlush = true };
-                    using var reader = new StreamReader(client, leaveOpen: true);
-
-                    writer.WriteLine(command);
-                    return reader.ReadLine();
-                }
-                catch (TimeoutException)
-                {
-                    if (attempt < 2)
-                    {
-                        Thread.Sleep(500);
-                    }
-                }
-                catch (IOException)
-                {
-                    if (attempt < 2)
-                    {
-                        Thread.Sleep(500);
-                    }
+                    queued++;
                 }
             }
 
-            return null;
+            granted.ShouldBe(3); // maxConcurrent = 3
+            queued.ShouldBe(3);
         }
 
-        #endregion
+        private string? SendCommand(string command)
+        {
+            try
+            {
+                using var client = new NamedPipeClientStream(".", _pipeName, PipeDirection.InOut, PipeOptions.CurrentUserOnly);
+                client.Connect(5000);
+                using var writer = new StreamWriter(client, leaveOpen: true) { AutoFlush = true };
+                using var reader = new StreamReader(client, leaveOpen: true);
+                writer.WriteLine(command);
+                return reader.ReadLine();
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }
 

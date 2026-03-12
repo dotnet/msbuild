@@ -170,7 +170,11 @@
     <Compile Include="BackEnd\BuildManager\GlobalPropertiesLookup.cs" />
     <Compile Include="BackEnd\BuildManager\ProjectIsolationMode.cs" />
     <Compile Include="BackEnd\BuildCoordinator\BuildCoordinator.cs" Condition="'$(TargetFramework)' != 'net472'" />
-    <Compile Include="BackEnd\BuildCoordinator\BuildCoordinatorClient.cs" Condition="'$(TargetFramework)' != 'net472'" />
+    <Compile Include="BackEnd\BuildCoordinator\ICoordinatorClient.cs" Condition="'$(TargetFramework)' != 'net472'" />
+    <Compile Include="BackEnd\BuildCoordinator\NamedPipeCoordinatorClient.cs" Condition="'$(TargetFramework)' != 'net472'" />
+    <Compile Include="BackEnd\BuildCoordinator\NamedPipeCoordinatorHost.cs" Condition="'$(TargetFramework)' != 'net472'" />
+    <Compile Include="BackEnd\BuildCoordinator\INodeBudgetPolicy.cs" Condition="'$(TargetFramework)' != 'net472'" />
+    <Compile Include="BackEnd\BuildCoordinator\FairShareBudgetPolicy.cs" Condition="'$(TargetFramework)' != 'net472'" />
     <Compile Include="BackEnd\BuildManager\BuildManager.Coordinator.cs" Condition="'$(TargetFramework)' != 'net472'" />
     <Compile Include="BackEnd\Client\MSBuildClientPacketPump.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientExitType.cs" />
