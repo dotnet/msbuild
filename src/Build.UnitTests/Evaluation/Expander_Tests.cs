@@ -5126,6 +5126,8 @@ $(
                 using (var env = TestEnvironment.Create())
                 {
                     env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_12.ToString());
+                    ChangeWaves.Reset_ForUnitTestsOnly();
+
                     currentThread.CurrentCulture = svSECultureInfo;
                     currentThread.CurrentUICulture = svSECultureInfo;
                     var root = env.CreateFolder();
