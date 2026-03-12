@@ -3462,7 +3462,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 string result = expander.ExpandIntoStringAndUnescape(@"$([MSBuild]::GetDirectoryNameOfFileAbove($(StartingDirectory), $(FileToFind)))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
-                Assert.Equal(FrameworkFileUtilities.EnsureTrailingSlash(tempPath), FrameworkFileUtilities.EnsureTrailingSlash(result));
+                Assert.Equal(FileUtilities.EnsureTrailingSlash(tempPath), FileUtilities.EnsureTrailingSlash(result));
 
                 result = expander.ExpandIntoStringAndUnescape(@"$([MSBuild]::GetDirectoryNameOfFileAbove($(StartingDirectory), Hobbits))", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
@@ -5328,7 +5328,7 @@ $(
         #region System.IO.File/Directory relative path resolution in -mt mode
 
         /// <summary>
-        /// TransientTestState that saves/restores <see cref="FrameworkFileUtilities.CurrentThreadWorkingDirectory"/>.
+        /// TransientTestState that saves/restores <see cref="FileUtilities.CurrentThreadWorkingDirectory"/>.
         /// </summary>
         private sealed class TransientThreadWorkingDirectory : TransientTestState
         {
@@ -5336,13 +5336,13 @@ $(
 
             public TransientThreadWorkingDirectory(string newWorkingDirectory)
             {
-                _originalValue = FrameworkFileUtilities.CurrentThreadWorkingDirectory;
-                FrameworkFileUtilities.CurrentThreadWorkingDirectory = newWorkingDirectory;
+                _originalValue = FileUtilities.CurrentThreadWorkingDirectory;
+                FileUtilities.CurrentThreadWorkingDirectory = newWorkingDirectory;
             }
 
             public override void Revert()
             {
-                FrameworkFileUtilities.CurrentThreadWorkingDirectory = _originalValue;
+                FileUtilities.CurrentThreadWorkingDirectory = _originalValue;
             }
         }
 

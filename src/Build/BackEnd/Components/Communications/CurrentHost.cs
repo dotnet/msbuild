@@ -3,6 +3,7 @@
 
 #if RUNTIME_TYPE_NETCORE
 using System.IO;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Constants = Microsoft.Build.Framework.Constants;
