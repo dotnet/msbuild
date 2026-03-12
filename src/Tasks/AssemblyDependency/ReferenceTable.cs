@@ -112,6 +112,11 @@ namespace Microsoft.Build.Tasks
         private readonly ReadMachineTypeFromPEHeader _readMachineTypeFromPEHeader;
 
         /// <summary>
+        /// TaskEnvironment for thread-safe access to environment variables and path resolution.
+        /// </summary>
+        private readonly TaskEnvironment _taskEnvironment;
+
+        /// <summary>
         /// Is the file a winMD file
         /// </summary>
         private readonly IsWinMDFile _isWinMDFile;
@@ -225,6 +230,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
         /// <param name="nonCultureResourceDirectories"></param>
+        /// <param name="taskEnvironment">TaskEnvironment for thread-safe environment variable access and path resolution.</param>
 #else
         /// <summary>
         /// Construct.
@@ -239,7 +245,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="relatedFileExtensions"></param>
         /// <param name="candidateAssemblyFiles">List of literal assembly file names to be considered when SearchPaths has {CandidateAssemblyFiles}.</param>
         /// <param name="resolvedSDKItems">Resolved sdk items</param>
-        /// <param name="frameworkPaths">Path to the FX.</param>
+        /// <param name="frameworkPaths">Full paths to the FX.</param>
         /// <param name="installedAssemblies">Installed assembly XML tables.</param>
         /// <param name="targetProcessorArchitecture">Like x86 or IA64\AMD64, the processor architecture being targeted.</param>
         /// <param name="fileExists">Delegate used for checking for the existence of a file.</param>
@@ -265,6 +271,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="warnOrErrorOnTargetArchitectureMismatch"></param>
         /// <param name="ignoreFrameworkAttributeVersionMismatch"></param>
         /// <param name="nonCultureResourceDirectories"></param>
+        /// <param name="taskEnvironment">TaskEnvironment for thread-safe environment variable access and path resolution.</param>
 #endif
         internal ReferenceTable(
             IBuildEngine buildEngine,
@@ -307,7 +314,8 @@ namespace Microsoft.Build.Tasks
             bool ignoreFrameworkAttributeVersionMismatch,
             bool unresolveFrameworkAssembliesFromHigherFrameworks,
             ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
-            string[] nonCultureResourceDirectories)
+            string[] nonCultureResourceDirectories,
+            TaskEnvironment taskEnvironment)
         {
             _log = log;
             _findDependencies = findDependencies;
@@ -339,6 +347,7 @@ namespace Microsoft.Build.Tasks
             _assemblyMetadataCache = assemblyMetadataCache;
             _nonCultureResourceDirectories = nonCultureResourceDirectories;
             _enableCustomCulture = enableCustomCulture;
+            _taskEnvironment = taskEnvironment;
 
             // Set condition for when to check assembly version against the target framework version
             _checkAssemblyVersionAgainstTargetFrameworkVersion = unresolveFrameworkAssembliesFromHigherFrameworks || ((_projectTargetFramework ?? ReferenceTable.s_targetFrameworkVersion_40) <= ReferenceTable.s_targetFrameworkVersion_40);
@@ -468,7 +477,7 @@ namespace Microsoft.Build.Tasks
 
             if (!Path.IsPathRooted(assemblyFileName))
             {
-                reference.FullPath = Path.GetFullPath(assemblyFileName);
+                reference.FullPath = _taskEnvironment.GetAbsolutePath(assemblyFileName).GetCanonicalForm();
             }
             else
             {
@@ -477,15 +486,15 @@ namespace Microsoft.Build.Tasks
 
             try
             {
-                if (_fileExists(assemblyFileName))
+                if (_fileExists(reference.FullPath))
                 {
-                    assemblyName = _getAssemblyName(assemblyFileName);
+                    assemblyName = _getAssemblyName(reference.FullPath);
                     if (assemblyName != null)
                     {
                         reference.ResolvedSearchPath = assemblyFileName;
                     }
                 }
-                else if (_directoryExists(assemblyFileName))
+                else if (_directoryExists(reference.FullPath))
                 {
                     assemblyName = new AssemblyNameExtension("*directory*");
 
@@ -1355,7 +1364,7 @@ namespace Microsoft.Build.Tasks
             // If the path was resolved, then specify the full path on the reference.
             if (resolvedPath != null)
             {
-                resolvedPath = FileUtilities.NormalizePath(resolvedPath);
+                resolvedPath = FileUtilities.FixFilePath(_taskEnvironment.GetAbsolutePath(resolvedPath).GetCanonicalForm()).Value;
                 if (isImmutableFrameworkReference)
                 {
                     _externallyResolvedImmutableFiles[resolvedPath] = GetAssemblyNameFromItemMetadata(reference.PrimarySourceItem);

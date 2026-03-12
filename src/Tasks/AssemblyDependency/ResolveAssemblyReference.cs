@@ -33,7 +33,8 @@ namespace Microsoft.Build.Tasks
     /// Given a list of assemblyFiles, determine the closure of all assemblyFiles that
     /// depend on those assemblyFiles including second and nth-order dependencies too.
     /// </summary>
-    public class ResolveAssemblyReference : TaskExtension, IIncrementalTask
+    [MSBuildMultiThreadableTask]
+    public class ResolveAssemblyReference : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
         /// <summary>
         /// key assembly used to trigger inclusion of facade references.
@@ -179,13 +180,14 @@ namespace Microsoft.Build.Tasks
         private bool _ignoreDefaultInstalledAssemblyTables = false;
         private bool _ignoreDefaultInstalledAssemblySubsetTables = false;
         private bool _enableCustomCulture = false;
-        private string[] _candidateAssemblyFiles = [];
-        private string[] _targetFrameworkDirectories = [];
+        private AbsolutePath[] _candidateAssemblyFiles = [];
+        private AbsolutePath[] _targetFrameworkDirectories = [];
         private string[] _nonCultureResourceDirectories = [];
         private string[] _searchPaths = [];
         private string[] _allowedAssemblyExtensions = [".winmd", ".dll", ".exe"];
         private string[] _relatedFileExtensions = [".pdb", ".xml", ".pri"];
-        private string _appConfigFile = null;
+        private AbsolutePath _appConfigFile = default;
+        private bool _appConfigValueIsEmptyString = false;
         private bool _supportsBindingRedirectGeneration;
         private bool _autoUnify = false;
         private bool _ignoreVersionForFrameworkReferences = false;
@@ -212,12 +214,13 @@ namespace Microsoft.Build.Tasks
         private string _targetedRuntimeVersionRawValue = String.Empty;
         private Version _projectTargetFramework;
 
-        private string _stateFile = null;
+        private AbsolutePath _stateFile = default;
+        private AbsolutePath _assemblyInformationCacheOutputPath = default;
         private string _targetProcessorArchitecture = null;
 
         private string _profileName = String.Empty;
-        private string[] _fullFrameworkFolders = [];
-        private string[] _latestTargetFrameworkDirectories = [];
+        private AbsolutePath[] _fullFrameworkFolders = [];
+        private AbsolutePath[] _latestTargetFrameworkDirectories = [];
         private bool _copyLocalDependenciesWhenParentReferenceInGac = true;
         private Dictionary<string, MessageImportance> _showAssemblyFoldersExLocations = new Dictionary<string, MessageImportance>(StringComparer.OrdinalIgnoreCase);
         private bool _logVerboseSearchResults = false;
@@ -292,12 +295,13 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return _latestTargetFrameworkDirectories;
+                return _latestTargetFrameworkDirectories?.Select(path => path.OriginalValue).ToArray();
             }
 
             set
             {
-                _latestTargetFrameworkDirectories = value;
+                _latestTargetFrameworkDirectories = value?.Select(
+                    path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray();
             }
         }
 
@@ -392,15 +396,22 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// A list of assembly files that can be part of the search and resolution process.
-        /// These must be absolute filenames, or project-relative filenames.
+        /// These must be absolute file paths, or project-relative file paths.
         ///
         /// Assembly files in this list will be considered when SearchPaths contains
         /// {CandidateAssemblyFiles} as one of the paths to consider.
         /// </summary>
         public string[] CandidateAssemblyFiles
         {
-            get { return _candidateAssemblyFiles; }
-            set { _candidateAssemblyFiles = value; }
+            get
+            {
+                return _candidateAssemblyFiles.Select(path => path.OriginalValue).ToArray();
+            }
+            set
+            {
+                _candidateAssemblyFiles = value?.Select(
+                    path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray();
+            }
         }
 
         /// <summary>
@@ -421,8 +432,15 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string[] TargetFrameworkDirectories
         {
-            get { return _targetFrameworkDirectories; }
-            set { _targetFrameworkDirectories = value; }
+            get
+            {
+                return _targetFrameworkDirectories?.Select(path => path.OriginalValue).ToArray();
+            }
+            set
+            {
+                _targetFrameworkDirectories = value?.Select(
+                    path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray();
+            }
         }
 
         /// <summary>
@@ -594,7 +612,17 @@ namespace Microsoft.Build.Tasks
         /// If not null, serializes information about <see cref="AssemblyFiles" /> inputs to the named file.
         /// This overrides the usual outputs, so do not use this unless you are building an SDK with many references.
         /// </summary>
-        public string AssemblyInformationCacheOutputPath { get; set; }
+        public string AssemblyInformationCacheOutputPath
+        {
+            get => _assemblyInformationCacheOutputPath.OriginalValue;
+            set
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    _assemblyInformationCacheOutputPath = TaskEnvironment.GetAbsolutePath(value);
+                }
+            }
+        }
 
         /// <summary>
         /// If not null, uses this set of caches as inputs if RAR cannot find the usual cache in the obj folder. Typically
@@ -676,8 +704,18 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         public string AppConfigFile
         {
-            get { return _appConfigFile; }
-            set { _appConfigFile = value; }
+            get => _appConfigFile.OriginalValue;
+            set 
+            { 
+                if (!string.IsNullOrEmpty(value))
+                {
+                    _appConfigFile = TaskEnvironment.GetAbsolutePath(value);
+                }
+                else if (value == string.Empty && !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+                {
+                    _appConfigValueIsEmptyString = true;
+                }
+            }
         }
 
         /// <summary>
@@ -764,8 +802,14 @@ namespace Microsoft.Build.Tasks
         /// <value></value>
         public string StateFile
         {
-            get { return _stateFile; }
-            set { _stateFile = value; }
+            get => _stateFile.OriginalValue;
+            set 
+            { 
+                if (!string.IsNullOrEmpty(value))
+                {
+                    _stateFile = TaskEnvironment.GetAbsolutePath(value).GetCanonicalForm();
+                }
+            }
         }
 
         /// <summary>
@@ -909,17 +953,21 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                return _fullFrameworkFolders;
+                return _fullFrameworkFolders?.Select(path => path.OriginalValue).ToArray();
             }
 
             set
             {
                 ErrorUtilities.VerifyThrowArgumentNull(value, "FullFrameworkFolders");
-                _fullFrameworkFolders = value;
+                _fullFrameworkFolders = value?.Select(
+                    path => string.IsNullOrEmpty(path) ? default : TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm()).ToArray();
             }
         }
 
         public bool FailIfNotIncremental { get; set; }
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// Allow the task to run on the out-of-proc node if enabled for this build.
@@ -1533,11 +1581,11 @@ namespace Microsoft.Build.Tasks
             }
 
             Log.LogMessage(importance, property, "CandidateAssemblyFiles");
-            foreach (string file in CandidateAssemblyFiles)
+            foreach (AbsolutePath file in _candidateAssemblyFiles)
             {
                 try
                 {
-                    if (FileUtilities.HasExtension(file, _allowedAssemblyExtensions))
+                    if (FileUtilities.HasExtension(file.OriginalValue, _allowedAssemblyExtensions))
                     {
                         Log.LogMessage(importance, indent + file);
                     }
@@ -1583,7 +1631,7 @@ namespace Microsoft.Build.Tasks
             }
 
             Log.LogMessage(importance, property, "AppConfigFile");
-            Log.LogMessage(importance, $"{indent}{AppConfigFile}");
+            Log.LogMessage(importance, $"{indent}{_appConfigFile.OriginalValue}");
 
             Log.LogMessage(importance, property, "AutoUnify");
             Log.LogMessage(importance, $"{indent}{AutoUnify}");
@@ -1632,15 +1680,15 @@ namespace Microsoft.Build.Tasks
             Log.LogMessage(importance, $"{indent}{ProfileName}");
 
             Log.LogMessage(importance, property, "FullFrameworkFolders");
-            foreach (string fullFolder in FullFrameworkFolders)
+            foreach (var fullFolder in _fullFrameworkFolders)
             {
-                Log.LogMessage(importance, $"{indent}{fullFolder}");
+                Log.LogMessage(importance, $"{indent}{fullFolder.OriginalValue}");
             }
 
             Log.LogMessage(importance, property, "LatestTargetFrameworkDirectories");
-            foreach (string latestFolder in _latestTargetFrameworkDirectories)
+            foreach (var latestFolder in _latestTargetFrameworkDirectories)
             {
-                Log.LogMessage(importance, $"{indent}{latestFolder}");
+                Log.LogMessage(importance, $"{indent}{latestFolder.OriginalValue}");
             }
 
             Log.LogMessage(importance, property, "ProfileTablesLocation");
@@ -1707,7 +1755,7 @@ namespace Microsoft.Build.Tasks
                         }
                         else
                         {
-                            Log.LogMessage(importance, Strings.UnificationByAppConfig, unificationVersion.version, _appConfigFile, unificationVersion.referenceFullPath);
+                            Log.LogMessage(importance, Strings.UnificationByAppConfig, unificationVersion.version, _appConfigFile.OriginalValue, unificationVersion.referenceFullPath);
                         }
                         break;
 
@@ -2107,7 +2155,7 @@ namespace Microsoft.Build.Tasks
             // Construct the cache only if we can't find any caches.
             if (_cache == null && AssemblyInformationCachePaths != null && AssemblyInformationCachePaths.Length > 0)
             {
-                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths, Log, fileExists);
+                _cache = SystemState.DeserializePrecomputedCaches(AssemblyInformationCachePaths, Log, fileExists, TaskEnvironment);
             }
 
             if (_cache == null)
@@ -2121,15 +2169,15 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void WriteStateFile()
         {
-            if (!string.IsNullOrEmpty(AssemblyInformationCacheOutputPath))
+            if (_assemblyInformationCacheOutputPath.Value is not null)
             {
-                _cache.SerializePrecomputedCache(AssemblyInformationCacheOutputPath, Log);
+                _cache.SerializePrecomputedCache(_assemblyInformationCacheOutputPath.Value, Log);
             }
-            else if (!string.IsNullOrEmpty(_stateFile) && (_cache.IsDirty || _cache.instanceLocalOutgoingFileStateCache.Count < _cache.instanceLocalFileStateCache.Count))
+            else if (_stateFile.Value is not null && (_cache.IsDirty || _cache.instanceLocalOutgoingFileStateCache.Count < _cache.instanceLocalFileStateCache.Count))
             {
                 // Either the cache is dirty (we added or updated an item) or the number of items actually used is less than what
                 // we got by reading the state file prior to execution. Serialize the cache into the state file.
-                _cache.SerializeCache(_stateFile, Log);
+                _cache.SerializeCache(_stateFile.Value, Log);
             }
         }
         #endregion
@@ -2140,10 +2188,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private List<DependentAssembly> GetAssemblyRemappingsFromAppConfig()
         {
-            if (_appConfigFile != null)
+            if (_appConfigFile.Value is not null)
             {
                 AppConfig appConfig = new AppConfig();
-                appConfig.Load(_appConfigFile);
+                appConfig.Load(_appConfigFile.Value);
 
                 return appConfig.Runtime.DependentAssemblies;
             }
@@ -2237,7 +2285,7 @@ namespace Microsoft.Build.Tasks
                         return false;
                     }
 
-                    _logVerboseSearchResults = Environment.GetEnvironmentVariable("MSBUILDLOGVERBOSERARSEARCHRESULTS") != null;
+                    _logVerboseSearchResults = TaskEnvironment.GetEnvironmentVariable("MSBUILDLOGVERBOSERARSEARCHRESULTS") != null;
 
                     // Loop through all the target framework directories that were passed in,
                     // and ensure that they all have a trailing slash.  This is necessary
@@ -2268,7 +2316,7 @@ namespace Microsoft.Build.Tasks
                     string subsetOrProfileName = null;
 
                     // Are we targeting a profile
-                    bool targetingProfile = !String.IsNullOrEmpty(ProfileName) && ((FullFrameworkFolders.Length > 0) || (FullFrameworkAssemblyTables.Length > 0));
+                    bool targetingProfile = !String.IsNullOrEmpty(ProfileName) && ((_fullFrameworkFolders.Length > 0) || (FullFrameworkAssemblyTables.Length > 0));
                     bool targetingSubset = false;
                     List<Exception> inclusionListErrors = new List<Exception>();
                     List<string> inclusionListErrorFilesNames = new List<string>();
@@ -2411,10 +2459,22 @@ namespace Microsoft.Build.Tasks
                         try
                         {
                             appConfigRemappedAssemblies = GetAssemblyRemappingsFromAppConfig();
+
+                            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6) && _appConfigValueIsEmptyString)
+                            {
+                                // Preserve backward compatibility for empty AppConfigFile handling.
+                                // Prior to Wave18_6, empty strings would cause TaskEnvironment.GetAbsolutePath() to throw an exception,
+                                // which would be caught and logged as an error, stopping RAR execution.
+                                // With the new behavior, empty strings are silently ignored (treated like null).
+                                // When Wave 18.5 is disabled, we preserve the old failure behavior.
+                                // When cleaning up this change wave, also clean up the _appConfigValueIsEmptyString field.
+                                Log.LogErrorWithCodeFromResources("ResolveAssemblyReference.InvalidAppConfig", string.Empty, "AppConfig file path cannot be empty.");
+                                return false;
+                            }
                         }
                         catch (AppConfigException e)
                         {
-                            Log.LogErrorWithCodeFromResources(null, e.FileName, e.Line, e.Column, 0, 0, "ResolveAssemblyReference.InvalidAppConfig", AppConfigFile, e.Message);
+                            Log.LogErrorWithCodeFromResources(null, e.FileName, e.Line, e.Column, 0, 0, "ResolveAssemblyReference.InvalidAppConfig", _appConfigFile.OriginalValue, e.Message);
                             return false;
                         }
                     }
@@ -2437,9 +2497,9 @@ namespace Microsoft.Build.Tasks
                         _searchPaths,
                         _allowedAssemblyExtensions,
                         _relatedFileExtensions,
-                        _candidateAssemblyFiles,
+                        _candidateAssemblyFiles?.Select(path => path.Value).ToArray(),
                         _resolvedSDKReferences,
-                        _targetFrameworkDirectories,
+                        _targetFrameworkDirectories?.Select(path => path.Value).ToArray(),
                         installedAssemblies,
                         processorArchitecture,
                         fileExists,
@@ -2457,7 +2517,7 @@ namespace Microsoft.Build.Tasks
                         _projectTargetFramework,
                         frameworkMoniker,
                         Log,
-                        _latestTargetFrameworkDirectories,
+                        _latestTargetFrameworkDirectories?.Select(path => path.Value).ToArray(),
                         _copyLocalDependenciesWhenParentReferenceInGac,
                         DoNotCopyLocalIfInGac,
                         getAssemblyPathInGac,
@@ -2468,7 +2528,8 @@ namespace Microsoft.Build.Tasks
                         _ignoreTargetFrameworkAttributeVersionMismatch,
                         _unresolveFrameworkAssembliesFromHigherFrameworks,
                         assemblyMetadataCache,
-                        _nonCultureResourceDirectories);
+                        _nonCultureResourceDirectories,
+                        TaskEnvironment);
 
                     dependencyTable.FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences;
 
@@ -2634,9 +2695,9 @@ namespace Microsoft.Build.Tasks
                     WriteStateFile();
 
                     // Save the new state out and put into the file exists if it is actually on disk.
-                    if (_stateFile != null && fileExists(_stateFile))
+                    if (_stateFile.Value is not null && fileExists(_stateFile.Value))
                     {
-                        _filesWritten.Add(new TaskItem(_stateFile));
+                        _filesWritten.Add(new TaskItem(_stateFile.OriginalValue));
                     }
 
                     // Log the results.
@@ -2822,7 +2883,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            fullRedistAssemblyTableInfo = GetInstalledAssemblyTableInfo(false, FullFrameworkAssemblyTables, new GetListPath(RedistList.GetRedistListPathsFromDisk), FullFrameworkFolders);
+            fullRedistAssemblyTableInfo = GetInstalledAssemblyTableInfo(false, FullFrameworkAssemblyTables, new GetListPath(RedistList.GetRedistListPathsFromDisk), _fullFrameworkFolders?.Select(path => path.Value).ToArray());
             if (fullRedistAssemblyTableInfo.Length > 0)
             {
                 // Get the redist list which represents the Full framework, we need this so that we can generate the exclusion list
@@ -2911,7 +2972,7 @@ namespace Microsoft.Build.Tasks
 
             // Make sure the inputs for profiles are correct
             bool profileNameIsSet = !String.IsNullOrEmpty(ProfileName);
-            bool fullFrameworkFoldersIsSet = FullFrameworkFolders.Length > 0;
+            bool fullFrameworkFoldersIsSet = _fullFrameworkFolders.Length > 0;
             bool fullFrameworkTableLocationsIsSet = FullFrameworkAssemblyTables.Length > 0;
             bool profileIsSet = profileNameIsSet && (fullFrameworkFoldersIsSet || fullFrameworkTableLocationsIsSet);
 
@@ -2942,7 +3003,7 @@ namespace Microsoft.Build.Tasks
                 return;
             }
 
-            string dumpFrameworkSubsetList = Environment.GetEnvironmentVariable("MSBUILDDUMPFRAMEWORKSUBSETLIST");
+            string dumpFrameworkSubsetList = TaskEnvironment.GetEnvironmentVariable("MSBUILDDUMPFRAMEWORKSUBSETLIST");
             if (dumpFrameworkSubsetList == null)
             {
                 return;
@@ -2955,7 +3016,7 @@ namespace Microsoft.Build.Tasks
             {
                 if (redistInfo != null)
                 {
-                    Log.LogMessage(MessageImportance.Low, Strings.FormattedAssemblyInfo, redistInfo.Path);
+                    Log.LogMessage(MessageImportance.Low, Strings.FormattedAssemblyInfo, redistInfo.Path.OriginalValue);
                 }
             }
 
@@ -2966,7 +3027,7 @@ namespace Microsoft.Build.Tasks
                 {
                     if (inclusionListInfo != null)
                     {
-                        Log.LogMessage(MessageImportance.Low, Strings.FormattedAssemblyInfo, inclusionListInfo.Path);
+                        Log.LogMessage(MessageImportance.Low, Strings.FormattedAssemblyInfo, inclusionListInfo.Path.OriginalValue);
                     }
                 }
             }
@@ -3084,7 +3145,7 @@ namespace Microsoft.Build.Tasks
                     string[] listPaths = GetAssemblyListPaths(targetFrameworkDirectory);
                     foreach (string listPath in listPaths)
                     {
-                        tableMap[listPath] = new AssemblyTableInfo(listPath, targetFrameworkDirectory);
+                        tableMap[listPath] = new AssemblyTableInfo(listPath, targetFrameworkDirectory, TaskEnvironment);
                     }
                 }
             }
@@ -3108,7 +3169,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                tableMap[installedAssemblyTable.ItemSpec] = new AssemblyTableInfo(installedAssemblyTable.ItemSpec, frameworkDirectory);
+                tableMap[installedAssemblyTable.ItemSpec] = new AssemblyTableInfo(installedAssemblyTable.ItemSpec, frameworkDirectory, TaskEnvironment);
             }
 
             AssemblyTableInfo[] extensions = new AssemblyTableInfo[tableMap.Count];
@@ -3249,7 +3310,7 @@ namespace Microsoft.Build.Tasks
         private string GetAssemblyPathInGac(AssemblyNameExtension assemblyName, SystemProcessorArchitecture targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, FileExists fileExists, bool fullFusionName, bool specificVersion)
         {
 #if FEATURE_GAC
-            return GlobalAssemblyCache.GetLocation(BuildEngine as IBuildEngine4, assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fullFusionName, fileExists, null, null, specificVersion /* this value does not matter if we are passing a full fusion name*/);
+            return GlobalAssemblyCache.GetLocation(BuildEngine as IBuildEngine4, assemblyName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fullFusionName, fileExists, null, null, specificVersion /* this value does not matter if we are passing a full fusion name*/, TaskEnvironment);
 #else
             return string.Empty;
 #endif
@@ -3274,9 +3335,9 @@ namespace Microsoft.Build.Tasks
                     // FilesWritten already defines a public setter which no-ops. Changing its visiblity is a breaking
                     // change, so we can't set it outside of RAR when we check for properties with OutputAttribute.
                     // It only has two possible states, so we can just compute it here.
-                    if (_stateFile != null && FileUtilities.FileExistsNoThrow(_stateFile))
+                    if (_stateFile.Value is not null && FileUtilities.FileExistsNoThrow(_stateFile.Value))
                     {
-                        _filesWritten.Add(new TaskItem(_stateFile));
+                        _filesWritten.Add(new TaskItem(_stateFile.OriginalValue));
                     }
 
                     return success;
@@ -3289,6 +3350,10 @@ namespace Microsoft.Build.Tasks
                     CommunicationsUtilities.Trace("RAR out-of-proc connection failed, failing back to in-proc. Exception: {0}", ex);
                 }
             }
+
+            // In a multithreaded node, relative paths must be resolved relative to the project directory
+            // rather than the process working directory. AbsolutePath objects are created in property setters
+            // when TaskEnvironment is available, so no additional processing needed here.
 
             return Execute(
                 p => FileUtilities.FileExistsNoThrow(p),
