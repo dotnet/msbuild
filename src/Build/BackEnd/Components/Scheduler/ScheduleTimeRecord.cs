@@ -34,9 +34,7 @@ namespace Microsoft.Build.BackEnd
         /// Retrieve the accumulated time.
         /// If the timer is still running, returns the accumulated time so far
         /// (elapsed time since the timer started plus any previously accumulated time)
-        /// instead of throwing. This prevents a crash in diagnostic summary logging
-        /// from killing the BuildManager work queue and hanging VS indefinitely.
-        /// See: https://github.com/dotnet/msbuild/issues/XXXXX
+        /// instead of throwing.
         /// </summary>
         public TimeSpan AccumulatedTime
         {
