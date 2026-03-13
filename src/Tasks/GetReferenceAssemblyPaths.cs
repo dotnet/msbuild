@@ -25,7 +25,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Task environment for thread-safe operations.
         /// </summary>
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
         #region Data
 #if FEATURE_GAC
         /// <summary>
