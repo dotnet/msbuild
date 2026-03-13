@@ -5,7 +5,9 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Versioning;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
+using Constants = Microsoft.Build.Tasks.Deployment.ManifestUtilities.Constants;
 
 #nullable disable
 
@@ -15,6 +17,7 @@ namespace Microsoft.Build.Tasks
     /// Generates a deploy manifest for ClickOnce projects.
     /// </summary>
     [SupportedOSPlatform("windows")]
+    [MSBuildMultiThreadableTask]
     public sealed class GenerateDeploymentManifest : GenerateManifestBase
     {
         private bool? _createDesktopShortcut;

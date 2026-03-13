@@ -16,7 +16,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Base class for all manifest generation tasks.
     /// </summary>
-    public abstract class GenerateManifestBase : Task
+    public abstract class GenerateManifestBase : Task, IMultiThreadableTask
     {
         private enum AssemblyType
         {
@@ -80,6 +80,9 @@ namespace Microsoft.Build.Tasks
         }
 
         public string TargetFrameworkMoniker { get; set; }
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         protected internal AssemblyReference AddAssemblyNameFromItem(ITaskItem item, AssemblyReferenceType referenceType)
         {
@@ -452,7 +455,8 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    _manifest = ManifestReader.ReadManifest(manifestType.Name, InputManifest.ItemSpec, true);
+                    AbsolutePath inputManifestPath = TaskEnvironment.GetAbsolutePath(InputManifest.ItemSpec);
+                    _manifest = ManifestReader.ReadManifest(manifestType.Name, inputManifestPath, true);
                 }
                 catch (Exception ex)
                 {
@@ -511,7 +515,7 @@ namespace Microsoft.Build.Tasks
         {
             int t1 = Environment.TickCount;
 
-            string[] searchPaths = { Directory.GetCurrentDirectory() };
+            string[] searchPaths = { TaskEnvironment.ProjectDirectory };
             _manifest.ResolveFiles(searchPaths);
             _manifest.UpdateFileInfo(TargetFrameworkVersion);
             if (_manifest.OutputMessages.ErrorCount > 0)
@@ -613,13 +617,14 @@ namespace Microsoft.Build.Tasks
             }
 
             int t1 = Environment.TickCount;
+            AbsolutePath outputManifestPath = TaskEnvironment.GetAbsolutePath(OutputManifest.ItemSpec);
             try
             {
-                ManifestWriter.WriteManifest(_manifest, OutputManifest.ItemSpec, TargetFrameworkVersion);
+                ManifestWriter.WriteManifest(_manifest, outputManifestPath, TargetFrameworkVersion);
             }
             catch (Exception ex)
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(OutputManifest.ItemSpec);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(outputManifestPath);
                 Log.LogErrorWithCodeFromResources("GenerateManifest.WriteOutputManifestFailed", OutputManifest.ItemSpec, ex.Message, lockedFileMessage);
 
                 return false;
