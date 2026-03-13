@@ -542,6 +542,40 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(project, binaryLogger);
         }
 
+        [Fact]
+        public void ProjectImportsCollectorArchiveSurvivesClearCacheDirectory()
+        {
+            // Regression test: ProjectImportsCollector must store its temporary archive
+            // outside GetCacheDirectory() so that ClearCacheDirectory() does not destroy
+            // the zip before the BinaryLogger finishes embedding it.
+            string logFilePath = Path.Combine(_env.DefaultTestDirectory.Path, "test.binlog");
+
+            var collector = new ProjectImportsCollector(logFilePath, createFile: false, runOnBackground: false);
+
+            // Add some content so the archive is non-empty.
+            collector.AddFileFromMemory("testfile.proj", "<Project />");
+
+            // Simulate the cleanup that XMake.cs performs after EndBuild.
+            FileUtilities.ClearCacheDirectory();
+
+            // The collector should still be able to process and embed the archive.
+            bool archiveRead = false;
+            collector.ProcessResult(
+                stream =>
+                {
+                    stream.Length.ShouldBeGreaterThan(0);
+                    archiveRead = true;
+                },
+                error => throw new InvalidOperationException(error));
+
+            archiveRead.ShouldBeTrue("The ProjectImports archive should still be readable after ClearCacheDirectory");
+
+            collector.DeleteArchive();
+
+            // Satisfy the fixture's expectation that _logFile exists.
+            File.WriteAllText(_logFile, string.Empty);
+        }
+
         /// <summary>
         /// Regression test for https://github.com/dotnet/msbuild/issues/6323.
         /// </summary>
