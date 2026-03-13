@@ -500,20 +500,17 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         string ITaskItem2.GetMetadataValueEscaped(string metadataName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(metadataName);
+            ArgumentNullException.ThrowIfNull(metadataName);
 
-            string metadataValue = null;
-
-            if (ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName))
+            if (ItemSpecModifiers.TryGetDerivableModifierKind(metadataName, out ItemSpecModifierKind modifierKind))
             {
                 // FileUtilities.GetItemSpecModifier is expecting escaped data, which we assume we already are.
                 // Passing in a null for currentDirectory indicates we are already in the correct current directory
-                metadataValue = ItemSpecModifiers.GetItemSpecModifier(null, _itemSpec, _definingProject, metadataName, ref _cachedModifiers);
+                return ItemSpecModifiers.GetItemSpecModifier(null, _itemSpec, _definingProject, modifierKind, ref _cachedModifiers);
             }
-            else
-            {
-                _metadata?.TryGetValue(metadataName, out metadataValue);
-            }
+
+            string metadataValue = null;
+            _metadata?.TryGetValue(metadataName, out metadataValue);
 
             return metadataValue ?? string.Empty;
         }

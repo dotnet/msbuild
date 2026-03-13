@@ -11,29 +11,10 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.Framework;
 
 /// <summary>
-/// Encapsulates the definitions of the item-spec modifiers a.k.a. reserved item metadata.
+///  Encapsulates the definitions of the item-spec modifiers a.k.a. reserved item metadata.
 /// </summary>
 internal static class ItemSpecModifiers
 {
-    private enum ModifierKind
-    {
-        FullPath,
-        RootDir,
-        Filename,
-        Extension,
-        RelativeDir,
-        Directory,
-        RecursiveDir,
-        Identity,
-        ModifiedTime,
-        CreatedTime,
-        AccessedTime,
-        DefiningProjectFullPath,
-        DefiningProjectDirectory,
-        DefiningProjectName,
-        DefiningProjectExtension
-    }
-
     internal const string FullPath = "FullPath";
     internal const string RootDir = "RootDir";
     internal const string Filename = "Filename";
@@ -97,16 +78,16 @@ internal static class ItemSpecModifiers
         public string? Directory;
 
         /// <summary>
-        /// Clears all cached values. Called when the item spec changes.
+        ///  Clears all cached values. Called when the item spec changes.
         /// </summary>
         public void Clear()
             => this = default;
     }
 
     /// <summary>
-    /// Cached results for all four DefiningProject* modifiers, computed from a single
-    /// defining project path. Instances are shared across all items that originate from
-    /// the same project file.
+    ///  Cached results for all four DefiningProject* modifiers, computed from a single
+    ///  defining project path. Instances are shared across all items that originate from
+    ///  the same project file.
     /// </summary>
     private sealed class DefiningProjectModifierCache
     {
@@ -127,20 +108,20 @@ internal static class ItemSpecModifiers
     }
 
     /// <summary>
-    /// Static cache of DefiningProject* results keyed by the escaped defining project path.
-    /// In a typical build there are only a handful of distinct defining projects (tens, not thousands),
-    /// so this dictionary stays very small. The cache lives for the lifetime of the process.
+    ///  Static cache of DefiningProject* results keyed by the escaped defining project path.
+    ///  In a typical build there are only a handful of distinct defining projects (tens, not thousands),
+    ///  so this dictionary stays very small. The cache lives for the lifetime of the process.
     /// </summary>
     private static readonly ConcurrentDictionary<string, DefiningProjectModifierCache> s_definingProjectCache =
         new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
-    ///  Resolves a modifier name to its <see cref="ModifierKind"/> using a length+char switch
+    ///  Resolves a modifier name to its <see cref="ItemSpecModifierKind"/> using a length+char switch
     ///  instead of a dictionary lookup. Every length bucket is unique or disambiguated by at
     ///  most two character comparisons, so misses are rejected in O(1) with no hashing.
     /// </summary>
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static bool TryGetModifierKind(string name, out ModifierKind kind)
+    public static bool TryGetModifierKind(string name, out ItemSpecModifierKind kind)
     {
         switch (name.Length)
         {
@@ -148,7 +129,7 @@ internal static class ItemSpecModifiers
                 // RootDir
                 if (string.Equals(name, RootDir, StringComparison.OrdinalIgnoreCase))
                 {
-                    kind = ModifierKind.RootDir;
+                    kind = ItemSpecModifierKind.RootDir;
                     return true;
                 }
 
@@ -164,7 +145,7 @@ internal static class ItemSpecModifiers
                             case 'U' or 'u':
                                 if (string.Equals(name, FullPath, StringComparison.OrdinalIgnoreCase))
                                 {
-                                    kind = ModifierKind.FullPath;
+                                    kind = ItemSpecModifierKind.FullPath;
                                     return true;
                                 }
 
@@ -173,7 +154,7 @@ internal static class ItemSpecModifiers
                             case 'I' or 'i':
                                 if (string.Equals(name, Filename, StringComparison.OrdinalIgnoreCase))
                                 {
-                                    kind = ModifierKind.Filename;
+                                    kind = ItemSpecModifierKind.Filename;
                                     return true;
                                 }
 
@@ -185,7 +166,7 @@ internal static class ItemSpecModifiers
                     case 'I' or 'i':
                         if (string.Equals(name, Identity, StringComparison.OrdinalIgnoreCase))
                         {
-                            kind = ModifierKind.Identity;
+                            kind = ItemSpecModifierKind.Identity;
                             return true;
                         }
 
@@ -201,7 +182,7 @@ internal static class ItemSpecModifiers
                     case 'E' or 'e':
                         if (string.Equals(name, Extension, StringComparison.OrdinalIgnoreCase))
                         {
-                            kind = ModifierKind.Extension;
+                            kind = ItemSpecModifierKind.Extension;
                             return true;
                         }
 
@@ -210,7 +191,7 @@ internal static class ItemSpecModifiers
                     case 'D' or 'd':
                         if (string.Equals(name, Directory, StringComparison.OrdinalIgnoreCase))
                         {
-                            kind = ModifierKind.Directory;
+                            kind = ItemSpecModifierKind.Directory;
                             return true;
                         }
 
@@ -226,7 +207,7 @@ internal static class ItemSpecModifiers
                     case 'R' or 'r':
                         if (string.Equals(name, RelativeDir, StringComparison.OrdinalIgnoreCase))
                         {
-                            kind = ModifierKind.RelativeDir;
+                            kind = ItemSpecModifierKind.RelativeDir;
                             return true;
                         }
 
@@ -235,7 +216,7 @@ internal static class ItemSpecModifiers
                     case 'C' or 'c':
                         if (string.Equals(name, CreatedTime, StringComparison.OrdinalIgnoreCase))
                         {
-                            kind = ModifierKind.CreatedTime;
+                            kind = ItemSpecModifierKind.CreatedTime;
                             return true;
                         }
 
@@ -251,7 +232,7 @@ internal static class ItemSpecModifiers
                     case 'R' or 'r':
                         if (string.Equals(name, RecursiveDir, StringComparison.OrdinalIgnoreCase))
                         {
-                            kind = ModifierKind.RecursiveDir;
+                            kind = ItemSpecModifierKind.RecursiveDir;
                             return true;
                         }
 
@@ -260,7 +241,7 @@ internal static class ItemSpecModifiers
                     case 'M' or 'm':
                         if (string.Equals(name, ModifiedTime, StringComparison.OrdinalIgnoreCase))
                         {
-                            kind = ModifierKind.ModifiedTime;
+                            kind = ItemSpecModifierKind.ModifiedTime;
                             return true;
                         }
 
@@ -269,7 +250,7 @@ internal static class ItemSpecModifiers
                     case 'A' or 'a':
                         if (string.Equals(name, AccessedTime, StringComparison.OrdinalIgnoreCase))
                         {
-                            kind = ModifierKind.AccessedTime;
+                            kind = ItemSpecModifierKind.AccessedTime;
                             return true;
                         }
 
@@ -282,7 +263,7 @@ internal static class ItemSpecModifiers
                 // DefiningProjectName
                 if (string.Equals(name, DefiningProjectName, StringComparison.OrdinalIgnoreCase))
                 {
-                    kind = ModifierKind.DefiningProjectName;
+                    kind = ItemSpecModifierKind.DefiningProjectName;
                     return true;
                 }
 
@@ -292,7 +273,7 @@ internal static class ItemSpecModifiers
                 // DefiningProjectFullPath
                 if (string.Equals(name, DefiningProjectFullPath, StringComparison.OrdinalIgnoreCase))
                 {
-                    kind = ModifierKind.DefiningProjectFullPath;
+                    kind = ItemSpecModifierKind.DefiningProjectFullPath;
                     return true;
                 }
 
@@ -305,7 +286,7 @@ internal static class ItemSpecModifiers
                     case 'D' or 'd':
                         if (string.Equals(name, DefiningProjectDirectory, StringComparison.OrdinalIgnoreCase))
                         {
-                            kind = ModifierKind.DefiningProjectDirectory;
+                            kind = ItemSpecModifierKind.DefiningProjectDirectory;
                             return true;
                         }
 
@@ -314,7 +295,7 @@ internal static class ItemSpecModifiers
                     case 'E' or 'e':
                         if (string.Equals(name, DefiningProjectExtension, StringComparison.OrdinalIgnoreCase))
                         {
-                            kind = ModifierKind.DefiningProjectExtension;
+                            kind = ItemSpecModifierKind.DefiningProjectExtension;
                             return true;
                         }
 
@@ -325,6 +306,20 @@ internal static class ItemSpecModifiers
         }
 
         kind = default;
+        return false;
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static bool TryGetDerivableModifierKind(string name, out ItemSpecModifierKind result)
+    {
+        if (TryGetModifierKind(name, out ItemSpecModifierKind kind) &&
+            kind is not ItemSpecModifierKind.RecursiveDir)
+        {
+            result = kind;
+            return true;
+        }
+
+        result = default;
         return false;
     }
 
@@ -343,8 +338,7 @@ internal static class ItemSpecModifiers
     /// <returns>true, if name of a derivable modifier</returns>
     public static bool IsDerivableItemSpecModifier([NotNullWhen(true)] string? name)
         => name is not null
-        && TryGetModifierKind(name, out ModifierKind kind)
-        && kind is not ModifierKind.RecursiveDir;
+        && TryGetDerivableModifierKind(name, out _);
 
     /// <summary>
     ///  Performs path manipulations on the given item-spec as directed.
@@ -352,8 +346,13 @@ internal static class ItemSpecModifiers
     /// </summary>
     internal static string GetItemSpecModifier(string? currentDirectory, string itemSpec, string? definingProjectEscaped, string modifier)
     {
+        if (!TryGetModifierKind(modifier, out ItemSpecModifierKind kind))
+        {
+            throw new InternalErrorException($"\"{modifier}\" is not a valid item-spec modifier.");
+        }
+
         Cache cache = default;
-        return GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, modifier, ref cache);
+        return GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, kind, ref cache);
     }
 
     /// <summary>
@@ -387,7 +386,7 @@ internal static class ItemSpecModifiers
     /// <param name="currentDirectory">The root directory for relative item-specs.</param>
     /// <param name="itemSpec">The item-spec to modify.</param>
     /// <param name="definingProjectEscaped">The path to the project that defined this item (may be null).</param>
-    /// <param name="modifier">The modifier to apply to the item-spec.</param>
+    /// <param name="modifierKind">The modifier to apply to the item-spec.</param>
     /// <param name="cache">Per-item cache of derivable modifier values.</param>
     /// <returns>The modified item-spec (can be empty string, but will never be null).</returns>
     /// <exception cref="InvalidOperationException">Thrown when the item-spec is not a path.</exception>
@@ -395,97 +394,93 @@ internal static class ItemSpecModifiers
         string? currentDirectory,
         string itemSpec,
         string? definingProjectEscaped,
-        string modifier,
+        ItemSpecModifierKind modifierKind,
         ref Cache cache)
     {
         FrameworkErrorUtilities.VerifyThrow(itemSpec != null, "Need item-spec to modify.");
-        FrameworkErrorUtilities.VerifyThrow(modifier != null, "Need modifier to apply to item-spec.");
 
-        if (TryGetModifierKind(modifier, out ModifierKind modifierKind))
+        try
         {
-            try
+            switch (modifierKind)
             {
-                switch (modifierKind)
-                {
-                    case ModifierKind.FullPath:
-                        return cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec);
+                case ItemSpecModifierKind.FullPath:
+                    return cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec);
 
-                    case ModifierKind.RootDir:
-                        return cache.RootDir ??= ComputeRootDir(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec));
+                case ItemSpecModifierKind.RootDir:
+                    return cache.RootDir ??= ComputeRootDir(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec));
 
-                    case ModifierKind.Filename:
-                        return cache.Filename ??= ComputeFilename(itemSpec);
+                case ItemSpecModifierKind.Filename:
+                    return cache.Filename ??= ComputeFilename(itemSpec);
 
-                    case ModifierKind.Extension:
-                        return cache.Extension ??= ComputeExtension(itemSpec);
+                case ItemSpecModifierKind.Extension:
+                    return cache.Extension ??= ComputeExtension(itemSpec);
 
-                    case ModifierKind.RelativeDir:
-                        return cache.RelativeDir ??= ComputeRelativeDir(itemSpec);
+                case ItemSpecModifierKind.RelativeDir:
+                    return cache.RelativeDir ??= ComputeRelativeDir(itemSpec);
 
-                    case ModifierKind.Directory:
-                        return cache.Directory ??= ComputeDirectory(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec));
+                case ItemSpecModifierKind.Directory:
+                    return cache.Directory ??= ComputeDirectory(cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec));
 
-                    case ModifierKind.RecursiveDir:
-                        return string.Empty;
-
-                    case ModifierKind.Identity:
-                        return itemSpec;
-
-                    // Time-based modifiers are NOT cached - they hit the file system.
-                    case ModifierKind.ModifiedTime:
-                        return ComputeModifiedTime(itemSpec);
-
-                    case ModifierKind.CreatedTime:
-                        return ComputeCreatedTime(itemSpec);
-
-                    case ModifierKind.AccessedTime:
-                        return ComputeAccessedTime(itemSpec);
-
-                    default:
-                        break;
-                }
-
-                // DefiningProject* modifiers — these operate on definingProjectEscaped, NOT itemSpec.
-                // Results are cached in a static shared dictionary keyed by the defining project path.
-                if (string.IsNullOrEmpty(definingProjectEscaped))
-                {
+                case ItemSpecModifierKind.RecursiveDir:
                     return string.Empty;
-                }
 
-                FrameworkErrorUtilities.VerifyThrow(definingProjectEscaped != null, "How could definingProjectEscaped by null?");
+                case ItemSpecModifierKind.Identity:
+                    return itemSpec;
 
-                // Fast path: check if we already have cached results for this defining project.
-                // This avoids any closure allocation on the hot path. The miss path only runs once per distinct defining project.
-                if (!s_definingProjectCache.TryGetValue(definingProjectEscaped, out DefiningProjectModifierCache? definingProjectModifiers))
-                {
-                    string? dir = currentDirectory;
-                    definingProjectModifiers = s_definingProjectCache.GetOrAdd(
-                        definingProjectEscaped,
-                        key => new DefiningProjectModifierCache(dir, key));
-                }
+                // Time-based modifiers are NOT cached - they hit the file system.
+                case ItemSpecModifierKind.ModifiedTime:
+                    return ComputeModifiedTime(itemSpec);
 
-                switch (modifierKind)
-                {
-                    case ModifierKind.DefiningProjectFullPath:
-                        return definingProjectModifiers.FullPath;
+                case ItemSpecModifierKind.CreatedTime:
+                    return ComputeCreatedTime(itemSpec);
 
-                    case ModifierKind.DefiningProjectDirectory:
-                        return definingProjectModifiers.Directory;
+                case ItemSpecModifierKind.AccessedTime:
+                    return ComputeAccessedTime(itemSpec);
 
-                    case ModifierKind.DefiningProjectName:
-                        return definingProjectModifiers.Name;
-
-                    case ModifierKind.DefiningProjectExtension:
-                        return definingProjectModifiers.Extension;
-                }
+                default:
+                    break;
             }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+
+            // DefiningProject* modifiers — these operate on definingProjectEscaped, NOT itemSpec.
+            // Results are cached in a static shared dictionary keyed by the defining project path.
+            if (string.IsNullOrEmpty(definingProjectEscaped))
             {
-                throw new InvalidOperationException(SR.FormatInvalidFilespecForTransform(modifier, itemSpec, e.Message));
+                return string.Empty;
+            }
+
+            FrameworkErrorUtilities.VerifyThrow(definingProjectEscaped != null, "How could definingProjectEscaped by null?");
+
+            // Fast path: check if we already have cached results for this defining project.
+            // This avoids any closure allocation on the hot path. The miss path only runs once per distinct defining project.
+            if (!s_definingProjectCache.TryGetValue(definingProjectEscaped, out DefiningProjectModifierCache? definingProjectModifiers))
+            {
+                string? dir = currentDirectory;
+                definingProjectModifiers = s_definingProjectCache.GetOrAdd(
+                    definingProjectEscaped,
+                    key => new DefiningProjectModifierCache(dir, key));
+            }
+
+            switch (modifierKind)
+            {
+                case ItemSpecModifierKind.DefiningProjectFullPath:
+                    return definingProjectModifiers.FullPath;
+
+                case ItemSpecModifierKind.DefiningProjectDirectory:
+                    return definingProjectModifiers.Directory;
+
+                case ItemSpecModifierKind.DefiningProjectName:
+                    return definingProjectModifiers.Name;
+
+                case ItemSpecModifierKind.DefiningProjectExtension:
+                    return definingProjectModifiers.Extension;
             }
         }
+        catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+        {
+            throw new InvalidOperationException(SR.FormatInvalidFilespecForTransform(modifierKind, itemSpec, e.Message));
+        }
 
-        throw new InternalErrorException($"\"{modifier}\" is not a valid item-spec modifier.");
+        throw new InternalErrorException($"\"{modifierKind}\" is not a valid item-spec modifier.");
     }
 
     private static string ComputeFullPath(string? currentDirectory, string itemSpec)
