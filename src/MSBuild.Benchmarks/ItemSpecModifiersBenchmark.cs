@@ -79,7 +79,7 @@ public class ItemSpecModifiersBenchmark
 
     [Benchmark]
     public string GetItemSpecModifier_FullPath()
-        => ItemSpecModifiers.GetItemSpecModifier(_currentDirectory, _itemSpec, _definingProjectEscaped, ItemSpecModifiers.FullPath);
+        => ItemSpecModifiers.GetItemSpecModifier(_itemSpec, ItemSpecModifiers.FullPath, _currentDirectory, _definingProjectEscaped);
 
     // -----------------------------------------------------------------------
     // GetItemSpecModifier – Directory has the most complex logic: resolves
@@ -88,7 +88,7 @@ public class ItemSpecModifiersBenchmark
 
     [Benchmark]
     public string GetItemSpecModifier_Directory()
-        => ItemSpecModifiers.GetItemSpecModifier(_currentDirectory, _itemSpec, _definingProjectEscaped, ItemSpecModifiers.Directory);
+        => ItemSpecModifiers.GetItemSpecModifier(_itemSpec, ItemSpecModifiers.Directory, _currentDirectory, _definingProjectEscaped);
 
     // -----------------------------------------------------------------------
     // GetItemSpecModifier – file-time modifier (I/O-bound). All three time
@@ -98,7 +98,7 @@ public class ItemSpecModifiersBenchmark
 
     [Benchmark]
     public string GetItemSpecModifier_ModifiedTime()
-        => ItemSpecModifiers.GetItemSpecModifier(_currentDirectory, _itemSpec, _definingProjectEscaped, ItemSpecModifiers.ModifiedTime);
+        => ItemSpecModifiers.GetItemSpecModifier(_itemSpec, ItemSpecModifiers.ModifiedTime, _currentDirectory, _definingProjectEscaped);
 
     // -----------------------------------------------------------------------
     // GetItemSpecModifier – DefiningProjectDirectory is the most expensive
@@ -108,5 +108,5 @@ public class ItemSpecModifiersBenchmark
 
     [Benchmark]
     public string GetItemSpecModifier_DefiningProjectDirectory()
-        => ItemSpecModifiers.GetItemSpecModifier(_currentDirectory, _itemSpec, _definingProjectEscaped, ItemSpecModifiers.DefiningProjectDirectory);
+        => ItemSpecModifiers.GetItemSpecModifier(_itemSpec, ItemSpecModifiers.DefiningProjectDirectory, _currentDirectory, _definingProjectEscaped);
 }

@@ -345,7 +345,11 @@ internal static class ItemSpecModifiers
     ///  Performs path manipulations on the given item-spec as directed.
     ///  Does not cache the result.
     /// </summary>
-    internal static string GetItemSpecModifier(string? currentDirectory, string itemSpec, string? definingProjectEscaped, string modifier)
+    /// <param name="itemSpec">The item-spec to modify.</param>
+    /// <param name="modifier">The modifier to apply to the item-spec.</param>
+    /// <param name="currentDirectory">The root directory for relative item-specs.</param>
+    /// <param name="definingProjectEscaped">The path to the project that defined this item (may be null).</param>
+    public static string GetItemSpecModifier(string itemSpec, string modifier, string? currentDirectory, string? definingProjectEscaped)
     {
         if (!TryGetModifierKind(modifier, out ItemSpecModifierKind kind))
         {
@@ -353,7 +357,7 @@ internal static class ItemSpecModifiers
         }
 
         Cache cache = default;
-        return GetItemSpecModifier(currentDirectory, itemSpec, definingProjectEscaped, kind, ref cache);
+        return GetItemSpecModifier(itemSpec, kind, currentDirectory, definingProjectEscaped, ref cache);
     }
 
     /// <summary>
@@ -384,25 +388,25 @@ internal static class ItemSpecModifiers
     /// <remarks>
     /// Never returns null.
     /// </remarks>
-    /// <param name="currentDirectory">The root directory for relative item-specs.</param>
     /// <param name="itemSpec">The item-spec to modify.</param>
+    /// <param name="modifier">The modifier to apply to the item-spec.</param>
+    /// <param name="currentDirectory">The root directory for relative item-specs.</param>
     /// <param name="definingProjectEscaped">The path to the project that defined this item (may be null).</param>
-    /// <param name="modifierKind">The modifier to apply to the item-spec.</param>
     /// <param name="cache">Per-item cache of derivable modifier values.</param>
     /// <returns>The modified item-spec (can be empty string, but will never be null).</returns>
     /// <exception cref="InvalidOperationException">Thrown when the item-spec is not a path.</exception>
     public static string GetItemSpecModifier(
-        string? currentDirectory,
         string itemSpec,
+        ItemSpecModifierKind modifier,
+        string? currentDirectory,
         string? definingProjectEscaped,
-        ItemSpecModifierKind modifierKind,
         ref Cache cache)
     {
         FrameworkErrorUtilities.VerifyThrow(itemSpec != null, "Need item-spec to modify.");
 
         try
         {
-            switch (modifierKind)
+            switch (modifier)
             {
                 case ItemSpecModifierKind.FullPath:
                     return cache.FullPath ??= ComputeFullPath(currentDirectory, itemSpec);
@@ -461,7 +465,7 @@ internal static class ItemSpecModifiers
                     key => new DefiningProjectModifierCache(dir, key));
             }
 
-            switch (modifierKind)
+            switch (modifier)
             {
                 case ItemSpecModifierKind.DefiningProjectFullPath:
                     return definingProjectModifiers.FullPath;
@@ -478,10 +482,10 @@ internal static class ItemSpecModifiers
         }
         catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
         {
-            throw new InvalidOperationException(SR.FormatInvalidFilespecForTransform(modifierKind, itemSpec, e.Message));
+            throw new InvalidOperationException(SR.FormatInvalidFilespecForTransform(modifier, itemSpec, e.Message));
         }
 
-        throw new InternalErrorException($"\"{modifierKind}\" is not a valid item-spec modifier.");
+        throw new InternalErrorException($"\"{modifier}\" is not a valid item-spec modifier.");
     }
 
     private static string ComputeFullPath(string? currentDirectory, string itemSpec)

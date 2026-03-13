@@ -509,7 +509,7 @@ namespace Microsoft.Build.Utilities
             {
                 // FileUtilities.GetItemSpecModifier is expecting escaped data, which we assume we already are.
                 // Passing in a null for currentDirectory indicates we are already in the correct current directory
-                return ItemSpecModifiers.GetItemSpecModifier(null, _itemSpec, _definingProject, modifierKind, ref _cachedModifiers);
+                return ItemSpecModifiers.GetItemSpecModifier(_itemSpec, modifierKind, null, _definingProject, ref _cachedModifiers);
             }
 
             string metadataValue = null;

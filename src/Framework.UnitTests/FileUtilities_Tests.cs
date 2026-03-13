@@ -33,55 +33,55 @@ public class FileUtilities_Tests
     private static void TestGetItemSpecModifier(string currentDirectory)
     {
         ItemSpecModifiers.Cache cache = default;
-        string modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, "foo", String.Empty, ItemSpecModifierKind.RecursiveDir, ref cache);
+        string modifier = ItemSpecModifiers.GetItemSpecModifier("foo", ItemSpecModifierKind.RecursiveDir, currentDirectory, String.Empty, ref cache);
         Assert.Equal(String.Empty, modifier);
 
         cache.Clear();
-        modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, "foo", String.Empty, ItemSpecModifierKind.ModifiedTime, ref cache);
+        modifier = ItemSpecModifiers.GetItemSpecModifier("foo", ItemSpecModifierKind.ModifiedTime, currentDirectory, String.Empty, ref cache);
         Assert.Equal(String.Empty, modifier);
 
         cache.Clear();
-        modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, @"foo\goo", String.Empty, ItemSpecModifierKind.RelativeDir, ref cache);
+        modifier = ItemSpecModifiers.GetItemSpecModifier(@"foo\goo", ItemSpecModifierKind.RelativeDir, currentDirectory, String.Empty, ref cache);
         Assert.Equal(@"foo" + Path.DirectorySeparatorChar, modifier);
 
         // confirm we get the same thing back the second time
-        modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, @"foo\goo", String.Empty, ItemSpecModifierKind.RelativeDir, ref cache);
+        modifier = ItemSpecModifiers.GetItemSpecModifier(@"foo\goo", ItemSpecModifierKind.RelativeDir, currentDirectory, String.Empty, ref cache);
         Assert.Equal(@"foo" + Path.DirectorySeparatorChar, modifier);
 
         cache.Clear();
         string itemSpec = NativeMethodsShared.IsWindows ? @"c:\foo.txt" : "/foo.txt";
         string itemSpecDir = NativeMethodsShared.IsWindows ? @"c:\" : "/";
-        modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, ItemSpecModifierKind.FullPath, ref cache);
+        modifier = ItemSpecModifiers.GetItemSpecModifier(itemSpec, ItemSpecModifierKind.FullPath, currentDirectory, String.Empty, ref cache);
         Assert.Equal(itemSpec, modifier);
         Assert.Equal(itemSpec, cache.FullPath);
 
-        modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, ItemSpecModifierKind.RootDir, ref cache);
+        modifier = ItemSpecModifiers.GetItemSpecModifier(itemSpec, ItemSpecModifierKind.RootDir, currentDirectory, String.Empty, ref cache);
         Assert.Equal(itemSpecDir, modifier);
 
-        modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, ItemSpecModifierKind.Filename, ref cache);
+        modifier = ItemSpecModifiers.GetItemSpecModifier(itemSpec, ItemSpecModifierKind.Filename, currentDirectory, String.Empty, ref cache);
         Assert.Equal(@"foo", modifier);
 
-        modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, ItemSpecModifierKind.Extension, ref cache);
+        modifier = ItemSpecModifiers.GetItemSpecModifier(itemSpec, ItemSpecModifierKind.Extension, currentDirectory, String.Empty, ref cache);
         Assert.Equal(@".txt", modifier);
 
-        modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, ItemSpecModifierKind.Directory, ref cache);
+        modifier = ItemSpecModifiers.GetItemSpecModifier(itemSpec, ItemSpecModifierKind.Directory, currentDirectory, String.Empty, ref cache);
         Assert.Equal(String.Empty, modifier);
 
-        modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, String.Empty, ItemSpecModifierKind.Identity, ref cache);
+        modifier = ItemSpecModifiers.GetItemSpecModifier(itemSpec, ItemSpecModifierKind.Identity, currentDirectory, String.Empty, ref cache);
         Assert.Equal(itemSpec, modifier);
 
         string projectPath = NativeMethodsShared.IsWindows ? @"c:\abc\goo.proj" : @"/abc/goo.proj";
         string projectPathDir = NativeMethodsShared.IsWindows ? @"c:\abc\" : @"/abc/";
-        modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, projectPath, ItemSpecModifierKind.DefiningProjectDirectory, ref cache);
+        modifier = ItemSpecModifiers.GetItemSpecModifier(itemSpec, ItemSpecModifierKind.DefiningProjectDirectory, currentDirectory, projectPath, ref cache);
         Assert.Equal(projectPathDir, modifier);
 
-        modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, projectPath, ItemSpecModifierKind.DefiningProjectExtension, ref cache);
+        modifier = ItemSpecModifiers.GetItemSpecModifier(itemSpec, ItemSpecModifierKind.DefiningProjectExtension, currentDirectory, projectPath, ref cache);
         Assert.Equal(@".proj", modifier);
 
-        modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, projectPath, ItemSpecModifierKind.DefiningProjectFullPath, ref cache);
+        modifier = ItemSpecModifiers.GetItemSpecModifier(itemSpec, ItemSpecModifierKind.DefiningProjectFullPath, currentDirectory, projectPath, ref cache);
         Assert.Equal(projectPath, modifier);
 
-        modifier = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, itemSpec, projectPath, ItemSpecModifierKind.DefiningProjectName, ref cache);
+        modifier = ItemSpecModifiers.GetItemSpecModifier(itemSpec, ItemSpecModifierKind.DefiningProjectName, currentDirectory, projectPath, ref cache);
         Assert.Equal(@"goo", modifier);
     }
 
@@ -175,7 +175,7 @@ public class FileUtilities_Tests
     {
         try
         {
-            ItemSpecModifiers.GetItemSpecModifier(currentDirectory, @"http://www.microsoft.com", String.Empty, ItemSpecModifiers.RootDir);
+            ItemSpecModifiers.GetItemSpecModifier(@"http://www.microsoft.com", ItemSpecModifiers.RootDir, currentDirectory, String.Empty);
         }
         catch (Exception e)
         {
@@ -441,7 +441,7 @@ public class FileUtilities_Tests
         string fullPath = @"c:\aardvark\aardvark\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\1234567890\a.cs";
         ItemSpecModifiers.Cache cache = new() { FullPath = fullPath };
 
-        Assert.Equal(@"c:\", ItemSpecModifiers.GetItemSpecModifier(currentDirectory, fullPath, String.Empty, ItemSpecModifierKind.RootDir, ref cache));
+        Assert.Equal(@"c:\", ItemSpecModifiers.GetItemSpecModifier(fullPath, ItemSpecModifierKind.RootDir, currentDirectory, String.Empty, ref cache));
     }
 
     [Fact]
