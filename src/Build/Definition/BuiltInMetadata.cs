@@ -71,21 +71,29 @@ namespace Microsoft.Build.Evaluation
             string name,
             ref ItemSpecModifiers.Cache cache)
         {
-            // This is an assert, not a VerifyThrow, because the caller should already have done this check, and it's slow/hot.
-            Debug.Assert(ItemSpecModifiers.IsItemSpecModifier(name));
-
-            string value;
-            if (String.Equals(name, ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase))
+            if (ItemSpecModifiers.TryGetModifierKind(name, out ItemSpecModifierKind modifierKind))
             {
-                value = GetRecursiveDirValue(evaluatedIncludeBeforeWildcardExpansionEscaped, evaluatedIncludeEscaped);
-            }
-            else
-            {
-                value = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, evaluatedIncludeEscaped, definingProjectEscaped, name, ref cache);
+                return GetMetadataValueEscaped(currentDirectory, evaluatedIncludeBeforeWildcardExpansionEscaped, evaluatedIncludeEscaped, definingProjectEscaped, modifierKind, ref cache);
             }
 
-            return value;
+            Debug.Fail($"Expected a valid item-spec modifier, got \"{name}\".");
+            return string.Empty;
         }
+
+        /// <summary>
+        /// Retrieves a built-in metadata value, caching derivable results in the provided per-item cache.
+        /// If value is not available, returns empty string.
+        /// </summary>
+        internal static string GetMetadataValueEscaped(
+            string currentDirectory,
+            string evaluatedIncludeBeforeWildcardExpansionEscaped,
+            string evaluatedIncludeEscaped,
+            string definingProjectEscaped,
+            ItemSpecModifierKind modifierKind,
+            ref ItemSpecModifiers.Cache cache)
+            => modifierKind is ItemSpecModifierKind.RecursiveDir
+                ? GetRecursiveDirValue(evaluatedIncludeBeforeWildcardExpansionEscaped, evaluatedIncludeEscaped)
+                : ItemSpecModifiers.GetItemSpecModifier(currentDirectory, evaluatedIncludeEscaped, definingProjectEscaped, modifierKind, ref cache);
 
         /// <summary>
         /// Extract the value for "RecursiveDir", if any, from the Include.

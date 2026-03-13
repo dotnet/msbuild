@@ -2081,16 +2081,9 @@ namespace Microsoft.Build.Execution
             /// If value is not available, returns empty string.
             /// </summary>
             private string GetBuiltInMetadataEscaped(string name)
-            {
-                string value = String.Empty;
-
-                if (ItemSpecModifiers.IsItemSpecModifier(name))
-                {
-                    value = BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, name, ref _cachedModifiers);
-                }
-
-                return value;
-            }
+                => ItemSpecModifiers.TryGetModifierKind(name, out ItemSpecModifierKind modifierKind)
+                    ? BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, modifierKind, ref _cachedModifiers)
+                    : string.Empty;
 
             /// <summary>
             /// Retrieves the named metadata from the item definition, if any.
