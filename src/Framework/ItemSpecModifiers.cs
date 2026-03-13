@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -15,25 +16,25 @@ namespace Microsoft.Build.Framework;
 /// </summary>
 internal static class ItemSpecModifiers
 {
-    internal const string FullPath = "FullPath";
-    internal const string RootDir = "RootDir";
-    internal const string Filename = "Filename";
-    internal const string Extension = "Extension";
-    internal const string RelativeDir = "RelativeDir";
-    internal const string Directory = "Directory";
-    internal const string RecursiveDir = "RecursiveDir";
-    internal const string Identity = "Identity";
-    internal const string ModifiedTime = "ModifiedTime";
-    internal const string CreatedTime = "CreatedTime";
-    internal const string AccessedTime = "AccessedTime";
-    internal const string DefiningProjectFullPath = "DefiningProjectFullPath";
-    internal const string DefiningProjectDirectory = "DefiningProjectDirectory";
-    internal const string DefiningProjectName = "DefiningProjectName";
-    internal const string DefiningProjectExtension = "DefiningProjectExtension";
+    public const string FullPath = "FullPath";
+    public const string RootDir = "RootDir";
+    public const string Filename = "Filename";
+    public const string Extension = "Extension";
+    public const string RelativeDir = "RelativeDir";
+    public const string Directory = "Directory";
+    public const string RecursiveDir = "RecursiveDir";
+    public const string Identity = "Identity";
+    public const string ModifiedTime = "ModifiedTime";
+    public const string CreatedTime = "CreatedTime";
+    public const string AccessedTime = "AccessedTime";
+    public const string DefiningProjectFullPath = "DefiningProjectFullPath";
+    public const string DefiningProjectDirectory = "DefiningProjectDirectory";
+    public const string DefiningProjectName = "DefiningProjectName";
+    public const string DefiningProjectExtension = "DefiningProjectExtension";
 
     // These are all the well-known attributes.
-    internal static readonly string[] All =
-    {
+    public static readonly ImmutableArray<string> All =
+    [
         FullPath,
         RootDir,
         Filename,
@@ -49,7 +50,7 @@ internal static class ItemSpecModifiers
         DefiningProjectDirectory,
         DefiningProjectName,
         DefiningProjectExtension
-    };
+    ];
 
     /// <summary>
     ///  <para>

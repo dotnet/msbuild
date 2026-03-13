@@ -226,7 +226,10 @@ namespace Microsoft.Build.Utilities
                     metadataNames.AddRange(_metadata.Keys);
                 }
 
-                metadataNames.AddRange(ItemSpecModifiers.All);
+                foreach (string name in ItemSpecModifiers.All)
+                {
+                    metadataNames.Add(name);
+                }
 
                 return metadataNames;
             }
