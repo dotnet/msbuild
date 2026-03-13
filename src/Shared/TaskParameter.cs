@@ -644,7 +644,11 @@ namespace Microsoft.Build.BackEnd
                 get
                 {
                     List<string> metadataNames = (_customEscapedMetadata == null) ? new List<string>() : new List<string>(_customEscapedMetadata.Keys);
-                    metadataNames.AddRange(ItemSpecModifiers.All);
+
+                    foreach (string name in ItemSpecModifiers.All)
+                    {
+                        metadataNames.Add(name);
+                    }
 
                     return metadataNames;
                 }

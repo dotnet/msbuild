@@ -981,7 +981,10 @@ namespace Microsoft.Build.Execution
                         names.Add(metadatum.Key);
                     }
 
-                    names.AddRange(ItemSpecModifiers.All);
+                    foreach (string name in ItemSpecModifiers.All)
+                    {
+                        names.Add(name);
+                    }
 
                     return names;
                 }

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -19,22 +19,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Retrieves the count of built-in metadata.
         /// </summary>
-        internal static int MetadataCount
-        {
-            [DebuggerStepThrough]
-            get
-            { return ItemSpecModifiers.All.Length; }
-        }
+        internal static int MetadataCount => ItemSpecModifiers.All.Length;
 
         /// <summary>
         /// Retrieves the list of metadata names.
         /// </summary>
-        internal static ICollection<string> MetadataNames
-        {
-            [DebuggerStepThrough]
-            get
-            { return ItemSpecModifiers.All; }
-        }
+        internal static ImmutableArray<string> MetadataNames => ItemSpecModifiers.All;
 
         /// <summary>
         /// Retrieves a built-in metadata value and caches it.
