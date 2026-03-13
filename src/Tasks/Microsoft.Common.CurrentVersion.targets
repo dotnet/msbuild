@@ -1667,10 +1667,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
       <_MSBuildProjectReference Include="@(ProjectReferenceWithConfiguration)" Condition="'$(BuildingInsideVisualStudio)'!='true' and '@(ProjectReferenceWithConfiguration)'!=''"/>
     </ItemGroup>
 
-    <!-- Break the project list into two lists: those that exist on disk and those that don't. -->
+    <!-- Break the project list into two lists: those that exist on disk and those that don't.
+         When _BuildNonexistentProjectsByDefault is true, treat all references as existent
+         because they may be virtual (in-memory) projects in the ProjectRootElementCache. -->
     <ItemGroup>
-      <_MSBuildProjectReferenceExistent Include="@(_MSBuildProjectReference)" Condition="Exists('%(Identity)')"/>
-      <_MSBuildProjectReferenceNonexistent Include="@(_MSBuildProjectReference)" Condition="!Exists('%(Identity)')"/>
+      <_MSBuildProjectReferenceExistent Include="@(_MSBuildProjectReference)" Condition="'$(_BuildNonexistentProjectsByDefault)' == 'true' or Exists('%(Identity)')"/>
+      <_MSBuildProjectReferenceNonexistent Include="@(_MSBuildProjectReference)" Condition="'$(_BuildNonexistentProjectsByDefault)' != 'true' and !Exists('%(Identity)')"/>
     </ItemGroup>
 
   </Target>
