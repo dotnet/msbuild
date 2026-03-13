@@ -4,6 +4,7 @@
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.CommandLine
 {
@@ -24,7 +25,12 @@ namespace Microsoft.Build.CommandLine
         internal NodeEndpointOutOfProcTaskHost(bool nodeReuse, byte parentPacketVersion)
         {
             _nodeReuse = nodeReuse;
-            InternalConstruct(pipeName: null, parentPacketVersion);
+
+            // Use hash-based pipe name on Unix to match TryConnectToProcess.
+            string? pipeName = NativeMethodsShared.IsUnixLike
+                ? NamedPipeUtil.GetHashBasedPipeName(GetHandshake().ComputeHash())
+                : null;
+            InternalConstruct(pipeName, parentPacketVersion);
         }
 
         #endregion // Constructors and Factories

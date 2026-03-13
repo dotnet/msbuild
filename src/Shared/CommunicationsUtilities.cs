@@ -342,35 +342,15 @@ namespace Microsoft.Build.Internal
         public virtual string GetKey() => $"{_handshakeComponents.Options} {_handshakeComponents.Salt} {_handshakeComponents.FileVersionMajor} {_handshakeComponents.FileVersionMinor} {_handshakeComponents.FileVersionBuild} {_handshakeComponents.FileVersionPrivate} {_handshakeComponents.SessionId}".ToString(CultureInfo.InvariantCulture);
 
         public virtual byte? ExpectedVersionInFirstByte => CommunicationsUtilities.handshakeVersion;
-    }
 
-    internal sealed class ServerNodeHandshake : Handshake
-    {
         /// <summary>
         /// Caching computed hash.
         /// </summary>
         private string _computedHash = null;
 
-        public override byte? ExpectedVersionInFirstByte => null;
-
-        internal ServerNodeHandshake(HandshakeOptions nodeType)
-            : base(nodeType, includeSessionId: false, toolsDirectory: null)
-        {
-        }
-
-        public override HandshakeComponents RetrieveHandshakeComponents() => new HandshakeComponents(
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Options),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Salt),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMajor),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMinor),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionBuild),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionPrivate));
-
-        public override string GetKey() => $"{_handshakeComponents.Options} {_handshakeComponents.Salt} {_handshakeComponents.FileVersionMajor} {_handshakeComponents.FileVersionMinor} {_handshakeComponents.FileVersionBuild} {_handshakeComponents.FileVersionPrivate}"
-            .ToString(CultureInfo.InvariantCulture);
-
         /// <summary>
         /// Computes Handshake stable hash string representing whole state of handshake.
+        /// Used for hash-based pipe naming to enable fast node discovery without trial-and-error probing.
         /// </summary>
         public string ComputeHash()
         {
@@ -391,6 +371,27 @@ namespace Microsoft.Build.Internal
             }
             return _computedHash;
         }
+    }
+
+    internal sealed class ServerNodeHandshake : Handshake
+    {
+        public override byte? ExpectedVersionInFirstByte => null;
+
+        internal ServerNodeHandshake(HandshakeOptions nodeType)
+            : base(nodeType, includeSessionId: false, toolsDirectory: null)
+        {
+        }
+
+        public override HandshakeComponents RetrieveHandshakeComponents() => new HandshakeComponents(
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Options),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Salt),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMajor),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMinor),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionBuild),
+            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionPrivate));
+
+        public override string GetKey() => $"{_handshakeComponents.Options} {_handshakeComponents.Salt} {_handshakeComponents.FileVersionMajor} {_handshakeComponents.FileVersionMinor} {_handshakeComponents.FileVersionBuild} {_handshakeComponents.FileVersionPrivate}"
+            .ToString(CultureInfo.InvariantCulture);
     }
 
     /// <summary>
@@ -983,6 +984,13 @@ namespace Microsoft.Build.Internal
                     }
 
                     architectureFlagToSet = taskHostParameters.Architecture;
+
+                    // Resolve "*" (any) to the current architecture so both parent and child
+                    // compute identical HandshakeOptions and hash-based pipe names.
+                    if (string.Equals(architectureFlagToSet, XMakeAttributes.MSBuildArchitectureValues.any, StringComparison.OrdinalIgnoreCase))
+                    {
+                        architectureFlagToSet = XMakeAttributes.GetCurrentMSBuildArchitecture();
+                    }
                 }
             }
 
