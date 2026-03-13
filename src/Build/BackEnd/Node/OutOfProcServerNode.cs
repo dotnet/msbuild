@@ -380,7 +380,7 @@ namespace Microsoft.Build.Experimental
             // Set build process context
             Directory.SetCurrentDirectory(command.StartupDirectory);
 
-            CommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
+            FrameworkCommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
             Traits.UpdateFromEnvironment();
 
             Thread.CurrentThread.CurrentCulture = command.Culture;
