@@ -61,7 +61,7 @@ namespace Microsoft.Build.Framework
             }
         }
 
-        // DebugUtils are initialized early on by the test runner - during preparing data for DataMemeberAttribute of some test,
+        // FrameworkDebugUtils is initialized early on by the test runner - during preparing data for DataMemberAttribute of some test,
         // for that reason it is not easily possible to inject the DebugPath in tests via env var (unless we want to run expensive exec style test).
         internal static void SetDebugPath()
         {
