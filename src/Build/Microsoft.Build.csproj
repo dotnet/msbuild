@@ -400,8 +400,6 @@
     <Compile Include="BackEnd\Node\INode.cs" />
     <!-- ########################## -->
     <Compile Include="BackEnd\TaskExecutionHost\TaskExecutionHost.cs" />
-    <Compile Include="BackEnd\TaskExecutionHost\MultiProcessTaskEnvironmentDriver.cs" />
-    <Compile Include="BackEnd\TaskExecutionHost\MultiThreadedTaskEnvironmentDriver.cs" />
     <!-- #### COLLECTIONS ### -->
     <Compile Include="..\Shared\CollectionHelpers.cs" />
     <Compile Include="Collections\ArrayDictionary.cs" />
