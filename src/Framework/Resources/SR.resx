@@ -153,4 +153,20 @@
   <data name="PathMustBeRooted" xml:space="preserve">
     <value>Path must be rooted.</value>
   </data>
+  <data name="PathTooLong" xml:space="preserve">
+    <value>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</value>
+  </data>
+  <data name="FailedCreatingTempFile" xml:space="preserve">
+    <value>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</value>
+  </data>
+  <data name="InvalidGetPathOfFileAboveParameter" xml:space="preserve">
+    <value>The parameter '{0}' can only be a file name and cannot include a directory.</value>
+  </data>
+  <data name="DebugPathTooLong" xml:space="preserve">
+    <value>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</value>
+  </data>
+  <data name="InvalidFilespecForTransform" xml:space="preserve">
+    <value>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</value>
+    <comment>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</comment>
+  </data>
 </root>

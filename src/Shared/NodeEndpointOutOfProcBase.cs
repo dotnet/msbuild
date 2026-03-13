@@ -5,25 +5,22 @@ using System;
 #if NET
 using System.Collections.Frozen;
 #endif
-using System.Diagnostics.CodeAnalysis;
-#if CLR2COMPATIBILITY
-using Microsoft.Build.Shared.Concurrent;
-#else
 using System.Collections.Concurrent;
-#endif
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.IO.Pipes;
 using System.Threading;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using System.IO.Pipes;
-using System.IO;
-using System.Collections.Generic;
+using Microsoft.Build.Shared.Debugging;
 
 #if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
 using System.Security.AccessControl;
 #endif
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
-
 #endif
 #if NET451_OR_GREATER || NETCOREAPP
 using System.Threading.Tasks;
@@ -137,7 +134,7 @@ namespace Microsoft.Build.BackEnd
             nameof(HandshakeComponents.FileVersionPrivate)];
 #endif
 
-#endregion
+        #endregion
 
         #region INodeEndpoint Events
 
@@ -318,11 +315,7 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(_packetPump.ManagedThreadId != Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
             _terminatePacketPump.Set();
             _packetPump.Join();
-#if CLR2COMPATIBILITY
-            _terminatePacketPump.Close();
-#else
             _terminatePacketPump.Dispose();
-#endif
             _pipeServer.Dispose();
             _packetPump = null;
             ChangeLinkStatus(LinkStatus.Inactive);
@@ -421,7 +414,7 @@ namespace Microsoft.Build.BackEnd
                         int index = 0;
                         foreach (var component in handshakeComponents.EnumerateComponents())
                         {
-                           
+
                             if (!_pipeServer.TryReadIntForHandshake(
                                 byteToAccept: index == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null, /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1_OR_GREATER
@@ -522,7 +515,7 @@ namespace Microsoft.Build.BackEnd
                         localPipeServer.Disconnect();
                     }
 
-                    ExceptionHandling.DumpExceptionToFile(e);
+                    DebugUtils.DumpExceptionToFile(e);
                     ChangeLinkStatus(LinkStatus.Failed);
                     return;
                 }
@@ -671,7 +664,7 @@ namespace Microsoft.Build.BackEnd
                             {
                                 // Lost communications.  Abort (but allow node reuse)
                                 CommunicationsUtilities.Trace("Exception reading from server.  {0}", e);
-                                ExceptionHandling.DumpExceptionToFile(e);
+                                DebugUtils.DumpExceptionToFile(e);
                                 ChangeLinkStatus(LinkStatus.Inactive);
                                 exitLoop = true;
                                 break;
@@ -730,7 +723,7 @@ namespace Microsoft.Build.BackEnd
                             {
                                 // Error while deserializing or handling packet.  Abort.
                                 CommunicationsUtilities.Trace("Exception while deserializing packet {0}: {1}", packetType, e);
-                                ExceptionHandling.DumpExceptionToFile(e);
+                                DebugUtils.DumpExceptionToFile(e);
                                 ChangeLinkStatus(LinkStatus.Failed);
                                 exitLoop = true;
                                 break;
@@ -789,7 +782,7 @@ namespace Microsoft.Build.BackEnd
                         {
                             // Error while deserializing or handling packet.  Abort.
                             CommunicationsUtilities.Trace("Exception while serializing packets: {0}", e);
-                            ExceptionHandling.DumpExceptionToFile(e);
+                            DebugUtils.DumpExceptionToFile(e);
                             ChangeLinkStatus(LinkStatus.Failed);
                             exitLoop = true;
                             break;
@@ -812,8 +805,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-#endregion
+        #endregion
 
-#endregion
+        #endregion
     }
 }

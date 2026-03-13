@@ -1574,7 +1574,7 @@ namespace Microsoft.Build.Shared
                     string referencePath = GenerateReferenceAssemblyPath(FrameworkLocationHelper.programFilesReferenceAssemblyLocation, this.FrameworkName);
                     if (FileSystems.Default.DirectoryExists(referencePath))
                     {
-                        this._pathToDotNetFrameworkReferenceAssemblies = FrameworkFileUtilities.EnsureTrailingSlash(referencePath);
+                        this._pathToDotNetFrameworkReferenceAssemblies = FileUtilities.EnsureTrailingSlash(referencePath);
                     }
                 }
 

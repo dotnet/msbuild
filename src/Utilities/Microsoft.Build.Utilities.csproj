@@ -1,6 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
@@ -20,7 +19,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectReference Include="..\StringTools\StringTools.csproj" />
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Collections.Immutable" Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'" />
@@ -33,7 +31,6 @@
 
   <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <ProjectReference Update="..\StringTools\StringTools.csproj" PrivateAssets="all" />
     <PackageReference Update="Microsoft.IO.Redist" PrivateAssets="all" />
     <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
     <PackageReference Update="System.Configuration.ConfigurationManager" PrivateAssets="all" />
@@ -72,32 +69,17 @@
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Shared\ErrorUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\EscapingUtilities.cs">
-      <Link>Shared\EscapingUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\EventArgsFormatting.cs">
       <Link>Shared\EventArgsFormatting.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ExceptionHandling.cs">
-      <Link>Shared\ExceptionHandling.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>Shared\FileUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\FileMatcher.cs">
       <Link>Shared\FileMatcher.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
-      <Link>Shared\FileUtilitiesRegex.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FrameworkLocationHelper.cs">
       <Link>Shared\FrameworkLocationHelper.cs</Link>
     </Compile>
     <Compile Include="..\Shared\IKeyed.cs">
       <Link>Shared\IKeyed.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\Modifiers.cs">
-      <Link>Shared\Modifiers.cs</Link>
     </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>Shared\InprocTrackingNativeMethods.cs</Link>
@@ -122,9 +104,6 @@
     </Compile>
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>Shared\TaskLoggingHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs">
-      <Link>Shared\TempFileUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Tracing.cs">
       <Link>Shared\Tracing.cs</Link>

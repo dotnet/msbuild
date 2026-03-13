@@ -28,7 +28,7 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
 using Microsoft.Win32;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
-using ItemSpecModifiers = Microsoft.Build.Shared.FileUtilities.ItemSpecModifiers;
+using ItemSpecModifiers = Microsoft.Build.Framework.ItemSpecModifiers;
 using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -1159,7 +1159,7 @@ namespace Microsoft.Build.Evaluation
 
                 string metadataValue = null;
 
-                bool isBuiltInMetadata = FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName);
+                bool isBuiltInMetadata = ItemSpecModifiers.IsItemSpecModifier(metadataName);
 
                 if (
                     (isBuiltInMetadata && ((evaluator._options & ExpanderOptions.ExpandBuiltInMetadata) != 0)) ||
@@ -1713,7 +1713,7 @@ namespace Microsoft.Build.Evaluation
                 }
                 else if (String.Equals(propertyName, ReservedPropertyNames.thisFileDirectory, StringComparison.OrdinalIgnoreCase))
                 {
-                    value = FrameworkFileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(elementLocation.File));
+                    value = FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(elementLocation.File));
                 }
                 else if (String.Equals(propertyName, ReservedPropertyNames.thisFileDirectoryNoRoot, StringComparison.OrdinalIgnoreCase))
                 {
@@ -1954,7 +1954,7 @@ namespace Microsoft.Build.Evaluation
 
                     ItemTransformFunctions functionType;
 
-                    if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(functionName))
+                    if (ItemSpecModifiers.IsDerivableItemSpecModifier(functionName))
                     {
                         functionType = ItemTransformFunctions.ItemSpecModifierFunction;
                     }
@@ -2552,10 +2552,10 @@ namespace Microsoft.Build.Evaluation
                             // 1. in multiprocess mode we're safe to get the current directory as we'll be running on TaskItems which
                             // only exist within a target where we can trust the current directory
                             // 2. in single process mode we get the project directory set for the thread
-                            string directoryToUse = item.Value.ProjectDirectory ?? FrameworkFileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory();
-                            string definingProjectEscaped = item.Value.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
+                            string directoryToUse = item.Value.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory();
+                            string definingProjectEscaped = item.Value.GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath);
 
-                            result = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, item.Key, definingProjectEscaped, functionName);
+                            result = ItemSpecModifiers.GetItemSpecModifier(directoryToUse, item.Key, definingProjectEscaped, functionName);
                         }
                         // InvalidOperationException is how GetItemSpecModifier communicates invalid conditions upwards, so
                         // we do not want to rethrow in that case.
@@ -2610,7 +2610,7 @@ namespace Microsoft.Build.Evaluation
                                 // 1. in multiprocess mode we're safe to get the current directory as we'll be running on TaskItems which
                                 // only exist within a target where we can trust the current directory
                                 // 2. in single process mode we get the project directory set for the thread
-                                string baseDirectoryToUse = item.Value.ProjectDirectory ?? FrameworkFileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
+                                string baseDirectoryToUse = item.Value.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
                                 rootedPath = Path.Combine(baseDirectoryToUse, unescapedPath);
                             }
                         }
@@ -2690,7 +2690,7 @@ namespace Microsoft.Build.Evaluation
                                 // 1. in multiprocess mode we're safe to get the current directory as we'll be running on TaskItems which
                                 // only exist within a target where we can trust the current directory
                                 // 2. in single process mode we get the project directory set for the thread
-                                string baseDirectoryToUse = item.Value.ProjectDirectory ?? FrameworkFileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
+                                string baseDirectoryToUse = item.Value.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
                                 rootedPath = Path.Combine(baseDirectoryToUse, unescapedPath);
                             }
 
@@ -2769,7 +2769,7 @@ namespace Microsoft.Build.Evaluation
                                     // 1. in multiprocess mode we're safe to get the current directory as we'll be running on TaskItems which
                                     // only exist within a target where we can trust the current directory
                                     // 2. in single process mode we get the project directory set for the thread
-                                    string baseDirectoryToUse = item.Value.ProjectDirectory ?? FrameworkFileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
+                                    string baseDirectoryToUse = item.Value.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? String.Empty;
                                     rootedPath = Path.Combine(baseDirectoryToUse, unescapedPath);
                                 }
 
@@ -3313,17 +3313,17 @@ namespace Microsoft.Build.Evaluation
                     string value = null;
                     try
                     {
-                        if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(match.Name))
+                        if (ItemSpecModifiers.IsDerivableItemSpecModifier(match.Name))
                         {
                             // If we're not a ProjectItem or ProjectItemInstance, then ProjectDirectory will be null.
                             // In that case,
                             // 1. in multiprocess mode we're safe to get the current directory as we'll be running on TaskItems which
                             // only exist within a target where we can trust the current directory
                             // 2. in single process mode we get the project directory set for the thread
-                            string directoryToUse = sourceOfMetadata.ProjectDirectory ?? FrameworkFileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory();
-                            string definingProjectEscaped = sourceOfMetadata.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
+                            string directoryToUse = sourceOfMetadata.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory();
+                            string definingProjectEscaped = sourceOfMetadata.GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath);
 
-                            value = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(directoryToUse, itemSpec, definingProjectEscaped, match.Name);
+                            value = ItemSpecModifiers.GetItemSpecModifier(directoryToUse, itemSpec, definingProjectEscaped, match.Name);
                         }
                         else
                         {
@@ -4008,7 +4008,7 @@ namespace Microsoft.Build.Evaluation
                             if (_receiverType == typeof(File) || _receiverType == typeof(Directory)
                                 || _receiverType == typeof(Path))
                             {
-                                argumentValue = FrameworkFileUtilities.FixFilePath(argumentValue);
+                                argumentValue = FileUtilities.FixFilePath(argumentValue);
                             }
 
                             args[n] = EscapingUtilities.UnescapeAll(argumentValue);

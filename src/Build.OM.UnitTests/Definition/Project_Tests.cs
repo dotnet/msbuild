@@ -2089,7 +2089,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ObjectModelHelpers.CleanupFileContents(@"<Project xmlns='msbuildnamespace'>
                 </Project>");
 
-            string importFileName = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName() + ".proj";
+            string importFileName = FileUtilities.GetTemporaryFileName() + ".proj";
             File.WriteAllText(importFileName, importProjectContent);
 
             string projectContent =
@@ -3350,7 +3350,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ("A", Operation.Include, Provenance.StringLiteral, 1)
             };
 
-            AssertProvenanceResult(expected, project, FileUtilities.GetIsFileSystemCaseSensitive() ? "a" : "A");
+            AssertProvenanceResult(expected, project, FileUtilities.IsFileSystemCaseSensitive ? "a" : "A");
         }
 
 

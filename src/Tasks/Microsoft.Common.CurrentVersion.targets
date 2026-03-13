@@ -5233,7 +5233,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <ItemGroup>
       <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='Always' AND '%(EmbeddedResource.MSBuildSourceProjectFile)'!=''"/>
       <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='PreserveNewest' AND '%(EmbeddedResource.MSBuildSourceProjectFile)'!=''"/>
-        <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='IfDifferent' AND '%(EmbeddedResource.MSBuildSourceProjectFile)'!=''"/>
+      <_CopyToOutputDirectoryTransitiveItems       KeepMetadata="$(_GCTODIKeepMetadata)" Include="@(EmbeddedResource->'%(FullPath)')" Condition="'%(EmbeddedResource.CopyToOutputDirectory)'=='IfDifferent' AND '%(EmbeddedResource.MSBuildSourceProjectFile)'!=''"/>
     </ItemGroup>
 
     <ItemGroup>

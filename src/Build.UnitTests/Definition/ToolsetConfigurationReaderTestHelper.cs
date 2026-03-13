@@ -4,6 +4,7 @@
 using System;
 using System.Configuration;
 using System.IO;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #pragma warning disable 436

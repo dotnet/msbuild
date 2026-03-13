@@ -63,7 +63,7 @@ namespace Microsoft.Build.BackEnd
                 _currentDirectory = value.GetCanonicalForm();
                 // Keep the thread-static in sync for use by Expander and Modifiers during property/item expansion.
                 // This allows Path.GetFullPath and %(FullPath) functions used in project files to resolve relative paths correctly in multithreaded mode.
-                FrameworkFileUtilities.CurrentThreadWorkingDirectory = _currentDirectory.Value;
+                FileUtilities.CurrentThreadWorkingDirectory = _currentDirectory.Value;
             }
         }
 
@@ -130,7 +130,7 @@ namespace Microsoft.Build.BackEnd
         public void Dispose()
         {
             // Clear the thread-static to prevent pollution between builds on the same thread.
-            FrameworkFileUtilities.CurrentThreadWorkingDirectory = null;
+            FileUtilities.CurrentThreadWorkingDirectory = null;
         }
     }
 }

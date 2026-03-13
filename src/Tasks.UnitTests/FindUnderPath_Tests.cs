@@ -33,8 +33,8 @@ namespace Microsoft.Build.UnitTests
             Assert.True(success);
             Assert.Single(t.InPath);
             Assert.Single(t.OutOfPath);
-            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"C:\MyProject\File1.txt"), t.InPath[0].ItemSpec);
-            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"C:\SomeoneElsesProject\File2.txt"), t.OutOfPath[0].ItemSpec);
+            Assert.Equal(FileUtilities.FixFilePath(@"C:\MyProject\File1.txt"), t.InPath[0].ItemSpec);
+            Assert.Equal(FileUtilities.FixFilePath(@"C:\SomeoneElsesProject\File2.txt"), t.OutOfPath[0].ItemSpec);
         }
 
         /// <summary>
