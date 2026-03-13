@@ -38,6 +38,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblies;
             t.SearchPaths = new String[] { @"C:\FakeSDK\References" };
             bool succeeded = Execute(t);
@@ -84,6 +85,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference t = new ResolveAssemblyReference();
 
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.Assemblies = assemblies;
             t.ResolvedSDKReferences = new ITaskItem[] { resolvedSDK };
             t.SearchPaths = new String[] { @"C:\SomeOtherPlace" };

@@ -71,6 +71,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
 
                 t.BuildEngine = engine;
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.Assemblies = assemblyNames;
                 t.SearchPaths = new[] { "{RawFileName}" };
                 t.AutoUnify = true;
@@ -116,6 +117,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 ResolveAssemblyReference t = new ResolveAssemblyReference();
 
                 t.BuildEngine = engine;
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.Assemblies = assemblyNames;
                 t.SearchPaths = new[] { "{RawFileName}" };
                 t.AutoUnify = true;

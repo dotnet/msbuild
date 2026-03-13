@@ -21,6 +21,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference clientRar = new()
             {
                 BuildEngine = new MockEngine(),
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 Assemblies = [new TaskItem("System"), new TaskItem("System.IO")],
                 AssemblyFiles = [],
                 AllowedAssemblyExtensions = [".dll", ".exe"],
@@ -58,26 +59,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Fact]
-        public void KnownRelativePathsAreResolvedToFullPaths()
-        {
-            const string AppConfigFileName = "App.config";
-            const string StateFileName = "AssemblyReference.cache";
-            ResolveAssemblyReference clientRar = new()
-            {
-                BuildEngine = new MockEngine(),
-                AppConfigFile = AppConfigFileName,
-                StateFile = StateFileName,
-            };
-            RarNodeExecuteRequest request = new(clientRar);
-
-            ResolveAssemblyReference nodeRar = new();
-            request.SetTaskInputs(nodeRar, CreateBuildEngine());
-
-            Assert.Equal(Path.GetFullPath(AppConfigFileName), nodeRar.AppConfigFile);
-            Assert.Equal(Path.GetFullPath(StateFileName), nodeRar.StateFile);
-        }
-
-        [Fact]
         public void BuildEngineSettingsArePropagated()
         {
             MockEngine mockEngine = new()
@@ -85,10 +66,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 MinimumMessageImportance = MessageImportance.Normal,
                 SetIsTaskInputLoggingEnabled = false,
             };
-            ResolveAssemblyReference clientRar = new() { BuildEngine = mockEngine };
+            ResolveAssemblyReference clientRar = new() { BuildEngine = mockEngine, TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             RarNodeExecuteRequest request = new(clientRar);
 
-            ResolveAssemblyReference nodeRar = new();
+            ResolveAssemblyReference nodeRar = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             request.SetTaskInputs(nodeRar, CreateBuildEngine());
 
             Assert.Equal(mockEngine.LineNumberOfTaskNode, nodeRar.BuildEngine.LineNumberOfTaskNode);
@@ -112,6 +93,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveAssemblyReference clientRar = new()
             {
                 BuildEngine = mockEngine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 AllowOutOfProcNode = true,
             };
             RarNodeExecuteRequest request = new(clientRar);
