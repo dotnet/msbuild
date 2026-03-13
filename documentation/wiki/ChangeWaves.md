@@ -29,6 +29,9 @@ Change wave checks around features will be removed in the release that accompani
 
 ## Current Rotation of Change Waves
 
+### 18.6
+- [Fix ASP.NET WebSite projects to resolve netstandard2.0 dependencies](https://github.com/dotnet/msbuild/pull/13058) - Pass TargetFrameworkVersion to RAR task and copy netstandard.dll facade for .NET Framework 4.7.1+ web projects.
+
 ### 18.5
 - [FindUnderPath and AssignTargetPath tasks no longer throw on invalid path characters when using TaskEnvironment.GetAbsolutePath](https://github.com/dotnet/msbuild/pull/13069)
 - [AssignTargetPath on Linux respects case sensitivity of the file system instead of always ignoring case](https://github.com/dotnet/msbuild/pull/13069)
