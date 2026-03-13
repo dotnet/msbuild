@@ -982,8 +982,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             record.StartState(startTime);
 
             // While running: should NOT throw — should return a positive elapsed time.
-            TimeSpan elapsed = record.AccumulatedTime;
-            elapsed.ShouldBeGreaterThan(TimeSpan.Zero);
+            record.AccumulatedTime.ShouldBeGreaterThan(TimeSpan.Zero);
 
             // Stop the timer.
             DateTime endTime = startTime.AddMilliseconds(500);
@@ -1009,8 +1008,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // While second interval is running: should include the 200ms from
             // the first interval plus the elapsed time of the current interval.
-            TimeSpan elapsed = record.AccumulatedTime;
-            elapsed.ShouldBeGreaterThan(TimeSpan.FromMilliseconds(200));
+            record.AccumulatedTime.ShouldBeGreaterThan(TimeSpan.FromMilliseconds(200));
 
             // Stop second interval after 100ms.
             record.EndState(t0.AddMilliseconds(400));
