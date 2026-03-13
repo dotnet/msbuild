@@ -19,6 +19,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
@@ -1285,6 +1286,10 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
+            // Accumulate telemetry into a local instance (no contention — single-owner).
+            // This mirrors the OOP node pattern: each node accumulates locally, then merges once.
+            var localTelemetry = new WorkerNodeTelemetryData();
+
             foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
             {
                 bool wasExecuted =
@@ -1315,15 +1320,8 @@ namespace Microsoft.Build.BackEnd
                                (isFromNuget && FileClassifier.Shared.IsMicrosoftPackageInNugetCache(projectTargetInstance.Value.FullPath));
                 }
 
-                telemetryForwarder.AddTarget(
-                    projectTargetInstance.Key,
-                    // would we want to distinguish targets that were executed only during this execution - we'd need
-                    //  to remember target names from ResultsByTarget from before execution
-                    wasExecuted,
-                    isCustom,
-                    isMetaprojTarget,
-                    isFromNuget,
-                    skipReason);
+                var key = new TaskOrTargetTelemetryKey(projectTargetInstance.Key, isCustom, isFromNuget, isMetaprojTarget);
+                localTelemetry.AddTarget(key, wasExecuted, skipReason);
             }
 
             TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
@@ -1338,13 +1336,17 @@ namespace Microsoft.Build.BackEnd
 
                 foreach (TaskRegistry.RegisteredTaskRecord registeredTaskRecord in taskRegistry.TaskRegistrations.Values.SelectMany(record => record))
                 {
-                    telemetryForwarder.AddTask(
+                    var key = new TaskOrTargetTelemetryKey(
                         registeredTaskRecord.TaskIdentity.Name,
+                        registeredTaskRecord.ComputeIfCustom(),
+                        registeredTaskRecord.IsFromNugetCache,
+                        isFromMetaProject: false);
+
+                    localTelemetry.AddTask(
+                        key,
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
                         registeredTaskRecord.Statistics.TotalMemoryConsumption,
-                        registeredTaskRecord.ComputeIfCustom(),
-                        registeredTaskRecord.IsFromNugetCache,
                         registeredTaskRecord.TaskFactoryAttributeName,
                         registeredTaskRecord.TaskFactoryParameters.Runtime);
 
@@ -1353,6 +1355,9 @@ namespace Microsoft.Build.BackEnd
 
                 taskRegistry.Toolset?.InspectInternalTaskRegistry(CollectTasksStats);
             }
+
+            // Single lock acquisition to merge local data into the shared node-level telemetry.
+            telemetryForwarder.MergeWorkerData(localTelemetry);
         }
 
         private static bool IsMetaprojTargetPath(string targetPath) => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
