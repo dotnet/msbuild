@@ -117,6 +117,14 @@ internal static class ItemSpecModifiers
         new(StringComparer.OrdinalIgnoreCase);
 
     /// <summary>
+    ///  Clears the static DefiningProject* modifier cache. Call at the end of a build
+    ///  (e.g., from <c>BuildManager.EndBuild</c>) to prevent stale entries from accumulating
+    ///  in long-lived processes such as Visual Studio.
+    /// </summary>
+    public static void ClearDefiningProjectCache()
+        => s_definingProjectCache.Clear();
+
+    /// <summary>
     ///  Resolves a modifier name to its <see cref="ItemSpecModifierKind"/> using a length+char switch
     ///  instead of a dictionary lookup. Every length bucket is unique or disambiguated by at
     ///  most two character comparisons, so misses are rejected in O(1) with no hashing.
