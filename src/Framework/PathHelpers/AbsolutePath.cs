@@ -162,7 +162,23 @@ namespace Microsoft.Build.Framework
             // On unix "\" is not a valid path separator, but is a part of the file/directory name, so no normalization is needed. 
             bool needsSeparatorNormalization = NativeMethods.IsWindows && Value.IndexOf(Path.AltDirectorySeparatorChar) >= 0;
 
-            if (!hasRelativeSegment && !needsSeparatorNormalization)
+            // Check for consecutive directory separators (e.g., "\\") which Path.GetFullPath would collapse.
+            // On Windows, consecutive backslashes in the middle of a path (not at the start for UNC) should be collapsed.
+            // On Unix, consecutive forward slashes should be collapsed.
+            bool hasConsecutiveSeparators;
+            if (NativeMethods.IsWindows)
+            {
+                // On Windows, search from offset 1 to skip position 0 where UNC paths legitimately start with "\\".
+                // This still catches cases like "C:\\foo" (positions 2-3) or "D:\foo\\bar".
+                // Length > 3 guard: searching for 2-char match from offset 1 needs at least 4 chars.
+                hasConsecutiveSeparators = Value.Length > 3 && Value.IndexOf("\\\\", 1, StringComparison.Ordinal) >= 0;
+            }
+            else
+            {
+                hasConsecutiveSeparators = Value.Contains("//");
+            }
+
+            if (!hasRelativeSegment && !needsSeparatorNormalization && !hasConsecutiveSeparators)
             {
                 return this;
             }
