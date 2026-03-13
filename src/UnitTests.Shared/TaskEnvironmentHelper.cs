@@ -20,5 +20,16 @@ namespace Microsoft.Build.UnitTests
         {
             return new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
         }
+
+        /// <summary>
+        /// Creates a TaskEnvironment backed by the multithreaded driver with a specific
+        /// project directory, simulating the production multithreaded build scenario.
+        /// </summary>
+#pragma warning disable CA2000 // Dispose objects before losing scope — ownership transfers to TaskEnvironment caller
+        public static TaskEnvironment CreateMultithreadedForTest(string projectDirectory)
+        {
+            return new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(projectDirectory));
+        }
+#pragma warning restore CA2000
     }
 }
