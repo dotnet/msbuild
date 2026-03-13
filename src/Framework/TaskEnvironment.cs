@@ -21,6 +21,13 @@ namespace Microsoft.Build.Framework
         {
             _driver = driver;
         }
+        
+        /// <summary>
+        /// Initializes a new instance of the TaskEnvironment class using the default multi-process execution mode.
+        /// This mode directly accesses the system environment variables and current working directory.
+        /// </summary>
+        public TaskEnvironment() : this(MultiProcessTaskEnvironmentDriver.Instance) 
+        { }
 
         /// <summary>
         /// Gets or sets the project directory for the task execution.
