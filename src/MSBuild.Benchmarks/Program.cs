@@ -6,7 +6,6 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnostics.Windows;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
-using Perfolizer.Horology;
 using static MSBuild.Benchmarks.Extensions;
 
 var argList = new List<string>(args);

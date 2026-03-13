@@ -22,13 +22,13 @@ dotnet run -c Release -f net10.0
 ### Filter to a Specific Benchmark Class
 
 ```
-dotnet run -c Release -f net10.0 -- --filter "*LazyItemEvaluatorBenchmarks*"
+dotnet run -c Release -f net10.0 -- --filter "*ItemSpecModifiersBenchmark*"
 ```
 
 ### Filter to a Single Benchmark Method
 
 ```
-dotnet run -c Release -f net10.0 -- --filter "*LazyItemEvaluatorBenchmarks.IncludeOnly"
+dotnet run -c Release -f net10.0 -- --filter "*ItemSpecModifiersBenchmark.IncludeOnly"
 ```
 ## Command-Line Options
 
@@ -41,5 +41,5 @@ dotnet run -c Release -f net10.0 -- --filter "*LazyItemEvaluatorBenchmarks.Inclu
 These custom options can be combined with any BenchmarkDotNet options:
 
 ```
-dotnet run -c Release -f net10.0 -- --filter "*LazyItemEvaluatorBenchmarks*" --job short --disable-ngen
+dotnet run -c Release -f net10.0 -- --filter "*ItemSpecModifiersBenchmark*" --job short --disable-ngen
 ```

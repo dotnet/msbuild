@@ -12,6 +12,7 @@ public class ItemSpecModifiersBenchmark
     private string _currentDirectory = null!;
     private string _itemSpec = null!;
     private string _definingProjectEscaped = null!;
+    private string _recursiveDirModifier = null!;
 
     [GlobalSetup]
     public void GlobalSetup()
@@ -26,6 +27,8 @@ public class ItemSpecModifiersBenchmark
         {
             File.WriteAllText(_itemSpec, string.Empty);
         }
+
+        _recursiveDirModifier = ItemSpecModifiers.RecursiveDir;
     }
 
     [GlobalCleanup]
@@ -39,7 +42,7 @@ public class ItemSpecModifiersBenchmark
 
     // -----------------------------------------------------------------------
     // FrozenSet lookup – covers IsItemSpecModifier for all known modifiers
-    // plus a miss, exercising the OrdinalIgnoreCase FrozenSet.
+    // plus a miss.
     // -----------------------------------------------------------------------
 
     [Benchmark]
@@ -70,7 +73,7 @@ public class ItemSpecModifiersBenchmark
 
     [Benchmark]
     public bool IsDerivableItemSpecModifier_RecursiveDir()
-        => ItemSpecModifiers.IsDerivableItemSpecModifier(ItemSpecModifiers.RecursiveDir);
+        => ItemSpecModifiers.IsDerivableItemSpecModifier(_recursiveDirModifier);
 
     // -----------------------------------------------------------------------
     // GetItemSpecModifier – FullPath is the most commonly used modifier and
