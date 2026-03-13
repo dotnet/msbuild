@@ -63,10 +63,8 @@ namespace Microsoft.Build.Logging
             }
             else
             {
-                // Store the temporary archive in TempFileDirectory rather than GetCacheDirectory().
-                // GetCacheDirectory() is shared across all assemblies and is wiped by
-                // ClearCacheDirectory() during build shutdown in XMake, which can race with
-                // the logger still needing this file for embedding into the binlog.
+                // Store the temporary archive in TempFileDirectory rather than GetCacheDirectory()
+                // because ClearCacheDirectory() wipes the cache dir during build shutdown.
                 string tempDirectory = FileUtilities.TempFileDirectory;
 
                 _archiveFilePath = Path.Combine(

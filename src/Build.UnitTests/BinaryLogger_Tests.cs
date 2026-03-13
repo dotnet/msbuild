@@ -542,23 +542,22 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(project, binaryLogger);
         }
 
+        /// <summary>
+        /// Regression test for dotnet/dotnet#5433 — ClearCacheDirectory must not destroy the
+        /// ProjectImports archive before it is embedded in the binlog.
+        /// </summary>
         [Fact]
-        public void ProjectImportsCollectorArchiveSurvivesClearCacheDirectory()
+        public void BinlogEmbeddedImportsSurviveClearCacheDirectory()
         {
-            // Regression test: ProjectImportsCollector must store its temporary archive
-            // outside GetCacheDirectory() so that ClearCacheDirectory() does not destroy
-            // the zip before the BinaryLogger finishes embedding it.
             string logFilePath = Path.Combine(_env.DefaultTestDirectory.Path, "test.binlog");
 
             var collector = new ProjectImportsCollector(logFilePath, createFile: false, runOnBackground: false);
-
-            // Add some content so the archive is non-empty.
             collector.AddFileFromMemory("testfile.proj", "<Project />");
 
-            // Simulate the cleanup that XMake.cs performs after EndBuild.
+            // This is what XMake.cs does after EndBuild — wipes the cache directory.
             FileUtilities.ClearCacheDirectory();
 
-            // The collector should still be able to process and embed the archive.
+            // ProcessResult must still read the archive after the cache dir is gone.
             bool archiveRead = false;
             collector.ProcessResult(
                 stream =>
@@ -567,9 +566,9 @@ namespace Microsoft.Build.UnitTests
                     archiveRead = true;
                 },
                 error => throw new InvalidOperationException(error));
+            archiveRead.ShouldBeTrue("Archive must be readable after ClearCacheDirectory");
 
-            archiveRead.ShouldBeTrue("The ProjectImports archive should still be readable after ClearCacheDirectory");
-
+            // DeleteArchive must not throw (directory must still exist).
             collector.DeleteArchive();
 
             // Satisfy the fixture's expectation that _logFile exists.
