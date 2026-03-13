@@ -418,6 +418,7 @@ namespace Microsoft.Build.Construction
             string copyLocalFilesItemName = referenceItemName + "_CopyLocalFiles";
             string targetFrameworkDirectoriesName = GenerateSafePropertyName(project, "_TargetFrameworkDirectories");
             string fullFrameworkRefAssyPathName = GenerateSafePropertyName(project, "_FullFrameworkReferenceAssemblyPaths");
+            string dependsOnNetStandardPropertyName = GenerateSafePropertyName(project, "_DependsOnNETStandard");
             string destinationFolder = String.Format(CultureInfo.InvariantCulture, @"$({0})\Bin\", GenerateSafePropertyName(project, "AspNetPhysicalPath"));
 
             // This is a bit of a hack.  We're actually calling the "Copy" task on all of
@@ -443,6 +444,7 @@ namespace Microsoft.Build.Construction
             // files need to be copy-localed.
             ProjectTaskInstance rarTask = target.AddTask("ResolveAssemblyReference", String.Format(CultureInfo.InvariantCulture, "Exists('%({0}.Identity)')", referenceItemName), null);
             rarTask.SetParameter("Assemblies", "@(" + referenceItemName + "->'%(FullPath)')");
+            rarTask.SetParameter("AppConfigFile", "$(WebConfigFileName)");
             rarTask.SetParameter("TargetFrameworkDirectories", "$(" + targetFrameworkDirectoriesName + ")");
             rarTask.SetParameter("FullFrameworkFolders", "$(" + fullFrameworkRefAssyPathName + ")");
             rarTask.SetParameter("SearchPaths", "{RawFileName};{TargetFrameworkDirectory};{GAC}");
@@ -451,15 +453,29 @@ namespace Microsoft.Build.Construction
             rarTask.SetParameter("FindSerializationAssemblies", "true");
             rarTask.SetParameter("FindRelatedFiles", "true");
             rarTask.SetParameter("TargetFrameworkMoniker", project.TargetFrameworkMoniker);
+            rarTask.SetParameter("TargetFrameworkVersion", $"v{new FrameworkName(project.TargetFrameworkMoniker).Version}");
             rarTask.AddOutputItem("CopyLocalFiles", copyLocalFilesItemName, null);
+
+            // Capture whether RAR detected a dependency on netstandard
+            rarTask.AddOutputProperty("DependsOnNETStandard", dependsOnNetStandardPropertyName, null);
 
             // Copy all the copy-local files (reported by RAR) to the web project's "bin"
             // directory.
             ProjectTaskInstance copyTask = target.AddTask("Copy", conditionDescribingValidConfigurations, null);
             copyTask.SetParameter("SourceFiles", "@(" + copyLocalFilesItemName + ")");
+            copyTask.SetParameter("SkipUnchangedFiles", "true");
             copyTask.SetParameter(
                 "DestinationFiles",
                 String.Format(CultureInfo.InvariantCulture, @"@({0}->'{1}%(DestinationSubDirectory)%(Filename)%(Extension)')", copyLocalFilesItemName, destinationFolder));
+
+            // If any references depend on netstandard, copy netstandard.dll from the Facades folder.
+            // .NET Framework 4.7.1+ has netstandard 2.0 support in the Facades folder.
+            string netstandardFacadePath = String.Format(CultureInfo.InvariantCulture, @"$({0})Facades\netstandard.dll", targetFrameworkDirectoriesName);
+            string copyFacadesCondition = String.Format(CultureInfo.InvariantCulture, "'$({0})' == 'True' AND Exists('{1}')", dependsOnNetStandardPropertyName, netstandardFacadePath);
+            ProjectTaskInstance copyFacadesTask = target.AddTask("Copy", copyFacadesCondition, null);
+            copyFacadesTask.SetParameter("SourceFiles", netstandardFacadePath);
+            copyFacadesTask.SetParameter("SkipUnchangedFiles", "true");
+            copyFacadesTask.SetParameter("DestinationFolder", destinationFolder);
         }
 
         /// <summary>
@@ -1242,6 +1258,16 @@ namespace Microsoft.Build.Construction
                     "AspNetCompiler.UnsupportedMSBuildVersion",
                     project.ProjectName);
 #else
+
+                if (File.Exists(Path.Combine(project.AbsolutePath, "web.config")))
+                {
+                    metaprojectInstance.SetProperty("WebConfigFileName", Path.Combine(project.AbsolutePath, "web.config"));
+                }
+                else if (File.Exists(Path.Combine(project.AbsolutePath, "Web.config")))
+                {
+                    metaprojectInstance.SetProperty("WebConfigFileName", Path.Combine(project.AbsolutePath, "Web.config"));
+                }
+
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, null);
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Clean");
                 AddMetaprojectTargetForWebProject(traversalProject, metaprojectInstance, project, "Rebuild");
@@ -1537,12 +1563,14 @@ namespace Microsoft.Build.Construction
             newTask.SetParameter("TargetPath", "$(" + GenerateSafePropertyName(project, "AspNetTargetPath") + ")");
             newTask.SetParameter("Force", "$(" + GenerateSafePropertyName(project, "AspNetForce") + ")");
             newTask.SetParameter("Updateable", "$(" + GenerateSafePropertyName(project, "AspNetUpdateable") + ")");
+            newTask.SetParameter("Clean", "true");
             newTask.SetParameter("Debug", "$(" + GenerateSafePropertyName(project, "AspNetDebug") + ")");
             newTask.SetParameter("KeyFile", "$(" + GenerateSafePropertyName(project, "AspNetKeyFile") + ")");
             newTask.SetParameter("KeyContainer", "$(" + GenerateSafePropertyName(project, "AspNetKeyContainer") + ")");
             newTask.SetParameter("DelaySign", "$(" + GenerateSafePropertyName(project, "AspNetDelaySign") + ")");
             newTask.SetParameter("AllowPartiallyTrustedCallers", "$(" + GenerateSafePropertyName(project, "AspNetAPTCA") + ")");
             newTask.SetParameter("FixedNames", "$(" + GenerateSafePropertyName(project, "AspNetFixedNames") + ")");
+            newTask.SetParameter("Clean", "true");
 
             ValidateTargetFrameworkForWebProject(project);
 
