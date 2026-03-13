@@ -228,11 +228,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal override bool IsInlineTask
             {
-#if !NET35
                 get { return _assemblyFile?.EndsWith(TaskFactoryUtilities.InlineTaskSuffix, StringComparison.OrdinalIgnoreCase) == true; }
-#else
-                get { return false; }
-#endif
             }
         }
     }

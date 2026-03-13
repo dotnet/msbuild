@@ -80,7 +80,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     {
                         SdkResolverManifest manifest = ParseSdkResolverElement(reader, filePath);
 
-                        manifest.Path = FrameworkFileUtilities.FixFilePath(manifest.Path);
+                        manifest.Path = FileUtilities.FixFilePath(manifest.Path);
                         if (!System.IO.Path.IsPathRooted(manifest.Path))
                         {
                             manifest.Path = System.IO.Path.Combine(manifestFolder, manifest.Path);

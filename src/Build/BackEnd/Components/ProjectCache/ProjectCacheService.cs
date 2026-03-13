@@ -24,7 +24,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
+using ExceptionHandling = Microsoft.Build.Framework.ExceptionHandling;
 
 #pragma warning disable CS0618 // Type or member is obsolete, this class is adapting to both Experimental and new plugin APIs
 namespace Microsoft.Build.ProjectCache

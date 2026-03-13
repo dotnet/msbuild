@@ -996,9 +996,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                     null,
 #endif
-#if !NET35
                     null,
-#endif
                     false,
                     CancellationToken.None,
                     TaskEnvironmentHelper.CreateForTest());
@@ -1029,9 +1027,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                 null,
 #endif
-#if !NET35
                 null,
-#endif
                 false,
                 CancellationToken.None,
                 TaskEnvironmentHelper.CreateForTest());
@@ -1097,11 +1093,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ml.AssertLogDoesntContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("UnhandledMSBuildError", string.Empty));
             ml.AssertLogContains(testExceptionMessage);
 
-            File.Exists(ExceptionHandling.DumpFilePath).ShouldBe(isCritical,
-                $"{ExceptionHandling.DumpFilePath} expected to exist: {isCritical}");
+            File.Exists(DebugUtils.DumpFilePath).ShouldBe(isCritical, $"{DebugUtils.DumpFilePath} expected to exist: {isCritical}");
+
             if (isCritical)
             {
-                FileUtilities.DeleteNoThrow(ExceptionHandling.DumpFilePath);
+                FileUtilities.DeleteNoThrow(DebugUtils.DumpFilePath);
             }
 
             // Reset DebugPath to not affect other tests
@@ -1277,9 +1273,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #if FEATURE_APPDOMAIN
                 null,
 #endif
-#if !NET35
                 null,
-#endif
                 false,
                 CancellationToken.None,
                 TaskEnvironmentHelper.CreateForTest());
