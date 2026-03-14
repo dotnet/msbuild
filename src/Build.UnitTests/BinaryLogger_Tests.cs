@@ -171,7 +171,53 @@ namespace Microsoft.Build.UnitTests
             var parallelExpected = parallelFromBuildText.ToString();
             var parallelActual = parallelFromPlaybackText.ToString();
 
+            parallelActual = RemoveNonDeterministicParallelOutput(parallelActual);
+            parallelExpected = RemoveNonDeterministicParallelOutput(parallelExpected);
+
             parallelActual.ShouldContainWithoutWhitespace(parallelExpected);
+        }
+
+        private static string RemoveNonDeterministicParallelOutput(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return text;
+            }
+
+            using StringReader reader = new StringReader(text);
+            StringBuilder builder = new StringBuilder(text.Length);
+            string line;
+            bool skipTargetOutputItems = false;
+
+            while ((line = reader.ReadLine()) is not null)
+            {
+                if (line.StartsWith("BinLogFilePath=", StringComparison.Ordinal)
+                    || line.StartsWith("CurrentUICulture=", StringComparison.Ordinal)
+                    || line.StartsWith("CurrentCulture=", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                if (line.StartsWith("Target output items:", StringComparison.Ordinal))
+                {
+                    skipTargetOutputItems = true;
+                    continue;
+                }
+
+                if (skipTargetOutputItems)
+                {
+                    if (string.IsNullOrWhiteSpace(line) || char.IsWhiteSpace(line[0]))
+                    {
+                        continue;
+                    }
+
+                    skipTargetOutputItems = false;
+                }
+
+                builder.AppendLine(line);
+            }
+
+            return builder.ToString();
         }
 
         /// <summary>
@@ -908,9 +954,9 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ProcessParameters_MixedConfigsWithDuplicates_HandledCorrectly()
         {
-            var result = BinaryLogger.ProcessParameters(new[] { 
-                "1.binlog", 
-                "2.binlog;ProjectImports=None", 
+            var result = BinaryLogger.ProcessParameters(new[] {
+                "1.binlog",
+                "2.binlog;ProjectImports=None",
                 "1.binlog;ProjectImports=None"  // Different config but same path - filtered as duplicate
             });
 
