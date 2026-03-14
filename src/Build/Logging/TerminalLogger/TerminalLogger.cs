@@ -164,7 +164,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// What is currently displaying in Nodes section as strings representing per-node console output.
     /// </summary>
-    private TerminalNodesFrame _currentFrame = new(Array.Empty<TerminalNodeStatus>(), 0, 0);
+    private TerminalNodesFrame _currentFrame = null!; // Will be initialized in Initialize method
 
     /// <summary>
     /// The <see cref="Terminal"/> to write console output to.
@@ -220,6 +220,17 @@ public sealed partial class TerminalLogger : INodeLogger
     /// Indicates whether to show the live-updated nodes display.
     /// </summary>
     private bool _showNodesDisplay = true;
+
+    /// <summary>
+    /// Controls whether to use colorized output. Null means not explicitly specified by parameter.
+    /// </summary>
+    private bool? _useColor = null;
+
+    /// <summary>
+    /// Cached colorize function determined during initialization.
+    /// Either returns AnsiCodes.Colorize or returns plain text depending on color settings.
+    /// </summary>
+    private Func<string?, TerminalColor, string> _colorizeFunc = null!; // Initialized in Initialize()
 
     private uint? _originalConsoleMode;
 
@@ -437,6 +448,14 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         ParseParameters();
 
+        // Compute the colorize function to use based on settings
+        _colorizeFunc = ComputeShouldUseColor() 
+            ? AnsiCodes.Colorize 
+            : static (text, _) => text ?? "";
+
+        // Initialize the current frame with the colorize function
+        _currentFrame = new TerminalNodesFrame(Array.Empty<TerminalNodeStatus>(), 0, 0, _colorizeFunc);
+
         // Detect if we're in replay mode
         _isReplayMode = eventSource is IBinaryLogReplaySource;
 
@@ -505,6 +524,10 @@ public sealed partial class TerminalLogger : INodeLogger
             case "DISABLENODEDISPLAY":
                 _showNodesDisplay = false;
                 break;
+            case "USE_COLOR":
+            case "USECOLOR":
+                TryApplyUseColorParameter(parameterValue);
+                break;
         }
     }
 
@@ -541,6 +564,28 @@ public sealed partial class TerminalLogger : INodeLogger
         return true;
     }
 
+    /// <summary>
+    /// Apply the use color value
+    /// </summary>
+    private bool TryApplyUseColorParameter(string? parameterValue)
+    {
+        if (String.IsNullOrEmpty(parameterValue))
+        {
+            _useColor = true;
+        }
+        else
+        {
+            if (ConversionUtilities.TryConvertStringToBool(parameterValue, out bool useColor))
+            {
+                _useColor = useColor;
+                return true;
+            }
+            return false;
+        }
+
+        return true;
+    }
+
     /// <inheritdoc/>
     public void Shutdown()
     {
@@ -551,6 +596,47 @@ public sealed partial class TerminalLogger : INodeLogger
         Terminal.Dispose();
         _cts.Dispose();
     }
+
+    /// <summary>
+    /// Computes whether colorized output should be used based on environment variables and parameters.
+    /// Precedence: explicit parameter > NO_COLOR > FORCE_COLOR > default (true)
+    /// Called once during initialization to determine which colorize function to use.
+    /// </summary>
+    private bool ComputeShouldUseColor()
+    {
+        // Explicit parameter takes precedence
+        if (_useColor.HasValue)
+        {
+            return _useColor.Value;
+        }
+
+        // NO_COLOR supersedes FORCE_COLOR - check if variable is set (not if it has a value)
+        string? noColor = Environment.GetEnvironmentVariable("NO_COLOR");
+        if (noColor is not null)
+        {
+            return false;
+        }
+
+        // FORCE_COLOR makes color mandatory - check if variable is set (not if it has a value)
+        string? forceColor = Environment.GetEnvironmentVariable("FORCE_COLOR");
+        if (forceColor is not null)
+        {
+            return true;
+        }
+
+        // Default: use color
+        return true;
+    }
+
+    /// <summary>
+    /// Returns whether color should be used (based on the cached function).
+    /// </summary>
+    internal bool ShouldUseColor() => _colorizeFunc == AnsiCodes.Colorize;
+
+    /// <summary>
+    /// Colorizes text using the cached colorize function determined during initialization.
+    /// </summary>
+    private string Colorize(string? text, TerminalColor color) => _colorizeFunc(text, color);
 
     public MessageImportance GetMinimumMessageImportance()
     {
@@ -621,9 +707,9 @@ public sealed partial class TerminalLogger : INodeLogger
                     string skippedText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Skipped", skipped);
                     string durationText = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestSummary_Duration", testDuration);
 
-                    failedText = colorizeFailed ? AnsiCodes.Colorize(failedText.ToString(), TerminalColor.Red) : failedText;
-                    passedText = colorizePassed ? AnsiCodes.Colorize(passedText.ToString(), TerminalColor.Green) : passedText;
-                    skippedText = colorizeSkipped ? AnsiCodes.Colorize(skippedText.ToString(), TerminalColor.Yellow) : skippedText;
+                    failedText = colorizeFailed ? Colorize(failedText.ToString(), TerminalColor.Red) : failedText;
+                    passedText = colorizePassed ? Colorize(passedText.ToString(), TerminalColor.Green) : passedText;
+                    skippedText = colorizeSkipped ? Colorize(skippedText.ToString(), TerminalColor.Yellow) : skippedText;
 
                     Terminal.WriteLine(string.Join(CultureInfo.CurrentCulture.TextInfo.ListSeparator + " ", summaryAndTotalText, failedText, passedText, skippedText, durationText));
                 }
@@ -964,50 +1050,55 @@ public sealed partial class TerminalLogger : INodeLogger
             _ => $"{AnsiCodes.LinkPrefix}{uri}{AnsiCodes.LinkInfix}{linkText}{AnsiCodes.LinkSuffix}",
         };
 
-    private static string GetProjectFinishedHeader(TerminalProjectInfo project, string buildResult, string duration)
+    private string GetProjectFinishedHeader(TerminalProjectInfo project, string buildResult, string duration)
     {
         string projectFile = project.ProjectFile is not null ?
             Path.GetFileNameWithoutExtension(project.ProjectFile) :
             string.Empty;
 
+        return FormatProjectResult(project, projectFile, buildResult, duration);
+    }
+
+    private string FormatProjectResult(TerminalProjectInfo project, string projectFile, string buildResult, string duration)
+    {
         return (project.TargetFramework, project.RuntimeIdentifier, project.IsTestProject) switch
         {
             (string tfm, null, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
                 Indentation,
                 projectFile,
-                AnsiCodes.Colorize(tfm, TargetFrameworkColor),
+                Colorize(tfm, TargetFrameworkColor),
                 buildResult,
                 duration),
             (string tfm, null, false) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
                 Indentation,
                 projectFile,
-                AnsiCodes.Colorize(tfm, TargetFrameworkColor),
+                Colorize(tfm, TargetFrameworkColor),
                 buildResult,
                 duration),
             (null, string rid, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTF",
                 Indentation,
                 projectFile,
-                AnsiCodes.Colorize(rid, RuntimeIdentifierColor),
+                Colorize(rid, RuntimeIdentifierColor),
                 buildResult,
                 duration),
             (null, string rid, false) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTF",
                 Indentation,
                 projectFile,
-                AnsiCodes.Colorize(rid, RuntimeIdentifierColor),
+                Colorize(rid, RuntimeIdentifierColor),
                 buildResult,
                 duration),
             (string tfm, string rid, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_WithTFAndRID",
                 Indentation,
                 projectFile,
-                AnsiCodes.Colorize(tfm, TargetFrameworkColor),
-                AnsiCodes.Colorize(rid, RuntimeIdentifierColor),
+                Colorize(tfm, TargetFrameworkColor),
+                Colorize(rid, RuntimeIdentifierColor),
                 buildResult,
                 duration),
             (string tfm, string rid, false) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ProjectFinished_WithTFAndRID",
                 Indentation,
                 projectFile,
-                AnsiCodes.Colorize(tfm, TargetFrameworkColor),
-                AnsiCodes.Colorize(rid, RuntimeIdentifierColor),
+                Colorize(tfm, TargetFrameworkColor),
+                Colorize(rid, RuntimeIdentifierColor),
                 buildResult,
                 duration),
             (null, null, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("TestProjectFinished_NoTF",
@@ -1477,7 +1568,7 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         int width = updateSize ? Terminal.Width : _currentFrame.Width;
         int height = updateSize ? Terminal.Height : _currentFrame.Height;
-        TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: width, height: height);
+        TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: width, height: height, colorize: _colorizeFunc);
 
         // Do not render delta but clear everything if Terminal width or height have changed.
         if (newFrame.Width != _currentFrame.Width || newFrame.Height != _currentFrame.Height)
@@ -1537,7 +1628,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <param name="countErrors">The number of errors encountered during the build.</param>
     /// <param name="countWarnings">The number of warnings encountered during the build.</param>
     /// <returns>A string representing the build result summary.</returns>
-    private static string GetBuildResultString(bool succeeded, int countErrors, int countWarnings)
+    private string GetBuildResultString(bool succeeded, int countErrors, int countWarnings)
     {
         if (!succeeded)
         {
@@ -1549,15 +1640,15 @@ public sealed partial class TerminalLogger : INodeLogger
                 (false, true) => ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildResult_FailedWithWarnings", countWarnings),
                 _ => ResourceUtilities.GetResourceString("BuildResult_Failed"),
             };
-            return AnsiCodes.Colorize(text, TerminalColor.Red);
+            return Colorize(text, TerminalColor.Red);
         }
         else if (countWarnings > 0)
         {
-            return AnsiCodes.Colorize(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildResult_SucceededWithWarnings", countWarnings), TerminalColor.Yellow);
+            return Colorize(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("BuildResult_SucceededWithWarnings", countWarnings), TerminalColor.Yellow);
         }
         else
         {
-            return AnsiCodes.Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
+            return Colorize(ResourceUtilities.GetResourceString("BuildResult_Succeeded"), TerminalColor.Green);
         }
     }
 
@@ -1602,10 +1693,10 @@ public sealed partial class TerminalLogger : INodeLogger
     }
 
     private string FormatWarningMessage(BuildWarningEventArgs e, string indent) => FormatEventMessage(
-                category: AnsiCodes.Colorize("warning", TerminalColor.Yellow),
+                category: Colorize("warning", TerminalColor.Yellow),
                 subcategory: e.Subcategory,
                 message: e.Message,
-                code: AnsiCodes.Colorize(CreateLink(GenerateLinkForWarning(e), e.Code), TerminalColor.Yellow),
+                code: Colorize(CreateLink(GenerateLinkForWarning(e), e.Code), TerminalColor.Yellow),
                 file: HighlightFileName(e.File),
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
@@ -1635,10 +1726,10 @@ public sealed partial class TerminalLogger : INodeLogger
     /// SDK's 'preview version' message, while not removing the code.
     /// </summary>
     private string FormatSimpleMessageWithoutFileData(BuildMessageEventArgs e, string indent) => FormatEventMessage(
-                category: AnsiCodes.Colorize("info", TerminalColor.Default),
+                category: Colorize("info", TerminalColor.Default),
                 subcategory: null,
                 message: e.Message,
-                code: AnsiCodes.Colorize(e.Code, TerminalColor.Default),
+                code: Colorize(e.Code, TerminalColor.Default),
                 file: null,
                 lineNumber: 0,
                 endLineNumber: 0,
@@ -1650,10 +1741,10 @@ public sealed partial class TerminalLogger : INodeLogger
                 prependIndentation: true);
 
     private string FormatErrorMessage(BuildErrorEventArgs e, string indent, bool requireFileAndLinePortion = true) => FormatEventMessage(
-                category: AnsiCodes.Colorize("error", TerminalColor.Red),
+                category: Colorize("error", TerminalColor.Red),
                 subcategory: e.Subcategory,
                 message: e.Message,
-                code: AnsiCodes.Colorize(CreateLink(GenerateLinkForError(e), e.Code), TerminalColor.Red),
+                code: Colorize(CreateLink(GenerateLinkForError(e), e.Code), TerminalColor.Red),
                 file: HighlightFileName(e.File),
                 lineNumber: e.LineNumber,
                 endLineNumber: e.EndLineNumber,
