@@ -675,7 +675,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleCoresRequest(TaskHostCoresRequest request)
         {
-            int grantedCores = 0;
+            // Default to 1 for RequestCores (not 0) to satisfy the API contract (return ∈ [1, requested]).
+            // For ReleaseCores, 0 is correct as it's just an acknowledgment.
+            int grantedCores = request.IsRelease ? 0 : 1;
 
             if (request.IsRelease)
             {
