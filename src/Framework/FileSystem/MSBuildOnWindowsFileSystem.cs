@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Versioning;
 
-
 namespace Microsoft.Build.Shared.FileSystem
 {
     /// <summary>

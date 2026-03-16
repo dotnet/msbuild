@@ -98,7 +98,7 @@ namespace Microsoft.Build.Tasks
                 AbsolutePath path;
                 try
                 {
-                    path = TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.FixFilePath(file.ItemSpec));
+                    path = TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(file.ItemSpec));
                 }
                 catch (ArgumentException ex)
                 {

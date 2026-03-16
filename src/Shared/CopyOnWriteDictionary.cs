@@ -28,7 +28,6 @@ namespace Microsoft.Build.Collections
     [Serializable]
     internal class CopyOnWriteDictionary<V> : IDictionary<string, V>, IDictionary, ISerializable
     {
-#if !NET35 // MSBuildNameIgnoreCaseComparer not compiled into MSBuildTaskHost but also allocations not interesting there.
         /// <summary>
         /// Empty dictionary with a <see cref="MSBuildNameIgnoreCaseComparer" />,
         /// used as the basis of new dictionaries with that comparer to avoid
@@ -42,8 +41,6 @@ namespace Microsoft.Build.Collections
         /// allocating new comparers objects.
         /// </summary>
         private static readonly ImmutableDictionary<string, V> OrdinalIgnoreCaseComparerDictionaryPrototype = ImmutableDictionary.Create<string, V>(StringComparer.OrdinalIgnoreCase);
-#endif
-
 
         /// <summary>
         /// The backing dictionary.
@@ -84,15 +81,11 @@ namespace Microsoft.Build.Collections
 
         private static ImmutableDictionary<string, V> GetInitialDictionary(IEqualityComparer<string>? keyComparer)
         {
-#if NET35
-            return ImmutableDictionary.Create<string, V>(keyComparer);
-#else
             return keyComparer is MSBuildNameIgnoreCaseComparer
-                            ? NameComparerDictionaryPrototype
-                            : keyComparer == StringComparer.OrdinalIgnoreCase
-                              ? OrdinalIgnoreCaseComparerDictionaryPrototype
-                              : ImmutableDictionary.Create<string, V>(keyComparer);
-#endif
+                ? NameComparerDictionaryPrototype
+                : keyComparer == StringComparer.OrdinalIgnoreCase
+                    ? OrdinalIgnoreCaseComparerDictionaryPrototype
+                    : ImmutableDictionary.Create<string, V>(keyComparer);
         }
 
         /// <summary>

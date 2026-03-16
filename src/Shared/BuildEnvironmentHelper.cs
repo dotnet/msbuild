@@ -34,6 +34,16 @@ namespace Microsoft.Build.Shared
         private static readonly string[] s_msBuildProcess = { "MSBUILD", "MSBUILDTASKHOST" };
 
         /// <summary>
+        /// Get the currently executing assembly path.
+        /// </summary>
+        /// <remarks>
+        /// This property depends on BuildEnvironmentHelper being compiled into separate assemblies.
+        /// If BuildEnvironmentHelper is moved to a shared assembly, this property will need to be re-evaluated.
+        /// </remarks>
+        internal static string ExecutingAssemblyPath
+            => Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(typeof(BuildEnvironmentHelper).Assembly));
+
+        /// <summary>
         /// Gets the cached Build Environment instance.
         /// </summary>
         public static BuildEnvironment Instance
@@ -443,16 +453,12 @@ namespace Microsoft.Build.Shared
 
         private static string GetExecutingAssemblyPath()
         {
-            return FileUtilities.ExecutingAssemblyPath;
+            return ExecutingAssemblyPath;
         }
 
         private static string GetAppContextBaseDirectory()
         {
-#if !CLR2COMPATIBILITY // Assemblies compiled against anything older than .NET 4.0 won't have a System.AppContext
             return AppContext.BaseDirectory;
-#else
-            return null;
-#endif
         }
 
         private static string GetEnvironmentVariable(string variable)
