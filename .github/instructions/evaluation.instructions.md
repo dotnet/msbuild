@@ -8,43 +8,33 @@ The evaluation engine (`Evaluator.cs`, `Expander.cs`, `LazyItemEvaluator.cs`) is
 
 ## Evaluation Model Integrity
 
-* Respect the strict evaluation order: environment → global properties → project properties (file order with imports) → item definitions → items. Do not introduce changes that alter this order.
-* Conditions are evaluated at the point they appear, not deferred. Never move condition evaluation to a later phase.
-* Undefined metadata and empty-string metadata must be treated equivalently — do not add logic that distinguishes them.
-* Property precedence is last-write-wins within the import chain. Changes to import ordering (especially `Directory.Build.props` before SDK props) can silently break downstream consumers.
-* Gate any evaluation behavior changes behind a ChangeWave — see [ChangeWaves docs](../../documentation/wiki/ChangeWaves.md).
+* Strict evaluation order: environment → global properties → project properties (file order with imports) → item definitions → items. Never alter this order.
+* Conditions are evaluated at the point they appear, not deferred.
+* Undefined metadata and empty-string metadata must be treated equivalently.
+* Property precedence is last-write-wins within the import chain.
+* Gate evaluation behavior changes behind a [ChangeWave](../../documentation/wiki/ChangeWaves.md).
 
 ## Expander Safety
 
-* `Expander.cs` is called millions of times per evaluation. Every allocation counts.
-* Use `ReadOnlySpan<char>` and `Slice()` to avoid string allocations in expansion.
+* `Expander.cs` is called millions of times per evaluation — every allocation counts.
 * Cache expanded values when the same expression is expanded repeatedly.
-* Use `MSBuildNameIgnoreCaseComparer` for property/item name lookups, not `StringComparer.OrdinalIgnoreCase`.
 
 ## IntrinsicFunctions
 
-* New intrinsic functions are permanent public API — they can never be removed once shipped.
-* Validate all inputs; intrinsic functions are called from user-authored MSBuild files with arbitrary arguments.
-* Security-sensitive functions (file I/O, registry, environment) must check for opt-in before execution.
-* Test edge cases: null arguments, empty strings, very long strings, culture-sensitive formatting.
-
-## Performance (Critical Hot Path)
-
-* `Evaluator.cs` (56 review comments) and `Expander.cs` (46 comments) are the two most-reviewed files in this folder.
-* Avoid LINQ in any method called during evaluation — use `for`/`foreach` loops.
-* Avoid `string.Format` on hot paths — use interpolation only when the result is needed.
-* Choose collection types deliberately: `Dictionary` for lookup-heavy, `List` for iteration-heavy, consider `FrozenDictionary` for read-only after construction.
-* Profile before optimizing — measure, do not guess.
+* New intrinsic functions are permanent public API — can never be removed once shipped.
+* Validate all inputs; called from user-authored MSBuild with arbitrary arguments.
+* Security-sensitive functions (file I/O, registry, environment) must check for opt-in.
+* Test edge cases: null, empty strings, very long strings, culture-sensitive formatting.
 
 ## Condition Evaluation
 
-* Condition parsing is allocation-sensitive. Prefer `Span<char>`-based parsing.
-* Boolean conditions should short-circuit correctly.
+* Condition parsing is allocation-sensitive — prefer `Span<char>`-based parsing.
+* Boolean conditions must short-circuit correctly.
 * String comparisons in conditions use MSBuild semantics (case-insensitive for identifiers).
 
 ## ProjectRootElementCache
 
-* Cache invalidation bugs cause stale evaluations or memory leaks. Test eviction scenarios.
+* Cache invalidation bugs cause stale evaluations or memory leaks — test eviction scenarios.
 * Thread safety is critical — the cache is accessed from multiple nodes.
 
 ## Related Documentation

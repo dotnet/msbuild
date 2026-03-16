@@ -1,12 +1,12 @@
 ---
-name: sdk-msbuild-integration
-description: 'Work on SDK-MSBuild integration: when authoring or modifying SDK targets, working on dotnet CLI to MSBuild invocation, handling project-reference protocol, coordinating changes with dotnet/sdk repo, debugging property resolution in SDK context, fixing import ordering issues, working on restore/build/publish/pack target chains, or dealing with Directory.Build.props/targets interaction with SDK imports.'
+name: integrating-sdk-and-msbuild
+description: 'Guides work on the SDK-MSBuild integration boundary. Consult when authoring or modifying SDK targets, working on dotnet CLI to MSBuild invocation, handling project-reference protocol, coordinating cross-repo changes with dotnet/sdk, debugging property resolution or import ordering, working on restore/build/publish/pack target chains, or dealing with Directory.Build.props/targets interaction.'
 argument-hint: 'Describe the SDK integration scenario or cross-repo coordination need.'
 ---
 
 # SDK-MSBuild Integration Patterns
 
-MSBuild operates as a component within the .NET SDK. This boundary is the most complex integration point in the .NET build stack, spanning MSBuild (engine), SDK (target implementations), NuGet (restore), and Roslyn (compilation). These patterns are derived from analysis of 1,083 SDK-related review comments.
+MSBuild operates as a component within the .NET SDK. This boundary is the most complex integration point in the .NET build stack, spanning MSBuild (engine), SDK (target implementations), NuGet (restore), and Roslyn (compilation).
 
 ## The Evaluation Boundary
 

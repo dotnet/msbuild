@@ -1,12 +1,12 @@
 ---
-name: error-and-warning-authoring
-description: 'Author MSBuild errors and warnings: when adding new MSBxxxx error or warning codes, writing user-facing diagnostic messages, modifying existing error text, deciding between error vs warning vs message severity, working with Strings.resx resource files, or formatting paths and identifiers in error output. Also consult when evaluating whether a new warning could break WarnAsError builds.'
+name: authoring-errors-and-warnings
+description: 'Guides authoring of MSBuild errors, warnings, and diagnostic messages. Consult when adding new MSBxxxx codes, writing or modifying user-facing diagnostic text, deciding between error/warning/message severity, working with Strings.resx resource files, formatting paths in error output, or evaluating whether a new warning could break WarnAsError builds.'
 argument-hint: 'Describe the error/warning being added or modified.'
 ---
 
 # Error and Warning Authoring in MSBuild
 
-Error messages are MSBuild's primary user interface. They must help developers fix problems without reading source code. These guidelines reflect patterns from 148+ reviewed error-related changes.
+Error messages are MSBuild's primary user interface. They must help developers fix problems without reading source code.
 
 For the mechanics of error code assignment, see [assigning-msb-error-code.md](../../../documentation/assigning-msb-error-code.md).
 

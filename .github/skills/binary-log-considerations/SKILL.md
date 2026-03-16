@@ -1,6 +1,6 @@
 ---
-name: binary-log-considerations
-description: 'Work on binary log infrastructure: when modifying BinaryLogger or BinaryLogReplayEventSource, adding new BuildEventArgs types, changing event serialization or deserialization, modifying ProjectImportsCollector, adjusting log message importance levels, or making changes that affect what gets captured in .binlog files. Also consult when verifying that a behavioral change is properly reflected in binary log output.'
+name: maintaining-binary-log-compatibility
+description: 'Guides changes to MSBuild binary log infrastructure. Consult when modifying BinaryLogger or BinaryLogReplayEventSource, adding new BuildEventArgs types, changing event serialization/deserialization, modifying ProjectImportsCollector, adjusting message importance levels, or making changes that affect .binlog content. Also applies when verifying that behavioral changes are properly reflected in binary log output.'
 argument-hint: 'Describe the binary log change or event serialization concern.'
 ---
 

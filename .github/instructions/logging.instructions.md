@@ -4,47 +4,37 @@ applyTo: "src/Build/Logging/**"
 
 # Logging Infrastructure Instructions
 
-The logging subsystem (180 review comments) includes the binary logger, console loggers, terminal (fancy) logger, and event forwarding infrastructure.
+Binary logger, console loggers, terminal logger, and event forwarding infrastructure.
 
 ## Binary Log Format Stability
 
-* The `.binlog` format must maintain backward compatibility — older readers must handle logs from newer MSBuild versions gracefully.
-* `BuildEventArgsWriter.cs` / `BuildEventArgsReader.cs` are the serialization boundary. Any field additions must be versioned.
-* Always write new fields at the end of existing records. Readers must handle missing fields for forward compat.
+* `.binlog` format must maintain backward compatibility — older readers must handle newer logs.
+* `BuildEventArgsWriter.cs`/`BuildEventArgsReader.cs` are the serialization boundary — field additions must be versioned.
+* Always write new fields at the end of existing records. Readers must handle missing fields.
 * Test round-trip: write → read → compare for all modified event types.
 
 ## Terminal Logger (FancyLogger)
 
-* `FancyLogger.cs` (22 comments) renders live build progress. It must handle:
-  - Terminal width changes and very narrow terminals.
-  - Non-TTY output (piped to file) — graceful fallback required.
-  - Concurrent project builds rendering without corruption.
-* ANSI escape sequence usage must be cross-platform compatible.
-* Output must be visually correct — test with actual terminal rendering, not just string comparison.
+* Must handle terminal width changes, very narrow terminals, and non-TTY output (piped to file).
+* Concurrent project builds must render without corruption.
+* ANSI escape sequences must be cross-platform compatible.
 
 ## Console Logger
 
-* `ParallelConsoleLogger.cs` (32 comments — most-reviewed logging file) handles multi-project console output.
-* Message importance filtering must be consistent: `MessageImportance.High` always shows, `Normal` at normal verbosity, `Low` at detailed, `Diagnostic` only at diagnostic.
-* Never change the default output format without a ChangeWave — build log parsers depend on it.
-
-## Log Message Formatting
-
-* All user-facing messages must go through resource strings (`.resx`), never hardcoded.
-* Use `ResourceUtilities.FormatResourceStringStripCodeAndKeyword` for proper MSBxxxx code extraction.
-* Log messages must include sufficient context for debugging without the binary log.
+* `ParallelConsoleLogger.cs` handles multi-project console output.
+* `MessageImportance` filtering: `High` always shows, `Normal` at normal verbosity, `Low` at detailed.
+* Never change the default output format without a [ChangeWave](../../documentation/wiki/ChangeWaves.md) — build log parsers depend on it.
 
 ## Build Event Handling
 
 * Event forwarding between nodes must preserve ordering and completeness.
-* Central vs distributed logger distinction matters — central loggers see all events, distributed loggers see only their node's events.
-* See [Logging Internals](../../documentation/wiki/Logging-Internals.md) for the forwarding architecture.
+* Central loggers see all events; distributed loggers see only their node's events. See [Logging Internals](../../documentation/wiki/Logging-Internals.md).
 
 ## Diagnostics Completeness
 
-* All behavioral changes must produce corresponding binary log entries.
+* Behavioral changes must produce corresponding binary log entries.
 * Error/warning events must include file, line, and column when available.
-* Structured events are preferred over string messages for programmatic consumption.
+* Prefer structured events over string messages for programmatic consumption.
 
 ## Related Documentation
 

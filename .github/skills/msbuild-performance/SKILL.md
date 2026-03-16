@@ -1,12 +1,12 @@
 ---
-name: msbuild-performance
-description: 'Optimize MSBuild performance: when working on hot paths in evaluation or execution, reducing allocations, choosing collection types, avoiding LINQ in loops, handling strings efficiently, reviewing Expander.cs or Evaluator.cs changes, using Span<T> or stackalloc, caching computed values, or profiling build performance. Also consult when a PR shows performance regression or when choosing between ImmutableArray and other collection types.'
+name: optimizing-msbuild-performance
+description: 'Guides performance optimization for MSBuild engine code. Consult when working on hot paths in evaluation or execution, reducing allocations, choosing collection types, handling strings efficiently, modifying Expander.cs or Evaluator.cs, using Span<T>/stackalloc, caching values, or profiling build performance. Also applies when reviewing PRs for performance regression.'
 argument-hint: 'Describe the performance-sensitive code area or optimization goal.'
 ---
 
 # MSBuild Performance Guidelines
 
-MSBuild evaluates and builds thousands of projects in enterprise solutions. Performance is an architectural concern, not an afterthought. These rules reflect patterns enforced across 348+ reviewed performance-related changes.
+MSBuild evaluates and builds thousands of projects in enterprise solutions. Performance is an architectural concern, not an afterthought.
 
 ## Guiding Principle
 

@@ -1,12 +1,12 @@
 ---
-name: backwards-compatibility
-description: 'Evaluate backward compatibility of MSBuild changes: when modifying behavior, adding warnings or errors, changing defaults, altering target ordering, removing or deprecating features, or assessing breaking-change risk. Also consult when deciding whether a change needs a ChangeWave, when reviewing blast radius of a behavioral change, or when a PR introduces user-visible output differences.'
+name: assessing-breaking-changes
+description: 'Guides assessment of backward compatibility for MSBuild changes. Consult when modifying behavior, adding warnings or errors, changing defaults, altering target ordering, removing or deprecating features, deciding whether a change needs a ChangeWave, reviewing blast radius of behavioral changes, or when a PR introduces user-visible output differences.'
 argument-hint: 'Describe the change and its potential compatibility impact.'
 ---
 
 # Backward Compatibility in MSBuild
 
-MSBuild is foundational infrastructure for all .NET development. Backward compatibility is the default — any change that could alter existing build behavior must be explicitly justified.
+Backward compatibility is the default — any change that could alter existing build behavior must be explicitly justified.
 
 This skill covers **how to evaluate compatibility risk**. For the mechanics of ChangeWave implementation, see the [changewaves skill](../changewaves/SKILL.md).
 
