@@ -35,6 +35,15 @@ internal static partial class FileUtilities
     {
         AppDomain.CurrentDomain.ProcessExit += (_, _) =>
         {
+            // ToolTask creates response files (.rsp) and batch files (.cmd/.sh) inside
+            // this directory via GetTemporaryFileName. MSBUILDPRESERVETOOLTEMPFILES=1 tells
+            // ToolTask.DeleteTempFile() to keep them for post-build inspection, but that is
+            // ineffective if we delete the entire directory here on exit.
+            if (string.Equals(Environment.GetEnvironmentVariable("MSBUILDPRESERVETOOLTEMPFILES"), "1", StringComparison.Ordinal))
+            {
+                return;
+            }
+
             try
             {
                 if (Directory.Exists(pathToCleanup))
