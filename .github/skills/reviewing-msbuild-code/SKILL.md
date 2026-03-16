@@ -1,15 +1,15 @@
 ---
 name: reviewing-msbuild-code
-description: "Reviews MSBuild code changes using @rainersigwald's 24-dimension methodology distilled from 10,081 comments (2016–2026). Activates for code review, PR review, pull request analysis, design review, architecture review, code quality assessment, or style check of MSBuild code. Covers backwards compatibility, ChangeWave discipline, performance, allocation awareness, test coverage, error message quality, logging, string comparison, API surface, target authoring, cross-platform correctness, code simplification, concurrency, naming, SDK integration, evaluation model integrity, correctness, dependency management, security, and build infrastructure."
+description: "Reviews MSBuild code changes using a 24-dimension methodology. Activates for code review, PR review, pull request analysis, design review, architecture review, code quality assessment, or style check of MSBuild code. Covers backwards compatibility, ChangeWave discipline, performance, allocation awareness, test coverage, error message quality, logging, string comparison, API surface, target authoring, cross-platform correctness, code simplification, concurrency, naming, SDK integration, evaluation model integrity, correctness, dependency management, security, and build infrastructure."
 ---
 
-# Rainer Sigwald — MSBuild Review Methodology
+# Expert MSBuild Review Methodology
 
-Review methodology distilled from **10,081 review comments** by **@rainersigwald** (2016–2026) across `dotnet/msbuild`, `dotnet/sdk`, and `dotnet/project-system`.
+Established review methodology covering 24 dimensions of MSBuild code quality across `dotnet/msbuild`, `dotnet/sdk`, and `dotnet/project-system`.
 
-> When review eras conflict, 2024–2026 takes precedence. Core concerns — backwards compatibility, test coverage, performance — are consistent across all eras.
+> When review guidance from different eras conflicts, the most recent conventions take precedence. Core concerns — backwards compatibility, test coverage, performance — are consistent across all eras.
 
-For the full reviewer persona, use `@rainersigwald-reviewer`. For detailed per-dimension checklists, see [DIMENSIONS.md](DIMENSIONS.md).
+For the full reviewer persona, use `@expert-reviewer`. For detailed per-dimension checklists, see [DIMENSIONS.md](DIMENSIONS.md).
 
 ---
 
@@ -37,82 +37,82 @@ Apply **all** dimensions on every review, weighted by file location (see [Folder
 
 ### BLOCKING Severity
 
-#### 1. Backwards Compatibility Vigilance (387 comments)
+#### 1. Backwards Compatibility Vigilance
 Gate breaking changes behind ChangeWave. New warnings break `WarnAsError` builds. Make behavioral changes opt-in. Never remove CLI switches — deprecate first. See `../../../documentation/wiki/ChangeWaves.md`.
 
-#### 2. ChangeWave Discipline (71 comments)
+#### 2. ChangeWave Discipline
 Use correct version (next release, not current). Test both enabled and disabled paths. Document in ChangeWaves tracking file. See `../../../documentation/wiki/ChangeWaves-Dev.md`.
 
-#### 13. Concurrency & Thread Safety (79 comments)
+#### 13. Concurrency & Thread Safety
 Shared mutable state must be thread-safe. Handle in-proc vs out-of-proc differences. Consider IPC ordering and reentrancy. See `../../../documentation/wiki/Nodes-Orchestration.md`.
 
-#### 21. Evaluation Model Integrity (112 comments)
+#### 21. Evaluation Model Integrity
 Respect evaluation order: env → global props → project props → item defs → items. `Directory.Build.props` before SDK props. Undefined metadata = empty string. See `../../../documentation/High-level-overview.md`.
 
-#### 24. Security Awareness (22 comments)
+#### 24. Security Awareness
 Security-relaxing params require explicit opt-in. Task loading unifies to running MSBuild assemblies. Guard against path traversal and symlink attacks.
 
 ### MAJOR Severity
 
-#### 3. Performance & Allocation Awareness (348 comments)
+#### 3. Performance & Allocation Awareness
 Minimize allocations on hot paths (`Evaluator.cs`, `Expander.cs`). Avoid LINQ in tight loops. Cache computed values. Choose collections for access pattern. Profile before optimizing.
 
-#### 4. Test Coverage & Completeness (916 comments — most frequent)
+#### 4. Test Coverage & Completeness
 All changes need tests. Bug fixes need regression tests. Descriptive test names (`Method_Scenario_Expected`). Deterministic tests. Cover edge cases and error paths.
 
-#### 5. Error Message Quality (148 comments)
+#### 5. Error Message Quality
 Actionable messages with `MSBxxxx` codes. Use `ResourceUtilities.FormatResourceStringStripCodeAndKeyword`. Correct severity. All user-facing strings in `.resx`. See `../../../documentation/assigning-msb-error-code.md`.
 
-#### 7. String Comparison Correctness (73 comments)
+#### 7. String Comparison Correctness
 `MSBuildNameIgnoreCaseComparer` for names. `OrdinalIgnoreCase` for identifiers — never `CurrentCulture`. OS-appropriate file path comparison. `DateTime` fields suffixed with `Utc`.
 
-#### 8. API Surface Discipline (156 comments)
+#### 8. API Surface Discipline
 Default to `internal`. Record public API in `PublicAPI.Unshipped.txt`. Never remove — deprecate with `[Obsolete]`. XML doc on all public members. See `../../../documentation/wiki/Microsoft.Build.Framework.md`.
 
-#### 9. Target Authoring Conventions (103 comments)
+#### 9. Target Authoring Conventions
 `DependsOnTargets` over `BeforeTargets`/`AfterTargets`. Proper conditions at correct evaluation point. Incremental builds need `Inputs`/`Outputs`. Respect SDK import ordering.
 
-#### 10. Design Before Implementation (243 comments)
+#### 10. Design Before Implementation
 Discuss tradeoffs first. Complex features need specs (see `../../../documentation/specs/`). Incremental commits. Follow established patterns.
 
-#### 11. Cross-Platform Correctness (99 comments)
+#### 11. Cross-Platform Correctness
 Cross-platform APIs only. Handle Framework vs Core differences. UNC paths, long paths, symlinks. Build output must not differ by OS.
 
-#### 15. SDK Integration Boundaries (605 comments)
+#### 15. SDK Integration Boundaries
 Respect evaluation/execution separation. Property defaults must not override user values. Cross-stack coordination for protocol changes. Restore ≠ Build. See `../../../documentation/ProjectReference-Protocol.md`.
 
-#### 17. File I/O & Path Handling (84 comments)
+#### 17. File I/O & Path Handling
 Use `FileUtilities` helpers. Handle UNC and long paths. Globbing must handle excludes. See `../../../documentation/WhenGlobbingReturnsOriginalFilespec.md`.
 
-#### 19. Build Infrastructure Care (183 comments)
+#### 19. Build Infrastructure Care
 Pin versions via Darc/Maestro. Verify all build entry points. Validate CI changes before merge. See `../../../documentation/wiki/Bootstrap.md`.
 
-#### 22. Correctness & Edge Cases (471 comments)
+#### 22. Correctness & Edge Cases
 Verify edge cases (null, empty, Unicode, large inputs). Match documented semantics. Validate fixes against repros. Fail fast with clear errors.
 
 ### MODERATE Severity
 
-#### 6. Logging & Diagnostics Rigor (195 comments)
+#### 6. Logging & Diagnostics Rigor
 Changes must appear in binary log. Correct `MessageImportance`. Diagnostic logging on complex paths. See `../../../documentation/wiki/Binary-Log.md`.
 
-#### 12. Code Simplification (234 comments)
+#### 12. Code Simplification
 Flatten nesting with guard clauses. Use existing shared utilities. Remove dead code. Prefer `switch` expressions and pattern matching.
 
-#### 18. Documentation Accuracy (384 comments)
+#### 18. Documentation Accuracy
 Explain _why_ in comments. XML docs on public/complex code. `learn.microsoft.com` URLs. Specs need problem statements, non-goals, examples.
 
-#### 20. Scope & PR Discipline (178 comments)
+#### 20. Scope & PR Discipline
 Track follow-ups as issues. Don't mix refactoring with behavior changes. Cross-reference related issues. Resolve feedback before merge.
 
-#### 23. Dependency Management (111 comments)
+#### 23. Dependency Management
 Minimize references. Use Darc/Maestro. Binding redirect changes need impact analysis.
 
 ### NIT Severity
 
-#### 14. Naming Precision (181 comments)
+#### 14. Naming Precision
 Descriptive names revealing intent. Consistent with surrounding code. Test methods: `Method_Scenario_Expected`.
 
-#### 16. Idiomatic C# Patterns (297 comments)
+#### 16. Idiomatic C# Patterns
 Modern C# features. Match codebase conventions. Explicit nullability. Track framework constraints.
 
 ---

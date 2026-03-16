@@ -8,7 +8,7 @@ For an overview of each dimension and its rules, see [SKILL.md](SKILL.md).
 
 ## 1. Backwards Compatibility Vigilance
 
-**Severity: BLOCKING** · Frequency: Very High · Evidence: 387 comments
+**Severity: BLOCKING**
 
 MSBuild's backward compatibility contract is near-inviolable. Any change that could alter existing build behavior must be justified, gated, or introduced as opt-in.
 
@@ -30,7 +30,7 @@ MSBuild's backward compatibility contract is near-inviolable. Any change that co
 
 ## 2. ChangeWave Discipline
 
-**Severity: BLOCKING** · Frequency: High · Evidence: 71 comments
+**Severity: BLOCKING**
 
 ChangeWave is MSBuild's mechanism for safely introducing behavioral changes. See `../../../documentation/wiki/ChangeWaves.md` and `../../../documentation/wiki/ChangeWaves-Dev.md`.
 
@@ -49,7 +49,7 @@ ChangeWave is MSBuild's mechanism for safely introducing behavioral changes. See
 
 ## 3. Performance & Allocation Awareness
 
-**Severity: MAJOR** · Frequency: High · Evidence: 348 comments
+**Severity: MAJOR**
 
 MSBuild evaluates and builds thousands of projects in enterprise scenarios. Hot paths include `Evaluator.cs`, `Expander.cs`, and file I/O operations.
 
@@ -71,9 +71,9 @@ MSBuild evaluates and builds thousands of projects in enterprise scenarios. Hot 
 
 ## 4. Test Coverage & Completeness
 
-**Severity: MAJOR** · Frequency: Very High · Evidence: 916 comments
+**Severity: MAJOR**
 
-This is the most frequently raised concern across all review eras.
+This is one of the most important review concerns.
 
 **Rules:**
 1. **Add test coverage** for all new functionality and bug fixes. Bug fixes require a regression test that fails without the fix.
@@ -93,7 +93,7 @@ This is the most frequently raised concern across all review eras.
 
 ## 5. Error Message Quality
 
-**Severity: MAJOR** · Frequency: High · Evidence: 148 comments
+**Severity: MAJOR**
 
 Error and warning messages directly impact millions of developers. See `../../../documentation/assigning-msb-error-code.md`.
 
@@ -114,7 +114,7 @@ Error and warning messages directly impact millions of developers. See `../../..
 
 ## 6. Logging & Diagnostics Rigor
 
-**Severity: MODERATE** · Frequency: High · Evidence: 195 comments
+**Severity: MODERATE**
 
 See `../../../documentation/wiki/Binary-Log.md` and `../../../documentation/wiki/Logging-Internals.md`.
 
@@ -136,7 +136,7 @@ See `../../../documentation/wiki/Binary-Log.md` and `../../../documentation/wiki
 
 ## 7. String Comparison Correctness
 
-**Severity: MAJOR** · Frequency: Moderate · Evidence: 73 comments
+**Severity: MAJOR**
 
 **Rules:**
 1. **Use `MSBuildNameIgnoreCaseComparer`** for property, item, and target name comparisons.
@@ -155,7 +155,7 @@ See `../../../documentation/wiki/Binary-Log.md` and `../../../documentation/wiki
 
 ## 8. API Surface Discipline
 
-**Severity: MAJOR** · Frequency: High · Evidence: 156 comments
+**Severity: MAJOR**
 
 See `../../../documentation/wiki/Microsoft.Build.Framework.md`.
 
@@ -177,7 +177,7 @@ See `../../../documentation/wiki/Microsoft.Build.Framework.md`.
 
 ## 9. MSBuild Target Authoring Conventions
 
-**Severity: MAJOR** · Frequency: Moderate · Evidence: 103 comments
+**Severity: MAJOR**
 
 **Rules:**
 1. **Follow target ordering conventions.** Use `DependsOnTargets` for required predecessors. Use `BeforeTargets`/`AfterTargets` sparingly.
@@ -195,7 +195,7 @@ See `../../../documentation/wiki/Microsoft.Build.Framework.md`.
 
 ## 10. Design Before Implementation
 
-**Severity: MAJOR** · Frequency: High · Evidence: 243 comments
+**Severity: MAJOR**
 
 **Rules:**
 1. **Discuss design tradeoffs** before implementation for non-trivial features. Probing questions are expected.
@@ -214,7 +214,7 @@ See `../../../documentation/wiki/Microsoft.Build.Framework.md`.
 
 ## 11. Cross-Platform Correctness
 
-**Severity: MAJOR** · Frequency: Moderate · Evidence: 99 comments
+**Severity: MAJOR**
 
 **Rules:**
 1. **File operations must use cross-platform APIs.** No hardcoded backslashes. Use `Path.Combine`, `Path.DirectorySeparatorChar`, or MSBuild's `FileUtilities`.
@@ -233,7 +233,7 @@ See `../../../documentation/wiki/Microsoft.Build.Framework.md`.
 
 ## 12. Code Simplification
 
-**Severity: MODERATE** · Frequency: High · Evidence: 234 comments
+**Severity: MODERATE**
 
 **Rules:**
 1. **Simplify without losing clarity.** Remove unnecessary conditions, flatten nested logic, collapse redundant branches.
@@ -253,7 +253,7 @@ See `../../../documentation/wiki/Microsoft.Build.Framework.md`.
 
 ## 13. Concurrency & Thread Safety
 
-**Severity: BLOCKING** · Frequency: Moderate · Evidence: 79 comments
+**Severity: BLOCKING**
 
 See `../../../documentation/wiki/Nodes-Orchestration.md`.
 
@@ -273,7 +273,7 @@ See `../../../documentation/wiki/Nodes-Orchestration.md`.
 
 ## 14. Naming Precision
 
-**Severity: NIT** · Frequency: High · Evidence: 181 comments
+**Severity: NIT**
 
 **Rules:**
 1. **Use clear, descriptive names.** Avoid abbreviations unless universally understood (e.g., `PRE` for `ProjectRootElement`).
@@ -290,7 +290,7 @@ See `../../../documentation/wiki/Nodes-Orchestration.md`.
 
 ## 15. SDK Integration Boundaries
 
-**Severity: MAJOR** · Frequency: High · Evidence: 605 comments
+**Severity: MAJOR**
 
 See `../../../documentation/ProjectReference-Protocol.md`.
 
@@ -312,7 +312,7 @@ See `../../../documentation/ProjectReference-Protocol.md`.
 
 ## 16. Idiomatic C# Patterns
 
-**Severity: NIT** · Frequency: High · Evidence: 297 comments
+**Severity: NIT**
 
 **Rules:**
 1. **Use modern C# features** where the target framework supports them.
@@ -330,7 +330,7 @@ See `../../../documentation/ProjectReference-Protocol.md`.
 
 ## 17. File I/O & Path Handling
 
-**Severity: MAJOR** · Frequency: Moderate · Evidence: 84 comments
+**Severity: MAJOR**
 
 **Rules:**
 1. **Use `FileUtilities` helpers** for path normalization, comparison, and manipulation.
@@ -347,7 +347,7 @@ See `../../../documentation/ProjectReference-Protocol.md`.
 
 ## 18. Documentation Accuracy
 
-**Severity: MODERATE** · Frequency: High · Evidence: 384 comments
+**Severity: MODERATE**
 
 **Rules:**
 1. **Include relevant context** in code comments. Explain _why_, not just _what_.
@@ -366,7 +366,7 @@ See `../../../documentation/ProjectReference-Protocol.md`.
 
 ## 19. Build Infrastructure Care
 
-**Severity: MAJOR** · Frequency: Moderate · Evidence: 183 comments
+**Severity: MAJOR**
 
 See `../../../documentation/wiki/Bootstrap.md`.
 
@@ -386,7 +386,7 @@ See `../../../documentation/wiki/Bootstrap.md`.
 
 ## 20. Scope & PR Discipline
 
-**Severity: MODERATE** · Frequency: High · Evidence: 178 comments
+**Severity: MODERATE**
 
 **Rules:**
 1. **Track follow-up work explicitly.** Create issues for deferred improvements.
@@ -404,7 +404,7 @@ See `../../../documentation/wiki/Bootstrap.md`.
 
 ## 21. Evaluation Model Integrity
 
-**Severity: BLOCKING** · Frequency: Moderate · Evidence: 112 comments
+**Severity: BLOCKING**
 
 See `../../../documentation/High-level-overview.md`.
 
@@ -424,7 +424,7 @@ See `../../../documentation/High-level-overview.md`.
 
 ## 22. Correctness & Edge Cases
 
-**Severity: MAJOR** · Frequency: Very High · Evidence: 471 comments
+**Severity: MAJOR**
 
 **Rules:**
 1. **Verify correctness for edge cases.** Empty collections, null values, concurrent access, very large inputs, Unicode paths.
@@ -442,7 +442,7 @@ See `../../../documentation/High-level-overview.md`.
 
 ## 23. Dependency Management
 
-**Severity: MODERATE** · Frequency: Moderate · Evidence: 111 comments
+**Severity: MODERATE**
 
 **Rules:**
 1. **Manage dependencies carefully.** Minimize unnecessary references.
@@ -458,7 +458,7 @@ See `../../../documentation/High-level-overview.md`.
 
 ## 24. Security Awareness
 
-**Severity: BLOCKING** · Frequency: Low · Evidence: 22 comments
+**Severity: BLOCKING**
 
 **Rules:**
 1. **Security-relaxing parameters** must only be applied with explicit user opt-in.
