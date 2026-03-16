@@ -302,14 +302,8 @@ namespace Microsoft.Build.Logging
         {
             Close();
 
-            try
-            {
-                File.Delete(_archiveFilePath);
-            }
-            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
-            {
-                // Best effort — the archive may already have been cleaned up.
-            }
+            // Best effort — the archive may already have been cleaned up.
+            FileUtilities.DeleteNoThrow(_archiveFilePath);
         }
     }
 }
