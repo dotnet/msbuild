@@ -21,6 +21,7 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.TelemetryInfra;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
@@ -844,7 +845,7 @@ namespace Microsoft.Build.BackEnd
                     // Dump all engine exceptions to a temp file
                     // so that we have something to go on in the
                     // event of a failure
-                    ExceptionHandling.DumpExceptionToFile(ex);
+                    DebugUtils.DumpExceptionToFile(ex);
 
                     // This includes InternalErrorException, which we definitely want a callstack for.
                     // Fortunately the default console UnhandledExceptionHandler will log the callstack even

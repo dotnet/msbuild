@@ -57,9 +57,34 @@
         <target state="new">The value cannot be an empty string.</target>
         <note />
       </trans-unit>
+      <trans-unit id="DebugPathTooLong">
+        <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
+        <target state="translated">il percorso "{0}" usato per i log di debug è troppo lungo. Impostarlo su un valore più breve usando la variabile dell'ambiente MSBUILDDEBUGPATH o modificare la configurazione del sistema per consentire percorsi lunghi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedCreatingTempFile">
+        <source>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
+        <target state="translated">non è stato possibile creare un file temporaneo. La cartella dei file temporanei è piena oppure il percorso è errato. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidFilespecForTransform">
+        <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
+        <target state="translated">Non è possibile applicare i metadati dell'elemento "%({0})" al percorso "{1}". {2}</target>
+        <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <target state="translated">Il parametro '{0}' può solo essere un nome file e non può includere una directory.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PathMustBeRooted">
         <source>Path must be rooted.</source>
         <target state="translated">Il percorso deve contenere una radice.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PathTooLong">
+        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
+        <target state="translated">Il percorso {0} supera il limite massimo dei percorsi del sistema operativo. Il nome completo del file deve essere composto da meno di {1}.</target>
         <note />
       </trans-unit>
     </body>

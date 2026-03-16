@@ -367,7 +367,7 @@ namespace Microsoft.Build.Evaluation
                 // technically hurt anything, but it doesn't look nice.)
                 string toolsPathToUse = value;
 
-                if (FrameworkFileUtilities.EndsWithSlash(toolsPathToUse))
+                if (FileUtilities.EndsWithSlash(toolsPathToUse))
                 {
                     string rootPath = Path.GetPathRoot(Path.GetFullPath(toolsPathToUse));
 
