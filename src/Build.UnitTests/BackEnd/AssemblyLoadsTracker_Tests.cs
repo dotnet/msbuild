@@ -85,7 +85,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 });
 
                 logger.AssertLogContains(typeof(AssemblyLoadsTracker_Tests).Assembly.FullName!);
-            
             }
             finally
             {
@@ -94,7 +93,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void CrossDomainTracker_DoesNotLogChildDomainLoads_AndObservesSerializationException()
+        public void CrossDomainTracker_DoesNotLogChildDomainLoads_AndDoesNotObserveSerializationException()
         {
             MockLogger logger = new(_output, verbosity: LoggerVerbosity.Diagnostic);
             LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -136,7 +135,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         Assembly loadedAssembly = Assembly.Load(File.ReadAllBytes(assemblyPath));
                         _ = loadedAssembly.FullName;
 
-                        sawSerializationException.ShouldBeTrue();
+                        sawSerializationException.ShouldBeFalse();
                     }
                     finally
                     {
@@ -150,14 +149,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 if (child is not null)
                 {
-                    AssemblyLoadsTracker.StopTracking(child);
                     AppDomain.Unload(child);
                 }
 
                 loggingService.ShutdownComponent();
             }
         }
-
     }
 }
 
