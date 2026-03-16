@@ -723,6 +723,8 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.WorkQueueDepth)].ShouldBe("5");
         props[nameof(CrashTelemetry.SubmissionDetails)].ShouldBe("1:True:True:False:False;2:True:False:False:False;3:False:False:False:False");
         props[nameof(CrashTelemetry.RegisteredLoggerTypeNames)].ShouldBe("Microsoft.Build.Logging.ConsoleLogger;Microsoft.Build.Logging.BinaryLogger");
+        props.ShouldNotContainKey(nameof(CrashTelemetry.ActiveNodeIds));
+        props.ShouldNotContainKey(nameof(CrashTelemetry.ActiveNodeDetails));
     }
 
     [Fact]
@@ -744,6 +746,9 @@ public class CrashTelemetry_Tests
             WorkQueueDepth = 0,
             SubmissionDetails = null,
             RegisteredLoggerTypeNames = "Microsoft.Build.Logging.ConsoleLogger",
+            ActiveNodeIds = "2,3,5,7,9",
+            EnableNodeReuse = true,
+            ActiveNodeDetails = "2:10:MyProject.csproj;3:idle;5:12:OtherProject.csproj;7:idle;9:error",
         };
 
         Dictionary<string, object> props = telemetry.GetActivityProperties();
@@ -760,6 +765,9 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.WorkQueueDepth)].ShouldBe(0);
         props.ShouldNotContainKey(nameof(CrashTelemetry.SubmissionDetails));
         props[nameof(CrashTelemetry.RegisteredLoggerTypeNames)].ShouldBe("Microsoft.Build.Logging.ConsoleLogger");
+        props[nameof(CrashTelemetry.ActiveNodeIds)].ShouldBe("2,3,5,7,9");
+        props[nameof(CrashTelemetry.EnableNodeReuse)].ShouldBe(true);
+        props[nameof(CrashTelemetry.ActiveNodeDetails)].ShouldBe("2:10:MyProject.csproj;3:idle;5:12:OtherProject.csproj;7:idle;9:error");
     }
 
     [Fact]

@@ -1305,6 +1305,45 @@ namespace Microsoft.Build.Execution
                     {
                         telemetry.SubmissionDetails = string.Join(";", submissionDetailParts);
                     }
+
+                    telemetry.EnableNodeReuse = _buildParameters?.EnableNodeReuse;
+
+                    if (_activeNodes.Count > 0)
+                    {
+                        telemetry.ActiveNodeIds = string.Join(",", _activeNodes);
+
+                        // Collect per-node details: what each stuck node was last executing.
+                        if (_scheduler is not null)
+                        {
+                            var nodeDetails = new List<string>(_activeNodes.Count);
+                            foreach (int nodeId in _activeNodes)
+                            {
+                                try
+                                {
+                                    BuildRequest? executingRequest = _scheduler.GetExecutingRequestByNode(nodeId);
+                                    if (executingRequest is not null)
+                                    {
+                                        string? projectFile = _configCache?[executingRequest.ConfigurationId]?.ProjectFullPath;
+                                        string projectName = projectFile is not null ? Path.GetFileName(projectFile) : "?";
+                                        nodeDetails.Add($"{nodeId}:{executingRequest.ConfigurationId}:{projectName}");
+                                    }
+                                    else
+                                    {
+                                        nodeDetails.Add($"{nodeId}:idle");
+                                    }
+                                }
+                                catch
+                                {
+                                    nodeDetails.Add($"{nodeId}:error");
+                                }
+                            }
+
+                            if (nodeDetails.Count > 0)
+                            {
+                                telemetry.ActiveNodeDetails = string.Join(";", nodeDetails);
+                            }
+                        }
+                    }
                 }
 
                 try

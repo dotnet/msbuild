@@ -334,6 +334,25 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     /// </summary>
     public string? RegisteredLoggerTypeNames { get; set; }
 
+    /// <summary>
+    /// Comma-separated list of active node IDs that have not yet shut down.
+    /// Populated during WaitingForNodes phase to identify which nodes are stuck.
+    /// </summary>
+    public string? ActiveNodeIds { get; set; }
+
+    /// <summary>
+    /// Whether node reuse is enabled. When true, nodes are told to go idle
+    /// rather than exit, which changes the shutdown pathway.
+    /// </summary>
+    public bool? EnableNodeReuse { get; set; }
+
+    /// <summary>
+    /// Per-node diagnostic summary for active nodes.
+    /// Format: "nodeId:configurationId:projectFile" separated by semicolons.
+    /// Shows what each stuck node was last working on.
+    /// </summary>
+    public string? ActiveNodeDetails { get; set; }
+
     // --- Build state diagnostic properties (help diagnose the context of the crash) ---
 
     /// <summary>
@@ -511,6 +530,9 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(WorkQueueDepth);
         AddIfNotNull(SubmissionDetails);
         AddIfNotNull(RegisteredLoggerTypeNames);
+        AddIfNotNull(ActiveNodeIds);
+        AddIfNotNull(EnableNodeReuse);
+        AddIfNotNull(ActiveNodeDetails);
 
         // Build state diagnostic properties
         AddIfNotNull(IsStandaloneExecution);
@@ -577,6 +599,9 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(WorkQueueDepth?.ToString(), nameof(WorkQueueDepth));
         AddIfNotNull(SubmissionDetails);
         AddIfNotNull(RegisteredLoggerTypeNames);
+        AddIfNotNull(ActiveNodeIds);
+        AddIfNotNull(EnableNodeReuse?.ToString(), nameof(EnableNodeReuse));
+        AddIfNotNull(ActiveNodeDetails);
 
         // Build state diagnostic properties
         AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
