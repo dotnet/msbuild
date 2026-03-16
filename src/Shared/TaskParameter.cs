@@ -615,20 +615,20 @@ namespace Microsoft.Build.BackEnd
                 // See https://github.com/dotnet/msbuild/issues/13140
                 if (copyFrom is ITaskItem2 copyFromForRecursiveDir)
                 {
-                    string recursiveDirEscaped = copyFromForRecursiveDir.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.RecursiveDir);
+                    string recursiveDirEscaped = copyFromForRecursiveDir.GetMetadataValueEscaped(ItemSpecModifiers.RecursiveDir);
                     if (!string.IsNullOrEmpty(recursiveDirEscaped))
                     {
                         _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
-                        _customEscapedMetadata[FileUtilities.ItemSpecModifiers.RecursiveDir] = recursiveDirEscaped;
+                        _customEscapedMetadata[ItemSpecModifiers.RecursiveDir] = recursiveDirEscaped;
                     }
                 }
                 else
                 {
-                    string recursiveDir = copyFrom.GetMetadata(FileUtilities.ItemSpecModifiers.RecursiveDir);
+                    string recursiveDir = copyFrom.GetMetadata(ItemSpecModifiers.RecursiveDir);
                     if (!string.IsNullOrEmpty(recursiveDir))
                     {
                         _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
-                        _customEscapedMetadata[FileUtilities.ItemSpecModifiers.RecursiveDir] = EscapingUtilities.Escape(recursiveDir);
+                        _customEscapedMetadata[ItemSpecModifiers.RecursiveDir] = EscapingUtilities.Escape(recursiveDir);
                     }
                 }
 
