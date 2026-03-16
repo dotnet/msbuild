@@ -59,22 +59,22 @@
       </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
-        <target state="new">The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</target>
+        <target state="translated">Le chemin d’accès « {0} » utilisé pour les journaux de débogage est trop long. Définissez-la sur une valeur plus courte à l’aide de la variable d’environnement MSBUILDDEBUGPATH ou modifiez votre configuration système pour autoriser les chemins longs.</target>
         <note />
       </trans-unit>
       <trans-unit id="FailedCreatingTempFile">
         <source>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
-        <target state="new">Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</target>
+        <target state="translated">Échec de la création d’un fichier temporaire. Le dossier de fichiers temporaires est plein ou son chemin est incorrect. {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidFilespecForTransform">
         <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
-        <target state="new">The item metadata "%({0})" cannot be applied to the path "{1}". {2}</target>
+        <target state="translated">Impossible d'appliquer la métadonnée d'élément "%({0})" au chemin d'accès "{1}". {2}</target>
         <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
       </trans-unit>
       <trans-unit id="InvalidGetPathOfFileAboveParameter">
         <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
-        <target state="new">The parameter '{0}' can only be a file name and cannot include a directory.</target>
+        <target state="translated">Le paramètre "{0}" peut uniquement être un nom de fichier et ne peut pas inclure de répertoire.</target>
         <note />
       </trans-unit>
       <trans-unit id="PathMustBeRooted">
@@ -84,7 +84,7 @@
       </trans-unit>
       <trans-unit id="PathTooLong">
         <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
-        <target state="new">Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</target>
+        <target state="translated">Le chemin {0} dépasse la limite maximale de chemin du système d'exploitation. Le nom du fichier qualifié complet doit contenir moins de {1} caractères.</target>
         <note />
       </trans-unit>
     </body>
