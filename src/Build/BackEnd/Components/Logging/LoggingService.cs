@@ -514,6 +514,13 @@ namespace Microsoft.Build.BackEnd.Logging
         public LoggerMode LoggingMode => _logMode;
 
         /// <summary>
+        /// Returns the number of events currently queued for processing.
+        /// Used for hang diagnostics to determine if the logging pipeline is backed up.
+        /// Returns 0 for synchronous logging or when the queue is not available.
+        /// </summary>
+        public int EventQueueCount => _eventQueue?.Count ?? 0;
+
+        /// <summary>
         /// Get of warnings to treat as errors.  An empty non-null set will treat all warnings as errors.
         /// </summary>
         public ISet<string> WarningsAsErrors
