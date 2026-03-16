@@ -15,7 +15,7 @@ Invoke the reviewer agent for thorough, multi-dimensional code review:
 @expert-reviewer Review this PR for MSBuild compliance across all 24 dimensions.
 ```
 
-The agent applies 24 review dimensions covering:
+The agent launches **5 parallel Opus 4.6 sub-agents**, each evaluating a batch of dimensions concurrently, then aggregates findings by severity:
 
 - **BLOCKING**: Backwards compatibility, ChangeWave discipline, concurrency, security, evaluation model integrity
 - **MAJOR**: Performance, test coverage, error messages, API surface, correctness, cross-platform, SDK integration

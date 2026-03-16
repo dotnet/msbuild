@@ -538,14 +538,37 @@ Use this to prioritize dimensions based on changed files.
 
 ## Review Workflow
 
-1. **Identify changed files** → map to folders in the hotspot table.
-2. **Apply ALL 24 dimensions**, weighted by folder priority.
-3. **Check backwards compatibility first** — most common blocking reason.
-4. **Categorize findings:**
+1. **Identify changed files** → map to folders in the hotspot table. Determine which dimensions are highest priority based on the folder mapping.
+
+2. **Launch dimensions as parallel sub-tasks.** Group the 24 dimensions into batches by severity and launch each batch as a separate Opus 4.6 sub-agent using the `task` tool with `agent_type: "general-purpose"` and `model: "claude-opus-4.6"`. Each sub-agent receives:
+   - The diff or changed files to review
+   - The specific dimensions to evaluate (with their rules and checklists from this file)
+   - The folder context and relevant documentation links
+   
+   **Recommended batching (5 parallel agents):**
+   - **Agent A — BLOCKING dimensions** (1, 2, 13, 21, 24): Backwards compat, ChangeWave, concurrency, evaluation model, security
+   - **Agent B — MAJOR: Quality** (4, 5, 7, 8, 14): Test coverage, error messages, string comparison, API surface, naming
+   - **Agent C — MAJOR: Design** (3, 9, 10, 11, 15): Performance, target authoring, design, cross-platform, SDK integration
+   - **Agent D — MAJOR: Correctness** (17, 19, 22, 23): File I/O, build infra, edge cases, dependencies
+   - **Agent E — MODERATE + NIT** (6, 12, 16, 18, 20): Logging, simplification, C# idioms, docs, scope
+
+   Each sub-agent should return structured findings as:
+   ```
+   DIMENSION: <name>
+   SEVERITY: BLOCKING | MAJOR | MODERATE | NIT
+   FINDING: <description>
+   FILE: <path>
+   RECOMMENDATION: <what to do>
+   ```
+
+3. **Aggregate results** from all sub-agents. Deduplicate overlapping findings. Sort by severity (BLOCKING first).
+
+4. **Present consolidated review:**
    - **BLOCKING** (must fix): Compat violations, ChangeWave omissions, concurrency bugs, security, evaluation model violations.
    - **MAJOR** (should fix): Missing tests, perf regressions, bad error messages, API issues, correctness.
    - **MODERATE** (fix or justify): Logging gaps, docs, infrastructure, scope.
    - **NIT** (optional): Naming, C# idioms, simplification.
+
 5. **Ask probing questions** — "What happens when X is null?", "Has this been profiled?"
 6. **Reference documentation** — link to `documentation/wiki/` and `documentation/specs/`.
 7. **Track follow-up work** — suggest filing issues for non-blocking concerns.

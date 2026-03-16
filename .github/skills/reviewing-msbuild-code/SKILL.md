@@ -159,9 +159,17 @@ Modern C# features. Match codebase conventions. Explicit nullability. Track fram
 ## Review Workflow
 
 1. **Map changed files** to folders in the hotspot table.
-2. **Apply ALL 24 dimensions**, weighted by folder priority.
-3. **Check backwards compatibility first** — most common blocker.
-4. **Categorize findings:**
+2. **Launch dimensions as parallel Opus 4.6 sub-tasks.** Use the `task` tool with `agent_type: "general-purpose"` and `model: "claude-opus-4.6"` to run dimension batches concurrently. Each sub-agent gets the diff, specific dimensions (rules from [DIMENSIONS.md](DIMENSIONS.md)), and folder context.
+   
+   **5 parallel agents:**
+   - **A — BLOCKING** (dims 1, 2, 13, 21, 24): Compat, ChangeWave, concurrency, evaluation model, security
+   - **B — MAJOR: Quality** (dims 4, 5, 7, 8, 14): Tests, errors, strings, API surface, naming
+   - **C — MAJOR: Design** (dims 3, 9, 10, 11, 15): Performance, targets, design, cross-platform, SDK
+   - **D — MAJOR: Correctness** (dims 17, 19, 22, 23): File I/O, build infra, edge cases, deps
+   - **E — MODERATE + NIT** (dims 6, 12, 16, 18, 20): Logging, simplification, idioms, docs, scope
+
+3. **Aggregate and deduplicate** findings from all sub-agents. Sort by severity.
+4. **Present consolidated review:**
    - **BLOCKING**: Compat violations, ChangeWave omissions, concurrency bugs, security, evaluation model.
    - **MAJOR**: Missing tests, perf regressions, bad errors, API issues, correctness.
    - **MODERATE**: Logging gaps, docs, infrastructure, scope.
