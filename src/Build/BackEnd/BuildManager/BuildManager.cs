@@ -1272,7 +1272,7 @@ namespace Microsoft.Build.Execution
                     BuildEngineFrameworkName = NativeMethodsShared.FrameworkName,
                     IsStandaloneExecution = _buildTelemetry?.IsStandaloneExecution ?? false,
                     MaxNodeCount = _buildParameters?.MaxNodeCount,
-                    ActiveNodeCount = _activeNodes?.Count,
+                    ActiveNodeCount = _activeNodes.Count,
                 };
 
                 lock (_syncLock)
