@@ -1261,71 +1261,78 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void EmitEndBuildHangDiagnostics(string waitPhase, Stopwatch hangWatch)
         {
-            var telemetry = new CrashTelemetry
-            {
-                ExitType = CrashExitType.EndBuildHang,
-                EndBuildWaitPhase = waitPhase,
-                EndBuildWaitDurationMs = hangWatch.ElapsedMilliseconds,
-                BuildEngineVersion = ProjectCollection.Version?.ToString(),
-                BuildEngineFrameworkName = NativeMethodsShared.FrameworkName,
-                IsStandaloneExecution = _buildTelemetry?.IsStandaloneExecution ?? false,
-                MaxNodeCount = _buildParameters?.MaxNodeCount,
-                ActiveNodeCount = _activeNodes?.Count,
-            };
-
-            lock (_syncLock)
-            {
-                var submissionDetailParts = new List<string>(_buildSubmissions.Count);
-                foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
-                {
-                    if (submission.BuildResultBase is not null && !submission.LoggingCompleted)
-                    {
-                        telemetry.SubmissionsWithResultNoLogging = (telemetry.SubmissionsWithResultNoLogging ?? 0) + 1;
-                    }
-
-                    submissionDetailParts.Add(string.Join(":",
-                        submission.SubmissionId,
-                        submission.IsStarted,
-                        submission.BuildResultBase is not null,
-                        submission.BuildResultBase?.Exception is not null,
-                        submission.LoggingCompleted));
-                }
-
-                telemetry.PendingSubmissionCount = _buildSubmissions.Count;
-                telemetry.ThreadExceptionRecorded = _threadException is not null;
-                telemetry.UnmatchedProjectStartedCount = _projectStartedEvents.Count;
-                telemetry.BuildEngineHost = _buildTelemetry?.BuildEngineHost ?? BuildEnvironmentState.GetHostName();
-                telemetry.IsShuttingDown = _shuttingDown;
-                telemetry.IsCancellationRequested = _executionCancellationTokenSource?.IsCancellationRequested ?? false;
-                telemetry.WorkQueueDepth = _workQueue?.InputCount;
-
-                if (submissionDetailParts.Count > 0)
-                {
-                    telemetry.SubmissionDetails = string.Join(";", submissionDetailParts);
-                }
-            }
-
             try
             {
-                ILoggingService? loggingService = ((IBuildComponentHost)this).LoggingService;
-                if (loggingService is not null)
+                var telemetry = new CrashTelemetry
                 {
-                    telemetry.LoggingServiceState = loggingService.ServiceState.ToString();
-                    telemetry.LoggingEventQueueDepth = loggingService.EventQueueCount;
+                    ExitType = CrashExitType.EndBuildHang,
+                    EndBuildWaitPhase = waitPhase,
+                    EndBuildWaitDurationMs = hangWatch.ElapsedMilliseconds,
+                    BuildEngineVersion = ProjectCollection.Version?.ToString(),
+                    BuildEngineFrameworkName = NativeMethodsShared.FrameworkName,
+                    IsStandaloneExecution = _buildTelemetry?.IsStandaloneExecution ?? false,
+                    MaxNodeCount = _buildParameters?.MaxNodeCount,
+                    ActiveNodeCount = _activeNodes?.Count,
+                };
 
-                    ICollection<string>? loggerTypes = loggingService.RegisteredLoggerTypeNames;
-                    if (loggerTypes is { Count: > 0 })
+                lock (_syncLock)
+                {
+                    var submissionDetailParts = new List<string>(_buildSubmissions.Count);
+                    foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                     {
-                        telemetry.RegisteredLoggerTypeNames = string.Join(";", loggerTypes);
+                        if (submission.BuildResultBase is not null && !submission.LoggingCompleted)
+                        {
+                            telemetry.SubmissionsWithResultNoLogging = (telemetry.SubmissionsWithResultNoLogging ?? 0) + 1;
+                        }
+
+                        submissionDetailParts.Add(string.Join(":",
+                            submission.SubmissionId,
+                            submission.IsStarted,
+                            submission.BuildResultBase is not null,
+                            submission.BuildResultBase?.Exception is not null,
+                            submission.LoggingCompleted));
+                    }
+
+                    telemetry.PendingSubmissionCount = _buildSubmissions.Count;
+                    telemetry.ThreadExceptionRecorded = _threadException is not null;
+                    telemetry.UnmatchedProjectStartedCount = _projectStartedEvents.Count;
+                    telemetry.BuildEngineHost = _buildTelemetry?.BuildEngineHost ?? BuildEnvironmentState.GetHostName();
+                    telemetry.IsShuttingDown = _shuttingDown;
+                    telemetry.IsCancellationRequested = _executionCancellationTokenSource?.IsCancellationRequested ?? false;
+                    telemetry.WorkQueueDepth = _workQueue?.InputCount;
+
+                    if (submissionDetailParts.Count > 0)
+                    {
+                        telemetry.SubmissionDetails = string.Join(";", submissionDetailParts);
                     }
                 }
-            }
-            catch
-            {
-                // Best effort: accessing the logging service may fail during shutdown.
-            }
 
-            CrashTelemetryRecorder.EmitEndBuildHangDiagnostics(telemetry);
+                try
+                {
+                    ILoggingService? loggingService = ((IBuildComponentHost)this).LoggingService;
+                    if (loggingService is not null)
+                    {
+                        telemetry.LoggingServiceState = loggingService.ServiceState.ToString();
+                        telemetry.LoggingEventQueueDepth = loggingService.EventQueueCount;
+
+                        ICollection<string>? loggerTypes = loggingService.RegisteredLoggerTypeNames;
+                        if (loggerTypes is { Count: > 0 })
+                        {
+                            telemetry.RegisteredLoggerTypeNames = string.Join(";", loggerTypes);
+                        }
+                    }
+                }
+                catch
+                {
+                    // Best effort: accessing the logging service may fail during shutdown.
+                }
+
+                CrashTelemetryRecorder.EmitEndBuildHangDiagnostics(telemetry);
+            }
+            catch (Exception)
+            {
+                // Best effort: hang diagnostics must never cause EndBuild to fail.
+            }
         }
 
         /// <summary>
