@@ -2,11 +2,8 @@
 name: "Close Stale Pull Requests"
 description: "Automatically close pull requests that have been open for more than 180 days."
 on:
-  schedule:
-    - cron: "0 8 * * 1" # Every Monday at 08:00 UTC
+  schedule: weekly on monday
   workflow_dispatch: # Allow manual triggering
-permissions:
-  pull-requests: write
 safe-outputs:
   close-pull-request:
     max: 25
