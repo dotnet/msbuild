@@ -553,17 +553,20 @@ Use this to prioritize dimensions based on changed files.
 
    **Critical sub-agent instructions** (include verbatim in every sub-agent prompt):
 
-   > **LGTM is the best outcome.** If a dimension is satisfied — no real issues — return exactly:
-   > `$DimensionName — LGTM`
+   > **Be rigorous, not a nodder.** LGTM is acceptable when genuinely clean, but do NOT explain away real issues to minimize output. Your job is hard review, not rubber-stamping.
    >
-   > Do NOT invent findings. Do NOT report hypothetical concerns ("maybe in theory..."). Do NOT nitpick to produce output. A clean PR is a good PR. Only report findings you can **prove** by tracing actual code flow in the source (not just the diff — read the full file to confirm).
+   > **Do NOT invent findings.** No hypothetical concerns ("maybe in theory..."), no nitpicking to produce output. But if you find a real issue — a race condition, a null deref, a shared mutable state problem — **report it even if the code "mostly works."** Trace the actual concurrent execution paths. Consider: what happens when two threads access this simultaneously?
    >
-   > For real findings, you MUST:
-   > 1. Include the **exact file path and line range**
-   > 2. **Verify the claim** by reading the actual source, tracing control flow, checking callers/callees
-   > 3. Explain concretely what breaks and under what conditions
+   > **Verification protocol:**
+   > 1. Read the **full source files** from the PR branch (or diff), not just snippets
+   > 2. **Trace control flow** across threads — especially for concurrency dimensions
+   > 3. For shared mutable state: identify ALL threads that read/write, map the timeline, check for overlapping access windows
+   > 4. For edge cases: construct a concrete scenario (specific null value, specific ordering) that triggers the issue
+   > 5. If you can construct a failing scenario → ISSUE. If you cannot → LGTM.
    >
-   > Return format per dimension:
+   > Return `$DimensionName — LGTM` only if you genuinely verified the dimension is clean.
+   >
+   > Return format:
    > ```
    > $DimensionName — LGTM
    > ```
@@ -573,7 +576,7 @@ Use this to prioritize dimensions based on changed files.
    > SEVERITY: BLOCKING | MAJOR | MODERATE | NIT
    > FILE: path/to/file.cs
    > LINES: 100-120
-   > FINDING: <concrete, verified description — what breaks, when, how>
+   > FINDING: <concrete scenario that triggers the bug>
    > RECOMMENDATION: <specific fix>
    > ```
 

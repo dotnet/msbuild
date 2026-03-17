@@ -159,8 +159,8 @@ Modern C# features. Match codebase conventions. Explicit nullability. Track fram
 ## Review Workflow
 
 1. **Map changed files** to folders in the hotspot table.
-2. **Launch 5 parallel Opus 4.6 sub-agents** (A–E, batched by severity). Each sub-agent gets diff + full source + dimension rules from [DIMENSIONS.md](DIMENSIONS.md). Sub-agents MUST return `$DimensionName — LGTM` for clean dimensions — no forced output. Only report verified findings with exact file:line ranges.
-3. **Multi-model verification**: Take all non-LGTM findings and validate with 3 parallel agents (Opus 4.6, Codex 5.2, Gemini 3 Pro). Each traces code flow to confirm or dispute. Keep findings with **≥2/3 consensus**.
+2. **Launch 5 parallel Opus 4.6 sub-agents** (A–E, batched by severity). Each sub-agent gets diff + full source + dimension rules from [DIMENSIONS.md](DIMENSIONS.md). Sub-agents must be **rigorous, not nodders** — LGTM only if genuinely verified clean. No invented findings, but no explaining away real issues either. For concurrency: trace all threads, map timelines, check overlapping access. For edge cases: construct concrete failing scenarios.
+3. **Multi-model verification**: Take all non-LGTM findings and validate with 3 parallel agents (Opus 4.6, Codex 5.2, Gemini 3 Pro). Verifiers must check against the **PR branch** (not main). Each traces code flow to confirm or dispute. Keep findings with **≥2/3 consensus**.
 4. **Post inline comments** on PR via GitHub CLI/MCP — one comment per confirmed finding at the exact file and line range. Format: `**[$SEVERITY] $DimensionName**\n$Finding.\n**Recommendation:** $Fix.`
 5. **Post design concerns** (not tied to lines) as a single PR comment — one bullet per concern.
 6. **Post summary table** with all 24 dimensions as checkboxes. `[x]` = LGTM/nits only. `[ ]` = MAJOR/BLOCKING. All checked → APPROVE. Any unchecked → REQUEST_CHANGES if BLOCKING, COMMENT otherwise.
