@@ -158,7 +158,7 @@ Modern C# features. Match codebase conventions. Explicit nullability. Track fram
 
 ## Review Workflow
 
-1. **Wave 1 — Find**: Launch 5 parallel Opus 4.6 sub-agents (A–E by severity). Each gets diff + full source + dimension rules from [DIMENSIONS.md](DIMENSIONS.md). Sub-agents must be **rigorous, not nodders; precise, not nitpickers**. LGTM means genuinely verified clean. For issues: require a concrete failing scenario (thread interleaving, null input, specific call sequence). No hypotheticals.
-2. **Wave 2 — Validate**: For each non-LGTM finding, actively prove it by tracing code flow in the PR branch (`refs/pull/{pr}/head`, NOT main), writing proof-of-concept test snippets, or simulating thread timelines. Multi-model vote (Opus+Codex+Gemini) for borderline findings. Keep only what's confirmed with evidence.
-3. **Wave 3 — Post**: Inline comments at file:line via GH CLI with `**[$SEVERITY] $DimensionName**`, concrete scenario, and test snippet or thread timeline as proof. Design concerns as a single PR comment.
+1. **Wave 1 — Find**: Launch **one sub-agent per dimension** (24 total, parallel batches of 6). Each evaluates one dimension against the full PR diff + rules from [DIMENSIONS.md](DIMENSIONS.md). LGTM when genuinely clean. ISSUE only with a concrete failing scenario. No hypotheticals. Read PR diff, not main.
+2. **Wave 2 — Validate**: For each non-LGTM finding, prove it by tracing code flow in the PR branch (`refs/pull/{pr}/head`), building, testing, or writing proof-of-concept test snippets. Multi-model vote (Opus+Codex+Gemini) for borderline findings. Keep only confirmed.
+3. **Wave 3 — Post**: Inline comments at file:line via GH CLI with `**[$SEVERITY] $DimensionName**`, concrete scenario, thread timeline or test snippet as proof. Design concerns as a single PR comment.
 4. **Wave 4 — Summary**: 24-dimension checkbox table. `[x]` = LGTM/nits. `[ ]` = MAJOR/BLOCKING. All `[x]` → APPROVE. Any BLOCKING → REQUEST_CHANGES.

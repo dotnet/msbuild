@@ -542,11 +542,14 @@ Use this to prioritize dimensions based on changed files.
 
 1. Map changed files to the [Folder Hotspot Mapping](#folder-hotspot-mapping).
 
-2. Launch **5 parallel sub-agents** (`task` tool, `agent_type: "general-purpose"`, `model: "claude-opus-4.6"`), each receiving the full PR diff, PR description, and dimension rules:
-   - **A — BLOCKING** (1, 2, 13, 21, 24) | **B — Quality** (4, 5, 7, 8, 14) | **C — Design** (3, 9, 10, 11, 15) | **D — Correctness** (17, 19, 22, 23) | **E — Moderate+Nit** (6, 12, 16, 18, 20)
+2. Launch **one sub-agent per dimension** (`task` tool, `agent_type: "general-purpose"`, `model: "claude-opus-4.6"`). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (4 batches for 24 dimensions).
+
+   Each sub-agent receives: the PR diff, PR description, the single dimension's rules and checklist, and the folder context.
 
    Include verbatim in every sub-agent prompt:
 
+   > You evaluate **one dimension only**: $DimensionName.
+   >
    > Report `$DimensionName — LGTM` when the dimension is genuinely clean.
    >
    > Report an ISSUE only when you can construct a **concrete failing scenario**: a specific thread interleaving, a specific null input, a specific call sequence that triggers the bug. No hypotheticals.
