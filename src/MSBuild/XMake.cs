@@ -36,6 +36,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
+using Microsoft.Build.CommandLine.Experimental;
 using BinaryLogger = Microsoft.Build.Logging.BinaryLogger;
 using ConsoleLogger = Microsoft.Build.Logging.ConsoleLogger;
 using FileLogger = Microsoft.Build.Logging.FileLogger;
@@ -143,6 +144,8 @@ namespace Microsoft.Build.CommandLine
 
         private static readonly char[] s_commaSemicolon = { ',', ';' };
 
+        private static CommandLineParser commandLineParser;
+
         /// <summary>
         /// Static constructor
         /// </summary>
@@ -157,17 +160,10 @@ namespace Microsoft.Build.CommandLine
                 //  This forces the type to initialize in this static constructor and thus    //
                 //  any configuration file exceptions can be caught here.                     //
                 ////////////////////////////////////////////////////////////////////////////////
-                s_exePath = Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath);
+                s_exePath = Path.GetDirectoryName(BuildEnvironmentHelper.ExecutingAssemblyPath);
+                commandLineParser = new CommandLineParser();
 
                 s_initialized = true;
-            }
-            catch (TypeInitializationException ex) when (ex.InnerException is not null
-#if FEATURE_SYSTEM_CONFIGURATION
-            && ex.InnerException is ConfigurationErrorsException
-#endif
-            )
-            {
-                HandleConfigurationException(ex);
             }
 #if FEATURE_SYSTEM_CONFIGURATION
             catch (ConfigurationException ex)
@@ -175,6 +171,22 @@ namespace Microsoft.Build.CommandLine
                 HandleConfigurationException(ex);
             }
 #endif
+            catch (Exception ex)
+            {
+                // Last line of defense: if any type initializer in the startup chain fails
+                // (e.g., DebugUtils → FileUtilities → EscapingUtilities), the CLR caches
+                // the failure as a TypeInitializationException and re-throws it at every
+                // subsequent access. By the time we see it here, the original cause may be
+                // buried under multiple TypeInitializationException wrappers or even lost
+                // entirely (InnerException == null).
+                //
+                // Instead of crashing the process with no diagnostics, we:
+                //   1. Record crash telemetry (including InnermostExceptionType) so the
+                //      root cause is visible in Kusto/Prism.
+                //   2. Write a message to stderr so the user sees something.
+                //   3. Set s_initialized = false so Main() returns exit code 1 gracefully.
+                HandleStaticConstructorException(ex);
+            }
         }
 
         /// <summary>
@@ -185,6 +197,7 @@ namespace Microsoft.Build.CommandLine
         {
         }
 
+#if FEATURE_SYSTEM_CONFIGURATION
         /// <summary>
         /// Dump any exceptions reading the configuration file, nicely
         /// </summary>
@@ -216,6 +229,41 @@ namespace Microsoft.Build.CommandLine
 
             s_initialized = false;
         }
+#endif
+
+        /// <summary>
+        /// Handles an unexpected exception from the MSBuildApp static constructor.
+        /// Records crash telemetry, writes a diagnostic message, and prevents the
+        /// process from crashing by setting <see cref="s_initialized"/> to false.
+        /// </summary>
+        private static void HandleStaticConstructorException(Exception ex)
+        {
+            try
+            {
+                // Record and flush immediately — the process may not survive past
+                // this point, and TelemetryManager may not be initialized yet.
+                CrashTelemetryRecorder.RecordAndFlushCrashTelemetry(
+                    ex,
+                    CrashExitType.UnhandledException,
+                    isUnhandled: false,
+                    isCritical: ExceptionHandling.IsCriticalException(ex));
+            }
+            catch
+            {
+                // Telemetry must never cause a secondary failure.
+            }
+
+            try
+            {
+                Console.Error.WriteLine("MSBuild could not start: " + ex);
+            }
+            catch
+            {
+                // Console may not be available (e.g. redirected to a broken pipe).
+            }
+
+            s_initialized = false;
+        }
 
         /// <summary>
         /// This is the entry point for the application.
@@ -235,6 +283,14 @@ namespace Microsoft.Build.CommandLine
 #endif
         public static int Main(string[] args)
         {
+            // When running on CoreCLR(.NET), insert the command executable path as the first element of the args array.
+            // Use the native process path if available.
+#if NET
+            args = [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, .. args];
+#else
+            args = QuotingUtilities.SplitUnquoted(Environment.CommandLine).ToArray();
+#endif
+
             // Setup the console UI.
             using AutomaticEncodingRestorer _ = new();
             SetConsoleUI();
@@ -242,9 +298,9 @@ namespace Microsoft.Build.CommandLine
             DebuggerLaunchCheck();
 
             // Initialize new build telemetry and record start of this build.
-            KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow };
-            // Initialize OpenTelemetry infrastructure
-            OpenTelemetryManager.Instance.Initialize(isStandalone: true);
+            KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry { StartAt = DateTime.UtcNow, IsStandaloneExecution = true };
+
+            TelemetryManager.Instance?.Initialize(isStandalone: true);
 
             using PerformanceLogEventListener eventListener = PerformanceLogEventListener.Create();
 
@@ -257,29 +313,29 @@ namespace Microsoft.Build.CommandLine
             if (
                 Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
-                CanRunServerBasedOnCommandLineSwitches(Environment.CommandLine))
+                CanRunServerBasedOnCommandLineSwitches(args))
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
 
                 // Use the client app to execute build in msbuild server. Opt-in feature.
-                exitCode = (s_initialized && MSBuildClientApp.Execute(Environment.CommandLine, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1;
+                exitCode = ((s_initialized && MSBuildClientApp.Execute(args, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
             }
             else
             {
                 // return 0 on success, non-zero on failure
-                exitCode = (s_initialized && Execute(Environment.CommandLine) == ExitType.Success) ? 0 : 1;
+                exitCode = ((s_initialized && Execute(args) == ExitType.Success) ? 0 : 1);
             }
 
             if (Environment.GetEnvironmentVariable("MSBUILDDUMPPROCESSCOUNTERS") == "1")
             {
                 DumpCounters(false /* log to console */);
             }
-            OpenTelemetryManager.Instance.Shutdown();
+
+            TelemetryManager.Instance?.Dispose();
 
             return exitCode;
         }
-
 
         /// <summary>
         /// Returns true if arguments allows or make sense to leverage msbuild server.
@@ -287,14 +343,21 @@ namespace Microsoft.Build.CommandLine
         /// <remarks>
         /// Will not throw. If arguments processing fails, we will not run it on server - no reason as it will not run any build anyway.
         /// </remarks>
-        private static bool CanRunServerBasedOnCommandLineSwitches(string commandLine)
+        private static bool CanRunServerBasedOnCommandLineSwitches(string[] commandLine)
         {
             bool canRunServer = true;
             try
             {
-                GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out string fullCommandLine);
+                commandLineParser.GatherAllSwitches(
+                    commandLine,
+                    s_globalMessagesToLogInBuildLoggers,
+                    out CommandLineSwitches switchesFromAutoResponseFile,
+                    out CommandLineSwitches switchesNotFromAutoResponseFile,
+                    out string fullCommandLine,
+                    out s_exeName);
+
                 CommandLineSwitches commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
-                if (CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, false, fullCommandLine))
+                if (commandLineParser.CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, false, fullCommandLine))
                 {
                     commandLineSwitches = CombineSwitchesRespectingPriority(switchesFromAutoResponseFile, switchesNotFromAutoResponseFile, fullCommandLine);
                 }
@@ -552,6 +615,13 @@ namespace Microsoft.Build.CommandLine
                 case "1":
                     Debugger.Launch();
                     break;
+                case "3":
+                    // Value "3" debugs the main MSBuild process but skips debugging child TaskHost processes
+                    if (!FrameworkDebugUtils.IsInTaskHostNode())
+                    {
+                        Debugger.Launch();
+                    }
+                    break;
 #endif
                 case "2":
                     // Sometimes easier to attach rather than deal with JIT prompt
@@ -571,7 +641,7 @@ namespace Microsoft.Build.CommandLine
         /// is ignored.</param>
         /// <returns>A value of type ExitType that indicates whether the build succeeded,
         /// or the manner in which it failed.</returns>
-        public static ExitType Execute(string commandLine)
+        public static ExitType Execute(string[] commandLine)
         {
             DebuggerLaunchCheck();
 
@@ -590,7 +660,7 @@ namespace Microsoft.Build.CommandLine
 
             ErrorUtilities.VerifyThrowArgumentLength(commandLine);
 
-            AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
+            AppDomain.CurrentDomain.UnhandledException += DebugUtils.UnhandledExceptionHandler;
 
             ExitType exitType = ExitType.Success;
 
@@ -600,7 +670,10 @@ namespace Microsoft.Build.CommandLine
             TextWriter targetsWriter = null;
             try
             {
-                MSBuildEventSource.Log.MSBuildExeStart(commandLine);
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    MSBuildEventSource.Log.MSBuildExeStart(string.Join(" ", commandLine));
+                }
 
                 Console.CancelKeyPress += cancelHandler;
 
@@ -627,11 +700,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                 int cpuCount = 1;
                 bool multiThreaded = false;
-#if FEATURE_NODE_REUSE
                 bool enableNodeReuse = true;
-#else
-                bool enableNodeReuse = false;
-#endif
                 bool detailedSummary = false;
                 ISet<string> warningsAsErrors = null;
                 ISet<string> warningsNotAsErrors = null;
@@ -657,9 +726,7 @@ namespace Microsoft.Build.CommandLine
                 bool reportFileAccesses = false;
 #endif
 
-                GatherAllSwitches(commandLine, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _);
-
-                CommunicationsUtilities.Trace($"Command line parameters: {commandLine}");
+                commandLineParser.GatherAllSwitches(commandLine, s_globalMessagesToLogInBuildLoggers, out var switchesFromAutoResponseFile, out var switchesNotFromAutoResponseFile, out _, out s_exeName);
 
                 bool buildCanBeInvoked = ProcessCommandLineSwitches(
                                             switchesFromAutoResponseFile,
@@ -706,7 +773,7 @@ namespace Microsoft.Build.CommandLine
                                             ref getTargetResult,
                                             ref getResultOutputFile,
                                             recursing: false,
-                                            commandLine);
+                                            string.Join(" ", commandLine));
 
                 CommandLineSwitches.SwitchesFromResponseFiles = null;
 
@@ -916,6 +983,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 exitType = ExitType.LoggerAbort;
+                RecordCrashTelemetry(e, exitType);
             }
             // handle logger failures (logger bugs)
             catch (InternalLoggerException e)
@@ -939,13 +1007,15 @@ namespace Microsoft.Build.CommandLine
                         $"MSBUILD : error {e.ErrorCode}: {e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : "")}");
                     exitType = ExitType.InitializationError;
                 }
+
+                RecordCrashTelemetry(e, exitType);
             }
-#pragma warning disable CS0618 // Experimental.ProjectCache.ProjectCacheException is obsolete, but we need to support both namespaces for now
-            catch (Exception e) when (e is ProjectCacheException || e is Experimental.ProjectCache.ProjectCacheException)
+#pragma warning disable CS0618 // Microsoft.Build.Experimental.ProjectCache.ProjectCacheException is obsolete, but we need to support both namespaces for now
+            catch (Exception e) when (e is ProjectCacheException || e is Microsoft.Build.Experimental.ProjectCache.ProjectCacheException)
             {
 
                 ProjectCacheException pce = e as ProjectCacheException;
-                Experimental.ProjectCache.ProjectCacheException exppce = e as Experimental.ProjectCache.ProjectCacheException;
+                Microsoft.Build.Experimental.ProjectCache.ProjectCacheException exppce = e as Microsoft.Build.Experimental.ProjectCache.ProjectCacheException;
 
                 Console.WriteLine($"MSBUILD : error {pce?.ErrorCode ?? exppce?.ErrorCode}: {e.Message}");
 
@@ -962,6 +1032,7 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 exitType = ExitType.ProjectCacheFailure;
+                RecordCrashTelemetry(e, exitType);
             }
 #pragma warning restore CS0618 // Type is obsolete
             catch (BuildAbortedException e)
@@ -970,6 +1041,7 @@ namespace Microsoft.Build.CommandLine
                     $"MSBUILD : error {e.ErrorCode}: {e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : string.Empty)}");
 
                 exitType = ExitType.Unexpected;
+                RecordCrashTelemetry(e, exitType);
             }
             catch (PathTooLongException e)
             {
@@ -977,6 +1049,7 @@ namespace Microsoft.Build.CommandLine
                     $"{e.Message}{(e.InnerException != null ? $" {e.InnerException.Message}" : string.Empty)}");
 
                 exitType = ExitType.Unexpected;
+                RecordCrashTelemetry(e, exitType);
             }
             // handle fatal errors
             catch (Exception e)
@@ -986,6 +1059,8 @@ namespace Microsoft.Build.CommandLine
 #if DEBUG
                 Console.WriteLine("This is an unhandled exception in MSBuild Engine -- PLEASE OPEN A BUG AGAINST THE MSBUILD TEAM.\r\n{0}", e.ToString());
 #endif
+                RecordCrashTelemetry(e, ExitType.Unexpected, isUnhandled: true);
+
                 // rethrow, in case Watson is enabled on the machine -- if not, the CLR will write out exception details
                 // allow the build lab to set an env var to avoid jamming the build
                 if (Environment.GetEnvironmentVariable("MSBUILDDONOTLAUNCHDEBUGGER") != "1")
@@ -995,6 +1070,8 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
+                CrashTelemetryRecorder.FlushCrashTelemetry();
+
                 s_buildComplete.Set();
                 Console.CancelKeyPress -= cancelHandler;
 
@@ -1006,13 +1083,38 @@ namespace Microsoft.Build.CommandLine
                 preprocessWriter?.Dispose();
                 targetsWriter?.Dispose();
 
-                MSBuildEventSource.Log.MSBuildExeStop(commandLine);
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    MSBuildEventSource.Log.MSBuildExeStop(string.Join(" ", commandLine));
+                }
             }
             /**********************************************************************************************************************
              * WARNING: Do NOT add any more catch blocks above!
              *********************************************************************************************************************/
 
             return exitType;
+        }
+
+        /// <summary>
+        /// Records crash telemetry data for later emission.
+        /// </summary>
+        private static void RecordCrashTelemetry(Exception exception, ExitType exitType, bool isUnhandled = false)
+        {
+            // Convert from MSBuildApp.ExitType to CrashExitType (names match).
+            if (!Enum.TryParse<CrashExitType>(exitType.ToString(), out CrashExitType crashExitType))
+            {
+                crashExitType = CrashExitType.Unknown;
+            }
+
+            CrashTelemetryRecorder.RecordCrashTelemetry(
+                exception,
+                crashExitType,
+                isUnhandled,
+                ExceptionHandling.IsCriticalException(exception),
+                ProjectCollection.Version?.ToString(),
+                NativeMethodsShared.FrameworkName,
+                BuildEnvironmentState.GetHostName(),
+                isStandaloneExecution: !s_isNodeMode);
         }
 
         private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project, TextWriter outputStream)
@@ -1147,14 +1249,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void ResetBuildState()
         {
-            ResetGatheringSwitchesState();
-        }
-
-        private static void ResetGatheringSwitchesState()
-        {
-            s_includedResponseFiles = new List<string>();
-            usingSwitchesFromAutoResponseFile = false;
-            CommandLineSwitches.SwitchesFromResponseFiles = new();
+            commandLineParser.ResetGatheringSwitchesState();
         }
 
         /// <summary>
@@ -1184,8 +1279,6 @@ namespace Microsoft.Build.CommandLine
         /// The original console output mode if we changed it as part of initialization.
         /// </summary>
         private static uint? s_originalConsoleMode = null;
-
-        private const int MAX_MULTITHREADED_CPU_COUNT_FOR_TASK_HOST = 256;
 
         /// <summary>
         /// Initializes the build engine, and starts the project building.
@@ -1231,14 +1324,8 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_REPORTFILEACCESSES
             bool reportFileAccesses,
 #endif
-            string commandLine)
+            string[] commandLine)
         {
-            // Set limitation for multithreaded and MSBUILDFORCEALLTASKSOUTOFPROC=1. Max is 256 because of unique task host id generation.
-            if (multiThreaded && Traits.Instance.ForceAllTasksOutOfProcToTaskHost)
-            {
-                ErrorUtilities.VerifyThrowArgument(cpuCount <= MAX_MULTITHREADED_CPU_COUNT_FOR_TASK_HOST, "MaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc", MAX_MULTITHREADED_CPU_COUNT_FOR_TASK_HOST);
-            }
-
             if (FileUtilities.IsVCProjFilename(projectFile) || FileUtilities.IsDspFilename(projectFile))
             {
                 InitializationException.Throw(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XMake.ProjectUpgradeNeededToVcxProj", projectFile), null);
@@ -1322,8 +1409,8 @@ namespace Microsoft.Build.CommandLine
                         // all of the loggers that are single-node only
                         .. loggers,
                         // all of the central loggers for multi-node systems. These need to be resilient to multiple calls
-                        // to Initialize
-                        .. distributedLoggerRecords.Select(d => d.CentralLogger)
+                        // to Initialize. Filter out null loggers (e.g., DistributedFileLogger uses null central logger).
+                        .. distributedLoggerRecords.Select(d => d.CentralLogger).Where(l => l is not null)
                     ];
 
                 projectCollection = new ProjectCollection(
@@ -1481,10 +1568,13 @@ namespace Microsoft.Build.CommandLine
 
                     if (!Traits.Instance.EscapeHatches.DoNotSendDeferredMessagesToBuildManager)
                     {
-                        messagesToLogInBuildLoggers.AddRange(GetMessagesToLogInBuildLoggers(commandLine));
+                        var commandLineString =
+                            string.Join(" ", commandLine);
+
+                        messagesToLogInBuildLoggers.AddRange(GetMessagesToLogInBuildLoggers(commandLineString));
 
                         // Log a message for every response file and include it in log
-                        foreach (var responseFilePath in s_includedResponseFiles)
+                        foreach (var responseFilePath in commandLineParser.IncludedResponseFiles)
                         {
                             messagesToLogInBuildLoggers.Add(
                                 new BuildManager.DeferredBuildMessage(
@@ -1736,7 +1826,7 @@ namespace Microsoft.Build.CommandLine
                     new BuildManager.DeferredBuildMessage(
                         ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "MSBuildDebugPath",
-                        DebugUtils.DebugPath),
+                        FrameworkDebugUtils.DebugPath),
                         MessageImportance.High));
             }
 
@@ -1851,23 +1941,26 @@ namespace Microsoft.Build.CommandLine
             CultureInfo.CurrentUICulture = desiredCulture;
             CultureInfo.DefaultThreadCurrentUICulture = desiredCulture;
 
-#if RUNTIME_TYPE_NETCORE
-            if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
-#else
-            if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
-                && !CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase))
-#endif
+            if (!Traits.Instance.ConsoleUseDefaultEncoding)
             {
-                try
+#if RUNTIME_TYPE_NETCORE
+                if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
+#else
+                if (EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding()
+                    && !CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.Equals("en", StringComparison.InvariantCultureIgnoreCase))
+#endif
                 {
-                    // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
-                    Console.OutputEncoding = Encoding.UTF8;
-                    // If the InputEncoding is not set, the encoding will work in CMD but not in PowerShell, as the raw CHCP page won't be changed.
-                    Console.InputEncoding = Encoding.UTF8;
-                }
-                catch (Exception ex) when (ex is IOException || ex is SecurityException)
-                {
-                    // The encoding is unavailable. Do nothing.
+                    try
+                    {
+                        // Setting both encodings causes a change in the CHCP, making it so we don't need to P-Invoke CHCP ourselves.
+                        Console.OutputEncoding = Encoding.UTF8;
+                        // If the InputEncoding is not set, the encoding will work in CMD but not in PowerShell, as the raw CHCP page won't be changed.
+                        Console.InputEncoding = Encoding.UTF8;
+                    }
+                    catch (Exception ex) when (ex is IOException || ex is SecurityException)
+                    {
+                        // The encoding is unavailable. Do nothing.
+                    }
                 }
             }
 
@@ -1905,497 +1998,15 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
-        /// Gets all specified switches, from the command line, as well as all
-        /// response files, including the auto-response file.
-        /// </summary>
-        /// <param name="commandLine"></param>
-        /// <param name="switchesFromAutoResponseFile"></param>
-        /// <param name="switchesNotFromAutoResponseFile"></param>
-        /// <param name="fullCommandLine"></param>
-        /// <returns>Combined bag of switches.</returns>
-        private static void GatherAllSwitches(string commandLine,
-            out CommandLineSwitches switchesFromAutoResponseFile, out CommandLineSwitches switchesNotFromAutoResponseFile, out string fullCommandLine)
-        {
-            ResetGatheringSwitchesState();
-
-            // split the command line on (unquoted) whitespace
-            var commandLineArgs = QuotingUtilities.SplitUnquoted(commandLine);
-
-            s_exeName = FileUtilities.FixFilePath(QuotingUtilities.Unquote(commandLineArgs[0]));
-
-#if USE_MSBUILD_DLL_EXTN
-            var msbuildExtn = ".dll";
-#else
-            var msbuildExtn = ".exe";
-#endif
-            if (!s_exeName.EndsWith(msbuildExtn, StringComparison.OrdinalIgnoreCase))
-            {
-                s_exeName += msbuildExtn;
-            }
-
-            // discard the first piece, because that's the path to the executable -- the rest are args
-            commandLineArgs.RemoveAt(0);
-
-            fullCommandLine = $"'{commandLine}'";
-
-            // parse the command line, and flag syntax errors and obvious switch errors
-            switchesNotFromAutoResponseFile = new CommandLineSwitches();
-            GatherCommandLineSwitches(commandLineArgs, switchesNotFromAutoResponseFile, fullCommandLine);
-
-            // parse the auto-response file (if "/noautoresponse" is not specified), and combine those switches with the
-            // switches on the command line
-            switchesFromAutoResponseFile = new CommandLineSwitches();
-            if (!switchesNotFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
-            {
-                GatherAutoResponseFileSwitches(s_exePath, switchesFromAutoResponseFile, fullCommandLine);
-            }
-        }
-
-        /// <summary>
-        /// Coordinates the parsing of the command line. It detects switches on the command line, gathers their parameters, and
-        /// flags syntax errors, and other obvious switch errors.
-        /// </summary>
-        /// <remarks>
-        /// Internal for unit testing only.
-        /// </remarks>
-        internal static void GatherCommandLineSwitches(List<string> commandLineArgs, CommandLineSwitches commandLineSwitches, string commandLine = "")
-        {
-            foreach (string commandLineArg in commandLineArgs)
-            {
-                string unquotedCommandLineArg = QuotingUtilities.Unquote(commandLineArg, out var doubleQuotesRemovedFromArg);
-
-                if (unquotedCommandLineArg.Length > 0)
-                {
-                    // response file switch starts with @
-                    if (unquotedCommandLineArg.StartsWith("@", StringComparison.Ordinal))
-                    {
-                        GatherResponseFileSwitch(unquotedCommandLineArg, commandLineSwitches, commandLine);
-                    }
-                    else
-                    {
-                        string switchName;
-                        string switchParameters;
-
-                        // all switches should start with - or / or -- unless a project is being specified
-                        if (!ValidateSwitchIndicatorInUnquotedArgument(unquotedCommandLineArg) || FileUtilities.LooksLikeUnixFilePath(unquotedCommandLineArg))
-                        {
-                            switchName = null;
-                            // add a (fake) parameter indicator for later parsing
-                            switchParameters = $":{commandLineArg}";
-                        }
-                        else
-                        {
-                            // check if switch has parameters (look for the : parameter indicator)
-                            int switchParameterIndicator = unquotedCommandLineArg.IndexOf(':');
-
-                            // get the length of the beginning sequence considered as a switch indicator (- or / or --)
-                            int switchIndicatorsLength = GetLengthOfSwitchIndicator(unquotedCommandLineArg);
-
-                            // extract the switch name and parameters -- the name is sandwiched between the switch indicator (the
-                            // leading - or / or --) and the parameter indicator (if the switch has parameters); the parameters (if any)
-                            // follow the parameter indicator
-                            if (switchParameterIndicator == -1)
-                            {
-                                switchName = unquotedCommandLineArg.Substring(switchIndicatorsLength);
-                                switchParameters = string.Empty;
-                            }
-                            else
-                            {
-                                switchName = unquotedCommandLineArg.Substring(switchIndicatorsLength, switchParameterIndicator - switchIndicatorsLength);
-                                switchParameters = ExtractSwitchParameters(commandLineArg, unquotedCommandLineArg, doubleQuotesRemovedFromArg, switchName, switchParameterIndicator, switchIndicatorsLength);
-                            }
-                        }
-
-                        // Special case: for the switches "/m" (or "/maxCpuCount") and "/bl" (or "/binarylogger") we wish to pretend we saw a default argument
-                        // This allows a subsequent /m:n on the command line to override it.
-                        // We could create a new kind of switch with optional parameters, but it's a great deal of churn for this single case.
-                        // Note that if no "/m" or "/maxCpuCount" switch -- either with or without parameters -- is present, then we still default to 1 cpu
-                        // for backwards compatibility.
-                        if (string.IsNullOrEmpty(switchParameters))
-                        {
-                            if (string.Equals(switchName, "m", StringComparison.OrdinalIgnoreCase) ||
-                                string.Equals(switchName, "maxcpucount", StringComparison.OrdinalIgnoreCase))
-                            {
-                                int numberOfCpus = NativeMethodsShared.GetLogicalCoreCount();
-                                switchParameters = $":{numberOfCpus}";
-                            }
-                            else if (string.Equals(switchName, "bl", StringComparison.OrdinalIgnoreCase) ||
-                                string.Equals(switchName, "binarylogger", StringComparison.OrdinalIgnoreCase))
-                            {
-                                // we have to specify at least one parameter otherwise it's impossible to distinguish the situation
-                                // where /bl is not specified at all vs. where /bl is specified without the file name.
-                                switchParameters = ":msbuild.binlog";
-                            }
-                            else if (string.Equals(switchName, "prof", StringComparison.OrdinalIgnoreCase) ||
-                                     string.Equals(switchName, "profileevaluation", StringComparison.OrdinalIgnoreCase))
-                            {
-                                switchParameters = ":no-file";
-                            }
-                        }
-
-                        if (CommandLineSwitches.IsParameterlessSwitch(switchName, out var parameterlessSwitch, out var duplicateSwitchErrorMessage))
-                        {
-                            GatherParameterlessCommandLineSwitch(commandLineSwitches, parameterlessSwitch, switchParameters, duplicateSwitchErrorMessage, unquotedCommandLineArg, commandLine);
-                        }
-                        else if (CommandLineSwitches.IsParameterizedSwitch(switchName, out var parameterizedSwitch, out duplicateSwitchErrorMessage, out var multipleParametersAllowed, out var missingParametersErrorMessage, out var unquoteParameters, out var allowEmptyParameters))
-                        {
-                            GatherParameterizedCommandLineSwitch(commandLineSwitches, parameterizedSwitch, switchParameters, duplicateSwitchErrorMessage, multipleParametersAllowed, missingParametersErrorMessage, unquoteParameters, unquotedCommandLineArg, allowEmptyParameters, commandLine);
-                        }
-                        else
-                        {
-                            commandLineSwitches.SetUnknownSwitchError(unquotedCommandLineArg, commandLine);
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Extracts a switch's parameters after processing all quoting around the switch.
-        /// </summary>
-        /// <remarks>
-        /// This method is marked "internal" for unit-testing purposes only -- ideally it should be "private".
-        /// </remarks>
-        /// <param name="commandLineArg"></param>
-        /// <param name="unquotedCommandLineArg"></param>
-        /// <param name="doubleQuotesRemovedFromArg"></param>
-        /// <param name="switchName"></param>
-        /// <param name="switchParameterIndicator"></param>
-        /// <param name="switchIndicatorsLength"></param>
-        /// <returns>The given switch's parameters (with interesting quoting preserved).</returns>
-        internal static string ExtractSwitchParameters(
-            string commandLineArg,
-            string unquotedCommandLineArg,
-            int doubleQuotesRemovedFromArg,
-            string switchName,
-            int switchParameterIndicator,
-            int switchIndicatorsLength)
-        {
-
-            // find the parameter indicator again using the quoted arg
-            // NOTE: since the parameter indicator cannot be part of a switch name, quoting around it is not relevant, because a
-            // parameter indicator cannot be escaped or made into a literal
-            int quotedSwitchParameterIndicator = commandLineArg.IndexOf(':');
-
-            // check if there is any quoting in the name portion of the switch
-            string unquotedSwitchIndicatorAndName = QuotingUtilities.Unquote(commandLineArg.Substring(0, quotedSwitchParameterIndicator), out var doubleQuotesRemovedFromSwitchIndicatorAndName);
-
-            ErrorUtilities.VerifyThrow(switchName == unquotedSwitchIndicatorAndName.Substring(switchIndicatorsLength),
-                "The switch name extracted from either the partially or completely unquoted arg should be the same.");
-
-            ErrorUtilities.VerifyThrow(doubleQuotesRemovedFromArg >= doubleQuotesRemovedFromSwitchIndicatorAndName,
-                "The name portion of the switch cannot contain more quoting than the arg itself.");
-
-            string switchParameters;
-            // if quoting in the name portion of the switch was terminated
-            if ((doubleQuotesRemovedFromSwitchIndicatorAndName % 2) == 0)
-            {
-                // get the parameters exactly as specified on the command line i.e. including quoting
-                switchParameters = commandLineArg.Substring(quotedSwitchParameterIndicator);
-            }
-            else
-            {
-                // if quoting was not terminated in the name portion of the switch, and the terminal double-quote (if any)
-                // terminates the switch parameters
-                int terminalDoubleQuote = commandLineArg.IndexOf('"', quotedSwitchParameterIndicator + 1);
-                if (((doubleQuotesRemovedFromArg - doubleQuotesRemovedFromSwitchIndicatorAndName) <= 1) &&
-                    ((terminalDoubleQuote == -1) || (terminalDoubleQuote == (commandLineArg.Length - 1))))
-                {
-                    // then the parameters are not quoted in any interesting way, so use the unquoted parameters
-                    switchParameters = unquotedCommandLineArg.Substring(switchParameterIndicator);
-                }
-                else
-                {
-                    // otherwise, use the quoted parameters, after compensating for the quoting that was started in the name
-                    // portion of the switch
-                    switchParameters = $":\"{commandLineArg.Substring(quotedSwitchParameterIndicator + 1)}";
-                }
-            }
-
-            ErrorUtilities.VerifyThrow(switchParameters != null, "We must be able to extract the switch parameters.");
-
-            return switchParameters;
-        }
-
-        /// <summary>
-        /// Used to keep track of response files to prevent them from
-        /// being included multiple times (or even recursively).
-        /// </summary>
-        private static List<string> s_includedResponseFiles;
-
-        /// <summary>
-        /// Called when a response file switch is detected on the command line. It loads the specified response file, and parses
-        /// each line in it like a command line. It also prevents multiple (or recursive) inclusions of the same response file.
-        /// </summary>
-        /// <param name="unquotedCommandLineArg"></param>
-        /// <param name="commandLineSwitches"></param>
-        private static void GatherResponseFileSwitch(string unquotedCommandLineArg, CommandLineSwitches commandLineSwitches, string commandLine)
-        {
-            try
-            {
-                string responseFile = FileUtilities.FixFilePath(unquotedCommandLineArg.Substring(1));
-
-                if (responseFile.Length == 0)
-                {
-                    commandLineSwitches.SetSwitchError("MissingResponseFileError", unquotedCommandLineArg, commandLine);
-                }
-                else if (!FileSystems.Default.FileExists(responseFile))
-                {
-                    commandLineSwitches.SetParameterError("ResponseFileNotFoundError", unquotedCommandLineArg, commandLine);
-                }
-                else
-                {
-                    // normalize the response file path to help catch multiple (or recursive) inclusions
-                    responseFile = Path.GetFullPath(responseFile);
-                    // NOTE: for network paths or mapped paths, normalization is not guaranteed to work
-
-                    bool isRepeatedResponseFile = false;
-
-                    foreach (string includedResponseFile in s_includedResponseFiles)
-                    {
-                        if (string.Equals(responseFile, includedResponseFile, StringComparison.OrdinalIgnoreCase))
-                        {
-                            commandLineSwitches.SetParameterError("RepeatedResponseFileError", unquotedCommandLineArg, commandLine);
-                            isRepeatedResponseFile = true;
-                            break;
-                        }
-                    }
-
-                    if (!isRepeatedResponseFile)
-                    {
-                        var responseFileDirectory = FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(responseFile));
-                        s_includedResponseFiles.Add(responseFile);
-
-                        List<string> argsFromResponseFile;
-
-#if FEATURE_ENCODING_DEFAULT
-                        using (StreamReader responseFileContents = new StreamReader(responseFile, Encoding.Default)) // HIGHCHAR: If response files have no byte-order marks, then assume ANSI rather than ASCII.
-#else
-                        using (StreamReader responseFileContents = FileUtilities.OpenRead(responseFile)) // HIGHCHAR: If response files have no byte-order marks, then assume ANSI rather than ASCII.
-#endif
-                        {
-                            argsFromResponseFile = new List<string>();
-
-                            while (responseFileContents.Peek() != -1)
-                            {
-                                // ignore leading whitespace on each line
-                                string responseFileLine = responseFileContents.ReadLine().TrimStart();
-
-                                // skip comment lines beginning with #
-                                if (!responseFileLine.StartsWith("#", StringComparison.Ordinal))
-                                {
-                                    // Allow special case to support a path relative to the .rsp file being processed.
-                                    responseFileLine = Regex.Replace(responseFileLine, responseFilePathReplacement,
-                                        responseFileDirectory, RegexOptions.IgnoreCase);
-
-                                    // treat each line of the response file like a command line i.e. args separated by whitespace
-                                    argsFromResponseFile.AddRange(QuotingUtilities.SplitUnquoted(Environment.ExpandEnvironmentVariables(responseFileLine)));
-                                }
-                            }
-                        }
-
-                        CommandLineSwitches.SwitchesFromResponseFiles.Add((responseFile, string.Join(" ", argsFromResponseFile)));
-
-                        GatherCommandLineSwitches(argsFromResponseFile, commandLineSwitches, commandLine);
-                    }
-                }
-            }
-            catch (NotSupportedException e)
-            {
-                commandLineSwitches.SetParameterError("ReadResponseFileError", unquotedCommandLineArg, e, commandLine);
-            }
-            catch (SecurityException e)
-            {
-                commandLineSwitches.SetParameterError("ReadResponseFileError", unquotedCommandLineArg, e, commandLine);
-            }
-            catch (UnauthorizedAccessException e)
-            {
-                commandLineSwitches.SetParameterError("ReadResponseFileError", unquotedCommandLineArg, e, commandLine);
-            }
-            catch (IOException e)
-            {
-                commandLineSwitches.SetParameterError("ReadResponseFileError", unquotedCommandLineArg, e, commandLine);
-            }
-        }
-
-        /// <summary>
-        /// Called when a switch that doesn't take parameters is detected on the command line.
-        /// </summary>
-        /// <param name="commandLineSwitches"></param>
-        /// <param name="parameterlessSwitch"></param>
-        /// <param name="switchParameters"></param>
-        /// <param name="duplicateSwitchErrorMessage"></param>
-        /// <param name="unquotedCommandLineArg"></param>
-        private static void GatherParameterlessCommandLineSwitch(
-            CommandLineSwitches commandLineSwitches,
-            CommandLineSwitches.ParameterlessSwitch parameterlessSwitch,
-            string switchParameters,
-            string duplicateSwitchErrorMessage,
-            string unquotedCommandLineArg,
-            string commandLine)
-        {
-            // switch should not have any parameters
-            if (switchParameters.Length == 0)
-            {
-                // check if switch is duplicated, and if that's allowed
-                if (!commandLineSwitches.IsParameterlessSwitchSet(parameterlessSwitch) ||
-                    (duplicateSwitchErrorMessage == null))
-                {
-                    commandLineSwitches.SetParameterlessSwitch(parameterlessSwitch, unquotedCommandLineArg);
-                }
-                else
-                {
-                    commandLineSwitches.SetSwitchError(duplicateSwitchErrorMessage, unquotedCommandLineArg, commandLine);
-                }
-            }
-            else
-            {
-                commandLineSwitches.SetUnexpectedParametersError(unquotedCommandLineArg, commandLine);
-            }
-        }
-
-        /// <summary>
-        /// Called when a switch that takes parameters is detected on the command line. This method flags errors and stores the
-        /// switch parameters.
-        /// </summary>
-        /// <param name="commandLineSwitches"></param>
-        /// <param name="parameterizedSwitch"></param>
-        /// <param name="switchParameters"></param>
-        /// <param name="duplicateSwitchErrorMessage"></param>
-        /// <param name="multipleParametersAllowed"></param>
-        /// <param name="missingParametersErrorMessage"></param>
-        /// <param name="unquoteParameters"></param>
-        /// <param name="unquotedCommandLineArg"></param>
-        private static void GatherParameterizedCommandLineSwitch(
-            CommandLineSwitches commandLineSwitches,
-            CommandLineSwitches.ParameterizedSwitch parameterizedSwitch,
-            string switchParameters,
-            string duplicateSwitchErrorMessage,
-            bool multipleParametersAllowed,
-            string missingParametersErrorMessage,
-            bool unquoteParameters,
-            string unquotedCommandLineArg,
-            bool allowEmptyParameters,
-            string commandLine)
-        {
-            if (// switch must have parameters
-                (switchParameters.Length > 1) ||
-                // unless the parameters are optional
-                (missingParametersErrorMessage == null))
-            {
-                // skip the parameter indicator (if any)
-                if (switchParameters.Length > 0)
-                {
-                    switchParameters = switchParameters.Substring(1);
-                }
-
-                if (parameterizedSwitch == CommandLineSwitches.ParameterizedSwitch.Project && IsEnvironmentVariable(switchParameters))
-                {
-                    commandLineSwitches.SetSwitchError("EnvironmentVariableAsSwitch", unquotedCommandLineArg, commandLine);
-                }
-
-                // check if switch is duplicated, and if that's allowed
-                if (!commandLineSwitches.IsParameterizedSwitchSet(parameterizedSwitch) ||
-                    (duplicateSwitchErrorMessage == null))
-                {
-                    // save the parameters after unquoting and splitting them if necessary
-                    if (!commandLineSwitches.SetParameterizedSwitch(parameterizedSwitch, unquotedCommandLineArg, switchParameters, multipleParametersAllowed, unquoteParameters, allowEmptyParameters))
-                    {
-                        // if parsing revealed there were no real parameters, flag an error, unless the parameters are optional
-                        if (missingParametersErrorMessage != null)
-                        {
-                            commandLineSwitches.SetSwitchError(missingParametersErrorMessage, unquotedCommandLineArg, commandLine);
-                        }
-                    }
-                }
-                else
-                {
-                    commandLineSwitches.SetSwitchError(duplicateSwitchErrorMessage, unquotedCommandLineArg, commandLine);
-                }
-            }
-            else
-            {
-                commandLineSwitches.SetSwitchError(missingParametersErrorMessage, unquotedCommandLineArg, commandLine);
-            }
-        }
-
-        /// <summary>
-        /// Checks whether envVar is an environment variable. MSBuild uses
-        /// Environment.ExpandEnvironmentVariables(string), which only
-        /// considers %-delimited variables.
-        /// </summary>
-        /// <param name="envVar">A possible environment variable</param>
-        /// <returns>Whether envVar is an environment variable</returns>
-        private static bool IsEnvironmentVariable(string envVar)
-        {
-            return envVar.StartsWith("%") && envVar.EndsWith("%") && envVar.Length > 1;
-        }
-
-        /// <summary>
-        /// The name of the auto-response file.
-        /// </summary>
-        private const string autoResponseFileName = "MSBuild.rsp";
-
-        /// <summary>
-        /// The name of an auto-response file to search for in the project directory and above.
-        /// </summary>
-        private const string directoryResponseFileName = "Directory.Build.rsp";
-
-        /// <summary>
-        /// String replacement pattern to support paths in response files.
-        /// </summary>
-        private const string responseFilePathReplacement = "%MSBuildThisFileDirectory%";
-
-        /// <summary>
-        /// Whether switches from the auto-response file are being used.
-        /// </summary>
-        internal static bool usingSwitchesFromAutoResponseFile = false;
-
-        /// <summary>
         /// Indicates that this process is working as a server.
         /// </summary>
         private static bool s_isServerNode;
 
         /// <summary>
-        /// Parses the auto-response file (assumes the "/noautoresponse" switch is not specified on the command line), and combines the
-        /// switches from the auto-response file with the switches passed in.
-        /// Returns true if the response file was found.
+        /// Indicates that this process was launched as a worker node (via -nodeMode switch).
+        /// Worker nodes are not standalone executions regardless of who spawned them.
         /// </summary>
-        private static bool GatherAutoResponseFileSwitches(string path, CommandLineSwitches switchesFromAutoResponseFile, string commandLine)
-        {
-            string autoResponseFile = Path.Combine(path, autoResponseFileName);
-            return GatherAutoResponseFileSwitchesFromFullPath(autoResponseFile, switchesFromAutoResponseFile, commandLine);
-        }
-
-        private static bool GatherAutoResponseFileSwitchesFromFullPath(string autoResponseFile, CommandLineSwitches switchesFromAutoResponseFile, string commandLine)
-        {
-            bool found = false;
-
-            // if the auto-response file does not exist, only use the switches on the command line
-            if (FileSystems.Default.FileExists(autoResponseFile))
-            {
-                found = true;
-                GatherResponseFileSwitch($"@{autoResponseFile}", switchesFromAutoResponseFile, commandLine);
-
-                // if the "/noautoresponse" switch was set in the auto-response file, flag an error
-                if (switchesFromAutoResponseFile[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
-                {
-                    switchesFromAutoResponseFile.SetSwitchError("CannotAutoDisableAutoResponseFile",
-                        switchesFromAutoResponseFile.GetParameterlessSwitchCommandLineArg(CommandLineSwitches.ParameterlessSwitch.NoAutoResponse), commandLine);
-                }
-
-                if (switchesFromAutoResponseFile.HaveAnySwitchesBeenSet())
-                {
-                    // we picked up some switches from the auto-response file
-                    usingSwitchesFromAutoResponseFile = true;
-                }
-
-                // Throw errors found in the response file
-                switchesFromAutoResponseFile.ThrowErrors();
-            }
-
-            return found;
-        }
+        private static bool s_isNodeMode;
 
         /// <summary>
         /// Coordinates the processing of all detected switches. It gathers information necessary to invoke the build engine, and
@@ -2471,11 +2082,18 @@ namespace Microsoft.Build.CommandLine
 
             bool useTerminalLogger = ProcessTerminalLoggerConfiguration(commandLineSwitches, out string aggregatedTerminalLoggerParameters);
 
-            // This is temporary until we can remove the need for the environment variable.
-                // DO NOT use this environment variable for any new features as it will be removed without further notice.
-                Environment.SetEnvironmentVariable("_MSBUILDTLENABLED", useTerminalLogger ? "1" : "0");
+            // Process nologo switch early so it can be used in DisplayVersionMessageIfNeeded
+            bool noLogo = false;
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NoLogo))
+            {
+                noLogo = ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NoLogo], defaultValue: true, resourceName: "InvalidNoLogoValue");
+            }
 
-            DisplayVersionMessageIfNeeded(recursing, useTerminalLogger, commandLineSwitches);
+            // This is temporary until we can remove the need for the environment variable.
+            // DO NOT use this environment variable for any new features as it will be removed without further notice.
+            Environment.SetEnvironmentVariable("_MSBUILDTLENABLED", useTerminalLogger ? "1" : "0");
+
+            DisplayVersionMessageIfNeeded(recursing, useTerminalLogger, noLogo, commandLineSwitches);
 
             // Idle priority would prevent the build from proceeding as the user does normal actions.
             // This switch is processed early to capture both the command line case (main node should
@@ -2515,6 +2133,13 @@ namespace Microsoft.Build.CommandLine
             }
             else if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode))
             {
+                s_isNodeMode = true;
+
+                // Worker nodes are not standalone executions. Override the flag that
+                // Main() set before we knew this was a worker node process, so that
+                // BuildManager crash/hang telemetry also reports correctly.
+                KnownTelemetry.PartialBuildTelemetry?.IsStandaloneExecution = false;
+
                 StartLocalNode(commandLineSwitches, lowPriority);
             }
             else
@@ -2534,7 +2159,7 @@ namespace Microsoft.Build.CommandLine
                 }
                 else
                 {
-                    bool foundProjectAutoResponseFile = CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, recursing, commandLine);
+                    bool foundProjectAutoResponseFile = commandLineParser.CheckAndGatherProjectAutoResponseFile(switchesFromAutoResponseFile, commandLineSwitches, recursing, commandLine);
 
                     if (foundProjectAutoResponseFile)
                     {
@@ -2626,7 +2251,6 @@ namespace Microsoft.Build.CommandLine
                     multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
                     // figure out if we should reuse nodes
-                    // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
                     enableNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
 
                     // determine what if any writer to preprocess to
@@ -2993,59 +2617,6 @@ namespace Microsoft.Build.CommandLine
             return commandLineSwitches;
         }
 
-        private static string GetProjectDirectory(string[] projectSwitchParameters)
-        {
-            string projectDirectory = ".";
-            ErrorUtilities.VerifyThrow(projectSwitchParameters.Length <= 1, "Expect exactly one project at a time.");
-
-            if (projectSwitchParameters.Length == 1)
-            {
-                var projectFile = FileUtilities.FixFilePath(projectSwitchParameters[0]);
-
-                if (FileSystems.Default.DirectoryExists(projectFile))
-                {
-                    // the provided argument value is actually the directory
-                    projectDirectory = projectFile;
-                }
-                else
-                {
-                    InitializationException.VerifyThrow(FileSystems.Default.FileExists(projectFile), "ProjectNotFoundError", projectFile);
-                    projectDirectory = Path.GetDirectoryName(Path.GetFullPath(projectFile));
-                }
-            }
-
-            return projectDirectory;
-        }
-
-
-        /// <summary>
-        /// Identifies if there is rsp files near the project file
-        /// </summary>
-        /// <returns>true if there autoresponse file was found</returns>
-        private static bool CheckAndGatherProjectAutoResponseFile(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches commandLineSwitches, bool recursing, string commandLine)
-        {
-            bool found = false;
-
-            var projectDirectory = GetProjectDirectory(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project]);
-
-            if (!recursing && !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoAutoResponse])
-            {
-                // gather any switches from the first Directory.Build.rsp found in the project directory or above
-                string directoryResponseFile = FileUtilities.GetPathOfFileAbove(directoryResponseFileName, projectDirectory);
-
-                found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile, commandLine);
-
-                // Don't look for more response files if it's only in the same place we already looked (next to the exe)
-                if (!string.Equals(projectDirectory, s_exePath, StringComparison.OrdinalIgnoreCase))
-                {
-                    // this combines any found, with higher precedence, with the switches from the original auto response file switches
-                    found |= GatherAutoResponseFileSwitches(projectDirectory, switchesFromAutoResponseFile, commandLine);
-                }
-            }
-
-            return found;
-        }
-
         private static bool WarningsAsErrorsSwitchIsEmpty(CommandLineSwitches commandLineSwitches)
         {
             string val = commandLineSwitches.GetParameterizedSwitchCommandLineArg(CommandLineSwitches.ParameterizedSwitch.WarningsAsErrors);
@@ -3137,18 +2708,44 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Processes the parent packet version switch, which indicates the packet version supported by the parent node.
+        /// This is used for backward-compatible packet version negotiation between parent and child nodes.
+        /// If not specified, returns 1 indicating the parent doesn't support version negotiation (old parent).
+        /// </summary>
+        /// <param name="parameters">The command line parameters for the switch.</param>
+        /// <returns>The packet version supported by the parent, or 1 if not specified or invalid.</returns>
+        internal static byte ProcessParentPacketVersionSwitch(string[] parameters)
+        {
+            byte parentPacketVersion = 1;
+
+            if (parameters.Length > 0)
+            {
+                try
+                {
+                    parentPacketVersion = byte.Parse(parameters[parameters.Length - 1], CultureInfo.InvariantCulture);
+                }
+                catch (FormatException ex)
+                {
+                    CommunicationsUtilities.Trace("Invalid node packet version value '{0}': {1}", parameters[parameters.Length - 1], ex.Message);
+                }
+                catch (OverflowException ex)
+                {
+                    // Value too large for byte - log and continue with default
+                    CommunicationsUtilities.Trace("Node packet version value '{0}' out of range: {1}", parameters[parameters.Length - 1], ex.Message);
+                }
+            }
+
+            return parentPacketVersion;
+        }
+
+        /// <summary>
         /// Processes the node reuse switch, the user can set node reuse to true, false or not set the switch. If the switch is
         /// not set the system will check to see if the process is being run as an administrator. This check in localnode provider
         /// will determine the node reuse setting for that case.
         /// </summary>
         internal static bool ProcessNodeReuseSwitch(string[] parameters)
         {
-            bool enableNodeReuse;
-#if FEATURE_NODE_REUSE
-            enableNodeReuse = true;
-#else
-            enableNodeReuse = false;
-#endif
+            bool enableNodeReuse = true;
 
             if (Environment.GetEnvironmentVariable("MSBUILDDISABLENODEREUSE") == "1") // For example to disable node reuse in a gated checkin, without using the flag
             {
@@ -3171,11 +2768,6 @@ namespace Microsoft.Build.CommandLine
                     CommandLineSwitchException.Throw("InvalidNodeReuseValue", parameters[parameters.Length - 1], ex.Message);
                 }
             }
-
-#if !FEATURE_NODE_REUSE
-            if (enableNodeReuse) // Only allowed to pass False on the command line for this switch if the feature is disabled for this installation
-                CommandLineSwitchException.Throw("InvalidNodeReuseTrueValue", parameters[parameters.Length - 1]);
-#endif
 
             return enableNodeReuse;
         }
@@ -3342,30 +2934,32 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Parses a node mode value from a string, supporting both integer values and enum names (case-insensitive).
+        /// </summary>
+        /// <param name="value">The value to parse (can be an integer or enum name)</param>
+        /// <returns>The parsed NodeMode value</returns>
+        internal static NodeMode ParseNodeMode(string value)
+        {
+            if (!NodeModeHelper.TryParse(value, out NodeMode? nodeMode))
+            {
+                CommandLineSwitchException.Throw("InvalidNodeNumberValue", value);
+            }
+
+            return nodeMode.Value;
+        }
+
+        /// <summary>
         /// Uses the input from thinNodeMode switch to start a local node server
         /// </summary>
         /// <param name="commandLineSwitches"></param>
         private static void StartLocalNode(CommandLineSwitches commandLineSwitches, bool lowpriority)
         {
             string[] input = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeMode];
-            int nodeModeNumber = 0;
+            NodeMode nodeMode = NodeMode.OutOfProcNode; // Default value
 
             if (input.Length > 0)
             {
-                try
-                {
-                    nodeModeNumber = int.Parse(input[0], CultureInfo.InvariantCulture);
-                }
-                catch (FormatException ex)
-                {
-                    CommandLineSwitchException.Throw("InvalidNodeNumberValue", input[0], ex.Message);
-                }
-                catch (OverflowException ex)
-                {
-                    CommandLineSwitchException.Throw("InvalidNodeNumberValue", input[0], ex.Message);
-                }
-
-                CommandLineSwitchException.VerifyThrow(nodeModeNumber >= 0, "InvalidNodeNumberValueIsNegative", input[0]);
+                nodeMode = ParseNodeMode(input[0]);
             }
 
             bool restart = true;
@@ -3374,71 +2968,72 @@ namespace Microsoft.Build.CommandLine
                 Exception nodeException = null;
                 NodeEngineShutdownReason shutdownReason = NodeEngineShutdownReason.Error;
 
-                // normal OOP node case
-                if (nodeModeNumber == 1)
+                switch (nodeMode)
                 {
-                    // If FEATURE_NODE_REUSE is OFF, just validates that the switch is OK, and always returns False
-                    bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                    OutOfProcNode node = new OutOfProcNode();
-                    shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
+                    case NodeMode.OutOfProcNode:
+                        bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+                        OutOfProcNode node = new OutOfProcNode();
+                        shutdownReason = node.Run(nodeReuse, lowpriority, out nodeException);
 
-                    FileUtilities.ClearCacheDirectory();
-                }
-                else if (nodeModeNumber == 2)
-                {
-                    // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
-                    bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-                    OutOfProcTaskHostNode node = new OutOfProcTaskHostNode();
-                    shutdownReason = node.Run(out nodeException, nodeReuse);
-                }
-                else if (nodeModeNumber == 3)
-                {
-                    // The RAR service persists between builds, and will continue to process requests until terminated.
-                    OutOfProcRarNode rarNode = new();
-                    RarNodeShutdownReason rarShutdownReason = rarNode.Run(out nodeException, s_buildCancellationSource.Token);
+                        FileUtilities.ClearCacheDirectory();
+                        break;
 
-                    shutdownReason = rarShutdownReason switch
-                    {
-                        RarNodeShutdownReason.Complete => NodeEngineShutdownReason.BuildComplete,
-                        RarNodeShutdownReason.Error => NodeEngineShutdownReason.Error,
-                        RarNodeShutdownReason.AlreadyRunning => NodeEngineShutdownReason.Error,
-                        RarNodeShutdownReason.ConnectionTimedOut => NodeEngineShutdownReason.ConnectionFailed,
-                        _ => throw new ArgumentOutOfRangeException(nameof(rarShutdownReason), $"Unexpected value: {rarShutdownReason}"),
-                    };
-                }
-                else if (nodeModeNumber == 8)
-                {
-                    // Since build function has to reuse code from *this* class and OutOfProcServerNode is in different assembly
-                    // we have to pass down xmake build invocation to avoid circular dependency
-                    OutOfProcServerNode.BuildCallback buildFunction = (commandLine) =>
-                    {
-                        int exitCode;
-                        ExitType exitType;
+                    case NodeMode.OutOfProcTaskHostNode:
+                        // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
+                        bool taskHostNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
+                        byte parentPacketVersion = ProcessParentPacketVersionSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ParentPacketVersion]);
+                        OutOfProcTaskHostNode taskHostNode = new();
+                        shutdownReason = taskHostNode.Run(out nodeException, taskHostNodeReuse, parentPacketVersion);
+                        break;
 
-                        if (!s_initialized)
+                    case NodeMode.OutOfProcRarNode:
+                        // The RAR service persists between builds, and will continue to process requests until terminated.
+                        OutOfProcRarNode rarNode = new();
+                        RarNodeShutdownReason rarShutdownReason = rarNode.Run(out nodeException, s_buildCancellationSource.Token);
+
+                        shutdownReason = rarShutdownReason switch
                         {
-                            exitType = ExitType.InitializationError;
-                        }
-                        else
+                            RarNodeShutdownReason.Complete => NodeEngineShutdownReason.BuildComplete,
+                            RarNodeShutdownReason.Error => NodeEngineShutdownReason.Error,
+                            RarNodeShutdownReason.AlreadyRunning => NodeEngineShutdownReason.Error,
+                            RarNodeShutdownReason.ConnectionTimedOut => NodeEngineShutdownReason.ConnectionFailed,
+                            _ => throw new ArgumentOutOfRangeException(nameof(rarShutdownReason), $"Unexpected value: {rarShutdownReason}"),
+                        };
+                        break;
+
+                    case NodeMode.OutOfProcServerNode:
+                        // Since build function has to reuse code from *this* class and OutOfProcServerNode is in different assembly
+                        // we have to pass down xmake build invocation to avoid circular dependency
+                        OutOfProcServerNode.BuildCallback buildFunction = (commandLine) =>
                         {
-                            exitType = Execute(commandLine);
-                        }
+                            int exitCode;
+                            ExitType exitType;
 
-                        exitCode = exitType == ExitType.Success ? 0 : 1;
+                            if (!s_initialized)
+                            {
+                                exitType = ExitType.InitializationError;
+                            }
+                            else
+                            {
+                                exitType = Execute(commandLine);
+                            }
 
-                        return (exitCode, exitType.ToString());
-                    };
+                            exitCode = exitType == ExitType.Success ? 0 : 1;
 
-                    OutOfProcServerNode node = new(buildFunction);
+                            return (exitCode, exitType.ToString());
+                        };
 
-                    s_isServerNode = true;
-                    shutdownReason = node.Run(out nodeException);
+                        OutOfProcServerNode serverNode = new(buildFunction);
 
-                    FileUtilities.ClearCacheDirectory();
-                }
-                else
-                {
-                    CommandLineSwitchException.Throw("InvalidNodeNumberValue", nodeModeNumber.ToString());
+                        s_isServerNode = true;
+                        shutdownReason = serverNode.Run(out nodeException);
+
+                        FileUtilities.ClearCacheDirectory();
+                        break;
+
+                    default:
+                        CommandLineSwitchException.Throw("InvalidNodeNumberValue", nodeMode.ToString());
+                        break;
                 }
 
                 if (shutdownReason == NodeEngineShutdownReason.Error)
@@ -3645,46 +3240,6 @@ namespace Microsoft.Build.CommandLine
                     // Make sure that no wild cards are in the string because for now we don't allow wild card extensions.
                     InitializationException.VerifyThrow(extension.IndexOfAny(MSBuildConstants.WildcardChars) == -1, "InvalidExtensionToIgnore", extension, null, false);
                 }
-            }
-        }
-
-        /// <summary>
-        /// Checks whether an argument given as a parameter starts with valid indicator,
-        /// <br/>which means, whether switch begins with one of: "/", "-", "--"
-        /// </summary>
-        /// <param name="unquotedCommandLineArgument">Command line argument with beginning indicator (e.g. --help).
-        /// <br/>This argument has to be unquoted, otherwise the first character will always be a quote character "</param>
-        /// <returns>true if argument's beginning matches one of possible indicators
-        /// <br/>false if argument's beginning doesn't match any of correct indicator
-        /// </returns>
-        private static bool ValidateSwitchIndicatorInUnquotedArgument(string unquotedCommandLineArgument)
-        {
-            return unquotedCommandLineArgument.StartsWith("-", StringComparison.Ordinal) // superset of "--"
-                || unquotedCommandLineArgument.StartsWith("/", StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Gets the length of the switch indicator (- or / or --)
-        /// <br/>The length returned from this method is deduced from the beginning sequence of unquoted argument.
-        /// <br/>This way it will "assume" that there's no further error (e.g. //  or ---) which would also be considered as a correct indicator.
-        /// </summary>
-        /// <param name="unquotedSwitch">Unquoted argument with leading indicator and name</param>
-        /// <returns>Correct length of used indicator
-        /// <br/>0 if no leading sequence recognized as correct indicator</returns>
-        /// Internal for testing purposes
-        internal static int GetLengthOfSwitchIndicator(string unquotedSwitch)
-        {
-            if (unquotedSwitch.StartsWith("--", StringComparison.Ordinal))
-            {
-                return 2;
-            }
-            else if (unquotedSwitch.StartsWith("-", StringComparison.Ordinal) || unquotedSwitch.StartsWith("/", StringComparison.Ordinal))
-            {
-                return 1;
-            }
-            else
-            {
-                return 0;
             }
         }
 
@@ -3945,16 +3500,40 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            string arguments = binaryLoggerParameters[binaryLoggerParameters.Length - 1];
-
-            BinaryLogger logger = new BinaryLogger { Parameters = arguments };
-
             // If we have a binary logger, force verbosity to diagnostic.
             // The only place where verbosity is used downstream is to determine whether to log task inputs.
             // Since we always want task inputs for a binary logger, set it to diagnostic.
             verbosity = LoggerVerbosity.Diagnostic;
 
-            loggers.Add(logger);
+            // Process the parameters to get distinct paths and configuration info
+            var processedParams = BinaryLogger.ProcessParameters(binaryLoggerParameters);
+
+            if (processedParams.DistinctParameterSets.Count == 0)
+            {
+                return;
+            }
+
+            // Log a message if duplicate paths were filtered out
+            if (processedParams.DuplicateFilePaths.Count > 0)
+            {
+                Console.WriteLine(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("DuplicateBinaryLoggerPathsIgnored", string.Join(", ", processedParams.DuplicateFilePaths)));
+            }
+
+            if (processedParams.AllConfigurationsIdentical && processedParams.AdditionalFilePaths.Count > 0)
+            {
+                // Optimized approach: single logger writing to one file, then copy to additional locations
+                BinaryLogger logger = new() { Parameters = processedParams.DistinctParameterSets[0], AdditionalFilePaths = processedParams.AdditionalFilePaths };
+                loggers.Add(logger);
+            }
+            else
+            {
+                // Create separate logger instances for each distinct configuration
+                foreach (string paramSet in processedParams.DistinctParameterSets)
+                {
+                    BinaryLogger logger = new BinaryLogger { Parameters = paramSet };
+                    loggers.Add(logger);
+                }
+            }
         }
 
         /// <summary>
@@ -4568,7 +4147,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Displays the application version message/logo.
         /// </summary>
-        private static void DisplayVersionMessageIfNeeded(bool recursing, bool useTerminalLogger, CommandLineSwitches commandLineSwitches)
+        private static void DisplayVersionMessageIfNeeded(bool recursing, bool useTerminalLogger, bool noLogo, CommandLineSwitches commandLineSwitches)
         {
             if (recursing)
             {
@@ -4579,7 +4158,7 @@ namespace Microsoft.Build.CommandLine
             //  where it is not appropriate to show the versioning information (information querying mode that can be plugged into CLI scripts,
             //  terminal logger mode, where we want to display only the most relevant info, while output is not meant for investigation).
             // NOTE: response files are not reflected in this check. So enabling TL in response file will lead to version message still being shown.
-            bool shouldShowLogo = !commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.NoLogo] &&
+            bool shouldShowLogo = !noLogo &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Preprocess) &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetProperty) &&
                                   !commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.GetItem) &&

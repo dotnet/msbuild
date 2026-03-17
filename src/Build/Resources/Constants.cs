@@ -106,92 +106,6 @@ namespace Microsoft.Build.Internal
     }
 
     /// <summary>
-    /// Constants used by the Engine
-    /// </summary>
-    internal static class Constants
-    {
-        /// <summary>
-        /// Defines the name of dotnet host path environment variable (e.g  DOTNET_HOST_PATH = C:\msbuild\.dotnet\dotnet.exe).
-        /// </summary>
-        internal const string DotnetHostPathEnvVarName = "DOTNET_HOST_PATH";
-
-        /// <summary>
-        /// The project property name used to get the path to the MSBuild assembly.
-        /// </summary>
-        internal const string RuntimeIdentifierGraphPath = nameof(RuntimeIdentifierGraphPath);
-
-        /// <summary>
-        /// Defines the name of dotnet process based on the operating system.
-        /// </summary>
-        internal static readonly string DotnetProcessName = NativeMethodsShared.IsWindows ? "dotnet.exe" : "dotnet";
-
-        /// <summary>
-        /// Defines the name of MSBuild assembly.
-        /// </summary>
-        internal const string MSBuildAssemblyName = "MSBuild.dll";
-
-        /// <summary>
-        /// Defines the name of MSBuild executable.
-        /// </summary>
-        internal const string MSBuildExecutableName = "MSBuild.exe";
-
-        /// <summary>
-        /// If no default tools version is specified in the config file or registry, we'll use 2.0.
-        /// The engine will use its binpath for the matching toolset path.
-        /// </summary>
-        internal const string defaultToolsVersion = "2.0";
-
-        /// <summary>
-        /// The toolsversion we will fall back to as a last resort if the default one cannot be found, this fallback should be the most current toolsversion known
-        /// </summary>
-        internal static string defaultFallbackToolsVersion = MSBuildConstants.CurrentToolsVersion;
-
-        /// <summary>
-        /// The toolsversion we will use when we construct the solution wrapper metaprojects; this should be the most current toolsversion known
-        /// </summary>
-        internal static string defaultSolutionWrapperProjectToolsVersion = MSBuildConstants.CurrentToolsVersion;
-
-        /// <summary>
-        /// Name of the property used to specify a Visual Studio version.
-        /// </summary>
-        internal const string VisualStudioVersionPropertyName = "VisualStudioVersion";
-
-        /// <summary>
-        /// Name of the property used to select which sub-toolset to use.
-        /// </summary>
-        internal const string SubToolsetVersionPropertyName = VisualStudioVersionPropertyName;
-
-        /// <summary>
-        /// The constant for the storing full path to the resolved dotnet.
-        /// </summary>
-        internal const string DotnetHostPath = nameof(DotnetHostPath);
-
-        /// <summary>
-        /// The constant for the storing the relative path to MSBuild assembly.
-        /// </summary>
-        internal const string MSBuildAssemblyPath = nameof(MSBuildAssemblyPath);
-
-        /// <summary>
-        /// Current version of this MSBuild Engine assembly in the
-        /// form, e.g, "4.0"
-        /// </summary>
-        internal static string AssemblyVersion
-        {
-            get
-            {
-                return MSBuildConstants.CurrentProductVersion;
-            }
-        }
-
-        // Name of the environment variable that always points to 32-bit program files.
-        internal const string programFilesx86 = "ProgramFiles(x86)";
-
-        internal const string MSBuildAllProjectsPropertyName = "MSBuildAllProjects";
-
-        internal const string TaskHostExplicitlyRequested = "TaskHostExplicitlyRequested";
-    }
-
-    /// <summary>
     /// The set of available static methods.
     /// NOTE: Do not allow methods here that could do "bad" things under any circumstances.
     /// These must be completely benign operations, as they run during project load, which must be safe in VS.
@@ -394,6 +308,7 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.StringComparer", new Tuple<string, Type>(null, typeof(StringComparer)));
                         availableStaticMethods.TryAdd("System.TimeSpan", new Tuple<string, Type>(null, typeof(TimeSpan)));
                         availableStaticMethods.TryAdd("System.Text.RegularExpressions.Regex", new Tuple<string, Type>(null, typeof(Regex)));
+                        availableStaticMethods.TryAdd("System.Uri", new Tuple<string, Type>(null, typeof(Uri)));
                         availableStaticMethods.TryAdd("System.UriBuilder", new Tuple<string, Type>(null, typeof(UriBuilder)));
                         availableStaticMethods.TryAdd("System.Version", new Tuple<string, Type>(null, typeof(Version)));
                         availableStaticMethods.TryAdd("Microsoft.Build.Utilities.ToolLocationHelper", new Tuple<string, Type>("Microsoft.Build.Utilities.ToolLocationHelper, Microsoft.Build.Utilities.Core, Version=" + MSBuildConstants.CurrentAssemblyVersion + ", Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", null));

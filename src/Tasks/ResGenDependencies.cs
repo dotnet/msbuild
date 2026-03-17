@@ -11,7 +11,7 @@ using System.Resources;
 #endif
 using System.Xml;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.ResourceHandling;
 using Microsoft.Build.Utilities;
@@ -264,9 +264,9 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (IResource resource in MSBuildResXReader.GetResourcesFromFile(filename, pathsRelativeToBasePath: baseLinkedFileDirectory == null, log, logWarningForBinaryFormatter))
                     {
-                        if (resource is FileStreamResource linkedResource)
+                        if (resource is ILinkedFileResource linked)
                         {
-                            retVal.Add(linkedResource.FileName);
+                            retVal.Add(linked.LinkedFilePath);
                         }
                     }
                 }

@@ -49,6 +49,21 @@
     <file src="zh-Hans\Microsoft.Build.resources.dll" target="lib\netstandard1.3\zh-Hans\Microsoft.Build.resources.dll" />
     <file src="zh-Hant\Microsoft.Build.resources.dll" target="lib\netstandard1.3\zh-Hant\Microsoft.Build.resources.dll" />
 
+    <!-- Microsoft.Build.Framework.dll-->
+    <file src="cs\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\cs\Microsoft.Build.Framework.resources.dll" />
+    <file src="de\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\de\Microsoft.Build.Framework.resources.dll" />
+    <file src="es\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\es\Microsoft.Build.Framework.resources.dll" />
+    <file src="fr\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\fr\Microsoft.Build.Framework.resources.dll" />
+    <file src="it\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\it\Microsoft.Build.Framework.resources.dll" />
+    <file src="ja\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\ja\Microsoft.Build.Framework.resources.dll" />
+    <file src="ko\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\ko\Microsoft.Build.Framework.resources.dll" />
+    <file src="pl\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\pl\Microsoft.Build.Framework.resources.dll" />
+    <file src="pt-BR\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\pt-BR\Microsoft.Build.Framework.resources.dll" />
+    <file src="ru\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\ru\Microsoft.Build.Framework.resources.dll" />
+    <file src="tr\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\tr\Microsoft.Build.Framework.resources.dll" />
+    <file src="zh-Hans\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\zh-Hans\Microsoft.Build.Framework.resources.dll" />
+    <file src="zh-Hant\Microsoft.Build.Framework.resources.dll" target="lib\netstandard1.3\zh-Hant\Microsoft.Build.Framework.resources.dll" />
+
     <!-- Microsoft.Build.Tasks.Core.dll-->
     <file src="cs\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\cs\Microsoft.Build.Tasks.Core.resources.dll" />
     <file src="de\Microsoft.Build.Tasks.Core.resources.dll" target="lib\netstandard1.3\de\Microsoft.Build.Tasks.Core.resources.dll" />

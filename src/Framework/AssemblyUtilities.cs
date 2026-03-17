@@ -14,10 +14,6 @@ namespace Microsoft.Build.Shared
     {
         public static AssemblyName CloneIfPossible(this AssemblyName assemblyNameToClone)
         {
-#if CLR2COMPATIBILITY
-            return (AssemblyName)assemblyNameToClone.Clone();
-#else
-
             // NOTE: In large projects, this is called a lot. Avoid calling AssemblyName.Clone
             // because it clones the Version property (which is immutable) and the PublicKey property
             // and the PublicKeyToken property.
@@ -45,8 +41,6 @@ namespace Microsoft.Build.Shared
 #endif
 
             return name;
-#endif
-
         }
     }
 }

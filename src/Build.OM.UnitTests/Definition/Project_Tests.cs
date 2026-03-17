@@ -2089,7 +2089,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ObjectModelHelpers.CleanupFileContents(@"<Project xmlns='msbuildnamespace'>
                 </Project>");
 
-            string importFileName = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName() + ".proj";
+            string importFileName = FileUtilities.GetTemporaryFileName() + ".proj";
             File.WriteAllText(importFileName, importProjectContent);
 
             string projectContent =
@@ -3065,7 +3065,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
 
         [Theory]
-        [MemberData(nameof(GetItemProvenanceByProjectItemTestData))]
+        [MemberData(nameof(GetItemProvenanceByProjectItemTestData), DisableDiscoveryEnumeration = true)]
         public void GetItemProvenanceByProjectItem(string items, string itemValue, int itemPosition, ProvenanceResultTupleList expected)
         {
             var formattedProject = string.Format(ProjectWithItemGroup, items);
@@ -3350,7 +3350,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ("A", Operation.Include, Provenance.StringLiteral, 1)
             };
 
-            AssertProvenanceResult(expected, project, FileUtilities.GetIsFileSystemCaseSensitive() ? "a" : "A");
+            AssertProvenanceResult(expected, project, FileUtilities.IsFileSystemCaseSensitive ? "a" : "A");
         }
 
 
@@ -3486,7 +3486,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
         }
         [Theory]
-        [MemberData(nameof(GetItemProvenanceShouldWorkWithEscapedCharactersTestData))]
+        [MemberData(nameof(GetItemProvenanceShouldWorkWithEscapedCharactersTestData), DisableDiscoveryEnumeration = true)]
         public void GetItemProvenanceShouldWorkWithEscapedCharacters(string project, string provenanceArgument, ProvenanceResultTupleList expectedProvenance)
         {
             AssertProvenanceResult(expectedProvenance, project, provenanceArgument);

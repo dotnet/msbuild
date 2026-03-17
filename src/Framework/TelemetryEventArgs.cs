@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {
@@ -43,6 +42,7 @@ namespace Microsoft.Build.Framework
                 writer.WriteOptionalString(kvp.Value);
             }
         }
+
         internal override void CreateFromStream(BinaryReader reader, int version)
         {
             base.CreateFromStream(reader, version);

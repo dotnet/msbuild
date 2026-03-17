@@ -364,7 +364,8 @@ namespace Microsoft.Build.BackEnd
                 _targetResult = new TargetResult(
                     Array.Empty<TaskItem>(),
                     new WorkUnitResult(WorkUnitResultCode.Skipped, WorkUnitActionCode.Continue, null),
-                    projectLoggingContext.BuildEventContext);
+                    projectLoggingContext.BuildEventContext,
+                    TargetSkipReason.ConditionWasFalse);
                 _state = TargetEntryState.Completed;
 
                 if (projectLoggingContext.LoggingService.MinimumRequiredMessageImportance > MessageImportance.Low &&

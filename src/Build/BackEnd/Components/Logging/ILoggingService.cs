@@ -142,6 +142,16 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Returns the number of events currently queued for processing.
+        /// Used for hang diagnostics to determine if the logging pipeline is backed up.
+        /// Returns 0 for synchronous logging or when the queue is not available.
+        /// </summary>
+        int EventQueueCount
+        {
+            get;
+        }
+
+        /// <summary>
         /// List of properties to serialize from the child node
         /// </summary>
         string[] PropertiesToSerialize
@@ -282,6 +292,12 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="submissionId">The ID of the build submission.  A value of "0" means that an error was logged outside of any build submission.</param>
         /// <returns><code>true</code> if the build submission logged an errors, otherwise <code>false</code>.</returns>
         bool HasBuildSubmissionLoggedErrors(int submissionId);
+
+        /// <summary>
+        /// Populates build telemetry with error categorization data.
+        /// </summary>
+        /// <param name="buildTelemetry">The BuildTelemetry object to populate with error data.</param>
+        void PopulateBuildTelemetryWithErrors(Framework.Telemetry.BuildTelemetry buildTelemetry);
 
         /// <summary>
         /// Get the warnings that will be promoted to errors for the specified context.

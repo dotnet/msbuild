@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
@@ -12,6 +12,11 @@
     <DefineConstants Condition="'$(MSBuildRuntimeType)' == 'Core'">$(DefineConstants);NO_MSBUILDTASKHOST</DefineConstants>
 
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+
+    <!-- Suppression in needed to build ExampleTaskX86 that targets x86 architecture. -->
+    <NoWarn>$(NoWarn);MSB3270;CS0436</NoWarn>
+
+    <AppConfig>..\Shared\UnitTests\App.config</AppConfig>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,9 +32,6 @@
     <PackageReference Include="NuGet.Frameworks">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-
-    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-    <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
@@ -55,11 +57,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <!-- Ensure that Net35WinFormsApp is not included in the build. -->
+    <Compile Remove=".\TestAssets\Net35WinFormsApp\**\*.*" />
+    <EmbeddedResource Remove=".\TestAssets\Net35WinFormsApp\**\*.*" />
+    <Content Remove=".\TestAssets\Net35WinFormsApp\**\*.*" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Include="..\Shared\UnitTests\CommunicationUtilities_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\FileUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\FileMatcher_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\TypeLoader_Tests.cs" />
@@ -77,9 +84,6 @@
     <Compile Include="..\Shared\UnitTests\CopyOnWriteDictionary_Tests.cs">
       <Link>Collections\CopyOnWriteDictionary_Tests.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\UnitTests\ImmutableDictionary_Tests.cs" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' == 'Full'">
-      <Link>Collections\ImmutableDictionary_Tests.cs</Link>
-    </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <None Include="..\Shared\UnitTests\App.config">
@@ -89,6 +93,7 @@
     <None Include="..\Shared\UnitTests\xunit.runner.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+
     <None Include="TestAssets\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
@@ -128,6 +133,11 @@
 
   <ItemGroup Label="TestAssests" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">
     <ProjectReference Include=".\TestAssets\ExampleNetTask\ExampleTask\ExampleTask.csproj" />
+  </ItemGroup>
+
+  <ItemGroup Label="TestAssests" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
+    <ProjectReference Include=".\TestAssets\ExampleFrameworkTask\ExampleTaskX64\ExampleTaskX64.csproj" />
+    <ProjectReference Include=".\TestAssets\ExampleFrameworkTask\ExampleTaskX86\ExampleTaskX86.csproj" />
   </ItemGroup>
 
   <ItemGroup>

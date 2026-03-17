@@ -99,19 +99,16 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Check if this base type is a Microsoft-owned task
                 // We identify Microsoft tasks by checking if they're in the Microsoft.Build namespace
                 string? baseTypeName = baseType.FullName;
-                if (!string.IsNullOrEmpty(baseTypeName) && 
-                    (baseTypeName.StartsWith("Microsoft.Build.Tasks.") || 
+                if (!string.IsNullOrEmpty(baseTypeName) &&
+                    (baseTypeName.StartsWith("Microsoft.Build.Tasks.") ||
                      baseTypeName.StartsWith("Microsoft.Build.Utilities.")))
                 {
                     // This is a subclass of a Microsoft-owned task
                     // Track it only if it's NOT itself Microsoft-owned (i.e., user-authored subclass)
                     if (!isMicrosoftOwned)
                     {
-                        if (!_msbuildTaskSubclassUsage.ContainsKey(baseTypeName))
-                        {
-                            _msbuildTaskSubclassUsage[baseTypeName] = 0;
-                        }
-                        _msbuildTaskSubclassUsage[baseTypeName]++;
+                        _msbuildTaskSubclassUsage.TryGetValue(baseTypeName, out int count);
+                        _msbuildTaskSubclassUsage[baseTypeName] = count + 1;
                     }
                     // Stop at the first Microsoft-owned base class we find
                     break;
@@ -162,7 +159,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 Clean();
             }
         }
-        
+
         private void Clean()
         {
             _assemblyTaskFactoryTasksExecutedCount = 0;
@@ -177,39 +174,24 @@ namespace Microsoft.Build.BackEnd.Logging
             _msbuildTaskSubclassUsage.Clear();
         }
 
+        private static void AddCountIfNonZero(Dictionary<string, string> properties, string propertyName, int count)
+        {
+            if (count > 0)
+            {
+                properties[propertyName] = count.ToString(CultureInfo.InvariantCulture);
+            }
+        }
+
         private Dictionary<string, string> GetTaskFactoryProperties()
         {
             Dictionary<string, string> properties = new();
 
-            if (_assemblyTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["AssemblyTaskFactoryTasksExecutedCount"] = _assemblyTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_intrinsicTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["IntrinsicTaskFactoryTasksExecutedCount"] = _intrinsicTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_codeTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["CodeTaskFactoryTasksExecutedCount"] = _codeTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_roslynCodeTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["RoslynCodeTaskFactoryTasksExecutedCount"] = _roslynCodeTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_xamlTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["XamlTaskFactoryTasksExecutedCount"] = _xamlTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_customTaskFactoryTasksExecutedCount > 0)
-            {
-                properties["CustomTaskFactoryTasksExecutedCount"] = _customTaskFactoryTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
+            AddCountIfNonZero(properties, "AssemblyTaskFactoryTasksExecutedCount", _assemblyTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "IntrinsicTaskFactoryTasksExecutedCount", _intrinsicTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "CodeTaskFactoryTasksExecutedCount", _codeTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "RoslynCodeTaskFactoryTasksExecutedCount", _roslynCodeTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "XamlTaskFactoryTasksExecutedCount", _xamlTaskFactoryTasksExecutedCount);
+            AddCountIfNonZero(properties, "CustomTaskFactoryTasksExecutedCount", _customTaskFactoryTasksExecutedCount);
 
             return properties;
         }
@@ -217,23 +199,16 @@ namespace Microsoft.Build.BackEnd.Logging
         private Dictionary<string, string> GetTaskProperties()
         {
             Dictionary<string, string> properties = new();
-            
-            var totalTasksExecuted = _assemblyTaskFactoryTasksExecutedCount + 
+
+            var totalTasksExecuted = _assemblyTaskFactoryTasksExecutedCount +
                                     _intrinsicTaskFactoryTasksExecutedCount +
-                                    _codeTaskFactoryTasksExecutedCount + 
+                                    _codeTaskFactoryTasksExecutedCount +
                                     _roslynCodeTaskFactoryTasksExecutedCount +
-                                    _xamlTaskFactoryTasksExecutedCount + 
+                                    _xamlTaskFactoryTasksExecutedCount +
                                     _customTaskFactoryTasksExecutedCount;
-            
-            if (totalTasksExecuted > 0)
-            {
-                properties["TasksExecutedCount"] = totalTasksExecuted.ToString(CultureInfo.InvariantCulture);
-            }
-            
-            if (_taskHostTasksExecutedCount > 0)
-            {
-                properties["TaskHostTasksExecutedCount"] = _taskHostTasksExecutedCount.ToString(CultureInfo.InvariantCulture);
-            }
+
+            AddCountIfNonZero(properties, "TasksExecutedCount", totalTasksExecuted);
+            AddCountIfNonZero(properties, "TaskHostTasksExecutedCount", _taskHostTasksExecutedCount);
 
             return properties;
         }

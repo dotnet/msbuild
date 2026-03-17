@@ -19,7 +19,8 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Represents a task that can extract a .zip archive.
     /// </summary>
-    public sealed class Unzip : TaskExtension, ICancelableTask, IIncrementalTask
+    [MSBuildMultiThreadableTask]
+    public sealed class Unzip : TaskExtension, ICancelableTask, IIncrementalTask, IMultiThreadableTask
     {
         // We pick a value that is the largest multiple of 4096 that is still smaller than the large object heap threshold (85K).
         // The CopyTo/CopyToAsync buffer is short-lived and is likely to be collected at Gen0, and it offers a significant
@@ -75,6 +76,9 @@ namespace Microsoft.Build.Tasks
 
         public bool FailIfNotIncremental { get; set; }
 
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
+
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
         {
@@ -87,7 +91,8 @@ namespace Microsoft.Build.Tasks
             DirectoryInfo destinationDirectory;
             try
             {
-                destinationDirectory = Directory.CreateDirectory(DestinationFolder.ItemSpec);
+                AbsolutePath destinationPath = TaskEnvironment.GetAbsolutePath(DestinationFolder.ItemSpec);
+                destinationDirectory = Directory.CreateDirectory(destinationPath);
             }
             catch (Exception e)
             {
@@ -106,7 +111,18 @@ namespace Microsoft.Build.Tasks
                 {
                     foreach (ITaskItem sourceFile in SourceFiles.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
                     {
-                        if (!FileSystems.Default.FileExists(sourceFile.ItemSpec))
+                        AbsolutePath sourceFilePath;
+                        try
+                        {
+                            sourceFilePath = TaskEnvironment.GetAbsolutePath(sourceFile.ItemSpec);
+                        }
+                        catch (Exception)
+                        {
+                            Log.LogErrorWithCodeFromResources("Unzip.ErrorFileDoesNotExist", sourceFile.ItemSpec);
+                            continue;
+                        }
+
+                        if (!FileSystems.Default.FileExists(sourceFilePath))
                         {
                             Log.LogErrorWithCodeFromResources("Unzip.ErrorFileDoesNotExist", sourceFile.ItemSpec);
                             continue;
@@ -114,7 +130,7 @@ namespace Microsoft.Build.Tasks
 
                         try
                         {
-                            using (FileStream stream = new FileStream(sourceFile.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
+                            using (FileStream stream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false))
                             {
 #pragma warning disable CA2000 // Dispose objects before losing scope because ZipArchive will dispose the stream when it is disposed.
                                 using (ZipArchive zipArchive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: false))

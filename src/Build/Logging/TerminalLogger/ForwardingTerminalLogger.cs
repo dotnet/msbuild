@@ -12,6 +12,7 @@ namespace Microsoft.Build.Logging;
 /// </summary>
 public sealed partial class ForwardingTerminalLogger : IForwardingLogger
 {
+    private const string MSBuildTaskName = "MSBuild";
     /// <inheritdoc />
     public IEventRedirector? BuildEventRedirector { get; set; }
     /// <inheritdoc />
@@ -38,6 +39,7 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
         eventSource.TargetStarted += ForwardEventUnconditionally;
         eventSource.TargetFinished += ScrubOutputsFromIrrelevantTargets;
         eventSource.TaskStarted += TaskStarted;
+        eventSource.TaskFinished += TaskFinished;
 
         eventSource.MessageRaised += MessageRaised;
         eventSource.WarningRaised += ForwardEventUnconditionally;
@@ -93,7 +95,17 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
     {
         // The central node updates the 'in-flight' node status on the terminal
         // when a node starts the MSBuild task, so we need to forward these along so that behavior still works.
-        if (e.BuildEventContext is not null && e.TaskName == "MSBuild")
+        if (e.BuildEventContext is not null && e.TaskName == MSBuildTaskName)
+        {
+            BuildEventRedirector?.ForwardEvent(e);
+        }
+    }
+
+    public void TaskFinished(object sender, TaskFinishedEventArgs e)
+    {
+        // The central node updates the 'in-flight' node status on the terminal
+        // when a node finishes the MSBuild task, so we need to forward these along so that behavior still works.
+        if (e.BuildEventContext is not null && e.TaskName == MSBuildTaskName)
         {
             BuildEventRedirector?.ForwardEvent(e);
         }

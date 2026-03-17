@@ -1,6 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
@@ -42,6 +41,7 @@
     <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
+    <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
@@ -111,29 +111,16 @@
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>TaskLoggingHelperExtension.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs" />
     <Compile Include="..\Shared\MetadataConversionUtilities.cs">
       <Link>MetadataConversionUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\LanguageParser\StreamMappedString.cs">
       <Link>StreamMappedString.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ExceptionHandling.cs">
-      <Link>ExceptionHandling.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>FileUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\StringUtils.cs">
       <Link>StringUtils.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\EscapingUtilities.cs">
-      <Link>EscapingUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\FileMatcher.cs" />
-    <Compile Include="..\Shared\Modifiers.cs">
-      <Link>Modifiers.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ReadOnlyCollection.cs" />
     <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
     <Compile Include="..\Shared\Tracing.cs" />
@@ -146,7 +133,6 @@
     <Compile Include="..\Shared\AssemblyNameExtension.cs" />
     <Compile Include="..\Shared\ErrorUtilities.cs" />
     <Compile Include="..\Shared\ConversionUtilities.cs" />
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs" />
     <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="..\Shared\LanguageParser\token.cs" />
     <Compile Include="..\Shared\LanguageParser\tokenChar.cs" />
@@ -202,6 +188,7 @@
     <Compile Include="AssemblyDependency\Node\OutOfProcRarClient.cs" />
     <Compile Include="AssemblyDependency\Node\OutOfProcRarNode.cs" />
     <Compile Include="AssemblyDependency\Node\OutOfProcRarNodeEndpoint.cs" />
+    <Compile Include="AssemblyDependency\Node\RarNodeBufferedLogEvents.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeBuildEngine.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeExecuteRequest.cs" />
     <Compile Include="AssemblyDependency\Node\RarNodeExecuteResponse.cs" />
@@ -665,7 +652,6 @@
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
-    <ProjectReference Include="..\StringTools\StringTools.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
@@ -686,6 +672,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' != '.NETCoreApp'">
+    <PackageReference Include="System.Threading.Channels" PrivateAssets="all" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
     <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
@@ -707,7 +694,6 @@
 
   <!-- When targeting NS2.0, make private all references not exposed in the public API. -->
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <ProjectReference Update="..\StringTools\StringTools.csproj" PrivateAssets="all" />
     <PackageReference Update="System.CodeDom" PrivateAssets="all" />
     <PackageReference Update="System.Collections.Immutable" PrivateAssets="all" />
     <PackageReference Update="System.Resources.Extensions" PrivateAssets="all" />
@@ -716,7 +702,6 @@
     <PackageReference Update="System.Threading.Tasks.Dataflow" PrivateAssets="all" />
     <PackageReference Include="Microsoft.Win32.Registry" PrivateAssets="all" />
     <PackageReference Include="System.Reflection.Metadata" PrivateAssets="all" />
-    <PackageReference Include="System.Threading.Channels" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

@@ -47,7 +47,7 @@ The folder contains collection of docs and references for MSBuild, detailed info
 
 ## In-depth tech topics
 
-* [Reserved and built-in properties](Built-in-Propeties.md)
+* [Reserved and built-in properties](Built-in-Properties.md)
 * [`ProjectReference`](ProjectReference-Protocol.md)
 * [MSBuild Server](MSBuild-Server.md)
 * [Low priority nodes](specs/low-priority-switch.md)

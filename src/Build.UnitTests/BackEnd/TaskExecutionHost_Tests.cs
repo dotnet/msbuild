@@ -992,13 +992,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     ElementLocation.Create("none", 1, 1),
                     this,
                     false,
+                    projectFile: "proj.proj",
 #if FEATURE_APPDOMAIN
                     null,
 #endif
+                    null,
                     false,
-                    CancellationToken.None);
-                _host.FindTask(null);
-                _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, null, scheduledNodeId: 1);
+                    CancellationToken.None,
+                    TaskEnvironmentHelper.CreateForTest());
+                _host.FindTask(TaskHostParameters.Empty);
+                _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
             });
         }
         /// <summary>
@@ -1020,14 +1023,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ElementLocation.Create("none", 1, 1),
                 this,
                 false,
+                projectFile: "proj.proj",
 #if FEATURE_APPDOMAIN
                 null,
 #endif
+                null,
                 false,
-                CancellationToken.None);
+                CancellationToken.None,
+                TaskEnvironmentHelper.CreateForTest());
 
-            _host.FindTask(null);
-            _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, null, scheduledNodeId: 1);
+            _host.FindTask(TaskHostParameters.Empty);
+            _host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
             _logger.AssertLogContains("MSB4036");
         }
 
@@ -1067,7 +1073,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Force initing the DebugPath from the env var - as we need it to be unique for those tests.
             // The ProjectCacheTests DataMemberAttribute usages (specifically SuccessfulGraphsWithBuildParameters) lead
             //  to the DebugPath being set before this test runs - and hence the env var is ignored.
-            DebugUtils.SetDebugPath();
+            FrameworkDebugUtils.SetDebugPath();
 
             ObjectModelHelpers.BuildProjectExpectFailure($"""
                      <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -1087,16 +1093,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ml.AssertLogDoesntContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("UnhandledMSBuildError", string.Empty));
             ml.AssertLogContains(testExceptionMessage);
 
-            File.Exists(ExceptionHandling.DumpFilePath).ShouldBe(isCritical,
-                $"{ExceptionHandling.DumpFilePath} expected to exist: {isCritical}");
+            File.Exists(DebugUtils.DumpFilePath).ShouldBe(isCritical, $"{DebugUtils.DumpFilePath} expected to exist: {isCritical}");
+
             if (isCritical)
             {
-                FileUtilities.DeleteNoThrow(ExceptionHandling.DumpFilePath);
+                FileUtilities.DeleteNoThrow(DebugUtils.DumpFilePath);
             }
 
             // Reset DebugPath to not affect other tests
             transientEnvVar.Revert();
-            DebugUtils.SetDebugPath();
+            FrameworkDebugUtils.SetDebugPath();
         }
 
         [Fact]
@@ -1254,7 +1260,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             TaskBuilderTestTask.TaskBuilderTestTaskFactory taskFactory = new TaskBuilderTestTask.TaskBuilderTestTaskFactory();
             taskFactory.ThrowOnExecute = throwOnExecute;
             string taskName = "TaskBuilderTestTask";
-            (_host as TaskExecutionHost)._UNITTESTONLY_TaskFactoryWrapper = new TaskFactoryWrapper(taskFactory, loadedType, taskName, null);
+            (_host as TaskExecutionHost)._UNITTESTONLY_TaskFactoryWrapper = new TaskFactoryWrapper(taskFactory, loadedType, taskName, TaskHostParameters.Empty);
             _host.InitializeForTask(
                 this,
                 tlc,
@@ -1263,11 +1269,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ElementLocation.Create("none", 1, 1),
                 this,
                 false,
+                projectFile: "proj.proj",
 #if FEATURE_APPDOMAIN
                 null,
 #endif
+                null,
                 false,
-                CancellationToken.None);
+                CancellationToken.None,
+                TaskEnvironmentHelper.CreateForTest());
 
             ProjectTaskInstance taskInstance = project.Targets["foo"].Tasks.First();
             TaskLoggingContext talc = tlc.LogTaskBatchStarted(".", taskInstance, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).Assembly.GetName().FullName);
@@ -1289,8 +1298,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             _bucket = new ItemBucket(FrozenSet<string>.Empty, new Dictionary<string, string>(), new Lookup(itemsByName, new PropertyDictionary<ProjectPropertyInstance>()), 0);
             _bucket.Initialize(null);
-            _host.FindTask(null);
-            _host.InitializeForBatch(talc, _bucket, null, scheduledNodeId: 1);
+            _host.FindTask(TaskHostParameters.Empty);
+            _host.InitializeForBatch(talc, _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
             _parametersSetOnTask = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
             _outputsReadFromTask = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
         }

@@ -14,7 +14,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal sealed class ServerNodeBuildCommand : INodePacket
     {
-        private string _commandLine = default!;
+        private string[] _commandLine = default!;
         private string _startupDirectory = default!;
         private Dictionary<string, string> _buildProcessEnvironment = default!;
         private CultureInfo _culture = default!;
@@ -30,7 +30,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Command line including arguments
         /// </summary>
-        public string CommandLine => _commandLine;
+        public string[] CommandLine => _commandLine;
 
         /// <summary>
         /// The startup directory
@@ -71,7 +71,7 @@ namespace Microsoft.Build.BackEnd
         }
 
         public ServerNodeBuildCommand(
-            string commandLine,
+            string[] commandLine,
             string startupDirectory,
             Dictionary<string, string> buildProcessEnvironment,
             CultureInfo culture, CultureInfo uiCulture,

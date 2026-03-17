@@ -20,6 +20,14 @@ jobs:
   steps:
   - powershell: |
       $versionsFile = "eng/Versions.props"
+
+      [xml]$xml = Get-Content $versionsFile
+      $finalVersionKind = $xml.Project.PropertyGroup.DotNetFinalVersionKind
+      if ($finalVersionKind -ne 'release') {
+        Write-Host "Since it is not released, skip the version bump check.";
+        return
+      }
+
       $changedFiles = git diff --name-only HEAD HEAD~1
       $changedVersionsFile = $changedFiles | Where-Object { $_ -eq $versionsFile }
       $isInitialCommit = $false
@@ -45,41 +53,27 @@ jobs:
       }
 
       if (!($isInitialCommit -or $isVersionBumped)) {
-        throw "Hello! I noticed that you're targeting one of our servicing branches. You need to increase the revision version number (the last part) of 'VersionPrefix' in eng/Versions.props."
+        Write-Host "##vso[task.logissue type=error;sourcepath=eng/Versions.props;linenumber=6;]Hello! I noticed that you're targeting one of our servicing branches. You need to increase the revision version number (the last part) of 'VersionPrefix' in eng/Versions.props."
+        exit 1
       }
     condition: startsWith(variables['System.PullRequest.TargetBranch'], 'vs')
     displayName: "Check if patch version is bumped up"
 
-- job: IfOnlyDocumentionChanged
-  displayName: "Check whether Test Results need to be executed"
-  steps:
-  - powershell: |
-      $changedFiles = git diff --name-only HEAD HEAD~1
-      $changedFiles
-      $onlyDocChanged = 1
-      foreach ($file in $changedFiles) {
-        $isUnderDocumentation = $file -match "^documentation/"
-        if(!$isUnderDocumentation)
-        {
-          $onlyDocChanged = 0
-          break;
-        }
-      }
-      Write-Host "##vso[task.setvariable variable=onlyDocChanged;isoutput=true]$onlyDocChanged"
-    name: SetIfOnlyDocumentionChangedVaribale
-    displayName: Check whether only documentation has been updated
-
 - job: BootstrapMSBuildOnFullFrameworkWindows
-  dependsOn: IfOnlyDocumentionChanged
   variables:
-    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
     coverageReportName: WindowsFullFrameworkCoverage
   displayName: "Windows Full"
   pool:
-    vmImage: 'windows-2022'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      name: VSEng-MicroBuildVSStable
+      demands: agent.os -equals Windows_NT
   timeoutInMinutes: 120
   steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: PowerShell@2
       displayName: Setup Private Feeds Credentials
@@ -179,15 +173,19 @@ jobs:
 
 - job: BootstrapMSBuildOnCoreWindows
   displayName: "Windows Core"
-  dependsOn: IfOnlyDocumentionChanged
   variables:
-    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
     coverageReportName: WindowsCoreCoverage
   pool:
-    vmImage: 'windows-2022'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      name: VSEng-MicroBuildVSStable
+      demands: agent.os -equals Windows_NT
   timeoutInMinutes: 120
   steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: PowerShell@2
       displayName: Setup Private Feeds Credentials
@@ -257,22 +255,51 @@ jobs:
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
 
+- job: BootstrapMSBuildWithMTMode
+  displayName: "Linux Core Multithreaded Mode"
+  pool:
+    vmImage: 'ubuntu-latest'
+  timeoutInMinutes: 120
+  steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
+  - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
+    - task: Bash@3
+      displayName: Setup Private Feeds Credentials
+      inputs:
+        filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.sh
+        arguments: $(Build.SourcesDirectory)/NuGet.config $Token
+      env:
+        Token: $(dn-bot-dnceng-artifact-feeds-rw)
+  - bash: sudo apt-get update
+  - bash: sudo apt-get install -y libxml2
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged) --skipTests --stage2Properties '/mt'
+    displayName: 'Build with bootstrapped MSBuild and -mt mode'
+    condition: eq(variables.onlyDocChanged, 0)
+    env:
+      MSBUILDUSESERVER: "1"
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'MTModeOnLinux build logs'
+    continueOnError: true
+    condition: always()
+
 - job: FullReleaseOnWindows
   displayName: "Windows Full Release (no bootstrap)"
-  dependsOn: IfOnlyDocumentionChanged
   variables:
-    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
     coverageReportName: WindowsFullReleaseCoverage
   pool:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
       name: NetCore-Public
-      demands: ImageOverride -equals windows.vs2022preview.scout.amd64.open
+      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
     ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      name: VSEngSS-MicroBuild2022-1ES
+      name: VSEng-MicroBuildVSStable
       demands: agent.os -equals Windows_NT
   timeoutInMinutes: 120
   steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: PowerShell@2
       displayName: Setup Private Feeds Credentials
@@ -349,12 +376,14 @@ jobs:
 
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
-  dependsOn: IfOnlyDocumentionChanged
-  variables:
-    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
   pool:
-    vmImage: 'ubuntu-latest'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      vmImage: 'ubuntu-latest'
   steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: Bash@3
       displayName: Setup Private Feeds Credentials
@@ -378,7 +407,7 @@ jobs:
       arguments: --repoRoot $(Build.SourcesDirectory)
   - task: PublishPipelineArtifact@1
     displayName: Publish Code Coverage Results
-    continueOnError: false
+    continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
@@ -441,12 +470,10 @@ jobs:
 
 - job: CoreOnMac
   displayName: "macOS Core"
-  dependsOn: IfOnlyDocumentionChanged
-  variables:
-    onlyDocChanged: $[ dependencies.IfOnlyDocumentionChanged.outputs['SetIfOnlyDocumentionChangedVaribale.onlyDocChanged'] ]
   pool:
     vmImage: 'macOS-latest'
   steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
     - task: Bash@3
       displayName: Setup Private Feeds Credentials
@@ -468,7 +495,7 @@ jobs:
       arguments: --repoRoot $(Build.SourcesDirectory)
   - task: PublishPipelineArtifact@1
     displayName: Publish Code Coverage Results
-    continueOnError: false
+    continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
@@ -537,8 +564,15 @@ jobs:
   - FullReleaseOnWindows
   - CoreBootstrappedOnLinux
   - CoreOnMac
+  variables:
+    onlyDocChanged: $[ dependencies.BootstrapMSBuildOnFullFrameworkWindows.outputs['CheckDocumentationOnlyChange.onlyDocChanged'] ]
   pool:
-    vmImage: 'windows-2022'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      name: VSEng-MicroBuildVSStable
+      demands: agent.os -equals Windows_NT
   steps:
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: DownloadPipelineArtifact@2
@@ -561,11 +595,13 @@ jobs:
       buildType: 'current'
       artifactName: 'LinuxCoreCoverage'
       targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/LinuxCore'
+    condition: eq(variables.onlyDocChanged, 0)
   - task: DownloadPipelineArtifact@2
     inputs:
       buildType: 'current'
       artifactName: 'MacCoreCoverage'
       targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/MacCore'
+    condition: eq(variables.onlyDocChanged, 0)
 
   - task: PowerShell@2
     displayName: Process coverage reports
@@ -573,20 +609,22 @@ jobs:
       filePath: $(Build.SourcesDirectory)\eng\process-coverage.ps1
       arguments: -repoRoot $(Build.SourcesDirectory) -coverageArtifactsDir $(Build.SourcesDirectory)/artifacts/CoverageResults
       pwsh: true
+    condition: eq(variables.onlyDocChanged, 0)
   - task: PublishBuildArtifacts@1
     displayName: Publish Artifact $(Build.BuildNumber) Coverage
     inputs:
       PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
       ArtifactName: '$(Build.BuildNumber) Coverage'
-    condition: succeededOrFailed()
+    condition: and(succeededOrFailed(), eq(variables.onlyDocChanged, 0))
   - task: PublishBuildArtifacts@1
     displayName: Publish Artifact $(Build.BuildNumber) Cobertura
     inputs:
       PathtoPublish: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.cobertura.xml'
       ArtifactName: '$(Build.BuildNumber) Cobertura'
-    condition: succeededOrFailed()
+    condition: and(succeededOrFailed(), eq(variables.onlyDocChanged, 0))
   - task: PublishCodeCoverageResults@2
     inputs:
       summaryFileLocation: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
       pathToSources: $(Build.SourcesDirectory)
+    condition: eq(variables.onlyDocChanged, 0)
 - template: /eng/common/templates/jobs/source-build.yml

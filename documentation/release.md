@@ -6,6 +6,8 @@ This is a description of the steps required to release MSBuild. It is **incomple
 
 To produce packages without a `-prerelease` suffix, we need to specify `<DotNetFinalVersionKind>release</DotNetFinalVersionKind>` (see the [Arcade versioning docs]). This is ideally done on the same line as the version specification so that it causes a Git merge conflict when merging to the next release's branch. See [#6902](https://github.com/dotnet/msbuild/pull/6902) for an example.
 
+Run `scripts/Stabilize-Release.ps1` to automate this process. The script modifies `eng/Versions.props` to add `DotNetFinalVersionKind` and change `PreReleaseVersionLabel` from `preview` to `servicing`. Use `-DryRun` to preview changes before applying them.
+
 [Arcade versioning docs]: https://github.com/dotnet/arcade/blob/31cecde14e1512ecf60d2d8afb71fd240919f4a8/Documentation/CorePackages/Versioning.md
 
 ## Public API

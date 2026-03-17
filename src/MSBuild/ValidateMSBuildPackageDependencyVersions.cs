@@ -20,11 +20,11 @@ namespace MSBuild
         // Microsoft.Build.Conversion.Core and Microsoft.Build.Engine are deprecated, but they're still used in VS for now. This project doesn't directly reference them, so they don't appear in its output directory.
         // Microsoft.NET.StringTools uses API not available in net35, but since we need it to work for TaskHosts as well, there are simpler versions implemented for that. Ensure it's the right version.
         // Microsoft.Activities.Build and XamlBuildTask are loaded within an AppDomain in the XamlBuildTask after having been loaded from the GAC elsewhere. See https://github.com/dotnet/msbuild/pull/856
-        private string[] assembliesToIgnore = { "Microsoft.Build.Conversion.Core", "Microsoft.NET.StringTools.net35", "Microsoft.Build.Engine", "Microsoft.Activities.Build", "XamlBuildTask" };
+        private string[] assembliesToIgnore = { "Microsoft.Build.Conversion.Core", "Microsoft.NET.StringTools.net35", "Microsoft.Build.Engine", "Microsoft.Activities.Build", "System.ValueTuple", "XamlBuildTask" };
 
         public override bool Execute()
         {
-            bool foundSystemValueTuple = false;
+            // bool foundSystemValueTuple = false;
 
             var settings = new XmlReaderSettings
             {
@@ -87,38 +87,21 @@ namespace MSBuild
                         string assemblyVersion = AssemblyName.GetAssemblyName(path).Version.ToString();
                         if (!version.Equals(assemblyVersion))
                         {
-                            // Ensure that the binding redirect is to the GAC version, but
-                            // we still ship the version we explicitly reference to let
-                            // API consumers bind to it at runtime.
-                            // See https://github.com/dotnet/msbuild/issues/6976.
-                            if (String.Equals(name, "System.ValueTuple", StringComparison.OrdinalIgnoreCase) &&
-                                String.Equals(version, "4.0.0.0") && String.Equals(assemblyVersion, "4.0.3.0"))
-                            {
-                                foundSystemValueTuple = true;
-                            }
-                            else
-                            {
-                                Log.LogError(
-                                    subcategory: null,
-                                    errorCode: null,
-                                    helpKeyword: null,
-                                    file: appConfigPath,
-                                    lineNumber: bindingRedirectLineNumber,
-                                    columnNumber: 0,
-                                    endLineNumber: 0,
-                                    endColumnNumber: 0,
-                                    message: $"Binding redirect for '{name}' redirects to a different version ({version}) than MSBuild ships ({assemblyVersion}).");
-                            }
+                            Log.LogError(
+                                subcategory: null,
+                                errorCode: null,
+                                helpKeyword: null,
+                                file: appConfigPath,
+                                lineNumber: bindingRedirectLineNumber,
+                                columnNumber: 0,
+                                endLineNumber: 0,
+                                endColumnNumber: 0,
+                                message: $"Binding redirect for '{name}' redirects to a different version ({version}) than MSBuild ships ({assemblyVersion}).");
+                            
                         }
                     }
                 }
             }
-            
-            if (!foundSystemValueTuple)
-            {
-                Log.LogError("Binding redirect for 'System.ValueTuple' missing.");
-            }
-
             return !Log.HasLoggedErrors;
         }
     }

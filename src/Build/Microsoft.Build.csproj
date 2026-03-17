@@ -1,6 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
@@ -30,7 +29,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectReference Include="..\StringTools\StringTools.csproj" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
 
@@ -38,12 +36,34 @@
 
     <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
 
-    <PackageReference Include="Microsoft.CodeAnalysis.Collections" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.PooledObjects" PrivateAssets="all" />
     <PackageReference Include="Microsoft.BuildXL.Processes" Condition="'$(FeatureReportFileAccesses)' == 'true'" PrivateAssets="all" />
     <!-- Remove the direct NETStandard.Library dependency when Microsoft.BuildXL.Processes stops bringing in netstandard1.x dependencies
          or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
     <PackageReference Include="NETStandard.Library" VersionOverride="2.0.3" PrivateAssets="all" Condition="'$(FeatureReportFileAccesses)' == 'true'" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.Collections" PrivateAssets="all" />
+
+    <!-- Display files included by the Microsoft.CodeAnalysis.Collections source package in a 'SourcePackages\Collections' folder -->
+    <Content Update="@(Content)">
+      <Link Condition="'%(NuGetPackageId)' == 'Microsoft.CodeAnalysis.Collections'">SourcePackages\Collections\%(Link)</Link>
+    </Content>
+    <Compile Update="@(Compile)">
+      <Link Condition="'%(NuGetPackageId)' == 'Microsoft.CodeAnalysis.Collections'">SourcePackages\Collections\%(Link)</Link>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.PooledObjects" PrivateAssets="all" />
+
+    <!-- Display files included by the Microsoft.CodeAnalysis.PooledObjects source package in a 'SourcePackages\PooledObjects' folder -->
+    <Content Update="@(Content)">
+      <Link Condition="'%(NuGetPackageId)' == 'Microsoft.CodeAnalysis.PooledObjects'">SourcePackages\PooledObjects\%(Link)</Link>
+    </Content>
+    <Compile Update="@(Compile)">
+      <Link Condition="'%(NuGetPackageId)' == 'Microsoft.CodeAnalysis.PooledObjects'">SourcePackages\PooledObjects\%(Link)</Link>
+    </Compile>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
@@ -100,6 +120,11 @@
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
+    <Compile Include="..\Shared\ITaskHostCallbackPacket.cs" />
+    <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesRequest.cs" />
+    <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesResponse.cs" />
+    <Compile Include="..\Shared\TaskHostCoresRequest.cs" />
+    <Compile Include="..\Shared\TaskHostCoresResponse.cs" />
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\NodeEngineShutdownReason.cs" />
@@ -139,6 +164,7 @@
     <Compile Include="BackEnd\BuildManager\BuildSubmissionBase.cs" />
     <Compile Include="BackEnd\BuildManager\CacheSerialization.cs" />
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
+    <Compile Include="BackEnd\BuildManager\EnvironmentVariableValidator.cs" />
     <Compile Include="BackEnd\BuildManager\GlobalPropertiesLookup.cs" />
     <Compile Include="BackEnd\BuildManager\ProjectIsolationMode.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientPacketPump.cs" />
@@ -182,7 +208,6 @@
     <Compile Include="Logging\ReusableLogger.cs" />
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
     <Compile Include="TelemetryInfra\ITelemetryForwarder.cs" />
-    <Compile Include="TelemetryInfra\TelemetryDataUtils.cs" />
     <Compile Include="TelemetryInfra\TelemetryForwarderProvider.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
@@ -223,6 +248,7 @@
     <Compile Include="BackEnd\Components\Logging\BuildLoggingContext.cs" />
     <Compile Include="BackEnd\Components\Logging\LoggingContext.cs" />
     <Compile Include="BackEnd\Components\Logging\BuildEventArgTransportSink.cs" />
+    <Compile Include="BackEnd\Components\Logging\BuildErrorTelemetryTracker.cs" />
     <Compile Include="BackEnd\Components\Logging\CentralForwardingLogger.cs" />
     <Compile Include="BackEnd\Components\Logging\EventRedirectorToSink.cs" />
     <Compile Include="BackEnd\Components\Logging\EventSourceSink.cs" />
@@ -627,28 +653,14 @@
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Errors\ErrorUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\EscapingUtilities.cs">
-      <Link>SharedUtilities\EscapingUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\VersionUtilities.cs">
       <Link>SharedUtilities\VersionUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\EventArgsFormatting.cs">
       <Link>SharedUtilities\EventArgsFormatting.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ExceptionHandling.cs">
-      <Link>SharedUtilities\ExceptionHandling.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\FileMatcher.cs">
       <Link>SharedUtilities\FileMatcher.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>SharedUtilities\FileUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs" />
-    <Compile Include="..\Shared\Modifiers.cs" />
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
-      <Link>SharedUtilities\FileUtilitiesRegex.cs</Link>
     </Compile>
     <Compile Include="..\Shared\FrameworkLocationHelper.cs">
       <Link>SharedUtilities\FrameworkLocationHelper.cs</Link>

@@ -500,7 +500,7 @@ namespace Microsoft.Build.Execution
             {
                 try
                 {
-                    CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                    FrameworkCommunicationsUtilities.SetEnvironment(_savedEnvironment);
                 }
                 catch (Exception ex)
                 {
@@ -714,7 +714,7 @@ namespace Microsoft.Build.Execution
             _buildParameters.ProjectRootElementCache = s_projectRootElementCacheBase;
 
             // Snapshot the current environment
-            _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+            _savedEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
 
             // Change to the startup directory
             try
@@ -743,6 +743,7 @@ namespace Microsoft.Build.Execution
             }
 
             Traits.UpdateFromEnvironment();
+            DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(_buildParameters.BuildProcessEnvironment);
 
             // We want to make sure the global project collection has the toolsets which were defined on the parent
             // so that any custom toolsets defined can be picked up by tasks who may use the global project collection but are

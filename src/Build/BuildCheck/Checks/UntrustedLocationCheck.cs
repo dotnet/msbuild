@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
@@ -40,7 +41,7 @@ internal sealed class UntrustedLocationCheck : Check
     private void EvaluatedPropertiesAction(BuildCheckDataContext<EvaluatedPropertiesCheckData> context)
     {
         if (checkedProjects.Add(context.Data.ProjectFilePath) &&
-            context.Data.ProjectFileDirectory.StartsWith(PathsHelper.Downloads, Shared.FileUtilities.PathComparison))
+            context.Data.ProjectFileDirectory.StartsWith(PathsHelper.Downloads, FileUtilities.PathComparison))
         {
             context.ReportResult(BuildCheckResult.Create(
                 SupportedRule,

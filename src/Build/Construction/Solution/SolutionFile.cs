@@ -21,7 +21,6 @@ using Microsoft.VisualStudio.SolutionPersistence.Model;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 using BuildEventFileInfo = Microsoft.Build.Shared.BuildEventFileInfo;
 using ErrorUtilities = Microsoft.Build.Shared.ErrorUtilities;
-using ExceptionUtilities = Microsoft.Build.Shared.ExceptionHandling;
 using ProjectFileErrorUtilities = Microsoft.Build.Shared.ProjectFileErrorUtilities;
 using ResourceUtilities = Microsoft.Build.Shared.ResourceUtilities;
 using VisualStudioConstants = Microsoft.Build.Shared.VisualStudioConstants;
@@ -278,7 +277,7 @@ namespace Microsoft.Build.Construction
 
         internal bool ProjectShouldBuild(string projectFile)
         {
-            return _solutionFilter?.Contains(FileUtilities.FixFilePath(projectFile)) != false;
+            return _solutionFilter?.Contains(FileUtilities.NormalizePathSeparatorsToForwardSlash(projectFile)) != false;
         }
 
         /// <summary>
@@ -648,7 +647,7 @@ namespace Microsoft.Build.Construction
                 _solutionFilter = new HashSet<string>(_pathComparer);
                 foreach (JsonElement project in solution.GetProperty("projects").EnumerateArray())
                 {
-                    _solutionFilter.Add(FileUtilities.FixFilePath(project.GetString()));
+                    _solutionFilter.Add(FileUtilities.NormalizePathSeparatorsToForwardSlash(project.GetString()));
                 }
             }
             catch (Exception e) when (e is JsonException || e is KeyNotFoundException || e is InvalidOperationException)
@@ -746,7 +745,7 @@ namespace Microsoft.Build.Construction
                 SolutionReader = new StreamReader(fileStream, Encoding.GetEncoding(0)); // HIGHCHAR: If solution files have no byte-order marks, then assume ANSI rather than ASCII.
                 ParseSolution();
             }
-            catch (Exception e) when (ExceptionUtilities.IsIoRelatedException(e))
+            catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
                 ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(_solutionFile), "InvalidProjectFile", e.Message);
             }
@@ -908,7 +907,7 @@ namespace Microsoft.Build.Construction
 
             foreach (ProjectInSolution project in _projectsInOrder)
             {
-                projectPaths.Add(FileUtilities.FixFilePath(project.RelativePath));
+                projectPaths.Add(FileUtilities.NormalizePathSeparatorsToForwardSlash(project.RelativePath));
             }
 
             foreach (string project in _solutionFilter)

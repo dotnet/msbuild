@@ -131,7 +131,7 @@ namespace Microsoft.Build.BackEnd
         internal BuildRequestEngine()
         {
             _debugDumpState = Traits.Instance.DebugScheduler;
-            _debugDumpPath = DebugUtils.DebugPath;
+            _debugDumpPath = FrameworkDebugUtils.DebugPath;
             _debugForceCaching = Environment.GetEnvironmentVariable("MSBUILDDEBUGFORCECACHING") == "1";
 
             if (String.IsNullOrEmpty(_debugDumpPath))
@@ -387,7 +387,21 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        BuildRequestEntry entry = new BuildRequestEntry(request, _configCache[request.ConfigurationId]);
+                        BuildRequestConfiguration config = _configCache[request.ConfigurationId];
+
+                        TaskEnvironment taskEnvironment;
+                        if (_componentHost.BuildParameters.MultiThreaded)
+                        {
+                            string projectDirectoryFullPath = Path.GetDirectoryName(config.ProjectFullPath);
+                            var environmentVariables = new Dictionary<string, string>(_componentHost.BuildParameters.BuildProcessEnvironmentInternal);
+                            taskEnvironment = new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(projectDirectoryFullPath, environmentVariables));
+                        }
+                        else
+                        {
+                            taskEnvironment = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+                        }
+
+                        BuildRequestEntry entry = new BuildRequestEntry(request, config, taskEnvironment);
 
                         entry.OnStateChanged += BuildRequestEntry_StateChanged;
 
@@ -1425,7 +1439,7 @@ namespace Microsoft.Build.BackEnd
                                 // Dump all engine exceptions to a temp file
                                 // so that we have something to go on in the
                                 // event of a failure
-                                ExceptionHandling.DumpExceptionToFile(e);
+                                DebugUtils.DumpExceptionToFile(e);
 
                                 // Raise the exception to the host, so that it can signal termination of the build.
                                 RaiseEngineException(e);

@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "MSBuild.sln",
+    "path": "MSBuild.slnx",
     "projects": [
       "src\\Build.OM.UnitTests\\Microsoft.Build.Engine.OM.UnitTests.csproj",
       "src\\Build.UnitTests\\Microsoft.Build.Engine.UnitTests.csproj",

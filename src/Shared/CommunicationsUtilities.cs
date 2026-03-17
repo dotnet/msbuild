@@ -7,7 +7,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
+
+#if RUNTIME_TYPE_NETCORE
 using System.Runtime.InteropServices;
+#endif
+
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS || RUNTIME_TYPE_NETCORE
 using System.Security.Principal;
 #endif
@@ -18,14 +22,8 @@ using System.Text;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.BackEnd;
 
-#if !CLR2COMPATIBILITY
-using Microsoft.Build.Shared.Debugging;
-using System.Collections;
-using System.Collections.Frozen;
-using Microsoft.NET.StringTools;
-
-#endif
 #if !FEATURE_APM
 using System.Threading.Tasks;
 #endif
@@ -37,7 +35,6 @@ namespace Microsoft.Build.Internal
     /// <summary>
     /// Enumeration of all possible (currently supported) options for handshakes.
     /// </summary>
-    /// <remarks> In case of adding new options, please remember to update the generation of unique task host node id in NodeProviderOutOfProcTaskHost. </remarks>
     [Flags]
     internal enum HandshakeOptions
     {
@@ -90,21 +87,64 @@ namespace Microsoft.Build.Internal
     }
 
     /// <summary>
+    /// Represents a unique key for identifying task host nodes.
+    /// Combines HandshakeOptions (which specify runtime/architecture configuration) with
+    /// the scheduled node ID to uniquely identify task hosts in multi-threaded mode.
+    /// </summary>
+    /// <param name="HandshakeOptions">The handshake options specifying runtime and architecture configuration.</param>
+    /// <param name="NodeId">
+    /// The scheduled node ID. In traditional multi-proc builds, this is -1 (meaning the task host
+    /// is identified by HandshakeOptions alone). In multi-threaded mode, each in-proc node has
+    /// its own task host, so the node ID is used to distinguish them.
+    /// </param>
+    internal readonly record struct TaskHostNodeKey(HandshakeOptions HandshakeOptions, int NodeId);
+
+    /// <summary>
     /// Status codes for the handshake process.
     /// It aggregates return values across several functions so we use an aggregate instead of a separate class for each method.
     /// </summary>
     internal enum HandshakeStatus
     {
+        /// <summary>
+        /// The handshake operation completed successfully.
+        /// </summary>
         Success = 0,
-        // Other node resurned different value than we expected.
-        // This can happen either by attempting to connect to a wrong node type. (e.g. transient TaskHost trying to connect to a long-running TaskHost)
-        // Or by trying to connect to a node that has a different MSBuild version.
+
+        /// <summary>
+        /// The other node returned a different value than expected.
+        /// This can happen either by attempting to connect to a wrong node type 
+        /// (e.g., transient TaskHost trying to connect to a long-running TaskHost)
+        /// or by trying to connect to a node that has a different MSBuild version.
+        /// </summary>
         VersionMismatch = 1,
-        // TryReadInt -> Abort due to old MSBuild version
+
+        /// <summary>
+        /// The handshake was aborted due to connection from an old MSBuild version.
+        /// Occurs in TryReadInt when detecting legacy MSBuild.exe connections.
+        /// </summary>
         OldMSBuild = 2,
+
+        /// <summary>
+        /// The handshake operation timed out before completion.
+        /// </summary>
         Timeout = 3,
+
+        /// <summary>
+        /// The stream ended unexpectedly during the handshake operation.
+        /// Indicates an incomplete or corrupted handshake sequence.
+        /// </summary>
         UnexpectedEndOfStream = 4,
+
+        /// <summary>
+        /// The endianness (byte order) of the communicating nodes does not match.
+        /// Indicates an architecture compatibility issue.
+        /// </summary>
         EndiannessMismatch = 5,
+
+        /// <summary>
+        /// The handshake status is undefined or uninitialized.
+        /// </summary>
+        Undefined,
     }
 
     /// <summary>
@@ -130,24 +170,33 @@ namespace Microsoft.Build.Internal
         public string ErrorMessage { get; }
 
         /// <summary>
+        /// The negotiated packet version with the child node.
+        /// It's needed to ensure both sides of the communication can read/write data in pipe.
+        /// </summary>
+        public byte NegotiatedPacketVersion { get; }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="HandshakeResult"/> class.
         /// </summary>
         /// <param name="status">The status of the handshake operation.</param>
         /// <param name="value">The value returned from the handshake.</param>
         /// <param name="errorMessage">The error message if the handshake failed.</param>
-        private HandshakeResult(HandshakeStatus status, int value, string errorMessage)
+        /// <param name="negotiatedPacketVersion">The packet version from the child node.</param>
+        private HandshakeResult(HandshakeStatus status, int value, string errorMessage, byte negotiatedPacketVersion = 1)
         {
             Status = status;
             Value = value;
             ErrorMessage = errorMessage;
+            NegotiatedPacketVersion = negotiatedPacketVersion;
         }
 
         /// <summary>
         /// Creates a successful handshake result with the specified value.
         /// </summary>
         /// <param name="value">The value returned from the handshake operation.</param>
+        /// <param name="negotiatedPacketVersion">The packet version received from the child node.</param>
         /// <returns>A new <see cref="HandshakeResult"/> instance representing a successful operation.</returns>
-        public static HandshakeResult Success(int value = 0) => new(HandshakeStatus.Success, value, null);
+        public static HandshakeResult Success(int value = 0, byte negotiatedPacketVersion = 1) => new(HandshakeStatus.Success, value, null, negotiatedPacketVersion);
 
         /// <summary>
         /// Creates a failed handshake result with the specified status and error message.
@@ -160,29 +209,40 @@ namespace Microsoft.Build.Internal
 
     internal class Handshake
     {
+        /// <summary>
+        /// Marker indicating that the next integer in the child handshake response is the PacketVersion.
+        /// </summary>
+        public const int PacketVersionFromChildMarker = -1;
+
         // The number is selected as an arbitrary value that is unlikely to conflict with any future sdk version.
         public const int NetTaskHostHandshakeVersion = 99;
-
-        public const HandshakeOptions NetTaskHostFlags = HandshakeOptions.NET | HandshakeOptions.TaskHost;
 
         protected readonly HandshakeComponents _handshakeComponents;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Handshake"/> class with the specified node type
-        /// and optional predefined tools directory.
+        ///  Initializes a new instance of the <see cref="Handshake"/> class with the specified node type.
         /// </summary>
         /// <param name="nodeType">
-        /// The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
+        ///  The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
         /// </param>
-        /// <param name="predefinedToolsDirectory">
-        /// An optional directory path used for .NET TaskHost handshake salt calculation (only on .NET Framework).
-        /// When specified for .NET TaskHost nodes, this directory path is included in the handshake salt 
-        /// to ensure the child dotnet process connects with the expected tools directory context.
-        /// For non-.NET TaskHost nodes or on .NET Core, the MSBuildToolsDirectoryRoot is used instead.
-        /// This parameter is ignored when not running .NET TaskHost on .NET Framework.
+        public Handshake(HandshakeOptions nodeType)
+            : this(nodeType, includeSessionId: true, toolsDirectory: null)
+        {
+        }
+
+        /// <summary>
+        ///  Initializes a new instance of the <see cref="Handshake"/> class with the specified node type
+        ///  and optional predefined tools directory.
+        /// </summary>
+        /// <param name="nodeType">
+        ///  The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
         /// </param>
-        internal Handshake(HandshakeOptions nodeType, string predefinedToolsDirectory = null)
-            : this(nodeType, includeSessionId: true, predefinedToolsDirectory)
+        /// <param name="toolsDirectory">
+        ///  The directory path to use for handshake salt calculation. For some task hosts, notably the .NET TaskHost (on .NET Framework)
+        ///  and the CLR2 TaskHost, this is needed to ensure the child process connects with the expected tools directory context.
+        /// </param>
+        public Handshake(HandshakeOptions nodeType, string toolsDirectory)
+            : this(nodeType, includeSessionId: true, toolsDirectory)
         {
         }
 
@@ -192,9 +252,22 @@ namespace Microsoft.Build.Internal
         // Source options of the handshake.
         internal HandshakeOptions HandshakeOptions { get; }
 
-        protected Handshake(HandshakeOptions nodeType, bool includeSessionId, string predefinedToolsDirectory)
+        protected Handshake(HandshakeOptions nodeType, bool includeSessionId, string toolsDirectory)
         {
             HandshakeOptions = nodeType;
+
+#if NETFRAMEWORK
+            ErrorUtilities.VerifyThrow(
+                toolsDirectory is null || IsNetTaskHost || IsClr2TaskHost,
+                $"{toolsDirectory} should only be provided for .NET or CLR2 TaskHost nodes.");
+#else
+            // IsNetTaskHost covers the case when NET process spawns NET TaskHost.
+            ErrorUtilities.VerifyThrow(
+                toolsDirectory is null || IsNetTaskHost,
+                $"{toolsDirectory} should not have been provided.");
+#endif
+
+            toolsDirectory ??= BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
             // Build handshake options with version in upper bits
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
@@ -202,9 +275,8 @@ namespace Microsoft.Build.Internal
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
             // Calculate salt from environment and tools directory
-            bool isNetTaskHost = IsHandshakeOptionEnabled(nodeType, NetTaskHostFlags);
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
-            string toolsDirectory = GetToolsDirectory(isNetTaskHost, predefinedToolsDirectory);
+
             int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
 
             CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt);
@@ -212,26 +284,26 @@ namespace Microsoft.Build.Internal
 
             // Get session ID if needed (expensive call)
             int sessionId = 0;
-            if (includeSessionId)
+            if (includeSessionId && NativeMethodsShared.IsWindows)
             {
+                // On Windows, SessionId differentiates RDP sessions.
+                // On Unix, getsid() returns the session leader PID which differs per terminal,
+                // preventing cross-terminal node reuse. Use 0 since Unix doesn't need
+                // RDP-style session isolation.
                 using var currentProcess = Process.GetCurrentProcess();
                 sessionId = currentProcess.SessionId;
             }
 
-            _handshakeComponents = isNetTaskHost
+            _handshakeComponents = IsNetTaskHost
                 ? CreateNetTaskHostComponents(options, salt, sessionId)
                 : CreateStandardComponents(options, salt, sessionId);
         }
 
-        private string GetToolsDirectory(bool isNetTaskHost, string predefinedToolsDirectory) =>
-#if NETFRAMEWORK
-            isNetTaskHost
+        private bool IsNetTaskHost => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.NET | HandshakeOptions.TaskHost);
 
-                // For .NET TaskHost assembly directory we set the expectation for the child dotnet process to connect to.
-                ? predefinedToolsDirectory
-                : BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-#else
-            BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+#if NETFRAMEWORK
+        private bool IsClr2TaskHost
+            => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.CLR2 | HandshakeOptions.TaskHost);
 #endif
 
         private static HandshakeComponents CreateNetTaskHostComponents(int options, int salt, int sessionId) => new(
@@ -281,7 +353,7 @@ namespace Microsoft.Build.Internal
         public override byte? ExpectedVersionInFirstByte => null;
 
         internal ServerNodeHandshake(HandshakeOptions nodeType)
-            : base(nodeType, includeSessionId: false, predefinedToolsDirectory: null)
+            : base(nodeType, includeSessionId: false, toolsDirectory: null)
         {
         }
 
@@ -360,18 +432,17 @@ namespace Microsoft.Build.Internal
         /// </summary>
         private static long s_lastLoggedTicks = DateTime.UtcNow.Ticks;
 
-#if !CLR2COMPATIBILITY
-        /// <summary>
-        /// A set of environment variables cached from the last time we called GetEnvironmentVariables.
-        /// Used to avoid allocations if the environment has not changed.
-        /// </summary>
-        private static EnvironmentState s_environmentState;
-#endif
-
         /// <summary>
         /// Delegate to debug the communication utilities.
         /// </summary>
         internal delegate void LogDebugCommunications(string format, params object[] stuff);
+
+        /// <summary>
+        /// On Windows, environment variables should be case-insensitive;
+        /// on Unix-like systems, they should be case-sensitive, but this might be a breaking change in an edge case.
+        /// https://github.com/dotnet/msbuild/issues/12858
+        /// </summary>
+        internal static StringComparer EnvironmentVariableComparer => StringComparer.OrdinalIgnoreCase;
 
         /// <summary>
         /// Gets or sets the node connection timeout.
@@ -379,293 +450,6 @@ namespace Microsoft.Build.Internal
         internal static int NodeConnectionTimeout
         {
             get { return GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout); }
-        }
-
-        /// <summary>
-        /// Get environment block.
-        /// </summary>
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-        internal static extern unsafe char* GetEnvironmentStrings();
-
-        /// <summary>
-        /// Free environment block.
-        /// </summary>
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-        internal static extern unsafe bool FreeEnvironmentStrings(char* pStrings);
-
-#if NETFRAMEWORK
-        /// <summary>
-        /// Set environment variable P/Invoke.
-        /// </summary>
-        [DllImport("kernel32.dll", EntryPoint = "SetEnvironmentVariable", SetLastError = true, CharSet = CharSet.Unicode)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetEnvironmentVariableNative(string name, string value);
-
-        /// <summary>
-        /// Sets an environment variable using P/Invoke to workaround the .NET Framework BCL implementation.
-        /// </summary>
-        /// <remarks>
-        /// .NET Framework implementation of SetEnvironmentVariable checks the length of the value and throws an exception if
-        /// it's greater than or equal to 32,767 characters. This limitation does not exist on modern Windows or .NET.
-        /// </remarks>
-        internal static void SetEnvironmentVariable(string name, string value)
-        {
-            if (!SetEnvironmentVariableNative(name, value))
-            {
-                throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
-            }
-        }
-#endif
-
-#if !CLR2COMPATIBILITY
-        /// <summary>
-        /// A container to atomically swap a cached set of environment variables and the block string used to create it.
-        /// The environment block property will only be set on Windows, since on Unix we need to directly call
-        /// Environment.GetEnvironmentVariables().
-        /// </summary>
-        private sealed record class EnvironmentState(FrozenDictionary<string, string> EnvironmentVariables, ReadOnlyMemory<char> EnvironmentBlock = default);
-#endif
-
-        /// <summary>
-        /// Returns key value pairs of environment variables in a new dictionary
-        /// with a case-insensitive key comparer.
-        /// </summary>
-        /// <remarks>
-        /// Copied from the BCL implementation to eliminate some expensive security asserts on .NET Framework.
-        /// </remarks>
-#if CLR2COMPATIBILITY
-        internal static Dictionary<string, string> GetEnvironmentVariables()
-        {
-#else
-        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-        private static FrozenDictionary<string, string> GetEnvironmentVariablesWindows()
-        {
-            // The DebugUtils static constructor can set the MSBUILDDEBUGPATH environment variable to propagate the debug path to out of proc nodes.
-            // Need to ensure that constructor is called before this method returns in order to capture its env var write.
-            // Otherwise the env var is not captured and thus gets deleted when RequiestBuilder resets the environment based on the cached results of this method.
-            ErrorUtilities.VerifyThrowInternalNull(DebugUtils.ProcessInfoString, nameof(DebugUtils.DebugPath));
-#endif
-
-            unsafe
-            {
-                char* pEnvironmentBlock = null;
-
-                try
-                {
-                    pEnvironmentBlock = GetEnvironmentStrings();
-                    if (pEnvironmentBlock == null)
-                    {
-                        throw new OutOfMemoryException();
-                    }
-
-                    // Search for terminating \0\0 (two unicode \0's).
-                    char* pEnvironmentBlockEnd = pEnvironmentBlock;
-                    while (!(*pEnvironmentBlockEnd == '\0' && *(pEnvironmentBlockEnd + 1) == '\0'))
-                    {
-                        pEnvironmentBlockEnd++;
-                    }
-                    long stringBlockLength = pEnvironmentBlockEnd - pEnvironmentBlock;
-
-#if !CLR2COMPATIBILITY
-                    // Avoid allocating any objects if the environment still matches the last state.
-                    // We speed this up by comparing the full block instead of individual key-value pairs.
-                    ReadOnlySpan<char> stringBlock = new(pEnvironmentBlock, (int)stringBlockLength);
-                    EnvironmentState lastState = s_environmentState;
-                    if (lastState?.EnvironmentBlock.Span.SequenceEqual(stringBlock) == true)
-                    {
-                        return lastState.EnvironmentVariables;
-                    }
-#endif
-
-                    Dictionary<string, string> table = new(200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
-
-                    // Copy strings out, parsing into pairs and inserting into the table.
-                    // The first few environment variable entries start with an '='!
-                    // The current working directory of every drive (except for those drives
-                    // you haven't cd'ed into in your DOS window) are stored in the
-                    // environment block (as =C:=pwd) and the program's exit code is
-                    // as well (=ExitCode=00000000)  Skip all that start with =.
-                    // Read docs about Environment Blocks on MSDN's CreateProcess page.
-
-                    // Format for GetEnvironmentStrings is:
-                    // (=HiddenVar=value\0 | Variable=value\0)* \0
-                    // See the description of Environment Blocks in MSDN's
-                    // CreateProcess page (null-terminated array of null-terminated strings).
-                    // Note the =HiddenVar's aren't always at the beginning.
-                    for (int i = 0; i < stringBlockLength; i++)
-                    {
-                        int startKey = i;
-
-                        // Skip to key
-                        // On some old OS, the environment block can be corrupted.
-                        // Some lines will not have '=', so we need to check for '\0'.
-                        while (*(pEnvironmentBlock + i) != '=' && *(pEnvironmentBlock + i) != '\0')
-                        {
-                            i++;
-                        }
-
-                        if (*(pEnvironmentBlock + i) == '\0')
-                        {
-                            continue;
-                        }
-
-                        // Skip over environment variables starting with '='
-                        if (i - startKey == 0)
-                        {
-                            while (*(pEnvironmentBlock + i) != 0)
-                            {
-                                i++;
-                            }
-
-                            continue;
-                        }
-
-#if !CLR2COMPATIBILITY
-                        string key = Strings.WeakIntern(new ReadOnlySpan<char>(pEnvironmentBlock + startKey, i - startKey));
-#else
-                        string key = new string(pEnvironmentBlock, startKey, i - startKey);
-#endif
-
-                        i++;
-
-                        // skip over '='
-                        int startValue = i;
-
-                        while (*(pEnvironmentBlock + i) != 0)
-                        {
-                            // Read to end of this entry
-                            i++;
-                        }
-
-#if !CLR2COMPATIBILITY
-                        string value = Strings.WeakIntern(new ReadOnlySpan<char>(pEnvironmentBlock + startValue, i - startValue));
-#else
-                        string value = new string(pEnvironmentBlock, startValue, i - startValue);
-#endif
-
-                        // skip over 0 handled by for loop's i++
-                        table[key] = value;
-                    }
-
-#if !CLR2COMPATIBILITY
-                    // Update with the current state.
-                    EnvironmentState currentState =
-                        new(table.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase), stringBlock.ToArray());
-                    s_environmentState = currentState;
-                    return currentState.EnvironmentVariables;
-#else
-                    return table;
-#endif
-                }
-                finally
-                {
-                    if (pEnvironmentBlock != null)
-                    {
-                        FreeEnvironmentStrings(pEnvironmentBlock);
-                    }
-                }
-            }
-        }
-
-#if NET
-        /// <summary>
-        /// Sets an environment variable using <see cref="Environment.SetEnvironmentVariable(string,string)" />.
-        /// </summary>
-        internal static void SetEnvironmentVariable(string name, string value)
-            => Environment.SetEnvironmentVariable(name, value);
-#endif
-
-#if !CLR2COMPATIBILITY
-        /// <summary>
-        /// Returns key value pairs of environment variables in a read-only dictionary
-        /// with a case-insensitive key comparer.
-        ///
-        /// If the environment variables have not changed since the last time
-        /// this method was called, the same dictionary instance will be returned.
-        /// </summary>
-        internal static FrozenDictionary<string, string> GetEnvironmentVariables()
-        {
-            // Always call the native method on Windows, as we'll be able to avoid the internal
-            // string and Hashtable allocations caused by Environment.GetEnvironmentVariables().
-            if (NativeMethodsShared.IsWindows)
-            {
-                return GetEnvironmentVariablesWindows();
-            }
-
-            IDictionary vars = Environment.GetEnvironmentVariables();
-
-            // Directly use the enumerator since Current will box DictionaryEntry.
-            IDictionaryEnumerator enumerator = vars.GetEnumerator();
-
-            // If every key-value pair matches the last state, return a cached dictionary.
-            FrozenDictionary<string, string> lastEnvironmentVariables = s_environmentState?.EnvironmentVariables;
-            if (vars.Count == lastEnvironmentVariables?.Count)
-            {
-                bool sameState = true;
-
-                while (enumerator.MoveNext() && sameState)
-                {
-                    DictionaryEntry entry = enumerator.Entry;
-                    if (!lastEnvironmentVariables.TryGetValue((string)entry.Key, out string value)
-                        || !string.Equals((string)entry.Value, value, StringComparison.Ordinal))
-                    {
-                        sameState = false;
-                    }
-                }
-
-                if (sameState)
-                {
-                    return lastEnvironmentVariables;
-                }
-            }
-
-            // Otherwise, allocate and update with the current state.
-            Dictionary<string, string> table = new(vars.Count, StringComparer.OrdinalIgnoreCase);
-
-            enumerator.Reset();
-            while (enumerator.MoveNext())
-            {
-                DictionaryEntry entry = enumerator.Entry;
-                string key = Strings.WeakIntern((string)entry.Key);
-                string value = Strings.WeakIntern((string)entry.Value);
-                table[key] = value;
-            }
-
-            EnvironmentState newState = new(table.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase));
-            s_environmentState = newState;
-
-            return newState.EnvironmentVariables;
-        }
-#endif
-
-        /// <summary>
-        /// Updates the environment to match the provided dictionary.
-        /// </summary>
-        internal static void SetEnvironment(IDictionary<string, string> newEnvironment)
-        {
-            if (newEnvironment != null)
-            {
-                // First, delete all no longer set variables
-                IDictionary<string, string> currentEnvironment = GetEnvironmentVariables();
-                foreach (KeyValuePair<string, string> entry in currentEnvironment)
-                {
-                    if (!newEnvironment.ContainsKey(entry.Key))
-                    {
-                        SetEnvironmentVariable(entry.Key, null);
-                    }
-                }
-
-                // Then, make sure the new ones have their new values.
-                foreach (KeyValuePair<string, string> entry in newEnvironment)
-                {
-                    if (!currentEnvironment.TryGetValue(entry.Key, out string currentValue) || currentValue != entry.Value)
-                    {
-                        SetEnvironmentVariable(entry.Key, entry.Value);
-                    }
-                }
-            }
         }
 
 #nullable enable
@@ -712,24 +496,53 @@ namespace Microsoft.Build.Internal
 #endif
                 out HandshakeResult innerResult))
             {
+                byte negotiatedPacketVersion = 1;
+
                 if (innerResult.Value != EndOfHandshakeSignal)
                 {
-                    if (isProvider)
+                    // If the received handshake part is not PacketVersionFromChildMarker it means we communicate with the host that does not support packet version negotiation.
+                    // Fallback to the old communication validation pattern.
+                    if (innerResult.Value != Handshake.PacketVersionFromChildMarker)
                     {
-                        var errorMessage = $"Handshake failed on part {innerResult.Value}. Probably the client is a different MSBuild build.";
-                        Trace(errorMessage);
-                        result = HandshakeResult.Failure(HandshakeStatus.VersionMismatch, errorMessage);
+                        result = CreateVersionMismatchResult(isProvider, innerResult.Value);
                         return false;
                     }
-                    else
+
+                    // We detected packet version marker, now let's read actual PacketVersion
+                    if (!stream.TryReadIntForHandshake(
+                            byteToAccept: null,
+#if NETCOREAPP2_1_OR_GREATER
+                            timeout,
+#endif
+                            out HandshakeResult versionResult))
                     {
-                        var errorMessage = $"Expected end of handshake signal but received {innerResult.Value}. Probably the host is a different MSBuild build.";
-                        Trace(errorMessage);
-                        result = HandshakeResult.Failure(HandshakeStatus.VersionMismatch, errorMessage);
+                        result = versionResult;
+                        return false;
+                    }
+
+                    byte childVersion = (byte)versionResult.Value;
+                    negotiatedPacketVersion = NodePacketTypeExtensions.GetNegotiatedPacketVersion(childVersion);
+                    Trace("Node PacketVersion: {0}, Local: {1}, Negotiated: {2}", childVersion, NodePacketTypeExtensions.PacketVersion, negotiatedPacketVersion);
+
+                    if (!stream.TryReadIntForHandshake(
+                            byteToAccept: null,
+#if NETCOREAPP2_1_OR_GREATER
+                            timeout,
+#endif
+                            out innerResult))
+                    {
+                        result = innerResult;
+                        return false;
+                    }
+
+                    if (innerResult.Value != EndOfHandshakeSignal)
+                    {
+                        result = CreateVersionMismatchResult(isProvider, innerResult.Value);
                         return false;
                     }
                 }
-                result = HandshakeResult.Success(0);
+
+                result = HandshakeResult.Success(0, negotiatedPacketVersion);
                 return true;
             }
             else
@@ -739,12 +552,24 @@ namespace Microsoft.Build.Internal
             }
         }
 
+        private static HandshakeResult CreateVersionMismatchResult(bool isProvider, int receivedValue)
+        {
+            var errorMessage = isProvider
+                ? $"Handshake failed on part {receivedValue}. Probably the client is a different MSBuild build."
+                : $"Expected end of handshake signal but received {receivedValue}. Probably the host is a different MSBuild build.";
+            Trace(errorMessage);
+
+            return HandshakeResult.Failure(HandshakeStatus.VersionMismatch, errorMessage);
+        }
+
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
         /// <summary>
         /// Extension method to read a series of bytes from a stream.
         /// If specified, leading byte matches one in the supplied array if any, returns rejection byte and throws IOException.
         /// </summary>
-        internal static bool TryReadIntForHandshake(this PipeStream stream, byte? byteToAccept,
+        internal static bool TryReadIntForHandshake(
+            this PipeStream stream,
+            byte? byteToAccept,
 #if NETCOREAPP2_1_OR_GREATER
             int timeout,
 #endif
@@ -846,10 +671,10 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static HandshakeOptions GetHandshakeOptions(
             bool taskHost,
+            TaskHostParameters taskHostParameters,
             string architectureFlagToSet = null,
             bool nodeReuse = false,
-            bool lowPriority = false,
-            IDictionary<string, string> taskHostParameters = null)
+            bool lowPriority = false)
         {
             HandshakeOptions context = taskHost ? HandshakeOptions.TaskHost : HandshakeOptions.None;
 
@@ -859,25 +684,25 @@ namespace Microsoft.Build.Internal
             if (taskHost)
             {
                 // No parameters given, default to current
-                if (taskHostParameters == null)
+                if (taskHostParameters.IsEmpty)
                 {
                     clrVersion = typeof(bool).Assembly.GetName().Version.Major;
                     architectureFlagToSet = XMakeAttributes.GetCurrentMSBuildArchitecture();
                 }
                 else // Figure out flags based on parameters given
                 {
-                    ErrorUtilities.VerifyThrow(taskHostParameters.TryGetValue(XMakeAttributes.runtime, out string runtimeVersion), "Should always have an explicit runtime when we call this method.");
-                    ErrorUtilities.VerifyThrow(taskHostParameters.TryGetValue(XMakeAttributes.architecture, out string architecture), "Should always have an explicit architecture when we call this method.");
+                    ErrorUtilities.VerifyThrow(taskHostParameters.Runtime != null, "Should always have an explicit runtime when we call this method.");
+                    ErrorUtilities.VerifyThrow(taskHostParameters.Architecture != null, "Should always have an explicit architecture when we call this method.");
 
-                    if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
+                    if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr2, StringComparison.OrdinalIgnoreCase))
                     {
                         clrVersion = 2;
                     }
-                    else if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase))
+                    else if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.clr4, StringComparison.OrdinalIgnoreCase))
                     {
                         clrVersion = 4;
                     }
-                    else if (runtimeVersion.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
+                    else if (taskHostParameters.Runtime.Equals(XMakeAttributes.MSBuildRuntimeValues.net, StringComparison.OrdinalIgnoreCase))
                     {
                         clrVersion = 5;
                     }
@@ -886,7 +711,7 @@ namespace Microsoft.Build.Internal
                         ErrorUtilities.ThrowInternalErrorUnreachable();
                     }
 
-                    architectureFlagToSet = architecture;
+                    architectureFlagToSet = taskHostParameters.Architecture;
                 }
             }
 
@@ -1061,12 +886,7 @@ namespace Microsoft.Build.Internal
         {
             lock (s_traceLock)
             {
-                s_debugDumpPath ??=
-#if CLR2COMPATIBILITY
-                    Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
-#else
-                        DebugUtils.DebugPath;
-#endif
+                s_debugDumpPath ??= FrameworkDebugUtils.DebugPath;
 
                 if (String.IsNullOrEmpty(s_debugDumpPath))
                 {

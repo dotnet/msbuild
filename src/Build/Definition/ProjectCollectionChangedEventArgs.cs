@@ -3,8 +3,6 @@
 
 using System;
 
-#nullable disable
-
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>

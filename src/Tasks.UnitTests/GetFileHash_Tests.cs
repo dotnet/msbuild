@@ -31,6 +31,7 @@ namespace Microsoft.Build.UnitTests
                 Files = new[] { new TaskItem(TestBinary.LoremFilePath) },
                 BuildEngine = _mockEngine,
                 Algorithm = "BANANA",
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
             };
             task.Execute().ShouldBeFalse();
             _mockEngine.Log.ShouldContain("MSB3953");
@@ -44,6 +45,7 @@ namespace Microsoft.Build.UnitTests
                 Files = new[] { new TaskItem(TestBinary.LoremFilePath) },
                 BuildEngine = _mockEngine,
                 HashEncoding = "blue",
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
             };
             task.Execute().ShouldBeFalse();
             _mockEngine.Log.ShouldContain("MSB3951");
@@ -56,6 +58,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Files = new[] { new TaskItem(Path.Combine(AppContext.BaseDirectory, "this_does_not_exist.txt")) },
                 BuildEngine = _mockEngine,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
             };
             task.Execute().ShouldBeFalse();
             _mockEngine.Log.ShouldContain("MSB3954");
@@ -71,6 +74,7 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = _mockEngine,
                 Algorithm = testBinary.HashAlgorithm,
                 HashEncoding = testBinary.HashEncoding,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
             };
             task.Execute().ShouldBeTrue();
             task.Hash.ShouldBe(testBinary.FileHash);
@@ -90,6 +94,7 @@ namespace Microsoft.Build.UnitTests
                 BuildEngine = _mockEngine,
                 Algorithm = testBinary.HashAlgorithm,
                 HashEncoding = testBinary.HashEncoding,
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
             };
 
             task.Execute().ShouldBeTrue();

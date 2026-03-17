@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -12,6 +12,11 @@
   <ItemGroup>
     <PackageVersion Include="Microsoft.Build.Framework" Version="17.14.28" />
     <PackageVersion Include="Microsoft.Build.Utilities.Core" Version="17.14.28" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\..\..\BackEnd\IsRunningMultipleNodesTask.cs" Link="IsRunningMultipleNodesTask.cs" />
+    <Compile Include="..\..\..\BackEnd\RequestCoresTask.cs" Link="RequestCoresTask.cs" />
   </ItemGroup>
 
 </Project>

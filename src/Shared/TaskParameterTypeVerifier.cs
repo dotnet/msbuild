@@ -3,9 +3,6 @@
 
 using System;
 using Microsoft.Build.Framework;
-#if NET35
-using Microsoft.Build.Shared;
-#endif
 
 #nullable disable
 

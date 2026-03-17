@@ -743,7 +743,8 @@ namespace Microsoft.Build.Execution
             if (itemDefinitions == null || !useItemDefinitionsWithoutModification)
             {
                 // TaskItems don't have an item type. So for their benefit, we have to lookup and add the regular item definition.
-                inheritedItemDefinitions = (itemDefinitions == null) ? null : new List<ProjectItemDefinitionInstance>(itemDefinitions);
+                inheritedItemDefinitions = (itemDefinitions == null) ? null : new List<ProjectItemDefinitionInstance>(itemDefinitions.Count + 1);
+                ((List<ProjectItemDefinitionInstance>)inheritedItemDefinitions)?.AddRange(itemDefinitions);
 
                 ProjectItemDefinitionInstance itemDefinition;
                 if (projectToUse.ItemDefinitions.TryGetValue(itemTypeToUse, out itemDefinition))
@@ -973,14 +974,14 @@ namespace Microsoft.Build.Execution
                 {
                     ImmutableDictionary<string, string> metadataCollection = MetadataCollection;
 
-                    List<string> names = new List<string>(capacity: metadataCollection.Count + FileUtilities.ItemSpecModifiers.All.Length);
+                    List<string> names = new List<string>(capacity: metadataCollection.Count + ItemSpecModifiers.All.Length);
 
                     foreach (KeyValuePair<string, string> metadatum in metadataCollection)
                     {
                         names.Add(metadatum.Key);
                     }
 
-                    names.AddRange(FileUtilities.ItemSpecModifiers.All);
+                    names.AddRange(ItemSpecModifiers.All);
 
                     return names;
                 }
@@ -1816,7 +1817,7 @@ namespace Microsoft.Build.Execution
             public bool HasMetadata(string name)
             {
                 if ((_directMetadata?.ContainsKey(name) == true) ||
-                     FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name) ||
+                     ItemSpecModifiers.IsItemSpecModifier(name) ||
                     GetItemDefinitionMetadataEscaped(name) != null)
                 {
                     return true;
@@ -2011,7 +2012,7 @@ namespace Microsoft.Build.Execution
             {
                 ProjectInstance.VerifyThrowNotImmutable(_isImmutable);
 
-                if (!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(name))
+                if (!ItemSpecModifiers.IsDerivableItemSpecModifier(name))
                 {
                     ProjectMetadataInstance.VerifyThrowReservedNameAllowItemSpecModifiers(name);
                     _directMetadata = DirectMetadata.SetItem(name, evaluatedValueEscaped ?? string.Empty);
@@ -2024,7 +2025,7 @@ namespace Microsoft.Build.Execution
                 _directMetadata ??= ImmutableDictionaryExtensions.EmptyMetadata;
 
                 var metadata = items
-                    .Where(item => !FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(item.Key));
+                    .Where(item => !ItemSpecModifiers.IsDerivableItemSpecModifier(item.Key));
 
                 _directMetadata = DirectMetadata.SetItems(metadata, ProjectMetadataInstance.VerifyThrowReservedNameAllowItemSpecModifiers);
             }
@@ -2083,7 +2084,7 @@ namespace Microsoft.Build.Execution
             {
                 string value = String.Empty;
 
-                if (FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name))
+                if (ItemSpecModifiers.IsItemSpecModifier(name))
                 {
                     value = BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, name, ref _fullPath);
                 }
@@ -2184,9 +2185,9 @@ namespace Microsoft.Build.Execution
                         }
                     }
 
-                    if (_itemSpecModifiersIndex < FileUtilities.ItemSpecModifiers.All.Length)
+                    if (_itemSpecModifiersIndex < ItemSpecModifiers.All.Length)
                     {
-                        Current = FileUtilities.ItemSpecModifiers.All[_itemSpecModifiersIndex];
+                        Current = ItemSpecModifiers.All[_itemSpecModifiersIndex];
                         ++_itemSpecModifiersIndex;
 
                         return true;

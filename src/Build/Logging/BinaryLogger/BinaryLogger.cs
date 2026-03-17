@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
@@ -13,6 +14,32 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging
 {
+    /// <summary>
+    /// Represents the parsed parameters for a BinaryLogger.
+    /// </summary>
+    public sealed class BinaryLoggerParameters
+    {
+        /// <summary>
+        /// Gets the log file path. Returns null if not specified or if the path contains wildcards.
+        /// </summary>
+        public string LogFilePath { get; internal set; }
+
+        /// <summary>
+        /// Gets the project imports collection mode.
+        /// </summary>
+        public BinaryLogger.ProjectImportsCollectionMode ProjectImportsCollectionMode { get; internal set; } = BinaryLogger.ProjectImportsCollectionMode.Embed;
+
+        /// <summary>
+        /// Gets whether the ProjectImports parameter was explicitly specified in the parameters string.
+        /// </summary>
+        internal bool HasProjectImportsParameter { get; set; }
+
+        /// <summary>
+        /// Gets whether to omit initial info from the log.
+        /// </summary>
+        public bool OmitInitialInfo { get; internal set; }
+    }
+
     /// <summary>
     /// A logger that serializes all incoming BuildEventArgs in a compressed binary file (*.binlog). The file
     /// can later be played back and piped into other loggers (file, console, etc) to reconstruct the log contents
@@ -100,6 +127,14 @@ namespace Microsoft.Build.Logging
         // skip them if they are not known to it. Example of change requiring the increment would be the introduction of strings deduplication)
         internal const int MinimumReaderVersion = 18;
 
+        // Parameter name constants
+        private const string LogFileParameterPrefix = "LogFile=";
+        private const string BinlogFileExtension = ".binlog";
+        private const string OmitInitialInfoParameter = "OmitInitialInfo";
+        private const string ProjectImportsNoneParameter = "ProjectImports=None";
+        private const string ProjectImportsEmbedParameter = "ProjectImports=Embed";
+        private const string ProjectImportsZipFileParameter = "ProjectImports=ZipFile";
+
         private Stream stream;
         private BinaryWriter binaryWriter;
         private BuildEventArgsWriter eventArgsWriter;
@@ -131,11 +166,147 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
+        /// Parses the parameters string for a BinaryLogger.
+        /// </summary>
+        /// <param name="parametersString">The parameters string to parse (e.g., "LogFile=msbuild.binlog;ProjectImports=None").</param>
+        /// <returns>A <see cref="BinaryLoggerParameters"/> object containing the parsed parameters.</returns>
+        /// <exception cref="LoggerException">Thrown when the parameters string contains invalid parameters.</exception>
+        /// <remarks>
+        /// This method parses the semicolon-delimited parameters string used by the BinaryLogger.
+        /// Supported parameters include:
+        /// - LogFile=&lt;path&gt; or just &lt;path&gt; (must end with .binlog): specifies the output file path
+        /// - ProjectImports=None|Embed|ZipFile: controls project imports collection
+        /// - OmitInitialInfo: omits initial build information
+        /// 
+        /// Wildcards ({}) in the LogFile path are NOT expanded by this method. The returned LogFilePath
+        /// will be null for wildcard patterns, and callers should handle expansion separately if needed.
+        /// </remarks>
+        public static BinaryLoggerParameters ParseParameters(string parametersString)
+        {
+            if (parametersString == null)
+            {
+                throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
+            }
+
+            var result = new BinaryLoggerParameters();
+            var parameters = parametersString.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var parameter in parameters)
+            {
+                if (TryParseProjectImports(parameter, result))
+                {
+                    continue;
+                }
+
+                if (string.Equals(parameter, OmitInitialInfoParameter, StringComparison.OrdinalIgnoreCase))
+                {
+                    result.OmitInitialInfo = true;
+                    continue;
+                }
+
+                if (TryParsePathParameter(parameter, out string filePath))
+                {
+                    result.LogFilePath = filePath;
+                    continue;
+                }
+
+                throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", parameter));
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Attempts to parse a ProjectImports parameter.
+        /// </summary>
+        /// <param name="parameter">The parameter to parse.</param>
+        /// <param name="result">The BinaryLoggerParameters object to update.</param>
+        /// <returns>True if the parameter was a ProjectImports parameter; otherwise, false.</returns>
+        private static bool TryParseProjectImports(string parameter, BinaryLoggerParameters result)
+        {
+            return TrySetProjectImportsMode(parameter, ProjectImportsNoneParameter, ProjectImportsCollectionMode.None, result)
+                || TrySetProjectImportsMode(parameter, ProjectImportsEmbedParameter, ProjectImportsCollectionMode.Embed, result)
+                || TrySetProjectImportsMode(parameter, ProjectImportsZipFileParameter, ProjectImportsCollectionMode.ZipFile, result);
+        }
+
+        /// <summary>
+        /// Attempts to match and set a ProjectImports mode.
+        /// </summary>
+        /// <param name="parameter">The parameter to check.</param>
+        /// <param name="expectedParameter">The expected parameter string.</param>
+        /// <param name="mode">The mode to set if matched.</param>
+        /// <param name="result">The BinaryLoggerParameters object to update.</param>
+        /// <returns>True if the parameter matched; otherwise, false.</returns>
+        private static bool TrySetProjectImportsMode(string parameter, string expectedParameter, ProjectImportsCollectionMode mode, BinaryLoggerParameters result)
+        {
+            if (string.Equals(parameter, expectedParameter, StringComparison.OrdinalIgnoreCase))
+            {
+                result.ProjectImportsCollectionMode = mode;
+                result.HasProjectImportsParameter = true;
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Attempts to parse a file path parameter from a BinaryLogger parameter string.
+        /// </summary>
+        /// <param name="parameter">The parameter to parse.</param>
+        /// <param name="filePath">The parsed file path, or null if the parameter contains wildcards.</param>
+        /// <returns>True if the parameter is a valid file path parameter; otherwise, false.</returns>
+        /// <remarks>
+        /// This method recognizes file paths in the following formats:
+        /// - "LogFile=&lt;path&gt;"
+        /// - "&lt;path&gt;" (must end with .binlog)
+        /// 
+        /// If the path contains wildcards ({}), the method returns true but sets filePath to null,
+        /// as wildcard expansion requires runtime context.
+        /// </remarks>
+        private static bool TryParsePathParameter(string parameter, out string filePath)
+        {
+            bool hasPathPrefix = parameter.StartsWith(LogFileParameterPrefix, StringComparison.OrdinalIgnoreCase);
+
+            if (hasPathPrefix)
+            {
+                parameter = parameter.Substring(LogFileParameterPrefix.Length);
+            }
+
+            parameter = parameter.Trim('"');
+
+            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
+            bool hasProperExtension = parameter.EndsWith(BinlogFileExtension, StringComparison.OrdinalIgnoreCase);
+
+            filePath = parameter;
+
+            if (isWildcard)
+            {
+                // For wildcards, we return true to indicate this is a valid path parameter,
+                // but set filePath to null since we can't expand it without instance context
+                filePath = null;
+                return true;
+            }
+
+            return hasProperExtension;
+        }
+
+        /// <summary>
         /// Gets or sets whether to capture and embed project and target source files used during the build.
         /// </summary>
         public ProjectImportsCollectionMode CollectProjectImports { get; set; } = ProjectImportsCollectionMode.Embed;
 
         internal string FilePath { get; private set; }
+
+        /// <summary>
+        /// Gets or sets additional output file paths. When set, the binlog will be copied to all these paths
+        /// after the build completes. The primary FilePath will be used as the temporary write location.
+        /// </summary>
+        /// <remarks>
+        /// This property is intended for internal use by MSBuild command-line processing.
+        /// It should not be set by external code or logger implementations.
+        /// Use multiple logger instances with different Parameters instead.
+        /// </remarks>
+        public IReadOnlyList<string> AdditionalFilePaths { get; init; }
 
         /// <summary> Gets or sets the verbosity level.</summary>
         /// <remarks>
@@ -346,6 +517,15 @@ namespace Microsoft.Build.Logging
             }
 
 
+            // Log additional file paths before closing stream (so they're recorded in the binlog)
+            if (AdditionalFilePaths != null && AdditionalFilePaths.Count > 0 && stream != null)
+            {
+                foreach (var additionalPath in AdditionalFilePaths)
+                {
+                    LogMessage("BinLogCopyDestination=" + additionalPath);
+                }
+            }
+
             if (stream != null)
             {
                 // It's hard to determine whether we're at the end of decoding GZipStream
@@ -354,6 +534,37 @@ namespace Microsoft.Build.Logging
                 stream.Flush();
                 stream.Dispose();
                 stream = null;
+            }
+
+            // Copy the binlog file to additional destinations if specified
+            if (AdditionalFilePaths != null && AdditionalFilePaths.Count > 0)
+            {
+                foreach (var additionalPath in AdditionalFilePaths)
+                {
+                    try
+                    {
+                        string directory = Path.GetDirectoryName(additionalPath);
+                        if (!string.IsNullOrEmpty(directory))
+                        {
+                            Directory.CreateDirectory(directory);
+                        }
+                        File.Copy(FilePath, additionalPath, overwrite: true);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the error but don't fail the build
+                        // Note: We can't use LogMessage here since the stream is already closed
+                        string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                            out _,
+                            out _,
+                            "ErrorCopyingBinaryLog",
+                            FilePath,
+                            additionalPath,
+                            ex.Message);
+
+                        Console.Error.WriteLine(message);
+                    }
+                }
             }
         }
 
@@ -426,39 +637,34 @@ namespace Microsoft.Build.Logging
         /// </exception>
         private void ProcessParameters(out bool omitInitialInfo)
         {
-            if (Parameters == null)
+            var parsedParams = ParseParameters(Parameters);
+            
+            omitInitialInfo = parsedParams.OmitInitialInfo;
+            
+            // Only set CollectProjectImports if it was explicitly specified in parameters
+            if (parsedParams.HasProjectImportsParameter)
             {
-                throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", ""));
+                CollectProjectImports = parsedParams.ProjectImportsCollectionMode;
             }
 
-            omitInitialInfo = false;
-            var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
-            foreach (var parameter in parameters)
+            // Handle the file path - expand wildcards if needed
+            if (parsedParams.LogFilePath == null)
             {
-                if (string.Equals(parameter, "ProjectImports=None", StringComparison.OrdinalIgnoreCase))
+                // Either no path was specified, or it contained wildcards
+                // Check if any parameter was a wildcard path
+                var parameters = Parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var parameter in parameters)
                 {
-                    CollectProjectImports = ProjectImportsCollectionMode.None;
+                    if (TryInterpretPathParameter(parameter, out string filePath))
+                    {
+                        FilePath = filePath;
+                        break;
+                    }
                 }
-                else if (string.Equals(parameter, "ProjectImports=Embed", StringComparison.OrdinalIgnoreCase))
-                {
-                    CollectProjectImports = ProjectImportsCollectionMode.Embed;
-                }
-                else if (string.Equals(parameter, "ProjectImports=ZipFile", StringComparison.OrdinalIgnoreCase))
-                {
-                    CollectProjectImports = ProjectImportsCollectionMode.ZipFile;
-                }
-                else if (string.Equals(parameter, "OmitInitialInfo", StringComparison.OrdinalIgnoreCase))
-                {
-                    omitInitialInfo = true;
-                }
-                else if (TryInterpretPathParameter(parameter, out string filePath))
-                {
-                    FilePath = filePath;
-                }
-                else
-                {
-                    throw new LoggerException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("InvalidBinaryLoggerParameters", parameter));
-                }
+            }
+            else
+            {
+                FilePath = parsedParams.LogFilePath;
             }
 
             if (FilePath == null)
@@ -482,31 +688,7 @@ namespace Microsoft.Build.Logging
 
         private bool TryInterpretPathParameter(string parameter, out string filePath)
         {
-            bool hasPathPrefix = parameter.StartsWith("LogFile=", StringComparison.OrdinalIgnoreCase);
-
-            if (hasPathPrefix)
-            {
-                parameter = parameter.Substring("LogFile=".Length);
-            }
-
-            parameter = parameter.Trim('"');
-
-            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
-            bool hasProperExtension = parameter.EndsWith(".binlog", StringComparison.OrdinalIgnoreCase);
-            filePath = parameter;
-
-            if (!isWildcard)
-            {
-                return hasProperExtension;
-            }
-
-            filePath = parameter.Replace("{}", GetUniqueStamp(), StringComparison.Ordinal);
-
-            if (!hasProperExtension)
-            {
-                filePath += ".binlog";
-            }
-            return true;
+            return TryInterpretPathParameterCore(parameter, GetUniqueStamp, out filePath);
         }
 
         private string GetUniqueStamp()
@@ -514,5 +696,240 @@ namespace Microsoft.Build.Logging
 
         private static string ExpandPathParameter(string parameters)
             => $"{DateTime.UtcNow.ToString("yyyyMMdd-HHmmss")}--{EnvironmentUtilities.CurrentProcessId}--{StringUtils.GenerateRandomString(6)}";
+
+        /// <summary>
+        /// Extracts the file path from binary logger parameters string.
+        /// This is a helper method for processing multiple binlog parameters.
+        /// </summary>
+        /// <param name="parameters">The parameters string (e.g., "output.binlog" or "output.binlog;ProjectImports=None")</param>
+        /// <returns>The resolved file path, or "msbuild.binlog" if no path is specified</returns>
+        public static string ExtractFilePathFromParameters(string parameters)
+        {
+            const string DefaultBinlogFileName = "msbuild" + BinlogFileExtension;
+
+            if (string.IsNullOrEmpty(parameters))
+            {
+                return Path.GetFullPath(DefaultBinlogFileName);
+            }
+
+            var paramParts = parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+            string filePath = null;
+
+            foreach (var parameter in paramParts)
+            {
+                if (TryInterpretPathParameterStatic(parameter, out string extractedPath))
+                {
+                    filePath = extractedPath;
+                    break;
+                }
+            }
+
+            if (filePath == null)
+            {
+                filePath = DefaultBinlogFileName;
+            }
+
+            try
+            {
+                return Path.GetFullPath(filePath);
+            }
+            catch
+            {
+                // If path resolution fails, return the original path
+                return filePath;
+            }
+        }
+
+        /// <summary>
+        /// Attempts to interpret a parameter string as a file path.
+        /// </summary>
+        /// <param name="parameter">The parameter to interpret (e.g., "LogFile=output.binlog" or "output.binlog")</param>
+        /// <param name="filePath">The extracted file path if the parameter is a path, otherwise the original parameter</param>
+        /// <returns>True if the parameter is a valid file path (ends with .binlog or contains wildcards), false otherwise</returns>
+        private static bool TryInterpretPathParameterStatic(string parameter, out string filePath)
+        {
+            return TryInterpretPathParameterCore(parameter, () => ExpandPathParameter(string.Empty), out filePath);
+        }
+
+        /// <summary>
+        /// Core logic for interpreting a parameter string as a file path.
+        /// </summary>
+        /// <param name="parameter">The parameter to interpret</param>
+        /// <param name="wildcardExpander">Function to expand wildcard placeholders</param>
+        /// <param name="filePath">The extracted file path</param>
+        /// <returns>True if the parameter is a valid file path</returns>
+        private static bool TryInterpretPathParameterCore(string parameter, Func<string> wildcardExpander, out string filePath)
+        {
+            bool hasPathPrefix = parameter.StartsWith(LogFileParameterPrefix, StringComparison.OrdinalIgnoreCase);
+
+            if (hasPathPrefix)
+            {
+                parameter = parameter.Substring(LogFileParameterPrefix.Length);
+            }
+
+            parameter = parameter.Trim('"');
+
+            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
+            bool hasProperExtension = parameter.EndsWith(BinlogFileExtension, StringComparison.OrdinalIgnoreCase);
+            filePath = parameter;
+
+            if (!isWildcard)
+            {
+                return hasProperExtension;
+            }
+
+            filePath = parameter.Replace("{}", wildcardExpander(), StringComparison.Ordinal);
+
+            if (!hasProperExtension)
+            {
+                filePath += BinlogFileExtension;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Extracts the non-file-path parameters from binary logger parameters string.
+        /// This is used to compare configurations between multiple binlog parameters.
+        /// </summary>
+        /// <param name="parameters">The parameters string (e.g., "output.binlog;ProjectImports=None")</param>
+        /// <returns>A normalized string of non-path parameters, or empty string if only path parameters</returns>
+        public static string ExtractNonPathParameters(string parameters)
+        {
+            if (string.IsNullOrEmpty(parameters))
+            {
+                return string.Empty;
+            }
+
+            var paramParts = parameters.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries);
+            var nonPathParams = new List<string>();
+
+            foreach (var parameter in paramParts)
+            {
+                // Skip file path parameters
+                if (TryInterpretPathParameterStatic(parameter, out _))
+                {
+                    continue;
+                }
+
+                // This is a configuration parameter (like ProjectImports=None, OmitInitialInfo, etc.)
+                nonPathParams.Add(parameter);
+            }
+
+            // Sort for consistent comparison
+            nonPathParams.Sort(StringComparer.OrdinalIgnoreCase);
+            return string.Join(";", nonPathParams);
+        }
+
+        /// <summary>
+        /// Result of processing multiple binary logger parameter sets.
+        /// </summary>
+        public readonly struct ProcessedBinaryLoggerParameters
+        {
+            /// <summary>
+            /// List of distinct parameter sets that need separate logger instances.
+            /// </summary>
+            public IReadOnlyList<string> DistinctParameterSets { get; }
+
+            /// <summary>
+            /// If true, all parameter sets have identical configurations (only file paths differ),
+            /// so a single logger can be used with file copying for additional paths.
+            /// </summary>
+            public bool AllConfigurationsIdentical { get; }
+
+            /// <summary>
+            /// Additional file paths to copy the binlog to (only valid when AllConfigurationsIdentical is true).
+            /// </summary>
+            public IReadOnlyList<string> AdditionalFilePaths { get; }
+
+            /// <summary>
+            /// List of duplicate file paths that were filtered out.
+            /// </summary>
+            public IReadOnlyList<string> DuplicateFilePaths { get; }
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ProcessedBinaryLoggerParameters"/> struct.
+            /// </summary>
+            /// <param name="distinctParameterSets">List of distinct parameter sets that need separate logger instances.</param>
+            /// <param name="allConfigurationsIdentical">Whether all parameter sets have identical configurations.</param>
+            /// <param name="additionalFilePaths">Additional file paths to copy the binlog to.</param>
+            /// <param name="duplicateFilePaths">List of duplicate file paths that were filtered out.</param>
+            public ProcessedBinaryLoggerParameters(
+                IReadOnlyList<string> distinctParameterSets,
+                bool allConfigurationsIdentical,
+                IReadOnlyList<string> additionalFilePaths,
+                IReadOnlyList<string> duplicateFilePaths)
+            {
+                DistinctParameterSets = distinctParameterSets;
+                AllConfigurationsIdentical = allConfigurationsIdentical;
+                AdditionalFilePaths = additionalFilePaths;
+                DuplicateFilePaths = duplicateFilePaths;
+            }
+        }
+
+        /// <summary>
+        /// Processes multiple binary logger parameter sets and returns distinct paths and configuration info.
+        /// </summary>
+        /// <param name="binaryLoggerParameters">Array of parameter strings from command line</param>
+        /// <returns>Processed result with distinct parameter sets and configuration info</returns>
+        public static ProcessedBinaryLoggerParameters ProcessParameters(string[] binaryLoggerParameters)
+        {
+            var distinctParameterSets = new List<string>();
+            var additionalFilePaths = new List<string>();
+            var duplicateFilePaths = new List<string>();
+            bool allConfigurationsIdentical = true;
+
+            if (binaryLoggerParameters == null || binaryLoggerParameters.Length == 0)
+            {
+                return new ProcessedBinaryLoggerParameters(distinctParameterSets, allConfigurationsIdentical, additionalFilePaths, duplicateFilePaths);
+            }
+
+            if (binaryLoggerParameters.Length == 1)
+            {
+                distinctParameterSets.Add(binaryLoggerParameters[0]);
+                return new ProcessedBinaryLoggerParameters(distinctParameterSets, allConfigurationsIdentical, additionalFilePaths, duplicateFilePaths);
+            }
+
+            string primaryArguments = binaryLoggerParameters[0];
+            string primaryNonPathParams = ExtractNonPathParameters(primaryArguments);
+
+            var distinctFilePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var extractedFilePaths = new List<string>();
+
+            // Check if all parameter sets have the same non-path configuration
+            for (int i = 0; i < binaryLoggerParameters.Length; i++)
+            {
+                string currentParams = binaryLoggerParameters[i];
+                string currentNonPathParams = ExtractNonPathParameters(currentParams);
+                string currentFilePath = ExtractFilePathFromParameters(currentParams);
+
+                // Check if this is a duplicate file path
+                if (distinctFilePaths.Add(currentFilePath))
+                {
+                    if (!string.Equals(primaryNonPathParams, currentNonPathParams, StringComparison.OrdinalIgnoreCase))
+                    {
+                        allConfigurationsIdentical = false;
+                    }
+                    distinctParameterSets.Add(currentParams);
+                    extractedFilePaths.Add(currentFilePath);
+                }
+                else
+                {
+                    // Track duplicate paths for logging
+                    duplicateFilePaths.Add(currentFilePath);
+                }
+            }
+
+            // If all configurations are identical, compute additional file paths for copying
+            // Use the pre-extracted paths to avoid redundant ExtractFilePathFromParameters calls
+            if (allConfigurationsIdentical && distinctParameterSets.Count > 1)
+            {
+                for (int i = 1; i < extractedFilePaths.Count; i++)
+                {
+                    additionalFilePaths.Add(extractedFilePaths[i]);
+                }
+            }
+
+            return new ProcessedBinaryLoggerParameters(distinctParameterSets, allConfigurationsIdentical, additionalFilePaths, duplicateFilePaths);
+        }
     }
 }

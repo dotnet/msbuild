@@ -27,3 +27,5 @@ eng/common/** linguist-vendored linguist-generated
 
 # VerifyTests
 *.verified.txt text eol=lf working-tree-encoding=UTF-8
+
+.github/workflows/*.lock.yml linguist-generated=true merge=ours

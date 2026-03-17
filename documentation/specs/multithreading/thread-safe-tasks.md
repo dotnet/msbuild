@@ -109,15 +109,17 @@ To prevent common thread-safety issues related to path handling, we introduce pa
 
 ```csharp
 namespace Microsoft.Build.Framework;
-public readonly struct AbsolutePath
+public readonly struct AbsolutePath : IEquatable<AbsolutePath>
 {
     // Default value returns string.Empty for Path property
-    public string Path { get; }
+    public string Value { get; }
     internal AbsolutePath(string path, bool ignoreRootedCheck) { }
     public AbsolutePath(string path); // Checks Path.IsPathRooted
     public AbsolutePath(string path, AbsolutePath basePath) { }
     public static implicit operator string(AbsolutePath path) { }
-    public override string ToString() => Path;
+    public override string ToString() => Value;
+
+    // overrides for equality and hashcode
 }
 ```
 

@@ -164,6 +164,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Returns the number of events currently queued for processing.
+        /// </summary>
+        public int EventQueueCount => 0;
+
+        /// <summary>
         /// Properties to serialize from the child node to the parent node
         /// </summary>
         public string[] PropertiesToSerialize
@@ -675,6 +680,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public bool HasBuildSubmissionLoggedErrors(int submissionId)
         {
             return false;
+        }
+
+        public void PopulateBuildTelemetryWithErrors(Framework.Telemetry.BuildTelemetry buildTelemetry)
+        {
+            // Mock implementation does nothing
         }
 
         public ICollection<string> GetWarningsAsErrors(BuildEventContext context)

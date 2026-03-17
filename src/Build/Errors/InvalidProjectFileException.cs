@@ -9,6 +9,7 @@ using System.Security.Permissions;
 #endif
 using Microsoft.Build.Framework.BuildException;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -71,7 +72,7 @@ namespace Microsoft.Build.Exceptions
         /// The assumption is that all the metadata for the outer exception comes from the inner exception, eg., they have the same error code.
         /// </summary>
         internal InvalidProjectFileException(string message, InvalidProjectFileException innerException)
-            : this(innerException.ProjectFile, innerException.LineNumber, innerException.ColumnNumber, innerException.EndLineNumber, innerException.EndColumnNumber, message, innerException.ErrorSubcategory, innerException.ErrorCode, innerException.HelpKeyword)
+            : this(innerException.ProjectFile ?? "MSBUILD", innerException.LineNumber, innerException.ColumnNumber, innerException.EndLineNumber, innerException.EndColumnNumber, message, innerException.ErrorSubcategory, innerException.ErrorCode, innerException.HelpKeyword)
         {
         }
 

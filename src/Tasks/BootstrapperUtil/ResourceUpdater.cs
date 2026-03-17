@@ -7,9 +7,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
-using Microsoft.Build.Shared;
-
-#nullable disable
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {

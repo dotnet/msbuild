@@ -2,10 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-#if !TASKHOST
 using System.Collections.Frozen;
 using System.Collections.Immutable;
-#endif
 using System.Collections.Generic;
 using System.Configuration.Assemblies;
 using System.Globalization;
@@ -178,7 +176,6 @@ namespace Microsoft.Build.BackEnd
             translator.TranslateDictionary(ref dictionary, AdaptFactory(valueFactory), valueFactory, collectionCreator);
         }
 
-#if !TASKHOST
         public static void TranslateDictionary(
             this ITranslator translator,
             ref FrozenDictionary<string, string> dictionary,
@@ -257,7 +254,6 @@ namespace Microsoft.Build.BackEnd
                 dictionary = (ImmutableDictionary<string, string>)localDict;
             }
         }
-#endif
 
         public static void TranslateHashSet<T>(
             this ITranslator translator,

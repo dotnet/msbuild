@@ -18,9 +18,13 @@ namespace Microsoft.Build.Tasks
     /// A task that sets values as specified by XPath Query
     /// into a XML file.
     /// </summary>
-    public class XmlPoke : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class XmlPoke : TaskExtension, IMultiThreadableTask
     {
         #region Properties
+
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; }
 
         /// <summary>
         /// The XML input as file path.
@@ -61,9 +65,11 @@ namespace Microsoft.Build.Tasks
             // Load the XPath Document
             XmlDocument xmlDoc = new XmlDocument();
 
+            AbsolutePath inputPath;
             try
             {
-                using (FileStream fs = new FileStream(XmlInputPath.ItemSpec, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                inputPath = TaskEnvironment.GetAbsolutePath(XmlInputPath.ItemSpec);
+                using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     XmlReaderSettings xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                     using (XmlReader sr = XmlReader.Create(fs, xrs))
@@ -139,12 +145,12 @@ namespace Microsoft.Build.Tasks
             if (count > 0)
             {
 #if RUNTIME_TYPE_NETCORE
-                using (Stream stream = File.Create(XmlInputPath.ItemSpec))
+                using (Stream stream = File.Create(inputPath))
                 {
                     xmlDoc.Save(stream);
                 }
 #else
-                xmlDoc.Save(XmlInputPath.ItemSpec);
+                xmlDoc.Save(inputPath);
 #endif
             }
 

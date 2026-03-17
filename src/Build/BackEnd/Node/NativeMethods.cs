@@ -4,8 +4,6 @@
 using System;
 using System.Runtime.InteropServices;
 
-#nullable disable
-
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -43,6 +41,11 @@ namespace Microsoft.Build.BackEnd
         /// Create a new console.
         /// </summary>
         internal const Int32 CREATE_NEW_CONSOLE = 0x00000010;
+
+        /// <summary>
+        /// Indicates that the environment block uses Unicode characters.
+        /// </summary>
+        internal const uint CREATE_UNICODE_ENVIRONMENT = 0x00000400;
 
         /// <summary>
         /// Create a new process

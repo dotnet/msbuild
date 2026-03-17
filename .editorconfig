@@ -415,6 +415,12 @@ dotnet_diagnostic.IDE0301.severity = suggestion
 dotnet_diagnostic.IDE0305.severity = suggestion
 dotnet_diagnostic.IDE0306.severity = suggestion
 
+# Remove unnecessary nullable warning suppression
+dotnet_diagnostic.IDE0370.severity = suggestion
+
+# Remove unnecessary 'unsafe' modifier
+dotnet_diagnostic.IDE0380.severity = suggestion
+
 # Temporarily disable SA1010 "Opening square brackets should not be preceded by a space" until https://github.com/DotNetAnalyzers/StyleCopAnalyzers/issues/3687 is fixed
 dotnet_diagnostic.SA1010.severity = none
 
