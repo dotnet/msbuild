@@ -35,4 +35,4 @@ Use the following comment when closing a stale pull request:
 
 > This pull request has been automatically closed because it has been open for more than 180 days without being merged.
 >
-> If you believe this work is still relevant, please feel free to open a new pull request. Thank you for your contribution!
+> If you believe this work is still relevant, please feel free to reopen or create a new pull request. Thank you for your contribution!
