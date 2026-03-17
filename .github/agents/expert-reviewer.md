@@ -538,35 +538,40 @@ Use this to prioritize dimensions based on changed files.
 
 ## Review Workflow
 
-### Phase 1: Map and Dispatch
+> **Lessons learned**: This workflow was refined through live review exercises. Key pitfalls to avoid:
+> - **Nodder bias**: "LGTM is the best outcome" wording caused agents to explain away real concurrency races. Fixed: LGTM requires genuine verification.
+> - **Nitpicker bias**: Without LGTM guidance, agents generated 25+ findings including hypotheticals. Fixed: require concrete failing scenarios.
+> - **Wrong branch verification**: Verifiers checked `main` instead of the PR branch, disputing real findings because new files/methods didn't exist on `main`. Fixed: always verify against PR diff or `refs/pull/{pr}/head`.
+> - **Missing active validation**: Static analysis alone missed whether races were real. Fixed: Wave 2 requires building, testing, or writing proof-of-concept test code.
 
-1. **Identify changed files** → map to folders in the hotspot table. Determine priority dimensions.
+### Wave 1: Parallel Dimension Evaluation (Find Candidates)
 
-2. **Launch dimensions as parallel sub-tasks.** Group the 24 dimensions into 5 batches and launch each as a separate Opus 4.6 sub-agent using `task` tool with `agent_type: "general-purpose"` and `model: "claude-opus-4.6"`.
+1. **Identify changed files** → map to folders in the hotspot table.
 
-   **Batching (5 parallel agents):**
-   - **Agent A — BLOCKING** (1, 2, 13, 21, 24): Compat, ChangeWave, concurrency, evaluation model, security
-   - **Agent B — MAJOR: Quality** (4, 5, 7, 8, 14): Tests, errors, strings, API surface, naming
-   - **Agent C — MAJOR: Design** (3, 9, 10, 11, 15): Performance, targets, design, cross-platform, SDK
-   - **Agent D — MAJOR: Correctness** (17, 19, 22, 23): File I/O, infra, edge cases, deps
-   - **Agent E — MODERATE + NIT** (6, 12, 16, 18, 20): Logging, simplification, idioms, docs, scope
+2. **Launch 5 parallel Opus 4.6 sub-agents** (A–E, batched by severity). Each receives the full PR diff + PR description + dimension rules.
 
-   **Critical sub-agent instructions** (include verbatim in every sub-agent prompt):
+   **Batching:**
+   - **A — BLOCKING** (1, 2, 13, 21, 24): Compat, ChangeWave, concurrency, evaluation model, security
+   - **B — MAJOR: Quality** (4, 5, 7, 8, 14): Tests, errors, strings, API surface, naming
+   - **C — MAJOR: Design** (3, 9, 10, 11, 15): Performance, targets, design, cross-platform, SDK
+   - **D — MAJOR: Correctness** (17, 19, 22, 23): File I/O, infra, edge cases, deps
+   - **E — MODERATE + NIT** (6, 12, 16, 18, 20): Logging, simplification, idioms, docs, scope
 
-   > **Be rigorous, not a nodder.** LGTM is acceptable when genuinely clean, but do NOT explain away real issues to minimize output. Your job is hard review, not rubber-stamping.
+   **Sub-agent instructions** (include verbatim in every prompt):
+
+   > **Be rigorous, not a nodder. Be precise, not a nitpicker.**
    >
-   > **Do NOT invent findings.** No hypothetical concerns ("maybe in theory..."), no nitpicking to produce output. But if you find a real issue — a race condition, a null deref, a shared mutable state problem — **report it even if the code "mostly works."** Trace the actual concurrent execution paths. Consider: what happens when two threads access this simultaneously?
+   > LGTM means you genuinely verified the dimension is clean — not that you couldn't find anything. Do NOT explain away real issues to reduce output. Do NOT invent hypothetical concerns to produce output.
+   >
+   > **The test for reporting**: Can you construct a **concrete scenario** (specific input, specific thread interleaving, specific call sequence) that triggers the bug? If yes → ISSUE. If you're just speculating → LGTM.
    >
    > **Verification protocol:**
-   > 1. Read the **full source files** from the PR branch (or diff), not just snippets
-   > 2. **Trace control flow** across threads — especially for concurrency dimensions
-   > 3. For shared mutable state: identify ALL threads that read/write, map the timeline, check for overlapping access windows
-   > 4. For edge cases: construct a concrete scenario (specific null value, specific ordering) that triggers the issue
-   > 5. If you can construct a failing scenario → ISSUE. If you cannot → LGTM.
+   > 1. Read the **full diff** (PR code, not main — new files only exist in the PR branch)
+   > 2. For concurrency: identify ALL threads that read/write shared state. Map the timeline. Find overlapping access windows. Example: "Thread 1 writes X at line 50 while Thread 2 reads X at line 80 — no lock protects this."
+   > 3. For correctness: construct the failing input. Example: "If `projectFileNames` is null, line 120 throws NRE because `.Length` is accessed without null check."
+   > 4. For compatibility: identify the specific behavioral change and who it affects.
    >
-   > Return `$DimensionName — LGTM` only if you genuinely verified the dimension is clean.
-   >
-   > Return format:
+   > **Return format per dimension:**
    > ```
    > $DimensionName — LGTM
    > ```
@@ -576,69 +581,113 @@ Use this to prioritize dimensions based on changed files.
    > SEVERITY: BLOCKING | MAJOR | MODERATE | NIT
    > FILE: path/to/file.cs
    > LINES: 100-120
-   > FINDING: <concrete scenario that triggers the bug>
+   > SCENARIO: <concrete trigger — thread interleaving, input value, call sequence>
+   > FINDING: <what breaks>
    > RECOMMENDATION: <specific fix>
    > ```
 
-### Phase 2: Multi-Model Verification
+### Wave 2: Active Validation (Build, Test, Prove)
 
-3. **Validate findings with a multi-model vote.** Take all non-LGTM findings from Phase 1 and launch **3 parallel verification agents** — one per model:
-   - `model: "claude-opus-4.6"` — deep reasoning verification
-   - `model: "gpt-5.2-codex"` — code flow analysis
-   - `model: "gemini-3-pro-preview"` — independent cross-check
+3. **For each non-LGTM finding from Wave 1**, launch a validation agent that **actively proves or disproves the claim**. This goes beyond static analysis:
 
-   Each verifier receives:
-   - The claimed findings with file paths and line ranges
-   - The **PR diff** (not the main branch — PR code may not be merged yet!) and/or the PR branch checkout
-   - For modified files: both the diff AND the full file from the PR branch (use `github-mcp-server-get_file_contents` with `ref: "refs/pull/{pr}/head"` or fetch the PR branch)
-   - Instruction: **For each finding, trace the code flow IN THE PR's CODE and produce a verdict: CONFIRMED (with evidence from the diff), DISPUTED (with explanation), or UNVERIFIABLE. Hypothetical or speculative findings must be DISPUTED.**
+   **Validation methods** (use whichever applies):
+   - **Code flow tracing**: Read the full source files from the PR branch (use `github-mcp-server-get_file_contents` with `ref: "refs/pull/{pr}/head"`). Trace callers, callees, locks, thread boundaries. Map the exact execution timeline.
+   - **Build and test**: If the repo is checked out locally, build the PR branch and run existing tests. Check if existing tests cover the claimed scenario.
+   - **Write a proof-of-concept test**: Create a minimal test case that demonstrates the issue. Even if too complex to run inline, write enough pseudocode/code for another engineer to implement it. Include this in the PR feedback as evidence.
+   - **Simulate the scenario**: For concurrency issues, write out the thread interleaving step-by-step:
+     ```
+     T=0  Thread-A: writes WarningsAsErrors = configA.WarningsAsErrors  (line 1334)
+     T=1  Thread-A: calls YieldForCallback → saves WarningsAsErrors to contextA
+     T=2  Thread-A: decrements _activeTaskCount to 0
+     T=3  Main:     receives TaskHostConfiguration for Task B
+     T=4  Main:     checks _activeTaskCount == 0 → passes
+     T=5  Main:     creates Thread-B, starts RunTask
+     T=6  Thread-B: writes WarningsAsErrors = configB.WarningsAsErrors  (line 1334)
+     T=7  Thread-A: TCS signals → ReacquireAfterCallback → restores WarningsAsErrors = configA
+     T=8  Thread-B: logs a warning → checks WarningsAsErrors → WRONG VALUES (configA, not configB)
+     ```
 
-   **IMPORTANT**: Never verify against `main` — the PR introduces new files and methods that only exist in the PR branch. Use the diff files or fetch the PR branch.
+   **Validation agent output format:**
+   ```
+   FINDING: <original claim>
+   VERDICT: CONFIRMED | DISPUTED
+   EVIDENCE: <code flow trace, test case, or thread timeline that proves/disproves>
+   TEST_SNIPPET: <optional: minimal test code or pseudocode demonstrating the issue>
+   ```
 
-   **Consensus rule**: Keep a finding only if **≥2 of 3 models confirm it**. Drop disputed findings.
+   **Rules:**
+   - A finding is CONFIRMED only with concrete evidence (code trace, test, timeline)
+   - A finding is DISPUTED if the validator can show the scenario cannot actually occur (e.g., a lock prevents the race, the thread is blocked, the method is never called with null)
+   - **Never validate against `main`** — PR code only exists in the PR branch. Use the diff or `refs/pull/{pr}/head`.
 
-### Phase 3: Post Review via GitHub
+4. **Multi-model consensus** (optional, for borderline findings): Launch the same validation prompt on 3 models (`claude-opus-4.6`, `gpt-5.2-codex`, `gemini-3-pro-preview`). Keep findings confirmed by ≥2/3.
 
-4. **Post inline review comments** on the PR for each confirmed finding that maps to a file and line range. Use the GitHub MCP tools or `gh` CLI:
+### Wave 3: Format and Post via GitHub
+
+5. **Post inline review comments** for each confirmed finding at the exact file and line range. Use GitHub MCP tools or `gh` CLI:
 
    ```bash
    gh api repos/{owner}/{repo}/pulls/{pr}/reviews \
      --method POST -f event="COMMENT" \
      -f 'comments[][path]=src/File.cs' \
      -f 'comments[][line]=42' \
-     -f 'comments[][body]=**[BLOCKING] Concurrency**\nDescription.\n**Recommendation:** Fix.'
+     -f 'comments[][body]=...'
    ```
 
-   Inline comment format:
-   ```
+   **Inline comment format:**
+   ```markdown
    **[$SEVERITY] $DimensionName**
-   $Concrete finding.
+
+   $Finding — concrete scenario.
+
+   **Thread timeline** (for concurrency issues):
+   ```
+   T=0  Thread-A: ...
+   T=1  Thread-B: ...  ← race here
+   ```
+
+   **Proof-of-concept test:**
+   ```csharp
+   [Fact]
+   public void ConcurrentTasks_WarningsAsErrors_NotStomped()
+   {
+       // Task A sets WarningsAsErrors = {"CS0001"}
+       // Task A yields
+       // Task B starts, sets WarningsAsErrors = {"CS0002"}
+       // Task A reacquires, restores WarningsAsErrors = {"CS0001"}
+       // Assert: Task B's WarningsAsErrors should still be {"CS0002"}
+   }
+   ```
+
    **Recommendation:** $Specific fix.
    ```
 
-5. **Post design-level concerns** (not tied to a line) as a **single PR comment**. Keep short — one bullet per concern.
+6. **Post design-level concerns** (not tied to a line) as a **single PR comment**. One bullet per concern, concise.
 
-### Phase 4: Summary Table
+### Wave 4: Summary Table
 
-6. **Post the summary table** as the review body. Reviewers scan this first:
+7. **Post the summary table** as the review body:
 
    ```markdown
    ## Expert Review Summary
 
    | # | Dimension | Verdict |
    |---|-----------|---------|
-   | 1 | Backwards Compatibility | ⚠️ 1 issue |
+   | 1 | Backwards Compatibility | ✅ LGTM |
    | 2 | ChangeWave Discipline | ✅ LGTM |
-   | 3 | Performance | ✅ LGTM |
    | ... | ... | ... |
+   | 13 | Concurrency | 🔴 2 MAJOR — shared state race |
 
-   - [x] Performance — clean
-   - [x] String Comparison — clean
-   - [ ] Concurrency — 2 BLOCKING issues
+   - [x] Backwards Compat
+   - [x] ChangeWave
+   - [ ] Concurrency — 2 MAJOR (shared WarningsAsErrors + CWD race)
    ```
 
    Checkbox rules:
    - `[x]` = LGTM or only NITs
    - `[ ]` = has MAJOR or BLOCKING findings
 
-   If all 24 dimensions are `[x]`, the review verdict is **APPROVE**. Otherwise **COMMENT** (or **REQUEST_CHANGES** if any BLOCKING findings exist).
+   Review verdict:
+   - All `[x]` → **APPROVE**
+   - Any BLOCKING `[ ]` → **REQUEST_CHANGES**
+   - Only MAJOR/MODERATE `[ ]` → **COMMENT**
