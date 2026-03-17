@@ -5,6 +5,4 @@ description: "Reviews MSBuild code changes using a 24-dimension methodology. Act
 
 # MSBuild Code Review
 
-Invoke `@expert-reviewer` for 24-dimension MSBuild code review. The agent contains the full methodology, principles, dimension rules, folder hotspot mapping, and 4-wave workflow.
-
-For per-dimension checklists (rules, CHECK flags, severity), see [DIMENSIONS.md](DIMENSIONS.md).
+Invoke `@expert-reviewer` for 24-dimension MSBuild code review. The agent contains the full methodology, principles, dimension rules with checklists, folder hotspot mapping, and 4-wave workflow.
