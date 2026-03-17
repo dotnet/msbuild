@@ -6,6 +6,15 @@
   On full framework it performs a more involved deployment.
    -->
 
+  <!-- BootstrapBinaryDestination moved from BootStrapMsBuild.props so that $(TargetFramework) is reliably available. -->
+  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <BootstrapBinaryDestination>$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin</BootstrapBinaryDestination>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
+    <BootstrapBinaryDestination>$(BootstrapDestination)</BootstrapBinaryDestination>
+  </PropertyGroup>
+
   <PropertyGroup>
     <BootstrapDependsOn Condition="$(TargetFramework.StartsWith('net4'))">BootstrapFull</BootstrapDependsOn>
     <BootstrapDependsOn Condition="!$(TargetFramework.StartsWith('net4'))">BootstrapNetCore</BootstrapDependsOn>
