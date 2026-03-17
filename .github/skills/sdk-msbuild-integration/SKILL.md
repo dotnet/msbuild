@@ -29,7 +29,7 @@ Understanding MSBuild's evaluation order is critical for SDK target authoring:
 
 - **SDK props import BEFORE user project** — SDK defaults can be overridden by the user
 - **SDK targets import AFTER user project** — SDK targets see user-specified properties
-- **`Directory.Build.props` imports before SDK props do anything** — it's the earliest user extension point
+- **`Directory.Build.props` is imported from `Microsoft.Common.props` as an early user extension point after core defaults are computed** — use it for solution-wide customization
 - **Property defaults set in SDK must not override user-specified values** — always use `Condition="'$(Prop)' == ''"`
 
 ```xml

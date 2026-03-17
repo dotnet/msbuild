@@ -432,13 +432,13 @@ See `../../documentation/High-level-overview.md` and `../../documentation/Built-
 
 **Rules:**
 1. Respect evaluation order: environment → global properties → project properties (in file order with imports) → item definitions → items.
-2. `Directory.Build.props` imports before SDK props; `Directory.Build.targets` imports after SDK targets.
+2. Understand how `Directory.Build.props`/`Directory.Build.targets` are injected: they are imported via `Microsoft.Common.props`/`Microsoft.Common.targets`, which may themselves be imported by SDK props/targets.
 3. Evaluation-time decisions have long-term architectural impact — extremely hard to reverse.
 4. Undefined metadata and empty-string metadata must be treated equivalently.
 
 **CHECK — Flag if:**
 - [ ] Change alters property evaluation order
-- [ ] `Directory.Build.props`/`.targets` import ordering violated
+- [ ] Changes rely on incorrect assumptions about `Directory.Build.props`/`.targets` import ordering
 - [ ] Evaluation-time side effects introduced
 - [ ] Undefined metadata treated differently from empty-string
 
@@ -502,7 +502,7 @@ See `../../documentation/High-level-overview.md` and `../../documentation/Built-
 | 1 | **Name Comparisons** | `MSBuildNameIgnoreCaseComparer` for property/item/target names. `OrdinalIgnoreCase` for identifiers. Never `CurrentCulture`. | — |
 | 2 | **ChangeWave Mechanism** | Gate behind correct version. Test opt-out. Document in ChangeWaves file. | `../../documentation/wiki/ChangeWaves.md` |
 | 3 | **Breaking Change Sensitivity** | New warnings break `WarnAsError`. Never remove CLI switches. Changed defaults break projects. | — |
-| 4 | **Evaluation Order** | Properties: last-write wins. `Directory.Build.props` before SDK props. Conditions at point of appearance. | `../../documentation/High-level-overview.md` |
+| 4 | **Evaluation Order** | Properties: last-write wins. Conditions at point of appearance. | `../../documentation/High-level-overview.md` |
 | 5 | **Target Ordering** | `DependsOnTargets` for predecessors. Incremental builds need `Inputs`/`Outputs`. | `../../documentation/wiki/Target-Maps.md` |
 | 6 | **Binary Log** | All events captured. Format backward-compatible. Correct `MessageImportance`. | `../../documentation/wiki/Binary-Log.md` |
 | 7 | **Node Architecture** | Test in-proc and out-of-proc. Shared state thread-safe. IPC serialization correct. | `../../documentation/wiki/Nodes-Orchestration.md` |
