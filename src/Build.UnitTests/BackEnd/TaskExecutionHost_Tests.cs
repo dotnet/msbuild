@@ -1073,7 +1073,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Force initing the DebugPath from the env var - as we need it to be unique for those tests.
             // The ProjectCacheTests DataMemberAttribute usages (specifically SuccessfulGraphsWithBuildParameters) lead
             //  to the DebugPath being set before this test runs - and hence the env var is ignored.
-            DebugUtils.SetDebugPath();
+            FrameworkDebugUtils.SetDebugPath();
 
             ObjectModelHelpers.BuildProjectExpectFailure($"""
                      <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -1102,7 +1102,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Reset DebugPath to not affect other tests
             transientEnvVar.Revert();
-            DebugUtils.SetDebugPath();
+            FrameworkDebugUtils.SetDebugPath();
         }
 
         [Fact]
