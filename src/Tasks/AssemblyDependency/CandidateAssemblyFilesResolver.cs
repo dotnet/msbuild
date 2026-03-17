@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable

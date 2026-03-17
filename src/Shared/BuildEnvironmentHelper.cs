@@ -34,6 +34,16 @@ namespace Microsoft.Build.Shared
         private static readonly string[] s_msBuildProcess = { "MSBUILD", "MSBUILDTASKHOST" };
 
         /// <summary>
+        /// Get the currently executing assembly path.
+        /// </summary>
+        /// <remarks>
+        /// This property depends on BuildEnvironmentHelper being compiled into separate assemblies.
+        /// If BuildEnvironmentHelper is moved to a shared assembly, this property will need to be re-evaluated.
+        /// </remarks>
+        internal static string ExecutingAssemblyPath
+            => Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(typeof(BuildEnvironmentHelper).Assembly));
+
+        /// <summary>
         /// Gets the cached Build Environment instance.
         /// </summary>
         public static BuildEnvironment Instance
@@ -443,16 +453,12 @@ namespace Microsoft.Build.Shared
 
         private static string GetExecutingAssemblyPath()
         {
-            return FileUtilities.ExecutingAssemblyPath;
+            return ExecutingAssemblyPath;
         }
 
         private static string GetAppContextBaseDirectory()
         {
-#if !CLR2COMPATIBILITY // Assemblies compiled against anything older than .NET 4.0 won't have a System.AppContext
             return AppContext.BaseDirectory;
-#else
-            return null;
-#endif
         }
 
         private static string GetEnvironmentVariable(string variable)
@@ -568,12 +574,14 @@ namespace Microsoft.Build.Shared
                 currentToolsDirectory = currentMSBuildExeFile.Directory;
 
                 CurrentMSBuildToolsDirectory = currentMSBuildExeFile.DirectoryName;
-                const string configFileExtension =
+                string configFileExtension =
 #if NET
-                    ".dll.config"; // Compat with what we looked for before 18.5
-#else
-                    ".exe.config";
+                    // Prior to 18.6, we looked at MSBuild.dll.config for core scenarios
+                    // EXCEPT in the force-full-framework case when we loaded the
+                    // full-framework copy of MSBuild.exe.config.
+                    !Traits.Instance.ForceEvaluateAsFullFramework ? ".dll.config" :
 #endif
+                    ".exe.config";
                 CurrentMSBuildConfigurationFile = Path.ChangeExtension(currentMSBuildExePath, configFileExtension);
                 MSBuildToolsDirectory32 = CurrentMSBuildToolsDirectory;
                 MSBuildToolsDirectory64 = CurrentMSBuildToolsDirectory;

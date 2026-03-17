@@ -56,7 +56,6 @@ namespace Microsoft.Build.Shared
 
             LoadedAssembly = loadedAssembly;
 
-#if !NET35
             // This block is reflection only loaded type implementation. Net35 does not support it, and fall backs to former implementation in #else
             // Property `Properties` set in this block aren't used by TaskHosts. Properties below are only used on the NodeProvider side to get information about the
             // properties and reflect over them without needing them to be fully loaded, so it also isn't need for TaskHosts.
@@ -161,12 +160,6 @@ namespace Microsoft.Build.Shared
                     }
                 }
             }
-#else
-            // For v3.5 fallback to old full type approach, as oppose to reflection only
-            HasLoadInSeparateAppDomainAttribute = Type.GetTypeInfo().IsDefined(typeof(LoadInSeparateAppDomainAttribute), true /* inherited */);
-            HasSTAThreadAttribute = Type.GetTypeInfo().IsDefined(typeof(RunInSTAAttribute), true /* inherited */);
-            IsMarshalByRef = Type.IsMarshalByRef;
-#endif
         }
 
         #endregion
@@ -236,9 +229,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal Assembly LoadedAssembly { get; private set; }
 
-#if !NET35
         internal ReflectableTaskPropertyInfo[] Properties { get; private set; }
-#endif
 
         /// <summary>
         /// Assembly-qualified names for properties. Only has a value if this type was loaded using MetadataLoadContext.

@@ -132,7 +132,7 @@ namespace Microsoft.Build.Internal
                 ? Directory.GetCurrentDirectory()
                 : FileUtilities.GetFullPathNoThrow(absoluteFixedDirPart);
 
-            normalizedFixedDirPart = FrameworkFileUtilities.EnsureTrailingSlash(normalizedFixedDirPart);
+            normalizedFixedDirPart = FileUtilities.EnsureTrailingSlash(normalizedFixedDirPart);
 
             var recombinedFileSpec = string.Concat(normalizedFixedDirPart, wildcardDirectoryPart, filenamePart);
 

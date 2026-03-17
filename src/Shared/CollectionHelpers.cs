@@ -49,7 +49,6 @@ namespace Microsoft.Build.Shared
             return false;
         }
 
-#if !CLR2COMPATIBILITY
         internal static bool SetEquivalent<T>(IEnumerable<T> a, IEnumerable<T> b)
         {
             return a.ToHashSet().SetEquals(b);
@@ -77,6 +76,5 @@ namespace Microsoft.Build.Shared
 
             return true;
         }
-#endif
     }
 }

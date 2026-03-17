@@ -468,7 +468,7 @@
       </trans-unit>
       <trans-unit id="DotnetHostPathNotSet">
         <source>DOTNET_HOST_PATH is not set. Cannot determine runtime location for app host bootstrap. This should always be set when running under the .NET SDK.</source>
-        <target state="new">DOTNET_HOST_PATH is not set. Cannot determine runtime location for app host bootstrap. This should always be set when running under the .NET SDK.</target>
+        <target state="translated">DOTNET_HOST_PATH není nastaven. Nelze určit umístění modulu runtime pro spuštění hostitele aplikace. Tato možnost by se měla nastavit vždy při spuštění v sadě .NET SDK.</target>
         <note />
       </trans-unit>
       <trans-unit id="DuplicateOverrideUsingTaskElement">

@@ -14,6 +14,7 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
@@ -511,6 +512,13 @@ namespace Microsoft.Build.BackEnd.Logging
         /// Is it Synchronous or Asynchronous
         /// </summary>
         public LoggerMode LoggingMode => _logMode;
+
+        /// <summary>
+        /// Returns the number of events currently queued for processing.
+        /// Used for hang diagnostics to determine if the logging pipeline is backed up.
+        /// Returns 0 for synchronous logging or when the queue is not available.
+        /// </summary>
+        public int EventQueueCount => _eventQueue?.Count ?? 0;
 
         /// <summary>
         /// Get of warnings to treat as errors.  An empty non-null set will treat all warnings as errors.
@@ -1530,7 +1538,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Dump all engine exceptions to a temp file
                 // so that we have something to go on in the
                 // event of a failure
-                ExceptionHandling.DumpExceptionToFile(e);
+                DebugUtils.DumpExceptionToFile(e);
 
                 // Catch all exceptions in order to pass them over to the engine thread. Due to
                 // hosts expecting to get logger exceptions on the same thread the engine was called from.
