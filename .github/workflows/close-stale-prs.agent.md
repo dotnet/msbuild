@@ -23,7 +23,7 @@ Find pull requests that have been open for more than **180 days** and have had n
 
 - **Created date**: The date the pull request was originally opened.
 - **Last activity date**: The date of the most recent comment, commit push, or review on the pull request. Use the `updated_at` field of the pull request as a proxy for last activity.
-- **Stale (warning)**: A PR is eligible for a stale warning if it was created more than 180 days ago **and** its last activity was between 30 and 37 days ago (i.e., `updated_at` is more than 30 days ago but 37 or fewer days ago).
+- **Stale (warning)**: A PR is eligible for a stale warning if it was created more than 180 days ago **and** its last activity was more than 30 days ago but no more than 37 days ago (i.e., 30 < days_since_updated ≤ 37).
 - **Stale (close)**: A PR is eligible for closure if it was created more than 180 days ago **and** its last activity was more than 37 days ago (i.e., `updated_at` is more than 37 days ago).
 
 ## Instructions
