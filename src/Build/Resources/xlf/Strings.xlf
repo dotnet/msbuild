@@ -1080,7 +1080,7 @@
         <note />
       </trans-unit>
       <trans-unit id="TaskHostAcquireFailed">
-        <source>MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</source>
+        <source>MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. If this is a transient failure (e.g. under heavy system load), you can increase retry attempts via the MSBUILDNODECREATIONRETRIES environment variable (default: 10) and the per-attempt timeout via MSBUILDNODECREATIONTIMEOUT (default: 30000 ms).</source>
         <note>{StrBegin="MSB4216: "}</note>
       </trans-unit>
       <trans-unit id="TaskHostNodeFailedToLaunch">

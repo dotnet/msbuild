@@ -3,7 +3,9 @@
 
 using System;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
 
@@ -145,6 +147,58 @@ namespace Microsoft.Build.UnitTests.BackEnd
             
             result.Length.ShouldBe(1);
             result[0].ShouldBeFalse();
+        }
+
+        [Fact]
+        public void NodeCreationRetries_Default_IsTen()
+        {
+            // Ensure default is 10 when env var is not set.
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDNODECREATIONRETRIES", null);
+
+            int retries = CommunicationsUtilities.GetIntegerVariableOrDefault("MSBUILDNODECREATIONRETRIES", 10);
+            retries.ShouldBe(10);
+        }
+
+        [Fact]
+        public void NodeCreationRetries_CanBeOverriddenViaEnvironmentVariable()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDNODECREATIONRETRIES", "25");
+
+            int retries = CommunicationsUtilities.GetIntegerVariableOrDefault("MSBUILDNODECREATIONRETRIES", 10);
+            retries.ShouldBe(25);
+        }
+
+        [Fact]
+        public void NodeCreationTimeout_Default_Is30000()
+        {
+            // Ensure default is 30000 ms when env var is not set.
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDNODECREATIONTIMEOUT", null);
+
+            int timeout = CommunicationsUtilities.GetIntegerVariableOrDefault("MSBUILDNODECREATIONTIMEOUT", 30000);
+            timeout.ShouldBe(30000);
+        }
+
+        [Fact]
+        public void NodeCreationTimeout_CanBeOverriddenViaEnvironmentVariable()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDNODECREATIONTIMEOUT", "60000");
+
+            int timeout = CommunicationsUtilities.GetIntegerVariableOrDefault("MSBUILDNODECREATIONTIMEOUT", 30000);
+            timeout.ShouldBe(60000);
+        }
+
+        [Fact]
+        public void NodeCreationRetries_InvalidValue_ReturnsDefault()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDNODECREATIONRETRIES", "not_a_number");
+
+            int retries = CommunicationsUtilities.GetIntegerVariableOrDefault("MSBUILDNODECREATIONRETRIES", 10);
+            retries.ShouldBe(10);
         }
     }
 }

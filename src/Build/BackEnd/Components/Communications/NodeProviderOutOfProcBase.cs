@@ -40,19 +40,43 @@ namespace Microsoft.Build.BackEnd
         private const int MaxPacketWriteSize = 1048576;
 
         /// <summary>
-        /// The number of times to retry creating an out-of-proc node.
+        /// The default number of times to retry creating an out-of-proc node.
+        /// Can be overridden via the MSBUILDNODECREATIONRETRIES environment variable.
         /// </summary>
-        private const int NodeCreationRetries = 10;
+        private const int DefaultNodeCreationRetries = 10;
 
         /// <summary>
-        /// The amount of time to wait for an out-of-proc node to spool up before we give up.
+        /// The default amount of time (ms) to wait for an out-of-proc node to spool up before we give up.
+        /// Can be overridden via the MSBUILDNODECREATIONTIMEOUT environment variable.
         /// </summary>
-        private const int TimeoutForNewNodeCreation = 30000;
+        private const int DefaultTimeoutForNewNodeCreation = 30000;
+
+        /// <summary>
+        /// The minimum backoff delay (ms) between node creation retry attempts.
+        /// </summary>
+        private const int MinBackoffDelayMs = 100;
+
+        /// <summary>
+        /// The maximum backoff delay (ms) between node creation retry attempts.
+        /// </summary>
+        private const int MaxBackoffDelayMs = 5000;
 
         /// <summary>
         /// The amount of time to wait for an out-of-proc node to exit.
         /// </summary>
         private const int TimeoutForWaitForExit = 30000;
+
+        /// <summary>
+        /// Gets the number of times to retry creating an out-of-proc node.
+        /// Configurable via the MSBUILDNODECREATIONRETRIES environment variable.
+        /// </summary>
+        private static int NodeCreationRetries => CommunicationsUtilities.GetIntegerVariableOrDefault("MSBUILDNODECREATIONRETRIES", DefaultNodeCreationRetries);
+
+        /// <summary>
+        /// Gets the amount of time (ms) to wait for an out-of-proc node to spool up before we give up.
+        /// Configurable via the MSBUILDNODECREATIONTIMEOUT environment variable.
+        /// </summary>
+        private static int TimeoutForNewNodeCreation => CommunicationsUtilities.GetIntegerVariableOrDefault("MSBUILDNODECREATIONTIMEOUT", DefaultTimeoutForNewNodeCreation);
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         private static readonly WindowsIdentity s_currentWindowsIdentity = WindowsIdentity.GetCurrent();
@@ -340,14 +364,20 @@ namespace Microsoft.Build.BackEnd
             // Create a new node process.
             bool StartNewNode(int nodeId)
             {
-                CommunicationsUtilities.Trace("Could not connect to existing process, now creating a process...");
+                int maxRetries = NodeCreationRetries;
+                int timeout = TimeoutForNewNodeCreation;
+
+                CommunicationsUtilities.Trace("Could not connect to existing process, now creating a process (retries: {0}, timeout: {1} ms)...", maxRetries, timeout);
 
                 // We try this in a loop because it is possible that there is another MSBuild multiproc
                 // host process running somewhere which is also trying to create nodes right now. It might
                 // find our newly created node and connect to it before we get a chance.
-                int retries = NodeCreationRetries;
+                int retries = maxRetries;
                 while (retries-- > 0)
                 {
+                    int attemptNumber = maxRetries - retries;
+                    CommunicationsUtilities.Trace("Node creation attempt {0} of {1} for node {2}...", attemptNumber, maxRetries, nodeId);
+
 #if FEATURE_NET35_TASKHOST
                     // We will also check to see if .NET 3.5 is installed in the case where we need to launch a CLR2 OOP TaskHost.
                     // Failure to detect this has been known to stall builds when Windows pops up a related dialog.
@@ -380,11 +410,11 @@ namespace Microsoft.Build.BackEnd
                     // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
 
                     // Now try to connect to it.
-                    Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, nodeLaunchData.Handshake, out HandshakeResult result);
+                    Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, timeout, nodeLaunchData.Handshake, out HandshakeResult result);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
-                        CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcess.Id);
+                        CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1} on attempt {2}", nodeId, msbuildProcess.Id, attemptNumber);
 
                         CreateNodeContext(nodeId, msbuildProcess, nodeStream, result.NegotiatedPacketVersion);
                         return true;
@@ -396,19 +426,27 @@ namespace Microsoft.Build.BackEnd
                         {
                             try
                             {
-                                CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with exit code {1}. This can indicate a crash at startup", msbuildProcess.Id, msbuildProcess.ExitCode);
+                                CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with exit code {1}. This can indicate a crash at startup (attempt {2} of {3})", msbuildProcess.Id, msbuildProcess.ExitCode, attemptNumber, maxRetries);
                             }
                             catch (InvalidOperationException)
                             {
                                 // This case is common on Windows where we called CreateProcess and the Process object
                                 // can't get the exit code.
-                                CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with unknown exit code. This can indicate a crash at startup", msbuildProcess.Id);
+                                CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it has exited with unknown exit code. This can indicate a crash at startup (attempt {1} of {2})", msbuildProcess.Id, attemptNumber, maxRetries);
                             }
                         }
                     }
                     else
                     {
-                        CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it is still running. This can occur when two multiprocess builds run in parallel and the other one 'stole' this node", msbuildProcess.Id);
+                        CommunicationsUtilities.Trace("Could not connect to node with PID {0}; it is still running. This can occur when two multiprocess builds run in parallel and the other one 'stole' this node (attempt {1} of {2})", msbuildProcess.Id, attemptNumber, maxRetries);
+                    }
+
+                    // Apply backoff before retrying to reduce contention under load.
+                    if (retries > 0)
+                    {
+                        int backoffMs = Math.Min(MinBackoffDelayMs * (1 << (attemptNumber - 1)), MaxBackoffDelayMs);
+                        CommunicationsUtilities.Trace("Waiting {0} ms before node creation retry attempt {1} of {2}", backoffMs, attemptNumber + 1, maxRetries);
+                        Thread.Sleep(backoffMs);
                     }
                 }
 

@@ -2403,7 +2403,7 @@ Errors: {3}</source>
         <note />
       </trans-unit>
       <trans-unit id="TaskHostAcquireFailed">
-        <source>MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run.</source>
+        <source>MSB4216: Could not run the "{0}" task because MSBuild could not create or connect to a task host with runtime "{1}" and architecture "{2}".  Please ensure that (1) the requested runtime and/or architecture are available on the machine, and (2) that the required executable "{3}" exists and can be run. If this is a transient failure (e.g. under heavy system load), you can increase retry attempts via the MSBUILDNODECREATIONRETRIES environment variable (default: 10) and the per-attempt timeout via MSBUILDNODECREATIONTIMEOUT (default: 30000 ms).</source>
         <target state="translated">MSB4216: 无法运行“{0}”任务，因为 MSBuild 无法创建或连接到运行时为“{1}”、体系结构为“{2}”的任务宿主。请确保 (1) 请求的运行时和/或体系结构在计算机上可用，以及 (2) 所需的可执行文件“{3}”存在，且可以运行。</target>
         <note>{StrBegin="MSB4216: "}</note>
       </trans-unit>
