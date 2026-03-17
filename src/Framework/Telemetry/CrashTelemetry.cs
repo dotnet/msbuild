@@ -353,6 +353,12 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
     /// </summary>
     public string? ActiveNodeDetails { get; set; }
 
+    /// <summary>
+    /// Diagnostic state of the project cache configuration when Project is unexpectedly null.
+    /// Format: "configId:projectFileName:IsLoaded:IsCached:WasGeneratedByNode:IsVsScenario:HasGlobalPlugins".
+    /// </summary>
+    public string? ProjectCacheState { get; set; }
+
     // --- Build state diagnostic properties (help diagnose the context of the crash) ---
 
     /// <summary>
@@ -533,6 +539,7 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(ActiveNodeIds);
         AddIfNotNull(EnableNodeReuse);
         AddIfNotNull(ActiveNodeDetails);
+        AddIfNotNull(ProjectCacheState);
 
         // Build state diagnostic properties
         AddIfNotNull(IsStandaloneExecution);
@@ -602,6 +609,7 @@ internal class CrashTelemetry : TelemetryBase, IActivityTelemetryDataHolder
         AddIfNotNull(ActiveNodeIds);
         AddIfNotNull(EnableNodeReuse?.ToString(), nameof(EnableNodeReuse));
         AddIfNotNull(ActiveNodeDetails);
+        AddIfNotNull(ProjectCacheState);
 
         // Build state diagnostic properties
         AddIfNotNull(IsStandaloneExecution?.ToString(), nameof(IsStandaloneExecution));
