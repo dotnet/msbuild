@@ -538,37 +538,101 @@ Use this to prioritize dimensions based on changed files.
 
 ## Review Workflow
 
-1. **Identify changed files** → map to folders in the hotspot table. Determine which dimensions are highest priority based on the folder mapping.
+### Phase 1: Map and Dispatch
 
-2. **Launch dimensions as parallel sub-tasks.** Group the 24 dimensions into batches by severity and launch each batch as a separate Opus 4.6 sub-agent using the `task` tool with `agent_type: "general-purpose"` and `model: "claude-opus-4.6"`. Each sub-agent receives:
-   - The diff or changed files to review
-   - The specific dimensions to evaluate (with their rules and checklists from this file)
-   - The folder context and relevant documentation links
-   
-   **Recommended batching (5 parallel agents):**
-   - **Agent A — BLOCKING dimensions** (1, 2, 13, 21, 24): Backwards compat, ChangeWave, concurrency, evaluation model, security
-   - **Agent B — MAJOR: Quality** (4, 5, 7, 8, 14): Test coverage, error messages, string comparison, API surface, naming
-   - **Agent C — MAJOR: Design** (3, 9, 10, 11, 15): Performance, target authoring, design, cross-platform, SDK integration
-   - **Agent D — MAJOR: Correctness** (17, 19, 22, 23): File I/O, build infra, edge cases, dependencies
-   - **Agent E — MODERATE + NIT** (6, 12, 16, 18, 20): Logging, simplification, C# idioms, docs, scope
+1. **Identify changed files** → map to folders in the hotspot table. Determine priority dimensions.
 
-   Each sub-agent should return structured findings as:
+2. **Launch dimensions as parallel sub-tasks.** Group the 24 dimensions into 5 batches and launch each as a separate Opus 4.6 sub-agent using `task` tool with `agent_type: "general-purpose"` and `model: "claude-opus-4.6"`.
+
+   **Batching (5 parallel agents):**
+   - **Agent A — BLOCKING** (1, 2, 13, 21, 24): Compat, ChangeWave, concurrency, evaluation model, security
+   - **Agent B — MAJOR: Quality** (4, 5, 7, 8, 14): Tests, errors, strings, API surface, naming
+   - **Agent C — MAJOR: Design** (3, 9, 10, 11, 15): Performance, targets, design, cross-platform, SDK
+   - **Agent D — MAJOR: Correctness** (17, 19, 22, 23): File I/O, infra, edge cases, deps
+   - **Agent E — MODERATE + NIT** (6, 12, 16, 18, 20): Logging, simplification, idioms, docs, scope
+
+   **Critical sub-agent instructions** (include verbatim in every sub-agent prompt):
+
+   > **LGTM is the best outcome.** If a dimension is satisfied — no real issues — return exactly:
+   > `$DimensionName — LGTM`
+   >
+   > Do NOT invent findings. Do NOT report hypothetical concerns ("maybe in theory..."). Do NOT nitpick to produce output. A clean PR is a good PR. Only report findings you can **prove** by tracing actual code flow in the source (not just the diff — read the full file to confirm).
+   >
+   > For real findings, you MUST:
+   > 1. Include the **exact file path and line range**
+   > 2. **Verify the claim** by reading the actual source, tracing control flow, checking callers/callees
+   > 3. Explain concretely what breaks and under what conditions
+   >
+   > Return format per dimension:
+   > ```
+   > $DimensionName — LGTM
+   > ```
+   > OR:
+   > ```
+   > $DimensionName — ISSUE
+   > SEVERITY: BLOCKING | MAJOR | MODERATE | NIT
+   > FILE: path/to/file.cs
+   > LINES: 100-120
+   > FINDING: <concrete, verified description — what breaks, when, how>
+   > RECOMMENDATION: <specific fix>
+   > ```
+
+### Phase 2: Multi-Model Verification
+
+3. **Validate findings with a multi-model vote.** Take all non-LGTM findings from Phase 1 and launch **3 parallel verification agents** — one per model:
+   - `model: "claude-opus-4.6"` — deep reasoning verification
+   - `model: "gpt-5.2-codex"` — code flow analysis
+   - `model: "gemini-3-pro-preview"` — independent cross-check
+
+   Each verifier receives:
+   - The claimed findings with file paths and line ranges
+   - The **full source files** in question (not just the diff)
+   - Instruction: **For each finding, trace the code flow and produce a verdict: CONFIRMED (with evidence), DISPUTED (with explanation), or UNVERIFIABLE. Hypothetical or speculative findings must be DISPUTED.**
+
+   **Consensus rule**: Keep a finding only if **≥2 of 3 models confirm it**. Drop disputed findings.
+
+### Phase 3: Post Review via GitHub
+
+4. **Post inline review comments** on the PR for each confirmed finding that maps to a file and line range. Use the GitHub MCP tools or `gh` CLI:
+
+   ```bash
+   gh api repos/{owner}/{repo}/pulls/{pr}/reviews \
+     --method POST -f event="COMMENT" \
+     -f 'comments[][path]=src/File.cs' \
+     -f 'comments[][line]=42' \
+     -f 'comments[][body]=**[BLOCKING] Concurrency**\nDescription.\n**Recommendation:** Fix.'
    ```
-   DIMENSION: <name>
-   SEVERITY: BLOCKING | MAJOR | MODERATE | NIT
-   FINDING: <description>
-   FILE: <path>
-   RECOMMENDATION: <what to do>
+
+   Inline comment format:
+   ```
+   **[$SEVERITY] $DimensionName**
+   $Concrete finding.
+   **Recommendation:** $Specific fix.
    ```
 
-3. **Aggregate results** from all sub-agents. Deduplicate overlapping findings. Sort by severity (BLOCKING first).
+5. **Post design-level concerns** (not tied to a line) as a **single PR comment**. Keep short — one bullet per concern.
 
-4. **Present consolidated review:**
-   - **BLOCKING** (must fix): Compat violations, ChangeWave omissions, concurrency bugs, security, evaluation model violations.
-   - **MAJOR** (should fix): Missing tests, perf regressions, bad error messages, API issues, correctness.
-   - **MODERATE** (fix or justify): Logging gaps, docs, infrastructure, scope.
-   - **NIT** (optional): Naming, C# idioms, simplification.
+### Phase 4: Summary Table
 
-5. **Ask probing questions** — "What happens when X is null?", "Has this been profiled?"
-6. **Reference documentation** — link to `documentation/wiki/` and `documentation/specs/`.
-7. **Track follow-up work** — suggest filing issues for non-blocking concerns.
+6. **Post the summary table** as the review body. Reviewers scan this first:
+
+   ```markdown
+   ## Expert Review Summary
+
+   | # | Dimension | Verdict |
+   |---|-----------|---------|
+   | 1 | Backwards Compatibility | ⚠️ 1 issue |
+   | 2 | ChangeWave Discipline | ✅ LGTM |
+   | 3 | Performance | ✅ LGTM |
+   | ... | ... | ... |
+
+   - [x] Performance — clean
+   - [x] String Comparison — clean
+   - [ ] Concurrency — 2 BLOCKING issues
+   ```
+
+   Checkbox rules:
+   - `[x]` = LGTM or only NITs
+   - `[ ]` = has MAJOR or BLOCKING findings
+
+   If all 24 dimensions are `[x]`, the review verdict is **APPROVE**. Otherwise **COMMENT** (or **REQUEST_CHANGES** if any BLOCKING findings exist).

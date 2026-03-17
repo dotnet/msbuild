@@ -159,21 +159,8 @@ Modern C# features. Match codebase conventions. Explicit nullability. Track fram
 ## Review Workflow
 
 1. **Map changed files** to folders in the hotspot table.
-2. **Launch dimensions as parallel Opus 4.6 sub-tasks.** Use the `task` tool with `agent_type: "general-purpose"` and `model: "claude-opus-4.6"` to run dimension batches concurrently. Each sub-agent gets the diff, specific dimensions (rules from [DIMENSIONS.md](DIMENSIONS.md)), and folder context.
-   
-   **5 parallel agents:**
-   - **A — BLOCKING** (dims 1, 2, 13, 21, 24): Compat, ChangeWave, concurrency, evaluation model, security
-   - **B — MAJOR: Quality** (dims 4, 5, 7, 8, 14): Tests, errors, strings, API surface, naming
-   - **C — MAJOR: Design** (dims 3, 9, 10, 11, 15): Performance, targets, design, cross-platform, SDK
-   - **D — MAJOR: Correctness** (dims 17, 19, 22, 23): File I/O, build infra, edge cases, deps
-   - **E — MODERATE + NIT** (dims 6, 12, 16, 18, 20): Logging, simplification, idioms, docs, scope
-
-3. **Aggregate and deduplicate** findings from all sub-agents. Sort by severity.
-4. **Present consolidated review:**
-   - **BLOCKING**: Compat violations, ChangeWave omissions, concurrency bugs, security, evaluation model.
-   - **MAJOR**: Missing tests, perf regressions, bad errors, API issues, correctness.
-   - **MODERATE**: Logging gaps, docs, infrastructure, scope.
-   - **NIT**: Naming, idioms, simplification.
-5. **Ask probing questions** — "What happens when X is null?", "Has this been profiled?"
-6. **Reference documentation** — link to `documentation/wiki/` and `documentation/specs/`.
-7. **Track follow-ups** — suggest issues for non-blocking concerns.
+2. **Launch 5 parallel Opus 4.6 sub-agents** (A–E, batched by severity). Each sub-agent gets diff + full source + dimension rules from [DIMENSIONS.md](DIMENSIONS.md). Sub-agents MUST return `$DimensionName — LGTM` for clean dimensions — no forced output. Only report verified findings with exact file:line ranges.
+3. **Multi-model verification**: Take all non-LGTM findings and validate with 3 parallel agents (Opus 4.6, Codex 5.2, Gemini 3 Pro). Each traces code flow to confirm or dispute. Keep findings with **≥2/3 consensus**.
+4. **Post inline comments** on PR via GitHub CLI/MCP — one comment per confirmed finding at the exact file and line range. Format: `**[$SEVERITY] $DimensionName**\n$Finding.\n**Recommendation:** $Fix.`
+5. **Post design concerns** (not tied to lines) as a single PR comment — one bullet per concern.
+6. **Post summary table** with all 24 dimensions as checkboxes. `[x]` = LGTM/nits only. `[ ]` = MAJOR/BLOCKING. All checked → APPROVE. Any unchecked → REQUEST_CHANGES if BLOCKING, COMMENT otherwise.

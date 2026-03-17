@@ -9,24 +9,19 @@ This skill performs comprehensive code review using the `@expert-reviewer` agent
 
 ## Usage
 
-Invoke the reviewer agent for thorough, multi-dimensional code review:
-
 ```
 @expert-reviewer Review this PR for MSBuild compliance across all 24 dimensions.
 ```
 
-The agent launches **5 parallel Opus 4.6 sub-agents**, each evaluating a batch of dimensions concurrently, then aggregates findings by severity:
+## Pipeline
 
-- **BLOCKING**: Backwards compatibility, ChangeWave discipline, concurrency, security, evaluation model integrity
-- **MAJOR**: Performance, test coverage, error messages, API surface, correctness, cross-platform, SDK integration
-- **MODERATE**: Logging, documentation, build infrastructure, scope discipline, dependency management
-- **NIT**: Naming precision, idiomatic C#, code simplification
-
-The agent prioritizes dimensions based on which files are changed (folder hotspot mapping) and categorizes all findings by severity.
+1. **5 parallel Opus 4.6 sub-agents** evaluate dimensions in batches. Each returns `$DimensionName — LGTM` for clean dimensions or verified findings with file:line.
+2. **3-model verification** (Opus, Codex, Gemini) validates non-LGTM findings by tracing code flow. Findings kept only with ≥2/3 consensus.
+3. **Inline PR comments** posted at exact file:line via GitHub CLI for each confirmed finding.
+4. **Summary table** with 24-dimension checkbox list posted as review body. All `[x]` → APPROVE.
 
 ## When to Use
 
 - Pull request reviews requiring MSBuild domain expertise
-- Architecture and design reviews for MSBuild changes
 - Pre-merge quality gates for backwards compatibility and ChangeWave compliance
 - Code quality assessment against MSBuild team conventions
