@@ -586,8 +586,11 @@ Use this to prioritize dimensions based on changed files.
 
    Each verifier receives:
    - The claimed findings with file paths and line ranges
-   - The **full source files** in question (not just the diff)
-   - Instruction: **For each finding, trace the code flow and produce a verdict: CONFIRMED (with evidence), DISPUTED (with explanation), or UNVERIFIABLE. Hypothetical or speculative findings must be DISPUTED.**
+   - The **PR diff** (not the main branch — PR code may not be merged yet!) and/or the PR branch checkout
+   - For modified files: both the diff AND the full file from the PR branch (use `github-mcp-server-get_file_contents` with `ref: "refs/pull/{pr}/head"` or fetch the PR branch)
+   - Instruction: **For each finding, trace the code flow IN THE PR's CODE and produce a verdict: CONFIRMED (with evidence from the diff), DISPUTED (with explanation), or UNVERIFIABLE. Hypothetical or speculative findings must be DISPUTED.**
+
+   **IMPORTANT**: Never verify against `main` — the PR introduces new files and methods that only exist in the PR branch. Use the diff files or fetch the PR branch.
 
    **Consensus rule**: Keep a finding only if **≥2 of 3 models confirm it**. Drop disputed findings.
 
