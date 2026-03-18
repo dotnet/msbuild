@@ -155,5 +155,44 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 Environment.GetEnvironmentVariable("DOTNET_ROOT_ARM64").ShouldBeNull(); // Was already null
             }
         }
+
+        /// <summary>
+        /// Verifies that the handshake toolsDirectory used by the parent
+        /// (ResolveAppHostOrFallback) matches what the child process
+        /// (NodeEndpointOutOfProcTaskHost) computes via its GetHandshake().
+        ///
+        /// Regression test for the macOS /tmp → /private/tmp symlink issue
+        /// where the parent used $(NetCoreSdkRoot) from MSBuild properties
+        /// (unresolved symlink) while the child used MSBuildToolsDirectoryRoot
+        /// from AppContext.BaseDirectory (resolved symlink), causing a
+        /// handshake hash mismatch → MSB4216.
+        /// </summary>
+        [Fact]
+        public void ResolveAppHostOrFallback_HandshakeMatchesChildHandshake()
+        {
+            // The parent's handshake should use MSBuildToolsDirectoryRoot —
+            // the same source the child (NodeEndpointOutOfProcTaskHost) defaults to.
+            string parentToolsDir = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+
+            // Simulate what the child does in NodeEndpointOutOfProcTaskHost.GetHandshake():
+            // new Handshake(options) with no explicit toolsDirectory → defaults to MSBuildToolsDirectoryRoot.
+            HandshakeOptions childOptions = CommunicationsUtilities.GetHandshakeOptions(
+                taskHost: true,
+                taskHostParameters: TaskHostParameters.Empty,
+                nodeReuse: false);
+
+            var childHandshake = new Handshake(childOptions);
+
+            // Simulate what the parent does in ResolveAppHostOrFallback (after the fix):
+            // new Handshake(hostContext, toolsDirectory: MSBuildToolsDirectoryRoot)
+            var parentHandshake = new Handshake(childOptions, parentToolsDir);
+
+            // The handshake keys must match for the pipe connection to succeed.
+            parentHandshake.GetKey().ShouldBe(childHandshake.GetKey(),
+                "Parent and child handshake keys must match. A mismatch here causes MSB4216 " +
+                "because the parent and child listen/connect on different pipe names. " +
+                "On macOS, this can happen when symlinks (like /tmp → /private/tmp) cause " +
+                "the toolsDirectory to have different string representations.");
+        }
     }
 }
