@@ -202,8 +202,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// /tmp is a symlink to /private/tmp.
         ///
         /// This test creates a real symlink to prove the mismatch. It only runs on
-        /// Unix where symlinks are natively supported and the scenario is relevant.
+        /// Unix (.NET Core) where symlinks are natively supported and the scenario is relevant.
         /// </summary>
+#if NET
         [UnixOnlyFact]
         public void Handshake_WithSymlinkedToolsDirectory_ProducesDifferentKey()
         {
@@ -258,5 +259,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 }
             }
         }
+#endif
     }
 }
