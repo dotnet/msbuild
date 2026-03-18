@@ -30,8 +30,6 @@ resources:
       branches:
         include: # trigger as a followup to CI on servicing branches
           - vs*
-          - rel/insiders
-          - rel/stable
   repositories:
   - repository: 1ESPipelineTemplates
     type: git
@@ -196,7 +194,7 @@ extends:
                   )
               $propsValue = $props -join ";"
 
-              # InsertPackagePropsValues is not needed for main/rel/insiders/rel/stable
+              # InsertPackagePropsValues was needed for old servicing branches (rel/d17.x) but is not used for main
               Write-Host "Unsetting InsertPackagePropsValues"
               Write-Host "##vso[task.setvariable variable=InsertPackagePropsValues]"
 
