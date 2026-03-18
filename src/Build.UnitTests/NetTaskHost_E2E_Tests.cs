@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -320,6 +321,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     apphostPath,
                     $"\"{testProjectPath}\" -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}",
                     out bool successTestTask,
+                    shellExecute: false,
                     outputHelper: _output,
                     environmentVariables: new Dictionary<string, string>
                     {
@@ -331,10 +333,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 // Without the fix, this fails with MSB4216 because the parent's handshake
                 // uses the symlink path from $(NetCoreSdkRoot) while the child resolves
                 // to the real path via AppContext.BaseDirectory.
-                testTaskOutput.ShouldNotContain("MSB4216",
-                    "Task host connection should succeed even when MSBuild is launched " +
-                    "through a symlinked path. MSB4216 here indicates a handshake mismatch " +
-                    "between parent (symlink path) and child (resolved path).");
+                testTaskOutput.ShouldNotContain("MSB4216");
 
                 successTestTask.ShouldBeTrue(
                     "TaskHostFactory task should execute successfully when MSBuild runs from a symlinked SDK path.");
