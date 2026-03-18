@@ -1,6 +1,51 @@
 # MSBuild release process
 
-This is a description of the steps required to release MSBuild. It is **incomplete**; when something not present here is discovered to be required it should be added.
+This is a description of the steps required to release MSBuild. The complete operational checklist is in [release-checklist.md](./release-checklist.md).
+
+MSBuild ships in both Visual Studio (monthly) and the .NET SDK (quarterly). Each monthly VS release gets its own `vs*` branch, final branding, and VS insertion. The checklist is organized into 6 timeline-gated phases (0–5) with explicit triggers and ordering.
+
+## How MSBuild releases flow into VS
+
+MSBuild is a **component** inserted into Visual Studio. VS ships monthly; MSBuild must branch and prepare its bits **before** VS is ready to take them.
+
+```mermaid
+graph LR
+    subgraph "BRANCH_SNAP_DATE — Phases 1–3"
+        A1[Create vs* branch from main]
+        A2[Bump main to NEXT version]
+        A3[DARC channel & subscription setup]
+    end
+
+    subgraph "Insertion → VS main"
+        B1["vs* builds auto-insert into VS main"]
+    end
+
+    subgraph "Before INSIDERS_SNAP_DATE — Phase 4"
+        C1[Final branding via Stabilize-Release.ps1]
+        C2[OptProf bootstrap]
+        C3["Final-branded bits land in VS main"]
+    end
+
+    subgraph "VS snaps"
+        D1["VS snaps main → rel/insiders"]
+        D2["VS promotes rel/insiders → rel/stable"]
+    end
+
+    subgraph "VS_SHIP_DATE — Phase 5"
+        E1[Publish packages to nuget.org]
+        E2[Tag release, update docs]
+    end
+
+    A1 --> A2 --> A3 --> B1 --> C1 --> C2 --> C3 --> D1 --> D2 --> E1 --> E2
+```
+
+The [VS insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) controls the routing:
+- MSBuild `main` → VS `main` (daily canary builds)
+- MSBuild `vs*` release branch → VS `main` (replaces `main` → `main` after branch snap)
+
+VS handles the progression from `main` → `rel/insiders` → `rel/stable` on its own schedule. MSBuild's responsibility is to have final-branded bits in VS `main` before `INSIDERS_SNAP_DATE`.
+
+The `AutoInsertTargetBranch` mapping in [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml) encodes which MSBuild branch maps to which VS branch.
 
 ## Final branding/versioning
 
