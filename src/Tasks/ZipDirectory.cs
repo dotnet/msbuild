@@ -59,8 +59,7 @@ namespace Microsoft.Build.Tasks
         public string? CompressionLevel { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; } = null!;
-
+        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(FallbackMultiProcessEnvironmentDriver.Instance);
         public override bool Execute()
         {
             AbsolutePath sourceDirectoryAbsolutePath = TaskEnvironment.GetAbsolutePath(SourceDirectory.ItemSpec);

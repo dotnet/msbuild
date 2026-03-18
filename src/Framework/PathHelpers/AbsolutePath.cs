@@ -146,27 +146,6 @@ namespace Microsoft.Build.Framework
                 return this;
             }
 
-
-            // Note: this is a quick check to avoid calling Path.GetFullPath when it's not necessary, since it can be expensive. 
-            // It should cover the most common cases and avoid the overhead of Path.GetFullPath in those cases.
-
-            // Check for relative path segments "." and ".."
-            // In absolute path those segments can not appear in the beginning of the path, only after a path separator.
-            // This is not a precise full detection of relative segments. There is no false negatives as this might affect correctenes, but it may have false positives:
-            // like when there is a hidden file or directory starting with a dot, or on linux the backslash and dot can be part of the file name.
-            // In case of false positives we would call Path.GetFullPath and the result would still be correct.
-
-            bool hasRelativeSegment = Value.Contains("/.") || Value.Contains("\\.");
-
-            // Check if directory separator normalization is required (only on Windows: "/" to "\")
-            // On unix "\" is not a valid path separator, but is a part of the file/directory name, so no normalization is needed. 
-            bool needsSeparatorNormalization = NativeMethods.IsWindows && Value.IndexOf(Path.AltDirectorySeparatorChar) >= 0;
-
-            if (!hasRelativeSegment && !needsSeparatorNormalization)
-            {
-                return this;
-            }
-
             // Use Path.GetFullPath to resolve relative segments and normalize separators.
             // Skip validation since Path.GetFullPath already ensures the result is absolute.
             return new AbsolutePath(Path.GetFullPath(Value), OriginalValue, ignoreRootedCheck: true);
