@@ -25,7 +25,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem File { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(FallbackMultiProcessEnvironmentDriver.Instance);
 
         /// <summary>
         /// Receives lines from file.
