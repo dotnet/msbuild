@@ -733,14 +733,6 @@ namespace Microsoft.Build.BackEnd
             string appHostPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildExecutableName);
             string commandLineArgs = BuildCommandLineArgs(nodeReuseEnabled);
 
-            // Use the same tools directory source as the child process for the handshake.
-            // The child (NodeEndpointOutOfProcTaskHost) defaults to MSBuildToolsDirectoryRoot
-            // which is derived from AppContext.BaseDirectory. On macOS, the runtime resolves
-            // the /tmp → /private/tmp symlink, but MSBuild properties (like $(NetCoreSdkRoot))
-            // preserve the unresolved form. Using different path forms produces different hashes
-            // in the handshake salt → pipe name mismatch → MSB4216.
-            string handshakeToolsDirectory = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-
             if (FileSystems.Default.FileExists(appHostPath))
             {
                 CommunicationsUtilities.Trace("For a host context of {0}, using app host from {1}.", hostContext, appHostPath);
@@ -752,7 +744,7 @@ namespace Microsoft.Build.BackEnd
                     : new NodeLaunchData(
                         appHostPath,
                         commandLineArgs,
-                        new Handshake(hostContext, toolsDirectory: handshakeToolsDirectory),
+                        new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath),
                         dotnetOverrides);
             }
 
@@ -770,7 +762,7 @@ namespace Microsoft.Build.BackEnd
             return new NodeLaunchData(
                 resolvedDotnetHostPath,
                 $"\"{Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName)}\" {commandLineArgs}",
-                new Handshake(hostContext, toolsDirectory: handshakeToolsDirectory));
+                new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath));
         }
 
         private string BuildCommandLineArgs(bool nodeReuseEnabled) => $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuseEnabled} /low:{ComponentHost.BuildParameters.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";
