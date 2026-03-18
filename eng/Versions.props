@@ -3,12 +3,12 @@
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.5.0</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind><!-- Keep next to VersionPrefix to create a conflict in forward-flow -->
+    <VersionPrefix>18.5.2</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind><!-- Keep next to VersionPrefix to create a conflict in forward-flow -->
     <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
     <PackageValidationBaselineVersion>18.0.2</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
-    <!-- differentiate experimental insertions to avoid package id conflicts, 
+    <!-- differentiate experimental insertions to avoid package id conflicts,
      it has to be alphabetically after "preview" to avoid downgrade errors in VS -->
     <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">test</PreReleaseVersionLabel>
     <!--
