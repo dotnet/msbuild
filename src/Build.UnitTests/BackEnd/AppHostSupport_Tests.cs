@@ -194,5 +194,68 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 "On macOS, this can happen when symlinks (like /tmp → /private/tmp) cause " +
                 "the toolsDirectory to have different string representations.");
         }
+
+        /// <summary>
+        /// Proves that using a symlinked path vs a resolved path in the handshake
+        /// produces DIFFERENT keys — demonstrating the exact bug on macOS where
+        /// /tmp is a symlink to /private/tmp.
+        ///
+        /// This test creates a real symlink to prove the mismatch. It only runs on
+        /// Unix where symlinks are natively supported and the scenario is relevant.
+        /// </summary>
+        [UnixOnlyFact]
+        public void Handshake_WithSymlinkedToolsDirectory_ProducesDifferentKey()
+        {
+            // Create a real directory and a symlink pointing to it.
+            string realDir = Path.Combine(Path.GetTempPath(), $"msbuild_test_real_{Guid.NewGuid():N}");
+            string symlinkDir = Path.Combine(Path.GetTempPath(), $"msbuild_test_link_{Guid.NewGuid():N}");
+
+            try
+            {
+                Directory.CreateDirectory(realDir);
+                Directory.CreateSymbolicLink(symlinkDir, realDir);
+
+                HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(
+                    taskHost: true,
+                    taskHostParameters: TaskHostParameters.Empty,
+                    nodeReuse: false);
+
+                // Parent using the symlink path (like $(MSBuildThisFileDirectory) would on macOS /tmp)
+                var symlinkHandshake = new Handshake(options, symlinkDir);
+
+                // Child using the resolved real path (like AppContext.BaseDirectory resolves /private/tmp)
+                var realHandshake = new Handshake(options, realDir);
+
+                // These produce DIFFERENT keys — this is the bug.
+                // If these were used as parent vs child toolsDirectory, the pipe names would
+                // differ and the parent could never connect to the child → MSB4216.
+                symlinkHandshake.GetKey().ShouldNotBe(realHandshake.GetKey(),
+                    "Symlinked and resolved paths should produce different handshake keys " +
+                    "(they are different strings). This demonstrates why the parent must NOT " +
+                    "use an MSBuild property path that may contain unresolved symlinks — it " +
+                    "must use MSBuildToolsDirectoryRoot (same source as the child) instead.");
+
+                // Using the SAME source (MSBuildToolsDirectoryRoot) on both sides always matches,
+                // regardless of symlinks, because both compute it from AppContext.BaseDirectory.
+                string consistentDir = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+                var parentFixed = new Handshake(options, consistentDir);
+                var childDefault = new Handshake(options);
+
+                parentFixed.GetKey().ShouldBe(childDefault.GetKey(),
+                    "Using MSBuildToolsDirectoryRoot on both sides must produce matching keys.");
+            }
+            finally
+            {
+                if (Directory.Exists(symlinkDir))
+                {
+                    Directory.Delete(symlinkDir);
+                }
+
+                if (Directory.Exists(realDir))
+                {
+                    Directory.Delete(realDir);
+                }
+            }
+        }
     }
 }
