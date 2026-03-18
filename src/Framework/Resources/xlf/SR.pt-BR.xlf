@@ -4,62 +4,62 @@
     <body>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeEqual">
         <source>{0} ('{1}') must be equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be equal to '{2}'.</target>
+        <target state="translated">{0} ("{1}") deve ser igual a "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreater">
         <source>{0} ('{1}') must be greater than '{2}'.</source>
-        <target state="new">{0} ('{1}') must be greater than '{2}'.</target>
+        <target state="translated">{0} ("{1}") deve ser maior que "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreaterOrEqual">
         <source>{0} ('{1}') must be greater than or equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be greater than or equal to '{2}'.</target>
+        <target state="translated">{0} ("{1}") deve ser maior ou igual a "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeLess">
         <source>{0} ('{1}') must be less than '{2}'.</source>
-        <target state="new">{0} ('{1}') must be less than '{2}'.</target>
+        <target state="translated">{0} ("{1}") deve ser menor que "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeLessOrEqual">
         <source>{0} ('{1}') must be less than or equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be less than or equal to '{2}'.</target>
+        <target state="translated">{0} ("{1}") deve ser menor ou igual a "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegative">
         <source>{0} ('{1}') must be a non-negative value.</source>
-        <target state="new">{0} ('{1}') must be a non-negative value.</target>
+        <target state="translated">{0} ("{1}") deve ser um valor não negativo.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegativeNonZero">
         <source>{0} ('{1}') must be a non-negative and non-zero value.</source>
-        <target state="new">{0} ('{1}') must be a non-negative and non-zero value.</target>
+        <target state="translated">{0} ("{1}") deve ser um valor não negativo e diferente de zero.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonZero">
         <source>{0} ('{1}') must be a non-zero value.</source>
-        <target state="new">{0} ('{1}') must be a non-zero value.</target>
+        <target state="translated">{0} ("{1}") deve ser um valor diferente de zero.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNotEqual">
         <source>{0} ('{1}') must not be equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must not be equal to '{2}'.</target>
+        <target state="translated">{0} ("{1}") não deve ser igual a "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="Argument_EmptyOrWhiteSpaceString">
         <source>The value cannot be an empty string or composed entirely of whitespace.</source>
-        <target state="new">The value cannot be an empty string or composed entirely of whitespace.</target>
+        <target state="translated">O valor não pode ser uma cadeia de caracteres vazia ou composta inteiramente de espaço em branco.</target>
         <note />
       </trans-unit>
       <trans-unit id="Argument_EmptyString">
         <source>The value cannot be an empty string.</source>
-        <target state="new">The value cannot be an empty string.</target>
+        <target state="translated">O valor não pode ser uma cadeia de caracteres vazia.</target>
         <note />
       </trans-unit>
       <trans-unit id="PathMustBeRooted">
         <source>Path must be rooted.</source>
-        <target state="new">Path must be rooted.</target>
+        <target state="translated">Caminho deve ter raiz.</target>
         <note />
       </trans-unit>
     </body>
