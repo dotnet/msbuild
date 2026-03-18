@@ -7,10 +7,8 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
-#if NET
+#if !FEATURE_MSIOREDIST
 using System.IO;
-#else
-using Microsoft.IO;
 #endif
 using System.Linq;
 using System.Reflection;
@@ -33,6 +31,13 @@ using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskItemFactory = Microsoft.Build.Execution.ProjectItemInstance.TaskItem.TaskItemFactory;
+
+#if FEATURE_MSIOREDIST
+// File is intentionally NOT aliased — all typeof() comparisons use fully-qualified
+// System.IO.File to match the types registered in AvailableStaticMethods.
+using Directory = Microsoft.IO.Directory;
+using Path = Microsoft.IO.Path;
+#endif
 
 #nullable disable
 
@@ -3941,6 +3946,38 @@ namespace Microsoft.Build.Evaluation
             }
 
             /// <summary>
+            /// Determines whether the argument at <paramref name="argIndex"/> for a System.IO.File
+            /// or System.IO.Directory method is a file/directory path that should be resolved
+            /// against the thread-local working directory.
+            /// </summary>
+            private static bool IsFileOrDirectoryPathArgument(string methodName, int argIndex)
+            {
+                // First argument is always a path for all File/Directory static methods.
+                if (argIndex == 0)
+                {
+                    return true;
+                }
+
+                // Second argument is a destination path for Copy, Move, Replace.
+                // CreateSymbolicLink is intentionally excluded — its arg1 (pathToTarget) is the
+                // symlink target and relative values are semantically meaningful (stored as-is).
+                if (argIndex == 1)
+                {
+                    return string.Equals(methodName, "Copy", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(methodName, "Move", StringComparison.OrdinalIgnoreCase)
+                        || string.Equals(methodName, "Replace", StringComparison.OrdinalIgnoreCase);
+                }
+
+                // Third argument is the backup path for Replace.
+                if (argIndex == 2)
+                {
+                    return string.Equals(methodName, "Replace", StringComparison.OrdinalIgnoreCase);
+                }
+
+                return false;
+            }
+
+            /// <summary>
             /// Execute the function on the given instance.
             /// </summary>
             internal object Execute(object objectInstance, IPropertyProvider<T> properties, ExpanderOptions options, IElementLocation elementLocation)
@@ -4005,13 +4042,33 @@ namespace Microsoft.Build.Evaluation
                         {
                             // Unescape the value since we're about to send it out of the engine and into
                             // the function being called. If a file or a directory function, fix the path
-                            if (_receiverType == typeof(File) || _receiverType == typeof(Directory)
-                                || _receiverType == typeof(Path))
+                            // Use fully qualified type names because FEATURE_MSIOREDIST aliases
+                            // Directory and Path to Microsoft.IO.* in this file, but _receiverType
+                            // from AvailableStaticMethods is always System.IO.*.
+                            if (_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory)
+                                || _receiverType == typeof(System.IO.Path))
                             {
                                 argumentValue = FileUtilities.FixFilePath(argumentValue);
                             }
 
                             args[n] = EscapingUtilities.UnescapeAll(argumentValue);
+
+                            // In -mt mode, resolve relative path arguments for File/Directory methods
+                            // against the thread-local working directory instead of the process-global
+                            // Environment.CurrentDirectory which may point to a different project's directory.
+                            // In multiprocess mode, CurrentThreadWorkingDirectory is null and
+                            // MakeFullPathFromThreadWorkingDirectory returns null — this is a no-op.
+                            // This must happen AFTER UnescapeAll so that the working directory path
+                            // (a real filesystem path) is not corrupted by MSBuild unescape processing.
+                            if ((_receiverType == typeof(System.IO.File) || _receiverType == typeof(System.IO.Directory))
+                                && IsFileOrDirectoryPathArgument(_methodMethodName, n))
+                            {
+                                AbsolutePath? resolved = FileUtilities.MakeFullPathFromThreadWorkingDirectory((string)args[n]);
+                                if (resolved.HasValue)
+                                {
+                                    args[n] = (string)resolved.GetValueOrDefault();
+                                }
+                            }
                         }
                         else
                         {
