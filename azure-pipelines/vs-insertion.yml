@@ -57,13 +57,11 @@ parameters:
 
 variables:
   # `auto` should work every time and selecting a branch in parameters is likely to fail due to incompatible versions in MSBuild and VS
-  - name: AutoInsertTargetBranch
-    value: 'main'
   - name: InsertTargetBranch
     ${{ if not(eq(parameters.TargetBranch, 'auto')) }}:
       value: ${{ parameters.TargetBranch }}
     ${{ else }}:
-      value: $(AutoInsertTargetBranch)
+      value: 'main'
   - name:  TeamName
     value: msbuild
   - name: TeamEmail
