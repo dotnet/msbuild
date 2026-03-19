@@ -40,15 +40,17 @@ Apply **all** dimensions on every review, weighted by file location (see [Folder
 **Severity: BLOCKING**
 
 **Rules:**
-1. Gate breaking behavior changes behind a ChangeWave. See `../../documentation/wiki/ChangeWaves.md`.
-2. New warnings are breaking changes for `-WarnAsError` builds. Gate behind ChangeWave or emit as `Message`.
-3. Make behavioral changes opt-in by default.
-4. SDK target changes must preserve backward compatibility with existing project files.
-5. Never remove CLI switches or aliases — deprecate with warnings first.
+1. Breaking changes are basically forbidden. Customers expect any project that built before to keep building.
+2. In cases where we expect no breaking behavior but there is a slight chance it should be gated behind a ChangeWave. See `../../documentation/wiki/ChangeWaves.md`.
+3. New warnings are breaking changes because customers set `-WarnAsError` in their builds. Gate them behind a ChangeWave or emit them as `Message`.
+4. Make behavioral changes opt-in by default.
+5. SDK target changes must preserve backward compatibility with existing project files.
+6. Never remove CLI switches or aliases — deprecate with warnings first.
 
 **CHECK — Flag if:**
-- [ ] A behavioral change has no ChangeWave gate
-- [ ] New warnings emitted without considering `WarnAsError` impact
+- [ ] A change can be percieved by customers as breaking
+- [ ] Risky behavioral change has no ChangeWave gate
+- [ ] New warnings emitted
 - [ ] A property default value has changed
 - [ ] A CLI switch or alias removed rather than deprecated
 - [ ] Output format changes could break downstream consumers
@@ -62,7 +64,7 @@ Apply **all** dimensions on every review, weighted by file location (see [Folder
 See `../../documentation/wiki/ChangeWaves.md` and `../../documentation/wiki/ChangeWaves-Dev.md`.
 
 **Rules:**
-1. Use the correct ChangeWave version — must match the upcoming MSBuild release, not the current one.
+1. Use the correct ChangeWave version — must match the upcoming MSBuild release, not the current one
 2. Test both enabled and disabled paths — `MSBuildDisableFeaturesFromVersion` opt-out must work.
 3. Document the ChangeWave in error messages, specs, and the ChangeWaves tracking file.
 
@@ -87,7 +89,7 @@ Hot paths: `Evaluator.cs`, `Expander.cs`, file I/O operations.
 4. Profile before optimizing — claims require evidence.
 
 **CHECK — Flag if:**
-- [ ] LINQ in a loop on a hot path
+- [ ] LINQ
 - [ ] Strings allocated that could be reused or avoided
 - [ ] A value recomputed on every call when cacheable
 - [ ] `Dictionary` for <10 items, or `List` for frequent lookups of >100 items
@@ -123,7 +125,7 @@ See `../../documentation/assigning-msb-error-code.md`.
 **Rules:**
 1. Messages must be actionable — state what happened, why, and how to fix.
 2. Use `MSBxxxx` format error/warning codes, each unique across the codebase.
-3. Use `ResourceUtilities.FormatResourceStringStripCodeAndKeyword` for formatting.
+3. Use `ResourceUtilities` for formatting.
 4. Use correct severity levels — don't emit errors for non-fatal conditions.
 
 **CHECK — Flag if:**
@@ -243,6 +245,7 @@ See `../../documentation/wiki/Microsoft.Build.Framework.md`.
 2. Handle .NET Framework vs .NET Core differences explicitly.
 3. Handle UNC paths, long paths (`\\?\`), and symlinks.
 4. Build output must not differ based on build machine OS.
+5. Use Microsoft.IO Redist when targeting .NET Framework for better performance.
 
 **CHECK — Flag if:**
 - [ ] Hardcoded path separators
@@ -250,6 +253,7 @@ See `../../documentation/wiki/Microsoft.Build.Framework.md`.
 - [ ] File path case sensitivity not considered
 - [ ] Code assumes `\r\n` newlines
 - [ ] `.NET Framework`-only API without `#if` guard
+- [ ] System.IO used instead of Microsoft.IO Redist for .NET Framework file operations
 
 ---
 
@@ -277,13 +281,14 @@ See `../../documentation/wiki/Microsoft.Build.Framework.md`.
 
 **Severity: BLOCKING**
 
-See `../../documentation/wiki/Nodes-Orchestration.md`.
+See `../../documentation/wiki/Nodes-Orchestration.md`, `../../documentation/specs/multithreading/multithreaded-msbuild.md`
 
 **Rules:**
 1. Shared mutable state must be thread-safe (`ConcurrentDictionary`, `Interlocked`, explicit locking).
 2. Synchronize access to state from multiple threads or nodes.
 3. Handle in-proc vs out-of-proc node differences — behavior must be correct in both.
 4. Consider IPC concurrency: message ordering, reentrancy, serialization.
+5. Check assumptions where only one thread accesses a code path.
 
 **CHECK — Flag if:**
 - [ ] Shared field read/written without synchronization
@@ -341,6 +346,7 @@ See `../../documentation/ProjectReference-Protocol.md`.
 2. Match surrounding code style — MSBuild conventions may differ from general .NET guidance.
 3. Handle nullability explicitly with annotations and `is null`/`is not null`.
 4. Track .NET version constraints with `// TODO` for unavailable APIs.
+5. new code should have nullable enabled even if some parts of codebase don't
 
 **CHECK — Flag if:**
 - [ ] `using` block where surrounding code uses `using` declarations
@@ -453,12 +459,14 @@ See `../../documentation/High-level-overview.md` and `../../documentation/Built-
 2. Verify behavior matches documented semantics.
 3. Validate fixes against original repro steps.
 4. Validate inputs early — fail fast with clear errors.
+5. Imagine exotic scenarios that could break assumptions. Like a red teamer trying to break MSBuild with weird project files or build environments.
 
 **CHECK — Flag if:**
 - [ ] New code path doesn't handle null/empty inputs
 - [ ] Bug fix doesn't include original repro as test
 - [ ] Boundary conditions not considered (off-by-one, max-length, empty)
 - [ ] Input validation missing at public API boundaries
+- [ ] Code relies on assumptions that exotic inputs could break
 
 ---
 
@@ -483,12 +491,12 @@ See `../../documentation/High-level-overview.md` and `../../documentation/Built-
 **Severity: BLOCKING**
 
 **Rules:**
-1. Security-relaxing parameters (e.g., `TrustServerCertificate`) must require explicit user opt-in.
+1. Never regress security
 2. Task type loading must unify to currently-running MSBuild assemblies.
 3. Consider path traversal, symlink following, and temp file safety.
 
 **CHECK — Flag if:**
-- [ ] Security-relaxing flag applied unconditionally
+- [ ] Security-relaxing assumption
 - [ ] Task assembly loading accepts untrusted paths without validation
 - [ ] File operations exploitable via symlinks or path traversal
 - [ ] Credentials or tokens logged/stored insecurely
