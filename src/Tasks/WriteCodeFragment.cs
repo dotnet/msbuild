@@ -34,7 +34,7 @@ namespace Microsoft.Build.Tasks
     public class WriteCodeFragment : TaskExtension, IMultiThreadableTask
     {
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
         private const string TypeNameSuffix = "_TypeName";
         private const string IsLiteralSuffix = "_IsLiteral";
         private static readonly string[] NamespaceImports = ["System", "System.Reflection"];
