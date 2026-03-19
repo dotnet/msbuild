@@ -32,6 +32,8 @@ Built-in tasks ship with MSBuild and cannot be independently versioned.
 * Support UNC paths, long paths (> 260 chars), and cross-platform separators.
 
 ## Multithreaded Task Migration
+
+* All built-in tasks implement `IMultiThreadableTask` with a default `TaskEnvironment` backed by `MultiProcessTaskEnvironmentDriver.Instance`.
 * Shared static state is a concurrency hazard in multi-process builds.
 
 ## Related Documentation
