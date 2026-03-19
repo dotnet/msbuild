@@ -176,11 +176,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void Handshake_ExternalPathCanMismatch_DefaultAlwaysMatches()
         {
-            // Use explicit NET runtime to ensure the NET HandshakeOptions flag is set,
-            // which is required for passing toolsDirectory to the Handshake constructor.
+            // Use explicit NET runtime and current architecture to ensure the NET
+            // HandshakeOptions flag is set, which is required for passing toolsDirectory
+            // to the Handshake constructor.
             var netTaskHostParams = new TaskHostParameters(
                 runtime: XMakeAttributes.MSBuildRuntimeValues.net,
-                architecture: null,
+                architecture: XMakeAttributes.GetCurrentMSBuildArchitecture(),
                 dotnetHostPath: null,
                 msBuildAssemblyPath: null);
 
