@@ -541,10 +541,8 @@ namespace Microsoft.Build.BackEnd
 #endif
             ITaskItem,
             ITaskItem2,
-            ITranslatable
-#if !TASKHOST
-            , IMetadataContainer
-#endif
+            ITranslatable,
+            IMetadataContainer
         {
             /// <summary>
             /// The item spec
@@ -574,7 +572,7 @@ namespace Microsoft.Build.BackEnd
                 if (copyFrom is ITaskItem2 copyFromAsITaskItem2)
                 {
                     _escapedItemSpec = copyFromAsITaskItem2.EvaluatedIncludeEscaped;
-                    _escapedDefiningProject = copyFromAsITaskItem2.GetMetadataValueEscaped(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath);
+                    _escapedDefiningProject = copyFromAsITaskItem2.GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath);
 
                     IDictionary nonGenericEscapedMetadata = copyFromAsITaskItem2.CloneCustomMetadataEscaped();
                     _customEscapedMetadata = nonGenericEscapedMetadata as Dictionary<string, string>;
@@ -595,7 +593,7 @@ namespace Microsoft.Build.BackEnd
                     // TaskParameterTaskItem's constructor expects escaped values, so escaping them all
                     // is the closest approximation to correct we can get.
                     _escapedItemSpec = EscapingUtilities.Escape(copyFrom.ItemSpec);
-                    _escapedDefiningProject = EscapingUtilities.EscapeWithCaching(copyFrom.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath));
+                    _escapedDefiningProject = EscapingUtilities.EscapeWithCaching(copyFrom.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath));
 
                     IDictionary customMetadata = copyFrom.CloneCustomMetadata();
                     _customEscapedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
@@ -606,6 +604,31 @@ namespace Microsoft.Build.BackEnd
                         {
                             _customEscapedMetadata[(string)entry.Key] = EscapingUtilities.Escape((string)entry.Value) ?? string.Empty;
                         }
+                    }
+                }
+
+                // RecursiveDir is a built-in metadata that cannot be derived from the item spec alone -
+                // it requires the original wildcard pattern (_includeBeforeWildcardExpansionEscaped).
+                // When crossing process boundaries (e.g., to TaskHost in -mt mode), built-in metadata
+                // is not included in CloneCustomMetadataEscaped(). Explicitly preserve RecursiveDir
+                // as custom metadata so it survives serialization.
+                // See https://github.com/dotnet/msbuild/issues/13140
+                if (copyFrom is ITaskItem2 copyFromForRecursiveDir)
+                {
+                    string recursiveDirEscaped = copyFromForRecursiveDir.GetMetadataValueEscaped(ItemSpecModifiers.RecursiveDir);
+                    if (!string.IsNullOrEmpty(recursiveDirEscaped))
+                    {
+                        _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                        _customEscapedMetadata[ItemSpecModifiers.RecursiveDir] = recursiveDirEscaped;
+                    }
+                }
+                else
+                {
+                    string recursiveDir = copyFrom.GetMetadata(ItemSpecModifiers.RecursiveDir);
+                    if (!string.IsNullOrEmpty(recursiveDir))
+                    {
+                        _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                        _customEscapedMetadata[ItemSpecModifiers.RecursiveDir] = EscapingUtilities.Escape(recursiveDir);
                     }
                 }
 
@@ -646,7 +669,7 @@ namespace Microsoft.Build.BackEnd
                 get
                 {
                     List<string> metadataNames = (_customEscapedMetadata == null) ? new List<string>() : new List<string>(_customEscapedMetadata.Keys);
-                    metadataNames.AddRange(FileUtilities.ItemSpecModifiers.All);
+                    metadataNames.AddRange(ItemSpecModifiers.All);
 
                     return metadataNames;
                 }
@@ -662,7 +685,7 @@ namespace Microsoft.Build.BackEnd
                 get
                 {
                     int count = (_customEscapedMetadata == null) ? 0 : _customEscapedMetadata.Count;
-                    return count + FileUtilities.ItemSpecModifiers.All.Length;
+                    return count + ItemSpecModifiers.All.Length;
                 }
             }
 
@@ -708,7 +731,7 @@ namespace Microsoft.Build.BackEnd
 
                 // Non-derivable metadata can only be set at construction time.
                 // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
-                ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
+                ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
 
                 _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
 
@@ -722,7 +745,7 @@ namespace Microsoft.Build.BackEnd
             public void RemoveMetadata(string metadataName)
             {
                 ErrorUtilities.VerifyThrowArgumentNull(metadataName);
-                ErrorUtilities.VerifyThrowArgument(!FileUtilities.ItemSpecModifiers.IsItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
+                ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsItemSpecModifier(metadataName), "Shared.CannotChangeItemSpecModifiers", metadataName);
 
                 if (_customEscapedMetadata == null)
                 {
@@ -750,7 +773,6 @@ namespace Microsoft.Build.BackEnd
                 // between items, and need to know the source item where the metadata came from
                 string originalItemSpec = destinationItem.GetMetadata("OriginalItemSpec");
 
-#if !TASKHOST
                 if (_customEscapedMetadata != null && destinationItem is IMetadataContainer destinationItemAsMetadataContainer)
                 {
                     // The destination implements IMetadataContainer so we can use the ImportMetadata bulk-set operation.
@@ -767,9 +789,7 @@ namespace Microsoft.Build.BackEnd
 
                     destinationItemAsMetadataContainer.ImportMetadata(metadataToImport);
                 }
-                else
-#endif
-                if (_customEscapedMetadata != null)
+                else if (_customEscapedMetadata != null)
                 {
                     foreach (KeyValuePair<string, string> entry in _customEscapedMetadata)
                     {
@@ -834,11 +854,11 @@ namespace Microsoft.Build.BackEnd
 
                 string metadataValue = null;
 
-                if (FileUtilities.ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName))
+                if (ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName))
                 {
                     // FileUtilities.GetItemSpecModifier is expecting escaped data, which we assume we already are.
                     // Passing in a null for currentDirectory indicates we are already in the correct current directory
-                    metadataValue = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(null, _escapedItemSpec, _escapedDefiningProject, metadataName, ref _fullPath);
+                    metadataValue = ItemSpecModifiers.GetItemSpecModifier(null, _escapedItemSpec, _escapedDefiningProject, metadataName, ref _fullPath);
                 }
                 else if (_customEscapedMetadata != null)
                 {

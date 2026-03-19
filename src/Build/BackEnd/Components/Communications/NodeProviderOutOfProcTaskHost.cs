@@ -733,6 +733,25 @@ namespace Microsoft.Build.BackEnd
             string appHostPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildExecutableName);
             string commandLineArgs = BuildCommandLineArgs(nodeReuseEnabled);
 
+            // The child task host (NodeEndpointOutOfProcTaskHost) computes its handshake
+            // toolsDirectory from BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot,
+            // which derives from AppContext.BaseDirectory (resolves symlinks).
+            //
+            // On .NET Framework, the parent MSBuild (VS) is in a different directory than the
+            // child .NET task host (SDK), so we must pass msbuildAssemblyPath explicitly to
+            // match the child's location. Windows has no symlink issues so this is safe.
+            //
+            // On .NET Core, parent and child are always from the same SDK directory. Passing
+            // msbuildAssemblyPath from $(NetCoreSdkRoot) can cause a handshake mismatch on
+            // macOS where /tmp → /private/tmp symlink means the property value differs from
+            // AppContext.BaseDirectory. By omitting toolsDirectory, both sides default to
+            // BuildEnvironmentHelper which resolves symlinks consistently.
+#if RUNTIME_TYPE_NETCORE
+            Handshake handshake = new Handshake(hostContext);
+#else
+            Handshake handshake = new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath);
+#endif
+
             if (FileSystems.Default.FileExists(appHostPath))
             {
                 CommunicationsUtilities.Trace("For a host context of {0}, using app host from {1}.", hostContext, appHostPath);
@@ -744,7 +763,7 @@ namespace Microsoft.Build.BackEnd
                     : new NodeLaunchData(
                         appHostPath,
                         commandLineArgs,
-                        new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath),
+                        handshake,
                         dotnetOverrides);
             }
 
@@ -762,7 +781,7 @@ namespace Microsoft.Build.BackEnd
             return new NodeLaunchData(
                 resolvedDotnetHostPath,
                 $"\"{Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName)}\" {commandLineArgs}",
-                new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath));
+                handshake);
         }
 
         private string BuildCommandLineArgs(bool nodeReuseEnabled) => $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuseEnabled} /low:{ComponentHost.BuildParameters.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";
