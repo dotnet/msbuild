@@ -1096,10 +1096,10 @@ namespace Microsoft.Build.Utilities
                 //
                 // Use a bounded timeout as a safety net for the grandchild case where
                 // EOF never arrives because grand child inherited the pipe and keeps it open.
-                const int eofTimeoutMs = 2000;
+                const int eofTimeoutSec = 2;
 
                 WaitHandle[] eofEvents = [_standardOutputEOF, _standardErrorEOF];
-                WaitHandle.WaitAll(eofEvents, TimeSpan.FromSeconds(2));
+                WaitHandle.WaitAll(eofEvents, TimeSpan.FromSeconds(eofTimeoutSec));
             }
             else
             {
