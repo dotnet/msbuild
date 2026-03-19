@@ -41,6 +41,7 @@ public sealed class EscapingUtilities_Tests
     [InlineData("%3B  ", ";")]
     [InlineData("%20foo", " foo")]
     [InlineData("foo%20", "foo ")]
+    [InlineData("  %ZZ  ", "%ZZ")]
     public void UnescapeWithTrim(string value, string result)
     => EscapingUtilities.UnescapeAll(value, trim: true).ShouldBe(result);
 
