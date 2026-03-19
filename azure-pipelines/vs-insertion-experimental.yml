@@ -109,13 +109,12 @@ extends:
             targetType: inline
             script: |
               $parameterTargetBranch = "${{ parameters.TargetBranch }}"
-              $detectedTarget = "main" # Default target branch
 
               # Determine which target branch to use based on build reason
               $finalTargetBranch = $parameterTargetBranch
               if ("$(Build.Reason)" -eq "ResourceTrigger" -or "$(Build.Reason)" -eq "PipelineCompletedTrigger") {
-                Write-Host "Build was triggered automatically, using default target branch: $detectedTarget"
-                $finalTargetBranch = $detectedTarget
+                Write-Host "Build was triggered automatically, using default target branch: main"
+                $finalTargetBranch = "main"
               } else {
                 Write-Host "Build was triggered manually, using parameter target branch: $parameterTargetBranch"
               }
