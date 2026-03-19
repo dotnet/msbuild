@@ -2,14 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Text;
 #if NET
 using System.Buffers;
 #endif
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Text;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.NET.StringTools;
+
+#pragma warning disable SA1519 // Braces should not be omitted from multi-line child statement
 
 namespace Microsoft.Build.Shared;
 
@@ -26,6 +29,22 @@ internal static class EscapingUtilities
     ///  The cache currently grows unbounded.
     /// </remarks>
     private static readonly Dictionary<string, string> s_escapedStringCache = new(StringComparer.Ordinal);
+
+    private static bool TryGetFromCache(string value, [NotNullWhen(true)] out string? result)
+    {
+        lock (s_escapedStringCache)
+        {
+            return s_escapedStringCache.TryGetValue(value, out result);
+        }
+    }
+
+    private static void AddToCache(string key, string value)
+    {
+        lock (s_escapedStringCache)
+        {
+            s_escapedStringCache[key] = value;
+        }
+    }
 
 #if NET
     private static readonly SearchValues<char> s_searchValues = SearchValues.Create(['%', '*', '?', '@', '$', '(', ')', ';', '\'']);
@@ -186,61 +205,131 @@ internal static class EscapingUtilities
             return value;
         }
 
-        // Find the first special char; if none, return early without allocating a StringBuilder.
-        int specialCharIndex = IndexOfAnyEscapeChar(value);
-        if (specialCharIndex < 0)
+        // Find the first special char; if none, return early without allocating anything.
+        int firstSpecialCharIndex = IndexOfAnyEscapeChar(value);
+        if (firstSpecialCharIndex < 0)
         {
             return value;
         }
 
-        if (cache)
+        if (cache && TryGetFromCache(value, out string? result))
         {
-            lock (s_escapedStringCache)
-            {
-                if (s_escapedStringCache.TryGetValue(value, out string? cachedEscapedString))
-                {
-                    return cachedEscapedString;
-                }
-            }
+            return result;
         }
 
-        StringBuilder sb = StringBuilderCache.Acquire(value.Length * 2);
-
-        int startIndex = 0;
+        using RefArrayBuilder<int> specialCharIndices = new(initialCapacity: 64);
+        int specialCharIndex = firstSpecialCharIndex;
 
         do
         {
-            sb.Append(value, startIndex, specialCharIndex - startIndex);
-
-            // Append escape sequence for special character.
-            sb.Append('%');
-
-            char ch = value[specialCharIndex];
-            sb.Append(HexDigitChar(ch >> 4));
-            sb.Append(HexDigitChar(ch & 0x0F));
-
-            startIndex = specialCharIndex + 1;
-            specialCharIndex = IndexOfAnyEscapeChar(value, startIndex);
+            specialCharIndices.Add(specialCharIndex);
+            specialCharIndex = IndexOfAnyEscapeChar(value, specialCharIndex + 1);
         }
         while (specialCharIndex >= 0);
 
-        sb.Append(value, startIndex, value.Length - startIndex);
+        result = Encode(value, specialCharIndices.AsSpan());
 
-        if (!cache)
+        if (cache)
         {
-            return StringBuilderCache.GetStringAndRelease(sb);
-        }
-
-        string result = Strings.WeakIntern(sb.ToString());
-        StringBuilderCache.Release(sb);
-
-        lock (s_escapedStringCache)
-        {
-            s_escapedStringCache[value] = result;
+            result = Strings.WeakIntern(result);
+            AddToCache(value, result);
         }
 
         return result;
+
+        static string Encode(string value, ReadOnlySpan<int> specialCharIndices)
+        {
+            // Each special char expands from 1 to 3 chars (%XX), a net gain of 2 each.
+            int length = value.Length + (specialCharIndices.Length * 2);
+
+#if NET
+            return string.Create(length, new EncodingHelper(value, specialCharIndices), static (destination, state) =>
+            {
+                var (source, specialCharIndices) = state;
+
+                int sourceIndex = 0;
+
+                foreach (int specialCharIndex in specialCharIndices)
+                {
+                    int charsToCopy = specialCharIndex - sourceIndex;
+                    if (charsToCopy > 0)
+                    {
+                        source.Slice(sourceIndex, charsToCopy).CopyTo(destination);
+                    }
+
+                    destination = destination[charsToCopy..];
+
+                    char ch = source[specialCharIndex];
+                    destination[0] = '%';
+                    destination[1] = HexDigitChar(ch >> 4);
+                    destination[2] = HexDigitChar(ch & 0x0F);
+                    destination = destination[3..];
+
+                    sourceIndex = specialCharIndex + 1;
+                }
+
+                if (sourceIndex < source.Length)
+                {
+                    source.Slice(sourceIndex).CopyTo(destination);
+                }
+            });
+
+#else
+
+            string result = new('\0', length);
+
+            unsafe
+            {
+                fixed (char* src = value)
+                fixed (char* dst = result)
+                {
+                    int srcIndex = 0;
+                    int dstIndex = 0;
+
+                    foreach (int specialCharIdx in specialCharIndices)
+                    {
+                        int charsToCopy = specialCharIdx - srcIndex;
+                        if (charsToCopy > 0)
+                        {
+                            Buffer.MemoryCopy(src + srcIndex, dst + dstIndex, charsToCopy * sizeof(char), charsToCopy * sizeof(char));
+                            dstIndex += charsToCopy;
+                        }
+
+                        char ch = src[specialCharIdx];
+                        dst[dstIndex] = '%';
+                        dst[dstIndex + 1] = HexDigitChar(ch >> 4);
+                        dst[dstIndex + 2] = HexDigitChar(ch & 0x0F);
+                        dstIndex += 3;
+
+                        srcIndex = specialCharIdx + 1;
+                    }
+
+                    int remainingChars = value.Length - srcIndex;
+                    if (remainingChars > 0)
+                    {
+                        Buffer.MemoryCopy(src + srcIndex, dst + dstIndex, remainingChars * sizeof(char), remainingChars * sizeof(char));
+                    }
+                }
+            }
+
+            return result;
+#endif
+        }
     }
+
+#if NET
+    private readonly ref struct EncodingHelper(ReadOnlySpan<char> value, ReadOnlySpan<int> indices)
+    {
+        public readonly ReadOnlySpan<char> Value = value;
+        public readonly ReadOnlySpan<int> Indices = indices;
+
+        public void Deconstruct(out ReadOnlySpan<char> value, out ReadOnlySpan<int> indices)
+        {
+            value = Value;
+            indices = Indices;
+        }
+    }
+#endif
 
     /// <summary>
     ///  Determines whether <paramref name="value"/> contains the escaped form of
