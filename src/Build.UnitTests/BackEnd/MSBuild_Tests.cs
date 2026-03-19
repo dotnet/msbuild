@@ -2044,7 +2044,7 @@ namespace Microsoft.Build.UnitTests
                 $$"""
                 {
                     "solution": {
-                        "path": "{{Path.GetFileName(solutionFile.Path).Replace("\\", "\\\\")}}",
+                        "path": "{{Path.GetFileName(solutionFile.Path)}}",
                         "projects": [
                             "NonExistingProject.csproj"
                         ]
@@ -2063,10 +2063,8 @@ namespace Microsoft.Build.UnitTests
                 """);
 
             var logger = new MockLogger(_testOutput);
-            var projectCollection = testEnvironment.CreateProjectCollection().Collection;
-            projectCollection.RegisterLogger(logger);
 
-            var project = projectCollection.LoadProject(buildProject.Path);
+            var project = new Project(buildProject.Path);
             bool result = project.Build(logger);
 
             _testOutput.WriteLine(logger.FullLog);
@@ -2113,10 +2111,8 @@ namespace Microsoft.Build.UnitTests
                 """);
 
             var logger = new MockLogger(_testOutput);
-            var projectCollection = testEnvironment.CreateProjectCollection().Collection;
-            projectCollection.RegisterLogger(logger);
 
-            var project = projectCollection.LoadProject(buildProject.Path);
+            var project = new Project(buildProject.Path);
             bool result = project.Build(logger);
 
             _testOutput.WriteLine(logger.FullLog);
