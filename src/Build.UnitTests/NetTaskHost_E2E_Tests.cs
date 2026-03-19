@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -274,5 +275,79 @@ namespace Microsoft.Build.Engine.UnitTests
             testTaskOutput.ShouldContain("The task is executed in process: MSBuild");
             testTaskOutput.ShouldContain("/nodereuse:True");
         }
+
+#if NET
+        /// <summary>
+        /// Regression test: proves that launching the MSBuild task host through a symlinked
+        /// SDK path causes MSB4216 due to handshake mismatch.
+        ///
+        /// On macOS, /tmp is a symlink to /private/tmp. When the SDK is under /tmp, the
+        /// MSBuild property $(NetCoreSdkRoot) = $(MSBuildThisFileDirectory) preserves the
+        /// unresolved /tmp form. But the child task host's AppContext.BaseDirectory resolves
+        /// to /private/tmp. The parent and child compute different handshake hashes → different
+        /// pipe names → MSB4216.
+        ///
+        /// This test recreates the scenario by symlinking the bootstrap SDK directory and
+        /// running MSBuild through the symlink.
+        /// </summary>
+        [UnixOnlyFact]
+        public void NetTaskHost_SymlinkedSdkPath_ShouldNotCauseMSB4216()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            // Create a symlink pointing to the bootstrap SDK binary location.
+            // This simulates the macOS /tmp → /private/tmp scenario.
+            string realSdkPath = RunnerUtilities.BootstrapMsBuildBinaryLocation;
+            string symlinkPath = Path.Combine(Path.GetTempPath(), $"msbuild_symlink_test_{Guid.NewGuid():N}");
+
+            try
+            {
+                Directory.CreateSymbolicLink(symlinkPath, realSdkPath);
+
+                // Launch the MSBuild apphost through the symlink path.
+                // This causes $(MSBuildThisFileDirectory) to use the symlink form,
+                // while the child's AppContext.BaseDirectory resolves to the real path.
+                string apphostPath = Path.Combine(symlinkPath, "sdk", RunnerUtilities.BootstrapSdkVersion, Constants.MSBuildExecutableName);
+
+                if (!File.Exists(apphostPath))
+                {
+                    // If the apphost isn't present, we can't test the symlink scenario.
+                    // Fail explicitly so this doesn't silently pass in broken environments.
+                    Assert.Fail($"MSBuild apphost not found at: {apphostPath}. " +
+                        "The bootstrap layout must include the MSBuild apphost for this test.");
+                }
+
+                string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestNetTask.csproj");
+
+                string testTaskOutput = RunnerUtilities.RunProcessAndGetOutput(
+                    apphostPath,
+                    $"\"{testProjectPath}\" -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}",
+                    out bool successTestTask,
+                    shellExecute: false,
+                    outputHelper: _output,
+                    environmentVariables: new Dictionary<string, string>
+                    {
+                        [Constants.DotnetHostPathEnvVarName] = Path.Combine(realSdkPath, "dotnet"),
+                    });
+
+                _output.WriteLine(testTaskOutput);
+
+                // Without the fix, this fails with MSB4216 because the parent's handshake
+                // uses the symlink path from $(NetCoreSdkRoot) while the child resolves
+                // to the real path via AppContext.BaseDirectory.
+                testTaskOutput.ShouldNotContain("MSB4216");
+
+                successTestTask.ShouldBeTrue(
+                    "TaskHostFactory task should execute successfully when MSBuild runs from a symlinked SDK path.");
+            }
+            finally
+            {
+                if (Directory.Exists(symlinkPath))
+                {
+                    Directory.Delete(symlinkPath);
+                }
+            }
+        }
+#endif
     }
 }
