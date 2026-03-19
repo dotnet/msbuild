@@ -1085,7 +1085,8 @@ namespace Microsoft.Build.Utilities
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
             {
                 // Step 1: Wait for the process handle to be signaled.
-                // Use int.MaxValue to avoid blocking on pipe EOF.
+                // Use int.MaxValue to avoid blocking on pipe EOF,
+                // as Process.WaitForExit does not wait for EOF when any timeout is provided.
                 proc.WaitForExit(int.MaxValue);
 
                 // Step 2: Wait for the AsyncStreamReader to deliver all remaining data.
@@ -1094,11 +1095,11 @@ namespace Microsoft.Build.Utilities
                 // Our ReceiveStandardErrorOrOutputData handler signals the EOF events.
                 //
                 // Use a bounded timeout as a safety net for the grandchild case where
-                // EOF never arrives.
+                // EOF never arrives because grand child inherited the pipe and keeps it open.
                 const int eofTimeoutMs = 2000;
 
                 WaitHandle[] eofEvents = [_standardOutputEOF, _standardErrorEOF];
-                WaitHandle.WaitAll(eofEvents, eofTimeoutMs);
+                WaitHandle.WaitAll(eofEvents, TimeSpan.FromSeconds(2));
             }
             else
             {
