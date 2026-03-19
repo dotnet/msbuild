@@ -2061,6 +2061,19 @@ namespace Microsoft.Build.Construction
                     ProjectFileErrorUtilities.ThrowInvalidProjectFile(new BuildEventFileInfo(projectFile), "ProjectUpgradeNeededToVcxProj", projectFile);
                 }
 
+                // Solution files (.sln, .slnx, .slnf) should not be loaded as XML project files.
+                // If a solution file reaches this point, it means the normal solution loading path
+                // (LoadSolutionIntoConfiguration) failed earlier. Re-parse as a solution to surface
+                // the original, meaningful error instead of a confusing XML parse error.
+                if (FileUtilities.IsSolutionFilename(projectFile))
+                {
+                    SolutionFile.Parse(projectFile);
+
+                    // If Parse didn't throw, the solution is valid but shouldn't be loaded as a project.
+                    // This shouldn't normally happen, but guard against it with a clear error.
+                    ErrorUtilities.ThrowInternalError("Solution file {0} should not be loaded as a project XML file.", projectFile);
+                }
+
                 // OK it's a regular project file, load it normally.
                 return new ProjectRootElement(projectFile, projectRootElementCache, preserveFormatting);
             }
