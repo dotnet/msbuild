@@ -71,9 +71,6 @@ internal class TelemetryForwarderProvider : IBuildComponent
             }
         }
 
-        internal static TaskOrTargetTelemetryKey GetKey(string name, bool isCustom, bool isMetaproj,
-            bool isFromNugetCache)
-            => new TaskOrTargetTelemetryKey(name, isCustom, isFromNugetCache, isMetaproj);
 
         public void FinalizeProcessing(LoggingContext loggingContext)
         {

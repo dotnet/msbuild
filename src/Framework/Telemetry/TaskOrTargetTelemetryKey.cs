@@ -56,6 +56,12 @@ internal struct TaskOrTargetTelemetryKey : IEquatable<TaskOrTargetTelemetryKey>
     public static explicit operator TaskOrTargetTelemetryKey(string key) => new(key);
 
     /// <summary>
+    /// Creates a <see cref="TaskOrTargetTelemetryKey"/> with all properties.
+    /// </summary>
+    internal static TaskOrTargetTelemetryKey Create(string name, bool isCustom, bool isFromNugetCache, bool isMetaproj)
+        => new(name, isCustom, isFromNugetCache, isMetaproj);
+
+    /// <summary>
     /// Gets the name of the task or target.
     /// </summary>
     /// <remarks>

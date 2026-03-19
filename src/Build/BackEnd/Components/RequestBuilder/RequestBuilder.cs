@@ -1287,7 +1287,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             // Accumulate all telemetry into a local instance, then merge into the shared singleton once.
-            WorkerNodeTelemetryData localData = new();
+            WorkerNodeTelemetryData telemetryData = new();
 
             foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
             {
@@ -1319,15 +1319,15 @@ namespace Microsoft.Build.BackEnd
                                (isFromNuget && FileClassifier.Shared.IsMicrosoftPackageInNugetCache(projectTargetInstance.Value.FullPath));
                 }
 
-                var key = TelemetryForwarderProvider.TelemetryForwarder.GetKey(
-                    projectTargetInstance.Key, isCustom, isMetaprojTarget, isFromNuget);
-                localData.AddTarget(key, wasExecuted, skipReason);
+                var key = TaskOrTargetTelemetryKey.Create(
+                    projectTargetInstance.Key, isCustom, isFromNuget, isMetaprojTarget);
+                telemetryData.AddTarget(key, wasExecuted, skipReason);
             }
 
             TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
             CollectTasksStats(taskReg);
 
-            telemetryForwarder.MergeWorkerData(localData);
+            telemetryForwarder.MergeWorkerData(telemetryData);
 
             void CollectTasksStats(TaskRegistry taskRegistry)
             {
@@ -1338,12 +1338,12 @@ namespace Microsoft.Build.BackEnd
 
                 foreach (TaskRegistry.RegisteredTaskRecord registeredTaskRecord in taskRegistry.TaskRegistrations.Values.SelectMany(record => record))
                 {
-                    var key = TelemetryForwarderProvider.TelemetryForwarder.GetKey(
+                    var key = TaskOrTargetTelemetryKey.Create(
                         registeredTaskRecord.TaskIdentity.Name,
                         registeredTaskRecord.ComputeIfCustom(),
-                        isMetaproj: false,
-                        registeredTaskRecord.IsFromNugetCache);
-                    localData.AddTask(
+                        registeredTaskRecord.IsFromNugetCache,
+                        isMetaproj: false);
+                    telemetryData.AddTask(
                         key,
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
