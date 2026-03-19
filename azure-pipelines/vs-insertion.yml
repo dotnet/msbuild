@@ -182,15 +182,6 @@ extends:
               $MicrosoftNETStringToolsPackageVersion = $packageFile.BaseName.TrimStart("Microsoft.NET.StringTools")
               Write-Host "Setting MicrosoftNETStringToolsPackageVersion to '$MicrosoftNETStringToolsPackageVersion'"
               Write-Host "##vso[task.setvariable variable=MicrosoftNETStringToolsPackageVersion]$($MicrosoftNETStringToolsPackageVersion)"
-              $props = @(
-                      "VS.ExternalAPIs.MSBuild=$MSBuild_ExtApisPackageVersion",
-                      "Microsoft.Build=$MicrosoftNETStringToolsPackageVersion",
-                      "Microsoft.Build.Framework=$MicrosoftNETStringToolsPackageVersion",
-                      "Microsoft.Build.Tasks.Core=$MicrosoftNETStringToolsPackageVersion",
-                      "Microsoft.Build.Utilities.Core=$MicrosoftNETStringToolsPackageVersion",
-                      "Microsoft.NET.StringTools=$MicrosoftNETStringToolsPackageVersion"
-                  )
-              $propsValue = $props -join ";"
 
               # InsertPackagePropsValues was needed for old servicing branches (rel/d17.x) but is not used for main
               Write-Host "Unsetting InsertPackagePropsValues"
