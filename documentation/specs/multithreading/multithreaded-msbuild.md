@@ -234,11 +234,11 @@ The `MSBuildMultiThreadableTaskAttribute` is **non-inheritable** (`Inherited = f
 * Derived classes cannot accidentally inherit thread-safety assumptions from base classes
 * The routing decision is always explicit and visible in the task's source code
 
-Tasks may optionally implement `IMultiThreadableTask` to access `TaskEnvironment` APIs, but only the attribute determines routing behavior.
+Tasks may optionally implement `IMultiThreadableTask` to access `TaskEnvironment` APIs, but only the attribute determines routing behavior. All 19 built-in MSBuild tasks now implement `IMultiThreadableTask` with a default `TaskEnvironment` backed by `MultiProcessTaskEnvironmentDriver.Instance`, which acts as a fallback for explicit instantiation and task host scenarios.
 
 ## Tasks transition
 
-In the initial phase of development of multithreaded execution mode, all tasks will run in sidecar taskhosts. Over time, we will update tasks that are maintained by us and our partners (such as MSBuild, SDK, and NuGet) to add the `MSBuildMultiThreadableTaskAttribute` and ensure thread-safety. As these tasks are marked with the attribute, their execution would be moved into the entry process. Customers' tasks would be executed in the sidecar taskhosts unless they add the attribute to their task classes.
+All built-in tasks maintained by the MSBuild team have been migrated to implement `IMultiThreadableTask` with default `TaskEnvironment` initialization and are decorated with `[MSBuildMultiThreadableTask]`. Partner tasks (SDK, NuGet) should follow the same pattern. Customer tasks that do not add the attribute will continue to execute in sidecar task hosts.
 
 To ease task authoring, we will provide a Roslyn analyzer that will check for known-bad API usage, like `System.Environment.GetEnvironmentVariable` or `System.IO.Directory.SetCurrentDirectory`, and suggest alternatives that use the `TaskEnvironment` object (for tasks that also implement `IMultiThreadableTask`).
 
