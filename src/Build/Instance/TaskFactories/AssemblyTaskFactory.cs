@@ -62,11 +62,6 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskHostParameters _factoryIdentityParameters;
 
-        /// <summary>
-        /// Need to store away the taskloggingcontext used by CreateTaskInstance so that
-        /// TaskLoader will be able to call back with errors.
-        /// </summary>
-        private TaskLoggingContext _taskLoggingContext;
 
         #endregion
 
@@ -330,7 +325,6 @@ namespace Microsoft.Build.BackEnd
             bool useTaskFactory = _loadedType.LoadedViaMetadataLoadContext;
 
             TaskHostParameters mergedParameters = TaskHostParameters.Empty;
-            _taskLoggingContext = taskLoggingContext;
 
             // Optimization for the common (vanilla AssemblyTaskFactory) case -- only calculate
             // the task factory parameters if we have any to calculate; otherwise even if we
@@ -355,7 +349,7 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
+            taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
 
             if (useTaskFactory)
             {
@@ -400,7 +394,8 @@ namespace Microsoft.Build.BackEnd
                     taskLocation.File,
                     taskLocation.Line,
                     taskLocation.Column,
-                    new TaskLoader.LogError(ErrorLoggingDelegate),
+                    new TaskLoader.LogError((taskLoc, taskLine, taskColumn, message, messageArgs) =>
+                        taskLoggingContext.LogError(new BuildEventFileInfo(taskLoc, taskLine, taskColumn), message, messageArgs)),
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
                     appDomain => AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _loadedType.Type, appDomain),
@@ -423,7 +418,7 @@ namespace Microsoft.Build.BackEnd
                 if (taskInstance != null)
                 {
                     bool isMicrosoftOwned = IsMicrosoftAuthoredTask();
-                    _taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.TrackTaskSubclassing(_loadedType.Type, isMicrosoftOwned);
+                    taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.TrackTaskSubclassing(_loadedType.Type, isMicrosoftOwned);
                 }
 
                 return taskInstance;
@@ -745,14 +740,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Log errors from TaskLoader.
-        /// </summary>
-        private void ErrorLoggingDelegate(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs)
-        {
-            _taskLoggingContext.LogError(new BuildEventFileInfo(taskLocation, taskLine, taskColumn), message, messageArgs);
         }
 
         /// <summary>
