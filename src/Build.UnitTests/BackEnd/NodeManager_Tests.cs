@@ -14,8 +14,6 @@ using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
-#nullable disable
-
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
@@ -118,9 +116,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private static ConcurrentDictionary<int, INodeProvider> GetNodeIdToProvider(NodeManager nodeManager)
         {
-            FieldInfo field = typeof(NodeManager).GetField("_nodeIdToProvider", BindingFlags.NonPublic | BindingFlags.Instance);
+            FieldInfo? field = typeof(NodeManager).GetField("_nodeIdToProvider", BindingFlags.NonPublic | BindingFlags.Instance);
             field.ShouldNotBeNull();
-            return (ConcurrentDictionary<int, INodeProvider>)field.GetValue(nodeManager);
+            var result = (ConcurrentDictionary<int, INodeProvider>?)field.GetValue(nodeManager);
+            result.ShouldNotBeNull();
+            return result;
         }
 
         private sealed class TestPacket : INodePacket
