@@ -61,8 +61,6 @@
 
   <PropertyGroup>
     <MicrosoftVisualStudioTelemetryVersion>17.14.18</MicrosoftVisualStudioTelemetryVersion>
-    <!-- Transitive dependency of Microsoft.VisualStudio.Telemetry; pinned here for ApiCompat search paths -->
-    <MicrosoftVisualStudioUtilitiesInternalVersion>16.3.90</MicrosoftVisualStudioUtilitiesInternalVersion>
     <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Packages.props -->
   </PropertyGroup>
 

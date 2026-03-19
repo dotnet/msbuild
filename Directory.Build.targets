@@ -12,14 +12,6 @@
     <EnablePackageValidation>false</EnablePackageValidation>
   </PropertyGroup>
 
-  <!-- Add PrivateAssets="all" packages (and their transitive dependencies) to API compat search paths
-       to suppress "Could not resolve reference" warnings during package validation.
-       Microsoft.VisualStudio.Telemetry is referenced with PrivateAssets="all" in Framework,
-       so package validation can't resolve it or its dependency Utilities.Internal when validating dependent packages.
-       These packages target net45 (not net472), so the TFM is hardcoded. -->
-  <PropertyGroup Condition="'$(EnablePackageValidation)' == 'true'">
-    <ApiCompatAdditionalSearchPaths>$(ApiCompatAdditionalSearchPaths);$(NuGetPackageRoot)microsoft.visualstudio.telemetry\$(MicrosoftVisualStudioTelemetryVersion)\lib\net45;$(NuGetPackageRoot)microsoft.visualstudio.utilities.internal\$(MicrosoftVisualStudioUtilitiesInternalVersion)\lib\net45</ApiCompatAdditionalSearchPaths>
-  </PropertyGroup>
 
   <ItemGroup Condition=" '$(IsPackable)' == 'true' ">
     <None Include="$(ThirdPartyNotice)" Pack="true" PackagePath="notices" Visible="false" />

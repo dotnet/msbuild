@@ -68,6 +68,10 @@
 
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
     <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
+    <!-- Telemetry and its transitive dependency Utilities.Internal are PrivateAssets in Framework,
+         so they don't flow here. Explicit references let package validation resolve them. -->
+    <PackageReference Include="Microsoft.VisualStudio.Telemetry" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.VisualStudio.Utilities.Internal" PrivateAssets="all" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Reference Include="System.IO.Compression" />
