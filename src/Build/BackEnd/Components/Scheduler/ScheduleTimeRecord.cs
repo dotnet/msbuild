@@ -32,12 +32,20 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Retrieve the accumulated time.
+        /// If the timer is still running, returns the accumulated time so far
+        /// (elapsed time since the timer started plus any previously accumulated time)
+        /// instead of throwing.
         /// </summary>
         public TimeSpan AccumulatedTime
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_startTimeForCurrentState == DateTime.MinValue, "Can't get the accumulated time while the timer is still running.");
+                if (_startTimeForCurrentState != DateTime.MinValue)
+                {
+                    // Timer is still running — return best-effort elapsed time.
+                    return _accumulatedTime + (DateTime.UtcNow - _startTimeForCurrentState);
+                }
+
                 return _accumulatedTime;
             }
         }

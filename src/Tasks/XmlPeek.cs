@@ -25,7 +25,7 @@ namespace Microsoft.Build.Tasks
         #region Properties
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
 
         /// <summary>
         /// The XPath Query.

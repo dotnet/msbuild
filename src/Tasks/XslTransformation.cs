@@ -29,7 +29,7 @@ namespace Microsoft.Build.Tasks
         #region Members
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
 
         /// <summary>
         /// The output files.

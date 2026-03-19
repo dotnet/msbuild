@@ -248,21 +248,28 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verifies that RequestCores when callbacks are disabled logs error MSB5022 and returns 0.
+        /// Regression test for https://github.com/dotnet/msbuild/issues/13333
+        /// When callbacks are not supported (cross-version OOP TaskHost), RequestCores must
+        /// throw NotImplementedException (not log a build error and return 0).
+        /// Real callers (MonoAOTCompiler, EmccCompile, ILStrip, EmitBundleBase) catch this
+        /// exception and fall back to their own parallelism estimate. The previous behavior
+        /// of logging BuildErrorEventArgs caused the build to fail silently.
         /// </summary>
         [Fact]
-        public void RequestCores_LogsErrorWhenCallbacksNotSupported()
+        public void RequestCores_ThrowsNotImplementedWhenCallbacksNotSupported()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
-            // Explicitly do NOT set MSBUILDENABLETASKHOSTCALLBACKS
+            // Explicitly do NOT set MSBUILDENABLETASKHOSTCALLBACKS — callbacks should be disabled.
+            // Use RequestCoresWithFallbackTask which catches NotImplementedException like real callers do.
             string projectContents = $@"
 <Project>
-    <UsingTask TaskName=""{nameof(RequestCoresTask)}"" AssemblyFile=""{typeof(RequestCoresTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <UsingTask TaskName=""{nameof(RequestCoresWithFallbackTask)}"" AssemblyFile=""{typeof(RequestCoresWithFallbackTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
     <Target Name=""Test"">
-        <{nameof(RequestCoresTask)} CoreCount=""2"">
-            <Output PropertyName=""Result"" TaskParameter=""GrantedCores"" />
-        </{nameof(RequestCoresTask)}>
+        <{nameof(RequestCoresWithFallbackTask)} CoreCount=""4"">
+            <Output PropertyName=""GrantedResult"" TaskParameter=""GrantedCores"" />
+            <Output PropertyName=""FellBack"" TaskParameter=""UsedFallback"" />
+        </{nameof(RequestCoresWithFallbackTask)}>
     </Target>
 </Project>";
 
@@ -274,9 +281,60 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new BuildParameters { MaxNodeCount = 4, EnableNodeReuse = false, Loggers = [logger] },
                 new BuildRequestData(projectInstance, targetsToBuild: ["Test"]));
 
-            // MSB5022 error should be logged — the callback was not forwarded
-            logger.ErrorCount.ShouldBeGreaterThan(0);
-            logger.FullLog.ShouldContain("MSB5022");
+            // Build must succeed — the task catches NotImplementedException and falls back.
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // No errors should be logged — NotImplementedException is caught by the task, not by MSBuild.
+            logger.ErrorCount.ShouldBe(0);
+
+            // The task should have used its fallback path (NotImplementedException was thrown).
+            logger.FullLog.ShouldContain("RequestCores threw NotImplementedException, using fallback");
+
+            // GrantedCores should be the task's own fallback (CoreCount), not 0.
+            logger.FullLog.ShouldContain("GrantedCores = 4");
+        }
+
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/13333
+        /// When callbacks are not supported, the full caller pattern (RequestCores with catch,
+        /// then skip ReleaseCores) must work. This matches MonoAOTCompiler/EmccCompile/ILStrip:
+        ///   try { cores = be9.RequestCores(N); }
+        ///   catch (NotImplementedException) { be9 = null; }
+        ///   finally { be9?.ReleaseCores(cores); }
+        /// ReleaseCores must NOT be called when the fallback fires (be9 is nulled).
+        /// </summary>
+        [Fact]
+        public void RequestAndReleaseCores_FallbackSkipsReleaseWhenCallbacksNotSupported()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            // Explicitly do NOT set MSBUILDENABLETASKHOSTCALLBACKS — callbacks should be disabled
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(RequestCoresWithFallbackTask)}"" AssemblyFile=""{typeof(RequestCoresWithFallbackTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""Test"">
+        <{nameof(RequestCoresWithFallbackTask)} CoreCount=""4"" ReleaseAfter=""true"">
+            <Output PropertyName=""GrantedResult"" TaskParameter=""GrantedCores"" />
+            <Output PropertyName=""FellBack"" TaskParameter=""UsedFallback"" />
+        </{nameof(RequestCoresWithFallbackTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            var logger = new MockLogger(_output);
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters { MaxNodeCount = 4, EnableNodeReuse = false, Loggers = [logger] },
+                new BuildRequestData(projectInstance, targetsToBuild: ["Test"]));
+
+            // Build must succeed.
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            logger.ErrorCount.ShouldBe(0);
+
+            // Fallback fired — ReleaseCores should have been skipped (be9 nulled in catch).
+            logger.FullLog.ShouldContain("RequestCores threw NotImplementedException, using fallback");
+            logger.FullLog.ShouldNotContain("ReleaseCores(");
         }
 
         /// <summary>

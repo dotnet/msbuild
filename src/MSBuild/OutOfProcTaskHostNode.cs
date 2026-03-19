@@ -1,28 +1,19 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
-#if !CLR2COMPATIBILITY
 using System.Collections.Concurrent;
-#endif
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
-#if !CLR2COMPATIBILITY
 using System.Threading.Tasks;
-#endif
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
-#if !CLR2COMPATIBILITY
-using Microsoft.Build.Exceptions;
-#endif
 using Microsoft.Build.Framework;
-#if !CLR2COMPATIBILITY
 using Microsoft.Build.Experimental.FileAccess;
-#endif
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 #if FEATURE_APPDOMAIN
@@ -40,12 +31,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        INodePacketFactory, INodePacketHandler,
-#if CLR2COMPATIBILITY
-        IBuildEngine3
-#else
-        IBuildEngine10
-#endif
+        INodePacketFactory, INodePacketHandler, IBuildEngine10
     {
         /// <summary>
         /// Keeps a record of all environment variables that, on startup of the task host, have a different
@@ -190,12 +176,10 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private bool _nodeReuse;
 
-#if !CLR2COMPATIBILITY
         /// <summary>
         /// The task object cache.
         /// </summary>
         private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
-#endif
 
 #if FEATURE_REPORTFILEACCESSES
         /// <summary>
@@ -204,7 +188,6 @@ namespace Microsoft.Build.CommandLine
         private List<FileAccessData> _fileAccessData = new List<FileAccessData>();
 #endif
 
-#if !CLR2COMPATIBILITY
         /// <summary>
         /// Counter for generating unique request IDs for callback correlation.
         /// </summary>
@@ -253,7 +236,6 @@ namespace Microsoft.Build.CommandLine
         /// True if the worker node's packet version is high enough, or if the feature is force-enabled via env var.
         /// </summary>
         private bool CallbacksSupported => _parentPacketVersion >= CallbacksMinPacketVersion || Traits.Instance.EnableTaskHostCallbacks;
-#endif
 
         /// <summary>
         /// Gets the effective configuration for the current task thread.
@@ -292,17 +274,12 @@ namespace Microsoft.Build.CommandLine
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostConfiguration, TaskHostConfiguration.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostTaskCancelled, TaskHostTaskCancelled.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
-
-#if !CLR2COMPATIBILITY
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesResponse, TaskHostIsRunningMultipleNodesResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostCoresResponse, TaskHostCoresResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostBuildResponse, TaskHostBuildResponse.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostYieldResponse, TaskHostYieldResponse.FactoryForDeserialization, this);
-#endif
 
-#if !CLR2COMPATIBILITY
             EngineServices = new EngineServicesImpl(this);
-#endif
         }
 
         #region IBuildEngine Implementation (Properties)
@@ -368,10 +345,6 @@ namespace Microsoft.Build.CommandLine
         {
             get
             {
-#if CLR2COMPATIBILITY
-                LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-                return false;
-#else
                 if (!CallbacksSupported)
                 {
                     LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
@@ -381,7 +354,6 @@ namespace Microsoft.Build.CommandLine
                 var request = new TaskHostIsRunningMultipleNodesRequest();
                 var response = SendCallbackRequestAndWaitForResponse<TaskHostIsRunningMultipleNodesResponse>(request);
                 return response.IsRunningMultipleNodes;
-#endif
             }
         }
 
@@ -603,7 +575,6 @@ namespace Microsoft.Build.CommandLine
 
         #endregion // IBuildEngine3 Implementation
 
-#if !CLR2COMPATIBILITY
         #region IBuildEngine4 Implementation
 
         /// <summary>
@@ -685,41 +656,31 @@ namespace Microsoft.Build.CommandLine
 
         public int RequestCores(int requestedCores)
         {
-#if CLR2COMPATIBILITY
-            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-            return 0;
-#else
             ErrorUtilities.VerifyThrowArgumentOutOfRange(requestedCores > 0, nameof(requestedCores));
 
             if (!CallbacksSupported)
             {
-                LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-                return 0;
+                // Callbacks not available (cross-version scenario). Throw so callers' existing
+                // catch (NotImplementedException) blocks fire and fall back gracefully.
+                throw new NotImplementedException();
             }
 
             var request = new TaskHostCoresRequest(requestedCores, isRelease: false);
             var response = SendCallbackRequestAndWaitForResponse<TaskHostCoresResponse>(request);
             return response.GrantedCores;
-#endif
         }
 
         public void ReleaseCores(int coresToRelease)
         {
-#if CLR2COMPATIBILITY
-            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-            return;
-#else
             ErrorUtilities.VerifyThrowArgumentOutOfRange(coresToRelease > 0, nameof(coresToRelease));
 
             if (!CallbacksSupported)
             {
-                LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-                return;
+                throw new NotImplementedException();
             }
 
             var request = new TaskHostCoresRequest(coresToRelease, isRelease: true);
             SendCallbackRequestAndWaitForResponse<TaskHostCoresResponse>(request);
-#endif
         }
 
         #endregion
@@ -766,8 +727,6 @@ namespace Microsoft.Build.CommandLine
         public EngineServices EngineServices { get; }
 
         #endregion
-
-#endif
 
         #region INodePacketFactory Members
 
@@ -852,14 +811,13 @@ namespace Microsoft.Build.CommandLine
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(out Exception shutdownException, bool nodeReuse = false, byte parentPacketVersion = 1)
         {
-#if !CLR2COMPATIBILITY
             _registeredTaskObjectCache = new RegisteredTaskObjectCacheBase();
             _parentPacketVersion = parentPacketVersion;
-#endif
+
             shutdownException = null;
 
             // Snapshot the current environment
-            _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+            _savedEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
 
             _nodeReuse = nodeReuse;
             _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(nodeReuse, parentPacketVersion);
@@ -933,7 +891,6 @@ namespace Microsoft.Build.CommandLine
                     HandleNodeBuildComplete(packet as NodeBuildComplete);
                     break;
 
-#if !CLR2COMPATIBILITY
                 // Callback response packets - route to pending request
                 case NodePacketType.TaskHostIsRunningMultipleNodesResponse:
                 case NodePacketType.TaskHostCoresResponse:
@@ -941,11 +898,9 @@ namespace Microsoft.Build.CommandLine
                 case NodePacketType.TaskHostYieldResponse:
                     HandleCallbackResponse(packet);
                     break;
-#endif
             }
         }
 
-#if !CLR2COMPATIBILITY
         /// <summary>
         /// Handles a callback response packet by completing the pending request's TaskCompletionSource.
         /// This is called on the main thread and unblocks the task thread waiting for the response.
@@ -1148,7 +1103,7 @@ namespace Microsoft.Build.CommandLine
 
             context.SavedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
             context.SavedEnvironment = new Dictionary<string, string>(
-                CommunicationsUtilities.GetEnvironmentVariables(),
+                FrameworkCommunicationsUtilities.GetEnvironmentVariables(),
                 StringComparer.OrdinalIgnoreCase);
 
             // Save warning settings that may be overwritten by a nested task
@@ -1169,7 +1124,7 @@ namespace Microsoft.Build.CommandLine
                 return;
             }
 
-            CommunicationsUtilities.SetEnvironment(context.SavedEnvironment);
+            FrameworkCommunicationsUtilities.SetEnvironment(context.SavedEnvironment);
             NativeMethodsShared.SetCurrentDirectory(context.SavedCurrentDirectory);
 
             // Restore warning settings
@@ -1180,7 +1135,6 @@ namespace Microsoft.Build.CommandLine
             context.SavedCurrentDirectory = null;
             context.SavedEnvironment = null;
         }
-#endif
 
         /// <summary>
         /// Configure the task host according to the information received in the
@@ -1356,10 +1310,8 @@ namespace Microsoft.Build.CommandLine
 
             debugWriter?.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
 
-#if !CLR2COMPATIBILITY
             _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
             _registeredTaskObjectCache = null;
-#endif
 
             // On Windows, a process holds a handle to the current directory,
             // so reset it away from a user-requested folder that may get deleted.
@@ -1368,7 +1320,7 @@ namespace Microsoft.Build.CommandLine
             // Restore the original environment, best effort.
             try
             {
-                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                FrameworkCommunicationsUtilities.SetEnvironment(_savedEnvironment);
             }
             catch (Exception ex)
             {
@@ -1387,17 +1339,10 @@ namespace Microsoft.Build.CommandLine
             _nodeEndpoint.Disconnect();
 
             // Dispose these WaitHandles
-#if CLR2COMPATIBILITY
-            _packetReceivedEvent.Close();
-            _shutdownEvent.Close();
-            _taskCompleteEvent.Close();
-            _taskCancelledEvent.Close();
-#else
             _packetReceivedEvent.Dispose();
             _shutdownEvent.Dispose();
             _taskCompleteEvent.Dispose();
             _taskCancelledEvent.Dispose();
-#endif
 
             return _shutdownReason;
         }
@@ -1413,7 +1358,6 @@ namespace Microsoft.Build.CommandLine
                 case LinkStatus.Failed:
                     _shutdownReason = NodeEngineShutdownReason.ConnectionFailed;
 
-#if !CLR2COMPATIBILITY
                     // Fail all pending callback requests so task threads unblock immediately
                     // instead of waiting indefinitely for responses that will never arrive.
                     foreach (var kvp in _pendingCallbackRequests)
@@ -1437,7 +1381,6 @@ namespace Microsoft.Build.CommandLine
                             }
                         }
                     }
-#endif
 
                     _shutdownEvent.Set();
                     break;
@@ -1501,9 +1444,7 @@ namespace Microsoft.Build.CommandLine
 
                 // Now set the new environment
                 SetTaskHostEnvironment(taskConfiguration.BuildProcessEnvironment);
-#if !CLR2COMPATIBILITY
                 DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(taskConfiguration.BuildProcessEnvironment);
-#endif
 
                 // Set culture
                 Thread.CurrentThread.CurrentCulture = taskConfiguration.Culture;
@@ -1511,9 +1452,9 @@ namespace Microsoft.Build.CommandLine
 
                 string taskName = taskConfiguration.TaskName;
                 string taskLocation = taskConfiguration.TaskLocation;
-#if !CLR2COMPATIBILITY
+
                 TaskFactoryUtilities.RegisterAssemblyResolveHandlersFromManifest(taskLocation);
-#endif
+
                 // We will not create an appdomain now because of a bug
                 // As a fix, we will create the class directly without wrapping it in a domain
                 taskWrapper = new OutOfProcTaskAppDomainWrapper();
@@ -1531,9 +1472,7 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                     taskConfiguration.AppDomainSetup,
 #endif
-#if !NET35
                     taskConfiguration.HostServices,
-#endif
                     taskParams);
             }
             catch (ThreadAbortException)
@@ -1567,7 +1506,7 @@ namespace Microsoft.Build.CommandLine
                     Interlocked.Decrement(ref _activeTaskCount);
 #endif
 
-                    IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+                    IDictionary<string, string> currentEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
                     taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
@@ -1600,7 +1539,7 @@ namespace Microsoft.Build.CommandLine
 #endif
 
                     // Restore the original clean environment
-                    CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                    FrameworkCommunicationsUtilities.SetEnvironment(_savedEnvironment);
                 }
                 catch (Exception e)
                 {
@@ -1711,7 +1650,7 @@ namespace Microsoft.Build.CommandLine
                 updatedEnvironment = environment;
             }
 
-            CommunicationsUtilities.SetEnvironment(updatedEnvironment);
+            FrameworkCommunicationsUtilities.SetEnvironment(updatedEnvironment);
         }
 
         /// <summary>

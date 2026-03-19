@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -155,5 +156,123 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 Environment.GetEnvironmentVariable("DOTNET_ROOT_ARM64").ShouldBeNull(); // Was already null
             }
         }
+
+        /// <summary>
+        /// Regression test for the macOS /tmp → /private/tmp symlink issue (MSB4216).
+        ///
+        /// Before the fix, the parent passed $(NetCoreSdkRoot) as toolsDirectory —
+        /// an MSBuild property that can contain unresolved symlinks. The child always
+        /// defaults to BuildEnvironmentHelper (which resolves symlinks via
+        /// AppContext.BaseDirectory). This caused different handshake hashes.
+        ///
+        /// After the fix (on .NET Core), the parent also omits toolsDirectory,
+        /// so both sides default to BuildEnvironmentHelper.
+        ///
+        /// This test proves that an arbitrary external path (simulating $(NetCoreSdkRoot))
+        /// CAN produce a different handshake than the BuildEnvironmentHelper default,
+        /// and that omitting toolsDirectory on both sides always matches.
+        /// </summary>
+#if NET
+        [Fact]
+        public void Handshake_ExternalPathCanMismatch_DefaultAlwaysMatches()
+        {
+            // Use explicit NET runtime and current architecture to ensure the NET
+            // HandshakeOptions flag is set, which is required for passing toolsDirectory
+            // to the Handshake constructor.
+            var netTaskHostParams = new TaskHostParameters(
+                runtime: XMakeAttributes.MSBuildRuntimeValues.net,
+                architecture: XMakeAttributes.GetCurrentMSBuildArchitecture(),
+                dotnetHostPath: null,
+                msBuildAssemblyPath: null);
+
+            HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(
+                taskHost: true,
+                taskHostParameters: netTaskHostParams,
+                nodeReuse: false);
+
+            // Simulate child: no explicit toolsDirectory → defaults to BuildEnvironmentHelper.
+            var childHandshake = new Handshake(options);
+
+            // After the fix: parent also omits toolsDirectory → same default → must match.
+            var parentFixedHandshake = new Handshake(options);
+            parentFixedHandshake.GetKey().ShouldBe(childHandshake.GetKey(),
+                "When both parent and child omit toolsDirectory, they must produce " +
+                "identical handshake keys (both default to BuildEnvironmentHelper).");
+
+            // Before the fix: parent passed an external path ($(NetCoreSdkRoot)).
+            // If that path differs from BuildEnvironmentHelper (e.g. symlinks),
+            // the handshake would mismatch.
+            string externalPath = Path.Combine(Path.GetTempPath(), $"different_path_{Guid.NewGuid():N}");
+            var parentBrokenHandshake = new Handshake(options, externalPath);
+            parentBrokenHandshake.GetKey().ShouldNotBe(childHandshake.GetKey(),
+                "An arbitrary external toolsDirectory should produce a different handshake " +
+                "than the BuildEnvironmentHelper default, proving the mismatch scenario.");
+        }
+#endif
+
+        /// <summary>
+        /// Proves that using a symlinked path vs a resolved path in the handshake
+        /// produces DIFFERENT keys — demonstrating the exact bug on macOS where
+        /// /tmp is a symlink to /private/tmp.
+        ///
+        /// This test creates a real symlink to prove the mismatch. It only runs on
+        /// Unix (.NET Core) where symlinks are natively supported and the scenario is relevant.
+        /// </summary>
+#if NET
+        [UnixOnlyFact]
+        public void Handshake_WithSymlinkedToolsDirectory_ProducesDifferentKey()
+        {
+            // Create a real directory and a symlink pointing to it.
+            string realDir = Path.Combine(Path.GetTempPath(), $"msbuild_test_real_{Guid.NewGuid():N}");
+            string symlinkDir = Path.Combine(Path.GetTempPath(), $"msbuild_test_link_{Guid.NewGuid():N}");
+
+            try
+            {
+                Directory.CreateDirectory(realDir);
+                Directory.CreateSymbolicLink(symlinkDir, realDir);
+
+                HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(
+                    taskHost: true,
+                    taskHostParameters: TaskHostParameters.Empty,
+                    nodeReuse: false);
+
+                // Parent using the symlink path (like $(MSBuildThisFileDirectory) would on macOS /tmp)
+                var symlinkHandshake = new Handshake(options, symlinkDir);
+
+                // Child using the resolved real path (like AppContext.BaseDirectory resolves /private/tmp)
+                var realHandshake = new Handshake(options, realDir);
+
+                // These produce DIFFERENT keys — this is the bug.
+                // If these were used as parent vs child toolsDirectory, the pipe names would
+                // differ and the parent could never connect to the child → MSB4216.
+                symlinkHandshake.GetKey().ShouldNotBe(realHandshake.GetKey(),
+                    "Symlinked and resolved paths should produce different handshake keys " +
+                    "(they are different strings). This demonstrates why the parent must NOT " +
+                    "use an MSBuild property path that may contain unresolved symlinks — it " +
+                    "must use MSBuildToolsDirectoryRoot (same source as the child) instead.");
+
+                // Using the SAME source (MSBuildToolsDirectoryRoot) on both sides always matches,
+                // regardless of symlinks, because both compute it from AppContext.BaseDirectory.
+                string consistentDir = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+                var parentFixed = new Handshake(options, consistentDir);
+                var childDefault = new Handshake(options);
+
+                parentFixed.GetKey().ShouldBe(childDefault.GetKey(),
+                    "Using MSBuildToolsDirectoryRoot on both sides must produce matching keys.");
+            }
+            finally
+            {
+                if (Directory.Exists(symlinkDir))
+                {
+                    Directory.Delete(symlinkDir);
+                }
+
+                if (Directory.Exists(realDir))
+                {
+                    Directory.Delete(realDir);
+                }
+            }
+        }
+#endif
     }
 }

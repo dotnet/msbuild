@@ -77,7 +77,7 @@ namespace Microsoft.Build.Tasks
         public bool FailIfNotIncremental { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
 
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
@@ -176,7 +176,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract files to.</param>
         private void Extract(ZipArchive sourceArchive, DirectoryInfo destinationDirectory)
         {
-            string fullDestinationDirectoryPath = Path.GetFullPath(FrameworkFileUtilities.EnsureTrailingSlash(destinationDirectory.FullName));
+            string fullDestinationDirectoryPath = Path.GetFullPath(FileUtilities.EnsureTrailingSlash(destinationDirectory.FullName));
 
             foreach (ZipArchiveEntry zipArchiveEntry in sourceArchive.Entries.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
             {

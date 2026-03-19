@@ -146,9 +146,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _useSidecarTaskHost = false;
 
-#if !NET35
         private readonly HostServices _hostServices;
-#endif
 
         /// <summary>
         /// The project file path that requests task execution.
@@ -174,9 +172,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-#if !NET35
             HostServices hostServices,
-#endif
             int scheduledNodeId,
             TaskEnvironment taskEnvironment)
         {
@@ -192,9 +188,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
 #endif
-#if !NET35
             _hostServices = hostServices;
-#endif
             _projectFile = projectFile;
             _taskHostParameters = taskHostParameters;
             _useSidecarTaskHost = useSidecarTaskHost;
@@ -338,9 +332,7 @@ namespace Microsoft.Build.BackEnd
                         (IDictionary<string, string>)_taskEnvironment.GetEnvironmentVariables(),
                         _buildComponentHost.BuildParameters.Culture,
                         _buildComponentHost.BuildParameters.UICulture,
-#if !NET35
                         _hostServices,
-#endif
 #if FEATURE_APPDOMAIN
                         _appDomainSetup,
 #endif
@@ -683,7 +675,9 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void HandleCoresRequest(TaskHostCoresRequest request)
         {
-            int grantedCores = 0;
+            // Default to 1 for RequestCores (not 0) to satisfy the API contract (return ∈ [1, requested]).
+            // For ReleaseCores, 0 is correct as it's just an acknowledgment.
+            int grantedCores = request.IsRelease ? 0 : 1;
 
             if (request.IsRelease)
             {
