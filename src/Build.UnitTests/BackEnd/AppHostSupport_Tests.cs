@@ -172,12 +172,21 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// CAN produce a different handshake than the BuildEnvironmentHelper default,
         /// and that omitting toolsDirectory on both sides always matches.
         /// </summary>
+#if NET
         [Fact]
         public void Handshake_ExternalPathCanMismatch_DefaultAlwaysMatches()
         {
+            // Use explicit NET runtime to ensure the NET HandshakeOptions flag is set,
+            // which is required for passing toolsDirectory to the Handshake constructor.
+            var netTaskHostParams = new TaskHostParameters(
+                runtime: XMakeAttributes.MSBuildRuntimeValues.net,
+                architecture: null,
+                dotnetHostPath: null,
+                msBuildAssemblyPath: null);
+
             HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(
                 taskHost: true,
-                taskHostParameters: TaskHostParameters.Empty,
+                taskHostParameters: netTaskHostParams,
                 nodeReuse: false);
 
             // Simulate child: no explicit toolsDirectory → defaults to BuildEnvironmentHelper.
@@ -198,6 +207,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 "An arbitrary external toolsDirectory should produce a different handshake " +
                 "than the BuildEnvironmentHelper default, proving the mismatch scenario.");
         }
+#endif
 
         /// <summary>
         /// Proves that using a symlinked path vs a resolved path in the handshake

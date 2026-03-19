@@ -311,8 +311,10 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 if (!File.Exists(apphostPath))
                 {
-                    _output.WriteLine($"[SKIP] MSBuild apphost not found at: {apphostPath}");
-                    return;
+                    // If the apphost isn't present, we can't test the symlink scenario.
+                    // Fail explicitly so this doesn't silently pass in broken environments.
+                    Assert.Fail($"MSBuild apphost not found at: {apphostPath}. " +
+                        "The bootstrap layout must include the MSBuild apphost for this test.");
                 }
 
                 string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestNetTask.csproj");
