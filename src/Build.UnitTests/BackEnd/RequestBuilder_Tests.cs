@@ -12,6 +12,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
+using Shouldly;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -348,17 +349,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// See https://github.com/dotnet/msbuild/issues/13188
         /// </summary>
         [Theory]
-        [InlineData(true, 1, 2, false)]   // MT mode, results on different node → skip transfer (shared cache)
-        [InlineData(true, 1, 1, false)]   // MT mode, results on same node → no transfer needed
-        [InlineData(true, -1, 2, false)]  // MT mode, results unset → no transfer needed
-        [InlineData(false, 1, 2, true)]   // ST mode, results on different node → transfer needed
-        [InlineData(false, 1, 1, false)]  // ST mode, results on same node → no transfer needed
-        [InlineData(false, -1, 2, false)] // ST mode, results unset → no transfer needed
+        [InlineData(true, 1, 2, false)]                      // MT mode, results on different node → skip transfer (shared cache)
+        [InlineData(true, 1, 1, false)]                      // MT mode, results on same node → no transfer needed
+        [InlineData(true, Scheduler.InvalidNodeId, 2, false)]  // MT mode, results unset → no transfer needed
+        [InlineData(false, 1, 2, true)]                      // ST mode, results on different node → transfer needed
+        [InlineData(false, 1, 1, false)]                     // ST mode, results on same node → no transfer needed
+        [InlineData(false, Scheduler.InvalidNodeId, 2, false)] // ST mode, results unset → no transfer needed
         public void NeedsResultsTransfer_SkipsInMultiThreadedMode(
             bool isMultiThreaded, int resultsNodeId, int currentNodeId, bool expectedNeedsTransfer)
         {
             bool result = RequestBuilder.NeedsResultsTransfer(resultsNodeId, currentNodeId, isMultiThreaded);
-            Assert.Equal(expectedNeedsTransfer, result);
+            result.ShouldBe(expectedNeedsTransfer);
         }
     }
 
