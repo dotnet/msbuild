@@ -110,7 +110,7 @@ internal static class EscapingUtilities
             }
         }
 
-        StringBuilder sb = StringBuilderCache.Acquire(value.Length);
+        StringBuilder? sb = null;
 
         do
         {
@@ -119,6 +119,8 @@ internal static class EscapingUtilities
                 TryDecodeHexDigit(value[percentIndex + 1], out int hi) &&
                 TryDecodeHexDigit(value[percentIndex + 2], out int lo))
             {
+                sb ??= StringBuilderCache.Acquire(value.Length);
+
                 sb.Append(value, startIndex, percentIndex - startIndex);
                 sb.Append((char)((hi << 4) + lo));
                 startIndex = percentIndex + 3;
@@ -128,9 +130,18 @@ internal static class EscapingUtilities
         }
         while (percentIndex >= 0);
 
-        sb.Append(value, startIndex, endIndex - startIndex);
+        if (sb is not null)
+        {
+            sb.Append(value, startIndex, endIndex - startIndex);
 
-        return StringBuilderCache.GetStringAndRelease(sb);
+            return StringBuilderCache.GetStringAndRelease(sb);
+        }
+
+        // No escape sequences were decoded; return the original string, or the trimmed
+        // slice if trim was requested.
+        return startIndex == 0 && endIndex == value.Length
+            ? value
+            : value.Substring(startIndex, endIndex - startIndex);
     }
 
     /// <summary>
