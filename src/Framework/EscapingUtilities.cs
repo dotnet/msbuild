@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
+#if NET
+using System.Buffers;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.NET.StringTools;
 
@@ -32,6 +35,19 @@ internal static class EscapingUtilities
     ///  placing it first ensures we don't double-escape sequences already present in the input.
     /// </remarks>
     private static readonly char[] s_charsToEscape = ['%', '*', '?', '@', '$', '(', ')', ';', '\''];
+
+#if NET
+    private static readonly SearchValues<char> s_searchValues = SearchValues.Create(s_charsToEscape);
+
+    private static int IndexOfAnyEscapeChar(string value, int startIndex = 0)
+    {
+        int i = value.AsSpan(startIndex).IndexOfAny(s_searchValues);
+        return i < 0 ? i : i + startIndex;
+    }
+#else
+    private static int IndexOfAnyEscapeChar(string value, int startIndex = 0)
+        => value.IndexOfAny(s_charsToEscape, startIndex);
+#endif
 
     private static bool TryDecodeHexDigit(char ch, out int value)
     {
@@ -158,7 +174,7 @@ internal static class EscapingUtilities
     public static string? Escape(string? value, bool cache = false)
     {
         // If there are no special chars, return early without allocating a StringBuilder.
-        if (value.IsNullOrEmpty() || value.IndexOfAny(s_charsToEscape) < 0)
+        if (value.IsNullOrEmpty() || IndexOfAnyEscapeChar(value) < 0)
         {
             return value;
         }
@@ -180,7 +196,7 @@ internal static class EscapingUtilities
 
         while (true)
         {
-            int specialCharIndex = value.IndexOfAny(s_charsToEscape, startIndex);
+            int specialCharIndex = IndexOfAnyEscapeChar(value, startIndex);
             if (specialCharIndex == -1)
             {
                 sb.Append(value, startIndex, value.Length - startIndex);
