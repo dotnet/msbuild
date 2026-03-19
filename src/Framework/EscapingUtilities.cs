@@ -181,8 +181,14 @@ internal static class EscapingUtilities
     [return: NotNullIfNotNull(nameof(value))]
     public static string? Escape(string? value, bool cache = false)
     {
-        // If there are no special chars, return early without allocating a StringBuilder.
-        if (value.IsNullOrEmpty() || IndexOfAnyEscapeChar(value) < 0)
+        if (value.IsNullOrEmpty())
+        {
+            return value;
+        }
+
+        // Find the first special char; if none, return early without allocating a StringBuilder.
+        int specialCharIndex = IndexOfAnyEscapeChar(value);
+        if (specialCharIndex < 0)
         {
             return value;
         }
@@ -202,15 +208,8 @@ internal static class EscapingUtilities
 
         int startIndex = 0;
 
-        while (true)
+        do
         {
-            int specialCharIndex = IndexOfAnyEscapeChar(value, startIndex);
-            if (specialCharIndex == -1)
-            {
-                sb.Append(value, startIndex, value.Length - startIndex);
-                break;
-            }
-
             sb.Append(value, startIndex, specialCharIndex - startIndex);
 
             // Append escape sequence for special character.
@@ -221,7 +220,11 @@ internal static class EscapingUtilities
             sb.Append(HexDigitChar(ch & 0x0F));
 
             startIndex = specialCharIndex + 1;
+            specialCharIndex = IndexOfAnyEscapeChar(value, startIndex);
         }
+        while (specialCharIndex >= 0);
+
+        sb.Append(value, startIndex, value.Length - startIndex);
 
         if (!cache)
         {
