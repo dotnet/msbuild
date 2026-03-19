@@ -31,6 +31,7 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.6
 - [Fix ASP.NET WebSite projects to resolve netstandard2.0 dependencies](https://github.com/dotnet/msbuild/pull/13058) - Pass TargetFrameworkVersion to RAR task and copy netstandard.dll facade for .NET Framework 4.7.1+ web projects.
+- [AbsolutePath.GetCanonicalForm optimization - avoid expensive Path.GetFullPath calls when paths don't need canonicalization](https://github.com/dotnet/msbuild/pull/13369)
 
 ### 18.5
 - [FindUnderPath and AssignTargetPath tasks no longer throw on invalid path characters when using TaskEnvironment.GetAbsolutePath](https://github.com/dotnet/msbuild/pull/13069)

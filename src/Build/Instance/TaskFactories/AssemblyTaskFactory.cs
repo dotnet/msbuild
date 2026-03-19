@@ -211,7 +211,6 @@ namespace Microsoft.Build.BackEnd
 
                 if (appDomain != null)
                 {
-                    AssemblyLoadsTracker.StopTracking(appDomain);
                     // Unload the AppDomain asynchronously to avoid a deadlock that can happen because
                     // AppDomain.Unload blocks for the process's one Finalizer thread to finalize all
                     // objects. Some objects are RCWs for STA COM objects and as such would need the
@@ -318,9 +317,7 @@ namespace Microsoft.Build.BackEnd
             IBuildComponentHost buildComponentHost,
             in TaskHostParameters taskIdentityParameters,
             string projectFile,
-#if !NET35
             HostServices hostServices,
-#endif
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
@@ -385,9 +382,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
 #endif
-#if !NET35
                     hostServices,
-#endif
                     scheduledNodeId,
                     taskEnvironment: taskEnvironment);
                 return task;
@@ -421,10 +416,6 @@ namespace Microsoft.Build.BackEnd
                 if (taskAppDomain != null && taskInstance != null)
                 {
                     _tasksAndAppDomains[taskInstance] = taskAppDomain;
-                }
-                else if (taskAppDomain != null)
-                {
-                    AssemblyLoadsTracker.StopTracking(taskAppDomain);
                 }
 #endif
 

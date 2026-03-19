@@ -24,7 +24,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using ExceptionHandling = Microsoft.Build.Shared.ExceptionHandling;
+using Microsoft.Build.Framework.Telemetry;
+using ExceptionHandling = Microsoft.Build.Framework.ExceptionHandling;
 
 #pragma warning disable CS0618 // Type or member is obsolete, this class is adapting to both Experimental and new plugin APIs
 namespace Microsoft.Build.ProjectCache
@@ -816,9 +817,32 @@ namespace Microsoft.Build.ProjectCache
                 requestConfiguration.RetrieveFromCache();
             }
 
-            // Now we are sure the Project property is available, verify it's not null before proceeding.
-            // If it's null, it means the configuration is not properly loaded, which should not happen at this stage. 
-            ErrorUtilities.VerifyThrowInternalNull(requestConfiguration.Project, nameof(requestConfiguration.Project));
+            // The Project property may be null if the configuration was created from a remote node
+            // request or the project was never loaded locally (e.g., in VS scenario where ShouldUseCache
+            // returns true before checking IsLoaded). Skip cache result handling in this case.
+            if (requestConfiguration.Project is null)
+            {
+                string projectCacheState = string.Join(":",
+                    requestConfiguration.ConfigurationId,
+                    Path.GetFileName(requestConfiguration.ProjectFullPath),
+                    requestConfiguration.IsLoaded,
+                    requestConfiguration.IsCached,
+                    requestConfiguration.WasGeneratedByNode,
+                    _isVsScenario,
+                    _globalProjectCacheDescriptor is not null);
+
+                CrashTelemetryRecorder.EmitEndBuildHangDiagnostics(new CrashTelemetry
+                {
+                    ExitType = CrashExitType.ProjectCacheFailure,
+                    ExceptionMessage = "Project unexpectedly null in HandleBuildResultAsync",
+                    BuildEngineVersion = Evaluation.ProjectCollection.Version?.ToString(),
+                    BuildEngineFrameworkName = NativeMethodsShared.FrameworkName,
+                    BuildEngineHost = BuildEnvironmentState.GetHostName(),
+                    IsStandaloneExecution = false,
+                    ProjectCacheState = projectCacheState,
+                });
+                return;
+            }
 
             // Filter to plugins which apply to the project, if any
             List<ProjectCacheDescriptor> projectCacheDescriptors = GetProjectCacheDescriptors(requestConfiguration.Project).ToList();

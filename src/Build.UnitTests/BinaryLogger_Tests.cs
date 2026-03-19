@@ -543,6 +543,39 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Regression test for dotnet/dotnet#5433 — ClearCacheDirectory must not destroy the
+        /// ProjectImports archive before it is embedded in the binlog.
+        /// </summary>
+        [Fact]
+        public void BinlogEmbeddedImportsSurviveClearCacheDirectory()
+        {
+            string logFilePath = Path.Combine(_env.DefaultTestDirectory.Path, "test.binlog");
+
+            var collector = new ProjectImportsCollector(logFilePath, createFile: false, runOnBackground: false);
+            collector.AddFileFromMemory("testfile.proj", "<Project />");
+
+            // This is what XMake.cs does after EndBuild — wipes the cache directory.
+            FileUtilities.ClearCacheDirectory();
+
+            // ProcessResult must still read the archive after the cache dir is gone.
+            bool archiveRead = false;
+            collector.ProcessResult(
+                stream =>
+                {
+                    stream.Length.ShouldBeGreaterThan(0);
+                    archiveRead = true;
+                },
+                error => throw new InvalidOperationException(error));
+            archiveRead.ShouldBeTrue("Archive must be readable after ClearCacheDirectory");
+
+            // DeleteArchive must not throw (directory must still exist).
+            collector.DeleteArchive();
+
+            // Satisfy the fixture's expectation that _logFile exists.
+            File.WriteAllText(_logFile, string.Empty);
+        }
+
+        /// <summary>
         /// Regression test for https://github.com/dotnet/msbuild/issues/6323.
         /// </summary>
         /// <remarks>

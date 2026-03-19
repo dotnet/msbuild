@@ -4,62 +4,87 @@
     <body>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeEqual">
         <source>{0} ('{1}') must be equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be equal to '{2}'.</target>
+        <target state="translated">{0} ("{1}") deve ser igual a "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreater">
         <source>{0} ('{1}') must be greater than '{2}'.</source>
-        <target state="new">{0} ('{1}') must be greater than '{2}'.</target>
+        <target state="translated">{0} ("{1}") deve ser maior que "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreaterOrEqual">
         <source>{0} ('{1}') must be greater than or equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be greater than or equal to '{2}'.</target>
+        <target state="translated">{0} ("{1}") deve ser maior ou igual a "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeLess">
         <source>{0} ('{1}') must be less than '{2}'.</source>
-        <target state="new">{0} ('{1}') must be less than '{2}'.</target>
+        <target state="translated">{0} ("{1}") deve ser menor que "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeLessOrEqual">
         <source>{0} ('{1}') must be less than or equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be less than or equal to '{2}'.</target>
+        <target state="translated">{0} ("{1}") deve ser menor ou igual a "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegative">
         <source>{0} ('{1}') must be a non-negative value.</source>
-        <target state="new">{0} ('{1}') must be a non-negative value.</target>
+        <target state="translated">{0} ("{1}") deve ser um valor não negativo.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegativeNonZero">
         <source>{0} ('{1}') must be a non-negative and non-zero value.</source>
-        <target state="new">{0} ('{1}') must be a non-negative and non-zero value.</target>
+        <target state="translated">{0} ("{1}") deve ser um valor não negativo e diferente de zero.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonZero">
         <source>{0} ('{1}') must be a non-zero value.</source>
-        <target state="new">{0} ('{1}') must be a non-zero value.</target>
+        <target state="translated">{0} ("{1}") deve ser um valor diferente de zero.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNotEqual">
         <source>{0} ('{1}') must not be equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must not be equal to '{2}'.</target>
+        <target state="translated">{0} ("{1}") não deve ser igual a "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="Argument_EmptyOrWhiteSpaceString">
         <source>The value cannot be an empty string or composed entirely of whitespace.</source>
-        <target state="new">The value cannot be an empty string or composed entirely of whitespace.</target>
+        <target state="translated">O valor não pode ser uma cadeia de caracteres vazia ou composta inteiramente de espaço em branco.</target>
         <note />
       </trans-unit>
       <trans-unit id="Argument_EmptyString">
         <source>The value cannot be an empty string.</source>
-        <target state="new">The value cannot be an empty string.</target>
+        <target state="translated">O valor não pode ser uma cadeia de caracteres vazia.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DebugPathTooLong">
+        <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
+        <target state="translated">O caminho "{0}" usado para logs de depuração é muito longo. Defina-o para um valor mais curto usando a variável de ambiente MSBUILDDEBUGPATH ou altere a configuração do sistema para permitir caminhos longos.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedCreatingTempFile">
+        <source>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
+        <target state="translated">Falha ao criar um arquivo temporário. A pasta de arquivos temporários está cheia ou o caminho está incorreto. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidFilespecForTransform">
+        <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
+        <target state="translated">Os metadados do item "%({0})" não podem ser aplicados ao caminho "{1}". {2}</target>
+        <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <target state="translated">O parâmetro '{0}' pode ser somente um nome de arquivo e não pode incluir um diretório.</target>
         <note />
       </trans-unit>
       <trans-unit id="PathMustBeRooted">
         <source>Path must be rooted.</source>
         <target state="translated">Caminho deve ter raiz.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PathTooLong">
+        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
+        <target state="translated">Caminho: {0} excede o limite máximo do caminho do SO. O nome do arquivo totalmente qualificado deve ter menos de {1} caracteres.</target>
         <note />
       </trans-unit>
     </body>

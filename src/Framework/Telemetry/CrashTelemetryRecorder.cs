@@ -214,45 +214,18 @@ internal static class CrashTelemetryRecorder
     }
 
     /// <summary>
-    /// Collects and emits diagnostic telemetry when EndBuild is stuck waiting.
+    /// Emits a pre-populated <see cref="CrashTelemetry"/> for an EndBuild hang.
     /// Called periodically from timed wait loops so that diagnostics are available
     /// even if the hang never resolves (crash telemetry in the finally block would be unreachable).
+    /// The caller is responsible for populating the <see cref="CrashTelemetry"/> with
+    /// all relevant hang diagnostic data.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static void CollectAndEmitEndBuildHangDiagnostics(
-        string waitPhase,
-        long waitDurationMs,
-        int pendingSubmissionCount,
-        int submissionsWithResultNoLogging,
-        bool threadExceptionRecorded,
-        int unmatchedProjectStartedCount,
-        string? buildEngineVersion,
-        string? buildEngineFrameworkName,
-        string? buildEngineHost,
-        bool isStandaloneExecution,
-        int? maxNodeCount = null,
-        int? activeNodeCount = null)
+    public static void EmitEndBuildHangDiagnostics(CrashTelemetry crashTelemetry)
     {
         try
         {
-            var crashTelemetry = new CrashTelemetry
-            {
-                ExitType = CrashExitType.EndBuildHang,
-                BuildEngineVersion = buildEngineVersion,
-                BuildEngineFrameworkName = buildEngineFrameworkName,
-                BuildEngineHost = buildEngineHost,
-                EndBuildWaitPhase = waitPhase,
-                EndBuildWaitDurationMs = waitDurationMs,
-                PendingSubmissionCount = pendingSubmissionCount,
-                SubmissionsWithResultNoLogging = submissionsWithResultNoLogging,
-                ThreadExceptionRecorded = threadExceptionRecorded,
-                UnmatchedProjectStartedCount = unmatchedProjectStartedCount,
-                IsStandaloneExecution = isStandaloneExecution,
-                MaxNodeCount = maxNodeCount,
-                ActiveNodeCount = activeNodeCount,
-            };
-
-            TelemetryManager.Instance?.Initialize(isStandaloneExecution);
+            TelemetryManager.Instance?.Initialize(crashTelemetry.IsStandaloneExecution ?? false);
 
             using IActivity? activity = TelemetryManager.Instance
                 ?.DefaultActivitySource

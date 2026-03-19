@@ -14,7 +14,7 @@ using System.Xml;
 using System.Text;
 #else
 using System.Buffers;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 #endif
 
 using XMakeAttributes = Microsoft.Build.Shared.XMakeAttributes;

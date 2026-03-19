@@ -492,7 +492,7 @@ namespace Microsoft.Build.Evaluation
                     // Use .CodeBase instead of .Location, because .Location doesn't
                     // work when Microsoft.Build.dll has been shadow-copied, for example
                     // in scenarios where NUnit is loading Microsoft.Build.
-                    var versionInfo = FileVersionInfo.GetVersionInfo(FileUtilities.ExecutingAssemblyPath);
+                    var versionInfo = FileVersionInfo.GetVersionInfo(BuildEnvironmentHelper.ExecutingAssemblyPath);
                     s_engineVersion = new Version(versionInfo.FileMajorPart, versionInfo.FileMinorPart, versionInfo.FileBuildPart, versionInfo.FilePrivatePart);
                 }
 

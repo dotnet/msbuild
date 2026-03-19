@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Xml;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Shared
 {

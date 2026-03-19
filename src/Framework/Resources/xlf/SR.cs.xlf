@@ -4,62 +4,87 @@
     <body>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeEqual">
         <source>{0} ('{1}') must be equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be equal to '{2}'.</target>
+        <target state="translated">{0} ({1}) se musí rovnat {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreater">
         <source>{0} ('{1}') must be greater than '{2}'.</source>
-        <target state="new">{0} ('{1}') must be greater than '{2}'.</target>
+        <target state="translated">{0} ({1}) musí být větší než {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreaterOrEqual">
         <source>{0} ('{1}') must be greater than or equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be greater than or equal to '{2}'.</target>
+        <target state="translated">{0} ({1}) musí být větší nebo se rovnat {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeLess">
         <source>{0} ('{1}') must be less than '{2}'.</source>
-        <target state="new">{0} ('{1}') must be less than '{2}'.</target>
+        <target state="translated">{0} ({1}) musí být menší než {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeLessOrEqual">
         <source>{0} ('{1}') must be less than or equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must be less than or equal to '{2}'.</target>
+        <target state="translated">{0} ({1}) musí být menší nebo se rovnat {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegative">
         <source>{0} ('{1}') must be a non-negative value.</source>
-        <target state="new">{0} ('{1}') must be a non-negative value.</target>
+        <target state="translated">{0} ({1}) musí být nezáporná hodnota.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegativeNonZero">
         <source>{0} ('{1}') must be a non-negative and non-zero value.</source>
-        <target state="new">{0} ('{1}') must be a non-negative and non-zero value.</target>
+        <target state="translated">{0} ({1}) musí být nezáporná a nenulová hodnota.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonZero">
         <source>{0} ('{1}') must be a non-zero value.</source>
-        <target state="new">{0} ('{1}') must be a non-zero value.</target>
+        <target state="translated">{0} ({1}) musí být nenulová hodnota.</target>
         <note />
       </trans-unit>
       <trans-unit id="ArgumentOutOfRange_Generic_MustBeNotEqual">
         <source>{0} ('{1}') must not be equal to '{2}'.</source>
-        <target state="new">{0} ('{1}') must not be equal to '{2}'.</target>
+        <target state="translated">{0} ({1}) se nesmí rovnat {2}.</target>
         <note />
       </trans-unit>
       <trans-unit id="Argument_EmptyOrWhiteSpaceString">
         <source>The value cannot be an empty string or composed entirely of whitespace.</source>
-        <target state="new">The value cannot be an empty string or composed entirely of whitespace.</target>
+        <target state="translated">Hodnota nemůže být prázdný řetězec ani složena pouze z prázdných znaků.</target>
         <note />
       </trans-unit>
       <trans-unit id="Argument_EmptyString">
         <source>The value cannot be an empty string.</source>
-        <target state="new">The value cannot be an empty string.</target>
+        <target state="translated">Hodnota nemůže být prázdný řetězec.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DebugPathTooLong">
+        <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
+        <target state="translated">Cesta {0} používaná pro protokoly ladění je příliš dlouhá. Nastavte ji na kratší hodnotu pomocí proměnné prostředí MSBUILDDEBUGPATH nebo změňte konfigurace vašeho systému, aby povolovala dlouhé cesty.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedCreatingTempFile">
+        <source>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
+        <target state="translated">Nepodařilo se vytvořit dočasný soubor. Složka dočasných souborů je plná nebo cesta k této složce není správná. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidFilespecForTransform">
+        <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
+        <target state="translated">Metadata položky %({0}) nelze použít na cestu {1}. {2}</target>
+        <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <target state="translated">Parametr {0} může být jenom název souboru a nemůže obsahovat adresář.</target>
         <note />
       </trans-unit>
       <trans-unit id="PathMustBeRooted">
         <source>Path must be rooted.</source>
         <target state="translated">Cesta musí začínat kořenem.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PathTooLong">
+        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
+        <target state="translated">Cesta: {0} překračuje maximální limit pro cestu k OS. Plně kvalifikovaný název souboru musí být kratší než {1} znaků.</target>
         <note />
       </trans-unit>
     </body>

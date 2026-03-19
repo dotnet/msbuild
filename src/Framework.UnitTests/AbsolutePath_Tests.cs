@@ -251,6 +251,8 @@ namespace Microsoft.Build.UnitTests
         [InlineData("C:\\foo\\..\\bar")]                   // Parent directory reference
         [InlineData("C:\\foo/bar")]                        // Forward slash to backslash
         [InlineData("C:\\foo\\bar")]                       // Simple Windows path (no normalization needed)
+        [InlineData("C:\\foo\\\\bar")]                     // Consecutive backslashes
+        [InlineData("C:\\foo\\bar\\\\")]                   // Trailing consecutive backslashes
         public void GetCanonicalForm_WindowsPathNormalization_ShouldMatchPathGetFullPath(string inputPath)
         {
             ValidateGetCanonicalFormMatchesSystem(inputPath);
@@ -261,6 +263,8 @@ namespace Microsoft.Build.UnitTests
         [InlineData("/foo/../bar")]                        // Parent directory reference     
         [InlineData("/foo/bar")]                           // Simple Unix path (no normalization needed)
         [InlineData("/foo/bar\\baz")]                      // Simple Unix path with backslash that is not a path separator (no normalization needed)
+        [InlineData("/foo//bar")]                          // Consecutive forward slashes
+        [InlineData("/foo/bar//")]                         // Trailing consecutive forward slashes
         public void GetCanonicalForm_UnixPathNormalization_ShouldMatchPathGetFullPath(string inputPath)
         {
             ValidateGetCanonicalFormMatchesSystem(inputPath);

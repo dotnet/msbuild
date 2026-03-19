@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Evaluation
@@ -22,7 +23,7 @@ namespace Microsoft.Build.Evaluation
         {
             [DebuggerStepThrough]
             get
-            { return FileUtilities.ItemSpecModifiers.All.Length; }
+            { return ItemSpecModifiers.All.Length; }
         }
 
         /// <summary>
@@ -32,7 +33,7 @@ namespace Microsoft.Build.Evaluation
         {
             [DebuggerStepThrough]
             get
-            { return FileUtilities.ItemSpecModifiers.All; }
+            { return ItemSpecModifiers.All; }
         }
 
         /// <summary>
@@ -71,16 +72,16 @@ namespace Microsoft.Build.Evaluation
         internal static string GetMetadataValueEscaped(string currentDirectory, string evaluatedIncludeBeforeWildcardExpansionEscaped, string evaluatedIncludeEscaped, string definingProjectEscaped, string name, ref string fullPath)
         {
             // This is an assert, not a VerifyThrow, because the caller should already have done this check, and it's slow/hot.
-            Debug.Assert(FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name));
+            Debug.Assert(ItemSpecModifiers.IsItemSpecModifier(name));
 
             string value;
-            if (String.Equals(name, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase))
+            if (String.Equals(name, ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase))
             {
                 value = GetRecursiveDirValue(evaluatedIncludeBeforeWildcardExpansionEscaped, evaluatedIncludeEscaped);
             }
             else
             {
-                value = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, evaluatedIncludeEscaped, definingProjectEscaped, name, ref fullPath);
+                value = ItemSpecModifiers.GetItemSpecModifier(currentDirectory, evaluatedIncludeEscaped, definingProjectEscaped, name, ref fullPath);
             }
 
             return value;
