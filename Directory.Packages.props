@@ -48,7 +48,8 @@
     <PackageVersion Include="System.ValueTuple" Version="$(SystemValueTupleVersion)" />
     <PackageVersion Include="xunit.console" Version="$(XUnitVersion)" />
     <PackageVersion Include="Microsoft.VisualStudio.Telemetry" Version="$(MicrosoftVisualStudioTelemetryVersion)" />
-    <!-- Transitive runtime dependency of Telemetry; version must match what Telemetry's nuspec requires -->
+    <!-- Transitive runtime dependency of Microsoft.VisualStudio.Telemetry; check Telemetry's nuspec
+         (.nuget/packages/microsoft.visualstudio.telemetry/{version}/*.nuspec) for the required version -->
     <PackageVersion Include="Microsoft.VisualStudio.Utilities.Internal" Version="16.3.90" />
     <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Packages.props -->
   </ItemGroup>
