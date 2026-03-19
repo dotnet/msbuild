@@ -158,42 +158,45 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Verifies that the handshake toolsDirectory used by the parent
-        /// (ResolveAppHostOrFallback) matches what the child process
-        /// (NodeEndpointOutOfProcTaskHost) computes via its GetHandshake().
+        /// Regression test for the macOS /tmp → /private/tmp symlink issue (MSB4216).
         ///
-        /// Regression test for the macOS /tmp → /private/tmp symlink issue
-        /// where the parent used $(NetCoreSdkRoot) from MSBuild properties
-        /// (unresolved symlink) while the child used MSBuildToolsDirectoryRoot
-        /// from AppContext.BaseDirectory (resolved symlink), causing a
-        /// handshake hash mismatch → MSB4216.
+        /// Before the fix, the parent passed $(NetCoreSdkRoot) as toolsDirectory —
+        /// an MSBuild property that can contain unresolved symlinks. The child always
+        /// defaults to BuildEnvironmentHelper (which resolves symlinks via
+        /// AppContext.BaseDirectory). This caused different handshake hashes.
+        ///
+        /// After the fix (on .NET Core), the parent also omits toolsDirectory,
+        /// so both sides default to BuildEnvironmentHelper.
+        ///
+        /// This test proves that an arbitrary external path (simulating $(NetCoreSdkRoot))
+        /// CAN produce a different handshake than the BuildEnvironmentHelper default,
+        /// and that omitting toolsDirectory on both sides always matches.
         /// </summary>
         [Fact]
-        public void ResolveAppHostOrFallback_HandshakeMatchesChildHandshake()
+        public void Handshake_ExternalPathCanMismatch_DefaultAlwaysMatches()
         {
-            // The parent's handshake should use MSBuildToolsDirectoryRoot —
-            // the same source the child (NodeEndpointOutOfProcTaskHost) defaults to.
-            string parentToolsDir = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-
-            // Simulate what the child does in NodeEndpointOutOfProcTaskHost.GetHandshake():
-            // new Handshake(options) with no explicit toolsDirectory → defaults to MSBuildToolsDirectoryRoot.
-            HandshakeOptions childOptions = CommunicationsUtilities.GetHandshakeOptions(
+            HandshakeOptions options = CommunicationsUtilities.GetHandshakeOptions(
                 taskHost: true,
                 taskHostParameters: TaskHostParameters.Empty,
                 nodeReuse: false);
 
-            var childHandshake = new Handshake(childOptions);
+            // Simulate child: no explicit toolsDirectory → defaults to BuildEnvironmentHelper.
+            var childHandshake = new Handshake(options);
 
-            // Simulate what the parent does in ResolveAppHostOrFallback (after the fix):
-            // new Handshake(hostContext, toolsDirectory: MSBuildToolsDirectoryRoot)
-            var parentHandshake = new Handshake(childOptions, parentToolsDir);
+            // After the fix: parent also omits toolsDirectory → same default → must match.
+            var parentFixedHandshake = new Handshake(options);
+            parentFixedHandshake.GetKey().ShouldBe(childHandshake.GetKey(),
+                "When both parent and child omit toolsDirectory, they must produce " +
+                "identical handshake keys (both default to BuildEnvironmentHelper).");
 
-            // The handshake keys must match for the pipe connection to succeed.
-            parentHandshake.GetKey().ShouldBe(childHandshake.GetKey(),
-                "Parent and child handshake keys must match. A mismatch here causes MSB4216 " +
-                "because the parent and child listen/connect on different pipe names. " +
-                "On macOS, this can happen when symlinks (like /tmp → /private/tmp) cause " +
-                "the toolsDirectory to have different string representations.");
+            // Before the fix: parent passed an external path ($(NetCoreSdkRoot)).
+            // If that path differs from BuildEnvironmentHelper (e.g. symlinks),
+            // the handshake would mismatch.
+            string externalPath = Path.Combine(Path.GetTempPath(), $"different_path_{Guid.NewGuid():N}");
+            var parentBrokenHandshake = new Handshake(options, externalPath);
+            parentBrokenHandshake.GetKey().ShouldNotBe(childHandshake.GetKey(),
+                "An arbitrary external toolsDirectory should produce a different handshake " +
+                "than the BuildEnvironmentHelper default, proving the mismatch scenario.");
         }
 
         /// <summary>
