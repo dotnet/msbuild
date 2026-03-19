@@ -234,7 +234,7 @@ The `MSBuildMultiThreadableTaskAttribute` is **non-inheritable** (`Inherited = f
 * Derived classes cannot accidentally inherit thread-safety assumptions from base classes
 * The routing decision is always explicit and visible in the task's source code
 
-Tasks may optionally implement `IMultiThreadableTask` to access `TaskEnvironment` APIs, but only the attribute determines routing behavior. All 19 built-in MSBuild tasks now implement `IMultiThreadableTask` with a default `TaskEnvironment` backed by `MultiProcessTaskEnvironmentDriver.Instance`, which acts as a fallback for explicit instantiation and task host scenarios.
+Tasks may optionally implement `IMultiThreadableTask` to access `TaskEnvironment` APIs, but only the attribute determines routing behavior. If task implements `IMultiThreadableTask`, `TaskEnvironment` should be backed by `MultiProcessTaskEnvironmentDriver.Instance`, which acts as a fallback for explicit instantiation and task host scenarios.
 
 ## Tasks transition
 
