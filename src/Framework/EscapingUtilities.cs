@@ -27,17 +27,8 @@ internal static class EscapingUtilities
     /// </remarks>
     private static readonly Dictionary<string, string> s_escapedStringCache = new(StringComparer.Ordinal);
 
-    /// <summary>
-    ///  Special characters that need escaping.
-    /// </summary>
-    /// <remarks>
-    ///  <c>%</c> MUST be first — since it is both a character we escape and part of every escape sequence,
-    ///  placing it first ensures we don't double-escape sequences already present in the input.
-    /// </remarks>
-    private static readonly char[] s_charsToEscape = ['%', '*', '?', '@', '$', '(', ')', ';', '\''];
-
 #if NET
-    private static readonly SearchValues<char> s_searchValues = SearchValues.Create(s_charsToEscape);
+    private static readonly SearchValues<char> s_searchValues = SearchValues.Create(['%', '*', '?', '@', '$', '(', ')', ';', '\'']);
 
     private static int IndexOfAnyEscapeChar(string value, int startIndex = 0)
     {
@@ -45,8 +36,25 @@ internal static class EscapingUtilities
         return i < 0 ? i : i + startIndex;
     }
 #else
+    // All chars in s_charsToEscape lie within the ASCII range ['$' (0x24) .. '@' (0x40)].
+    // Encoding each as bit (c - '$') in a uint gives a 29-bit bitmask that replaces the
+    // per-char O(k) array scan inside IndexOfAny with a single range check + bit test.
+    //   Bit:  0='$'  1='%'  3='\''  4='('  5=')'  6='*'  23=';'  27='?'  28='@'
+    private const uint EscapeCharBitmask = 0x1880_007Bu;
+
     private static int IndexOfAnyEscapeChar(string value, int startIndex = 0)
-        => value.IndexOfAny(s_charsToEscape, startIndex);
+    {
+        for (int i = startIndex; i < value.Length; i++)
+        {
+            int offset = value[i] - '$';
+            if ((uint)offset <= 28u && ((EscapeCharBitmask >> offset) & 1u) != 0)
+            {
+                return i;
+            }
+        }
+
+        return -1;
+    }
 #endif
 
     private static bool TryDecodeHexDigit(char ch, out int value)
