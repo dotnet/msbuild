@@ -45,9 +45,6 @@
     <PackageReference Include="System.Text.Json" />
     <!-- Telemetry in Visual Studio scenarios -->
     <PackageReference Include="Microsoft.VisualStudio.Telemetry" PrivateAssets="all" />
-    <!-- Transitive runtime dependency of Telemetry; explicit reference so package validation
-         can resolve it when checking assemblies that depend on Framework. -->
-    <PackageReference Include="Microsoft.VisualStudio.Utilities.Internal" PrivateAssets="all" />
   </ItemGroup>
 
   <!-- Framework and standard don't have these. -->

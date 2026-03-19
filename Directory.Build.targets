@@ -12,6 +12,23 @@
     <EnablePackageValidation>false</EnablePackageValidation>
   </PropertyGroup>
 
+  <!-- PrivateAssets="all" packages (e.g. Microsoft.VisualStudio.Telemetry) and their transitive
+       dependencies are excluded from the compilation reference path. Package validation then emits
+       "Could not resolve reference" messages when it encounters types from these assemblies inside
+       the nupkg. This target injects @(RuntimeCopyLocalItems), which NuGet populates from the full
+       transitive closure, into the reference list that feeds ValidatePackageTask. No per-package
+       version tracking needed — NuGet resolves the paths automatically.
+       Note: this only fixes messages for PrivateAssets packages directly referenced by the project
+       being validated. Cross-project private deps (e.g. Build referencing Framework which privately
+       references Telemetry) remain unresolvable — see https://github.com/dotnet/sdk/issues/51991. -->
+  <Target Name="_AddPrivatePackageRefsForApiCompat"
+          BeforeTargets="GetReferencesForApiCompatValidatePackage"
+          DependsOnTargets="ResolvePackageAssets"
+          Condition="'$(EnablePackageValidation)' == 'true'">
+    <ItemGroup>
+      <ReferencePathWithRefAssemblies Include="@(RuntimeCopyLocalItems)" />
+    </ItemGroup>
+  </Target>
 
   <ItemGroup Condition=" '$(IsPackable)' == 'true' ">
     <None Include="$(ThirdPartyNotice)" Pack="true" PackagePath="notices" Visible="false" />
