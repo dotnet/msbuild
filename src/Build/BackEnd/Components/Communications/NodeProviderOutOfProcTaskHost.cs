@@ -733,6 +733,13 @@ namespace Microsoft.Build.BackEnd
             string appHostPath = Path.Combine(msbuildAssemblyPath, Constants.MSBuildExecutableName);
             string commandLineArgs = BuildCommandLineArgs(nodeReuseEnabled);
 
+            // Do not pass explicit toolsDirectory to the Handshake. The child task host process
+            // computes its own toolsDirectory from BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot
+            // (derived from AppContext.BaseDirectory, which resolves symlinks). If we pass
+            // msbuildAssemblyPath here (from the $(NetCoreSdkRoot) MSBuild property), it may contain
+            // unresolved symlinks (e.g. /tmp/... vs /private/tmp/... on macOS) causing a handshake
+            // mismatch and MSB4216. By omitting it, both parent and child default to
+            // BuildEnvironmentHelper which resolves symlinks consistently.
             if (FileSystems.Default.FileExists(appHostPath))
             {
                 CommunicationsUtilities.Trace("For a host context of {0}, using app host from {1}.", hostContext, appHostPath);
@@ -744,7 +751,7 @@ namespace Microsoft.Build.BackEnd
                     : new NodeLaunchData(
                         appHostPath,
                         commandLineArgs,
-                        new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath),
+                        new Handshake(hostContext),
                         dotnetOverrides);
             }
 
@@ -762,7 +769,7 @@ namespace Microsoft.Build.BackEnd
             return new NodeLaunchData(
                 resolvedDotnetHostPath,
                 $"\"{Path.Combine(msbuildAssemblyPath, Constants.MSBuildAssemblyName)}\" {commandLineArgs}",
-                new Handshake(hostContext, toolsDirectory: msbuildAssemblyPath));
+                new Handshake(hostContext));
         }
 
         private string BuildCommandLineArgs(bool nodeReuseEnabled) => $"/nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcTaskHostNode)} /nodereuse:{nodeReuseEnabled} /low:{ComponentHost.BuildParameters.LowPriority} /parentpacketversion:{NodePacketTypeExtensions.PacketVersion} ";
