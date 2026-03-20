@@ -2,8 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #if NETFRAMEWORK
+using System.Diagnostics;
 using Microsoft.Build.Utilities;
 #endif
+
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -14,8 +17,11 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// The AspNetCompiler task, which is a wrapper around aspnet_compiler.exe
     /// </summary>
-    public class AspNetCompiler : ToolTaskExtension, IAspNetCompilerTaskContract
+    [MSBuildMultiThreadableTask]
+    public class AspNetCompiler : ToolTaskExtension, IAspNetCompilerTaskContract, IMultiThreadableTask
     {
+        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+
         /*
             C:\WINDOWS\Microsoft.NET\Framework\v2.0.x86dbg>aspnet_compiler /?
             Utility to precompile an ASP.NET application
@@ -306,8 +312,15 @@ namespace Microsoft.Build.Tasks
                     ToolLocationHelper.GetDotNetFrameworkVersionFolderPrefix(TargetDotNetFrameworkVersion.Latest));
             }
 
-            return pathToTool;
+            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
         }
+
+        protected override ProcessStartInfo GetProcessStartInfo(
+            string pathToTool,
+            string commandLineCommands,
+            string responseFileSwitch) => TaskEnvironment != null
+                ? GetProcessStartInfoMultiThreaded(pathToTool, commandLineCommands, responseFileSwitch, TaskEnvironment)
+                : base.GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
 
         /// <summary>
         /// Validate the task arguments, log any warnings/errors
@@ -344,7 +357,7 @@ namespace Microsoft.Build.Tasks
     }
 
 #else
-
+    [MSBuildMultiThreadableTask]
     public sealed class AspNetCompiler : TaskRequiresFramework, IAspNetCompilerTaskContract
     {
         public AspNetCompiler()
