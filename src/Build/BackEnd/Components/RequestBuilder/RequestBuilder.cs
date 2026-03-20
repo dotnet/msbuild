@@ -1319,7 +1319,7 @@ namespace Microsoft.Build.BackEnd
                                (isFromNuget && FileClassifier.Shared.IsMicrosoftPackageInNugetCache(projectTargetInstance.Value.FullPath));
                 }
 
-                var key = TaskOrTargetTelemetryKey.Create(
+                var key = new TaskOrTargetTelemetryKey(
                     projectTargetInstance.Key, isCustom, isFromNuget, isMetaprojTarget);
                 telemetryData.AddTarget(key, wasExecuted, skipReason);
             }
@@ -1338,11 +1338,11 @@ namespace Microsoft.Build.BackEnd
 
                 foreach (TaskRegistry.RegisteredTaskRecord registeredTaskRecord in taskRegistry.TaskRegistrations.Values.SelectMany(record => record))
                 {
-                    var key = TaskOrTargetTelemetryKey.Create(
+                    var key = new TaskOrTargetTelemetryKey(
                         registeredTaskRecord.TaskIdentity.Name,
                         registeredTaskRecord.ComputeIfCustom(),
                         registeredTaskRecord.IsFromNugetCache,
-                        isMetaproj: false);
+                        isFromMetaProject: false);
                     telemetryData.AddTask(
                         key,
                         registeredTaskRecord.Statistics.ExecutedTime,

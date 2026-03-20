@@ -480,7 +480,7 @@ namespace Microsoft.Build.Engine.UnitTests
             var data = new WorkerNodeTelemetryData();
             data.IsEmpty.ShouldBeTrue();
 
-            var targetKey = TaskOrTargetTelemetryKey.Create("Target1", isCustom: false, isFromNugetCache: false, isMetaproj: false);
+            var targetKey = new TaskOrTargetTelemetryKey("Target1", isCustom: false, isFromNugetCache: false, isFromMetaProject: false);
             data.AddTarget(targetKey, wasExecuted: true);
             data.IsEmpty.ShouldBeFalse();
         }
@@ -497,7 +497,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // Merge some data.
             var localData = new WorkerNodeTelemetryData();
-            var key = TaskOrTargetTelemetryKey.Create("TestTarget", isCustom: true, isFromNugetCache: false, isMetaproj: false);
+            var key = new TaskOrTargetTelemetryKey("TestTarget", isCustom: true, isFromNugetCache: false, isFromMetaProject: false);
             localData.AddTarget(key, wasExecuted: true);
             forwarder.MergeWorkerData(localData);
 
@@ -513,7 +513,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // Merge new data after reset — forwarder should still work.
             var localData2 = new WorkerNodeTelemetryData();
-            var key2 = TaskOrTargetTelemetryKey.Create("TestTarget2", isCustom: false, isFromNugetCache: false, isMetaproj: false);
+            var key2 = new TaskOrTargetTelemetryKey("TestTarget2", isCustom: false, isFromNugetCache: false, isFromMetaProject: false);
             localData2.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.ConditionWasFalse);
             forwarder.MergeWorkerData(localData2);
 
