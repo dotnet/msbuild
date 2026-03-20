@@ -81,7 +81,7 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <BootstrapSdkVersion>10.0.103</BootstrapSdkVersion>
+    <BootstrapSdkVersion>10.0.104</BootstrapSdkVersion>
   </PropertyGroup>
 
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
