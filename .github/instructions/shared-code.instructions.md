@@ -29,7 +29,3 @@ Code in `src/Shared/` is linked (compiled) into multiple MSBuild assemblies. A b
 
 * Handle .NET Framework vs .NET Core differences with appropriate `#if` guards.
 * Environment variable access patterns differ across platforms — use the shared helpers.
-
-## Related Documentation
-
-* [Contributing Code](../../documentation/wiki/Contributing-Code.md)

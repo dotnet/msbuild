@@ -18,7 +18,7 @@ b. Implement `IMultiThreadableTask` **only if** the task needs `TaskEnvironment`
 [MSBuildMultiThreadableTask]
 public class MyTask : Task, IMultiThreadableTask
 {
-    public TaskEnvironment TaskEnvironment { get; set; }
+    public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
     ...
 }
 ```
@@ -61,7 +61,7 @@ The [`AbsolutePath`](https://github.com/dotnet/msbuild/blob/main/src/Framework/P
 
 ## Updating Unit Tests
 
-Every test creating a task instance must set `TaskEnvironment = TaskEnvironmentHelper.CreateForTest()`.
+Built-in MSBuild tasks now initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. Tests creating instances of built-in tasks no longer need manual `TaskEnvironment` setup. For custom or third-party tasks that implement `IMultiThreadableTask` without a default initializer, set `TaskEnvironment = TaskEnvironmentHelper.CreateForTest()`.
 
 ## APIs to Avoid
 
@@ -276,7 +276,7 @@ Assertions: Execute() return value, [Output] exact string, error message content
 ## Sign-Off Checklist
 
 - [ ] `[MSBuildMultiThreadableTask]` on every concrete class (not just base — `Inherited=false`)
-- [ ] `IMultiThreadableTask` only on classes that use `TaskEnvironment` APIs
+- [ ] `IMultiThreadableTask` on classes that use `TaskEnvironment` APIs, with default initializer `= new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance)`
 - [ ] Every `[Output]` property: exact string value matches pre-migration
 - [ ] Every `Log.LogError`/`LogWarning`: path in message matches pre-migration (use `OriginalValue`)
 - [ ] Every `GetAbsolutePath` call: null/empty exception behavior matches old code path
@@ -285,7 +285,7 @@ Assertions: Execute() return value, [Output] exact string, error message content
 - [ ] Every `??` or `?.` added: verified it doesn't swallow a previously-thrown exception
 - [ ] No `AbsolutePath` leaks into user-visible strings unintentionally
 - [ ] Helper methods traced for internal File API usage with non-absolutized paths
-- [ ] All tests set `TaskEnvironment = TaskEnvironmentHelper.CreateForTest()`
+- [ ] Tests for custom tasks set `TaskEnvironment = TaskEnvironmentHelper.CreateForTest()` (built-in tasks have a default)
 - [ ] Cross-framework: tested on both net472 and net10.0
 - [ ] Concurrent execution: two tasks with different project directories produce correct results
 - [ ] No forbidden APIs (`Environment.Exit`, `Console.*`, etc.)

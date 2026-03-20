@@ -65,7 +65,7 @@ namespace Microsoft.Build.Tasks
         public bool FailIfNotIncremental { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
 
         /// <summary>
         /// Verify that the inputs are correct.

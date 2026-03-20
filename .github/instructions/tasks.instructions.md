@@ -33,7 +33,7 @@ Built-in tasks ship with MSBuild and cannot be independently versioned.
 
 ## Multithreaded Task Migration
 
-* Tasks must not hold locks across yield points.
+* All built-in tasks implement `IMultiThreadableTask` with a default `TaskEnvironment` backed by `MultiProcessTaskEnvironmentDriver.Instance`.
 * Shared static state is a concurrency hazard in multi-process builds.
 
 ## Related Documentation
