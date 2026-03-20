@@ -9,12 +9,4 @@
     <!-- This path is used for Windows Full test run and it points to net472 during execution-->
     <BootstrapDestination>$(BootstrapDestination)$(TargetFramework.ToLowerInvariant())\MSBuild\</BootstrapDestination>
   </PropertyGroup>
-
-  <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
-    <BootstrapBinaryDestination>$(BootstrapDestination)$(TargetMSBuildToolsVersion)\Bin</BootstrapBinaryDestination>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
-    <BootstrapBinaryDestination>$(BootstrapDestination)</BootstrapBinaryDestination>
-  </PropertyGroup>
 </Project>
