@@ -105,6 +105,41 @@
         <target state="translated">MSB5009: "{1}" GUID'si ile "{0}" proje bölümü ayrıştırılırken hata oluştu. Proje "{2}" altında iç içe yerleştirilmiş ancak bu proje çözümde bulunamadı.</target>
         <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
+      <trans-unit id="TaskHostAcceptingNestedTask">
+        <source>TaskHost accepting nested task "{0}" while {1} task(s) are yielded.</source>
+        <target state="new">TaskHost accepting nested task "{0}" while {1} task(s) are yielded.</target>
+        <note>"TaskHost" is an MSBuild term and should not be localized. {0} is the task name, {1} is the count of yielded tasks.</note>
+      </trans-unit>
+      <trans-unit id="TaskHostBuildCallbackFailed">
+        <source>MSB5030: TaskHost BuildProjectFile callback failed: {0}</source>
+        <target state="new">MSB5030: TaskHost BuildProjectFile callback failed: {0}</target>
+        <note>{StrBegin="MSB5030: "}"BuildProjectFile" and "TaskHost" are MSBuild terms and should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="TaskHostBuildCallbackRequiresIBuildEngine3">
+        <source>MSB5031: TaskHost BuildProjectFile callback requires IBuildEngine3 but the build engine does not implement it.</source>
+        <target state="new">MSB5031: TaskHost BuildProjectFile callback requires IBuildEngine3 but the build engine does not implement it.</target>
+        <note>{StrBegin="MSB5031: "}"BuildProjectFile", "TaskHost", and "IBuildEngine3" are MSBuild terms and should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="TaskHostCallbackStarted">
+        <source>TaskHost callback: BuildProjectFile for "{0}" targets=[{1}]</source>
+        <target state="new">TaskHost callback: BuildProjectFile for "{0}" targets=[{1}]</target>
+        <note>"BuildProjectFile" and "TaskHost" are MSBuild terms and should not be localized. {0} is the project file names, {1} is the target names.</note>
+      </trans-unit>
+      <trans-unit id="TaskHostReacquiredAfterCallback">
+        <source>TaskHost reacquired after callback. Active tasks: {0}, Yielded tasks: {1}</source>
+        <target state="new">TaskHost reacquired after callback. Active tasks: {0}, Yielded tasks: {1}</target>
+        <note>"TaskHost" is an MSBuild term and should not be localized. {0} and {1} are integer counts.</note>
+      </trans-unit>
+      <trans-unit id="TaskHostUnmatchedCallbackResponse">
+        <source>TaskHost received callback response with no pending request. RequestId={0}, Type={1}</source>
+        <target state="new">TaskHost received callback response with no pending request. RequestId={0}, Type={1}</target>
+        <note>"TaskHost" is an MSBuild term and should not be localized. {0} is the request ID, {1} is the packet type.</note>
+      </trans-unit>
+      <trans-unit id="TaskHostYieldingForCallback">
+        <source>TaskHost yielding for callback. Active tasks: {0}, Yielded tasks: {1}</source>
+        <target state="new">TaskHost yielding for callback. Active tasks: {0}, Yielded tasks: {1}</target>
+        <note>"TaskHost" is an MSBuild term and should not be localized. {0} and {1} are integer counts.</note>
+      </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
         <target state="translated">MSB4132: Araçlar sürümü "{0}" tanınmıyor. Kullanılabilir araç sürümleri şunlardır: {1}.</target>

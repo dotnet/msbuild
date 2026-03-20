@@ -528,6 +528,10 @@ namespace Microsoft.Build.CommandLine
                 return new BuildEngineResult(false, null);
             }
 
+            LogMessageFromResource(MessageImportance.Low, "TaskHostCallbackStarted",
+                string.Join(";", projectFileNames ?? []),
+                string.Join(";", targetNames ?? []));
+
             var request = new TaskHostBuildRequest(
                 projectFileNames,
                 targetNames,
@@ -581,9 +585,14 @@ namespace Microsoft.Build.CommandLine
             // Send reacquire request and wait for response.
             // The worker side calls engine3.Reacquire() which may block on the scheduler.
             var request = new TaskHostYieldRequest(YieldOperation.Reacquire);
-            SendCallbackRequestAndWaitForResponse<TaskHostYieldResponse>(request);
-
-            ReacquireAfterCallback();
+            try
+            {
+                SendCallbackRequestAndWaitForResponse<TaskHostYieldResponse>(request);
+            }
+            finally
+            {
+                ReacquireAfterCallback();
+            }
         }
 
         #endregion // IBuildEngine3 Implementation
@@ -939,7 +948,12 @@ namespace Microsoft.Build.CommandLine
             if (_pendingCallbackRequests.TryRemove(callbackPacket.RequestId, out TaskCompletionSource<INodePacket> tcs))
             {
                 tcs.TrySetResult(packet);
+                return;
             }
+
+            // No pending request matched — log for diagnostic visibility.
+            LogMessageFromResource(MessageImportance.Low, "TaskHostUnmatchedCallbackResponse",
+                callbackPacket.RequestId, packet.Type);
         }
 
         /// <summary>
@@ -1031,11 +1045,10 @@ namespace Microsoft.Build.CommandLine
             }
 
             // Transition from "active" to "yielded" state.
-            // Order matters: increment yielded BEFORE decrementing active so the sum
-            // (_activeTaskCount + _yieldedTaskCount) is never zero during the transition.
-            // This prevents CompleteTask from prematurely nulling _currentConfiguration.
             Interlocked.Increment(ref _yieldedTaskCount);
-            Interlocked.Decrement(ref _activeTaskCount);
+            int newActive = Interlocked.Decrement(ref _activeTaskCount);
+
+            LogMessageFromResource(MessageImportance.Low, "TaskHostYieldingForCallback", newActive, _yieldedTaskCount);
         }
 
         /// <summary>
@@ -1045,10 +1058,10 @@ namespace Microsoft.Build.CommandLine
         private void ReacquireAfterCallback()
         {
             // Transition from "yielded" back to "active" state.
-            // Order matters: increment active BEFORE decrementing yielded so the sum
-            // (_activeTaskCount + _yieldedTaskCount) is never zero during the transition.
             Interlocked.Increment(ref _activeTaskCount);
-            Interlocked.Decrement(ref _yieldedTaskCount);
+            int newYielded = Interlocked.Decrement(ref _yieldedTaskCount);
+
+            LogMessageFromResource(MessageImportance.Low, "TaskHostReacquiredAfterCallback", _activeTaskCount, newYielded);
 
             // Restore environment state after reacquiring
             var context = GetCurrentTaskContext();
@@ -1110,7 +1123,7 @@ namespace Microsoft.Build.CommandLine
         /// Saves the current operating environment to the task context.
         /// Called before yielding or blocking on a callback that allows other tasks to run.
         /// </summary>
-        internal void SaveOperatingEnvironment(TaskExecutionContext context)
+        private void SaveOperatingEnvironment(TaskExecutionContext context)
         {
             ErrorUtilities.VerifyThrowArgumentNull(context, nameof(context));
 
@@ -1128,7 +1141,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Restores the previously saved operating environment from the task context.
         /// </summary>
-        internal void RestoreOperatingEnvironment(TaskExecutionContext context)
+        private void RestoreOperatingEnvironment(TaskExecutionContext context)
         {
             ErrorUtilities.VerifyThrowArgumentNull(context, nameof(context));
 
@@ -1161,6 +1174,13 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(_activeTaskCount == 0,
                 "Why are we getting a TaskHostConfiguration packet while a task is actively executing? activeTaskCount={0}",
                 _activeTaskCount);
+
+            if (_yieldedTaskCount > 0)
+            {
+                LogMessageFromResource(MessageImportance.Low, "TaskHostAcceptingNestedTask",
+                    taskHostConfiguration.TaskName, _yieldedTaskCount);
+            }
+
             _currentConfiguration = taskHostConfiguration;
             // Create task execution context for this task
             var context = CreateTaskContext(taskHostConfiguration);
@@ -1171,7 +1191,7 @@ namespace Microsoft.Build.CommandLine
             _taskRunnerThread.Name = "Task runner for task " + taskHostConfiguration.TaskName;
             context.ExecutingThread = _taskRunnerThread;
 
-            _taskRunnerThread.Start(taskHostConfiguration);
+            _taskRunnerThread.Start(context);
         }
 
         /// <summary>
@@ -1382,17 +1402,8 @@ namespace Microsoft.Build.CommandLine
         {
             Interlocked.Increment(ref _activeTaskCount);
             OutOfProcTaskHostTaskResult taskResult = null;
-            TaskHostConfiguration taskConfiguration = state as TaskHostConfiguration;
-            // Set the current task context for this thread
-            TaskExecutionContext taskContext = null;
-            foreach (var kvp in _taskContexts)
-            {
-                if (kvp.Value.Configuration == taskConfiguration)
-                {
-                    taskContext = kvp.Value;
-                    break;
-                }
-            }
+            TaskExecutionContext taskContext = state as TaskExecutionContext;
+            TaskHostConfiguration taskConfiguration = taskContext?.Configuration ?? state as TaskHostConfiguration;
 
             if (taskContext is not null)
             {

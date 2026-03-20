@@ -50,16 +50,22 @@ namespace Microsoft.Build.BackEnd
             set => _requestId = value;
         }
 
+        /// <summary>Array of project file paths to build.</summary>
         public string[]? ProjectFileNames => _projectFileNames;
 
+        /// <summary>Array of target names to build in each project.</summary>
         public string[]? TargetNames => _targetNames;
 
+        /// <summary>Per-project global properties to pass to the build.</summary>
         public Dictionary<string, string>?[]? GlobalProperties => _globalProperties;
 
+        /// <summary>Per-project global properties to remove before building.</summary>
         public List<string>?[]? RemoveGlobalProperties => _removeGlobalProperties;
 
+        /// <summary>Per-project tools versions to use.</summary>
         public string[]? ToolsVersions => _toolsVersions;
 
+        /// <summary>Whether to include target outputs in the response.</summary>
         public bool ReturnTargetOutputs => _returnTargetOutputs;
 
         /// <summary>
@@ -99,16 +105,8 @@ namespace Microsoft.Build.BackEnd
                 return null;
             }
 
-            var result = new List<string>?[removeGlobalProperties.Length];
-            for (int i = 0; i < removeGlobalProperties.Length; i++)
-            {
-                if (removeGlobalProperties[i] is not null)
-                {
-                    result[i] = new List<string>(removeGlobalProperties[i]);
-                }
-            }
-
-            return result;
+            return Array.ConvertAll(removeGlobalProperties,
+                list => list is not null ? new List<string>(list) : null);
         }
 
         public void Translate(ITranslator translator)

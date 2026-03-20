@@ -41,8 +41,10 @@ namespace Microsoft.Build.BackEnd
             set => _requestId = value;
         }
 
+        /// <summary>Whether the build succeeded.</summary>
         public bool Success => _success;
 
+        /// <summary>Per-project target outputs, or null if outputs were not requested.</summary>
         public List<Dictionary<string, TaskParameter>>? TargetOutputsPerProject => _targetOutputsPerProject;
 
         /// <summary>

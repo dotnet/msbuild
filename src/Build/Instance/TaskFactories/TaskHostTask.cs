@@ -710,6 +710,20 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_buildEngine is not IBuildEngine3 engine3)
                 {
+                    // Log so the failure is visible in binlog.
+                    string ibeMissingMsg = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskHostBuildCallbackRequiresIBuildEngine3");
+                    this.BuildEngine?.LogWarningEvent(new BuildWarningEventArgs(
+                        subcategory: null,
+                        code: "MSB5031",
+                        file: null,
+                        lineNumber: 0,
+                        columnNumber: 0,
+                        endLineNumber: 0,
+                        endColumnNumber: 0,
+                        message: ibeMissingMsg,
+                        helpKeyword: null,
+                        senderName: "TaskHostTask"));
+
                     response = new TaskHostBuildResponse(request.RequestId, false, null);
                     _taskHostProvider.SendData(_taskHostNodeKey, response);
                     return;
@@ -749,16 +763,17 @@ namespace Microsoft.Build.BackEnd
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
-                // Log the exception so it appears in binlog — otherwise it vanishes silently.
+                // Log with resource string so it appears in binlog and is localizable.
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskHostBuildCallbackFailed", ex.Message);
                 this.BuildEngine?.LogWarningEvent(new BuildWarningEventArgs(
                     subcategory: null,
-                    code: "MSB5023",
+                    code: "MSB5030",
                     file: null,
                     lineNumber: 0,
                     columnNumber: 0,
                     endLineNumber: 0,
                     endColumnNumber: 0,
-                    message: $"TaskHost BuildProjectFile callback failed: {ex.Message}",
+                    message: message,
                     helpKeyword: null,
                     senderName: "TaskHostTask"));
 
@@ -784,6 +799,8 @@ namespace Microsoft.Build.BackEnd
                 case YieldOperation.Yield:
                     if (_buildEngine is IBuildEngine3 engine3Yield)
                     {
+                        this.BuildEngine?.LogMessageEvent(new BuildMessageEventArgs(
+                            "TaskHost: forwarding Yield to scheduler.", null, "TaskHostTask", MessageImportance.Low));
                         engine3Yield.Yield();
                     }
 
@@ -793,6 +810,8 @@ namespace Microsoft.Build.BackEnd
                 case YieldOperation.Reacquire:
                     if (_buildEngine is IBuildEngine3 engine3Reacquire)
                     {
+                        this.BuildEngine?.LogMessageEvent(new BuildMessageEventArgs(
+                            "TaskHost: forwarding Reacquire to scheduler.", null, "TaskHostTask", MessageImportance.Low));
                         engine3Reacquire.Reacquire();
                     }
 
