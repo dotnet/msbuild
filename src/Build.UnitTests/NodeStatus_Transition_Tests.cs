@@ -110,11 +110,11 @@ public class NodeStatus_Transition_Tests
         var width = 80;
         var height = 1;
 
-        TerminalNodesFrame previousFrame = new(Array.Empty<TerminalNodeStatus>(), 0, 0);
+        TerminalNodesFrame previousFrame = new(Array.Empty<TerminalNodeStatus>(), 0, 0, AnsiCodes.Colorize);
         StringBuilder result = new StringBuilder();
         foreach (var nodeStatuses in nodeStatusesUpdates)
         {
-            TerminalNodesFrame currentFrame = new TerminalNodesFrame(nodeStatuses, width, height);
+            TerminalNodesFrame currentFrame = new TerminalNodesFrame(nodeStatuses, width, height, AnsiCodes.Colorize);
             result.Append(currentFrame.Render(previousFrame));
             previousFrame = currentFrame;
         }
