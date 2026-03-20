@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -79,6 +80,7 @@ namespace Microsoft.Build.Shared
             : base(w)
         {
             _documentEncoding = w.Encoding;
+            _textWriter = w;
         }
 
         /// <summary>
@@ -186,6 +188,24 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        /// <summary>
+        /// Writes a trailing newline to ensure the file ends with one.
+        /// Must be called after the XML document has been fully written (e.g. after XmlDocument.Save()).
+        /// </summary>
+        internal void WriteTrailingNewLine()
+        {
+            Flush();
+            if (_textWriter != null)
+            {
+                _textWriter.Write(Environment.NewLine);
+            }
+            else if (BaseStream != null)
+            {
+                byte[] newlineBytes = (_documentEncoding ?? Encoding.UTF8).GetBytes(Environment.NewLine);
+                BaseStream.Write(newlineBytes, 0, newlineBytes.Length);
+            }
+        }
+
         #endregion
 
         // indicates whether an XML declaration e.g. <?xml version="1.0"?> will be written at the start of the project
@@ -193,5 +213,8 @@ namespace Microsoft.Build.Shared
 
         // encoding of the document, if specified when constructing
         private readonly Encoding _documentEncoding;
+
+        // the underlying TextWriter, if constructed with one (null for file-based construction)
+        private readonly TextWriter _textWriter;
     }
 }
