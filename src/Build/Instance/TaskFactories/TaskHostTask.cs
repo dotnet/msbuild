@@ -749,6 +749,19 @@ namespace Microsoft.Build.BackEnd
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
+                // Log the exception so it appears in binlog — otherwise it vanishes silently.
+                this.BuildEngine?.LogWarningEvent(new BuildWarningEventArgs(
+                    subcategory: null,
+                    code: "MSB5023",
+                    file: null,
+                    lineNumber: 0,
+                    columnNumber: 0,
+                    endLineNumber: 0,
+                    endColumnNumber: 0,
+                    message: $"TaskHost BuildProjectFile callback failed: {ex.Message}",
+                    helpKeyword: null,
+                    senderName: "TaskHostTask"));
+
                 // Always send a response to prevent the OOP task from hanging.
                 response = new TaskHostBuildResponse(request.RequestId, false, null);
             }

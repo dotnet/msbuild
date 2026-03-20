@@ -1,16 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if !CLR2COMPATIBILITY
-
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
-
-#nullable disable
 
 namespace Microsoft.Build.CommandLine
 {
@@ -42,7 +38,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// The thread executing this task, or null if not yet started.
         /// </summary>
-        public Thread ExecutingThread { get; set; }
+        public Thread? ExecutingThread { get; set; }
 
         /// <summary>
         /// Current execution state of this task.
@@ -52,42 +48,41 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// Saved current directory when task yields or awaits a blocking callback.
         /// </summary>
-        public string SavedCurrentDirectory { get; set; }
+        public string? SavedCurrentDirectory { get; set; }
 
         /// <summary>
         /// Saved environment variables when task yields or awaits a blocking callback.
         /// </summary>
-        public IDictionary<string, string> SavedEnvironment { get; set; }
+        public IDictionary<string, string>? SavedEnvironment { get; set; }
 
         /// <summary>
         /// Saved per-task warning/debug settings, captured from OutOfProcTaskHostNode shared fields
         /// before yielding so they can be restored when the task resumes.
         /// </summary>
-        public ICollection<string> SavedWarningsAsErrors { get; set; }
+        public ICollection<string>? SavedWarningsAsErrors { get; set; }
 
         /// <summary>Saved WarningsNotAsErrors.</summary>
-        public ICollection<string> SavedWarningsNotAsErrors { get; set; }
+        public ICollection<string>? SavedWarningsNotAsErrors { get; set; }
 
         /// <summary>Saved WarningsAsMessages.</summary>
-        public ICollection<string> SavedWarningsAsMessages { get; set; }
+        public ICollection<string>? SavedWarningsAsMessages { get; set; }
 
         /// <summary>
         /// Pending callback requests for THIS task, keyed by request ID.
         /// Each task has isolated pending requests to prevent cross-contamination
         /// when multiple tasks are blocked on callbacks simultaneously.
         /// </summary>
-        public ConcurrentDictionary<int, TaskCompletionSource<INodePacket>> PendingCallbackRequests { get; }
-            = new ConcurrentDictionary<int, TaskCompletionSource<INodePacket>>();
+        public ConcurrentDictionary<int, TaskCompletionSource<INodePacket>> PendingCallbackRequests { get; } = new();
 
         /// <summary>
         /// Event signaled when this task completes execution.
         /// </summary>
-        public ManualResetEvent CompletedEvent { get; } = new ManualResetEvent(false);
+        public ManualResetEvent CompletedEvent { get; } = new(false);
 
         /// <summary>
         /// Event signaled when this specific task is cancelled.
         /// </summary>
-        public ManualResetEvent CancelledEvent { get; } = new ManualResetEvent(false);
+        public ManualResetEvent CancelledEvent { get; } = new(false);
 
         /// <summary>
         /// Creates a new task execution context.
@@ -128,5 +123,3 @@ namespace Microsoft.Build.CommandLine
         Cancelled,
     }
 }
-
-#endif

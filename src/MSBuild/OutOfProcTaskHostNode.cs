@@ -106,13 +106,11 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private int _activeTaskCount;
 
-#if !CLR2COMPATIBILITY
         /// <summary>
         /// Number of tasks currently yielded (blocked on a BuildProjectFile callback or explicit Yield).
         /// A yielded task does NOT prevent new tasks from being scheduled to this TaskHost.
         /// </summary>
         private int _yieldedTaskCount;
-#endif
 
         /// <summary>
         /// The event which is set when a task has completed.
@@ -124,18 +122,7 @@ namespace Microsoft.Build.CommandLine
         /// Using a queue instead of a single slot prevents lost completions when
         /// multiple tasks finish concurrently (e.g., nested task reuse scenarios).
         /// </summary>
-#if !CLR2COMPATIBILITY
         private readonly ConcurrentQueue<TaskHostTaskComplete> _taskCompleteQueue = new();
-#else
-        private TaskHostTaskComplete _taskCompletePacket;
-#endif
-
-        /// <summary>
-        /// Object used to synchronize access to taskCompletePacket (CLR2 only)
-        /// </summary>
-#if CLR2COMPATIBILITY
-        private LockType _taskCompleteLock = new();
-#endif
 
         /// <summary>
         /// The event which is set when a task is cancelled
@@ -242,12 +229,7 @@ namespace Microsoft.Build.CommandLine
         /// In concurrent-task mode (non-CLR2), uses the per-task context first.
         /// Falls back to <see cref="_currentConfiguration"/>.
         /// </summary>
-        private TaskHostConfiguration EffectiveConfiguration =>
-#if !CLR2COMPATIBILITY
-            GetCurrentConfiguration();
-#else
-            _currentConfiguration;
-#endif
+        private TaskHostConfiguration EffectiveConfiguration => GetCurrentConfiguration();
 
         /// <summary>
         /// Constructor.
@@ -372,26 +354,61 @@ namespace Microsoft.Build.CommandLine
         /// Contains all warnings that should be logged as errors.
         /// Non-null empty set when all warnings should be treated as errors.
         /// </summary>
-        private ICollection<string> WarningsAsErrors { get; set; }
+        private ICollection<string> _warningsAsErrors;
 
-        private ICollection<string> WarningsNotAsErrors { get; set; }
+        private ICollection<string> _warningsNotAsErrors;
 
-        private ICollection<string> WarningsAsMessages { get; set; }
+        private ICollection<string> _warningsAsMessages;
+
+        /// <summary>
+        /// Gets the effective WarningsAsErrors for the current task context.
+        /// Uses per-task saved values when available (during concurrent execution),
+        /// falling back to the shared field.
+        /// </summary>
+        private ICollection<string> EffectiveWarningsAsErrors
+        {
+            get
+            {
+                var context = GetCurrentTaskContext();
+                return context?.SavedWarningsAsErrors ?? _warningsAsErrors;
+            }
+        }
+
+        private ICollection<string> EffectiveWarningsNotAsErrors
+        {
+            get
+            {
+                var context = GetCurrentTaskContext();
+                return context?.SavedWarningsNotAsErrors ?? _warningsNotAsErrors;
+            }
+        }
+
+        private ICollection<string> EffectiveWarningsAsMessages
+        {
+            get
+            {
+                var context = GetCurrentTaskContext();
+                return context?.SavedWarningsAsMessages ?? _warningsAsMessages;
+            }
+        }
 
         public bool ShouldTreatWarningAsError(string warningCode)
         {
+            var warningsAsErrors = EffectiveWarningsAsErrors;
+            var warningsAsMessages = EffectiveWarningsAsMessages;
+
             // Warnings as messages overrides warnings as errors.
-            if (WarningsAsErrors == null || WarningsAsMessages?.Contains(warningCode) == true)
+            if (warningsAsErrors is null || warningsAsMessages?.Contains(warningCode) == true)
             {
                 return false;
             }
 
-            return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsMessages.Contains(warningCode);
+            return (warningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || warningsAsErrors.Contains(warningCode);
         }
 
         private bool WarningAsErrorNotOverriden(string warningCode)
         {
-            return WarningsNotAsErrors?.Contains(warningCode) != true;
+            return EffectiveWarningsNotAsErrors?.Contains(warningCode) != true;
         }
         #endregion
 
@@ -469,6 +486,11 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         public bool BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IDictionary[] targetOutputsPerProject, string[] toolsVersion, bool useResultsCache, bool unloadProjectsOnCompletion)
         {
+            if (projectFileNames is null)
+            {
+                return false;
+            }
+
             bool includeTargetOutputs = targetOutputsPerProject is not null;
 
             BuildEngineResult result = BuildProjectFilesInParallel(projectFileNames, targetNames, globalProperties, new List<string>[projectFileNames.Length], toolsVersion, includeTargetOutputs);
@@ -500,10 +522,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         public BuildEngineResult BuildProjectFilesInParallel(string[] projectFileNames, string[] targetNames, IDictionary[] globalProperties, IList<string>[] removeGlobalProperties, string[] toolsVersion, bool returnTargetOutputs)
         {
-#if CLR2COMPATIBILITY
-            LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
-            return new BuildEngineResult(false, null);
-#else
             if (!CallbacksSupported)
             {
                 LogErrorFromResource("BuildEngineCallbacksInTaskHostUnsupported");
@@ -529,7 +547,6 @@ namespace Microsoft.Build.CommandLine
             {
                 ReacquireAfterCallback();
             }
-#endif
         }
 
         /// <summary>
@@ -538,7 +555,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         public void Yield()
         {
-#if !CLR2COMPATIBILITY
             if (!CallbacksSupported)
             {
                 return;
@@ -549,7 +565,6 @@ namespace Microsoft.Build.CommandLine
             // Fire-and-forget: send yield notification to parent, no response expected.
             var request = new TaskHostYieldRequest(YieldOperation.Yield);
             _nodeEndpoint.SendData(request);
-#endif
         }
 
         /// <summary>
@@ -558,7 +573,6 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         public void Reacquire()
         {
-#if !CLR2COMPATIBILITY
             if (!CallbacksSupported)
             {
                 return;
@@ -570,7 +584,6 @@ namespace Microsoft.Build.CommandLine
             SendCallbackRequestAndWaitForResponse<TaskHostYieldResponse>(request);
 
             ReacquireAfterCallback();
-#endif
         }
 
         #endregion // IBuildEngine3 Implementation
@@ -1107,9 +1120,9 @@ namespace Microsoft.Build.CommandLine
                 StringComparer.OrdinalIgnoreCase);
 
             // Save warning settings that may be overwritten by a nested task
-            context.SavedWarningsAsErrors = WarningsAsErrors;
-            context.SavedWarningsNotAsErrors = WarningsNotAsErrors;
-            context.SavedWarningsAsMessages = WarningsAsMessages;
+            context.SavedWarningsAsErrors = _warningsAsErrors;
+            context.SavedWarningsNotAsErrors = _warningsNotAsErrors;
+            context.SavedWarningsAsMessages = _warningsAsMessages;
         }
 
         /// <summary>
@@ -1128,9 +1141,9 @@ namespace Microsoft.Build.CommandLine
             NativeMethodsShared.SetCurrentDirectory(context.SavedCurrentDirectory);
 
             // Restore warning settings
-            WarningsAsErrors = context.SavedWarningsAsErrors;
-            WarningsNotAsErrors = context.SavedWarningsNotAsErrors;
-            WarningsAsMessages = context.SavedWarningsAsMessages;
+            _warningsAsErrors = context.SavedWarningsAsErrors;
+            _warningsNotAsErrors = context.SavedWarningsNotAsErrors;
+            _warningsAsMessages = context.SavedWarningsAsMessages;
 
             context.SavedCurrentDirectory = null;
             context.SavedEnvironment = null;
@@ -1142,31 +1155,21 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void HandleTaskHostConfiguration(TaskHostConfiguration taskHostConfiguration)
         {
-#if !CLR2COMPATIBILITY
             // Allow new configuration when no task is actively executing.
             // A task that is yielded (blocked on BuildProjectFile callback) does NOT prevent
             // a new task from starting - this enables nested build scenarios.
             ErrorUtilities.VerifyThrow(_activeTaskCount == 0,
                 "Why are we getting a TaskHostConfiguration packet while a task is actively executing? activeTaskCount={0}",
                 _activeTaskCount);
-#else
-            ErrorUtilities.VerifyThrow(_activeTaskCount == 0, "Why are we getting a TaskHostConfiguration packet while we're still executing a task?");
-#endif
             _currentConfiguration = taskHostConfiguration;
-
-#if !CLR2COMPATIBILITY
             // Create task execution context for this task
             var context = CreateTaskContext(taskHostConfiguration);
             context.State = TaskExecutionState.Executing;
-#endif
 
             // Kick off the task running thread.
             _taskRunnerThread = new Thread(new ParameterizedThreadStart(RunTask));
             _taskRunnerThread.Name = "Task runner for task " + taskHostConfiguration.TaskName;
-
-#if !CLR2COMPATIBILITY
             context.ExecutingThread = _taskRunnerThread;
-#endif
 
             _taskRunnerThread.Start(taskHostConfiguration);
         }
@@ -1182,37 +1185,19 @@ namespace Microsoft.Build.CommandLine
             // by the time this method runs.
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {
-#if !CLR2COMPATIBILITY
                 // Drain all queued completion packets — multiple tasks may have completed
                 // before the main thread serviced the AutoResetEvent.
                 while (_taskCompleteQueue.TryDequeue(out TaskHostTaskComplete packet))
                 {
                     _nodeEndpoint.SendData(packet);
                 }
-#else
-                TaskHostTaskComplete taskCompletePacketToSend;
-
-                lock (_taskCompleteLock)
-                {
-                    ErrorUtilities.VerifyThrowInternalNull(_taskCompletePacket, "taskCompletePacket");
-                    taskCompletePacketToSend = _taskCompletePacket;
-                    _taskCompletePacket = null;
-                }
-
-                _nodeEndpoint.SendData(taskCompletePacketToSend);
-#endif
             }
-
-#if !CLR2COMPATIBILITY
             // Only clear _currentConfiguration when no tasks remain (active or yielded).
             // A yielded task still needs the config for logging via EffectiveConfiguration.
             if (_activeTaskCount == 0 && _yieldedTaskCount == 0)
             {
                 _currentConfiguration = null;
             }
-#else
-            _currentConfiguration = null;
-#endif
 
             // If the task has been canceled, the event will still be set.
             // If so, now that we've completed the task, we want to shut down
@@ -1281,8 +1266,6 @@ namespace Microsoft.Build.CommandLine
         {
             // Wait for the RunTask task runner thread before shutting down so that we can cleanly dispose all WaitHandles.
             _taskRunnerThread?.Join();
-
-#if !CLR2COMPATIBILITY
             // Also join any other task threads that may be blocked (e.g., a yielded task waiting on TCS).
             // Fail their pending callback requests first so they can unblock.
             foreach (var kvp in _taskContexts)
@@ -1302,7 +1285,6 @@ namespace Microsoft.Build.CommandLine
                     thread.Join(TimeSpan.FromSeconds(5));
                 }
             }
-#endif
 
             using StreamWriter debugWriter = _debugCommunications
                     ? File.CreateText(string.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), EnvironmentUtilities.CurrentProcessId))
@@ -1401,8 +1383,6 @@ namespace Microsoft.Build.CommandLine
             Interlocked.Increment(ref _activeTaskCount);
             OutOfProcTaskHostTaskResult taskResult = null;
             TaskHostConfiguration taskConfiguration = state as TaskHostConfiguration;
-
-#if !CLR2COMPATIBILITY
             // Set the current task context for this thread
             TaskExecutionContext taskContext = null;
             foreach (var kvp in _taskContexts)
@@ -1418,7 +1398,6 @@ namespace Microsoft.Build.CommandLine
             {
                 _currentTaskContext.Value = taskContext;
             }
-#endif
 
             IDictionary<string, TaskParameter> taskParams = taskConfiguration.TaskParameters;
 
@@ -1428,9 +1407,19 @@ namespace Microsoft.Build.CommandLine
             _debugCommunications = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBUILDDEBUGCOMM", "1", StringComparison.OrdinalIgnoreCase);
             _updateEnvironment = !taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostDoNotUpdateEnvironment", "1", StringComparison.OrdinalIgnoreCase);
             _updateEnvironmentAndLog = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostUpdateEnvironmentAndLog", "1", StringComparison.OrdinalIgnoreCase);
-            WarningsAsErrors = taskConfiguration.WarningsAsErrors;
-            WarningsNotAsErrors = taskConfiguration.WarningsNotAsErrors;
-            WarningsAsMessages = taskConfiguration.WarningsAsMessages;
+            _warningsAsErrors = taskConfiguration.WarningsAsErrors;
+            _warningsNotAsErrors = taskConfiguration.WarningsNotAsErrors;
+            _warningsAsMessages = taskConfiguration.WarningsAsMessages;
+
+            // Store warning settings in per-task context so EffectiveWarningsAs* accessors
+            // return the correct values when multiple tasks run concurrently.
+            if (taskContext is not null)
+            {
+                taskContext.SavedWarningsAsErrors = taskConfiguration.WarningsAsErrors;
+                taskContext.SavedWarningsNotAsErrors = taskConfiguration.WarningsNotAsErrors;
+                taskContext.SavedWarningsAsMessages = taskConfiguration.WarningsAsMessages;
+            }
+
             OutOfProcTaskAppDomainWrapper taskWrapper = null;
             try
             {
@@ -1488,7 +1477,6 @@ namespace Microsoft.Build.CommandLine
             {
                 try
                 {
-#if !CLR2COMPATIBILITY
                     // Reconcile counters: if the task is still in "yielded" state (e.g., it called Yield()
                     // without a matching Reacquire() before exiting), fix up the counters.
                     // The yielded count should be decremented and active count should NOT be decremented again
@@ -1502,33 +1490,17 @@ namespace Microsoft.Build.CommandLine
                     {
                         Interlocked.Decrement(ref _activeTaskCount);
                     }
-#else
-                    Interlocked.Decrement(ref _activeTaskCount);
-#endif
 
                     IDictionary<string, string> currentEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
                     taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
-
-#if !CLR2COMPATIBILITY
                     _taskCompleteQueue.Enqueue(new TaskHostTaskComplete(
                         taskResult,
 #if FEATURE_REPORTFILEACCESSES
                         _fileAccessData,
 #endif
                         currentEnvironment));
-#else
-                    lock (_taskCompleteLock)
-                    {
-                        _taskCompletePacket = new TaskHostTaskComplete(
-                            taskResult,
-#if FEATURE_REPORTFILEACCESSES
-                            _fileAccessData,
-#endif
-                            currentEnvironment);
-                    }
-#endif
 
 #if FEATURE_APPDOMAIN
                     foreach (TaskParameter param in taskParams.Values)
@@ -1543,7 +1515,6 @@ namespace Microsoft.Build.CommandLine
                 }
                 catch (Exception e)
                 {
-#if !CLR2COMPATIBILITY
                     // Create a minimal taskCompletePacket to carry the exception so that the TaskHostTask does not hang while waiting
                     _taskCompleteQueue.Enqueue(new TaskHostTaskComplete(
                         new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e),
@@ -1551,18 +1522,6 @@ namespace Microsoft.Build.CommandLine
                         _fileAccessData,
 #endif
                         null));
-#else
-                    lock (_taskCompleteLock)
-                    {
-                        // Create a minimal taskCompletePacket to carry the exception so that the TaskHostTask does not hang while waiting
-                        _taskCompletePacket = new TaskHostTaskComplete(
-                            new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e),
-#if FEATURE_REPORTFILEACCESSES
-                            _fileAccessData,
-#endif
-                            null);
-                    }
-#endif
                 }
                 finally
                 {
@@ -1573,8 +1532,6 @@ namespace Microsoft.Build.CommandLine
                     // Call CleanupTask to unload any domains and other necessary cleanup in the taskWrapper
                     // Use local variable — _taskWrapper may have been overwritten by a nested task.
                     taskWrapper?.CleanupTask();
-
-#if !CLR2COMPATIBILITY
                     // Mark context as completed and clean up
                     if (taskContext is not null)
                     {
@@ -1583,7 +1540,6 @@ namespace Microsoft.Build.CommandLine
                         _currentTaskContext.Value = null;
                         RemoveTaskContext(taskContext.TaskId);
                     }
-#endif
 
                     // The task has now fully completed executing
                     _taskCompleteEvent.Set();
