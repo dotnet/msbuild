@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             project.Build(new MockLogger(_output)).ShouldBeFalse();
 
             // Assert
-            project.GetPropertyValue("BaseOutputPath").ShouldBe(baseOutputPath + '\\');
+            project.GetPropertyValue("BaseOutputPath").ShouldBe(baseOutputPath.WithTrailingSlash());
             project.GetPropertyValue("BaseOutputPathWasSpecified").ShouldBe(string.Empty);
             project.GetPropertyValue("_OutputPathWasMissing").ShouldBe("true");
         }
