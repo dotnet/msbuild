@@ -125,24 +125,17 @@ internal static class EscapingUtilities
             return value;
         }
 
-        // If there are no percent signs, return early without allocating a StringBuilder.
-        int percentIndex = value.IndexOf('%');
-        if (percentIndex == -1)
-        {
-            return trim ? value.Trim() : value;
-        }
-
         int startIndex = 0;
         int endIndex = value.Length;
 
         if (trim)
         {
-            while (startIndex < value.Length && char.IsWhiteSpace(value[startIndex]))
+            while (startIndex < endIndex && char.IsWhiteSpace(value[startIndex]))
             {
                 startIndex++;
             }
 
-            if (startIndex == value.Length)
+            if (startIndex == endIndex)
             {
                 return string.Empty;
             }
@@ -151,6 +144,14 @@ internal static class EscapingUtilities
             {
                 endIndex--;
             }
+        }
+
+        // Search only within the active [startIndex, endIndex) window.
+        int percentIndex = value.IndexOf('%', startIndex, endIndex - startIndex);
+        if (percentIndex == -1)
+        {
+            // value contains no escape sequences.
+            return GetDefaultResult(value, startIndex, endIndex);
         }
 
         StringBuilder? sb = null;
@@ -169,22 +170,26 @@ internal static class EscapingUtilities
                 startIndex = percentIndex + 3;
             }
 
-            percentIndex = value.IndexOf('%', percentIndex + 1);
+            int nextIndex = percentIndex + 1;
+            percentIndex = value.IndexOf('%', nextIndex, endIndex - nextIndex);
         }
         while (percentIndex >= 0);
 
-        if (sb is not null)
+        if (sb is null)
         {
-            sb.Append(value, startIndex, endIndex - startIndex);
-
-            return StringBuilderCache.GetStringAndRelease(sb);
+            // No escape sequences were decoded; return the original string, or the trimmed
+            // slice if trim was requested.
+            return GetDefaultResult(value, startIndex, endIndex);
         }
 
-        // No escape sequences were decoded; return the original string, or the trimmed
-        // slice if trim was requested.
-        return startIndex == 0 && endIndex == value.Length
-            ? value
-            : value.Substring(startIndex, endIndex - startIndex);
+        sb.Append(value, startIndex, endIndex - startIndex);
+
+        return StringBuilderCache.GetStringAndRelease(sb);
+
+        static string GetDefaultResult(string value, int startIndex, int endIndex)
+            => startIndex == 0 && endIndex == value.Length
+                ? value
+                : value.Substring(startIndex, endIndex - startIndex);
     }
 
     /// <summary>
