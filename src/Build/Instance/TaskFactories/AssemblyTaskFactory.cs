@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 #if FEATURE_APPDOMAIN
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
 #endif
 
@@ -54,7 +55,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// A cache of tasks and the AppDomains they are loaded in.
         /// </summary>
-        private Dictionary<ITask, AppDomain> _tasksAndAppDomains = new Dictionary<ITask, AppDomain>();
+        private readonly ConcurrentDictionary<ITask, AppDomain> _tasksAndAppDomains = new ConcurrentDictionary<ITask, AppDomain>();
 #endif
 
         /// <summary>
@@ -199,10 +200,8 @@ namespace Microsoft.Build.BackEnd
         {
             ErrorUtilities.VerifyThrowArgumentNull(task);
 #if FEATURE_APPDOMAIN
-            AppDomain appDomain;
-            if (_tasksAndAppDomains.TryGetValue(task, out appDomain))
+            if (_tasksAndAppDomains.TryRemove(task, out AppDomain appDomain))
             {
-                _tasksAndAppDomains.Remove(task);
 
                 if (appDomain != null)
                 {
