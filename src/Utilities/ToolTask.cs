@@ -634,6 +634,14 @@ namespace Microsoft.Build.Utilities
             string commandLineCommands,
             string responseFileSwitch)
         {
+            return CreateBaseProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
+        }
+
+        private ProcessStartInfo CreateBaseProcessStartInfo(
+            string pathToTool,
+            string commandLineCommands,
+            string responseFileSwitch)
+        {
             // Build up the command line that will be spawned.
             string commandLine = commandLineCommands;
 
@@ -699,6 +707,63 @@ namespace Microsoft.Build.Utilities
                 foreach (KeyValuePair<string, string> variable in _environmentVariablePairs)
                 {
                     startInfo.Environment[variable.Key] = variable.Value;
+                }
+            }
+
+            return startInfo;
+        }
+
+        protected ProcessStartInfo GetProcessStartInfoMultithreadable(
+            string pathToTool,
+            string commandLineCommands,
+            string responseFileSwitch,
+            TaskEnvironment taskEnvironment)
+        {
+            // Call the non-virtual helper to get base ProcessStartInfo with all ToolTask settings
+            // (command line, redirections, encodings, etc.). Using CreateBaseProcessStartInfo instead
+            // of the virtual GetProcessStartInfo avoids infinite recursion when a subclass overrides
+            // GetProcessStartInfo to route through this method.
+            ProcessStartInfo startInfo = CreateBaseProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
+
+            // Replace the inherited process environment with the virtualized one from TaskEnvironment.
+            // TaskEnvironment.GetProcessStartInfo() already configures env vars and working directory correctly
+            // for both multithreaded (virtualized) and multi-process (inherited) modes.
+            ProcessStartInfo taskEnvStartInfo = taskEnvironment.GetProcessStartInfo();
+            startInfo.Environment.Clear();
+            foreach (var kvp in taskEnvStartInfo.Environment)
+            {
+                startInfo.Environment[kvp.Key] = kvp.Value;
+            }
+
+            string workingDirectory = taskEnvStartInfo.WorkingDirectory;
+            if (workingDirectory != null)
+            {
+                startInfo.WorkingDirectory = workingDirectory;
+            }
+
+            // Re-apply obsolete EnvironmentOverride and EnvironmentVariables property overrides —
+            // they should take precedence over TaskEnvironment. CreateBaseProcessStartInfo already applied these,
+            // but we cleared the environment above, so we need to re-apply them.
+#pragma warning disable 0618 // obsolete
+            Dictionary<string, string> envOverrides = EnvironmentOverride;
+            if (envOverrides != null)
+            {
+                foreach (KeyValuePair<string, string> entry in envOverrides)
+                {
+                    startInfo.Environment[entry.Key] = entry.Value;
+                }
+            }
+#pragma warning restore 0618
+
+            if (EnvironmentVariables != null)
+            {
+                foreach (string entry in EnvironmentVariables)
+                {
+                    string[] nameValuePair = entry.Split(['='], 2);
+                    if (nameValuePair.Length == 2 && nameValuePair[0].Length > 0)
+                    {
+                        startInfo.Environment[nameValuePair[0]] = nameValuePair[1];
+                    }
                 }
             }
 

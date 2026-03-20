@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Resources;
@@ -1167,6 +1168,88 @@ namespace Microsoft.Build.UnitTests
             /// This dummy tool task is not meant to run anything.
             /// </remarks>
             public override bool Execute() => true;
+        }
+
+        /// <summary>
+        /// A ToolTask subclass that exposes GetProcessStartInfoMultiThreaded for testing.
+        /// </summary>
+        private sealed class MultiThreadedToolTask : ToolTask, IDisposable
+        {
+            private readonly string _fullToolName;
+
+            public MultiThreadedToolTask(string fullToolName)
+            {
+                _fullToolName = fullToolName;
+            }
+
+            public void Dispose() { }
+
+            protected override string ToolName => Path.GetFileName(_fullToolName);
+
+            protected override string GenerateFullPathToTool() => _fullToolName;
+
+            /// <summary>
+            /// Exposes the protected GetProcessStartInfoMultiThreaded for test verification.
+            /// </summary>
+            public ProcessStartInfo CallGetProcessStartInfoMultiThreaded(TaskEnvironment taskEnvironment)
+            {
+                return GetProcessStartInfoMultithreadable(
+                    _fullToolName,
+                    commandLineCommands: "/nologo",
+                    responseFileSwitch: null,
+                    taskEnvironment);
+            }
+        }
+
+        [Fact]
+        public void GetProcessStartInfoMultiThreaded_ShouldPropagateWorkingDirectory()
+        {
+            // Arrange: create a MultiThreadedTaskEnvironmentDriver with a known project directory.
+            string expectedWorkingDir = NativeMethodsShared.IsUnixLike ? "/tmp" : @"C:\SomeProjectDir";
+            using var driver = new MultiThreadedTaskEnvironmentDriver(expectedWorkingDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath);
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStartInfoMultiThreaded(taskEnv);
+
+            // Assert: verify env vars from the driver are present
+            result.Environment.Count.ShouldBeGreaterThan(0, "Environment variables should be propagated from TaskEnvironment");
+
+            // Assert: verify WorkingDirectory
+            result.WorkingDirectory.ShouldBe(expectedWorkingDir,
+                "WorkingDirectory from MultiThreadedTaskEnvironmentDriver should be propagated to the child process ProcessStartInfo");
+        }
+
+        [Fact]
+        public void GetProcessStartInfoMultiThreaded_EnvironmentVariablesOverride()
+        {
+            // Arrange: create a multithreaded driver with a custom env var.
+            string expectedWorkingDir = NativeMethodsShared.IsUnixLike ? "/tmp" : @"C:\SomeProjectDir";
+            var envVars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["MY_VAR"] = "from_driver",
+                ["PATH"] = "driver_path"
+            };
+            using var driver = new MultiThreadedTaskEnvironmentDriver(expectedWorkingDir, envVars);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath);
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Set EnvironmentVariables on the task (should override the driver's value).
+            tool.EnvironmentVariables = ["MY_VAR=from_task_override"];
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStartInfoMultiThreaded(taskEnv);
+
+            // Assert: task-level override should win.
+            result.Environment["MY_VAR"].ShouldBe("from_task_override",
+                "EnvironmentVariables property on the task should override TaskEnvironment values");
         }
     }
 }
