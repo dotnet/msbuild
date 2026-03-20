@@ -238,6 +238,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getPathFromFusionName">Delegate to get path to a file based on the fusion name.</param>
         /// <param name="getGacEnumerator">Delegate to get the enumerator which will enumerate over the GAC.</param>
         /// <param name="specificVersion">Whether to check for a specific version.</param>
+        /// <param name="taskEnvironment">TaskEnvironment for thread-safe operations.</param>
         /// <returns>The path to the assembly. Empty if none exists.</returns>
         internal static string GetLocation(
             AssemblyNameExtension strongName,
@@ -248,9 +249,10 @@ namespace Microsoft.Build.Tasks
             FileExists fileExists,
             GetPathFromFusionName getPathFromFusionName,
             GetGacEnumerator getGacEnumerator,
-            bool specificVersion)
+            bool specificVersion,
+            TaskEnvironment taskEnvironment)
         {
-            return GetLocation(null, strongName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fullFusionName, fileExists, getPathFromFusionName, getGacEnumerator, specificVersion);
+            return GetLocation(null, strongName, targetProcessorArchitecture, getRuntimeVersion, targetedRuntimeVersion, fullFusionName, fileExists, getPathFromFusionName, getGacEnumerator, specificVersion, taskEnvironment);
         }
 
         /// <summary>
@@ -266,6 +268,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="getPathFromFusionName">Delegate to get path to a file based on the fusion name.</param>
         /// <param name="getGacEnumerator">Delegate to get the enumerator which will enumerate over the GAC.</param>
         /// <param name="specificVersion">Whether to check for a specific version.</param>
+        /// <param name="taskEnvironment">Optional TaskEnvironment for thread-safe environment variable access.</param>
         /// <returns>The path to the assembly. Empty if none exists.</returns>
         internal static string GetLocation(
             IBuildEngine4 buildEngine,
@@ -277,10 +280,11 @@ namespace Microsoft.Build.Tasks
             FileExists fileExists,
             GetPathFromFusionName getPathFromFusionName,
             GetGacEnumerator getGacEnumerator,
-            bool specificVersion)
+            bool specificVersion,
+            TaskEnvironment taskEnvironment)
         {
             ConcurrentDictionary<AssemblyNameExtension, string> fusionNameToResolvedPath = null;
-            bool useGacRarCache = Environment.GetEnvironmentVariable("MSBUILDDISABLEGACRARCACHE") == null;
+            bool useGacRarCache = taskEnvironment.GetEnvironmentVariable("MSBUILDDISABLEGACRARCACHE") == null;
             if (buildEngine != null && useGacRarCache)
             {
                 string key = $"44d78b60-3bbe-48fe-9493-04119ebf515f|{targetProcessorArchitecture}|{targetedRuntimeVersion}|{fullFusionName}|{specificVersion}";

@@ -556,11 +556,12 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads in cached data from stateFiles to build an initial cache. Avoids logging warnings or errors.
         /// </summary>
-        /// <param name="stateFiles">List of locations of caches on disk.</param>
+        /// <param name="stateFiles">List of locations of caches on disk. </param>
         /// <param name="log">How to log</param>
         /// <param name="fileExists">Whether a file exists</param>
+        /// <param name="taskEnvironment">TaskEnvironment for path resolution</param>
         /// <returns>A cache representing key aspects of file states.</returns>
-        internal static SystemState DeserializePrecomputedCaches(ITaskItem[] stateFiles, TaskLoggingHelper log, FileExists fileExists)
+        internal static SystemState DeserializePrecomputedCaches(ITaskItem[] stateFiles, TaskLoggingHelper log, FileExists fileExists, TaskEnvironment taskEnvironment)
         {
             SystemState retVal = new SystemState();
             retVal.isDirty = stateFiles.Length > 0;
@@ -568,8 +569,25 @@ namespace Microsoft.Build.Tasks
 
             foreach (ITaskItem stateFile in stateFiles)
             {
-                // Verify that it's a real stateFile. Log message but do not error if not.
-                SystemState sysState = DeserializeCache<SystemState>(stateFile.ToString(), log);
+                SystemState sysState = null;
+                string stateFilePath = null;
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+                {
+                    AbsolutePath stateFileAbsolutePath = taskEnvironment.GetAbsolutePath(stateFile.ItemSpec).GetCanonicalForm();
+                    stateFilePath = stateFileAbsolutePath.Value;
+
+                    // Verify that it's a real stateFile. Log message but do not error if not.
+                    sysState = DeserializeCache<SystemState>(stateFileAbsolutePath, log);
+                }
+                else
+                {
+                    // This should be equivalent to stateFile.ItemSpec, but in some cases (for example custom TaskItems) it might not be.
+                    stateFilePath = stateFile.ToString();
+
+                    // Verify that it's a real stateFile. Log message but do not error if not.
+                    sysState = DeserializeCache<SystemState>(stateFilePath, log);
+                }
+
                 if (sysState == null)
                 {
                     continue;
@@ -580,7 +598,8 @@ namespace Microsoft.Build.Tasks
                     if (!assembliesFound.Contains(relativePath))
                     {
                         FileState fileState = kvp.Value;
-                        string fullPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(stateFile.ToString()), relativePath));
+                        string fullPath  = taskEnvironment.GetAbsolutePath(Path.Combine(Path.GetDirectoryName(stateFilePath), relativePath)).GetCanonicalForm().Value;
+                        
                         if (fileExists(fullPath))
                         {
                             // Correct file path

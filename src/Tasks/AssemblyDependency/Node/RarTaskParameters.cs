@@ -162,7 +162,12 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                     }
                     else
                     {
-                        inputs.Add(reflectedProperty);
+                        // Exclude TaskEnvironment since it is not a serializable parameter type for cross-process communication. 
+                        // It should be set to each task instance after deserialization.
+                        if (!string.Equals(property.Name, nameof(ResolveAssemblyReference.TaskEnvironment), StringComparison.Ordinal))
+                        {
+                            inputs.Add(reflectedProperty);
+                        }
                     }
                 }
 

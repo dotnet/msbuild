@@ -938,6 +938,34 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
+        /// Determine whether the given assembly is an FX assembly.
+        /// </summary>
+        /// <param name="fullPath">The full path to the assembly.</param>
+        /// <param name="frameworkPaths">The path to the frameworks.</param>
+        /// <returns>True if this is a frameworks assembly.</returns>
+        internal static bool IsFrameworkFile(string fullPath, AbsolutePath[] frameworkPaths)
+        {
+            if (frameworkPaths != null)
+            {
+                foreach (var frameworkPath in frameworkPaths)
+                {
+                    if
+                    (
+                        frameworkPath.Value is not null &&
+                        String.Compare(
+                            frameworkPath.Value, 0,
+                            fullPath, 0,
+                            frameworkPath.Value.Length,
+                            StringComparison.OrdinalIgnoreCase) == 0)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Figure out the what the CopyLocal state of given assembly should be.
         /// </summary>
         /// <param name="assemblyName">The name of the assembly.</param>

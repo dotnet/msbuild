@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using ParameterType = Microsoft.Build.Tasks.AssemblyDependency.RarTaskParameters.ParameterType;
@@ -19,23 +18,17 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
         private int _lineNumberOfTaskNode;
         private int _columnNumberOfTaskNode;
         private string? _projectFileOfTaskNode;
+        private string _projectDirectory = null!;
         private MessageImportance _minimumMessageImportance;
         private bool _isTaskInputLoggingEnabled;
 
         internal RarNodeExecuteRequest(ResolveAssemblyReference rar)
         {
-            // The RAR node may have a different working directory than the target, so convert potential relative paths to absolute.
-            if (rar.AppConfigFile != null)
-            {
-                rar.AppConfigFile = Path.GetFullPath(rar.AppConfigFile);
-            }
-
-            if (rar.StateFile != null)
-            {
-                rar.StateFile = Path.GetFullPath(rar.StateFile);
-            }
 
             _taskInputs = RarTaskParameters.Get(ParameterType.Input, rar);
+
+            // Capture the project directory from TaskEnvironment
+            _projectDirectory = rar.TaskEnvironment.ProjectDirectory.Value;
 
             // Ensure log messages are identical to those that would be produced on the client.
             _lineNumberOfTaskNode = rar.BuildEngine.LineNumberOfTaskNode;
@@ -49,6 +42,8 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
 
         internal RarNodeExecuteRequest(ITranslator translator) => Translate(translator);
 
+        public string ProjectDirectory => _projectDirectory;
+
         public NodePacketType Type => NodePacketType.RarNodeExecuteRequest;
 
         public void Translate(ITranslator translator)
@@ -60,6 +55,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             translator.Translate(ref _lineNumberOfTaskNode);
             translator.Translate(ref _columnNumberOfTaskNode);
             translator.Translate(ref _projectFileOfTaskNode);
+            translator.Translate(ref _projectDirectory);
             translator.TranslateEnum(ref _minimumMessageImportance, (int)_minimumMessageImportance);
             translator.Translate(ref _isTaskInputLoggingEnabled);
         }
