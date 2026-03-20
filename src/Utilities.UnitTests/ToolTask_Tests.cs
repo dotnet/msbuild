@@ -1193,7 +1193,7 @@ namespace Microsoft.Build.UnitTests
             /// </summary>
             public ProcessStartInfo CallGetProcessStartInfoMultiThreaded(TaskEnvironment taskEnvironment)
             {
-                return GetProcessStartInfoMultiThreaded(
+                return GetProcessStartInfoMultithreadable(
                     _fullToolName,
                     commandLineCommands: "/nologo",
                     responseFileSwitch: null,

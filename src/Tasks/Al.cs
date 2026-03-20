@@ -338,9 +338,7 @@ namespace Microsoft.Build.Tasks
         protected override ProcessStartInfo GetProcessStartInfo(
              string pathToTool,
              string commandLineCommands,
-             string responseFileSwitch) => TaskEnvironment != null
-                ? GetProcessStartInfoMultiThreaded(pathToTool, commandLineCommands, responseFileSwitch, TaskEnvironment)
-                : base.GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
+             string responseFileSwitch) => GetProcessStartInfoMultithreadable(pathToTool, commandLineCommands, responseFileSwitch, TaskEnvironment);
 
         /// <summary>
         /// Fills the provided CommandLineBuilderExtension with those switches and other information that can go into a response file.

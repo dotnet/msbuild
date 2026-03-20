@@ -713,7 +713,7 @@ namespace Microsoft.Build.Utilities
             return startInfo;
         }
 
-        protected ProcessStartInfo GetProcessStartInfoMultiThreaded(
+        protected ProcessStartInfo GetProcessStartInfoMultithreadable(
             string pathToTool,
             string commandLineCommands,
             string responseFileSwitch,
@@ -742,7 +742,7 @@ namespace Microsoft.Build.Utilities
             }
 
             // Re-apply obsolete EnvironmentOverride and EnvironmentVariables property overrides —
-            // they should take precedence over TaskEnvironment. The base class already applied these,
+            // they should take precedence over TaskEnvironment. CreateBaseProcessStartInfo already applied these,
             // but we cleared the environment above, so we need to re-apply them.
 #pragma warning disable 0618 // obsolete
             Dictionary<string, string> envOverrides = EnvironmentOverride;
