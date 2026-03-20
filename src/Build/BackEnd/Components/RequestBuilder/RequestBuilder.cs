@@ -1068,11 +1068,11 @@ namespace Microsoft.Build.BackEnd
         /// moved from their original node to this one.
         /// </para>
         /// <para>
-        /// In MT (multi-threaded) mode, all in-proc nodes share the same ConfigCache and ResultsCache,
-        /// so results are already accessible without transfer. Attempting transfer would race on the
-        /// shared ResultsNodeId field because multiple nodes can simultaneously call
-        /// HandleRequestBlockedOnResultsTransfer for the same configuration, each overwriting
-        /// ResultsNodeId with their own node ID.
+        /// In MT mode, all worker nodes share the same process and caches, so transfer is unnecessary
+        /// and would race on the shared ResultsNodeId field (see #13188). This relies on the invariant
+        /// that <c>MultiThreaded == true</c> implies all worker nodes share caches (see
+        /// multithreaded-msbuild.md). If a future mode mixes in-proc and out-of-proc worker nodes,
+        /// revisit this check — see https://github.com/dotnet/msbuild/issues/11939.
         /// </para>
         /// </summary>
         /// <param name="resultsNodeId">The node ID where results currently reside.</param>
