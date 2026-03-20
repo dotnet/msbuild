@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -10,6 +10,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.NET.StringTools;
 
 #pragma warning disable SA1519 // Braces should not be omitted from multi-line child statement
@@ -76,28 +77,10 @@ internal static class EscapingUtilities
     }
 #endif
 
-    private static bool TryDecodeHexDigit(char ch, out int value)
+    private static bool TryDecodeHexDigit(char c, out int digit)
     {
-        if (ch is >= '0' and <= '9')
-        {
-            value = ch - '0';
-            return true;
-        }
-
-        if (ch is >= 'A' and <= 'F')
-        {
-            value = ch - 'A' + 10;
-            return true;
-        }
-
-        if (ch is >= 'a' and <= 'f')
-        {
-            value = ch - 'a' + 10;
-            return true;
-        }
-
-        value = default;
-        return false;
+        digit = HexConverter.FromChar(c);
+        return digit != 0xff;
     }
 
     /// <summary>
