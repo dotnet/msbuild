@@ -9,6 +9,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+using Shouldly;
 
 using Xunit;
 using Xunit.Abstractions;
@@ -1996,6 +1997,132 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains(buildNonexistentProjectsByDefault == true
                 ? "MSB4025" // error MSB4025: The project file could not be loaded.
                 : "MSB3202"); // error MSB3202: The project file was not found.
+        }
+
+        /// <summary>
+        /// Verifies that building a .slnf file through the MSBuild task produces a meaningful error
+        /// when the filter references a project not in the solution, instead of a misleading
+        /// "Data at the root level is invalid" XML parse error.
+        /// </summary>
+        [Fact]
+        public void SolutionFilterWithNonExistingProjectViaMSBuildTask()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_testOutput);
+
+            TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+
+            TransientTestFile realProject = testEnvironment.CreateFile(folder, "RealProject.csproj",
+                """
+                <Project>
+                    <Target Name="Build">
+                        <Message Text="RealProjectBuilt" />
+                    </Target>
+                </Project>
+                """);
+
+            TransientTestFile solutionFile = testEnvironment.CreateFile(folder, "solution.sln",
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 16
+                VisualStudioVersion = 16.0.29326.124
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RealProject", "RealProject.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                    EndGlobalSection
+                EndGlobal
+                """);
+
+            // The .slnf references a project (NonExistingProject.csproj) that is not in the solution.
+            TransientTestFile filterFile = testEnvironment.CreateFile(folder, "filter.slnf",
+                $$"""
+                {
+                    "solution": {
+                        "path": "{{Path.GetFileName(solutionFile.Path)}}",
+                        "projects": [
+                            "NonExistingProject.csproj"
+                        ]
+                    }
+                }
+                """);
+
+            // Build the .slnf file through the MSBuild task.
+            TransientTestFile buildProject = testEnvironment.CreateFile(folder, "build.proj",
+                $"""
+                <Project>
+                    <Target Name="Build">
+                        <MSBuild Projects="{Path.GetFileName(filterFile.Path)}" />
+                    </Target>
+                </Project>
+                """);
+
+            var logger = new MockLogger(_testOutput);
+
+            var project = new Project(buildProject.Path);
+            bool result = project.Build(logger);
+
+            _testOutput.WriteLine(logger.FullLog);
+
+            result.ShouldBeFalse();
+
+            // Should contain the meaningful error about the project not being in the solution,
+            // NOT a misleading "Data at the root level is invalid" XML parse error.
+            logger.AssertLogDoesntContain("Data at the root level is invalid");
+            logger.AssertLogContains("NonExistingProject.csproj");
+        }
+
+        /// <summary>
+        /// Verifies that building a .slnf file through the MSBuild task produces a meaningful error
+        /// when the filter references a non-existing solution file.
+        /// </summary>
+        [Fact]
+        public void SolutionFilterWithNonExistingSolutionViaMSBuildTask()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_testOutput);
+
+            TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
+
+            // The .slnf references a solution file that doesn't exist.
+            TransientTestFile filterFile = testEnvironment.CreateFile(folder, "filter.slnf",
+                """
+                {
+                    "solution": {
+                        "path": "nonexistent.slnx",
+                        "projects": [
+                            "SomeProject.csproj"
+                        ]
+                    }
+                }
+                """);
+
+            TransientTestFile buildProject = testEnvironment.CreateFile(folder, "build.proj",
+                $"""
+                <Project>
+                    <Target Name="Build">
+                        <MSBuild Projects="{Path.GetFileName(filterFile.Path)}" />
+                    </Target>
+                </Project>
+                """);
+
+            var logger = new MockLogger(_testOutput);
+
+            var project = new Project(buildProject.Path);
+            bool result = project.Build(logger);
+
+            _testOutput.WriteLine(logger.FullLog);
+
+            result.ShouldBeFalse();
+
+            // Should contain a meaningful error about the missing solution file,
+            // NOT a misleading "Data at the root level is invalid" XML parse error.
+            logger.AssertLogDoesntContain("Data at the root level is invalid");
+            logger.AssertLogContains("filter.slnf");
         }
     }
 }
