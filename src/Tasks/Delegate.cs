@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Versioning;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.AssemblyDependency;
 
@@ -117,7 +118,7 @@ namespace Microsoft.Build.Tasks
     /// <param name="mode">File mode</param>
     /// <param name="access">Access type</param>
     /// <returns>The Stream</returns>
-    internal delegate Stream CreateFileStream(string path, FileMode mode, FileAccess access);
+    internal delegate Stream CreateFileStream(AbsolutePath path, FileMode mode, FileAccess access);
 
     /// <summary>
     /// Delegate for System.IO.File.GetLastWriteTime
