@@ -1171,7 +1171,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// A ToolTask subclass that exposes GetProcessStartInforMultiThreaded for testing.
+        /// A ToolTask subclass that exposes GetProcessStartInfoMultiThreaded for testing.
         /// </summary>
         private sealed class MultiThreadedToolTask : ToolTask, IDisposable
         {
@@ -1189,9 +1189,9 @@ namespace Microsoft.Build.UnitTests
             protected override string GenerateFullPathToTool() => _fullToolName;
 
             /// <summary>
-            /// Exposes the protected GetProcessStartInforMultiThreaded for test verification.
+            /// Exposes the protected GetProcessStartInfoMultiThreaded for test verification.
             /// </summary>
-            public ProcessStartInfo CallGetProcessStartInforMultiThreaded(TaskEnvironment taskEnvironment)
+            public ProcessStartInfo CallGetProcessStartInfoMultiThreaded(TaskEnvironment taskEnvironment)
             {
                 return GetProcessStartInfoMultiThreaded(
                     _fullToolName,
@@ -1202,7 +1202,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void GetProcessStartInforMultiThreaded_ShouldPropagateWorkingDirectory()
+        public void GetProcessStartInfoMultiThreaded_ShouldPropagateWorkingDirectory()
         {
             // Arrange: create a MultiThreadedTaskEnvironmentDriver with a known project directory.
             string expectedWorkingDir = NativeMethodsShared.IsUnixLike ? "/tmp" : @"C:\SomeProjectDir";
@@ -1214,7 +1214,7 @@ namespace Microsoft.Build.UnitTests
             tool.BuildEngine = new MockEngine(_output);
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInforMultiThreaded(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStartInfoMultiThreaded(taskEnv);
 
             // Assert: verify env vars from the driver are present
             result.Environment.Count.ShouldBeGreaterThan(0, "Environment variables should be propagated from TaskEnvironment");
@@ -1225,7 +1225,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void GetProcessStartInforMultiThreaded_EnvironmentVariablesOverride()
+        public void GetProcessStartInfoMultiThreaded_EnvironmentVariablesOverride()
         {
             // Arrange: create a multithreaded driver with a custom env var.
             string expectedWorkingDir = NativeMethodsShared.IsUnixLike ? "/tmp" : @"C:\SomeProjectDir";
@@ -1245,7 +1245,7 @@ namespace Microsoft.Build.UnitTests
             tool.EnvironmentVariables = ["MY_VAR=from_task_override"];
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInforMultiThreaded(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStartInfoMultiThreaded(taskEnv);
 
             // Assert: task-level override should win.
             result.Environment["MY_VAR"].ShouldBe("from_task_override",
