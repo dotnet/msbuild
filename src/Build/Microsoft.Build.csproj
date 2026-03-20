@@ -275,6 +275,7 @@
     <Compile Include="BackEnd\Components\Scheduler\SchedulingPlan.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\CachingSdkResolverLoader.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\DefaultSdkResolver.cs" />
+    <Compile Include="BackEnd\Components\SdkResolution\RepoLocalSdkResolver.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\ISdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\OutOfProcNodeSdkResolverService.cs" />
     <Compile Include="BackEnd\Components\SdkResolution\OutOfProcNodeSdkResolverServiceFactory.cs" />

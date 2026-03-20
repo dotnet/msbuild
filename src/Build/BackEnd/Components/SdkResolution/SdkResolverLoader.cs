@@ -37,7 +37,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         internal virtual IReadOnlyList<SdkResolver> GetDefaultResolvers()
         {
             var resolvers = !string.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
-                new List<SdkResolver> { new DefaultSdkResolver() }
+                new List<SdkResolver> { new RepoLocalSdkResolver(), new DefaultSdkResolver() }
                 : new List<SdkResolver>();
             return resolvers;
         }
@@ -46,7 +46,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         {
             MSBuildEventSource.Log.SdkResolverLoadAllResolversStart();
             var resolvers = !string.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
-                    new List<SdkResolver> { new DefaultSdkResolver() }
+                    new List<SdkResolver> { new RepoLocalSdkResolver(), new DefaultSdkResolver() }
                     : new List<SdkResolver>();
             try
             {
