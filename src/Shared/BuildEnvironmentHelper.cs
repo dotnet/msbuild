@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -41,7 +41,7 @@ namespace Microsoft.Build.Shared
         /// If BuildEnvironmentHelper is moved to a shared assembly, this property will need to be re-evaluated.
         /// </remarks>
         internal static string ExecutingAssemblyPath
-            => Path.GetFullPath(AssemblyUtilities.GetAssemblyLocation(typeof(BuildEnvironmentHelper).Assembly));
+            => Path.GetFullPath(typeof(BuildEnvironmentHelper).Assembly.Location);
 
         /// <summary>
         /// Gets the cached Build Environment instance.
@@ -441,10 +441,7 @@ namespace Microsoft.Build.Shared
             }
 
             // EntryAssembly can be null in some hosting scenarios (e.g., when loaded as a library)
-            var entryAssembly = AssemblyUtilities.EntryAssembly;
-            return entryAssembly != null
-                ? AssemblyUtilities.GetAssemblyLocation(entryAssembly)
-                : processName;
+            return System.Reflection.Assembly.GetEntryAssembly()?.Location ?? processName;
 #else
 
             return EnvironmentUtilities.ProcessPath;

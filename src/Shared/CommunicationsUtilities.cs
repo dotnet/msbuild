@@ -686,7 +686,7 @@ namespace Microsoft.Build.Internal
                 // No parameters given, default to current
                 if (taskHostParameters.IsEmpty)
                 {
-                    clrVersion = typeof(bool).GetTypeInfo().Assembly.GetName().Version.Major;
+                    clrVersion = typeof(bool).Assembly.GetName().Version.Major;
                     architectureFlagToSet = XMakeAttributes.GetCurrentMSBuildArchitecture();
                 }
                 else // Figure out flags based on parameters given
