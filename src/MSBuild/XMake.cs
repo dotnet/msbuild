@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -65,7 +65,7 @@ namespace Microsoft.Build.CommandLine
     /// This class implements the MSBuild.exe command-line application. It processes
     /// command-line arguments and invokes the build engine.
     /// </summary>
-    public static class MSBuildApp
+    public static partial class MSBuildApp
     {
         /// <summary>
         /// Enumeration of the various ways in which the MSBuild.exe application can exit.
@@ -380,6 +380,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     KnownTelemetry.PartialBuildTelemetry.ServerEnableReason = serverEnableReason;
                 }
+                EnsureWindowsConsoleShutdownHandlersRegistered();
 
                 // Hand the build off to the MSBuild Server client. The server (not this process) decides
                 // Server GC for itself from the multiThreaded value we pass through.
@@ -933,6 +934,8 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 Console.CancelKeyPress += cancelHandler;
+
+                EnsureWindowsConsoleShutdownHandlersRegistered();
 
                 // check the operating system the code is running on
                 VerifyThrowSupportedOS();
@@ -1519,13 +1522,22 @@ namespace Microsoft.Build.CommandLine
 
             e.Cancel = true; // do not terminate rudely
 
+            QueueGracefulShutdownFromExternalConsoleSignal();
+        }
+
+        /// <summary>
+        /// Begins the same graceful cancellation path as Ctrl+C, for signals that do not go through
+        /// <see cref="Console.CancelKeyPress"/> (e.g. Windows Restart Manager / installer shutdown via
+        /// <c>CTRL_CLOSE_EVENT</c>, <c>CTRL_LOGOFF_EVENT</c>, <c>CTRL_SHUTDOWN_EVENT</c>).
+        /// </summary>
+        private static void QueueGracefulShutdownFromExternalConsoleSignal()
+        {
             if (s_buildCancellationSource.IsCancellationRequested)
             {
                 return;
             }
 
             s_buildCancellationSource.Cancel();
-
 
             // The OS takes a lock in
             // kernel32.dll!_SetConsoleCtrlHandler, so if a task
