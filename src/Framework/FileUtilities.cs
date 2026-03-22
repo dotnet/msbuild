@@ -683,6 +683,11 @@ namespace Microsoft.Build.Framework
         private static string GetFullPath(string path)
         {
 #if FEATURE_MSIOREDIST
+            if (path.IndexOfAny(InvalidPathChars) != -1)
+            {
+                // Trigger the same exception as System.IO.Path.GetFullPath would
+                return Path.GetFullPath(path);
+            }
             return NewPath.GetFullPath(path);
 #else
             return Path.GetFullPath(path);
