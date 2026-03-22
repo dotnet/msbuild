@@ -923,7 +923,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("Item CleanFiles=foo.obj;bar.obj");
         }
 
-#if FEATURE_LEGACY_GETFULLPATH
+#if NETFRAMEWORK
         /// <summary>
         /// Bad path when getting metadata through ->Metadata function
         /// </summary>
@@ -942,6 +942,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             logger.AssertLogContains("MSB4023");
         }
+
 #endif
 
         /// <summary>
@@ -982,7 +983,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4023");
         }
 
-#if FEATURE_LEGACY_GETFULLPATH
+#if NETFRAMEWORK
         /// <summary>
         /// Bad path when getting metadata through ->WithMetadataValue function
         /// </summary>
@@ -1041,7 +1042,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4023");
         }
 
-#if FEATURE_LEGACY_GETFULLPATH
+#if NETFRAMEWORK
         /// <summary>
         /// Bad path when getting metadata through ->AnyHaveMetadataValue function
         /// </summary>

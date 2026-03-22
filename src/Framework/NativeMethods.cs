@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -1485,23 +1485,18 @@ internal static class NativeMethods
     }
 
     /// <summary>
-    /// Internal, optimized GetCurrentDirectory implementation that simply delegates to the native method
+    /// Returns the current working directory. On .NET Framework, uses Microsoft.IO.Redist for performance.
     /// </summary>
-    /// <returns></returns>
-    internal static unsafe string GetCurrentDirectory()
+    internal static string GetCurrentDirectory()
     {
-#if FEATURE_LEGACY_GETCURRENTDIRECTORY
-        if (IsWindows)
-        {
-            int bufferSize = GetCurrentDirectoryWin32(0, null);
-            char* buffer = stackalloc char[bufferSize];
-            int pathLength = GetCurrentDirectoryWin32(bufferSize, buffer);
-            return new string(buffer, startIndex: 0, length: pathLength);
-        }
-#endif
+#if FEATURE_MSIOREDIST
+        return Microsoft.IO.Directory.GetCurrentDirectory();
+#else
         return Directory.GetCurrentDirectory();
+#endif
     }
 
+#if FEATURE_LEGACY_GETCURRENTDIRECTORY
     [SupportedOSPlatform("windows")]
     private static unsafe int GetCurrentDirectoryWin32(int nBufferLength, char* lpBuffer)
     {
@@ -1509,7 +1504,9 @@ internal static class NativeMethods
         VerifyThrowWin32Result(pathLength);
         return pathLength;
     }
+#endif
 
+#if FEATURE_LEGACY_GETFULLPATH
     [SupportedOSPlatform("windows")]
     internal static unsafe string GetFullPath(string path)
     {
@@ -1548,6 +1545,7 @@ internal static class NativeMethods
     {
         return s.AsSpan().SequenceEqual(new ReadOnlySpan<char>(buffer, len));
     }
+#endif
 
     internal static void VerifyThrowWin32Result(int result)
     {
@@ -1694,10 +1692,26 @@ internal static class NativeMethods
     [DllImport("kernel32.dll")]
     internal static extern bool SetConsoleMode(IntPtr hConsoleHandle, uint dwMode);
 
+    /*
+    Legacy kernel32 P/Invokes when FEATURE_LEGACY_GETCURRENTDIRECTORY / FEATURE_LEGACY_GETFULLPATH are enabled
+    (see commented DefineConstants in Directory.BeforeCommon.targets). Kept for reference when disabled.
+
     [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     [SupportedOSPlatform("windows")]
     internal static extern unsafe int GetCurrentDirectory(int nBufferLength, char* lpBuffer);
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    [SupportedOSPlatform("windows")]
+    internal static extern unsafe int GetFullPathName(string target, int bufferLength, char* buffer, IntPtr mustBeZero);
+    */
+
+#if FEATURE_LEGACY_GETCURRENTDIRECTORY
+    [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    [SupportedOSPlatform("windows")]
+    internal static extern unsafe int GetCurrentDirectory(int nBufferLength, char* lpBuffer);
+#endif
 
     [SuppressMessage("Microsoft.Usage", "CA2205:UseManagedEquivalentsOfWin32Api", Justification = "Using unmanaged equivalent for performance reasons")]
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "SetCurrentDirectory")]
@@ -1723,9 +1737,11 @@ internal static class NativeMethods
         return true;
     }
 
+#if FEATURE_LEGACY_GETFULLPATH
     [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
     [SupportedOSPlatform("windows")]
     internal static extern unsafe int GetFullPathName(string target, int bufferLength, char* buffer, IntPtr mustBeZero);
+#endif
 
     [DllImport("KERNEL32.DLL")]
     [SupportedOSPlatform("windows")]
