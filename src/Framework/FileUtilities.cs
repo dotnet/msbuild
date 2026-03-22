@@ -682,65 +682,12 @@ namespace Microsoft.Build.Framework
 
         private static string GetFullPath(string path)
         {
-#if FEATURE_LEGACY_GETFULLPATH
-            if (NativeMethods.IsWindows)
-            {
-                string uncheckedFullPath = NativeMethods.GetFullPath(path);
-
-                if (IsPathTooLong(uncheckedFullPath))
-                {
-                    throw new PathTooLongException(SR.FormatPathTooLong(path, NativeMethods.MaxPath));
-                }
-
-                // We really don't care about extensions here, but Path.HasExtension provides a great way to
-                // invoke the CLR's invalid path checks (these are independent of path length)
-                Path.HasExtension(uncheckedFullPath);
-
-                // If we detect we are a UNC path then we need to use the regular get full path in order to do the correct checks for UNC formatting
-                // and security checks for strings like \\?\GlobalRoot
-                return IsUNCPath(uncheckedFullPath) ? Path.GetFullPath(uncheckedFullPath) : uncheckedFullPath;
-            }
-#endif
-
+#if FEATURE_MSIOREDIST
+            return NewPath.GetFullPath(path);
+#else
             return Path.GetFullPath(path);
+#endif
         }
-
-#if FEATURE_LEGACY_GETFULLPATH
-        private static bool IsUNCPath(string path)
-        {
-            if (!NativeMethods.IsWindows || !path.StartsWith(@"\\", StringComparison.Ordinal))
-            {
-                return false;
-            }
-            bool isUNC = true;
-            for (int i = 2; i < path.Length - 1; i++)
-            {
-                if (path[i] == '\\')
-                {
-                    isUNC = false;
-                    break;
-                }
-            }
-
-            /*
-              From Path.cs in the CLR
-
-              Throw an ArgumentException for paths like \\, \\server, \\server\
-              This check can only be properly done after normalizing, so
-              \\foo\.. will be properly rejected.  Also, reject \\?\GLOBALROOT\
-              (an internal kernel path) because it provides aliases for drives.
-
-              throw new ArgumentException(Environment.GetResourceString("Arg_PathIllegalUNC"));
-
-               // Check for \\?\Globalroot, an internal mechanism to the kernel
-               // that provides aliases for drives and other undocumented stuff.
-               // The kernel team won't even describe the full set of what
-               // is available here - we don't want managed apps mucking
-               // with this for security reasons.
-            */
-            return isUNC || path.IndexOf(@"\\?\globalroot", StringComparison.OrdinalIgnoreCase) != -1;
-        }
-#endif // FEATURE_LEGACY_GETFULLPATH
 
         /// <summary>
         /// Normalizes all path separators (both forward and back slashes) to forward slashes.
