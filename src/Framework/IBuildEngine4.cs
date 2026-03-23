@@ -51,6 +51,12 @@ namespace Microsoft.Build.Framework
         /// manage limited process memory resources.
         /// </para>
         /// <para>
+        /// This method is thread-safe. If multiple threads concurrently attempt to register an object with the
+        /// same <paramref name="key"/> and <paramref name="lifetime"/>, only the first registration takes effect
+        /// and subsequent registrations are ignored. Callers should use <see cref="GetRegisteredTaskObject"/> after
+        /// registration to obtain the authoritative instance.
+        /// </para>
+        /// <para>
         /// The thread on which the object is disposed may be arbitrary - however it is guaranteed not to
         /// be disposed while the task is executing, even if <paramref name="allowEarlyCollection"/> is set
         /// to true.
@@ -72,6 +78,9 @@ namespace Microsoft.Build.Framework
         /// The registered object, or null is there is no object registered under that key or the object
         /// has been discarded through early collection.
         /// </returns>
+        /// <remarks>
+        /// This method is thread-safe and may be called concurrently from multiple tasks.
+        /// </remarks>
         object GetRegisteredTaskObject(object key, RegisteredTaskObjectLifetime lifetime);
 
         /// <summary>
@@ -83,6 +92,9 @@ namespace Microsoft.Build.Framework
         /// The registered object, or null is there is no object registered under that key or the object
         /// has been discarded through early collection.
         /// </returns>
+        /// <remarks>
+        /// This method is thread-safe and may be called concurrently from multiple tasks.
+        /// </remarks>
         object UnregisterTaskObject(object key, RegisteredTaskObjectLifetime lifetime);
     }
 }
