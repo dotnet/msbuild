@@ -1051,6 +1051,25 @@ namespace Microsoft.Build.Framework
 
         internal static bool PathIsInvalid(string path)
         {
+            if (path == null)
+            {
+                return true;
+            }
+
+            // Leading or trailing whitespace can cause NormalizePath to produce wrong results
+            // (e.g. Microsoft.IO.Path.GetFullPath may trim), so treat as invalid. See issue #4593.
+            if (path != path.Trim())
+            {
+                return true;
+            }
+
+            // Paths that exceed MAX_PATH (260) will cause GetFullPath to throw PathTooLongException on
+            // legacy Windows. Treat as invalid so callers skip NormalizePath and handle gracefully (e.g. RAR Regress314573).
+            if (path.Length >= NativeMethods.MAX_PATH)
+            {
+                return true;
+            }
+
             // Path.GetFileName does not react well to malformed filenames.
             // For example, Path.GetFileName("a/b/foo:bar") returns bar instead of foo:bar
             // It also throws exceptions on illegal path characters
