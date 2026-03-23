@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
@@ -672,6 +673,99 @@ namespace Microsoft.Build.Engine.UnitTests
                 logger.WarningCount.ShouldBe(0);
                 logger.ErrorCount.ShouldBe(0);
             }
+        }
+        /// <summary>
+        /// Verifies that when a task runs out-of-proc via TaskHostFactory and logs a warning
+        /// whose code is in MSBuildWarningsAsErrors, the warning is promoted to an error.
+        /// This was broken before ChangeWave 18.6 (the OOP code checked WarningsAsMessages
+        /// instead of WarningsAsErrors).
+        /// </summary>
+        [Fact]
+        public void TreatWarningsAsErrorsWhenSpecified_TaskHostFactory()
+        {
+            string assemblyLocation = Path.Combine(
+                Path.GetDirectoryName(typeof(WarningsAsMessagesAndErrorsTests).Assembly.Location) ?? AppContext.BaseDirectory,
+                "Microsoft.Build.Engine.UnitTests.dll");
+
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName=""CustomLogAndReturnTask"" AssemblyFile=""{assemblyLocation}"" TaskFactory=""TaskHostFactory"" />
+                    <PropertyGroup>
+                        <MSBuildWarningsAsErrors>{ExpectedEventCode}</MSBuildWarningsAsErrors>
+                    </PropertyGroup>
+                    <Target Name='Build'>
+                        <CustomLogAndReturnTask Return=""true"" WarningCode=""{ExpectedEventCode}""/>
+                    </Target>
+                </Project>");
+
+            MockLogger logger = proj.BuildProjectExpectFailure();
+
+            logger.ErrorCount.ShouldBe(1);
+            logger.WarningCount.ShouldBe(0);
+            logger.AssertLogContains(ExpectedEventCode);
+        }
+
+        /// <summary>
+        /// Verifies that when a task runs out-of-proc via TaskHostFactory and
+        /// MSBuildTreatWarningsAsErrors is true, all warnings are promoted to errors.
+        /// </summary>
+        [Fact]
+        public void TreatAllWarningsAsErrors_TaskHostFactory()
+        {
+            string assemblyLocation = Path.Combine(
+                Path.GetDirectoryName(typeof(WarningsAsMessagesAndErrorsTests).Assembly.Location) ?? AppContext.BaseDirectory,
+                "Microsoft.Build.Engine.UnitTests.dll");
+
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName=""CustomLogAndReturnTask"" AssemblyFile=""{assemblyLocation}"" TaskFactory=""TaskHostFactory"" />
+                    <PropertyGroup>
+                        <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+                    </PropertyGroup>
+                    <Target Name='Build'>
+                        <CustomLogAndReturnTask Return=""true"" WarningCode=""{ExpectedEventCode}""/>
+                    </Target>
+                </Project>");
+
+            MockLogger logger = proj.BuildProjectExpectFailure();
+
+            logger.ErrorCount.ShouldBe(1);
+            logger.WarningCount.ShouldBe(0);
+        }
+
+        /// <summary>
+        /// Verifies that WarningsAsMessages takes priority over WarningsAsErrors
+        /// when a task runs out-of-proc via TaskHostFactory.
+        /// </summary>
+        [Fact]
+        public void TreatWarningAsMessageOverridesTreatingItAsError_TaskHostFactory()
+        {
+            string assemblyLocation = Path.Combine(
+                Path.GetDirectoryName(typeof(WarningsAsMessagesAndErrorsTests).Assembly.Location) ?? AppContext.BaseDirectory,
+                "Microsoft.Build.Engine.UnitTests.dll");
+
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName=""CustomLogAndReturnTask"" AssemblyFile=""{assemblyLocation}"" TaskFactory=""TaskHostFactory"" />
+                    <PropertyGroup>
+                        <MSBuildWarningsAsErrors>{ExpectedEventCode}</MSBuildWarningsAsErrors>
+                        <MSBuildWarningsAsMessages>{ExpectedEventCode}</MSBuildWarningsAsMessages>
+                    </PropertyGroup>
+                    <Target Name='Build'>
+                        <CustomLogAndReturnTask Return=""true"" WarningCode=""{ExpectedEventCode}""/>
+                    </Target>
+                </Project>");
+
+            MockLogger logger = proj.BuildProjectExpectSuccess();
+
+            logger.ErrorCount.ShouldBe(0);
+            logger.WarningCount.ShouldBe(0);
         }
     }
 }
