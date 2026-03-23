@@ -876,8 +876,8 @@ namespace Microsoft.Build.Framework
                 return false;
             }
 
-            // In MT mode the process CWD should not be used to resolve absolute paths. Use the thread-local working directory
-            // so the directory existence check resolves against the correct project directory.
+            // In MT mode the process CWD should not be used when resolving the first relative path segment. Use the
+            // thread-local working directory so the directory existence heuristic runs against the correct project directory.
             if (string.IsNullOrEmpty(baseDirectory))
             {
                 baseDirectory = CurrentThreadWorkingDirectory ?? "";
