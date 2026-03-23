@@ -695,7 +695,9 @@ namespace Microsoft.Build.Framework
                     throw new ArgumentException("Illegal characters in path.");
                 }
 
-                return NewPath.GetFullPath(path);
+                // Re-throw to preserve behavior expected by Copy/Move tasks and Regress451057 tests.
+                // Microsoft.IO.Path.GetFullPath may not throw for the same path; we must not fall back.
+                throw;
             }
             catch (ArgumentException)
             {
