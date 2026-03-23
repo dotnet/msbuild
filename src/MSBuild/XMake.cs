@@ -13,6 +13,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
 using System.Text.Json;
@@ -1254,6 +1255,43 @@ namespace Microsoft.Build.CommandLine
 
             ThreadPoolExtensions.QueueThreadPoolWorkItemWithCulture(callback, CultureInfo.CurrentCulture, CultureInfo.CurrentUICulture);
         }
+
+        /// <summary>
+        /// Registers a console ctrl handler on Windows so that Restart Manager / installer shutdown
+        /// (<c>CTRL_CLOSE_EVENT</c>, <c>CTRL_LOGOFF_EVENT</c>, <c>CTRL_SHUTDOWN_EVENT</c>) triggers the
+        /// same graceful cancellation path as Ctrl+C. No-op on non-Windows.
+        /// </summary>
+        private static void EnsureWindowsConsoleShutdownHandlersRegistered()
+        {
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                return;
+            }
+
+            s_consoleCtrlHandler = ConsoleCtrlHandler;
+            SetConsoleCtrlHandler(s_consoleCtrlHandler, Add: true);
+        }
+
+#if NETFRAMEWORK || NETCOREAPP
+        private static ConsoleCtrlHandlerDelegate s_consoleCtrlHandler;
+
+        private delegate bool ConsoleCtrlHandlerDelegate(uint dwCtrlType);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        private static extern bool SetConsoleCtrlHandler(ConsoleCtrlHandlerDelegate handler, bool Add);
+
+        private static bool ConsoleCtrlHandler(uint dwCtrlType)
+        {
+            // CTRL_CLOSE_EVENT (2), CTRL_LOGOFF_EVENT (5), CTRL_SHUTDOWN_EVENT (6) - Restart Manager / installer
+            if (dwCtrlType is 2 or 5 or 6)
+            {
+                QueueGracefulShutdownFromExternalConsoleSignal();
+                return true; // We handled it
+            }
+
+            return false;
+        }
+#endif
 
         /// <summary>
         /// Clears out any state accumulated from previous builds, and resets
