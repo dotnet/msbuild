@@ -1146,7 +1146,6 @@ internal static class NativeMethods
     /// </remarks>
     internal static DateTime GetLastWriteFileUtcTime(string fullPath)
     {
-#if !MICROSOFT_BUILD_ENGINE_OM_UNITTESTS
         if (Traits.Instance.EscapeHatches.AlwaysDoImmutableFilesUpToDateCheck)
         {
             return LastWriteFileUtcTime(fullPath);
@@ -1169,9 +1168,6 @@ internal static class NativeMethods
         }
 
         return modifiedTime;
-#else
-        return LastWriteFileUtcTime(fullPath);
-#endif
 
         DateTime LastWriteFileUtcTime(string path)
         {
