@@ -131,7 +131,7 @@ namespace Microsoft.Build.BackEnd
         internal BuildRequestEngine()
         {
             _debugDumpState = Traits.Instance.DebugScheduler;
-            _debugDumpPath = DebugUtils.DebugPath;
+            _debugDumpPath = FrameworkDebugUtils.DebugPath;
             _debugForceCaching = Environment.GetEnvironmentVariable("MSBUILDDEBUGFORCECACHING") == "1";
 
             if (String.IsNullOrEmpty(_debugDumpPath))

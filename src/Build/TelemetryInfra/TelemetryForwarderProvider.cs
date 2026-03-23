@@ -1,10 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 
@@ -49,32 +47,48 @@ internal class TelemetryForwarderProvider : IBuildComponent
         _instance = null;
     }
 
+    /// <summary>
+    /// Active telemetry forwarder that accumulates worker node telemetry.
+    /// </summary>
+    /// <remarks>
+    /// Thread-safe: in /m /mt mode, multiple <see cref="BuildRequestEngine"/> instances share a single
+    /// <see cref="TelemetryForwarderProvider"/> singleton, so <see cref="MergeWorkerData"/> and
+    /// <see cref="FinalizeProcessing"/> may be called concurrently from different node threads.
+    /// </remarks>
     public class TelemetryForwarder : ITelemetryForwarder
     {
-        private readonly WorkerNodeTelemetryData _workerNodeTelemetryData = new();
+        private WorkerNodeTelemetryData _workerNodeTelemetryData = new();
+        private readonly LockType _lock = new();
 
         // in future, this might be per event type
         public bool IsTelemetryCollected => true;
 
-        public void AddTask(string name, TimeSpan cumulativeExecutionTime, short executionsCount, long totalMemoryConsumed, bool isCustom, bool isFromNugetCache, string? taskFactoryName, string? taskHostRuntime)
+        public void MergeWorkerData(IWorkerNodeTelemetryData data)
         {
-            var key = GetKey(name, isCustom, false, isFromNugetCache);
-            _workerNodeTelemetryData.AddTask(key, cumulativeExecutionTime, executionsCount, totalMemoryConsumed, taskFactoryName, taskHostRuntime);
+            lock (_lock)
+            {
+                _workerNodeTelemetryData.Add(data);
+            }
         }
 
-        public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isMetaproj, bool isFromNugetCache, TargetSkipReason skipReason = TargetSkipReason.None)
-        {
-            var key = GetKey(name, isCustom, isMetaproj, isFromNugetCache);
-            _workerNodeTelemetryData.AddTarget(key, wasExecuted, skipReason);
-        }
-
-        private static TaskOrTargetTelemetryKey GetKey(string name, bool isCustom, bool isMetaproj,
-            bool isFromNugetCache)
-            => new TaskOrTargetTelemetryKey(name, isCustom, isFromNugetCache, isMetaproj);
 
         public void FinalizeProcessing(LoggingContext loggingContext)
         {
-            WorkerNodeTelemetryEventArgs telemetryArgs = new(_workerNodeTelemetryData)
+            WorkerNodeTelemetryData snapshot;
+
+            lock (_lock)
+            {
+                // Nothing accumulated since the last call — skip sending.
+                if (_workerNodeTelemetryData.IsEmpty)
+                {
+                    return;
+                }
+
+                snapshot = _workerNodeTelemetryData;
+                _workerNodeTelemetryData = new();
+            }
+
+            WorkerNodeTelemetryEventArgs telemetryArgs = new(snapshot)
             { BuildEventContext = loggingContext.BuildEventContext };
             loggingContext.LogBuildEvent(telemetryArgs);
         }
@@ -84,9 +98,7 @@ internal class TelemetryForwarderProvider : IBuildComponent
     {
         public bool IsTelemetryCollected => false;
 
-        public void AddTask(string name, TimeSpan cumulativeExecutionTime, short executionsCount, long totalMemoryConsumed, bool isCustom, bool isFromNugetCache, string? taskFactoryName, string? taskHostRuntime) { }
-
-        public void AddTarget(string name, bool wasExecuted, bool isCustom, bool isMetaproj, bool isFromNugetCache, TargetSkipReason skipReason = TargetSkipReason.None) { }
+        public void MergeWorkerData(IWorkerNodeTelemetryData data) { }
 
         public void FinalizeProcessing(LoggingContext loggingContext) { }
     }
