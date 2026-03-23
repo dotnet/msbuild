@@ -938,6 +938,35 @@ public class FileUtilities_Tests
         }
     }
 
+    /// <summary>
+    /// MaybeAdjustFilePath should correctly convert backslashes to forward slashes
+    /// when CurrentThreadWorkingDirectory is set and baseDirectory is omitted.
+    /// </summary>
+    [UnixOnlyFact]
+    public void MaybeAdjustFilePath_UsesCurrentThreadWorkingDirectory_WhenBaseDirectoryOmitted()
+    {
+        string filePath = ObjectModelHelpers.CreateFileInTempProjectDirectory("obj/Debug/file.txt", string.Empty);
+        string projectDirectory = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(filePath)));
+        string unrelatedDirectory = Path.GetTempPath();
+        string oldCWD = Directory.GetCurrentDirectory();
+
+        try
+        {
+            // Set process CWD somewhere unrelated (simulating stale CWD in MT mode)
+            Directory.SetCurrentDirectory(unrelatedDirectory);
+
+            // Simulate MT mode: set thread-local working directory to the project dir
+            FileUtilities.CurrentThreadWorkingDirectory = projectDirectory;
+            FileUtilities.MaybeAdjustFilePath("obj\\Debug\\file.txt").ShouldBe("obj/Debug/file.txt");
+        }
+        finally
+        {
+            FileUtilities.CurrentThreadWorkingDirectory = null;
+            Directory.SetCurrentDirectory(oldCWD);
+            File.Delete(filePath);
+        }
+    }
+
     private static string SystemSpecificAbsolutePath => BuildEnvironmentHelper.ExecutingAssemblyPath;
 
 
