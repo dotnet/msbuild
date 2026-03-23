@@ -341,7 +341,7 @@ namespace Microsoft.Build.CommandLine
                 return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsErrors.Contains(warningCode);
             }
 
-            // Pre-18.6 buggy behavior: checked WarningsAsMessages instead of WarningsAsErrors.
+            // Pre-18.6 behavior preserved for backward compatibility: incorrectly checks WarningsAsMessages instead of WarningsAsErrors.
             return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsMessages.Contains(warningCode);
         }
 
