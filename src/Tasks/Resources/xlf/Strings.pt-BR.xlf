@@ -494,6 +494,11 @@
         <target state="translated">MSB3071: Todas as letras de unidade de A: a Z: estão em uso no momento. Como o diretório de trabalho "{0}" é um caminho UNC, a tarefa "Exec" precisa de uma letra da unidade livre na qual mapear o caminho UNC. Desconecte um ou mais recursos compartilhados para liberar algumas letras da unidade ou especifique um diretório de trabalho local antes de tentar usar esse comando novamente.</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
+      <trans-unit id="Exec.CommandExitedZeroWithErrors">
+        <source>MSB3077: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="translated">MSB3077: O comando "{0}" foi encerrado com valor retornado 0, mas erros foram detectados durante a execução. ExitCode foi definido como -1.</target>
+        <note>{StrBegin="MSB3077: "}</note>
+      </trans-unit>
       <trans-unit id="Exec.CommandFailed">
         <source>MSB3073: The command "{0}" exited with code {1}.</source>
         <target state="translated">MSB3073: O comando "{0}" foi encerrado com o código {1}.</target>
@@ -1263,6 +1268,26 @@
         <source>MSB3557: Error(s) generating strongly typed resources for file "{0}".</source>
         <target state="translated">MSB3557: Erro(s) ao gerar recursos fortemente tipados para o arquivo "{0}".</target>
         <note>{StrBegin="MSB3557: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedInvalidIdentifier">
+        <source>MSB3828: Skipping strongly typed resource property generation for resource "{0}": the name cannot be converted to a valid identifier.</source>
+        <target state="translated">MSB3828: ignorando a geração de propriedade de recurso fortemente tipada para o recurso "{0}": o nome não pode ser convertido em um identificador válido.</target>
+        <note>{StrBegin="MSB3828: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedNameCollision">
+        <source>MSB3829: Skipping strongly typed resource property generation for resource "{0}": a name collision exists with resource "{1}" after identifier normalization.</source>
+        <target state="translated">MSB3829: ignorando a geração de propriedade de recurso fortemente tipada para o recurso "{0}": existe uma colisão de nomes com o recurso "{1}" após a normalização do identificador.</target>
+        <note>{StrBegin="MSB3829: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedReservedName">
+        <source>MSB3827: Skipping strongly typed resource property generation for resource "{0}": the name conflicts with a reserved name. Reserved names: {1}.</source>
+        <target state="translated">MSB3827: ignorando a geração de propriedade de recurso fortemente tipada para o recurso "{0}": o nome está em conflito com um nome reservado. Nomes reservados: {1}.</target>
+        <note>{StrBegin="MSB3827: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.STRPropertySkippedVoidType">
+        <source>MSB3830: Skipping strongly typed resource property generation for resource "{0}": the resource value type is void, which cannot be used as a property type.</source>
+        <target state="translated">MSB3830: ignorando a geração de propriedade de recurso fortemente tipada para o recurso "{0}": o tipo do valor do recurso é nulo e não pode ser usado como tipo de propriedade.</target>
+        <note>{StrBegin="MSB3830: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.UnknownFileExtension">
         <source>MSB3558: Unsupported file extension "{0}" on file "{1}".</source>
@@ -2896,6 +2921,11 @@
         <source>Using transactional mode to write to file "{0}".</source>
         <target state="translated">Usando o modo transacional para gravar no arquivo "{0}".</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Xaml.CommandExitedZeroWithErrors">
+        <source>MSB3725: The command "{0}" exited with return value 0, but errors were detected during execution. ExitCode was set to -1.</source>
+        <target state="translated">MSB3725: O comando "{0}" foi encerrado com valor retornado 0, mas erros foram detectados durante a execução. ExitCode foi definido como -1.</target>
+        <note>{StrBegin="MSB3725: "}</note>
       </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
         <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>

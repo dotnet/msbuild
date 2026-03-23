@@ -1,6 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
@@ -9,10 +8,6 @@
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <!-- MSBuild.exe needs to be architecture specific, the rest of the .dlls can be AnyCPU. -->
     <PlatformTarget Condition="'$(Platform)' == 'arm64'">arm64</PlatformTarget>
-
-    <!-- MSBuild.csproj no longer uses apphost. This fixes an issue where certain tests would find
-         MSBuild.exe AND MSBuild.dll when they should only find MSBuild.dll. -->
-    <UseAppHost>false</UseAppHost>
 
     <!-- Set RuntimeIdentifiers so that NuGet will restore for both AnyCPU as well as x86 and x64.
          This is important for the MSBuild.VSSetup project, which "references" both the x86 and x64
@@ -60,46 +55,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\FrameworkLocationHelper.cs">
-      <Link>Shared\FrameworkLocationHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
-      <Link>BuildEnvironmentHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyNameComparer.cs">
-      <Link>AssemblyNameComparer.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\CollectionHelpers.cs" />
-    <Compile Include="..\Shared\FileDelegates.cs">
-      <Link>FileDelegates.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>FileUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Build\Instance\ReflectableTaskPropertyInfo.cs" />
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
-      <Link>FileUtilitiesRegex.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\QuotingUtilities.cs" />
     <Compile Include="..\Shared\RegisteredTaskObjectCacheBase.cs">
       <Link>RegisteredTaskObjectCacheBase.cs</Link>
     </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs" />
-    <Compile Include="..\Shared\EscapingUtilities.cs" />
     <Compile Include="..\Shared\ErrorUtilities.cs" />
-    <Compile Include="..\Shared\Modifiers.cs" />
     <Compile Include="..\Shared\XMakeElements.cs" />
-    <Compile Include="..\Shared\BufferedReadStream.cs" />
-    <Compile Include="..\Shared\CopyOnWriteDictionary.cs" />
-    <Compile Include="..\Shared\IKeyed.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
-    <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs" />
-    <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs" />
-    <Compile Include="..\Shared\ExceptionHandling.cs" />
-    <Compile Include="..\Shared\EventArgsFormatting.cs" />
-    <Compile Include="..\Shared\TempFileUtilities.cs">
-      <Link>TempFileUtilities.cs</Link>
-    </Compile>
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\XMakeAttributes.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
@@ -109,36 +71,30 @@
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
-    <Compile Include="..\Shared\TranslatorHelpers.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
-    <Compile Include="..\Shared\InterningBinaryReader.cs" />
-    <Compile Include="..\Shared\TaskFactoryUtilities.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
+    <Compile Include="..\Shared\ITaskHostCallbackPacket.cs" />
+    <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesRequest.cs" />
+    <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesResponse.cs" />
+    <Compile Include="..\Shared\TaskHostCoresRequest.cs" />
+    <Compile Include="..\Shared\TaskHostCoresResponse.cs" />
     <Compile Include="..\Shared\TaskLoader.cs" />
-    <Compile Include="..\Shared\MSBuildLoadContext.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
     <Compile Include="..\Shared\TypeLoader.cs" />
-    <Compile Include="..\Shared\LoadedType.cs" />
-    <Compile Include="..\Shared\TypeUtilities.cs" />
-    <Compile Include="..\Shared\AssemblyLoadInfo.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
-    <Compile Include="..\Shared\AssemblyNameExtension.cs" />
-    <Compile Include="..\Shared\ThreadPoolExtensions.cs" />
     <Compile Include="..\Shared\StringExtensions.cs" />
-    <Compile Include="..\Shared\ConversionUtilities.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="AssemblyResources.cs" />
     <Compile Include="AutomaticEncodingRestorer.cs" />
     <Compile Include="CommandLine\CommandLineParser.cs" />
     <Compile Include="CommandLine\CommandLineSwitches.cs" />
     <Compile Include="CommandLine\CommandLineSwitchException.cs" />
-    <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'" />
     <Compile Include="CommandLine\CommandLineSwitchesAccessor.cs" />
     <Compile Include="DistributedLoggerRecord.cs" />
     <Compile Include="InitializationException.cs" />
@@ -169,9 +125,10 @@
     <Content Include="MSBuild.rsp" Pack="false">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <!-- Only include XSDs for .NET Framework (they don't ship in the .NET SDK). -->
     <XsdsForVS Include="**\*.xsd" Exclude="$(DefaultItemExcludes);$(DefaultExcludesInProjectFolder)" />
     <XsdsForVS Include="Update-MSBuildXsds.ps1" />
-    <None Include="@(XsdsForVS)">
+    <None Include="@(XsdsForVS)" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
@@ -320,4 +277,3 @@
   </Target>
 
 </Project>
- 

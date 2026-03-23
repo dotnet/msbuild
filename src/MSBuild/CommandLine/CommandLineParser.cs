@@ -62,7 +62,7 @@ namespace Microsoft.Build.CommandLine.Experimental
         /// </exception>
         public CommandLineSwitchesAccessor Parse(IEnumerable<string> commandLineArgs)
         {
-            List<string> args = [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, ..commandLineArgs];
+            List<string> args = [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, .. commandLineArgs];
             List<DeferredBuildMessage> deferredBuildMessages = [];
 
             GatherAllSwitches(
@@ -104,18 +104,7 @@ namespace Microsoft.Build.CommandLine.Experimental
 
             // discard the first piece, because that's the path to the executable -- the rest are args
             commandLineArgs = commandLineArgs.Skip(1);
-
             exeName = BuildEnvironmentHelper.Instance.CurrentMSBuildExePath;
-
-#if USE_MSBUILD_DLL_EXTN
-            var msbuildExtn = ".dll";
-#else
-            var msbuildExtn = ".exe";
-#endif
-            if (!exeName.EndsWith(msbuildExtn, StringComparison.OrdinalIgnoreCase))
-            {
-                exeName += msbuildExtn;
-            }
 
             fullCommandLine = $"'{string.Join(" ", commandLineArgs)}'";
 
@@ -128,7 +117,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             switchesFromAutoResponseFile = new CommandLineSwitches();
             if (!switchesNotFromAutoResponseFile[ParameterlessSwitch.NoAutoResponse])
             {
-                string exePath = Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath); // Copied from XMake
+                string exePath = Path.GetDirectoryName(typeof(MSBuildApp).GetAssemblyPath()); // Copied from XMake
                 GatherAutoResponseFileSwitches(exePath, switchesFromAutoResponseFile, fullCommandLine);
             }
 
@@ -339,7 +328,7 @@ namespace Microsoft.Build.CommandLine.Experimental
         {
             try
             {
-                string responseFile = FrameworkFileUtilities.FixFilePath(unquotedCommandLineArg.Substring(1));
+                string responseFile = FileUtilities.FixFilePath(unquotedCommandLineArg.Substring(1));
 
                 if (responseFile.Length == 0)
                 {
@@ -369,7 +358,7 @@ namespace Microsoft.Build.CommandLine.Experimental
 
                     if (!isRepeatedResponseFile)
                     {
-                        var responseFileDirectory = FrameworkFileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(responseFile));
+                        var responseFileDirectory = FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(responseFile));
                         includedResponseFiles.Add(responseFile);
 
                         List<string> argsFromResponseFile;
@@ -543,7 +532,7 @@ namespace Microsoft.Build.CommandLine.Experimental
                 found = !string.IsNullOrWhiteSpace(directoryResponseFile) && GatherAutoResponseFileSwitchesFromFullPath(directoryResponseFile, switchesFromAutoResponseFile, commandLine);
 
                 // Don't look for more response files if it's only in the same place we already looked (next to the exe)
-                string exePath = Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath); // Copied from XMake
+                string exePath = Path.GetDirectoryName(typeof(MSBuildApp).GetAssemblyPath()); // Copied from XMake
                 if (!string.Equals(projectDirectory, exePath, StringComparison.OrdinalIgnoreCase))
                 {
                     // this combines any found, with higher precedence, with the switches from the original auto response file switches
@@ -561,7 +550,7 @@ namespace Microsoft.Build.CommandLine.Experimental
 
             if (projectSwitchParameters.Length == 1)
             {
-                var projectFile = FrameworkFileUtilities.FixFilePath(projectSwitchParameters[0]);
+                var projectFile = FileUtilities.FixFilePath(projectSwitchParameters[0]);
 
                 if (FileSystems.Default.DirectoryExists(projectFile))
                 {

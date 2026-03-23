@@ -9,6 +9,7 @@ using System.Security.Permissions;
 #endif
 using Microsoft.Build.Framework.BuildException;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 
 #nullable disable
 

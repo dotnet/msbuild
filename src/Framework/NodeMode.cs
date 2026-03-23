@@ -36,7 +36,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// Helper methods for the NodeMode enum.
     /// </summary>
-    internal static class NodeModeHelper
+    internal static partial class NodeModeHelper
     {
         /// <summary>
         /// Converts a NodeMode value to a command line argument string.
@@ -53,12 +53,45 @@ namespace Microsoft.Build.Framework
         /// <returns>True if parsing succeeded, false otherwise</returns>
         public static bool TryParse(string value, [NotNullWhen(true)] out NodeMode? nodeMode)
         {
+#if NET
+            return TryParseImpl(value.AsSpan(), out nodeMode);
+#else
+            return TryParseImpl(value, out nodeMode);
+#endif
+        }
+
+#if NET
+        /// <summary>
+        /// Tries to parse a node mode value from a span, supporting both integer values and enum names (case-insensitive).
+        /// </summary>
+        /// <param name="value">The value to parse (can be an integer or enum name)</param>
+        /// <param name="nodeMode">The parsed NodeMode value if successful</param>
+        /// <returns>True if parsing succeeded, false otherwise</returns>
+        public static bool TryParse(ReadOnlySpan<char> value, [NotNullWhen(true)] out NodeMode? nodeMode)
+        {
+            return TryParseImpl(value, out nodeMode);
+        }
+#endif
+
+#if NET
+        private static bool TryParseImpl(ReadOnlySpan<char> value, [NotNullWhen(true)] out NodeMode? nodeMode)
+#else
+        private static bool TryParseImpl(string value, [NotNullWhen(true)] out NodeMode? nodeMode)
+#endif
+        {
             nodeMode = null;
 
+#if NET
+            if (value.IsEmpty || value.IsWhiteSpace())
+            {
+                return false;
+            }
+#else
             if (string.IsNullOrWhiteSpace(value))
             {
                 return false;
             }
+#endif
 
             // First try to parse as an integer for backward compatibility
             if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int intValue))
@@ -69,7 +102,7 @@ namespace Microsoft.Build.Framework
                     nodeMode = (NodeMode)intValue;
                     return true;
                 }
-                
+
                 return false;
             }
 
@@ -82,5 +115,47 @@ namespace Microsoft.Build.Framework
 
             return false;
         }
+
+        /// <summary>
+        /// Extracts the NodeMode from a command line string using regex pattern matching.
+        /// </summary>
+        /// <param name="commandLine">The command line to parse. Note that this can't be a span because generated regex don't have a Span Match overload</param>
+        /// <returns>The NodeMode if found, otherwise null</returns>
+        public static NodeMode? ExtractFromCommandLine(string commandLine)
+        {
+            if (string.IsNullOrWhiteSpace(commandLine))
+            {
+                return null;
+            }
+
+            var match = CommandLineNodeModeRegex.Match(commandLine);
+
+            if (!match.Success)
+            {
+                return null;
+            }
+
+#if NET
+            if (TryParse(match.Groups["nodemode"].ValueSpan, out NodeMode? nodeMode))
+#else
+            if (TryParse(match.Groups["nodemode"].Value, out NodeMode? nodeMode))
+#endif
+            {
+                return nodeMode;
+            }
+
+            return null;
+        }
+
+        private const string CommandLineNodeModePattern = @"/nodemode:(?<nodemode>[a-zA-Z0-9]+)(?:\s|$)";
+
+#if NET
+        [System.Text.RegularExpressions.GeneratedRegex(CommandLineNodeModePattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase)]
+        private static partial System.Text.RegularExpressions.Regex CommandLineNodeModeRegex { get; }
+#else
+        private static System.Text.RegularExpressions.Regex CommandLineNodeModeRegex { get; } = new(
+            CommandLineNodeModePattern, 
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase | System.Text.RegularExpressions.RegexOptions.Compiled);
+#endif
     }
 }

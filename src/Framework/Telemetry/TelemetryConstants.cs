@@ -47,4 +47,9 @@ internal static class TelemetryConstants
     /// Name of the property for build activity.
     /// </summary>
     public const string Build = "Build";
+
+    /// <summary>
+    /// Name of the property for crash/failure activity.
+    /// </summary>
+    public const string Crash = "Crash";
 }

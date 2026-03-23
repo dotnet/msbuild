@@ -27,7 +27,7 @@
       "type": "parameter",
       "description": "Overrides the default Microsoft.Build version where check's interfaces are placed",
       "datatype": "text",
-      "defaultValue": "18.5.0",
+      "defaultValue": "18.6.0",
       "replaces": "1.0.0-MicrosoftBuildPackageVersion",
       "displayName": "Microsoft.Build default package version override"
     }

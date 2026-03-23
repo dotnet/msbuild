@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
+  <file datatype="xml" source-language="en" target-language="pl" original="../SR.resx">
+    <body>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeEqual">
+        <source>{0} ('{1}') must be equal to '{2}'.</source>
+        <target state="translated">{0} („{1}”) musi równać się „{2}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreater">
+        <source>{0} ('{1}') must be greater than '{2}'.</source>
+        <target state="translated">{0} („{1}”) musi być większe niż „{2}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeGreaterOrEqual">
+        <source>{0} ('{1}') must be greater than or equal to '{2}'.</source>
+        <target state="translated">{0} („{1}”) musi być większe lub równe „{2}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeLess">
+        <source>{0} ('{1}') must be less than '{2}'.</source>
+        <target state="translated">{0} („{1}”) musi być mniejsze niż „{2}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeLessOrEqual">
+        <source>{0} ('{1}') must be less than or equal to '{2}'.</source>
+        <target state="translated">{0} („{1}”) musi być mniejsze lub równe „{2}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegative">
+        <source>{0} ('{1}') must be a non-negative value.</source>
+        <target state="translated">{0} („{1}”) musi być wartością nieujemną.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonNegativeNonZero">
+        <source>{0} ('{1}') must be a non-negative and non-zero value.</source>
+        <target state="translated">{0} („{1}”) musi być wartością nieujemną i niezerową.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNonZero">
+        <source>{0} ('{1}') must be a non-zero value.</source>
+        <target state="translated">{0} („{1}”) musi być wartością niezerową.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ArgumentOutOfRange_Generic_MustBeNotEqual">
+        <source>{0} ('{1}') must not be equal to '{2}'.</source>
+        <target state="translated">{0} („{1}”) nie może równać się „{2}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Argument_EmptyOrWhiteSpaceString">
+        <source>The value cannot be an empty string or composed entirely of whitespace.</source>
+        <target state="translated">Wartość nie może być pustym ciągiem ani składać się wyłącznie z białych znaków.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Argument_EmptyString">
+        <source>The value cannot be an empty string.</source>
+        <target state="translated">Wartość nie może być ciągiem pustym.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CannotConvertStringToBool">
+        <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
+        <target state="translated">Ciągu „{0}” nie można przekonwertować na wartość logiczną (prawda/fałsz).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CollectionIsReadOnly">
+        <source>This collection is read-only.</source>
+        <target state="translated">Ta kolekcja jest tylko do odczytu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotGenerateReferenceAssemblyDirectory">
+        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
+        <target state="translated">Wystąpił błąd podczas próby wygenerowania ścieżki zestawu odwołania ze ścieżki „{0}” i monikera struktury „{1}”. {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DebugPathTooLong">
+        <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
+        <target state="translated">Ścieżka „{0}” używana w dziennikach debugowania jest za długa. Ustaw ją na krótszą wartość przy użyciu zmiennej środowiskowej MSBUILDEBUGPATH lub zmień konfigurację systemu, aby zezwolić na długie ścieżki.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="FailedCreatingTempFile">
+        <source>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
+        <target state="translated">Nie można utworzyć pliku tymczasowego. Folder plików tymczasowych jest zapełniony lub jego ścieżka jest niepoprawna. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">Wystąpił wyjątek podczas rozwijania elementu fileSpec za pomocą globów: fileSpec: „{0}”, przy założeniu, że jest to nazwa pliku. Wyjątek: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidAttributeMetadata">
+        <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
+        <target state="translated">Element „{0}” ma atrybut „{1}” o wartości „{2}”, którego nie można przekonwertować na „{3}”.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidFilespecForTransform">
+        <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
+        <target state="translated">Elementu metadanych „%({0})” nie można zastosować do ścieżki „{1}”. {2}</target>
+        <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
+      </trans-unit>
+      <trans-unit id="InvalidGetPathOfFileAboveParameter">
+        <source>The parameter '{0}' can only be a file name and cannot include a directory.</source>
+        <target state="translated">Parametr „{0}” może zawierać tylko nazwę pliku i nie może zawierać katalogu.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PathMustBeRooted">
+        <source>Path must be rooted.</source>
+        <target state="translated">Ścieżka musi zaczynać się od katalogu głównego.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="PathTooLong">
+        <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
+        <target state="translated">Ścieżka: {0} przekracza limit maksymalnej długości ścieżki w systemie operacyjnym. W pełni kwalifikowana nazwa pliku musi się składać z mniej niż {1} znaków.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany. Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
+        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
+        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany, jeśli jawnym obiektem docelowym jest zestaw SDK systemu Windows, ponieważ taki zestaw jest obsługiwany tylko na platformie .NET w wersji 4.5 lub nowszej.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion, która wynosi co najmniej Version45.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedVisualStudioVersion">
+        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
+        <target state="translated">Program Visual Studio w wersji „{0}” nie jest obsługiwany.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.VisualStudioVersion.</target>
+        <note />
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

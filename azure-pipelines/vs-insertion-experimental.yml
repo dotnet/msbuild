@@ -24,20 +24,8 @@ parameters:
     displayName: 'Insertion Target Branch (select for manual insertion)'
     values:
       - main
-      - rel/d18.5
-      - rel/d18.4
-      - rel/d18.3
-      - rel/d18.0
-      - rel/d17.14
-      - rel/d17.13
-      - rel/d17.12
-      - rel/d17.11
-      - rel/d17.10
-      - rel/d17.8
-      - rel/d17.6
-      - rel/d17.3
-      - rel/d17.0
-      - rel/d16.11
+      - rel/insiders
+      - rel/stable
       
 variables:
   - name: TeamName
@@ -64,7 +52,7 @@ extends:
     settings:
       networkIsolationPolicy: Permissive,CFSClean
     pool:
-      name: VSEngSS-MicroBuild2022-1ES
+      name: VSEng-MicroBuildVSStable
     stages:
     - stage: VSInsertion
       displayName: VS insertion
@@ -120,28 +108,13 @@ extends:
           inputs:
             targetType: inline
             script: |
-              # Extract VS version from branch name if it follows exp/vsXX.Y-somename pattern
-              $fullBranch = "$(resources.pipeline.MSBuildExpPerf.sourceBranch)"
               $parameterTargetBranch = "${{ parameters.TargetBranch }}"
-              $detectedTarget = "main" # Default target branch
-
-              # Try to match the pattern with regex
-              if ($fullBranch -match "exp/vs(\d+)\.(\d+).*") {
-                $major = $matches[1]
-                $minor = $matches[2]
-                $targetBranch = "rel/d$major.$minor"
-                Write-Host "Detected version pattern in branch: $major.$minor"
-                Write-Host "Setting target branch to $targetBranch"
-                $detectedTarget = $targetBranch
-              } else {
-                Write-Host "No version pattern detected in branch, using default target: main"
-              }
 
               # Determine which target branch to use based on build reason
               $finalTargetBranch = $parameterTargetBranch
               if ("$(Build.Reason)" -eq "ResourceTrigger" -or "$(Build.Reason)" -eq "PipelineCompletedTrigger") {
-                Write-Host "Build was triggered automatically, using detected target branch: $detectedTarget"
-                $finalTargetBranch = $detectedTarget
+                Write-Host "Build was triggered automatically, using default target branch: main"
+                $finalTargetBranch = "main"
               } else {
                 Write-Host "Build was triggered manually, using parameter target branch: $parameterTargetBranch"
               }

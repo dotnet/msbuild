@@ -26,6 +26,7 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
+using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
 
@@ -3490,7 +3491,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void DotnetHostPathDirectoryWarning()
         {
-            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", Path.GetTempPath());
+            _env.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, Path.GetTempPath());
 
             BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
             _buildManager.Build(_parameters, data);
@@ -3505,7 +3506,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void DotnetHostPathFileNoWarning()
         {
             TransientTestFile tempFile = _env.CreateFile("dotnet.exe", "");
-            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", tempFile.Path);
+            _env.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, tempFile.Path);
 
             BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
             _buildManager.Build(_parameters, data);
@@ -3519,7 +3520,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void DotnetHostPathNotSetNoWarning()
         {
-            _env.SetEnvironmentVariable("DOTNET_HOST_PATH", null);
+            _env.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, null);
 
             BuildRequestData data = GetBuildRequestData(CleanupFileContents(@"<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'><Target Name='test'/></Project>"));
             _buildManager.Build(_parameters, data);
@@ -4483,6 +4484,143 @@ $@"<Project InitialTargets=`Sleep`>
             Assert.Equal(BuildResultCode.Failure, result.OverallResult);
 
             _logger.AssertLogContains("MSB4040");
+        }
+
+        /// <summary>
+        /// Verifies that MT mode builds with multiple projects referencing the same dependency
+        /// with different target sets do not crash with "Results for configuration X were not
+        /// retrieved from node Y" (GitHub issue #13188).
+        ///
+        /// The bug: in MT mode, BuildRequestConfiguration.ResultsNodeId is shared across all
+        /// in-proc nodes. When multiple nodes need to build different targets of the same config,
+        /// the results cache can't fully resolve the request, so the scheduler assigns it to a
+        /// new node. That node's BuildProject() sees ResultsNodeId pointing to the original node
+        /// and enters the results transfer block, which races on ResultsNodeId when multiple
+        /// nodes do this concurrently.
+        ///
+        /// The fix: skip the results transfer block entirely in MT mode, since all in-proc nodes
+        /// share the same ConfigCache and ResultsCache — results are already accessible.
+        ///
+        /// This test forces the scenario by having multiple parallel projects reference the same
+        /// dependency with DIFFERENT target sets, causing cache misses that force the scheduler
+        /// to assign the same config to different nodes.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedBuild_SharedConfiguration_DoesNotCrash()
+        {
+            // Shared dependency project with multiple targets.
+            // Different parent projects will request different target combinations,
+            // causing partial cache misses that force re-scheduling on different nodes.
+            var sharedDep = _env.CreateFile(".proj").Path;
+            var projRoot = _env.CreateFile(".proj").Path;
+
+            // Create many parallel referencing projects to maximize the chance of
+            // scheduling the same config on different nodes.
+            const int projectCount = 8;
+            var childProjects = new string[projectCount];
+            for (int i = 0; i < projectCount; i++)
+            {
+                childProjects[i] = _env.CreateFile(".proj").Path;
+            }
+
+            // The shared dep has multiple targets. Each parent project requests a different
+            // combination so the cache can't satisfy the request from a previous build.
+            string sharedDepContents = CleanupFileContents("""
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                  <Target Name="TargetA">
+                    <Message Text="TargetA built" Importance="High" />
+                  </Target>
+                  <Target Name="TargetB">
+                    <Message Text="TargetB built" Importance="High" />
+                  </Target>
+                  <Target Name="TargetC">
+                    <Message Text="TargetC built" Importance="High" />
+                  </Target>
+                  <Target Name="TargetD">
+                    <Message Text="TargetD built" Importance="High" />
+                  </Target>
+                  <Target Name="TargetE">
+                    <Message Text="TargetE built" Importance="High" />
+                  </Target>
+                  <Target Name="TargetF">
+                    <Message Text="TargetF built" Importance="High" />
+                  </Target>
+                  <Target Name="TargetG">
+                    <Message Text="TargetG built" Importance="High" />
+                  </Target>
+                  <Target Name="TargetH">
+                    <Message Text="TargetH built" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+            File.WriteAllText(sharedDep, sharedDepContents);
+
+            // Each child project requests a different cumulative set of targets from the shared dep.
+            // Child 0: TargetA
+            // Child 1: TargetA;TargetB  (cache has TargetA but not TargetB → miss → re-schedule)
+            // Child 2: TargetA;TargetB;TargetC  (cache has A,B but not C → miss → re-schedule)
+            // etc.
+            // This forces the scheduler to schedule the shared dep's config on different nodes
+            // each time a new target is needed, triggering the ResultsNodeId != currentNodeId check.
+            string[] targetNames = ["TargetA", "TargetB", "TargetC", "TargetD", "TargetE", "TargetF", "TargetG", "TargetH"];
+            for (int i = 0; i < projectCount; i++)
+            {
+                string targets = string.Join(";", targetNames.Take(i + 1));
+                string childContents = CleanupFileContents($"""
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                      <Target Name="Build">
+                        <MSBuild Projects="{sharedDep}" Targets="{targets}" />
+                        <Message Text="Child{i} built" Importance="High" />
+                      </Target>
+                    </Project>
+                    """);
+                File.WriteAllText(childProjects[i], childContents);
+            }
+
+            // Root project builds all children in parallel, maximizing the chance that multiple
+            // nodes simultaneously need the shared dependency with different target sets.
+            string allChildProjects = string.Join(";", childProjects);
+            string rootContents = CleanupFileContents($"""
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                  <Target Name="Build">
+                    <MSBuild Projects="{allChildProjects}" BuildInParallel="true" />
+                  </Target>
+                </Project>
+                """);
+            File.WriteAllText(projRoot, rootContents);
+
+            var buildParameters = new BuildParameters
+            {
+                MaxNodeCount = 8,
+                EnableNodeReuse = false,
+                MultiThreaded = true,
+                DisableInProcNode = false,
+                // MT mode needs SaveOperatingEnvironment=false to allow multiple in-proc nodes.
+                // With it enabled, the operating environment semaphore limits to one in-proc node.
+                SaveOperatingEnvironment = false,
+                Loggers = [_logger],
+            };
+
+            var data = new BuildRequestData(projRoot, new Dictionary<string, string>(), null,
+                ["Build"], null);
+
+            // Use DefaultBuildManager for MT mode (needs proper in-proc node setup).
+            BuildManager.DefaultBuildManager.Dispose();
+            BuildResult result = BuildManager.DefaultBuildManager.Build(buildParameters, data);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Verify all targets of the shared dep were built.
+            foreach (string target in targetNames)
+            {
+                _logger.AssertLogContains($"{target} built");
+            }
+
+            // Verify all child projects completed.
+            for (int i = 0; i < projectCount; i++)
+            {
+                _logger.AssertLogContains($"Child{i} built");
+            }
         }
     }
 }

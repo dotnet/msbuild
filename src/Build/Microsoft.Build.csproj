@@ -1,6 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <Import Project="..\Shared\FileSystemSources.proj" />
   <Import Project="..\Shared\DebuggingSources.proj" />
 
   <PropertyGroup>
@@ -30,7 +29,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
-    <ProjectReference Include="..\StringTools\StringTools.csproj" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
 
@@ -86,21 +84,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
-      <Link>SharedUtilities\BuildEnvironmentHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\EncodingStringWriter.cs">
-      <Link>SharedUtilities\EncodingStringWriter.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyNameComparer.cs">
-      <Link>SharedUtilities\AssemblyNameComparer.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AwaitExtensions.cs">
-      <Link>SharedUtilities\AwaitExtensions</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyNameReverseVersionComparer.cs">
-      <Link>SharedUtilities\AssemblyNameReverseVersionComparer.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\CanonicalError.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\CanonicalError.cs</Link>
     </Compile>
@@ -110,22 +93,18 @@
     <Compile Include="..\Shared\StringExtensions.cs">
       <Link>SharedUtilities\StringExtensions.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\StringUtils.cs">
-      <Link>SharedUtilities\StringUtils.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ReadOnlyEmptyCollection.cs">
-      <Link>Collections\ReadOnlyEmptyCollection.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\BufferedReadStream.cs" />
-    <Compile Include="..\Shared\TaskFactoryUtilities.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskCancelled.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
+    <Compile Include="..\Shared\ITaskHostCallbackPacket.cs" />
+    <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesRequest.cs" />
+    <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesResponse.cs" />
+    <Compile Include="..\Shared\TaskHostCoresRequest.cs" />
+    <Compile Include="..\Shared\TaskHostCoresResponse.cs" />
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\NodeEngineShutdownReason.cs" />
-    <Compile Include="..\Shared\IKeyed.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
     <Compile Include="..\Shared\INodePacket.cs" />
@@ -136,11 +115,9 @@
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\NamedPipeUtil.cs" />
-    <Compile Include="..\Shared\ProcessExtensions.cs" />
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\SolutionConfiguration.cs" />
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelper.cs</Link>
     </Compile>
@@ -149,11 +126,8 @@
     </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
-    <Compile Include="..\Shared\TranslatorHelpers.cs" />
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
-    <Compile Include="..\Shared\InterningBinaryReader.cs" />
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
-    <Compile Include="..\Shared\ThreadPoolExtensions.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />
     <Compile Include="BackEnd\BuildManager\BuildParameters.cs" />
@@ -189,16 +163,19 @@
     <Compile Include="FileSystem\*.cs" />
     <Compile Include="BackEnd\Shared\BuildResultBase.cs" />
     <Compile Include="BuildCheck\**\*.cs" />
+    <Compile Include="Collections\IKeyed.cs" />
     <Compile Include="Collections\IValueDictionaryConverter.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\IRetrievableUnescapedValuedEntryHashSet.cs" />
     <Compile Include="Evaluation\IItemTypeDefinition.cs" />
     <Compile Include="Evaluation\PropertiesUseTracker.cs" />
+    <Compile Include="Evaluation\ToolsetElement.cs" />
     <Compile Include="FileAccess\DesiredAccess.cs" />
     <Compile Include="FileAccess\FileAccessData.cs" />
     <Compile Include="FileAccess\FlagsAndAttributes.cs" />
     <Compile Include="FileAccess\ProcessData.cs" />
     <Compile Include="FileAccess\ReportedFileOperation.cs" />
     <Compile Include="FileAccess\RequestedAccess.cs" />
+    <Compile Include="IElementLocation.cs" />
     <Compile Include="Instance\IPropertyElementWithLocation.cs" />
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
     <Compile Include="Logging\TerminalLogger\**\*.cs" />
@@ -206,6 +183,9 @@
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
     <Compile Include="TelemetryInfra\ITelemetryForwarder.cs" />
     <Compile Include="TelemetryInfra\TelemetryForwarderProvider.cs" />
+    <Compile Include="Utilities\AwaitExtensions.cs" />
+    <Compile Include="Utilities\EncodingStringWriter.cs" />
+    <Compile Include="Utilities\ProjectWriter.cs" />
     <Compile Include="Utilities\ReaderWriterLockSlimExtensions.cs" />
     <Compile Include="BackEnd\Node\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
@@ -397,18 +377,12 @@
     <Compile Include="BackEnd\Node\INode.cs" />
     <!-- ########################## -->
     <Compile Include="BackEnd\TaskExecutionHost\TaskExecutionHost.cs" />
-    <Compile Include="BackEnd\TaskExecutionHost\MultiProcessTaskEnvironmentDriver.cs" />
-    <Compile Include="BackEnd\TaskExecutionHost\MultiThreadedTaskEnvironmentDriver.cs" />
     <!-- #### COLLECTIONS ### -->
-    <Compile Include="..\Shared\CollectionHelpers.cs" />
     <Compile Include="Collections\ArrayDictionary.cs" />
     <Compile Include="Collections\ConcurrentQueueExtensions.cs" />
     <Compile Include="Collections\ConcurrentStackExtensions.cs" />
     <Compile Include="Collections\ConvertingEnumerable.cs" />
     <Compile Include="Collections\CopyOnReadEnumerable.cs" />
-    <Compile Include="..\Shared\CopyOnWriteDictionary.cs">
-      <Link>Collections\CopyOnWriteDictionary.cs</Link>
-    </Compile>
     <Compile Include="Collections\CopyOnWritePropertyDictionary.cs" />
     <Compile Include="Collections\HashTableUtility.cs" />
     <Compile Include="Collections\IConstrainableDictionary.cs" />
@@ -422,7 +396,6 @@
     <Compile Include="Collections\IValued.cs" />
     <Compile Include="Collections\LookasideStringInterner.cs" />
     <Compile Include="Collections\PropertyDictionary.cs" />
-    <Compile Include="..\Shared\ReadOnlyCollection.cs" />
     <Compile Include="Collections\ReadOnlyConvertingDictionary.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\BitHelper.cs" />
     <Compile Include="Collections\RetrievableEntryHashSet\HashSetDebugView.cs" />
@@ -473,7 +446,6 @@
     <Compile Include="Definition\SubToolset.cs" />
     <Compile Include="Definition\Toolset.cs" />
     <Compile Include="Definition\ToolsetConfigurationReader.cs" />
-    <Compile Include="..\Shared\ToolsetElement.cs" />
     <Compile Include="Definition\ToolsetPropertyDefinition.cs" />
     <Compile Include="Definition\ToolsetReader.cs" />
     <Compile Include="Definition\ToolsetRegistryReader.cs" />
@@ -554,7 +526,6 @@
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableProjectMetadataCollectionConverter.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\ImmutableProjectPropertyCollectionConverter.cs" />
     <Compile Include="Instance\ImmutableProjectCollections\LazyStringValuedList.cs" />
-    <Compile Include="Instance\ReflectableTaskPropertyInfo.cs" />
     <Compile Include="Instance\HostServices.cs" />
     <Compile Include="Instance\ProjectTargetInstanceChild.cs" />
     <Compile Include="Instance\ProjectTaskInstanceChild.cs" />
@@ -628,64 +599,15 @@
     <Compile Include="Utilities\RegistryKeyWrapper.cs" />
     <Compile Include="Utilities\Utilities.cs" />
     <Compile Include="Utilities\SimpleVersion.cs" />
+    <Compile Include="Utilities\XmlUtilities.cs" />
     <Compile Include="Xml\ProjectXmlUtilities.XmlElementChildIterator.cs" />
     <Compile Include="Xml\ProjectXmlUtilities.cs" />
     <Compile Include="Xml\XmlReaderExtension.cs" />
-    <Compile Include="..\Shared\AssemblyLoadInfo.cs">
-      <Link>SharedUtilities\AssemblyLoadInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ReadOnlyEmptyDictionary.cs">
-      <Link>SharedUtilities\ReadOnlyEmptyDictionary.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\AssemblyNameExtension.cs">
-      <Link>SharedUtilities\AssemblyNameExtension.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\BuildEventFileInfo.cs">
       <Link>SharedUtilities\BuildEventFileInfo.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ConversionUtilities.cs">
-      <Link>SharedUtilities\ConversionUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileDelegates.cs">
-      <Link>SharedUtilities\FileDelegates.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ErrorUtilities.cs">
       <Link>Errors\ErrorUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\EscapingUtilities.cs">
-      <Link>SharedUtilities\EscapingUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\VersionUtilities.cs">
-      <Link>SharedUtilities\VersionUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\EventArgsFormatting.cs">
-      <Link>SharedUtilities\EventArgsFormatting.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\ExceptionHandling.cs">
-      <Link>SharedUtilities\ExceptionHandling.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileMatcher.cs">
-      <Link>SharedUtilities\FileMatcher.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FileUtilities.cs">
-      <Link>SharedUtilities\FileUtilities.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TempFileUtilities.cs" />
-    <Compile Include="..\Shared\Modifiers.cs" />
-    <Compile Include="..\Shared\FileUtilitiesRegex.cs">
-      <Link>SharedUtilities\FileUtilitiesRegex.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\FrameworkLocationHelper.cs">
-      <Link>SharedUtilities\FrameworkLocationHelper.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\IElementLocation.cs">
-      <Link>SharedUtilities\IElementLocation.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\LoadedType.cs">
-      <Link>SharedUtilities\LoadedType.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\TypeUtilities.cs">
-      <Link>SharedUtilities\TypeUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\InprocTrackingNativeMethods.cs">
       <Link>InprocTrackingNativeMethods.cs</Link>
@@ -696,19 +618,12 @@
     <Compile Include="..\Shared\ProjectFileErrorUtilities.cs">
       <Link>Errors\ProjectFileErrorUtilities.cs</Link>
     </Compile>
-    <Compile Include="..\Shared\ProjectWriter.cs">
-      <Link>SharedUtilities\ProjectWriter.cs</Link>
-    </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs">
       <Link>SharedUtilities\ResourceUtilities.cs</Link>
     </Compile>
     <Compile Include="..\Shared\Tracing.cs" />
-    <Compile Include="..\Shared\CoreCLRAssemblyLoader.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'" />
     <Compile Include="..\Shared\TypeLoader.cs">
       <Link>SharedUtilities\TypeLoader.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\MSBuildLoadContext.cs" Condition="'$(TargetFrameworkIdentifier)'!='.NETFramework'">
-      <Link>SharedUtilities\MSBuildLoadContext.cs</Link>
     </Compile>
     <Compile Include="..\Shared\VisualStudioConstants.cs">
       <Link>VisualStudioConstants.cs</Link>
@@ -718,9 +633,6 @@
     </Compile>
     <Compile Include="..\Shared\XMakeElements.cs">
       <Link>Resources\XMakeElements.cs</Link>
-    </Compile>
-    <Compile Include="..\Shared\XmlUtilities.cs">
-      <Link>SharedUtilities\XmlUtilities.cs</Link>
     </Compile>
     <Compile Include="Evaluation\LazyItemEvaluator.EvaluatorData.cs" />
 

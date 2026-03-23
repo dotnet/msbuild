@@ -5,12 +5,17 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.BackEnd;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
+
+using ProjectItemInstanceTaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
 
@@ -472,6 +477,44 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal("c1)d1", foo2.GetMetadataValueEscaped("b"));
         }
 
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/13140
+        /// RecursiveDir (built-in, non-derivable metadata) must survive TaskParameter
+        /// serialization, which is the TaskHost boundary crossed in -mt mode.
+        /// </summary>
+        [Fact]
+        public void RecursiveDirSurvivesTaskParameterSerialization()
+        {
+            string sep = Path.DirectorySeparatorChar.ToString();
+            string itemSpec = $"src{sep}sub1{sep}sub2{sep}file.txt";
+            string wildcardPattern = $"src{sep}**{sep}file.txt";
+            string expectedRecursiveDir = $"sub1{sep}sub2{sep}";
+
+            // ProjectItemInstance.TaskItem computes RecursiveDir as built-in metadata
+            // from the wildcard pattern — it is NOT in CloneCustomMetadataEscaped().
+            var item = new ProjectItemInstanceTaskItem(
+                includeEscaped: itemSpec,
+                includeBeforeWildcardExpansionEscaped: wildcardPattern,
+                directMetadata: null,
+                itemDefinitions: null,
+                projectDirectory: Directory.GetCurrentDirectory(),
+                immutable: false,
+                definingFileEscaped: "test.proj");
+
+            item.GetMetadata("RecursiveDir").ShouldBe(expectedRecursiveDir);
+            ((ITaskItem2)item).CloneCustomMetadataEscaped().Contains("RecursiveDir").ShouldBeFalse();
+
+            // Wrap in TaskParameter (TaskHost serialization boundary)
+            TaskParameter t = new TaskParameter(item);
+            (t.WrappedParameter as ITaskItem).GetMetadata("RecursiveDir").ShouldBe(expectedRecursiveDir);
+
+            // Round-trip serialize/deserialize
+            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
+            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            (t2.WrappedParameter as ITaskItem).GetMetadata("RecursiveDir").ShouldBe(expectedRecursiveDir);
+        }
+
 #if FEATURE_APPDOMAIN
         private sealed class RemoteTaskItemFactory : MarshalByRefObject
         {
@@ -538,67 +581,5 @@ namespace Microsoft.Build.UnitTests
             }
         }
 #endif
-
-        /// <summary>
-        /// Verifies that RecursiveDir built-in metadata survives serialization.
-        /// RecursiveDir cannot be derived from the item spec alone - it requires the original
-        /// wildcard pattern. This test ensures it is copied to custom metadata during serialization.
-        /// See https://github.com/dotnet/msbuild/issues/3121
-        /// </summary>
-        [Fact]
-        public void ITaskItemParameter_RecursiveDirMetadataPreserved()
-        {
-            // Create a TaskItem with RecursiveDir set as custom metadata
-            // (simulating what happens when TaskParameterTaskItem copies it)
-            TaskItem baseItem = new TaskItem("src\\sub1\\sub2\\file.txt");
-            baseItem.SetMetadata("RecursiveDir", "sub1\\sub2\\");
-
-            TaskParameter t = new TaskParameter(baseItem);
-
-            Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
-
-            ITaskItem item = t.WrappedParameter as ITaskItem;
-            Assert.NotNull(item);
-            Assert.Equal("sub1\\sub2\\", item.GetMetadata("RecursiveDir"));
-
-            // Serialize and deserialize
-            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
-            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
-
-            Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
-
-            ITaskItem item2 = t2.WrappedParameter as ITaskItem;
-            Assert.NotNull(item2);
-            Assert.Equal("sub1\\sub2\\", item2.GetMetadata("RecursiveDir"));
-        }
-
-        /// <summary>
-        /// Verifies that when a TaskParameterTaskItem is created from a ProjectItemInstance.TaskItem
-        /// with RecursiveDir metadata, the RecursiveDir is preserved through serialization.
-        /// </summary>
-        [Fact]
-        public void ITaskItemParameter_BuiltInRecursiveDirCopiedToCustomMetadata()
-        {
-            // Create a TaskItem that has RecursiveDir as built-in metadata
-            // by simulating what TaskParameterTaskItem does - it copies RecursiveDir to custom metadata
-            var baseItem = new TaskItem("src\\sub1\\sub2\\file.txt");
-
-            // When TaskParameterTaskItem wraps an item with built-in RecursiveDir,
-            // it copies it to custom metadata. We simulate this by setting it directly.
-            baseItem.SetMetadata("RecursiveDir", "sub1\\sub2\\");
-
-            TaskParameter t = new TaskParameter(baseItem);
-
-            // Serialize and deserialize (simulates crossing TaskHost boundary)
-            ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
-            TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
-
-            ITaskItem deserializedItem = t2.WrappedParameter as ITaskItem;
-            Assert.NotNull(deserializedItem);
-
-            // RecursiveDir should survive serialization
-            string recursiveDir = deserializedItem.GetMetadata("RecursiveDir");
-            Assert.Equal("sub1\\sub2\\", recursiveDir);
-        }
     }
 }
