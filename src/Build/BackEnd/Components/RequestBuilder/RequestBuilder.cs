@@ -1059,6 +1059,38 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Determines whether results need to be transferred from another node before building.
+        /// <para>
+        /// In order for the check for target completeness for this project to be valid, all of the
+        /// target results from the project must be present in the results cache. It is possible that
+        /// this project has been moved from its original node and when it was, its results did not come
+        /// with it. This would be signified by the ResultsNodeId value in the configuration pointing to
+        /// a different node than the current one. In that case we will need to request those results be
+        /// moved from their original node to this one.
+        /// </para>
+        /// <para>
+        /// In MT mode, all worker nodes share the same process and caches, so transfer is unnecessary
+        /// and would race on the shared ResultsNodeId field (see #13188). This relies on the invariant
+        /// that <c>MultiThreaded == true</c> implies all worker nodes share caches (see
+        /// multithreaded-msbuild.md). If a future mode mixes in-proc and out-of-proc worker nodes,
+        /// revisit this check — see https://github.com/dotnet/msbuild/issues/11939.
+        /// </para>
+        /// </summary>
+        /// <param name="resultsNodeId">The node ID where results currently reside.</param>
+        /// <param name="currentNodeId">The node ID of the current node.</param>
+        /// <param name="isMultiThreaded">Whether MT mode is active.</param>
+        /// <returns>True if results must be transferred from another node before building.</returns>
+        internal static bool NeedsResultsTransfer(int resultsNodeId, int currentNodeId, bool isMultiThreaded)
+        {
+            if (isMultiThreaded)
+            {
+                return false;
+            }
+
+            return resultsNodeId != Scheduler.InvalidNodeId && resultsNodeId != currentNodeId;
+        }
+
+        /// <summary>
         /// Invokes the OnBlockedRequest event
         /// </summary>
         private void RaiseOnBlockedRequest(int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult = null)
@@ -1191,13 +1223,11 @@ namespace Microsoft.Build.BackEnd
                 // Set the current directory to that required by the project.
                 SetProjectDirectory();
 
-                // Transfer results and state from the previous node, if necessary.
-                // In order for the check for target completeness for this project to be valid, all of the target results from the project must be present
-                // in the results cache.  It is possible that this project has been moved from its original node and when it was its results did not come
-                // with it.  This would be signified by the ResultsNode value in the configuration pointing to a different node than the current one.  In that
-                // case we will need to request those results be moved from their original node to this one.
-                if ((_requestEntry.RequestConfiguration.ResultsNodeId != Scheduler.InvalidNodeId) &&
-                    (_requestEntry.RequestConfiguration.ResultsNodeId != _componentHost.BuildParameters.NodeId))
+                // Transfer results from the previous node if necessary — see NeedsResultsTransfer.
+                if (NeedsResultsTransfer(
+                    _requestEntry.RequestConfiguration.ResultsNodeId,
+                    _componentHost.BuildParameters.NodeId,
+                    _componentHost.BuildParameters.MultiThreaded))
                 {
                     // This indicates to the system that we will block waiting for a results transfer.  We will block here until those results become available.
                     await BlockOnTargetInProgress(Microsoft.Build.BackEnd.BuildRequest.InvalidGlobalRequestId, null);

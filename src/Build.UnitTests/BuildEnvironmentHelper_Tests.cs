@@ -18,7 +18,7 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void GetExecutablePath()
         {
-            var msbuildPath = Path.GetDirectoryName(BuildEnvironmentHelper.ExecutingAssemblyPath);
+            var msbuildPath = Path.GetDirectoryName(typeof(BuildEnvironmentHelper).GetAssemblyPath());
             string expectedMSBuildPath = Path.Combine(msbuildPath, Constants.MSBuildExecutableName).ToLowerInvariant();
 
             string configFilePath = BuildEnvironmentHelper.Instance.CurrentMSBuildConfigurationFile.ToLowerInvariant();
