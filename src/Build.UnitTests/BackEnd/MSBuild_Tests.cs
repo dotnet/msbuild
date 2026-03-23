@@ -2033,7 +2033,7 @@ namespace Microsoft.Build.UnitTests
 
             // Create the main project ON DISK with <ProjectReference> and import of real targets.
             string mainProjectPath = Path.Combine(projectDir, "main.csproj");
-            File.WriteAllText(mainProjectPath, $"""
+            File.WriteAllText(mainProjectPath, """
                 <Project>
                     <Import Project="$(MSBuildBinPath)\Microsoft.Common.CurrentVersion.targets" />
                     <ItemGroup>
@@ -2107,7 +2107,7 @@ namespace Microsoft.Build.UnitTests
 
             // Create the main project with <ProjectReference> and import of real targets.
             string mainProjectPath = Path.Combine(projectDir, "main.csproj");
-            string mainProjectXml = $"""
+            string mainProjectXml = """
                 <Project>
                     <Import Project="$(MSBuildBinPath)\Microsoft.Common.CurrentVersion.targets" />
                     <ItemGroup>
