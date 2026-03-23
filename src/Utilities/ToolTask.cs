@@ -634,7 +634,9 @@ namespace Microsoft.Build.Utilities
             string commandLineCommands,
             string responseFileSwitch)
         {
-            return CreateBaseProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
+            ProcessStartInfo startInfo = CreateBaseProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
+            ApplyEnvironmentOverrides(startInfo);
+            return startInfo;
         }
 
         private ProcessStartInfo CreateBaseProcessStartInfo(
@@ -689,6 +691,18 @@ namespace Microsoft.Build.Utilities
                 startInfo.WorkingDirectory = workingDirectory;
             }
 
+            return startInfo;
+        }
+
+        /// <summary>
+        /// Applies task-level environment variable  (both the obsolete <see cref="EnvironmentOverride"/>
+        /// and the current <see cref="EnvironmentVariables"/>) to the given <see cref="ProcessStartInfo"/>.
+        /// Prefers the pre-parsed <see cref="_environmentVariablePairs"/> populated by <see cref="Execute()"/>,
+        /// falling back to parsing <see cref="EnvironmentVariables"/> directly for callers outside
+        /// the normal Execute() path.
+        /// </summary>
+        private void ApplyEnvironmentOverrides(ProcessStartInfo startInfo)
+        {
             // Old style environment overrides
 #pragma warning disable 0618 // obsolete
             Dictionary<string, string> envOverrides = EnvironmentOverride;
@@ -709,8 +723,19 @@ namespace Microsoft.Build.Utilities
                     startInfo.Environment[variable.Key] = variable.Value;
                 }
             }
-
-            return startInfo;
+            else if (EnvironmentVariables != null)
+            {
+                // Fallback for callers outside the normal Execute() path
+                // where _environmentVariablePairs hasn't been populated yet.
+                foreach (string entry in EnvironmentVariables)
+                {
+                    string[] nameValuePair = entry.Split(s_equalsSplitter, 2);
+                    if (nameValuePair.Length == 2 && nameValuePair[0].Length > 0)
+                    {
+                        startInfo.Environment[nameValuePair[0]] = nameValuePair[1];
+                    }
+                }
+            }
         }
 
         protected ProcessStartInfo GetProcessStartInfoMultithreadable(
@@ -735,37 +760,10 @@ namespace Microsoft.Build.Utilities
                 startInfo.Environment[kvp.Key] = kvp.Value;
             }
 
-            string workingDirectory = taskEnvStartInfo.WorkingDirectory;
-            if (workingDirectory != null)
-            {
-                startInfo.WorkingDirectory = workingDirectory;
-            }
+            startInfo.WorkingDirectory = taskEnvStartInfo.WorkingDirectory;
 
-            // Re-apply obsolete EnvironmentOverride and EnvironmentVariables property overrides —
-            // they should take precedence over TaskEnvironment. CreateBaseProcessStartInfo already applied these,
-            // but we cleared the environment above, so we need to re-apply them.
-#pragma warning disable 0618 // obsolete
-            Dictionary<string, string> envOverrides = EnvironmentOverride;
-            if (envOverrides != null)
-            {
-                foreach (KeyValuePair<string, string> entry in envOverrides)
-                {
-                    startInfo.Environment[entry.Key] = entry.Value;
-                }
-            }
-#pragma warning restore 0618
-
-            if (EnvironmentVariables != null)
-            {
-                foreach (string entry in EnvironmentVariables)
-                {
-                    string[] nameValuePair = entry.Split(['='], 2);
-                    if (nameValuePair.Length == 2 && nameValuePair[0].Length > 0)
-                    {
-                        startInfo.Environment[nameValuePair[0]] = nameValuePair[1];
-                    }
-                }
-            }
+            // Apply task-level environment overrides — they should take precedence over TaskEnvironment.
+            ApplyEnvironmentOverrides(startInfo);
 
             return startInfo;
         }
