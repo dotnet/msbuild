@@ -19,6 +19,9 @@ namespace Microsoft.Build.Engine.UnitTests
     {
         private const string ExpectedEventMessage = "03767942CDB147B98D0ECDBDE1436DA3";
         private const string ExpectedEventCode = "0BF68998";
+        private static string TestAssemblyLocation { get; } = Path.Combine(
+            Path.GetDirectoryName(typeof(WarningsAsMessagesAndErrorsTests).Assembly.Location) ?? AppContext.BaseDirectory,
+            "Microsoft.Build.Engine.UnitTests.dll");
         private ITestOutputHelper _output;
 
         public WarningsAsMessagesAndErrorsTests(ITestOutputHelper output)
@@ -683,15 +686,11 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void TreatWarningsAsErrorsWhenSpecified_TaskHostFactory()
         {
-            string assemblyLocation = Path.Combine(
-                Path.GetDirectoryName(typeof(WarningsAsMessagesAndErrorsTests).Assembly.Location) ?? AppContext.BaseDirectory,
-                "Microsoft.Build.Engine.UnitTests.dll");
-
             using TestEnvironment env = TestEnvironment.Create(_output);
 
             TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
                 <Project>
-                    <UsingTask TaskName=""CustomLogAndReturnTask"" AssemblyFile=""{assemblyLocation}"" TaskFactory=""TaskHostFactory"" />
+                    <UsingTask TaskName=""CustomLogAndReturnTask"" AssemblyFile=""{TestAssemblyLocation}"" TaskFactory=""TaskHostFactory"" />
                     <PropertyGroup>
                         <MSBuildWarningsAsErrors>{ExpectedEventCode}</MSBuildWarningsAsErrors>
                     </PropertyGroup>
@@ -714,15 +713,11 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void TreatAllWarningsAsErrors_TaskHostFactory()
         {
-            string assemblyLocation = Path.Combine(
-                Path.GetDirectoryName(typeof(WarningsAsMessagesAndErrorsTests).Assembly.Location) ?? AppContext.BaseDirectory,
-                "Microsoft.Build.Engine.UnitTests.dll");
-
             using TestEnvironment env = TestEnvironment.Create(_output);
 
             TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
                 <Project>
-                    <UsingTask TaskName=""CustomLogAndReturnTask"" AssemblyFile=""{assemblyLocation}"" TaskFactory=""TaskHostFactory"" />
+                    <UsingTask TaskName=""CustomLogAndReturnTask"" AssemblyFile=""{TestAssemblyLocation}"" TaskFactory=""TaskHostFactory"" />
                     <PropertyGroup>
                         <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
                     </PropertyGroup>
@@ -744,15 +739,11 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void TreatWarningAsMessageOverridesTreatingItAsError_TaskHostFactory()
         {
-            string assemblyLocation = Path.Combine(
-                Path.GetDirectoryName(typeof(WarningsAsMessagesAndErrorsTests).Assembly.Location) ?? AppContext.BaseDirectory,
-                "Microsoft.Build.Engine.UnitTests.dll");
-
             using TestEnvironment env = TestEnvironment.Create(_output);
 
             TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
                 <Project>
-                    <UsingTask TaskName=""CustomLogAndReturnTask"" AssemblyFile=""{assemblyLocation}"" TaskFactory=""TaskHostFactory"" />
+                    <UsingTask TaskName=""CustomLogAndReturnTask"" AssemblyFile=""{TestAssemblyLocation}"" TaskFactory=""TaskHostFactory"" />
                     <PropertyGroup>
                         <MSBuildWarningsAsErrors>{ExpectedEventCode}</MSBuildWarningsAsErrors>
                         <MSBuildWarningsAsMessages>{ExpectedEventCode}</MSBuildWarningsAsMessages>
