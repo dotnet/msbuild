@@ -59,17 +59,17 @@
       </trans-unit>
       <trans-unit id="CannotConvertStringToBool">
         <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
-        <target state="translated">無法將字串 "{0}" 轉換成布林值 (true/false)。</target>
+        <target state="new">The string "{0}" cannot be converted to a boolean (true/false) value.</target>
         <note />
       </trans-unit>
       <trans-unit id="CollectionIsReadOnly">
         <source>This collection is read-only.</source>
-        <target state="translated">這是一個唯讀集合。</target>
+        <target state="new">This collection is read-only.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotGenerateReferenceAssemblyDirectory">
         <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
-        <target state="translated">嘗試從路徑 "{0}" 和架構 Moniker "{1}" 產生參考組件路徑時，發生錯誤。{2}</target>
+        <target state="new">When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="DebugPathTooLong">
@@ -84,12 +84,12 @@
       </trans-unit>
       <trans-unit id="GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">展開具有 glob 的 fileSpec 時發生例外狀況: fileSpec: "{0}" (假設它是檔案名稱)。例外狀況: {1}</target>
+        <target state="new">An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidAttributeMetadata">
         <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
-        <target state="translated">項目 "{0}" 的屬性 "{1}" 的值為 "{2}"，不能轉換為 "{3}"。</target>
+        <target state="new">Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidFilespecForTransform">
@@ -114,17 +114,17 @@
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
-          <target state="translated">不支援 .NET Framework 版本 "{0}"。請從列舉 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中指定值。</target>
+        <target state="new">.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
         <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
-        <target state="translated">明確地以 Windows SDK 為目標時，不支援 .NET Framework 版本 "{0}"，只有 .NET 4.5 及更新版本才予以支援。請從 Version45 (含) 以上版本的列舉 Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 中指定值。</target>
+        <target state="new">.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedVisualStudioVersion">
         <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
-        <target state="translated">不支援 Visual Studio 版本 "{0}"。請從列舉 Microsoft.Build.Utilities.VisualStudioVersion 中指定值。</target>
+        <target state="new">Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</target>
         <note />
       </trans-unit>
     </body>

@@ -59,17 +59,17 @@
       </trans-unit>
       <trans-unit id="CannotConvertStringToBool">
         <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
-        <target state="translated">"{0}" 문자열을 부울 값(true/false)으로 변환할 수 없습니다.</target>
+        <target state="new">The string "{0}" cannot be converted to a boolean (true/false) value.</target>
         <note />
       </trans-unit>
       <trans-unit id="CollectionIsReadOnly">
         <source>This collection is read-only.</source>
-        <target state="translated">이 컬렉션은 읽기 전용입니다.</target>
+        <target state="new">This collection is read-only.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotGenerateReferenceAssemblyDirectory">
         <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
-        <target state="translated">"{0}" 경로 및 프레임워크 모니커 "{1}"에서 참조 어셈블리 경로를 생성하는 동안 오류가 발생했습니다. {2}</target>
+        <target state="new">When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="DebugPathTooLong">
@@ -84,12 +84,12 @@
       </trans-unit>
       <trans-unit id="GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">glob를 사용하여 fileSpec을 확장하는 동안 예외가 발생했습니다. fileSpec: "{0}", 파일 이름이라고 가정합니다. 예외: {1}</target>
+        <target state="new">An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidAttributeMetadata">
         <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
-        <target state="translated">"{0}" 항목에 "{3}"(으)로 변환할 수 없는 "{2}" 값이 있는 "{1}" 특성이 있습니다.</target>
+        <target state="new">Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidFilespecForTransform">
@@ -114,17 +114,17 @@
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
-        <target state="translated">.NET Framework 버전 "{0}"이(가) 지원되지 않습니다. Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 열거형에서 값을 지정하세요.</target>
+        <target state="new">.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
         <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
-        <target state="translated">.NET 4.5 이상에서만 지원되는 Windows SDK를 명시적으로 대상으로 지정하는 경우 .NET Framework 버전 "{0}"이(가) 지원되지 않습니다.  Microsoft.Build.Utilities.TargetDotNetFrameworkVersion 열거형에서 Version45 이상인 값을 지정하세요.</target>
+        <target state="new">.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedVisualStudioVersion">
         <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
-        <target state="translated">Visual Studio 버전 "{0}"이(가) 지원되지 않습니다.  Microsoft.Build.Utilities.VisualStudioVersion 열거형에서 값을 지정하세요.</target>
+        <target state="new">Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</target>
         <note />
       </trans-unit>
     </body>
