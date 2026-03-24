@@ -21,13 +21,31 @@ namespace Microsoft.Build.Framework
         {
             _driver = driver;
         }
-        
+
         /// <summary>
-        /// Initializes a new instance of the TaskEnvironment class using the default multi-process execution mode.
-        /// This mode directly accesses the system environment variables and current working directory.
+        /// Gets the default task environment that directly accesses the system environment variables and current working directory. 
         /// </summary>
-        public TaskEnvironment() : this(MultiProcessTaskEnvironmentDriver.Instance) 
-        { }
+        /// <remarks>
+        /// Suitable for multi-process execution mode. Tasks running with this environment will see the same environment variables and working directory as the MSBuild process.
+        /// </remarks>
+        public static TaskEnvironment Default { get; } = new(MultiProcessTaskEnvironmentDriver.Instance);
+
+        /// <summary>
+        /// Creates a new <see cref="TaskEnvironment"/> with isolated environment variables and working directory.
+        /// </summary>
+        /// <remarks>
+        /// Suitable for multithreaded execution mode where each task needs its own environment state
+        /// that does not interfere with other concurrently executing tasks.
+        /// </remarks>
+        /// <param name="projectDirectory">The initial working directory for the task.</param>
+        /// <param name="environmentVariables">A dictionary of environment variables to use, or <see langword="null"/> to use the current process environment variables.</param>
+        /// <returns>A new <see cref="TaskEnvironment"/> with isolated environment state.</returns>
+        public static TaskEnvironment CreateMultithreaded(string projectDirectory, IDictionary<string, string>? environmentVariables = null)
+        {
+            return environmentVariables is null
+                ? new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(projectDirectory))
+                : new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(projectDirectory, environmentVariables));
+        }
 
         /// <summary>
         /// Gets or sets the project directory for the task execution.
