@@ -117,7 +117,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                 // Register operation-level analysis within this type
                 symbolStartContext.RegisterOperationAction(
-                    ctx => AnalyzeOperation(ctx, bannedApiLookup, filePathTypes, reportEnvironmentRules, analyzeAsMultiThreadable,
+                    ctx => AnalyzeOperation(ctx, bannedApiLookup, filePathTypes, reportEnvironmentRules,
                         taskEnvironmentType, absolutePathType, iTaskItemType, consoleType),
                     OperationKind.Invocation,
                     OperationKind.ObjectCreation,
@@ -133,7 +133,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             Dictionary<ISymbol, BannedApiEntry> bannedApiLookup,
             ImmutableHashSet<INamedTypeSymbol> filePathTypes,
             bool reportEnvironmentRules,
-            bool isMultiThreadable,
             INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? iTaskItemType,
@@ -187,7 +186,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     return;
                 }
 
-                var descriptor = GetDescriptor(entry.Category, isMultiThreadable);
+                var descriptor = GetDescriptor(entry.Category);
                 var displayName = referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
                 context.ReportDiagnostic(Diagnostic.Create(descriptor, context.Operation.Syntax.GetLocation(),
                     displayName, entry.Message));
@@ -230,7 +229,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                             string hint = "wrap path argument with TaskEnvironment.GetAbsolutePath()";
                             context.ReportDiagnostic(Diagnostic.Create(
-                                isMultiThreadable ? DiagnosticDescriptors.FilePathRequiresAbsolute : DiagnosticDescriptors.FilePathRequiresAbsoluteInfo,
+                                DiagnosticDescriptors.FilePathRequiresAbsolute,
                                 context.Operation.Syntax.GetLocation(),
                                 displayName, hint));
                         }
@@ -239,20 +238,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
         }
 
-        private static DiagnosticDescriptor GetDescriptor(BannedApiDefinitions.ApiCategory category, bool isMultiThreadable)
+        private static DiagnosticDescriptor GetDescriptor(BannedApiDefinitions.ApiCategory category)
         {
             return category switch
             {
                 BannedApiDefinitions.ApiCategory.CriticalError => DiagnosticDescriptors.CriticalError,
-                BannedApiDefinitions.ApiCategory.TaskEnvironment => isMultiThreadable
-                    ? DiagnosticDescriptors.TaskEnvironmentRequired
-                    : DiagnosticDescriptors.TaskEnvironmentRequiredInfo,
-                BannedApiDefinitions.ApiCategory.PotentialIssue => isMultiThreadable
-                    ? DiagnosticDescriptors.PotentialIssue
-                    : DiagnosticDescriptors.PotentialIssueInfo,
-                _ => isMultiThreadable
-                    ? DiagnosticDescriptors.TaskEnvironmentRequired
-                    : DiagnosticDescriptors.TaskEnvironmentRequiredInfo,
+                BannedApiDefinitions.ApiCategory.TaskEnvironment => DiagnosticDescriptors.TaskEnvironmentRequired,
+                BannedApiDefinitions.ApiCategory.PotentialIssue => DiagnosticDescriptors.PotentialIssue,
+                _ => DiagnosticDescriptors.TaskEnvironmentRequired,
             };
         }
     }

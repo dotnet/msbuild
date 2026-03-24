@@ -37,7 +37,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         private const int MaxCallChainDepth = 20;
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
-            ImmutableArray.Create(DiagnosticDescriptors.TransitiveUnsafeCall, DiagnosticDescriptors.TransitiveUnsafeCallInfo);
+            ImmutableArray.Create(DiagnosticDescriptors.TransitiveUnsafeCall);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -271,12 +271,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             foreach (var taskType in taskTypes)
             {
-                // Determine if this task type is multithreadable for severity selection
-                bool isMultiThreadable =
-                    (iMultiThreadableTaskType is not null && ImplementsInterface(taskType, iMultiThreadableTaskType)) ||
-                    (multiThreadableTaskAttributeType is not null && taskType.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, multiThreadableTaskAttributeType))) ||
-                    (analyzedAttributeType is not null && taskType.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, analyzedAttributeType)));
-
                 // Track reported violations per task type to avoid flooding with duplicates.
                 // Key: target banned API display name. We report only the shortest chain per API.
                 var reportedPerTaskType = new HashSet<string>(StringComparer.Ordinal);
@@ -320,7 +314,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         {
                             foreach (var v in violations)
                             {
-                                ReportTransitiveViolation(context, method, v, chain, reportedPerTaskType, isMultiThreadable);
+                                ReportTransitiveViolation(context, method, v, chain, reportedPerTaskType);
                             }
                         }
 
@@ -360,8 +354,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             IMethodSymbol taskMethod,
             ViolationInfo violation,
             List<string> chain,
-            HashSet<string> reportedPerTaskType,
-            bool isMultiThreadable)
+            HashSet<string> reportedPerTaskType)
         {
             // Deduplicate by target API — report each banned API only once per task type
             if (!reportedPerTaskType.Add(violation.ApiDisplayName))
@@ -373,12 +366,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var chainStr = string.Join(" → ", chainWithApi);
 
             var location = taskMethod.Locations.Length > 0 ? taskMethod.Locations[0] : Location.None;
-            var descriptor = isMultiThreadable
-                ? DiagnosticDescriptors.TransitiveUnsafeCall
-                : DiagnosticDescriptors.TransitiveUnsafeCallInfo;
-
             context.ReportDiagnostic(Diagnostic.Create(
-                descriptor,
+                DiagnosticDescriptors.TransitiveUnsafeCall,
                 location,
                 FormatMethodFull(taskMethod),
                 violation.ApiDisplayName,
