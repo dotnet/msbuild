@@ -344,7 +344,7 @@ namespace Microsoft.Build.BackEnd
                         _projectFile,
                         _buildComponentHost.BuildParameters.LogTaskInputs,
                         _setParameters,
-                        new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),
+                        GetGlobalPropertiesForTaskHost(),
                         _taskLoggingContext.GetWarningsAsErrors(),
                         _taskLoggingContext.GetWarningsNotAsErrors(),
                         _taskLoggingContext.GetWarningsAsMessages());
@@ -410,6 +410,31 @@ namespace Microsoft.Build.BackEnd
             }
 
             return _taskExecutionSucceeded;
+        }
+
+        /// <summary>
+        /// Gets the global properties to send to the out-of-proc TaskHost.
+        /// Uses request-level properties from BuildEngine (which is a <see cref="TaskHost"/>
+        /// implementing <see cref="IBuildEngine6"/>) because those include per-request properties
+        /// like MSBuildRestoreSessionId that are added by ExecuteRestore() but are not present
+        /// in the build-level BuildParameters.GlobalProperties.
+        /// Falls back to build-level properties if the BuildEngine does not support IBuildEngine6.
+        /// </summary>
+        private Dictionary<string, string> GetGlobalPropertiesForTaskHost()
+        {
+            if (BuildEngine is IBuildEngine6 buildEngine6)
+            {
+                IReadOnlyDictionary<string, string> requestProperties = buildEngine6.GetGlobalProperties();
+                var result = new Dictionary<string, string>(requestProperties.Count, StringComparer.OrdinalIgnoreCase);
+                foreach (KeyValuePair<string, string> kvp in requestProperties)
+                {
+                    result[kvp.Key] = kvp.Value;
+                }
+
+                return result;
+            }
+
+            return new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties);
         }
 
         /// <summary>
