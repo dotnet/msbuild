@@ -414,15 +414,14 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Gets the global properties to send to the out-of-proc TaskHost.
-        /// Uses request-level properties from BuildEngine (which is a <see cref="TaskHost"/>
-        /// implementing <see cref="IBuildEngine6"/>) because those include per-request properties
-        /// like MSBuildRestoreSessionId that are added by ExecuteRestore() but are not present
-        /// in the build-level BuildParameters.GlobalProperties.
-        /// Falls back to build-level properties if the BuildEngine does not support IBuildEngine6.
+        /// Under ChangeWave 18.6, uses request-level properties from BuildEngine via
+        /// <see cref="IBuildEngine6.GetGlobalProperties"/> because those include per-request
+        /// properties like MSBuildRestoreSessionId that are added by ExecuteRestore() but are
+        /// not present in the build-level BuildParameters.GlobalProperties.
         /// </summary>
         private Dictionary<string, string> GetGlobalPropertiesForTaskHost()
         {
-            if (BuildEngine is IBuildEngine6 buildEngine6)
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6) && BuildEngine is IBuildEngine6 buildEngine6)
             {
                 IReadOnlyDictionary<string, string> requestProperties = buildEngine6.GetGlobalProperties();
                 var result = new Dictionary<string, string>(requestProperties.Count, StringComparer.OrdinalIgnoreCase);
