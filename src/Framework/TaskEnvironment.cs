@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -23,7 +24,7 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Gets the default task environment that directly accesses the system environment variables and current working directory. 
+        /// Gets the default task environment that directly accesses the system environment variables and current working directory.
         /// </summary>
         /// <remarks>
         /// Suitable for multi-process execution mode. Tasks running with this environment will see the same environment variables and working directory as the MSBuild process.
@@ -40,8 +41,12 @@ namespace Microsoft.Build.Framework
         /// <param name="projectDirectory">The initial working directory for the task.</param>
         /// <param name="environmentVariables">A dictionary of environment variables to use, or <see langword="null"/> to use the current process environment variables.</param>
         /// <returns>A new <see cref="TaskEnvironment"/> with isolated environment state.</returns>
+        /// <exception cref="ArgumentNullException"><paramref name="projectDirectory"/> is <see langword="null"/>.</exception>
+        /// <exception cref="ArgumentException"><paramref name="projectDirectory"/> is empty.</exception>
         public static TaskEnvironment CreateMultithreaded(string projectDirectory, IDictionary<string, string>? environmentVariables = null)
         {
+            ArgumentException.ThrowIfNullOrEmpty(projectDirectory);
+
             return environmentVariables is null
                 ? new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(projectDirectory))
                 : new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(projectDirectory, environmentVariables));
