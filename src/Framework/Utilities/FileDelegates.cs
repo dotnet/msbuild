@@ -3,7 +3,6 @@
 
 using System.IO;
 
-
 namespace Microsoft.Build.Shared
 {
     /// <summary>
