@@ -4622,5 +4622,69 @@ $@"<Project InitialTargets=`Sleep`>
                 _logger.AssertLogContains($"Child{i} built");
             }
         }
+
+        /// <summary>
+        /// Regression test: when MSBUILDDEBUGSCHEDULER is enabled in multithreaded (-mt) mode,
+        /// multiple in-proc node engines write trace output to files. Previously, all engines
+        /// wrote to the same EngineTrace_{PID}.txt file with FileShare.Read, causing IOException
+        /// when two engines traced concurrently. The IOException fatally crashed the ActionBlock
+        /// work queue, silently dropping subsequent request completions and causing a deadlock.
+        ///
+        /// The fix uses per-node trace files (EngineTrace_{PID}_{NodeId}.txt) and catches IO
+        /// exceptions in TraceEngine() so they can never crash the build engine.
+        /// </summary>
+        [Fact]
+        public void MultiThreadedBuild_WithDebugSchedulerTracing_DoesNotDeadlock()
+        {
+            string debugPath = _env.CreateFolder().Path;
+            _env.SetEnvironmentVariable("MSBUILDDEBUGSCHEDULER", "1");
+            _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath);
+
+            // Create a root project that builds two independent child projects in parallel.
+            // This forces multiple in-proc nodes to run concurrently, which triggers
+            // concurrent TraceEngine() calls.
+            string child1 = _env.CreateFile(".proj").Path;
+            string child2 = _env.CreateFile(".proj").Path;
+            string root = _env.CreateFile(".proj").Path;
+
+            string childContent = CleanupFileContents("""
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                  <Target Name="Build">
+                    <Message Text="Child built" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+            File.WriteAllText(child1, childContent);
+            File.WriteAllText(child2, childContent);
+
+            string rootContent = CleanupFileContents($"""
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                  <Target Name="Build">
+                    <MSBuild Projects="{child1};{child2}" BuildInParallel="true" />
+                    <Message Text="Root completed" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+            File.WriteAllText(root, rootContent);
+
+            var buildParameters = new BuildParameters
+            {
+                MaxNodeCount = 4,
+                EnableNodeReuse = false,
+                MultiThreaded = true,
+                DisableInProcNode = false,
+                SaveOperatingEnvironment = false,
+                Loggers = [_logger],
+            };
+
+            var data = new BuildRequestData(root, new Dictionary<string, string>(), null,
+                ["Build"], null);
+
+            BuildManager.DefaultBuildManager.Dispose();
+            BuildResult result = BuildManager.DefaultBuildManager.Build(buildParameters, data);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            _logger.AssertLogContains("Root completed");
+        }
     }
 }

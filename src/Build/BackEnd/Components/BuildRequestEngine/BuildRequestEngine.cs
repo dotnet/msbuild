@@ -1561,13 +1561,27 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (this)
                 {
-                    FileUtilities.EnsureDirectoryExists(_debugDumpPath);
-
-                    using (StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true))
+                    try
                     {
-                        string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
-                        file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, DateTime.UtcNow.Ticks, message);
-                        file.Flush();
+                        FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+
+                        // Use per-node trace files to avoid file contention when multiple in-proc
+                        // nodes run in the same process (multithreaded / -mt mode).
+                        int nodeId = _componentHost?.BuildParameters?.NodeId ?? 0;
+                        string traceFile = string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}_{1}.txt"), EnvironmentUtilities.CurrentProcessId, nodeId);
+
+                        using (StreamWriter file = FileUtilities.OpenWrite(traceFile, append: true))
+                        {
+                            string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
+                            file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, DateTime.UtcNow.Ticks, message);
+                            file.Flush();
+                        }
+                    }
+                    catch (IOException)
+                    {
+                        // Trace file IO failures must never crash the build engine.
+                        // In multithreaded mode, file contention can occur if multiple engines
+                        // happen to share a trace file path despite the per-node naming.
                     }
                 }
             }
