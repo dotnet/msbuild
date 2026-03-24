@@ -354,6 +354,38 @@
     <comment>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</comment>
   </data>
+  <data name="TaskHostBuildCallbackFailed" xml:space="preserve">
+    <value>MSB5030: TaskHost BuildProjectFile callback failed: {0}</value>
+    <comment>{StrBegin="MSB5030: "}"BuildProjectFile" and "TaskHost" are MSBuild terms and should not be localized.</comment>
+  </data>
+  <data name="TaskHostCallbackStarted" xml:space="preserve">
+    <value>TaskHost callback: BuildProjectFile for "{0}" targets=[{1}]</value>
+    <comment>"BuildProjectFile" and "TaskHost" are MSBuild terms and should not be localized. {0} is the project file names, {1} is the target names.</comment>
+  </data>
+  <data name="TaskHostYieldingForCallback" xml:space="preserve">
+    <value>TaskHost yielding for callback. Active tasks: {0}, Yielded tasks: {1}</value>
+    <comment>"TaskHost" is an MSBuild term and should not be localized. {0} and {1} are integer counts.</comment>
+  </data>
+  <data name="TaskHostReacquiredAfterCallback" xml:space="preserve">
+    <value>TaskHost reacquired after callback. Active tasks: {0}, Yielded tasks: {1}</value>
+    <comment>"TaskHost" is an MSBuild term and should not be localized. {0} and {1} are integer counts.</comment>
+  </data>
+  <data name="TaskHostAcceptingNestedTask" xml:space="preserve">
+    <value>TaskHost accepting nested task "{0}" while {1} task(s) are yielded.</value>
+    <comment>"TaskHost" is an MSBuild term and should not be localized. {0} is the task name, {1} is the count of yielded tasks.</comment>
+  </data>
+  <data name="TaskHostForwardingYield" xml:space="preserve">
+    <value>TaskHost: forwarding Yield to scheduler.</value>
+    <comment>"TaskHost" and "Yield" are MSBuild terms and should not be localized.</comment>
+  </data>
+  <data name="TaskHostForwardingReacquire" xml:space="preserve">
+    <value>TaskHost: forwarding Reacquire to scheduler.</value>
+    <comment>"TaskHost" and "Reacquire" are MSBuild terms and should not be localized.</comment>
+  </data>
+  <data name="TaskHostUnmatchedCallbackResponse" xml:space="preserve">
+    <value>TaskHost received callback response with no pending request. RequestId={0}, Type={1}</value>
+    <comment>"TaskHost" is an MSBuild term and should not be localized. {0} is the request ID, {1} is the packet type.</comment>
+  </data>
   <data name="LoggingBeforeTaskInitialization" xml:space="preserve">
     <value>MSB6005: Task attempted to log before it was initialized. Message was: {0}</value>
     <comment>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</comment>
