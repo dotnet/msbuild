@@ -21,7 +21,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// - MSBuildTask0002: Replaces banned APIs with TaskEnvironment equivalents
     /// - MSBuildTask0003: Wraps path arguments with TaskEnvironment.GetAbsolutePath()
     /// </summary>
-    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(MultiThreadableTaskCodeFixProvider)), Shared]
+    [ExportCodeFixProvider(LanguageNames.CSharp, Name = nameof(MultiThreadableTaskCodeFixProvider))]
+    [Shared]
     public sealed class MultiThreadableTaskCodeFixProvider : CodeFixProvider
     {
         public override ImmutableArray<string> FixableDiagnosticIds =>

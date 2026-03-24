@@ -2,14 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>12.0</LangVersion>
     <Nullable>enable</Nullable>
     <AssemblyName>Microsoft.Build.TaskAuthoring.Analyzer</AssemblyName>
     <RootNamespace>Microsoft.Build.TaskAuthoring.Analyzer</RootNamespace>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
     <IsPackable>false</IsPackable>
     <IsTestProject>false</IsTestProject>
-    <!-- Suppress RS2001: our rules intentionally have dual severity (Warning for IMultiThreadableTask, Info for plain ITask) -->
+    <!-- Suppress RS2001: our analyzer rules use custom severities -->
     <NoWarn>$(NoWarn);NU5128;RS1038;RS2001</NoWarn>
   </PropertyGroup>
 

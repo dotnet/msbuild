@@ -13,12 +13,10 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | ID | Severity | Scope | Title |
 |---|---|---|---|
 | **MSBuildTask0001** | Error | All `ITask` implementations | API is never safe in MSBuild tasks |
-| **MSBuildTask0002** | Warning / Info ¹ | All `ITask` implementations | API requires `TaskEnvironment` alternative |
-| **MSBuildTask0003** | Warning / Info ¹ | All `ITask` implementations | File system API requires absolute path |
-| **MSBuildTask0004** | Warning / Info ¹ | All `ITask` implementations | API may cause issues in multithreaded tasks |
-| **MSBuildTask0005** | Warning / Info ¹ | All `ITask` implementations | Transitive unsafe API usage in task call chain |
-
-> ¹ **Warning** for `IMultiThreadableTask` / `[MSBuildMultiThreadableTask]` tasks; **Info** (Message) for plain `ITask` implementations. MSBuildTask0001 is always **Error** regardless of task type.
+| **MSBuildTask0002** | Warning | All `ITask` implementations | API requires `TaskEnvironment` alternative |
+| **MSBuildTask0003** | Warning | All `ITask` implementations | File system API requires absolute path |
+| **MSBuildTask0004** | Warning | All `ITask` implementations | API may cause issues in multithreaded tasks |
+| **MSBuildTask0005** | Warning | All `ITask` implementations | Transitive unsafe API usage in task call chain |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -39,7 +37,7 @@ These APIs affect the entire process or interfere with build infrastructure. The
 
 ### MSBuildTask0002 — Use TaskEnvironment Alternative
 
-These APIs access process-global state that varies per task in multithreaded mode. Reported as **Warning** for `IMultiThreadableTask` / `[MSBuildMultiThreadableTask]` tasks and **Info** for plain `ITask` implementations.
+These APIs access process-global state that varies per task in multithreaded mode.
 
 | Banned API | Replacement |
 |---|---|
@@ -58,7 +56,7 @@ These APIs access process-global state that varies per task in multithreaded mod
 
 ### MSBuildTask0003 — File Paths Must Be Absolute
 
-File system APIs that accept a path parameter will resolve relative paths against the process working directory — which is shared and unpredictable in multithreaded mode. Reported as **Warning** for `IMultiThreadableTask` / `[MSBuildMultiThreadableTask]` tasks and **Info** for plain `ITask` implementations.
+File system APIs that accept a path parameter will resolve relative paths against the process working directory — which is shared and unpredictable in multithreaded mode.
 
 **Monitored types:** `File`, `Directory`, `FileInfo`, `DirectoryInfo`, `FileStream`, `StreamReader`, `StreamWriter`, `FileSystemWatcher`
 
@@ -87,7 +85,7 @@ void Helper(AbsolutePath p) => File.Exists(p);
 
 ### MSBuildTask0004 — Potential Issue (Review Required)
 
-These APIs may cause version conflicts or other issues in a shared task host. Reported as **Warning** for `IMultiThreadableTask` / `[MSBuildMultiThreadableTask]` tasks and **Info** for plain `ITask` implementations.
+These APIs may cause version conflicts or other issues in a shared task host.
 
 | API | Concern |
 |---|---|
@@ -113,11 +111,8 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting in helper cla
 
 ### Severity Levels
 
-The analyzer uses a dual-severity model based on the task type:
-
-- **`IMultiThreadableTask` / `[MSBuildMultiThreadableTask]` tasks:** Rules MSBuildTask0002–MSBuildTask0005 report as **Warning**, since these tasks have explicitly opted into multithreaded execution and must use safe alternatives.
-- **Plain `ITask` implementations:** Rules MSBuildTask0002–MSBuildTask0005 report as **Info** (Message), serving as guidance for future migration without blocking the build.
-- **MSBuildTask0001** is always **Error** regardless of task type — these APIs are never safe in any MSBuild task.
+- **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
+- **MSBuildTask0002–MSBuildTask0005** report as **Warning** for all task types.
 
 ## Code Fixes
 
@@ -235,7 +230,8 @@ dotnet test
 ### Performance
 
 - **O(1) banned API lookup** via `Dictionary<ISymbol, BannedApiEntry>` with `SymbolEqualityComparer`
-- **Per-type scoping** via `RegisterSymbolStartAction` — operations outside task classes are never analyzed
+- **Per-type scoping in MultiThreadableTaskAnalyzer** via `RegisterSymbolStartAction` — operations outside task classes are never analyzed
+- **Compilation-wide scan in TransitiveCallChainAnalyzer** — traces call chains across all methods to detect transitive banned API usage from task entry points
 - **No LINQ on hot paths** — `ImplementsInterface` uses explicit loop
 - **Static `AnalyzeOperation`** — no instance state captured
 - **Cached banned API definitions** — built once per compilation via `static readonly` field

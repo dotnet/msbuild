@@ -260,8 +260,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 taskTypes = taskTypes.Where(t =>
                     (iMultiThreadableTaskType is not null && t.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, iMultiThreadableTaskType))) ||
                     (multiThreadableTaskAttributeType is not null && t.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, multiThreadableTaskAttributeType))) ||
-                    (analyzedAttributeType is not null && t.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, analyzedAttributeType)))
-                ).ToList();
+                    (analyzedAttributeType is not null && t.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, analyzedAttributeType)))).ToList();
 
                 if (taskTypes.Count == 0)
                 {
@@ -338,8 +337,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                                 }
                             }
                         }
-
-
                     }
                 }
             }
@@ -392,15 +389,24 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         result.Add(type);
                     }
 
-                    // Check nested types
-                    foreach (var nested in type.GetTypeMembers())
-                    {
-                        if (!nested.IsAbstract && ImplementsInterface(nested, iTaskType))
-                        {
-                            result.Add(nested);
-                        }
-                    }
+                    FindNestedTaskTypes(type, iTaskType, result);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Recursively discovers task types in arbitrarily nested type hierarchies.
+        /// </summary>
+        private static void FindNestedTaskTypes(INamedTypeSymbol parentType, INamedTypeSymbol iTaskType, List<INamedTypeSymbol> result)
+        {
+            foreach (var nested in parentType.GetTypeMembers())
+            {
+                if (!nested.IsAbstract && ImplementsInterface(nested, iTaskType))
+                {
+                    result.Add(nested);
+                }
+
+                FindNestedTaskTypes(nested, iTaskType, result);
             }
         }
 

@@ -175,8 +175,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 new BannedApi("M:System.AppDomain.CreateInstanceFrom(System.String,System.String)",
                     ApiCategory.PotentialIssue, "may cause version conflicts in shared task host"),
                 new BannedApi("M:System.AppDomain.CreateInstance(System.String,System.String)",
-                    ApiCategory.PotentialIssue, "may cause version conflicts in shared task host")
-            );
+                    ApiCategory.PotentialIssue, "may cause version conflicts in shared task host"));
         }
     }
 }
