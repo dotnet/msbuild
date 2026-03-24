@@ -29,14 +29,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests
             ");
 
             var pathDiags = diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ToArray();
-            
-            // Debug: print all diagnostics
-            System.Console.WriteLine($"Total diagnostics: {diags.Length}");
-            foreach (var diag in diags)
-            {
-                System.Console.WriteLine($"  [{diag.Id}] {diag.GetMessage()} at {diag.Location}");
-            }
-            
+
             pathDiags.Length.ShouldBe(1, $"Expected exactly 1 diagnostic but got {pathDiags.Length}: {string.Join(", ", pathDiags.Select(d => d.GetMessage()))}");
         }
     }

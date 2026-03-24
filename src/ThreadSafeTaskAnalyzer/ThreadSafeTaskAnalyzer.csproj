@@ -7,14 +7,8 @@
     <AssemblyName>Microsoft.Build.TaskAuthoring.Analyzer</AssemblyName>
     <RootNamespace>Microsoft.Build.TaskAuthoring.Analyzer</RootNamespace>
     <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
-    <!-- This project is an analyzer, not a regular MSBuild component -->
     <IsPackable>false</IsPackable>
     <IsTestProject>false</IsTestProject>
-    <!-- Analyzer projects manage their own Roslyn package versions independently -->
-    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <!-- Suppress RS2001: our rules intentionally have dual severity (Warning for IMultiThreadableTask, Info for plain ITask) -->
     <NoWarn>$(NoWarn);NU5128;RS1038;RS2001</NoWarn>
   </PropertyGroup>
@@ -29,9 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.12.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" PrivateAssets="all" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.11.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

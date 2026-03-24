@@ -6,10 +6,10 @@
     <IsTestProject>true</IsTestProject>
     <!-- Not a standard MSBuild unit test — uses Roslyn analyzer testing infra.
          IsUnitTestProject=false prevents Directory.Build.targets from adding
-         shared test files and unversioned PackageReferences that conflict
-         with ManagePackageVersionsCentrally=false. -->
+         shared test files (TestAssemblyInfo.cs, TestProgram.cs). -->
     <IsUnitTestProject>false</IsUnitTestProject>
-    <!-- Analyzer testing packages are not in central management -->
+    <!-- CodeAnalysis.Testing packages have transitive NuGet dependencies
+         that conflict with the repo's centrally-managed NuGet versions. -->
     <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
   </PropertyGroup>
 
