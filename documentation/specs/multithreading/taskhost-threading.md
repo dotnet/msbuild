@@ -36,7 +36,7 @@ The task runner thread is where user task code runs. Any `IBuildEngine` calls fr
 
 Before callback support, the two threads had a simple lifecycle: the main thread spawned the task thread, waited for completion, and sent the result. Communication was one-directional (worker node → TaskHost for configuration/cancellation, TaskHost → worker node for logs/completion).
 
-With callback support, the task can query the owning worker node for information it doesn't have locally (e.g., `IsRunningMultipleNodes`, and in future stages: `RequestCores`, `BuildProjectFile`). This introduces **bidirectional IPC** between the threads:
+With callback support, the task can query the owning worker node for information it doesn't have locally (e.g., `IsRunningMultipleNodes`, `RequestCores`, `BuildProjectFile`). This introduces **bidirectional IPC** between the threads:
 
 ```mermaid
 sequenceDiagram
@@ -95,9 +95,65 @@ Worker node sends callback response
 
 The worker node cannot exit its packet loop without first receiving `TaskHostTaskComplete`. But `TaskHostTaskComplete` cannot be sent until the task finishes. And the task cannot finish while it is blocked waiting for a callback response. Therefore, the worker node **must** process the callback request and send the response before it can ever stop.
 
+## BuildProjectFile Callback Flow (added in Stage 3)
+
+Tasks running in the TaskHost can call `BuildProjectFile` to build other projects. All four overloads normalize to the canonical 6-param form and send a `TaskHostBuildRequest` packet to the owning worker node, which forwards the call to the in-process `IBuildEngine3.BuildProjectFilesInParallel`.
+
+### Yield-for-Callback Pattern
+
+When a task calls `BuildProjectFile`, the TaskHost yields so the scheduler can reuse the process for nested tasks:
+
+```mermaid
+sequenceDiagram
+    participant TR as Task Runner Thread
+    participant MT as Main Thread
+    participant PP as Owning Worker Node
+    participant SC as Scheduler
+
+    TR->>TR: YieldForCallback()<br/>(yielded++, active--)
+    TR->>MT: TaskHostBuildRequest<br/>(blocks on TCS)
+    activate TR
+
+    MT->>PP: TaskHostBuildRequest packet
+    PP->>SC: BuildProjectFilesInParallel()
+
+    Note over SC: Child project needs same TaskHost runtime
+    SC->>PP: Schedule nested task to same TaskHost
+    PP->>MT: TaskHostConfiguration (nested)
+    MT->>MT: HandleTaskHostConfiguration()<br/>(starts Thread-B)
+
+    Note over MT: Thread-B executes nested task
+    MT-->>PP: TaskHostTaskComplete (nested)
+    PP-->>SC: Nested task done
+
+    SC-->>PP: BuildProjectFile result
+    PP-->>MT: TaskHostBuildResponse
+    MT->>MT: HandleCallbackResponse()<br/>(sets TCS result)
+    MT-->>TR: TCS unblocks
+    deactivate TR
+    TR->>TR: ReacquireAfterCallback()<br/>(active++, yielded--)
+```
+
+### Counter Management
+
+Two counters track the TaskHost's availability:
+
+- `_activeTaskCount`: Number of tasks actively executing. A non-zero count prevents new tasks from being scheduled.
+- `_yieldedTaskCount`: Number of tasks blocked on a callback. A yielded task does NOT prevent new tasks from being scheduled.
+
+**Transition ordering**: When yielding, increment `_yieldedTaskCount` BEFORE decrementing `_activeTaskCount`. When reacquiring, the reverse. This ensures the sum is never zero during transition.
+
+### Handler Stack (Process Reuse)
+
+`NodeProviderOutOfProcTaskHost` uses a `Stack<INodePacketHandler>` to manage multiple `TaskHostTask` handlers on the same node. Push on nested task dispatch, peek for packet routing, pop on nested task completion.
+
+### Per-Task Isolation (TaskExecutionContext)
+
+Each task gets a `TaskExecutionContext` stored in `_taskContexts` (ConcurrentDictionary) and accessed via `_currentTaskContext` (AsyncLocal). The context holds configuration, saved environment (CWD, env vars, warning settings), pending callback requests, and execution state. `EffectiveConfiguration` reads from the per-task context first, falling back to `_currentConfiguration`.
+
 ## TaskHost Lifecycle
 
-The TaskHost process can execute multiple tasks sequentially. After finishing one task, it returns to an idle state and waits for either a new task or a shutdown signal.
+The TaskHost process can execute multiple tasks, both sequentially and concurrently. After finishing one task, it returns to an idle state and waits for either a new task or a shutdown signal. When a task calls `BuildProjectFile`, the TaskHost yields (incrementing `_yieldedTaskCount`, then decrementing `_activeTaskCount`), allowing the scheduler to dispatch a nested task to the same process while the outer task is blocked waiting for the callback response.
 
 ### Event Loop Cycle
 
@@ -113,15 +169,15 @@ stateDiagram-v2
 
 1. **Idle**: `WaitAny()` blocks on the four wait handles. No task thread exists. `_currentConfiguration` is null.
 2. **TaskHostConfiguration arrives**: `HandleTaskHostConfiguration()` stores the config and spawns `_taskRunnerThread` to call `RunTask()`. The main thread immediately returns to `WaitAny()`.
-3. **Task executes**: `RunTask()` sets up the environment, loads the task assembly, calls `task.Execute()`, collects output parameters, and packages the result into `_taskCompletePacket`. On completion (success or failure), it signals `_taskCompleteEvent`.
-4. **CompleteTask()**: The main thread wakes on index 2, sends `_taskCompletePacket` to the owning worker node, and sets `_currentConfiguration = null`. The node is now idle again.
+3. **Task executes**: `RunTask()` sets up the environment, loads the task assembly, calls `task.Execute()`, collects output parameters, and enqueues the result into `_taskCompleteQueue`. On completion (success or failure), it signals `_taskCompleteEvent`.
+4. **CompleteTask()**: The main thread wakes on index 2, drains `_taskCompleteQueue` sending each `TaskHostTaskComplete` packet to the owning worker node. When no tasks remain active or yielded, it clears `_currentConfiguration`. The node is now idle again.
 5. **Back to step 1**: The main thread loops back to `WaitAny()`, ready for another `TaskHostConfiguration` or a `NodeBuildComplete`.
 
 ### State Between Tasks
 
 Each new `TaskHostConfiguration` carries a full environment snapshot, task parameters, and warning settings. The task runner thread resets per-task state at the start of `RunTask()`:
 
-**Reset per task:** `_isTaskExecuting`, `_currentConfiguration`, `_debugCommunications`, `_updateEnvironment`, `WarningsAsErrors`/`WarningsNotAsErrors`/`WarningsAsMessages`, `_fileAccessData`
+**Reset per task:** `_activeTaskCount`, `_yieldedTaskCount`, `_currentConfiguration`, `_debugCommunications`, `_updateEnvironment`, `_warningsAsErrors`/`_warningsNotAsErrors`/`_warningsAsMessages`, `_fileAccessData`, per-task `TaskExecutionContext`
 
 **Persists across tasks (within a single build):**
 - `s_mismatchedEnvironmentValues` (static) — environment variable fixups for bitness differences, computed once per process
