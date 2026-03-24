@@ -59,17 +59,17 @@
       </trans-unit>
       <trans-unit id="CannotConvertStringToBool">
         <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
-        <target state="new">The string "{0}" cannot be converted to a boolean (true/false) value.</target>
+        <target state="translated">Řetězec {0} nelze převést na logickou hodnotu (true/false).</target>
         <note />
       </trans-unit>
       <trans-unit id="CollectionIsReadOnly">
         <source>This collection is read-only.</source>
-        <target state="new">This collection is read-only.</target>
+        <target state="translated">Tato kolekce je jen pro čtení.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotGenerateReferenceAssemblyDirectory">
         <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
-        <target state="new">When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</target>
+        <target state="translated">Při pokusu o vygenerování cesty odkazovaného sestavení z cesty {0} a monikeru rozhraní {1} došlo k chybě. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="DebugPathTooLong">
@@ -84,12 +84,12 @@
       </trans-unit>
       <trans-unit id="GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="new">An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</target>
+        <target state="translated">Při rozbalování fileSpec s globs: fileSpec došlo k výjimce: {0}, za předpokladu, že se jedná o název souboru. Výjimka: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidAttributeMetadata">
         <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
-        <target state="new">Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</target>
+        <target state="translated">Položka {0} má atribut {1} s hodnotou {2}, kterou nebylo možné převést na hodnotu {3}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidFilespecForTransform">
@@ -114,17 +114,17 @@
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
-        <target state="new">.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <target state="translated">Verze {0} rozhraní .NET Framework není podporovaná. Zadejte hodnotu z výčtu Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
         <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
-        <target state="new">.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</target>
+        <target state="translated">Verze {0} rozhraní .NET Framework není podporovaná, pokud je jako cíl explicitně určená sada Windows SDK, která je podporovaná jenom v rozhraní .NET 4.5 nebo novějším.  Určete hodnotu Version45 nebo vyšší z výčtu Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedVisualStudioVersion">
         <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
-        <target state="new">Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</target>
+        <target state="translated">Verze {0} sady Visual Studio není podporovaná.  Zadejte hodnotu z výčtu Microsoft.Build.Utilities.VisualStudioVersion.</target>
         <note />
       </trans-unit>
     </body>

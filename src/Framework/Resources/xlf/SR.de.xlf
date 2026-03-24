@@ -59,17 +59,17 @@
       </trans-unit>
       <trans-unit id="CannotConvertStringToBool">
         <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
-        <target state="new">The string "{0}" cannot be converted to a boolean (true/false) value.</target>
+        <target state="translated">Die Zeichenfolge "{0}" kann nicht in einen booleschen Wert (true/false) konvertiert werden.</target>
         <note />
       </trans-unit>
       <trans-unit id="CollectionIsReadOnly">
         <source>This collection is read-only.</source>
-        <target state="new">This collection is read-only.</target>
+        <target state="translated">Diese Sammlung ist schreibgeschützt.</target>
         <note />
       </trans-unit>
       <trans-unit id="CouldNotGenerateReferenceAssemblyDirectory">
         <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
-        <target state="new">When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</target>
+        <target state="translated">Fehler beim Versuch, einen Referenzassemblypfad aus dem Pfad "{0}" und dem Frameworkmoniker "{1}" zu generieren. {2}</target>
         <note />
       </trans-unit>
       <trans-unit id="DebugPathTooLong">
@@ -84,12 +84,12 @@
       </trans-unit>
       <trans-unit id="GlobExpansionFailed">
         <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="new">An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</target>
+        <target state="translated">Eine Ausnahme ist beim Erweitern einer fileSpec mit Globs aufgetreten: fileSpec: „{0}“, angenommen, es handelt sich um einen Dateinamen. Ausnahme: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidAttributeMetadata">
         <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
-        <target state="new">Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</target>
+        <target state="translated">Das Element "{0}" enthält das {1}-Attribut mit dem Wert "{2}", der nicht in "{3}" konvertiert werden konnte.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidFilespecForTransform">
@@ -114,17 +114,17 @@
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersion">
         <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
-        <target state="new">.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <target state="translated">Die .NET Framework-Version "{0}" wird nicht unterstützt. Geben Sie einen Wert aus der Enumeration "Microsoft.Build.Utilities.TargetDotNetFrameworkVersion" an.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
         <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
-        <target state="new">.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</target>
+        <target state="translated">.NET Framework, Version "{0}" wird nicht unterstützt, wenn das Windows SDK das explizite Ziel ist, da dies nur unter .NET 4.5 und höher unterstützt wird.  Geben Sie einen Wert aus der Enumeration "Microsoft.Build.Utilities.TargetDotNetFrameworkVersion", Version45 oder höher an.</target>
         <note />
       </trans-unit>
       <trans-unit id="UnsupportedVisualStudioVersion">
         <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
-        <target state="new">Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</target>
+        <target state="translated">Visual Studio-Version "{0}" wird nicht unterstützt.  Geben Sie einen Wert aus der Enumeration "Microsoft.Build.Utilities.VisualStudioVersion" an.</target>
         <note />
       </trans-unit>
     </body>
