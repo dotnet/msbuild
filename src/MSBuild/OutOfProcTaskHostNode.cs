@@ -335,6 +335,13 @@ namespace Microsoft.Build.CommandLine
                 return false;
             }
 
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+            {
+                // An empty set means all warnings are errors.
+                return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsErrors.Contains(warningCode);
+            }
+
+            // Pre-18.6 behavior preserved for backward compatibility: incorrectly checks WarningsAsMessages instead of WarningsAsErrors.
             return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsMessages.Contains(warningCode);
         }
 

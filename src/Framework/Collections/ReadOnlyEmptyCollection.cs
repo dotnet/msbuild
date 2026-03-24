@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -84,7 +83,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Add(T item)
         {
-            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            throw new InvalidOperationException(SR.CollectionIsReadOnly);
         }
 
         /// <summary>
@@ -92,7 +91,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Clear()
         {
-            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            throw new InvalidOperationException(SR.CollectionIsReadOnly);
         }
 
         /// <summary>
@@ -115,8 +114,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(T item)
         {
-            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
-            return false;
+            throw new InvalidOperationException(SR.CollectionIsReadOnly);
         }
 
         /// <summary>
@@ -130,7 +128,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Get an enumerator over an empty collection
         /// </summary>
-        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }

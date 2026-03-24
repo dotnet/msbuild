@@ -938,8 +938,7 @@ public class FileUtilities_Tests
         }
     }
 
-    private static string SystemSpecificAbsolutePath => BuildEnvironmentHelper.ExecutingAssemblyPath;
-
+    private static string SystemSpecificAbsolutePath => typeof(BuildEnvironmentHelper).GetAssemblyPath();
 
     [Fact]
     public void GetFolderAboveTest()

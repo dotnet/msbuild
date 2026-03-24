@@ -6,7 +6,6 @@ using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
-
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -36,9 +35,9 @@ namespace Microsoft.Build.Shared
             string? architecture = null,
             bool loadedViaMetadataLoadContext = false)
         {
-            ErrorUtilities.VerifyThrow(type != null, "We must have the type.");
-            ErrorUtilities.VerifyThrow(assemblyLoadInfo != null, "We must have the assembly the type was loaded from.");
-            ErrorUtilities.VerifyThrow(loadedAssembly is not null, "The assembly should always be loaded even if only by MetadataLoadContext.");
+            FrameworkErrorUtilities.VerifyThrow(type != null, "We must have the type.");
+            FrameworkErrorUtilities.VerifyThrow(assemblyLoadInfo != null, "We must have the assembly the type was loaded from.");
+            FrameworkErrorUtilities.VerifyThrow(loadedAssembly is not null, "The assembly should always be loaded even if only by MetadataLoadContext.");
 
             Type = type;
             Assembly = assemblyLoadInfo;

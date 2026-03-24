@@ -69,6 +69,15 @@ namespace Microsoft.Build.Collections
         }
 
         /// <summary>
+        /// Constructor taking a specified comparer and initial capacity for the keys.
+        /// Pre-sizing avoids repeated dictionary resizes when the number of keys is known.
+        /// </summary>
+        internal MultiDictionary(int capacity, IEqualityComparer<K> keyComparer)
+        {
+            _backing = new Dictionary<K, SmallList<V>>(capacity, keyComparer);
+        }
+
+        /// <summary>
         /// Number of keys
         /// </summary>
         internal int KeyCount => _backing.Count;

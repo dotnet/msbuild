@@ -57,6 +57,21 @@
         <target state="translated">Hodnota nemůže být prázdný řetězec.</target>
         <note />
       </trans-unit>
+      <trans-unit id="CannotConvertStringToBool">
+        <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
+        <target state="translated">Řetězec {0} nelze převést na logickou hodnotu (true/false).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CollectionIsReadOnly">
+        <source>This collection is read-only.</source>
+        <target state="translated">Tato kolekce je jen pro čtení.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CouldNotGenerateReferenceAssemblyDirectory">
+        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
+        <target state="translated">Při pokusu o vygenerování cesty odkazovaného sestavení z cesty {0} a monikeru rozhraní {1} došlo k chybě. {2}</target>
+        <note />
+      </trans-unit>
       <trans-unit id="DebugPathTooLong">
         <source>The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
         <target state="translated">Cesta {0} používaná pro protokoly ladění je příliš dlouhá. Nastavte ji na kratší hodnotu pomocí proměnné prostředí MSBUILDDEBUGPATH nebo změňte konfigurace vašeho systému, aby povolovala dlouhé cesty.</target>
@@ -65,6 +80,16 @@
       <trans-unit id="FailedCreatingTempFile">
         <source>Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
         <target state="translated">Nepodařilo se vytvořit dočasný soubor. Složka dočasných souborů je plná nebo cesta k této složce není správná. {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GlobExpansionFailed">
+        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
+        <target state="translated">Při rozbalování fileSpec s globs: fileSpec došlo k výjimce: {0}, za předpokladu, že se jedná o název souboru. Výjimka: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidAttributeMetadata">
+        <source>Item "{0}" has attribute "{1}" with value "{2}" that could not be converted to "{3}".</source>
+        <target state="translated">Položka {0} má atribut {1} s hodnotou {2}, kterou nebylo možné převést na hodnotu {3}.</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidFilespecForTransform">
@@ -85,6 +110,21 @@
       <trans-unit id="PathTooLong">
         <source>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</source>
         <target state="translated">Cesta: {0} překračuje maximální limit pro cestu k OS. Plně kvalifikovaný název souboru musí být kratší než {1} znaků.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersion">
+        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
+        <target state="translated">Verze {0} rozhraní .NET Framework není podporovaná. Zadejte hodnotu z výčtu Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedFrameworkVersionForWindowsSdk">
+        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
+        <target state="translated">Verze {0} rozhraní .NET Framework není podporovaná, pokud je jako cíl explicitně určená sada Windows SDK, která je podporovaná jenom v rozhraní .NET 4.5 nebo novějším.  Určete hodnotu Version45 nebo vyšší z výčtu Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="UnsupportedVisualStudioVersion">
+        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
+        <target state="translated">Verze {0} sady Visual Studio není podporovaná.  Zadejte hodnotu z výčtu Microsoft.Build.Utilities.VisualStudioVersion.</target>
         <note />
       </trans-unit>
     </body>
