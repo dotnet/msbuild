@@ -174,8 +174,6 @@ With MSBuild Server, `Build` lifetime objects are disposed between each build re
 
 ### Example: Migrating a Static Cache
 
-A common pattern is a static `Dictionary` that caches expensive lookups across task invocations within a build:
-
 **Before — static cache that leaks across builds:**
 
 ```csharp
