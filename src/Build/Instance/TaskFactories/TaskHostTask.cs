@@ -201,6 +201,8 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostIsRunningMultipleNodesRequest, TaskHostIsRunningMultipleNodesRequest.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostCoresRequest, TaskHostCoresRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostBuildRequest, TaskHostBuildRequest.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostYieldRequest, TaskHostYieldRequest.FactoryForDeserialization, this);
 
             _packetReceivedEvent = new AutoResetEvent(false);
             _receivedPackets = new ConcurrentQueue<INodePacket>();
@@ -511,6 +513,12 @@ namespace Microsoft.Build.BackEnd
                 case NodePacketType.TaskHostCoresRequest:
                     HandleCoresRequest(packet as TaskHostCoresRequest);
                     break;
+                case NodePacketType.TaskHostBuildRequest:
+                    HandleBuildRequest(packet as TaskHostBuildRequest);
+                    break;
+                case NodePacketType.TaskHostYieldRequest:
+                    HandleYieldRequest(packet as TaskHostYieldRequest);
+                    break;
                 default:
                     ErrorUtilities.ThrowInternalErrorUnreachable();
                     break;
@@ -688,6 +696,117 @@ namespace Microsoft.Build.BackEnd
 
             var response = new TaskHostCoresResponse(request.RequestId, grantedCores);
             _taskHostProvider.SendData(_taskHostNodeKey, response);
+        }
+
+        /// <summary>
+        /// Handle BuildProjectFile* request from the TaskHost.
+        /// Forwards the call to the in-process IBuildEngine3.BuildProjectFilesInParallel,
+        /// which handles project resolution, scheduler interaction, and target execution.
+        /// </summary>
+        private void HandleBuildRequest(TaskHostBuildRequest request)
+        {
+            TaskHostBuildResponse response;
+            try
+            {
+                if (_buildEngine is not IBuildEngine3 engine3)
+                {
+                    ErrorUtilities.ThrowInternalError("HandleBuildRequest requires IBuildEngine3 but _buildEngine is {0}",
+                        _buildEngine?.GetType().Name ?? "null");
+                    return; // unreachable, but satisfies flow analysis
+                }
+
+                // Reconstruct IDictionary[] from the serialized Dictionary<string, string>[]
+                System.Collections.IDictionary[] globalProperties = null;
+                if (request.GlobalProperties is not null)
+                {
+                    globalProperties = new System.Collections.IDictionary[request.GlobalProperties.Length];
+                    for (int i = 0; i < request.GlobalProperties.Length; i++)
+                    {
+                        globalProperties[i] = request.GlobalProperties[i];
+                    }
+                }
+
+                // Reconstruct IList<string>[] from List<string>[]
+                IList<string>[] removeGlobalProperties = null;
+                if (request.RemoveGlobalProperties is not null)
+                {
+                    removeGlobalProperties = new IList<string>[request.RemoveGlobalProperties.Length];
+                    for (int i = 0; i < request.RemoveGlobalProperties.Length; i++)
+                    {
+                        removeGlobalProperties[i] = request.RemoveGlobalProperties[i];
+                    }
+                }
+
+                BuildEngineResult result = engine3.BuildProjectFilesInParallel(
+                    request.ProjectFileNames,
+                    request.TargetNames,
+                    globalProperties,
+                    removeGlobalProperties,
+                    request.ToolsVersions,
+                    request.ReturnTargetOutputs);
+
+                response = TaskHostBuildResponse.FromBuildEngineResult(request.RequestId, result);
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                // Log with resource string so it appears in binlog and is localizable.
+                string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("TaskHostBuildCallbackFailed", ex.Message);
+                this.BuildEngine?.LogWarningEvent(new BuildWarningEventArgs(
+                    subcategory: null,
+                    code: "MSB5030",
+                    file: null,
+                    lineNumber: 0,
+                    columnNumber: 0,
+                    endLineNumber: 0,
+                    endColumnNumber: 0,
+                    message: message,
+                    helpKeyword: null,
+                    senderName: "TaskHostTask"));
+
+                // Always send a response to prevent the OOP task from hanging.
+                response = new TaskHostBuildResponse(request.RequestId, false, null);
+            }
+
+            _taskHostProvider.SendData(_taskHostNodeKey, response);
+        }
+
+        /// <summary>
+        /// Handles Yield/Reacquire requests from the TaskHost.
+        /// <para>
+        /// Yield is fire-and-forget: forwards to <see cref="IBuildEngine3.Yield()"/>, no response sent.
+        /// Reacquire is blocking: forwards to <see cref="IBuildEngine3.Reacquire()"/> (which may block
+        /// on the scheduler), then sends <see cref="TaskHostYieldResponse"/> to unblock the TaskHost.
+        /// </para>
+        /// </summary>
+        private void HandleYieldRequest(TaskHostYieldRequest request)
+        {
+            switch (request.Operation)
+            {
+                case YieldOperation.Yield:
+                    if (_buildEngine is IBuildEngine3 engine3Yield)
+                    {
+                        this.BuildEngine?.LogMessageEvent(new BuildMessageEventArgs(
+                            ResourceUtilities.GetResourceString("TaskHostForwardingYield"),
+                            null, "TaskHostTask", MessageImportance.Low));
+                        engine3Yield.Yield();
+                    }
+
+                    // No response — Yield is fire-and-forget.
+                    break;
+
+                case YieldOperation.Reacquire:
+                    if (_buildEngine is IBuildEngine3 engine3Reacquire)
+                    {
+                        this.BuildEngine?.LogMessageEvent(new BuildMessageEventArgs(
+                            ResourceUtilities.GetResourceString("TaskHostForwardingReacquire"),
+                            null, "TaskHostTask", MessageImportance.Low));
+                        engine3Reacquire.Reacquire();
+                    }
+
+                    // Send acknowledgment to unblock the TaskHost.
+                    _taskHostProvider.SendData(_taskHostNodeKey, new TaskHostYieldResponse(request.RequestId));
+                    break;
+            }
         }
 
         /// <summary>
