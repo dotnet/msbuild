@@ -424,7 +424,7 @@ namespace Microsoft.Build.BackEnd
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6) && BuildEngine is IBuildEngine6 buildEngine6)
             {
                 IReadOnlyDictionary<string, string> requestProperties = buildEngine6.GetGlobalProperties();
-                var result = new Dictionary<string, string>(requestProperties.Count, StringComparer.OrdinalIgnoreCase);
+                var result = new Dictionary<string, string>(requestProperties.Count);
                 foreach (KeyValuePair<string, string> kvp in requestProperties)
                 {
                     result[kvp.Key] = kvp.Value;
