@@ -725,7 +725,9 @@ public sealed partial class TerminalLogger : INodeLogger
             EvalContext evalContext = new(e.BuildEventContext);
             string? targetFramework = null;
             string? runtimeIdentifier = null;
-            if (_projectEvaluations.TryGetValue(evalContext, out EvalProjectInfo evalInfo))
+            EvalProjectInfo evalInfo = default;
+            if (evalContext.Id != BuildEventContext.InvalidEvaluationId
+                && _projectEvaluations.TryGetValue(evalContext, out evalInfo))
             {
                 targetFramework = evalInfo.TargetFramework;
                 runtimeIdentifier = evalInfo.RuntimeIdentifier;
