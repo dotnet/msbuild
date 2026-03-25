@@ -43,7 +43,7 @@ namespace Microsoft.Build.Framework
         /// <returns>A new <see cref="TaskEnvironment"/> with isolated environment state.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="projectDirectory"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="projectDirectory"/> is empty.</exception>
-        public static TaskEnvironment CreateMultithreaded(string projectDirectory, IDictionary<string, string>? environmentVariables = null)
+        public static TaskEnvironment CreateMultiThreaded(string projectDirectory, IDictionary<string, string>? environmentVariables = null)
         {
             ArgumentException.ThrowIfNullOrEmpty(projectDirectory);
 

@@ -389,7 +389,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void TaskEnvironment_CreateMultithreaded_SnapshotsCurrentEnvironment()
+        public void TaskEnvironment_CreateMultiThreaded_SnapshotsCurrentEnvironment()
         {
             string testVarName = $"MSBUILD_CREATE_MT_TEST_{Guid.NewGuid():N}";
             string testVarValue = "snapshot_test_value";
@@ -399,7 +399,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Environment.SetEnvironmentVariable(testVarName, testVarValue);
 
-                TaskEnvironment env = TaskEnvironment.CreateMultithreaded(projectDir);
+                TaskEnvironment env = TaskEnvironment.CreateMultiThreaded(projectDir);
 
                 env.ShouldNotBeNull();
                 env.GetEnvironmentVariable(testVarName).ShouldBe(testVarValue);
@@ -416,7 +416,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void TaskEnvironment_CreateMultithreaded_WithCustomEnvironment_UsesProvidedDictionary()
+        public void TaskEnvironment_CreateMultiThreaded_WithCustomEnvironment_UsesProvidedDictionary()
         {
             string excludedVarName = $"MSBUILD_EXCLUDED_VAR_{Guid.NewGuid():N}";
             string projectDir = GetResolvedTempPath();
@@ -432,7 +432,7 @@ namespace Microsoft.Build.UnitTests
                     ["ANOTHER_VAR"] = "another_value"
                 };
 
-                TaskEnvironment env = TaskEnvironment.CreateMultithreaded(projectDir, customEnv);
+                TaskEnvironment env = TaskEnvironment.CreateMultiThreaded(projectDir, customEnv);
 
                 env.ShouldNotBeNull();
                 env.GetEnvironmentVariable("MY_CUSTOM_VAR").ShouldBe("custom_value");
@@ -447,12 +447,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void TaskEnvironment_CreateMultithreaded_ReturnsIsolatedInstances()
+        public void TaskEnvironment_CreateMultiThreaded_ReturnsIsolatedInstances()
         {
             string projectDir = GetResolvedTempPath();
 
-            TaskEnvironment env1 = TaskEnvironment.CreateMultithreaded(projectDir);
-            TaskEnvironment env2 = TaskEnvironment.CreateMultithreaded(projectDir);
+            TaskEnvironment env1 = TaskEnvironment.CreateMultiThreaded(projectDir);
+            TaskEnvironment env2 = TaskEnvironment.CreateMultiThreaded(projectDir);
 
             env1.ShouldNotBeSameAs(env2);
 
@@ -464,15 +464,15 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void TaskEnvironment_CreateMultithreaded_NullProjectDirectory_Throws()
+        public void TaskEnvironment_CreateMultiThreaded_NullProjectDirectory_Throws()
         {
-            Should.Throw<ArgumentNullException>(() => TaskEnvironment.CreateMultithreaded(null!));
+            Should.Throw<ArgumentNullException>(() => TaskEnvironment.CreateMultiThreaded(null!));
         }
 
         [Fact]
-        public void TaskEnvironment_CreateMultithreaded_EmptyProjectDirectory_Throws()
+        public void TaskEnvironment_CreateMultiThreaded_EmptyProjectDirectory_Throws()
         {
-            Should.Throw<ArgumentException>(() => TaskEnvironment.CreateMultithreaded(string.Empty));
+            Should.Throw<ArgumentException>(() => TaskEnvironment.CreateMultiThreaded(string.Empty));
         }
 
         [Theory]
