@@ -17,9 +17,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Output]
         public int GlobalPropertyCount { get; set; }
 
-        [Output]
-        public string GlobalPropertyLog { get; set; } = string.Empty;
-
         public override bool Execute()
         {
             if (BuildEngine is IBuildEngine6 engine6)
