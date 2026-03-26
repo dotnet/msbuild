@@ -93,7 +93,7 @@ namespace Microsoft.Build.Framework
         /// has been discarded through early collection.
         /// </returns>
         /// <remarks>
-        /// This method is thread-safe and may be called concurrently from multiple tasks.
+        /// This method is thread-safe and may be called concurrently from multiple tasks. However, another task may be using the object after this method returns.
         /// </remarks>
         object UnregisterTaskObject(object key, RegisteredTaskObjectLifetime lifetime);
     }
