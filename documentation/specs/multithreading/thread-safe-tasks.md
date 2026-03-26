@@ -204,6 +204,7 @@ This cache persists across builds on reused nodes. It is also not thread-safe fo
 public class MyTask : Task
 {
     private const string CacheKey = "MyNamespace.MyTask.Cache";
+    private static readonly object s_cacheLock = new();
 
     public override bool Execute()
     {
@@ -213,14 +214,19 @@ public class MyTask : Task
             CacheKey, RegisteredTaskObjectLifetime.Build);
         if (cache is null)
         {
-            engine4.RegisterTaskObject(
-                CacheKey, new ConcurrentDictionary<string, string>(),
-                RegisteredTaskObjectLifetime.Build,
-                allowEarlyCollection: true);
-            // Re-read to get the authoritative instance in case another
-            // task registered first.
-            cache = (ConcurrentDictionary<string, string>)engine4.GetRegisteredTaskObject(
-                CacheKey, RegisteredTaskObjectLifetime.Build);
+            lock (s_cacheLock)
+            {
+                cache = (ConcurrentDictionary<string, string>)engine4.GetRegisteredTaskObject(
+                    CacheKey, RegisteredTaskObjectLifetime.Build);
+                if (cache is null)
+                {
+                    cache = new ConcurrentDictionary<string, string>();
+                    engine4.RegisterTaskObject(
+                        CacheKey, cache,
+                        RegisteredTaskObjectLifetime.Build,
+                        allowEarlyCollection: true);
+                }
+            }
         }
 
         cache[key] = value;
@@ -230,6 +236,24 @@ public class MyTask : Task
 ```
 
 The cache is now scoped to a single build and automatically discarded when the build completes.
+
+Alternatively, a **lock-free** version of the same pattern takes advantage of the fact that `RegisterTaskObject` is thread-safe and only keeps the first registration for a given key — subsequent calls are ignored. After registering, re-read with `GetRegisteredTaskObject` to obtain the authoritative instance:
+
+```csharp
+var cache = (ConcurrentDictionary<string, string>)engine4.GetRegisteredTaskObject(
+    CacheKey, RegisteredTaskObjectLifetime.Build);
+if (cache is null)
+{
+    engine4.RegisterTaskObject(
+        CacheKey, new ConcurrentDictionary<string, string>(),
+        RegisteredTaskObjectLifetime.Build,
+        allowEarlyCollection: true);
+    // Re-read to get the authoritative instance in case another
+    // task registered first.
+    cache = (ConcurrentDictionary<string, string>)engine4.GetRegisteredTaskObject(
+        CacheKey, RegisteredTaskObjectLifetime.Build);
+}
+```
 
 
 > **Important:** When multiple tasks share a static field, for example through a utility class, migrating to `RegisterTaskObject` requires that _all_ tasks using the same key are migrated together. If some tasks are migrated while others continue to run in a separate task host process, the migrated tasks will use the engine-managed object while the non-migrated tasks will still use the static field, resulting in inconsistent behavior.
