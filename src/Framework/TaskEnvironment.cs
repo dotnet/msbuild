@@ -15,6 +15,11 @@ namespace Microsoft.Build.Framework
         private readonly ITaskEnvironmentDriver _driver;
 
         /// <summary>
+        /// Gets the underlying driver for this TaskEnvironment.
+        /// </summary>
+        internal ITaskEnvironmentDriver Driver => _driver;
+
+        /// <summary>
         /// Initializes a new instance of the TaskEnvironment class.
         /// </summary>
         internal TaskEnvironment(ITaskEnvironmentDriver driver)

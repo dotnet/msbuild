@@ -58,7 +58,7 @@ namespace Microsoft.Build.Utilities
     /// </summary>
     // INTERNAL WARNING: DO NOT USE the Log property in this class! Log points to resources in the task assembly itself, and
     // we want to use resources from Utilities. Use LogPrivate (for private Utilities resources) and LogShared (for shared MSBuild resources)
-    public abstract class ToolTask : Task, IIncrementalTask, ICancelableTask
+    public abstract class ToolTask : Task, IIncrementalTask, ICancelableTask, IMultiThreadableTask
     {
         private static readonly bool s_preserveTempFiles = string.Equals(Environment.GetEnvironmentVariable("MSBUILDPRESERVETOOLTEMPFILES"), "1", StringComparison.Ordinal);
 
@@ -213,6 +213,8 @@ namespace Microsoft.Build.Utilities
         /// which cannot be set from an MSBuild project.
         /// </remarks>
         public string[] EnvironmentVariables { get; set; }
+
+        public virtual TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
 
         /// <summary>
         /// Project visible property that allows the user to specify an amount of time after which the task executable
@@ -529,7 +531,7 @@ namespace Microsoft.Build.Utilities
                 pathToTool = Path.Combine(ToolPath, ToolExe);
             }
 
-            if (string.IsNullOrWhiteSpace(pathToTool) || (ToolPath == null && !FileSystems.Default.FileExists(pathToTool)))
+            if (string.IsNullOrWhiteSpace(pathToTool) || (ToolPath == null && !FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(pathToTool))))
             {
                 // Otherwise, try to find the tool ourselves.
                 pathToTool = GenerateFullPathToTool();
@@ -550,7 +552,7 @@ namespace Microsoft.Build.Utilities
                 bool isOnlyFileName = Path.GetFileName(pathToTool).Length == pathToTool.Length;
                 if (!isOnlyFileName)
                 {
-                    bool isExistingFile = FileSystems.Default.FileExists(pathToTool);
+                    bool isExistingFile = FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(pathToTool));
                     if (!isExistingFile)
                     {
                         LogPrivate.LogErrorWithCodeFromResources("ToolTask.ToolExecutableNotFound", pathToTool);
@@ -634,6 +636,11 @@ namespace Microsoft.Build.Utilities
             string commandLineCommands,
             string responseFileSwitch)
         {
+            if (TaskEnvironment.Driver is MultiThreadedTaskEnvironmentDriver)
+            {
+                return GetProcessStartInfoMultithreadable(pathToTool, commandLineCommands, responseFileSwitch);
+            }
+
             ProcessStartInfo startInfo = new ProcessStartInfo();
 
             // Generally we won't set a working directory, and it will use the current directory
@@ -744,10 +751,9 @@ namespace Microsoft.Build.Utilities
         protected ProcessStartInfo GetProcessStartInfoMultithreadable(
             string pathToTool,
             string commandLineCommands,
-            string responseFileSwitch,
-            TaskEnvironment taskEnvironment)
+            string responseFileSwitch)
         {
-            ProcessStartInfo startInfo = taskEnvironment.GetProcessStartInfo();
+            ProcessStartInfo startInfo = TaskEnvironment.GetProcessStartInfo();
 
             SetUpProcessStartInfo(startInfo, pathToTool, commandLineCommands, responseFileSwitch);
 
@@ -755,15 +761,11 @@ namespace Microsoft.Build.Utilities
             ApplyEnvironmentOverrides(startInfo);
 
             // Set working directory: prefer the derived task's GetWorkingDirectory() override
-            // (absolutized against the project directory), otherwise fall back to the project directory.
+            // (absolutized against the project directory), otherwise keep the project directory.
             string workingDirectory = GetWorkingDirectory();
             if (!string.IsNullOrEmpty(workingDirectory))
             {
-                startInfo.WorkingDirectory = taskEnvironment.GetAbsolutePath(workingDirectory);
-            }
-            else
-            {
-                startInfo.WorkingDirectory = taskEnvironment.ProjectDirectory;
+                startInfo.WorkingDirectory = TaskEnvironment.GetAbsolutePath(workingDirectory);
             }
 
             return startInfo;
@@ -930,13 +932,15 @@ namespace Microsoft.Build.Utilities
                 return;
             }
 
+            string absolutePath = !string.IsNullOrEmpty(fileName) ? TaskEnvironment.GetAbsolutePath(fileName) : fileName;
+
             try
             {
-                File.Delete(fileName);
+                File.Delete(absolutePath);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(fileName);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(absolutePath);
 
                 // Warn only -- occasionally temp files fail to delete because of virus checkers; we
                 // don't want the build to fail in such cases
@@ -1082,7 +1086,7 @@ namespace Microsoft.Build.Utilities
                 }
 
                 int timeout = TaskProcessTerminationTimeout >= -1 ? TaskProcessTerminationTimeout : 5000;
-                string timeoutFromEnvironment = Environment.GetEnvironmentVariable("MSBUILDTOOLTASKCANCELPROCESSWAITTIMEOUT");
+                string timeoutFromEnvironment = TaskEnvironment.GetEnvironmentVariable("MSBUILDTOOLTASKCANCELPROCESSWAITTIMEOUT");
                 if (timeoutFromEnvironment != null)
                 {
                     if (int.TryParse(timeoutFromEnvironment, out int result) && result >= 0)
@@ -1392,17 +1396,17 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="filename"></param>
         /// <returns>The location of the file, or null if file not found.</returns>
-        internal static string FindOnPath(string filename)
+        internal string FindOnPath(string filename)
         {
             // Get path from the environment and split path separator
-            return Environment.GetEnvironmentVariable("PATH")?
+            return TaskEnvironment.GetEnvironmentVariable("PATH")?
                 .Split(MSBuildConstants.PathSeparatorChar)?
                 .Where(path =>
                 {
                     try
                     {
                         // The PATH can contain anything, including bad characters
-                        return FileSystems.Default.DirectoryExists(path);
+                        return FileSystems.Default.DirectoryExists(TaskEnvironment.GetAbsolutePath(path));
                     }
                     catch (Exception)
                     {
@@ -1410,7 +1414,7 @@ namespace Microsoft.Build.Utilities
                     }
                 })
                 .Select(folderPath => Path.Combine(folderPath, filename))
-                .FirstOrDefault(fullPath => !string.IsNullOrEmpty(fullPath) && FileSystems.Default.FileExists(fullPath));
+                .FirstOrDefault(fullPath => !string.IsNullOrEmpty(fullPath) && FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(fullPath)));
         }
 
         #endregion

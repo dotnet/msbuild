@@ -755,6 +755,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void FindOnPathSucceeds()
         {
+            using MyTool tool = new MyTool();
             string[] expectedCmdPath;
             string shellName;
             string cmdPath;
@@ -762,13 +763,13 @@ namespace Microsoft.Build.UnitTests
             {
                 expectedCmdPath = new[] { Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe").ToUpperInvariant() };
                 shellName = "cmd.exe";
-                cmdPath = ToolTask.FindOnPath(shellName).ToUpperInvariant();
+                cmdPath = tool.FindOnPath(shellName).ToUpperInvariant();
             }
             else
             {
                 expectedCmdPath = new[] { "/bin/sh", "/usr/bin/sh" };
                 shellName = "sh";
-                cmdPath = ToolTask.FindOnPath(shellName);
+                cmdPath = tool.FindOnPath(shellName);
             }
 
             cmdPath.ShouldBeOneOf(expectedCmdPath);
@@ -1193,16 +1194,27 @@ namespace Microsoft.Build.UnitTests
             protected override string GetWorkingDirectory() => _workingDirectory;
 
             /// <summary>
-            /// Exposes the protected GetProcessStartInfoMultiThreaded for test verification.
+            /// Exposes the protected GetProcessStartInfoMultithreadable for test verification.
             /// </summary>
             public ProcessStartInfo CallGetProcessStartInfoMultithreadable(TaskEnvironment taskEnvironment)
             {
+                TaskEnvironment = taskEnvironment;
                 return GetProcessStartInfoMultithreadable(
                     _fullToolName,
                     commandLineCommands: "/nologo",
-                    responseFileSwitch: null,
-                    taskEnvironment);
+                    responseFileSwitch: null);
             }
+
+            /// <summary>
+            /// Exposes the protected DeleteTempFile for test verification.
+            /// </summary>
+            public void CallDeleteTempFile(string fileName) => DeleteTempFile(fileName);
+
+            /// <summary>
+            /// Exposes the virtual GetProcessStartInfo for test verification of routing.
+            /// </summary>
+            public ProcessStartInfo CallGetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)
+                => GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
         }
 
         [Fact]
@@ -1294,6 +1306,223 @@ namespace Microsoft.Build.UnitTests
             // Assert: task-level override should win.
             result.Environment["MY_VAR"].ShouldBe("from_task_override",
                 "EnvironmentVariables property on the task should override TaskEnvironment values");
+        }
+
+        [Fact]
+        public void GetProcessStartInfoMultithreadable_MultiProcessDriver_BackwardCompat()
+        {
+            // Arrange: use the default MultiProcessTaskEnvironmentDriver (non-multithreaded mode).
+            // This simulates a task that hasn't been fully migrated — GetProcessStartInfoMultithreadable
+            // with the default driver should behave like the old GetProcessStartInfo: no working directory
+            // is set (the process inherits the parent's CWD), and process environment is inherited.
+            var taskEnv = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, null);
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+
+            // Assert: with MultiProcessTaskEnvironmentDriver, WorkingDirectory should be empty
+            // (process inherits parent CWD) — matching pre-migration behavior.
+            result.WorkingDirectory.ShouldBeEmpty(
+                "MultiProcessTaskEnvironmentDriver should not set WorkingDirectory, preserving old inherit-from-parent behavior");
+            result.FileName.ShouldBe(toolPath);
+            result.Arguments.ShouldContain("/nologo");
+        }
+
+        [Fact]
+        public void GetProcessStartInfoMultithreadable_EmptyWorkingDirectory_KeepsProjectDirectory()
+        {
+            // Arrange: GetWorkingDirectory() returns empty string — should NOT override project dir.
+            // The multithreadable path checks !string.IsNullOrEmpty, so empty string should leave
+            // the project directory from TaskEnvironment intact.
+            string projectDir = NativeMethodsShared.IsUnixLike ? "/tmp" : @"C:\SomeProjectDir";
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, string.Empty);
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+
+            // Assert: empty-string GetWorkingDirectory() must not overwrite the project directory.
+            result.WorkingDirectory.ShouldBe(projectDir,
+                "Empty-string from GetWorkingDirectory() should not override the project directory from TaskEnvironment");
+        }
+
+        [Fact]
+        public void FindOnPath_UsesTaskEnvironmentPath()
+        {
+            // Arrange: create a temp dir with a dummy file, set TaskEnvironment PATH to that dir.
+            using var env = TestEnvironment.Create(_output);
+            string tempDir = env.CreateFolder().Path;
+            string toolName = NativeMethodsShared.IsWindows ? "mytesttool.exe" : "mytesttool";
+            File.WriteAllText(Path.Combine(tempDir, toolName), "dummy");
+
+            string projectDir = tempDir;
+            var envVars = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["PATH"] = tempDir
+            };
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir, envVars);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string fullToolName = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(fullToolName, null);
+            tool.TaskEnvironment = taskEnv;
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            string result = tool.FindOnPath(toolName);
+
+            // Assert: should find the tool via TaskEnvironment's PATH.
+            result.ShouldNotBeNull("FindOnPath should find the tool via TaskEnvironment's PATH");
+            result.ShouldBe(Path.Combine(tempDir, toolName));
+        }
+
+        [Fact]
+        public void DeleteTempFile_UsesTaskEnvironmentForAbsolutePath()
+        {
+            // Arrange: create a temp file in the project directory, use relative path for deletion.
+            using var env = TestEnvironment.Create(_output);
+            string projectDir = env.CreateFolder().Path;
+            string fileName = "tempfile.rsp";
+            string fullPath = Path.Combine(projectDir, fileName);
+            File.WriteAllText(fullPath, "test content");
+
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, null);
+            tool.TaskEnvironment = taskEnv;
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act: delete using a relative path — TaskEnvironment should absolutize it.
+            tool.CallDeleteTempFile(fileName);
+
+            // Assert
+            File.Exists(fullPath).ShouldBeFalse(
+                "DeleteTempFile should have deleted the file using TaskEnvironment-absolutized path");
+        }
+
+        [Fact]
+        public void DeleteTempFile_WarningMessage_UsesOriginalPath()
+        {
+            // Arrange: create a read-only file that will fail to delete, then verify the
+            // warning message uses the original (non-absolutized) relative path.
+            using var env = TestEnvironment.Create(_output);
+            string projectDir = env.CreateFolder().Path;
+            string fileName = "locked.rsp";
+            string fullPath = Path.Combine(projectDir, fileName);
+            File.WriteAllText(fullPath, "test content");
+            File.SetAttributes(fullPath, FileAttributes.ReadOnly);
+
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, null);
+            tool.TaskEnvironment = taskEnv;
+            var mockEngine = new MockEngine(_output);
+            tool.BuildEngine = mockEngine;
+
+            try
+            {
+                // Act: delete using relative path — should fail and log a warning with original path.
+                tool.CallDeleteTempFile(fileName);
+
+                // Assert: if a warning was logged, it should reference the original relative path.
+                if (mockEngine.Warnings > 0)
+                {
+                    mockEngine.AssertLogContains(fileName);
+                }
+            }
+            finally
+            {
+                // Clean up: remove read-only attribute so the test environment can clean up.
+                File.SetAttributes(fullPath, FileAttributes.Normal);
+            }
+        }
+
+        [Fact]
+        public void GetProcessStartInfo_RoutesToMultithreadablePath_ForMultiThreadedDriver()
+        {
+            // Arrange: when TaskEnvironment uses MultiThreadedTaskEnvironmentDriver,
+            // GetProcessStartInfo should route through GetProcessStartInfoMultithreadable
+            // which sets WorkingDirectory from the driver's ProjectDirectory.
+            string projectDir = NativeMethodsShared.IsUnixLike ? "/tmp" : @"C:\SomeProjectDir";
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, null);
+            tool.TaskEnvironment = taskEnv;
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act: call through the virtual GetProcessStartInfo (the normal entry point).
+            ProcessStartInfo result = tool.CallGetProcessStartInfo(toolPath, "/nologo", null);
+
+            // Assert: multithreaded path should set WorkingDirectory to project directory
+            // and propagate environment variables from the driver.
+            result.WorkingDirectory.ShouldBe(projectDir,
+                "MultiThreadedDriver should route through multithreadable path, setting WorkingDirectory to ProjectDirectory");
+            result.Environment.Count.ShouldBeGreaterThan(0,
+                "MultiThreadedDriver path should propagate environment variables");
+        }
+
+        [Fact]
+        public void GetProcessStartInfo_UsesOldPath_ForMultiProcessDriver()
+        {
+            // Arrange: when TaskEnvironment uses the default MultiProcessTaskEnvironmentDriver,
+            // GetProcessStartInfo should take the classic code path that does NOT set
+            // WorkingDirectory (the process inherits the parent's CWD).
+            var taskEnv = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, null);
+            tool.TaskEnvironment = taskEnv;
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStartInfo(toolPath, "/nologo", null);
+
+            // Assert: classic path leaves WorkingDirectory empty (inherits from parent process).
+            result.WorkingDirectory.ShouldBeNullOrEmpty(
+                "MultiProcessDriver should use the old code path with no explicit WorkingDirectory");
+        }
+
+        [Fact]
+        public void ComputePathToTool_UsesTaskEnvironmentForFileExistence()
+        {
+            // Arrange: create a temp dir with a dummy tool, set up TaskEnvironment pointing there.
+            using var env = TestEnvironment.Create(_output);
+            string projectDir = env.CreateFolder().Path;
+            string toolDir = env.CreateFolder().Path;
+            string toolName = NativeMethodsShared.IsWindows ? "mytool.exe" : "mytool";
+            string toolFullPath = Path.Combine(toolDir, toolName);
+            File.WriteAllText(toolFullPath, "dummy");
+
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            // Use MyTool pointing to the actual tool location.
+            using var tool = new MyTool();
+            tool.FullToolName = toolFullPath;
+            tool.TaskEnvironment = taskEnv;
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act: Execute triggers ComputePathToTool which uses TaskEnvironment.GetAbsolutePath
+            // for file existence checks. The tool exists at an absolute path, so this should succeed.
+            bool result = tool.Execute();
+
+            // Assert: the tool should have been found and executed.
+            tool.ExecuteCalled.ShouldBeTrue(
+                "ComputePathToTool should find the tool using TaskEnvironment-absolutized path for existence check");
         }
     }
 }

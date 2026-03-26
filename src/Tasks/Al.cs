@@ -3,7 +3,6 @@
 
 #if NETFRAMEWORK
 using System;
-using System.Diagnostics;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 #endif
@@ -21,11 +20,9 @@ namespace Microsoft.Build.Tasks
     /// modules and resource files into assemblies.
     /// </summary>
     [MSBuildMultiThreadableTask]
-    public class AL : ToolTaskExtension, IALTaskContract, IMultiThreadableTask
+    public class AL : ToolTaskExtension, IALTaskContract
     {
         #region Properties
-        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
-
         /*
         Microsoft (R) Assembly Linker version 7.10.2175
         for Microsoft (R) .NET Framework version 1.2
@@ -334,11 +331,6 @@ namespace Microsoft.Build.Tasks
 
             return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
         }
-
-        protected override ProcessStartInfo GetProcessStartInfo(
-             string pathToTool,
-             string commandLineCommands,
-             string responseFileSwitch) => GetProcessStartInfoMultithreadable(pathToTool, commandLineCommands, responseFileSwitch, TaskEnvironment);
 
         /// <summary>
         /// Fills the provided CommandLineBuilderExtension with those switches and other information that can go into a response file.
