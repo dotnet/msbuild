@@ -1318,15 +1318,24 @@ namespace Microsoft.Build.BackEnd.Logging
                     return;
                 }
 
-                // Block until queue is not full.
-                while (eventQueue.Count >= _queueCapacity)
+                try
                 {
-                    // Block and wait for dequeue event.
-                    dequeueEvent.WaitOne();
-                }
+                    // Block until queue is not full.
+                    while (eventQueue.Count >= _queueCapacity)
+                    {
+                        // Block and wait for dequeue event.
+                        dequeueEvent.WaitOne();
+                    }
 
-                eventQueue.Enqueue(buildEvent);
-                enqueueEvent.Set();
+                    eventQueue.Enqueue(buildEvent);
+                    enqueueEvent.Set();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Shutdown disposed the wait handles after we captured them;
+                    // silently drop the event.
+                    return;
+                }
             }
             else
             {

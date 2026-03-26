@@ -1096,7 +1096,7 @@ namespace Microsoft.Build.UnitTests.Logging
 
             // Shut down the service, which will null out _eventQueue, _dequeueEvent, _enqueueEvent.
             ((IBuildComponent)loggingService).ShutdownComponent();
-            Assert.Equal(LoggingServiceState.Shutdown, loggingService.ServiceState);
+            loggingService.ServiceState.ShouldBe(LoggingServiceState.Shutdown);
 
             // Simulate a late callback (e.g., Process.Exited) trying to log after shutdown.
             // This must not throw a NullReferenceException.
@@ -1115,7 +1115,7 @@ namespace Microsoft.Build.UnitTests.Logging
             _initializedService.RegisterLogger(new ConsoleLogger());
 
             ((IBuildComponent)_initializedService).ShutdownComponent();
-            Assert.Equal(LoggingServiceState.Shutdown, _initializedService.ServiceState);
+            _initializedService.ServiceState.ShouldBe(LoggingServiceState.Shutdown);
 
             // Late log after shutdown - must not crash.
             BuildMessageEventArgs lateEvent = new BuildMessageEventArgs("Late message after shutdown", null, null, MessageImportance.Low);
@@ -1183,7 +1183,8 @@ namespace Microsoft.Build.UnitTests.Logging
             startSignal.Set();
             ((IBuildComponent)loggingService).ShutdownComponent();
 
-            logThread.Join(TimeSpan.FromSeconds(10));
+            bool joined = logThread.Join(TimeSpan.FromSeconds(10));
+            joined.ShouldBeTrue("Logging thread did not terminate within the allotted time.");
             caughtException.ShouldBeNull();
         }
 
