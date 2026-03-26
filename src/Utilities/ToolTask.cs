@@ -645,6 +645,7 @@ namespace Microsoft.Build.Utilities
 
             SetUpProcessStartInfo(startInfo, pathToTool, commandLineCommands, responseFileSwitch);
             ApplyEnvironmentOverrides(startInfo);
+
             return startInfo;
         }
 
@@ -746,20 +747,24 @@ namespace Microsoft.Build.Utilities
             string responseFileSwitch,
             TaskEnvironment taskEnvironment)
         {
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-
-            startInfo.WorkingDirectory = taskEnvironment.ProjectDirectory;
-
-            startInfo.Environment.Clear();
-            foreach (var kvp in taskEnvironment.GetEnvironmentVariables())
-            {
-                startInfo.Environment[kvp.Key] = kvp.Value;
-            }
+            ProcessStartInfo startInfo = taskEnvironment.GetProcessStartInfo();
 
             SetUpProcessStartInfo(startInfo, pathToTool, commandLineCommands, responseFileSwitch);
 
             // Apply task-level environment overrides — they should take precedence over TaskEnvironment.
             ApplyEnvironmentOverrides(startInfo);
+
+            // Set working directory: prefer the derived task's GetWorkingDirectory() override
+            // (absolutized against the project directory), otherwise fall back to the project directory.
+            string workingDirectory = GetWorkingDirectory();
+            if (!string.IsNullOrEmpty(workingDirectory))
+            {
+                startInfo.WorkingDirectory = taskEnvironment.GetAbsolutePath(workingDirectory);
+            }
+            else
+            {
+                startInfo.WorkingDirectory = taskEnvironment.ProjectDirectory;
+            }
 
             return startInfo;
         }

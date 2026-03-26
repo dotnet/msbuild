@@ -1171,15 +1171,17 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// A ToolTask subclass that exposes GetProcessStartInfoMultiThreaded for testing.
+        /// A ToolTask subclass that exposes GetProcessStartInfoMultithreadable for testing.
         /// </summary>
         private sealed class MultiThreadedToolTask : ToolTask, IDisposable
         {
             private readonly string _fullToolName;
+            private readonly string _workingDirectory;
 
-            public MultiThreadedToolTask(string fullToolName)
+            public MultiThreadedToolTask(string fullToolName, string workingDirectory)
             {
                 _fullToolName = fullToolName;
+                _workingDirectory = workingDirectory;
             }
 
             public void Dispose() { }
@@ -1188,10 +1190,12 @@ namespace Microsoft.Build.UnitTests
 
             protected override string GenerateFullPathToTool() => _fullToolName;
 
+            protected override string GetWorkingDirectory() => _workingDirectory;
+
             /// <summary>
             /// Exposes the protected GetProcessStartInfoMultiThreaded for test verification.
             /// </summary>
-            public ProcessStartInfo CallGetProcessStartInfoMultiThreaded(TaskEnvironment taskEnvironment)
+            public ProcessStartInfo CallGetProcessStartInfoMultithreadable(TaskEnvironment taskEnvironment)
             {
                 return GetProcessStartInfoMultithreadable(
                     _fullToolName,
@@ -1202,30 +1206,70 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void GetProcessStartInfoMultiThreaded_ShouldPropagateWorkingDirectory()
+        public void GetProcessStartInfoMultithreadable_NoOverride_UsesProjectDirectory()
         {
-            // Arrange: create a MultiThreadedTaskEnvironmentDriver with a known project directory.
-            string expectedWorkingDir = NativeMethodsShared.IsUnixLike ? "/tmp" : @"C:\SomeProjectDir";
-            using var driver = new MultiThreadedTaskEnvironmentDriver(expectedWorkingDir);
+            // Arrange: no GetWorkingDirectory() override — should fall back to project directory.
+            string projectDir = NativeMethodsShared.IsUnixLike ? "/tmp" : @"C:\SomeProjectDir";
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
             var taskEnv = new TaskEnvironment(driver);
 
             string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
-            using var tool = new MultiThreadedToolTask(toolPath);
+            using var tool = new MultiThreadedToolTask(toolPath, null);
             tool.BuildEngine = new MockEngine(_output);
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInfoMultiThreaded(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
 
-            // Assert: verify env vars from the driver are present
+            // Assert
             result.Environment.Count.ShouldBeGreaterThan(0, "Environment variables should be propagated from TaskEnvironment");
-
-            // Assert: verify WorkingDirectory
-            result.WorkingDirectory.ShouldBe(expectedWorkingDir,
-                "WorkingDirectory from MultiThreadedTaskEnvironmentDriver should be propagated to the child process ProcessStartInfo");
+            result.WorkingDirectory.ShouldBe(projectDir,
+                "Without a GetWorkingDirectory() override, WorkingDirectory should fall back to taskEnvironment.ProjectDirectory");
         }
 
         [Fact]
-        public void GetProcessStartInfoMultiThreaded_EnvironmentVariablesOverride()
+        public void GetProcessStartInfoMultithreadable_RelativeOverride_AbsolutizedAgainstProjectDir()
+        {
+            // Arrange: GetWorkingDirectory() returns a relative path — should be absolutized against project dir.
+            string projectDir = NativeMethodsShared.IsUnixLike ? "/projects/myapp" : @"C:\Projects\MyApp";
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, "subdir");
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+
+            // Assert: relative path should be combined with the project directory.
+            string expected = Path.Combine(projectDir, "subdir");
+            result.WorkingDirectory.ShouldBe(expected,
+                "A relative GetWorkingDirectory() result should be absolutized against taskEnvironment.ProjectDirectory");
+        }
+
+        [Fact]
+        public void GetProcessStartInfoMultithreadable_AbsoluteOverride_UsesOverridePath()
+        {
+            // Arrange: GetWorkingDirectory() returns an absolute path — should be used directly.
+            string projectDir = NativeMethodsShared.IsUnixLike ? "/projects/myapp" : @"C:\Projects\MyApp";
+            string overrideDir = NativeMethodsShared.IsUnixLike ? "/custom/workdir" : @"D:\Custom\WorkDir";
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
+            using var tool = new MultiThreadedToolTask(toolPath, overrideDir);
+            tool.BuildEngine = new MockEngine(_output);
+
+            // Act
+            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+
+            // Assert: absolute path should be used as-is (Path.Combine with absolute second arg returns it).
+            result.WorkingDirectory.ShouldBe(overrideDir,
+                "An absolute GetWorkingDirectory() result should be used directly, not combined with project directory");
+        }
+
+        [Fact]
+        public void GetProcessStartInfoMultithreadable_EnvironmentVariablesOverride()
         {
             // Arrange: create a multithreaded driver with a custom env var.
             string expectedWorkingDir = NativeMethodsShared.IsUnixLike ? "/tmp" : @"C:\SomeProjectDir";
@@ -1238,14 +1282,14 @@ namespace Microsoft.Build.UnitTests
             var taskEnv = new TaskEnvironment(driver);
 
             string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
-            using var tool = new MultiThreadedToolTask(toolPath);
+            using var tool = new MultiThreadedToolTask(toolPath, null);
             tool.BuildEngine = new MockEngine(_output);
 
             // Set EnvironmentVariables on the task (should override the driver's value).
             tool.EnvironmentVariables = ["MY_VAR=from_task_override"];
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInfoMultiThreaded(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
 
             // Assert: task-level override should win.
             result.Environment["MY_VAR"].ShouldBe("from_task_override",
