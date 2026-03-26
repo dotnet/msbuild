@@ -3,13 +3,14 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.Build.Framework;
 
 #if NET
-using System.Runtime.Versioning;
-using System.Runtime.InteropServices;
 using System.Buffers;
-using System.Text;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
+using System.Text;
 #endif
 
 namespace Microsoft.Build.Shared
@@ -21,11 +22,11 @@ namespace Microsoft.Build.Shared
 #if NET
             process.Kill(entireProcessTree: true);
 #else
-            if (NativeMethodsShared.IsWindows)
+            if (NativeMethods.IsWindows)
             {
                 try
                 {
-                    NativeMethodsShared.KillTree(process.Id);
+                    NativeMethods.KillTree(process.Id);
                 }
                 catch (InvalidOperationException)
                 {
@@ -62,17 +63,17 @@ namespace Microsoft.Build.Shared
             try
             {
 #if NET
-                if (NativeMethodsShared.IsWindows)
+                if (NativeMethods.IsWindows)
                 {
                     commandLine = Windows.GetCommandLine(process.Id);
                     return true;
                 }
-                else if (NativeMethodsShared.IsOSX || NativeMethodsShared.IsBSD)
+                else if (NativeMethods.IsOSX || NativeMethods.IsBSD)
                 {
                     commandLine = BSD.GetCommandLine(process.Id);
                     return true;
                 }
-                else if (NativeMethodsShared.IsLinux)
+                else if (NativeMethods.IsLinux)
                 {
                     commandLine = Linux.GetCommandLine(process.Id);
                     return true;
@@ -131,7 +132,7 @@ namespace Microsoft.Build.Shared
 
                         // Decode UTF-8 directly into the char buffer
                         int charsWritten = Encoding.UTF8.GetChars(segment, charBuffer.AsSpan(totalChars));
-                        
+
                         // UTF-8 decoder converts null bytes to null chars - replace them with spaces for safety
                         Span<char> decodedChars = charBuffer.AsSpan(totalChars, charsWritten);
                         for (int i = 0; i < decodedChars.Length; i++)
@@ -182,7 +183,7 @@ namespace Microsoft.Build.Shared
             private const int WBEM_FLAG_RETURN_IMMEDIATELY = 0x00000010;
             private const int WBEM_INFINITE = -1;
 
-            
+
             // RPC authentication/impersonation constants (used by CoInitializeSecurity and CoSetProxyBlanket)
             private const int RPC_C_AUTHN_LEVEL_DEFAULT = 0;
             private const int RPC_C_AUTHN_LEVEL_CALL = 3;

@@ -100,9 +100,9 @@ namespace Microsoft.Build.Evaluation
         private PropertyDictionary<ProjectMetadata> _directMetadata;
 
         /// <summary>
-        /// Cached value of the fullpath metadata. All other metadata are computed on demand.
+        /// Cached values of derivable item-spec modifiers. All time-based metadata are computed on demand.
         /// </summary>
-        private string _fullPath;
+        private ItemSpecModifiers.Cache _cachedModifiers;
 
         /// <summary>
         /// External projects support
@@ -299,12 +299,7 @@ namespace Microsoft.Build.Evaluation
         /// Includes any metadata inherited from item definitions.
         /// Includes both custom and built-in metadata.
         /// </summary>
-        public int MetadataCount
-        {
-            [DebuggerStepThrough]
-            get
-            { return Metadata.Count + ItemSpecModifiers.All.Length; }
-        }
+        public int MetadataCount => Metadata.Count + ItemSpecModifiers.All.Length;
 
         /// <summary>
         /// Implementation of IKeyed exposing the item type, so items
@@ -700,7 +695,7 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            _fullPath = null; // Clear cached value
+            _cachedModifiers.Clear(); // Clear cached values
 
             if (_xml.Count == 0 /* no metadata */ && _project.IsSuitableExistingItemXml(_xml, name, null /* no metadata */) && !FileMatcher.HasWildcardsSemicolonItemOrPropertyReferences(name))
             {
@@ -854,16 +849,9 @@ namespace Microsoft.Build.Evaluation
         /// the specified name, if any.
         /// </summary>
         private string GetBuiltInMetadataEscaped(string name)
-        {
-            string value = null;
-
-            if (ItemSpecModifiers.IsItemSpecModifier(name))
-            {
-                value = BuiltInMetadata.GetMetadataValueEscaped(_project.DirectoryPath, _evaluatedIncludeBeforeWildcardExpansionEscaped, _evaluatedIncludeEscaped, this.Xml.ContainingProject.FullPath, name, ref _fullPath);
-            }
-
-            return value;
-        }
+            => ItemSpecModifiers.TryGetModifierKind(name, out ItemSpecModifierKind modifierKind)
+                ? BuiltInMetadata.GetMetadataValueEscaped(_project.DirectoryPath, _evaluatedIncludeBeforeWildcardExpansionEscaped, _evaluatedIncludeEscaped, Xml.ContainingProject.FullPath, modifierKind, ref _cachedModifiers)
+                : null;
 
         /// <summary>
         /// Retrieves the named metadata from the item definition, if any.
