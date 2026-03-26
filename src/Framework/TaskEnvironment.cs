@@ -24,26 +24,27 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Gets the default task environment that directly accesses the system environment variables and current working directory.
+        /// Gets the default task environment that directly accesses the system environment variables and working directory of the current process.
         /// </summary>
         /// <remarks>
-        /// Suitable for multi-process execution mode. Tasks running with this environment will see the same environment variables and working directory as the MSBuild process.
+        /// This environment is provided to tasks by MSBuild engine in multi-process execution mode. 
         /// </remarks>
-        public static TaskEnvironment Default { get; } = new(MultiProcessTaskEnvironmentDriver.Instance);
+        public static TaskEnvironment CurrentProcess { get; } = new(MultiProcessTaskEnvironmentDriver.Instance);
 
         /// <summary>
-        /// Creates a new <see cref="TaskEnvironment"/> with isolated environment variables and working directory.
+        /// Creates a new <see cref="TaskEnvironment"/> with isolated working directory and environment variables.
         /// </summary>
         /// <remarks>
-        /// Suitable for multithreaded execution mode where each task needs its own environment state
-        /// that does not interfere with other concurrently executing tasks.
+        /// This method is primarily intended for testing scenarios. In normal MSBuild operation, the correct task environment is provided by the MSBuild engine.
+        /// The created TaskEnvironment provides isolated environment state similar to what tasks receive in multithreaded execution mode, enabling testing of task isolation behavior.
         /// </remarks>
         /// <param name="projectDirectory">The initial working directory for the task.</param>
         /// <param name="environmentVariables">A dictionary of environment variables to use, or <see langword="null"/> to use the current process environment variables.</param>
         /// <returns>A new <see cref="TaskEnvironment"/> with isolated environment state.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="projectDirectory"/> is <see langword="null"/>.</exception>
         /// <exception cref="ArgumentException"><paramref name="projectDirectory"/> is empty.</exception>
-        public static TaskEnvironment CreateMultiThreaded(string projectDirectory, IDictionary<string, string>? environmentVariables = null)
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        public static TaskEnvironment CreateWithProjectDirectoryAndEnvironment(string projectDirectory, IDictionary<string, string>? environmentVariables = null)
         {
             ArgumentException.ThrowIfNullOrEmpty(projectDirectory);
 
