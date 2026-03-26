@@ -20,8 +20,6 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class AspNetCompiler : ToolTaskExtension, IAspNetCompilerTaskContract, IMultiThreadableTask
     {
-        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
-
         /*
             C:\WINDOWS\Microsoft.NET\Framework\v2.0.x86dbg>aspnet_compiler /?
             Utility to precompile an ASP.NET application
@@ -314,13 +312,7 @@ namespace Microsoft.Build.Tasks
 
             return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
         }
-
-        protected override ProcessStartInfo GetProcessStartInfo(
-            string pathToTool,
-            string commandLineCommands,
-            string responseFileSwitch) =>
-                 GetProcessStartInfoMultithreadable(pathToTool, commandLineCommands, responseFileSwitch, TaskEnvironment);
-
+        
         /// <summary>
         /// Validate the task arguments, log any warnings/errors
         /// </summary>
