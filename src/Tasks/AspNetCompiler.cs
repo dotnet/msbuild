@@ -18,7 +18,7 @@ namespace Microsoft.Build.Tasks
     /// The AspNetCompiler task, which is a wrapper around aspnet_compiler.exe
     /// </summary>
     [MSBuildMultiThreadableTask]
-    public class AspNetCompiler : ToolTaskExtension, IAspNetCompilerTaskContract, IMultiThreadableTask
+    public class AspNetCompiler : ToolTaskExtension, IAspNetCompilerTaskContract
     {
         /*
             C:\WINDOWS\Microsoft.NET\Framework\v2.0.x86dbg>aspnet_compiler /?
