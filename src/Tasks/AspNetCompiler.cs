@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #if NETFRAMEWORK
-using System.Diagnostics;
 using Microsoft.Build.Utilities;
 #endif
 
