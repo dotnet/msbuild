@@ -363,8 +363,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TaskEnvironment_Default_ReturnsSingleton()
         {
-            TaskEnvironment first = TaskEnvironment.Default;
-            TaskEnvironment second = TaskEnvironment.Default;
+            TaskEnvironment first = TaskEnvironment.CurrentProcess;
+            TaskEnvironment second = TaskEnvironment.CurrentProcess;
 
             first.ShouldNotBeNull();
             first.ShouldBeSameAs(second);
@@ -380,7 +380,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Environment.SetEnvironmentVariable(testVarName, testVarValue);
 
-                TaskEnvironment.Default.GetEnvironmentVariable(testVarName).ShouldBe(testVarValue);
+                TaskEnvironment.CurrentProcess.GetEnvironmentVariable(testVarName).ShouldBe(testVarValue);
             }
             finally
             {
