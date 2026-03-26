@@ -34,7 +34,7 @@ Fill in these values before starting. Version increments are irregular — they 
   - [ ] Confirm branch `vs{{THIS_RELEASE_VERSION}}` does **not** already exist — if it does, this release was already started
   - [ ] Confirm DARC channel `VS {{THIS_RELEASE_VERSION}}` exists: \
   `darc get-channel --name "VS {{THIS_RELEASE_VERSION}}"` \
-  If missing, it should have been created during the previous release (Phase 1 step 3). Create it now: `darc add-channel --name "VS {{THIS_RELEASE_VERSION}}"`
+  If missing, it should have been created during the previous release (Phase 1.2b "create next channel" step). Create it now: `darc add-channel --name "VS {{THIS_RELEASE_VERSION}}"`
 - [ ] Create this tracking issue in dotnet/msbuild with all `{{PLACEHOLDERS}}` replaced
 - [ ] Record all tracking URLs in the table below as phases are completed:
 
@@ -75,7 +75,6 @@ Use `--configuration-branch release/msbuild-{{THIS_RELEASE_VERSION}}` on every c
   - [ ] **1.2e** Ping internal "First Responders" Teams channel to get the new `VS {{NEXT_VERSION}}` channel available as a promotion target: {{URL_OF_CHANNEL_PROMOTION_PR}}
 - [ ] **1.3** Update `.config/git-merge-flow-config.jsonc`: \
 Insert `vs{{THIS_RELEASE_VERSION}}` as the last entry before `main` in the merge chain. Add a comment noting the VS/SDK version context.
-- [ ] **1.4** Update `VisualStudio.ChannelName` (and `VisualStudio.MajorVersion` if applicable) in `.vsts-dotnet.yml` on the `vs{{THIS_RELEASE_VERSION}}` branch. It must point to the matching VS release branch. Ensure the change is **not auto-mergeable** with the interbranch flow (the merge-flow should produce a conflict so this gets human review): {{URL_OF_CHANNEL_NAME_PR}}
 
 ---
 
@@ -178,7 +177,7 @@ The insertion PR contains the inserted package versions — useful for the nuget
 Steps are **mostly parallel** unless noted.
 
 - [ ] **5.1** Push packages to nuget.org. Contact dnceng — search "Publish MSBuild {{THIS_RELEASE_VERSION}} to NuGet.org" email subject for template. \
-`THIS_RELEASE_EXACT_VERSION` = `VersionPrefix` from `eng/Versions.props` on the release branch (also visible in the VS insertion PR). Packages to publish taken from the official build https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434 for the {{THIS_RELEASE_VERSION}} branch (search in artifacts under Shipping folder:
+`THIS_RELEASE_EXACT_VERSION` = `VersionPrefix` from `eng/Versions.props` on the release branch (also visible in the VS insertion PR). Packages to publish taken from the official build https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434 for the {{THIS_RELEASE_VERSION}} branch; search in artifacts under the Shipping folder for:
     - Microsoft.Build.Utilities.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
     - Microsoft.Build.{{THIS_RELEASE_EXACT_VERSION}}.nupkg
     - Microsoft.Build.Framework.{{THIS_RELEASE_EXACT_VERSION}}.nupkg

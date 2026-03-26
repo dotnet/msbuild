@@ -8,36 +8,22 @@ MSBuild ships in both Visual Studio (monthly) and the .NET SDK (quarterly). Each
 
 MSBuild is a **component** inserted into Visual Studio. VS ships monthly; MSBuild must branch and prepare its bits **before** VS is ready to take them.
 
-```mermaid
-graph LR
-    subgraph "BRANCH_SNAP_DATE — Phases 1–3"
-        A1[Create vs* branch from main]
-        A2[Bump main to NEXT version]
-        A3[DARC channel & subscription setup]
-    end
-
-    subgraph "Insertion → VS main"
-        B1["vs* builds auto-insert into VS main"]
-    end
-
-    subgraph "Before INSIDERS_SNAP_DATE — Phase 4"
-        C1[Final branding via Stabilize-Release.ps1]
-        C2[OptProf bootstrap]
-        C3["Final-branded bits land in VS main"]
-    end
-
-    subgraph "VS snaps"
-        D1["VS snaps main → rel/insiders"]
-        D2["VS promotes rel/insiders → rel/stable"]
-    end
-
-    subgraph "VS_SHIP_DATE — Phase 5"
-        E1[Publish packages to nuget.org]
-        E2[Tag release, update docs]
-    end
-
-    A1 --> A2 --> A3 --> B1 --> C1 --> C2 --> C3 --> D1 --> D2 --> E1 --> E2
-```
+* BRANCH_SNAP_DATE — Phases 1–3"
+  - Create vs* branch from main
+  - Bump main to NEXT version
+  - DARC channel & subscription setup
+* Insertion → VS main
+  - vs* builds auto-insert into VS main
+* Before INSIDERS_SNAP_DATE — Phase 4
+  - Final branding via `Stabilize-Release.ps1`
+  - OptProf bootstrap
+  - Final-branded bits land in VS main
+* VS snaps
+  - VS snaps main → rel/insiders
+  - VS promotes rel/insiders → rel/stable
+* VS_SHIP_DATE — Phase 5
+  - Publish packages to nuget.org
+  - Tag release, update docs
 
 The [VS insertion pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=24295) controls the routing:
 - MSBuild `main` → VS `main` (daily canary builds)
