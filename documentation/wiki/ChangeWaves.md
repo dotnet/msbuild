@@ -31,6 +31,7 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.6
 - [AbsolutePath.GetCanonicalForm optimization - avoid expensive Path.GetFullPath calls when paths don't need canonicalization](https://github.com/dotnet/msbuild/pull/13369)
+- [TaskHostTask forwards request-level global properties (e.g. MSBuildRestoreSessionId) to out-of-proc TaskHost in -mt mode](https://github.com/dotnet/msbuild/pull/13443)
 - [Fix ShouldTreatWarningAsError in OOP TaskHost checking wrong collection (WarningsAsMessages instead of WarningsAsErrors)](https://github.com/dotnet/msbuild/issues/11952)
 - [Fix ToolTask hang when tool spawns grandchild processes that inherit stdout/stderr pipe handles](https://github.com/dotnet/msbuild/issues/2981)
 
