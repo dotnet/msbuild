@@ -705,5 +705,78 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Child should not have been built
             logger.FullLog.ShouldNotContain("ShouldNotRun");
         }
+
+        /// <summary>
+        /// Verifies explicit Yield/Reacquire round-trip works when task runs in TaskHost.
+        /// This exercises the public IBuildEngine3.Yield()/Reacquire() API (fire-and-forget yield
+        /// + blocking reacquire), distinct from the implicit yield path in BuildProjectFile.
+        /// </summary>
+        [Fact]
+        public void YieldAndReacquire_WorksWithExplicitTaskHostFactory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(YieldAndReacquireTask)}"" AssemblyFile=""{typeof(YieldAndReacquireTask).Assembly.Location}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""Test"">
+        <{nameof(YieldAndReacquireTask)}>
+            <Output PropertyName=""Result"" TaskParameter=""YieldSucceeded"" />
+        </{nameof(YieldAndReacquireTask)}>
+    </Target>
+</Project>";
+
+            TransientTestProjectWithFiles project = env.CreateTestProjectWithFiles(projectContents);
+            ProjectInstance projectInstance = new(project.ProjectFile);
+
+            var logger = new MockLogger(_output);
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters { MaxNodeCount = 4, EnableNodeReuse = false, Loggers = [logger] },
+                new BuildRequestData(projectInstance, targetsToBuild: ["Test"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            bool.Parse(projectInstance.GetPropertyValue("Result")).ShouldBeTrue();
+            logger.FullLog.ShouldContain("Yield/Reacquire round-trip completed successfully");
+        }
+
+        /// <summary>
+        /// Verifies explicit Yield/Reacquire works when task is auto-ejected in multithreaded mode.
+        /// </summary>
+        [Fact]
+        public void YieldAndReacquire_WorksWhenAutoEjectedInMultiThreadedMode()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+            string testDir = env.CreateFolder().Path;
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""{nameof(YieldAndReacquireTask)}"" AssemblyFile=""{typeof(YieldAndReacquireTask).Assembly.Location}"" />
+    <Target Name=""Test"">
+        <{nameof(YieldAndReacquireTask)}>
+            <Output PropertyName=""Result"" TaskParameter=""YieldSucceeded"" />
+        </{nameof(YieldAndReacquireTask)}>
+    </Target>
+</Project>";
+
+            string projectFile = Path.Combine(testDir, "Test.proj");
+            File.WriteAllText(projectFile, projectContents);
+
+            var logger = new MockLogger(_output);
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters
+                {
+                    MultiThreaded = true,
+                    MaxNodeCount = 4,
+                    Loggers = [logger],
+                    EnableNodeReuse = false
+                },
+                new BuildRequestData(projectFile, new Dictionary<string, string?>(), null, ["Test"], null));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            logger.FullLog.ShouldContain("external task host");
+            logger.FullLog.ShouldContain("Yield/Reacquire round-trip completed successfully");
+        }
     }
 }

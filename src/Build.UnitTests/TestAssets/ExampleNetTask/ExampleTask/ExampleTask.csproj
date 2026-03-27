@@ -19,6 +19,7 @@
     <Compile Include="..\..\..\BackEnd\RequestCoresTask.cs" Link="RequestCoresTask.cs" />
     <Compile Include="..\..\..\BackEnd\BuildProjectFileTask.cs" Link="BuildProjectFileTask.cs" />
     <Compile Include="..\..\..\BackEnd\BuildProjectFileAndReportPidTask.cs" Link="BuildProjectFileAndReportPidTask.cs" />
+    <Compile Include="..\..\..\BackEnd\YieldAndReacquireTask.cs" Link="YieldAndReacquireTask.cs" />
   </ItemGroup>
 
 </Project>
