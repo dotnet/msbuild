@@ -107,7 +107,9 @@ The analyzer determines what to check based on the type declaration:
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | All five rules |
 | Regular class (no task interface or attribute) | Not analyzed |
 
-The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting in helper classes that are called from multithreadable tasks but don't implement `ITask` themselves.
+The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004). Without it, only classes implementing `ITask` receive per-line diagnostics and code fixes for those rules. The **transitive** analyzer (MSBuildTask0005) already discovers helpers via call graph analysis, but it reports only at the task entry point. Adding this attribute to a helper class gives you inline diagnostics and code fixes directly in the helper's source.
+
+**When to use:** Apply `[MSBuildMultiThreadableTaskAnalyzed]` to utility or helper classes that are primarily used by multithreadable tasks and where you want immediate in-editor feedback (squiggles and code fixes) on unsafe APIs within those helpers.
 
 ### Severity Levels
 

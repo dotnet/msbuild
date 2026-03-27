@@ -32,17 +32,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// The .editorconfig key controlling analysis scope.
         /// Values: "all" (default) | "multithreadable_only"
         /// </summary>
-        internal const string ScopeOptionKey = "msbuild_task_analyzer.scope";
-        internal const string ScopeAll = "all";
-        internal const string ScopeMultiThreadableOnly = "multithreadable_only";
-        // Well-known type names
-        private const string ITaskFullName = "Microsoft.Build.Framework.ITask";
-        private const string IMultiThreadableTaskFullName = "Microsoft.Build.Framework.IMultiThreadableTask";
-        private const string TaskEnvironmentFullName = "Microsoft.Build.Framework.TaskEnvironment";
-        private const string AbsolutePathFullName = "Microsoft.Build.Framework.AbsolutePath";
-        private const string ITaskItemFullName = "Microsoft.Build.Framework.ITaskItem";
-        private const string AnalyzedAttributeFullName = "Microsoft.Build.Framework.MSBuildMultiThreadableTaskAnalyzedAttribute";
-        private const string MultiThreadableTaskAttributeFullName = "Microsoft.Build.Framework.MSBuildMultiThreadableTaskAttribute";
+        internal const string ScopeOptionKey = SharedAnalyzerHelpers.ScopeOptionKey;
+        internal const string ScopeAll = SharedAnalyzerHelpers.ScopeAll;
+        internal const string ScopeMultiThreadableOnly = SharedAnalyzerHelpers.ScopeMultiThreadableOnly;
 
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics => DiagnosticDescriptors.All;
 
@@ -56,7 +48,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         private void OnCompilationStart(CompilationStartAnalysisContext compilationContext)
         {
             // Resolve well-known types
-            var iTaskType = compilationContext.Compilation.GetTypeByMetadataName(ITaskFullName);
+            var iTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskFullName);
             if (iTaskType is null)
             {
                 // No ITask in compilation - nothing to analyze
@@ -64,22 +56,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             // Read scope option from .editorconfig: "all" (default) or "multithreadable_only"
-            bool analyzeAllTasks = true;
-            if (compilationContext.Options.AnalyzerConfigOptionsProvider
-                    .GlobalOptions.TryGetValue($"build_property.{ScopeOptionKey}", out var scopeValue) ||
-                compilationContext.Options.AnalyzerConfigOptionsProvider
-                    .GlobalOptions.TryGetValue(ScopeOptionKey, out scopeValue))
-            {
-                analyzeAllTasks = !string.Equals(scopeValue, ScopeMultiThreadableOnly, StringComparison.OrdinalIgnoreCase);
-            }
+            bool analyzeAllTasks = SharedAnalyzerHelpers.ReadAnalyzeAllTasksOption(compilationContext.Options.AnalyzerConfigOptionsProvider);
 
-            var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(IMultiThreadableTaskFullName);
-            var taskEnvironmentType = compilationContext.Compilation.GetTypeByMetadataName(TaskEnvironmentFullName);
-            var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(AbsolutePathFullName);
-            var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(ITaskItemFullName);
-            var consoleType = compilationContext.Compilation.GetTypeByMetadataName("System.Console");
-            var analyzedAttributeType = compilationContext.Compilation.GetTypeByMetadataName(AnalyzedAttributeFullName);
-            var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(MultiThreadableTaskAttributeFullName);
+            var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
+            var taskEnvironmentType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
+            var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
+            var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName);
+            var consoleType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ConsoleFullName);
+            var analyzedAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AnalyzedAttributeFullName);
+            var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
 
             // Build symbol lookup for banned APIs
             var bannedApiLookup = BuildBannedApiLookup(compilationContext.Compilation);

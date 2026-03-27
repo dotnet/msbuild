@@ -26,13 +26,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class TransitiveCallChainAnalyzer : DiagnosticAnalyzer
     {
-        private const string ITaskFullName = "Microsoft.Build.Framework.ITask";
-        private const string TaskEnvironmentFullName = "Microsoft.Build.Framework.TaskEnvironment";
-        private const string AbsolutePathFullName = "Microsoft.Build.Framework.AbsolutePath";
-        private const string ITaskItemFullName = "Microsoft.Build.Framework.ITaskItem";
-
         /// <summary>
-        /// Maximum call chain depth to prevent infinite traversal in recursive call graphs.
+        /// Maximum BFS depth. The visited set already prevents cycles, but this limits
+        /// exploration of very deep non-cyclic call chains for performance.
         /// </summary>
         private const int MaxCallChainDepth = 20;
 
@@ -48,30 +44,23 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         private void OnCompilationStart(CompilationStartAnalysisContext compilationContext)
         {
-            var iTaskType = compilationContext.Compilation.GetTypeByMetadataName(ITaskFullName);
+            var iTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskFullName);
             if (iTaskType is null)
             {
                 return;
             }
 
             // Read scope option from .editorconfig
-            bool analyzeAllTasks = true;
-            if (compilationContext.Options.AnalyzerConfigOptionsProvider
-                    .GlobalOptions.TryGetValue($"build_property.{MultiThreadableTaskAnalyzer.ScopeOptionKey}", out var scopeValue) ||
-                compilationContext.Options.AnalyzerConfigOptionsProvider
-                    .GlobalOptions.TryGetValue(MultiThreadableTaskAnalyzer.ScopeOptionKey, out scopeValue))
-            {
-                analyzeAllTasks = !string.Equals(scopeValue, MultiThreadableTaskAnalyzer.ScopeMultiThreadableOnly, StringComparison.OrdinalIgnoreCase);
-            }
+            bool analyzeAllTasks = SharedAnalyzerHelpers.ReadAnalyzeAllTasksOption(compilationContext.Options.AnalyzerConfigOptionsProvider);
 
-            var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName("Microsoft.Build.Framework.IMultiThreadableTask");
-            var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName("Microsoft.Build.Framework.MSBuildMultiThreadableTaskAttribute");
-            var analyzedAttributeType = compilationContext.Compilation.GetTypeByMetadataName("Microsoft.Build.Framework.MSBuildMultiThreadableTaskAnalyzedAttribute");
+            var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
+            var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
+            var analyzedAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AnalyzedAttributeFullName);
 
-            var taskEnvironmentType = compilationContext.Compilation.GetTypeByMetadataName(TaskEnvironmentFullName);
-            var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(AbsolutePathFullName);
-            var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(ITaskItemFullName);
-            var consoleType = compilationContext.Compilation.GetTypeByMetadataName("System.Console");
+            var taskEnvironmentType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
+            var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
+            var iTaskItemType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskItemFullName);
+            var consoleType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ConsoleFullName);
 
             var bannedApiLookup = BuildBannedApiLookup(compilationContext.Compilation);
             var filePathTypes = ResolveFilePathTypes(compilationContext.Compilation);

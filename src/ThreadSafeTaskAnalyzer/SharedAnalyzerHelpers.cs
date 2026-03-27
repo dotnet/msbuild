@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Operations;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer
@@ -15,6 +16,28 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// </summary>
     internal static class SharedAnalyzerHelpers
     {
+        /// <summary>
+        /// The .editorconfig key controlling analysis scope.
+        /// Values: "all" (default) | "multithreadable_only"
+        /// </summary>
+        internal const string ScopeOptionKey = "msbuild_task_analyzer.scope";
+        internal const string ScopeAll = "all";
+        internal const string ScopeMultiThreadableOnly = "multithreadable_only";
+
+        /// <summary>
+        /// Reads the scope option from the analyzer config options provider.
+        /// Returns true if all tasks should be analyzed; false if only multithreadable tasks.
+        /// </summary>
+        internal static bool ReadAnalyzeAllTasksOption(AnalyzerConfigOptionsProvider optionsProvider)
+        {
+            if (optionsProvider.GlobalOptions.TryGetValue($"build_property.{ScopeOptionKey}", out var scopeValue) ||
+                optionsProvider.GlobalOptions.TryGetValue(ScopeOptionKey, out scopeValue))
+            {
+                return !string.Equals(scopeValue, ScopeMultiThreadableOnly, StringComparison.OrdinalIgnoreCase);
+            }
+
+            return true; // default: analyze all tasks
+        }
         /// <summary>
         /// Represents a resolved banned API entry for O(1) lookup during analysis.
         /// </summary>

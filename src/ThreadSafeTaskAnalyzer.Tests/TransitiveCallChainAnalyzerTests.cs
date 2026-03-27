@@ -19,30 +19,35 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 /// </summary>
 public class TransitiveCallChainAnalyzerTests
 {
-    [Fact]
-    public async Task HelperCallingConsole_TransitivelyFromTask_ProducesDiagnostic()
+    [Theory]
+    [InlineData("using System;", "Console.WriteLine(\"test\");", "Console.WriteLine")]
+    [InlineData("using System.IO;", "File.Exists(\"test.txt\");", "File.Exists")]
+    [InlineData("using System;", "Environment.GetEnvironmentVariable(\"KEY\");", "GetEnvironmentVariable")]
+    public async Task HelperCallingBannedApi_TransitivelyFromTask_ProducesDiagnostic(
+        string usingDirective, string helperBody, string expectedApiName)
     {
-        var diags = await GetAllDiagnosticsAsync("""
-            using System;
-            public class Helper
+        var source = $$"""
+            {{usingDirective}}
+            public class TestHelper
             {
-                public static void Log(string msg) { Console.WriteLine(msg); }
+                public static void DoWork() { {{helperBody}} }
             }
 
             public class MyTask : Microsoft.Build.Utilities.Task
             {
                 public override bool Execute()
                 {
-                    Helper.Log("hello");
+                    TestHelper.DoWork();
                     return true;
                 }
             }
-            """);
+            """;
+
+        var diags = await GetAllDiagnosticsAsync(source);
 
         var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
         transitive.ShouldNotBeEmpty();
-        transitive[0].GetMessage().ShouldContain("Console.WriteLine");
-        transitive[0].GetMessage().ShouldContain("Helper.Log");
+        transitive[0].GetMessage().ShouldContain(expectedApiName);
     }
 
     [Fact]
@@ -76,59 +81,6 @@ public class TransitiveCallChainAnalyzerTests
         // Chain should show: MyTask.Execute → OuterHelper.Process → InnerHelper.DoExit → Environment.Exit
         msg.ShouldContain("OuterHelper.Process");
         msg.ShouldContain("InnerHelper.DoExit");
-    }
-
-    [Fact]
-    public async Task HelperCallingFileExists_WithoutAbsolutePath_ProducesDiagnostic()
-    {
-        var diags = await GetAllDiagnosticsAsync("""
-            using System.IO;
-            public class FileHelper
-            {
-                public static bool CheckFile(string path) { return File.Exists(path); }
-            }
-
-            public class MyTask : Microsoft.Build.Utilities.Task
-            {
-                public override bool Execute()
-                {
-                    FileHelper.CheckFile("test.txt");
-                    return true;
-                }
-            }
-            """);
-
-        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
-        transitive.ShouldNotBeEmpty();
-        transitive[0].GetMessage().ShouldContain("File.Exists");
-    }
-
-    [Fact]
-    public async Task HelperCallingEnvironmentGetVar_ProducesDiagnostic()
-    {
-        var diags = await GetAllDiagnosticsAsync("""
-            using System;
-            public class ConfigHelper
-            {
-                public static string GetConfig(string key)
-                {
-                    return Environment.GetEnvironmentVariable(key);
-                }
-            }
-
-            public class MyTask : Microsoft.Build.Utilities.Task
-            {
-                public override bool Execute()
-                {
-                    var val = ConfigHelper.GetConfig("MY_VAR");
-                    return true;
-                }
-            }
-            """);
-
-        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
-        transitive.ShouldNotBeEmpty();
-        transitive[0].GetMessage().ShouldContain("GetEnvironmentVariable");
     }
 
     [Fact]

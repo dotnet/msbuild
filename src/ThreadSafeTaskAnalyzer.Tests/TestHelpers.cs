@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using Microsoft.CodeAnalysis;
@@ -144,6 +145,26 @@ internal static class TestHelpers
                 .WithNullableContextOptions(NullableContextOptions.Enable));
     }
 
+    /// <summary>
+    /// Runs the MultiThreadableTaskAnalyzer with a specific scope option and returns analyzer diagnostics.
+    /// </summary>
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithScopeAsync(string source, string scope)
+    {
+        var compilation = CreateCompilation(source);
+        var analyzer = new MultiThreadableTaskAnalyzer();
+
+        var globalOptions = new Dictionary<string, string>
+        {
+            { $"build_property.{SharedAnalyzerHelpers.ScopeOptionKey}", scope }
+        };
+        var optionsProvider = new TestAnalyzerConfigOptionsProvider(globalOptions);
+        var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);
+
+        var compilationWithAnalyzers = compilation.WithAnalyzers(
+            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer), options);
+        return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+    }
+
     private static MetadataReference[] CreateCoreReferences()
     {
         // Reference the core runtime assemblies needed
@@ -190,5 +211,39 @@ internal static class TestHelpers
         return locations
             .Select(loc => (MetadataReference)MetadataReference.CreateFromFile(loc))
             .ToArray();
+    }
+}
+
+/// <summary>
+/// A test implementation of <see cref="AnalyzerConfigOptionsProvider"/> that returns
+/// configurable global options for testing scope and other analyzer settings.
+/// </summary>
+internal sealed class TestAnalyzerConfigOptionsProvider : AnalyzerConfigOptionsProvider
+{
+    private readonly TestAnalyzerConfigOptions _globalOptions;
+
+    public TestAnalyzerConfigOptionsProvider(Dictionary<string, string> globalOptions)
+    {
+        _globalOptions = new TestAnalyzerConfigOptions(globalOptions);
+    }
+
+    public override AnalyzerConfigOptions GlobalOptions => _globalOptions;
+
+    public override AnalyzerConfigOptions GetOptions(SyntaxTree tree) => TestAnalyzerConfigOptions.Empty;
+
+    public override AnalyzerConfigOptions GetOptions(AdditionalText textFile) => TestAnalyzerConfigOptions.Empty;
+
+    private sealed class TestAnalyzerConfigOptions : AnalyzerConfigOptions
+    {
+        public static readonly TestAnalyzerConfigOptions Empty = new(new Dictionary<string, string>());
+
+        private readonly Dictionary<string, string> _options;
+
+        public TestAnalyzerConfigOptions(Dictionary<string, string> options)
+        {
+            _options = options;
+        }
+
+        public override bool TryGetValue(string key, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? value) => _options.TryGetValue(key, out value);
     }
 }

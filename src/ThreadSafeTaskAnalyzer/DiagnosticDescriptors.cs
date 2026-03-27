@@ -33,7 +33,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         public static readonly DiagnosticDescriptor FilePathRequiresAbsolute = new(
             id: DiagnosticIds.FilePathRequiresAbsolute,
             title: "File system API requires absolute path in MSBuild tasks",
-            messageFormat: "'{0}' may resolve relative paths against the process working directory: {1}",
+            messageFormat: "'{0}' uses a path that may be relative; in multithreaded mode the working directory is shared. {1}",
             category: "MSBuild.TaskAuthoring",
             defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true,

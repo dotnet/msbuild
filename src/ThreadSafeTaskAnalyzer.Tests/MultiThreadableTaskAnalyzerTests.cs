@@ -1986,4 +1986,48 @@ public class MultiThreadableTaskAnalyzerTests
         // Should still flag the path parameter
         diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).Count().ShouldBe(1);
     }
+
+    // ═══════════════════════════════════════════════════════════════════════
+    // Scope option tests
+    // ═══════════════════════════════════════════════════════════════════════
+
+    [Fact]
+    public async Task Scope_MultithreadableOnly_PlainTask_NoDiagnostic()
+    {
+        var diags = await GetDiagnosticsWithScopeAsync("""
+            using System;
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var val = Environment.GetEnvironmentVariable("KEY");
+                    return true;
+                }
+            }
+            """, SharedAnalyzerHelpers.ScopeMultiThreadableOnly);
+
+        // Plain ITask should NOT get MSBuildTask0002 when scope is multithreadable_only
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Scope_MultithreadableOnly_MultiThreadableTask_GetsDiagnostic()
+    {
+        var diags = await GetDiagnosticsWithScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public class MtTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    var val = Environment.GetEnvironmentVariable("KEY");
+                    return true;
+                }
+            }
+            """, SharedAnalyzerHelpers.ScopeMultiThreadableOnly);
+
+        // IMultiThreadableTask SHOULD get MSBuildTask0002 even when scope is multithreadable_only
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldNotBeEmpty();
+    }
 }
