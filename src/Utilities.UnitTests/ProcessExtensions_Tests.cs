@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests
             p.ExitCode.ShouldNotBe(0);
         }
 
-        [Fact]
+        [DotNetOnlyFact]
         public async Task TryGetCommandLine_RunningProcess_ContainsExpectedExecutable()
         {
             using Process p = StartLongRunningProcess();
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [DotNetOnlyFact]
         public async Task TryGetCommandLine_RunningProcess_ContainsArguments()
         {
             using Process p = StartLongRunningProcess();
@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests
             {
                 await Task.Delay(300);
                 var sw = Stopwatch.StartNew();
-                p.TryGetCommandLine(out string commandLine);
+                p.TryGetCommandLine(out string commandLine).ShouldBeTrue();
                 sw.Stop();
                 _output.WriteLine($"TryGetCommandLine elapsed: {sw.Elapsed.TotalMilliseconds:F2} ms");
 

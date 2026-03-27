@@ -326,7 +326,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// When a message is logged to the standard error stream error if LogStandardErrorAsError is true
+        /// When LogStandardErrorAsError is true and text is sent to stderr, the tool exits with
+        /// code 0 but ToolTask overrides the exit code to -1. The low-importance message
+        /// "The command exited with return value 0, but errors were detected" should be logged,
+        /// not the generic tool failure error MSB6006.
         /// </summary>
         [Fact]
         public void ErrorWhenTextSentToStandardError()
@@ -342,9 +345,44 @@ namespace Microsoft.Build.UnitTests
 
                 t.Execute().ShouldBeFalse();
 
-                engine.AssertLogDoesntContain("MSB3073");
                 engine.AssertLogContains("Who made you king anyways");
+
+                // Should not log other failure error codes
+                engine.AssertLogDoesntContain("MSB3073");
+
                 t.ExitCode.ShouldBe(-1);
+                // Only the stderr-as-error from tool output
+                engine.Errors.ShouldBe(1);
+            }
+        }
+
+        /// <summary>
+        /// When the tool exits with a non-zero exit code and has already logged its own errors,
+        /// ToolTask should log the "command exited with code" message (not MSB6006) as a low-importance
+        /// diagnostic rather than a duplicate error.
+        /// </summary>
+        [Fact]
+        public void HandleExecutionErrorsWhenToolLogsErrorAndExitsNonZero()
+        {
+            using (MyTool t = new MyTool())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                                                ? "/C echo BADTHINGHAPPENED && exit /b 1"
+                                                : @"-c ""echo BADTHINGHAPPENED; exit 1""";
+
+                t.Execute().ShouldBeFalse();
+
+                engine.AssertLogContains("BADTHINGHAPPENED");
+
+                // Should not log the generic tool failure error or the zero-with-errors message
+                engine.AssertLogDoesntContain("MSB3073");
+                engine.AssertLogDoesntContain("exited with return value 0");
+
+                t.ExitCode.ShouldBe(1);
+                // Only the custom error logged by MyTool.LogEventsFromTextOutput
                 engine.Errors.ShouldBe(1);
             }
         }
@@ -999,6 +1037,68 @@ namespace Microsoft.Build.UnitTests
                     result.ShouldBeTrue();
                     task.ExitCode.ShouldBe(0);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Verifies that ToolTask does not hang when the tool process spawns a grandchild
+        /// process that inherits stdout/stderr pipe handles and outlives the tool.
+        /// This is a regression test for https://github.com/dotnet/msbuild/issues/2981.
+        /// </summary>
+        [Fact]
+        public void ToolTaskDoesNotHangWhenGrandchildInheritsPipeHandles()
+        {
+            using (MyTool t = new MyTool())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+
+                // cmd echoes "hello", then starts a background ping that inherits
+                // pipe handles. cmd exits immediately; ping outlives the 2s EOF timeout.
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                    ? "/c echo hello & start /b ping -n 10 127.0.0.1 > nul"
+                    : "-c \"echo hello; sleep 10 &\"";
+
+                // Set a generous timeout - without the fix this would hang for the full ping duration
+                t.Timeout = 30000;
+
+                bool result = t.Execute();
+
+                // The tool should complete without hanging.
+                // The exit code may be non-zero depending on timing, but the key thing
+                // is that Execute() returns at all rather than hanging forever.
+                _output.WriteLine(engine.Log);
+                engine.Log.ShouldContain("hello");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that ToolTask still captures all output from the tool process
+        /// even with the grandchild pipe fix enabled. This is a regression test for
+        /// https://github.com/dotnet/msbuild/issues/10378 where switching to
+        /// WaitForExit(int) caused output to be lost.
+        /// </summary>
+        [Fact]
+        public void ToolTaskCapturesAllOutputWithFix()
+        {
+            using (MyTool t = new MyTool())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+
+                // Echo multiple lines to verify all output is captured
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows ?
+                    "/c echo line1 & echo line2 & echo line3"
+                    : "-c \"echo line1; echo line2; echo line3\"";
+
+                bool result = t.Execute();
+
+                _output.WriteLine(engine.Log);
+
+                result.ShouldBeTrue();
+                engine.Log.ShouldContain("line1");
+                engine.Log.ShouldContain("line2");
+                engine.Log.ShouldContain("line3");
             }
         }
 

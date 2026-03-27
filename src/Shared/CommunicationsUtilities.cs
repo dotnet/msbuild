@@ -7,7 +7,11 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.IO.Pipes;
+
+#if RUNTIME_TYPE_NETCORE
 using System.Runtime.InteropServices;
+#endif
+
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS || RUNTIME_TYPE_NETCORE
 using System.Security.Principal;
 #endif
@@ -20,13 +24,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.BackEnd;
 
-#if !CLR2COMPATIBILITY
-using Microsoft.Build.Shared.Debugging;
-using System.Collections;
-using System.Collections.Frozen;
-using Microsoft.NET.StringTools;
-
-#endif
 #if !FEATURE_APM
 using System.Threading.Tasks;
 #endif
@@ -223,21 +220,29 @@ namespace Microsoft.Build.Internal
         protected readonly HandshakeComponents _handshakeComponents;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Handshake"/> class with the specified node type
-        /// and optional predefined tools directory.
+        ///  Initializes a new instance of the <see cref="Handshake"/> class with the specified node type.
         /// </summary>
         /// <param name="nodeType">
-        /// The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
+        ///  The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
         /// </param>
-        /// <param name="predefinedToolsDirectory">
-        /// An optional directory path used for .NET TaskHost handshake salt calculation (only on .NET Framework).
-        /// When specified for .NET TaskHost nodes, this directory path is included in the handshake salt 
-        /// to ensure the child dotnet process connects with the expected tools directory context.
-        /// For non-.NET TaskHost nodes or on .NET Core, the MSBuildToolsDirectoryRoot is used instead.
-        /// This parameter is ignored when not running .NET TaskHost on .NET Framework.
+        public Handshake(HandshakeOptions nodeType)
+            : this(nodeType, includeSessionId: true, toolsDirectory: null)
+        {
+        }
+
+        /// <summary>
+        ///  Initializes a new instance of the <see cref="Handshake"/> class with the specified node type
+        ///  and optional predefined tools directory.
+        /// </summary>
+        /// <param name="nodeType">
+        ///  The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
         /// </param>
-        internal Handshake(HandshakeOptions nodeType, string predefinedToolsDirectory = null)
-            : this(nodeType, includeSessionId: true, predefinedToolsDirectory)
+        /// <param name="toolsDirectory">
+        ///  The directory path to use for handshake salt calculation. For some task hosts, notably the .NET TaskHost (on .NET Framework)
+        ///  and the CLR2 TaskHost, this is needed to ensure the child process connects with the expected tools directory context.
+        /// </param>
+        public Handshake(HandshakeOptions nodeType, string toolsDirectory)
+            : this(nodeType, includeSessionId: true, toolsDirectory)
         {
         }
 
@@ -247,9 +252,22 @@ namespace Microsoft.Build.Internal
         // Source options of the handshake.
         internal HandshakeOptions HandshakeOptions { get; }
 
-        protected Handshake(HandshakeOptions nodeType, bool includeSessionId, string predefinedToolsDirectory)
+        protected Handshake(HandshakeOptions nodeType, bool includeSessionId, string toolsDirectory)
         {
             HandshakeOptions = nodeType;
+
+#if NETFRAMEWORK
+            ErrorUtilities.VerifyThrow(
+                toolsDirectory is null || IsNetTaskHost || IsClr2TaskHost,
+                $"{toolsDirectory} should only be provided for .NET or CLR2 TaskHost nodes.");
+#else
+            // IsNetTaskHost covers the case when NET process spawns NET TaskHost.
+            ErrorUtilities.VerifyThrow(
+                toolsDirectory is null || IsNetTaskHost,
+                $"{toolsDirectory} should not have been provided.");
+#endif
+
+            toolsDirectory ??= BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
             // Build handshake options with version in upper bits
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
@@ -257,9 +275,8 @@ namespace Microsoft.Build.Internal
             CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
 
             // Calculate salt from environment and tools directory
-            bool isNetTaskHost = IsHandshakeOptionEnabled(nodeType, HandshakeOptions.NET | HandshakeOptions.TaskHost);
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
-            string toolsDirectory = GetToolsDirectory(isNetTaskHost, predefinedToolsDirectory);
+
             int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
 
             CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt);
@@ -267,26 +284,26 @@ namespace Microsoft.Build.Internal
 
             // Get session ID if needed (expensive call)
             int sessionId = 0;
-            if (includeSessionId)
+            if (includeSessionId && NativeMethodsShared.IsWindows)
             {
+                // On Windows, SessionId differentiates RDP sessions.
+                // On Unix, getsid() returns the session leader PID which differs per terminal,
+                // preventing cross-terminal node reuse. Use 0 since Unix doesn't need
+                // RDP-style session isolation.
                 using var currentProcess = Process.GetCurrentProcess();
                 sessionId = currentProcess.SessionId;
             }
 
-            _handshakeComponents = isNetTaskHost
+            _handshakeComponents = IsNetTaskHost
                 ? CreateNetTaskHostComponents(options, salt, sessionId)
                 : CreateStandardComponents(options, salt, sessionId);
         }
 
-        private string GetToolsDirectory(bool isNetTaskHost, string predefinedToolsDirectory) =>
-#if NETFRAMEWORK
-            isNetTaskHost
+        private bool IsNetTaskHost => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.NET | HandshakeOptions.TaskHost);
 
-                // For .NET TaskHost assembly directory we set the expectation for the child dotnet process to connect to.
-                ? predefinedToolsDirectory
-                : BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-#else
-            BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
+#if NETFRAMEWORK
+        private bool IsClr2TaskHost
+            => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.CLR2 | HandshakeOptions.TaskHost);
 #endif
 
         private static HandshakeComponents CreateNetTaskHostComponents(int options, int salt, int sessionId) => new(
@@ -336,7 +353,7 @@ namespace Microsoft.Build.Internal
         public override byte? ExpectedVersionInFirstByte => null;
 
         internal ServerNodeHandshake(HandshakeOptions nodeType)
-            : base(nodeType, includeSessionId: false, predefinedToolsDirectory: null)
+            : base(nodeType, includeSessionId: false, toolsDirectory: null)
         {
         }
 
@@ -415,14 +432,6 @@ namespace Microsoft.Build.Internal
         /// </summary>
         private static long s_lastLoggedTicks = DateTime.UtcNow.Ticks;
 
-#if !CLR2COMPATIBILITY
-        /// <summary>
-        /// A set of environment variables cached from the last time we called GetEnvironmentVariables.
-        /// Used to avoid allocations if the environment has not changed.
-        /// </summary>
-        private static EnvironmentState s_environmentState;
-#endif
-
         /// <summary>
         /// Delegate to debug the communication utilities.
         /// </summary>
@@ -441,293 +450,6 @@ namespace Microsoft.Build.Internal
         internal static int NodeConnectionTimeout
         {
             get { return GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout); }
-        }
-
-        /// <summary>
-        /// Get environment block.
-        /// </summary>
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-        internal static extern unsafe char* GetEnvironmentStrings();
-
-        /// <summary>
-        /// Free environment block.
-        /// </summary>
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-        internal static extern unsafe bool FreeEnvironmentStrings(char* pStrings);
-
-#if NETFRAMEWORK
-        /// <summary>
-        /// Set environment variable P/Invoke.
-        /// </summary>
-        [DllImport("kernel32.dll", EntryPoint = "SetEnvironmentVariable", SetLastError = true, CharSet = CharSet.Unicode)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool SetEnvironmentVariableNative(string name, string value);
-
-        /// <summary>
-        /// Sets an environment variable using P/Invoke to workaround the .NET Framework BCL implementation.
-        /// </summary>
-        /// <remarks>
-        /// .NET Framework implementation of SetEnvironmentVariable checks the length of the value and throws an exception if
-        /// it's greater than or equal to 32,767 characters. This limitation does not exist on modern Windows or .NET.
-        /// </remarks>
-        internal static void SetEnvironmentVariable(string name, string value)
-        {
-            if (!SetEnvironmentVariableNative(name, value))
-            {
-                throw Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error());
-            }
-        }
-#endif
-
-#if !CLR2COMPATIBILITY
-        /// <summary>
-        /// A container to atomically swap a cached set of environment variables and the block string used to create it.
-        /// The environment block property will only be set on Windows, since on Unix we need to directly call
-        /// Environment.GetEnvironmentVariables().
-        /// </summary>
-        private sealed record class EnvironmentState(FrozenDictionary<string, string> EnvironmentVariables, ReadOnlyMemory<char> EnvironmentBlock = default);
-#endif
-
-        /// <summary>
-        /// Returns key value pairs of environment variables in a new dictionary
-        /// with a case-insensitive key comparer.
-        /// </summary>
-        /// <remarks>
-        /// Copied from the BCL implementation to eliminate some expensive security asserts on .NET Framework.
-        /// </remarks>
-#if CLR2COMPATIBILITY
-        internal static Dictionary<string, string> GetEnvironmentVariables()
-        {
-#else
-        [System.Runtime.Versioning.SupportedOSPlatform("windows")]
-        private static FrozenDictionary<string, string> GetEnvironmentVariablesWindows()
-        {
-            // The DebugUtils static constructor can set the MSBUILDDEBUGPATH environment variable to propagate the debug path to out of proc nodes.
-            // Need to ensure that constructor is called before this method returns in order to capture its env var write.
-            // Otherwise the env var is not captured and thus gets deleted when RequiestBuilder resets the environment based on the cached results of this method.
-            ErrorUtilities.VerifyThrowInternalNull(DebugUtils.ProcessInfoString, nameof(DebugUtils.DebugPath));
-#endif
-
-            unsafe
-            {
-                char* pEnvironmentBlock = null;
-
-                try
-                {
-                    pEnvironmentBlock = GetEnvironmentStrings();
-                    if (pEnvironmentBlock == null)
-                    {
-                        throw new OutOfMemoryException();
-                    }
-
-                    // Search for terminating \0\0 (two unicode \0's).
-                    char* pEnvironmentBlockEnd = pEnvironmentBlock;
-                    while (!(*pEnvironmentBlockEnd == '\0' && *(pEnvironmentBlockEnd + 1) == '\0'))
-                    {
-                        pEnvironmentBlockEnd++;
-                    }
-                    long stringBlockLength = pEnvironmentBlockEnd - pEnvironmentBlock;
-
-#if !CLR2COMPATIBILITY
-                    // Avoid allocating any objects if the environment still matches the last state.
-                    // We speed this up by comparing the full block instead of individual key-value pairs.
-                    ReadOnlySpan<char> stringBlock = new(pEnvironmentBlock, (int)stringBlockLength);
-                    EnvironmentState lastState = s_environmentState;
-                    if (lastState?.EnvironmentBlock.Span.SequenceEqual(stringBlock) == true)
-                    {
-                        return lastState.EnvironmentVariables;
-                    }
-#endif
-
-                    Dictionary<string, string> table = new(200, StringComparer.OrdinalIgnoreCase); // Razzle has 150 environment variables
-
-                    // Copy strings out, parsing into pairs and inserting into the table.
-                    // The first few environment variable entries start with an '='!
-                    // The current working directory of every drive (except for those drives
-                    // you haven't cd'ed into in your DOS window) are stored in the
-                    // environment block (as =C:=pwd) and the program's exit code is
-                    // as well (=ExitCode=00000000)  Skip all that start with =.
-                    // Read docs about Environment Blocks on MSDN's CreateProcess page.
-
-                    // Format for GetEnvironmentStrings is:
-                    // (=HiddenVar=value\0 | Variable=value\0)* \0
-                    // See the description of Environment Blocks in MSDN's
-                    // CreateProcess page (null-terminated array of null-terminated strings).
-                    // Note the =HiddenVar's aren't always at the beginning.
-                    for (int i = 0; i < stringBlockLength; i++)
-                    {
-                        int startKey = i;
-
-                        // Skip to key
-                        // On some old OS, the environment block can be corrupted.
-                        // Some lines will not have '=', so we need to check for '\0'.
-                        while (*(pEnvironmentBlock + i) != '=' && *(pEnvironmentBlock + i) != '\0')
-                        {
-                            i++;
-                        }
-
-                        if (*(pEnvironmentBlock + i) == '\0')
-                        {
-                            continue;
-                        }
-
-                        // Skip over environment variables starting with '='
-                        if (i - startKey == 0)
-                        {
-                            while (*(pEnvironmentBlock + i) != 0)
-                            {
-                                i++;
-                            }
-
-                            continue;
-                        }
-
-#if !CLR2COMPATIBILITY
-                        string key = Strings.WeakIntern(new ReadOnlySpan<char>(pEnvironmentBlock + startKey, i - startKey));
-#else
-                        string key = new string(pEnvironmentBlock, startKey, i - startKey);
-#endif
-
-                        i++;
-
-                        // skip over '='
-                        int startValue = i;
-
-                        while (*(pEnvironmentBlock + i) != 0)
-                        {
-                            // Read to end of this entry
-                            i++;
-                        }
-
-#if !CLR2COMPATIBILITY
-                        string value = Strings.WeakIntern(new ReadOnlySpan<char>(pEnvironmentBlock + startValue, i - startValue));
-#else
-                        string value = new string(pEnvironmentBlock, startValue, i - startValue);
-#endif
-
-                        // skip over 0 handled by for loop's i++
-                        table[key] = value;
-                    }
-
-#if !CLR2COMPATIBILITY
-                    // Update with the current state.
-                    EnvironmentState currentState =
-                        new(table.ToFrozenDictionary(StringComparer.OrdinalIgnoreCase), stringBlock.ToArray());
-                    s_environmentState = currentState;
-                    return currentState.EnvironmentVariables;
-#else
-                    return table;
-#endif
-                }
-                finally
-                {
-                    if (pEnvironmentBlock != null)
-                    {
-                        FreeEnvironmentStrings(pEnvironmentBlock);
-                    }
-                }
-            }
-        }
-
-#if NET
-        /// <summary>
-        /// Sets an environment variable using <see cref="Environment.SetEnvironmentVariable(string,string)" />.
-        /// </summary>
-        internal static void SetEnvironmentVariable(string name, string value)
-            => Environment.SetEnvironmentVariable(name, value);
-#endif
-
-#if !CLR2COMPATIBILITY
-        /// <summary>
-        /// Returns key value pairs of environment variables in a read-only dictionary
-        /// with a case-insensitive key comparer.
-        ///
-        /// If the environment variables have not changed since the last time
-        /// this method was called, the same dictionary instance will be returned.
-        /// </summary>
-        internal static FrozenDictionary<string, string> GetEnvironmentVariables()
-        {
-            // Always call the native method on Windows, as we'll be able to avoid the internal
-            // string and Hashtable allocations caused by Environment.GetEnvironmentVariables().
-            if (NativeMethodsShared.IsWindows)
-            {
-                return GetEnvironmentVariablesWindows();
-            }
-
-            IDictionary vars = Environment.GetEnvironmentVariables();
-
-            // Directly use the enumerator since Current will box DictionaryEntry.
-            IDictionaryEnumerator enumerator = vars.GetEnumerator();
-
-            // If every key-value pair matches the last state, return a cached dictionary.
-            FrozenDictionary<string, string> lastEnvironmentVariables = s_environmentState?.EnvironmentVariables;
-            if (vars.Count == lastEnvironmentVariables?.Count)
-            {
-                bool sameState = true;
-
-                while (enumerator.MoveNext() && sameState)
-                {
-                    DictionaryEntry entry = enumerator.Entry;
-                    if (!lastEnvironmentVariables.TryGetValue((string)entry.Key, out string value)
-                        || !string.Equals((string)entry.Value, value, StringComparison.Ordinal))
-                    {
-                        sameState = false;
-                    }
-                }
-
-                if (sameState)
-                {
-                    return lastEnvironmentVariables;
-                }
-            }
-
-            // Otherwise, allocate and update with the current state.
-            Dictionary<string, string> table = new(vars.Count, EnvironmentVariableComparer);
-
-            enumerator.Reset();
-            while (enumerator.MoveNext())
-            {
-                DictionaryEntry entry = enumerator.Entry;
-                string key = Strings.WeakIntern((string)entry.Key);
-                string value = Strings.WeakIntern((string)entry.Value);
-                table[key] = value;
-            }
-
-            EnvironmentState newState = new(table.ToFrozenDictionary(EnvironmentVariableComparer));
-            s_environmentState = newState;
-
-            return newState.EnvironmentVariables;
-        }
-#endif
-
-        /// <summary>
-        /// Updates the environment to match the provided dictionary.
-        /// </summary>
-        internal static void SetEnvironment(IDictionary<string, string> newEnvironment)
-        {
-            if (newEnvironment != null)
-            {
-                // First, delete all no longer set variables
-                IDictionary<string, string> currentEnvironment = GetEnvironmentVariables();
-                foreach (KeyValuePair<string, string> entry in currentEnvironment)
-                {
-                    if (!newEnvironment.ContainsKey(entry.Key))
-                    {
-                        SetEnvironmentVariable(entry.Key, null);
-                    }
-                }
-
-                // Then, make sure the new ones have their new values.
-                foreach (KeyValuePair<string, string> entry in newEnvironment)
-                {
-                    if (!currentEnvironment.TryGetValue(entry.Key, out string currentValue) || currentValue != entry.Value)
-                    {
-                        SetEnvironmentVariable(entry.Key, entry.Value);
-                    }
-                }
-            }
         }
 
 #nullable enable
@@ -1164,12 +886,7 @@ namespace Microsoft.Build.Internal
         {
             lock (s_traceLock)
             {
-                s_debugDumpPath ??=
-#if CLR2COMPATIBILITY
-                    Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
-#else
-                        DebugUtils.DebugPath;
-#endif
+                s_debugDumpPath ??= FrameworkDebugUtils.DebugPath;
 
                 if (String.IsNullOrEmpty(s_debugDumpPath))
                 {

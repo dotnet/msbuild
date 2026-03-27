@@ -510,7 +510,7 @@ namespace Microsoft.Build.Evaluation
 #if NETFRAMEWORK
             if (Handshake.IsHandshakeOptionEnabled(desiredContext, HandshakeOptions.NET))
             {
-                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(desiredContext, parameters).MSBuildAssemblyPath;
+                taskHostLocation = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(desiredContext, parameters).MSBuildPath;
             }
 #endif
 
@@ -525,7 +525,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns>The specified path with a trailing slash.</returns>
         internal static string EnsureTrailingSlash(string path)
         {
-            return FrameworkFileUtilities.EnsureTrailingSlash(path);
+            return FileUtilities.EnsureTrailingSlash(path);
         }
 
         /// <summary>

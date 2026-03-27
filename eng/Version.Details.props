@@ -5,35 +5,40 @@ This file should be imported by eng/Versions.props
 -->
 <Project>
   <PropertyGroup>
-    <!-- dotnet/runtime dependencies -->
-    <SystemCodeDomPackageVersion>10.0.2</SystemCodeDomPackageVersion>
-    <SystemCollectionsImmutablePackageVersion>10.0.2</SystemCollectionsImmutablePackageVersion>
-    <SystemConfigurationConfigurationManagerPackageVersion>10.0.2</SystemConfigurationConfigurationManagerPackageVersion>
-    <SystemDiagnosticsDiagnosticSourcePackageVersion>10.0.2</SystemDiagnosticsDiagnosticSourcePackageVersion>
-    <SystemDiagnosticsEventLogPackageVersion>10.0.2</SystemDiagnosticsEventLogPackageVersion>
-    <SystemFormatsAsn1PackageVersion>10.0.2</SystemFormatsAsn1PackageVersion>
-    <SystemFormatsNrbfPackageVersion>10.0.2</SystemFormatsNrbfPackageVersion>
-    <SystemReflectionMetadataPackageVersion>10.0.2</SystemReflectionMetadataPackageVersion>
-    <SystemReflectionMetadataLoadContextPackageVersion>10.0.2</SystemReflectionMetadataLoadContextPackageVersion>
-    <SystemResourcesExtensionsPackageVersion>10.0.2</SystemResourcesExtensionsPackageVersion>
-    <SystemSecurityCryptographyPkcsPackageVersion>10.0.2</SystemSecurityCryptographyPkcsPackageVersion>
-    <SystemSecurityCryptographyProtectedDataPackageVersion>10.0.2</SystemSecurityCryptographyProtectedDataPackageVersion>
-    <SystemSecurityCryptographyXmlPackageVersion>10.0.2</SystemSecurityCryptographyXmlPackageVersion>
-    <SystemTextEncodingCodePagesPackageVersion>10.0.2</SystemTextEncodingCodePagesPackageVersion>
-    <SystemTextJsonPackageVersion>10.0.2</SystemTextJsonPackageVersion>
-    <SystemThreadingChannelsPackageVersion>10.0.2</SystemThreadingChannelsPackageVersion>
-    <SystemThreadingTasksDataflowPackageVersion>10.0.2</SystemThreadingTasksDataflowPackageVersion>
-    <!-- dotnet/arcade dependencies -->
-    <MicrosoftDotNetArcadeSdkPackageVersion>10.0.0-beta.26119.2</MicrosoftDotNetArcadeSdkPackageVersion>
-    <MicrosoftDotNetXUnitExtensionsPackageVersion>10.0.0-beta.26119.2</MicrosoftDotNetXUnitExtensionsPackageVersion>
-    <!-- nuget/nuget.client dependencies -->
-    <NuGetBuildTasksPackageVersion>7.5.0-rc.31</NuGetBuildTasksPackageVersion>
-    <!-- dotnet/roslyn dependencies -->
-    <MicrosoftNetCompilersToolsetPackageVersion>5.5.0-2.26114.2</MicrosoftNetCompilersToolsetPackageVersion>
+    <!-- dotnet-arcade dependencies -->
+    <MicrosoftDotNetArcadeSdkPackageVersion>10.0.0-beta.26164.1</MicrosoftDotNetArcadeSdkPackageVersion>
+    <MicrosoftDotNetXUnitExtensionsPackageVersion>10.0.0-beta.26164.1</MicrosoftDotNetXUnitExtensionsPackageVersion>
+    <!-- dotnet-roslyn dependencies -->
+    <MicrosoftNetCompilersToolsetPackageVersion>5.6.0-2.26151.2</MicrosoftNetCompilersToolsetPackageVersion>
+    <!-- dotnet-runtime dependencies -->
+    <SystemCodeDomPackageVersion>10.0.3</SystemCodeDomPackageVersion>
+    <SystemCollectionsImmutablePackageVersion>10.0.3</SystemCollectionsImmutablePackageVersion>
+    <SystemConfigurationConfigurationManagerPackageVersion>10.0.3</SystemConfigurationConfigurationManagerPackageVersion>
+    <SystemDiagnosticsDiagnosticSourcePackageVersion>10.0.3</SystemDiagnosticsDiagnosticSourcePackageVersion>
+    <SystemDiagnosticsEventLogPackageVersion>10.0.3</SystemDiagnosticsEventLogPackageVersion>
+    <SystemFormatsAsn1PackageVersion>10.0.3</SystemFormatsAsn1PackageVersion>
+    <SystemFormatsNrbfPackageVersion>10.0.3</SystemFormatsNrbfPackageVersion>
+    <SystemReflectionMetadataPackageVersion>10.0.3</SystemReflectionMetadataPackageVersion>
+    <SystemReflectionMetadataLoadContextPackageVersion>10.0.3</SystemReflectionMetadataLoadContextPackageVersion>
+    <SystemResourcesExtensionsPackageVersion>10.0.3</SystemResourcesExtensionsPackageVersion>
+    <SystemSecurityCryptographyPkcsPackageVersion>10.0.3</SystemSecurityCryptographyPkcsPackageVersion>
+    <SystemSecurityCryptographyProtectedDataPackageVersion>10.0.3</SystemSecurityCryptographyProtectedDataPackageVersion>
+    <SystemSecurityCryptographyXmlPackageVersion>10.0.3</SystemSecurityCryptographyXmlPackageVersion>
+    <SystemTextEncodingCodePagesPackageVersion>10.0.3</SystemTextEncodingCodePagesPackageVersion>
+    <SystemTextJsonPackageVersion>10.0.3</SystemTextJsonPackageVersion>
+    <SystemThreadingChannelsPackageVersion>10.0.3</SystemThreadingChannelsPackageVersion>
+    <SystemThreadingTasksDataflowPackageVersion>10.0.3</SystemThreadingTasksDataflowPackageVersion>
+    <!-- nuget-nuget.client dependencies -->
+    <NuGetBuildTasksPackageVersion>7.5.0-rc.36</NuGetBuildTasksPackageVersion>
   </PropertyGroup>
   <!--Property group for alternate package version names-->
   <PropertyGroup>
-    <!-- dotnet/runtime dependencies -->
+    <!-- dotnet-arcade dependencies -->
+    <MicrosoftDotNetArcadeSdkVersion>$(MicrosoftDotNetArcadeSdkPackageVersion)</MicrosoftDotNetArcadeSdkVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>$(MicrosoftDotNetXUnitExtensionsPackageVersion)</MicrosoftDotNetXUnitExtensionsVersion>
+    <!-- dotnet-roslyn dependencies -->
+    <MicrosoftNetCompilersToolsetVersion>$(MicrosoftNetCompilersToolsetPackageVersion)</MicrosoftNetCompilersToolsetVersion>
+    <!-- dotnet-runtime dependencies -->
     <SystemCodeDomVersion>$(SystemCodeDomPackageVersion)</SystemCodeDomVersion>
     <SystemCollectionsImmutableVersion>$(SystemCollectionsImmutablePackageVersion)</SystemCollectionsImmutableVersion>
     <SystemConfigurationConfigurationManagerVersion>$(SystemConfigurationConfigurationManagerPackageVersion)</SystemConfigurationConfigurationManagerVersion>
@@ -51,12 +56,7 @@ This file should be imported by eng/Versions.props
     <SystemTextJsonVersion>$(SystemTextJsonPackageVersion)</SystemTextJsonVersion>
     <SystemThreadingChannelsVersion>$(SystemThreadingChannelsPackageVersion)</SystemThreadingChannelsVersion>
     <SystemThreadingTasksDataflowVersion>$(SystemThreadingTasksDataflowPackageVersion)</SystemThreadingTasksDataflowVersion>
-    <!-- dotnet/arcade dependencies -->
-    <MicrosoftDotNetArcadeSdkVersion>$(MicrosoftDotNetArcadeSdkPackageVersion)</MicrosoftDotNetArcadeSdkVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>$(MicrosoftDotNetXUnitExtensionsPackageVersion)</MicrosoftDotNetXUnitExtensionsVersion>
-    <!-- nuget/nuget.client dependencies -->
+    <!-- nuget-nuget.client dependencies -->
     <NuGetBuildTasksVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksVersion>
-    <!-- dotnet/roslyn dependencies -->
-    <MicrosoftNetCompilersToolsetVersion>$(MicrosoftNetCompilersToolsetPackageVersion)</MicrosoftNetCompilersToolsetVersion>
   </PropertyGroup>
 </Project>

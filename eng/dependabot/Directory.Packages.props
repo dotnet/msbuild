@@ -10,8 +10,11 @@
   these properties to override package versions if necessary. -->
 
   <ItemGroup>
-    <PackageVersion Include="BenchmarkDotNet" Version="0.13.10" />
+    <PackageVersion Include="BenchmarkDotNet" Version="0.13.12" />
     <PackageVersion Update="BenchmarkDotNet" Condition="'$(BenchmarkDotNetVersion)' != ''" Version="$(BenchmarkDotNetVersion)" />
+
+    <PackageVersion Include="BenchmarkDotNet.Diagnostics.Windows" Version="0.13.12" />
+    <PackageVersion Update="BenchmarkDotNet.Diagnostics.Windows" Condition="'$(BenchmarkDotNetDiagnosticsWindowsVersion)' != ''" Version="$(BenchmarkDotNetDiagnosticsWindowsVersion)" />
 
     <PackageVersion Include="AwesomeAssertions" Version="8.0.2" />
     <PackageVersion Update="AwesomeAssertions" Condition="'$(AwesomeAssertionsVersion)' != ''" Version="$(AwesomeAssertionsVersion)" />
