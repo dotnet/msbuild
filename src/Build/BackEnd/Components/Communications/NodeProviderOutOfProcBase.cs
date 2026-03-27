@@ -22,6 +22,7 @@ using System.Security.Principal;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
@@ -228,6 +229,33 @@ namespace Microsoft.Build.BackEnd
                 msbuildLocation = _componentHost.BuildParameters.NodeExeLocation;
             }
 
+            // Extract the expected NodeMode from the command line arguments
+            NodeMode? expectedNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLineArgs);
+
+#if RUNTIME_TYPE_NETCORE
+            // When MSBuild is hosted by dotnet.exe (e.g. `dotnet build`), NodeExeLocation may resolve
+            // to the AppHost (MSBuild.exe on Windows, MSBuild on Unix) because BuildEnvironmentHelper
+            // prefers the AppHost over MSBuild.dll. Launching worker nodes as AppHost processes incurs
+            // significant native bootstrap overhead. Prefer MSBuild.dll so worker nodes are launched
+            // via dotnet.exe, matching the parent process.
+            // This only applies to regular out-of-proc worker nodes (nodemode:1), not task host nodes
+            // (nodemode:2) which may need the AppHost for COM host object support.
+            if (expectedNodeMode == NodeMode.OutOfProcNode
+                && !String.IsNullOrEmpty(msbuildLocation)
+                && Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase))
+            {
+                string currentProcessName = Path.GetFileName(EnvironmentUtilities.ProcessPath);
+                if (currentProcessName?.Equals(Constants.DotnetProcessName, StringComparison.OrdinalIgnoreCase) == true)
+                {
+                    string dllPath = Path.Combine(Path.GetDirectoryName(msbuildLocation), Constants.MSBuildAssemblyName);
+                    if (FileSystems.Default.FileExists(dllPath))
+                    {
+                        msbuildLocation = dllPath;
+                    }
+                }
+            }
+#endif
+
             if (String.IsNullOrEmpty(msbuildLocation))
             {
                 string msbuildExeName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
@@ -240,9 +268,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             bool nodeReuseRequested = Handshake.IsHandshakeOptionEnabled(nodeLaunchData.Handshake.HandshakeOptions, HandshakeOptions.NodeReuse);
-
-            // Extract the expected NodeMode from the command line arguments
-            NodeMode? expectedNodeMode = NodeModeHelper.ExtractFromCommandLine(commandLineArgs);
       
             // Get all process of possible running node processes for reuse and put them into ConcurrentQueue.
             // Processes from this queue will be concurrently consumed by TryReusePossibleRunningNodes while
