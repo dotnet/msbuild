@@ -560,9 +560,9 @@ namespace Microsoft.Build.BackEnd
             private Dictionary<string, string> _customEscapedMetadata = null;
 
             /// <summary>
-            /// Cache for fullpath metadata
+            /// Cache for derivable modifier values
             /// </summary>
-            private string _fullPath;
+            private ItemSpecModifiers.Cache _cachedModifiers;
 
             /// <summary>
             /// Constructor for serialization
@@ -669,7 +669,11 @@ namespace Microsoft.Build.BackEnd
                 get
                 {
                     List<string> metadataNames = (_customEscapedMetadata == null) ? new List<string>() : new List<string>(_customEscapedMetadata.Keys);
-                    metadataNames.AddRange(ItemSpecModifiers.All);
+
+                    foreach (string name in ItemSpecModifiers.All)
+                    {
+                        metadataNames.Add(name);
+                    }
 
                     return metadataNames;
                 }
@@ -850,22 +854,19 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             string ITaskItem2.GetMetadataValueEscaped(string metadataName)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(metadataName);
+                ArgumentNullException.ThrowIfNull(metadataName);
 
-                string metadataValue = null;
-
-                if (ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName))
+                if (ItemSpecModifiers.TryGetDerivableModifierKind(metadataName, out ItemSpecModifierKind modifierKind))
                 {
                     // FileUtilities.GetItemSpecModifier is expecting escaped data, which we assume we already are.
                     // Passing in a null for currentDirectory indicates we are already in the correct current directory
-                    metadataValue = ItemSpecModifiers.GetItemSpecModifier(null, _escapedItemSpec, _escapedDefiningProject, metadataName, ref _fullPath);
-                }
-                else if (_customEscapedMetadata != null)
-                {
-                    _customEscapedMetadata.TryGetValue(metadataName, out metadataValue);
+                    return ItemSpecModifiers.GetItemSpecModifier(_escapedItemSpec, modifierKind, null, _escapedDefiningProject, ref _cachedModifiers);
                 }
 
-                return metadataValue ?? String.Empty;
+                string metadataValue = null;
+                _customEscapedMetadata?.TryGetValue(metadataName, out metadataValue);
+
+                return metadataValue ?? string.Empty;
             }
 
             /// <summary>
