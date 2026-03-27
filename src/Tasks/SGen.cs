@@ -68,6 +68,7 @@ namespace Microsoft.Build.Tasks
     }
 
 #if RUNTIME_TYPE_NETCORE
+    [MSBuildMultiThreadableTask]
     public class SGen : ToolTaskExtension, ISGenTaskContract
     {
 #pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
@@ -138,6 +139,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Genererates a serialization assembly containing XML serializers for the input assembly.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class SGen : ToolTaskExtension, ISGenTaskContract
     {
         private string _buildAssemblyPath;
@@ -170,7 +172,12 @@ namespace Microsoft.Build.Tasks
                 string thisPath;
                 try
                 {
-                    thisPath = Path.GetFullPath(_buildAssemblyPath);
+                    // Validate the path first — GetFullPath throws for invalid characters.
+                    // Then resolve via TaskEnvironment for thread-safe absolute path resolution.
+                    Path.GetFullPath(_buildAssemblyPath);
+                    thisPath = !string.IsNullOrEmpty(_buildAssemblyPath)
+                        ? TaskEnvironment.GetAbsolutePath(_buildAssemblyPath)
+                        : _buildAssemblyPath;
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
@@ -255,16 +262,28 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        private string SerializationAssemblyPath
+        private AbsolutePath SerializationAssemblyPath
         {
             get
             {
                 Debug.Assert(BuildAssemblyPath.Length > 0, "Build assembly path is blank");
-                return Path.Combine(BuildAssemblyPath, SerializationAssemblyName);
+                string combined = Path.Combine(BuildAssemblyPath, SerializationAssemblyName);
+                return !string.IsNullOrEmpty(combined)
+                    ? TaskEnvironment.GetAbsolutePath(combined)
+                    : new AbsolutePath(combined, ignoreRootedCheck: true);
             }
         }
 
-        private string AssemblyFullPath => Path.Combine(BuildAssemblyPath, BuildAssemblyName);
+        private AbsolutePath AssemblyFullPath
+        {
+            get
+            {
+                string combined = Path.Combine(BuildAssemblyPath, BuildAssemblyName);
+                return !string.IsNullOrEmpty(combined)
+                    ? TaskEnvironment.GetAbsolutePath(combined)
+                    : new AbsolutePath(combined, ignoreRootedCheck: true);
+            }
+        }
 
         public string SdkToolsPath
         {
@@ -307,17 +326,17 @@ namespace Microsoft.Build.Tasks
 
             // If COMPLUS_InstallRoot\COMPLUS_Version are set (the dogfood world), we want to find it there, instead of
             // the SDK, which may or may not be installed. The following will look there.
-            if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("COMPLUS_InstallRoot")) || !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("COMPLUS_Version")))
+            if (!String.IsNullOrEmpty(TaskEnvironment.GetEnvironmentVariable("COMPLUS_InstallRoot")) || !String.IsNullOrEmpty(TaskEnvironment.GetEnvironmentVariable("COMPLUS_Version")))
             {
                 pathToTool = ToolLocationHelper.GetPathToDotNetFrameworkFile(ToolExe, TargetDotNetFrameworkVersion.Latest);
             }
 
-            if (String.IsNullOrEmpty(pathToTool) || !FileSystems.Default.FileExists(pathToTool))
+            if (String.IsNullOrEmpty(pathToTool) || !FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(pathToTool)))
             {
                 pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
             }
 
-            return pathToTool;
+            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
         }
 
         /// <summary>
@@ -330,7 +349,7 @@ namespace Microsoft.Build.Tasks
             {
                 foreach (string reference in References)
                 {
-                    if (!FileSystems.Default.FileExists(reference))
+                    if (string.IsNullOrEmpty(reference) || !FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(reference)))
                     {
                         Log.LogErrorWithCodeFromResources("SGen.ResourceNotFound", reference);
                         return false;
@@ -365,11 +384,11 @@ namespace Microsoft.Build.Tasks
                 {
                     Debug.Assert(ShouldGenerateSerializer, "GenerateCommandLineCommands() should not be called if ShouldGenerateSerializer is true and SerializationAssembly is null.");
 
-                    SerializationAssembly = [new TaskItem(SerializationAssemblyPath)];
+                    SerializationAssembly = [new TaskItem(SerializationAssemblyPath.OriginalValue)];
                 }
 
                 // Add the assembly switch
-                commandLineBuilder.AppendSwitchIfNotNull("/assembly:", AssemblyFullPath);
+                commandLineBuilder.AppendSwitchIfNotNull("/assembly:", AssemblyFullPath.Value);
 
                 commandLineBuilder.AppendWhenTrue("/proxytypes", Bag, "UseProxyTypes");
 
@@ -441,11 +460,11 @@ namespace Microsoft.Build.Tasks
                 // leave the earlier produced assembly around to be propagated by later processes.
                 catch (UnauthorizedAccessException e)
                 {
-                    Log.LogErrorWithCodeFromResources("SGen.CouldNotDeleteSerializer", SerializationAssemblyPath, e.Message);
+                    Log.LogErrorWithCodeFromResources("SGen.CouldNotDeleteSerializer", SerializationAssemblyPath.OriginalValue, e.Message);
                 }
                 catch (IOException e)
                 {
-                    Log.LogErrorWithCodeFromResources("SGen.CouldNotDeleteSerializer", SerializationAssemblyPath, e.Message);
+                    Log.LogErrorWithCodeFromResources("SGen.CouldNotDeleteSerializer", SerializationAssemblyPath.OriginalValue, e.Message);
                 }
                 // The DirectoryNotFoundException is safely ignorable since that means that there is no
                 // existing serialization assembly.  This would be extremely unlikely anyway because we
