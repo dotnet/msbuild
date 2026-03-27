@@ -710,5 +710,54 @@ namespace Microsoft.Build.Eventing
             WriteEvent(98);
         }
         #endregion
+
+        #region TaskHost Callback Events
+
+        /// <summary>
+        /// Raised when a TaskHost begins a BuildProjectFile callback.
+        /// </summary>
+        [Event(99, Keywords = Keywords.All)]
+        public void TaskHostBuildProjectFileStart(string projectFiles, string targetNames)
+        {
+            WriteEvent(99, projectFiles, targetNames);
+        }
+
+        /// <summary>
+        /// Raised when a TaskHost BuildProjectFile callback completes.
+        /// </summary>
+        [Event(100, Keywords = Keywords.All)]
+        public void TaskHostBuildProjectFileStop(string projectFiles, bool success)
+        {
+            WriteEvent(100, projectFiles, success);
+        }
+
+        /// <summary>
+        /// Raised when a TaskHost yields for a callback or explicit Yield().
+        /// </summary>
+        [Event(101, Keywords = Keywords.All)]
+        public void TaskHostYieldStart(int activeTasks, int yieldedTasks)
+        {
+            WriteEvent(101, activeTasks, yieldedTasks);
+        }
+
+        /// <summary>
+        /// Raised when a TaskHost reacquires after a callback or explicit Reacquire().
+        /// </summary>
+        [Event(102, Keywords = Keywords.All)]
+        public void TaskHostYieldStop(int activeTasks, int yieldedTasks)
+        {
+            WriteEvent(102, activeTasks, yieldedTasks);
+        }
+
+        /// <summary>
+        /// Raised when a TaskHost accepts a nested task while other tasks are yielded.
+        /// </summary>
+        [Event(103, Keywords = Keywords.All)]
+        public void TaskHostNestedTaskStart(string taskName, int yieldedTasks)
+        {
+            WriteEvent(103, taskName, yieldedTasks);
+        }
+
+        #endregion
     }
 }

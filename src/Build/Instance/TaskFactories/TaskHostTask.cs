@@ -809,9 +809,6 @@ namespace Microsoft.Build.BackEnd
                 case YieldOperation.Yield:
                     if (_buildEngine is IBuildEngine3 engine3Yield)
                     {
-                        this.BuildEngine?.LogMessageEvent(new BuildMessageEventArgs(
-                            ResourceUtilities.GetResourceString("TaskHostForwardingYield"),
-                            null, "TaskHostTask", MessageImportance.Low));
                         engine3Yield.Yield();
                     }
 
@@ -821,9 +818,6 @@ namespace Microsoft.Build.BackEnd
                 case YieldOperation.Reacquire:
                     if (_buildEngine is IBuildEngine3 engine3Reacquire)
                     {
-                        this.BuildEngine?.LogMessageEvent(new BuildMessageEventArgs(
-                            ResourceUtilities.GetResourceString("TaskHostForwardingReacquire"),
-                            null, "TaskHostTask", MessageImportance.Low));
                         engine3Reacquire.Reacquire();
                     }
 

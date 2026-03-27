@@ -11,6 +11,7 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Experimental.FileAccess;
@@ -561,9 +562,13 @@ namespace Microsoft.Build.CommandLine
                 return new BuildEngineResult(false, null);
             }
 
-            LogMessageFromResource(MessageImportance.Low, "TaskHostCallbackStarted",
-                string.Join(";", projectFileNames ?? []),
-                string.Join(";", targetNames ?? []));
+            string projectFilesJoined = string.Join(";", projectFileNames ?? []);
+            string targetNamesJoined = string.Join(";", targetNames ?? []);
+
+            if (MSBuildEventSource.Log.IsEnabled())
+            {
+                MSBuildEventSource.Log.TaskHostBuildProjectFileStart(projectFilesJoined, targetNamesJoined);
+            }
 
             var request = new TaskHostBuildRequest(
                 projectFileNames,
@@ -578,7 +583,14 @@ namespace Microsoft.Build.CommandLine
             try
             {
                 var response = SendCallbackRequestAndWaitForResponse<TaskHostBuildResponse>(request);
-                return response.ToBuildEngineResult();
+                var result = response.ToBuildEngineResult();
+
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    MSBuildEventSource.Log.TaskHostBuildProjectFileStop(projectFilesJoined, result.Result);
+                }
+
+                return result;
             }
             finally
             {
@@ -1079,7 +1091,10 @@ namespace Microsoft.Build.CommandLine
             Interlocked.Increment(ref _yieldedTaskCount);
             int newActive = Interlocked.Decrement(ref _activeTaskCount);
 
-            LogMessageFromResource(MessageImportance.Low, "TaskHostYieldingForCallback", newActive, _yieldedTaskCount);
+            if (MSBuildEventSource.Log.IsEnabled())
+            {
+                MSBuildEventSource.Log.TaskHostYieldStart(newActive, _yieldedTaskCount);
+            }
         }
 
         /// <summary>
@@ -1092,7 +1107,10 @@ namespace Microsoft.Build.CommandLine
             Interlocked.Increment(ref _activeTaskCount);
             int newYielded = Interlocked.Decrement(ref _yieldedTaskCount);
 
-            LogMessageFromResource(MessageImportance.Low, "TaskHostReacquiredAfterCallback", _activeTaskCount, newYielded);
+            if (MSBuildEventSource.Log.IsEnabled())
+            {
+                MSBuildEventSource.Log.TaskHostYieldStop(_activeTaskCount, newYielded);
+            }
 
             // Restore environment state after reacquiring
             var context = GetCurrentTaskContext();
@@ -1208,8 +1226,10 @@ namespace Microsoft.Build.CommandLine
 
             if (_yieldedTaskCount > 0)
             {
-                LogMessageFromResource(MessageImportance.Low, "TaskHostAcceptingNestedTask",
-                    taskHostConfiguration.TaskName, _yieldedTaskCount);
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    MSBuildEventSource.Log.TaskHostNestedTaskStart(taskHostConfiguration.TaskName, _yieldedTaskCount);
+                }
             }
 
             _currentConfiguration = taskHostConfiguration;
