@@ -24,12 +24,14 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
-        /// Gets the default task environment that directly accesses the system environment variables and working directory of the current process.
+        /// Gets the fallback task environment that directly accesses the system environment variables
+        /// and working directory of the current process.
         /// </summary>
         /// <remarks>
-        /// This environment is provided to tasks by MSBuild engine in multi-process execution mode. 
+        /// This is the environment provided to tasks by the MSBuild engine in multi-process execution mode,
+        /// where each task runs in its own process and process-level state is inherently isolated.
         /// </remarks>
-        public static TaskEnvironment CurrentProcess { get; } = new(MultiProcessTaskEnvironmentDriver.Instance);
+        public static TaskEnvironment Fallback { get; } = new(MultiProcessTaskEnvironmentDriver.Instance);
 
         /// <summary>
         /// Creates a new <see cref="TaskEnvironment"/> with isolated working directory and environment variables.

@@ -361,17 +361,17 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void TaskEnvironment_Default_ReturnsSingleton()
+        public void TaskEnvironment_Fallback_ReturnsSingleton()
         {
-            TaskEnvironment first = TaskEnvironment.CurrentProcess;
-            TaskEnvironment second = TaskEnvironment.CurrentProcess;
+            TaskEnvironment first = TaskEnvironment.Fallback;
+            TaskEnvironment second = TaskEnvironment.Fallback;
 
             first.ShouldNotBeNull();
             first.ShouldBeSameAs(second);
         }
 
         [Fact]
-        public void TaskEnvironment_Default_ReadsProcessEnvironment()
+        public void TaskEnvironment_Fallback_ReadsProcessEnvironment()
         {
             string testVarName = $"MSBUILD_DEFAULT_ENV_TEST_{Guid.NewGuid():N}";
             string testVarValue = "default_env_test_value";
@@ -380,7 +380,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Environment.SetEnvironmentVariable(testVarName, testVarValue);
 
-                TaskEnvironment.CurrentProcess.GetEnvironmentVariable(testVarName).ShouldBe(testVarValue);
+                TaskEnvironment.Fallback.GetEnvironmentVariable(testVarName).ShouldBe(testVarValue);
             }
             finally
             {
