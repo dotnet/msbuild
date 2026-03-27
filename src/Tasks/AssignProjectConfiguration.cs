@@ -205,9 +205,10 @@ namespace Microsoft.Build.Tasks
                     }
                     else
                     {
-                        // If the reference was unresolved, we want to undefine the Configuration and Platform
-                        // global properties, so that the project will build using its default Configuration and
-                        // Platform rather than that of its parent.
+                        // Pre-18.6 behavior: for unresolved references, undefine the Configuration and Platform
+                        // global properties so that the referenced project builds using its own default
+                        // Configuration and Platform rather than inheriting those from its parent. Under ChangeWave
+                        // 18.6, this block is skipped and unresolved references keep the parent's Configuration/Platform.
                         if (ShouldUnsetParentConfigurationAndPlatform
                             && !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
                         {
