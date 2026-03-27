@@ -22,7 +22,6 @@ using System.Security.Principal;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
 using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
@@ -235,9 +234,9 @@ namespace Microsoft.Build.BackEnd
 #if RUNTIME_TYPE_NETCORE
             // When MSBuild is hosted by dotnet.exe (e.g. `dotnet build`), NodeExeLocation may resolve
             // to the AppHost (MSBuild.exe on Windows, MSBuild on Unix) because BuildEnvironmentHelper
-            // prefers the AppHost over MSBuild.dll. Launching worker nodes as AppHost processes incurs
-            // significant native bootstrap overhead. Prefer MSBuild.dll so worker nodes are launched
-            // via dotnet.exe, matching the parent process.
+            // prefers the AppHost over MSBuild.dll. Launching worker nodes as MSBuild.exe AppHost
+            // processes is measurably slower than using dotnet MSBuild.dll. Prefer MSBuild.dll so
+            // worker nodes are launched via dotnet.exe, matching the parent process.
             // This only applies to regular out-of-proc worker nodes (nodemode:1), not task host nodes
             // (nodemode:2) which may need the AppHost for COM host object support.
             if (expectedNodeMode == NodeMode.OutOfProcNode
@@ -248,7 +247,7 @@ namespace Microsoft.Build.BackEnd
                 if (currentProcessName?.Equals(Constants.DotnetProcessName, StringComparison.OrdinalIgnoreCase) == true)
                 {
                     string dllPath = Path.Combine(Path.GetDirectoryName(msbuildLocation), Constants.MSBuildAssemblyName);
-                    if (FileSystems.Default.FileExists(dllPath))
+                    if (File.Exists(dllPath))
                     {
                         msbuildLocation = dllPath;
                     }
