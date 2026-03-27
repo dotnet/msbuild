@@ -134,7 +134,7 @@ namespace Microsoft.Build.Framework
         /// Enable IBuildEngine callbacks in the TaskHost process.
         /// Temporary escape hatch until all callback stages are complete and PacketVersion is bumped to 3.
         /// </summary>
-        public readonly bool EnableTaskHostCallbacks = Environment.GetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS") == "1";
+        public readonly bool EnableTaskHostCallbacks = true;
 
         /// <summary>
         /// Name of environment variables used to enable MSBuild server.
