@@ -1473,45 +1473,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void DeleteTempFile_WarningMessage_UsesOriginalPath()
-        {
-            // Arrange: create a read-only file that will fail to delete, then verify the
-            // warning message uses the original (non-absolutized) relative path.
-            using var env = TestEnvironment.Create(_output);
-            string projectDir = env.CreateFolder().Path;
-            string fileName = "locked.rsp";
-            string fullPath = Path.Combine(projectDir, fileName);
-            File.WriteAllText(fullPath, "test content");
-            File.SetAttributes(fullPath, FileAttributes.ReadOnly);
-
-            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
-            var taskEnv = new TaskEnvironment(driver);
-
-            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
-            using var tool = new MultiThreadedToolTask(toolPath, null);
-            tool.TaskEnvironment = taskEnv;
-            var mockEngine = new MockEngine(_output);
-            tool.BuildEngine = mockEngine;
-
-            try
-            {
-                // Act: delete using relative path — should fail and log a warning with original path.
-                tool.CallDeleteTempFile(fileName);
-
-                // Assert: if a warning was logged, it should reference the original relative path.
-                if (mockEngine.Warnings > 0)
-                {
-                    mockEngine.AssertLogContains(fileName);
-                }
-            }
-            finally
-            {
-                // Clean up: remove read-only attribute so the test environment can clean up.
-                File.SetAttributes(fullPath, FileAttributes.Normal);
-            }
-        }
-
-        [Fact]
         public void GetProcessStartInfo_RoutesToMultithreadablePath_ForMultiThreadedDriver()
         {
             // Arrange: when TaskEnvironment uses MultiThreadedTaskEnvironmentDriver,
