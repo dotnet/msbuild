@@ -13,9 +13,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Eventing;
 
 #if NETFRAMEWORK
-using Microsoft.Build.Eventing;
 using System.Security.Principal;
 #endif
 
@@ -271,6 +271,8 @@ namespace Microsoft.Build.BackEnd
             {
                 try
                 {
+                    MSBuildEventSource.Log.NodeConnectStart(nodeId);
+
                     if (nodeReuseRequested && TryReuseAnyFromPossibleRunningNodes(currentProcessId, nodeId))
                     {
                         return;
@@ -330,6 +332,7 @@ namespace Microsoft.Build.BackEnd
                         });
 
                         CreateNodeContext(nodeId, nodeToReuse, nodeStream, result.NegotiatedPacketVersion);
+                        MSBuildEventSource.Log.NodeConnectStop(nodeId, nodeToReuse.Id, isReused: true);
                         return true;
                     }
                 }
@@ -387,6 +390,7 @@ namespace Microsoft.Build.BackEnd
                         CommunicationsUtilities.Trace("Successfully connected to created node {0} which is PID {1}", nodeId, msbuildProcess.Id);
 
                         CreateNodeContext(nodeId, msbuildProcess, nodeStream, result.NegotiatedPacketVersion);
+                        MSBuildEventSource.Log.NodeConnectStop(nodeId, msbuildProcess.Id, isReused: false);
                         return true;
                     }
 

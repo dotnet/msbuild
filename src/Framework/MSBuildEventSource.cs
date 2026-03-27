@@ -709,6 +709,18 @@ namespace Microsoft.Build.Eventing
         {
             WriteEvent(98);
         }
+
+        [Event(99, Keywords = Keywords.All)]
+        public void NodeConnectStart(int nodeId)
+        {
+            WriteEvent(99, nodeId);
+        }
+
+        [Event(100, Keywords = Keywords.All)]
+        public void NodeConnectStop(int nodeId, int processId, bool isReused)
+        {
+            WriteEvent(100, nodeId, processId, isReused);
+        }
         #endregion
     }
 }
