@@ -297,7 +297,7 @@ namespace Microsoft.Build.Tasks
         protected override string ToolName => "al.exe";
 
         /// <summary>
-        /// Return the path of the tool to execute.
+        /// Return the path of the tool to execute
         /// </summary>
         protected override string GenerateFullPathToTool()
         {
@@ -377,7 +377,7 @@ namespace Microsoft.Build.Tasks
                 ["LogicalName", "TargetFile", "Access"]);
 
             // It's a good idea for the response file to be the very last switch passed, just
-            // from a predictability perspective. This is also consistent with the compiler
+            // from a predictability perspective.  This is also consistent with the compiler
             // tasks (Csc, etc.)
             if (ResponseFiles != null)
             {
