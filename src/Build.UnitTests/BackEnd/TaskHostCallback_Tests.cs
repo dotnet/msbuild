@@ -778,5 +778,157 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.FullLog.ShouldContain("external task host");
             logger.FullLog.ShouldContain("Yield/Reacquire round-trip completed successfully");
         }
+
+        /// <summary>
+        /// Verifies that 4 tasks can yield simultaneously on a single TaskHost process.
+        /// With MaxNodeCount=1 and MultiThreaded=true, all 4 tasks are ejected to the same
+        /// TaskHost. Each task yields, allowing the next to be dispatched. All 4 must
+        /// successfully reacquire and complete without cross-contamination.
+        /// </summary>
+        [Fact]
+        public void FourNestedYields_AllCompleteSuccessfully()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+            string testDir = env.CreateFolder().Path;
+
+            string taskAssembly = typeof(ConfigurableCallbackTask).Assembly.Location;
+
+            // Create 4 projects, each running a task that yields.
+            for (int i = 1; i <= 4; i++)
+            {
+                File.WriteAllText(Path.Combine(testDir, $"Yield{i}.proj"), $@"
+<Project>
+    <UsingTask TaskName=""{nameof(ConfigurableCallbackTask)}"" AssemblyFile=""{taskAssembly}"" />
+    <Target Name=""Build"">
+        <{nameof(ConfigurableCallbackTask)} Operation=""Yield"" TaskIdentity=""Yield{i}"">
+            <Output PropertyName=""Result"" TaskParameter=""OperationSucceeded"" />
+        </{nameof(ConfigurableCallbackTask)}>
+        <Message Text=""Yield{i}Result=$(Result)"" Importance=""high"" />
+    </Target>
+</Project>");
+            }
+
+            // Orchestrator builds all 4 via MSBuild task.
+            string orchestrator = Path.Combine(testDir, "Orchestrator.proj");
+            File.WriteAllText(orchestrator, @"
+<Project>
+    <ItemGroup>
+        <ProjectsToBuild Include=""Yield1.proj;Yield2.proj;Yield3.proj;Yield4.proj"" />
+    </ItemGroup>
+    <Target Name=""Build"">
+        <MSBuild Projects=""@(ProjectsToBuild)"" />
+    </Target>
+</Project>");
+
+            var logger = new MockLogger(_output);
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters
+                {
+                    MultiThreaded = true,
+                    MaxNodeCount = 1,
+                    Loggers = [logger],
+                    EnableNodeReuse = false,
+                },
+                new BuildRequestData(
+                    orchestrator,
+                    new Dictionary<string, string?>(),
+                    null,
+                    ["Build"],
+                    null));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            for (int i = 1; i <= 4; i++)
+            {
+                logger.FullLog.ShouldContain($"Yield{i}Result=True");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that a mix of 2 yielding tasks and 2 BuildProjectFile tasks can
+        /// run on the same TaskHost without cross-contamination.
+        /// </summary>
+        [Fact]
+        public void TwoYieldsTwoBuildProjectFiles_AllCompleteSuccessfully()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+            string testDir = env.CreateFolder().Path;
+
+            string taskAssembly = typeof(ConfigurableCallbackTask).Assembly.Location;
+
+            // Child project for BuildProjectFile tasks
+            string childProject = Path.Combine(testDir, "Child.proj");
+            File.WriteAllText(childProject, @"
+<Project>
+    <Target Name=""Build"">
+        <Message Text=""ChildBuilt"" Importance=""high"" />
+    </Target>
+</Project>");
+
+            // 2 yield projects
+            for (int i = 1; i <= 2; i++)
+            {
+                File.WriteAllText(Path.Combine(testDir, $"Yield{i}.proj"), $@"
+<Project>
+    <UsingTask TaskName=""{nameof(ConfigurableCallbackTask)}"" AssemblyFile=""{taskAssembly}"" />
+    <Target Name=""Build"">
+        <{nameof(ConfigurableCallbackTask)} Operation=""Yield"" TaskIdentity=""Yield{i}"">
+            <Output PropertyName=""Result"" TaskParameter=""OperationSucceeded"" />
+        </{nameof(ConfigurableCallbackTask)}>
+        <Message Text=""Yield{i}Result=$(Result)"" Importance=""high"" />
+    </Target>
+</Project>");
+            }
+
+            // 2 BuildProjectFile projects
+            for (int i = 1; i <= 2; i++)
+            {
+                File.WriteAllText(Path.Combine(testDir, $"BPF{i}.proj"), $@"
+<Project>
+    <UsingTask TaskName=""{nameof(ConfigurableCallbackTask)}"" AssemblyFile=""{taskAssembly}"" />
+    <Target Name=""Build"">
+        <{nameof(ConfigurableCallbackTask)} Operation=""BuildProjectFile"" TaskIdentity=""BPF{i}"" ChildProjectFile=""{childProject}"">
+            <Output PropertyName=""Result"" TaskParameter=""OperationSucceeded"" />
+        </{nameof(ConfigurableCallbackTask)}>
+        <Message Text=""BPF{i}Result=$(Result)"" Importance=""high"" />
+    </Target>
+</Project>");
+            }
+
+            // Orchestrator builds all 4 interleaved
+            string orchestrator = Path.Combine(testDir, "Orchestrator.proj");
+            File.WriteAllText(orchestrator, @"
+<Project>
+    <ItemGroup>
+        <ProjectsToBuild Include=""Yield1.proj;BPF1.proj;Yield2.proj;BPF2.proj"" />
+    </ItemGroup>
+    <Target Name=""Build"">
+        <MSBuild Projects=""@(ProjectsToBuild)"" />
+    </Target>
+</Project>");
+
+            var logger = new MockLogger(_output);
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters
+                {
+                    MultiThreaded = true,
+                    MaxNodeCount = 1,
+                    Loggers = [logger],
+                    EnableNodeReuse = false,
+                },
+                new BuildRequestData(
+                    orchestrator,
+                    new Dictionary<string, string?>(),
+                    null,
+                    ["Build"],
+                    null));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            logger.FullLog.ShouldContain("Yield1Result=True");
+            logger.FullLog.ShouldContain("Yield2Result=True");
+            logger.FullLog.ShouldContain("BPF1Result=True");
+            logger.FullLog.ShouldContain("BPF2Result=True");
+        }
     }
 }
