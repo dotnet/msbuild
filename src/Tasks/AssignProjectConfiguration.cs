@@ -208,7 +208,8 @@ namespace Microsoft.Build.Tasks
                         // If the reference was unresolved, we want to undefine the Configuration and Platform
                         // global properties, so that the project will build using its default Configuration and
                         // Platform rather than that of its parent.
-                        if (ShouldUnsetParentConfigurationAndPlatform)
+                        if (ShouldUnsetParentConfigurationAndPlatform
+                            && !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
                         {
                             string globalPropertiesToRemove = projectRef.GetMetadata("GlobalPropertiesToRemove");
 
