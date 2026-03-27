@@ -166,7 +166,7 @@ void IBuildEngine4.RegisterTaskObject(object key, object obj, RegisteredTaskObje
 object IBuildEngine4.GetRegisteredTaskObject(object key, RegisteredTaskObjectLifetime lifetime);
 ```
 
-The engine stores registered objects. Both methods are thread-safe and may be called concurrently from multiple tasks. If multiple tasks attempt to register an object with the same key concurrently, only the first registration takes effect — subsequent calls are ignored. When an object's lifetime expires, MSBuild removes it from the registry so no new consumers can retrieve it, then calls `IDisposable.Dispose` on it if it implements `IDisposable`.
+The engine stores registered objects. Both methods are thread-safe and may be called concurrently from multiple tasks. If multiple tasks attempt to register an object with the same key concurrently, only the first registration takes effect — subsequent calls are ignored. When an object's lifetime expires, MSBuild disposes registered objects (calling `IDisposable.Dispose` on them if they implement `IDisposable`) and clears them from the registry, so their availability and cleanup are managed by the engine according to the configured lifetime.
 
 `RegisteredTaskObjectLifetime` controls when objects are disposed:
 
