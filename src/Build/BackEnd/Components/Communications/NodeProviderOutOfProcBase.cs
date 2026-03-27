@@ -255,7 +255,9 @@ namespace Microsoft.Build.BackEnd
             if (nodeReuseRequested)
             {
                 IList<Process> possibleRunningNodesList;
+                MSBuildEventSource.Log.NodeReuseScanStart();
                 (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation, expectedNodeMode);
+                MSBuildEventSource.Log.NodeReuseScanStop(possibleRunningNodesList.Count);
                 possibleRunningNodes = new ConcurrentQueue<Process>(possibleRunningNodesList);
 
                 if (possibleRunningNodesList.Count > 0)
@@ -320,7 +322,9 @@ namespace Microsoft.Build.BackEnd
                     _processesToIgnore.TryAdd(nodeLookupKey, default);
 
                     // Attempt to connect to each process in turn.
+                    MSBuildEventSource.Log.NodePipeConnectStart(nodeId, nodeToReuse.Id);
                     Stream nodeStream = TryConnectToProcess(nodeToReuse.Id, 0 /* poll, don't wait for connections */, nodeLaunchData.Handshake, out HandshakeResult result);
+                    MSBuildEventSource.Log.NodePipeConnectStop(nodeId, nodeToReuse.Id, succeeded: nodeStream != null);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
@@ -374,7 +378,9 @@ namespace Microsoft.Build.BackEnd
                     // Create the node process
                     INodeLauncher nodeLauncher = (INodeLauncher)_componentHost.GetComponent(BuildComponentType.NodeLauncher);
                     NodeLaunchData launchData = new(msbuildLocation, commandLineArgs, nodeLaunchData.Handshake, nodeLaunchData.EnvironmentOverrides);
+                    MSBuildEventSource.Log.NodeLaunchStart(nodeId);
                     Process msbuildProcess = nodeLauncher.Start(launchData, nodeId);
+                    MSBuildEventSource.Log.NodeLaunchStop(nodeId, msbuildProcess.Id);
 
                     _processesToIgnore.TryAdd(GetProcessesToIgnoreKey(nodeLaunchData.Handshake, msbuildProcess.Id), default);
 
@@ -383,7 +389,9 @@ namespace Microsoft.Build.BackEnd
                     // to the debugger process. Instead, use MSBUILDDEBUGONSTART=1
 
                     // Now try to connect to it.
+                    MSBuildEventSource.Log.NodePipeConnectStart(nodeId, msbuildProcess.Id);
                     Stream nodeStream = TryConnectToProcess(msbuildProcess.Id, TimeoutForNewNodeCreation, nodeLaunchData.Handshake, out HandshakeResult result);
+                    MSBuildEventSource.Log.NodePipeConnectStop(nodeId, msbuildProcess.Id, succeeded: nodeStream != null);
                     if (nodeStream != null)
                     {
                         // Connection successful, use this node.
