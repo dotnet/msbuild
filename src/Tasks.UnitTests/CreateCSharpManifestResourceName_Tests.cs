@@ -325,7 +325,7 @@ namespace Microsoft.Build.UnitTests
                     binaryStream: null,
                     log: null);
 
-            Assert.Equal(FrameworkFileUtilities.FixFilePath(@"fr\RootNamespace.SubFolder.SplashScreen.bmp"), result);
+            Assert.Equal(FileUtilities.FixFilePath(@"fr\RootNamespace.SubFolder.SplashScreen.bmp"), result);
         }
 
         /// <summary>

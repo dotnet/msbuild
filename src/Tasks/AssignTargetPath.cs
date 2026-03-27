@@ -23,7 +23,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Gets or sets the task execution environment for thread-safe path resolution.
         /// </summary>
-        public TaskEnvironment TaskEnvironment { get; set; }
+        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
 
 
         /// <summary>
@@ -67,10 +67,10 @@ namespace Microsoft.Build.Tasks
                     // Ensure trailing slash otherwise c:\bin appears to match part of c:\bin2\foo
                     // Also ensure that relative segments in the path are resolved.
                     fullRootPath =
-                        TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(RootFolder)).GetCanonicalForm();
+                        TaskEnvironment.GetAbsolutePath(FileUtilities.EnsureTrailingSlash(RootFolder)).GetCanonicalForm();
 
                     // Ensure trailing slash for comparison. Current directory is already canonical, so we don't need to call GetCanonicalForm on it.
-                    AbsolutePath currentDirectory = FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory);
+                    AbsolutePath currentDirectory = FileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory);
 
                     // Check if the root folder is the same as the current directory - AbsolutePath handles OS-aware case sensitivity.
                     isRootFolderSameAsCurrentDirectory = fullRootPath == currentDirectory;
@@ -82,10 +82,10 @@ namespace Microsoft.Build.Tasks
                     // Ensure trailing slash otherwise c:\bin appears to match part of c:\bin2\foo
                     // Also ensure that relative segments in the path are resolved and throw on illegal characters in Path.GetFullPath to preserve pre-existing behavior.
                     fullRootPathString = 
-                        Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FrameworkFileUtilities.EnsureTrailingSlash(RootFolder)));
+                        Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FileUtilities.EnsureTrailingSlash(RootFolder)));
 
                     // Ensure trailing slash for comparison. Current directory is already canonical, so we don't need to call GetCanonicalForm on it.
-                    AbsolutePath currentDirectory = FrameworkFileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory);
+                    AbsolutePath currentDirectory = FileUtilities.EnsureTrailingSlash(TaskEnvironment.ProjectDirectory);
 
                     // Check if the root folder is the same as the current directory. 
                     // Perform a case-insensitive comparison to match Path.GetFullPath behavior on Windows, even on case-sensitive file systems, 

@@ -105,7 +105,7 @@ namespace Microsoft.Build.Tasks
         {
             try
             {
-                var path = FrameworkFileUtilities.FixFilePath(item.ItemSpec);
+                var path = FileUtilities.FixFilePath(item.ItemSpec);
                 string filename = (MatchFileNameOnly ? Path.GetFileName(path) : path);
 
                 if (String.Equals(filename, ItemSpecToFind, comparison))

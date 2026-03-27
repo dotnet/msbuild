@@ -154,7 +154,8 @@ internal static class CrashTelemetryRecorder
 
             string eventName = $"{TelemetryConstants.EventPrefix}{TelemetryConstants.Crash}";
             string description = $"{crashTelemetry.ExitType}: {crashTelemetry.ExceptionType}";
-            var faultEvent = new FaultEvent(eventName, description, crashTelemetry.Exception);
+            var sanitizedException = new SanitizedException(crashTelemetry.Exception!);
+            var faultEvent = new FaultEvent(eventName, description, sanitizedException);
 
             faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}ExitType"] = crashTelemetry.ExitType.ToString();
             faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}CrashOrigin"] = crashTelemetry.CrashOrigin.ToString();
@@ -178,6 +179,26 @@ internal static class CrashTelemetryRecorder
 #endif
     }
 
+    /// <summary>
+    /// Exception wrapper that sanitizes message and stack trace to remove PII
+    /// before being passed to VS Telemetry's <c>FaultEvent</c>.
+    /// </summary>
+    internal sealed class SanitizedException : Exception
+    {
+        private readonly string? _sanitizedStackTrace;
+
+        public SanitizedException(Exception original)
+            : base(CrashTelemetry.TruncateMessage(original.Message) ?? original.GetType().FullName,
+                   original.InnerException is not null ? new SanitizedException(original.InnerException) : null)
+        {
+            _sanitizedStackTrace = original.StackTrace is not null
+                ? CrashTelemetry.SanitizeFilePathsInText(original.StackTrace)
+                : null;
+        }
+
+        public override string? StackTrace => _sanitizedStackTrace;
+    }
+
     private static CrashTelemetry CreateCrashTelemetry(
         Exception exception,
         CrashExitType exitType,
@@ -193,45 +214,18 @@ internal static class CrashTelemetryRecorder
     }
 
     /// <summary>
-    /// Collects and emits diagnostic telemetry when EndBuild is stuck waiting.
+    /// Emits a pre-populated <see cref="CrashTelemetry"/> for an EndBuild hang.
     /// Called periodically from timed wait loops so that diagnostics are available
     /// even if the hang never resolves (crash telemetry in the finally block would be unreachable).
+    /// The caller is responsible for populating the <see cref="CrashTelemetry"/> with
+    /// all relevant hang diagnostic data.
     /// </summary>
     [MethodImpl(MethodImplOptions.NoInlining)]
-    public static void CollectAndEmitEndBuildHangDiagnostics(
-        string waitPhase,
-        long waitDurationMs,
-        int pendingSubmissionCount,
-        int submissionsWithResultNoLogging,
-        bool threadExceptionRecorded,
-        int unmatchedProjectStartedCount,
-        string? buildEngineVersion,
-        string? buildEngineFrameworkName,
-        string? buildEngineHost,
-        bool isStandaloneExecution,
-        int? maxNodeCount = null,
-        int? activeNodeCount = null)
+    public static void EmitEndBuildHangDiagnostics(CrashTelemetry crashTelemetry)
     {
         try
         {
-            var crashTelemetry = new CrashTelemetry
-            {
-                ExitType = CrashExitType.EndBuildHang,
-                BuildEngineVersion = buildEngineVersion,
-                BuildEngineFrameworkName = buildEngineFrameworkName,
-                BuildEngineHost = buildEngineHost,
-                EndBuildWaitPhase = waitPhase,
-                EndBuildWaitDurationMs = waitDurationMs,
-                PendingSubmissionCount = pendingSubmissionCount,
-                SubmissionsWithResultNoLogging = submissionsWithResultNoLogging,
-                ThreadExceptionRecorded = threadExceptionRecorded,
-                UnmatchedProjectStartedCount = unmatchedProjectStartedCount,
-                IsStandaloneExecution = isStandaloneExecution,
-                MaxNodeCount = maxNodeCount,
-                ActiveNodeCount = activeNodeCount,
-            };
-
-            TelemetryManager.Instance?.Initialize(isStandaloneExecution);
+            TelemetryManager.Instance?.Initialize(crashTelemetry.IsStandaloneExecution ?? false);
 
             using IActivity? activity = TelemetryManager.Instance
                 ?.DefaultActivitySource

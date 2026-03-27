@@ -19,8 +19,10 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.TelemetryInfra;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
@@ -844,7 +846,7 @@ namespace Microsoft.Build.BackEnd
                     // Dump all engine exceptions to a temp file
                     // so that we have something to go on in the
                     // event of a failure
-                    ExceptionHandling.DumpExceptionToFile(ex);
+                    DebugUtils.DumpExceptionToFile(ex);
 
                     // This includes InternalErrorException, which we definitely want a callstack for.
                     // Fortunately the default console UnhandledExceptionHandler will log the callstack even
@@ -1057,6 +1059,38 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Determines whether results need to be transferred from another node before building.
+        /// <para>
+        /// In order for the check for target completeness for this project to be valid, all of the
+        /// target results from the project must be present in the results cache. It is possible that
+        /// this project has been moved from its original node and when it was, its results did not come
+        /// with it. This would be signified by the ResultsNodeId value in the configuration pointing to
+        /// a different node than the current one. In that case we will need to request those results be
+        /// moved from their original node to this one.
+        /// </para>
+        /// <para>
+        /// In MT mode, all worker nodes share the same process and caches, so transfer is unnecessary
+        /// and would race on the shared ResultsNodeId field (see #13188). This relies on the invariant
+        /// that <c>MultiThreaded == true</c> implies all worker nodes share caches (see
+        /// multithreaded-msbuild.md). If a future mode mixes in-proc and out-of-proc worker nodes,
+        /// revisit this check — see https://github.com/dotnet/msbuild/issues/11939.
+        /// </para>
+        /// </summary>
+        /// <param name="resultsNodeId">The node ID where results currently reside.</param>
+        /// <param name="currentNodeId">The node ID of the current node.</param>
+        /// <param name="isMultiThreaded">Whether MT mode is active.</param>
+        /// <returns>True if results must be transferred from another node before building.</returns>
+        internal static bool NeedsResultsTransfer(int resultsNodeId, int currentNodeId, bool isMultiThreaded)
+        {
+            if (isMultiThreaded)
+            {
+                return false;
+            }
+
+            return resultsNodeId != Scheduler.InvalidNodeId && resultsNodeId != currentNodeId;
+        }
+
+        /// <summary>
         /// Invokes the OnBlockedRequest event
         /// </summary>
         private void RaiseOnBlockedRequest(int blockingGlobalRequestId, string blockingTarget, BuildResult partialBuildResult = null)
@@ -1189,13 +1223,11 @@ namespace Microsoft.Build.BackEnd
                 // Set the current directory to that required by the project.
                 SetProjectDirectory();
 
-                // Transfer results and state from the previous node, if necessary.
-                // In order for the check for target completeness for this project to be valid, all of the target results from the project must be present
-                // in the results cache.  It is possible that this project has been moved from its original node and when it was its results did not come
-                // with it.  This would be signified by the ResultsNode value in the configuration pointing to a different node than the current one.  In that
-                // case we will need to request those results be moved from their original node to this one.
-                if ((_requestEntry.RequestConfiguration.ResultsNodeId != Scheduler.InvalidNodeId) &&
-                    (_requestEntry.RequestConfiguration.ResultsNodeId != _componentHost.BuildParameters.NodeId))
+                // Transfer results from the previous node if necessary — see NeedsResultsTransfer.
+                if (NeedsResultsTransfer(
+                    _requestEntry.RequestConfiguration.ResultsNodeId,
+                    _componentHost.BuildParameters.NodeId,
+                    _componentHost.BuildParameters.MultiThreaded))
                 {
                     // This indicates to the system that we will block waiting for a results transfer.  We will block here until those results become available.
                     await BlockOnTargetInProgress(Microsoft.Build.BackEnd.BuildRequest.InvalidGlobalRequestId, null);
@@ -1284,6 +1316,9 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
+            // Accumulate all telemetry into a local instance, then merge into the shared singleton once.
+            WorkerNodeTelemetryData telemetryData = new();
+
             foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
             {
                 bool wasExecuted =
@@ -1314,19 +1349,15 @@ namespace Microsoft.Build.BackEnd
                                (isFromNuget && FileClassifier.Shared.IsMicrosoftPackageInNugetCache(projectTargetInstance.Value.FullPath));
                 }
 
-                telemetryForwarder.AddTarget(
-                    projectTargetInstance.Key,
-                    // would we want to distinguish targets that were executed only during this execution - we'd need
-                    //  to remember target names from ResultsByTarget from before execution
-                    wasExecuted,
-                    isCustom,
-                    isMetaprojTarget,
-                    isFromNuget,
-                    skipReason);
+                var key = new TaskOrTargetTelemetryKey(
+                    projectTargetInstance.Key, isCustom, isFromNuget, isMetaprojTarget);
+                telemetryData.AddTarget(key, wasExecuted, skipReason);
             }
 
             TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
             CollectTasksStats(taskReg);
+
+            telemetryForwarder.MergeWorkerData(telemetryData);
 
             void CollectTasksStats(TaskRegistry taskRegistry)
             {
@@ -1337,13 +1368,16 @@ namespace Microsoft.Build.BackEnd
 
                 foreach (TaskRegistry.RegisteredTaskRecord registeredTaskRecord in taskRegistry.TaskRegistrations.Values.SelectMany(record => record))
                 {
-                    telemetryForwarder.AddTask(
+                    var key = new TaskOrTargetTelemetryKey(
                         registeredTaskRecord.TaskIdentity.Name,
+                        registeredTaskRecord.ComputeIfCustom(),
+                        registeredTaskRecord.IsFromNugetCache,
+                        isFromMetaProject: false);
+                    telemetryData.AddTask(
+                        key,
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
                         registeredTaskRecord.Statistics.TotalMemoryConsumption,
-                        registeredTaskRecord.ComputeIfCustom(),
-                        registeredTaskRecord.IsFromNugetCache,
                         registeredTaskRecord.TaskFactoryAttributeName,
                         registeredTaskRecord.TaskFactoryParameters.Runtime);
 

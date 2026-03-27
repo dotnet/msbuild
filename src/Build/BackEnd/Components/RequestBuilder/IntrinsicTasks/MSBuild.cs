@@ -711,7 +711,7 @@ namespace Microsoft.Build.BackEnd
                                         // Set a metadata on the output items called "MSBuildProjectFile" which tells you which project file produced this item.
                                         if (String.IsNullOrEmpty(outputItemFromTarget.GetMetadata(ItemMetadataNames.msbuildSourceProjectFile)))
                                         {
-                                            outputItemFromTarget.SetMetadata(ItemMetadataNames.msbuildSourceProjectFile, projects[i].GetMetadata(FileUtilities.ItemSpecModifiers.FullPath));
+                                            outputItemFromTarget.SetMetadata(ItemMetadataNames.msbuildSourceProjectFile, projects[i].GetMetadata(ItemSpecModifiers.FullPath));
                                         }
                                     }
 

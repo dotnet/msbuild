@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Assert.Equal(item.ItemSpec, deserializedItem.ItemSpec);
             Assert.Equal(item.MetadataCount, deserializedItem.MetadataCount);
             Assert.Equal(item.GetMetadata("a"), deserializedItem.GetMetadata("a"));
-            Assert.Equal(item.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath), deserializedItem.GetMetadata(FileUtilities.ItemSpecModifiers.DefiningProjectFullPath));
+            Assert.Equal(item.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath), deserializedItem.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath));
         }
 
         /// <summary>

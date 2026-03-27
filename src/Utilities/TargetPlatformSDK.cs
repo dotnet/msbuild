@@ -105,7 +105,7 @@ namespace Microsoft.Build.Utilities
         public string Path
         {
             get => _path;
-            set => _path = value != null ? FrameworkFileUtilities.EnsureTrailingSlash(value) : null;
+            set => _path = value != null ? FileUtilities.EnsureTrailingSlash(value) : null;
         }
 
         /// <summary>
