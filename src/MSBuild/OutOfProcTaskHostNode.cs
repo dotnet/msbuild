@@ -1334,34 +1334,19 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private NodeEngineShutdownReason HandleShutdown()
         {
+            // FIRST: Fail all pending callback requests so blocked task threads can unblock.
+            // This must happen BEFORE joining threads to prevent deadlock.
+            FailAllPendingCallbackRequests("TaskHost shutting down.");
+
             // Wait for the RunTask task runner thread before shutting down so that we can cleanly dispose all WaitHandles.
             _taskRunnerThread?.Join();
-            // Also join any other task threads that may be blocked (e.g., a yielded task waiting on TCS).
-            // Fail their pending callback requests first so they can unblock.
+            // Also join any other task threads that may be blocked.
             foreach (var kvp in _taskContexts)
             {
                 Thread thread = kvp.Value.ExecutingThread;
                 if (thread is not null && thread != _taskRunnerThread && thread.IsAlive)
                 {
-                    // Fail any pending callbacks so the thread can unblock
-                    foreach (var reqKvp in kvp.Value.PendingCallbackRequests)
-                    {
-                        if (kvp.Value.PendingCallbackRequests.TryRemove(reqKvp.Key, out var tcs))
-                        {
-                            tcs.TrySetException(new InvalidOperationException("TaskHost shutting down."));
-                        }
-                    }
-
                     thread.Join(TimeSpan.FromSeconds(5));
-                }
-            }
-
-            // Also fail global pending callback requests (backward compatibility path).
-            foreach (var globalKvp in _pendingCallbackRequests)
-            {
-                if (_pendingCallbackRequests.TryRemove(globalKvp.Key, out var globalTcs))
-                {
-                    globalTcs.TrySetException(new InvalidOperationException("TaskHost shutting down."));
                 }
             }
 
@@ -1421,27 +1406,7 @@ namespace Microsoft.Build.CommandLine
 
                     // Fail all pending callback requests so task threads unblock immediately
                     // instead of waiting indefinitely for responses that will never arrive.
-                    foreach (var kvp in _pendingCallbackRequests)
-                    {
-                        if (_pendingCallbackRequests.TryRemove(kvp.Key, out TaskCompletionSource<INodePacket> tcs))
-                        {
-                            tcs.TrySetException(new InvalidOperationException(
-                                "TaskHost lost connection to owning worker node during callback."));
-                        }
-                    }
-
-                    // Also fail per-task context pending requests
-                    foreach (var contextKvp in _taskContexts)
-                    {
-                        foreach (var reqKvp in contextKvp.Value.PendingCallbackRequests)
-                        {
-                            if (contextKvp.Value.PendingCallbackRequests.TryRemove(reqKvp.Key, out TaskCompletionSource<INodePacket> ctxTcs))
-                            {
-                                ctxTcs.TrySetException(new InvalidOperationException(
-                                    "TaskHost lost connection to owning worker node during callback."));
-                            }
-                        }
-                    }
+                    FailAllPendingCallbackRequests("TaskHost lost connection to owning worker node during callback.");
 
                     _shutdownEvent.Set();
                     break;
@@ -1451,6 +1416,32 @@ namespace Microsoft.Build.CommandLine
 
                 default:
                     break;
+            }
+        }
+
+        /// <summary>
+        /// Fails all pending callback requests (both global and per-task) with an InvalidOperationException.
+        /// Used during shutdown and connection loss to unblock task threads waiting on callback responses.
+        /// </summary>
+        private void FailAllPendingCallbackRequests(string errorMessage)
+        {
+            foreach (var kvp in _pendingCallbackRequests)
+            {
+                if (_pendingCallbackRequests.TryRemove(kvp.Key, out TaskCompletionSource<INodePacket> tcs))
+                {
+                    tcs.TrySetException(new InvalidOperationException(errorMessage));
+                }
+            }
+
+            foreach (var contextKvp in _taskContexts)
+            {
+                foreach (var reqKvp in contextKvp.Value.PendingCallbackRequests)
+                {
+                    if (contextKvp.Value.PendingCallbackRequests.TryRemove(reqKvp.Key, out TaskCompletionSource<INodePacket> ctxTcs))
+                    {
+                        ctxTcs.TrySetException(new InvalidOperationException(errorMessage));
+                    }
+                }
             }
         }
 
@@ -1615,8 +1606,17 @@ namespace Microsoft.Build.CommandLine
                         RemoveTaskContext(taskContext.TaskId);
                     }
 
-                    // The task has now fully completed executing
-                    _taskCompleteEvent.Set();
+                    // The task has now fully completed executing.
+                    // Guard against ObjectDisposedException if HandleShutdown already disposed
+                    // the event (can happen if thread.Join timed out during shutdown).
+                    try
+                    {
+                        _taskCompleteEvent.Set();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // Shutdown already disposed the event — nothing to signal.
+                    }
                 }
             }
         }
