@@ -753,7 +753,7 @@ namespace Microsoft.Build.Eventing
         /// Raised when a TaskHost accepts a nested task while other tasks are yielded.
         /// </summary>
         [Event(103, Keywords = Keywords.All)]
-        public void TaskHostNestedTaskStart(string taskName, int yieldedTasks)
+        public void TaskHostNestedTaskDispatched(string taskName, int yieldedTasks)
         {
             WriteEvent(103, taskName, yieldedTasks);
         }

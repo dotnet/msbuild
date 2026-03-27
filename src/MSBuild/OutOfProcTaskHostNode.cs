@@ -580,20 +580,21 @@ namespace Microsoft.Build.CommandLine
 
             // Yield before the callback so the scheduler can reuse this TaskHost for nested tasks.
             YieldForCallback();
+            bool success = false;
             try
             {
                 var response = SendCallbackRequestAndWaitForResponse<TaskHostBuildResponse>(request);
                 var result = response.ToBuildEngineResult();
-
-                if (MSBuildEventSource.Log.IsEnabled())
-                {
-                    MSBuildEventSource.Log.TaskHostBuildProjectFileStop(projectFilesJoined, result.Result);
-                }
-
+                success = result.Result;
                 return result;
             }
             finally
             {
+                if (MSBuildEventSource.Log.IsEnabled())
+                {
+                    MSBuildEventSource.Log.TaskHostBuildProjectFileStop(projectFilesJoined, success);
+                }
+
                 ReacquireAfterCallback();
             }
         }
@@ -1088,12 +1089,12 @@ namespace Microsoft.Build.CommandLine
             }
 
             // Transition from "active" to "yielded" state.
-            Interlocked.Increment(ref _yieldedTaskCount);
+            int newYielded = Interlocked.Increment(ref _yieldedTaskCount);
             int newActive = Interlocked.Decrement(ref _activeTaskCount);
 
             if (MSBuildEventSource.Log.IsEnabled())
             {
-                MSBuildEventSource.Log.TaskHostYieldStart(newActive, _yieldedTaskCount);
+                MSBuildEventSource.Log.TaskHostYieldStart(newActive, newYielded);
             }
         }
 
@@ -1104,12 +1105,12 @@ namespace Microsoft.Build.CommandLine
         private void ReacquireAfterCallback()
         {
             // Transition from "yielded" back to "active" state.
-            Interlocked.Increment(ref _activeTaskCount);
+            int newActive = Interlocked.Increment(ref _activeTaskCount);
             int newYielded = Interlocked.Decrement(ref _yieldedTaskCount);
 
             if (MSBuildEventSource.Log.IsEnabled())
             {
-                MSBuildEventSource.Log.TaskHostYieldStop(_activeTaskCount, newYielded);
+                MSBuildEventSource.Log.TaskHostYieldStop(newActive, newYielded);
             }
 
             // Restore environment state after reacquiring
@@ -1228,7 +1229,7 @@ namespace Microsoft.Build.CommandLine
             {
                 if (MSBuildEventSource.Log.IsEnabled())
                 {
-                    MSBuildEventSource.Log.TaskHostNestedTaskStart(taskHostConfiguration.TaskName, _yieldedTaskCount);
+                    MSBuildEventSource.Log.TaskHostNestedTaskDispatched(taskHostConfiguration.TaskName, _yieldedTaskCount);
                 }
             }
 

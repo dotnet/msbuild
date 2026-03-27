@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
@@ -817,7 +817,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         <ProjectsToBuild Include=""Yield1.proj;Yield2.proj;Yield3.proj;Yield4.proj"" />
     </ItemGroup>
     <Target Name=""Build"">
-        <MSBuild Projects=""@(ProjectsToBuild)"" />
+        <MSBuild Projects=""@(ProjectsToBuild)"" BuildInParallel=""true"" />
     </Target>
 </Project>");
 
@@ -904,7 +904,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         <ProjectsToBuild Include=""Yield1.proj;BPF1.proj;Yield2.proj;BPF2.proj"" />
     </ItemGroup>
     <Target Name=""Build"">
-        <MSBuild Projects=""@(ProjectsToBuild)"" />
+        <MSBuild Projects=""@(ProjectsToBuild)"" BuildInParallel=""true"" />
     </Target>
 </Project>");
 
@@ -929,6 +929,112 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.FullLog.ShouldContain("Yield2Result=True");
             logger.FullLog.ShouldContain("BPF1Result=True");
             logger.FullLog.ShouldContain("BPF2Result=True");
+        }
+
+        /// <summary>
+        /// Verifies that MT-ejected tasks and explicit TaskHostFactory tasks both
+        /// succeed in the same build session using callbacks. Both dispatch paths
+        /// exercise Yield and BuildProjectFile operations without errors.
+        /// </summary>
+        [Fact]
+        public void MtEjectedAndExplicitTaskHostFactory_CoexistWithoutCrossContamination()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDENABLETASKHOSTCALLBACKS", "1");
+            string testDir = env.CreateFolder().Path;
+
+            string taskAssembly = typeof(ConfigurableCallbackTask).Assembly.Location;
+
+            // Child project for BuildProjectFile callbacks
+            string childProject = Path.Combine(testDir, "Child.proj");
+            File.WriteAllText(childProject, @"
+<Project>
+    <Target Name=""Build"">
+        <Message Text=""ChildBuilt"" Importance=""high"" />
+    </Target>
+</Project>");
+
+            // Project A: explicit TaskHostFactory — uses Yield/Reacquire
+            File.WriteAllText(Path.Combine(testDir, "ExplicitTH.proj"), $@"
+<Project>
+    <UsingTask TaskName=""{nameof(ConfigurableCallbackTask)}"" AssemblyFile=""{taskAssembly}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""Build"">
+        <{nameof(ConfigurableCallbackTask)} Operation=""Yield"" TaskIdentity=""ExplicitTH"">
+            <Output PropertyName=""Result"" TaskParameter=""OperationSucceeded"" />
+        </{nameof(ConfigurableCallbackTask)}>
+        <Message Text=""ExplicitTHResult=$(Result)"" Importance=""high"" />
+    </Target>
+</Project>");
+
+            // Project B: MT-ejected (no TaskFactory) — uses BuildProjectFile
+            File.WriteAllText(Path.Combine(testDir, "MtEjected.proj"), $@"
+<Project>
+    <UsingTask TaskName=""{nameof(ConfigurableCallbackTask)}"" AssemblyFile=""{taskAssembly}"" />
+    <Target Name=""Build"">
+        <{nameof(ConfigurableCallbackTask)} Operation=""BuildProjectFile"" TaskIdentity=""MtEjected"" ChildProjectFile=""{childProject}"">
+            <Output PropertyName=""Result"" TaskParameter=""OperationSucceeded"" />
+        </{nameof(ConfigurableCallbackTask)}>
+        <Message Text=""MtEjectedResult=$(Result)"" Importance=""high"" />
+    </Target>
+</Project>");
+
+            // Project C: explicit TaskHostFactory — uses BuildProjectFile
+            File.WriteAllText(Path.Combine(testDir, "ExplicitBPF.proj"), $@"
+<Project>
+    <UsingTask TaskName=""{nameof(ConfigurableCallbackTask)}"" AssemblyFile=""{taskAssembly}"" TaskFactory=""TaskHostFactory"" />
+    <Target Name=""Build"">
+        <{nameof(ConfigurableCallbackTask)} Operation=""BuildProjectFile"" TaskIdentity=""ExplicitBPF"" ChildProjectFile=""{childProject}"">
+            <Output PropertyName=""Result"" TaskParameter=""OperationSucceeded"" />
+        </{nameof(ConfigurableCallbackTask)}>
+        <Message Text=""ExplicitBPFResult=$(Result)"" Importance=""high"" />
+    </Target>
+</Project>");
+
+            // Project D: MT-ejected — uses Yield
+            File.WriteAllText(Path.Combine(testDir, "MtYield.proj"), $@"
+<Project>
+    <UsingTask TaskName=""{nameof(ConfigurableCallbackTask)}"" AssemblyFile=""{taskAssembly}"" />
+    <Target Name=""Build"">
+        <{nameof(ConfigurableCallbackTask)} Operation=""Yield"" TaskIdentity=""MtYield"">
+            <Output PropertyName=""Result"" TaskParameter=""OperationSucceeded"" />
+        </{nameof(ConfigurableCallbackTask)}>
+        <Message Text=""MtYieldResult=$(Result)"" Importance=""high"" />
+    </Target>
+</Project>");
+
+            // Orchestrator interleaves explicit and MT-ejected tasks
+            string orchestrator = Path.Combine(testDir, "Orchestrator.proj");
+            File.WriteAllText(orchestrator, @"
+<Project>
+    <ItemGroup>
+        <ProjectsToBuild Include=""ExplicitTH.proj;MtEjected.proj;ExplicitBPF.proj;MtYield.proj"" />
+    </ItemGroup>
+    <Target Name=""Build"">
+        <MSBuild Projects=""@(ProjectsToBuild)"" BuildInParallel=""true"" />
+    </Target>
+</Project>");
+
+            var logger = new MockLogger(_output);
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters
+                {
+                    MultiThreaded = true,
+                    MaxNodeCount = 1,
+                    Loggers = [logger],
+                    EnableNodeReuse = false,
+                },
+                new BuildRequestData(
+                    orchestrator,
+                    new Dictionary<string, string?>(),
+                    null,
+                    ["Build"],
+                    null));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            logger.FullLog.ShouldContain("ExplicitTHResult=True");
+            logger.FullLog.ShouldContain("MtEjectedResult=True");
+            logger.FullLog.ShouldContain("ExplicitBPFResult=True");
+            logger.FullLog.ShouldContain("MtYieldResult=True");
         }
     }
 }
