@@ -22,7 +22,7 @@ jobs:
       $versionsFile = "eng/Versions.props"
 
       [xml]$xml = Get-Content $versionsFile
-      $finalVersionKind = $xml.Project.PropertyGroup.DotNetFinalVersionKind
+      $finalVersionKind = $xml.SelectSingleNode('//DotNetFinalVersionKind').'#text'
       if ($finalVersionKind -ne 'release') {
         Write-Host "Since it is not released, skip the version bump check.";
         return
