@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Runtime.Serialization;
 using System.Text;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -18,7 +19,7 @@ namespace Microsoft.Build.Shared
     /// <summary>
     /// Specifies the parts of the assembly name to partially match
     /// </summary>
-    [FlagsAttribute]
+    [Flags]
     internal enum PartialComparisonFlags : int
     {
         /// <summary>
@@ -324,7 +325,7 @@ namespace Microsoft.Build.Shared
         /// <param name="version"></param>
         internal void ReplaceVersion(Version version)
         {
-            ErrorUtilities.VerifyThrow(!immutable, "Object is immutable cannot replace the version");
+            FrameworkErrorUtilities.VerifyThrow(!immutable, "Object is immutable cannot replace the version");
             CreateAssemblyName();
             if (asAssemblyName.Version != version)
             {
@@ -381,7 +382,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal void AddRemappedAssemblyName(AssemblyNameExtension extensionToAdd)
         {
-            ErrorUtilities.VerifyThrow(extensionToAdd.Immutable, "ExtensionToAdd is not immutable");
+            FrameworkErrorUtilities.VerifyThrow(extensionToAdd.Immutable, "ExtensionToAdd is not immutable");
             InitializeRemappedFrom();
             remappedFrom.Add(extensionToAdd);
         }
@@ -512,7 +513,7 @@ namespace Microsoft.Build.Shared
             }
 
             int baselineResult = string.Compare(a1.Name, a2.Name, StringComparison.OrdinalIgnoreCase);
-            ErrorUtilities.VerifyThrow(result == baselineResult, "Optimized version of CompareBaseNameTo didn't return the same result as the baseline.");
+            FrameworkErrorUtilities.VerifyThrow(result == baselineResult, "Optimized version of CompareBaseNameTo didn't return the same result as the baseline.");
 #endif
             return result;
         }

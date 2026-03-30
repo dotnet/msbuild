@@ -1043,6 +1043,68 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
+        /// Verifies that ToolTask does not hang when the tool process spawns a grandchild
+        /// process that inherits stdout/stderr pipe handles and outlives the tool.
+        /// This is a regression test for https://github.com/dotnet/msbuild/issues/2981.
+        /// </summary>
+        [Fact]
+        public void ToolTaskDoesNotHangWhenGrandchildInheritsPipeHandles()
+        {
+            using (MyTool t = new MyTool())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+
+                // cmd echoes "hello", then starts a background ping that inherits
+                // pipe handles. cmd exits immediately; ping outlives the 2s EOF timeout.
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows
+                    ? "/c echo hello & start /b ping -n 10 127.0.0.1 > nul"
+                    : "-c \"echo hello; sleep 10 &\"";
+
+                // Set a generous timeout - without the fix this would hang for the full ping duration
+                t.Timeout = 30000;
+
+                bool result = t.Execute();
+
+                // The tool should complete without hanging.
+                // The exit code may be non-zero depending on timing, but the key thing
+                // is that Execute() returns at all rather than hanging forever.
+                _output.WriteLine(engine.Log);
+                engine.Log.ShouldContain("hello");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that ToolTask still captures all output from the tool process
+        /// even with the grandchild pipe fix enabled. This is a regression test for
+        /// https://github.com/dotnet/msbuild/issues/10378 where switching to
+        /// WaitForExit(int) caused output to be lost.
+        /// </summary>
+        [Fact]
+        public void ToolTaskCapturesAllOutputWithFix()
+        {
+            using (MyTool t = new MyTool())
+            {
+                MockEngine3 engine = new MockEngine3();
+                t.BuildEngine = engine;
+
+                // Echo multiple lines to verify all output is captured
+                t.MockCommandLineCommands = NativeMethodsShared.IsWindows ?
+                    "/c echo line1 & echo line2 & echo line3"
+                    : "-c \"echo line1; echo line2; echo line3\"";
+
+                bool result = t.Execute();
+
+                _output.WriteLine(engine.Log);
+
+                result.ShouldBeTrue();
+                engine.Log.ShouldContain("line1");
+                engine.Log.ShouldContain("line2");
+                engine.Log.ShouldContain("line3");
+            }
+        }
+
+        /// <summary>
         /// A simple implementation of <see cref="ToolTask"/> to sleep for a while.
         /// </summary>
         /// <remarks>
@@ -1194,12 +1256,12 @@ namespace Microsoft.Build.UnitTests
             protected override string GetWorkingDirectory() => _workingDirectory;
 
             /// <summary>
-            /// Exposes the protected GetProcessStartInfoMultithreadable for test verification.
+            /// Exposes the protected GetProcessStartInfo for test verification.
             /// </summary>
-            public ProcessStartInfo CallGetProcessStartInfoMultithreadable(TaskEnvironment taskEnvironment)
+            public ProcessStartInfo CallGetProcessStart(TaskEnvironment taskEnvironment)
             {
                 TaskEnvironment = taskEnvironment;
-                return GetProcessStartInfoMultithreadable(
+                return GetProcessStartInfo(
                     _fullToolName,
                     commandLineCommands: "/nologo",
                     responseFileSwitch: null);
@@ -1230,7 +1292,7 @@ namespace Microsoft.Build.UnitTests
             tool.BuildEngine = new MockEngine(_output);
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
 
             // Assert
             result.Environment.Count.ShouldBeGreaterThan(0, "Environment variables should be propagated from TaskEnvironment");
@@ -1251,7 +1313,7 @@ namespace Microsoft.Build.UnitTests
             tool.BuildEngine = new MockEngine(_output);
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
 
             // Assert: relative path should be combined with the project directory.
             string expected = Path.Combine(projectDir, "subdir");
@@ -1273,7 +1335,7 @@ namespace Microsoft.Build.UnitTests
             tool.BuildEngine = new MockEngine(_output);
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
 
             // Assert: absolute path should be used as-is (Path.Combine with absolute second arg returns it).
             result.WorkingDirectory.ShouldBe(overrideDir,
@@ -1301,7 +1363,7 @@ namespace Microsoft.Build.UnitTests
             tool.EnvironmentVariables = ["MY_VAR=from_task_override"];
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
 
             // Assert: task-level override should win.
             result.Environment["MY_VAR"].ShouldBe("from_task_override",
@@ -1322,7 +1384,7 @@ namespace Microsoft.Build.UnitTests
             tool.BuildEngine = new MockEngine(_output);
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
 
             // Assert: with MultiProcessTaskEnvironmentDriver, WorkingDirectory should be empty
             // (process inherits parent CWD) — matching pre-migration behavior.
@@ -1347,7 +1409,7 @@ namespace Microsoft.Build.UnitTests
             tool.BuildEngine = new MockEngine(_output);
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
 
             // Assert: empty-string GetWorkingDirectory() must not overwrite the project directory.
             result.WorkingDirectory.ShouldBe(projectDir,
@@ -1408,45 +1470,6 @@ namespace Microsoft.Build.UnitTests
             // Assert
             File.Exists(fullPath).ShouldBeFalse(
                 "DeleteTempFile should have deleted the file using TaskEnvironment-absolutized path");
-        }
-
-        [Fact]
-        public void DeleteTempFile_WarningMessage_UsesOriginalPath()
-        {
-            // Arrange: create a read-only file that will fail to delete, then verify the
-            // warning message uses the original (non-absolutized) relative path.
-            using var env = TestEnvironment.Create(_output);
-            string projectDir = env.CreateFolder().Path;
-            string fileName = "locked.rsp";
-            string fullPath = Path.Combine(projectDir, fileName);
-            File.WriteAllText(fullPath, "test content");
-            File.SetAttributes(fullPath, FileAttributes.ReadOnly);
-
-            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
-            var taskEnv = new TaskEnvironment(driver);
-
-            string toolPath = NativeMethodsShared.IsUnixLike ? "/bin/sh" : @"C:\Windows\System32\cmd.exe";
-            using var tool = new MultiThreadedToolTask(toolPath, null);
-            tool.TaskEnvironment = taskEnv;
-            var mockEngine = new MockEngine(_output);
-            tool.BuildEngine = mockEngine;
-
-            try
-            {
-                // Act: delete using relative path — should fail and log a warning with original path.
-                tool.CallDeleteTempFile(fileName);
-
-                // Assert: if a warning was logged, it should reference the original relative path.
-                if (mockEngine.Warnings > 0)
-                {
-                    mockEngine.AssertLogContains(fileName);
-                }
-            }
-            finally
-            {
-                // Clean up: remove read-only attribute so the test environment can clean up.
-                File.SetAttributes(fullPath, FileAttributes.Normal);
-            }
         }
 
         [Fact]

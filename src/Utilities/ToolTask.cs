@@ -636,7 +636,7 @@ namespace Microsoft.Build.Utilities
             string commandLineCommands,
             string responseFileSwitch)
         {
-            if (TaskEnvironment.Driver is MultiThreadedTaskEnvironmentDriver)
+            if (TaskEnvironment.DriverKind == TaskEnvironmentDriverKind.MultiThreaded)
             {
                 return GetProcessStartInfoMultithreadable(pathToTool, commandLineCommands, responseFileSwitch);
             }
@@ -651,7 +651,6 @@ namespace Microsoft.Build.Utilities
             }
 
             SetUpProcessStartInfo(startInfo, pathToTool, commandLineCommands, responseFileSwitch);
-            ApplyEnvironmentOverrides(startInfo);
 
             return startInfo;
         }
@@ -702,17 +701,11 @@ namespace Microsoft.Build.Utilities
                 // the program terminates very fast.
                 startInfo.RedirectStandardInput = true;
             }
-        }
 
-        /// <summary>
-        /// Applies task-level environment variable  (both the obsolete <see cref="EnvironmentOverride"/>
-        /// and the current <see cref="EnvironmentVariables"/>) to the given <see cref="ProcessStartInfo"/>.
-        /// Prefers the pre-parsed <see cref="_environmentVariablePairs"/> populated by <see cref="Execute()"/>,
-        /// falling back to parsing <see cref="EnvironmentVariables"/> directly for callers outside
-        /// the normal Execute() path.
-        /// </summary>
-        private void ApplyEnvironmentOverrides(ProcessStartInfo startInfo)
-        {
+            // Apply task-level environment variable overrides (both the obsolete EnvironmentOverride
+            // and the current EnvironmentVariables). Prefers the pre-parsed _environmentVariablePairs
+            // populated by Execute(), falling back to parsing EnvironmentVariables directly for
+            // callers outside the normal Execute() path.
             // Old style environment overrides
 #pragma warning disable 0618 // obsolete
             Dictionary<string, string> envOverrides = EnvironmentOverride;
@@ -748,7 +741,7 @@ namespace Microsoft.Build.Utilities
             }
         }
 
-        protected ProcessStartInfo GetProcessStartInfoMultithreadable(
+        private ProcessStartInfo GetProcessStartInfoMultithreadable(
             string pathToTool,
             string commandLineCommands,
             string responseFileSwitch)
@@ -756,9 +749,6 @@ namespace Microsoft.Build.Utilities
             ProcessStartInfo startInfo = TaskEnvironment.GetProcessStartInfo();
 
             SetUpProcessStartInfo(startInfo, pathToTool, commandLineCommands, responseFileSwitch);
-
-            // Apply task-level environment overrides — they should take precedence over TaskEnvironment.
-            ApplyEnvironmentOverrides(startInfo);
 
             // Set working directory: prefer the derived task's GetWorkingDirectory() override
             // (absolutized against the project directory), otherwise keep the project directory.
@@ -810,6 +800,12 @@ namespace Microsoft.Build.Utilities
 
             _standardErrorDataAvailable = new ManualResetEvent(false);
             _standardOutputDataAvailable = new ManualResetEvent(false);
+
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+            {
+                _standardOutputEOF = new ManualResetEvent(false);
+                _standardErrorEOF = new ManualResetEvent(false);
+            }
 
             _toolExited = new ManualResetEvent(false);
             _terminatedTool = false;
@@ -904,6 +900,9 @@ namespace Microsoft.Build.Utilities
                     _standardErrorDataAvailable.Dispose();
                     _standardOutputDataAvailable.Dispose();
 
+                    _standardOutputEOF?.Dispose();
+                    _standardErrorEOF?.Dispose();
+
                     _toolExited.Dispose();
                     _toolTimeoutExpired.Dispose();
 
@@ -926,25 +925,35 @@ namespace Microsoft.Build.Utilities
         /// <param name="fileName">File to delete</param>
         protected void DeleteTempFile(string fileName)
         {
+            AbsolutePath filePath = !string.IsNullOrEmpty(fileName) ? TaskEnvironment.GetAbsolutePath(fileName) : new AbsolutePath(fileName, ignoreRootedCheck: true);
+            DeleteTempFile(filePath);
+        }
+
+        /// <summary>
+        /// Overload of <see cref="DeleteTempFile(string)"/> that accepts an <see cref="AbsolutePath"/>.
+        /// If the delete fails for some reason (e.g. file locked by anti-virus) then
+        /// the call will not throw an exception. Instead a warning will be logged, but the build will not fail.
+        /// </summary>
+        /// <param name="filePath">Absolute path to file to delete</param>
+        protected void DeleteTempFile(AbsolutePath filePath)
+        {
             if (s_preserveTempFiles)
             {
-                Log.LogMessageFromText($"Preserving temporary file '{fileName}'", MessageImportance.Low);
+                Log.LogMessageFromText($"Preserving temporary file '{filePath.OriginalValue}'", MessageImportance.Low);
                 return;
             }
 
-            string absolutePath = !string.IsNullOrEmpty(fileName) ? TaskEnvironment.GetAbsolutePath(fileName) : fileName;
-
             try
             {
-                File.Delete(absolutePath);
+                File.Delete(filePath);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(absolutePath);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
 
                 // Warn only -- occasionally temp files fail to delete because of virus checkers; we
                 // don't want the build to fail in such cases
-                LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", fileName, e.Message, lockedFileMessage);
+                LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", filePath.OriginalValue, e.Message, lockedFileMessage);
             }
         }
 
@@ -1132,13 +1141,40 @@ namespace Microsoft.Build.Utilities
         /// process is still finishing up, this method waits until it is done.
         /// </summary>
         /// <remarks>
-        /// This method is a hack, but it needs to be called after both
-        /// Process.WaitForExit() and Process.Kill().
+        /// On both .NET Framework and modern .NET, the parameterless Process.WaitForExit() waits not
+        /// only for the process to exit, but also for stdout/stderr pipe EOF via
+        /// AsyncStreamReader.WaitUtilEOF() (Framework) or awaiting the EOF task (Core).
+        /// If the tool spawned child processes that inherited the pipe handles, the EOF wait blocks
+        /// forever even though the tool itself has exited — causing the entire build node to hang.
         /// </remarks>
         /// <param name="proc"></param>
-        private static void WaitForProcessExit(Process proc)
+        private void WaitForProcessExit(Process proc)
         {
-            proc.WaitForExit();
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
+            {
+                // Step 1: Wait for the process handle to be signaled.
+                // Use int.MaxValue to avoid blocking on pipe EOF,
+                // as Process.WaitForExit does not wait for EOF when any timeout is provided.
+                proc.WaitForExit(int.MaxValue);
+
+                // Step 2: Wait for the AsyncStreamReader to deliver all remaining data.
+                // When the pipe reaches EOF, AsyncStreamReader flushes its StringBuilder
+                // (delivering any final partial line) and sends Data=null via the callback.
+                // Our ReceiveStandardErrorOrOutputData handler signals the EOF events.
+                //
+                // Use a bounded timeout as a safety net for the grandchild case where
+                // EOF never arrives because grand child inherited the pipe and keeps it open.
+                const int eofTimeoutSec = 2;
+
+                WaitHandle[] eofEvents = [_standardOutputEOF, _standardErrorEOF];
+                WaitHandle.WaitAll(eofEvents, TimeSpan.FromSeconds(eofTimeoutSec));
+            }
+            else
+            {
+                // Legacy behavior: parameterless WaitForExit waits for pipe EOF.
+                // This can hang if grandchild processes hold pipe handles.
+                proc.WaitForExit();
+            }
 
             // Process.WaitForExit() may return prematurely. We need to check to be sure.
             while (!proc.HasExited)
@@ -1304,36 +1340,52 @@ namespace Microsoft.Build.Utilities
         /// <param name="dataAvailableSignal"></param>
         private void ReceiveStandardErrorOrOutputData(DataReceivedEventArgs e, Queue dataQueue, ManualResetEvent dataAvailableSignal)
         {
-            // NOTE: don't ignore empty string, because we need to log that
-            if (e.Data != null)
+            if (e.Data == null)
             {
-                ErrorUtilities.VerifyThrow(dataQueue != null,
-                    "The data queue must be available.");
-
-                // synchronize access to the queue -- this is a producer-consumer problem
-                // NOTE: we lock the entire queue instead of using synchronized queue
-                // wrappers, because ManualResetEvents don't have ref counts, and it's
-                // difficult to discretely signal the availability of each instance of
-                // data in the queue -- so instead we let the consumer lock and empty
-                // the queue and reset the ManualResetEvent, before we add more data
-                // into the queue, and signal the ManualResetEvent again
-                lock (dataQueue.SyncRoot)
+                // The AsyncStreamReader sends Data=null when the pipe reaches EOF.
+                // Signal the appropriate EOF event so WaitForProcessExit knows
+                // all data from this stream has been delivered.
+                ManualResetEvent eofEvent = (dataQueue == _standardErrorData) ? _standardErrorEOF : _standardOutputEOF;
+                if (eofEvent != null)
                 {
-                    dataQueue.Enqueue(e.Data);
-
-                    ErrorUtilities.VerifyThrow(dataAvailableSignal != null,
-                        "The signalling event must be available.");
-
-                    // signal the availability of data
-                    // NOTE: intentionally, do the signalling inside the lock, because
-                    // ManualResetEvents don't have ref counts, and we want to make sure
-                    // we don't signal the notification just before the consumer resets it
                     lock (_eventCloseLock)
                     {
                         if (!_eventsDisposed)
                         {
-                            dataAvailableSignal.Set();
+                            eofEvent.Set();
                         }
+                    }
+                }
+
+                return;
+            }
+
+            // NOTE: don't ignore empty string, because we need to log that
+            ErrorUtilities.VerifyThrow(dataQueue != null, "The data queue must be available.");
+
+            // synchronize access to the queue -- this is a producer-consumer problem
+            // NOTE: we lock the entire queue instead of using synchronized queue
+            // wrappers, because ManualResetEvents don't have ref counts, and it's
+            // difficult to discretely signal the availability of each instance of
+            // data in the queue -- so instead we let the consumer lock and empty
+            // the queue and reset the ManualResetEvent, before we add more data
+            // into the queue, and signal the ManualResetEvent again
+            lock (dataQueue.SyncRoot)
+            {
+                dataQueue.Enqueue(e.Data);
+
+                ErrorUtilities.VerifyThrow(dataAvailableSignal != null,
+                    "The signalling event must be available.");
+
+                // signal the availability of data
+                // NOTE: intentionally, do the signalling inside the lock, because
+                // ManualResetEvents don't have ref counts, and we want to make sure
+                // we don't signal the notification just before the consumer resets it
+                lock (_eventCloseLock)
+                {
+                    if (!_eventsDisposed)
+                    {
+                        dataAvailableSignal.Set();
                     }
                 }
             }
@@ -1837,6 +1889,18 @@ namespace Microsoft.Build.Utilities
         /// calls on the event handlers don't try to reset a disposed event
         /// </summary>
         private bool _eventsDisposed;
+
+        /// <summary>
+        /// Signalled when the stdout AsyncStreamReader reaches EOF (sends Data=null).
+        /// Used by WaitForProcessExit to know when all stdout data has been delivered.
+        /// </summary>
+        private ManualResetEvent _standardOutputEOF;
+
+        /// <summary>
+        /// Signalled when the stderr AsyncStreamReader reaches EOF (sends Data=null).
+        /// Used by WaitForProcessExit to know when all stderr data has been delivered.
+        /// </summary>
+        private ManualResetEvent _standardErrorEOF;
 
         /// <summary>
         /// List of name, value pairs to be passed to the spawned tool's environment.

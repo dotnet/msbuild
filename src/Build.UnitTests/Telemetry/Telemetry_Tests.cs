@@ -6,11 +6,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.TelemetryInfra;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
@@ -469,6 +472,68 @@ namespace Microsoft.Build.Engine.UnitTests
             incrementality!.Classification.ShouldBe(BuildInsights.BuildType.Unknown);
             incrementality.TotalTargetsCount.ShouldBe(0);
             incrementality.IncrementalityRatio.ShouldBe(0.0);
+        }
+
+        [Fact]
+        public void IsEmpty_TrueForDefault_FalseAfterAdd()
+        {
+            var data = new WorkerNodeTelemetryData();
+            data.IsEmpty.ShouldBeTrue();
+
+            var targetKey = new TaskOrTargetTelemetryKey("Target1", isCustom: false, isFromNugetCache: false, isFromMetaProject: false);
+            data.AddTarget(targetKey, wasExecuted: true);
+            data.IsEmpty.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void FinalizeProcessing_AfterMerge_ResetsState()
+        {
+            var forwarder = new TelemetryForwarderProvider.TelemetryForwarder();
+            var loggingService = new EventRecordingLoggingService();
+
+            var loggingContext = new MockLoggingContext(
+                loggingService,
+                new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
+
+            // Merge some data.
+            var localData = new WorkerNodeTelemetryData();
+            var key = new TaskOrTargetTelemetryKey("TestTarget", isCustom: true, isFromNugetCache: false, isFromMetaProject: false);
+            localData.AddTarget(key, wasExecuted: true);
+            forwarder.MergeWorkerData(localData);
+
+            // First FinalizeProcessing should emit a telemetry event.
+            forwarder.FinalizeProcessing(loggingContext);
+            var telemetryEvents = loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().ToList();
+            telemetryEvents.Count.ShouldBe(1);
+            telemetryEvents[0].WorkerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(key);
+
+            // Second FinalizeProcessing on an empty forwarder should be a no-op (state was reset).
+            forwarder.FinalizeProcessing(loggingContext);
+            loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().Count().ShouldBe(1, "No new event should be emitted after reset");
+
+            // Merge new data after reset — forwarder should still work.
+            var localData2 = new WorkerNodeTelemetryData();
+            var key2 = new TaskOrTargetTelemetryKey("TestTarget2", isCustom: false, isFromNugetCache: false, isFromMetaProject: false);
+            localData2.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.ConditionWasFalse);
+            forwarder.MergeWorkerData(localData2);
+
+            // Third FinalizeProcessing should emit only the new data.
+            forwarder.FinalizeProcessing(loggingContext);
+            var allTelemetryEvents = loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().ToList();
+            allTelemetryEvents.Count.ShouldBe(2);
+            allTelemetryEvents[1].WorkerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(key2);
+            allTelemetryEvents[1].WorkerNodeTelemetryData.TargetsExecutionData.ShouldNotContainKey(key, "Old data should not appear after reset");
+        }
+
+        /// <summary>
+        /// <see cref="MockLoggingService"/> that records all <see cref="ILoggingService.LogBuildEvent"/> calls
+        /// so tests can inspect emitted build events.
+        /// </summary>
+        private sealed class EventRecordingLoggingService : MockLoggingService, ILoggingService
+        {
+            public List<BuildEventArgs> RecordedEvents { get; } = [];
+
+            void ILoggingService.LogBuildEvent(BuildEventArgs buildEvent) => RecordedEvents.Add(buildEvent);
         }
     }
 }
