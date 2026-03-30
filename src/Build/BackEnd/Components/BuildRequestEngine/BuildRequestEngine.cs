@@ -394,11 +394,11 @@ namespace Microsoft.Build.BackEnd
                         {
                             string projectDirectoryFullPath = Path.GetDirectoryName(config.ProjectFullPath);
                             var environmentVariables = new Dictionary<string, string>(_componentHost.BuildParameters.BuildProcessEnvironmentInternal);
-                            taskEnvironment = new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(projectDirectoryFullPath, environmentVariables));
+                            taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectoryFullPath, environmentVariables);
                         }
                         else
                         {
-                            taskEnvironment = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+                            taskEnvironment = TaskEnvironment.Fallback;
                         }
 
                         BuildRequestEntry entry = new BuildRequestEntry(request, config, taskEnvironment);

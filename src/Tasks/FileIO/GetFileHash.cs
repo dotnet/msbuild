@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] Items { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         public override bool Execute()
         {

@@ -31,8 +31,8 @@ namespace Microsoft.Build.UnitTests
         {
             return environmentType switch
             {
-                StubEnvironmentName => TaskEnvironmentHelper.CreateForTest(),
-                MultithreadedEnvironmentName => new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(GetResolvedTempPath())),
+                StubEnvironmentName => TaskEnvironment.Fallback,
+                MultithreadedEnvironmentName => TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(GetResolvedTempPath()),
                 _ => throw new ArgumentException($"Unknown environment type: {environmentType}")
             };
         }
@@ -306,7 +306,7 @@ namespace Microsoft.Build.UnitTests
             string testVarName = $"MSBUILD_STUB_ISOLATION_TEST_{Guid.NewGuid():N}";
             string testVarValue = "stub_test_value";
 
-            var stubEnvironment = TaskEnvironmentHelper.CreateForTest();
+            var stubEnvironment = TaskEnvironment.Fallback;
 
             try
             {
@@ -336,10 +336,9 @@ namespace Microsoft.Build.UnitTests
             string testVarName = $"MSBUILD_MULTITHREADED_ISOLATION_TEST_{Guid.NewGuid():N}";
             string testVarValue = "multithreaded_test_value";
 
-            using var driver = new MultiThreadedTaskEnvironmentDriver(
+            var multithreadedEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(
                 GetResolvedTempPath(),
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
-            var multithreadedEnvironment = new TaskEnvironment(driver);
 
             try
             {
