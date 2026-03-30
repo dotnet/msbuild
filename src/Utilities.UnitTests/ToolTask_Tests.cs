@@ -1256,12 +1256,12 @@ namespace Microsoft.Build.UnitTests
             protected override string GetWorkingDirectory() => _workingDirectory;
 
             /// <summary>
-            /// Exposes the protected GetProcessStartInfoMultithreadable for test verification.
+            /// Exposes the protected GetProcessStartInfo for test verification.
             /// </summary>
-            public ProcessStartInfo CallGetProcessStartInfoMultithreadable(TaskEnvironment taskEnvironment)
+            public ProcessStartInfo CallGetProcessStart(TaskEnvironment taskEnvironment)
             {
                 TaskEnvironment = taskEnvironment;
-                return GetProcessStartInfoMultithreadable(
+                return GetProcessStartInfo(
                     _fullToolName,
                     commandLineCommands: "/nologo",
                     responseFileSwitch: null);
@@ -1292,7 +1292,7 @@ namespace Microsoft.Build.UnitTests
             tool.BuildEngine = new MockEngine(_output);
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
 
             // Assert
             result.Environment.Count.ShouldBeGreaterThan(0, "Environment variables should be propagated from TaskEnvironment");
@@ -1313,7 +1313,7 @@ namespace Microsoft.Build.UnitTests
             tool.BuildEngine = new MockEngine(_output);
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
 
             // Assert: relative path should be combined with the project directory.
             string expected = Path.Combine(projectDir, "subdir");
@@ -1335,7 +1335,7 @@ namespace Microsoft.Build.UnitTests
             tool.BuildEngine = new MockEngine(_output);
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
 
             // Assert: absolute path should be used as-is (Path.Combine with absolute second arg returns it).
             result.WorkingDirectory.ShouldBe(overrideDir,
@@ -1363,7 +1363,7 @@ namespace Microsoft.Build.UnitTests
             tool.EnvironmentVariables = ["MY_VAR=from_task_override"];
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
 
             // Assert: task-level override should win.
             result.Environment["MY_VAR"].ShouldBe("from_task_override",
@@ -1384,7 +1384,7 @@ namespace Microsoft.Build.UnitTests
             tool.BuildEngine = new MockEngine(_output);
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
 
             // Assert: with MultiProcessTaskEnvironmentDriver, WorkingDirectory should be empty
             // (process inherits parent CWD) — matching pre-migration behavior.
@@ -1409,7 +1409,7 @@ namespace Microsoft.Build.UnitTests
             tool.BuildEngine = new MockEngine(_output);
 
             // Act
-            ProcessStartInfo result = tool.CallGetProcessStartInfoMultithreadable(taskEnv);
+            ProcessStartInfo result = tool.CallGetProcessStart(taskEnv);
 
             // Assert: empty-string GetWorkingDirectory() must not overwrite the project directory.
             result.WorkingDirectory.ShouldBe(projectDir,
