@@ -2,9 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
@@ -272,6 +275,91 @@ namespace Microsoft.Build.UnitTests
                                        + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /reference:\"C:\\SomeFolder\\reference1.dll,C:\\SomeFolder\\reference2.dll\"";
 
             Assert.Equal(targetCommandLine, commandLine);
+        }
+
+        /// <summary>
+        /// Verifies that GenerateFullPathToTool returns an absolute path (or null)
+        /// when called with a multithreaded TaskEnvironment, validating the
+        /// TaskEnvironment.GetAbsolutePath() integration.
+        /// </summary>
+        [Fact]
+        public void GenerateFullPathToTool_ReturnsAbsolutePathOrNull()
+        {
+            string projectDir = Path.GetTempPath();
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            TestableSGen t = new TestableSGen();
+            t.TaskEnvironment = taskEnv;
+            t.BuildEngine = new MockEngine();
+
+            string result = t.CallGenerateFullPathToTool();
+
+            if (result is not null)
+            {
+                Path.IsPathRooted(result).ShouldBeTrue(
+                    $"GenerateFullPathToTool should return an absolute path, got: {result}");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that the GetProcessStartInfo routes through the multithreadable path
+        /// when TaskEnvironment uses MultiThreadedTaskEnvironmentDriver,
+        /// and that the working directory comes from the TaskEnvironment.
+        /// </summary>
+        [Fact]
+        public void GetProcessStartInfo_UsesTaskEnvironmentWorkingDirectory()
+        {
+            string expectedWorkingDir = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar);
+            using var driver = new MultiThreadedTaskEnvironmentDriver(expectedWorkingDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            TestableSGen t = new TestableSGen();
+            t.TaskEnvironment = taskEnv;
+            t.BuildEngine = new MockEngine();
+
+            ProcessStartInfo startInfo = t.CallGetProcessStartInfo(@"C:\test\sgen.exe", "/nologo", null);
+
+            startInfo.WorkingDirectory.ShouldBe(expectedWorkingDir);
+        }
+
+        /// <summary>
+        /// Verifies that BuildAssemblyPath uses TaskEnvironment.GetAbsolutePath
+        /// instead of Path.GetFullPath, by providing a relative path that resolves
+        /// correctly against the TaskEnvironment's project directory.
+        /// </summary>
+        [Fact]
+        public void BuildAssemblyPath_UsesTaskEnvironmentGetAbsolutePath()
+        {
+            using var env = TestEnvironment.Create();
+            string projectDir = env.CreateFolder().Path;
+            string subDir = "output";
+            Directory.CreateDirectory(Path.Combine(projectDir, subDir));
+
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            TestableSGen t = new TestableSGen();
+            t.TaskEnvironment = taskEnv;
+            t.BuildEngine = new MockEngine();
+            t.BuildAssemblyPath = subDir; // relative path
+
+            string result = t.BuildAssemblyPath;
+
+            Path.IsPathRooted(result).ShouldBeTrue(
+                "BuildAssemblyPath should return an absolute path resolved via TaskEnvironment");
+            result.ShouldBe(Path.Combine(projectDir, subDir));
+        }
+
+        /// <summary>
+        /// Subclass that exposes protected methods for testing without reflection.
+        /// </summary>
+        private sealed class TestableSGen : SGen
+        {
+            public string CallGenerateFullPathToTool() => GenerateFullPathToTool();
+
+            public ProcessStartInfo CallGetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)
+                => GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
         }
 #endif
     }
