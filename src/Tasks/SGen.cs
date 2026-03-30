@@ -176,8 +176,8 @@ namespace Microsoft.Build.Tasks
                     // Then resolve via TaskEnvironment for thread-safe absolute path resolution.
                     Path.GetFullPath(_buildAssemblyPath);
                     thisPath = !string.IsNullOrEmpty(_buildAssemblyPath)
-                        ? TaskEnvironment.GetAbsolutePath(_buildAssemblyPath)
-                        : _buildAssemblyPath;
+                       ? TaskEnvironment.GetAbsolutePath(_buildAssemblyPath).GetCanonicalForm()
+                       : _buildAssemblyPath;
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
@@ -262,28 +262,9 @@ namespace Microsoft.Build.Tasks
             }
         }
 
-        private AbsolutePath SerializationAssemblyPath
-        {
-            get
-            {
-                Debug.Assert(BuildAssemblyPath.Length > 0, "Build assembly path is blank");
-                string combined = Path.Combine(BuildAssemblyPath, SerializationAssemblyName);
-                return !string.IsNullOrEmpty(combined)
-                    ? TaskEnvironment.GetAbsolutePath(combined)
-                    : new AbsolutePath(combined, ignoreRootedCheck: true);
-            }
-        }
+        private AbsolutePath SerializationAssemblyPath => new AbsolutePath(Path.Combine(BuildAssemblyPath, SerializationAssemblyName));
 
-        private AbsolutePath AssemblyFullPath
-        {
-            get
-            {
-                string combined = Path.Combine(BuildAssemblyPath, BuildAssemblyName);
-                return !string.IsNullOrEmpty(combined)
-                    ? TaskEnvironment.GetAbsolutePath(combined)
-                    : new AbsolutePath(combined, ignoreRootedCheck: true);
-            }
-        }
+        private AbsolutePath AssemblyFullPathv => new AbsolutePath(Path.Combine(BuildAssemblyPath, BuildAssemblyName));
 
         public string SdkToolsPath
         {
@@ -333,7 +314,11 @@ namespace Microsoft.Build.Tasks
 
             if (String.IsNullOrEmpty(pathToTool) || !FileSystems.Default.FileExists(TaskEnvironment.GetAbsolutePath(pathToTool)))
             {
-                pathToTool = SdkToolsPathUtility.GeneratePathToTool(SdkToolsPathUtility.FileInfoExists, ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
+                pathToTool = SdkToolsPathUtility.GeneratePathToTool(
+                    f => !string.IsNullOrEmpty(f)
+                    ? SdkToolsPathUtility.FileInfoExists(TaskEnvironment.GetAbsolutePath(f))
+                    : SdkToolsPathUtility.FileInfoExists(f),
+                    ProcessorArchitecture.CurrentProcessArchitecture, SdkToolsPath, ToolExe, Log, true);
             }
 
             return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
