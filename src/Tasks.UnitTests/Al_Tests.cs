@@ -620,13 +620,12 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(t, @"/win32res:foo.res");
         }
 
-#if NETFRAMEWORK
         /// <summary>
         /// Verifies that GenerateFullPathToTool returns an absolute path (or null)
         /// when called with a multithreaded TaskEnvironment, validating the
         /// TaskEnvironment.GetAbsolutePath() integration.
         /// </summary>
-        [Fact]
+        [WindowsFullFrameworkOnlyFact]
         public void GenerateFullPathToTool_ReturnsAbsolutePathOrNull()
         {
             string projectDir = Path.GetTempPath();
@@ -651,7 +650,7 @@ namespace Microsoft.Build.UnitTests
         /// GetProcessStartInfoMultiThreaded when TaskEnvironment is set,
         /// and that the working directory comes from the TaskEnvironment.
         /// </summary>
-        [Fact]
+        [WindowsFullFrameworkOnlyFact]
         public void GetProcessStartInfo_UsesTaskEnvironmentWorkingDirectory()
         {
             string expectedWorkingDir = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar);
@@ -677,6 +676,5 @@ namespace Microsoft.Build.UnitTests
             public ProcessStartInfo CallGetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)
                 => GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
         }
-#endif
     }
 }

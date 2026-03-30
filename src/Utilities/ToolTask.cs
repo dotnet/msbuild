@@ -636,7 +636,7 @@ namespace Microsoft.Build.Utilities
             string commandLineCommands,
             string responseFileSwitch)
         {
-            if (TaskEnvironment.Driver is MultiThreadedTaskEnvironmentDriver)
+            if (TaskEnvironment.DriverKind == TaskEnvironmentDriverKind.MultiThreaded)
             {
                 return GetProcessStartInfoMultithreadable(pathToTool, commandLineCommands, responseFileSwitch);
             }
@@ -651,7 +651,6 @@ namespace Microsoft.Build.Utilities
             }
 
             SetUpProcessStartInfo(startInfo, pathToTool, commandLineCommands, responseFileSwitch);
-            ApplyEnvironmentOverrides(startInfo);
 
             return startInfo;
         }
@@ -702,17 +701,11 @@ namespace Microsoft.Build.Utilities
                 // the program terminates very fast.
                 startInfo.RedirectStandardInput = true;
             }
-        }
 
-        /// <summary>
-        /// Applies task-level environment variable  (both the obsolete <see cref="EnvironmentOverride"/>
-        /// and the current <see cref="EnvironmentVariables"/>) to the given <see cref="ProcessStartInfo"/>.
-        /// Prefers the pre-parsed <see cref="_environmentVariablePairs"/> populated by <see cref="Execute()"/>,
-        /// falling back to parsing <see cref="EnvironmentVariables"/> directly for callers outside
-        /// the normal Execute() path.
-        /// </summary>
-        private void ApplyEnvironmentOverrides(ProcessStartInfo startInfo)
-        {
+            // Apply task-level environment variable overrides (both the obsolete EnvironmentOverride
+            // and the current EnvironmentVariables). Prefers the pre-parsed _environmentVariablePairs
+            // populated by Execute(), falling back to parsing EnvironmentVariables directly for
+            // callers outside the normal Execute() path.
             // Old style environment overrides
 #pragma warning disable 0618 // obsolete
             Dictionary<string, string> envOverrides = EnvironmentOverride;
@@ -748,7 +741,7 @@ namespace Microsoft.Build.Utilities
             }
         }
 
-        protected ProcessStartInfo GetProcessStartInfoMultithreadable(
+        private ProcessStartInfo GetProcessStartInfoMultithreadable(
             string pathToTool,
             string commandLineCommands,
             string responseFileSwitch)
@@ -756,9 +749,6 @@ namespace Microsoft.Build.Utilities
             ProcessStartInfo startInfo = TaskEnvironment.GetProcessStartInfo();
 
             SetUpProcessStartInfo(startInfo, pathToTool, commandLineCommands, responseFileSwitch);
-
-            // Apply task-level environment overrides — they should take precedence over TaskEnvironment.
-            ApplyEnvironmentOverrides(startInfo);
 
             // Set working directory: prefer the derived task's GetWorkingDirectory() override
             // (absolutized against the project directory), otherwise keep the project directory.
@@ -935,25 +925,35 @@ namespace Microsoft.Build.Utilities
         /// <param name="fileName">File to delete</param>
         protected void DeleteTempFile(string fileName)
         {
+            AbsolutePath filePath = !string.IsNullOrEmpty(fileName) ? TaskEnvironment.GetAbsolutePath(fileName) : new AbsolutePath(fileName, ignoreRootedCheck: true);
+            DeleteTempFile(filePath);
+        }
+
+        /// <summary>
+        /// Overload of <see cref="DeleteTempFile(string)"/> that accepts an <see cref="AbsolutePath"/>.
+        /// If the delete fails for some reason (e.g. file locked by anti-virus) then
+        /// the call will not throw an exception. Instead a warning will be logged, but the build will not fail.
+        /// </summary>
+        /// <param name="filePath">Absolute path to file to delete</param>
+        protected void DeleteTempFile(AbsolutePath filePath)
+        {
             if (s_preserveTempFiles)
             {
-                Log.LogMessageFromText($"Preserving temporary file '{fileName}'", MessageImportance.Low);
+                Log.LogMessageFromText($"Preserving temporary file '{filePath.OriginalValue}'", MessageImportance.Low);
                 return;
             }
 
-            string absolutePath = !string.IsNullOrEmpty(fileName) ? TaskEnvironment.GetAbsolutePath(fileName) : fileName;
-
             try
             {
-                File.Delete(absolutePath);
+                File.Delete(filePath);
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                string lockedFileMessage = LockCheck.GetLockedFileMessage(absolutePath);
+                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
 
                 // Warn only -- occasionally temp files fail to delete because of virus checkers; we
                 // don't want the build to fail in such cases
-                LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", fileName, e.Message, lockedFileMessage);
+                LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", filePath.OriginalValue, e.Message, lockedFileMessage);
             }
         }
 
