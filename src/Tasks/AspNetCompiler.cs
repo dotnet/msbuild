@@ -5,6 +5,8 @@
 using Microsoft.Build.Utilities;
 #endif
 
+using Microsoft.Build.Framework;
+
 #nullable disable
 
 namespace Microsoft.Build.Tasks
@@ -14,6 +16,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// The AspNetCompiler task, which is a wrapper around aspnet_compiler.exe
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class AspNetCompiler : ToolTaskExtension, IAspNetCompilerTaskContract
     {
         /*
@@ -306,9 +309,9 @@ namespace Microsoft.Build.Tasks
                     ToolLocationHelper.GetDotNetFrameworkVersionFolderPrefix(TargetDotNetFrameworkVersion.Latest));
             }
 
-            return pathToTool;
+            return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
         }
-
+        
         /// <summary>
         /// Validate the task arguments, log any warnings/errors
         /// </summary>
@@ -344,7 +347,7 @@ namespace Microsoft.Build.Tasks
     }
 
 #else
-
+    [MSBuildMultiThreadableTask]
     public sealed class AspNetCompiler : TaskRequiresFramework, IAspNetCompilerTaskContract
     {
         public AspNetCompiler()
