@@ -109,6 +109,21 @@ public class RefArrayBuilder_Tests
     }
 
     [Fact]
+    public void Add_ScratchBuffer_ExceedsCapacity_GrowsAutomatically()
+    {
+        using RefArrayBuilder<int> builder = new(stackalloc int[4]);
+        builder.Add(1);
+        builder.Add(2);
+        builder.Add(3);
+        builder.Add(4);
+        builder.Add(5);
+
+        builder.Count.ShouldBe(5);
+        builder[0].ShouldBe(1);
+        builder[4].ShouldBe(5);
+    }
+
+    [Fact]
     public void AddRange_SingleElement_AddsCorrectly()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -136,6 +151,17 @@ public class RefArrayBuilder_Tests
     public void AddRange_ExceedsCapacity_GrowsAutomatically()
     {
         using RefArrayBuilder<int> builder = new(4);
+        builder.Add(1);
+        builder.AddRange([2, 3, 4, 5]);
+
+        builder.Count.ShouldBe(5);
+        builder[4].ShouldBe(5);
+    }
+
+    [Fact]
+    public void AddRange_ScratchBuffer_ExceedsCapacity_GrowsAutomatically()
+    {
+        using RefArrayBuilder<int> builder = new(stackalloc int[4]);
         builder.Add(1);
         builder.AddRange([2, 3, 4, 5]);
 
@@ -213,6 +239,24 @@ public class RefArrayBuilder_Tests
     }
 
     [Fact]
+    public void Insert_ScratchBuffer_ExceedsCapacity_GrowsAutomatically()
+    {
+        using RefArrayBuilder<int> builder = new(stackalloc int[4]);
+        builder.Add(2);
+        builder.Add(3);
+        builder.Add(4);
+        builder.Add(5);
+        builder.Insert(0, 1);
+
+        builder.Count.ShouldBe(5);
+        builder[0].ShouldBe(1);
+        builder[1].ShouldBe(2);
+        builder[2].ShouldBe(3);
+        builder[3].ShouldBe(4);
+        builder[4].ShouldBe(5);
+    }
+
+    [Fact]
     public void InsertRange_AtBeginning_ShiftsExistingElements()
     {
         using RefArrayBuilder<int> builder = new(10);
@@ -262,6 +306,22 @@ public class RefArrayBuilder_Tests
     public void InsertRange_ExceedsCapacity_GrowsAutomatically()
     {
         using RefArrayBuilder<int> builder = new(2);
+        builder.Add(1);
+        builder.Add(5);
+        builder.InsertRange(1, [2, 3, 4]);
+
+        builder.Count.ShouldBe(5);
+        builder[0].ShouldBe(1);
+        builder[1].ShouldBe(2);
+        builder[2].ShouldBe(3);
+        builder[3].ShouldBe(4);
+        builder[4].ShouldBe(5);
+    }
+
+    [Fact]
+    public void InsertRange_ScratchBuffer_ExceedsCapacity_GrowsAutomatically()
+    {
+        using RefArrayBuilder<int> builder = new(stackalloc int[2]);
         builder.Add(1);
         builder.Add(5);
         builder.InsertRange(1, [2, 3, 4]);

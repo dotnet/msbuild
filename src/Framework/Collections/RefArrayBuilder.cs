@@ -193,7 +193,7 @@ internal ref struct RefArrayBuilder<T>
         int count = _count;
         Span<T> span = _scope;
 
-        if ((uint)index < (uint)span.Length)
+        if ((uint)count < (uint)span.Length)
         {
             // Shift existing items
             int toCopy = count - index;
