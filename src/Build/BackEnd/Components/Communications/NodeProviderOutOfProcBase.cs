@@ -255,7 +255,34 @@ namespace Microsoft.Build.BackEnd
             if (nodeReuseRequested)
             {
                 IList<Process> possibleRunningNodesList;
-                (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation, expectedNodeMode);
+
+                // On Unix, use hash-based pipe file listing for O(1) discovery of compatible nodes
+                // instead of enumerating all dotnet processes and probing each one.
+                if (NativeMethodsShared.IsUnixLike)
+                {
+                    string handshakeHash = nodeLaunchData.Handshake.ComputeHash();
+                    IList<int> pids = NamedPipeUtil.FindNodesByHandshakeHash(handshakeHash);
+                    var processes = new List<Process>(pids.Count);
+                    foreach (int pid in pids)
+                    {
+                        try
+                        {
+                            processes.Add(Process.GetProcessById(pid));
+                        }
+                        catch
+                        {
+                            // Process may have exited between pipe file listing and this call.
+                        }
+                    }
+
+                    expectedProcessName = "dotnet";
+                    possibleRunningNodesList = processes;
+                }
+                else
+                {
+                    (expectedProcessName, possibleRunningNodesList) = GetPossibleRunningNodes(msbuildLocation, expectedNodeMode);
+                }
+
                 possibleRunningNodes = new ConcurrentQueue<Process>(possibleRunningNodesList);
 
                 if (possibleRunningNodesList.Count > 0)
@@ -712,8 +739,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake, out HandshakeResult result)
         {
-            // Try and connect to the process.
-            string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(nodeProcessId);
+            // On Unix, nodes create pipes with hash-based names for fast discovery.
+            // On Windows, keep legacy MSBuild{PID} naming.
+            string pipeName = NativeMethodsShared.IsUnixLike
+                ? NamedPipeUtil.GetHashBasedPipeName(handshake.ComputeHash(), nodeProcessId)
+                : NamedPipeUtil.GetPlatformSpecificPipeName(nodeProcessId);
 
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
             NamedPipeClientStream nodeStream = new NamedPipeClientStream(

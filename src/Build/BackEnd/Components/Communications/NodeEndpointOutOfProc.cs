@@ -26,7 +26,13 @@ namespace Microsoft.Build.BackEnd
             _enableReuse = enableReuse;
             LowPriority = lowPriority;
 
-            InternalConstruct();
+            // Use hash-based pipe name for fast discovery on Unix.
+            // Format: MSBuild-{hash}-{pid} — allows schedulers to find compatible nodes
+            // by listing /tmp/MSBuild-{hash}-* instead of probing all dotnet processes.
+            string? pipeName = NativeMethodsShared.IsUnixLike
+                ? NamedPipeUtil.GetHashBasedPipeName(GetHandshake().ComputeHash())
+                : null; // Windows: keep legacy MSBuild{PID} naming
+            InternalConstruct(pipeName);
         }
 
         /// <summary>
