@@ -37,6 +37,12 @@ namespace Microsoft.Build.BackEnd
     internal class BuildRequestEngine : IBuildRequestEngine, IBuildComponent
     {
         /// <summary>
+        /// Static lock serializing trace file writes across all BuildRequestEngine instances.
+        /// In multithreaded (-mt) mode, multiple engines share the same process and trace file.
+        /// </summary>
+        private static readonly object s_traceLock = new();
+
+        /// <summary>
         /// The starting unresolved configuration id assigned by the engine.
         /// </summary>
         private const int StartingUnresolvedConfigId = -1;
@@ -1559,29 +1565,23 @@ namespace Microsoft.Build.BackEnd
         {
             if (_debugDumpState)
             {
-                lock (this)
+                lock (s_traceLock)
                 {
                     try
                     {
                         FileUtilities.EnsureDirectoryExists(_debugDumpPath);
 
-                        // Use per-node trace files to avoid file contention when multiple in-proc
-                        // nodes run in the same process (multithreaded / -mt mode).
-                        int nodeId = _componentHost?.BuildParameters?.NodeId ?? 0;
-                        string traceFile = string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}_{1}.txt"), EnvironmentUtilities.CurrentProcessId, nodeId);
-
-                        using (StreamWriter file = FileUtilities.OpenWrite(traceFile, append: true))
+                        using (StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true))
                         {
                             string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
                             file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, DateTime.UtcNow.Ticks, message);
                             file.Flush();
                         }
                     }
-                    catch (IOException)
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                     {
-                        // Trace file IO failures must never crash the build engine.
-                        // In multithreaded mode, file contention can occur if multiple engines
-                        // happen to share a trace file path despite the per-node naming.
+                        // Trace file failures must never crash the build engine.
+                        // Matches the defensive pattern used by Scheduler.TraceScheduler.
                     }
                 }
             }
