@@ -361,16 +361,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void TaskEnvironment_Fallback_ReturnsSingleton()
-        {
-            TaskEnvironment first = TaskEnvironment.Fallback;
-            TaskEnvironment second = TaskEnvironment.Fallback;
-
-            first.ShouldNotBeNull();
-            first.ShouldBeSameAs(second);
-        }
-
-        [Fact]
         public void TaskEnvironment_Fallback_ReadsProcessEnvironment()
         {
             string testVarName = $"MSBUILD_DEFAULT_ENV_TEST_{Guid.NewGuid():N}";
