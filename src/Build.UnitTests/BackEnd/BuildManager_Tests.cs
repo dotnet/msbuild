@@ -4635,11 +4635,12 @@ $@"<Project InitialTargets=`Sleep`>
         /// and catches non-critical exceptions so trace failures can never crash the build engine.
         /// </summary>
         [Fact(Timeout = 30_000)]
-        public async System.Threading.Tasks.Task MultiThreadedBuild_WithDebugSchedulerTracing_DoesNotDeadlock()
+        public void MultiThreadedBuild_WithDebugSchedulerTracing_DoesNotDeadlock()
         {
             string debugPath = _env.CreateFolder().Path;
             _env.SetEnvironmentVariable("MSBUILDDEBUGSCHEDULER", "1");
             _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath);
+            FrameworkDebugUtils.SetDebugPath(debugPath);
 
             // Create a root project that builds several independent child projects in parallel.
             // This forces multiple in-proc nodes to run concurrently, which triggers
@@ -4691,6 +4692,17 @@ $@"<Project InitialTargets=`Sleep`>
 
             result.OverallResult.ShouldBe(BuildResultCode.Success);
             _logger.AssertLogContains("Root completed");
+
+            // Verify that scheduler tracing actually produced at least one non-empty trace file
+            // in the configured debug directory.
+            string[] traceFiles = Directory.GetFiles(debugPath, "EngineTrace_*.txt");
+            traceFiles.ShouldNotBeEmpty("Expected at least one EngineTrace_*.txt file to be created in the debug directory.");
+
+            bool hasNonEmptyTraceFile = traceFiles
+                .Select(path => new FileInfo(path))
+                .Any(info => info.Length > 0);
+
+            hasNonEmptyTraceFile.ShouldBeTrue("Expected at least one EngineTrace_*.txt file to contain trace data.");
         }
     }
 }
