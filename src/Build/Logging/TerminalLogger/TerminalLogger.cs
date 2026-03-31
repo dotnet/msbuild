@@ -733,7 +733,7 @@ public sealed partial class TerminalLogger : INodeLogger
             }
             // Metaproj files (generated for multi-targeting) are never evaluated, so they
             // won't have a matching ProjectEvaluationFinished event. Only assert for real projects.
-            bool isMetaproj = e.ProjectFile?.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase) == true;
+            bool isMetaproj = e.ProjectFile is not null && FileUtilities.IsMetaprojectFilename(e.ProjectFile);
             System.Diagnostics.Debug.Assert(
                 evalInfo != default || isMetaproj,
                 "EvalProjectInfo should have been captured before ProjectStarted");
