@@ -19,7 +19,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
@@ -1316,9 +1315,6 @@ namespace Microsoft.Build.BackEnd
                 return;
             }
 
-            // Accumulate all telemetry into a local instance, then merge into the shared singleton once.
-            WorkerNodeTelemetryData telemetryData = new();
-
             foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
             {
                 bool wasExecuted =
@@ -1349,15 +1345,19 @@ namespace Microsoft.Build.BackEnd
                                (isFromNuget && FileClassifier.Shared.IsMicrosoftPackageInNugetCache(projectTargetInstance.Value.FullPath));
                 }
 
-                var key = new TaskOrTargetTelemetryKey(
-                    projectTargetInstance.Key, isCustom, isFromNuget, isMetaprojTarget);
-                telemetryData.AddTarget(key, wasExecuted, skipReason);
+                telemetryForwarder.AddTarget(
+                    projectTargetInstance.Key,
+                    // would we want to distinguish targets that were executed only during this execution - we'd need
+                    //  to remember target names from ResultsByTarget from before execution
+                    wasExecuted,
+                    isCustom,
+                    isMetaprojTarget,
+                    isFromNuget,
+                    skipReason);
             }
 
             TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
             CollectTasksStats(taskReg);
-
-            telemetryForwarder.MergeWorkerData(telemetryData);
 
             void CollectTasksStats(TaskRegistry taskRegistry)
             {
@@ -1368,16 +1368,13 @@ namespace Microsoft.Build.BackEnd
 
                 foreach (TaskRegistry.RegisteredTaskRecord registeredTaskRecord in taskRegistry.TaskRegistrations.Values.SelectMany(record => record))
                 {
-                    var key = new TaskOrTargetTelemetryKey(
+                    telemetryForwarder.AddTask(
                         registeredTaskRecord.TaskIdentity.Name,
-                        registeredTaskRecord.ComputeIfCustom(),
-                        registeredTaskRecord.IsFromNugetCache,
-                        isFromMetaProject: false);
-                    telemetryData.AddTask(
-                        key,
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
                         registeredTaskRecord.Statistics.TotalMemoryConsumption,
+                        registeredTaskRecord.ComputeIfCustom(),
+                        registeredTaskRecord.IsFromNugetCache,
                         registeredTaskRecord.TaskFactoryAttributeName,
                         registeredTaskRecord.TaskFactoryParameters.Runtime);
 

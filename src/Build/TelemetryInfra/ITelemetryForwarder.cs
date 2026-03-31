@@ -1,8 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.TelemetryInfra;
 
@@ -14,13 +15,26 @@ internal interface ITelemetryForwarder
 {
     bool IsTelemetryCollected { get; }
 
-    /// <summary>
-    /// Merges a batch of telemetry data into this forwarder's accumulated state.
-    /// </summary>
-    void MergeWorkerData(IWorkerNodeTelemetryData data);
+    void AddTask(
+        string name,
+        TimeSpan cumulativeExecutionTime,
+        short executionsCount,
+        long totalMemoryConsumed,
+        bool isCustom,
+        bool isFromNugetCache,
+        string? taskFactoryName,
+        string? taskHostRuntime);
 
     /// <summary>
-    /// Sends accumulated telemetry and resets internal state.
+    /// Add info about target execution to the telemetry.
     /// </summary>
+    /// <param name="name">The target name.</param>
+    /// <param name="wasExecuted">Whether the target was executed (not skipped).</param>
+    /// <param name="isCustom">Whether this is a custom target.</param>
+    /// <param name="isMetaproj">Whether the target is from a meta project.</param>
+    /// <param name="isFromNugetCache">Whether the target is from a NuGet package.</param>
+    /// <param name="skipReason">The reason the target was skipped, if applicable.</param>
+    void AddTarget(string name, bool wasExecuted, bool isCustom, bool isMetaproj, bool isFromNugetCache, TargetSkipReason skipReason = TargetSkipReason.None);
+
     void FinalizeProcessing(LoggingContext loggingContext);
 }
