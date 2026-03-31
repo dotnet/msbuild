@@ -817,9 +817,9 @@ namespace Microsoft.Build.Execution
             private IReadOnlyDictionary<string, string> _directMetadata;
 
             /// <summary>
-            /// Cached values of derivable item-spec modifiers. All time-based metadata are computed on demand.
+            /// Cached value of the fullpath metadata. All other metadata are computed on demand.
             /// </summary>
-            private ItemSpecModifiers.Cache _cachedModifiers;
+            private string _fullPath;
 
             /// <summary>
             /// All the item definitions that apply to this item, in order of
@@ -893,7 +893,7 @@ namespace Microsoft.Build.Execution
                 _includeEscaped = source._includeEscaped;
                 _includeBeforeWildcardExpansionEscaped = source._includeBeforeWildcardExpansionEscaped;
                 source.CopyMetadataTo(this, addOriginalItemSpec);
-                _cachedModifiers = source._cachedModifiers;
+                _fullPath = source._fullPath;
                 _definingFileEscaped = source._definingFileEscaped;
             }
 
@@ -936,7 +936,7 @@ namespace Microsoft.Build.Execution
                     ErrorUtilities.VerifyThrowArgumentNull(value, "ItemSpec");
 
                     _includeEscaped = value;
-                    _cachedModifiers.Clear(); // Clear cached values
+                    _fullPath = null; // Clear cached value
                 }
             }
 
@@ -981,10 +981,7 @@ namespace Microsoft.Build.Execution
                         names.Add(metadatum.Key);
                     }
 
-                    foreach (string name in ItemSpecModifiers.All)
-                    {
-                        names.Add(name);
-                    }
+                    names.AddRange(ItemSpecModifiers.All);
 
                     return names;
                 }
@@ -1057,7 +1054,7 @@ namespace Microsoft.Build.Execution
 
                     ErrorUtilities.VerifyThrowArgumentLength(value, "IncludeEscaped");
                     _includeEscaped = value;
-                    _cachedModifiers.Clear(); // Clear cached values
+                    _fullPath = null; // Clear cached value
                 }
             }
 
@@ -2084,9 +2081,16 @@ namespace Microsoft.Build.Execution
             /// If value is not available, returns empty string.
             /// </summary>
             private string GetBuiltInMetadataEscaped(string name)
-                => ItemSpecModifiers.TryGetModifierKind(name, out ItemSpecModifierKind modifierKind)
-                    ? BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, modifierKind, ref _cachedModifiers)
-                    : string.Empty;
+            {
+                string value = String.Empty;
+
+                if (ItemSpecModifiers.IsItemSpecModifier(name))
+                {
+                    value = BuiltInMetadata.GetMetadataValueEscaped(_projectDirectory, _includeBeforeWildcardExpansionEscaped, _includeEscaped, _definingFileEscaped, name, ref _fullPath);
+                }
+
+                return value;
+            }
 
             /// <summary>
             /// Retrieves the named metadata from the item definition, if any.

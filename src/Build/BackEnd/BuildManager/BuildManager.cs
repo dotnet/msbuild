@@ -1105,7 +1105,6 @@ namespace Microsoft.Build.Execution
                 }
 
                 TaskRouter.ClearCache();
-                ItemSpecModifiers.ClearDefiningProjectCache();
             }
             catch (Exception e)
             {

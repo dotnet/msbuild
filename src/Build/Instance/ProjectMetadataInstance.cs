@@ -241,10 +241,12 @@ namespace Microsoft.Build.Execution
             // PERF: This sequence of checks is faster than a full HashSet lookup since finding a match is an error case.
             // Otherwise, many keys would still match to a bucket and begin a string comparison.
             VerifyThrowReservedNameAllowItemSpecModifiers(name);
-
-            if (ItemSpecModifiers.IsItemSpecModifier(name))
+            foreach (string itemSpecModifier in ItemSpecModifiers.All)
             {
-                ErrorUtilities.ThrowArgument("OM_ReservedName", name);
+                if (itemSpecModifier.Length == name.Length && itemSpecModifier[0] == char.ToUpperInvariant(name[0]))
+                {
+                    ErrorUtilities.VerifyThrowArgument(!MSBuildNameIgnoreCaseComparer.Default.Equals(itemSpecModifier, name), "OM_ReservedName", name);
+                }
             }
         }
 
