@@ -5,6 +5,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -33,7 +34,7 @@ namespace Microsoft.Build.Execution
         internal ReflectableTaskPropertyInfo(TaskPropertyInfo taskPropertyInfo, Type taskType)
             : base(taskPropertyInfo.Name, taskPropertyInfo.PropertyType, taskPropertyInfo.Output, taskPropertyInfo.Required)
         {
-            ArgumentNullException.ThrowIfNull(taskType);
+            ErrorUtilities.VerifyThrowArgumentNull(taskType);
             _taskType = taskType;
         }
 
@@ -77,7 +78,7 @@ namespace Microsoft.Build.Execution
                 if (_propertyInfo == null)
                 {
                     _propertyInfo = _taskType.GetProperty(Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
-                    FrameworkErrorUtilities.VerifyThrow(_propertyInfo != null, $"Could not find property {Name} on type {_taskType.FullName} that the task factory indicated should exist.");
+                    ErrorUtilities.VerifyThrow(_propertyInfo != null, "Could not find property {0} on type {1} that the task factory indicated should exist.", Name, _taskType.FullName);
                 }
 
                 return _propertyInfo;

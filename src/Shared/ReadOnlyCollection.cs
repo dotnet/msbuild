@@ -5,7 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -35,7 +35,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal ReadOnlyCollection(IEnumerable<T> backing)
         {
-            FrameworkErrorUtilities.VerifyThrow(backing != null, "Need backing collection");
+            ErrorUtilities.VerifyThrow(backing != null, "Need backing collection");
 
             _backing = backing;
         }
@@ -98,7 +98,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Add(T item)
         {
-            throw new InvalidOperationException(SR.CollectionIsReadOnly);
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
         }
 
         /// <summary>
@@ -106,7 +106,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Clear()
         {
-            throw new InvalidOperationException(SR.CollectionIsReadOnly);
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
         }
 
         /// <summary>
@@ -129,7 +129,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void CopyTo(T[] array, int arrayIndex)
         {
-            ArgumentNullException.ThrowIfNull(array);
+            ErrorUtilities.VerifyThrowArgumentNull(array);
 
             ICollection<T> backingCollection = _backing as ICollection<T>;
             if (backingCollection != null)
@@ -152,7 +152,8 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(T item)
         {
-            throw new InvalidOperationException(SR.CollectionIsReadOnly);
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            return false;
         }
 
         /// <summary>
@@ -184,7 +185,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         void ICollection.CopyTo(Array array, int index)
         {
-            ArgumentNullException.ThrowIfNull(array);
+            ErrorUtilities.VerifyThrowArgumentNull(array);
 
             int i = index;
             foreach (T entry in _backing)

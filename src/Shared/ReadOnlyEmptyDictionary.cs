@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -162,7 +163,7 @@ namespace Microsoft.Build.Collections
 
             set
             {
-                throw new InvalidOperationException(SR.CollectionIsReadOnly);
+                ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
             }
         }
 
@@ -171,7 +172,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Add(K key, V value)
         {
-            throw new InvalidOperationException(SR.CollectionIsReadOnly);
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
         }
 
         /// <summary>
@@ -187,7 +188,8 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(K key)
         {
-            throw new InvalidOperationException(SR.CollectionIsReadOnly);
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            return false;
         }
 
         /// <summary>
@@ -204,7 +206,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Add(KeyValuePair<K, V> item)
         {
-            throw new InvalidOperationException(SR.CollectionIsReadOnly);
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
         }
 
         /// <summary>
@@ -212,7 +214,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Clear()
         {
-            throw new InvalidOperationException(SR.CollectionIsReadOnly);
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
         }
 
         /// <summary>
@@ -235,7 +237,8 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(KeyValuePair<K, V> item)
         {
-            throw new InvalidOperationException(SR.CollectionIsReadOnly);
+            ErrorUtilities.ThrowInvalidOperation("OM_NotSupportedReadOnlyCollection");
+            return false;
         }
 
         /// <summary>
@@ -249,7 +252,7 @@ namespace Microsoft.Build.Collections
         /// <summary>
         /// Get empty enumerator
         /// </summary>
-        IEnumerator IEnumerable.GetEnumerator()
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }

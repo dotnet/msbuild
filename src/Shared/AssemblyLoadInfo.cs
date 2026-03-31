@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -25,9 +24,9 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static AssemblyLoadInfo Create(string assemblyName, string assemblyFile)
         {
-            FrameworkErrorUtilities.VerifyThrow((!string.IsNullOrEmpty(assemblyName)) || (!string.IsNullOrEmpty(assemblyFile)),
+            ErrorUtilities.VerifyThrow((!string.IsNullOrEmpty(assemblyName)) || (!string.IsNullOrEmpty(assemblyFile)),
                 "We must have either the assembly name or the assembly file/path.");
-            FrameworkErrorUtilities.VerifyThrow((assemblyName == null) || (assemblyFile == null),
+            ErrorUtilities.VerifyThrow((assemblyName == null) || (assemblyFile == null),
                 "We must not have both the assembly name and the assembly file/path.");
 
             if (assemblyName != null)
@@ -108,7 +107,7 @@ namespace Microsoft.Build.Shared
 
         public void Translate(ITranslator translator)
         {
-            FrameworkErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");
+            ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");
             string assemblyName = AssemblyName;
             string assemblyFile = AssemblyFile;
             translator.Translate(ref assemblyName);
@@ -194,7 +193,7 @@ namespace Microsoft.Build.Shared
             /// </summary>
             internal AssemblyLoadInfoWithFile(string assemblyFile)
             {
-                FrameworkErrorUtilities.VerifyThrow(Path.IsPathRooted(assemblyFile), "Assembly file path should be rooted");
+                ErrorUtilities.VerifyThrow(Path.IsPathRooted(assemblyFile), "Assembly file path should be rooted");
 
                 _assemblyFile = assemblyFile;
             }

@@ -6,7 +6,7 @@ using System.Globalization;
 #if !NET
 using System.Text;
 #endif
-using Microsoft.Build.Framework;
+using Error = Microsoft.Build.Shared.ErrorUtilities;
 
 #nullable disable
 
@@ -37,7 +37,8 @@ namespace Microsoft.Build.Shared
             else
             {
                 // Unsupported boolean representation.
-                throw new ArgumentException(SR.FormatCannotConvertStringToBool(parameterValue));
+                Error.ThrowArgument("Shared.CannotConvertStringToBool", parameterValue);
+                return false;
             }
         }
 
@@ -155,7 +156,7 @@ namespace Microsoft.Build.Shared
             {
                 return result;
             }
-            FrameworkErrorUtilities.ThrowInternalError("Cannot numeric evaluate");
+            Error.ThrowInternalError("Cannot numeric evaluate");
             return 0.0D;
         }
 

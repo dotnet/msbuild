@@ -1,5 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\Shared\DebuggingSources.proj" />
+
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
@@ -7,6 +9,8 @@
 
     <AssemblyName>Microsoft.Build.Engine.OM.UnitTests</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+    <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_ENGINE_OM_UNITTESTS;NO_FRAMEWORK_IVT</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -32,6 +36,15 @@
     <Compile Include="..\GlobalUsings.cs">
       <Link>GlobalUsings.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\EncodingStringWriter.cs">
+      <Link>EncodingStringWriter.cs</Link>
+    </Compile>
+    <Compile Include="..\Shared\ErrorUtilities.cs" />
+    <Compile Include="..\Shared\FileDelegates.cs" />
+    <Compile Include="..\Shared\ResourceUtilities.cs" />
+    <Compile Include="..\Shared\BuildEnvironmentHelper.cs">
+      <Link>BuildEnvironmentHelper.cs</Link>
+    </Compile>
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
@@ -48,7 +61,7 @@
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
-    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" PrivateAssets="all"/>
   </ItemGroup>
 
   <ItemGroup>
