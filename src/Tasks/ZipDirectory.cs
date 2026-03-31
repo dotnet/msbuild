@@ -59,7 +59,7 @@ namespace Microsoft.Build.Tasks
         public string? CompressionLevel { get; set; }
 
         /// <inheritdoc />
-        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         public override bool Execute()
         {
