@@ -1582,7 +1582,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         // Trace file failures must never crash the build engine.
                         // Matches the defensive pattern used by Scheduler.TraceScheduler.
-                        _nodeLoggingContext?.LogCommentFromText(MessageImportance.Low, $"Writing Engine trace file failed: {e}");
+                        _nodeLoggingContext?.LogCommentFromText(MessageImportance.Low, $"Failed to write to engine trace file: {e}");
                     }
                 }
             }
