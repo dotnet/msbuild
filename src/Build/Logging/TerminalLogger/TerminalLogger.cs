@@ -731,11 +731,11 @@ public sealed partial class TerminalLogger : INodeLogger
                 targetFramework = evalInfo.TargetFramework;
                 runtimeIdentifier = evalInfo.RuntimeIdentifier;
             }
-            // Metaproj files (generated for multi-targeting) are never evaluated, so they
-            // won't have a matching ProjectEvaluationFinished event. Only assert for real projects.
-            bool isMetaproj = e.ProjectFile is not null && FileUtilities.IsMetaprojectFilename(e.ProjectFile);
+
+            // Metaproj files (generated for multi-targeting and solution builds) are never evaluated,
+            // so they won't have a matching ProjectEvaluationFinished event. Only assert for real projects.
             System.Diagnostics.Debug.Assert(
-                evalInfo != default || isMetaproj,
+                evalInfo != default || FileUtilities.IsMetaprojectFilename(e.ProjectFile),
                 "EvalProjectInfo should have been captured before ProjectStarted");
 
             TerminalProjectInfo projectInfo = new(c, evalInfo, _createStopwatch?.Invoke());

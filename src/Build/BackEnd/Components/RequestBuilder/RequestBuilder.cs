@@ -1342,7 +1342,7 @@ namespace Microsoft.Build.BackEnd
 
                 bool isFromNuget, isMetaprojTarget, isCustom;
 
-                if (IsMetaprojTargetPath(projectTargetInstance.Value.FullPath))
+                if (FileUtilities.IsMetaprojectFilename(projectTargetInstance.Value.FullPath))
                 {
                     isMetaprojTarget = true;
                     isFromNuget = false;
@@ -1395,8 +1395,6 @@ namespace Microsoft.Build.BackEnd
                 taskRegistry.Toolset?.InspectInternalTaskRegistry(CollectTasksStats);
             }
         }
-
-        private static bool IsMetaprojTargetPath(string targetPath) => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Saves the current operating environment (working directory and environment variables)

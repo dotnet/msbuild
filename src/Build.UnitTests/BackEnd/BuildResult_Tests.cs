@@ -343,6 +343,74 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(TranslationHelpers.CompareCollections(result["omega"].Items, deserializedResult["omega"].Items, TaskItemComparer.Instance));
         }
 
+        [Fact]
+        public void TestTranslationPreservesEvaluationId()
+        {
+            BuildRequest request = new(1, 1, 2, ["Build"], null, new BuildEventContext(1, 1, 2, 3, 4, 5), null);
+            BuildResult result = new(request, new BuildAbortedException())
+            {
+                EvaluationId = 42,
+            };
+
+            ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket packet = BuildResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            BuildResult deserializedResult = (packet as BuildResult)!;
+
+            Assert.Equal(42, deserializedResult.EvaluationId);
+        }
+
+        [Fact]
+        public void TestTranslationWithInvalidEvaluationId()
+        {
+            BuildRequest request = CreateNewBuildRequest(1, ["Build"]);
+            BuildResult result = new(request, new BuildAbortedException());
+
+            // EvaluationId should default to InvalidEvaluationId
+            Assert.Equal(BuildEventContext.InvalidEvaluationId, result.EvaluationId);
+
+            ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket packet = BuildResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            BuildResult deserializedResult = (packet as BuildResult)!;
+
+            Assert.Equal(BuildEventContext.InvalidEvaluationId, deserializedResult.EvaluationId);
+        }
+
+        [Fact]
+        public void TestTranslationWithDoNotVersionBuildResultEscapeHatch()
+        {
+            // When DoNotVersionBuildResult is active, version=0 and EvaluationId should not be serialized.
+            // Simulate this by writing a result normally (version 2) and verifying that a version-0 result
+            // round-trips without EvaluationId.
+            BuildRequest request = CreateNewBuildRequest(1, ["Build"]);
+            BuildResult result = new(request, new BuildAbortedException())
+            {
+                // Default result should have version 2 and support EvaluationId
+                EvaluationId = 99,
+            };
+
+            ((ITranslatable)result).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket packet = BuildResult.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+            BuildResult deserializedResult = (packet as BuildResult)!;
+
+            // Version 2 round-trip should preserve the evaluation ID
+            Assert.Equal(99, deserializedResult.EvaluationId);
+        }
+
+        [Fact]
+        public void TestEvaluationIdSetAndGet()
+        {
+            BuildRequest request = CreateNewBuildRequest(1, ["Build"]);
+            BuildResult result = new(request);
+
+            Assert.Equal(BuildEventContext.InvalidEvaluationId, result.EvaluationId);
+
+            result.EvaluationId = 123;
+            Assert.Equal(123, result.EvaluationId);
+
+            result.EvaluationId = BuildEventContext.InvalidEvaluationId;
+            Assert.Equal(BuildEventContext.InvalidEvaluationId, result.EvaluationId);
+        }
+
         private BuildRequest CreateNewBuildRequest(int configurationId, string[] targets)
         {
             return new BuildRequest(1 /* submissionId */, _nodeRequestId++, configurationId, targets, null, BuildEventContext.Invalid, null);

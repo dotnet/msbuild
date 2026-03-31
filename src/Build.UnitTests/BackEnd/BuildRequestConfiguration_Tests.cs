@@ -576,5 +576,133 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             configuration.ShouldSkipIsolationConstraintsForReference(referencePath).ShouldBe(expectedOutput);
         }
+
+        [Fact]
+        public void TestProjectEvaluationIdDefaultsToInvalid()
+        {
+            BuildRequestConfiguration configuration = new(
+                new BuildRequestData("file", new Dictionary<string, string>(), "4.0", [], null), "2.0");
+
+            configuration.ProjectEvaluationId.ShouldBe(BuildEventContext.InvalidEvaluationId);
+        }
+
+        [Fact]
+        public void TestProjectEvaluationIdPreservedAcrossTranslation()
+        {
+            string projectBody = """
+            <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                <Target Name='Build' />
+            </Project>
+            """.Cleanup();
+
+            using var collection = new ProjectCollection();
+            using ProjectFromString projectFromString = new(
+                projectBody,
+                new Dictionary<string, string>(),
+                ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                collection);
+            Project project = projectFromString.Project;
+            project.FullPath = "foo";
+            ProjectInstance instance = project.CreateProjectInstance();
+
+            instance.TranslateEntireState = true;
+
+            BuildRequestConfiguration configuration = new(new BuildRequestData(instance, [], null), "2.0")
+            {
+                ConfigurationId = 1,
+            };
+
+            // The evaluation ID should be set from the project instance.
+            int expectedEvalId = instance.EvaluationId;
+            configuration.ProjectEvaluationId.ShouldBe(expectedEvalId);
+            expectedEvalId.ShouldNotBe(BuildEventContext.InvalidEvaluationId);
+
+            ((ITranslatable)configuration).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket packet = BuildRequestConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            BuildRequestConfiguration deserializedConfig = packet as BuildRequestConfiguration;
+            deserializedConfig.ShouldNotBeNull();
+            deserializedConfig.ProjectEvaluationId.ShouldBe(expectedEvalId);
+        }
+
+        [Fact]
+        public void TestProjectEvaluationIdPreservedInShallowClone()
+        {
+            string projectBody = """
+            <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                <Target Name='Build' />
+            </Project>
+            """.Cleanup();
+
+            using var collection = new ProjectCollection();
+            using ProjectFromString projectFromString = new(
+                projectBody,
+                new Dictionary<string, string>(),
+                ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                collection);
+            Project project = projectFromString.Project;
+            project.FullPath = "foo";
+            ProjectInstance instance = project.CreateProjectInstance();
+
+            BuildRequestConfiguration original = new(new BuildRequestData(instance, [], null), "2.0")
+            {
+                ConfigurationId = 1,
+            };
+
+            int expectedEvalId = instance.EvaluationId;
+            original.ProjectEvaluationId.ShouldBe(expectedEvalId);
+
+            BuildRequestConfiguration clone = original.ShallowCloneWithNewId(2);
+            clone.ProjectEvaluationId.ShouldBe(expectedEvalId);
+        }
+
+        [Fact]
+        public void TestProjectEvaluationIdUpdatableFromResult()
+        {
+            BuildRequestConfiguration configuration = new(
+                new BuildRequestData("file", new Dictionary<string, string>(), "4.0", [], null), "2.0");
+
+            configuration.ProjectEvaluationId.ShouldBe(BuildEventContext.InvalidEvaluationId);
+
+            // Simulate what BuildManager.HandleResult does.
+            configuration.ProjectEvaluationId = 42;
+            configuration.ProjectEvaluationId.ShouldBe(42);
+        }
+
+        [Fact]
+        public void TestProjectEvaluationIdPreservedAcrossTranslateForFutureUse()
+        {
+            string projectBody = ObjectModelHelpers.CleanupFileContents(@"
+<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+<Target Name='Build' />
+</Project>");
+
+            using var collection = new ProjectCollection();
+            using ProjectFromString projectFromString = new(
+                projectBody,
+                new Dictionary<string, string>(),
+                ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                collection);
+            Project project = projectFromString.Project;
+            project.FullPath = "foo";
+            ProjectInstance instance = project.CreateProjectInstance();
+
+            BuildRequestConfiguration configuration = new(new BuildRequestData(instance, [], null), "2.0")
+            {
+                ConfigurationId = 1,
+            };
+
+            int expectedEvalId = instance.EvaluationId;
+            configuration.ProjectEvaluationId.ShouldBe(expectedEvalId);
+
+            // TranslateForFutureUse uses a different serialization path.
+            configuration.TranslateForFutureUse(TranslationHelpers.GetWriteTranslator());
+            ITranslator reader = TranslationHelpers.GetReadTranslator();
+
+            BuildRequestConfiguration deserialized = new();
+            deserialized.TranslateForFutureUse(reader);
+
+            deserialized.ProjectEvaluationId.ShouldBe(expectedEvalId);
+        }
     }
 }
