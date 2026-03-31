@@ -4640,7 +4640,7 @@ $@"<Project InitialTargets=`Sleep`>
             string debugPath = _env.CreateFolder().Path;
             _env.SetEnvironmentVariable("MSBUILDDEBUGSCHEDULER", "1");
             _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath);
-            FrameworkDebugUtils.SetDebugPath(debugPath);
+            FrameworkDebugUtils.SetDebugPath();
 
             // Create a root project that builds several independent child projects in parallel.
             // This forces multiple in-proc nodes to run concurrently, which triggers
