@@ -136,22 +136,9 @@ namespace Microsoft.Build.Framework
             unchecked
             {
                 int hashCode = 0;
-
-                if (Name != null)
-                {
-                    hashCode = comparer.GetHashCode(Name);
-                }
-
-                if (Version != null)
-                {
-                    hashCode = (hashCode * 397) ^ comparer.GetHashCode(Version);
-                }
-
-                if (MinimumVersion != null)
-                {
-                    hashCode = (hashCode * 397) ^ comparer.GetHashCode(MinimumVersion);
-                }
-
+                hashCode = (hashCode * 397) ^ (Name != null ? comparer.GetHashCode(Name) : 0);
+                hashCode = (hashCode * 397) ^ (Version != null ? comparer.GetHashCode(Version) : 0);
+                hashCode = (hashCode * 397) ^ (MinimumVersion != null ? comparer.GetHashCode(MinimumVersion) : 0);
                 return hashCode;
             }
         }
