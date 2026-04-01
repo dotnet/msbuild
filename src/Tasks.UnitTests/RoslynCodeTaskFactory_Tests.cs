@@ -26,7 +26,6 @@ using static VerifyXunit.Verifier;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
-    [UsesVerify]
     public class RoslynCodeTaskFactory_Tests
     {
         private const string TaskName = "MyInlineTask";
