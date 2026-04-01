@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
 using Xunit;
@@ -42,7 +43,7 @@ public class MultiThreadableTaskCodeFixProviderTests
         DiagnosticIds.FilePathRequiresAbsolute => new DiagnosticResult(DiagnosticDescriptors.FilePathRequiresAbsolute),
         DiagnosticIds.PotentialIssue => new DiagnosticResult(DiagnosticDescriptors.PotentialIssue),
         DiagnosticIds.TransitiveUnsafeCall => new DiagnosticResult(DiagnosticDescriptors.TransitiveUnsafeCall),
-        _ => new DiagnosticResult(id, Microsoft.CodeAnalysis.DiagnosticSeverity.Warning),
+        _ => new DiagnosticResult(id, DiagnosticSeverity.Warning),
     };
 
     [Fact]
