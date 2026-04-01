@@ -3,8 +3,6 @@
 
 using System.Collections.Generic;
 
-using Xunit.Abstractions;
-
 #nullable disable
 
 namespace Microsoft.NET.StringTools.Tests
