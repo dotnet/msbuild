@@ -760,6 +760,11 @@ namespace Microsoft.Build.UnitTests
                 {
                     ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026");
                 }
+                else
+                {
+                    // non-Windows: retries are expected due to possible transient EACCES
+                    ((MockEngine)t.BuildEngine).AssertLogContains("MSB3026");
+                }
             }
             finally
             {
@@ -771,7 +776,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// When Wave18_6 is disabled, non-Windows should NOT retry on ERROR_ACCESS_DENIED (old behavior).
+        /// When Wave18_6 is disabled, non-Windows should NOT retry on ERROR_ACCESS_DENIED (old behavior preserved via opt-out).
         /// </summary>
         [Theory]
         [Trait("Category", "netcore-osx-failing")]
