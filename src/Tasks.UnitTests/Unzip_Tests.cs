@@ -156,26 +156,29 @@ namespace Microsoft.Build.Tasks.UnitTests
             _mockEngine.Log.ShouldContain("MSB3931", customMessage: _mockEngine.Log);
         }
 
-        public static bool NotRunningAsRoot()
+        public static bool NotRunningAsRoot
         {
-            if (NativeMethodsShared.IsWindows)
+            get
             {
-                return true;
+                if (NativeMethodsShared.IsWindows)
+                {
+                    return true;
+                }
+
+                var psi = new ProcessStartInfo
+                {
+                    FileName = "id",
+                    Arguments = "-u",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                };
+
+                var process = Process.Start(psi);
+
+                process.WaitForExit((int)TimeSpan.FromSeconds(2).TotalMilliseconds).ShouldBeTrue();
+
+                return process.StandardOutput.ReadToEnd().Trim() != "0";
             }
-
-            var psi = new ProcessStartInfo
-            {
-                FileName = "id",
-                Arguments = "-u",
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-            };
-
-            var process = Process.Start(psi);
-
-            process.WaitForExit((int)TimeSpan.FromSeconds(2).TotalMilliseconds).ShouldBeTrue();
-
-            return process.StandardOutput.ReadToEnd().Trim() != "0";
         }
 
         [ConditionalFact(nameof(NotRunningAsRoot))] // root can write to read-only files

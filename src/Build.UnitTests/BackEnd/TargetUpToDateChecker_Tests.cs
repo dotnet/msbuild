@@ -15,7 +15,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Win32.SafeHandles;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 

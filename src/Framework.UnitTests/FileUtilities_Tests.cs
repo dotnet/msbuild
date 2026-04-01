@@ -646,14 +646,12 @@ public class FileUtilities_Tests
         }
     }
 
-    public static bool RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241()
-    {
+    public static bool RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241
         // Run these tests only when we're not on Windows
-        return !NativeMethodsShared.IsWindows ||
+        => !NativeMethodsShared.IsWindows ||
         // OR we're on Windows and long paths aren't enabled
         // https://github.com/dotnet/msbuild/issues/4241
-               NativeMethodsShared.IsMaxPathLegacyWindows();
-    }
+           NativeMethodsShared.IsMaxPathLegacyWindows();
 
     [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
     public void FileExistsNoThrowTooLongWithDots()
