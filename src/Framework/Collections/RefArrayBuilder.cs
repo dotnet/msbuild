@@ -478,7 +478,7 @@ internal ref struct RefArrayBuilder<T>
 
         if (!found)
         {
-            ThrowInvalidOperation("RefArrayBuilder_Empty");
+            ThrowInvalidOperation(SR.Format_0_contains_no_elements(nameof(RefArrayBuilder<>)));
         }
 
         return first!;
@@ -498,7 +498,7 @@ internal ref struct RefArrayBuilder<T>
 
         if (!found)
         {
-            ThrowInvalidOperation("RefArrayBuilder_NoMatch");
+            ThrowInvalidOperation(SR.Format_0_does_not_contain_matching_element(nameof(RefArrayBuilder<>)));
         }
 
         return first!;
@@ -520,7 +520,7 @@ internal ref struct RefArrayBuilder<T>
 
         if (!found)
         {
-            ThrowInvalidOperation("RefArrayBuilder_NoMatch");
+            ThrowInvalidOperation(SR.Format_0_does_not_contain_matching_element(nameof(RefArrayBuilder<>)));
         }
 
         return first!;
@@ -620,7 +620,7 @@ internal ref struct RefArrayBuilder<T>
 
         if (!found)
         {
-            ThrowInvalidOperation("RefArrayBuilder_Empty");
+            ThrowInvalidOperation(SR.Format_0_contains_no_elements(nameof(RefArrayBuilder<>)));
         }
 
         return last!;
@@ -640,7 +640,7 @@ internal ref struct RefArrayBuilder<T>
 
         if (!found)
         {
-            ThrowInvalidOperation("RefArrayBuilder_NoMatch");
+            ThrowInvalidOperation(SR.Format_0_does_not_contain_matching_element(nameof(RefArrayBuilder<>)));
         }
 
         return last!;
@@ -662,7 +662,7 @@ internal ref struct RefArrayBuilder<T>
 
         if (!found)
         {
-            ThrowInvalidOperation("RefArrayBuilder_NoMatch");
+            ThrowInvalidOperation(SR.Format_0_does_not_contain_matching_element(nameof(RefArrayBuilder<>)));
         }
 
         return last!;
