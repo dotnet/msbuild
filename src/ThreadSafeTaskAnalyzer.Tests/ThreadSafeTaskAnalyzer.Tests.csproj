@@ -11,6 +11,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+<<<<<<< HEAD
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" />
@@ -24,6 +25,12 @@
     <PackageReference Include="NuGet.Protocol" VersionOverride="6.3.4" />
     <PackageReference Include="NuGet.Resolver" VersionOverride="6.3.4" />
     <PackageReference Include="NuGet.Frameworks" VersionOverride="6.3.4" />
+=======
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="1.1.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" Version="1.1.2" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.12.0" />
+    <PackageReference Include="Shouldly" Version="4.3.0" />
+>>>>>>> 852f23393f (First step to xunit.v3)
   </ItemGroup>
 
   <ItemGroup>

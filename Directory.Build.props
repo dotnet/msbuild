@@ -13,6 +13,11 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <TestRunnerName>XUnitV3</TestRunnerName>
+    <XUnitV3Version>3.2.2</XUnitV3Version>
+    <MicrosoftTestingPlatformVersion>1.9.1</MicrosoftTestingPlatformVersion>
+    <OutputType Condition="$(MSBuildProjectName.EndsWith('.UnitTests')) or $(MSBuildProjectName.EndsWith('.Tests'))">Exe</OutputType>
+
     <FullFrameworkTFM>net472</FullFrameworkTFM>
 
     <!--
