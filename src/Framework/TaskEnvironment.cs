@@ -8,28 +8,12 @@ using System.Diagnostics;
 namespace Microsoft.Build.Framework
 {
     /// <summary>
-    /// Identifies the kind of driver backing a <see cref="TaskEnvironment"/>.
-    /// </summary>
-    internal enum TaskEnvironmentDriverKind
-    {
-        MultiProcess,
-        MultiThreaded,
-    }
-
-    /// <summary>
     /// Provides an <see cref="IMultiThreadableTask"/> with access to a run-time execution environment including
     /// environment variables, file paths, and process management capabilities.
     /// </summary>
     public sealed class TaskEnvironment
     {
         private readonly ITaskEnvironmentDriver _driver;
-
-        /// <summary>
-        /// Gets the kind of driver backing this TaskEnvironment.
-        /// </summary>
-        internal TaskEnvironmentDriverKind DriverKind => _driver is MultiThreadedTaskEnvironmentDriver
-            ? TaskEnvironmentDriverKind.MultiThreaded
-            : TaskEnvironmentDriverKind.MultiProcess;
 
         /// <summary>
         /// Initializes a new instance of the TaskEnvironment class.
