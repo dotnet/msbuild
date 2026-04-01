@@ -220,19 +220,38 @@ namespace Microsoft.Build.Tasks
                         // Only retry with Replace if the destination now exists (concurrent write race).
                         if (System.IO.File.Exists(filePath))
                         {
-                            try
+                            IOException lastReplaceException = null;
+
+                            // Retry Replace a few times with a small delay, mirroring the later Replace retry logic.
+                            for (int retry = 0; retry < 3; retry++)
                             {
-                                System.IO.File.Replace(temporaryFilePath, filePath, null, true);
-                                temporaryFilePath = null; // Mark as successfully replaced
-                                return !Log.HasLoggedErrors;
+                                try
+                                {
+                                    if (retry > 0)
+                                    {
+                                        System.Threading.Thread.Sleep(10);
+                                    }
+
+                                    System.IO.File.Replace(temporaryFilePath, filePath, null, true);
+                                    temporaryFilePath = null; // Mark as successfully replaced
+                                    return !Log.HasLoggedErrors;
+                                }
+                                catch (IOException replaceEx)
+                                {
+                                    lastReplaceException = replaceEx;
+                                    // Continue to next retry.
+                                }
                             }
-                            catch (IOException replaceEx)
-                            {
-                                // Both attempts failed; log the original move error as the root cause.
-                                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
-                                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.OriginalValue, moveEx.Message + " " + replaceEx.Message, lockedFileMessage);
-                                return !Log.HasLoggedErrors;
-                            }
+
+                            // All Replace retries failed; log the original move error as the root cause.
+                            string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
+                            string replaceMessage = lastReplaceException != null ? lastReplaceException.Message : string.Empty;
+                            Log.LogErrorWithCodeFromResources(
+                                "WriteLinesToFile.ErrorOrWarning",
+                                filePath.OriginalValue,
+                                moveEx.Message + (string.IsNullOrEmpty(replaceMessage) ? string.Empty : " " + replaceMessage),
+                                lockedFileMessage);
+                            return !Log.HasLoggedErrors;
                         }
 
                         // Destination doesn't exist; move failed for a different reason.
