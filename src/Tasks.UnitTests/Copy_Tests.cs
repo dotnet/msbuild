@@ -753,7 +753,13 @@ namespace Microsoft.Build.UnitTests
                 string destinationContent = File.ReadAllText(destination);
                 Assert.Equal("This is a destination file.", destinationContent);
 
-                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // did not do retries as it was r/o
+                if (NativeMethodsShared.IsWindows)
+                {
+                    // On Windows, ERROR_ACCESS_DENIED is not retried (it's a real ACL or r/o bit issue).
+                    ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026");
+                }
+                // On non-Windows, access denied can be a transient lock (e.g. macOS CoW filesystem),
+                // so we retry; retries will ultimately fail for a genuinely read-only file.
             }
             finally
             {
