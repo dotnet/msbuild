@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -395,6 +396,15 @@ namespace Microsoft.Build.UnitTests
 
         private sealed class DefaultOutput : ITestOutputHelper
         {
+            // Probably unreachable. Don't bother implementing it unless we hit this exception.
+            public string Output => throw new InvalidOperationException();
+
+            public void Write(string message)
+                => Console.Write(message);
+
+            public void Write(string format, params object[] args)
+                => Console.Write(format, args);
+
             public void WriteLine(string message)
             {
                 Console.WriteLine(message);
