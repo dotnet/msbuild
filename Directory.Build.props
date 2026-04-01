@@ -18,6 +18,10 @@
     <MicrosoftTestingPlatformVersion>1.9.1</MicrosoftTestingPlatformVersion>
     <OutputType Condition="$(MSBuildProjectName.EndsWith('.UnitTests')) or $(MSBuildProjectName.EndsWith('.Tests'))">Exe</OutputType>
 
+    <!-- xUnit1051: Calls to methods which accept CancellationToken should use TestContext.Current.CancellationToken to allow test cancellation to be more responsive. -->
+    <!-- Consider fixing this later. -->
+    <NoWarn>$(NoWarn);xUnit1051</NoWarn>
+
     <FullFrameworkTFM>net472</FullFrameworkTFM>
 
     <!--
