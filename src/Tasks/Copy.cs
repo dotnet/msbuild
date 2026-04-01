@@ -1036,7 +1036,7 @@ namespace Microsoft.Build.Tasks
                                 // On at least some non-Windows platforms (e.g. macOS https://github.com/dotnet/msbuild/issues/13463), access denied can also indicate a
                                 // transient lock conflict (e.g. EACCES from a concurrent clonefile/flock), so we only skip retries for
                                 // access denied on Windows.
-                                if (!s_alwaysRetryCopy && NativeMethodsShared.IsWindows)
+                                if (!s_alwaysRetryCopy && (NativeMethodsShared.IsWindows || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6)))
                                 {
                                     throw;
                                 }
