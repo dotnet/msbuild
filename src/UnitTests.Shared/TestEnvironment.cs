@@ -17,7 +17,6 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
 using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 

@@ -9,7 +9,6 @@ using System.Reflection;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Xunit.Abstractions;
 using Constants = Microsoft.Build.Framework.Constants;
 
 #nullable disable
