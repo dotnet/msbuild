@@ -22,7 +22,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
-using Microsoft.VisualStudio.TestPlatform.Utilities;
 using Shouldly;
 using Xunit;
 
