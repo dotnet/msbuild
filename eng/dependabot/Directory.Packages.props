@@ -49,6 +49,9 @@
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Update="Shouldly" Condition="'$(ShouldlyVersion)' != ''" Version="$(ShouldlyVersion)" />
 
+    <PackageVersion Include="Microsoft.Testing.Extensions.CodeCoverage" Version="18.0.6" />
+    <PackageVersion Update="Microsoft.Testing.Extensions.CodeCoverage" Condition="'$(MicrosoftTestingExtensionsCodeCoverageVersion)' != ''" Version="$(MicrosoftTestingExtensionsCodeCoverageVersion)" />
+
     <PackageVersion Include="FakeItEasy" Version="8.1.0" />
     <PackageVersion Update="FakeItEasy" Condition="'$(FakeItEasyVersion)' != ''" Version="$(FakeItEasyVersion)" />
 
