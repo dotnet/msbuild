@@ -225,11 +225,11 @@ namespace Microsoft.Build.Tasks
                             temporaryFilePath = null; // Mark as successfully replaced
                             return !Log.HasLoggedErrors;
                         }
-                        catch (IOException moveEx)
+                        catch (IOException replaceEx)
                         {
-                            // Move failed, log and return
+                            // Replace failed, log and return
                             string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
-                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.OriginalValue, moveEx.Message, lockedFileMessage);
+                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.OriginalValue, replaceEx.Message, lockedFileMessage);
                             return !Log.HasLoggedErrors;
                         }
                     }
