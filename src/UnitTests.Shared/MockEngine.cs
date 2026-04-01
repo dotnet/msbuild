@@ -12,6 +12,7 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 
 using Shouldly;
+using Xunit;
 
 #nullable disable
 

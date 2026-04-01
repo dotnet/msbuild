@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Linq;
@@ -13,19 +14,17 @@ using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Xunit;
+using Xunit.NetCore.Extensions;
+using Xunit.v3;
 
 #nullable disable
 
 [assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly)]
 
-// Register test framework for assembly fixture
-[assembly: TestFramework("Xunit.NetCore.Extensions.XunitTestFrameworkWithAssemblyFixture", "Xunit.NetCore.Extensions")]
-
 [assembly: AssemblyFixture(typeof(MSBuildTestAssemblyFixture))]
 
 // Wrap a TestEnvironment around each test method and class so if invariants have changed we will know where
-[assembly: AssemblyFixture(typeof(MSBuildTestEnvironmentFixture), LifetimeScope = AssemblyFixtureAttribute.Scope.Class)]
-[assembly: AssemblyFixture(typeof(MSBuildTestEnvironmentFixture), LifetimeScope = AssemblyFixtureAttribute.Scope.Method)]
+[assembly: MSBuildBeforeAfterEveryTest]
 
 namespace Microsoft.Build.UnitTests
 {
@@ -38,14 +37,14 @@ namespace Microsoft.Build.UnitTests
         {
             // Set field to indicate tests are running in the TestInfo class in Microsoft.Build.Framework.
             //  See the comments on the TestInfo class for an explanation of why it works this way.
-            var frameworkAssembly = typeof(Microsoft.Build.Framework.ITask).Assembly;
+            var frameworkAssembly = typeof(ITask).Assembly;
             var testInfoType = frameworkAssembly.GetType("Microsoft.Build.Framework.TestInfo");
-            var runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            var runningTestsField = testInfoType.GetField("s_runningTests", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
             runningTestsField.SetValue(null, true);
 
             // Set the field in BuildEnvironmentState - as it might have been already preintialized by the data preparation of data driven tests
             testInfoType = frameworkAssembly.GetType("Microsoft.Build.Framework.BuildEnvironmentState");
-            runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            runningTestsField = testInfoType.GetField("s_runningTests", BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static);
             runningTestsField.SetValue(null, true);
 
             // BuildEnvironment instance may be initialized in some tests' static members before s_runningTests is set
@@ -122,24 +121,14 @@ namespace Microsoft.Build.UnitTests
         }
     }
 
-    public class MSBuildTestEnvironmentFixture : IDisposable
+    public class MSBuildBeforeAfterEveryTest : BeforeAfterTestAttribute
     {
-        private bool _disposed;
         private TestEnvironment _testEnvironment;
 
-        public MSBuildTestEnvironmentFixture()
-        {
-            _testEnvironment = TestEnvironment.Create();
-        }
+        public override void Before(MethodInfo methodUnderTest, IXunitTest test)
+            => _testEnvironment = TestEnvironment.Create();
 
-        public void Dispose()
-        {
-            if (!_disposed)
-            {
-                _testEnvironment.Dispose();
-
-                _disposed = true;
-            }
-        }
+        public override void After(MethodInfo methodUnderTest, IXunitTest test)
+            => _testEnvironment.Dispose();
     }
 }
