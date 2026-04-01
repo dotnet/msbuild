@@ -21,7 +21,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Gets or sets the task execution environment for thread-safe path resolution.
         /// </summary>
-        public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// Filter based on whether items fall under this path or not.
