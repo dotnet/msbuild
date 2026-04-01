@@ -18,10 +18,6 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsUnitTestProject)' == 'true'">
-    <!-- Set output type of test projects to EXE.  This will allow us to run tests on .NET Core via F5 or "dotnet run" -->
-    <OutputType>Exe</OutputType>
-    <GenerateProgramFile>false</GenerateProgramFile>
-
     <!-- Makes xunit print all test names in stdout -->
     <XunitOptions>$(XunitOptions)</XunitOptions>
 
@@ -59,13 +55,12 @@
          9.0.1, causing it to be downloaded and flagged by component governance -->
     <PackageReference Include="Newtonsoft.Json" />
 
-    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" Condition="'$(DisableTestSharedFiles)' != 'true'" />
+    <PackageReference Include="Microsoft.DotNet.XUnitV3Extensions" Condition="'$(DisableTestSharedFiles)' != 'true'" />
 
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
 
     <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestAssemblyInfo.cs" Condition="'$(IsLibraryTestProject)' != 'true' AND '$(DisableTestSharedFiles)' != 'true'" />
-    <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestProgram.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -84,10 +79,6 @@
     <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard'">netstandard</PublicApiTfm>
     <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETCoreApp'">netstandard</PublicApiTfm>
   </PropertyGroup>
-
-  <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
-    <PackageReference Include="xunit.console" />
-  </ItemGroup>
 
   <ItemGroup Condition="'$(OutputType)' == 'Exe'">
     <!-- Copy empty Directory.Build.props and Directory.Build.targets files to output directory to prevent
