@@ -47,9 +47,14 @@ namespace Microsoft.Build.UnitTests
                 => _wrapped.Find(testCase => callback(new MSBuildTestCase((IXunitTestCase)testCase)), discoveryOptions, types, cancellationToken);
         }
 
-        private sealed class MSBuildTestCase : IXunitTestCase, ISelfExecutingXunitTestCase
+        private sealed class MSBuildTestCase : IXunitTestCase, ISelfExecutingXunitTestCase, IXunitSerializable
         {
-            private readonly IXunitTestCase _wrapped;
+            private IXunitTestCase _wrapped;
+
+            [Obsolete("Called by the de-serializer; should only be called for de-serialization purposes")]
+            public MSBuildTestCase()
+            {
+            }
 
             public MSBuildTestCase(IXunitTestCase wrapped)
                 => _wrapped = wrapped;
@@ -128,6 +133,12 @@ namespace Microsoft.Build.UnitTests
                     explicitOption,
                     constructorArguments);
             }
+
+            public void Serialize(IXunitSerializationInfo info)
+                => info.AddValue("wr", _wrapped);
+
+            public void Deserialize(IXunitSerializationInfo info)
+                => _wrapped = info.GetValue<IXunitTestCase>("wr");
         }
 
         protected override ITestFrameworkDiscoverer CreateDiscoverer(Assembly assembly) => new MSBuildDiscoverer(base.CreateDiscoverer(assembly));
