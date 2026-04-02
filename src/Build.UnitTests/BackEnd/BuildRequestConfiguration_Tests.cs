@@ -596,9 +596,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             project.FullPath = "foo";
             ProjectInstance instance = project.CreateProjectInstance();
 
-            instance.TranslateEntireState = true;
-
-            BuildRequestConfiguration configuration = new(new BuildRequestData(instance, [], null), "2.0")
+            BuildRequestConfiguration configuration = new(
+                new BuildRequestData(instance, [], null, BuildRequestDataFlags.None, propertiesToTransfer: []), "2.0")
             {
                 ConfigurationId = 1,
             };

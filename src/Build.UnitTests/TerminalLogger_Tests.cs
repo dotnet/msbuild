@@ -1136,5 +1136,30 @@ namespace Microsoft.Build.UnitTests
 
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform().UseParameters(runOnCentralNode);
         }
+
+        [Fact]
+        public void MetaprojProjectStartedDoesNotCrash()
+        {
+#if DEBUG
+            // Metaproj files (generated for solution multi-targeting builds) are never evaluated,
+            // so they have no matching ProjectEvaluationFinished event. TerminalLogger should
+            // handle ProjectStarted for metaproj files without hitting the Debug.Assert that
+            // checks for prior evaluation info. In Release mode this test is a no-op because
+            // Debug.Assert is compiled out.
+            string metaprojFile = NativeMethods.IsUnixLike ? "/src/solution.sln.metaproj" : @"C:\src\solution.sln.metaproj";
+
+            BuildEventContext buildContext = MakeBuildEventContext(evalId: -1, projectContextId: 10);
+
+            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+
+            Should.NotThrow(() =>
+            {
+                _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(metaprojFile, "Build", buildEventContext: buildContext));
+                _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(metaprojFile, true, buildEventContext: buildContext));
+            });
+
+            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
+#endif
+        }
     }
 }
