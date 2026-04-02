@@ -23,6 +23,7 @@
     <PackageReference Include="NuGet.Packaging" VersionOverride="6.3.4" />
     <PackageReference Include="NuGet.Protocol" VersionOverride="6.3.4" />
     <PackageReference Include="NuGet.Resolver" VersionOverride="6.3.4" />
+    <PackageReference Include="NuGet.Frameworks" VersionOverride="6.3.4" />
   </ItemGroup>
 
   <ItemGroup>
