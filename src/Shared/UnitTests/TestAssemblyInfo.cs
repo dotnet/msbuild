@@ -122,10 +122,10 @@ namespace Microsoft.Build.UnitTests
             public void PostInvoke() => _wrapped.PostInvoke();
 
             public void PreInvoke() => _wrapped.PreInvoke();
-            public ValueTask<RunSummary> Run(ExplicitOption explicitOption, IMessageBus messageBus, object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource)
+            public async ValueTask<RunSummary> Run(ExplicitOption explicitOption, IMessageBus messageBus, object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource)
             {
                 using var _ = TestEnvironment.Create();
-                return XunitRunnerHelper.RunXunitTestCase(
+                return await XunitRunnerHelper.RunXunitTestCase(
                     this,
                     messageBus,
                     cancellationTokenSource,
