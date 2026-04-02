@@ -4,6 +4,12 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
 
     <UseVSTestRunner Condition="'$(IsTestProject)' == 'true'">true</UseVSTestRunner>
+
+    <!-- Re-apply RuntimeOutputPlatformTarget to PlatformTarget.
+         RuntimeOutputPlatformTarget was moved from .props to .targets (via Directory.BeforeCommon.targets) so that
+         $(TargetFramework) is reliably available. Projects that set PlatformTarget=$(RuntimeOutputPlatformTarget) in
+         their project body evaluated it as empty; this override corrects PlatformTarget now that the value is set. -->
+    <PlatformTarget Condition="'$(PlatformTarget)' == ''">$(RuntimeOutputPlatformTarget)</PlatformTarget>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsUnitTestProject)' != 'true'">
