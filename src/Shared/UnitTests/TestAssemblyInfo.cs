@@ -2,10 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using Microsoft.Build.Framework;
@@ -15,6 +18,7 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Xunit;
 using Xunit.NetCore.Extensions;
+using Xunit.Sdk;
 using Xunit.v3;
 
 #nullable disable
@@ -24,10 +28,113 @@ using Xunit.v3;
 [assembly: AssemblyFixture(typeof(MSBuildTestAssemblyFixture))]
 
 // Wrap a TestEnvironment around each test method and class so if invariants have changed we will know where
-[assembly: MSBuildBeforeAfterEveryTest]
+[assembly: TestFramework(typeof(MSBuildTestFramework))]
 
 namespace Microsoft.Build.UnitTests
 {
+    public class MSBuildTestFramework : XunitTestFramework
+    {
+        private sealed class MSBuildDiscoverer : ITestFrameworkDiscoverer
+        {
+            private readonly ITestFrameworkDiscoverer _wrapped;
+
+            public MSBuildDiscoverer(ITestFrameworkDiscoverer wrapped)
+                => _wrapped = wrapped;
+
+            public ITestAssembly TestAssembly => _wrapped.TestAssembly;
+
+            public ValueTask Find(Func<ITestCase, ValueTask<bool>> callback, ITestFrameworkDiscoveryOptions discoveryOptions, Type[] types = null, CancellationToken? cancellationToken = null)
+                => _wrapped.Find(testCase => callback(new MSBuildTestCase((IXunitTestCase)testCase)), discoveryOptions, types, cancellationToken);
+        }
+
+        private sealed class MSBuildTestCase : IXunitTestCase, ISelfExecutingXunitTestCase
+        {
+            private readonly IXunitTestCase _wrapped;
+
+            public MSBuildTestCase(IXunitTestCase wrapped)
+                => _wrapped = wrapped;
+
+            public Type[] SkipExceptions => _wrapped.SkipExceptions;
+
+            public string SkipReason => _wrapped.SkipReason;
+
+            public Type SkipType => _wrapped.SkipType;
+
+            public string SkipUnless => _wrapped.SkipUnless;
+
+            public string SkipWhen => _wrapped.SkipWhen;
+
+            public IXunitTestClass TestClass => _wrapped.TestClass;
+
+            public int TestClassMetadataToken => _wrapped.TestClassMetadataToken;
+
+            public string TestClassName => _wrapped.TestClassName;
+
+            public string TestClassSimpleName => _wrapped.TestClassSimpleName;
+
+            public IXunitTestCollection TestCollection => _wrapped.TestCollection;
+
+            public IXunitTestMethod TestMethod => _wrapped.TestMethod;
+
+            public int TestMethodMetadataToken => _wrapped.TestMethodMetadataToken;
+
+            public string TestMethodName => _wrapped.TestMethodName;
+
+            public string[] TestMethodParameterTypesVSTest => _wrapped.TestMethodParameterTypesVSTest;
+
+            public string TestMethodReturnTypeVSTest => _wrapped.TestMethodReturnTypeVSTest;
+
+            public int Timeout => _wrapped.Timeout;
+
+            public bool Explicit => _wrapped.Explicit;
+
+            public string SourceFilePath => _wrapped.SourceFilePath;
+
+            public int? SourceLineNumber => _wrapped.SourceLineNumber;
+
+            public string TestCaseDisplayName => _wrapped.TestCaseDisplayName;
+
+            public string TestClassNamespace => _wrapped.TestClassNamespace;
+
+            public int? TestMethodArity => _wrapped.TestMethodArity;
+
+            public IReadOnlyDictionary<string, IReadOnlyCollection<string>> Traits => _wrapped.Traits;
+
+            public string UniqueID => _wrapped.UniqueID;
+
+            ITestClass ITestCase.TestClass => TestClass;
+
+            ITestCollection ITestCase.TestCollection => TestCollection;
+
+            ITestMethod ITestCase.TestMethod => TestMethod;
+
+            int? ITestCaseMetadata.TestClassMetadataToken => TestClassMetadataToken;
+
+            int? ITestCaseMetadata.TestMethodMetadataToken => TestMethodMetadataToken;
+
+            public ValueTask<IReadOnlyCollection<IXunitTest>> CreateTests() => _wrapped.CreateTests();
+
+            public void PostInvoke() => _wrapped.PostInvoke();
+
+            public void PreInvoke() => _wrapped.PreInvoke();
+            public ValueTask<RunSummary> Run(ExplicitOption explicitOption, IMessageBus messageBus, object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource)
+            {
+                using var _ = TestEnvironment.Create();
+                return XunitRunnerHelper.RunXunitTestCase(
+                    this,
+                    messageBus,
+                    cancellationTokenSource,
+                    aggregator.Clone(),
+                    explicitOption,
+                    constructorArguments);
+            }
+        }
+
+        protected override ITestFrameworkDiscoverer CreateDiscoverer(Assembly assembly) => new MSBuildDiscoverer(base.CreateDiscoverer(assembly));
+
+        protected override ITestFrameworkExecutor CreateExecutor(Assembly assembly) => base.CreateExecutor(assembly);
+    }
+
     public class MSBuildTestAssemblyFixture : IDisposable
     {
         private bool _disposed;
@@ -119,16 +226,5 @@ namespace Microsoft.Build.UnitTests
                 _disposed = true;
             }
         }
-    }
-
-    public class MSBuildBeforeAfterEveryTest : BeforeAfterTestAttribute
-    {
-        private TestEnvironment _testEnvironment;
-
-        public override void Before(MethodInfo methodUnderTest, IXunitTest test)
-            => _testEnvironment = TestEnvironment.Create();
-
-        public override void After(MethodInfo methodUnderTest, IXunitTest test)
-            => _testEnvironment.Dispose();
     }
 }
