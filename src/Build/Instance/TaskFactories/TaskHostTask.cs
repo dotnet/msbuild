@@ -146,9 +146,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool _useSidecarTaskHost = false;
 
-#if !NET35
         private readonly HostServices _hostServices;
-#endif
 
         /// <summary>
         /// The project file path that requests task execution.
@@ -174,9 +172,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
 #endif
-#if !NET35
             HostServices hostServices,
-#endif
             int scheduledNodeId,
             TaskEnvironment taskEnvironment)
         {
@@ -192,9 +188,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             _appDomainSetup = appDomainSetup;
 #endif
-#if !NET35
             _hostServices = hostServices;
-#endif
             _projectFile = projectFile;
             _taskHostParameters = taskHostParameters;
             _useSidecarTaskHost = useSidecarTaskHost;
@@ -336,9 +330,7 @@ namespace Microsoft.Build.BackEnd
                         (IDictionary<string, string>)_taskEnvironment.GetEnvironmentVariables(),
                         _buildComponentHost.BuildParameters.Culture,
                         _buildComponentHost.BuildParameters.UICulture,
-#if !NET35
                         _hostServices,
-#endif
 #if FEATURE_APPDOMAIN
                         _appDomainSetup,
 #endif
@@ -352,7 +344,7 @@ namespace Microsoft.Build.BackEnd
                         _projectFile,
                         _buildComponentHost.BuildParameters.LogTaskInputs,
                         _setParameters,
-                        new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties),
+                        GetGlobalPropertiesForTaskHost(),
                         _taskLoggingContext.GetWarningsAsErrors(),
                         _taskLoggingContext.GetWarningsNotAsErrors(),
                         _taskLoggingContext.GetWarningsAsMessages());
@@ -418,6 +410,30 @@ namespace Microsoft.Build.BackEnd
             }
 
             return _taskExecutionSucceeded;
+        }
+
+        /// <summary>
+        /// Gets the global properties to send to the out-of-proc TaskHost.
+        /// Under ChangeWave 18.6, uses request-level properties from BuildEngine via
+        /// <see cref="IBuildEngine6.GetGlobalProperties"/> because those include per-request
+        /// properties like MSBuildRestoreSessionId that are added by ExecuteRestore() but are
+        /// not present in the build-level BuildParameters.GlobalProperties.
+        /// </summary>
+        private Dictionary<string, string> GetGlobalPropertiesForTaskHost()
+        {
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6) && BuildEngine is IBuildEngine6 buildEngine6)
+            {
+                IReadOnlyDictionary<string, string> requestProperties = buildEngine6.GetGlobalProperties();
+                var result = new Dictionary<string, string>(requestProperties.Count);
+                foreach (KeyValuePair<string, string> kvp in requestProperties)
+                {
+                    result[kvp.Key] = kvp.Value;
+                }
+
+                return result;
+            }
+
+            return new Dictionary<string, string>(_buildComponentHost.BuildParameters.GlobalProperties);
         }
 
         /// <summary>

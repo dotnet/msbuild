@@ -18,6 +18,7 @@ using Microsoft.Build.Utilities;
 // TYPELIBATTR clashes with the one in InteropServices.
 using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
 using UtilitiesProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
+using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 #endif
 
 using Microsoft.Build.Framework;
@@ -570,12 +571,12 @@ namespace Microsoft.Build.Tasks
             {
                 case UtilitiesProcessorArchitecture.ARM:
                 case UtilitiesProcessorArchitecture.X86:
-                    path = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(file, targetFrameworkVersion, visualStudioVersion, DotNetFrameworkArchitecture.Bitness32);
+                    path = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(file, targetFrameworkVersion, visualStudioVersion, UtilitiesDotNetFrameworkArchitecture.Bitness32);
                     break;
                 case UtilitiesProcessorArchitecture.AMD64:
                 case UtilitiesProcessorArchitecture.IA64:
                 case UtilitiesProcessorArchitecture.ARM64:
-                    path = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(file, targetFrameworkVersion, visualStudioVersion, DotNetFrameworkArchitecture.Bitness64);
+                    path = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile(file, targetFrameworkVersion, visualStudioVersion, UtilitiesDotNetFrameworkArchitecture.Bitness64);
                     break;
                 case UtilitiesProcessorArchitecture.MSIL:
                 default:
