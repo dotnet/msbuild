@@ -753,10 +753,94 @@ namespace Microsoft.Build.UnitTests
                 string destinationContent = File.ReadAllText(destination);
                 Assert.Equal("This is a destination file.", destinationContent);
 
-                ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026"); // did not do retries as it was r/o
+                // On Windows, ERROR_ACCESS_DENIED is not retried (it's a real ACL or r/o bit issue).
+                // On non-Windows with Wave18_6 enabled (default), access denied can be a transient lock
+                // (e.g. macOS CoW filesystem), so we retry; retries will ultimately fail for a genuinely read-only file.
+                if (NativeMethodsShared.IsWindows)
+                {
+                    ((MockEngine)t.BuildEngine).AssertLogDoesntContain("MSB3026");
+                }
+                else
+                {
+                    // non-Windows: retries are expected due to possible transient EACCES
+                    ((MockEngine)t.BuildEngine).AssertLogContains("MSB3026");
+                }
             }
             finally
             {
+                File.SetAttributes(source, FileAttributes.Normal);
+                File.SetAttributes(destination, FileAttributes.Normal);
+                File.Delete(source);
+                File.Delete(destination);
+            }
+        }
+
+        /// <summary>
+        /// When Wave18_6 is disabled, non-Windows should NOT retry on ERROR_ACCESS_DENIED (old behavior preserved via opt-out).
+        /// </summary>
+        [Theory]
+        [Trait("Category", "netcore-osx-failing")]
+        [Trait("Category", "netcore-linux-failing")]
+        [MemberData(nameof(GetHardLinksSymLinks))]
+        public void DoNotRetryCopyOverReadOnlyFileWhenWave18_6Disabled(bool isUseHardLinks, bool isUseSymbolicLinks)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_testOutputHelper);
+
+            // TODO: Remove test when Wave18_6 rotates out
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_6.ToString());
+
+            string source = FileUtilities.GetTemporaryFile();
+            string destination = FileUtilities.GetTemporaryFile();
+            try
+            {
+                using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
+                {
+                    sw.Write("This is a source file.");
+                }
+
+                using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
+                {
+                    sw.Write("This is a destination file.");
+                }
+
+                File.SetAttributes(destination, FileAttributes.ReadOnly);
+
+                ITaskItem sourceItem = new TaskItem(source);
+                ITaskItem destinationItem = new TaskItem(destination);
+                ITaskItem[] sourceFiles = { sourceItem };
+                ITaskItem[] destinationFiles = { destinationItem };
+
+                var engine = new MockEngine(_testOutputHelper);
+                var t = new Copy
+                {
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                    RetryDelayMilliseconds = 1,  // speed up tests!
+                    BuildEngine = engine,
+                    SourceFiles = sourceFiles,
+                    DestinationFiles = destinationFiles,
+                    SkipUnchangedFiles = true,
+                    // OverwriteReadOnlyFiles defaults to false
+                    UseHardlinksIfPossible = isUseHardLinks,
+                    UseSymboliclinksIfPossible = isUseSymbolicLinks,
+                };
+
+                // Should fail: target is readonly
+                Assert.False(t.Execute());
+
+                // Expect for there to have been no copies.
+                Assert.Empty(t.CopiedFiles);
+
+                string destinationContent = File.ReadAllText(destination);
+                Assert.Equal("This is a destination file.", destinationContent);
+
+                // With Wave18_6 disabled, ERROR_ACCESS_DENIED should not be retried on any platform (old behavior).
+                engine.AssertLogDoesntContain("MSB3026");
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+
                 File.SetAttributes(source, FileAttributes.Normal);
                 File.SetAttributes(destination, FileAttributes.Normal);
                 File.Delete(source);
