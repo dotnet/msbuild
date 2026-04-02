@@ -77,8 +77,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 }
                 """,
             Diag(DiagnosticIds.TaskEnvironmentRequired).WithLocation(0)
-                .WithArguments("Environment.GetEnvironmentVariable(string)", "use TaskEnvironment.GetEnvironmentVariable instead")
-        ).RunAsync();
+                .WithArguments("Environment.GetEnvironmentVariable(string)", "use TaskEnvironment.GetEnvironmentVariable instead")).RunAsync();
     }
 
     [Fact]
@@ -112,8 +111,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 }
                 """,
             Diag(DiagnosticIds.TaskEnvironmentRequired).WithLocation(0)
-                .WithArguments("Environment.SetEnvironmentVariable(string, string?)", "use TaskEnvironment.SetEnvironmentVariable instead")
-        ).RunAsync();
+                .WithArguments("Environment.SetEnvironmentVariable(string, string?)", "use TaskEnvironment.SetEnvironmentVariable instead")).RunAsync();
     }
 
     [Fact]
@@ -147,8 +145,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 }
                 """,
             Diag(DiagnosticIds.TaskEnvironmentRequired).WithLocation(0)
-                .WithArguments("Path.GetFullPath(string)", "use TaskEnvironment.GetAbsolutePath instead")
-        ).RunAsync();
+                .WithArguments("Path.GetFullPath(string)", "use TaskEnvironment.GetAbsolutePath instead")).RunAsync();
     }
 
     [Fact]
@@ -182,8 +179,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 }
                 """,
             Diag(DiagnosticIds.TaskEnvironmentRequired).WithLocation(0)
-                .WithArguments("Environment.CurrentDirectory", "use TaskEnvironment.ProjectDirectory instead")
-        ).RunAsync();
+                .WithArguments("Environment.CurrentDirectory", "use TaskEnvironment.ProjectDirectory instead")).RunAsync();
     }
 
     [Fact]
@@ -217,8 +213,7 @@ public class MultiThreadableTaskCodeFixProviderTests
                 }
                 """,
             Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
-                .WithArguments("File.Exists(string?)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")
-        ).RunAsync();
+                .WithArguments("File.Exists(string?)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")).RunAsync();
     }
 
     [Fact]
@@ -252,7 +247,6 @@ public class MultiThreadableTaskCodeFixProviderTests
                 }
                 """,
             Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
-                .WithArguments("new FileInfo(...)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")
-        ).RunAsync();
+                .WithArguments("new FileInfo(...)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")).RunAsync();
     }
 }
