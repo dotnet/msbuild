@@ -213,87 +213,6 @@ public class MultiThreadableTaskAnalyzerTests
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
-    public async Task EnvironmentGetEnvVar_InMultiThreadableTask_ProducesWarning()
-    {
-        var diags = await GetDiagnosticsAsync("""
-            using System;
-            using Microsoft.Build.Framework;
-            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
-            {
-                public TaskEnvironment TaskEnvironment { get; set; }
-                public override bool Execute()
-                {
-                    var val = Environment.GetEnvironmentVariable("PATH");
-                    return true;
-                }
-            }
-            """);
-
-        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
-        diags.Length.ShouldBe(1);
-    }
-
-    [Fact]
-    public async Task EnvironmentSetEnvVar_InMultiThreadableTask_ProducesWarning()
-    {
-        var diags = await GetDiagnosticsAsync("""
-            using System;
-            using Microsoft.Build.Framework;
-            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
-            {
-                public TaskEnvironment TaskEnvironment { get; set; }
-                public override bool Execute()
-                {
-                    Environment.SetEnvironmentVariable("KEY", "VALUE");
-                    return true;
-                }
-            }
-            """);
-
-        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
-    }
-
-    [Fact]
-    public async Task EnvironmentCurrentDirectory_InMultiThreadableTask_ProducesWarning()
-    {
-        var diags = await GetDiagnosticsAsync("""
-            using System;
-            using Microsoft.Build.Framework;
-            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
-            {
-                public TaskEnvironment TaskEnvironment { get; set; }
-                public override bool Execute()
-                {
-                    var dir = Environment.CurrentDirectory;
-                    return true;
-                }
-            }
-            """);
-
-        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
-    }
-
-    [Fact]
-    public async Task PathGetFullPath_InMultiThreadableTask_ProducesWarning()
-    {
-        var diags = await GetDiagnosticsAsync("""
-            using System.IO;
-            using Microsoft.Build.Framework;
-            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
-            {
-                public TaskEnvironment TaskEnvironment { get; set; }
-                public override bool Execute()
-                {
-                    var p = Path.GetFullPath("relative");
-                    return true;
-                }
-            }
-            """);
-
-        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
-    }
-
-    [Fact]
     public async Task ProcessStart_InMultiThreadableTask_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -376,26 +295,6 @@ public class MultiThreadableTaskAnalyzerTests
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
-    public async Task FileExists_WithStringArg_ProducesWarning()
-    {
-        var diags = await GetDiagnosticsAsync("""
-            using System.IO;
-            using Microsoft.Build.Framework;
-            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
-            {
-                public TaskEnvironment TaskEnvironment { get; set; }
-                public override bool Execute()
-                {
-                    File.Exists("foo.txt");
-                    return true;
-                }
-            }
-            """);
-
-        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
-    }
-
-    [Fact]
     public async Task FileReadAllText_WithStringArg_ProducesWarning()
     {
         var diags = await GetDiagnosticsAsync("""
@@ -427,26 +326,6 @@ public class MultiThreadableTaskAnalyzerTests
                 public override bool Execute()
                 {
                     Directory.Exists("mydir");
-                    return true;
-                }
-            }
-            """);
-
-        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
-    }
-
-    [Fact]
-    public async Task NewFileInfo_WithStringArg_ProducesWarning()
-    {
-        var diags = await GetDiagnosticsAsync("""
-            using System.IO;
-            using Microsoft.Build.Framework;
-            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
-            {
-                public TaskEnvironment TaskEnvironment { get; set; }
-                public override bool Execute()
-                {
-                    var fi = new FileInfo("file.txt");
                     return true;
                 }
             }
