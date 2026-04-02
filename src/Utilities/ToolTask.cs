@@ -1420,6 +1420,11 @@ namespace Microsoft.Build.Utilities
                 .Split(MSBuildConstants.PathSeparatorChar)?
                 .Where(path =>
                 {
+                    if (string.IsNullOrEmpty(path))
+                    {
+                        return false;
+                    }
+
                     try
                     {
                         // The PATH can contain anything, including bad characters
