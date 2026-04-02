@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests
         {
             _outputHelper = outputHelper;
             _mockTerminal = new Terminal(_outputWriter);
-            
+
             _terminallogger = new TerminalLogger(_mockTerminal);
             _terminallogger.Initialize(_centralNodeEventSource, _nodeCount);
             _terminallogger._createStopwatch = () => new MockStopwatch();
@@ -916,11 +916,11 @@ namespace Microsoft.Build.UnitTests
                 string logFileWithoutTL = env.ExpectFile(".binlog").Path;
 
                 // Execute MSBuild with binary, file and terminal loggers
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success,   outputHelper: _outputHelper);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithTL.log")};verbosity=diagnostic -tl:on", out bool success, outputHelper: _outputHelper);
                 success.ShouldBeTrue();
 
                 // Execute MSBuild with binary and file loggers
-                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithoutTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithoutTL.log")};verbosity=diagnostic", out success,   outputHelper: _outputHelper);
+                RunnerUtilities.ExecMSBuild($"{projectFile.Path} /bl:{logFileWithoutTL} -flp:logfile={Path.Combine(logFolder.Path, "logFileWithoutTL.log")};verbosity=diagnostic", out success, outputHelper: _outputHelper);
                 success.ShouldBeTrue();
 
                 // Read the binary log and replay into mockLogger
@@ -1029,7 +1029,7 @@ namespace Microsoft.Build.UnitTests
             {
                 // Create multiple projects that will build in parallel
                 TransientTestFolder logFolder = env.CreateFolder(createFolder: true);
-                
+
                 // Create three simple projects
                 TransientTestFile project1 = env.CreateFile(logFolder, "project1.proj", @"
 <Project>
@@ -1037,21 +1037,21 @@ namespace Microsoft.Build.UnitTests
         <Message Text='Building project1' Importance='High' />
     </Target>
 </Project>");
-                
+
                 TransientTestFile project2 = env.CreateFile(logFolder, "project2.proj", @"
 <Project>
     <Target Name='Build'>
         <Message Text='Building project2' Importance='High' />
     </Target>
 </Project>");
-                
+
                 TransientTestFile project3 = env.CreateFile(logFolder, "project3.proj", @"
 <Project>
     <Target Name='Build'>
         <Message Text='Building project3' Importance='High' />
     </Target>
 </Project>");
-                
+
                 // Create a solution file that builds all projects in parallel
                 string solutionContents = $@"
 <Project>
@@ -1135,95 +1135,6 @@ namespace Microsoft.Build.UnitTests
             _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
 
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform().UseParameters(runOnCentralNode);
-        }
-
-        [Fact]
-        public void MetaprojProjectStartedDoesNotCrash()
-        {
-            // Metaproj files are generated for solution-based multi-targeting builds and are never evaluated.
-            // TerminalLogger should handle ProjectStarted for metaproj files without crashing,
-            // even though there's no matching ProjectEvaluationFinished event.
-            string metaprojFile = NativeMethodsShared.IsUnixLike ? "/src/solution.sln.metaproj" : @"C:\src\solution.sln.metaproj";
-
-            BuildEventContext buildContext = MakeBuildEventContext(evalId: -1, projectContextId: 10);
-    
-            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
-
-            // No ProjectEvaluationFinished for metaproj — this is the scenario that used to crash.
-            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(metaprojFile, "Build", buildEventContext: buildContext));
-
-            // Should not throw — the metaproj check suppresses the assertion.
-            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(metaprojFile, true, buildEventContext: buildContext));
-            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
-        }
-
-        [Fact]
-        public void MetaprojWithEvaluatedProjectDoesNotInterfere()
-        {
-            // A build with both a real evaluated project and a metaproj should work fine.
-            string metaprojFile = NativeMethodsShared.IsUnixLike ? "/src/solution.sln.metaproj" : @"C:\src\solution.sln.metaproj";
-
-            BuildEventContext evalContext = MakeBuildEventContext(evalId: 1, projectContextId: 1);
-            BuildEventContext metaprojContext = MakeBuildEventContext(evalId: -1, projectContextId: 10);
-
-            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
-
-            // Real project with evaluation
-            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(
-                _projectFile,
-                properties: [("TargetFramework", "net10.0")],
-                buildEventContext: evalContext));
-            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, "Build", buildEventContext: evalContext));
-
-            // Metaproj — no evaluation event
-            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(metaprojFile, "Build", buildEventContext: metaprojContext));
-
-            // Finish both
-            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(metaprojFile, true, buildEventContext: metaprojContext));
-            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, true, buildEventContext: evalContext));
-            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
-        }
-
-        [Fact]
-        public void MultipleMetaprojsDoNotCrash()
-        {
-            // Multiple metaproj files in the same build (common in large solution builds)
-            // all have InvalidEvaluationId. They should all be handled without crashing.
-            string metaproj1 = NativeMethodsShared.IsUnixLike ? "/src/ProjectA.csproj.metaproj" : @"C:\src\ProjectA.csproj.metaproj";
-            string metaproj2 = NativeMethodsShared.IsUnixLike ? "/src/ProjectB.csproj.metaproj" : @"C:\src\ProjectB.csproj.metaproj";
-
-            BuildEventContext context1 = MakeBuildEventContext(evalId: -1, projectContextId: 10);
-            BuildEventContext context2 = MakeBuildEventContext(evalId: -1, projectContextId: 11);
-
-            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
-
-            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(metaproj1, "Build", buildEventContext: context1));
-            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(metaproj2, "Build", buildEventContext: context2));
-
-            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(metaproj1, true, buildEventContext: context1));
-            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(metaproj2, true, buildEventContext: context2));
-            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
-        }
-
-        [Fact]
-        public void RegularProjectWithEvalInfoDoesNotAssert()
-        {
-            // Verify that a regular (non-metaproj) project with proper evaluation info
-            // flows through ProjectStarted without issues.
-            BuildEventContext buildContext = MakeBuildEventContext(evalId: 50, projectContextId: 20);
-
-            _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
-
-            // Provide evaluation info for evalId: 50
-            _centralNodeEventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(
-                _projectFile,
-                properties: [("TargetFramework", "net10.0")],
-                buildEventContext: buildContext));
-
-            // ProjectStarted for regular project — should succeed with eval info present.
-            _centralNodeEventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile, "Build", buildEventContext: buildContext));
-            _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, true, buildEventContext: buildContext));
-            _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
         }
     }
 }

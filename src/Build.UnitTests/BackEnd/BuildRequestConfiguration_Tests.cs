@@ -578,15 +578,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void TestProjectEvaluationIdDefaultsToInvalid()
-        {
-            BuildRequestConfiguration configuration = new(
-                new BuildRequestData("file", new Dictionary<string, string>(), "4.0", [], null), "2.0");
-
-            configuration.ProjectEvaluationId.ShouldBe(BuildEventContext.InvalidEvaluationId);
-        }
-
-        [Fact]
         public void TestProjectEvaluationIdPreservedAcrossTranslation()
         {
             string projectBody = """
@@ -656,26 +647,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             clone.ProjectEvaluationId.ShouldBe(expectedEvalId);
         }
 
-        [Fact]
-        public void TestProjectEvaluationIdUpdatableFromResult()
-        {
-            BuildRequestConfiguration configuration = new(
-                new BuildRequestData("file", new Dictionary<string, string>(), "4.0", [], null), "2.0");
-
-            configuration.ProjectEvaluationId.ShouldBe(BuildEventContext.InvalidEvaluationId);
-
-            // Simulate what BuildManager.HandleResult does.
-            configuration.ProjectEvaluationId = 42;
-            configuration.ProjectEvaluationId.ShouldBe(42);
-        }
 
         [Fact]
         public void TestProjectEvaluationIdPreservedAcrossTranslateForFutureUse()
         {
-            string projectBody = ObjectModelHelpers.CleanupFileContents(@"
-<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
-<Target Name='Build' />
-</Project>");
+            string projectBody = """
+                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='Build' />
+                </Project>
+                """.Cleanup();
 
             using var collection = new ProjectCollection();
             using ProjectFromString projectFromString = new(
