@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
         public bool HaveLoggedBuildFinishedEvent { get; set; }
 
         void IBuildEventSink.Consume(BuildEventArgs buildEvent, int sinkId) => (this as IBuildEventSink).Consume(buildEvent);
-        
+
         void IBuildEventSink.Consume(BuildEventArgs buildEvent)
         {
             // map the incoming build event to the appropriate event handler
