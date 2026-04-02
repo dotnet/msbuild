@@ -22,6 +22,9 @@
     <PackageVersion Include="LargeAddressAware" Version="1.0.5" />
     <PackageVersion Update="LargeAddressAware" Condition="'$(LargeAddressAwareVersion)' != ''" Version="$(LargeAddressAwareVersion)" />
 
+    <PackageVersion Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" Version="5.0.0-1.25277.114" />
+    <PackageVersion Update="Microsoft.CodeAnalysis.PublicApiAnalyzers" Condition="'$(MicrosoftCodeAnalysisPublicApiAnalyzersVersion)' != ''" Version="$(MicrosoftCodeAnalysisPublicApiAnalyzersVersion)" />
+
     <PackageVersion Include="Microsoft.CodeCoverage" Version="18.0.1" />
     <PackageVersion Update="Microsoft.CodeCoverage" Condition="'$(MicrosoftCodeCoverageVersion)' != ''" Version="$(MicrosoftCodeCoverageVersion)" />
 
