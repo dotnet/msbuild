@@ -5,7 +5,7 @@
   <PropertyGroup>
     <VersionPrefix>18.7.0</VersionPrefix>
     <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <PackageValidationBaselineVersion>18.5.0-preview-26126-01</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>18.5.0</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
     <!-- differentiate experimental insertions to avoid package id conflicts, 
