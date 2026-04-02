@@ -48,16 +48,13 @@
     <XUnitCoreSettingsFile>$(XUnitDesktopSettingsFile)</XUnitCoreSettingsFile>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(IsTestingPlatformApplication)' == 'true'">
-    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true'">
     <!-- As of 17.3, one TF of Microsoft.NET.Test.Sdk depends on Newtonsoft.Json
          9.0.1, causing it to be downloaded and flagged by component governance -->
     <PackageReference Include="Newtonsoft.Json" />
 
     <PackageReference Include="Microsoft.DotNet.XUnitV3Extensions" Condition="'$(DisableTestSharedFiles)' != 'true'" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
 
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
