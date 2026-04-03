@@ -75,6 +75,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     MSBuild msbuildTask = new MSBuild
                     {
+                        TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                         BuildEngine = new MockEngine(_testOutput),
 
                         Projects = new ITaskItem[] { new TaskItem(projectFile1) }
@@ -123,6 +124,7 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 MSBuild msbuildTask = new MSBuild();
+                msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 msbuildTask.BuildEngine = new MockEngine();
 
                 msbuildTask.Projects = new ITaskItem[] { new TaskItem(projectFile1), new TaskItem(projectFile2) };
@@ -519,6 +521,7 @@ namespace Microsoft.Build.UnitTests
                 projects[3].SetMetadata("Properties", "MyProp=1");
 
                 MSBuild msbuildTask = new MSBuild();
+                msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 msbuildTask.BuildEngine = new MockEngine();
                 msbuildTask.Projects = projects;
                 msbuildTask.Properties = new string[] { "MyProp=0" };
@@ -577,6 +580,7 @@ namespace Microsoft.Build.UnitTests
                 projects[3].SetMetadata("Properties", "MyProp=1");
 
                 MSBuild msbuildTask = new MSBuild();
+                msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 msbuildTask.BuildEngine = new MockEngine();
 
                 msbuildTask.Projects = projects;
@@ -633,6 +637,7 @@ namespace Microsoft.Build.UnitTests
                 projects[3].SetMetadata("Properties", "MyProp=1");
 
                 MSBuild msbuildTask = new MSBuild();
+                msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 msbuildTask.BuildEngine = new MockEngine();
 
                 msbuildTask.Projects = projects;
@@ -688,6 +693,7 @@ namespace Microsoft.Build.UnitTests
                 projects[3].SetMetadata("Properties", "=;1");
 
                 MSBuild msbuildTask = new MSBuild();
+                msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 msbuildTask.BuildEngine = new MockEngine();
 
                 msbuildTask.Projects = projects;
@@ -735,6 +741,7 @@ namespace Microsoft.Build.UnitTests
                 projects[1].SetMetadata("AdditionalProperties", "MyPropA=0");
 
                 MSBuild msbuildTask = new MSBuild();
+                msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 msbuildTask.BuildEngine = new MockEngine();
                 msbuildTask.Properties = new string[] { "MyPropG=1" };
                 msbuildTask.Projects = projects;
@@ -794,6 +801,7 @@ namespace Microsoft.Build.UnitTests
                 projects[1].SetMetadata("Properties", "MyPropG=0");
 
                 MSBuild msbuildTask = new MSBuild();
+                msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 msbuildTask.BuildEngine = new MockEngine();
                 msbuildTask.Projects = projects;
 
@@ -849,6 +857,7 @@ namespace Microsoft.Build.UnitTests
                 projects[1].SetMetadata("AdditionalProperties", "MyPropA=1");
 
                 MSBuild msbuildTask = new MSBuild();
+                msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 msbuildTask.BuildEngine = new MockEngine();
                 msbuildTask.Projects = projects;
 
@@ -907,6 +916,7 @@ namespace Microsoft.Build.UnitTests
                 };
 
                 MSBuild msbuildTask = new MSBuild();
+                msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 msbuildTask.BuildEngine = new MockEngine();
                 msbuildTask.Projects = projects;
 
@@ -957,6 +967,7 @@ namespace Microsoft.Build.UnitTests
                 for (int i = 0; i < 4; i++)
                 {
                     MSBuild msbuildTask = new MSBuild();
+                    msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                     // By default IsMultipleNodesIs false
                     MockEngine mockEngine = new MockEngine();
                     mockEngine.IsRunningMultipleNodes = false;
@@ -1059,6 +1070,7 @@ namespace Microsoft.Build.UnitTests
                 for (int i = 0; i < 4; i++)
                 {
                     MSBuild msbuildTask = new MSBuild();
+                    msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                     MockEngine mockEngine = new MockEngine();
                     mockEngine.IsRunningMultipleNodes = true;
                     msbuildTask.BuildEngine = mockEngine;
@@ -1157,6 +1169,7 @@ namespace Microsoft.Build.UnitTests
                 };
 
                 MSBuild msbuildTask = new MSBuild();
+                msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 MockEngine mockEngine = new MockEngine();
                 mockEngine.IsRunningMultipleNodes = true;
                 msbuildTask.BuildEngine = mockEngine;
@@ -1174,6 +1187,7 @@ namespace Microsoft.Build.UnitTests
                 };
 
                 msbuildTask = new MSBuild();
+                msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 mockEngine = new MockEngine();
                 mockEngine.IsRunningMultipleNodes = true;
                 msbuildTask.BuildEngine = mockEngine;
@@ -1221,6 +1235,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     // Test the case where the error is in the last target
                     MSBuild msbuildTask = new MSBuild();
+                    msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                     MockEngine mockEngine = new MockEngine();
                     msbuildTask.BuildEngine = mockEngine;
                     msbuildTask.Projects = projects;
@@ -1338,6 +1353,7 @@ namespace Microsoft.Build.UnitTests
                 };
 
                 MSBuild msbuildTask = new MSBuild();
+                msbuildTask.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 msbuildTask.BuildEngine = new MockEngine();
                 msbuildTask.Projects = projects;
 
