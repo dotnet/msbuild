@@ -4,6 +4,7 @@ trigger:
 - vs*
 
 variables:
+- template: /eng/common/templates/variables/pool-providers.yml
 - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
   - group: AzureDevOps-Artifact-Feeds-Pats
 - name: cfsNugetWarnLevel
@@ -12,6 +13,25 @@ variables:
   value: none
 - name: NugetSecurityAnalysisWarningLevel
   value: none
+# Centralized pool configuration to avoid duplicating conditional blocks across jobs.
+- ${{ if eq(variables['System.TeamProject'], 'public') }}:
+  - name: WindowsPoolName
+    value: $(DncEngPublicBuildPool)
+  - name: WindowsPoolDemands
+    value: ImageOverride -equals windows.vs2026preview.scout.amd64.open
+  - name: LinuxPoolName
+    value: $(DncEngPublicBuildPool)
+  - name: LinuxPoolDemands
+    value: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
+- ${{ if ne(variables['System.TeamProject'], 'public') }}:
+  - name: WindowsPoolName
+    value: VSEng-MicroBuildVSStable
+  - name: WindowsPoolDemands
+    value: agent.os -equals Windows_NT
+  - name: LinuxPoolName
+    value: Azure Pipelines
+  - name: LinuxPoolDemands
+    value: ImageOverride -equals ubuntu-latest
 
 jobs:
 - job: CheckVersionBumpOnReleaseBranches
@@ -71,12 +91,8 @@ jobs:
     coverageReportName: WindowsFullFrameworkCoverage
   displayName: "Windows Full"
   pool:
-    ${{ if eq(variables['System.TeamProject'], 'public') }}:
-      name: NetCore-Public
-      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
-    ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      name: VSEng-MicroBuildVSStable
-      demands: agent.os -equals Windows_NT
+    name: $(WindowsPoolName)
+    demands: $(WindowsPoolDemands)
   timeoutInMinutes: 120
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
@@ -183,12 +199,8 @@ jobs:
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
     coverageReportName: WindowsCoreCoverage
   pool:
-    ${{ if eq(variables['System.TeamProject'], 'public') }}:
-      name: NetCore-Public
-      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
-    ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      name: VSEng-MicroBuildVSStable
-      demands: agent.os -equals Windows_NT
+    name: $(WindowsPoolName)
+    demands: $(WindowsPoolDemands)
   timeoutInMinutes: 120
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
@@ -264,7 +276,11 @@ jobs:
 - job: BootstrapMSBuildWithMTMode
   displayName: "Linux Core Multithreaded Mode"
   pool:
-    vmImage: 'ubuntu-latest'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: $(DncEngPublicBuildPool)
+      demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      vmImage: 'ubuntu-latest'
   timeoutInMinutes: 120
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
@@ -297,12 +313,8 @@ jobs:
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
     coverageReportName: WindowsFullReleaseCoverage
   pool:
-    ${{ if eq(variables['System.TeamProject'], 'public') }}:
-      name: NetCore-Public
-      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
-    ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      name: VSEng-MicroBuildVSStable
-      demands: agent.os -equals Windows_NT
+    name: $(WindowsPoolName)
+    demands: $(WindowsPoolDemands)
   timeoutInMinutes: 120
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
@@ -383,11 +395,8 @@ jobs:
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
   pool:
-    ${{ if eq(variables['System.TeamProject'], 'public') }}:
-      name: NetCore-Public
-      demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
-    ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      vmImage: 'ubuntu-latest'
+    name: $(LinuxPoolName)
+    demands: $(LinuxPoolDemands)
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
   - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
@@ -573,12 +582,8 @@ jobs:
   variables:
     onlyDocChanged: $[ dependencies.BootstrapMSBuildOnFullFrameworkWindows.outputs['CheckDocumentationOnlyChange.onlyDocChanged'] ]
   pool:
-    ${{ if eq(variables['System.TeamProject'], 'public') }}:
-      name: NetCore-Public
-      demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
-    ${{ if ne(variables['System.TeamProject'], 'public') }}:
-      name: VSEng-MicroBuildVSStable
-      demands: agent.os -equals Windows_NT
+    name: $(WindowsPoolName)
+    demands: $(WindowsPoolDemands)
   steps:
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: DownloadPipelineArtifact@2
