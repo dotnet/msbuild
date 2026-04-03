@@ -217,9 +217,27 @@ namespace Microsoft.Build.Tasks
                     }
                     catch (IOException moveEx)
                     {
-                        // Move failed, log and return
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
-                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.OriginalValue, moveEx.Message, lockedFileMessage);
+                        // Only retry with Replace if the destination now exists (concurrent write race).
+                        if (System.IO.File.Exists(filePath))
+                        {
+                            try
+                            {
+                                System.IO.File.Replace(temporaryFilePath, filePath, null, true);
+                                temporaryFilePath = null; // Mark as successfully replaced
+                                return !Log.HasLoggedErrors;
+                            }
+                            catch (IOException replaceEx)
+                            {
+                                // Both attempts failed; log the original move error as the root cause.
+                                string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
+                                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.OriginalValue, moveEx.Message + " " + replaceEx.Message, lockedFileMessage);
+                                return !Log.HasLoggedErrors;
+                            }
+                        }
+
+                        // Destination doesn't exist; move failed for a different reason.
+                        string lockedFileDiagnostics = LockCheck.GetLockedFileMessage(filePath);
+                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.OriginalValue, moveEx.Message, lockedFileDiagnostics);
                         return !Log.HasLoggedErrors;
                     }
                 }
