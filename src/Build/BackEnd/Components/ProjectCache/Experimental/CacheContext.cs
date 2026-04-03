@@ -35,6 +35,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "Already shipped")]
         public CacheContext(
             IReadOnlyDictionary<string, string> pluginSettings,
             MSBuildFileSystemBase fileSystem,

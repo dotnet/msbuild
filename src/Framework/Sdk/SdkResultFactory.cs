@@ -21,6 +21,7 @@ namespace Microsoft.Build.Framework
         /// <param name="version">Version of the SDK that was resolved.</param>
         /// <param name="warnings">Optional warnings to display during resolution.</param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0027:Public API with optional parameter(s) should have the most parameters amongst its public overloads.", Justification = "Already shipped")]
         public abstract SdkResult IndicateSuccess(string path, string version, IEnumerable<string> warnings = null);
 
         /// <summary>
@@ -32,6 +33,7 @@ namespace Microsoft.Build.Framework
         /// <param name="itemsToAdd">Items to add to the evaluation</param>
         /// <param name="warnings">Optional warnings to display during resolution.</param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0027:Public API with optional parameter(s) should have the most parameters amongst its public overloads.", Justification = "Already shipped")]
         public virtual SdkResult IndicateSuccess(string path,
             string version,
             IDictionary<string, string> propertiesToAdd,
@@ -85,6 +87,7 @@ namespace Microsoft.Build.Framework
         /// additionally set as environment variables during execution, including to tasks and launched processes.
         /// </param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "Already shipped")]
         public virtual SdkResult IndicateSuccess(string path,
             string version,
             IDictionary<string, string> propertiesToAdd,
@@ -115,6 +118,7 @@ namespace Microsoft.Build.Framework
         /// additionally set as environment variables during execution, including to tasks and launched processes.
         /// </param>
         /// <returns></returns>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "Already shipped")]
         public virtual SdkResult IndicateSuccess(IEnumerable<string> paths,
             string version,
             IDictionary<string, string> propertiesToAdd = null,
