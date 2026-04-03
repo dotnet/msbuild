@@ -48,7 +48,7 @@ namespace Microsoft.Build.Execution
     /// This class is the public entry point for executing builds.
     /// </summary>
     [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Refactoring at the end of Beta1 is not appropriate.")]
-    public class BuildManager : INodePacketHandler, IBuildComponentHost, IDisposable
+    public partial class BuildManager : INodePacketHandler, IBuildComponentHost, IDisposable
     {
         // TODO: Figure out a more elegant way to do this.
         //       The rationale for this is that we can detect during design-time builds in the Evaluator (which populates this) that the project cache will be used so that we don't
@@ -266,6 +266,8 @@ namespace Microsoft.Build.Execution
         private ProjectCacheService? _projectCacheService;
 
         private bool _hasProjectCacheServiceInitializedVsScenario;
+
+
 
 #if DEBUG
         /// <summary>
@@ -687,6 +689,10 @@ namespace Microsoft.Build.Execution
                 _noNodesActiveEvent!.Set();
             }
 
+#if NET
+            TryRegisterWithCoordinator();
+#endif
+
             ILoggingService InitializeLoggingService()
             {
                 ILoggingService loggingService = CreateLoggingService(
@@ -1025,6 +1031,10 @@ namespace Microsoft.Build.Execution
             }
 
             var exceptionsThrownInEndBuild = false;
+
+#if NET
+            UnregisterFromCoordinator();
+#endif
 
             try
             {
@@ -2347,7 +2357,12 @@ namespace Microsoft.Build.Execution
                 _executionCancellationTokenSource?.Cancel();
 
                 // If we are aborting, we will NOT reuse the nodes because their state may be compromised by attempts to shut down while the build is in-progress.
-                _nodeManager?.ShutdownConnectedNodes(!abort && _buildParameters!.EnableNodeReuse);
+#if NET
+                bool enableReuse = !abort && _buildParameters!.EnableNodeReuse && !IsCoordinatorManaged;
+#else
+                bool enableReuse = !abort && _buildParameters!.EnableNodeReuse;
+#endif
+                _nodeManager?.ShutdownConnectedNodes(enableReuse);
 
                 // if we are aborting, the task host will hear about it in time through the task building infrastructure;
                 // so only shut down the task host nodes if we're shutting down tidily (in which case, it is assumed that all
