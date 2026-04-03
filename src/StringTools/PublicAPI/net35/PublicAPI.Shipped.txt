@@ -1,0 +1,27 @@
+Microsoft.NET.StringTools.FowlerNollVo1aHash
+Microsoft.NET.StringTools.SpanBasedStringBuilder
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Clear() -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Dispose() -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Enumerator
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Enumerator.Current.get -> char
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Enumerator.Enumerator() -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Enumerator.Enumerator(System.Text.StringBuilder builder) -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Enumerator.MoveNext() -> bool
+Microsoft.NET.StringTools.SpanBasedStringBuilder.GetEnumerator() -> Microsoft.NET.StringTools.SpanBasedStringBuilder.Enumerator
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Length.get -> int
+Microsoft.NET.StringTools.SpanBasedStringBuilder.SpanBasedStringBuilder(int capacity = 4) -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.SpanBasedStringBuilder(string str) -> void
+Microsoft.NET.StringTools.Strings
+System.MemoryExtensions
+override Microsoft.NET.StringTools.SpanBasedStringBuilder.ToString() -> string
+static Microsoft.NET.StringTools.FowlerNollVo1aHash.Combine64(long left, long right) -> long
+static Microsoft.NET.StringTools.FowlerNollVo1aHash.ComputeHash32(string text) -> int
+static Microsoft.NET.StringTools.FowlerNollVo1aHash.ComputeHash32Fast(string text) -> int
+static Microsoft.NET.StringTools.FowlerNollVo1aHash.ComputeHash64(string text) -> long
+static Microsoft.NET.StringTools.FowlerNollVo1aHash.ComputeHash64Fast(string text) -> long
+static Microsoft.NET.StringTools.Strings.ClearCachedStrings() -> void
+static Microsoft.NET.StringTools.Strings.CreateDiagnosticReport() -> string
+static Microsoft.NET.StringTools.Strings.EnableDiagnostics() -> void
+static Microsoft.NET.StringTools.Strings.GetSpanBasedStringBuilder() -> Microsoft.NET.StringTools.SpanBasedStringBuilder
+static Microsoft.NET.StringTools.Strings.WeakIntern(string str) -> string
+static System.MemoryExtensions.AsSpan<T>(this T[] array, int start, int length) -> string
