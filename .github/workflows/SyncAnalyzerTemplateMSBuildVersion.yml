@@ -16,7 +16,7 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v3
+      uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 #v3
 
     - name: Set baseBranch variable
       id: vars
@@ -88,7 +88,7 @@ jobs:
 
     - name: Create Pull Request
       if: env.updateNeeded == 'true'
-      uses: actions/github-script@v7
+      uses: actions/github-script@f28e40c7f34bde8b3046d885e986cb6290c5673b #v7
       with:
         script: |
           const baseBranch = process.env.baseBranch;
