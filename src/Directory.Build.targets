@@ -79,11 +79,20 @@
   </ItemGroup>
 
   <PropertyGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true'">
-    <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework'">net</PublicApiTfm>
+    <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework'">netfx</PublicApiTfm>
     <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETFramework' and $([MSBuild]::GetTargetFrameworkVersion('$(TargetFramework)')) == '3.5'">net35</PublicApiTfm>
     <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard'">netstandard</PublicApiTfm>
-    <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETCoreApp'">netstandard</PublicApiTfm>
+    <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETCoreApp'">net</PublicApiTfm>
   </PropertyGroup>
+
+  <!-- Enable the Roslyn PublicApi analyzer for projects that carry PublicAPI baselines. -->
+  <ItemGroup Condition="'$(GenerateReferenceAssemblySource)' == 'true' and '$(TargetFramework)' != ''">
+    <!-- Ensure API stability for shipping packages -->
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" Condition="'$(DotNetBuildFromSource)' != 'true'" />
+
+    <AdditionalFiles Include="PublicAPI/$(PublicApiTfm)/PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI/$(PublicApiTfm)/PublicAPI.Unshipped.txt" />
+  </ItemGroup>
 
   <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
     <PackageReference Include="xunit.console" />

@@ -18,6 +18,7 @@ namespace Microsoft.Build.Tasks
     /// Resolves metadata for the specified set of assemblies.
     /// </summary>
     [SupportedOSPlatform("windows")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0022:Constructor make noninheritable base class inheritable", Justification = "Already shippped")]
     public class GetAssembliesMetadata : TaskExtension
     {
         /// <summary>

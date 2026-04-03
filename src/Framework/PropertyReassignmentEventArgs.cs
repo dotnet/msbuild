@@ -63,6 +63,7 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">The help keyword.</param>
         /// <param name="senderName">The sender name of the event.</param>
         /// <param name="importance">The importance of the message.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "Already shipped")]
         public PropertyReassignmentEventArgs(
             string propertyName,
             string previousValue,
