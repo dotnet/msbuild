@@ -33,6 +33,9 @@ namespace Microsoft.Build.CommandLine
 #endif
         INodePacketFactory, INodePacketHandler, IBuildEngine10
     {
+        private static readonly object s_activeInstanceLock = new();
+        private static OutOfProcTaskHostNode s_activeInstance;
+
         /// <summary>
         /// Keeps a record of all environment variables that, on startup of the task host, have a different
         /// value from those that are passed to the task host in the configuration packet for the first task.
@@ -710,54 +713,94 @@ namespace Microsoft.Build.CommandLine
             _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
             _nodeEndpoint.Listen(this);
 
-            WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent, _taskCompleteEvent, _taskCancelledEvent];
-
-            while (true)
+            lock (s_activeInstanceLock)
             {
-                int index = WaitHandle.WaitAny(waitHandles);
-                switch (index)
+                s_activeInstance = this;
+            }
+
+            try
+            {
+                WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent, _taskCompleteEvent, _taskCancelledEvent];
+
+                while (true)
                 {
-                    case 0: // shutdownEvent
-                        NodeEngineShutdownReason shutdownReason = HandleShutdown();
-                        return shutdownReason;
+                    int index = WaitHandle.WaitAny(waitHandles);
+                    switch (index)
+                    {
+                        case 0: // shutdownEvent
+                            NodeEngineShutdownReason shutdownReason = HandleShutdown();
+                            return shutdownReason;
 
-                    case 1: // packetReceivedEvent
-                        INodePacket packet = null;
+                        case 1: // packetReceivedEvent
+                            INodePacket packet = null;
 
-                        int packetCount = _receivedPackets.Count;
+                            int packetCount = _receivedPackets.Count;
 
-                        while (packetCount > 0)
-                        {
-                            lock (_receivedPackets)
+                            while (packetCount > 0)
                             {
-                                if (_receivedPackets.Count > 0)
+                                lock (_receivedPackets)
                                 {
-                                    packet = _receivedPackets.Dequeue();
+                                    if (_receivedPackets.Count > 0)
+                                    {
+                                        packet = _receivedPackets.Dequeue();
+                                    }
+                                    else
+                                    {
+                                        break;
+                                    }
                                 }
-                                else
+
+                                if (packet != null)
                                 {
-                                    break;
+                                    HandlePacket(packet);
                                 }
                             }
 
-                            if (packet != null)
-                            {
-                                HandlePacket(packet);
-                            }
-                        }
-
-                        break;
-                    case 2: // taskCompleteEvent
-                        CompleteTask();
-                        break;
-                    case 3: // taskCancelledEvent
-                        CancelTask();
-                        break;
+                            break;
+                        case 2: // taskCompleteEvent
+                            CompleteTask();
+                            break;
+                        case 3: // taskCancelledEvent
+                            CancelTask();
+                            break;
+                    }
+                }
+            }
+            finally
+            {
+                lock (s_activeInstanceLock)
+                {
+                    if (s_activeInstance == this)
+                    {
+                        s_activeInstance = null;
+                    }
                 }
             }
 
             // UNREACHABLE
         }
+
+        /// <summary>
+        /// Requests the active out-of-proc task host node (if any) to shut down in response to an external stop signal
+        /// (for example <c>CTRL_C_EVENT</c> from Windows Restart Manager).
+        /// </summary>
+        internal static void RequestExternalShutdown()
+        {
+            OutOfProcTaskHostNode instance;
+            lock (s_activeInstanceLock)
+            {
+                instance = s_activeInstance;
+            }
+
+            instance?.SignalShutdownFromExternalStopRequest();
+        }
+
+        private void SignalShutdownFromExternalStopRequest()
+        {
+            _shutdownReason = NodeEngineShutdownReason.BuildComplete;
+            _shutdownEvent.Set();
+        }
+
         #endregion
 
         /// <summary>
