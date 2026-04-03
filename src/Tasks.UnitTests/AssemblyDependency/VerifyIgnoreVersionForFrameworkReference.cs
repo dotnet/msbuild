@@ -41,6 +41,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.IgnoreVersionForFrameworkReferences = true;
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
@@ -66,6 +67,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                            "</FileList >";
 
             t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
@@ -97,6 +99,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
@@ -119,6 +122,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                            "</FileList >";
 
             t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
@@ -150,6 +154,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 
             Assert.Equal(0, e.Warnings); // "No warnings expected in this scenario."
@@ -180,6 +185,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                                   "</FileList >";
 
             ResolveAssemblyReference t = new ResolveAssemblyReference();
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             ExecuteRAROnItemsAndRedist(t, e, items, redistString, true);
 

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -18,8 +19,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Construct.
         /// </summary>
-        public RawFilenameResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion)
-            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false)
+        public RawFilenameResolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVesion, TaskEnvironment taskEnvironment)
+            : base(searchPathElement, getAssemblyName, fileExists, getRuntimeVersion, targetedRuntimeVesion, ProcessorArchitecture.None, false, taskEnvironment)
         {
         }
 
@@ -44,10 +45,11 @@ namespace Microsoft.Build.Tasks
             if (rawFileNameCandidate != null)
             {
                 // {RawFileName} was passed in.
-                if (isImmutableFrameworkReference || fileExists(rawFileNameCandidate))
+                string fullRawFileName = taskEnvironment.GetAbsolutePath(rawFileNameCandidate).GetCanonicalForm().Value;
+                if (isImmutableFrameworkReference || fileExists(fullRawFileName))
                 {
                     userRequestedSpecificFile = true;
-                    foundPath = rawFileNameCandidate;
+                    foundPath = fullRawFileName;
                     return true;
                 }
 
@@ -55,7 +57,7 @@ namespace Microsoft.Build.Tasks
                 {
                     var considered = new ResolutionSearchLocation
                     {
-                        FileNameAttempted = rawFileNameCandidate,
+                        FileNameAttempted = fullRawFileName,
                         SearchPath = searchPathElement,
                         Reason = NoMatchReason.NotAFileNameOnDisk
                     };

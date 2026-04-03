@@ -45,6 +45,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     Assemblies = new ITaskItem[] { new TaskItem("assemblyfromconfig2") },
                     SearchPaths = new[] { moniker }
                 };
@@ -74,6 +75,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     Assemblies = new ITaskItem[] { new TaskItem("assemblyfromconfig_common.dll") },
                     SearchPaths = new[] { moniker },
                     TargetProcessorArchitecture = "x86"
@@ -104,6 +106,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     Assemblies = new ITaskItem[] { new TaskItem("v5assembly.dll") },
                     SearchPaths = new[] { moniker },
                     TargetProcessorArchitecture = "x86"
@@ -119,6 +122,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 t = new ResolveAssemblyReference
                 {
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     Assemblies = new ITaskItem[] { new TaskItem("v5assembly.dll") },
                     SearchPaths = new[] { moniker },
                     TargetProcessorArchitecture = "AMD64"
@@ -148,6 +152,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
                     BuildEngine = new MockEngine(_output),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     Assemblies = new ITaskItem[] { new TaskItem("assemblyfromconfig_common.dll") },
                     SearchPaths = new[] { moniker },
                     TargetProcessorArchitecture = "x86"
@@ -176,6 +181,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
                     BuildEngine = engine,
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                     Assemblies = new ITaskItem[] { new TaskItem("assemblyfromconfig2") },
                     SearchPaths = new[] { moniker }
                 };
