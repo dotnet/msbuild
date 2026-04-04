@@ -25,7 +25,7 @@ using Xunit.v3;
 
 [assembly: CollectionBehavior(CollectionBehavior.CollectionPerAssembly)]
 
-[assembly: AssemblyFixture(typeof(MSBuildTestAssemblyFixture))]
+[assembly: TestPipelineStartup(typeof(MSBuildTestPipelineStartup))]
 
 // Wrap a TestEnvironment around each test method and class so if invariants have changed we will know where
 [assembly: TestFramework(typeof(MSBuildTestFramework))]
@@ -146,12 +146,12 @@ namespace Microsoft.Build.UnitTests
         protected override ITestFrameworkExecutor CreateExecutor(Assembly assembly) => base.CreateExecutor(assembly);
     }
 
-    public class MSBuildTestAssemblyFixture : IDisposable
+    public class MSBuildTestPipelineStartup : ITestPipelineStartup
     {
         private bool _disposed;
         private TestEnvironment _testEnvironment;
 
-        public MSBuildTestAssemblyFixture()
+        public MSBuildTestPipelineStartup()
         {
             // Set field to indicate tests are running in the TestInfo class in Microsoft.Build.Framework.
             //  See the comments on the TestInfo class for an explanation of why it works this way.
@@ -227,8 +227,8 @@ namespace Microsoft.Build.UnitTests
                 fileName: "Directory.Build.targets",
                 contents: "<Project />");
         }
- 
-        public void Dispose()
+
+        public ValueTask StopAsync()
         {
             if (!_disposed)
             {
@@ -236,6 +236,10 @@ namespace Microsoft.Build.UnitTests
 
                 _disposed = true;
             }
+
+            return default;
         }
+
+        public ValueTask StartAsync(IMessageSink diagnosticMessageSink) => default;
     }
 }
