@@ -24,7 +24,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// </summary>
     public sealed class TaskHostFactory_Tests
     {
-        private static string AssemblyLocation { get; } = Path.Combine(Path.GetDirectoryName(typeof(TaskHostFactory_Tests).Assembly.Location) ?? AppContext.BaseDirectory, "Microsoft.Build.Engine.UnitTests.dll");
+        private static string AssemblyLocation { get; } =
+            typeof(TaskHostFactory_Tests).Assembly.Location
+            ?? Path.Combine(AppContext.BaseDirectory, "Microsoft.Build.Engine.UnitTests.dll");
 
         private ITestOutputHelper _output;
 
