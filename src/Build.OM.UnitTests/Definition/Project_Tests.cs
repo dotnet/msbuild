@@ -17,7 +17,6 @@ using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using GlobResultList = System.Collections.Generic.List<(string, string[], System.Collections.Immutable.ImmutableHashSet<string>, System.Collections.Immutable.ImmutableHashSet<string>)>;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 // can't use an actual ProvenanceResult because it points to a ProjectItemElement which is hard to mock.

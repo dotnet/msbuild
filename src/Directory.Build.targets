@@ -2,8 +2,6 @@
 
   <PropertyGroup>
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
-
-    <UseVSTestRunner Condition="'$(IsTestProject)' == 'true'">true</UseVSTestRunner>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsUnitTestProject)' != 'true'">
@@ -18,32 +16,28 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(IsUnitTestProject)' == 'true'">
-    <!-- Set output type of test projects to EXE.  This will allow us to run tests on .NET Core via F5 or "dotnet run" -->
-    <OutputType>Exe</OutputType>
-    <GenerateProgramFile>false</GenerateProgramFile>
-
-    <!-- Makes xunit print all test names in stdout -->
-    <XunitOptions>$(XunitOptions)</XunitOptions>
-
     <!-- Respect the traits set up by PlatformSpecific attribute. -->
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) --filter &quot;Category!=nonwindowstests</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux'))">$(XunitOptions) --filter &quot;Category!=nonlinuxtests</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux')) and '$(NetCoreBuild)'=='true'">--filter &quot;Category!=nonlinuxtests&amp;Category!=netcore-linux-failing</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx'))">$(XunitOptions) --filter &quot;Category!=nonosxtests</XunitOptions>
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx')) and '$(NetCoreBuild)'=='true'">--filter &quot;Category!=nonosxtests&amp;Category!=netcore-osx-failing</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) --filter-not-trait Category=nonwindowstests</XunitOptions>
+
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux'))">$(XunitOptions) --filter-not-trait Category=nonlinuxtests</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('linux')) and '$(NetCoreBuild)'=='true'">$(XunitOptions) --filter-not-trait Category=netcore-linux-failing</XunitOptions>
+
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx'))">$(XunitOptions) --filter-not-trait Category=nonosxtests</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('osx')) and '$(NetCoreBuild)'=='true'">$(XunitOptions) --filter-not-trait Category=netcore-osx-failing</XunitOptions>
+
     <!-- Replace with MSBuild::IsBsdLike once the initial msbuild knows about it -->
-    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">$(XunitOptions) --filter &quot;Category!=nonfreebsdtests</XunitOptions>
+    <XunitOptions Condition="$([MSBuild]::IsOSPlatform('FREEBSD')) Or $([MSBuild]::IsOSPlatform('NETBSD')) Or $([MSBuild]::IsOSPlatform('OPENBSD'))">$(XunitOptions) --filter-not-trait Category=nonfreebsdtests</XunitOptions>
 
-    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions)&amp;Category!=nonnetcoreapptests</XunitOptions>
-    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(XunitOptions)&amp;Category!=nonnetfxtests</XunitOptions>
+    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">$(XunitOptions) --filter-not-trait Category=nonnetcoreapptests</XunitOptions>
+    <XunitOptions Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">$(XunitOptions) --filter-not-trait Category=nonnetfxtests</XunitOptions>
 
-    <XunitOptions>$(XunitOptions)&amp;Category!=failing&quot; --Diag $(TargetName).log</XunitOptions>
+    <XunitOptions>$(XunitOptions) --filter-not-trait Category=failing</XunitOptions>
     
     <!-- Enable code coverage -->
     <!-- There are separate runsettings files for Windows and non-Windows. -->
     <!-- Some test projects hang on windows and hence coverage is disabled for these projects. -->
-    <!-- <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) - -settings $(RepoRoot)CoverageWindowsFull.runsettings - -test-adapter-path $(NuGetPackageRoot)microsoft.codecoverage/18.0.0-preview-25479-103/build/netstandard2.0</XunitOptions> -->
-    <XunitOptions Condition="!$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) --settings $(RepoRoot)Coverage.runsettings --test-adapter-path $(NuGetPackageRoot)microsoft.codecoverage/18.0.0-preview-25479-103/build/netstandard2.0</XunitOptions>
+    <!-- <XunitOptions Condition="$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) - -coverage - -coverage-settings $(RepoRoot)CoverageWindowsFull.config</XunitOptions> -->
+    <XunitOptions Condition="!$([MSBuild]::IsOSPlatform('windows'))">$(XunitOptions) --coverage --coverage-settings $(RepoRoot)Coverage.config</XunitOptions>
 
     <TestRunnerAdditionalArguments>$(XunitOptions)</TestRunnerAdditionalArguments>
 
@@ -59,13 +53,13 @@
          9.0.1, causing it to be downloaded and flagged by component governance -->
     <PackageReference Include="Newtonsoft.Json" />
 
-    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" Condition="'$(DisableTestSharedFiles)' != 'true'" />
+    <PackageReference Include="Microsoft.DotNet.XUnitV3Extensions" Condition="'$(DisableTestSharedFiles)' != 'true'" />
+    <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
 
     <!-- Don't localize unit test projects -->
     <PackageReference Remove="XliffTasks" />
 
     <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestAssemblyInfo.cs" Condition="'$(IsLibraryTestProject)' != 'true' AND '$(DisableTestSharedFiles)' != 'true'" />
-    <Compile Include="$(RepoRoot)src\Shared\UnitTests\TestProgram.cs" />
   </ItemGroup>
 
   <ItemGroup>
@@ -84,10 +78,6 @@
     <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETStandard'">netstandard</PublicApiTfm>
     <PublicApiTfm Condition="$([MSBuild]::GetTargetFrameworkIdentifier('$(TargetFramework)')) == '.NETCoreApp'">netstandard</PublicApiTfm>
   </PropertyGroup>
-
-  <ItemGroup Condition="'$(IsUnitTestProject)' == 'true' And '$(TargetFrameworkIdentifier)' != '.NETFramework' ">
-    <PackageReference Include="xunit.console" />
-  </ItemGroup>
 
   <ItemGroup Condition="'$(OutputType)' == 'Exe'">
     <!-- Copy empty Directory.Build.props and Directory.Build.targets files to output directory to prevent
