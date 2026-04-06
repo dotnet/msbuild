@@ -779,8 +779,6 @@ namespace Microsoft.Build.UnitTests
         /// When Wave18_6 is disabled, non-Windows should NOT retry on ERROR_ACCESS_DENIED (old behavior preserved via opt-out).
         /// </summary>
         [Theory]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
         [MemberData(nameof(GetHardLinksSymLinks))]
         public void DoNotRetryCopyOverReadOnlyFileWhenWave18_6Disabled(bool isUseHardLinks, bool isUseSymbolicLinks)
         {
@@ -790,24 +788,14 @@ namespace Microsoft.Build.UnitTests
             ChangeWaves.ResetStateForTests();
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_6.ToString());
 
-            string source = FileUtilities.GetTemporaryFile();
-            string destination = FileUtilities.GetTemporaryFile();
+            TransientTestFile source = env.CreateFile("source.tmp", "This is a source file.");
+            TransientTestFile destination = env.CreateFile("destination.tmp", "This is a destination file.");
+
+            File.SetAttributes(destination.Path, FileAttributes.ReadOnly);
             try
             {
-                using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
-                {
-                    sw.Write("This is a source file.");
-                }
-
-                using (StreamWriter sw = FileUtilities.OpenWrite(destination, true))
-                {
-                    sw.Write("This is a destination file.");
-                }
-
-                File.SetAttributes(destination, FileAttributes.ReadOnly);
-
-                ITaskItem sourceItem = new TaskItem(source);
-                ITaskItem destinationItem = new TaskItem(destination);
+                ITaskItem sourceItem = new TaskItem(source.Path);
+                ITaskItem destinationItem = new TaskItem(destination.Path);
                 ITaskItem[] sourceFiles = { sourceItem };
                 ITaskItem[] destinationFiles = { destinationItem };
 
@@ -826,25 +814,19 @@ namespace Microsoft.Build.UnitTests
                 };
 
                 // Should fail: target is readonly
-                Assert.False(t.Execute());
+                t.Execute().ShouldBeFalse();
 
                 // Expect for there to have been no copies.
-                Assert.Empty(t.CopiedFiles);
+                t.CopiedFiles.ShouldBeEmpty();
 
-                string destinationContent = File.ReadAllText(destination);
-                Assert.Equal("This is a destination file.", destinationContent);
+                File.ReadAllText(destination.Path).ShouldBe("This is a destination file.");
 
                 // With Wave18_6 disabled, ERROR_ACCESS_DENIED should not be retried on any platform (old behavior).
                 engine.AssertLogDoesntContain("MSB3026");
             }
             finally
             {
-                ChangeWaves.ResetStateForTests();
-
-                File.SetAttributes(source, FileAttributes.Normal);
-                File.SetAttributes(destination, FileAttributes.Normal);
-                File.Delete(source);
-                File.Delete(destination);
+                File.SetAttributes(destination.Path, FileAttributes.Normal);
             }
         }
 
