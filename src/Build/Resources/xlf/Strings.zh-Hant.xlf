@@ -927,8 +927,8 @@ Errors: {3}</source>
         <note />
       </trans-unit>
       <trans-unit id="SdkEnvironmentVariableOverridingAmbient">
-        <source>An SDK set the environment variable "{0}" to "{1}", overriding the ambient environment variable value.</source>
-        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the ambient environment variable value.</target>
+        <source>An SDK set the environment variable "{0}" to "{1}", overriding the ambient environment variable value "{2}".</source>
+        <target state="new">An SDK set the environment variable "{0}" to "{1}", overriding the ambient environment variable value "{2}".</target>
         <note />
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">

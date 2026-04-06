@@ -1416,8 +1416,9 @@ namespace Microsoft.Build.Execution
             bool overridingAmbient = _environmentVariableProperties.Contains(name);
             if (overridingAmbient)
             {
+                // Log before removing so LogIfValueDiffers can compare the old and new values.
+                LogIfValueDiffers(_environmentVariableProperties, name, value, "SdkEnvironmentVariableOverridingAmbient");
                 _environmentVariableProperties.Remove(name);
-                _loggingContext.LogComment(MessageImportance.Low, "SdkEnvironmentVariableOverridingAmbient", name, value);
             }
 
             // Set the property, overriding ambient environment variables but not regular properties defined in XML.
