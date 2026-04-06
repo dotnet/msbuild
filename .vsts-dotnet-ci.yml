@@ -9,12 +9,6 @@ trigger:
     - documentation/*
     - .github/*
 
-pr:
-  paths:
-    exclude:
-    - documentation/*
-    - .github/*
-
 variables:
 - ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
   - group: AzureDevOps-Artifact-Feeds-Pats
