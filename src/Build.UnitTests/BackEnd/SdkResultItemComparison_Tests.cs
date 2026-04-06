@@ -46,7 +46,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result1.ShouldNotBe(result2);
         }
 
-
         [Fact]
         public void SdkResultItem_Equal_WithDefaultCtor()
         {
