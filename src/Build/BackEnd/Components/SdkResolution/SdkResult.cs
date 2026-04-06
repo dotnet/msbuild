@@ -111,7 +111,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                   StringComparer.OrdinalIgnoreCase.Equals(_version, result._version) &&
                   _additionalPaths?.Count == result._additionalPaths?.Count &&
                   _propertiesToAdd?.Count == result._propertiesToAdd?.Count &&
-                  _itemsToAdd?.Count == result._propertiesToAdd?.Count &&
+                  _itemsToAdd?.Count == result._itemsToAdd?.Count &&
                   EqualityComparer<SdkReference>.Default.Equals(_sdkReference, result._sdkReference))
             {
                 if (_additionalPaths != null)
