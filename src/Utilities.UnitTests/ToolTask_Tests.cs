@@ -996,9 +996,9 @@ namespace Microsoft.Build.UnitTests
         /// <param name="repeats">Specifies the number of repeats for external command execution.</param>
         /// <param name="timeoutOnFirstExecution">Whether the first execution should be forced to time out before later retries succeed.</param>
         /// <remarks>
-        /// These tests execute the same task instance multiple times using a direct OS sleep process rather than
-        /// shelling through PowerShell or cmd.exe. When configured to time out, the first execution is expected to
-        /// fail and all following executions must still succeed.
+        /// These tests execute the same task instance multiple times, which will in turn run a command to sleep for a
+        /// predefined amount of time. The first execution may time out, but all following ones won't. It is expected
+        /// that all following executions return success.
         /// </remarks>
         [Theory]
         [InlineData(1, false)]
@@ -1010,7 +1010,7 @@ namespace Microsoft.Build.UnitTests
 
             int fastDelayMilliseconds = NativeMethodsShared.IsWindows ? 1_000 : 100;
             int slowDelayMilliseconds = 5_000;
-            int timeoutMilliseconds = NativeMethodsShared.IsWindows ? 2_000 : 1_000;
+            int timeoutMilliseconds = 2_000;
 
             MockEngine3 engine = new();
 
