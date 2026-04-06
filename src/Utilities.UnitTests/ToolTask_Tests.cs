@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests
 {
     public sealed class ToolTask_Tests
     {
-        private ITestOutputHelper _output;
+        private readonly ITestOutputHelper _output;
 
         public ToolTask_Tests(ITestOutputHelper testOutput)
         {
@@ -994,21 +994,23 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that a ToolTask instance can return correct results when executed multiple times with timeout.
         /// </summary>
         /// <param name="repeats">Specifies the number of repeats for external command execution.</param>
-        /// <param name="initialDelay">Delay to generate on the first execution in milliseconds.</param>
-        /// <param name="followupDelay">Delay to generate on follow-up execution in milliseconds.</param>
-        /// <param name="timeout">Task timeout in milliseconds.</param>
+        /// <param name="timeoutOnFirstExecution">Whether the first execution should be forced to time out before later retries succeed.</param>
         /// <remarks>
-        /// These tests execute the same task instance multiple times, which will in turn run a shell command to sleep
-        /// predefined amount of time. The first execution may time out, but all following ones won't. It is expected
-        /// that all following executions return success.
+        /// These tests execute the same task instance multiple times using a direct OS sleep process rather than
+        /// shelling through PowerShell or cmd.exe. When configured to time out, the first execution is expected to
+        /// fail and all following executions must still succeed.
         /// </remarks>
         [Theory]
-        [InlineData(1, 1, 1, -1)] // Normal case, no repeat.
-        [InlineData(3, 1, 1, -1)] // Repeat without timeout.
-        [InlineData(3, 10000, 1, 1000)] // Repeat with timeout.
-        public void ToolTaskThatTimeoutAndRetry(int repeats, int initialDelay, int followupDelay, int timeout)
+        [InlineData(1, false)]
+        [InlineData(3, false)]
+        [InlineData(3, true)]
+        public void ToolTaskThatTimeoutAndRetry(int repeats, bool timeoutOnFirstExecution)
         {
             using var env = TestEnvironment.Create(_output);
+
+            int fastDelayMilliseconds = NativeMethodsShared.IsWindows ? 1_000 : 100;
+            int slowDelayMilliseconds = 5_000;
+            int timeoutMilliseconds = NativeMethodsShared.IsWindows ? 2_000 : 1_000;
 
             MockEngine3 engine = new();
 
@@ -1016,27 +1018,36 @@ namespace Microsoft.Build.UnitTests
             var task = new ToolTaskThatSleeps
             {
                 BuildEngine = engine,
-                InitialDelay = initialDelay,
-                FollowupDelay = followupDelay,
-                Timeout = timeout
+                InitialDelay = timeoutOnFirstExecution ? slowDelayMilliseconds : fastDelayMilliseconds,
+                FollowupDelay = fastDelayMilliseconds,
+                Timeout = timeoutOnFirstExecution ? timeoutMilliseconds : System.Threading.Timeout.Infinite
             };
 
             // Execute the same task instance multiple times. The index is one-based.
-            bool result;
-            for (int i = 1; i <= repeats; i++)
+            for (int attempt = 1; attempt <= repeats; attempt++)
             {
-                // Execute the task:
-                result = task.Execute();
+                bool shouldSucceed = attempt > 1 || !timeoutOnFirstExecution;
+                bool result = task.Execute();
 
-                _output.WriteLine(engine.Log);
+                _output.WriteLine(
+                    $"Attempt {attempt}/{repeats}: expectedSuccess={shouldSucceed}, actualSuccess={result}, exitCode={task.ExitCode}.");
 
-                task.RepeatCount.ShouldBe(i);
-
-                // The first execution may fail (timeout), but all following ones should succeed:
-                if (i > 1)
+                if (!string.IsNullOrEmpty(engine.Log))
                 {
-                    result.ShouldBeTrue();
+                    _output.WriteLine(engine.Log);
+                    engine.Log = string.Empty;
+                }
+
+                task.RepeatCount.ShouldBe(attempt);
+                result.ShouldBe(shouldSucceed);
+
+                if (shouldSucceed)
+                {
                     task.ExitCode.ShouldBe(0);
+                }
+                else
+                {
+                    task.ExitCode.ShouldNotBe(0);
                 }
             }
         }
