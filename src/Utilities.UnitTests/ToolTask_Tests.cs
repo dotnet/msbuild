@@ -1008,7 +1008,7 @@ namespace Microsoft.Build.UnitTests
         {
             using var env = TestEnvironment.Create(_output);
 
-            int fastDelayMilliseconds = NativeMethodsShared.IsWindows ? 1_000 : 100;
+            int fastDelayMilliseconds = 100;
             int slowDelayMilliseconds = 5_000;
             int timeoutMilliseconds = 2_000;
 
