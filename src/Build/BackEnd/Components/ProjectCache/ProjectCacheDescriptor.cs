@@ -34,6 +34,7 @@ namespace Microsoft.Build.ProjectCache
             => new ProjectCacheDescriptor(pluginAssemblyPath: null, pluginSettings, pluginInstance);
 
         [Obsolete("Microsoft.Build.Experimental.ProjectCachePluginBase was moved to Microsoft.Build.ProjectCache, migrate your plugins and use the new type instead.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "Already shipped")]
         public static ProjectCacheDescriptor FromInstance(
 #pragma warning disable CS0618 // Type or member is obsolete
             Experimental.ProjectCache.ProjectCachePluginBase experimentalPluginInstance,

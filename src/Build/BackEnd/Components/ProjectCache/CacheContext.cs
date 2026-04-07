@@ -24,6 +24,7 @@ namespace Microsoft.Build.ProjectCache
         public MSBuildFileSystemBase FileSystem { get; }
         public IReadOnlyCollection<string> RequestedTargets { get; }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "Already shipped")]
         public CacheContext(
             IReadOnlyDictionary<string, string> pluginSettings,
             MSBuildFileSystemBase fileSystem,
@@ -33,6 +34,7 @@ namespace Microsoft.Build.ProjectCache
         {
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0026:Do not add multiple public overloads with optional parameters", Justification = "Already shipped")]
         public CacheContext(
             IReadOnlyDictionary<string, string> pluginSettings,
             MSBuildFileSystemBase fileSystem,

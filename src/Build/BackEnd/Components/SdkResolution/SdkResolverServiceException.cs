@@ -13,6 +13,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// </summary>
     public class SdkResolverServiceException : BuildExceptionBase
     {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0022:Constructor make noninheritable base class inheritable", Justification = "Shipped in 18.0")]
         public SdkResolverServiceException(string message, params string[] args)
             : base(string.Format(message, args))
         {

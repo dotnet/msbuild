@@ -27,6 +27,7 @@ namespace Microsoft.Build.Framework
         /// <param name="helpKeyword">Help keyword.</param>
         /// <param name="senderName">The name of the sender of the event.</param>
         /// <param name="importance">The importance of the message.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("ApiDesign", "RS0027:Public API with optional parameter(s) should have the most parameters amongst its public overloads.", Justification = "Already shipped")]
         public EnvironmentVariableReadEventArgs(
             string environmentVariableName,
             string message,

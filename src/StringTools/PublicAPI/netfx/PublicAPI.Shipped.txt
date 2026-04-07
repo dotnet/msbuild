@@ -1,0 +1,40 @@
+Microsoft.NET.StringTools.FowlerNollVo1aHash
+Microsoft.NET.StringTools.SpanBasedStringBuilder
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Append(System.ReadOnlyMemory<char> span) -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Append(string value) -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Append(string value, int startIndex, int count) -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Capacity.get -> int
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Clear() -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Dispose() -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Enumerator
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Enumerator.Current.get -> char
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Enumerator.Enumerator() -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Enumerator.MoveNext() -> bool
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Equals(System.ReadOnlySpan<char> other) -> bool
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Equals(System.ReadOnlySpan<char> other, System.StringComparison comparison) -> bool
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Equals(string other) -> bool
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Equals(string other, System.StringComparison comparison) -> bool
+Microsoft.NET.StringTools.SpanBasedStringBuilder.GetEnumerator() -> Microsoft.NET.StringTools.SpanBasedStringBuilder.Enumerator
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Length.get -> int
+Microsoft.NET.StringTools.SpanBasedStringBuilder.SpanBasedStringBuilder(int capacity = 4) -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.SpanBasedStringBuilder(string str) -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Trim() -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.Trim(char c) -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.TrimEnd() -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.TrimEnd(char c) -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.TrimStart() -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.TrimStart(char c) -> void
+Microsoft.NET.StringTools.SpanBasedStringBuilder.this[int index].get -> char
+Microsoft.NET.StringTools.Strings
+override Microsoft.NET.StringTools.SpanBasedStringBuilder.ToString() -> string
+static Microsoft.NET.StringTools.FowlerNollVo1aHash.Combine64(long left, long right) -> long
+static Microsoft.NET.StringTools.FowlerNollVo1aHash.ComputeHash32(string text) -> int
+static Microsoft.NET.StringTools.FowlerNollVo1aHash.ComputeHash32Fast(string text) -> int
+static Microsoft.NET.StringTools.FowlerNollVo1aHash.ComputeHash64(string text) -> long
+static Microsoft.NET.StringTools.FowlerNollVo1aHash.ComputeHash64Fast(string text) -> long
+static Microsoft.NET.StringTools.Strings.ClearCachedStrings() -> void
+static Microsoft.NET.StringTools.Strings.CreateDiagnosticReport() -> string
+static Microsoft.NET.StringTools.Strings.EnableDiagnostics() -> void
+static Microsoft.NET.StringTools.Strings.GetSpanBasedStringBuilder() -> Microsoft.NET.StringTools.SpanBasedStringBuilder
+static Microsoft.NET.StringTools.Strings.WeakIntern(System.ReadOnlySpan<char> str) -> string
+static Microsoft.NET.StringTools.Strings.WeakIntern(string str) -> string
