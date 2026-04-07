@@ -161,17 +161,14 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                if (s_msbuildTaskHostName == null)
+                string name = s_msbuildTaskHostName;
+                if (name is null)
                 {
-                    s_msbuildTaskHostName = Environment.GetEnvironmentVariable("MSBUILDTASKHOST_EXE_NAME");
-
-                    if (s_msbuildTaskHostName == null)
-                    {
-                        s_msbuildTaskHostName = "MSBuildTaskHost.exe";
-                    }
+                    name = Environment.GetEnvironmentVariable("MSBUILDTASKHOST_EXE_NAME") ?? "MSBuildTaskHost.exe";
+                    s_msbuildTaskHostName = name;
                 }
 
-                return s_msbuildTaskHostName;
+                return name;
             }
         }
 
@@ -378,7 +375,9 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Clears out our cached values for the various task host names and paths.
-        /// FOR UNIT TESTING ONLY
+        /// FOR UNIT TESTING ONLY. Must not be called concurrently with methods that
+        /// read or populate these statics (e.g. GetMSBuildExecutablePathForNonNETRuntimes),
+        /// otherwise cleared fields may be partially reinstated by an in-flight caller.
         /// </summary>
         internal static void ClearCachedTaskHostPaths()
         {
@@ -405,19 +404,20 @@ namespace Microsoft.Build.BackEnd
                 return TaskHostNameForClr2TaskHost;
             }
 
-            if (string.IsNullOrEmpty(s_msbuildName))
+            string name = s_msbuildName;
+            if (string.IsNullOrEmpty(name))
             {
-                s_msbuildName = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
-                if (!string.IsNullOrEmpty(s_msbuildName))
+                name = Environment.GetEnvironmentVariable("MSBUILD_EXE_NAME");
+                if (string.IsNullOrEmpty(name))
                 {
-                    return s_msbuildName;
+                    // Default based on whether it's .NET or Framework
+                    name = Constants.MSBuildExecutableName;
                 }
 
-                // Default based on whether it's .NET or Framework
-                s_msbuildName = Constants.MSBuildExecutableName;
+                s_msbuildName = name;
             }
 
-            return s_msbuildName;
+            return name;
         }
 
         /// <summary>
@@ -433,9 +433,30 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrowInternalErrorUnreachable(Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.TaskHost));
 
             var toolName = GetTaskHostNameFromHostContext(hostContext);
-            s_baseTaskHostPath = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
-            s_baseTaskHostPath64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
-            s_baseTaskHostPathArm64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryArm64;
+
+            // Snapshot to locals so concurrent callers never read a null static
+            // that another thread hasn't written yet. Redundant computation is
+            // harmless — BuildEnvironmentHelper properties are deterministic.
+            string basePath = s_baseTaskHostPath;
+            if (basePath is null)
+            {
+                basePath = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory32;
+                s_baseTaskHostPath = basePath;
+            }
+
+            string basePath64 = s_baseTaskHostPath64;
+            if (basePath64 is null)
+            {
+                basePath64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectory64;
+                s_baseTaskHostPath64 = basePath64;
+            }
+
+            string basePathArm64 = s_baseTaskHostPathArm64;
+            if (basePathArm64 is null)
+            {
+                basePathArm64 = BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryArm64;
+                s_baseTaskHostPathArm64 = basePathArm64;
+            }
 
             bool isX64 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.X64);
             bool isArm64 = Handshake.IsHandshakeOptionEnabled(hostContext, HandshakeOptions.Arm64);
@@ -449,21 +470,21 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 return isX64
-                    ? Path.Combine(GetOrInitializeX64Clr2Path(toolName), toolName)
-                    : Path.Combine(GetOrInitializeX32Clr2Path(toolName), toolName);
+                    ? Path.Combine(GetOrInitializeX64Clr2Path(toolName, basePath64), toolName)
+                    : Path.Combine(GetOrInitializeX32Clr2Path(toolName, basePath), toolName);
             }
 
             if (isX64)
             {
-                return Path.Combine(s_pathToX64Clr4 ??= s_baseTaskHostPath64, toolName);
+                return Path.Combine(s_pathToX64Clr4 ??= basePath64, toolName);
             }
 
             if (isArm64)
             {
-                return Path.Combine(s_pathToArm64Clr4 ??= s_baseTaskHostPathArm64, toolName);
+                return Path.Combine(s_pathToArm64Clr4 ??= basePathArm64, toolName);
             }
 
-            return Path.Combine(s_pathToX32Clr4 ??= s_baseTaskHostPath, toolName);
+            return Path.Combine(s_pathToX32Clr4 ??= basePath, toolName);
         }
 
         /// <summary>
@@ -559,18 +580,14 @@ namespace Microsoft.Build.BackEnd
                 : null;
         }
 
-        private static string GetOrInitializeX64Clr2Path(string toolName)
+        private static string GetOrInitializeX64Clr2Path(string toolName, string basePath64)
         {
-            s_pathToX64Clr2 ??= GetPathFromEnvironmentOrDefault("MSBUILDTASKHOSTLOCATION64", s_baseTaskHostPath64, toolName);
-
-            return s_pathToX64Clr2;
+            return s_pathToX64Clr2 ??= GetPathFromEnvironmentOrDefault("MSBUILDTASKHOSTLOCATION64", basePath64, toolName);
         }
 
-        private static string GetOrInitializeX32Clr2Path(string toolName)
+        private static string GetOrInitializeX32Clr2Path(string toolName, string basePath)
         {
-            s_pathToX32Clr2 ??= GetPathFromEnvironmentOrDefault("MSBUILDTASKHOSTLOCATION", s_baseTaskHostPath, toolName);
-
-            return s_pathToX32Clr2;
+            return s_pathToX32Clr2 ??= GetPathFromEnvironmentOrDefault("MSBUILDTASKHOSTLOCATION", basePath, toolName);
         }
 
         private static string GetPathFromEnvironmentOrDefault(string environmentVariable, string defaultPath, string toolName)
