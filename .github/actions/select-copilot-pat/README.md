@@ -20,7 +20,7 @@ To use Agentic Workflows in a dotnet org repository:
 
 ## PAT Management
 
-Team members provide PATs into the pools for the repository by adding them as repository secrets with secret names matching the pattern of `<pool_name>_<0-9>`, such as `COPILOT_PAT_0`.
+Team members provide PATs into the pools for the repository by adding them as repository secrets. This repository uses the `COPILOT_GITHUB_TOKEN` naming convention: the base secret is named `COPILOT_GITHUB_TOKEN` (used for index 0) and additional pool entries are named `COPILOT_GITHUB_TOKEN_1` through `COPILOT_GITHUB_TOKEN_9`.
 
 [Use this link to prefill the PAT creation form with the required settings][create-pat]:
 
@@ -33,10 +33,11 @@ The **Token Name** _does not_ need to match the secret name and is only visible 
 
 Team members providing PATs for workflows should set weekly recurring reminders to regenerate and update their PATs in the repository secrets. With an 8-day expiration, renewal can be done on the same day each week.
 
-PATs are added to repositories through the **Settings > Secrets and variables > Actions** UI, saved as **Repository secrets** and matching the `<pool_name>_<0-9>` naming convention. This can also be done using the GitHub CLI.
+PATs are added to repositories through the **Settings > Secrets and variables > Actions** UI, saved as **Repository secrets** using the `COPILOT_GITHUB_TOKEN(_#)` naming convention. This can also be done using the GitHub CLI.
 
 ```sh
-gh aw secrets set "<pool_name>_<0-9>" --value "<your-github-pat>" --repo dotnet/<repo>
+gh aw secrets set "COPILOT_GITHUB_TOKEN" --value "<your-github-pat>" --repo dotnet/<repo>
+gh aw secrets set "COPILOT_GITHUB_TOKEN_1" --value "<your-github-pat>" --repo dotnet/<repo>
 ```
 
 ## Workflow Output Attribution
@@ -47,7 +48,7 @@ Team members' PATs are _only_ used for the Copilot requests from within the agen
 
 Add the following frontmatter at the top-level of an agentic workflow. These elements are not supported through [imports][imports], so they must be copied into all workflows.
 
-Up to 10 `SECRET_#` environment variables can be passed to the action, numbered 0-9. Different workflows can use different pools of PATs if desired. Change the `secrets.COPILOT_PAT_0` through `secrets.COPILOT_PAT_9` secret names in both the `select-copilot-pat` step `env` values and in the `case` expression under the `engine: env` configuration.
+Up to 10 `SECRET_#` environment variables can be passed to the action, numbered 0-9. This repository uses `COPILOT_GITHUB_TOKEN` (index 0) and `COPILOT_GITHUB_TOKEN_1` through `COPILOT_GITHUB_TOKEN_9` (indices 1-9). If you choose a different `<pool_name>` scheme, update both the `select-copilot-pat` step `env` values and the `case` expression under the `engine: env` configuration to match.
 
 ```yml
 on:
@@ -67,16 +68,16 @@ on:
       env:
         # If the secret names are changed here, they must also be changed
         # in the `engine: env` case expression
-        SECRET_0: ${{ secrets.COPILOT_PAT_0 }}
-        SECRET_1: ${{ secrets.COPILOT_PAT_1 }}
-        SECRET_2: ${{ secrets.COPILOT_PAT_2 }}
-        SECRET_3: ${{ secrets.COPILOT_PAT_3 }}
-        SECRET_4: ${{ secrets.COPILOT_PAT_4 }}
-        SECRET_5: ${{ secrets.COPILOT_PAT_5 }}
-        SECRET_6: ${{ secrets.COPILOT_PAT_6 }}
-        SECRET_7: ${{ secrets.COPILOT_PAT_7 }}
-        SECRET_8: ${{ secrets.COPILOT_PAT_8 }}
-        SECRET_9: ${{ secrets.COPILOT_PAT_9 }}
+        SECRET_0: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+        SECRET_1: ${{ secrets.COPILOT_GITHUB_TOKEN_1 }}
+        SECRET_2: ${{ secrets.COPILOT_GITHUB_TOKEN_2 }}
+        SECRET_3: ${{ secrets.COPILOT_GITHUB_TOKEN_3 }}
+        SECRET_4: ${{ secrets.COPILOT_GITHUB_TOKEN_4 }}
+        SECRET_5: ${{ secrets.COPILOT_GITHUB_TOKEN_5 }}
+        SECRET_6: ${{ secrets.COPILOT_GITHUB_TOKEN_6 }}
+        SECRET_7: ${{ secrets.COPILOT_GITHUB_TOKEN_7 }}
+        SECRET_8: ${{ secrets.COPILOT_GITHUB_TOKEN_8 }}
+        SECRET_9: ${{ secrets.COPILOT_GITHUB_TOKEN_9 }}
 
 # Add the pre-activation output of the randomly selected PAT
 jobs:
@@ -90,8 +91,8 @@ engine:
   id: copilot
   env:
     # We cannot use line breaks in this expression as it leads to a syntax error in the compiled workflow
-    # If none of the `COPILOT_PAT_#` secrets were selected, then the default COPILOT_GITHUB_TOKEN is used
-    COPILOT_GITHUB_TOKEN: ${{ case(needs.pre_activation.outputs.copilot_pat_number == '0', secrets.COPILOT_PAT_0, needs.pre_activation.outputs.copilot_pat_number == '1', secrets.COPILOT_PAT_1, needs.pre_activation.outputs.copilot_pat_number == '2', secrets.COPILOT_PAT_2, needs.pre_activation.outputs.copilot_pat_number == '3', secrets.COPILOT_PAT_3, needs.pre_activation.outputs.copilot_pat_number == '4', secrets.COPILOT_PAT_4, needs.pre_activation.outputs.copilot_pat_number == '5', secrets.COPILOT_PAT_5, needs.pre_activation.outputs.copilot_pat_number == '6', secrets.COPILOT_PAT_6, needs.pre_activation.outputs.copilot_pat_number == '7', secrets.COPILOT_PAT_7, needs.pre_activation.outputs.copilot_pat_number == '8', secrets.COPILOT_PAT_8, needs.pre_activation.outputs.copilot_pat_number == '9', secrets.COPILOT_PAT_9, secrets.COPILOT_GITHUB_TOKEN) }}
+    # If none of the `COPILOT_GITHUB_TOKEN(_#)` secrets were selected, then the default COPILOT_GITHUB_TOKEN is used
+    COPILOT_GITHUB_TOKEN: ${{ case(needs.pre_activation.outputs.copilot_pat_number == '0', secrets.COPILOT_GITHUB_TOKEN, needs.pre_activation.outputs.copilot_pat_number == '1', secrets.COPILOT_GITHUB_TOKEN_1, needs.pre_activation.outputs.copilot_pat_number == '2', secrets.COPILOT_GITHUB_TOKEN_2, needs.pre_activation.outputs.copilot_pat_number == '3', secrets.COPILOT_GITHUB_TOKEN_3, needs.pre_activation.outputs.copilot_pat_number == '4', secrets.COPILOT_GITHUB_TOKEN_4, needs.pre_activation.outputs.copilot_pat_number == '5', secrets.COPILOT_GITHUB_TOKEN_5, needs.pre_activation.outputs.copilot_pat_number == '6', secrets.COPILOT_GITHUB_TOKEN_6, needs.pre_activation.outputs.copilot_pat_number == '7', secrets.COPILOT_GITHUB_TOKEN_7, needs.pre_activation.outputs.copilot_pat_number == '8', secrets.COPILOT_GITHUB_TOKEN_8, needs.pre_activation.outputs.copilot_pat_number == '9', secrets.COPILOT_GITHUB_TOKEN_9, secrets.COPILOT_GITHUB_TOKEN) }}
 ```
 
 ## Design / Security
