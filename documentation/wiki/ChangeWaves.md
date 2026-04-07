@@ -29,8 +29,10 @@ Change wave checks around features will be removed in the release that accompani
 
 ## Current Rotation of Change Waves
 
-### 18.6
+### 18.7
 - [Fix ASP.NET WebSite projects to resolve netstandard2.0 dependencies](https://github.com/dotnet/msbuild/pull/13058) - Pass TargetFrameworkVersion to RAR task and copy netstandard.dll facade for .NET Framework 4.7.1+ web projects.
+
+### 18.6
 - [AbsolutePath.GetCanonicalForm optimization - avoid expensive Path.GetFullPath calls when paths don't need canonicalization](https://github.com/dotnet/msbuild/pull/13369)
 
 ### 18.5
