@@ -876,6 +876,13 @@ namespace Microsoft.Build.Framework
                 return false;
             }
 
+            // In MT mode the process CWD should not be used when resolving the first relative path segment. Use the
+            // thread-local working directory so the directory existence heuristic runs against the correct project directory.
+            if (string.IsNullOrEmpty(baseDirectory))
+            {
+                baseDirectory = CurrentThreadWorkingDirectory ?? "";
+            }
+
             // The first slash will either be at the beginning of the string or after the first directory name
             int directoryLength = value.Slice(1).IndexOf('/') + 1;
             bool shouldCheckDirectory = directoryLength != 0;
