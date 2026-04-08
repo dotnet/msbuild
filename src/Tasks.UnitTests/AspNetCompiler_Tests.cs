@@ -312,8 +312,7 @@ namespace Microsoft.Build.UnitTests
         public void GenerateFullPathToTool_ReturnsAbsolutePathOrNull()
         {
             string projectDir = Path.GetTempPath();
-            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
-            var taskEnv = new TaskEnvironment(driver);
+            TaskEnvironment taskEnv = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir);
 
             TestableAspNetCompiler t = new TestableAspNetCompiler();
             t.TaskEnvironment = taskEnv;
@@ -337,8 +336,7 @@ namespace Microsoft.Build.UnitTests
         public void GetProcessStartInfo_UsesTaskEnvironmentWorkingDirectory()
         {
             string expectedWorkingDir = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar);
-            using var driver = new MultiThreadedTaskEnvironmentDriver(expectedWorkingDir);
-            var taskEnv = new TaskEnvironment(driver);
+            TaskEnvironment taskEnv = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(expectedWorkingDir);
 
             TestableAspNetCompiler t = new TestableAspNetCompiler();
             t.TaskEnvironment = taskEnv;
