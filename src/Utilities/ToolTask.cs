@@ -636,31 +636,6 @@ namespace Microsoft.Build.Utilities
             string commandLineCommands,
             string responseFileSwitch)
         {
-            if (TaskEnvironment.DriverKind == TaskEnvironmentDriverKind.MultiThreaded)
-            {
-                return GetProcessStartInfoMultithreadable(pathToTool, commandLineCommands, responseFileSwitch);
-            }
-
-            ProcessStartInfo startInfo = new ProcessStartInfo();
-
-            // Generally we won't set a working directory, and it will use the current directory
-            string workingDirectory = GetWorkingDirectory();
-            if (workingDirectory != null)
-            {
-                startInfo.WorkingDirectory = workingDirectory;
-            }
-
-            SetUpProcessStartInfo(startInfo, pathToTool, commandLineCommands, responseFileSwitch);
-
-            return startInfo;
-        }
-
-        private void SetUpProcessStartInfo(
-            ProcessStartInfo startInfo,
-            string pathToTool,
-            string commandLineCommands,
-            string responseFileSwitch)
-        {
             // Build up the command line that will be spawned.
             string commandLine = commandLineCommands;
 
