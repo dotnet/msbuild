@@ -628,11 +628,11 @@ Use this to prioritize dimensions based on changed files.
    **Recommendation:** $Fix.
    ```
 
-6. Post design-level concerns (not tied to a line) as a single PR comment — one bullet each.
+6. Post design-level concerns (not tied to a line) as a single PR comment via GitHub MCP `add_comment` tool or `gh pr comment` — one bullet each.
 
 ### Wave 4: Summary
 
-7. Post the summary table as the review body:
+7. Post the summary table as a PR comment via GitHub MCP `add_comment` tool or `gh pr comment`:
 
    ```markdown
    | # | Dimension | Verdict |
