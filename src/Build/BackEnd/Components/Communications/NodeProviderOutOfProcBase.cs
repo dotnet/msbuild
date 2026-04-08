@@ -475,6 +475,12 @@ namespace Microsoft.Build.BackEnd
             bool isNativeHost = msbuildLocation != null && Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
             string expectedProcessName = Path.GetFileNameWithoutExtension(isNativeHost ? msbuildLocation : (CurrentHost.GetCurrentHost() ?? msbuildLocation));
 
+#if NETFRAMEWORK
+            // Fall back to the standard executable name for most nodes
+            // on .NET Framework, to function in `ShutdownAllNodes()`
+            expectedProcessName ??= Constants.MSBuildAppName;
+#endif
+
             Process[] processes;
             try
             {
