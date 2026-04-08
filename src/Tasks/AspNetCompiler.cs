@@ -4,7 +4,6 @@
 #if NETFRAMEWORK
 using Microsoft.Build.Utilities;
 #endif
-
 using Microsoft.Build.Framework;
 
 #nullable disable
@@ -311,7 +310,6 @@ namespace Microsoft.Build.Tasks
 
             return string.IsNullOrEmpty(pathToTool) ? pathToTool : TaskEnvironment.GetAbsolutePath(pathToTool).Value;
         }
-        
         /// <summary>
         /// Validate the task arguments, log any warnings/errors
         /// </summary>
