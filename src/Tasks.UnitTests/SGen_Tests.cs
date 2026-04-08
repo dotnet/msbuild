@@ -286,35 +286,38 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that GenerateFullPathToTool returns an absolute path (or null)
-        /// when called with a multithreaded TaskEnvironment, validating the
-        /// TaskEnvironment.GetAbsolutePath() integration.
+        /// Verifies that GenerateFullPathToTool resolves SdkToolsPath relative to the
+        /// TaskEnvironment's project directory and returns an absolute path, validating
+        /// the TaskEnvironment.GetAbsolutePath() integration.
         /// </summary>
         [Fact]
-        public void GenerateFullPathToTool_ReturnsAbsolutePathOrNull()
+        public void GenerateFullPathToTool_ResolvesRelativeSdkToolsPathViaTaskEnvironment()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            string projectDir = env.DefaultTestDirectory.Path;
+            string projectDir = env.CreateFolder().Path;
+            string sdkSubDir = "sdk";
+            string sdkFullDir = Path.Combine(projectDir, sdkSubDir);
+            Directory.CreateDirectory(sdkFullDir);
+            string fakeTool = Path.Combine(sdkFullDir, "sgen.exe");
+            File.WriteAllBytes(fakeTool, []);
+
             using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
             var taskEnv = new TaskEnvironment(driver);
 
             TestableSGen t = new TestableSGen();
             t.TaskEnvironment = taskEnv;
             t.BuildEngine = new MockEngine(_output);
+            t.SdkToolsPath = sdkSubDir; // relative path — must resolve via TaskEnvironment
 
             string result = t.CallGenerateFullPathToTool();
 
-            if (result is not null)
-            {
-                Path.IsPathRooted(result).ShouldBeTrue(
-                    $"GenerateFullPathToTool should return an absolute path, got: {result}");
-            }
+            result.ShouldNotBeNull("GenerateFullPathToTool should find the tool via SdkToolsPath");
+            result.ShouldBe(fakeTool);
         }
 
         /// <summary>
-        /// Verifies that the GetProcessStartInfo routes through the multithreadable path
-        /// when TaskEnvironment uses MultiThreadedTaskEnvironmentDriver,
-        /// and that the working directory comes from the TaskEnvironment.
+        /// Verifies that in GetProcessStartInfo
+        /// working directory comes from the TaskEnvironment.
         /// </summary>
         [Fact]
         public void GetProcessStartInfo_UsesTaskEnvironmentWorkingDirectory()
@@ -328,7 +331,7 @@ namespace Microsoft.Build.UnitTests
             t.TaskEnvironment = taskEnv;
             t.BuildEngine = new MockEngine(_output);
 
-            ProcessStartInfo startInfo = t.CallGetProcessStartInfo(@"C:\test\sgen.exe", "/nologo", null);
+            ProcessStartInfo startInfo = t.CallGetProcessStartInfo(Path.Combine(expectedWorkingDir, "sgen.exe"), "/nologo", null);
 
             startInfo.WorkingDirectory.ShouldBe(expectedWorkingDir);
         }
@@ -356,8 +359,6 @@ namespace Microsoft.Build.UnitTests
 
             string result = t.BuildAssemblyPath;
 
-            Path.IsPathRooted(result).ShouldBeTrue(
-                "BuildAssemblyPath should return an absolute path resolved via TaskEnvironment");
             result.ShouldBe(Path.Combine(projectDir, subDir));
         }
 
