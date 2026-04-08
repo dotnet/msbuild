@@ -29,9 +29,8 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TaskFailsOnCore()
         {
-            using (TestEnvironment testenv = TestEnvironment.Create())
-            {
-                MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(@$"
+            using TestEnvironment testenv = TestEnvironment.Create(_output);
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure(@$"
 <Project>
     <Target Name=""MyTarget"">
         <SGen
@@ -51,9 +50,8 @@ namespace Microsoft.Build.UnitTests
         />
     </Target>
 </Project>");
-                logger.ErrorCount.ShouldBe(1);
-                logger.Errors.First().Code.ShouldBe("MSB3474");
-            }
+            logger.ErrorCount.ShouldBe(1);
+            logger.Errors.First().Code.ShouldBe("MSB3474");
         }
 #else
         internal sealed class SGenExtension : SGen
