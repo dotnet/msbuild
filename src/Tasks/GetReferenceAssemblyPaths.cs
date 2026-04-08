@@ -254,9 +254,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private IList<String> GetPaths(AbsolutePath? rootPath, IList<AbsolutePath> fallbackSearchPaths, FrameworkNameVersioning frameworkmoniker)
         {
-            string fallbackSearchPathsJoined = fallbackSearchPaths.Count > 0
-                ? string.Join(";", fallbackSearchPaths)
-                : null;
+            string fallbackSearchPathsJoined = string.Join(";", fallbackSearchPaths);
 
             IList<String> pathsToReturn = ToolLocationHelper.GetPathToReferenceAssemblies(
                                                 frameworkmoniker.Identifier,

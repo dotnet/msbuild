@@ -7,7 +7,9 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 
 #if !RUNTIME_TYPE_NETCORE
@@ -20,6 +22,13 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     public sealed class GetReferenceAssmeblyPath_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public GetReferenceAssmeblyPath_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in.
         /// </summary>
@@ -335,39 +344,38 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestRelativeRootPathProducesSameResultAsAbsolute()
         {
-            using (var env = TestEnvironment.Create())
-            {
-                string baseDir = env.DefaultTestDirectory.Path;
-                string relativeDir = "framework-root";
-                string absoluteDir = Path.Combine(baseDir, relativeDir);
-                var framework41Directory = env.CreateFolder(Path.Combine(absoluteDir, Path.Combine("MyFramework", "v4.1") + Path.DirectorySeparatorChar));
-                var redistListDirectory = env.CreateFolder(Path.Combine(framework41Directory.Path, "RedistList"));
-                env.CreateFile(redistListDirectory, "FrameworkList.xml",
-                    "<FileList Redist='Microsoft-Windows-CLRCoreComp' Name='.NET Framework 4.1'>" +
-                        "<File AssemblyName='System.Xml' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
-                    "</FileList >");
+            using TestEnvironment env = TestEnvironment.Create(_output);
 
-                // Baseline: absolute RootPath
-                MockEngine absoluteEngine = new MockEngine();
-                GetReferenceAssemblyPaths absoluteTask = new GetReferenceAssemblyPaths();
-                absoluteTask.BuildEngine = absoluteEngine;
-                absoluteTask.TargetFrameworkMoniker = "MyFramework, Version=v4.1";
-                absoluteTask.RootPath = absoluteDir;
-                absoluteTask.Execute();
+            string baseDir = env.DefaultTestDirectory.Path;
+            string relativeDir = "framework-root";
+            string absoluteDir = Path.Combine(baseDir, relativeDir);
+            var framework41Directory = env.CreateFolder(Path.Combine(absoluteDir, Path.Combine("MyFramework", "v4.1") + Path.DirectorySeparatorChar));
+            var redistListDirectory = env.CreateFolder(Path.Combine(framework41Directory.Path, "RedistList"));
+            env.CreateFile(redistListDirectory, "FrameworkList.xml",
+                "<FileList Redist='Microsoft-Windows-CLRCoreComp' Name='.NET Framework 4.1'>" +
+                    "<File AssemblyName='System.Xml' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
+                "</FileList >");
 
-                // Test: relative RootPath with TaskEnvironment
-                MockEngine relativeEngine = new MockEngine();
-                GetReferenceAssemblyPaths relativeTask = new GetReferenceAssemblyPaths();
-                relativeTask.BuildEngine = relativeEngine;
-                relativeTask.TargetFrameworkMoniker = "MyFramework, Version=v4.1";
-                relativeTask.TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(baseDir);
-                relativeTask.RootPath = relativeDir;
-                relativeTask.Execute();
+            // Baseline: absolute RootPath
+            MockEngine absoluteEngine = new MockEngine();
+            GetReferenceAssemblyPaths absoluteTask = new GetReferenceAssemblyPaths();
+            absoluteTask.BuildEngine = absoluteEngine;
+            absoluteTask.TargetFrameworkMoniker = "MyFramework, Version=v4.1";
+            absoluteTask.RootPath = absoluteDir;
+            absoluteTask.Execute();
 
-                Assert.Equal(absoluteTask.ReferenceAssemblyPaths, relativeTask.ReferenceAssemblyPaths);
-                Assert.Equal(absoluteTask.TargetFrameworkMonikerDisplayName, relativeTask.TargetFrameworkMonikerDisplayName);
-                Assert.Equal(0, relativeEngine.Errors);
-            }
+            // Test: relative RootPath with TaskEnvironment
+            MockEngine relativeEngine = new MockEngine();
+            GetReferenceAssemblyPaths relativeTask = new GetReferenceAssemblyPaths();
+            relativeTask.BuildEngine = relativeEngine;
+            relativeTask.TargetFrameworkMoniker = "MyFramework, Version=v4.1";
+            relativeTask.TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(baseDir);
+            relativeTask.RootPath = relativeDir;
+            relativeTask.Execute();
+
+            relativeTask.ReferenceAssemblyPaths.ShouldBe(absoluteTask.ReferenceAssemblyPaths);
+            relativeTask.TargetFrameworkMonikerDisplayName.ShouldBe(absoluteTask.TargetFrameworkMonikerDisplayName);
+            relativeEngine.Errors.ShouldBe(0);
         }
 
         /// <summary>
@@ -377,43 +385,42 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestRelativeFallbackSearchPathProducesSameResultAsAbsolute()
         {
-            using (var env = TestEnvironment.Create())
-            {
-                string baseDir = env.DefaultTestDirectory.Path;
-                string relativeDir = "framework-root";
-                string absoluteDir = Path.Combine(baseDir, relativeDir);
-                var framework41Directory = env.CreateFolder(Path.Combine(absoluteDir, Path.Combine("MyFramework", "v4.1") + Path.DirectorySeparatorChar));
-                var redistListDirectory = env.CreateFolder(Path.Combine(framework41Directory.Path, "RedistList"));
-                env.CreateFile(redistListDirectory, "FrameworkList.xml",
-                    "<FileList Redist='Microsoft-Windows-CLRCoreComp' Name='.NET Framework 4.1'>" +
-                        "<File AssemblyName='System.Xml' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
-                    "</FileList >");
+            using TestEnvironment env = TestEnvironment.Create(_output);
 
-                string nonExistentRoot = Path.Combine(baseDir, "nonexistent");
+            string baseDir = env.DefaultTestDirectory.Path;
+            string relativeDir = "framework-root";
+            string absoluteDir = Path.Combine(baseDir, relativeDir);
+            var framework41Directory = env.CreateFolder(Path.Combine(absoluteDir, Path.Combine("MyFramework", "v4.1") + Path.DirectorySeparatorChar));
+            var redistListDirectory = env.CreateFolder(Path.Combine(framework41Directory.Path, "RedistList"));
+            env.CreateFile(redistListDirectory, "FrameworkList.xml",
+                "<FileList Redist='Microsoft-Windows-CLRCoreComp' Name='.NET Framework 4.1'>" +
+                    "<File AssemblyName='System.Xml' Version='2.0.0.0' PublicKeyToken='b03f5f7f11d50a3a' Culture='Neutral' FileVersion='2.0.50727.208' InGAC='true' />" +
+                "</FileList >");
 
-                // Baseline: absolute fallback path
-                MockEngine absoluteEngine = new MockEngine();
-                GetReferenceAssemblyPaths absoluteTask = new GetReferenceAssemblyPaths();
-                absoluteTask.BuildEngine = absoluteEngine;
-                absoluteTask.TargetFrameworkMoniker = "MyFramework, Version=v4.1";
-                absoluteTask.RootPath = nonExistentRoot;
-                absoluteTask.TargetFrameworkFallbackSearchPaths = absoluteDir;
-                absoluteTask.Execute();
+            string nonExistentRoot = Path.Combine(baseDir, "nonexistent");
 
-                // Test: relative fallback path with TaskEnvironment
-                MockEngine relativeEngine = new MockEngine();
-                GetReferenceAssemblyPaths relativeTask = new GetReferenceAssemblyPaths();
-                relativeTask.BuildEngine = relativeEngine;
-                relativeTask.TargetFrameworkMoniker = "MyFramework, Version=v4.1";
-                relativeTask.TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(baseDir);
-                relativeTask.RootPath = nonExistentRoot;
-                relativeTask.TargetFrameworkFallbackSearchPaths = relativeDir;
-                relativeTask.Execute();
+            // Baseline: absolute fallback path
+            MockEngine absoluteEngine = new MockEngine();
+            GetReferenceAssemblyPaths absoluteTask = new GetReferenceAssemblyPaths();
+            absoluteTask.BuildEngine = absoluteEngine;
+            absoluteTask.TargetFrameworkMoniker = "MyFramework, Version=v4.1";
+            absoluteTask.RootPath = nonExistentRoot;
+            absoluteTask.TargetFrameworkFallbackSearchPaths = absoluteDir;
+            absoluteTask.Execute();
 
-                Assert.Equal(absoluteTask.ReferenceAssemblyPaths, relativeTask.ReferenceAssemblyPaths);
-                Assert.Equal(absoluteTask.TargetFrameworkMonikerDisplayName, relativeTask.TargetFrameworkMonikerDisplayName);
-                Assert.Equal(0, relativeEngine.Errors);
-            }
+            // Test: relative fallback path with TaskEnvironment
+            MockEngine relativeEngine = new MockEngine();
+            GetReferenceAssemblyPaths relativeTask = new GetReferenceAssemblyPaths();
+            relativeTask.BuildEngine = relativeEngine;
+            relativeTask.TargetFrameworkMoniker = "MyFramework, Version=v4.1";
+            relativeTask.TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(baseDir);
+            relativeTask.RootPath = nonExistentRoot;
+            relativeTask.TargetFrameworkFallbackSearchPaths = relativeDir;
+            relativeTask.Execute();
+
+            relativeTask.ReferenceAssemblyPaths.ShouldBe(absoluteTask.ReferenceAssemblyPaths);
+            relativeTask.TargetFrameworkMonikerDisplayName.ShouldBe(absoluteTask.TargetFrameworkMonikerDisplayName);
+            relativeEngine.Errors.ShouldBe(0);
         }
     }
 }
