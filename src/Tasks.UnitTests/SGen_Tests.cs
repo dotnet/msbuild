@@ -10,6 +10,7 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 #nullable disable
 
@@ -17,6 +18,13 @@ namespace Microsoft.Build.UnitTests
 {
     public class SGen_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public SGen_Tests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
 #if RUNTIME_TYPE_NETCORE
         [Fact]
         public void TaskFailsOnCore()
@@ -285,13 +293,14 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GenerateFullPathToTool_ReturnsAbsolutePathOrNull()
         {
-            string projectDir = Path.GetTempPath();
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string projectDir = env.DefaultTestDirectory.Path;
             using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
             var taskEnv = new TaskEnvironment(driver);
 
             TestableSGen t = new TestableSGen();
             t.TaskEnvironment = taskEnv;
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             string result = t.CallGenerateFullPathToTool();
 
@@ -310,13 +319,14 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetProcessStartInfo_UsesTaskEnvironmentWorkingDirectory()
         {
-            string expectedWorkingDir = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar);
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            string expectedWorkingDir = env.DefaultTestDirectory.Path;
             using var driver = new MultiThreadedTaskEnvironmentDriver(expectedWorkingDir);
             var taskEnv = new TaskEnvironment(driver);
 
             TestableSGen t = new TestableSGen();
             t.TaskEnvironment = taskEnv;
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             ProcessStartInfo startInfo = t.CallGetProcessStartInfo(@"C:\test\sgen.exe", "/nologo", null);
 
@@ -331,7 +341,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void BuildAssemblyPath_UsesTaskEnvironmentGetAbsolutePath()
         {
-            using var env = TestEnvironment.Create();
+            using TestEnvironment env = TestEnvironment.Create(_output);
             string projectDir = env.CreateFolder().Path;
             string subDir = "output";
             Directory.CreateDirectory(Path.Combine(projectDir, subDir));
@@ -341,7 +351,7 @@ namespace Microsoft.Build.UnitTests
 
             TestableSGen t = new TestableSGen();
             t.TaskEnvironment = taskEnv;
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
             t.BuildAssemblyPath = subDir; // relative path
 
             string result = t.BuildAssemblyPath;

@@ -262,7 +262,7 @@ namespace Microsoft.Build.Tasks
 
         private AbsolutePath SerializationAssemblyPath => new AbsolutePath(Path.Combine(BuildAssemblyPath, SerializationAssemblyName));
 
-        private AbsolutePath AssemblyFullPathv => new AbsolutePath(Path.Combine(BuildAssemblyPath, BuildAssemblyName));
+        private AbsolutePath AssemblyFullPath => new AbsolutePath(Path.Combine(BuildAssemblyPath, BuildAssemblyName));
 
         public string SdkToolsPath
         {
