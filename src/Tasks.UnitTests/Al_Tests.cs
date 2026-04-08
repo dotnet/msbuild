@@ -1,10 +1,14 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Diagnostics;
+using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
+using Xunit.Abstractions;
 
 #nullable disable
 
@@ -18,13 +22,19 @@ namespace Microsoft.Build.UnitTests
      */
     public sealed class AlTests
     {
+        private readonly ITestOutputHelper _output;
+
+        public AlTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
         /// <summary>
         /// Tests the AlgorithmId parameter
         /// </summary>
         [Fact]
         public void AlgorithmId()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.AlgorithmId); // "Default value"
             t.AlgorithmId = "whatisthis";
@@ -40,7 +50,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void BaseAddress()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.BaseAddress); // "Default value"
             t.BaseAddress = "12345678";
@@ -56,7 +66,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CompanyName()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.CompanyName); // "Default value"
             t.CompanyName = "Google";
@@ -72,7 +82,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Configuration()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.Configuration); // "Default value"
             t.Configuration = "debug";
@@ -88,7 +98,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Copyright()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.Copyright); // "Default value"
             t.Copyright = "(C) 2005";
@@ -104,7 +114,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Culture()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.Culture); // "Default value"
             t.Culture = "aussie";
@@ -120,7 +130,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DelaySign()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.False(t.DelaySign); // "Default value"
             t.DelaySign = true;
@@ -136,7 +146,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Description()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.Description); // "Default value"
             t.Description = "whatever";
@@ -152,7 +162,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EmbedResourcesWithPrivateAccess()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.EmbedResources); // "Default value"
 
@@ -177,7 +187,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void EvidenceFile()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.EvidenceFile); // "Default value"
             t.EvidenceFile = "MyEvidenceFile";
@@ -193,7 +203,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void FileVersion()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.FileVersion); // "Default value"
             t.FileVersion = "1.2.3.4";
@@ -209,7 +219,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Flags()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.Flags); // "Default value"
             t.Flags = "0x8421";
@@ -225,7 +235,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GenerateFullPaths()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.False(t.GenerateFullPaths); // "Default value"
             t.GenerateFullPaths = true;
@@ -241,7 +251,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void KeyFile()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.KeyFile); // "Default value"
             t.KeyFile = "mykey.snk";
@@ -257,7 +267,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void KeyContainer()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.KeyContainer); // "Default value"
             t.KeyContainer = "MyKeyContainer";
@@ -273,7 +283,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LinkResourcesWithPrivateAccessAndTargetFile()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.LinkResources); // "Default value"
 
@@ -299,7 +309,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void LinkResourcesWithTwoItems()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.LinkResources); // "Default value"
 
@@ -332,7 +342,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MainEntryPoint()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.MainEntryPoint); // "Default value"
             t.MainEntryPoint = "Class1.Main";
@@ -348,7 +358,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OutputAssembly()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.OutputAssembly); // "Default value"
             t.OutputAssembly = new TaskItem("foo.dll");
@@ -364,7 +374,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Platform()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.Platform); // "Default value"
             t.Platform = "x86";
@@ -380,26 +390,26 @@ namespace Microsoft.Build.UnitTests
         public void PlatformAndPrefer32Bit()
         {
             // Implicit "anycpu"
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             CommandLine.ValidateNoParameterStartsWith(t, @"/platform:");
-            t = new AL();
+            t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             t.Prefer32Bit = false;
             CommandLine.ValidateNoParameterStartsWith(t, @"/platform:");
-            t = new AL();
+            t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             t.Prefer32Bit = true;
             CommandLine.ValidateHasParameter(
                 t,
                 @"/platform:anycpu32bitpreferred");
 
             // Explicit "anycpu"
-            t = new AL();
+            t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             t.Platform = "anycpu";
             CommandLine.ValidateHasParameter(t, @"/platform:anycpu");
-            t = new AL();
+            t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             t.Platform = "anycpu";
             t.Prefer32Bit = false;
             CommandLine.ValidateHasParameter(t, @"/platform:anycpu");
-            t = new AL();
+            t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             t.Platform = "anycpu";
             t.Prefer32Bit = true;
             CommandLine.ValidateHasParameter(
@@ -407,14 +417,14 @@ namespace Microsoft.Build.UnitTests
                 @"/platform:anycpu32bitpreferred");
 
             // Explicit "x86"
-            t = new AL();
+            t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             t.Platform = "x86";
             CommandLine.ValidateHasParameter(t, @"/platform:x86");
-            t = new AL();
+            t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             t.Platform = "x86";
             t.Prefer32Bit = false;
             CommandLine.ValidateHasParameter(t, @"/platform:x86");
-            t = new AL();
+            t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             t.Platform = "x86";
             t.Prefer32Bit = true;
             CommandLine.ValidateHasParameter(t, @"/platform:x86");
@@ -426,7 +436,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ProductName()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.ProductName); // "Default value"
             t.ProductName = "VisualStudio";
@@ -442,7 +452,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ProductVersion()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.ProductVersion); // "Default value"
             t.ProductVersion = "8.0";
@@ -458,7 +468,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ResponseFiles()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.ResponseFiles); // "Default value"
             t.ResponseFiles = new string[2] { "one.rsp", "two.rsp" };
@@ -475,7 +485,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void SourceModules()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.SourceModules); // "Default value"
 
@@ -500,7 +510,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TargetType()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.TargetType); // "Default value"
             t.TargetType = "winexe";
@@ -516,7 +526,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TemplateFile()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.TemplateFile); // "Default value"
             t.TemplateFile = "mymainassembly.dll";
@@ -534,7 +544,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Title()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.Title); // "Default value"
             t.Title = "WarAndPeace";
@@ -550,7 +560,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Trademark()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.Trademark); // "Default value"
             t.Trademark = "MyTrademark";
@@ -566,7 +576,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Version()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.Version); // "Default value"
             t.Version = "WowHowManyKindsOfVersionsAreThere";
@@ -584,7 +594,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Win32Icon()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.Win32Icon); // "Default value"
             t.Win32Icon = "foo.ico";
@@ -600,7 +610,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Win32Resource()
         {
-            AL t = new AL();
+            AL t = new AL() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
 
             Assert.Null(t.Win32Resource); // "Default value"
             t.Win32Resource = "foo.res";
@@ -608,6 +618,63 @@ namespace Microsoft.Build.UnitTests
 
             // Check the parameters.
             CommandLine.ValidateHasParameter(t, @"/win32res:foo.res");
+        }
+
+        /// <summary>
+        /// Verifies that GenerateFullPathToTool returns an absolute path (or null)
+        /// when called with a multithreaded TaskEnvironment, validating the
+        /// TaskEnvironment.GetAbsolutePath() integration.
+        /// </summary>
+        [WindowsFullFrameworkOnlyFact]
+        public void GenerateFullPathToTool_ReturnsAbsolutePathOrNull()
+        {
+            string projectDir = Path.GetTempPath();
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            TestableAL t = new TestableAL();
+            t.TaskEnvironment = taskEnv;
+            t.BuildEngine = new MockEngine(_output);
+
+            string result = t.CallGenerateFullPathToTool();
+
+            if (result is not null)
+            {
+                Path.IsPathRooted(result).ShouldBeTrue(
+                    $"GenerateFullPathToTool should return an absolute path, got: {result}");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that the GetProcessStartInfo override routes through
+        /// GetProcessStartInfoMultiThreaded when TaskEnvironment is set,
+        /// and that the working directory comes from the TaskEnvironment.
+        /// </summary>
+        [WindowsFullFrameworkOnlyFact]
+        public void GetProcessStartInfo_UsesTaskEnvironmentWorkingDirectory()
+        {
+            string expectedWorkingDir = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar);
+            using var driver = new MultiThreadedTaskEnvironmentDriver(expectedWorkingDir);
+            var taskEnv = new TaskEnvironment(driver);
+
+            TestableAL t = new TestableAL();
+            t.TaskEnvironment = taskEnv;
+            t.BuildEngine = new MockEngine(_output);
+
+            ProcessStartInfo startInfo = t.CallGetProcessStartInfo(@"C:\test\al.exe", "/nologo", null);
+
+            startInfo.WorkingDirectory.ShouldBe(expectedWorkingDir);
+        }
+
+        /// <summary>
+        /// Subclass that exposes protected methods for testing without reflection.
+        /// </summary>
+        private sealed class TestableAL : AL
+        {
+            public string CallGenerateFullPathToTool() => GenerateFullPathToTool();
+
+            public ProcessStartInfo CallGetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)
+                => GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
         }
     }
 }

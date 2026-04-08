@@ -40,6 +40,12 @@
     <PackageVersion Include="PdbGit" Version="3.0.41" />
     <PackageVersion Update="PdbGit" Condition="'$(PdbGitVersion)' != ''" Version="$(PdbGitVersion)" />
 
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Version="1.1.2" />
+    <PackageVersion Update="Microsoft.CodeAnalysis.CSharp.Analyzer.Testing" Condition="'$(MicrosoftCodeAnalysisCSharpAnalyzerTestingVersion)' != ''" Version="$(MicrosoftCodeAnalysisCSharpAnalyzerTestingVersion)" />
+
+    <PackageVersion Include="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" Version="1.1.2" />
+    <PackageVersion Update="Microsoft.CodeAnalysis.CSharp.CodeFix.Testing" Condition="'$(MicrosoftCodeAnalysisCSharpCodeFixTestingVersion)' != ''" Version="$(MicrosoftCodeAnalysisCSharpCodeFixTestingVersion)" />
+
     <PackageVersion Include="Shouldly" Version="4.3.0" />
     <PackageVersion Update="Shouldly" Condition="'$(ShouldlyVersion)' != ''" Version="$(ShouldlyVersion)" />
 
