@@ -102,6 +102,8 @@
   <Project Path="src/Tasks/Microsoft.Build.Tasks.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="src/ThreadSafeTaskAnalyzer/ThreadSafeTaskAnalyzer.csproj" />
+  <Project Path="src/ThreadSafeTaskAnalyzer.Tests/ThreadSafeTaskAnalyzer.Tests.csproj" />
   <Project Path="src/UnitTests.Shared/Microsoft.Build.UnitTests.Shared.csproj">
     <Platform Solution="*|ARM64" Project="arm64" />
     <Platform Solution="*|x64" Project="x64" />

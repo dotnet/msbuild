@@ -214,7 +214,7 @@ namespace Microsoft.Build.Utilities
         /// </remarks>
         public string[] EnvironmentVariables { get; set; }
 
-        public virtual TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+        public virtual TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// Project visible property that allows the user to specify an amount of time after which the task executable
@@ -684,6 +684,7 @@ namespace Microsoft.Build.Utilities
                 LogPrivate.LogWarningWithCodeFromResources("ToolTask.CommandTooLong", GetType().Name);
             }
 
+            ProcessStartInfo startInfo = TaskEnvironment.GetProcessStartInfo();
             startInfo.FileName = pathToTool;
             startInfo.Arguments = commandLine;
             startInfo.CreateNoWindow = true;
@@ -700,6 +701,13 @@ namespace Microsoft.Build.Utilities
                 // We only do it under Windows, we get Pipe Broken IO exception on other systems if
                 // the program terminates very fast.
                 startInfo.RedirectStandardInput = true;
+            }
+
+            // Generally we won't set a working directory, and it will use the current directory
+            string workingDirectory = GetWorkingDirectory();
+            if (!string.IsNullOrEmpty(workingDirectory))
+            {
+                startInfo.WorkingDirectory = TaskEnvironment.GetAbsolutePath(workingDirectory);
             }
 
             // Apply task-level environment variable overrides (both the obsolete EnvironmentOverride
@@ -738,24 +746,6 @@ namespace Microsoft.Build.Utilities
                         startInfo.Environment[nameValuePair[0]] = nameValuePair[1];
                     }
                 }
-            }
-        }
-
-        private ProcessStartInfo GetProcessStartInfoMultithreadable(
-            string pathToTool,
-            string commandLineCommands,
-            string responseFileSwitch)
-        {
-            ProcessStartInfo startInfo = TaskEnvironment.GetProcessStartInfo();
-
-            SetUpProcessStartInfo(startInfo, pathToTool, commandLineCommands, responseFileSwitch);
-
-            // Set working directory: prefer the derived task's GetWorkingDirectory() override
-            // (absolutized against the project directory), otherwise keep the project directory.
-            string workingDirectory = GetWorkingDirectory();
-            if (!string.IsNullOrEmpty(workingDirectory))
-            {
-                startInfo.WorkingDirectory = TaskEnvironment.GetAbsolutePath(workingDirectory);
             }
 
             return startInfo;
@@ -1455,6 +1445,11 @@ namespace Microsoft.Build.Utilities
                 .Split(MSBuildConstants.PathSeparatorChar)?
                 .Where(path =>
                 {
+                    if (string.IsNullOrEmpty(path))
+                    {
+                        return false;
+                    }
+
                     try
                     {
                         // The PATH can contain anything, including bad characters
