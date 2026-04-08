@@ -172,8 +172,6 @@ namespace Microsoft.Build.Tasks
                 string thisPath;
                 try
                 {
-                    // Validate the path first — GetFullPath throws for invalid characters.
-                    // Then resolve via TaskEnvironment for thread-safe absolute path resolution.
                     Path.GetFullPath(_buildAssemblyPath);
                     thisPath = !string.IsNullOrEmpty(_buildAssemblyPath)
                        ? TaskEnvironment.GetAbsolutePath(_buildAssemblyPath).GetCanonicalForm()
