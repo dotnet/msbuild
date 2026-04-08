@@ -732,8 +732,8 @@ public sealed partial class TerminalLogger : INodeLogger
                 runtimeIdentifier = evalInfo.RuntimeIdentifier;
             }
 
-            // Metaproj files (generated for multi-targeting and solution builds) are never evaluated,
-            // so they won't have a matching ProjectEvaluationFinished event. Only assert for real projects.
+            // Per-project metaproj files (e.g. MyProject.csproj.metaproj) are constructed
+            // directly without evaluation, so they won't have a matching ProjectEvaluationFinished event.
             System.Diagnostics.Debug.Assert(
                 evalInfo != default || FileUtilities.IsMetaprojectFilename(e.ProjectFile),
                 "EvalProjectInfo should have been captured before ProjectStarted");
