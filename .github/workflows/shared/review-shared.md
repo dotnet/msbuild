@@ -25,11 +25,11 @@ safe-outputs:
 
 # Expert Code Review
 
-Review pull request #${{ github.event.pull_request.number || github.event.issue.number }} using the expert-reviewer agent defined at `.github/agents/expert-reviewer.md`.
+Review pull request #${{ github.event.pull_request.number || github.event.issue.number }} using the `expert-reviewer` agent defined at `.github/agents/expert-reviewer.md`.
 
 ## Instructions
 
 1. Fetch the full diff for the pull request.
-2. Apply the expert-reviewer methodology from `.github/agents/expert-reviewer.md` — all 24 review dimensions, prioritized by severity and weighted by file location.
+2. Call the `expert-reviewer` agent. Make sure to call it as subagent (`task` tool, `agent_type: "general-purpose"`, `model: "claude-opus-4.6"`). And make sure to follow the guidance on subagent calls from within the `expert-reviewer` agent. We expect 2+ levels of agents to be called.
 3. Post a single review comment summarizing findings, organized by severity (BLOCKING > MAJOR > MODERATE > MINOR).
 4. If no issues are found, post a brief approval comment.
