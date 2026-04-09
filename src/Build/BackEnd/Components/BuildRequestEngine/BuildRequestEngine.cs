@@ -37,6 +37,12 @@ namespace Microsoft.Build.BackEnd
     internal class BuildRequestEngine : IBuildRequestEngine, IBuildComponent
     {
         /// <summary>
+        /// Static lock serializing trace file writes across all BuildRequestEngine instances.
+        /// In multithreaded (-mt) mode, multiple engines share the same process and trace file.
+        /// </summary>
+        private static readonly object s_traceLock = new();
+
+        /// <summary>
         /// The starting unresolved configuration id assigned by the engine.
         /// </summary>
         private const int StartingUnresolvedConfigId = -1;
@@ -394,11 +400,11 @@ namespace Microsoft.Build.BackEnd
                         {
                             string projectDirectoryFullPath = Path.GetDirectoryName(config.ProjectFullPath);
                             var environmentVariables = new Dictionary<string, string>(_componentHost.BuildParameters.BuildProcessEnvironmentInternal);
-                            taskEnvironment = new TaskEnvironment(new MultiThreadedTaskEnvironmentDriver(projectDirectoryFullPath, environmentVariables));
+                            taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectoryFullPath, environmentVariables);
                         }
                         else
                         {
-                            taskEnvironment = new TaskEnvironment(MultiProcessTaskEnvironmentDriver.Instance);
+                            taskEnvironment = TaskEnvironment.Fallback;
                         }
 
                         BuildRequestEntry entry = new BuildRequestEntry(request, config, taskEnvironment);
@@ -1559,15 +1565,24 @@ namespace Microsoft.Build.BackEnd
         {
             if (_debugDumpState)
             {
-                lock (this)
+                lock (s_traceLock)
                 {
-                    FileUtilities.EnsureDirectoryExists(_debugDumpPath);
-
-                    using (StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true))
+                    try
                     {
-                        string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
-                        file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, DateTime.UtcNow.Ticks, message);
-                        file.Flush();
+                        FileUtilities.EnsureDirectoryExists(_debugDumpPath);
+
+                        using (StreamWriter file = FileUtilities.OpenWrite(string.Format(CultureInfo.CurrentCulture, Path.Combine(_debugDumpPath, @"EngineTrace_{0}.txt"), EnvironmentUtilities.CurrentProcessId), append: true))
+                        {
+                            string message = String.Format(CultureInfo.CurrentCulture, format, stuff);
+                            file.WriteLine("{0}({1})-{2}: {3}", Thread.CurrentThread.Name, Environment.CurrentManagedThreadId, DateTime.UtcNow.Ticks, message);
+                            file.Flush();
+                        }
+                    }
+                    catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                    {
+                        // Trace file failures must never crash the build engine.
+                        // Matches the defensive pattern used by Scheduler.TraceScheduler.
+                        _nodeLoggingContext?.LogCommentFromText(MessageImportance.Low, $"Failed to write to engine trace file: {e}");
                     }
                 }
             }
