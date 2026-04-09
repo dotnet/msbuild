@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
 using Xunit;

@@ -332,9 +332,7 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
                         taskHost.AppDomainSetup,
 #endif
-#if !NET35
                         _buildRequestEntry.Request.HostServices,
-#endif
                         taskHost.IsOutOfProc,
                         _cancellationToken,
                         _buildRequestEntry.TaskEnvironment);

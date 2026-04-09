@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Framework
 {

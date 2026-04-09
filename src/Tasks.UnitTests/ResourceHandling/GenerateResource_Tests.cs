@@ -446,6 +446,55 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.InProc
             }
         }
 
+        /// <summary>
+        /// Force out-of-date with ShouldRebuildResgenOutputFile on a linked text file.
+        /// This is the regression test for the bug where linked text files
+        /// were not tracked in the dependency cache, so modifying them did not trigger
+        /// resource regeneration.
+        /// </summary>
+        [Fact]
+        public void ForceOutOfDateLinkedTextFile()
+        {
+            var folder = _env.CreateFolder(createFolder: true);
+            var linkedTextFile = folder.CreateFile("linked.txt", "original content");
+
+            // Build a resx that references the text file via ResXFileRef as System.String,
+            string linkedTextData =
+                "  <data name='LinkedText' type='System.Resources.ResXFileRef, System.Windows.Forms'>\xd\xa"
+                + "    <value>" + linkedTextFile.Path + ";System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>\xd\xa"
+                + "  </data>\xd\xa";
+
+            string resxFile = Utilities.WriteTestResX(false, null, linkedTextData, _env.CreateFile(folder, ".resx").Path, includeDefaultString: false);
+            string stateFile = _env.GetTempFile(".cache").Path;
+
+            // First run: generate resources.
+            GenerateResource t = Utilities.CreateTask(_output, usePreserialized: true, _env);
+            t.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+            t.StateFile = new TaskItem(stateFile);
+            Utilities.ExecuteTask(t);
+
+            Path.GetExtension(t.OutputResources[0].ItemSpec).ShouldBe(".resources");
+            Utilities.AssertStateFileWasWritten(t);
+
+            // Read back the compiled .resources and verify it contains the original content.
+            Utilities.ReadResourceValue(t.OutputResources[0].ItemSpec, "LinkedText").ShouldBe("original content");
+
+            // Update the linked text file with new content and set its timestamp
+            // unambiguously into the future so the task detects it as newer than the output,
+            // regardless of filesystem timestamp granularity.
+            File.WriteAllText(linkedTextFile.Path, "updated content");
+            File.SetLastWriteTime(linkedTextFile.Path, DateTime.Now.AddDays(1));
+
+            // Second run: should detect the linked text file is newer and regenerate.
+            GenerateResource t2 = Utilities.CreateTask(_output, usePreserialized: true, _env);
+            t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
+            t2.StateFile = new TaskItem(stateFile);
+            Utilities.ExecuteTask(t2);
+
+            // Read back the compiled .resources and verify it contains the updated content.
+            Utilities.ReadResourceValue(t2.OutputResources[0].ItemSpec, "LinkedText").ShouldBe("updated content");
+        }
+
         [Fact]
         public void QuestionOutOfDateByDeletion()
         {
@@ -4037,6 +4086,24 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         }
 
         /// <summary>
+        /// Reads a single resource value by key from a compiled .resources file.
+        /// </summary>
+        public static object ReadResourceValue(string resourcesFilePath, string resourceName)
+        {
+            using var reader = new System.Resources.ResourceReader(resourcesFilePath);
+            IDictionaryEnumerator enumerator = reader.GetEnumerator();
+            while (enumerator.MoveNext())
+            {
+                if ((string)enumerator.Key == resourceName)
+                {
+                    return enumerator.Value;
+                }
+            }
+
+            throw new KeyNotFoundException($"Resource '{resourceName}' not found in '{resourcesFilePath}'.");
+        }
+        
+        /// <summary>
         /// Given an array of ITaskItems, checks to make sure that at least one read tlog and at least one
         /// write tlog exist, and that they were written to disk.  If that is not true, asserts.
         /// </summary>
@@ -4234,7 +4301,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <param name="linkedBitmap">The name of a linked-in bitmap.  use 'null' for no bitmap.</param>
         /// <returns>The content of the resx blob as a string</returns>
         /// <returns>The name of the text file</returns>
-        public static string GetTestResXContent(bool useType, string linkedBitmap, string extraToken, bool useInvalidType)
+        public static string GetTestResXContent(bool useType, string linkedBitmap, string extraToken, bool useInvalidType, bool includeDefaultString = true)
         {
             StringBuilder resgenFileContents = new StringBuilder();
 
@@ -4253,11 +4320,14 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
                 + "    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>\xd\xa"
                 + "  </resheader>\xd\xa");
 
-            resgenFileContents.Append(
-                 // A plain old string value.
-                 "  <data name=\"MyString\">\xd\xa"
-                + "    <value>MyValue</value>\xd\xa"
-                + "  </data>\xd\xa");
+            if (includeDefaultString)
+            {
+                resgenFileContents.Append(
+                     // A plain old string value.
+                     "  <data name=\"MyString\">\xd\xa"
+                    + "    <value>MyValue</value>\xd\xa"
+                    + "  </data>\xd\xa");
+            }
 
             if (extraToken != null)
             {
@@ -4312,9 +4382,9 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <param name="useType">Indicates whether to include an enum to test type-specific resource encoding with assembly references</param>
         /// <param name="linkedBitmap">The name of a linked-in bitmap.  use 'null' for no bitmap.</param>
         /// <returns>The name of the resx file</returns>
-        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, string resxFileToWrite = null, TestEnvironment env = null)
+        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, string resxFileToWrite = null, TestEnvironment env = null, bool includeDefaultString = true)
         {
-            return WriteTestResX(useType, linkedBitmap, extraToken, useInvalidType: false, resxFileToWrite: resxFileToWrite);
+            return WriteTestResX(useType, linkedBitmap, extraToken, useInvalidType: false, resxFileToWrite: resxFileToWrite, includeDefaultString: includeDefaultString);
         }
 
         /// <summary>
@@ -4323,11 +4393,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests
         /// <param name="useType">Indicates whether to include an enum to test type-specific resource encoding with assembly references</param>
         /// <param name="linkedBitmap">The name of a linked-in bitmap.  use 'null' for no bitmap.</param>
         /// <returns>The name of the resx file</returns>
-        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, bool useInvalidType, string resxFileToWrite = null, TestEnvironment env = null)
+        public static string WriteTestResX(bool useType, string linkedBitmap, string extraToken, bool useInvalidType, string resxFileToWrite = null, TestEnvironment env = null, bool includeDefaultString = true)
         {
             string resgenFile = resxFileToWrite;
 
-            string contents = GetTestResXContent(useType, linkedBitmap, extraToken, useInvalidType);
+            string contents = GetTestResXContent(useType, linkedBitmap, extraToken, useInvalidType, includeDefaultString);
 
             if (env == null)
             {

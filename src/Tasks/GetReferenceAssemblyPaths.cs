@@ -4,10 +4,11 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
+
 #if FEATURE_GAC
+using Microsoft.Build.Shared;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 #endif
 

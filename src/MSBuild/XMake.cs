@@ -160,7 +160,7 @@ namespace Microsoft.Build.CommandLine
                 //  This forces the type to initialize in this static constructor and thus    //
                 //  any configuration file exceptions can be caught here.                     //
                 ////////////////////////////////////////////////////////////////////////////////
-                s_exePath = Path.GetDirectoryName(FileUtilities.ExecutingAssemblyPath);
+                s_exePath = Path.GetDirectoryName(typeof(MSBuildApp).GetAssemblyPath());
                 commandLineParser = new CommandLineParser();
 
                 s_initialized = true;
@@ -284,9 +284,7 @@ namespace Microsoft.Build.CommandLine
         public static int Main(string[] args)
         {
             // When running on CoreCLR(.NET), insert the command executable path as the first element of the args array.
-            // This is needed because on .NET the first element of Environment.CommandLine is the dotnet executable path
-            // and not the msbuild executable path. CoreCLR version didn't support Environment.CommandLine initially, so
-            // workaround was needed.
+            // Use the native process path if available.
 #if NET
             args = [BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, .. args];
 #else
@@ -619,7 +617,7 @@ namespace Microsoft.Build.CommandLine
                     break;
                 case "3":
                     // Value "3" debugs the main MSBuild process but skips debugging child TaskHost processes
-                    if (!DebugUtils.IsInTaskHostNode())
+                    if (!FrameworkDebugUtils.IsInTaskHostNode())
                     {
                         Debugger.Launch();
                     }
@@ -662,7 +660,7 @@ namespace Microsoft.Build.CommandLine
 
             ErrorUtilities.VerifyThrowArgumentLength(commandLine);
 
-            AppDomain.CurrentDomain.UnhandledException += ExceptionHandling.UnhandledExceptionHandler;
+            AppDomain.CurrentDomain.UnhandledException += DebugUtils.UnhandledExceptionHandler;
 
             ExitType exitType = ExitType.Success;
 
@@ -1115,7 +1113,8 @@ namespace Microsoft.Build.CommandLine
                 ExceptionHandling.IsCriticalException(exception),
                 ProjectCollection.Version?.ToString(),
                 NativeMethodsShared.FrameworkName,
-                BuildEnvironmentState.GetHostName());
+                BuildEnvironmentState.GetHostName(),
+                isStandaloneExecution: !s_isNodeMode);
         }
 
         private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project, TextWriter outputStream)
@@ -1831,7 +1830,7 @@ namespace Microsoft.Build.CommandLine
                     new BuildManager.DeferredBuildMessage(
                         ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
                         "MSBuildDebugPath",
-                        DebugUtils.DebugPath),
+                        FrameworkDebugUtils.DebugPath),
                         MessageImportance.High));
             }
 
@@ -2008,6 +2007,12 @@ namespace Microsoft.Build.CommandLine
         private static bool s_isServerNode;
 
         /// <summary>
+        /// Indicates that this process was launched as a worker node (via -nodeMode switch).
+        /// Worker nodes are not standalone executions regardless of who spawned them.
+        /// </summary>
+        private static bool s_isNodeMode;
+
+        /// <summary>
         /// Coordinates the processing of all detected switches. It gathers information necessary to invoke the build engine, and
         /// performs deeper error checking on the switches and their parameters.
         /// </summary>
@@ -2132,6 +2137,13 @@ namespace Microsoft.Build.CommandLine
             }
             else if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.NodeMode))
             {
+                s_isNodeMode = true;
+
+                // Worker nodes are not standalone executions. Override the flag that
+                // Main() set before we knew this was a worker node process, so that
+                // BuildManager crash/hang telemetry also reports correctly.
+                KnownTelemetry.PartialBuildTelemetry?.IsStandaloneExecution = false;
+
                 StartLocalNode(commandLineSwitches, lowPriority);
             }
             else
@@ -3091,7 +3103,7 @@ namespace Microsoft.Build.CommandLine
 
             if (parameters.Length == 1)
             {
-                projectFile = FrameworkFileUtilities.FixFilePath(parameters[0]);
+                projectFile = FileUtilities.FixFilePath(parameters[0]);
 
                 if (FileSystems.Default.DirectoryExists(projectFile))
                 {
@@ -3677,7 +3689,7 @@ namespace Microsoft.Build.CommandLine
                 // Check to see if the logfile parameter has been set, if not set it to the current directory
                 string logFileParameter = ExtractAnyLoggerParameter(fileParameters, "logfile");
 
-                string logFileName = FrameworkFileUtilities.FixFilePath(ExtractAnyParameterValue(logFileParameter));
+                string logFileName = FileUtilities.FixFilePath(ExtractAnyParameterValue(logFileParameter));
 
                 try
                 {
@@ -3941,7 +3953,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             // figure out whether the assembly's identity (strong/weak name), or its filename/path is provided
-            string testFile = FrameworkFileUtilities.FixFilePath(loggerAssemblySpec);
+            string testFile = FileUtilities.FixFilePath(loggerAssemblySpec);
             if (FileSystems.Default.FileExists(testFile))
             {
                 loggerAssemblyFile = testFile;
@@ -4099,7 +4111,7 @@ namespace Microsoft.Build.CommandLine
             foreach (string parameter in parameters)
             {
                 InitializationException.VerifyThrow(schemaFile == null, "MultipleSchemasError", parameter);
-                string fileName = FrameworkFileUtilities.FixFilePath(parameter);
+                string fileName = FileUtilities.FixFilePath(parameter);
                 InitializationException.VerifyThrow(FileSystems.Default.FileExists(fileName), "SchemaNotFoundError", fileName);
 
                 schemaFile = Path.Combine(Directory.GetCurrentDirectory(), fileName);

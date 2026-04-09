@@ -3406,7 +3406,7 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            var multiDictionary = new MultiDictionary<string, ProjectItemInstance>(StringComparer.OrdinalIgnoreCase);
+            var multiDictionary = new MultiDictionary<string, ProjectItemInstance>(items.Count, StringComparer.OrdinalIgnoreCase);
             foreach (var item in items)
             {
                 multiDictionary.Add(item.EvaluatedInclude, projectItemToInstanceMap[item]);

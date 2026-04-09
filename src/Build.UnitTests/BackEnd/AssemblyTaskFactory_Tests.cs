@@ -250,9 +250,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new MockHost(),
                     TaskHostParameters.Empty,
                     projectFile: "proj.proj",
-#if !NET35
                     hostServices: null,
-#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -290,9 +288,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new MockHost(),
                     taskParameters,
                     projectFile: "proj.proj",
-#if !NET35
                     hostServices: null,
-#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -330,9 +326,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new MockHost(),
                     taskParameters,
                     projectFile: "proj.proj",
-#if !NET35
                     hostServices: null,
-#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -372,9 +366,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new MockHost(),
                     TaskHostParameters.Empty,
                     projectFile: "proj.proj",
-#if !NET35
                     hostServices: null,
-#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -414,9 +406,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new MockHost(),
                     TaskHostParameters.Empty,
                     projectFile: "proj.proj",
-#if !NET35
                     hostServices: null,
-#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -458,9 +448,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new MockHost(),
                     taskParameters,
                     projectFile: "proj.proj",
-#if !NET35
                     hostServices: null,
-#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -500,9 +488,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new MockHost(),
                     TaskHostParameters.Empty,
                     projectFile: "proj.proj",
-#if !NET35
                     hostServices: null,
-#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -540,9 +526,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new MockHost(),
                     taskParameters,
                     projectFile: "proj.proj",
-#if !NET35
                     hostServices: null,
-#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -584,9 +568,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new MockHost(),
                     taskParameters,
                     projectFile: "proj.proj",
-#if !NET35
                     hostServices: null,
-#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -624,9 +606,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new MockHost(),
                     TaskHostParameters.Empty,
                     projectFile: "proj.proj",
-#if !NET35
                     hostServices: null,
-#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -666,9 +646,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new MockHost(),
                     TaskHostParameters.Empty,
                     projectFile: "proj.proj",
-#if !NET35
                     hostServices: null,
-#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -708,9 +686,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new MockHost(),
                     taskParameters,
                     projectFile: "proj.proj",
-#if !NET35
                     hostServices: null,
-#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -751,9 +727,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new MockHost(),
                     TaskHostParameters.Empty,
                     projectFile: "proj.proj",
-#if !NET35
                     hostServices: null,
-#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif
@@ -783,9 +757,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     new MockHost(),
                     taskParameters,
                     projectFile: "proj.proj",
-#if !NET35
                     hostServices: null,
-#endif
 #if FEATURE_APPDOMAIN
                     new AppDomainSetup(),
 #endif

@@ -16,6 +16,12 @@ namespace Microsoft.Build.Framework.Telemetry;
 internal static class CrashTelemetryRecorder
 {
     /// <summary>
+    /// Interval in milliseconds between EndBuild hang diagnostic emissions.
+    /// When EndBuild is stuck waiting for submissions or nodes, diagnostics are emitted at this interval.
+    /// </summary>
+    public const int EndBuildHangDiagnosticsIntervalMs = 30_000;
+
+    /// <summary>
     /// Records crash telemetry data for later emission via <see cref="FlushCrashTelemetry"/>.
     /// </summary>
     /// <param name="exception">The exception that caused the crash.</param>
@@ -25,6 +31,10 @@ internal static class CrashTelemetryRecorder
     /// <param name="buildEngineVersion">MSBuild version string, if available.</param>
     /// <param name="buildEngineFrameworkName">Framework name, if available.</param>
     /// <param name="buildEngineHost">Host name (VS, VSCode, CLI, etc.), if available.</param>
+    /// <param name="isStandaloneExecution">True if MSBuild runs from command line, false if hosted.</param>
+    /// <param name="maxNodeCount">Maximum number of build nodes configured.</param>
+    /// <param name="activeNodeCount">Number of currently active build nodes at crash time.</param>
+    /// <param name="submissionCount">Number of active build submissions at crash time.</param>
     public static void RecordCrashTelemetry(
         Exception exception,
         CrashExitType exitType,
@@ -32,7 +42,11 @@ internal static class CrashTelemetryRecorder
         bool isCritical,
         string? buildEngineVersion = null,
         string? buildEngineFrameworkName = null,
-        string? buildEngineHost = null)
+        string? buildEngineHost = null,
+        bool? isStandaloneExecution = null,
+        int? maxNodeCount = null,
+        int? activeNodeCount = null,
+        int? submissionCount = null)
     {
         try
         {
@@ -40,6 +54,10 @@ internal static class CrashTelemetryRecorder
             crashTelemetry.BuildEngineVersion = buildEngineVersion;
             crashTelemetry.BuildEngineFrameworkName = buildEngineFrameworkName;
             crashTelemetry.BuildEngineHost = buildEngineHost;
+            crashTelemetry.IsStandaloneExecution = isStandaloneExecution;
+            crashTelemetry.MaxNodeCount = maxNodeCount;
+            crashTelemetry.ActiveNodeCount = activeNodeCount;
+            crashTelemetry.SubmissionCount = submissionCount;
             KnownTelemetry.CrashTelemetry = crashTelemetry;
         }
         catch
@@ -136,7 +154,8 @@ internal static class CrashTelemetryRecorder
 
             string eventName = $"{TelemetryConstants.EventPrefix}{TelemetryConstants.Crash}";
             string description = $"{crashTelemetry.ExitType}: {crashTelemetry.ExceptionType}";
-            var faultEvent = new FaultEvent(eventName, description, crashTelemetry.Exception);
+            var sanitizedException = new SanitizedException(crashTelemetry.Exception!);
+            var faultEvent = new FaultEvent(eventName, description, sanitizedException);
 
             faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}ExitType"] = crashTelemetry.ExitType.ToString();
             faultEvent.Properties[$"{TelemetryConstants.PropertyPrefix}CrashOrigin"] = crashTelemetry.CrashOrigin.ToString();
@@ -160,6 +179,26 @@ internal static class CrashTelemetryRecorder
 #endif
     }
 
+    /// <summary>
+    /// Exception wrapper that sanitizes message and stack trace to remove PII
+    /// before being passed to VS Telemetry's <c>FaultEvent</c>.
+    /// </summary>
+    internal sealed class SanitizedException : Exception
+    {
+        private readonly string? _sanitizedStackTrace;
+
+        public SanitizedException(Exception original)
+            : base(CrashTelemetry.TruncateMessage(original.Message) ?? original.GetType().FullName,
+                   original.InnerException is not null ? new SanitizedException(original.InnerException) : null)
+        {
+            _sanitizedStackTrace = original.StackTrace is not null
+                ? CrashTelemetry.SanitizeFilePathsInText(original.StackTrace)
+                : null;
+        }
+
+        public override string? StackTrace => _sanitizedStackTrace;
+    }
+
     private static CrashTelemetry CreateCrashTelemetry(
         Exception exception,
         CrashExitType exitType,
@@ -172,5 +211,30 @@ internal static class CrashTelemetryRecorder
         crashTelemetry.IsCritical = isCritical;
         crashTelemetry.IsUnhandled = isUnhandled;
         return crashTelemetry;
+    }
+
+    /// <summary>
+    /// Emits a pre-populated <see cref="CrashTelemetry"/> for an EndBuild hang.
+    /// Called periodically from timed wait loops so that diagnostics are available
+    /// even if the hang never resolves (crash telemetry in the finally block would be unreachable).
+    /// The caller is responsible for populating the <see cref="CrashTelemetry"/> with
+    /// all relevant hang diagnostic data.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void EmitEndBuildHangDiagnostics(CrashTelemetry crashTelemetry)
+    {
+        try
+        {
+            TelemetryManager.Instance?.Initialize(crashTelemetry.IsStandaloneExecution ?? false);
+
+            using IActivity? activity = TelemetryManager.Instance
+                ?.DefaultActivitySource
+                ?.StartActivity(TelemetryConstants.Crash);
+            activity?.SetTags(crashTelemetry);
+        }
+        catch
+        {
+            // Best effort: diagnostic telemetry must never cause a secondary failure.
+        }
     }
 }
