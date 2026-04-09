@@ -690,16 +690,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
 
 
-#if FEATURE_CODETASKFACTORY
         /// <summary>
-        /// If an item being output from a task has null metadata, we shouldn't crash.
+        /// If an item being output from an inline task has null metadata, we shouldn't crash.
         /// </summary>
         [Fact]
         public void NullMetadataOnOutputItems_InlineTask()
         {
             string projectContents = @"
-                    <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`NullMetadataTask_v12` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll`>
+                    <Project>
+                        <UsingTask TaskName=`NullMetadataTask_Roslyn` TaskFactory=`RoslynCodeTaskFactory` AssemblyFile=`$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll`>
                             <ParameterGroup>
                                <OutputItems ParameterType=`Microsoft.Build.Framework.ITaskItem[]` Output=`true` />
                             </ParameterGroup>
@@ -719,9 +718,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                             </Task>
                         </UsingTask>
                       <Target Name=`Build`>
-                        <NullMetadataTask_v12>
+                        <NullMetadataTask_Roslyn>
                           <Output TaskParameter=`OutputItems` ItemName=`Outputs` />
-                        </NullMetadataTask_v12>
+                        </NullMetadataTask_Roslyn>
 
                         <Message Text=`[%(Outputs.Identity): %(Outputs.a)]` Importance=`High` />
                       </Target>
@@ -730,88 +729,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, LoggerVerbosity.Diagnostic);
             logger.AssertLogContains("[foo: ]");
         }
-
-        /// <summary>
-        /// If an item being output from a task has null metadata, we shouldn't crash.
-        /// </summary>
-        [Fact(Skip = "This test fails when diagnostic logging is available, as deprecated EscapingUtilities.UnescapeAll method cannot handle null value. This is not relevant to non-deprecated version of this method.")]
-        public void NullMetadataOnLegacyOutputItems_InlineTask()
-        {
-            string projectContents = @"
-                    <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`NullMetadataTask_v4` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildFrameworkToolsPath)\Microsoft.Build.Tasks.v4.0.dll`>
-                            <ParameterGroup>
-                               <OutputItems ParameterType=`Microsoft.Build.Framework.ITaskItem[]` Output=`true` />
-                            </ParameterGroup>
-                            <Task>
-                                <Code>
-                                <![CDATA[
-                                    OutputItems = new ITaskItem[1];
-
-                                    IDictionary<string, string> metadata = new Dictionary<string, string>();
-                                    metadata.Add(`a`, null);
-
-                                    OutputItems[0] = new TaskItem(`foo`, (IDictionary)metadata);
-
-                                    return true;
-                                ]]>
-                                </Code>
-                            </Task>
-                        </UsingTask>
-                      <Target Name=`Build`>
-                        <NullMetadataTask_v4>
-                          <Output TaskParameter=`OutputItems` ItemName=`Outputs` />
-                        </NullMetadataTask_v4>
-
-                        <Message Text=`[%(Outputs.Identity): %(Outputs.a)]` Importance=`High` />
-                      </Target>
-                    </Project>";
-
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
-            logger.AssertLogContains("[foo: ]");
-        }
-
-        /// <summary>
-        /// If an item being output from a task has null metadata, we shouldn't crash.
-        /// </summary>
-        [Fact(Skip = "This test fails when diagnostic logging is available, as deprecated EscapingUtilities.UnescapeAll method cannot handle null value. This is not relevant to non-deprecated version of this method.")]
-        [Trait("Category", "non-mono-tests")]
-        public void NullMetadataOnLegacyOutputItems_InlineTask_Diagnostic()
-        {
-            string projectContents = @"
-                    <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName=`NullMetadataTask_v4` TaskFactory=`CodeTaskFactory` AssemblyFile=`$(MSBuildFrameworkToolsPath)\Microsoft.Build.Tasks.v4.0.dll`>
-                            <ParameterGroup>
-                               <OutputItems ParameterType=`Microsoft.Build.Framework.ITaskItem[]` Output=`true` />
-                            </ParameterGroup>
-                            <Task>
-                                <Code>
-                                <![CDATA[
-                                    OutputItems = new ITaskItem[1];
-
-                                    IDictionary<string, string> metadata = new Dictionary<string, string>();
-                                    metadata.Add(`a`, null);
-
-                                    OutputItems[0] = new TaskItem(`foo`, (IDictionary)metadata);
-
-                                    return true;
-                                ]]>
-                                </Code>
-                            </Task>
-                        </UsingTask>
-                      <Target Name=`Build`>
-                        <NullMetadataTask_v4>
-                          <Output TaskParameter=`OutputItems` ItemName=`Outputs` />
-                        </NullMetadataTask_v4>
-
-                        <Message Text=`[%(Outputs.Identity): %(Outputs.a)]` Importance=`High` />
-                      </Target>
-                    </Project>";
-
-            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput, loggerVerbosity: LoggerVerbosity.Diagnostic);
-            logger.AssertLogContains("[foo: ]");
-        }
-#endif
 
         /// <summary>
         /// Validates that the defining project metadata is set (or not set) as expected in
