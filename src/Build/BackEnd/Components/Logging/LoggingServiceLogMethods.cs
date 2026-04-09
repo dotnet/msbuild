@@ -584,10 +584,12 @@ namespace Microsoft.Build.BackEnd.Logging
             int configurationId = remoteNodeEvaluationBuildEventContext.ProjectInstanceId;
 
             // we need to be a valid BuildEventContext for a ProjectLoggingContext out of this, so we need to make sure
-            // we have ProjectContextId set.
-            BuildEventContextBuilder thisEventBuildEventContext = parentBuildEventContext
-                .WithProjectInstanceId(configurationId)
-                .WithProjectContextId(validatedRemoteNodeEvaluationBuildContext.ProjectContextId);
+            // we have ProjectContextId set. We derive from the validated remote context rather than the parent
+            // to preserve submissionId, nodeId, and evaluationId - which are needed for the OnProjectFinished
+            // handler to find the submission and call CompleteLogging().
+            BuildEventContextBuilder thisEventBuildEventContext = validatedRemoteNodeEvaluationBuildContext
+                .WithTargetId(BuildEventContext.InvalidTargetId)
+                .WithTaskId(BuildEventContext.InvalidTaskId);
 
             ProjectStartedEventArgs buildEvent = new(
                 projectId: configurationId,

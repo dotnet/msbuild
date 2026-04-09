@@ -706,17 +706,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         public ICollection<string> GetWarningsAsErrors(BuildEventContext context)
         {
-            throw new NotImplementedException();
+            return Array.Empty<string>();
         }
 
         public ICollection<string> GetWarningsNotAsErrors(BuildEventContext context)
         {
-            throw new NotImplementedException();
+            return Array.Empty<string>();
         }
 
         public ICollection<string> GetWarningsAsMessages(BuildEventContext context)
         {
-            throw new NotImplementedException();
+            return Array.Empty<string>();
         }
 
         public void LogIncludeFile(BuildEventContext buildEventContext, string filePath)
