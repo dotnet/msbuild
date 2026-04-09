@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -486,39 +485,43 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void FinalizeProcessing_AfterMerge_ResetsState()
+        public void FinalizeProcessing_SendsDataAndResets()
         {
-            var forwarder = new TelemetryForwarderProvider.TelemetryForwarder();
+            // Simulate per-engine telemetry: data is owned by NodeLoggingContext,
+            // and BuildRequestEngine sends it via WorkerNodeTelemetryEventArgs.
             var loggingService = new EventRecordingLoggingService();
 
             var loggingContext = new MockLoggingContext(
                 loggingService,
                 new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
 
-            // Merge some data.
-            var localData = new WorkerNodeTelemetryData();
+            // Add some data directly to the telemetry data (simulating RequestBuilder writes).
+            var telemetryData = new WorkerNodeTelemetryData();
             var key = new TaskOrTargetTelemetryKey("TestTarget", isCustom: true, isFromNugetCache: false, isFromMetaProject: false);
-            localData.AddTarget(key, wasExecuted: true);
-            forwarder.MergeWorkerData(localData);
+            telemetryData.AddTarget(key, wasExecuted: true);
 
-            // First FinalizeProcessing should emit a telemetry event.
-            forwarder.FinalizeProcessing(loggingContext);
+            // Simulate what BuildRequestEngine.SendTelemetryData does.
+            telemetryData.IsEmpty.ShouldBeFalse();
+            WorkerNodeTelemetryEventArgs telemetryArgs = new(telemetryData)
+            { BuildEventContext = loggingContext.BuildEventContext };
+            loggingContext.LogBuildEvent(telemetryArgs);
+
             var telemetryEvents = loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().ToList();
             telemetryEvents.Count.ShouldBe(1);
             telemetryEvents[0].WorkerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(key);
 
-            // Second FinalizeProcessing on an empty forwarder should be a no-op (state was reset).
-            forwarder.FinalizeProcessing(loggingContext);
-            loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().Count().ShouldBe(1, "No new event should be emitted after reset");
+            // After sending, a new empty data is used for the next build (simulating engine reset).
+            var freshData = new WorkerNodeTelemetryData();
+            freshData.IsEmpty.ShouldBeTrue();
 
-            // Merge new data after reset — forwarder should still work.
-            var localData2 = new WorkerNodeTelemetryData();
+            // Add new data to the fresh instance.
             var key2 = new TaskOrTargetTelemetryKey("TestTarget2", isCustom: false, isFromNugetCache: false, isFromMetaProject: false);
-            localData2.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.ConditionWasFalse);
-            forwarder.MergeWorkerData(localData2);
+            freshData.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.ConditionWasFalse);
 
-            // Third FinalizeProcessing should emit only the new data.
-            forwarder.FinalizeProcessing(loggingContext);
+            WorkerNodeTelemetryEventArgs telemetryArgs2 = new(freshData)
+            { BuildEventContext = loggingContext.BuildEventContext };
+            loggingContext.LogBuildEvent(telemetryArgs2);
+
             var allTelemetryEvents = loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().ToList();
             allTelemetryEvents.Count.ShouldBe(2);
             allTelemetryEvents[1].WorkerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(key2);

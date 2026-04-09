@@ -23,7 +23,6 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
-using Microsoft.Build.TelemetryInfra;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 
@@ -1297,11 +1296,9 @@ namespace Microsoft.Build.BackEnd
 
         private void UpdateStatisticsPostBuild()
         {
-            ITelemetryForwarder telemetryForwarder =
-                ((TelemetryForwarderProvider)_componentHost.GetComponent(BuildComponentType.TelemetryForwarder))
-                ?.Instance;
+            WorkerNodeTelemetryData telemetryData = _nodeLoggingContext?.TelemetryData;
 
-            if (telemetryForwarder == null || !telemetryForwarder.IsTelemetryCollected)
+            if (telemetryData is null)
             {
                 return;
             }
@@ -1315,9 +1312,6 @@ namespace Microsoft.Build.BackEnd
             {
                 return;
             }
-
-            // Accumulate all telemetry into a local instance, then merge into the shared singleton once.
-            WorkerNodeTelemetryData telemetryData = new();
 
             foreach (var projectTargetInstance in _requestEntry.RequestConfiguration.Project.Targets)
             {
@@ -1351,13 +1345,16 @@ namespace Microsoft.Build.BackEnd
 
                 var key = new TaskOrTargetTelemetryKey(
                     projectTargetInstance.Key, isCustom, isFromNuget, isMetaprojTarget);
-                telemetryData.AddTarget(key, wasExecuted, skipReason);
+
+                // Multiple RequestBuilder threads within one engine may call concurrently.
+                lock (telemetryData)
+                {
+                    telemetryData.AddTarget(key, wasExecuted, skipReason);
+                }
             }
 
             TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
             CollectTasksStats(taskReg);
-
-            telemetryForwarder.MergeWorkerData(telemetryData);
 
             void CollectTasksStats(TaskRegistry taskRegistry)
             {
@@ -1373,13 +1370,17 @@ namespace Microsoft.Build.BackEnd
                         registeredTaskRecord.ComputeIfCustom(),
                         registeredTaskRecord.IsFromNugetCache,
                         isFromMetaProject: false);
-                    telemetryData.AddTask(
-                        key,
-                        registeredTaskRecord.Statistics.ExecutedTime,
-                        registeredTaskRecord.Statistics.ExecutedCount,
-                        registeredTaskRecord.Statistics.TotalMemoryConsumption,
-                        registeredTaskRecord.TaskFactoryAttributeName,
-                        registeredTaskRecord.TaskFactoryParameters.Runtime);
+
+                    lock (telemetryData)
+                    {
+                        telemetryData.AddTask(
+                            key,
+                            registeredTaskRecord.Statistics.ExecutedTime,
+                            registeredTaskRecord.Statistics.ExecutedCount,
+                            registeredTaskRecord.Statistics.TotalMemoryConsumption,
+                            registeredTaskRecord.TaskFactoryAttributeName,
+                            registeredTaskRecord.TaskFactoryParameters.Runtime);
+                    }
 
                     registeredTaskRecord.Statistics.Reset();
                 }

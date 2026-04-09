@@ -12,9 +12,9 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
-using Microsoft.Build.TelemetryInfra;
 using Microsoft.NET.StringTools;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
 
@@ -208,7 +208,14 @@ namespace Microsoft.Build.BackEnd
 
             _nodeLoggingContext = loggingContext;
 
-            // Create a work queue that will take an action and invoke it.  The generic parameter is the type which ActionBlock.Post() will
+            // Create per-engine telemetry data if telemetry collection is enabled.
+            // Each engine owns its data — no cross-engine sharing, no singleton contention.
+            if (_componentHost.BuildParameters.IsTelemetryEnabled)
+            {
+                _nodeLoggingContext.TelemetryData = new WorkerNodeTelemetryData();
+            }
+
+            // Create a work queuethat will take an action and invoke it.  The generic parameter is the type which ActionBlock.Post() will
             // take (an Action in this case) and the parameter to this constructor is a function which takes that parameter of type Action
             // (which we have named action) and does something with it (in this case calls invoke on it.)
             _workQueue = new ActionBlock<Action>(action => action.Invoke());
@@ -302,9 +309,8 @@ namespace Microsoft.Build.BackEnd
                     IBuildCheckManagerProvider buildCheckProvider = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider);
                     var buildCheckManager = buildCheckProvider!.Instance;
                     buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
-                    // Flush and send the final telemetry data if they are being collected
-                    ITelemetryForwarder telemetryForwarder = (_componentHost.GetComponent(BuildComponentType.TelemetryForwarder) as TelemetryForwarderProvider)!.Instance;
-                    telemetryForwarder.FinalizeProcessing(_nodeLoggingContext);
+                    // Flush and send the per-engine telemetry data if any was collected.
+                    SendTelemetryData(_nodeLoggingContext);
                     // Clears the instance so that next call (on node reuse) to 'GetComponent' leads to reinitialization.
                     buildCheckProvider.ShutdownComponent();
                 },
@@ -335,6 +341,27 @@ namespace Microsoft.Build.BackEnd
 
                 ChangeStatus(BuildRequestEngineStatus.Uninitialized);
             }
+        }
+
+        /// <summary>
+        /// Sends accumulated per-engine telemetry data and resets for the next build.
+        /// Called once at the end of each build, after all builders have been deactivated.
+        /// </summary>
+        private static void SendTelemetryData(NodeLoggingContext loggingContext)
+        {
+            WorkerNodeTelemetryData telemetryData = loggingContext?.TelemetryData;
+
+            if (telemetryData is null || telemetryData.IsEmpty)
+            {
+                return;
+            }
+
+            // Detach the data so the next build starts fresh.
+            loggingContext.TelemetryData = null;
+
+            WorkerNodeTelemetryEventArgs telemetryArgs = new(telemetryData)
+            { BuildEventContext = loggingContext.BuildEventContext };
+            loggingContext.LogBuildEvent(telemetryArgs);
         }
 
         /// <summary>

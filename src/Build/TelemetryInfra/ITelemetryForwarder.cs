@@ -2,22 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Framework.Telemetry;
 
 namespace Microsoft.Build.TelemetryInfra;
 
 /// <summary>
-/// A build component responsible for accumulating telemetry data from worker node and then sending it to main node
-/// at the end of the build.
+/// A build component that indicates whether telemetry collection is enabled
+/// and provides a finalization hook.
 /// </summary>
 internal interface ITelemetryForwarder
 {
     bool IsTelemetryCollected { get; }
-
-    /// <summary>
-    /// Merges a batch of telemetry data into this forwarder's accumulated state.
-    /// </summary>
-    void MergeWorkerData(IWorkerNodeTelemetryData data);
 
     /// <summary>
     /// Sends accumulated telemetry and resets internal state.

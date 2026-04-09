@@ -3,14 +3,14 @@
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.TelemetryInfra;
 
 /// <summary>
-/// A build component responsible for accumulating telemetry data from worker node and then sending it to main node
-/// at the end of the build.
+/// A build component that indicates whether telemetry collection is enabled.
+/// Telemetry data accumulation has moved to <see cref="BuildRequestEngine"/> (per-engine ownership),
+/// eliminating singleton contention and per-request dictionary allocations.
 /// </summary>
 internal class TelemetryForwarderProvider : IBuildComponent
 {
@@ -48,57 +48,22 @@ internal class TelemetryForwarderProvider : IBuildComponent
     }
 
     /// <summary>
-    /// Active telemetry forwarder that accumulates worker node telemetry.
+    /// Telemetry forwarder that reports whether telemetry collection is active.
+    /// Data accumulation is handled by <see cref="BuildRequestEngine"/> per-engine.
     /// </summary>
-    /// <remarks>
-    /// Thread-safe: in /m /mt mode, multiple <see cref="BuildRequestEngine"/> instances share a single
-    /// <see cref="TelemetryForwarderProvider"/> singleton, so <see cref="MergeWorkerData"/> and
-    /// <see cref="FinalizeProcessing"/> may be called concurrently from different node threads.
-    /// </remarks>
     public class TelemetryForwarder : ITelemetryForwarder
     {
-        private WorkerNodeTelemetryData _workerNodeTelemetryData = new();
-        private readonly LockType _lock = new();
-
-        // in future, this might be per event type
         public bool IsTelemetryCollected => true;
-
-        public void MergeWorkerData(IWorkerNodeTelemetryData data)
-        {
-            lock (_lock)
-            {
-                _workerNodeTelemetryData.Add(data);
-            }
-        }
-
 
         public void FinalizeProcessing(LoggingContext loggingContext)
         {
-            WorkerNodeTelemetryData snapshot;
-
-            lock (_lock)
-            {
-                // Nothing accumulated since the last call — skip sending.
-                if (_workerNodeTelemetryData.IsEmpty)
-                {
-                    return;
-                }
-
-                snapshot = _workerNodeTelemetryData;
-                _workerNodeTelemetryData = new();
-            }
-
-            WorkerNodeTelemetryEventArgs telemetryArgs = new(snapshot)
-            { BuildEventContext = loggingContext.BuildEventContext };
-            loggingContext.LogBuildEvent(telemetryArgs);
+            // No-op: telemetry data is now sent by BuildRequestEngine.SendTelemetryData.
         }
     }
 
     public class NullTelemetryForwarder : ITelemetryForwarder
     {
         public bool IsTelemetryCollected => false;
-
-        public void MergeWorkerData(IWorkerNodeTelemetryData data) { }
 
         public void FinalizeProcessing(LoggingContext loggingContext) { }
     }

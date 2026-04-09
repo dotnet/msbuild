@@ -3,6 +3,7 @@
 
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -33,6 +34,14 @@ namespace Microsoft.Build.BackEnd.Logging
 
             this.IsValid = true;
         }
+
+        /// <summary>
+        /// Per-engine telemetry data. Owned by the <see cref="BuildRequestEngine"/> that
+        /// created this context. Multiple <see cref="RequestBuilder"/> threads may write
+        /// concurrently, so callers must lock on this instance before mutating.
+        /// Null when telemetry collection is disabled.
+        /// </summary>
+        internal WorkerNodeTelemetryData TelemetryData { get; set; }
 
         /// <summary>
         /// Log the completion of a build
