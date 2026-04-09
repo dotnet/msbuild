@@ -15,9 +15,11 @@ description: "Automatically runs the expert-reviewer agent when a non-draft PR i
 # NOTE: The gh-aw compiler does not support `ready_for_review` as a
 # type for pull_request_target. Only `opened` is used here; for PRs
 # transitioned from draft to ready, use the `/review` slash command.
+# Add `ready_for_review` after https://github.com/github/gh-aw/issues/25436
+# is fixed and deployed.
 on:
   pull_request_target:
-    types: [opened]
+    types: [opened] # TODO: add ready_for_review (gh-aw#25436)
     forks: ["*"]
   roles: [admin, maintainer, write]
 
