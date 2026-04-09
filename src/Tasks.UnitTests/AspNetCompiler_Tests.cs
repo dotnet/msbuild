@@ -2,9 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Globalization;
+#if NETFRAMEWORK
+using System.Diagnostics;
+using System.IO;
+using Microsoft.Build.Framework;
+using Shouldly;
+#endif
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 #nullable disable
 
@@ -18,11 +25,18 @@ namespace Microsoft.Build.UnitTests
      */
     public sealed class AspNetCompilerTests
     {
+        private readonly ITestOutputHelper _output;
+
+        public AspNetCompilerTests(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         [Fact]
         public void NoParameters()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             // It's invalid to have zero parameters, so we expect a "false" return value from ValidateParameters.
             Assert.False(CommandLine.CallValidateParameters(t));
@@ -32,7 +46,7 @@ namespace Microsoft.Build.UnitTests
         public void OnlyMetabasePath()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
 
@@ -46,7 +60,7 @@ namespace Microsoft.Build.UnitTests
         public void OnlyVirtualPath()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.VirtualPath = @"/MyApp";
 
@@ -61,7 +75,7 @@ namespace Microsoft.Build.UnitTests
         public void OnlyPhysicalPath()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.PhysicalPath = @"c:\MyApp";
 
@@ -73,7 +87,7 @@ namespace Microsoft.Build.UnitTests
         public void OnlyTargetPath()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.TargetPath = @"c:\MyTarget";
 
@@ -85,7 +99,7 @@ namespace Microsoft.Build.UnitTests
         public void MetabasePathAndVirtualPath()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
             t.VirtualPath = @"/MyApp";
@@ -98,7 +112,7 @@ namespace Microsoft.Build.UnitTests
         public void MetabasePathAndPhysicalPath()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
             t.PhysicalPath = @"c:\MyApp";
@@ -111,7 +125,7 @@ namespace Microsoft.Build.UnitTests
         public void MetabasePathAndTargetPath()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
             t.TargetPath = @"c:\MyTarget";
@@ -126,7 +140,7 @@ namespace Microsoft.Build.UnitTests
         public void VirtualPathAndPhysicalPath()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.VirtualPath = @"/MyApp";
             t.PhysicalPath = @"c:\MyApp";
@@ -141,7 +155,7 @@ namespace Microsoft.Build.UnitTests
         public void VirtualPathAndTargetPath()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.VirtualPath = @"/MyApp";
             t.TargetPath = @"c:\MyTarget";
@@ -156,7 +170,7 @@ namespace Microsoft.Build.UnitTests
         public void PhysicalPathAndTargetPath()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.PhysicalPath = @"c:\MyApp";
             t.TargetPath = @"c:\MyTarget";
@@ -169,7 +183,7 @@ namespace Microsoft.Build.UnitTests
         public void AllExceptMetabasePath()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.VirtualPath = @"/MyApp";
             t.PhysicalPath = @"c:\MyApp";
@@ -185,7 +199,7 @@ namespace Microsoft.Build.UnitTests
         public void AllExceptVirtualPath()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
             t.PhysicalPath = @"c:\MyApp";
@@ -199,7 +213,7 @@ namespace Microsoft.Build.UnitTests
         public void AllExceptPhysicalPath()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
             t.VirtualPath = @"/MyApp";
@@ -213,7 +227,7 @@ namespace Microsoft.Build.UnitTests
         public void AllExceptTargetPath()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
             t.VirtualPath = @"/MyApp";
@@ -227,7 +241,7 @@ namespace Microsoft.Build.UnitTests
         public void AllParameters()
         {
             AspNetCompiler t = new AspNetCompiler();
-            t.BuildEngine = new MockEngine();
+            t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
             t.VirtualPath = @"/MyApp";
@@ -264,7 +278,7 @@ namespace Microsoft.Build.UnitTests
 
             string fullProjectFile = string.Format(CultureInfo.InvariantCulture, projectFileContents, typeof(AspNetCompiler).Assembly.FullName);
 
-            MockLogger logger = new MockLogger();
+            MockLogger logger = new MockLogger(_output);
             Project proj = ObjectModelHelpers.CreateInMemoryProject(fullProjectFile, logger);
             Assert.False(proj.Build(logger));
 
@@ -287,5 +301,62 @@ namespace Microsoft.Build.UnitTests
             Assert.False(logger.ExternalProjectFinishedEvents[1].Succeeded);
             Assert.False(logger.ExternalProjectFinishedEvents[2].Succeeded);
         }
+
+#if NETFRAMEWORK
+        /// <summary>
+        /// Verifies that GenerateFullPathToTool returns an absolute path (or null)
+        /// when called with a multithreaded TaskEnvironment, validating the
+        /// TaskEnvironment.GetAbsolutePath() integration.
+        /// </summary>
+        [Fact]
+        public void GenerateFullPathToTool_ReturnsAbsolutePathOrNull()
+        {
+            string projectDir = Path.GetTempPath();
+            TaskEnvironment taskEnv = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir);
+
+            TestableAspNetCompiler t = new TestableAspNetCompiler();
+            t.TaskEnvironment = taskEnv;
+            t.BuildEngine = new MockEngine(_output);
+
+            string result = t.CallGenerateFullPathToTool();
+
+            if (result is not null)
+            {
+                Path.IsPathRooted(result).ShouldBeTrue(
+                    $"GenerateFullPathToTool should return an absolute path, got: {result}");
+            }
+        }
+
+        /// <summary>
+        /// Verifies that the GetProcessStartInfo override routes through
+        /// GetProcessStartInfoMultiThreaded when TaskEnvironment is set,
+        /// and that the working directory comes from the TaskEnvironment.
+        /// </summary>
+        [Fact]
+        public void GetProcessStartInfo_UsesTaskEnvironmentWorkingDirectory()
+        {
+            string expectedWorkingDir = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar);
+            TaskEnvironment taskEnv = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(expectedWorkingDir);
+
+            TestableAspNetCompiler t = new TestableAspNetCompiler();
+            t.TaskEnvironment = taskEnv;
+            t.BuildEngine = new MockEngine(_output);
+
+            ProcessStartInfo startInfo = t.CallGetProcessStartInfo(@"C:\test\aspnet_compiler.exe", "-v /MyApp", null);
+
+            startInfo.WorkingDirectory.ShouldBe(expectedWorkingDir);
+        }
+
+        /// <summary>
+        /// Subclass that exposes protected methods.
+        /// </summary>
+        private sealed class TestableAspNetCompiler : AspNetCompiler
+        {
+            public string CallGenerateFullPathToTool() => GenerateFullPathToTool();
+
+            public ProcessStartInfo CallGetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)
+                => GetProcessStartInfo(pathToTool, commandLineCommands, responseFileSwitch);
+        }
+#endif
     }
 }
