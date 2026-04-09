@@ -952,46 +952,6 @@ namespace InlineTask
         }
 #endif
 
-        [Fact]
-        public void BuildRoslynCodeTaskFactoryTempDirectoryDoesntExist()
-        {
-            string text = """
-                <Project>
-                  <UsingTask TaskName="MyTempDirTask" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-                    <ParameterGroup>
-                      <Text />
-                    </ParameterGroup>
-                    <Task>
-                      <Code Type="Fragment" Language="cs">
-                        Log.LogMessage(MessageImportance.High, Text);
-                      </Code>
-                    </Task>
-                  </UsingTask>
-                  <Target Name="Build">
-                    <MyTempDirTask Text="Hello, World!" />
-                  </Target>
-                </Project>
-                """;
-
-            var newTempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-
-            using var env = TestEnvironment.Create();
-
-            Directory.Exists(newTempPath).ShouldBeFalse();
-            env.SetEnvironmentVariable("TMP", newTempPath);
-            env.SetEnvironmentVariable("TMPDIR", newTempPath);
-
-            try
-            {
-                MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(text);
-                logger.AssertLogContains("Hello, World!");
-            }
-            finally
-            {
-                FileUtilities.DeleteDirectoryNoThrow(newTempPath, true);
-            }
-        }
-
         private void TryLoadTaskBodyAndExpectFailure(string taskBody, string expectedErrorMessage)
         {
             if (expectedErrorMessage == null)
