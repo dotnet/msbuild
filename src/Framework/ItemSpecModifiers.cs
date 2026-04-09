@@ -52,6 +52,12 @@ internal static class ItemSpecModifiers
         DefiningProjectExtension
     ];
 
+    /// <summary>
+    ///  Per-item cache for the FullPath modifier. Other derivable modifiers (RootDir,
+    ///  Filename, Extension, RelativeDir, Directory) are intentionally NOT cached here
+    ///  because TaskItem is a MarshalByRefObject on .NET Framework, and copying a
+    ///  multi-field struct cross-AppDomain causes allocation regression in VS.
+    /// </summary>
     internal struct Cache
     {
         public string? FullPath;
