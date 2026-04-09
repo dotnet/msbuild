@@ -6,6 +6,7 @@ on:
   slash_command:
     name: review
     events: [pull_request_comment]
+  roles: [admin, maintainer, write]
 
   # ###############################################################
   # Override the COPILOT_GITHUB_TOKEN secret usage for the workflow

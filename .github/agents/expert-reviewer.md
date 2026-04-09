@@ -624,7 +624,9 @@ Use this to prioritize dimensions based on changed files.
 
 ### Wave 3: Post
 
-5. Post **inline review comments** at the exact file and line via GitHub MCP or `gh` CLI. Format:
+> **Tool availability note**: Steps 5–7 reference gh-aw safe-output tools (`create_pull_request_review_comment`, `submit_pull_request_review`, `add_comment`). When running outside an agentic workflow (e.g. locally in VS Code), these tools are unavailable — use the closest GitHub MCP or CLI equivalents instead (e.g. `gh api` to create PR review comments, `gh pr review` to submit a review, `gh pr comment` to post general comments).
+
+5. Post **inline review comments** on the exact diff lines using the `create_pull_request_review_comment` safe-output tool. Each comment must target a specific `path` and `line` in the PR diff. Format:
 
    ```markdown
    **[$SEVERITY] $DimensionName**
@@ -642,11 +644,13 @@ Use this to prioritize dimensions based on changed files.
    **Recommendation:** $Fix.
    ```
 
-6. Post design-level concerns (not tied to a line) as a single PR comment via GitHub MCP `add_comment` tool or `gh pr comment` — one bullet each.
+   **Important**: Use `create_pull_request_review_comment` (inline on diff), NOT `add_comment` (general PR comment). Only findings tied to a specific changed line should use this tool.
+
+6. Post design-level concerns (not tied to a specific diff line) as a single PR comment via the `add_comment` safe-output tool — one bullet each.
 
 ### Wave 4: Summary
 
-7. Post the summary table as a PR comment via GitHub MCP `add_comment` tool or `gh pr comment`:
+7. Submit the final review verdict via the `submit_pull_request_review` safe-output tool. Include the summary table in the review `body` and set the `event` field:
 
    ```markdown
    | # | Dimension | Verdict |
@@ -658,5 +662,8 @@ Use this to prioritize dimensions based on changed files.
    - [ ] Concurrency — shared state race
    ```
 
-   `[x]` = LGTM or NITs only. `[ ]` = MAJOR or BLOCKING.
-   All `[x]` → **APPROVE**. Any BLOCKING → **REQUEST_CHANGES**. Otherwise → **COMMENT**.
+   `[x]` = LGTM or NITs only. `[ ]` = BLOCKING.
+   Any BLOCKING → event: **REQUEST_CHANGES**. Otherwise (including all-clear) → event: **COMMENT**.
+   **Never use APPROVE** — the agent must not count as a PR approval.
+
+   All inline comments from step 5 are automatically bundled into this review submission.
