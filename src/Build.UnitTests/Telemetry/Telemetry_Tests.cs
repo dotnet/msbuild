@@ -493,7 +493,10 @@ namespace Microsoft.Build.Engine.UnitTests
 
             var loggingContext = new MockLoggingContext(
                 loggingService,
-                new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
+                BuildEventContext.CreateInitial(BuildEventContext.InvalidSubmissionId, 1)
+                    .WithProjectInstanceId(2)
+                    .WithProjectContextId(BuildEventContext.InvalidProjectContextId)
+                    .WithTargetId(4));
 
             // Merge some data.
             var localData = new WorkerNodeTelemetryData();
