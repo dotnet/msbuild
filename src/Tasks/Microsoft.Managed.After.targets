@@ -4,7 +4,7 @@ WARNING:  DO NOT MODIFY this file unless you are knowledgeable about MSBuild and
           created a backup copy.  Incorrect changes to this file will make it
           impossible to load or build your projects from the command-line or the IDE.
 
-This file defines common build logic for all managed languaged: C#, VisualBasic, F#
+This file defines common build logic for all managed languages: C#, VisualBasic, F#
 It is imported after the common targets have been imported.
 
 The core ProjectReferenceTargets for Build, Clean, and Rebuild are defined in
