@@ -784,6 +784,49 @@ namespace InlineTask
             }
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ClassDoesNotInheritFromITask(bool forceOutOfProc)
+        {
+            const string taskName = "ClassDoesNotInheritFromITask";
+            string unformattedMessage = ResourceUtilities.GetResourceString("CodeTaskFactory.NeedsITaskInterface");
+
+            string projectContent = $$"""
+                <Project>
+                  <UsingTask TaskName="{{taskName}}" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+                    <Task>
+                      <Code Type="Class">
+                namespace InlineTask
+                {
+                    public class {{taskName}}
+                    {
+                        public bool Execute()
+                        {
+                            return true;
+                        }
+                    }
+                }
+                      </Code>
+                    </Task>
+                  </UsingTask>
+                  <Target Name="Build">
+                    <{{taskName}} />
+                  </Target>
+                </Project>
+                """;
+
+            using TestEnvironment env = TestEnvironment.Create();
+            if (forceOutOfProc)
+            {
+                env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
+            }
+
+            TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(projectContent);
+            MockLogger logger = proj.BuildProjectExpectFailure();
+            logger.AssertLogContains(unformattedMessage);
+        }
+
         [Fact]
         public void EmbedsGeneratedFromSourceFileInBinlog()
         {
@@ -908,6 +951,46 @@ namespace InlineTask
             logLines.Where(l => l.Contains(dotnetPath)).Count().ShouldBe(1, log);
         }
 #endif
+
+        [Fact]
+        public void BuildRoslynCodeTaskFactoryTempDirectoryDoesntExist()
+        {
+            string text = """
+                <Project>
+                  <UsingTask TaskName="MyTempDirTask" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+                    <ParameterGroup>
+                      <Text />
+                    </ParameterGroup>
+                    <Task>
+                      <Code Type="Fragment" Language="cs">
+                        Log.LogMessage(MessageImportance.High, Text);
+                      </Code>
+                    </Task>
+                  </UsingTask>
+                  <Target Name="Build">
+                    <MyTempDirTask Text="Hello, World!" />
+                  </Target>
+                </Project>
+                """;
+
+            var newTempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+
+            using var env = TestEnvironment.Create();
+
+            Directory.Exists(newTempPath).ShouldBeFalse();
+            env.SetEnvironmentVariable("TMP", newTempPath);
+            env.SetEnvironmentVariable("TMPDIR", newTempPath);
+
+            try
+            {
+                MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(text);
+                logger.AssertLogContains("Hello, World!");
+            }
+            finally
+            {
+                FileUtilities.DeleteDirectoryNoThrow(newTempPath, true);
+            }
+        }
 
         private void TryLoadTaskBodyAndExpectFailure(string taskBody, string expectedErrorMessage)
         {
