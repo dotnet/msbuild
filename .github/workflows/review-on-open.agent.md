@@ -2,12 +2,15 @@
 name: "Expert Code Review (on ready)"
 description: "Automatically runs the expert-reviewer agent when a contributor PR is marked ready for review."
 
-# Fork protection and contributor membership checks are enforced in
-# the compiled lock file (not visible here). See the gh-aw docs on
-# integrity filtering and pre-activation membership gates.
+# Only users with admin, maintainer, or write permissions can trigger
+# this workflow (this is also the gh-aw default, made explicit here).
+# Fork PRs are allowed so external contributors with repo permissions
+# still get automatic reviews.
 on:
   pull_request:
     types: [opened, ready_for_review]
+    forks: ["*"]
+  roles: [admin, maintainer, write]
 
   # ###############################################################
   # Override the COPILOT_GITHUB_TOKEN secret usage for the workflow
