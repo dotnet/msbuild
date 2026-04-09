@@ -18,6 +18,7 @@ using Shouldly;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
+using Xunit.Abstractions;
 
 using static VerifyXunit.Verifier;
 
@@ -30,10 +31,12 @@ namespace Microsoft.Build.Tasks.UnitTests
     {
         private const string TaskName = "MyInlineTask";
 
+        private readonly ITestOutputHelper _output;
         private readonly VerifySettings _verifySettings;
 
-        public RoslynCodeTaskFactory_Tests()
+        public RoslynCodeTaskFactory_Tests(ITestOutputHelper output)
         {
+            _output = output;
             UseProjectRelativeDirectory("TaskFactorySource");
 
             _verifySettings = new();
@@ -1517,6 +1520,48 @@ EndGlobal
                         mockEngine,
                         out RoslynCodeTaskFactoryTaskInfo _);
                 });
+            }
+        }
+
+        /// <summary>
+        /// Verifies that inline Roslyn compilation succeeds even when the TMP/TMPDIR
+        /// environment variable points to a nonexistent directory. This is a real-world
+        /// edge case in corporate environments with roaming profiles or cleanup scripts.
+        /// </summary>
+        [Fact]
+        public void RoslynCodeTaskFactoryTempDirectoryDoesntExist()
+        {
+            string projectFileContents = """
+                    <Project>
+                        <UsingTask TaskName="RoslynTempDirTask" TaskFactory="RoslynCodeTaskFactory" AssemblyFile="$(MSBuildToolsPath)/Microsoft.Build.Tasks.Core.dll">
+                            <Task>
+                                <Code Type="Fragment" Language="cs">
+                                    Log.LogMessage(MessageImportance.High, "Hello from nonexistent temp dir");
+                                </Code>
+                            </Task>
+                        </UsingTask>
+                        <Target Name="Build">
+                            <RoslynTempDirTask />
+                        </Target>
+                    </Project>
+                    """;
+
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                string newTempPath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+
+                // The directory should not exist yet.
+                Directory.Exists(newTempPath).ShouldBeFalse();
+
+                // Set both TMP (Windows) and TMPDIR (macOS/Linux) to cover cross-platform.
+                env.SetEnvironmentVariable("TMP", newTempPath);
+                env.SetEnvironmentVariable("TMPDIR", newTempPath);
+
+                MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
+                mockLogger.AssertLogContains("Hello from nonexistent temp dir");
+
+                // Clean up the directory if the build created it.
+                FileUtilities.DeleteDirectoryNoThrow(newTempPath, true);
             }
         }
     }
