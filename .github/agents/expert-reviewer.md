@@ -662,7 +662,7 @@ Use this to prioritize dimensions based on changed files.
    - [ ] Concurrency — shared state race
    ```
 
-   `[x]` = LGTM or NITs only. `[ ]` = MAJOR or BLOCKING.
+   `[x]` = LGTM or NITs only. `[ ]` = BLOCKING.
    Any BLOCKING → event: **REQUEST_CHANGES**. Otherwise (including all-clear) → event: **COMMENT**.
    **Never use APPROVE** — the agent must not count as a PR approval.
 
