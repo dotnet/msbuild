@@ -624,7 +624,7 @@ Use this to prioritize dimensions based on changed files.
 
 ### Wave 3: Post
 
-5. Post **inline review comments** at the exact file and line via GitHub MCP or `gh` CLI. Format:
+5. Post **inline review comments** on the exact diff lines using the `create_pull_request_review_comment` safe-output tool. Each comment must target a specific `path` and `line` in the PR diff. Format:
 
    ```markdown
    **[$SEVERITY] $DimensionName**
@@ -642,11 +642,13 @@ Use this to prioritize dimensions based on changed files.
    **Recommendation:** $Fix.
    ```
 
-6. Post design-level concerns (not tied to a line) as a single PR comment via GitHub MCP `add_comment` tool or `gh pr comment` — one bullet each.
+   **Important**: Use `create_pull_request_review_comment` (inline on diff), NOT `add_comment` (general PR comment). Only findings tied to a specific changed line should use this tool.
+
+6. Post design-level concerns (not tied to a specific diff line) as a single PR comment via the `add_comment` safe-output tool — one bullet each.
 
 ### Wave 4: Summary
 
-7. Post the summary table as a PR comment via GitHub MCP `add_comment` tool or `gh pr comment`:
+7. Submit the final review verdict via the `submit_pull_request_review` safe-output tool. Include the summary table in the review `body` and set the `event` field:
 
    ```markdown
    | # | Dimension | Verdict |
@@ -659,4 +661,6 @@ Use this to prioritize dimensions based on changed files.
    ```
 
    `[x]` = LGTM or NITs only. `[ ]` = MAJOR or BLOCKING.
-   All `[x]` → **APPROVE**. Any BLOCKING → **REQUEST_CHANGES**. Otherwise → **COMMENT**.
+   All `[x]` → event: **APPROVE**. Any BLOCKING → event: **REQUEST_CHANGES**. Otherwise → event: **COMMENT**.
+
+   All inline comments from step 5 are automatically bundled into this review submission.
