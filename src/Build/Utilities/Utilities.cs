@@ -197,12 +197,12 @@ namespace Microsoft.Build.Internal
             // Avoid accessing node.ChildNodes -- it allocates a new XmlChildNodes wrapper on every call.
             // Use FirstChild/NextSibling linked-list traversal instead (allocation-free).
             XmlNode firstChild = node.FirstChild;
-            if (firstChild == null)
+            if (firstChild is null)
             {
                 return String.Empty;
             }
 
-            bool isSingleChild = firstChild.NextSibling == null;
+            bool isSingleChild = firstChild.NextSibling is null;
             if (isSingleChild && firstChild.NodeType == XmlNodeType.Whitespace)
             {
                 return String.Empty;
