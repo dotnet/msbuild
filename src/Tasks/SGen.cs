@@ -172,8 +172,7 @@ namespace Microsoft.Build.Tasks
                 string thisPath;
                 try
                 {
-                    thisPath = !string.IsNullOrEmpty(_buildAssemblyPath)
-                       ? TaskEnvironment.GetAbsolutePath(_buildAssemblyPath).GetCanonicalForm().Value : _buildAssemblyPath;
+                    thisPath = TaskEnvironment.GetAbsolutePath(_buildAssemblyPath).GetCanonicalForm().Value;
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
