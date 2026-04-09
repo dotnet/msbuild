@@ -472,18 +472,25 @@ namespace Microsoft.Build.BackEnd
             string msbuildLocation = null,
             NodeMode? expectedNodeMode = null)
         {
-            bool isNativeHost = msbuildLocation != null && Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
-            string expectedProcessName = Path.GetFileNameWithoutExtension(isNativeHost ? msbuildLocation : (CurrentHost.GetCurrentHost() ?? msbuildLocation));
+            string[] processNamesToSearch = msbuildLocation != null
+                ? [GetProcessNameForNodeReuse(msbuildLocation)]
+                : GetProcessNamesForShutdown();
 
-            Process[] processes;
-            try
+            ErrorUtilities.VerifyThrow(processNamesToSearch.Length > 0, "Expected at least one process name to search for.");
+            string expectedProcessName = string.Join(", ", processNamesToSearch);
+
+            // Enumerate all candidate processes matching any of the target names.
+            List<Process> processes = new();
+            foreach (string name in processNamesToSearch)
             {
-                processes = Process.GetProcessesByName(expectedProcessName);
-            }
-            catch
-            {
-                // Process enumeration can fail due to permissions or transient OS errors.
-                return (expectedProcessName, Array.Empty<Process>());
+                try
+                {
+                    processes.AddRange(Process.GetProcessesByName(name));
+                }
+                catch
+                {
+                    // Process enumeration can fail due to permissions or transient OS errors.
+                }
             }
 
             bool shouldFilterByNodeMode = expectedNodeMode.HasValue && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_5);
@@ -492,9 +499,58 @@ namespace Microsoft.Build.BackEnd
                 return (expectedProcessName, FilterProcessesByNodeMode(processes, expectedNodeMode.Value, expectedProcessName));
             }
 
-            Array.Sort(processes, static (left, right) => left.Id.CompareTo(right.Id));
+            processes.Sort(static (left, right) => left.Id.CompareTo(right.Id));
 
             return (expectedProcessName, processes);
+        }
+
+        /// <summary>
+        /// Returns the single process name to search when reusing nodes.
+        /// We know exactly how nodes were launched from <paramref name="msbuildLocation"/>.
+        /// </summary>
+        private static string GetProcessNameForNodeReuse(string msbuildLocation)
+        {
+            bool isAppHost = Path.GetFileName(msbuildLocation)
+                .Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase);
+
+            return Path.GetFileNameWithoutExtension(
+                isAppHost ? msbuildLocation : (CurrentHost.GetCurrentHost() ?? msbuildLocation));
+        }
+
+        /// <summary>
+        /// Returns all process names that could host idle MSBuild nodes.
+        /// During shutdown we don't know how nodes were launched - they could be running as
+        /// "dotnet" (via <c>dotnet MSBuild.dll</c>) or as "MSBuild" (via the AppHost).
+        /// We search for both so that <see cref="ShutdownAllNodes"/> finds all idle nodes.
+        /// </summary>
+        /// <remarks>
+        /// On .NET Core, <see cref="CurrentHost.GetCurrentHost"/> always resolves a host (it throws
+        /// via <c>ErrorUtilities.ThrowInternalErrorUnreachable</c> if it cannot). The null check on
+        /// <c>currentHostPath</c> only applies on .NET Framework, where <c>GetCurrentHost()</c>
+        /// returns null.
+        /// </remarks>
+        private static string[] GetProcessNamesForShutdown()
+        {
+            string currentHostPath = CurrentHost.GetCurrentHost();
+            string currentHostName = currentHostPath != null
+                ? Path.GetFileNameWithoutExtension(currentHostPath)
+                : null;
+
+            var names = new List<string>(capacity: 2);
+
+            // The current host process (e.g. "dotnet").
+            if (currentHostName != null)
+            {
+                names.Add(currentHostName);
+            }
+
+            // The MSBuild AppHost (e.g. "MSBuild"), if it differs from the current host.
+            if (!string.Equals(currentHostName, Constants.MSBuildAppName, StringComparison.OrdinalIgnoreCase))
+            {
+                names.Add(Constants.MSBuildAppName);
+            }
+
+            return names.ToArray();
         }
 
         /// <summary>
@@ -502,11 +558,11 @@ namespace Microsoft.Build.BackEnd
         /// Processes whose command line cannot be retrieved (unsupported platform) are included
         /// unconditionally to preserve node reuse on those platforms.
         /// </summary>
-        private static IList<Process> FilterProcessesByNodeMode(Process[] processes, NodeMode expectedNodeMode, string expectedProcessName)
+        private static IList<Process> FilterProcessesByNodeMode(List<Process> processes, NodeMode expectedNodeMode, string expectedProcessName)
         {
-            CommunicationsUtilities.Trace("Filtering {0} candidate processes by NodeMode {1} for process name '{2}'", processes.Length, expectedNodeMode, expectedProcessName);
+            CommunicationsUtilities.Trace("Filtering {0} candidate processes by NodeMode {1} for process name '{2}'", processes.Count, expectedNodeMode, expectedProcessName);
 
-            List<Process> filtered = new(capacity: processes.Length);
+            List<Process> filtered = new(capacity: processes.Count);
 
             foreach (Process process in processes)
             {
