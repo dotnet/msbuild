@@ -27,7 +27,7 @@ namespace Microsoft.Build.Graph.UnitTests
     /// </summary>
     public class ProjectReferenceTargetsProtocolTests : IDisposable
     {
-        private TestEnvironment _env;
+        private readonly TestEnvironment _env;
 
         public ProjectReferenceTargetsProtocolTests(ITestOutputHelper output)
         {
@@ -318,7 +318,9 @@ namespace Microsoft.Build.Graph.UnitTests
             // Project 2 is a single-targeting reference
             string innerBuildContent = CommonCurrentVersionTargetsProtocol + AllDummyTargets;
 
-            // The outer build uses CrossTargeting protocol
+            // The outer build uses CrossTargeting protocol + CommonCurrentVersion protocol.
+            // Both are needed because the same project file serves as outer and inner builds;
+            // IsCrossTargetingBuild conditions determine which protocol items activate.
             string outerBuildContent = MultitargetingSpec + CrossTargetingProtocol + CommonCurrentVersionTargetsProtocol + AllDummyTargets;
 
             ProjectGraph graph = Helpers.CreateProjectGraph(
