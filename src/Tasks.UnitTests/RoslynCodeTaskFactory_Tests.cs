@@ -18,6 +18,7 @@ using Shouldly;
 using VerifyTests;
 using VerifyXunit;
 using Xunit;
+using Xunit.Abstractions;
 
 using static VerifyXunit.Verifier;
 
@@ -32,8 +33,11 @@ namespace Microsoft.Build.Tasks.UnitTests
 
         private readonly VerifySettings _verifySettings;
 
-        public RoslynCodeTaskFactory_Tests()
+        private readonly ITestOutputHelper _testOutput;
+
+        public RoslynCodeTaskFactory_Tests(ITestOutputHelper testOutput)
         {
+            _testOutput = testOutput;
             UseProjectRelativeDirectory("TaskFactorySource");
 
             _verifySettings = new();
@@ -816,7 +820,7 @@ namespace InlineTask
                 </Project>
                 """;
 
-            using TestEnvironment env = TestEnvironment.Create();
+            using TestEnvironment env = TestEnvironment.Create(_testOutput);
             if (forceOutOfProc)
             {
                 env.SetEnvironmentVariable("MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC", "1");
