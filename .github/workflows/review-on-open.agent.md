@@ -1,13 +1,27 @@
 ---
-name: "Expert Code Review (on ready)"
-description: "Automatically runs the expert-reviewer agent when a contributor PR is marked ready for review."
+name: "Expert Code Review (on open)"
+description: "Automatically runs the expert-reviewer agent when a non-draft PR is opened."
 
-# Fork protection and contributor membership checks are enforced in
-# the compiled lock file (not visible here). See the gh-aw docs on
-# integrity filtering and pre-activation membership gates.
+# Non-draft PRs still trigger this workflow, including fork PRs.
+# The `roles` setting below does not block triggering; it restricts
+# execution past pre-activation to users with admin, maintainer, or
+# write permissions (see the compiled lock file for the gating logic).
+#
+# Uses pull_request_target (not pull_request) so that fork PRs have
+# access to repo secrets needed for the Copilot PAT pool. This is safe
+# because the agent reads the diff via GitHub MCP tools — it does not
+# check out or execute code from the PR branch.
+#
+# NOTE: The gh-aw compiler does not support `ready_for_review` as a
+# type for pull_request_target. Only `opened` is used here; for PRs
+# transitioned from draft to ready, use the `/review` slash command.
+# Add `ready_for_review` after https://github.com/github/gh-aw/issues/25436
+# is fixed and deployed.
 on:
-  pull_request:
-    types: [opened, ready_for_review]
+  pull_request_target:
+    types: [opened] # TODO: add ready_for_review (gh-aw#25436)
+    forks: ["*"]
+  roles: [admin, maintainer, write]
 
   # ###############################################################
   # Override the COPILOT_GITHUB_TOKEN secret usage for the workflow
