@@ -663,6 +663,7 @@ Use this to prioritize dimensions based on changed files.
    ```
 
    `[x]` = LGTM or NITs only. `[ ]` = MAJOR or BLOCKING.
-   All `[x]` → event: **APPROVE**. Any BLOCKING → event: **REQUEST_CHANGES**. Otherwise → event: **COMMENT**.
+   Any BLOCKING → event: **REQUEST_CHANGES**. Otherwise (including all-clear) → event: **COMMENT**.
+   **Never use APPROVE** — the agent must not count as a PR approval.
 
    All inline comments from step 5 are automatically bundled into this review submission.

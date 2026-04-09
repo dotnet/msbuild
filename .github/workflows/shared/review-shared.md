@@ -38,5 +38,6 @@ Review pull request #${{ github.event.pull_request.number || github.event.issue.
 3. Do **not** post comments yourself. The subagent will post its own comments using the available safe-output tools:
    - **Inline review comments** on specific diff lines via `create_pull_request_review_comment`
    - **Design-level concerns** (not tied to a line) via `add_comment`
-   - **Final review verdict** (APPROVE / COMMENT / REQUEST_CHANGES) via `submit_pull_request_review`
-4. If the subagent does not post anything (e.g. no issues found), post a brief approval comment.
+   - **Final review verdict** (COMMENT or REQUEST_CHANGES) via `submit_pull_request_review`
+   - **Never use APPROVE** — the agent must not count as a PR approval. Use COMMENT for clean reviews.
+4. If the subagent does not post anything (e.g. no issues found), post a brief COMMENT (not APPROVE).
