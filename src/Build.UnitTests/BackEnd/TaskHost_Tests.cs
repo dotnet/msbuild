@@ -546,37 +546,35 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.True(_taskHost.IsRunningMultipleNodes); // "Expect IsRunningMultipleNodes to be true with 4 nodes"
         }
 
-#if FEATURE_CODETASKFACTORY
         /// <summary>
         /// Task logging after it's done should not crash us.
         /// </summary>
         [Fact]
         public void LogCustomAfterTaskIsDone()
         {
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName='test' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
-                            <Task>
-                              <Using Namespace='System' />
-                              <Using Namespace='System.Threading' />
-                              <Code Type='Fragment' Language='cs'>
+            string projectFileContents = """
+                <Project>
+                    <UsingTask TaskName='test' TaskFactory='RoslynCodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll'>
+                        <Task>
+                            <Using Namespace='System.Threading' />
+                            <Code Type='Fragment' Language='cs'>
                                 <![CDATA[
-                                  Log.LogWarning(""[1]"");
-                                  ThreadPool.QueueUserWorkItem(state=>
-                                  {
-                                          Thread.Sleep(100);
-                                          Log.LogExternalProjectStarted(""a"", ""b"", ""c"", ""d""); // this logs a custom event
-                                  });
-
+                                Log.LogWarning("[1]");
+                                ThreadPool.QueueUserWorkItem(state =>
+                                {
+                                    Thread.Sleep(100);
+                                    Log.LogExternalProjectStarted("a", "b", "c", "d");
+                                });
                                 ]]>
-                              </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name='Build'>
-                            <test/>
-                            <Warning Text=""[3]""/>
-                        </Target>
-                    </Project>";
+                            </Code>
+                        </Task>
+                    </UsingTask>
+                    <Target Name='Build'>
+                        <test/>
+                        <Warning Text="[3]"/>
+                    </Target>
+                </Project>
+                """;
 
             MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
             mockLogger.AssertLogContains("[1]");
@@ -589,30 +587,29 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void LogCommentAfterTaskIsDone()
         {
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName='test' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
-                            <Task>
-                              <Using Namespace='System' />
-                              <Using Namespace='System.Threading' />
-                              <Code Type='Fragment' Language='cs'>
+            string projectFileContents = """
+                <Project>
+                    <UsingTask TaskName='test' TaskFactory='RoslynCodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll'>
+                        <Task>
+                            <Using Namespace='System.Threading' />
+                            <Code Type='Fragment' Language='cs'>
                                 <![CDATA[
-                                  Log.LogMessage(""[1]"");
-                                  ThreadPool.QueueUserWorkItem(state=>
-                                  {
-                                          Thread.Sleep(100);
-                                          Log.LogMessage(""[2]"");
-                                  });
-
+                                Log.LogMessage("[1]");
+                                ThreadPool.QueueUserWorkItem(state =>
+                                {
+                                    Thread.Sleep(100);
+                                    Log.LogMessage("[2]");
+                                });
                                 ]]>
-                              </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name='Build'>
-                            <test/>
-                            <Message Text=""[3]""/>
-                        </Target>
-                    </Project>";
+                            </Code>
+                        </Task>
+                    </UsingTask>
+                    <Target Name='Build'>
+                        <test/>
+                        <Message Text="[3]"/>
+                    </Target>
+                </Project>
+                """;
 
             MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
             mockLogger.AssertLogContains("[1]");
@@ -620,35 +617,34 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Task logging after it's done should not crash us.
+        /// Task logging a warning after it's done should not crash us.
         /// </summary>
         [Fact]
         public void LogWarningAfterTaskIsDone()
         {
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName='test' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
-                            <Task>
-                              <Using Namespace='System' />
-                              <Using Namespace='System.Threading' />
-                              <Code Type='Fragment' Language='cs'>
+            string projectFileContents = """
+                <Project>
+                    <UsingTask TaskName='test' TaskFactory='RoslynCodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll'>
+                        <Task>
+                            <Using Namespace='System.Threading' />
+                            <Code Type='Fragment' Language='cs'>
                                 <![CDATA[
-                                  Log.LogWarning(""[1]"");
-                                  ThreadPool.QueueUserWorkItem(state=>
-                                  {
-                                          Thread.Sleep(100);
-                                          Log.LogWarning(""[2]"");
-                                  });
-
+                                Log.LogWarning("[1]");
+                                ThreadPool.QueueUserWorkItem(state =>
+                                {
+                                    Thread.Sleep(100);
+                                    Log.LogWarning("[2]");
+                                });
                                 ]]>
-                              </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name='Build'>
-                            <test/>
-                            <Warning Text=""[3]""/>
-                        </Target>
-                    </Project>";
+                            </Code>
+                        </Task>
+                    </UsingTask>
+                    <Target Name='Build'>
+                        <test/>
+                        <Warning Text="[3]"/>
+                    </Target>
+                </Project>
+                """;
 
             MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
             mockLogger.AssertLogContains("[1]");
@@ -656,41 +652,39 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Task logging after it's done should not crash us.
+        /// Task logging an error after it's done should not crash us.
         /// </summary>
         [Fact]
         public void LogErrorAfterTaskIsDone()
         {
-            string projectFileContents = @"
-                    <Project ToolsVersion='msbuilddefaulttoolsversion'>
-                        <UsingTask TaskName='test' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
-                            <Task>
-                              <Using Namespace='System' />
-                              <Using Namespace='System.Threading' />
-                              <Code Type='Fragment' Language='cs'>
+            string projectFileContents = """
+                <Project>
+                    <UsingTask TaskName='test' TaskFactory='RoslynCodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll'>
+                        <Task>
+                            <Using Namespace='System.Threading' />
+                            <Code Type='Fragment' Language='cs'>
                                 <![CDATA[
-                                  Log.LogError(""[1]"");
-                                  ThreadPool.QueueUserWorkItem(state=>
-                                  {
-                                          Thread.Sleep(100);
-                                          Log.LogError(""[2]"");
-                                  });
-
+                                Log.LogError("[1]");
+                                ThreadPool.QueueUserWorkItem(state =>
+                                {
+                                    Thread.Sleep(100);
+                                    Log.LogError("[2]");
+                                });
                                 ]]>
-                              </Code>
-                            </Task>
-                        </UsingTask>
-                        <Target Name='Build'>
-                            <test ContinueOnError=""true""/>
-                            <Warning Text=""[3]""/>
-                        </Target>
-                    </Project>";
+                            </Code>
+                        </Task>
+                    </UsingTask>
+                    <Target Name='Build'>
+                        <test ContinueOnError="true"/>
+                        <Warning Text="[3]"/>
+                    </Target>
+                </Project>
+                """;
 
             MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
             mockLogger.AssertLogContains("[1]");
             mockLogger.AssertLogContains("[3]"); // [2] may or may not appear.
         }
-#endif
 
         /// <summary>
         /// Verifies that tasks can get global properties.
