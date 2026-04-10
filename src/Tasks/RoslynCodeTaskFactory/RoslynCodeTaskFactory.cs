@@ -144,7 +144,11 @@ namespace Microsoft.Build.Tasks
             ITask taskInstance = Activator.CreateInstance(TaskType) as ITask;
             if (taskInstance is null)
             {
-                TaskLoggingHelper taskInvocationLog = new TaskLoggingHelper(taskFactoryLoggingHost, _taskName);
+                TaskLoggingHelper taskInvocationLog = new TaskLoggingHelper(taskFactoryLoggingHost, _taskName)
+                {
+                    TaskResources = AssemblyResources.PrimaryResources,
+                    HelpKeywordPrefix = "MSBuild."
+                };
                 taskInvocationLog.LogErrorWithCodeFromResources("CodeTaskFactory.NeedsITaskInterface", _taskName);
             }
 
