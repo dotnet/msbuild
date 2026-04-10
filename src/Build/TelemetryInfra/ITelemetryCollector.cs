@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -12,9 +12,9 @@ namespace Microsoft.Build.TelemetryInfra;
 /// Collects task and target telemetry for a single build engine's lifetime.
 /// Thread-safe: multiple request builder threads within one engine may call
 /// <see cref="AddTarget"/> and <see cref="AddTask"/> concurrently.
-/// Created per engine by <see cref="TelemetryForwarderProvider.CreateForwarder"/>.
+/// Created per engine by <see cref="TelemetryCollectorProvider.CreateCollector"/>.
 /// </summary>
-internal interface ITelemetryForwarder
+internal interface ITelemetryCollector
 {
     bool IsTelemetryCollected { get; }
 

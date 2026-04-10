@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -11,25 +11,25 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.TelemetryInfra;
 
 /// <summary>
-/// Build component that creates per-engine <see cref="ITelemetryForwarder"/> instances.
-/// Registered as a singleton (<see cref="BuildComponentType.TelemetryForwarder"/>),
-/// but holds no mutable state - each engine gets its own forwarder via <see cref="CreateForwarder"/>.
+/// Build component that creates per-engine <see cref="ITelemetryCollector"/> instances.
+/// Registered as a singleton (<see cref="BuildComponentType.TelemetryCollector"/>),
+/// but holds no mutable state - each engine gets its own collector via <see cref="CreateCollector"/>.
 /// </summary>
-internal class TelemetryForwarderProvider : IBuildComponent
+internal class TelemetryCollectorProvider : IBuildComponent
 {
     private bool _telemetryEnabled;
 
     /// <summary>
-    /// Creates a new <see cref="ITelemetryForwarder"/> scoped to one engine's build lifetime.
-    /// Returns a no-op forwarder when telemetry is disabled.
+    /// Creates a new <see cref="ITelemetryCollector"/> scoped to one engine's build lifetime.
+    /// Returns a no-op collector when telemetry is disabled.
     /// </summary>
-    internal ITelemetryForwarder CreateForwarder()
-        => _telemetryEnabled ? new TelemetryForwarder() : NullTelemetryForwarder.Instance;
+    internal ITelemetryCollector CreateCollector()
+        => _telemetryEnabled ? new TelemetryCollector() : NullTelemetryCollector.Instance;
 
     internal static IBuildComponent CreateComponent(BuildComponentType type)
     {
-        ErrorUtilities.VerifyThrow(type == BuildComponentType.TelemetryForwarder, "Cannot create components of type {0}", type);
-        return new TelemetryForwarderProvider();
+        ErrorUtilities.VerifyThrow(type == BuildComponentType.TelemetryCollector, "Cannot create components of type {0}", type);
+        return new TelemetryCollectorProvider();
     }
 
     public void InitializeComponent(IBuildComponentHost host)
@@ -46,7 +46,7 @@ internal class TelemetryForwarderProvider : IBuildComponent
     /// Collects task/target telemetry for one engine. Owns the data and the lock -
     /// callers just call <see cref="AddTarget"/>/<see cref="AddTask"/> without synchronization concerns.
     /// </summary>
-    internal class TelemetryForwarder : ITelemetryForwarder
+    internal class TelemetryCollector : ITelemetryCollector
     {
         private WorkerNodeTelemetryData _data = new();
         private readonly LockType _lock = new();
@@ -90,9 +90,9 @@ internal class TelemetryForwarderProvider : IBuildComponent
         }
     }
 
-    internal class NullTelemetryForwarder : ITelemetryForwarder
+    internal class NullTelemetryCollector : ITelemetryCollector
     {
-        internal static readonly NullTelemetryForwarder Instance = new();
+        internal static readonly NullTelemetryCollector Instance = new();
 
         public bool IsTelemetryCollected => false;
 

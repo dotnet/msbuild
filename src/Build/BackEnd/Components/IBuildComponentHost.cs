@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using BuildParameters = Microsoft.Build.Execution.BuildParameters;
@@ -151,7 +151,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The component which collects telemetry data in worker node and forwards it to the main node.
         /// </summary>
-        TelemetryForwarder,
+        TelemetryCollector,
     }
 
     /// <summary>

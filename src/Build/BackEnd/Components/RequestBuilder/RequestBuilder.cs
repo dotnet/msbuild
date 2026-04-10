@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -1297,9 +1297,9 @@ namespace Microsoft.Build.BackEnd
 
         private void UpdateStatisticsPostBuild()
         {
-            ITelemetryForwarder TelemetryForwarder = _nodeLoggingContext?.TelemetryForwarder;
+            ITelemetryCollector telemetryCollector = _nodeLoggingContext?.TelemetryCollector;
 
-            if (TelemetryForwarder is null || !TelemetryForwarder.IsTelemetryCollected)
+            if (telemetryCollector is null || !telemetryCollector.IsTelemetryCollected)
             {
                 return;
             }
@@ -1346,7 +1346,7 @@ namespace Microsoft.Build.BackEnd
 
                 var key = new TaskOrTargetTelemetryKey(
                     projectTargetInstance.Key, isCustom, isFromNuget, isMetaprojTarget);
-                TelemetryForwarder.AddTarget(key, wasExecuted, skipReason);
+                telemetryCollector.AddTarget(key, wasExecuted, skipReason);
             }
 
             TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
@@ -1366,7 +1366,7 @@ namespace Microsoft.Build.BackEnd
                         registeredTaskRecord.ComputeIfCustom(),
                         registeredTaskRecord.IsFromNugetCache,
                         isFromMetaProject: false);
-                    TelemetryForwarder.AddTask(
+                    telemetryCollector.AddTask(
                         key,
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
