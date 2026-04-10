@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -486,7 +485,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void FinalizeProcessing_AfterMerge_ResetsState()
+        public void TelemetryForwarder_AccumulatesAndSendsOnFinalize()
         {
             var forwarder = new TelemetryForwarderProvider.TelemetryForwarder();
             var loggingService = new EventRecordingLoggingService();
@@ -495,11 +494,9 @@ namespace Microsoft.Build.Engine.UnitTests
                 loggingService,
                 new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
 
-            // Merge some data.
-            var localData = new WorkerNodeTelemetryData();
+            // Add data via the forwarder API.
             var key = new TaskOrTargetTelemetryKey("TestTarget", isCustom: true, isFromNugetCache: false, isFromMetaProject: false);
-            localData.AddTarget(key, wasExecuted: true);
-            forwarder.MergeWorkerData(localData);
+            forwarder.AddTarget(key, wasExecuted: true);
 
             // First FinalizeProcessing should emit a telemetry event.
             forwarder.FinalizeProcessing(loggingContext);
@@ -511,11 +508,9 @@ namespace Microsoft.Build.Engine.UnitTests
             forwarder.FinalizeProcessing(loggingContext);
             loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().Count().ShouldBe(1, "No new event should be emitted after reset");
 
-            // Merge new data after reset — forwarder should still work.
-            var localData2 = new WorkerNodeTelemetryData();
+            // Add new data after reset — forwarder should still work.
             var key2 = new TaskOrTargetTelemetryKey("TestTarget2", isCustom: false, isFromNugetCache: false, isFromMetaProject: false);
-            localData2.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.ConditionWasFalse);
-            forwarder.MergeWorkerData(localData2);
+            forwarder.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.ConditionWasFalse);
 
             // Third FinalizeProcessing should emit only the new data.
             forwarder.FinalizeProcessing(loggingContext);
