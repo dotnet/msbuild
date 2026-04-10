@@ -108,8 +108,6 @@ namespace Microsoft.Build.UnitTests
 
             Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, null);
             Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, null);
-
-            Copy.RefreshInternalEnvironmentValues();
         }
 
         /// <summary>
@@ -119,8 +117,6 @@ namespace Microsoft.Build.UnitTests
         {
             Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, _alwaysOverwriteReadOnlyFiles);
             Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, _alwaysRetry);
-
-            Copy.RefreshInternalEnvironmentValues();
         }
 
         [Fact]
@@ -848,7 +844,6 @@ namespace Microsoft.Build.UnitTests
             try
             {
                 Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, "1   ");
-                Copy.RefreshInternalEnvironmentValues();
 
                 using (StreamWriter sw = FileUtilities.OpenWrite(source, true))
                 {
@@ -896,7 +891,6 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, oldAlwaysRetryValue);
-                Copy.RefreshInternalEnvironmentValues();
 
                 File.SetAttributes(destination, FileAttributes.Normal);
 
