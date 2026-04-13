@@ -158,8 +158,30 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             if (projectProperties == null ||
                 loggingService.OnlyLogCriticalEvents ||
-                !loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent ||
-                (loggingService.RunningOnRemoteNode && !loggingService.SerializeAllProperties))
+                !loggingService.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent)
+            {
+                return null;
+            }
+
+            // When PropertiesToSerialize is set (e.g. MsBuildForwardPropertiesFromChild),
+            // filter to only those properties regardless of RunningOnRemoteNode.
+            string[] propertiesToSerialize = loggingService.PropertiesToSerialize;
+            if (propertiesToSerialize?.Length > 0 && !loggingService.SerializeAllProperties)
+            {
+                PropertyDictionary<ProjectPropertyInstance> filtered = new();
+                foreach (string propertyToGet in propertiesToSerialize)
+                {
+                    ProjectPropertyInstance instance = projectProperties[propertyToGet];
+                    if (instance is not null)
+                    {
+                        filtered.Set(instance);
+                    }
+                }
+
+                return filtered.GetCopyOnReadEnumerable(p => new DictionaryEntry(p.Name, p.EvaluatedValue));
+            }
+
+            if (loggingService.RunningOnRemoteNode && !loggingService.SerializeAllProperties)
             {
                 return null;
             }
