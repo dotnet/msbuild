@@ -479,6 +479,19 @@ When the fingerprint shows only copy operations are needed (compilation up-to-da
 
 With MSBuild server mode maintaining in-memory state, FUTDC operates identically to VS: cached evaluation results, file watchers, sub-millisecond decisions. This is the ultimate convergence point.
 
+### Storage Model: In-Memory with Disk Fallback
+
+VS uses a dual-storage approach: FUTDC state lives in-memory during the session and is flushed to `.futdcache.v2` on solution close (`OnBeforeCloseSolution`). On next launch it restores from the file. The same pattern maps cleanly to MSBuild:
+
+| Scenario | Storage | Check Cost | Write Cost |
+|----------|---------|-----------|------------|
+| **Server alive** | In-memory, next to existing `ProjectRootElementCache` singleton | Sub-millisecond | None (memory write) |
+| **Server shutdown** | Flush to `obj/.futdc` via the existing `BuildCompleteReuse` shutdown path | N/A | Single disk write |
+| **Server cold start** | Read from `obj/.futdc`, populate memory | ~1ms (disk read) | None |
+| **No server (fallback)** | Read/write `obj/.futdc` per build | ~1–5ms per project | Small disk write post-build |
+
+This means Phase 1 (disk-based fingerprints) and Phase 4 (server convergence) use the **same data format and logic** — just different storage backends. The server is an optimization over the disk path, not a different architecture. The disk format serves as the persistence layer for both paths and as the cold-start bootstrap.
+
 ### Where to implement: Engine vs SDK vs Plugin
 
 The Phase 0 plugin and Phase 1 engine hook are not mutually exclusive. The plugin validates the approach; the engine hook delivers the full performance benefit. The key architectural decision is whether to expose the pre-evaluation check as a plugin API extension (`PreEvaluationGetCacheResultAsync`) or as built-in engine logic. The plugin API is more extensible; the built-in approach is simpler and avoids plugin packaging overhead.
