@@ -1,542 +1,538 @@
-# Fast Up-To-Date Checks in MSBuild CLI: Architecture & Roadmap
+# Fast Up-To-Date Check for CLI Builds
 
-## Executive Summary
+## Summary
 
-Today, Visual Studio achieves dramatically faster inner-loop build times through a **Fast Up-To-Date Check (FUTDC)** implemented in [dotnet/project-system](https://github.com/dotnet/project-system). This check runs entirely in-process in VS and can determine whether a project needs building in **1–10 ms**, compared to **100–500+ ms** for MSBuild's own no-op evaluation-and-target-execution cycle. The FUTDC is VS-only; CLI users running `dotnet build` get no benefit from it.
+Visual Studio determines whether a project needs building in 1–10 ms via a [Fast Up-To-Date Check (FUTDC)](https://github.com/dotnet/project-system/tree/main/src/Microsoft.VisualStudio.ProjectSystem.Managed.VS/ProjectSystem/VS/UpToDate) that runs *before* MSBuild is ever invoked. CLI users (`dotnet build`) get none of this — every no-op build pays full evaluation, RAR, and target-walking costs, taking seconds even when nothing changed.
 
-This document analyzes the FUTDC architecture, maps it to MSBuild's existing infrastructure, and proposes a roadmap for bringing equivalent fast up-to-date checking to `dotnet build` and other batch-build scenarios.
-
----
+This document is a deep investigation into what it would take to bring FUTDC-equivalent performance to CLI builds: what the VS FUTDC actually does, where exactly in the MSBuild pipeline a skip could be injected, what each candidate approach can and cannot do, and what the correctness risks are.
 
 ## Table of Contents
 
-1. [Problem Statement](#1-problem-statement)
-2. [How VS Fast Up-To-Date Check Works](#2-how-vs-fast-up-to-date-check-works)
-3. [How MSBuild Incremental Build Works Today](#3-how-msbuild-incremental-build-works-today)
-4. [Gap Analysis](#4-gap-analysis)
-5. [Design Principles for CLI Fast Up-To-Date Check](#5-design-principles-for-cli-fast-up-to-date-check)
-6. [Roadmap: Phased Implementation](#6-roadmap-phased-implementation)
-7. [Key Technical Challenges](#7-key-technical-challenges)
-8. [References](#8-references)
+1. [What makes no-op CLI builds slow](#1-what-makes-no-op-cli-builds-slow)
+2. [What VS FUTDC actually does](#2-what-vs-futdc-actually-does)
+3. [MSBuild's current incremental mechanisms](#3-msbuilds-current-incremental-mechanisms)
+4. [Candidate approaches — deep analysis](#4-candidate-approaches)
+5. [The obj/ path discovery problem](#5-the-obj-path-discovery-problem)
+6. [Correctness risk matrix](#6-correctness-risk-matrix)
+7. [Why this wasn't done before](#7-why-this-wasnt-done-before)
+8. [Recommended path forward](#8-recommended-path-forward)
+9. [Related issues and prior art](#9-related-issues-and-prior-art)
 
 ---
 
-## 1. Problem Statement
+## 1. What Makes No-Op CLI Builds Slow
 
-### The Cost of a No-Op Build
+When a developer runs `dotnet build && dotnet build`, the second invocation should ideally cost near-zero. In practice, MSBuild must:
 
-When a developer runs `dotnet build && dotnet build`, the second invocation should ideally take zero time. In practice, MSBuild must:
-
-1. **Parse and evaluate** every project file in the build graph (property/item/import resolution)
+1. **Parse and evaluate** every project file (property/item/import resolution)
 2. **Walk every target** in the `BuildDependsOn` chain, performing timestamp comparisons
 3. **Execute non-skippable targets** like `ResolveAssemblyReferences` (RAR) that lack concrete `Inputs`/`Outputs`
-4. **Run Copy tasks** that check file-level incrementality even when targets cannot be skipped
+4. **Run Copy tasks** that check file-level incrementality
+
+The measured cost breakdown for a no-op build:
+
+| Phase | % of no-op time | Skippable by existing mechanisms? |
+|-------|----------------|----------------------------------|
+| Evaluation (parsing, property/item resolution, imports) | **50–70%** | ❌ Never — always runs |
+| RAR + ResolvePackageAssets (no `Inputs`/`Outputs`) | **20–30%** | ❌ Targets don't declare incrementality |
+| Target dependency analysis (timestamp comparisons) | **5–10%** | ❌ Must check each target |
+| Copy tasks (fine-grained incrementality) | **5–15%** | ❌ Targets not fully incremental |
 
 > "Every [batch build] must evaluate every project in the scope of the build."
-> — [`documentation/Persistent-Problems.md`](../../documentation/Persistent-Problems.md), Line 9
+> — [`Persistent-Problems.md`](../../documentation/Persistent-Problems.md)
 
-> "When build is invoked, most targets can be skipped as up to date, but `ResolveAssemblyReferences` (RAR) and some of its prerequisites like `ResolvePackageAssets` cannot, because their role is to produced data used within the build to compute the compiler command line."
-> — [`documentation/Persistent-Problems.md`](../../documentation/Persistent-Problems.md), Lines 11–13
+> "RAR and some of its prerequisites like ResolvePackageAssets cannot [be skipped], because their role is to produce data used within the build to compute the compiler command line."
+> — [`Persistent-Problems.md`](../../documentation/Persistent-Problems.md)
 
-> "In the limit, a fully-up-to-date build is instructive for the MSBuild team, because an ideal fully up-to-date build would take no time to run."
-> — [`documentation/Build-Scenarios.md`](../../documentation/Build-Scenarios.md), Lines 21–22
-
-### What VS Does Differently
-
-Visual Studio's project system implements `IBuildUpToDateCheckProvider` to perform a **project-level** up-to-date check *before* invoking MSBuild. If the project is up-to-date, MSBuild is never called at all. This eliminates the evaluation, target-walking, and task-execution overhead entirely.
-
-> "Fast Up-To-Date Check is a system that is implemented by the Project System, that decides, if it needs to run MSBuild. MSBuild takes a non-trivial amount of time to load, evaluate, and run through each target and task. Fast Up-To-Date is faster, but can be less accurate, suitable for an IDE and a human interface."
-> — [`documentation/specs/question.md`](../../documentation/specs/question.md), Lines 8–9
-
-**This document proposes bringing this concept into MSBuild itself, so that `dotnet build` can skip entire projects without the overhead of evaluation and target execution.**
+The VS FUTDC takes 1–10 ms per project because it **skips all four phases entirely**. Any CLI solution that runs inside MSBuild and doesn't skip evaluation addresses at most 30–50% of the problem.
 
 ---
 
-## 2. How VS Fast Up-To-Date Check Works
+## 2. What VS FUTDC Actually Does
 
-### 2.1 Architecture Overview
+Source: [`BuildUpToDateCheck.cs`](https://github.com/dotnet/project-system/blob/main/src/Microsoft.VisualStudio.ProjectSystem.Managed.VS/ProjectSystem/VS/UpToDate/BuildUpToDateCheck.cs)
 
-The FUTDC lives in the `dotnet/project-system` repository under:
-```
-src/Microsoft.VisualStudio.ProjectSystem.Managed.VS/ProjectSystem/VS/UpToDate/
-```
-— [GitHub directory](https://github.com/dotnet/project-system/tree/main/src/Microsoft.VisualStudio.ProjectSystem.Managed.VS/ProjectSystem/VS/UpToDate)
+### 2.1 Architecture
 
-#### Data Flow
+The FUTDC is a layer *above* MSBuild. VS's Common Project System (CPS) subscribes to MSBuild evaluation and design-time build results via Dataflow pipelines. This produces an in-memory snapshot (`UpToDateCheckImplicitConfiguredInput`) that the FUTDC queries — no MSBuild invocation required.
 
 ```
 MSBuild Evaluation + Design-Time Build
          │
          ▼
-UpToDateCheckImplicitConfiguredInputDataSource
-   (Dataflow pipeline subscribed to evaluation/design-time build results)
+UpToDateCheckImplicitConfiguredInputDataSource (Dataflow subscription)
          │
          ▼
 UpToDateCheckImplicitConfiguredInput (immutable snapshot)
          │
          ▼
-BuildUpToDateCheck.IsUpToDateAsync()
-   ├─ Stage 1: CheckGlobalConditions()
-   ├─ Stage 2: CheckInputsAndOutputs()     (per named set)
-   ├─ Stage 3: CheckCopiedOutputFiles()     (1:1 transforms)
-   ├─ Stage 4: CheckCopyToOutputDirectoryFiles()
-   └─ Stage 5: Reference Assembly Markers
+BuildUpToDateCheck.IsUpToDateAsync() — 5-stage algorithm
          │
          ▼
-Decision: Up-to-date → Skip MSBuild entirely
-          Not up-to-date → Invoke MSBuild
+Up-to-date → Skip MSBuild entirely (1–10 ms)
+Not up-to-date → Invoke MSBuild
 ```
 
-— Source: [`BuildUpToDateCheck.cs`](https://github.com/dotnet/project-system/blob/main/src/Microsoft.VisualStudio.ProjectSystem.Managed.VS/ProjectSystem/VS/UpToDate/BuildUpToDateCheck.cs)
+### 2.2 The 5-Stage Decision Algorithm
 
-### 2.2 Key Components
+The check short-circuits on the first failure:
 
-| Component | File | Role |
-|-----------|------|------|
-| **Orchestrator** | `BuildUpToDateCheck.cs` | Main decision logic; implements `IBuildUpToDateCheckProvider2` |
-| **State Snapshot** | `UpToDateCheckImplicitConfiguredInput.cs` | Immutable record of all inputs, outputs, references, copy items |
-| **Data Pipeline** | `UpToDateCheckImplicitConfiguredInputDataSource.cs` | Subscribes to evaluation/DTB results; incrementally builds snapshots |
-| **Timestamp Cache** | `BuildUpToDateCheck.TimestampCache.cs` | Caches `File.GetLastWriteTimeUtc()` within a single check |
-| **Item Hashing** | `BuildUpToDateCheck.ItemHashing.cs` | Detects when the *set* of project items changes (add/remove) |
-| **State Persistence** | `UpToDateCheckStatePersistence.cs` | Persists state to `.futdcache.v2` across VS sessions |
-| **Copy Aggregator** | `CopyItemAggregator.cs` | Walks project reference graph for transitive copy items |
+**Stage 1 — Global Conditions:** Is this the first build? Are there pending critical operations? Has the item set changed (add/remove) since last successful build?
 
-### 2.3 What the FUTDC Tracks
+**Stage 2 — Input/Output Timestamps:** For each named set, is any input newer than the earliest output? Is any input modified after the last successful build start time? Inputs include `@(Compile)`, `@(EmbeddedResource)`, resolved references, analyzer references, and the project import chain (`MSBuildAllProjects`).
 
-#### Inputs
-- **Source items**: `Compile`, `EmbeddedResource`, `Content`, etc. (via evaluation data)
-- **Resolved references**: Analyzer references, compilation references (from design-time build targets)
-- **Import chain**: Newest entry in `MSBuildAllProjects` (the `.props`/`.targets` import graph)
-- **Custom inputs**: `UpToDateCheckInput` items (user/SDK-declared)
-- **Copy-to-output items**: Items with `CopyToOutputDirectory` metadata
+**Stage 3 — Built-From Transforms:** For `UpToDateCheckBuilt` items with `Original` metadata (single-input → single-output transforms), is source newer than destination?
 
-#### Outputs
-- **Primary output**: `TargetPath` property (e.g., `bin/Debug/net9.0/MyApp.dll`)
-- **Custom outputs**: `UpToDateCheckOutput` items
-- **Built outputs**: `UpToDateCheckBuilt` items (with optional `Original` metadata for 1:1 transforms)
-- **Output directory**: `OutDir` / `OutputPath`
+**Stage 4 — Copy Markers:** Is any referenced project's `CopyUpToDateMarker` newer than this project's marker? (Skipped when Build Acceleration is enabled.)
 
-#### Grouping
-- **Sets** (`Set` metadata): Partition inputs/outputs into independent groups
-- **Kinds** (`Kind` metadata): Filter items via `FastUpToDateCheckIgnoresKinds`
+**Stage 5 — Copy-to-Output-Directory:** For items with `CopyToOutputDirectory` metadata, compare source vs destination timestamps. If Build Acceleration is on and only copies are needed, VS copies the files directly and reports "up to date."
 
-— Source: [project-system docs/up-to-date-check.md](https://github.com/dotnet/project-system/blob/main/docs/up-to-date-check.md)
+### 2.3 Item Set Change Detection
 
-### 2.4 Decision Algorithm
+Source: `BuildUpToDateCheck.ItemHashing.cs`
 
-The check short-circuits on the first "not up-to-date" finding:
+The FUTDC hashes all item include paths per item type using a stable, order-independent XOR hash. The hash is persisted — if it changes between checks (files added/removed), a rebuild is forced. This catches glob changes that timestamps alone miss.
 
-1. **Global conditions**: Is this the first run? Have items been added/removed since last successful build?
-2. **Per-set timestamp comparison**: For each set, is any input newer than the earliest output? Is any input newer than the last successful build start time?
-3. **Copied output files**: For 1:1 transforms (`UpToDateCheckBuilt` with `Original`), is source newer than destination?
-4. **Copy-to-output-directory files**: For `PreserveNewest` items, is source newer? For `Always` items, compare size + timestamp.
-5. **Reference assembly markers**: Have referenced project implementations changed?
+The hash uses a stable hash function copied from .NET Framework's `string.GetHashCode()` (not the randomized .NET Core version) because the hash is persisted to disk across sessions.
+
+### 2.4 State Persistence
+
+Source: [`UpToDateCheckStatePersistence.cs`](https://github.com/dotnet/project-system/blob/main/src/Microsoft.VisualStudio.ProjectSystem.Managed.VS/ProjectSystem/VS/UpToDate/UpToDateCheckStatePersistence.cs)
+
+State is persisted to `.futdcache.v2` in the `.vs/` solution working folder using a custom binary format:
+
+```
+[int32: configuredProjectCount]
+  for each:
+    [string: projectPath]
+    [int32: dimensionCount]           // e.g., Configuration=Debug, TargetFramework=net9.0
+      for each: [string: name] [string: value]
+    [int32: itemHash]                 // XOR hash of item sets
+    [int64: itemsChangedAtUtc.Ticks]
+    [int64: lastSuccessfulBuildStartedAtUtc.Ticks]
+```
+
+Typical size is ~20 KB for a 50-project, 2-config solution. Corruption is handled by discarding the entire file and forcing a full rebuild (fail-open design). Schema versioning is via the filename suffix (`.v2`).
 
 ### 2.5 Build Acceleration
 
-Starting in VS 17.5, when the FUTDC determines that only file copies are needed (not recompilation), VS performs the copies directly without invoking MSBuild at all. In a chain `A → B → C → D`, changing D previously required 4 MSBuild invocations; with acceleration, only 1 MSBuild call + fast VS-driven copies for the rest.
+Source: [docs/build-acceleration.md](https://github.com/dotnet/project-system/blob/main/docs/build-acceleration.md)
 
-— Source: [project-system docs/build-acceleration.md](https://github.com/dotnet/project-system/blob/main/docs/build-acceleration.md)
+When the FUTDC determines that only file copies are needed (compilation is up-to-date), VS performs the copies directly without invoking MSBuild. In a chain A → B → C → D, changing D previously required 4 MSBuild invocations; with acceleration, only 1 MSBuild call + VS-driven copies for the rest.
+
+Known incompatible packages are declared via `<BuildAccelerationIncompatiblePackage Include="..." />`. Known correctness bugs: wrong files copied in multi-target setups ([project-system#8908](https://github.com/dotnet/project-system/issues/8908)), duplicate output items ([project-system#9001](https://github.com/dotnet/project-system/issues/9001)).
+
+### 2.6 Known FUTDC Bugs and Limitations
+
+The VS FUTDC has had real correctness issues that any CLI version must learn from:
+
+| Issue | Category | Description |
+|-------|----------|-------------|
+| [project-system#4261](https://github.com/dotnet/project-system/issues/4261) | **False positive** | Git branch switch caused FUTDC to wrongly skip builds |
+| [project-system#7803](https://github.com/dotnet/project-system/issues/7803) | **Correctness** | Item change tracking doesn't respect `Set` metadata partitioning |
+| [project-system#9477](https://github.com/dotnet/project-system/issues/9477) | **Gap** | T4 template changes not detected |
+| [project-system#4100](https://github.com/dotnet/project-system/issues/4100) | **Gap** | Custom target `Inputs`/`Outputs` invisible to FUTDC |
+| [project-system#6301](https://github.com/dotnet/project-system/issues/6301) | **False positive** | Copy tasks skipped when they shouldn't be |
+| [msbuild#3762](https://github.com/dotnet/msbuild/issues/3762) | **Cascade** | `DisableFastUpToDateCheck` cascades incorrectly through P2P |
+| [msbuild#5406](https://github.com/dotnet/msbuild/issues/5406) | **Correctness** | Broken with `GeneratePackageOnBuild` + binding redirects |
+
+Source generators, `.editorconfig` changes, and custom build targets are all known gaps — the FUTDC cannot model arbitrary build logic.
 
 ---
 
-## 3. How MSBuild Incremental Build Works Today
+## 3. MSBuild's Current Incremental Mechanisms
 
-### 3.1 Target-Level Up-To-Date Checking
+### 3.1 Target-Level `Inputs`/`Outputs`
 
-MSBuild's primary incrementality mechanism operates at the **target level**. Each target can declare `Inputs` and `Outputs` attributes. Before executing a target, the engine runs [`TargetUpToDateChecker.PerformDependencyAnalysis()`](../../src/Build/BackEnd/Components/RequestBuilder/TargetUpToDateChecker.cs) (Line 132) which returns one of:
+Source: [`TargetUpToDateChecker.cs`](../../src/Build/BackEnd/Components/RequestBuilder/TargetUpToDateChecker.cs)
 
-```csharp
-internal enum DependencyAnalysisResult
-{
-    SkipUpToDate,      // Target outputs are all newer than inputs
-    SkipNoInputs,      // Target declared no inputs
-    SkipNoOutputs,     // Target declared no outputs
-    IncrementalBuild,  // Some outputs are out of date
-    FullBuild          // All outputs need rebuilding
-}
-```
-— Source: [`src/Build/BackEnd/Components/RequestBuilder/TargetUpToDateChecker.cs`](../../src/Build/BackEnd/Components/RequestBuilder/TargetUpToDateChecker.cs), Lines 37–44
+Each target can declare `Inputs` and `Outputs`. Before execution, `TargetUpToDateChecker.PerformDependencyAnalysis()` compares timestamps and returns `SkipUpToDate`, `IncrementalBuild`, or `FullBuild`. This is purely timestamp-based — `DateTime.Compare(inputWriteTime, outputWriteTime)`.
 
-The analysis uses `NativeMethodsShared.GetLastWriteFileUtcTime()` for timestamp comparisons (Lines 1197–1232) and supports two correlation strategies:
-- **Correlated inputs/outputs**: Item vector correlation (e.g., `@(Compile)` → `@(IntermediateAssembly)`)
-- **Discrete outputs**: All inputs compared against all outputs
-
-— Source: [`src/Build/BackEnd/Components/RequestBuilder/TargetUpToDateChecker.cs`](../../src/Build/BackEnd/Components/RequestBuilder/TargetUpToDateChecker.cs), Lines 589–777
+The critical limitation: many important targets (RAR, ResolvePackageAssets) **cannot declare** `Inputs`/`Outputs` because their inputs are the transitive closure of all referenced assemblies, which is too expensive to enumerate without running the target itself.
 
 ### 3.2 The `/question` Flag
 
-MSBuild's `/question` switch runs the build but errors out at the first non-up-to-date target or task. This is a **diagnostic tool**, not an optimization—it still performs full evaluation and walks every target.
+Source: [`documentation/specs/question.md`](../../documentation/specs/question.md), [`TargetEntry.cs:477`](../../src/Build/BackEnd/Components/RequestBuilder/TargetEntry.cs)
 
-```cmd
-msbuild /p:Configuration=Debug Project1.csproj /bl:incremental.binlog /question
-```
+`/question` runs the build but errors at the first non-up-to-date target or task. It's a **diagnostic tool**, not an optimization — it still performs full evaluation and walks every target. Tasks implement `IIncrementalTask` to participate.
 
-Tasks can implement `IIncrementalTask` to participate in `/question` mode:
+The spec explicitly notes: *"Fast Up-To-Date is faster, but can be less accurate, suitable for an IDE and a human interface."*
+
+### 3.3 `CopyUpToDateMarker`
+
+Source: [`Microsoft.Common.CurrentVersion.targets:389–399`](../../src/Tasks/Microsoft.Common.CurrentVersion.targets)
+
+A lightweight marker (`.Up2Date` file) is `Touch`ed after copy operations and checked by downstream projects. This is a narrow optimization covering only copy operations across project references.
+
+### 3.4 `CoreCompileInputs.cache`
+
+The one exception to MSBuild's pure timestamp approach: `_GenerateCompileDependencyCache` hashes `@(Compile)`, `@(ReferencePath)`, `$(DefineConstants)`, and `$(LangVersion)` into a cache file to catch add/remove of glob-matched files. This is the closest existing thing to a build fingerprint, but it only covers compilation inputs.
+
+### 3.5 Results Cache
+
+`BuildManager` maintains `IConfigCache` and `IResultsCache` keyed by `(project path, global properties, targets)`. Results are cached within a single `BeginBuild`/`EndBuild` session but **not persisted** across `dotnet build` invocations.
+
+---
+
+## 4. Candidate Approaches
+
+### Approach A: Pre-Evaluation Hook in MSBuild Engine ⭐
+
+**Core idea:** Add a fingerprint check in `BuildManager.ExecuteSubmission()` *before* evaluation, short-circuiting with a cached `BuildResult`.
+
+**Insertion point found:** `BuildManager.cs` line 1580 — the fork between cache path and build path:
 
 ```csharp
-public interface IIncrementalTask
+// BuildManager.cs:1580 — CURRENT fork point
+if (_projectCacheService!.ShouldUseCache(resolvedConfiguration))
+    IssueCacheRequestForBuildSubmission(...)   // evaluates, then queries plugin
+else
+    IssueBuildRequestForBuildSubmission(...)   // scheduler → node → evaluate → execute
+```
+
+At this point, we have:
+- ✅ Project path
+- ✅ Global properties (Configuration, Platform, TargetFramework)
+- ✅ Target names, tools version
+- ❌ No evaluated `ProjectInstance` (that's the whole point — we skip evaluation)
+
+**Proposed insertion:**
+```csharp
+// NEW: Pre-evaluation FUTDC check
+if (TryGetUpToDateResult(resolvedConfiguration, out BuildResult cachedResult))
 {
-    bool FailIfNotIncremental { set; }
+    var result = new BuildResult(submission.BuildRequest!);
+    foreach (var tr in cachedResult.ResultsByTarget)
+        result.AddResultsForTarget(tr.Key, tr.Value);
+    _resultsCache!.AddResult(result);
+    ReportResultsToSubmission<BuildRequestData, BuildResult>(result);
+    return;  // No evaluation, no execution.
 }
 ```
-— Source: [`src/Framework/IIncrementalTask.cs`](../../src/Framework/IIncrementalTask.cs)
 
-— Source: [`documentation/specs/question.md`](../../documentation/specs/question.md)
+This pattern already exists — `PostCacheResult()` at line 2566 does exactly this for cache hits.
 
-### 3.3 The Build Target Chain
+**`TryGetUpToDateResult` would:**
+1. Compute expected `obj/` path via convention (see [Section 5](#5-the-obj-path-discovery-problem))
+2. Read `.futdc` fingerprint file
+3. Compare project file, `Directory.Build.props/targets`, `project.assets.json`, `global.json` timestamps
+4. Verify all stored output files still exist
+5. If all match → return cached `BuildResult`
 
-A standard `dotnet build` walks this target chain:
+**How the fingerprint gets written:** A new `_WriteBuildFingerprint` target runs as the last step of `CoreBuild`. It has access to all evaluated properties and items and writes the fingerprint to `$(IntermediateOutputPath)/.futdc`.
 
-```xml
-<BuildDependsOn>
-    BeforeBuild;
-    CoreBuild;
-    AfterBuild
-</BuildDependsOn>
+| Aspect | Assessment |
+|--------|-----------|
+| Skips evaluation? | ✅ Yes — the dominant 50–70% cost |
+| Skips execution? | ✅ Yes — entire pipeline bypassed |
+| Requires engine changes? | Yes — moderate risk, needs MSBuild team buy-in |
+| Works for all MSBuild invocations? | ✅ Yes — not limited to `dotnet build` |
+| First build overhead? | None — fingerprint written post-build, no fingerprint → normal build |
 
-<CoreBuildDependsOn>
-    BuildOnlySettings;
-    PrepareForBuild;
-    PreBuildEvent;
-    ResolveReferences;       ← Includes RAR (cannot be skipped)
-    PrepareResources;
-    ResolveKeySource;
-    Compile;                 ← CoreCompile has Inputs/Outputs
-    ExportWindowsMDFile;
-    UnmanagedUnregistration;
-    GenerateSerializationAssemblies;
-    CreateSatelliteAssemblies;
-    GenerateManifests;
-    GetTargetPath;
-    PrepareForRun;           ← Copy operations
-    UnmanagedRegistration;
-    IncrementalClean;
-    PostBuildEvent
-</CoreBuildDependsOn>
+**Flaws:**
+- Requires MSBuild engine changes — high bar for acceptance
+- `obj/` path discovery is convention-based (fails for ~2–3% of projects)
+- Cached `BuildResult` must faithfully represent what MSBuild would have produced (target results, output items)
+- The fingerprint target adds a small cost to every successful build
+
+### Approach B: ProjectCachePlugin — ❌ Cannot Skip Evaluation
+
+**Critical finding:** Cache plugins are consulted **after** evaluation.
+
+From `ProjectCacheService.cs:531`:
+```csharp
+PostCacheRequest() {
+    EvaluateProjectIfNecessary(...)    // ← FULL EVALUATION ALWAYS HAPPENS
+    cacheResult = await GetCacheResultAsync(buildRequest, ...)  // ← Then plugin is asked
+}
 ```
-— Source: [`src/Tasks/Microsoft.Common.CurrentVersion.targets`](../../src/Tasks/Microsoft.Common.CurrentVersion.targets), Lines 902–960
 
-### 3.4 Cost Centers in a No-Op Build
+The plugin receives a fully-evaluated `ProjectInstance`. By that point, 50–70% of the no-op build cost has already been paid.
 
-| Phase | Approximate Cost | Can Be Skipped? |
-|-------|-----------------|-----------------|
-| Project evaluation (parsing, property/item resolution) | 50–70% of no-op time | ❌ Always runs |
-| ResolveAssemblyReferences + ResolvePackageAssets | 20–30% | ❌ No Inputs/Outputs |
-| Target dependency analysis (timestamp comparisons) | 5–10% | ❌ Must check each target |
-| Copy tasks (fine-grained incrementality) | 5–15% | ❌ Targets not incremental |
+A `FutdcCachePlugin` as a NuGet package could skip execution (RAR, Compile, Copy targets), saving 30–50%. But it cannot address the dominant cost.
 
-### 3.5 Copy Up-To-Date Marker
-
-MSBuild does have a lightweight marker mechanism for copy operations:
-
-```xml
-<MSBuildCopyMarkerName>$(MSBuildProjectFile).Up2Date</MSBuildCopyMarkerName>
-<CopyUpToDateMarker Include="$(IntermediateOutputPath)$(MSBuildCopyMarkerName)" />
 ```
-— Source: [`src/Tasks/Microsoft.Common.CurrentVersion.targets`](../../src/Tasks/Microsoft.Common.CurrentVersion.targets), Lines 389–399
+                     ┌───────────────────────────────────────┐
+                     │        Build Pipeline Timeline        │
+                     ├──────────┬────────────┬───────────────┤
+                     │  Parse   │  Evaluate  │   Execute     │
+                     │  XML     │  Props     │   Targets     │
+                     │          │  Items     │   (Build,     │
+                     │          │  Imports   │    RAR, etc.) │
+                     ├──────────┴────────────┼───────────────┤
+                     │ ◄── CANNOT SKIP ────► │ ◄─ CAN SKIP ─►│
+                     │                       │               │
+                     │   Plugin consulted ───┤               │
+                     │   HERE (after eval)   │               │
+                     └───────────────────────┴───────────────┘
+```
 
-This marker is `Touch`ed after copy operations complete (Line 5118) and checked by referencing projects to skip copying when the referenced project hasn't changed. However, this is a narrow optimization that only covers copy operations, not the overall project build.
+**What would make this viable:** A new `PreEvaluationGetCacheResultAsync(string projectPath, IDictionary<string, string> globalProperties)` on `ProjectCachePluginBase` called before `EvaluateProjectIfNecessary()`. This is essentially Approach A exposed as a plugin API — more extensible but requires the same engine change.
 
-### 3.6 Results Cache
+Existing implementations (`microsoft/MSBuildCache`) confirm the limitation: they target CI distributed caching (skip compilation), not developer inner-loop FUTDC (skip evaluation). MSBuildCache explicitly states it doesn't support incremental developer builds.
 
-`BuildManager` maintains `IConfigCache` and `IResultsCache` that cache build results by `(project path, global properties, targets)`. Within a single `BeginBuild`/`EndBuild` session, previously-built projects can be served from cache. However, this cache does not persist across `dotnet build` invocations.
+### Approach C: SDK CLI Layer (`dotnet/sdk`) — ⚠️ Architecturally Clean but Impractical
 
-— Source: [`src/Build/BackEnd/BuildManager/BuildManager.cs`](../../src/Build/BackEnd/BuildManager/BuildManager.cs)
+**How `dotnet build` invokes MSBuild:**
+```
+dotnet build [args]
+  → RestoringCommand → MSBuildForwardingApp
+    → MSBuildForwardingAppWithoutLogging.ExecuteInProc()
+      → MSBuildApp.Main(args)  ← IN-PROCESS method call
+```
+
+MSBuild is invoked **in-process** by default. The SDK is a pure pass-through — it has zero project evaluation capability. For solutions, the `.sln` path is passed directly to MSBuild; there is no per-project loop in the CLI.
+
+**Fundamental problem:** The SDK doesn't know what projects are in the solution, what their `obj/` paths are, or what their inputs/outputs are. All of that requires MSBuild evaluation. To perform FUTDC at this layer, the SDK would need to:
+1. Parse `.sln`/`.slnx` files independently
+2. Discover `obj/` paths via convention
+3. Read fingerprints and compare timestamps
+4. Produce a synthetic "everything is up-to-date" result
+
+This is building a mini build system on top of MSBuild. It mirrors the VS architecture (VS FUTDC also sits above MSBuild), but VS has CPS with live Dataflow subscriptions — the SDK has nothing.
+
+**Where it could work:** Single-project builds with default `obj/` layout. Not viable for solution builds without duplicating substantial MSBuild logic.
+
+### Approach D: MSBuild Targets — Early Short-Circuit — ❌ Cannot Skip Evaluation
+
+A target running early in the build chain (e.g., `BeforeTargets="BeforeBuild"`) could read a fingerprint and try to short-circuit. But evaluation has already happened before any target runs, so this saves at most 30–50%.
+
+Additionally, there's no clean mechanism for a target to say "skip all remaining targets." You'd need conditions on every target in the chain, which is fragile and breaks third-party target extensibility.
+
+### Approach E: MSBuild Server Mode — 🔮 Long-Term Ideal
+
+**Current state:** Server mode is opt-in (`MSBUILDUSESERVER=1`), in `Microsoft.Build.Experimental` namespace. The server process persists between builds and keeps a `ProjectRootElementCache` (parsed XML roots, not evaluated state).
+
+What survives across builds in server mode today:
+- ✅ `ProjectRootElementCache` — static singleton, auto-reloads on file timestamp changes
+- ❌ No evaluation result cache
+- ❌ No FUTDC state
+- ❌ No file watchers
+
+A persistent process is the natural host for FUTDC state — it can cache evaluation results, watch filesystems, and make sub-millisecond decisions from memory, just like VS CPS. But server mode was previously shelved due to state-leak bugs and is not yet production-ready.
+
+### Approach Comparison
+
+| Approach | Skips Evaluation? | Skips Execution? | Engine Changes? | Ships As |
+|----------|:-:|:-:|:-:|---|
+| **A: Engine pre-eval hook** | ✅ | ✅ | Yes | MSBuild change |
+| **B: Cache plugin** | ❌ | ✅ | No (or small) | NuGet package |
+| **B': Cache plugin + pre-eval API** | ✅ | ✅ | Yes | NuGet + MSBuild |
+| **C: SDK CLI layer** | ✅ (single project) | ✅ | No MSBuild changes | SDK change |
+| **D: Targets** | ❌ | Partially | No | `.targets` package |
+| **E: Server mode** | ✅ | ✅ | Yes (substantial) | MSBuild change |
 
 ---
 
-## 4. Gap Analysis
+## 5. The obj/ Path Discovery Problem
 
-| Capability | VS FUTDC | MSBuild CLI |
-|-----------|----------|-------------|
-| **Skip MSBuild entirely for up-to-date projects** | ✅ Yes | ❌ No |
-| **Project-level up-to-date check** | ✅ ~1–10 ms | ❌ Must evaluate + walk targets |
-| **Persisted state across invocations** | ✅ `.futdcache.v2` | ❌ No persistence |
-| **Item set change detection** (add/remove) | ✅ Hash-based | ❌ Only timestamp-based |
-| **Reference graph-aware copy optimization** | ✅ Build Acceleration | ❌ Each project runs Copy targets |
-| **Custom input/output declarations** | ✅ `UpToDateCheckInput`/`Output` | Partial (target `Inputs`/`Outputs`) |
-| **Target-level incrementality** | N/A (skips MSBuild) | ✅ `TargetUpToDateChecker` |
-| **Task-level incrementality** | N/A (skips MSBuild) | ✅ `IIncrementalTask`, Copy task |
-| **Diagnostic mode** | ✅ Logging in Build Output | ✅ `/question` flag |
-| **Handles non-timestamp changes** (config, env) | ✅ Detected by evaluation data | ❌ Only file timestamps |
+To check a fingerprint *before* evaluation, we need to find the `obj/` directory — but `obj/` path depends on evaluated properties. This is the chicken-and-egg problem.
 
-### Key Architectural Difference
+### 5.1 How `obj/` Path Is Determined
 
-The VS FUTDC operates as a **higher-order build system** that sits above MSBuild. It receives continuously-updated project state from the CPS (Common Project System) Dataflow pipeline and can make fast decisions without invoking MSBuild at all.
+Source: [`Microsoft.Common.props:50`](../../src/Tasks/Microsoft.Common.props), [`Microsoft.Common.CurrentVersion.targets:146–163`](../../src/Tasks/Microsoft.Common.CurrentVersion.targets)
 
-For CLI scenarios, there is no long-lived process maintaining project state. A new `dotnet build` invocation starts from scratch. **The core challenge is: how do we get FUTDC-level speed without a persistent process?**
+```
+Microsoft.Common.props:50   → BaseIntermediateOutputPath = "obj\"
+Microsoft.Common.props:54   → MSBuildProjectExtensionsPath = $(BaseIntermediateOutputPath)
+CurrentVersion.targets:160  → IntermediateOutputPath = obj\$(Configuration)\
+SDK targets                  → IntermediateOutputPath += $(TargetFramework)\
+```
 
----
+| Scenario | IntermediateOutputPath |
+|---|---|
+| Simple SDK project | `obj\Debug\net9.0\` |
+| Non-SDK (.NET Framework) | `obj\Debug\` |
+| Multi-target inner build | `obj\Debug\net8.0\` |
+| Multi-target outer build | `obj\Debug\` (no TFM) |
+| Non-AnyCPU platform | `obj\x64\Debug\net9.0\` |
+| Artifacts layout (.NET 8+) | `artifacts\obj\ProjectName\debug\` |
 
-## 5. Design Principles for CLI Fast Up-To-Date Check
+### 5.2 Key Insight: `BaseIntermediateOutputPath` Is Stable
 
-1. **Correctness first**: A CLI FUTDC must never produce false positives (claiming up-to-date when not). In contrast to the VS FUTDC which notes "It is not accurate enough for a CI" ([`documentation/specs/question.md`](../../documentation/specs/question.md), Line 8), a CLI version used in CI must be conservative.
+`BaseIntermediateOutputPath` defaults to `obj\` and is set in `Microsoft.Common.props` before project content is parsed. It doesn't vary by Configuration, Platform, or TFM. It can only be overridden in `Directory.Build.props` (which imports before the project body).
 
-2. **Persistence-based**: Since there's no long-lived process, the check must persist state to disk between invocations. The VS `.futdcache.v2` pattern is the model.
+**Recommendation:** Store the fingerprint at `BaseIntermediateOutputPath` level (`obj/.futdc`), not at `IntermediateOutputPath` level. The fingerprint file itself stores per-config, per-TFM entries internally.
 
-3. **Pre-evaluation**: The check must run *before* MSBuild evaluation to avoid the dominant cost center. This means reading persisted state and comparing it against the filesystem.
+### 5.3 Convention-Based Discovery
 
-4. **Opt-in initially**: Like VS Build Acceleration, start opt-in to build confidence before making it default.
+```
+1. Probe: {project_dir}/obj/.futdc              → ~90% of projects (default layout)
+2. Probe: Walk up for Directory.Build.props
+   with ArtifactsPath → {artifacts}/obj/{name}/ → ~5–8% more (artifacts layout)
+3. Fallback: Run MSBuild evaluation              → remaining ~2–3% (custom layouts)
+```
 
-5. **Composable with existing mechanisms**: The CLI FUTDC should complement, not replace, target-level `Inputs`/`Outputs` and `IIncrementalTask`. If the CLI check says "not up-to-date," MSBuild's existing incrementality still minimizes work.
+NuGet already uses this same convention — `project.assets.json` lives at `BaseIntermediateOutputPath`. If NuGet can find `obj/`, so can FUTDC.
 
-6. **Graph-aware**: For solution/multi-project builds, the check should understand project references to make graph-level skip decisions.
+### 5.4 Multi-Targeting
 
----
+Multi-targeting projects dispatch to inner builds per TFM. The outer build (`TargetFramework` = empty) and each inner build (`TargetFramework` = `net8.0`, etc.) have different `IntermediateOutputPath` values but share the same `BaseIntermediateOutputPath`.
 
-## 6. Roadmap: Phased Implementation
-
-### Phase 1: Build State Persistence ("Build Fingerprint Cache")
-
-**Goal**: After a successful build, persist a fingerprint of the project's build state. Before the next build, compare the fingerprint to determine if MSBuild needs to be invoked.
-
-#### 1.1 Define the Fingerprint
-
-A project build fingerprint should capture:
-
-| Component | What to Hash/Store | Source |
-|-----------|-------------------|--------|
-| **Source items** | Sorted list of item include paths + timestamps | Evaluation: `@(Compile)`, `@(EmbeddedResource)`, etc. |
-| **Reference assemblies** | Resolved reference paths + timestamps | RAR output from prior build |
-| **Project file chain** | `MSBuildAllProjects` paths + timestamps | Evaluation property |
-| **Global properties** | Sorted key-value pairs | `BuildParameters.GlobalProperties` |
-| **Target framework** | `$(TargetFramework)` value | Evaluation property |
-| **Primary output** | `$(TargetPath)` timestamp | Evaluation property |
-| **Copy-to-output items** | Source/destination pairs + timestamps | Evaluation: items with `CopyToOutputDirectory` |
-| **Build configuration** | `$(Configuration)`, `$(Platform)`, key switches | Evaluation properties |
-
-This mirrors the VS FUTDC's `UpToDateCheckImplicitConfiguredInput` snapshot but stored on disk rather than in memory.
-
-#### 1.2 Persistence Format
-
-Store the fingerprint in the intermediate output directory (e.g., `obj/Debug/net9.0/.msbuild.futdc`). Use a binary or JSON format with:
-- Schema version number for forward/backward compatibility
-- Timestamp of last successful build start
-- Hash of the item set (for add/remove detection, mirroring `BuildUpToDateCheck.ItemHashing.cs`)
-- Per-file timestamps for all tracked inputs and outputs
-- Hash of global properties and build configuration
-
-This is analogous to `UpToDateCheckStatePersistence.cs` in the project-system, which writes `.futdcache.v2` files.
-
-#### 1.3 Write Phase (Post-Build)
-
-After a successful build, write the fingerprint. This could be implemented as:
-- A new target (`_WriteBuildFingerprint`) that runs at the end of `CoreBuild`
-- Or integrated into `BuildManager.EndBuild()` for solution-level state
-
-#### 1.4 Read Phase (Pre-Build)
-
-Before evaluation, read the fingerprint and compare against the filesystem. This is the most architecturally challenging part because it must run **before** MSBuild evaluation to avoid that cost.
-
-**Options:**
-- **Option A: MSBuild engine-level check** — Add a pre-evaluation hook in `BuildManager` or `RequestBuilder` that reads the fingerprint file and compares timestamps. If up-to-date, inject a cached `BuildResult` without evaluation.
-- **Option B: SDK-level wrapper target** — A target that runs before evaluation-dependent targets, reads the fingerprint, and short-circuits. Less effective because evaluation still runs.
-- **Option C: CLI-level check** — The `dotnet build` CLI (in dotnet/sdk) performs the check before invoking MSBuild, similar to how VS performs FUTDC before invoking MSBuild. Most analogous to the VS architecture.
-
-**Recommendation**: Option A (engine-level) gives the best performance, but Option C (CLI-level) is the most architecturally clean and mirrors the VS pattern. A hybrid approach could work: the CLI reads a lightweight fingerprint, and the engine persists it.
-
-### Phase 2: Project-Level Skip in Graph Builds
-
-**Goal**: In `dotnet build` with `--graph` (or the default graph-based build), skip entire projects that are up-to-date.
-
-#### 2.1 Graph Build Integration
-
-MSBuild's graph build (`BuildManager` with `ProjectGraph`) already evaluates all projects up front to construct the dependency graph. After graph construction, before scheduling builds:
-
-1. For each project node in topological order, check the build fingerprint
-2. If a project and all its dependencies are up-to-date (fingerprints match), skip it entirely
-3. If any dependency was rebuilt, mark the project as potentially not up-to-date
-
-This mirrors the VS behavior where `CopyItemAggregator.cs` walks the project reference graph to make transitive up-to-date decisions.
-
-— Source: [`CopyItemAggregator.cs`](https://github.com/dotnet/project-system/blob/main/src/Microsoft.VisualStudio.ProjectSystem.Managed.VS/ProjectSystem/VS/UpToDate/CopyItemAggregator.cs)
-
-#### 2.2 Integration with Project Caching
-
-MSBuild's existing project caching plugin system (`ProjectCachePluginBase`) already supports graph-based builds with cache consultation. The fingerprint check could be implemented as a built-in cache plugin, or the fingerprint could feed into the existing `IResultsCache`.
-
-— Source: [`src/Build/BackEnd/BuildManager/BuildManager.cs`](../../src/Build/BackEnd/BuildManager/BuildManager.cs)
-
-### Phase 3: Lightweight Pre-Evaluation Check
-
-**Goal**: Avoid MSBuild evaluation entirely for up-to-date projects.
-
-#### 3.1 Pre-Evaluation Fingerprint Comparison
-
-The dominant cost of a no-op build is evaluation (~50–70%). To eliminate this:
-
-1. Before calling `Evaluator.Evaluate()`, read the fingerprint file from the expected `obj/` path
-2. Compare key filesystem timestamps against the fingerprint:
-   - Project file timestamp
-   - `Directory.Build.props`/`Directory.Build.targets` timestamps
-   - `global.json` timestamp
-   - NuGet assets file timestamp
-3. If all match, skip evaluation and inject the cached build result
-
-This requires knowing the `obj/` path without evaluation, which is possible for SDK-style projects using convention (`obj/$(Configuration)/$(TargetFramework)/`). For non-standard layouts, fall back to full evaluation.
-
-#### 3.2 Evaluation Caching (Alternative)
-
-Instead of skipping evaluation, cache evaluation results:
-- After evaluation, serialize the `ProjectInstance` to disk
-- Before evaluation, check if the serialized state is still valid (import chain timestamps)
-- If valid, deserialize instead of re-evaluating
-
-This is a heavier mechanism but handles more edge cases. It's related to the existing `ProjectRootElementCache` which caches parsed XML but not evaluated state.
-
-### Phase 4: Build Acceleration for CLI
-
-**Goal**: When only file copies are needed, perform them without a full MSBuild invocation.
-
-#### 4.1 Copy-Only Fast Path
-
-Mirroring VS Build Acceleration:
-1. The fingerprint records which files need copying (source → destination)
-2. On the fast path, if only copy operations are needed (compilation outputs are up-to-date), perform the copies directly
-3. This eliminates the need to invoke MSBuild for reference-chain propagation
-
-#### 4.2 Reference Assembly Awareness
-
-When a referenced project rebuilds but its **reference assembly** (`ref/` output) is unchanged:
-1. The referencing project's compilation is still up-to-date
-2. Only copy operations (copying the implementation assembly) are needed
-3. The CLI FUTDC can detect this by checking the reference assembly timestamp separately from the implementation assembly
-
-This mirrors the VS FUTDC's `CopyUpToDateMarker` checking logic and the `ProduceReferenceAssembly` mechanism.
-
-— Source: [`src/Tasks/Microsoft.Common.CurrentVersion.targets`](../../src/Tasks/Microsoft.Common.CurrentVersion.targets), Lines 399–406
-
-### Phase 5: MSBuild Server Mode Integration
-
-**Goal**: In the long term, a persistent MSBuild server process can maintain in-memory state, eliminating the need for disk-based fingerprinting.
-
-The MSBuild server mode (already partially implemented) keeps the MSBuild process alive between builds. With a persistent process:
-1. Evaluation results can be cached in memory (like VS CPS)
-2. File system watchers can detect changes incrementally (like VS Dataflow subscriptions)
-3. The FUTDC can operate exactly like the VS version—in-memory, sub-millisecond decisions
-
-This is the ultimate convergence point where CLI builds approach IDE build performance.
+Store one fingerprint file at `obj/.futdc` with per-TFM sections:
+```
+obj/.futdc
+  ├─ [Debug|net8.0]: {hash, timestamps, outputs}
+  └─ [Debug|net9.0]: {hash, timestamps, outputs}
+```
 
 ---
 
-## 7. Key Technical Challenges
+## 6. Correctness Risk Matrix
 
-### 7.1 Correctness vs. Speed Tradeoff
+For each scenario: would a fingerprint-based FUTDC miss the change? What does VS do?
 
-The VS FUTDC explicitly acknowledges being "not accurate enough for a CI" ([`documentation/specs/question.md`](../../documentation/specs/question.md), Line 8). A CLI FUTDC must be more conservative because:
-- CI builds must be reproducible
-- Users expect `dotnet build` to always produce correct output
-- Silent build skips that miss changes would severely damage trust
+### Critical Risks
 
-**Mitigation**: Start opt-in, maintain a conservative default, and provide detailed logging (like VS's `FastUpToDate:` messages) for diagnostics.
+| Scenario | Would FUTDC Miss It? | Mitigation |
+|----------|---------------------|------------|
+| **Output file deleted** (DLL removed but fingerprint intact) | Yes | **Mandatory output existence check** — verify all expected outputs exist before declaring up-to-date. Non-negotiable. |
+| **`global.json` SDK version change** | Yes — not in `MSBuildAllProjects`, no project timestamp changes | Hash resolved SDK version/path into fingerprint. VS doesn't handle this either (pins SDK at startup). |
+| **SDK/workload update** (new targets installed) | Yes — SDK directory changes are invisible to project timestamps | Hash SDK root path or version marker file. |
+| **Environment variable change** (`DOTNET_ROOT`, `PATH`, `MSBuild*`) | Yes — env vars injected as properties during evaluation | Hash a known set of critical env vars. Accept that custom env vars are a known gap (VS has the same gap). |
 
-### 7.2 RAR and Non-Skippable Targets
+### High Risks
 
-`ResolveAssemblyReferences` cannot declare `Inputs`/`Outputs` because its inputs are the transitive closure of all referenced assemblies, which is expensive to compute. The FUTDC approach sidesteps this by checking at the project level—if no inputs changed, RAR's outputs won't change either.
+| Scenario | Would FUTDC Miss It? | Mitigation |
+|----------|---------------------|------------|
+| **Source generator DLL or `@(AdditionalFiles)` change** | Partially — not in `CoreCompileInputs.cache` | Include `@(Analyzer)` and `@(AdditionalFiles)` in fingerprint. VS has similar gaps. |
+| **`.editorconfig` / `.globalconfig` change** | Yes — passed to compiler but not in cache hash | Include `@(EditorConfigFiles)` in fingerprint. VS FUTDC has this same bug. |
+| **Custom targets with side effects** (pre/post build events) | Yes, by design — no `Inputs`/`Outputs` | Disable FUTDC for projects with Pre/PostBuildEvent. Honor `DisableFastUpToDateCheck`. |
+| **P2P reference: impl assembly changed, ref assembly unchanged** | Partially — `CopyUpToDateMarker` doesn't always advance | Track full `@(ReferencePath)` timestamps, not just ref assemblies. |
 
-> "ResolveAssemblyReferences (RAR) and some of its prerequisites like ResolvePackageAssets cannot [be skipped], because their role is to produce data used within the build to compute the compiler command line."
-> — [`documentation/Persistent-Problems.md`](../../documentation/Persistent-Problems.md), Lines 11–13
+### Medium Risks
 
-**Mitigation**: The fingerprint must capture enough information to know that RAR's inputs haven't changed (reference assembly paths + timestamps, NuGet lock file, etc.).
+| Scenario | Would FUTDC Miss It? | Mitigation |
+|----------|---------------------|------------|
+| **NuGet restore changes** | Partially — `project.assets.json` timestamp changes propagate, but edge cases exist | Include `project.assets.json` and `packages.lock.json` in fingerprint inputs. |
+| **New `Directory.Build.props` added** | Possibly — discovery runs at eval time, but previous builds didn't have it in `MSBuildAllProjects` | Probe for existence at ancestor paths even when not currently imported. |
+| **Git branch switch** | Maybe — git sets timestamps to checkout time, so all files look "newer" | Content hashing would fix this; timestamp-based checks may cause unnecessary rebuilds (safe but slow). Known VS bug: [project-system#4261](https://github.com/dotnet/project-system/issues/4261). |
+| **Multi-targeting (only one TFM needs rebuild)** | Only if fingerprint is per-project, not per-TFM | Per-TFM fingerprint entries. |
+| **Concurrent builds** | Race conditions on fingerprint file | Atomic writes (write-temp-rename). Document that concurrent builds of the same project are unsupported. |
+| **File system edge cases** (FAT32 2s resolution, network clock skew, DST) | Yes for within-resolution edits | Use `>=` comparison. Document FAT32 limitations. |
 
-### 7.3 Determining `obj/` Path Without Evaluation
+### Non-Negotiable Requirements
 
-To skip evaluation, we need to read the fingerprint file, but the fingerprint is stored in `obj/` whose path depends on evaluated properties. For SDK-style projects, the default is predictable (`obj/$(Configuration)/$(TargetFramework)/`), but users can customize `IntermediateOutputPath`.
-
-**Mitigation**: Store a lightweight pointer file at a well-known location (e.g., `obj/.futdc-pointer`) that records the actual fingerprint path. Or use a convention-based path that only works for default layouts (covering the majority of projects).
-
-### 7.4 Multi-Targeting
-
-Multi-targeting projects (`<TargetFrameworks>net8.0;net9.0</TargetFrameworks>`) dispatch to inner builds for each framework. Each inner build needs its own fingerprint. The VS FUTDC handles this via `UpToDateCheckConfiguredInputDataSource.cs` which aggregates across configurations.
-
-**Mitigation**: Store per-TFM fingerprints and check all of them. The outer build is up-to-date only if all inner builds are up-to-date.
-
-### 7.5 Custom Build Logic and Extensibility
-
-NuGet packages, SDK extensions, and user targets can add arbitrary build logic that the FUTDC may not model. The VS FUTDC handles this partially via `UpToDateCheckInput`/`UpToDateCheckOutput`/`UpToDateCheckBuilt` items and `BuildAccelerationIncompatiblePackage` markers.
-
-**Mitigation**: Support the same `UpToDateCheckInput`/`UpToDateCheckOutput`/`UpToDateCheckBuilt` item types. Provide a `BuildAccelerationIncompatiblePackage` escape hatch. When unknown custom targets are detected, disable the fast path.
-
-### 7.6 Environment Variable and Tool Version Changes
-
-Changes to environment variables, SDK versions, or tool versions can affect build output without changing any tracked file timestamps. The VS FUTDC detects some of these through evaluation data changes.
-
-**Mitigation**: Include in the fingerprint:
-- SDK version (`dotnet --version` or `global.json` timestamp)
-- Key environment variables (`DOTNET_ROOT`, `MSBUILD_*`)
-- Hash of the tools version
-
-### 7.7 Concurrent and Distributed Builds
-
-In CI environments with parallel builds, concurrent file system access could cause race conditions with fingerprint files.
-
-**Mitigation**: Use atomic write patterns (write to temp file, then rename). Include a build ID in the fingerprint to detect stale data from concurrent builds.
+1. **Output existence verification** before declaring up-to-date
+2. **Fail-open design** — missing/corrupt fingerprint → always build
+3. **Honor `DisableFastUpToDateCheck`** property
+4. **Detailed logging** for diagnostics (like VS's `FastUpToDate:` messages)
+5. **Opt-in initially** — build confidence before making it default
 
 ---
 
-## 8. References
+## 7. Why This Wasn't Done Before
 
-### MSBuild Repository
+From @rainersigwald (MSBuild team lead) in [#9122](https://github.com/dotnet/msbuild/issues/9122):
 
-| Document | Path | Description |
-|----------|------|-------------|
-| Persistent Problems | [`documentation/Persistent-Problems.md`](../../documentation/Persistent-Problems.md) | Documents known performance bottlenecks |
-| Build Scenarios | [`documentation/Build-Scenarios.md`](../../documentation/Build-Scenarios.md) | Describes batch, incremental, and IDE build scenarios |
-| Question Spec | [`documentation/specs/question.md`](../../documentation/specs/question.md) | `/question` flag and FUTDC relationship |
-| TargetUpToDateChecker | [`src/Build/BackEnd/Components/RequestBuilder/TargetUpToDateChecker.cs`](../../src/Build/BackEnd/Components/RequestBuilder/TargetUpToDateChecker.cs) | Target-level up-to-date analysis engine |
-| TargetEntry | [`src/Build/BackEnd/Components/RequestBuilder/TargetEntry.cs`](../../src/Build/BackEnd/Components/RequestBuilder/TargetEntry.cs) | Target execution including skip decisions |
-| IIncrementalTask | [`src/Framework/IIncrementalTask.cs`](../../src/Framework/IIncrementalTask.cs) | Task-level incrementality interface |
-| BuildManager | [`src/Build/BackEnd/BuildManager/BuildManager.cs`](../../src/Build/BackEnd/BuildManager/BuildManager.cs) | Build orchestration and result caching |
-| Common Targets | [`src/Tasks/Microsoft.Common.CurrentVersion.targets`](../../src/Tasks/Microsoft.Common.CurrentVersion.targets) | Build/CoreBuild target chain, CopyUpToDateMarker |
-| Cross-Targeting Targets | [`src/Tasks/Microsoft.Common.CrossTargeting.targets`](../../src/Tasks/Microsoft.Common.CrossTargeting.targets) | Multi-TFM dispatch |
+> *"MSBuild always builds projects. MSBuild's unit of incremental build is the Target... no hashing is involved — it's timestamp-based. This piece [a project-level build hash] doesn't exist. It was not part of the design of MSBuild. That's a major limitation of MSBuild compared to more modern build systems."*
 
-### dotnet/project-system Repository
+### Prior Attempts
 
-| Document | URL | Description |
-|----------|-----|-------------|
-| FUTDC Documentation | [docs/up-to-date-check.md](https://github.com/dotnet/project-system/blob/main/docs/up-to-date-check.md) | Official FUTDC documentation |
-| Build Acceleration | [docs/build-acceleration.md](https://github.com/dotnet/project-system/blob/main/docs/build-acceleration.md) | Build Acceleration feature documentation |
-| BuildUpToDateCheck.cs | [src/.../UpToDate/BuildUpToDateCheck.cs](https://github.com/dotnet/project-system/blob/main/src/Microsoft.VisualStudio.ProjectSystem.Managed.VS/ProjectSystem/VS/UpToDate/BuildUpToDateCheck.cs) | Main FUTDC orchestrator |
-| State Snapshot | [src/.../UpToDate/UpToDateCheckImplicitConfiguredInput.cs](https://github.com/dotnet/project-system/blob/main/src/Microsoft.VisualStudio.ProjectSystem.Managed.VS/ProjectSystem/VS/UpToDate/UpToDateCheckImplicitConfiguredInput.cs) | Immutable project state for up-to-date checking |
-| Data Source | [src/.../UpToDate/UpToDateCheckImplicitConfiguredInputDataSource.cs](https://github.com/dotnet/project-system/blob/main/src/Microsoft.VisualStudio.ProjectSystem.Managed.VS/ProjectSystem/VS/UpToDate/UpToDateCheckImplicitConfiguredInputDataSource.cs) | Dataflow pipeline for FUTDC data |
-| State Persistence | [src/.../UpToDate/UpToDateCheckStatePersistence.cs](https://github.com/dotnet/project-system/blob/main/src/Microsoft.VisualStudio.ProjectSystem.Managed.VS/ProjectSystem/VS/UpToDate/UpToDateCheckStatePersistence.cs) | `.futdcache.v2` persistence |
-| Copy Aggregator | [src/.../UpToDate/CopyItemAggregator.cs](https://github.com/dotnet/project-system/blob/main/src/Microsoft.VisualStudio.ProjectSystem.Managed.VS/ProjectSystem/VS/UpToDate/CopyItemAggregator.cs) | Transitive copy item collection |
+**RAR-as-a-Service** ([#3139](https://github.com/dotnet/msbuild/issues/3139), [#5536](https://github.com/dotnet/msbuild/issues/5536), [#6193](https://github.com/dotnet/msbuild/issues/6193)): The closest prior effort — tried to make RAR faster rather than skip it. Prototyped in 2020–2021, **abandoned** after VS 17.0. A new [spec revival](https://github.com/dotnet/msbuild/issues/11741) is underway.
 
-### Microsoft Learn
+**Static Graph Design** ([#3696](https://github.com/dotnet/msbuild/issues/3696)): Explicitly envisioned "persistent cross-build cache" and noted that with export targets, *"an incremental build of a particular project in the project graph would not require re-evaluation or any target execution in that project's dependencies."* This vision was partially realized via `ProjectCachePluginBase` but without the pre-evaluation skip.
 
-| Document | URL | Description |
-|----------|-----|-------------|
-| Build Incrementally | [learn.microsoft.com](https://learn.microsoft.com/en-us/visualstudio/msbuild/how-to-build-incrementally) | MSBuild incremental build documentation |
-| Up-to-date Check | [learn.microsoft.com](https://learn.microsoft.com/en-us/visualstudio/project-system/up-to-date-check) | Official VS FUTDC documentation |
+**dotnet/sdk build performance complaints** ([sdk#7850](https://github.com/dotnet/sdk/issues/7850): 35 👍, 99 comments): The canonical user complaint, filed in 2017, demonstrating `dotnet build` wasting seconds on no-op builds.
+
+### Key Blockers
+
+| Blocker | Source |
+|---------|--------|
+| MSBuild was designed for target-level incrementality, not project-level skip | @rainersigwald in #9122 |
+| Evaluation is load-bearing — RAR and other targets need evaluated state | `Persistent-Problems.md` |
+| Correctness fear — VS FUTDC is explicitly "not accurate enough for CI" | `question.md` |
+| No champion for cross-cutting work across engine + SDK + targets | Organizational |
+| Server mode instability prevented persistent-process approach | MSBuild Server history |
 
 ---
 
-## Appendix A: Concept Mapping — VS FUTDC → MSBuild CLI FUTDC
+## 8. Recommended Path Forward
 
-| VS FUTDC Concept | Proposed MSBuild CLI Equivalent |
-|-----------------|-------------------------------|
-| `IBuildUpToDateCheckProvider` | New `IProjectUpToDateCheck` interface in `Microsoft.Build.Framework` |
-| `UpToDateCheckImplicitConfiguredInput` | `BuildFingerprint` class persisted to `obj/` |
-| `UpToDateCheckImplicitConfiguredInputDataSource` | Post-build fingerprint writer target + pre-build reader |
-| `BuildUpToDateCheck.TimestampCache` | Similar timestamp cache in fingerprint comparison logic |
-| `BuildUpToDateCheck.ItemHashing` | Item set hashing included in fingerprint |
-| `UpToDateCheckStatePersistence` (.futdcache.v2) | `.msbuild.futdc` file in intermediate output |
-| `CopyItemAggregator` (BFS graph walk) | Graph build integration in `BuildManager`/`ProjectGraph` |
-| Build Acceleration (copy-only fast path) | CLI copy-only fast path skipping MSBuild for copy operations |
-| `UpToDateCheckInput` / `UpToDateCheckOutput` items | Same items, interpreted by MSBuild engine fingerprint writer |
-| `FastUpToDateCheckIgnoresKinds` | Same property, interpreted by CLI FUTDC |
-| `DisableFastUpToDateCheck` | Same property, additionally disables CLI FUTDC |
-| Design-time build data subscription | N/A — use evaluation + last build's RAR/ResolvePackageAssets output |
+### Phase 0: Prototype Cache Plugin (no engine changes)
 
-## Appendix B: Decision Matrix — Where to Implement
+Build a `FutdcCachePlugin` NuGet package that fingerprints projects post-build and returns `CacheHit` on subsequent builds. This saves ~30–50% (execution only, not evaluation). Ships as a NuGet package, requires `/graph` mode.
 
-| Implementation Location | Pros | Cons |
-|------------------------|------|------|
-| **dotnet/sdk CLI** (`dotnet build` command) | Mirrors VS architecture; clean separation; can use conventions for `obj/` path | Requires cross-repo work; duplicate logic if MSBuild also needs it |
-| **MSBuild Engine** (`BuildManager` / `RequestBuilder`) | Single source of truth; works for all MSBuild invocations | Harder to skip evaluation (evaluation already started); increases engine complexity |
-| **MSBuild Targets** (`.targets` files) | Easy to prototype; no engine changes | Cannot skip evaluation; limited performance benefit |
-| **Project Cache Plugin** (`ProjectCachePluginBase`) | Uses existing extensibility; graph-aware | Plugin infrastructure overhead; requires graph build mode |
-| **MSBuild Server** (persistent process) | Best long-term perf; mirrors VS architecture closely | Depends on MSBuild server maturity; complex state management |
+**Value:** Validates fingerprinting approach and correctness with real-world projects. Low risk, independent of MSBuild release cycle.
 
-**Recommended approach**: Start with SDK CLI-level check (Phase 1–2), integrate into MSBuild engine for graph builds (Phase 2–3), and converge with MSBuild Server long-term (Phase 5).
+### Phase 1: Pre-Evaluation Engine Hook (the key change)
+
+Add a pre-evaluation FUTDC check in `BuildManager.ExecuteSubmission()` before the cache/build fork. This is the highest-leverage change — it enables skipping evaluation, the dominant cost.
+
+The fingerprint is written by a new `_WriteBuildFingerprint` target and read by the engine. Convention-based `obj/` path discovery covers ~95–98% of projects.
+
+**Value:** CLI builds match VS FUTDC performance (1–10 ms) for up-to-date projects.
+
+### Phase 2: Graph Build Integration
+
+After constructing the `ProjectGraph` (which evaluates all projects upfront), check fingerprints for each node in topological order. Skip submission entirely for up-to-date projects whose dependencies are also up-to-date.
+
+**Value:** Solution-level no-op builds drop from seconds to milliseconds.
+
+### Phase 3: CLI Build Acceleration
+
+When the fingerprint shows only copy operations are needed (compilation up-to-date, referenced project implementation assemblies changed), perform copies directly without full MSBuild invocation.
+
+**Value:** In a chain A → B → C → D, changing D triggers 1 MSBuild build + fast copies for A, B, C.
+
+### Phase 4: Server Mode Convergence
+
+With MSBuild server mode maintaining in-memory state, FUTDC operates identically to VS: cached evaluation results, file watchers, sub-millisecond decisions. This is the ultimate convergence point.
+
+### Where to implement: Engine vs SDK vs Plugin
+
+The Phase 0 plugin and Phase 1 engine hook are not mutually exclusive. The plugin validates the approach; the engine hook delivers the full performance benefit. The key architectural decision is whether to expose the pre-evaluation check as a plugin API extension (`PreEvaluationGetCacheResultAsync`) or as built-in engine logic. The plugin API is more extensible; the built-in approach is simpler and avoids plugin packaging overhead.
+
+---
+
+## 9. Related Issues and Prior Art
+
+### Core Problem
+
+- [dotnet/sdk#7850](https://github.com/dotnet/sdk/issues/7850) — "Slow build with msbuild and dotnet cli" (35 👍, 99 comments)
+- [dotnet/msbuild#2015](https://github.com/dotnet/msbuild/issues/2015) — "RAR is slow on .NET Core" (20 👍, 64 comments, open since 2017)
+- [dotnet/msbuild#12954](https://github.com/dotnet/msbuild/issues/12954) — "blazor big project: build perf downgrade" (180-project solution)
+- [dotnet/msbuild#1979](https://github.com/dotnet/msbuild/issues/1979) — "MSBuild in VS2017 & CLI rebuilds everything every time"
+
+### RAR-as-a-Service (abandoned predecessor)
+
+- [dotnet/msbuild#3139](https://github.com/dotnet/msbuild/issues/3139) — User story (abandoned)
+- [dotnet/msbuild#5536](https://github.com/dotnet/msbuild/issues/5536) — Design doc
+- [dotnet/msbuild#6193](https://github.com/dotnet/msbuild/issues/6193) — Prototype
+- [dotnet/msbuild#11741](https://github.com/dotnet/msbuild/issues/11741) — Spec revival (active)
+
+### Project Cache Plugin Infrastructure
+
+- [dotnet/msbuild#5936](https://github.com/dotnet/msbuild/pull/5936) — Initial implementation
+- [dotnet/msbuild#8726](https://github.com/dotnet/msbuild/pull/8726) — "Cache add" functionality
+- [dotnet/msbuild#9329](https://github.com/dotnet/msbuild/pull/9329) — Updated docs
+- [dotnet/msbuild#9122](https://github.com/dotnet/msbuild/issues/9122) — @rainersigwald: "MSBuild has no project-level skip"
+
+### Static Graph
+
+- [dotnet/msbuild#3696](https://github.com/dotnet/msbuild/issues/3696) — Static Graph Design (mentions persistent cross-build cache)
+
+### VS FUTDC
+
+- [dotnet/project-system#62](https://github.com/dotnet/project-system/issues/62) — Original tracking issue
+- [dotnet/project-system#2380](https://github.com/dotnet/project-system/issues/2380) — UpToDateCheckInput/Output design
+
+### Evaluation Performance
+
+- [dotnet/msbuild#4025](https://github.com/dotnet/msbuild/issues/4025) — NuGetSdkResolver adds 180–400ms per evaluation
+
+### Concurrency
+
+- [dotnet/msbuild#9462](https://github.com/dotnet/msbuild/issues/9462) — Global mutex for concurrent builds
+
+### Server Mode
+
+- [dotnet/msbuild#10035](https://github.com/dotnet/msbuild/issues/10035) — Daemon lifetime management
+
+### Design Documents
+
+- [`Persistent-Problems.md`](../../documentation/Persistent-Problems.md) — Evaluation and RAR are the dominant no-op costs
+- [`Build-Scenarios.md`](../../documentation/Build-Scenarios.md) — "An ideal fully up-to-date build would take no time"
+- [`specs/question.md`](../../documentation/specs/question.md) — `/question` flag; acknowledges VS FUTDC is "not accurate enough for CI"
+- [VS FUTDC docs](https://github.com/dotnet/project-system/blob/main/docs/up-to-date-check.md)
+- [Build Acceleration docs](https://github.com/dotnet/project-system/blob/main/docs/build-acceleration.md)
