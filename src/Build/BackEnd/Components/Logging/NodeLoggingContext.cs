@@ -36,7 +36,7 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// Per-engine telemetry collector created by the build request engine.
+        /// Per-<see cref="BuildRequestEngine"/> telemetry collector.
         /// Null when telemetry collection is disabled.
         /// </summary>
         internal ITelemetryCollector TelemetryCollector { get; set; }

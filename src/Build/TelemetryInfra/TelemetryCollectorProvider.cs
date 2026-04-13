@@ -11,8 +11,8 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.TelemetryInfra;
 
 /// <summary>
-/// Build component that creates per-engine <see cref="ITelemetryCollector"/> instances.
-/// Registered as a singleton, but holds no mutable state — each engine gets its own
+/// Build component that creates per-<see cref="BuildRequestEngine"/> <see cref="ITelemetryCollector"/> instances.
+/// Registered as a singleton, but holds no mutable state — each <see cref="BuildRequestEngine"/> gets its own
 /// forwarder via <see cref="CreateCollector"/>.
 /// </summary>
 internal class TelemetryCollectorProvider : IBuildComponent
@@ -20,7 +20,7 @@ internal class TelemetryCollectorProvider : IBuildComponent
     private bool _telemetryEnabled;
 
     /// <summary>
-    /// Creates a new <see cref="ITelemetryCollector"/> scoped to one engine's build lifetime.
+    /// Creates a new <see cref="ITelemetryCollector"/> scoped to one <see cref="BuildRequestEngine"/>'s build lifetime.
     /// Returns a no-op collector when telemetry is disabled.
     /// </summary>
     internal ITelemetryCollector CreateCollector()
@@ -43,10 +43,8 @@ internal class TelemetryCollectorProvider : IBuildComponent
     }
 
     /// <summary>
-    /// Collects task/target telemetry for one engine. Not thread-safe — the engine's
-    /// one-active-builder-at-a-time invariant guarantees single-threaded access.
-    /// See <see href="https://github.com/dotnet/msbuild/issues/13531"/> for hardening
-    /// the yield/reacquire protocol that this invariant depends on.
+    /// Collects task/target telemetry for one <see cref="BuildRequestEngine"/>. Not thread-safe —
+    /// only one <see cref="RequestBuilder"/> is active at a time per <see cref="BuildRequestEngine"/>.
     /// </summary>
     internal class telemetryCollector : ITelemetryCollector
     {

@@ -202,8 +202,8 @@ namespace Microsoft.Build.BackEnd
 
             _nodeLoggingContext = loggingContext;
 
-            // Create a per-engine telemetry collector via the provider.
-            // Each engine owns its forwarder — no cross-engine sharing, no singleton contention.
+            // Create a per-BuildRequestEngine telemetry collector via the provider.
+            // Each BuildRequestEngine owns its collector — no cross-engine sharing, no singleton contention.
             var telemetryProvider = (TelemetryCollectorProvider)_componentHost.GetComponent(BuildComponentType.TelemetryCollector);
             _nodeLoggingContext.TelemetryCollector = telemetryProvider.CreateCollector();
 
@@ -301,7 +301,7 @@ namespace Microsoft.Build.BackEnd
                     IBuildCheckManagerProvider buildCheckProvider = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider);
                     var buildCheckManager = buildCheckProvider!.Instance;
                     buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
-                    // Flush and send the per-engine telemetry data if any was collected.
+                    // Flush and send the per-BuildRequestEngine telemetry data if any was collected.
                     _nodeLoggingContext.TelemetryCollector?.FinalizeProcessing(_nodeLoggingContext);
                     // Clears the instance so that next call (on node reuse) to 'GetComponent' leads to reinitialization.
                     buildCheckProvider.ShutdownComponent();

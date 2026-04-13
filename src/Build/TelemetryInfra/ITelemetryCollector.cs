@@ -9,10 +9,11 @@ using Microsoft.Build.Framework.Telemetry;
 namespace Microsoft.Build.TelemetryInfra;
 
 /// <summary>
-/// Collects task and target telemetry for a single build engine's lifetime.
-/// Not thread-safe: the engine's one-active-builder-at-a-time invariant
-/// guarantees single-threaded access to <see cref="AddTarget"/> and <see cref="AddTask"/>.
-/// Created per engine by <see cref="TelemetryCollectorProvider.CreateCollector"/>.
+/// Collects task and target telemetry for a single <see cref="BuildRequestEngine"/>'s lifetime.
+/// Not thread-safe: only one <see cref="RequestBuilder"/> is active at a time per
+/// <see cref="BuildRequestEngine"/>, so <see cref="AddTarget"/> and <see cref="AddTask"/>
+/// are always called from a single thread.
+/// Created per <see cref="BuildRequestEngine"/> by <see cref="TelemetryCollectorProvider.CreateCollector"/>.
 /// </summary>
 internal interface ITelemetryCollector
 {
