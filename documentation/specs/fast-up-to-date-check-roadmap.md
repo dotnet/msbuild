@@ -449,19 +449,28 @@ For each scenario: would a fingerprint-based FUTDC miss the change? What does VS
 
 The following are potential fatal flaws identified through adversarial review of the proposal. These must be resolved before deciding whether to pursue this work.
 
-### 7.1 🔴 The Cached `BuildResult` Semantic Gap
+### 7.1 🔴 For Non-Leaf Projects, This Is Not an FUTDC — It's a Result Cache
 
-**The spec's Approach A proposes injecting a cached `BuildResult` before evaluation. But a `BuildResult` is not just "build succeeded" — it's a full semantic object.**
+**The core reframing:** The proposal describes a "fast up-to-date check," but for any project consumed by other projects via `ProjectReference`, it's actually a **result-cache architecture**. This is a fundamentally harder problem.
 
-VS FUTDC gets away with skipping MSBuild entirely because it doesn't need to synthesize engine-level results for downstream consumers. But when MSBuild's engine skips a project, the rest of the build still expects:
+VS FUTDC gets away with skipping MSBuild entirely because it doesn't need to synthesize engine-level results for downstream consumers. When a VS project is "up to date," VS simply doesn't call MSBuild — nothing downstream within the MSBuild engine needs to know.
 
-- **Target results with output items** — `GetTargetPath`, `GetCopyToOutputDirectoryItems`, `GetNativeManifest`, `GetTargetFrameworks` are all project-reference protocol surfaces. Downstream projects call these via the `MSBuild` task and expect items back.
-- **`ProjectStateAfterBuild`** — callers can request evaluated properties/items from the built project. `ResultsCache` validates this (`ResultsCache.cs:369-390`).
-- **Target-set specificity** — a prior `/t:Build` cache record is not valid for a later `/t:GetTargetPath` request. Default-target builds don't even have an explicit target list up front.
+But when the MSBuild *engine* skips a project, the rest of the build still expects target results. Project references consume specific target outputs:
 
-A cached `BuildResult` from a prior `/t:Build` won't satisfy a downstream project requesting `/t:GetTargetPath` — the cache key doesn't match. The fingerprint would need to store results for every callable target, or the engine would need target-set-aware caching.
+- `GetTargetPath` returns `@(TargetPathWithTargetPlatformMoniker)` with metadata (`ReferenceAssembly`, `CopyUpToDateMarker`, etc.) — consumed by every upstream project reference (`Microsoft.Common.CurrentVersion.targets:2242-2278`)
+- `GetCopyToOutputDirectoryItems` returns `@(AllItemsFullPathWithTargetPath)` — consumed transitively via `TargetOutputs` (`Microsoft.Common.CurrentVersion.targets:5197-5336`)
+- Graph target propagation is computed from `ProjectReferenceTargets` in the upstream project's evaluation (`ProjectInterpretation.cs:492-523`)
 
-**This is arguably the hardest problem in the proposal.** VS sidesteps it entirely. The engine approach cannot.
+A cached `BuildResult` *can* structurally hold these outputs (MSBuild's `TargetResult` stores `TaskItem[]` with metadata, and `PluginTargetResult` already supports this). The problem is not serialization — it's **identity, completeness, and invalidation**:
+
+- **Target-set identity:** A cache entry from `/t:Build` is not valid for a `/t:GetTargetPath` request. The fingerprint must be keyed by requested targets, not just "last build succeeded."
+- **Configuration identity:** The cache must be keyed by global properties (`-p:Configuration=Debug` vs `Release`). A `.futdc` keyed only by project path is unsound.
+- **Completeness:** The cached result must contain results for *every* target that any upstream project might request — which depends on upstream evaluation (another circularity).
+- **Invalidation model:** What makes a cached result stale? File timestamps? Content hashes? The cache needs a formal invalidation specification.
+
+**For leaf projects (no downstream consumers):** The problem is much simpler. The cache only needs to confirm "build would produce the same outputs" — no target result synthesis needed. A leaf-only FUTDC MVP could be viable.
+
+**For non-leaf projects:** This is a full result-cache architecture (like `microsoft/MSBuildCache`) with pre-evaluation semantics. The current proposal does not define the target surface, cache identity, or invalidation model needed to make this sound.
 
 ### 7.2 🔴 Circular Dependency in Fingerprinting
 
