@@ -15,6 +15,10 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="$(TargetFramework.StartsWith('net4'))">
+    <!-- When targeting .NET Framework, Exe and unit test projects build with x86 architecture if Platform is AnyCPU,
+         and build for x64 architecture when Platform is x64 -->
+    <RuntimeOutputPlatformTarget>x86</RuntimeOutputPlatformTarget>
+    <RuntimeOutputPlatformTarget Condition="'$(Platform)' == 'x64'">x64</RuntimeOutputPlatformTarget>
     <DefineConstants>$(DefineConstants);FEATURE_APARTMENT_STATE</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APM</DefineConstants>
     <DefineConstants>$(DefineConstants);FEATURE_APPDOMAIN</DefineConstants>
@@ -70,6 +74,11 @@
     <DefineConstants>$(DefineConstants);FEATURE_MSCOREE</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition="!$(TargetFramework.StartsWith('net4'))">
+    <!-- When targeting .NET Core, Exe and unit tests projects always use AnyCPU architecture -->
+    <RuntimeOutputPlatformTarget>AnyCPU</RuntimeOutputPlatformTarget>
+  </PropertyGroup>
+
   <PropertyGroup>
     <!-- Useful for tests that need OS information as a constant -->
     <DefineConstants Condition="$([MSBuild]::IsOSPlatform('windows'))">$(DefineConstants);TEST_ISWINDOWS</DefineConstants>
@@ -116,6 +125,20 @@
   <PropertyGroup Condition="'$(TargetFramework)' == '$(FullFrameworkTFM)'">
     <DefineConstants>$(DefineConstants);FEATURE_REPORTFILEACCESSES</DefineConstants>
     <FeatureReportFileAccesses>true</FeatureReportFileAccesses>
+  </PropertyGroup>
+
+  <!-- Produce ONLY reference assemblies and SKIP roslyn analyzers for netstandard2.0 builds.
+       Moved from Directory.Build.props so that $(TargetFramework) is reliably available. -->
+  <PropertyGroup Condition="'$(TargetFramework)' == 'netstandard2.0' and '$(MSBuildProjectFile)' != 'PortableTask.csproj' and '$(MSBuildProjectFile)' != 'StringTools.csproj'">
+    <!-- ProduceOnlyReferenceAssembly and ProduceReferenceAssembly are mutually exclusive compiler flags. -->
+    <ProduceOnlyReferenceAssembly>true</ProduceOnlyReferenceAssembly>
+    <ProduceReferenceAssembly>false</ProduceReferenceAssembly>
+    <RunAnalyzers>false</RunAnalyzers>
+    <TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificContentInPackage);ShipRefAssembliesToNuGetPackage</TargetsForTfmSpecificBuildOutput>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <!-- pdb publishing fails builds for reference-only assemblies. -->
+    <!-- https://github.com/dotnet/msbuild/pull/6148. -->
+    <PublishWindowsPdb>false</PublishWindowsPdb>
   </PropertyGroup>
 
 </Project>
