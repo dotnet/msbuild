@@ -5,7 +5,12 @@ This file should be imported by eng/Versions.props
 -->
 <Project>
   <PropertyGroup>
-    <!-- dotnet/runtime dependencies -->
+    <!-- dotnet-arcade dependencies -->
+    <MicrosoftDotNetArcadeSdkPackageVersion>10.0.0-beta.26208.4</MicrosoftDotNetArcadeSdkPackageVersion>
+    <MicrosoftDotNetXUnitExtensionsPackageVersion>10.0.0-beta.26208.4</MicrosoftDotNetXUnitExtensionsPackageVersion>
+    <!-- dotnet-roslyn dependencies -->
+    <MicrosoftNetCompilersToolsetPackageVersion>5.3.0-2.26051.1</MicrosoftNetCompilersToolsetPackageVersion>
+    <!-- dotnet-runtime dependencies -->
     <SystemCodeDomPackageVersion>9.0.11</SystemCodeDomPackageVersion>
     <SystemCollectionsImmutablePackageVersion>9.0.11</SystemCollectionsImmutablePackageVersion>
     <SystemConfigurationConfigurationManagerPackageVersion>9.0.11</SystemConfigurationConfigurationManagerPackageVersion>
@@ -23,17 +28,17 @@ This file should be imported by eng/Versions.props
     <SystemTextJsonPackageVersion>9.0.11</SystemTextJsonPackageVersion>
     <SystemThreadingChannelsPackageVersion>9.0.11</SystemThreadingChannelsPackageVersion>
     <SystemThreadingTasksDataflowPackageVersion>9.0.11</SystemThreadingTasksDataflowPackageVersion>
-    <!-- dotnet/arcade dependencies -->
-    <MicrosoftDotNetArcadeSdkPackageVersion>10.0.0-beta.26123.2</MicrosoftDotNetArcadeSdkPackageVersion>
-    <MicrosoftDotNetXUnitExtensionsPackageVersion>10.0.0-beta.26123.2</MicrosoftDotNetXUnitExtensionsPackageVersion>
-    <!-- nuget/nuget.client dependencies -->
+    <!-- nuget-nuget.client dependencies -->
     <NuGetBuildTasksPackageVersion>7.3.0-preview.1.50</NuGetBuildTasksPackageVersion>
-    <!-- dotnet/roslyn dependencies -->
-    <MicrosoftNetCompilersToolsetPackageVersion>5.3.0-2.26051.1</MicrosoftNetCompilersToolsetPackageVersion>
   </PropertyGroup>
   <!--Property group for alternate package version names-->
   <PropertyGroup>
-    <!-- dotnet/runtime dependencies -->
+    <!-- dotnet-arcade dependencies -->
+    <MicrosoftDotNetArcadeSdkVersion>$(MicrosoftDotNetArcadeSdkPackageVersion)</MicrosoftDotNetArcadeSdkVersion>
+    <MicrosoftDotNetXUnitExtensionsVersion>$(MicrosoftDotNetXUnitExtensionsPackageVersion)</MicrosoftDotNetXUnitExtensionsVersion>
+    <!-- dotnet-roslyn dependencies -->
+    <MicrosoftNetCompilersToolsetVersion>$(MicrosoftNetCompilersToolsetPackageVersion)</MicrosoftNetCompilersToolsetVersion>
+    <!-- dotnet-runtime dependencies -->
     <SystemCodeDomVersion>$(SystemCodeDomPackageVersion)</SystemCodeDomVersion>
     <SystemCollectionsImmutableVersion>$(SystemCollectionsImmutablePackageVersion)</SystemCollectionsImmutableVersion>
     <SystemConfigurationConfigurationManagerVersion>$(SystemConfigurationConfigurationManagerPackageVersion)</SystemConfigurationConfigurationManagerVersion>
@@ -51,12 +56,7 @@ This file should be imported by eng/Versions.props
     <SystemTextJsonVersion>$(SystemTextJsonPackageVersion)</SystemTextJsonVersion>
     <SystemThreadingChannelsVersion>$(SystemThreadingChannelsPackageVersion)</SystemThreadingChannelsVersion>
     <SystemThreadingTasksDataflowVersion>$(SystemThreadingTasksDataflowPackageVersion)</SystemThreadingTasksDataflowVersion>
-    <!-- dotnet/arcade dependencies -->
-    <MicrosoftDotNetArcadeSdkVersion>$(MicrosoftDotNetArcadeSdkPackageVersion)</MicrosoftDotNetArcadeSdkVersion>
-    <MicrosoftDotNetXUnitExtensionsVersion>$(MicrosoftDotNetXUnitExtensionsPackageVersion)</MicrosoftDotNetXUnitExtensionsVersion>
-    <!-- nuget/nuget.client dependencies -->
+    <!-- nuget-nuget.client dependencies -->
     <NuGetBuildTasksVersion>$(NuGetBuildTasksPackageVersion)</NuGetBuildTasksVersion>
-    <!-- dotnet/roslyn dependencies -->
-    <MicrosoftNetCompilersToolsetVersion>$(MicrosoftNetCompilersToolsetPackageVersion)</MicrosoftNetCompilersToolsetVersion>
   </PropertyGroup>
 </Project>
