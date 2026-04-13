@@ -83,4 +83,9 @@ ates https://learn.microsoft.com/en-gb/dotnet/fundamentals/syslib-diagnostics/sy
     <EnableNETAnalyzers>true</EnableNETAnalyzers>
   </PropertyGroup>
 
+  <!-- Wire up BannedApiAnalyzers configuration -->
+  <ItemGroup>
+    <AdditionalFiles Include="$(MSBuildThisFileDirectory)eng\BannedSymbols.txt" />
+  </ItemGroup>
+
 </Project>

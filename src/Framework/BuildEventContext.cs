@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.ComponentModel;
 
 namespace Microsoft.Build.Framework
 {
@@ -56,11 +57,95 @@ namespace Microsoft.Build.Framework
         #endregion
 
         /// <summary>
-        /// Constructs a BuildEventContext with all parameters specified.
-        /// This constructor should only be used internally for serialization/deserialization
-        /// and by the fluent WithXxx methods. External code should use CreateInitial() and fluent methods.
+        /// This is the original constructor. No one should ever use this except internally for backward compatibility.
+        /// Use <see cref="CreateInitial"/>, <see cref="CreateForSubmission"/>, or <see cref="CreateForNode"/> and the fluent <c>WithXxx</c> methods instead.
         /// </summary>
-        internal BuildEventContext(
+        /// <remarks>
+        /// This constructor is obsolete and will be removed in a future version.
+        /// It does not set <see cref="SubmissionId"/>, <see cref="EvaluationId"/>, or <see cref="ProjectInstanceId"/>,
+        /// making it easy to accidentally lose important context data.
+        /// Prefer the builder pattern: <c>BuildEventContext.CreateInitial(submissionId, nodeId).WithProjectContextId(...).WithTargetId(...).WithTaskId(...)</c>
+        /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public BuildEventContext(
+            int nodeId,
+            int targetId,
+            int projectContextId,
+            int taskId)
+        {
+            _submissionId = InvalidSubmissionId;
+            _nodeId = nodeId;
+            _evaluationId = InvalidEvaluationId;
+            _projectInstanceId = InvalidProjectInstanceId;
+            _projectContextId = projectContextId;
+            _targetId = targetId;
+            _taskId = taskId;
+        }
+
+        /// <summary>
+        /// Constructs a BuildEventContext with a specified project instance id.
+        /// Use <see cref="CreateInitial"/>, <see cref="CreateForSubmission"/>, or <see cref="CreateForNode"/> and the fluent <c>WithXxx</c> methods instead.
+        /// </summary>
+        /// <remarks>
+        /// This constructor is obsolete and will be removed in a future version.
+        /// It does not set <see cref="SubmissionId"/> or <see cref="EvaluationId"/>,
+        /// making it easy to accidentally lose important context data.
+        /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public BuildEventContext(
+            int nodeId,
+            int projectInstanceId,
+            int projectContextId,
+            int targetId,
+            int taskId)
+        {
+            _submissionId = InvalidSubmissionId;
+            _nodeId = nodeId;
+            _evaluationId = InvalidEvaluationId;
+            _projectInstanceId = projectInstanceId;
+            _projectContextId = projectContextId;
+            _targetId = targetId;
+            _taskId = taskId;
+        }
+
+        /// <summary>
+        /// Constructs a BuildEventContext with a specific submission id.
+        /// Use <see cref="CreateInitial"/>, <see cref="CreateForSubmission"/>, or <see cref="CreateForNode"/> and the fluent <c>WithXxx</c> methods instead.
+        /// </summary>
+        /// <remarks>
+        /// This constructor is obsolete and will be removed in a future version.
+        /// It does not set <see cref="EvaluationId"/>,
+        /// making it easy to accidentally lose important context data.
+        /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public BuildEventContext(
+            int submissionId,
+            int nodeId,
+            int projectInstanceId,
+            int projectContextId,
+            int targetId,
+            int taskId)
+        {
+            _submissionId = submissionId;
+            _nodeId = nodeId;
+            _evaluationId = InvalidEvaluationId;
+            _projectInstanceId = projectInstanceId;
+            _projectContextId = projectContextId;
+            _targetId = targetId;
+            _taskId = taskId;
+        }
+
+        /// <summary>
+        /// Constructs a BuildEventContext with all parameters specified.
+        /// Use <see cref="CreateInitial"/>, <see cref="CreateForSubmission"/>, or <see cref="CreateForNode"/> and the fluent <c>WithXxx</c> methods instead.
+        /// </summary>
+        /// <remarks>
+        /// This constructor is obsolete and will be removed in a future version.
+        /// Prefer the builder pattern which makes it impossible to accidentally drop ID values:
+        /// <c>BuildEventContext.CreateInitial(submissionId, nodeId).WithEvaluationId(...).WithProjectInstanceId(...)</c>
+        /// </remarks>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public BuildEventContext(
             int submissionId,
             int nodeId,
             int evaluationId,
@@ -183,7 +268,12 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Returns a default invalid BuildEventContext
         /// </summary>
-        public static BuildEventContext Invalid { get; } = new(InvalidSubmissionId, InvalidNodeId, InvalidEvaluationId, InvalidProjectInstanceId, InvalidProjectContextId, InvalidTargetId, InvalidTaskId);
+        public static BuildEventContext Invalid { get; } = CreateInitial(InvalidSubmissionId, InvalidNodeId)
+            .WithEvaluationId(InvalidEvaluationId)
+            .WithProjectInstanceId(InvalidProjectInstanceId)
+            .WithProjectContextId(InvalidProjectContextId)
+            .WithTargetId(InvalidTargetId)
+            .WithTaskId(InvalidTaskId);
 
         /// <summary>
         /// Retrieves the Evaluation id.
@@ -505,6 +595,7 @@ namespace Microsoft.Build.Framework
         /// This is the only operation that allocates memory on the heap.
         /// </summary>
         /// <returns>A new BuildEventContext with the configured values</returns>
+#pragma warning disable RS0030 // Banned API - Build() is the only sanctioned way to create BuildEventContext from builder
         public readonly BuildEventContext Build() => new BuildEventContext(
                 _submissionId,
                 _nodeId,
@@ -513,6 +604,7 @@ namespace Microsoft.Build.Framework
                 _projectContextId,
                 _targetId,
                 _taskId);
+#pragma warning restore RS0030
 
         /// <summary>
         /// Implicit conversion from builder to BuildEventContext for convenience.
