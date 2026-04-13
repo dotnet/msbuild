@@ -181,8 +181,8 @@
     <Compile Include="Logging\TerminalLogger\**\*.cs" />
     <Compile Include="Logging\ReusableLogger.cs" />
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
-    <Compile Include="TelemetryInfra\ITelemetryForwarder.cs" />
-    <Compile Include="TelemetryInfra\TelemetryForwarderProvider.cs" />
+    <Compile Include="TelemetryInfra\ITelemetryCollector.cs" />
+    <Compile Include="TelemetryInfra\TelemetryCollectorProvider.cs" />
     <Compile Include="Utilities\AwaitExtensions.cs" />
     <Compile Include="Utilities\EncodingStringWriter.cs" />
     <Compile Include="Utilities\ProjectWriter.cs" />

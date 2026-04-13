@@ -151,7 +151,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The component which collects telemetry data in worker node and forwards it to the main node.
         /// </summary>
-        TelemetryForwarder,
+        TelemetryCollector,
     }
 
     /// <summary>

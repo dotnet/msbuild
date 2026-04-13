@@ -36,10 +36,10 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
-        /// per-engine telemetry forwarder created by <see cref="BuildRequestEngine"/>.
+        /// per-engine telemetry collector created by <see cref="BuildRequestEngine"/>.
         /// Null when telemetry collection is disabled.
         /// </summary>
-        internal ITelemetryForwarder TelemetryForwarder { get; set; }
+        internal ITelemetryCollector TelemetryCollector { get; set; }
 
         /// <summary>
         /// Log the completion of a build

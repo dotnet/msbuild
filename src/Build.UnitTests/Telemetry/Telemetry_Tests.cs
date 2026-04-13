@@ -485,35 +485,35 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void TelemetryForwarder_AccumulatesAndSendsOnFinalize()
+        public void TelemetryCollector_AccumulatesAndSendsOnFinalize()
         {
-            var forwarder = new TelemetryForwarderProvider.TelemetryForwarder();
+            var collector = new TelemetryCollectorProvider.TelemetryCollector();
             var loggingService = new EventRecordingLoggingService();
 
             var loggingContext = new MockLoggingContext(
                 loggingService,
                 new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
 
-            // Add data via the forwarder API.
+            // Add data via the collector API.
             var key = new TaskOrTargetTelemetryKey("TestTarget", isCustom: true, isFromNugetCache: false, isFromMetaProject: false);
-            forwarder.AddTarget(key, wasExecuted: true);
+            collector.AddTarget(key, wasExecuted: true);
 
             // First FinalizeProcessing should emit a telemetry event.
-            forwarder.FinalizeProcessing(loggingContext);
+            collector.FinalizeProcessing(loggingContext);
             var telemetryEvents = loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().ToList();
             telemetryEvents.Count.ShouldBe(1);
             telemetryEvents[0].WorkerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(key);
 
-            // Second FinalizeProcessing on an empty forwarder should be a no-op (state was reset).
-            forwarder.FinalizeProcessing(loggingContext);
+            // Second FinalizeProcessing on an empty collector should be a no-op (state was reset).
+            collector.FinalizeProcessing(loggingContext);
             loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().Count().ShouldBe(1, "No new event should be emitted after reset");
 
-            // Add new data after reset — forwarder should still work.
+            // Add new data after reset — collector should still work.
             var key2 = new TaskOrTargetTelemetryKey("TestTarget2", isCustom: false, isFromNugetCache: false, isFromMetaProject: false);
-            forwarder.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.ConditionWasFalse);
+            collector.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.ConditionWasFalse);
 
             // Third FinalizeProcessing should emit only the new data.
-            forwarder.FinalizeProcessing(loggingContext);
+            collector.FinalizeProcessing(loggingContext);
             var allTelemetryEvents = loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().ToList();
             allTelemetryEvents.Count.ShouldBe(2);
             allTelemetryEvents[1].WorkerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(key2);
