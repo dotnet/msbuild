@@ -55,13 +55,13 @@ Source: [`BuildUpToDateCheck.cs`](https://github.com/dotnet/project-system/blob/
 
 ### 2.1 Architecture
 
-The FUTDC is a layer *above* MSBuild. It has a **two-layer design**: CPS tells it *what files to check* (via Dataflow snapshots from evaluation/design-time builds), but it reads *actual file timestamps* from the filesystem at check time.
+The FUTDC is a layer *above* MSBuild. It has a **two-layer design**: VS's project system tells it *what files to check* (via in-memory snapshots from evaluation/design-time builds), but it reads *actual file timestamps* from the filesystem at check time.
 
-**CPS does NOT use `FileSystemWatcher`.** It uses VS's kernel-level file change service (`IVsAsyncFileChangeEx` — a VS COM API) to detect project file changes, which trigger CPS re-evaluation, which updates the Dataflow snapshots. However, the FUTDC itself does not subscribe to file watchers — it reads `File.GetLastWriteTimeUtc()` directly when a build is requested.
+**VS's project system does NOT use `FileSystemWatcher`.** It uses VS's kernel-level file change service (`IVsAsyncFileChangeEx` — a VS COM API) to detect project file changes, which trigger project re-evaluation, which updates the in-memory snapshots. However, the FUTDC itself does not subscribe to file watchers — it reads `File.GetLastWriteTimeUtc()` directly when a build is requested.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  CPS Project Subscription Service                           │
+│  VS Project System Subscription Service                      │
 │  (continuously maintained while VS is open)                 │
 │                                                             │
 │  JointRuleSource ──────┐  SourceItemsRuleSource ──┐        │
@@ -73,7 +73,7 @@ The FUTDC is a layer *above* MSBuild. It has a **two-layer design**: CPS tells i
 │                        │                          │        │
 │  ProjectItemSchema ────┤  ProjectCatalogSource ───┤        │
 └────────────────────────┼──────────────────────────┼────────┘
-                         │  SyncLinkTo (Dataflow)   │
+                         │  SyncLinkTo (async pipeline)   │
                          ▼                          ▼
 ┌─────────────────────────────────────────────────────────────┐
 │  UpToDateCheckImplicitConfiguredInputDataSource              │
@@ -94,7 +94,7 @@ The design-time MSBuild targets that produce FUTDC data are:
 - `CollectUpToDateCheckBuiltDesignTime` → `@(UpToDateCheckBuilt)` (output DLL, PDB, doc, etc.)
 - `CollectResolvedCompilationReferencesDesignTime` → `@(ReferencePathWithRefAssemblies)`
 
-**Key implication for CLI:** The CLI doesn't need file watchers or the CPS Dataflow pipeline. Those exist to keep the snapshot warm between builds. What the CLI needs is the same *data* (list of inputs/outputs/references) — which it can obtain from a prior build's evaluation results, persisted to the fingerprint file. The actual timestamp comparison logic is trivially portable (`File.GetLastWriteTimeUtc` is cross-platform .NET).
+**Key implication for CLI:** The CLI doesn't need file watchers or VS's in-memory project subscription pipeline. Those exist to keep the snapshot warm between builds in a long-lived IDE process. The CLI needs the same *data* (list of inputs/outputs/references) — which it can obtain from a prior build's evaluation results, persisted to the fingerprint file. The actual timestamp comparison logic is trivially portable (`File.GetLastWriteTimeUtc` is cross-platform .NET).
 
 
 ### 2.2 The 5-Stage Decision Algorithm
@@ -313,7 +313,7 @@ MSBuild is invoked **in-process** by default. The SDK is a pure pass-through —
 3. Read fingerprints and compare timestamps
 4. Produce a synthetic "everything is up-to-date" result
 
-This is building a mini build system on top of MSBuild. It mirrors the VS architecture (VS FUTDC also sits above MSBuild), but VS has CPS with live Dataflow subscriptions — the SDK has nothing.
+This is building a mini build system on top of MSBuild. It mirrors the VS architecture (VS FUTDC also sits above MSBuild), but VS has a long-lived project system maintaining project state in memory — the SDK has nothing.
 
 **Where it could work:** Single-project builds with default `obj/` layout. Not viable for solution builds without duplicating substantial MSBuild logic.
 
@@ -362,14 +362,14 @@ A solution-level FUTDC would generalize this pattern: instead of one file, itera
 
 #### VS FUTDC Code Reusability
 
-The FUTDC source in `dotnet/project-system` is in the VS-coupled assembly (`Microsoft.VisualStudio.ProjectSystem.Managed.VS`). The check class (`BuildUpToDateCheck.cs`) depends on MEF composition, CPS project subscriptions, VS solution services, and VS telemetry — **not directly reusable**.
+The FUTDC source in `dotnet/project-system` is in the VS-coupled assembly (`Microsoft.VisualStudio.ProjectSystem.Managed.VS`). The check class (`BuildUpToDateCheck.cs`) depends on MEF composition, VS project system subscriptions, VS solution services, and VS telemetry — **not directly reusable**.
 
 However, the **core algorithm is portable**:
 - `ItemHashing.cs` — pure hash computation, no VS dependencies
 - `TimestampCache` / `ConcurrentTimestampCache` — only depends on `IFileSystem` abstraction
 - The 5-stage decision logic — conceptually simple timestamp comparisons
 
-The **data acquisition** is the VS-specific part. VS gets input/output lists from CPS Dataflow snapshots. A CLI version would get them from a prior MSBuild build's persisted state (the fingerprint file).
+The **data acquisition** is the VS-specific part. VS gets input/output lists from its in-memory project snapshots (kept current by continuous re-evaluation). A CLI version would get them from a prior MSBuild build's persisted state (the fingerprint file).
 
 **What's still hard:**
 - Dependency order resolution requires knowing `ProjectReference` items, which requires evaluation (but `dotnet run file.cs` already solves the simpler case of "does this need MSBuild at all?")
@@ -394,7 +394,7 @@ What survives across builds in server mode today:
 - ❌ No FUTDC state
 - ❌ No file watchers
 
-A persistent process is the natural host for FUTDC state — it can cache evaluation results, watch filesystems, and make sub-millisecond decisions from memory, just like VS CPS. But server mode was previously shelved due to state-leak bugs and is not yet production-ready.
+A persistent process is the natural host for FUTDC state — it can cache evaluation results, watch filesystems, and make sub-millisecond decisions from memory, just like VS's project system does. But server mode was previously shelved due to state-leak bugs and is not yet production-ready.
 
 ### Approach Comparison
 
