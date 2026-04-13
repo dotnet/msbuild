@@ -1297,9 +1297,9 @@ namespace Microsoft.Build.BackEnd
 
         private void UpdateStatisticsPostBuild()
         {
-            ITelemetryForwarder TelemetryForwarder = _nodeLoggingContext?.TelemetryForwarder;
+            ITelemetryCollector TelemetryCollector = _nodeLoggingContext?.TelemetryCollector;
 
-            if (TelemetryForwarder is null || !TelemetryForwarder.IsTelemetryCollected)
+            if (TelemetryCollector is null || !TelemetryCollector.IsTelemetryCollected)
             {
                 return;
             }
@@ -1346,7 +1346,7 @@ namespace Microsoft.Build.BackEnd
 
                 var key = new TaskOrTargetTelemetryKey(
                     projectTargetInstance.Key, isCustom, isFromNuget, isMetaprojTarget);
-                TelemetryForwarder.AddTarget(key, wasExecuted, skipReason);
+                TelemetryCollector.AddTarget(key, wasExecuted, skipReason);
             }
 
             TaskRegistry taskReg = _requestEntry.RequestConfiguration.Project.TaskRegistry;
@@ -1366,7 +1366,7 @@ namespace Microsoft.Build.BackEnd
                         registeredTaskRecord.ComputeIfCustom(),
                         registeredTaskRecord.IsFromNugetCache,
                         isFromMetaProject: false);
-                    TelemetryForwarder.AddTask(
+                    TelemetryCollector.AddTask(
                         key,
                         registeredTaskRecord.Statistics.ExecutedTime,
                         registeredTaskRecord.Statistics.ExecutedCount,
