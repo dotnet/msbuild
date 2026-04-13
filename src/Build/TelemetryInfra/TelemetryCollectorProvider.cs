@@ -11,9 +11,9 @@ using Microsoft.Build.Shared;
 namespace Microsoft.Build.TelemetryInfra;
 
 /// <summary>
-/// Build component that creates per-<see cref="BuildRequestEngine"/> <see cref="ITelemetryCollector"/> instances.
-/// Registered as a singleton, but holds no mutable state — each <see cref="BuildRequestEngine"/> gets its own
-/// forwarder via <see cref="CreateCollector"/>.
+/// Build component that creates per-BuildRequestEngine <see cref="ITelemetryCollector"/> instances.
+/// Registered as a singleton, but holds no mutable state — each BuildRequestEngine gets its own
+/// collector via <see cref="CreateCollector"/>.
 /// </summary>
 internal class TelemetryCollectorProvider : IBuildComponent
 {
@@ -24,7 +24,7 @@ internal class TelemetryCollectorProvider : IBuildComponent
     /// Returns a no-op collector when telemetry is disabled.
     /// </summary>
     internal ITelemetryCollector CreateCollector()
-        => _telemetryEnabled ? new telemetryCollector() : NullTelemetryCollector.Instance;
+        => _telemetryEnabled ? new TelemetryCollector() : NullTelemetryCollector.Instance;
 
     internal static IBuildComponent CreateComponent(BuildComponentType type)
     {
@@ -43,10 +43,10 @@ internal class TelemetryCollectorProvider : IBuildComponent
     }
 
     /// <summary>
-    /// Collects task/target telemetry for one <see cref="BuildRequestEngine"/>. Not thread-safe —
-    /// only one <see cref="RequestBuilder"/> is active at a time per <see cref="BuildRequestEngine"/>.
+    /// Collects task/target telemetry for one BuildRequestEngine. Not thread-safe —
+    /// only one RequestBuilder is active at a time per BuildRequestEngine.
     /// </summary>
-    internal class telemetryCollector : ITelemetryCollector
+    internal class TelemetryCollector : ITelemetryCollector
     {
         private WorkerNodeTelemetryData _data = new();
 
