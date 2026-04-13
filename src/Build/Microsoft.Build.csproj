@@ -294,6 +294,7 @@
     <Compile Include="Evaluation\MetadataReference.cs" />
     <Compile Include="Graph\ProjectGraphEntryPoint.cs" />
     <Compile Include="Graph\ProjectGraph.cs" />
+    <Compile Include="Graph\ProjectGraphCache.cs" />
     <Compile Include="Graph\ProjectGraphNode.cs" />
     <Compile Include="Instance\HostObjectException.cs" />
     <Compile Include="Instance\IRunningObjectTableWrapper.cs" />
@@ -500,6 +501,7 @@
     <Compile Include="Evaluation\ProjectParser.cs" />
     <Compile Include="Evaluation\ProjectRootElementCacheBase.cs" />
     <Compile Include="Evaluation\ProjectRootElementCache.cs" />
+    <Compile Include="Evaluation\ProjectInstanceCache.cs" />
     <Compile Include="Evaluation\SimpleProjectRootElementCache.cs" />
     <Compile Include="Evaluation\SemiColonTokenizer.cs" />
     <Compile Include="Evaluation\StringMetadataTable.cs" />

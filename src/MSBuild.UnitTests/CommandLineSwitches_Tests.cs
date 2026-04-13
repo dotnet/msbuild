@@ -1216,6 +1216,7 @@ namespace Microsoft.Build.UnitTests
                                         graphBuildOptions: null,
                                         lowPriority: false,
                                         question: false,
+                                        superFast: false,
                                         isTaskAndTargetItemLoggingRequired: false,
                                         isBuildCheckEnabled: false,
                                         inputResultsCaches: null,

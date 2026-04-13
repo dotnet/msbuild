@@ -2155,6 +2155,14 @@ namespace Microsoft.Build.Execution
             var projectGraph = submission.BuildRequestData.ProjectGraph;
             if (projectGraph == null)
             {
+                // SuperFast: try to reuse a cached graph from a prior build in the same server process.
+                if (_buildParameters!.SuperFast && submission.BuildRequestData.ProjectGraphEntryPoints is not null)
+                {
+                    projectGraph = ProjectGraphCache.TryGet(submission.BuildRequestData.ProjectGraphEntryPoints);
+                }
+
+                if (projectGraph == null)
+                {
                 projectGraph = new ProjectGraph(
                     submission.BuildRequestData.ProjectGraphEntryPoints,
                     ProjectCollection.GlobalProjectCollection,
@@ -2171,7 +2179,17 @@ namespace Microsoft.Build.Execution
                             projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
                         }
 
-                        return new ProjectInstance(
+                        // SuperFast: try evaluation cache before doing fresh evaluation.
+                        if (_buildParameters.SuperFast)
+                        {
+                            var cached = Evaluation.ProjectInstanceCache.TryGet(path, properties);
+                            if (cached != null)
+                            {
+                                return cached;
+                            }
+                        }
+
+                        var instance = new ProjectInstance(
                             path,
                             properties,
                             null,
@@ -2188,7 +2206,22 @@ namespace Microsoft.Build.Execution
                             SdkResolverService,
                             submission.SubmissionId,
                             projectLoadSettings);
+
+                        // SuperFast: cache the freshly evaluated instance.
+                        if (_buildParameters.SuperFast)
+                        {
+                            Evaluation.ProjectInstanceCache.Store(path, properties, instance);
+                        }
+
+                        return instance;
                     });
+
+                // SuperFast: cache the constructed graph for reuse in subsequent server builds.
+                if (_buildParameters.SuperFast && submission.BuildRequestData.ProjectGraphEntryPoints is not null)
+                {
+                    ProjectGraphCache.Store(submission.BuildRequestData.ProjectGraphEntryPoints, projectGraph);
+                }
+                }
             }
 
             LogMessage(
@@ -2261,6 +2294,7 @@ namespace Microsoft.Build.Execution
 
             var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
             var finishedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes.Count);
+            var skippedNodes = new HashSet<ProjectGraphNode>();
             var buildingNodes = new Dictionary<BuildSubmissionBase, ProjectGraphNode>();
             var resultsPerNode = new Dictionary<ProjectGraphNode, BuildResult>(projectGraph.ProjectNodes.Count);
             ExceptionDispatchInfo? submissionException = null;
@@ -2292,6 +2326,34 @@ namespace Microsoft.Build.Execution
 
                             waitHandle.Set();
 
+                            continue;
+                        }
+
+                        // SuperFast: skip up-to-date nodes.
+                        if (_buildParameters!.SuperFast && IsNodeUpToDate(node, skippedNodes))
+                        {
+                            skippedNodes.Add(node);
+                            finishedNodes.Add(node);
+                            blockedNodes.Remove(node);
+
+                            // Create a synthetic success result for this skipped node.
+                            var skipResult = new BuildResult();
+                            foreach (string target in targetList)
+                            {
+                                skipResult.AddResultsForTarget(target,
+                                    new TargetResult(
+                                        [],
+                                        new WorkUnitResult(
+                                            WorkUnitResultCode.Success,
+                                            WorkUnitActionCode.Continue,
+                                            null)));
+                            }
+
+                            resultsPerNode.Add(node, skipResult);
+
+                            LogMessage($"SuperFast: Skipping '{Path.GetFileNameWithoutExtension(node.ProjectInstance.FullPath)}' — up-to-date");
+
+                            waitHandle.Set();
                             continue;
                         }
 
@@ -2332,7 +2394,131 @@ namespace Microsoft.Build.Execution
                 }
             }
 
+            if (_buildParameters!.SuperFast && skippedNodes.Count > 0)
+            {
+                LogMessage($"SuperFast: {skippedNodes.Count}/{projectGraph.ProjectNodes.Count} projects skipped (up-to-date)");
+            }
+
             return resultsPerNode;
+        }
+
+        /// <summary>
+        /// Determines whether a project graph node is up-to-date by comparing input timestamps
+        /// against output timestamps using the node's evaluated <see cref="ProjectInstance"/>.
+        /// A node is up-to-date only if all its dependencies were also skipped (not rebuilt)
+        /// and all its input files are older than its primary output.
+        /// </summary>
+        private static bool IsNodeUpToDate(ProjectGraphNode node, HashSet<ProjectGraphNode> skippedNodes)
+        {
+            // If any dependency was rebuilt (not skipped), this node might need rebuilding.
+            foreach (ProjectGraphNode dep in node.ProjectReferences)
+            {
+                if (!skippedNodes.Contains(dep))
+                {
+                    return false;
+                }
+            }
+
+            ProjectInstance project = node.ProjectInstance;
+
+            // Honor DisableFastUpToDateCheck.
+            string disableCheck = project.GetPropertyValue("DisableFastUpToDateCheck");
+            if (disableCheck.Equals("true", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            // Get the primary output path.
+            string targetPath = project.GetPropertyValue("TargetPath");
+            if (string.IsNullOrEmpty(targetPath))
+            {
+                return false;
+            }
+
+            DateTime outputTime = NativeMethodsShared.GetLastWriteFileUtcTime(targetPath);
+            if (outputTime == DateTime.MinValue)
+            {
+                // Output doesn't exist — must build.
+                return false;
+            }
+
+            // Check project file and all imports (MSBuildAllProjects).
+            string allProjects = project.GetPropertyValue("MSBuildAllProjects");
+            if (!string.IsNullOrEmpty(allProjects))
+            {
+                foreach (string importPath in allProjects.Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    string trimmed = importPath.Trim();
+                    if (!string.IsNullOrEmpty(trimmed))
+                    {
+                        DateTime inputTime = NativeMethodsShared.GetLastWriteFileUtcTime(trimmed);
+                        if (inputTime > outputTime)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            // Check source items.
+            foreach (string itemType in new[] { "Compile", "EmbeddedResource", "Content" })
+            {
+                foreach (ProjectItemInstance item in project.GetItems(itemType))
+                {
+                    string fullPath = item.GetMetadataValue("FullPath");
+                    if (!string.IsNullOrEmpty(fullPath))
+                    {
+                        DateTime inputTime = NativeMethodsShared.GetLastWriteFileUtcTime(fullPath);
+                        if (inputTime > outputTime)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+
+            // Check resolved references.
+            foreach (ProjectItemInstance item in project.GetItems("ReferencePath"))
+            {
+                string refPath = item.EvaluatedInclude;
+                if (!string.IsNullOrEmpty(refPath))
+                {
+                    DateTime inputTime = NativeMethodsShared.GetLastWriteFileUtcTime(refPath);
+                    if (inputTime > outputTime)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            // Check analyzers.
+            foreach (ProjectItemInstance item in project.GetItems("Analyzer"))
+            {
+                string analyzerPath = item.EvaluatedInclude;
+                if (!string.IsNullOrEmpty(analyzerPath))
+                {
+                    DateTime inputTime = NativeMethodsShared.GetLastWriteFileUtcTime(analyzerPath);
+                    if (inputTime > outputTime)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            // Check NuGet assets file.
+            string extensionsPath = project.GetPropertyValue("MSBuildProjectExtensionsPath");
+            if (!string.IsNullOrEmpty(extensionsPath))
+            {
+                string assetsPath = Path.Combine(extensionsPath, "project.assets.json");
+                DateTime assetsTime = NativeMethodsShared.GetLastWriteFileUtcTime(assetsPath);
+                if (assetsTime > outputTime)
+                {
+                    return false;
+                }
+            }
+
+            // All checks passed.
+            return true;
         }
 
         /// <summary>

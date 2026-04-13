@@ -715,6 +715,7 @@ namespace Microsoft.Build.CommandLine
                 string[] inputResultsCaches = null;
                 string outputResultsCache = null;
                 bool question = false;
+                bool superFast = false;
                 bool isTaskInputLoggingRequired = false;
                 bool isBuildCheckEnabled = false;
                 string[] getProperty = [];
@@ -766,6 +767,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                             ref lowPriority,
                                             ref question,
+                                            ref superFast,
                                             ref isTaskInputLoggingRequired,
                                             ref isBuildCheckEnabled,
                                             ref getProperty,
@@ -880,6 +882,7 @@ namespace Microsoft.Build.CommandLine
                                     graphBuildOptions,
                                     lowPriority,
                                     question,
+                                    superFast,
                                     isTaskInputLoggingRequired,
                                     isBuildCheckEnabled,
                                     inputResultsCaches,
@@ -1315,6 +1318,7 @@ namespace Microsoft.Build.CommandLine
             GraphBuildOptions graphBuildOptions,
             bool lowPriority,
             bool question,
+            bool superFast,
             bool isTaskAndTargetItemLoggingRequired,
             bool isBuildCheckEnabled,
             string[] inputResultsCaches,
@@ -1526,6 +1530,14 @@ namespace Microsoft.Build.CommandLine
                     parameters.InputResultsCacheFiles = inputResultsCaches;
                     parameters.OutputResultsCacheFile = outputResultsCache;
                     parameters.Question = question;
+                    parameters.SuperFast = superFast;
+
+                    // SuperFast implies graph build mode.
+                    if (superFast && graphBuildOptions == null)
+                    {
+                        graphBuildOptions = new GraphBuildOptions { Build = true };
+                    }
+
                     parameters.IsBuildCheckEnabled = isBuildCheckEnabled;
 #if FEATURE_REPORTFILEACCESSES
                     parameters.ReportFileAccesses = reportFileAccesses;
@@ -2055,6 +2067,7 @@ namespace Microsoft.Build.CommandLine
 #endif
             ref bool lowPriority,
             ref bool question,
+            ref bool superFast,
             ref bool isTaskInputLoggingRequired,
             ref bool isBuildCheckEnabled,
             ref string[] getProperty,
@@ -2210,6 +2223,7 @@ namespace Microsoft.Build.CommandLine
 #endif
                                                            ref lowPriority,
                                                            ref question,
+                                                           ref superFast,
                                                            ref isTaskInputLoggingRequired,
                                                            ref isBuildCheckEnabled,
                                                            ref getProperty,
@@ -2298,6 +2312,8 @@ namespace Microsoft.Build.CommandLine
                     }
 
                     question = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.Question);
+
+                    superFast = commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.SuperFast);
 
                     isBuildCheckEnabled = IsBuildCheckEnabled(commandLineSwitches);
 

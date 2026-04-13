@@ -112,6 +112,7 @@ namespace Microsoft.Build.CommandLine.Experimental
 #endif
             LowPriority,
             Question,
+            SuperFast,
             DetailedSummary,
             GetProperty,
             GetItem,
@@ -289,6 +290,7 @@ namespace Microsoft.Build.CommandLine.Experimental
 #endif
             new ParameterizedSwitchInfo(  ["lowpriority", "low"],               ParameterizedSwitch.LowPriority,                null,                           false,          null,                                  true,   false,   "HelpMessage_39_LowPrioritySwitch"),
             new ParameterizedSwitchInfo(  ["question", "q"],                    ParameterizedSwitch.Question,                   null,                           false,          null,                                  true,   false,   "HelpMessage_41_QuestionSwitch"),
+            new ParameterizedSwitchInfo(  ["superfast", "sf"],                  ParameterizedSwitch.SuperFast,                  null,                           false,          null,                                  true,   false,   "HelpMessage_41_QuestionSwitch"),
             new ParameterizedSwitchInfo(  ["detailedsummary", "ds"],            ParameterizedSwitch.DetailedSummary,            null,                           false,          null,                                  true,   false,   "HelpMessage_26_DetailedSummarySwitch"),
             new ParameterizedSwitchInfo(  ["getProperty"],                      ParameterizedSwitch.GetProperty,                null,                           true,           "MissingGetPropertyError",             true,   false,   "HelpMessage_43_GetPropertySwitch"),
             new ParameterizedSwitchInfo(  ["getItem"],                          ParameterizedSwitch.GetItem,                    null,                           true,           "MissingGetItemError",                 true,   false,   "HelpMessage_44_GetItemSwitch"),

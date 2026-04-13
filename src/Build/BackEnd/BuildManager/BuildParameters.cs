@@ -327,6 +327,7 @@ namespace Microsoft.Build.Execution
             LowPriority = other.LowPriority;
             Question = other.Question;
             IsBuildCheckEnabled = other.IsBuildCheckEnabled;
+            SuperFast = other.SuperFast;
             IsTelemetryEnabled = other.IsTelemetryEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
             _enableTargetOutputLogging = other.EnableTargetOutputLogging;
@@ -894,6 +895,13 @@ namespace Microsoft.Build.Execution
             get => _isBuildCheckEnabled;
             set => _isBuildCheckEnabled = value;
         }
+
+        /// <summary>
+        /// Gets or sets a value enabling SuperFast mode.
+        /// When true, enables evaluation caching, graph caching, and per-node project skip
+        /// to avoid rebuilding up-to-date projects. Implies graph build and server mode.
+        /// </summary>
+        public bool SuperFast { get; set; }
 
         /// <summary>
         /// Gets or sets an indication if telemetry is enabled.
