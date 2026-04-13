@@ -81,6 +81,12 @@ namespace Microsoft.Build.BackEnd.Logging
                 items,
                 requestEntry.RequestConfiguration.ToolsVersion);
 
+            // The child project's BuildEventContext must use the child's evaluationId and current node's nodeId,
+            // not the parent's. The parent context is only used as the parentBuildEventContext field on the event args.
+            args.BuildEventContext = args.BuildEventContext
+                .WithEvaluationId(requestEntry.RequestConfiguration.ProjectEvaluationId)
+                .WithNodeId(nodeLoggingContext.BuildEventContext.NodeId);
+
             var context = new ProjectLoggingContext(
                 nodeLoggingContext,
                 args.BuildEventContext,
