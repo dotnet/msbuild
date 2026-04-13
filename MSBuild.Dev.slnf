@@ -11,6 +11,7 @@
       "src\\MSBuild.UnitTests\\Microsoft.Build.CommandLine.UnitTests.csproj",
       "src\\MSBuild\\MSBuild.csproj",
       "src\\MSBuild.Benchmarks\\MSBuild.Benchmarks.csproj",
+      "src\\MSBuild.Coordinator\\MSBuild.Coordinator.csproj",
       "src\\StringTools\\StringTools.csproj",
       "src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj",
       "src\\Tasks\\Microsoft.Build.Tasks.csproj",

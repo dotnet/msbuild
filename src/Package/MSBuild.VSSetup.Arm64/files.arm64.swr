@@ -12,6 +12,7 @@ vs.relatedProcessFiles
 folder InstallDir:\MSBuild\Current\Bin\arm64
   file source=$(Arm64BinPath)MSBuild.exe vs.file.ngenArchitecture=arm64
   file source=$(Arm64BinPath)MSBuild.exe.config
+  file source=$(CoordinatorArm64BinPath)MSBuild.Coordinator.exe vs.file.ngenArchitecture=arm64
 
   file source=$(FrameworkBinPath)x64\Microsoft.Build.Framework.tlb
   file source=$(Arm64BinPath)Microsoft.Build.dll vs.file.ngenArchitecture=arm64

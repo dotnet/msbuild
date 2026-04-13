@@ -19,6 +19,13 @@
                       ReferenceOutputAssembly="false"
                       OutputItemType="MSBuildTaskHostResolvedProjectReferencePath" />
 
+    <ProjectReference Include="$(MSBuildThisFileDirectory)\..\MSBuild.Coordinator\MSBuild.Coordinator.csproj"
+                      Private="false"
+                      ReferenceOutputAssembly="false"
+                      OutputItemType="MSBuildCoordinatorResolvedProjectReferencePath"
+                      SetTargetFramework="TargetFramework=$(TargetFramework)"/>
+
+
     <!-- Set up items to build projects where the Platform is set to x64, when we need the x64 versions of the files.
          We have to treat these separately from normal project references, as the AssignProjectConfiguration task would overwrite
          the SetPlatform item metadata if they were ProjectReferences.
@@ -27,10 +34,17 @@
                          SetPlatform="Platform=x64"
                          SetTargetFramework="TargetFramework=$(FullFrameworkTFM)"
                          OutputItemType="MSBuildX64ResolvedProjectReferencePath" />
+
     <X64ProjectReference Include="$(MSBuildThisFileDirectory)\..\MSBuildTaskHost\MSBuildTaskHost.csproj"
                          SetPlatform="Platform=x64"
                          OutputItemType="MSBuildTaskHostX64ResolvedProjectReferencePath"
                          GlobalPropertiesToRemove="TargetFramework" />
+
+    <X64ProjectReference Include="$(MSBuildThisFileDirectory)\..\MSBuild.Coordinator\MSBuild.Coordinator.csproj"
+                         SetPlatform="Platform=x64"
+                         SetTargetFramework="TargetFramework=$(FullFrameworkTFM)"
+                         OutputItemType="MSBuildCoordinatorX64ResolvedProjectReferencePath" />
+                         
   </ItemGroup>
 
   <Target Name="SetBinPaths" DependsOnTargets="ResolveProjectReferences">
@@ -49,6 +63,8 @@
       <FrameworkBinPath>@(FrameworkResolvedProjectReferencePath->'%(RootDir)%(Directory)')</FrameworkBinPath>
       <MSBuildTaskHostBinPath>@(MSBuildTaskHostResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostBinPath>
       <MSBuildTaskHostX64BinPath>@(MSBuildTaskHostX64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</MSBuildTaskHostX64BinPath>
+      <CoordinatorBinPath>@(MSBuildCoordinatorResolvedProjectReferencePath->'%(RootDir)%(Directory)')</CoordinatorBinPath>
+      <CoordinatorX64BinPath>@(MSBuildCoordinatorX64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</CoordinatorX64BinPath> 
     </PropertyGroup>
   </Target>
 

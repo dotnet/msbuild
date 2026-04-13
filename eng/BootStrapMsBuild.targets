@@ -113,6 +113,10 @@
       <FreshlyBuiltBinaries Include="$(MSBuildTaskHostBinPath)**\*.pdb" />
       <FreshlyBuiltBinaries Include="$(MSBuildTaskHostBinPath)**\*.exe.config" />
       <FreshlyBuiltBinaries Include="$(MSBuildTaskHostBinPath)**\*.dll.config" />
+      
+      <!-- Only copy the coordinator's own binaries; transitive dependencies (e.g. Microsoft.IO.Redist)
+           are already provided by the Bootstrap/MSBuild output. -->
+      <FreshlyBuiltBinaries Include="$(CoordinatorBinPath)**\MSBuild.Coordinator.*" />
 
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll" />
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.exe" />
@@ -126,6 +130,8 @@
       <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.pdb" />
       <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.exe.config" />
       <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.dll.config" />
+      
+      <FreshlyBuiltBinariesx64 Include="$(CoordinatorX64BinPath)**\MSBuild.Coordinator.*" />
 
       <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.Tasks.Core.dll" />
       <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.dll" />
@@ -134,6 +140,8 @@
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.pdb" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.exe.config" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.dll.config" />
+      
+      <FreshlyBuiltBinariesArm64 Include="$(CoordinatorArm64BinPath)**\MSBuild.Coordinator.*" />
 
       <FreshlyBuiltRootProjects Include="$(OutputPath)Microsoft.Common.props" />
       <FreshlyBuiltRootProjects Include="$(OutputPath)Microsoft.VisualStudioVersion.*.Common.props" />
@@ -238,6 +246,7 @@
 
     <PropertyGroup>
       <InstallDir>$(ArtifactsBinDir)bootstrap\core\</InstallDir>
+      <CoordinatorBinPath>$(ArtifactsBinDir)MSBuild.Coordinator\$(Configuration)\$(TargetFramework.ToLowerInvariant())\</CoordinatorBinPath>
     </PropertyGroup>
 
     <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetRoot)" InstallDir="$(InstallDir)" Version="$(BootstrapSdkVersion)"/>
@@ -248,6 +257,9 @@
     <ItemGroup>
      <!-- *.deps.json are excluded because the SDK rewrites these files for consistency with the rest of the SDK, so take their version. -->
       <FreshlyBuiltNetBinaries Include="$(OutDir)**\*.*" Exclude="$(OutDir)**\*.deps.json" />
+      <FreshlyBuiltNetBinaries Include="$(CoordinatorBinPath)**\*.dll" />
+      <FreshlyBuiltNetBinaries Include="$(CoordinatorBinPath)**\*.exe" />
+      <FreshlyBuiltNetBinaries Include="$(CoordinatorBinPath)**\*.runtimeconfig.json" />
     </ItemGroup>
 
     <!-- The copying of these dependencies is required by bootstrap\**\sdk\**\NuGet.RestoreEx.targets. Otherwise NuGet.Build.Tasks.dll can not be found. -->
