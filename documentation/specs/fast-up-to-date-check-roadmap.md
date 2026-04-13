@@ -644,89 +644,149 @@ From @rainersigwald (MSBuild team lead) in [#9122](https://github.com/dotnet/msb
 
 ---
 
-## 9. Recommended Path Forward
+## 9. Recommended Architecture: MSBuild Server as the CLI's Project System
 
-### Phase 0: Prototype Cache Plugin (no engine changes)
+### The Insight
 
-Build a `FutdcCachePlugin` NuGet package that fingerprints projects post-build and returns `CacheHit` on subsequent builds. This saves ~30–50% (execution only, not evaluation). Ships as a NuGet package, requires `/graph` mode.
+The previous sections explored various approaches — SDK-layer checks, engine pre-evaluation hooks, cache plugins. The red-team review in [Section 7](#7-red-team-blocking-flaws-and-open-questions) found blocking flaws in the simpler approaches (synthetic `BuildResult` semantic gap, fingerprint circularity, graph/solution bypass).
 
-**Value:** Validates fingerprinting approach and correctness with real-world projects. Low risk, independent of MSBuild release cycle.
+The correct path is to replicate what VS does, but inside MSBuild's own server process. VS has: persistent process (VS itself), cached evaluations (project system snapshots), cached graph (SBM `DependencyGraph`), per-node skip (FUTDC), per-project build (`BuildProjectReferences=false`). MSBuild server already has the persistent process, cached XML parsing, graph build mode, and multithreaded tasks. What's missing: cached evaluations, cached graph, and per-node project skip.
 
-### Phase 1: Pre-Evaluation Engine Hook (the key change)
+### How VS Works (the model)
 
-Add a pre-evaluation FUTDC check in `BuildManager.ExecuteSubmission()` before the cache/build fork. This is the highest-leverage change — it enables skipping evaluation, the dominant cost.
+```
+VS opens solution → project system evaluates all projects → snapshots cached in memory
+File changes → project system re-evaluates affected projects → snapshots update
 
-The fingerprint is written by a new `_WriteBuildFingerprint` target and read by the engine. Convention-based `obj/` path discovery covers ~95–98% of projects.
+Ctrl+B → SBM iterates projects in dependency order
+  → Per project: FUTDC compares cached snapshot vs disk timestamps (1-10ms)
+  → Up-to-date → skip, don't call MSBuild at all
+  → Stale → MSBuild with BuildProjectReferences=false
+```
 
-**Value:** CLI builds match VS FUTDC performance (1–10 ms) for up-to-date projects.
+### How `dotnet build --superfast` Would Work
 
-### Phase 2: Graph Build Integration
+```
+dotnet build --superfast MySolution.slnx
+  → MSBuildApp.Main() with --graph + server mode
+  → Server node (persistent process):
 
-After constructing the `ProjectGraph` (which evaluates all projects upfront), check fingerprints for each node in topological order. Skip submission entirely for up-to-date projects whose dependencies are also up-to-date.
+     Cached ProjectGraph? ──yes──→ Validate: any input file timestamps changed?
+       │                             │                              │
+       no                          some nodes stale               all fresh
+       ↓                             ↓                              ↓
+     Construct ProjectGraph        Re-evaluate stale nodes        Return instant
+     (use cached evaluations       (use cached XML parsing)       success (0ms)
+      where still valid)             ↓
+       ↓                          Submit only stale nodes
+     Cache graph + evaluations     to graph scheduler
+       ↓                             ↓
+     Submit all nodes              Execute with MT tasks
+     to graph scheduler              ↓
+       ↓                          Update cache with
+     Execute with MT tasks         new evaluations
+       ↓
+     Write obj/.futdc per project (cold-start recovery)
+```
 
-**Value:** Solution-level no-op builds drop from seconds to milliseconds.
+The SDK is a transparent wrapper (`MSBuildApp.Main(args)`) — zero SDK changes needed. `--superfast` is an MSBuild switch that bundles: graph mode + server mode + evaluation caching + graph caching + per-node skip + multithreaded tasks.
 
-### Phase 3: CLI Build Acceleration
+### Layer 1: Evaluation Cache in Server (~800 LOC)
 
-When the fingerprint shows only copy operations are needed (compilation up-to-date, referenced project implementation assemblies changed), perform copies directly without full MSBuild invocation.
+Cache `ProjectInstance` objects in server memory, keyed by `(projectPath, globalProperties, toolsVersion)`. Validate freshness by checking timestamps of all files in the import chain (`MSBuildAllProjects`).
 
-**Value:** In a chain A → B → C → D, changing D triggers 1 MSBuild build + fast copies for A, B, C.
+New `ProjectInstanceCache` static field on `OutOfProcNode` alongside existing `s_projectRootElementCacheBase`. Same invalidation pattern as `ProjectRootElementCache.IsInvalidEntry()`: if any file in the import chain has a different `LastWriteTime` from when it was cached, discard and re-evaluate.
 
-### Phase 4: Server Mode Convergence
+What this skips: full evaluation (~50-70% of no-op cost). XML parsing is already cached by `ProjectRootElementCache`; this adds property/item/import resolution caching on top.
 
-With MSBuild server mode maintaining in-memory state, FUTDC operates identically to VS: cached evaluation results, file watchers, sub-millisecond decisions. This is the ultimate convergence point.
+### Layer 2: Graph Cache in Server (~400 LOC)
 
-### Storage Model: In-Memory with Disk Fallback
+Cache the `ProjectGraph` (nodes, edges, target lists) across builds. Static field on `BuildManager` (reused across builds in server mode via `BeginBuild`/`EndBuild` cycle).
 
-VS uses a dual-storage approach: FUTDC state lives in-memory during the session and is flushed to `.futdcache.v2` on solution close (`OnBeforeCloseSolution`). On next launch it restores from the file. The same pattern maps cleanly to MSBuild:
+Invalidation: compare solution file timestamp + all project file timestamps against stored values. If any changed, reconstruct graph — but reuse cached evaluations from Layer 1, so reconstruction is cheaper. If none changed, reuse entire graph.
 
-| Scenario | Storage | Check Cost | Write Cost |
-|----------|---------|-----------|------------|
-| **Server alive** | In-memory, next to existing `ProjectRootElementCache` singleton | Sub-millisecond | None (memory write) |
-| **Server shutdown** | Flush to `obj/.futdc` via the existing `BuildCompleteReuse` shutdown path | N/A | Single disk write |
-| **Server cold start** | Read from `obj/.futdc`, populate memory | ~1ms (disk read) | None |
-| **No server (fallback)** | Read/write `obj/.futdc` per build | ~1–5ms per project | Small disk write post-build |
+### Layer 3: Per-Node Project Skip (~200 LOC)
 
-This means Phase 1 (disk-based fingerprints) and Phase 4 (server convergence) use the **same data format and logic** — just different storage backends. The server is an optimization over the disk path, not a different architecture. The disk format serves as the persistence layer for both paths and as the cold-start bootstrap.
+In `ExecuteGraphBuildScheduler()`, before submitting each node, determine if it's up-to-date using the cached evaluation. If yes, add to `finishedNodes` and skip submission.
 
-### Reassessment After Red-Team Review
+```csharp
+foreach (ProjectGraphNode node in nodesToBuild)
+{
+    if (IsNodeUpToDate(node, finishedNodes))
+    {
+        finishedNodes.Add(node);
+        continue; // skip — don't submit to scheduler
+    }
+    // existing: submit build
+}
+```
 
-The red-team findings in [Section 7](#7-red-team-blocking-flaws-and-open-questions) significantly change the recommendation. The original Phase 1 (pre-evaluation engine hook with cached `BuildResult`) has **three blocking problems**: the `BuildResult` semantic gap, the fingerprint circularity, and the graph/solution build bypass.
+`IsNodeUpToDate` uses the cached (and validated) `ProjectInstance` — it has the real evaluated items, properties, and import chain. It compares input timestamps vs output timestamps using the same logic as `TargetUpToDateChecker`. No fingerprint circularity because we DO evaluate (from cache).
 
-A safer path forward:
+### Layer 4: Disk Persistence for Cold Start (~300 LOC)
 
-**Phase A — Instrument and Measure:** Add telemetry/binlog markers to measure actual no-op build cost breakdown (evaluation vs RAR vs targets vs copies). Validate the assumed 50–70% evaluation cost with real data across diverse projects.
+Write `obj/.futdc` per project after successful build for cold-start recovery. On server startup, read these to warm the cache. This is the recovery path — once the server is warm, everything is in-memory.
 
-**Phase B — Evaluation Caching in Server Mode:** Instead of *skipping* evaluation, *cache* it. Extend `ProjectRootElementCache` to cache `ProjectInstance` (evaluated state, not just XML). Use import-chain timestamps as cache keys. This preserves full engine semantics — evaluation produces a real `ProjectInstance`, targets run normally, `BuildResult` is genuine. Server mode is the natural host. This avoids the `BuildResult` semantic gap entirely.
+### Layer 5: The `--superfast` Switch (~50 LOC)
 
-**Phase C — Strictly Opt-In Pre-Eval Skip:** For a narrow, well-defined scenario (SDK-style projects, `/t:Build` only, no custom targets, no requested project state), implement a pre-evaluation skip as a `ProjectCachePlugin` with a new `PreEvaluationGetCacheResultAsync` API. This limits blast radius to users who explicitly opt in and to projects that fit the constrained model.
+Maps to setting `BuildParameters` flags: graph mode + server + eval cache + graph cache + project skip + MT tasks. Eventually becomes the default.
 
-**Phase D — Build Acceleration for CLI:** Independent of the above — when only copies are needed, perform them without full MSBuild. This is valuable even without evaluation skipping.
+### Change Detection: Proactive vs Reactive
 
-### Where to implement: Engine vs SDK vs Plugin
+VS uses `IVsAsyncFileChangeEx` (a kernel-level file change notification COM service) to **proactively** detect file changes while VS is open. When a file changes, the project system immediately re-evaluates the affected project.
 
-The Phase B evaluation-caching approach and Phase C plugin API extension are not mutually exclusive. The plugin API is more extensible; the built-in approach is simpler and avoids plugin packaging overhead. The key decision is whether the MSBuild team sees evaluation caching or evaluation skipping as the right long-term direction.
+The MSBuild server would use **reactive** validation: when a build request arrives, check timestamps of all files in each project's import chain against cached values. If any changed, re-evaluate. If none changed, reuse cached evaluation.
 
-### Open Question: Where to Store the Fingerprint File
+The difference is ~5-10ms of stat() calls at build start vs zero (VS already knows). Functionally equivalent — both detect all changes, just at different times. File-watcher integration could be added later for proactive invalidation, but isn't needed for correctness.
 
-The choice of storage location affects discoverability (can we find it without evaluation?), gitignore behavior, clean-build semantics, and multi-tool compatibility.
+### Why This Is Correct (Not Hacky)
 
-| Location | Pros | Cons |
-|----------|------|------|
-| **`obj/.futdc`** (`BaseIntermediateOutputPath`) | Convention matches NuGet (`project.assets.json` lives here); `dotnet clean` deletes it (correct behavior); discoverable without evaluation for ~95% of projects | Pollutes `obj/` with yet another file; custom `BaseIntermediateOutputPath` breaks convention-based discovery; already crowded directory |
-| **`.msbuild/` in project dir** | Clean namespace; clearly MSBuild-owned; easy to `.gitignore` as a pattern | New directory convention — nothing uses this today; not deleted by `dotnet clean`; needs explicit `.gitignore` entry |
-| **`.vs/` in solution dir** | Precedent — VS FUTDC stores `.futdcache.v2` here; already `.gitignore`d by default | VS-specific convention; no solution context for standalone project builds; path requires knowing solution root; not deleted by `dotnet clean` on individual projects |
-| **`~/.dotnet/futdc/` or OS temp** (user-level cache) | Never pollutes project tree; always writable; shared across clones | Cache invalidation nightmare; out of sync with build artifacts; stale across git worktrees; permissions issues in CI containers |
-| **`artifacts/` dir** (artifacts layout) | Natural fit for `.NET 8+` artifacts layout users | Only ~5-8% of projects use this; doesn't help non-artifacts projects |
+VS FUTDC is a heuristic — it checks timestamps of a pre-known input set without re-evaluating. It can miss changes that affect evaluation itself (new `Directory.Build.props`, conditional imports). Known bugs: [project-system#4261](https://github.com/dotnet/project-system/issues/4261), [project-system#4100](https://github.com/dotnet/project-system/issues/4100).
 
-**Factors to consider:**
-- `dotnet clean` should invalidate the fingerprint — `obj/` gets this for free, other locations need explicit cleanup
-- CI builds typically start from clean `obj/` — fingerprint absence triggers normal build (correct)
-- `.gitignore` — `obj/` is already ignored; `.msbuild/` would need a new global convention
-- Multi-tool — if Rider/VS Code/VS all need the fingerprint, a project-local location beats a tool-specific one (`.vs/`)
-- Pre-evaluation discovery — `obj/` is the only location discoverable by convention without evaluation (NuGet already proved this works)
+This approach is correct by construction:
+- We DO evaluate (from cache) — real import chain, real items, real properties
+- Evaluation cache invalidation covers the complete `MSBuildAllProjects` list — any imported file change triggers re-evaluation
+- Up-to-date determination uses real evaluated `ProjectInstance` — same data MSBuild's own `TargetUpToDateChecker` uses
+- No fingerprint circularity — the evaluation cache IS the source of truth
 
-**Current recommendation in this spec:** `obj/.futdc` — but this needs broader input from the team.
+The only assumption: "if no imported file timestamp changed, the evaluation result is the same." This is the same assumption `ProjectRootElementCache` already makes for XML caching, proven over years.
+
+### Comparison
+
+| Capability | VS | `--superfast` |
+|---|---|---|
+| Persistent process | VS process | MSBuild server node |
+| Cached XML parsing | `ProjectRootElementCache` via project system | `ProjectRootElementCache` (exists) |
+| Cached evaluation | Project system snapshots (in-memory) | `ProjectInstanceCache` (new, Layer 1) |
+| Cached graph | SBM `DependencyGraph` | Server-cached `ProjectGraph` (new, Layer 2) |
+| Change detection | **Proactive:** kernel file watcher → immediate re-eval | **Reactive:** timestamp checks at build request time |
+| Up-to-date method | `File.GetLastWriteTimeUtc()` — pure timestamps | Same: `File.GetLastWriteTimeUtc()` — pure timestamps |
+| Per-project skip | FUTDC → don't call `StartBuild()` | `IsNodeUpToDate` → don't submit to scheduler |
+| Cold-start recovery | `.futdcache.v2` in `.vs/` | `obj/.futdc` (new, Layer 4) |
+| Multithreaded tasks | N/A | `IMultiThreadableTask` (exists) |
+
+### Complexity
+
+| Layer | LOC | Risk |
+|-------|-----|------|
+| 1: Evaluation cache | ~800 | High — needs careful invalidation |
+| 2: Graph cache | ~400 | Medium |
+| 3: Per-node skip | ~200 | Medium |
+| 4: Disk persistence | ~300 | Low |
+| 5: `--superfast` switch | ~50 | Low |
+| Tests | ~1500 | Medium |
+| **Total** | **~3250** | |
+
+### Open Questions
+
+| Question | Impact |
+|----------|--------|
+| Is server mode stable enough? (Was shelved before due to state-leak bugs) | Blocking — this architecture depends on server mode |
+| Should `--graph` become the default for `dotnet build`? (`--superfast` implies it) | Scoping — metaproject mode can't benefit from per-node skip |
+| Memory pressure from cached `ProjectInstance` objects in large solutions | Design — may need LRU eviction |
+| Evaluation cache correctness for environment variables, SDK resolver changes, workload installs | `MSBuildAllProjects` covers imports but not env vars — need to hash critical env vars too |
+| Should file watchers be added for proactive invalidation? | Nice-to-have, not needed for correctness |
+| Where to store `obj/.futdc` for cold-start recovery (see storage location analysis in earlier sections) | Design — `obj/` is the natural choice |
 
 ---
 
