@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -202,10 +202,10 @@ namespace Microsoft.Build.BackEnd
 
             _nodeLoggingContext = loggingContext;
 
-            // Create a per-engine telemetry forwarder via the provider.
+            // Create a per-engine telemetry collector via the provider.
             // Each engine owns its forwarder — no cross-engine sharing, no singleton contention.
-            var telemetryProvider = (TelemetryForwarderProvider)_componentHost.GetComponent(BuildComponentType.TelemetryForwarder);
-            _nodeLoggingContext.TelemetryForwarder = telemetryProvider.CreateForwarder();
+            var telemetryProvider = (TelemetryCollectorProvider)_componentHost.GetComponent(BuildComponentType.TelemetryCollector);
+            _nodeLoggingContext.TelemetryCollector = telemetryProvider.CreateCollector();
 
             // Create a work queue that will take an action and invoke it.  The generic parameter is the type which ActionBlock.Post() will
             // take (an Action in this case) and the parameter to this constructor is a function which takes that parameter of type Action
@@ -302,7 +302,7 @@ namespace Microsoft.Build.BackEnd
                     var buildCheckManager = buildCheckProvider!.Instance;
                     buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
                     // Flush and send the per-engine telemetry data if any was collected.
-                    _nodeLoggingContext.TelemetryForwarder?.FinalizeProcessing(_nodeLoggingContext);
+                    _nodeLoggingContext.TelemetryCollector?.FinalizeProcessing(_nodeLoggingContext);
                     // Clears the instance so that next call (on node reuse) to 'GetComponent' leads to reinitialization.
                     buildCheckProvider.ShutdownComponent();
                 },

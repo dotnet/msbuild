@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -486,16 +486,16 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void TelemetryForwarder_AccumulatesAndSendsOnFinalize()
+        public void TelemetryCollector_AccumulatesAndSendsOnFinalize()
         {
-            var forwarder = new TelemetryForwarderProvider.TelemetryForwarder();
+            var forwarder = new TelemetryCollectorProvider.telemetryCollector();
             var loggingService = new EventRecordingLoggingService();
 
             var loggingContext = new MockLoggingContext(
                 loggingService,
                 new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
 
-            // Add data via the forwarder API.
+            // Add data via the collector API.
             var key = new TaskOrTargetTelemetryKey("TestTarget", isCustom: true, isFromNugetCache: false, isFromMetaProject: false);
             forwarder.AddTarget(key, wasExecuted: true);
 
@@ -505,11 +505,11 @@ namespace Microsoft.Build.Engine.UnitTests
             telemetryEvents.Count.ShouldBe(1);
             telemetryEvents[0].WorkerNodeTelemetryData.TargetsExecutionData.ShouldContainKey(key);
 
-            // Second FinalizeProcessing on an empty forwarder should be a no-op (state was reset).
+            // Second FinalizeProcessing on an empty collector should be a no-op (state was reset).
             forwarder.FinalizeProcessing(loggingContext);
             loggingService.RecordedEvents.OfType<WorkerNodeTelemetryEventArgs>().Count().ShouldBe(1, "No new event should be emitted after reset");
 
-            // Add new data after reset — forwarder should still work.
+            // Add new data after reset — collector should still work.
             var key2 = new TaskOrTargetTelemetryKey("TestTarget2", isCustom: false, isFromNugetCache: false, isFromMetaProject: false);
             forwarder.AddTarget(key2, wasExecuted: false, skipReason: TargetSkipReason.ConditionWasFalse);
 
