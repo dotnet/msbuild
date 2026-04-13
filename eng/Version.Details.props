@@ -9,7 +9,7 @@ This file should be imported by eng/Versions.props
     <MicrosoftDotNetArcadeSdkPackageVersion>10.0.0-beta.26164.1</MicrosoftDotNetArcadeSdkPackageVersion>
     <MicrosoftDotNetXUnitExtensionsPackageVersion>10.0.0-beta.26164.1</MicrosoftDotNetXUnitExtensionsPackageVersion>
     <!-- dotnet-roslyn dependencies -->
-    <MicrosoftNetCompilersToolsetPackageVersion>5.7.0-1.26203.6</MicrosoftNetCompilersToolsetPackageVersion>
+    <MicrosoftNetCompilersToolsetPackageVersion>5.7.0-1.26210.5</MicrosoftNetCompilersToolsetPackageVersion>
     <!-- dotnet-runtime dependencies -->
     <SystemCodeDomPackageVersion>10.0.3</SystemCodeDomPackageVersion>
     <SystemCollectionsImmutablePackageVersion>10.0.3</SystemCollectionsImmutablePackageVersion>
