@@ -317,6 +317,41 @@ This is building a mini build system on top of MSBuild. It mirrors the VS archit
 
 **Where it could work:** Single-project builds with default `obj/` layout. Not viable for solution builds without duplicating substantial MSBuild logic.
 
+### Approach C': SDK Solution-Level Build Loop — ⭐ The VS Architecture Match
+
+**Key reframe:** How does VS actually use FUTDC?
+
+VS's Solution Build Manager (SBM) iterates projects in dependency order. For *each* project, it asks the FUTDC "is this project up to date?" If yes, it skips that project's MSBuild invocation entirely. The FUTDC is a **per-project gate within a solution build loop** — not an engine-level optimization.
+
+Today, `dotnet build` on a `.sln` passes the entire solution path to MSBuild as a single invocation. MSBuild internally generates a traversal metaproject and builds everything. The SDK has no per-project loop where FUTDC could be inserted.
+
+**But if the SDK built solutions by iterating projects itself** (like VS SBM does), it could do FUTDC per-project without any MSBuild engine changes:
+
+```
+dotnet build MySolution.slnx
+  1. Parse .slnx → list of projects in dependency order
+  2. For each project (leaves first):
+     a. Check obj/.futdc fingerprint
+     b. If up-to-date and all dependencies up-to-date → skip
+     c. Otherwise → invoke MSBuild for this project only
+  3. Done
+```
+
+This mirrors the VS architecture exactly. The SDK acts as the "higher-order build system" that sits above MSBuild — the same role VS's SBM plays.
+
+**What makes this newly feasible:**
+- `.slnx` is a simpler, parseable format (JSON-like) — unlike `.sln` which required MSBuild's `SolutionProjectGenerator`
+- The SDK already has solution-parsing logic for `dotnet sln` commands
+- Graph builds already compute dependency order — the SDK could use `ProjectGraph` for this
+- No MSBuild engine changes required — each project is built via a normal `dotnet build MyProject.csproj` (or MSBuild API call)
+
+**What's still hard:**
+- Dependency order resolution requires knowing `ProjectReference` items, which requires evaluation
+- Multi-targeting complicates the project list (each TFM is effectively a separate build)
+- Global properties from solution configurations must be propagated correctly
+
+**This approach sidesteps ALL the red-team blocking issues from Section 7:** no synthetic `BuildResult` needed (MSBuild is either called or not), no target-result completeness problem, no `ResultsCache` semantic gap. Each project that IS built gets a genuine MSBuild invocation; each project that's skipped simply isn't called — exactly like VS.
+
 ### Approach D: MSBuild Targets — Early Short-Circuit — ❌ Cannot Skip Evaluation
 
 A target running early in the build chain (e.g., `BeforeTargets="BeforeBuild"`) could read a fingerprint and try to short-circuit. But evaluation has already happened before any target runs, so this saves at most 30–50%.
@@ -337,14 +372,15 @@ A persistent process is the natural host for FUTDC state — it can cache evalua
 
 ### Approach Comparison
 
-| Approach | Skips Evaluation? | Skips Execution? | Engine Changes? | Ships As |
-|----------|:-:|:-:|:-:|---|
-| **A: Engine pre-eval hook** | ✅ | ✅ | Yes | MSBuild change |
-| **B: Cache plugin** | ❌ | ✅ | No (or small) | NuGet package |
-| **B': Cache plugin + pre-eval API** | ✅ | ✅ | Yes | NuGet + MSBuild |
-| **C: SDK CLI layer** | ✅ (single project) | ✅ | No MSBuild changes | SDK change |
-| **D: Targets** | ❌ | Partially | No | `.targets` package |
-| **E: Server mode** | ✅ | ✅ | Yes (substantial) | MSBuild change |
+| Approach | Skips Evaluation? | Skips Execution? | Engine Changes? | Ships As | Red-Team Blockers? |
+|----------|:-:|:-:|:-:|---|:-:|
+| **A: Engine pre-eval hook** | ✅ | ✅ | Yes | MSBuild change | 🔴 3 blocking flaws |
+| **B: Cache plugin** | ❌ | ✅ | No (or small) | NuGet package | None, but limited value |
+| **B': Cache plugin + pre-eval API** | ✅ | ✅ | Yes | NuGet + MSBuild | Same as A |
+| **C: SDK single-project** | ✅ | ✅ | No | SDK change | Only for single projects |
+| **C': SDK solution build loop** | ✅ | ✅ | No | SDK change | ⭐ No blocking flaws |
+| **D: Targets** | ❌ | Partially | No | `.targets` package | Limited value |
+| **E: Server mode** | ✅ | ✅ | Yes (substantial) | MSBuild change | Long-term only |
 
 ---
 
