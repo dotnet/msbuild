@@ -339,14 +339,40 @@ dotnet build MySolution.slnx
 
 This mirrors the VS architecture exactly. The SDK acts as the "higher-order build system" that sits above MSBuild — the same role VS's SBM plays.
 
-**What makes this newly feasible:**
-- `.slnx` is a simpler, parseable format (JSON-like) — unlike `.sln` which required MSBuild's `SolutionProjectGenerator`
-- The SDK already has solution-parsing logic for `dotnet sln` commands
-- Graph builds already compute dependency order — the SDK could use `ProjectGraph` for this
-- No MSBuild engine changes required — each project is built via a normal `dotnet build MyProject.csproj` (or MSBuild API call)
+#### Precedent: `dotnet run file.cs` Already Does This
+
+The `dotnet run file.cs` feature (.NET 10) implements exactly this pattern for single-file programs. `VirtualProjectBuildingCommand` has a three-tier `BuildLevel` system:
+
+| `BuildLevel` | When | What happens |
+|---|---|---|
+| `None` | Outputs are up-to-date | Skip build entirely — run cached binary |
+| `Csc` | Only source changed, no MSBuild-affecting files | Skip MSBuild, invoke Roslyn compiler server directly |
+| `All` | `Directory.Build.props`, NuGet directives, etc. changed | Full MSBuild restore + build |
+
+The up-to-date check (`NeedsToBuild()`) compares a `build-success.cache` file against:
+- Entry point `.cs` file timestamp
+- `Directory.Build.props/targets`, `Directory.Packages.props`, `nuget.config` timestamps
+- SDK version and runtime version
+- Global property changes
+- Source directive changes
+
+This proves the concept works outside VS. The measured MSBuild overhead it avoids: **~870ms on Windows, ~500ms on Linux** per invocation ([sdk#48011](https://github.com/dotnet/sdk/issues/48011)).
+
+A solution-level FUTDC would generalize this pattern: instead of one file, iterate N projects, each with its own `build-success.cache` / `.futdc` check.
+
+#### VS FUTDC Code Reusability
+
+The FUTDC source in `dotnet/project-system` is in the VS-coupled assembly (`Microsoft.VisualStudio.ProjectSystem.Managed.VS`). The check class (`BuildUpToDateCheck.cs`) depends on MEF composition, CPS project subscriptions, VS solution services, and VS telemetry — **not directly reusable**.
+
+However, the **core algorithm is portable**:
+- `ItemHashing.cs` — pure hash computation, no VS dependencies
+- `TimestampCache` / `ConcurrentTimestampCache` — only depends on `IFileSystem` abstraction
+- The 5-stage decision logic — conceptually simple timestamp comparisons
+
+The **data acquisition** is the VS-specific part. VS gets input/output lists from CPS Dataflow snapshots. A CLI version would get them from a prior MSBuild build's persisted state (the fingerprint file).
 
 **What's still hard:**
-- Dependency order resolution requires knowing `ProjectReference` items, which requires evaluation
+- Dependency order resolution requires knowing `ProjectReference` items, which requires evaluation (but `dotnet run file.cs` already solves the simpler case of "does this need MSBuild at all?")
 - Multi-targeting complicates the project list (each TFM is effectively a separate build)
 - Global properties from solution configurations must be propagated correctly
 
