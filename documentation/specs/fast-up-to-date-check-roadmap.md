@@ -14,9 +14,10 @@ This document is a deep investigation into what it would take to bring FUTDC-equ
 4. [Candidate approaches — deep analysis](#4-candidate-approaches)
 5. [The obj/ path discovery problem](#5-the-obj-path-discovery-problem)
 6. [Correctness risk matrix](#6-correctness-risk-matrix)
-7. [Why this wasn't done before](#7-why-this-wasnt-done-before)
-8. [Recommended path forward](#8-recommended-path-forward)
-9. [Related issues and prior art](#9-related-issues-and-prior-art)
+7. [Red-team: blocking flaws and open questions](#7-red-team-blocking-flaws-and-open-questions)
+8. [Why this wasn't done before](#8-why-this-wasnt-done-before)
+9. [Recommended path forward](#9-recommended-path-forward)
+10. [Related issues and prior art](#10-related-issues-and-prior-art)
 
 ---
 
@@ -54,24 +55,47 @@ Source: [`BuildUpToDateCheck.cs`](https://github.com/dotnet/project-system/blob/
 
 ### 2.1 Architecture
 
-The FUTDC is a layer *above* MSBuild. VS's Common Project System (CPS) subscribes to MSBuild evaluation and design-time build results via Dataflow pipelines. This produces an in-memory snapshot (`UpToDateCheckImplicitConfiguredInput`) that the FUTDC queries — no MSBuild invocation required.
+The FUTDC is a layer *above* MSBuild. It has a **two-layer design**: CPS tells it *what files to check* (via Dataflow snapshots from evaluation/design-time builds), but it reads *actual file timestamps* from the filesystem at check time.
+
+**CPS does NOT use `FileSystemWatcher`.** It uses VS's kernel-level file change service (`IVsAsyncFileChangeEx` — a VS COM API) to detect project file changes, which trigger CPS re-evaluation, which updates the Dataflow snapshots. However, the FUTDC itself does not subscribe to file watchers — it reads `File.GetLastWriteTimeUtc()` directly when a build is requested.
 
 ```
-MSBuild Evaluation + Design-Time Build
-         │
-         ▼
-UpToDateCheckImplicitConfiguredInputDataSource (Dataflow subscription)
-         │
-         ▼
-UpToDateCheckImplicitConfiguredInput (immutable snapshot)
-         │
-         ▼
-BuildUpToDateCheck.IsUpToDateAsync() — 5-stage algorithm
-         │
-         ▼
-Up-to-date → Skip MSBuild entirely (1–10 ms)
-Not up-to-date → Invoke MSBuild
+┌─────────────────────────────────────────────────────────────┐
+│  CPS Project Subscription Service                           │
+│  (continuously maintained while VS is open)                 │
+│                                                             │
+│  JointRuleSource ──────┐  SourceItemsRuleSource ──┐        │
+│  (eval + DT build      │  (Compile, Content, etc) │        │
+│   rules like           │                          │        │
+│   ConfigurationGeneral,│                          │        │
+│   ResolvedCompilation- │                          │        │
+│   Reference, etc.)     │                          │        │
+│                        │                          │        │
+│  ProjectItemSchema ────┤  ProjectCatalogSource ───┤        │
+└────────────────────────┼──────────────────────────┼────────┘
+                         │  SyncLinkTo (Dataflow)   │
+                         ▼                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│  UpToDateCheckImplicitConfiguredInputDataSource              │
+│  TransformBlock → state.Update(...)                          │
+│  Produces: UpToDateCheckImplicitConfiguredInput              │
+│  (immutable snapshot of WHAT to check)                       │
+└──────────────────────────┬──────────────────────────────────┘
+                           ▼
+┌─────────────────────────────────────────────────────────────┐
+│  BuildUpToDateCheck.IsUpToDateAsync()                        │
+│  Gets latest snapshot, then reads File.GetLastWriteTimeUtc() │
+│  for every input/output at CHECK TIME (not from snapshot)    │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+The design-time MSBuild targets that produce FUTDC data are:
+- `CollectUpToDateCheckInputDesignTime` → `@(UpToDateCheckInput)` items
+- `CollectUpToDateCheckBuiltDesignTime` → `@(UpToDateCheckBuilt)` (output DLL, PDB, doc, etc.)
+- `CollectResolvedCompilationReferencesDesignTime` → `@(ReferencePathWithRefAssemblies)`
+
+**Key implication for CLI:** The CLI doesn't need file watchers or the CPS Dataflow pipeline. Those exist to keep the snapshot warm between builds. What the CLI needs is the same *data* (list of inputs/outputs/references) — which it can obtain from a prior build's evaluation results, persisted to the fingerprint file. The actual timestamp comparison logic is trivially portable (`File.GetLastWriteTimeUtc` is cross-platform .NET).
+
 
 ### 2.2 The 5-Stage Decision Algorithm
 
@@ -421,7 +445,93 @@ For each scenario: would a fingerprint-based FUTDC miss the change? What does VS
 
 ---
 
-## 7. Why This Wasn't Done Before
+## 7. Red-Team: Blocking Flaws and Open Questions
+
+The following are potential fatal flaws identified through adversarial review of the proposal. These must be resolved before deciding whether to pursue this work.
+
+### 7.1 🔴 The Cached `BuildResult` Semantic Gap
+
+**The spec's Approach A proposes injecting a cached `BuildResult` before evaluation. But a `BuildResult` is not just "build succeeded" — it's a full semantic object.**
+
+VS FUTDC gets away with skipping MSBuild entirely because it doesn't need to synthesize engine-level results for downstream consumers. But when MSBuild's engine skips a project, the rest of the build still expects:
+
+- **Target results with output items** — `GetTargetPath`, `GetCopyToOutputDirectoryItems`, `GetNativeManifest`, `GetTargetFrameworks` are all project-reference protocol surfaces. Downstream projects call these via the `MSBuild` task and expect items back.
+- **`ProjectStateAfterBuild`** — callers can request evaluated properties/items from the built project. `ResultsCache` validates this (`ResultsCache.cs:369-390`).
+- **Target-set specificity** — a prior `/t:Build` cache record is not valid for a later `/t:GetTargetPath` request. Default-target builds don't even have an explicit target list up front.
+
+A cached `BuildResult` from a prior `/t:Build` won't satisfy a downstream project requesting `/t:GetTargetPath` — the cache key doesn't match. The fingerprint would need to store results for every callable target, or the engine would need target-set-aware caching.
+
+**This is arguably the hardest problem in the proposal.** VS sidesteps it entirely. The engine approach cannot.
+
+### 7.2 🔴 Circular Dependency in Fingerprinting
+
+The proposal says: check fingerprint before evaluation. But the real set of inputs is only known *after* evaluation:
+
+- Conditional imports (`Condition="'$(CI)'=='true'"`) change the import graph
+- SDK resolution determines which `.targets` files are loaded
+- Globs expand to different files depending on what's on disk
+- Property functions compute values at evaluation time
+- Command-line global properties change evaluation results
+
+The fingerprint from the *last* build records what the inputs *were*. But pre-evaluation, we can't know if the inputs *changed* — because discovering the inputs IS evaluation.
+
+**Example:** User adds a new `Directory.Build.targets` file at a higher directory level. No existing file timestamp changes. The import graph is different. The fingerprint doesn't know about the new file because it wasn't imported last time. **Result: false positive (stale build).**
+
+This circularity is fundamental, not an implementation detail. The fingerprint is always an approximation of the true input set.
+
+### 7.3 🔴 Graph/Solution Builds Defeat the Purpose
+
+The proposed insertion point (`BuildManager.ExecuteSubmission()` line 1580) handles individual `BuildSubmission`s. But:
+
+- **Graph builds** go through `ExecuteSubmission(GraphBuildSubmission)` → `ExecuteGraphBuildScheduler()`, which constructs a `ProjectGraph` that evaluates ALL projects during graph construction (`ProjectGraph.cs:434-442`). The expensive evaluation happens before any per-project submission.
+- **Solution builds** (the common case for `dotnet build` on a `.sln`) generate a metaproject via `SolutionProjectGenerator`, which dispatches to individual project builds — but the solution-level evaluation and project resolution still happens first.
+- **Project-reference builds** are internal build requests, not top-level submissions. A hook at the submission level doesn't catch nested `MSBuild` task calls that build referenced projects.
+
+**Phase 2 (graph integration) is not a later optimization — it's the hard part.** Most real-world `dotnet build` invocations are solution or multi-project builds where per-submission hooks don't help.
+
+### 7.4 🟠 Blast Radius and Acceptance Risk
+
+This is an engine change in `BuildManager` — the most complex and stability-critical component of MSBuild. It touches:
+
+- Top-level submission semantics
+- Results cache compatibility
+- Graph build behavior
+- Project-reference protocol
+- IDE vs CLI behavior divergence
+- Logging/diagnostics expectations
+
+Given the MSBuild team's correctness culture and @rainersigwald's statement that project-level skip "was not part of the design of MSBuild," this will face heavy scrutiny. The change would need to be:
+- Strictly opt-in (environment variable or property)
+- Easy to disable when it causes issues
+- Heavily tested across SDK-style, legacy, multi-targeting, solution, graph, and project-reference scenarios
+- Proven to have zero false positives in CI scenarios
+
+### 7.5 🟠 Alternative: Make Evaluation Faster Instead of Skipping It
+
+Instead of the complexity of synthetic pre-evaluation skips, could MSBuild cache and reuse evaluation results?
+
+- `ProjectRootElementCache` already caches parsed XML roots across builds in server mode
+- Extending this to cache `ProjectInstance` (evaluated state) would preserve full engine semantics
+- The import chain's timestamps could serve as a cache key (if any imported file changed, invalidate)
+- This avoids the `BuildResult` semantic gap entirely — evaluation produces a real `ProjectInstance`, targets can run normally and skip via existing `Inputs`/`Outputs`
+- Server mode is the natural host for this cache
+
+This approach is less ambitious (doesn't skip evaluation entirely, just makes it cheaper) but is conceptually safer and more likely to be accepted.
+
+### 7.6 Open Questions
+
+| Question | Impact | Status |
+|----------|--------|--------|
+| What target results must a cached `BuildResult` contain to satisfy all callers? | Blocking — determines if Approach A is viable at all | Needs investigation of the project-reference protocol |
+| Can the fingerprint circularity be bounded? (i.e., can we define a conservative over-approximation of inputs that's cheap to check?) | Blocking — determines false-positive rate | Needs formal analysis |
+| How does `dotnet build` on a `.sln` actually dispatch? Does it use graph mode or metaproject mode? Can per-project skip work in either? | Blocking — determines if Phase 1 has real-world value | Partially answered (metaproject mode, no per-project loop in CLI) |
+| Would the MSBuild team accept an engine change of this magnitude? | Blocking — organizational | Needs team discussion |
+| Is evaluation caching (`ProjectInstance` reuse) a more viable path than evaluation skipping? | Could redirect the entire effort | Needs prototyping |
+| What is the actual measured breakdown of evaluation cost? (XML parsing vs property resolution vs glob expansion vs import resolution vs SDK resolution) | Informs whether partial caching (e.g., just XML parsing via server mode) gives enough benefit | Needs profiling |
+
+---
+
+## 8. Why This Wasn't Done Before
 
 From @rainersigwald (MSBuild team lead) in [#9122](https://github.com/dotnet/msbuild/issues/9122):
 
@@ -447,7 +557,7 @@ From @rainersigwald (MSBuild team lead) in [#9122](https://github.com/dotnet/msb
 
 ---
 
-## 8. Recommended Path Forward
+## 9. Recommended Path Forward
 
 ### Phase 0: Prototype Cache Plugin (no engine changes)
 
@@ -492,9 +602,23 @@ VS uses a dual-storage approach: FUTDC state lives in-memory during the session 
 
 This means Phase 1 (disk-based fingerprints) and Phase 4 (server convergence) use the **same data format and logic** — just different storage backends. The server is an optimization over the disk path, not a different architecture. The disk format serves as the persistence layer for both paths and as the cold-start bootstrap.
 
+### Reassessment After Red-Team Review
+
+The red-team findings in [Section 7](#7-red-team-blocking-flaws-and-open-questions) significantly change the recommendation. The original Phase 1 (pre-evaluation engine hook with cached `BuildResult`) has **three blocking problems**: the `BuildResult` semantic gap, the fingerprint circularity, and the graph/solution build bypass.
+
+A safer path forward:
+
+**Phase A — Instrument and Measure:** Add telemetry/binlog markers to measure actual no-op build cost breakdown (evaluation vs RAR vs targets vs copies). Validate the assumed 50–70% evaluation cost with real data across diverse projects.
+
+**Phase B — Evaluation Caching in Server Mode:** Instead of *skipping* evaluation, *cache* it. Extend `ProjectRootElementCache` to cache `ProjectInstance` (evaluated state, not just XML). Use import-chain timestamps as cache keys. This preserves full engine semantics — evaluation produces a real `ProjectInstance`, targets run normally, `BuildResult` is genuine. Server mode is the natural host. This avoids the `BuildResult` semantic gap entirely.
+
+**Phase C — Strictly Opt-In Pre-Eval Skip:** For a narrow, well-defined scenario (SDK-style projects, `/t:Build` only, no custom targets, no requested project state), implement a pre-evaluation skip as a `ProjectCachePlugin` with a new `PreEvaluationGetCacheResultAsync` API. This limits blast radius to users who explicitly opt in and to projects that fit the constrained model.
+
+**Phase D — Build Acceleration for CLI:** Independent of the above — when only copies are needed, perform them without full MSBuild. This is valuable even without evaluation skipping.
+
 ### Where to implement: Engine vs SDK vs Plugin
 
-The Phase 0 plugin and Phase 1 engine hook are not mutually exclusive. The plugin validates the approach; the engine hook delivers the full performance benefit. The key architectural decision is whether to expose the pre-evaluation check as a plugin API extension (`PreEvaluationGetCacheResultAsync`) or as built-in engine logic. The plugin API is more extensible; the built-in approach is simpler and avoids plugin packaging overhead.
+The Phase B evaluation-caching approach and Phase C plugin API extension are not mutually exclusive. The plugin API is more extensible; the built-in approach is simpler and avoids plugin packaging overhead. The key decision is whether the MSBuild team sees evaluation caching or evaluation skipping as the right long-term direction.
 
 ### Open Question: Where to Store the Fingerprint File
 
@@ -519,7 +643,7 @@ The choice of storage location affects discoverability (can we find it without e
 
 ---
 
-## 9. Related Issues and Prior Art
+## 10. Related Issues and Prior Art
 
 ### Core Problem
 
