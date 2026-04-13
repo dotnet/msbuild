@@ -106,6 +106,7 @@ Hot paths: `Evaluator.cs`, `Expander.cs`, file I/O operations.
 2. Name test methods to describe scenario and outcome (e.g., `PropertyOverride_LastWriteWins_InImportedProject`).
 3. Tests must be deterministic — no dependency on file system ordering, timing, or uncontrolled environment.
 4. Test both positive and negative paths, including edge cases.
+5. Verify test assertions actually validate the claimed behavior — weak assertions (e.g., "not empty", "no crash") can pass even with incorrect output.
 
 **CHECK — Flag if:**
 - [ ] New behavior has no test coverage
@@ -113,6 +114,7 @@ Hot paths: `Evaluator.cs`, `Expander.cs`, file I/O operations.
 - [ ] Test method names are opaque (e.g., `Test1`, `TestBug`)
 - [ ] Tests depend on implicit environment state
 - [ ] Only the happy path is tested
+- [ ] Test assertions are too weak to catch incorrect behavior (would pass with wrong output)
 
 ---
 
@@ -227,12 +229,18 @@ See `../../documentation/wiki/Microsoft.Build.Framework.md`.
 2. Complex features require a written spec — see `../../documentation/specs/`.
 3. Make incremental, reviewable commits. Large monolithic PRs are rejected.
 4. Follow established design patterns. Don't introduce new patterns without discussion.
+5. For bug fix PRs, read the original issue and feature PR discussions to understand the design intent. Verify the fix aligns with it.
+6. When code works around an API limitation (try/catch chains, TOCTOU patterns, fallback sequences), check whether a better API exists in already-referenced packages that would eliminate the workaround.
+7. When a pattern is borrowed from another codebase or context, verify its assumptions still hold in the new context.
 
 **CHECK — Flag if:**
 - [ ] Large feature PR with no linked spec
 - [ ] New architectural pattern introduced without discussion
 - [ ] Single PR mixes multiple unrelated concerns
 - [ ] Design trade-offs not articulated
+- [ ] Fix contradicts design intent established in original feature discussions
+- [ ] Workaround for an API limitation when a better API is available in existing dependencies
+- [ ] Pattern borrowed from a different context without validating its assumptions apply here
 
 ---
 
@@ -460,6 +468,8 @@ See `../../documentation/High-level-overview.md` and `../../documentation/Built-
 3. Validate fixes against original repro steps.
 4. Validate inputs early — fail fast with clear errors.
 5. Imagine exotic scenarios that could break assumptions. Like a red teamer trying to break MSBuild with weird project files or build environments.
+6. When a fix handles N=2 participants (e.g., two concurrent writers), verify it also works for N=3+. Fixes that close one race window often leave a wider one.
+7. Verify the fix addresses the root cause, not just a symptom. Patching over a structural issue (e.g., adding retries around a TOCTOU) may need revisiting if a cleaner solution exists.
 
 **CHECK — Flag if:**
 - [ ] New code path doesn't handle null/empty inputs
@@ -467,6 +477,8 @@ See `../../documentation/High-level-overview.md` and `../../documentation/Built-
 - [ ] Boundary conditions not considered (off-by-one, max-length, empty)
 - [ ] Input validation missing at public API boundaries
 - [ ] Code relies on assumptions that exotic inputs could break
+- [ ] Fix only handles the 2-participant case but fails with more concurrent actors
+- [ ] Fix patches a symptom when the root cause could be addressed
 
 ---
 
@@ -550,6 +562,8 @@ Use this to prioritize dimensions based on changed files.
 
 1. Map changed files to the [Folder Hotspot Mapping](#folder-hotspot-mapping).
 
+1b. **Historical context** (for bug fix and follow-up PRs): Read the linked issue and the original feature PR discussions. Identify design intent, constraints, and reviewer-established principles. Feed this context to every dimension agent so they can evaluate whether the fix aligns with the original design, not just whether the code compiles.
+
 2. Launch **one sub-agent per dimension** (`task` tool, `agent_type: "general-purpose"`, `model: "claude-opus-4.6"`). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (4 batches for 24 dimensions).
 
    Each sub-agent receives: the PR diff, PR description, the single dimension's rules and checklist, and the folder context.
@@ -610,7 +624,9 @@ Use this to prioritize dimensions based on changed files.
 
 ### Wave 3: Post
 
-5. Post **inline review comments** at the exact file and line via GitHub MCP or `gh` CLI. Format:
+> **Tool availability note**: Steps 5–7 reference gh-aw safe-output tools (`create_pull_request_review_comment`, `submit_pull_request_review`, `add_comment`). When running outside an agentic workflow (e.g. locally in VS Code), these tools are unavailable — use the closest GitHub MCP or CLI equivalents instead (e.g. `gh api` to create PR review comments, `gh pr review` to submit a review, `gh pr comment` to post general comments).
+
+5. Post **inline review comments** on the exact diff lines using the `create_pull_request_review_comment` safe-output tool. Each comment must target a specific `path` and `line` in the PR diff. Format:
 
    ```markdown
    **[$SEVERITY] $DimensionName**
@@ -628,11 +644,13 @@ Use this to prioritize dimensions based on changed files.
    **Recommendation:** $Fix.
    ```
 
-6. Post design-level concerns (not tied to a line) as a single PR comment — one bullet each.
+   **Important**: Use `create_pull_request_review_comment` (inline on diff), NOT `add_comment` (general PR comment). Only findings tied to a specific changed line should use this tool.
+
+6. Post design-level concerns (not tied to a specific diff line) as a single PR comment via the `add_comment` safe-output tool — one bullet each.
 
 ### Wave 4: Summary
 
-7. Post the summary table as the review body:
+7. Submit the final review verdict via the `submit_pull_request_review` safe-output tool. Include the summary table in the review `body` and set the `event` field:
 
    ```markdown
    | # | Dimension | Verdict |
@@ -644,5 +662,8 @@ Use this to prioritize dimensions based on changed files.
    - [ ] Concurrency — shared state race
    ```
 
-   `[x]` = LGTM or NITs only. `[ ]` = MAJOR or BLOCKING.
-   All `[x]` → **APPROVE**. Any BLOCKING → **REQUEST_CHANGES**. Otherwise → **COMMENT**.
+   `[x]` = LGTM or NITs only. `[ ]` = BLOCKING.
+   Any BLOCKING → event: **REQUEST_CHANGES**. Otherwise (including all-clear) → event: **COMMENT**.
+   **Never use APPROVE** — the agent must not count as a PR approval.
+
+   All inline comments from step 5 are automatically bundled into this review submission.

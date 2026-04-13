@@ -144,7 +144,8 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Override GetHashCode
         /// </summary>
-        public override int GetHashCode() => TargetPlatformIdentifier.ToLowerInvariant().GetHashCode() ^ TargetPlatformVersion.GetHashCode();
+        public override int GetHashCode()
+            => StringComparer.OrdinalIgnoreCase.GetHashCode(TargetPlatformIdentifier) ^ TargetPlatformVersion.GetHashCode();
 
         /// <summary>
         /// Override equals
