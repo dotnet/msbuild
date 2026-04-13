@@ -219,7 +219,6 @@ namespace Microsoft.Build.UnitTests
                 new BuildRequestData(p.CreateProjectInstance(), new[] { "Spawn" }));
 
             p.Build().ShouldBeTrue();
-            System.IO.File.WriteAllText(@"C:\Users\janprovaznik\console_output.txt", sc.ToString());
             sc.ToString().ShouldContain("source_of_warning : warning : Hello from project 1 [" + project.ProjectFile + "::Number=1]");
             sc.ToString().ShouldContain("source_of_warning : warning : Hello from project 2 [" + project.ProjectFile + "::Number=2]");
         }
