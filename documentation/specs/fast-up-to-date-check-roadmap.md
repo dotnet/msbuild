@@ -472,6 +472,20 @@ A cached `BuildResult` *can* structurally hold these outputs (MSBuild's `TargetR
 
 **For non-leaf projects:** This is a full result-cache architecture (like `microsoft/MSBuildCache`) with pre-evaluation semantics. The current proposal does not define the target surface, cache identity, or invalidation model needed to make this sound.
 
+#### Engine-Level Constraints (from code review)
+
+Detailed investigation of the engine reveals five specific constraints that a cached `BuildResult` injection must satisfy:
+
+1. **`InitialTargets`/`DefaultTargets` must be present.** `ResultsCache.SatisfyRequest` (`ResultsCache.cs:188-202`) returns `NotSatisfied` when `configInitialTargets == null`. These are normally populated from the evaluated `ProjectInstance` via `BuildRequestConfiguration.SetProjectBasedState`. Skipping evaluation means these must be persisted and restored alongside the cached result.
+
+2. **`TargetResult.Items` must include full metadata.** The `MSBuild` task deep-clones every `TargetResult.Items` entry (`TaskHost.cs:1237-1241`) and enriches them with `MSBuildSourceProjectFile`/`MSBuildSourceTargetName` metadata. Empty or incomplete items produce empty `@(TargetOutputs)`, breaking `ProjectReference` protocol.
+
+3. **`ResultsCache.SatisfyRequest` has all-or-nothing semantics.** It returns `Satisfied` only if ALL requested targets, ALL initial targets, and (if no explicit targets) ALL default targets have results (`ResultsCache.cs:149-228`). A cache entry for `{Build}` won't satisfy a later request for `{GetCopyToOutputDirectoryItems}`.
+
+4. **In non-graph builds, target requests arrive dynamically.** The `MSBuild` task issues child build requests at execution time. The full set of targets that will be requested for a project is not known upfront — it depends on what other projects' targets do.
+
+5. **Graph builds know the full target closure** via `ProjectGraph.GetTargetLists` (`ProjectGraph.cs:609-770`), making them the natural fit for pre-computed result caching. Non-graph builds would need a heuristic target closure (e.g., `Build + GetTargetPath + GetCopyToOutputDirectoryItems + GetTargetFrameworks`).
+
 ### 7.2 🔴 Circular Dependency in Fingerprinting
 
 The proposal says: check fingerprint before evaluation. But the real set of inputs is only known *after* evaluation:
@@ -531,12 +545,14 @@ This approach is less ambitious (doesn't skip evaluation entirely, just makes it
 
 | Question | Impact | Status |
 |----------|--------|--------|
-| What target results must a cached `BuildResult` contain to satisfy all callers? | Blocking — determines if Approach A is viable at all | Needs investigation of the project-reference protocol |
-| Can the fingerprint circularity be bounded? (i.e., can we define a conservative over-approximation of inputs that's cheap to check?) | Blocking — determines false-positive rate | Needs formal analysis |
-| How does `dotnet build` on a `.sln` actually dispatch? Does it use graph mode or metaproject mode? Can per-project skip work in either? | Blocking — determines if Phase 1 has real-world value | Partially answered (metaproject mode, no per-project loop in CLI) |
+| What target results must a cached `BuildResult` contain? | Blocking for non-leaf projects | **Answered:** Must contain results for the full target closure including `GetTargetPath`, `GetCopyToOutputDirectoryItems`, `GetTargetFrameworks`. Graph builds compute this via `GetTargetLists`; non-graph builds need a heuristic. |
+| Must `InitialTargets`/`DefaultTargets` be persisted alongside the cache? | Blocking | **Answered:** Yes — `ResultsCache.SatisfyRequest` returns `NotSatisfied` without them. |
+| Can the fingerprint circularity be bounded? | Blocking — determines false-positive rate | Needs formal analysis. Conservative approach: invalidate on any file change in ancestor directories. |
+| Is graph-only scope acceptable for an MVP? | Scoping decision | Graph builds know the full target closure; non-graph builds have dynamic target requests. Graph-only is safer but limits applicability. |
 | Would the MSBuild team accept an engine change of this magnitude? | Blocking — organizational | Needs team discussion |
-| Is evaluation caching (`ProjectInstance` reuse) a more viable path than evaluation skipping? | Could redirect the entire effort | Needs prototyping |
-| What is the actual measured breakdown of evaluation cost? (XML parsing vs property resolution vs glob expansion vs import resolution vs SDK resolution) | Informs whether partial caching (e.g., just XML parsing via server mode) gives enough benefit | Needs profiling |
+| Is evaluation caching (`ProjectInstance` reuse) a more viable path than evaluation skipping? | Could redirect the entire effort | Needs prototyping — likely safer, avoids `BuildResult` semantic gap entirely |
+| What is the actual measured breakdown of evaluation cost? | Informs whether partial caching gives enough benefit | Needs profiling with representative projects |
+| Can graph construction itself be cached? (cached topology + target map) | Would make graph-build FUTDC skip evaluation too | Unknown — graph depends on evaluation to discover `ProjectReference` items |
 
 ---
 
