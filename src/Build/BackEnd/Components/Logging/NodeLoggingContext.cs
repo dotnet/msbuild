@@ -1,9 +1,10 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.TelemetryInfra;
 
 #nullable disable
 
@@ -33,6 +34,12 @@ namespace Microsoft.Build.BackEnd.Logging
 
             this.IsValid = true;
         }
+
+        /// <summary>
+        /// Per-engine telemetry forwarder created by <see cref="BuildRequestEngine"/>.
+        /// Null when telemetry collection is disabled.
+        /// </summary>
+        internal ITelemetryForwarder TelemetryForwarder { get; set; }
 
         /// <summary>
         /// Log the completion of a build
