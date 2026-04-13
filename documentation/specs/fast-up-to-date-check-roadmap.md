@@ -496,6 +496,27 @@ This means Phase 1 (disk-based fingerprints) and Phase 4 (server convergence) us
 
 The Phase 0 plugin and Phase 1 engine hook are not mutually exclusive. The plugin validates the approach; the engine hook delivers the full performance benefit. The key architectural decision is whether to expose the pre-evaluation check as a plugin API extension (`PreEvaluationGetCacheResultAsync`) or as built-in engine logic. The plugin API is more extensible; the built-in approach is simpler and avoids plugin packaging overhead.
 
+### Open Question: Where to Store the Fingerprint File
+
+The choice of storage location affects discoverability (can we find it without evaluation?), gitignore behavior, clean-build semantics, and multi-tool compatibility.
+
+| Location | Pros | Cons |
+|----------|------|------|
+| **`obj/.futdc`** (`BaseIntermediateOutputPath`) | Convention matches NuGet (`project.assets.json` lives here); `dotnet clean` deletes it (correct behavior); discoverable without evaluation for ~95% of projects | Pollutes `obj/` with yet another file; custom `BaseIntermediateOutputPath` breaks convention-based discovery; already crowded directory |
+| **`.msbuild/` in project dir** | Clean namespace; clearly MSBuild-owned; easy to `.gitignore` as a pattern | New directory convention — nothing uses this today; not deleted by `dotnet clean`; needs explicit `.gitignore` entry |
+| **`.vs/` in solution dir** | Precedent — VS FUTDC stores `.futdcache.v2` here; already `.gitignore`d by default | VS-specific convention; no solution context for standalone project builds; path requires knowing solution root; not deleted by `dotnet clean` on individual projects |
+| **`~/.dotnet/futdc/` or OS temp** (user-level cache) | Never pollutes project tree; always writable; shared across clones | Cache invalidation nightmare; out of sync with build artifacts; stale across git worktrees; permissions issues in CI containers |
+| **`artifacts/` dir** (artifacts layout) | Natural fit for `.NET 8+` artifacts layout users | Only ~5-8% of projects use this; doesn't help non-artifacts projects |
+
+**Factors to consider:**
+- `dotnet clean` should invalidate the fingerprint — `obj/` gets this for free, other locations need explicit cleanup
+- CI builds typically start from clean `obj/` — fingerprint absence triggers normal build (correct)
+- `.gitignore` — `obj/` is already ignored; `.msbuild/` would need a new global convention
+- Multi-tool — if Rider/VS Code/VS all need the fingerprint, a project-local location beats a tool-specific one (`.vs/`)
+- Pre-evaluation discovery — `obj/` is the only location discoverable by convention without evaluation (NuGet already proved this works)
+
+**Current recommendation in this spec:** `obj/.futdc` — but this needs broader input from the team.
+
 ---
 
 ## 9. Related Issues and Prior Art
