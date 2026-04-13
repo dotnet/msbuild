@@ -2432,7 +2432,28 @@ namespace Microsoft.Build.Execution
             string targetPath = project.GetPropertyValue("TargetPath");
             if (string.IsNullOrEmpty(targetPath))
             {
+                // TargetPath is empty for multi-targeting outer builds (IsCrossTargetingBuild=true).
+                // For outer builds, if all dependencies (inner builds) were skipped, we can skip too
+                // because the outer build just dispatches to inner builds.
+                string isCrossTargeting = project.GetPropertyValue("IsCrossTargetingBuild");
+                if (string.Equals(isCrossTargeting, "true", StringComparison.OrdinalIgnoreCase))
+                {
+                    // All inner-build dependencies were already checked via the dependency cascade.
+                    // If we got here, all deps are in skippedNodes, so outer build is also up-to-date.
+                    return true;
+                }
+
                 return false;
+            }
+
+            // Make path absolute if relative.
+            if (!Path.IsPathRooted(targetPath))
+            {
+                string projectDir = project.GetPropertyValue("MSBuildProjectDirectory");
+                if (!string.IsNullOrEmpty(projectDir))
+                {
+                    targetPath = Path.Combine(projectDir, targetPath);
+                }
             }
 
             DateTime outputTime = NativeMethodsShared.GetLastWriteFileUtcTime(targetPath);
@@ -2461,7 +2482,7 @@ namespace Microsoft.Build.Execution
             }
 
             // Check source items.
-            foreach (string itemType in new[] { "Compile", "EmbeddedResource", "Content" })
+            foreach (string itemType in new[] { "Compile", "EmbeddedResource", "Content", "None" })
             {
                 foreach (ProjectItemInstance item in project.GetItems(itemType))
                 {

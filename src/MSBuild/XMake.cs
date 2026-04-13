@@ -310,6 +310,22 @@ namespace Microsoft.Build.CommandLine
             }
 
             int exitCode;
+
+            // SuperFast mode: enable server mode if --superfast or -sf is on the command line.
+            // This must happen before the server mode check below since server mode is decided early.
+            bool hasSuperFastArg = args.Any(a =>
+                a.Equals("-superfast", StringComparison.OrdinalIgnoreCase) ||
+                a.Equals("--superfast", StringComparison.OrdinalIgnoreCase) ||
+                a.Equals("-sf", StringComparison.OrdinalIgnoreCase) ||
+                a.Equals("--sf", StringComparison.OrdinalIgnoreCase) ||
+                a.StartsWith("-superfast:", StringComparison.OrdinalIgnoreCase) ||
+                a.StartsWith("-sf:", StringComparison.OrdinalIgnoreCase));
+
+            if (hasSuperFastArg)
+            {
+                Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "1");
+            }
+
             if (
                 Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
