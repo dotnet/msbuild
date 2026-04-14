@@ -5,7 +5,10 @@ using System;
 using System.Collections;
 using System.Collections.Frozen;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 using Microsoft.NET.StringTools;
 
 #nullable disable
@@ -18,6 +21,26 @@ namespace Microsoft.Build.Framework
     /// </summary>
     internal static class FrameworkCommunicationsUtilities
     {
+        /// <summary>
+        /// Whether to trace communications
+        /// </summary>
+        private static readonly bool s_trace = Traits.Instance.DebugNodeCommunication;
+
+        /// <summary>
+        /// Lock trace to ensure we are logging in serial fashion.
+        /// </summary>
+        private static readonly LockType s_traceLock = new LockType();
+
+        /// <summary>
+        /// Place to dump trace
+        /// </summary>
+        private static string s_debugDumpPath;
+
+        /// <summary>
+        /// Ticks at last time logged
+        /// </summary>
+        private static long s_lastLoggedTicks = DateTime.UtcNow.Ticks;
+
         /// <summary>
         /// Case-insensitive string comparer for environment variable names.
         /// </summary>
@@ -289,6 +312,135 @@ namespace Microsoft.Build.Framework
                     {
                         SetEnvironmentVariable(entry.Key, entry.Value);
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Writes trace information to a log file
+        /// </summary>
+        internal static void Trace<T>(string format, T arg0)
+        {
+            Trace(nodeId: -1, format, arg0);
+        }
+
+        /// <summary>
+        /// Writes trace information to a log file
+        /// </summary>
+        internal static void Trace<T>(int nodeId, string format, T arg0)
+        {
+            if (s_trace)
+            {
+                TraceCore(nodeId, string.Format(format, arg0));
+            }
+        }
+
+        /// <summary>
+        /// Writes trace information to a log file
+        /// </summary>
+        internal static void Trace<T0, T1>(string format, T0 arg0, T1 arg1)
+        {
+            Trace(nodeId: -1, format, arg0, arg1);
+        }
+
+        /// <summary>
+        /// Writes trace information to a log file
+        /// </summary>
+        internal static void Trace<T0, T1>(int nodeId, string format, T0 arg0, T1 arg1)
+        {
+            if (s_trace)
+            {
+                TraceCore(nodeId, string.Format(format, arg0, arg1));
+            }
+        }
+
+        /// <summary>
+        /// Writes trace information to a log file
+        /// </summary>
+        internal static void Trace<T0, T1, T2>(string format, T0 arg0, T1 arg1, T2 arg2)
+        {
+            Trace(nodeId: -1, format, arg0, arg1, arg2);
+        }
+
+        /// <summary>
+        /// Writes trace information to a log file
+        /// </summary>
+        internal static void Trace<T0, T1, T2>(int nodeId, string format, T0 arg0, T1 arg1, T2 arg2)
+        {
+            if (s_trace)
+            {
+                TraceCore(nodeId, string.Format(format, arg0, arg1, arg2));
+            }
+        }
+
+        /// <summary>
+        /// Writes trace information to a log file
+        /// </summary>
+        internal static void Trace(string format, params object[] args)
+        {
+            Trace(nodeId: -1, format, args);
+        }
+
+        /// <summary>
+        /// Writes trace information to a log file
+        /// </summary>
+        internal static void Trace(int nodeId, string format, params object[] args)
+        {
+            if (s_trace)
+            {
+                string message = string.Format(CultureInfo.CurrentCulture, format, args);
+                TraceCore(nodeId, message);
+            }
+        }
+
+        internal static void Trace(int nodeId, string message)
+        {
+            if (s_trace)
+            {
+                TraceCore(nodeId, message);
+            }
+        }
+
+        /// <summary>
+        /// Writes trace information to a log file
+        /// </summary>
+        private static void TraceCore(int nodeId, string message)
+        {
+            lock (s_traceLock)
+            {
+                s_debugDumpPath ??= FrameworkDebugUtils.DebugPath;
+
+                if (String.IsNullOrEmpty(s_debugDumpPath))
+                {
+                    s_debugDumpPath = FileUtilities.TempFileDirectory;
+                }
+                else
+                {
+                    Directory.CreateDirectory(s_debugDumpPath);
+                }
+
+                try
+                {
+                    string fileName = @"MSBuild_CommTrace_PID_{0}";
+                    if (nodeId != -1)
+                    {
+                        fileName += "_node_" + nodeId;
+                    }
+
+                    fileName += ".txt";
+
+                    using (StreamWriter file = FileUtilities.OpenWrite(
+                        string.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), EnvironmentUtilities.CurrentProcessId, nodeId), append: true))
+                    {
+                        long now = DateTime.UtcNow.Ticks;
+                        float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;
+                        s_lastLoggedTicks = now;
+                        file.WriteLine("{0} (TID {1}) {2,15} +{3,10}ms: {4}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, now, millisecondsSinceLastLog, message);
+                    }
+                }
+                catch (IOException)
+                {
+                    // Ignore
                 }
             }
         }
