@@ -119,19 +119,46 @@ namespace Microsoft.Build.UnitTests
 
             public ValueTask<IReadOnlyCollection<IXunitTest>> CreateTests() => _wrapped.CreateTests();
 
-            public void PostInvoke() => _wrapped.PostInvoke();
+            public void PostInvoke()
+            {
+                Assert.True(BuildEnvironmentState.s_runningTests);
+                _wrapped.PostInvoke();
+                Assert.True(BuildEnvironmentState.s_runningTests);
+            }
 
-            public void PreInvoke() => _wrapped.PreInvoke();
+            public void PreInvoke()
+            {
+                Assert.True(BuildEnvironmentState.s_runningTests);
+                _wrapped.PreInvoke();
+                Assert.True(BuildEnvironmentState.s_runningTests);
+            }
+
             public async ValueTask<RunSummary> Run(ExplicitOption explicitOption, IMessageBus messageBus, object[] constructorArguments, ExceptionAggregator aggregator, CancellationTokenSource cancellationTokenSource)
             {
                 using var _ = TestEnvironment.Create();
-                return await XunitRunnerHelper.RunXunitTestCase(
-                    this,
-                    messageBus,
-                    cancellationTokenSource,
-                    aggregator.Clone(),
-                    explicitOption,
-                    constructorArguments);
+#if !IS_OM_TESTS
+                string initialHandshakeSalt = Framework.Traits.MSBuildNodeHandshakeSalt;
+                bool initialLogAllEnvVariables = Framework.Traits.LogAllEnvironmentVariables;
+#endif
+                Assert.True(BuildEnvironmentState.s_runningTests);
+                try
+                {
+                    return await XunitRunnerHelper.RunXunitTestCase(
+                        this,
+                        messageBus,
+                        cancellationTokenSource,
+                        aggregator,
+                        explicitOption,
+                        constructorArguments);
+                }
+                finally
+                {
+                    Assert.True(BuildEnvironmentState.s_runningTests);
+#if !IS_OM_TESTS
+                    Assert.Equal(initialHandshakeSalt, Framework.Traits.MSBuildNodeHandshakeSalt);
+                    Assert.Equal(initialLogAllEnvVariables, Framework.Traits.LogAllEnvironmentVariables);
+#endif
+                }
             }
 
             public void Serialize(IXunitSerializationInfo info)
