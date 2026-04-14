@@ -137,7 +137,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
-        public void VerifyMixedLegacyBehavior()
+        public void VerifyServerIgnoresLegacyEnvVarToggles()
         {
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
@@ -155,14 +155,15 @@ namespace Microsoft.Build.Engine.UnitTests
             success.ShouldBeTrue();
             pidOfInitialProcess = ParseNumber(output, "Process ID is ");
             int pidOfNewserverProcess = ParseNumber(output, "Server ID is ");
-            pidOfInitialProcess.ShouldBe(pidOfNewserverProcess, "We did not start a server node to execute the target, so its pid should be the same.");
+            pidOfInitialProcess.ShouldNotBe(pidOfNewserverProcess, "Server execution should remain enabled even if the legacy opt-in environment variable is unset.");
+            pidOfServerProcess.ShouldBe(pidOfNewserverProcess, "The existing server should still be reused.");
 
-            Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
             output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
             success.ShouldBeTrue();
             pidOfInitialProcess = ParseNumber(output, "Process ID is ");
             pidOfNewserverProcess = ParseNumber(output, "Server ID is ");
-            pidOfInitialProcess.ShouldNotBe(pidOfNewserverProcess, "We started a server node to execute the target rather than running it in-proc, so its pid should be different.");
+            pidOfInitialProcess.ShouldNotBe(pidOfNewserverProcess, "Server execution should remain enabled even if the legacy opt-in environment variable is explicitly disabled.");
             pidOfServerProcess.ShouldBe(pidOfNewserverProcess, "Server node should be the same as from earlier.");
 
             if (pidOfServerProcess != pidOfNewserverProcess)
@@ -210,14 +211,6 @@ namespace Microsoft.Build.Engine.UnitTests
             _output.WriteLine("Waiting for the server to be in use.");
             mre.WaitOne();
             _output.WriteLine("It's OK to go ahead.");
-
-            Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
-
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
-            success.ShouldBeTrue();
-            ParseNumber(output, "Server ID is ").ShouldBe(ParseNumber(output, "Process ID is "), "There should not be a server node for this build.");
-
-            Environment.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
             output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
             success.ShouldBeTrue();

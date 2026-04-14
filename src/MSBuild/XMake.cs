@@ -311,14 +311,13 @@ namespace Microsoft.Build.CommandLine
 
             int exitCode;
             if (
-                Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
                 CanRunServerBasedOnCommandLineSwitches(args))
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
 
-                // Use the client app to execute build in msbuild server. Opt-in feature.
+                // Prefer the client app to execute the build in the persistent MSBuild server whenever this invocation supports it.
                 exitCode = ((s_initialized && MSBuildClientApp.Execute(args, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
             }
             else
