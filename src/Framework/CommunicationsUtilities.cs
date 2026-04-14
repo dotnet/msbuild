@@ -23,6 +23,16 @@ namespace Microsoft.Build.Framework
     internal static class FrameworkCommunicationsUtilities
     {
         /// <summary>
+        /// Indicates to the NodeEndpoint that all the various parts of the Handshake have been sent.
+        /// </summary>
+        private const int EndOfHandshakeSignal = -0x2a2a2a2a;
+
+        /// <summary>
+        /// The version of the handshake. This should be updated each time the handshake structure is altered.
+        /// </summary>
+        internal const byte handshakeVersion = 0x01;
+
+        /// <summary>
         /// Whether to trace communications
         /// </summary>
         private static readonly bool s_trace = Traits.Instance.DebugNodeCommunication;
@@ -316,6 +326,45 @@ namespace Microsoft.Build.Framework
                 }
             }
         }
+
+        /// <summary>
+        ///  Gets a hash code for this string.  If strings A and B are such that A.Equals(B), then
+        ///  they will return the same hash code.
+        ///  This is as implemented in CLR String.GetHashCode() [ndp\clr\src\BCL\system\String.cs]
+        ///  but stripped out architecture specific defines
+        ///  that causes the hashcode to be different and this causes problem in cross-architecture handshaking.
+        /// </summary>
+        internal static int GetHashCode(string fileVersion)
+        {
+            unsafe
+            {
+                fixed (char* src = fileVersion)
+                {
+                    int hash1 = (5381 << 16) + 5381;
+                    int hash2 = hash1;
+
+                    int* pint = (int*)src;
+                    int len = fileVersion.Length;
+                    while (len > 0)
+                    {
+                        hash1 = ((hash1 << 5) + hash1 + (hash1 >> 27)) ^ pint[0];
+                        if (len <= 2)
+                        {
+                            break;
+                        }
+
+                        hash2 = ((hash2 << 5) + hash2 + (hash2 >> 27)) ^ pint[1];
+                        pint += 2;
+                        len -= 4;
+                    }
+
+                    return hash1 + (hash2 * 1566083941);
+                }
+            }
+        }
+
+        internal static int AvoidEndOfHandshakeSignal(int x)
+            => x == EndOfHandshakeSignal ? ~x : x;
 
         /// <summary>
         ///  Writes trace information to a log file.

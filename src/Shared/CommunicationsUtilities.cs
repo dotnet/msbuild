@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO.Pipes;
 
@@ -12,8 +10,6 @@ using System.Security.Principal;
 #endif
 
 using System.Reflection;
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -22,60 +18,6 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Internal
 {
-    /// <summary>
-    /// Enumeration of all possible (currently supported) options for handshakes.
-    /// </summary>
-    [Flags]
-    internal enum HandshakeOptions
-    {
-        None = 0,
-
-        /// <summary>
-        /// Process is a TaskHost.
-        /// </summary>
-        TaskHost = 1,
-
-        /// <summary>
-        /// Using the 2.0 CLR.
-        /// </summary>
-        CLR2 = 2,
-
-        /// <summary>
-        /// 64-bit Intel process.
-        /// </summary>
-        X64 = 4,
-
-        /// <summary>
-        /// Node reuse enabled.
-        /// </summary>
-        NodeReuse = 8,
-
-        /// <summary>
-        /// Building with BelowNormal priority.
-        /// </summary>
-        LowPriority = 16,
-
-        /// <summary>
-        /// Building with administrator privileges.
-        /// </summary>
-        Administrator = 32,
-
-        /// <summary>
-        /// Using the .NET Core/.NET 5.0+ runtime.
-        /// </summary>
-        NET = 64,
-
-        /// <summary>
-        /// ARM64 process.
-        /// </summary>
-        Arm64 = 128,
-
-        /// <summary>
-        /// Using a long-running sidecar TaskHost process to reduce startup overhead and reuse in-memory caches.
-        /// </summary>
-        SidecarTaskHost = 256,
-    }
-
     /// <summary>
     /// Represents a unique key for identifying task host nodes.
     /// Combines HandshakeOptions (which specify runtime/architecture configuration) with
@@ -88,299 +30,6 @@ namespace Microsoft.Build.Internal
     /// its own task host, so the node ID is used to distinguish them.
     /// </param>
     internal readonly record struct TaskHostNodeKey(HandshakeOptions HandshakeOptions, int NodeId);
-
-    /// <summary>
-    /// Status codes for the handshake process.
-    /// It aggregates return values across several functions so we use an aggregate instead of a separate class for each method.
-    /// </summary>
-    internal enum HandshakeStatus
-    {
-        /// <summary>
-        /// The handshake operation completed successfully.
-        /// </summary>
-        Success = 0,
-
-        /// <summary>
-        /// The other node returned a different value than expected.
-        /// This can happen either by attempting to connect to a wrong node type 
-        /// (e.g., transient TaskHost trying to connect to a long-running TaskHost)
-        /// or by trying to connect to a node that has a different MSBuild version.
-        /// </summary>
-        VersionMismatch = 1,
-
-        /// <summary>
-        /// The handshake was aborted due to connection from an old MSBuild version.
-        /// Occurs in TryReadInt when detecting legacy MSBuild.exe connections.
-        /// </summary>
-        OldMSBuild = 2,
-
-        /// <summary>
-        /// The handshake operation timed out before completion.
-        /// </summary>
-        Timeout = 3,
-
-        /// <summary>
-        /// The stream ended unexpectedly during the handshake operation.
-        /// Indicates an incomplete or corrupted handshake sequence.
-        /// </summary>
-        UnexpectedEndOfStream = 4,
-
-        /// <summary>
-        /// The endianness (byte order) of the communicating nodes does not match.
-        /// Indicates an architecture compatibility issue.
-        /// </summary>
-        EndiannessMismatch = 5,
-
-        /// <summary>
-        /// The handshake status is undefined or uninitialized.
-        /// </summary>
-        Undefined,
-    }
-
-    /// <summary>
-    /// An aggregate class for passing around results of a handshake and adjacent information.
-    /// ErrorMessage is to propagate error messages where necessary
-    /// </summary> 
-    internal class HandshakeResult
-    {
-        /// <summary>
-        /// Gets the status code indicating the result of the handshake operation.
-        /// </summary>
-        public HandshakeStatus Status { get; }
-
-        /// <summary>
-        /// Handshake in MSBuild is performed as passing integers back and forth.
-        /// This field holds the value returned from a successful handshake step.
-        /// </summary>
-        public int Value { get; }
-
-        /// <summary>
-        /// Gets the error message when a handshake operation fails.
-        /// </summary>
-        public string ErrorMessage { get; }
-
-        /// <summary>
-        /// The negotiated packet version with the child node.
-        /// It's needed to ensure both sides of the communication can read/write data in pipe.
-        /// </summary>
-        public byte NegotiatedPacketVersion { get; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="HandshakeResult"/> class.
-        /// </summary>
-        /// <param name="status">The status of the handshake operation.</param>
-        /// <param name="value">The value returned from the handshake.</param>
-        /// <param name="errorMessage">The error message if the handshake failed.</param>
-        /// <param name="negotiatedPacketVersion">The packet version from the child node.</param>
-        private HandshakeResult(HandshakeStatus status, int value, string errorMessage, byte negotiatedPacketVersion = 1)
-        {
-            Status = status;
-            Value = value;
-            ErrorMessage = errorMessage;
-            NegotiatedPacketVersion = negotiatedPacketVersion;
-        }
-
-        /// <summary>
-        /// Creates a successful handshake result with the specified value.
-        /// </summary>
-        /// <param name="value">The value returned from the handshake operation.</param>
-        /// <param name="negotiatedPacketVersion">The packet version received from the child node.</param>
-        /// <returns>A new <see cref="HandshakeResult"/> instance representing a successful operation.</returns>
-        public static HandshakeResult Success(int value = 0, byte negotiatedPacketVersion = 1) => new(HandshakeStatus.Success, value, null, negotiatedPacketVersion);
-
-        /// <summary>
-        /// Creates a failed handshake result with the specified status and error message.
-        /// </summary>
-        /// <param name="status">The error status code for the failure.</param>
-        /// <param name="errorMessage">A description of the error that occurred.</param>
-        /// <returns>A new <see cref="HandshakeResult"/> instance representing a failed operation.</returns>
-        public static HandshakeResult Failure(HandshakeStatus status, string errorMessage) => new(status, 0, errorMessage);
-    }
-
-    internal class Handshake
-    {
-        /// <summary>
-        /// Marker indicating that the next integer in the child handshake response is the PacketVersion.
-        /// </summary>
-        public const int PacketVersionFromChildMarker = -1;
-
-        // The number is selected as an arbitrary value that is unlikely to conflict with any future sdk version.
-        public const int NetTaskHostHandshakeVersion = 99;
-
-        protected readonly HandshakeComponents _handshakeComponents;
-
-        /// <summary>
-        ///  Initializes a new instance of the <see cref="Handshake"/> class with the specified node type.
-        /// </summary>
-        /// <param name="nodeType">
-        ///  The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
-        /// </param>
-        public Handshake(HandshakeOptions nodeType)
-            : this(nodeType, includeSessionId: true, toolsDirectory: null)
-        {
-        }
-
-        /// <summary>
-        ///  Initializes a new instance of the <see cref="Handshake"/> class with the specified node type
-        ///  and optional predefined tools directory.
-        /// </summary>
-        /// <param name="nodeType">
-        ///  The <see cref="HandshakeOptions"/> that specifies the type of node and configuration options for the handshake operation.
-        /// </param>
-        /// <param name="toolsDirectory">
-        ///  The directory path to use for handshake salt calculation. For some task hosts, notably the .NET TaskHost (on .NET Framework)
-        ///  and the CLR2 TaskHost, this is needed to ensure the child process connects with the expected tools directory context.
-        /// </param>
-        public Handshake(HandshakeOptions nodeType, string toolsDirectory)
-            : this(nodeType, includeSessionId: true, toolsDirectory)
-        {
-        }
-
-        // Helper method to validate handshake option presence
-        internal static bool IsHandshakeOptionEnabled(HandshakeOptions hostContext, HandshakeOptions option) => (hostContext & option) == option;
-
-        // Source options of the handshake.
-        internal HandshakeOptions HandshakeOptions { get; }
-
-        protected Handshake(HandshakeOptions nodeType, bool includeSessionId, string toolsDirectory)
-        {
-            HandshakeOptions = nodeType;
-
-#if NETFRAMEWORK
-            ErrorUtilities.VerifyThrow(
-                toolsDirectory is null || IsNetTaskHost || IsClr2TaskHost,
-                $"{toolsDirectory} should only be provided for .NET or CLR2 TaskHost nodes.");
-#else
-            // IsNetTaskHost covers the case when NET process spawns NET TaskHost.
-            ErrorUtilities.VerifyThrow(
-                toolsDirectory is null || IsNetTaskHost,
-                $"{toolsDirectory} should not have been provided.");
-#endif
-
-            toolsDirectory ??= BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
-
-            // Build handshake options with version in upper bits
-            const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
-            var options = (int)nodeType | (handshakeVersion << 24);
-            CommunicationsUtilities.Trace($"Building handshake for node type {nodeType}, (version {handshakeVersion}): options {options}.");
-
-            // Calculate salt from environment and tools directory
-            string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
-
-            int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
-
-            CommunicationsUtilities.Trace($"Handshake salt is {handshakeSalt}");
-            CommunicationsUtilities.Trace($"Tools directory root is {toolsDirectory}");
-
-            // Get session ID if needed (expensive call)
-            int sessionId = 0;
-            if (includeSessionId && NativeMethodsShared.IsWindows)
-            {
-                // On Windows, SessionId differentiates RDP sessions.
-                // On Unix, getsid() returns the session leader PID which differs per terminal,
-                // preventing cross-terminal node reuse. Use 0 since Unix doesn't need
-                // RDP-style session isolation.
-                using var currentProcess = Process.GetCurrentProcess();
-                sessionId = currentProcess.SessionId;
-            }
-
-            _handshakeComponents = IsNetTaskHost
-                ? CreateNetTaskHostComponents(options, salt, sessionId)
-                : CreateStandardComponents(options, salt, sessionId);
-        }
-
-        private bool IsNetTaskHost => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.NET | HandshakeOptions.TaskHost);
-
-#if NETFRAMEWORK
-        private bool IsClr2TaskHost
-            => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.CLR2 | HandshakeOptions.TaskHost);
-#endif
-
-        private static HandshakeComponents CreateNetTaskHostComponents(int options, int salt, int sessionId) => new(
-            options,
-            salt,
-            NetTaskHostHandshakeVersion,
-            NetTaskHostHandshakeVersion,
-            NetTaskHostHandshakeVersion,
-            NetTaskHostHandshakeVersion,
-            sessionId);
-
-        private static HandshakeComponents CreateStandardComponents(int options, int salt, int sessionId)
-        {
-            var fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion);
-
-            return new(
-                options,
-                salt,
-                fileVersion.Major,
-                fileVersion.Minor,
-                fileVersion.Build,
-                fileVersion.Revision,
-                sessionId);
-        }
-
-        public virtual HandshakeComponents RetrieveHandshakeComponents() => new HandshakeComponents(
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Options),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Salt),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMajor),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMinor),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionBuild),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionPrivate),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.SessionId));
-
-        public virtual string GetKey() => $"{_handshakeComponents.Options} {_handshakeComponents.Salt} {_handshakeComponents.FileVersionMajor} {_handshakeComponents.FileVersionMinor} {_handshakeComponents.FileVersionBuild} {_handshakeComponents.FileVersionPrivate} {_handshakeComponents.SessionId}".ToString(CultureInfo.InvariantCulture);
-
-        public virtual byte? ExpectedVersionInFirstByte => CommunicationsUtilities.handshakeVersion;
-    }
-
-    internal sealed class ServerNodeHandshake : Handshake
-    {
-        /// <summary>
-        /// Caching computed hash.
-        /// </summary>
-        private string _computedHash = null;
-
-        public override byte? ExpectedVersionInFirstByte => null;
-
-        internal ServerNodeHandshake(HandshakeOptions nodeType)
-            : base(nodeType, includeSessionId: false, toolsDirectory: null)
-        {
-        }
-
-        public override HandshakeComponents RetrieveHandshakeComponents() => new HandshakeComponents(
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Options),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Salt),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMajor),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMinor),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionBuild),
-            CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionPrivate));
-
-        public override string GetKey() => $"{_handshakeComponents.Options} {_handshakeComponents.Salt} {_handshakeComponents.FileVersionMajor} {_handshakeComponents.FileVersionMinor} {_handshakeComponents.FileVersionBuild} {_handshakeComponents.FileVersionPrivate}"
-            .ToString(CultureInfo.InvariantCulture);
-
-        /// <summary>
-        /// Computes Handshake stable hash string representing whole state of handshake.
-        /// </summary>
-        public string ComputeHash()
-        {
-            if (_computedHash == null)
-            {
-                var input = GetKey();
-                byte[] utf8 = Encoding.UTF8.GetBytes(input);
-#if NET
-                Span<byte> bytes = stackalloc byte[SHA256.HashSizeInBytes];
-                SHA256.HashData(utf8, bytes);
-#else
-                using var sha = SHA256.Create();
-                var bytes = sha.ComputeHash(utf8);
-#endif
-                _computedHash = Convert.ToBase64String(bytes)
-                    .Replace("/", "_")
-                    .Replace("=", string.Empty);
-            }
-            return _computedHash;
-        }
-    }
 
     /// <summary>
     /// This class contains utility methods for the MSBuild engine.
@@ -403,16 +52,11 @@ namespace Microsoft.Build.Internal
         private const int DefaultNodeConnectionTimeout = 900 * 1000; // 15 minutes; enough time that a dev will typically do another build in this time
 
         /// <summary>
-        /// Delegate to debug the communication utilities.
-        /// </summary>
-        internal delegate void LogDebugCommunications(string format, params object[] stuff);
-
-        /// <summary>
         /// On Windows, environment variables should be case-insensitive;
         /// on Unix-like systems, they should be case-sensitive, but this might be a breaking change in an edge case.
         /// https://github.com/dotnet/msbuild/issues/12858
         /// </summary>
-        internal static StringComparer EnvironmentVariableComparer => StringComparer.OrdinalIgnoreCase;
+        internal static StringComparer EnvironmentVariableComparer => FrameworkCommunicationsUtilities.EnvironmentVariableComparer;
 
         /// <summary>
         /// Gets the node connection timeout.
@@ -742,99 +386,11 @@ namespace Microsoft.Build.Internal
         public static void Trace(int nodeId, FrameworkCommunicationsUtilities.TraceInterpolatedStringHandler message)
             => FrameworkCommunicationsUtilities.Trace(nodeId, message);
 
-        /// <summary>
-        /// Gets a hash code for this string.  If strings A and B are such that A.Equals(B), then
-        /// they will return the same hash code.
-        /// This is as implemented in CLR String.GetHashCode() [ndp\clr\src\BCL\system\String.cs]
-        /// but stripped out architecture specific defines
-        /// that causes the hashcode to be different and this causes problem in cross-architecture handshaking.
-        /// </summary>
+        /// <inheritdoc cref="FrameworkCommunicationsUtilities.GetHashCode(string)"/>
         internal static int GetHashCode(string fileVersion)
-        {
-            unsafe
-            {
-                fixed (char* src = fileVersion)
-                {
-                    int hash1 = (5381 << 16) + 5381;
-                    int hash2 = hash1;
+            => FrameworkCommunicationsUtilities.GetHashCode(fileVersion);
 
-                    int* pint = (int*)src;
-                    int len = fileVersion.Length;
-                    while (len > 0)
-                    {
-                        hash1 = ((hash1 << 5) + hash1 + (hash1 >> 27)) ^ pint[0];
-                        if (len <= 2)
-                        {
-                            break;
-                        }
-
-                        hash2 = ((hash2 << 5) + hash2 + (hash2 >> 27)) ^ pint[1];
-                        pint += 2;
-                        len -= 4;
-                    }
-
-                    return hash1 + (hash2 * 1566083941);
-                }
-            }
-        }
-
-        internal static int AvoidEndOfHandshakeSignal(int x) => x == EndOfHandshakeSignal ? ~x : x;
-    }
-
-    /// <summary>
-    /// Represents the components of a handshake in a structured format with named fields.
-    /// </summary>
-    internal readonly struct HandshakeComponents
-    {
-        private readonly int options;
-        private readonly int salt;
-        private readonly int fileVersionMajor;
-        private readonly int fileVersionMinor;
-        private readonly int fileVersionBuild;
-        private readonly int fileVersionPrivate;
-        private readonly int sessionId;
-
-        public HandshakeComponents(int options, int salt, int fileVersionMajor, int fileVersionMinor, int fileVersionBuild, int fileVersionPrivate, int sessionId)
-        {
-            this.options = options;
-            this.salt = salt;
-            this.fileVersionMajor = fileVersionMajor;
-            this.fileVersionMinor = fileVersionMinor;
-            this.fileVersionBuild = fileVersionBuild;
-            this.fileVersionPrivate = fileVersionPrivate;
-            this.sessionId = sessionId;
-        }
-
-        public HandshakeComponents(int options, int salt, int fileVersionMajor, int fileVersionMinor, int fileVersionBuild, int fileVersionPrivate)
-            : this(options, salt, fileVersionMajor, fileVersionMinor, fileVersionBuild, fileVersionPrivate, 0)
-        {
-        }
-
-        public int Options => options;
-
-        public int Salt => salt;
-
-        public int FileVersionMajor => fileVersionMajor;
-
-        public int FileVersionMinor => fileVersionMinor;
-
-        public int FileVersionBuild => fileVersionBuild;
-
-        public int FileVersionPrivate => fileVersionPrivate;
-
-        public int SessionId => sessionId;
-
-        public IEnumerable<KeyValuePair<string, int>> EnumerateComponents()
-        {
-            yield return new KeyValuePair<string, int>(nameof(Options), Options);
-            yield return new KeyValuePair<string, int>(nameof(Salt), Salt);
-            yield return new KeyValuePair<string, int>(nameof(FileVersionMajor), FileVersionMajor);
-            yield return new KeyValuePair<string, int>(nameof(FileVersionMinor), FileVersionMinor);
-            yield return new KeyValuePair<string, int>(nameof(FileVersionBuild), FileVersionBuild);
-            yield return new KeyValuePair<string, int>(nameof(FileVersionPrivate), FileVersionPrivate);
-            yield return new KeyValuePair<string, int>(nameof(SessionId), SessionId);
-        }
-
-        public override string ToString() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}";
+        internal static int AvoidEndOfHandshakeSignal(int x)
+            => FrameworkCommunicationsUtilities.AvoidEndOfHandshakeSignal(x);
     }
 }
