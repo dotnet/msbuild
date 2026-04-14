@@ -284,8 +284,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
-                System.Threading.Thread.Sleep(200);
-                File.SetLastWriteTime(resxFile, DateTime.Now);
+                System.Threading.Thread.Sleep(500);
+                // Use a timestamp slightly in the past so that when ExecuteTask writes the output,
+                // its filesystem timestamp is guaranteed to be >= this value even on Linux ext4
+                // where nanosecond-precision timestamps can cause sub-millisecond ordering inversions.
+                File.SetLastWriteTime(resxFile, DateTime.Now.AddMilliseconds(-100));
 
                 Utilities.ExecuteTask(t2);
 
@@ -334,8 +337,11 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
-                System.Threading.Thread.Sleep(200);
-                File.SetLastWriteTime(bitmap, DateTime.Now);
+                System.Threading.Thread.Sleep(500);
+                // Use a timestamp slightly in the past so that when ExecuteTask writes the output,
+                // its filesystem timestamp is guaranteed to be >= this value even on Linux ext4
+                // where nanosecond-precision timestamps can cause sub-millisecond ordering inversions.
+                File.SetLastWriteTime(bitmap, DateTime.Now.AddMilliseconds(-100));
 
                 Utilities.ExecuteTask(t2);
 
@@ -388,9 +394,12 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t2.StateFile = new TaskItem(createResources.StateFile.ItemSpec);
                 t2.Sources = new ITaskItem[] { new TaskItem(firstResx), new TaskItem(secondResx) };
 
-                System.Threading.Thread.Sleep(200);
+                System.Threading.Thread.Sleep(500);
                 _output.WriteLine("Touch one input");
-                File.SetLastWriteTime(firstResx, DateTime.Now);
+                // Use a timestamp slightly in the past so that when ExecuteTask writes the output,
+                // its filesystem timestamp is guaranteed to be >= this value even on Linux ext4
+                // where nanosecond-precision timestamps can cause sub-millisecond ordering inversions.
+                File.SetLastWriteTime(firstResx, DateTime.Now.AddMilliseconds(-100));
 
                 Utilities.ExecuteTask(t2);
 
@@ -462,7 +471,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
                 t2.StateFile = new TaskItem(t.StateFile);
                 t2.Sources = new ITaskItem[] { new TaskItem(resxFile) };
 
-                System.Threading.Thread.Sleep(200);
+                System.Threading.Thread.Sleep(500);
 
                 Utilities.ExecuteTask(t2);
 
@@ -521,7 +530,7 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
 
                 DateTime time = File.GetLastWriteTime(t.OutputResources[0].ItemSpec);
                 DateTime time2 = File.GetLastWriteTime(t.OutputResources[1].ItemSpec);
-                System.Threading.Thread.Sleep(200);
+                System.Threading.Thread.Sleep(500);
 
                 Utilities.ExecuteTask(t2);
                 // Although everything was up to date, OutputResources and FilesWritten
