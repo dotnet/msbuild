@@ -7,10 +7,6 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO.Pipes;
 
-#if RUNTIME_TYPE_NETCORE
-using System.Runtime.InteropServices;
-#endif
-
 #if FEATURE_SECURITY_PRINCIPAL_WINDOWS || RUNTIME_TYPE_NETCORE
 using System.Security.Principal;
 #endif
