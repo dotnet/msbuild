@@ -9,7 +9,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 
 #if !RUNTIME_TYPE_NETCORE
