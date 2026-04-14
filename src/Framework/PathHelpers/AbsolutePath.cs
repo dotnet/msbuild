@@ -120,7 +120,7 @@ namespace Microsoft.Build.Framework
         public static implicit operator string(AbsolutePath path) => path.Value;
 
         /// <summary>
-        /// Returns the canonical form of this path.
+        /// Returns the canonical form of this path, equivalent to calling <see cref="System.IO.Path.GetFullPath(string)"/>.
         /// </summary>
         /// <returns>
         /// An <see cref="AbsolutePath"/> representing the canonical form of the path.
@@ -132,12 +132,10 @@ namespace Microsoft.Build.Framework
         /// <list type="bullet">
         ///   <item>All relative path segments ("." and "..") are resolved.</item>
         ///   <item>Directory separators are normalized to the platform convention (backslash on Windows).</item>
-        ///   <item>Invalid path characters are rejected (throws the same exceptions as <see cref="System.IO.Path.GetFullPath(string)"/>).</item>
+        ///   <item>Invalid path characters are rejected.</item>
         /// </list>
         /// </para>
         /// <para>
-        /// This method explicitly uses <see cref="System.IO.Path"/> rather than the file-scoped Microsoft.IO import
-        /// to ensure consistent validation behavior with the .NET Framework BCL, which rejects characters like |, &lt;, &gt;, ".
         /// Preserves the OriginalValue of the current instance.
         /// </para>
         /// </remarks>
