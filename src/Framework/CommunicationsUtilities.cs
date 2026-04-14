@@ -7,8 +7,10 @@ using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.NET.StringTools;
 
 #nullable disable
@@ -45,7 +47,7 @@ namespace Microsoft.Build.Framework
         /// Case-insensitive string comparer for environment variable names.
         /// </summary>
         internal static StringComparer EnvironmentVariableComparer => StringComparer.OrdinalIgnoreCase;
-        
+
         /// <summary>
         /// A set of environment variables cached from the last time we called GetEnvironmentVariables.
         /// Used to avoid allocations if the environment has not changed.
@@ -317,6 +319,68 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        ///  Writes trace information to a log file.
+        /// </summary>
+        public static void Trace(string message)
+        {
+            if (s_trace)
+            {
+                TraceCore(nodeId: -1, message);
+            }
+        }
+
+        /// <inheritdoc cref="Trace(string)" />
+        public static void Trace(int nodeId, string message)
+        {
+            if (s_trace)
+            {
+                TraceCore(nodeId, message);
+            }
+        }
+
+        /// <inheritdoc cref="Trace(string)" />
+        public static void Trace(TraceInterpolatedStringHandler message)
+        {
+            if (s_trace)
+            {
+                TraceCore(nodeId: -1, message.GetFormattedText());
+            }
+        }
+
+        /// <inheritdoc cref="Trace(string)" />
+        public static void Trace(int nodeId, TraceInterpolatedStringHandler message)
+        {
+            if (s_trace)
+            {
+                TraceCore(nodeId, message.GetFormattedText());
+            }
+        }
+
+        [InterpolatedStringHandler]
+        public ref struct TraceInterpolatedStringHandler
+        {
+            private StringBuilderHelper _builder;
+
+            public TraceInterpolatedStringHandler(int literalLength, int formattedCount)
+            {
+                _builder = new(literalLength, condition: true);
+            }
+
+            public readonly void AppendLiteral(string value)
+                => _builder.AppendLiteral(value);
+
+            public readonly void AppendFormatted<TValue>(TValue value)
+                => _builder.AppendFormatted(value);
+
+            public readonly void AppendFormatted<TValue>(TValue value, string format)
+                where TValue : IFormattable
+                => _builder.AppendFormatted(value, format);
+
+            public readonly string GetFormattedText()
+                => _builder.GetFormattedText();
+        }
+
+        /// <summary>
         /// Writes trace information to a log file
         /// </summary>
         internal static void Trace<T>(string format, T arg0)
@@ -393,14 +457,6 @@ namespace Microsoft.Build.Framework
             }
         }
 
-        internal static void Trace(int nodeId, string message)
-        {
-            if (s_trace)
-            {
-                TraceCore(nodeId, message);
-            }
-        }
-
         /// <summary>
         /// Writes trace information to a log file
         /// </summary>
@@ -435,7 +491,8 @@ namespace Microsoft.Build.Framework
                         long now = DateTime.UtcNow.Ticks;
                         float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;
                         s_lastLoggedTicks = now;
-                        file.WriteLine("{0} (TID {1}) {2,15} +{3,10}ms: {4}", Thread.CurrentThread.Name, Thread.CurrentThread.ManagedThreadId, now, millisecondsSinceLastLog, message);
+
+                        file.WriteLine($"{Thread.CurrentThread.Name} (TID {Thread.CurrentThread.ManagedThreadId}) {now,15} +{millisecondsSinceLastLog,10}ms: {message}");
                     }
                 }
                 catch (IOException)

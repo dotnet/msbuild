@@ -775,6 +775,24 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
+        ///  Writes trace information to a log file.
+        /// </summary>
+        public static void Trace(string message)
+            => FrameworkCommunicationsUtilities.Trace(message);
+
+        /// <inheritdoc cref="Trace(string)" />
+        public static void Trace(int nodeId, string message)
+            => FrameworkCommunicationsUtilities.Trace(nodeId, message);
+
+        /// <inheritdoc cref="Trace(string)" />
+        public static void Trace(FrameworkCommunicationsUtilities.TraceInterpolatedStringHandler message)
+            => FrameworkCommunicationsUtilities.Trace(message);
+
+        /// <inheritdoc cref="Trace(string)" />
+        public static void Trace(int nodeId, FrameworkCommunicationsUtilities.TraceInterpolatedStringHandler message)
+            => FrameworkCommunicationsUtilities.Trace(nodeId, message);
+
+        /// <summary>
         /// Writes trace information to a log file
         /// </summary>
         internal static void Trace<T>(string format, T arg0)
@@ -821,9 +839,6 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal static void Trace(int nodeId, string format, params object[] args)
             => FrameworkCommunicationsUtilities.Trace(nodeId, format, args);
-
-        internal static void Trace(int nodeId, string message)
-            => FrameworkCommunicationsUtilities.Trace(nodeId, message);
 
         /// <summary>
         /// Gets a hash code for this string.  If strings A and B are such that A.Equals(B), then
