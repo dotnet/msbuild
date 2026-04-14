@@ -5,7 +5,6 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
