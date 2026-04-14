@@ -35,7 +35,6 @@
     <!-- Node communication -->
     <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
-    <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />

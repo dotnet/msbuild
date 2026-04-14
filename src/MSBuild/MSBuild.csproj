@@ -64,7 +64,6 @@
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
-    <Compile Include="..\Shared\INodePacket.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
