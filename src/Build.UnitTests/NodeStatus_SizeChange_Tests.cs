@@ -14,7 +14,6 @@ using static VerifyXunit.Verifier;
 
 namespace Microsoft.Build.CommandLine.UnitTests;
 
-[UsesVerify]
 [UseInvariantCulture]
 public class NodeStatus_SizeChange_Tests
 {
