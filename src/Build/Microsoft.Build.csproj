@@ -125,7 +125,6 @@
     </Compile>
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
-    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="BackEnd\BuildManager\BuildManager.cs" />

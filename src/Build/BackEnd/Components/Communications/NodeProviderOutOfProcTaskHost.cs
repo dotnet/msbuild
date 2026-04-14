@@ -20,6 +20,19 @@ using Constants = Microsoft.Build.Framework.Constants;
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
+    /// Represents a unique key for identifying task host nodes.
+    /// Combines HandshakeOptions (which specify runtime/architecture configuration) with
+    /// the scheduled node ID to uniquely identify task hosts in multi-threaded mode.
+    /// </summary>
+    /// <param name="HandshakeOptions">The handshake options specifying runtime and architecture configuration.</param>
+    /// <param name="NodeId">
+    /// The scheduled node ID. In traditional multi-proc builds, this is -1 (meaning the task host
+    /// is identified by HandshakeOptions alone). In multi-threaded mode, each in-proc node has
+    /// its own task host, so the node ID is used to distinguish them.
+    /// </param>
+    internal readonly record struct TaskHostNodeKey(HandshakeOptions HandshakeOptions, int NodeId);
+
+    /// <summary>
     /// The provider for out-of-proc nodes.  This manages the lifetime of external MSBuild.exe processes
     /// which act as child nodes for the build system.
     /// </summary>

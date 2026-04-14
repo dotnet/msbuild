@@ -703,7 +703,7 @@ namespace Microsoft.Build.CommandLine
             shutdownException = null;
 
             // Snapshot the current environment
-            _savedEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
+            _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
             _nodeReuse = nodeReuse;
             _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(nodeReuse, parentPacketVersion);
@@ -985,7 +985,7 @@ namespace Microsoft.Build.CommandLine
             // Restore the original environment, best effort.
             try
             {
-                FrameworkCommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
             }
             catch (Exception ex)
             {
@@ -1121,7 +1121,7 @@ namespace Microsoft.Build.CommandLine
                 {
                     _isTaskExecuting = false;
 
-                    IDictionary<string, string> currentEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
+                    IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
                     taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
@@ -1145,7 +1145,7 @@ namespace Microsoft.Build.CommandLine
 #endif
 
                     // Restore the original clean environment
-                    FrameworkCommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                    CommunicationsUtilities.SetEnvironment(_savedEnvironment);
                 }
                 catch (Exception e)
                 {
@@ -1234,7 +1234,7 @@ namespace Microsoft.Build.CommandLine
                 updatedEnvironment = environment;
             }
 
-            FrameworkCommunicationsUtilities.SetEnvironment(updatedEnvironment);
+            CommunicationsUtilities.SetEnvironment(updatedEnvironment);
         }
 
         /// <summary>

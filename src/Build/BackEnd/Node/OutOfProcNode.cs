@@ -500,7 +500,7 @@ namespace Microsoft.Build.Execution
             {
                 try
                 {
-                    FrameworkCommunicationsUtilities.SetEnvironment(_savedEnvironment);
+                    CommunicationsUtilities.SetEnvironment(_savedEnvironment);
                 }
                 catch (Exception ex)
                 {
@@ -714,7 +714,7 @@ namespace Microsoft.Build.Execution
             _buildParameters.ProjectRootElementCache = s_projectRootElementCacheBase;
 
             // Snapshot the current environment
-            _savedEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
+            _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
             // Change to the startup directory
             try

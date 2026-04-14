@@ -33,7 +33,6 @@
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <!-- Node communication -->
-    <Compile Include="..\Shared\CommunicationsUtilities.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />

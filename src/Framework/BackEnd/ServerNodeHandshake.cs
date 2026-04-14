@@ -5,7 +5,6 @@ using System;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Internal;
 
@@ -24,12 +23,12 @@ internal sealed class ServerNodeHandshake : Handshake
     }
 
     public override HandshakeComponents RetrieveHandshakeComponents() => new(
-        FrameworkCommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Options),
-        FrameworkCommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Salt),
-        FrameworkCommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMajor),
-        FrameworkCommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMinor),
-        FrameworkCommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionBuild),
-        FrameworkCommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionPrivate));
+        CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Options),
+        CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Salt),
+        CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMajor),
+        CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMinor),
+        CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionBuild),
+        CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionPrivate));
 
     public override string GetKey() => $"{_handshakeComponents.Options} {_handshakeComponents.Salt} {_handshakeComponents.FileVersionMajor} {_handshakeComponents.FileVersionMinor} {_handshakeComponents.FileVersionBuild} {_handshakeComponents.FileVersionPrivate}"
         .ToString(CultureInfo.InvariantCulture);

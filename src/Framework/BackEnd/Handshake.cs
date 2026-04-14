@@ -74,17 +74,17 @@ internal class Handshake
         toolsDirectory ??= BuildEnvironmentHelper.Instance.MSBuildToolsDirectoryRoot;
 
         // Build handshake options with version in upper bits
-        const int handshakeVersion = (int)FrameworkCommunicationsUtilities.handshakeVersion;
+        const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
         var options = (int)nodeType | (handshakeVersion << 24);
-        FrameworkCommunicationsUtilities.Trace($"Building handshake for node type {nodeType}, (version {handshakeVersion}): options {options}.");
+        CommunicationsUtilities.Trace($"Building handshake for node type {nodeType}, (version {handshakeVersion}): options {options}.");
 
         // Calculate salt from environment and tools directory
         string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
 
-        int salt = FrameworkCommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
+        int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
 
-        FrameworkCommunicationsUtilities.Trace($"Handshake salt is {handshakeSalt}");
-        FrameworkCommunicationsUtilities.Trace($"Tools directory root is {toolsDirectory}");
+        CommunicationsUtilities.Trace($"Handshake salt is {handshakeSalt}");
+        CommunicationsUtilities.Trace($"Tools directory root is {toolsDirectory}");
 
         // Get session ID if needed (expensive call)
         int sessionId = 0;
@@ -135,17 +135,17 @@ internal class Handshake
     }
 
     public virtual HandshakeComponents RetrieveHandshakeComponents() => new(
-        FrameworkCommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Options),
-        FrameworkCommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Salt),
-        FrameworkCommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMajor),
-        FrameworkCommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMinor),
-        FrameworkCommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionBuild),
-        FrameworkCommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionPrivate),
-        FrameworkCommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.SessionId));
+        CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Options),
+        CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.Salt),
+        CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMajor),
+        CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionMinor),
+        CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionBuild),
+        CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.FileVersionPrivate),
+        CommunicationsUtilities.AvoidEndOfHandshakeSignal(_handshakeComponents.SessionId));
 
     public virtual string GetKey()
         => $"{_handshakeComponents.Options} {_handshakeComponents.Salt} {_handshakeComponents.FileVersionMajor} {_handshakeComponents.FileVersionMinor} {_handshakeComponents.FileVersionBuild} {_handshakeComponents.FileVersionPrivate} {_handshakeComponents.SessionId}".ToString(CultureInfo.InvariantCulture);
 
     public virtual byte? ExpectedVersionInFirstByte
-        => FrameworkCommunicationsUtilities.handshakeVersion;
+        => CommunicationsUtilities.handshakeVersion;
 }

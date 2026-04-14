@@ -12,6 +12,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Graph;
+using Microsoft.Build.Internal;
 using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -284,7 +285,7 @@ namespace Microsoft.Build.Execution
             _enableNodeReuse = other._enableNodeReuse;
             _enableRarNode = other._enableRarNode;
             _buildProcessEnvironment = resetEnvironment
-                ? FrameworkCommunicationsUtilities.GetEnvironmentVariables()
+                ? CommunicationsUtilities.GetEnvironmentVariables()
                 : other._buildProcessEnvironment;
             _environmentProperties = other._environmentProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._environmentProperties) : null;
             _forwardingLoggers = other._forwardingLoggers != null ? new List<ForwardingLoggerRecord>(other._forwardingLoggers) : null;
@@ -1003,7 +1004,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void Initialize(PropertyDictionary<ProjectPropertyInstance> environmentProperties, ProjectRootElementCacheBase projectRootElementCache, ToolsetProvider toolsetProvider)
         {
-            _buildProcessEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
+            _buildProcessEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
             _environmentProperties = environmentProperties;
             ProjectRootElementCache = projectRootElementCache;
             ResetCaches = true;
