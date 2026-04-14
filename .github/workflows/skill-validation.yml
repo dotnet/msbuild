@@ -109,6 +109,10 @@ jobs:
             echo ""
             if [ "$rc" -eq 0 ]; then
               echo "All checks passed."
+              echo ""
+              skill_count=$(find .github/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+              agent_count=$(find .github/agents -name '*.agent.md' 2>/dev/null | wc -l)
+              echo "Validated **${skill_count}** skill(s) and **${agent_count}** agent(s)."
             else
               for f in skill-check-skills.txt skill-check-agents.txt; do
                 if [ -f "$f" ]; then
@@ -128,10 +132,13 @@ jobs:
         if: always()
         run: |
           mkdir -p sv-results
+          skill_count=$(find .github/skills -mindepth 1 -maxdepth 1 -type d 2>/dev/null | wc -l)
+          agent_count=$(find .github/agents -name '*.agent.md' 2>/dev/null | wc -l)
+          total=$((skill_count + agent_count))
           echo "${{ github.event.pull_request.number }}" > sv-results/pr-number.txt
-          echo "13" > sv-results/skill-count.txt
-          echo "1" > sv-results/agent-count.txt
-          echo "14" > sv-results/total.txt
+          echo "$skill_count" > sv-results/skill-count.txt
+          echo "$agent_count" > sv-results/agent-count.txt
+          echo "$total" > sv-results/total.txt
           echo "${{ steps.check.outputs.exit_code }}" > sv-results/exit-code.txt
           if [ -f sv-output.txt ]; then
             cp sv-output.txt sv-results/sv-output.txt
