@@ -419,12 +419,10 @@ namespace Microsoft.Build.Internal
         internal static StringComparer EnvironmentVariableComparer => StringComparer.OrdinalIgnoreCase;
 
         /// <summary>
-        /// Gets or sets the node connection timeout.
-        /// </summary>
+        /// Gets the node connection timeout.
+        /// </summary>e
         internal static int NodeConnectionTimeout
-        {
-            get { return GetIntegerVariableOrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout); }
-        }
+            => EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDNODECONNECTIONTIMEOUT", DefaultNodeConnectionTimeout);
 
 #nullable enable
         /// <summary>
@@ -720,7 +718,7 @@ namespace Microsoft.Build.Internal
             // to the username check which is also done on connection.
             if (
 #if RUNTIME_TYPE_NETCORE
-                RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
+                NativeMethodsShared.IsWindows &&
 #endif
                 new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
             {
@@ -728,26 +726,6 @@ namespace Microsoft.Build.Internal
             }
 #endif
             return context;
-        }
-
-        /// <summary>
-        /// Gets the value of an integer environment variable, or returns the default if none is set or it cannot be converted.
-        /// </summary>
-        internal static int GetIntegerVariableOrDefault(string environmentVariable, int defaultValue)
-        {
-            string environmentValue = Environment.GetEnvironmentVariable(environmentVariable);
-            if (String.IsNullOrEmpty(environmentValue))
-            {
-                return defaultValue;
-            }
-
-            int localDefaultValue;
-            if (Int32.TryParse(environmentValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out localDefaultValue))
-            {
-                defaultValue = localDefaultValue;
-            }
-
-            return defaultValue;
         }
 
         /// <summary>

@@ -2584,7 +2584,8 @@ namespace Microsoft.Build.CommandLine
         private static bool IsAutomatedEnvironment()
         {
             // Check for common CI environment indicators that use boolean values
-            if (Traits.IsEnvVarOneOrTrue("CI") || Traits.IsEnvVarOneOrTrue("GITHUB_ACTIONS"))
+            if (EnvironmentUtilities.IsValueOneOrTrue("CI") ||
+                EnvironmentUtilities.IsValueOneOrTrue("GITHUB_ACTIONS"))
             {
                 return true;
             }

@@ -92,4 +92,28 @@ internal static partial class EnvironmentUtilities
             propertyName.StartsWith("COMPLUS_", StringComparison.OrdinalIgnoreCase) ||
             propertyName.StartsWith("DOTNET_", StringComparison.OrdinalIgnoreCase);
     }
+
+    public static int GetValueAsInt32OrDefault(string name, int defaultValue)
+    {
+        string? value = Environment.GetEnvironmentVariable(name);
+
+        return !string.IsNullOrEmpty(value) && int.TryParse(value, out int result)
+            ? result
+            : defaultValue;
+    }
+
+    public static bool ValueExistsOrDefault(string name, bool defaultValue)
+    {
+        string? value = Environment.GetEnvironmentVariable(name);
+
+        return !string.IsNullOrEmpty(value) || defaultValue;
+    }
+
+    internal static bool IsValueOneOrTrue(string name)
+    {
+        string? value = Environment.GetEnvironmentVariable(name);
+
+        return value != null &&
+               (value == "1" || value.Equals("true", StringComparison.OrdinalIgnoreCase));
+    }
 }
