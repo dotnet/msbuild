@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Frozen;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -390,33 +389,32 @@ namespace Microsoft.Build.Framework
             {
                 s_debugDumpPath ??= FrameworkDebugUtils.DebugPath;
 
-                if (String.IsNullOrEmpty(s_debugDumpPath))
+                if (!string.IsNullOrEmpty(s_debugDumpPath))
                 {
-                    s_debugDumpPath = FileUtilities.TempFileDirectory;
+                    Directory.CreateDirectory(s_debugDumpPath);
                 }
                 else
                 {
-                    Directory.CreateDirectory(s_debugDumpPath);
+                    // Note: FileUtilities.TempFileDirectory ensures the directory exists,
+                    // so we don't need to create it in that case.
+                    s_debugDumpPath = FileUtilities.TempFileDirectory;
                 }
 
                 try
                 {
-                    string fileName = @"MSBuild_CommTrace_PID_{0}";
-                    if (nodeId != -1)
-                    {
-                        fileName += "_node_" + nodeId;
-                    }
+                    string fileName = nodeId != -1
+                        ? $"MSBuild_CommTrace_PID_{EnvironmentUtilities.CurrentProcessId}.txt"
+                        : $"MSBuild_CommTrace_PID_{EnvironmentUtilities.CurrentProcessId}_node_{nodeId}.txt";
 
-                    fileName += ".txt";
+                    string filePath = Path.Combine(s_debugDumpPath, fileName);
 
-                    using (StreamWriter file = FileUtilities.OpenWrite(
-                        string.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), EnvironmentUtilities.CurrentProcessId, nodeId), append: true))
+                    using (StreamWriter writer = FileUtilities.OpenWrite(filePath, append: true))
                     {
                         long now = DateTime.UtcNow.Ticks;
                         float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;
                         s_lastLoggedTicks = now;
 
-                        file.WriteLine($"{Thread.CurrentThread.Name} (TID {Thread.CurrentThread.ManagedThreadId}) {now,15} +{millisecondsSinceLastLog,10}ms: {message}");
+                        writer.WriteLine($"{Thread.CurrentThread.Name} (TID {Environment.CurrentManagedThreadId}) {now,15} +{millisecondsSinceLastLog,10}ms: {message}");
                     }
                 }
                 catch (IOException)
