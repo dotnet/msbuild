@@ -2158,69 +2158,80 @@ namespace Microsoft.Build.Execution
                 // SuperFast: try to reuse a cached graph from a prior build in the same server process.
                 if (_buildParameters!.SuperFast && submission.BuildRequestData.ProjectGraphEntryPoints is not null)
                 {
-                    projectGraph = ProjectGraphCache.TryGet(submission.BuildRequestData.ProjectGraphEntryPoints);
+                    var cachedGraph = ProjectGraphCache.TryGet(submission.BuildRequestData.ProjectGraphEntryPoints);
+                    if (cachedGraph != null)
+                    {
+                        // Deep-copy each node's ProjectInstance so target execution
+                        // mutations don't corrupt the cached originals.
+                        foreach (ProjectGraphNode node in cachedGraph.ProjectNodes)
+                        {
+                            node.ProjectInstance = node.ProjectInstance.DeepCopy();
+                        }
+
+                        projectGraph = cachedGraph;
+                    }
                 }
 
                 if (projectGraph == null)
                 {
-                projectGraph = new ProjectGraph(
-                    submission.BuildRequestData.ProjectGraphEntryPoints,
-                    ProjectCollection.GlobalProjectCollection,
-                    (path, properties, collection) =>
-                    {
-                        ProjectLoadSettings projectLoadSettings = _buildParameters!.ProjectLoadSettings;
-                        if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
+                    projectGraph = new ProjectGraph(
+                        submission.BuildRequestData.ProjectGraphEntryPoints,
+                        ProjectCollection.GlobalProjectCollection,
+                        (path, properties, collection) =>
                         {
-                            projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
-                        }
-
-                        if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.FailOnUnresolvedSdk))
-                        {
-                            projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
-                        }
-
-                        // SuperFast: try evaluation cache before doing fresh evaluation.
-                        if (_buildParameters.SuperFast)
-                        {
-                            var cached = Evaluation.ProjectInstanceCache.TryGet(path, properties);
-                            if (cached != null)
+                            ProjectLoadSettings projectLoadSettings = _buildParameters!.ProjectLoadSettings;
+                            if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.IgnoreMissingEmptyAndInvalidImports))
                             {
-                                return cached;
+                                projectLoadSettings |= ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreInvalidImports | ProjectLoadSettings.IgnoreEmptyImports;
                             }
-                        }
 
-                        var instance = new ProjectInstance(
-                            path,
-                            properties,
-                            null,
-                            _buildParameters,
-                            ((IBuildComponentHost)this).LoggingService,
-                            new BuildEventContext(
+                            if (submission.BuildRequestData.Flags.HasFlag(BuildRequestDataFlags.FailOnUnresolvedSdk))
+                            {
+                                projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
+                            }
+
+                            // SuperFast: try evaluation cache before doing fresh evaluation.
+                            if (_buildParameters.SuperFast)
+                            {
+                                var cached = Evaluation.ProjectInstanceCache.TryGet(path, properties);
+                                if (cached != null)
+                                {
+                                    return cached;
+                                }
+                            }
+
+                            var instance = new ProjectInstance(
+                                path,
+                                properties,
+                                null,
+                                _buildParameters,
+                                ((IBuildComponentHost)this).LoggingService,
+                                new BuildEventContext(
+                                    submission.SubmissionId,
+                                    _buildParameters.NodeId,
+                                    BuildEventContext.InvalidEvaluationId,
+                                    BuildEventContext.InvalidProjectInstanceId,
+                                    BuildEventContext.InvalidProjectContextId,
+                                    BuildEventContext.InvalidTargetId,
+                                    BuildEventContext.InvalidTaskId),
+                                SdkResolverService,
                                 submission.SubmissionId,
-                                _buildParameters.NodeId,
-                                BuildEventContext.InvalidEvaluationId,
-                                BuildEventContext.InvalidProjectInstanceId,
-                                BuildEventContext.InvalidProjectContextId,
-                                BuildEventContext.InvalidTargetId,
-                                BuildEventContext.InvalidTaskId),
-                            SdkResolverService,
-                            submission.SubmissionId,
-                            projectLoadSettings);
+                                projectLoadSettings);
 
-                        // SuperFast: cache the freshly evaluated instance.
-                        if (_buildParameters.SuperFast)
-                        {
-                            Evaluation.ProjectInstanceCache.Store(path, properties, instance);
-                        }
+                            // SuperFast: cache the freshly evaluated instance.
+                            if (_buildParameters.SuperFast)
+                            {
+                                Evaluation.ProjectInstanceCache.Store(path, properties, instance);
+                            }
 
-                        return instance;
-                    });
+                            return instance;
+                        });
 
-                // SuperFast: cache the constructed graph for reuse in subsequent server builds.
-                if (_buildParameters.SuperFast && submission.BuildRequestData.ProjectGraphEntryPoints is not null)
-                {
-                    ProjectGraphCache.Store(submission.BuildRequestData.ProjectGraphEntryPoints, projectGraph);
-                }
+                    // SuperFast: cache the constructed graph for reuse in subsequent builds.
+                    if (_buildParameters.SuperFast && submission.BuildRequestData.ProjectGraphEntryPoints is not null)
+                    {
+                        ProjectGraphCache.Store(submission.BuildRequestData.ProjectGraphEntryPoints, projectGraph);
+                    }
                 }
             }
 

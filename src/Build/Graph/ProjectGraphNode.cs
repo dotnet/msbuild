@@ -44,7 +44,7 @@ namespace Microsoft.Build.Graph
         /// <summary>
         /// Gets the evaluated project instance represented by this node in the graph.
         /// </summary>
-        public ProjectInstance ProjectInstance { get; }
+        public ProjectInstance ProjectInstance { get; internal set; }
 
         private string DebugString()
         {
