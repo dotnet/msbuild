@@ -361,9 +361,10 @@ namespace Microsoft.Build.Framework
         {
             private StringBuilderHelper _builder;
 
-            public TraceInterpolatedStringHandler(int literalLength, int formattedCount)
+            public TraceInterpolatedStringHandler(int literalLength, int formattedCount, out bool isEnabled)
             {
-                _builder = new(literalLength, condition: true);
+                isEnabled = s_trace;
+                _builder = isEnabled ? new(literalLength) : default;
             }
 
             public readonly void AppendLiteral(string value)
@@ -378,83 +379,6 @@ namespace Microsoft.Build.Framework
 
             public readonly string GetFormattedText()
                 => _builder.GetFormattedText();
-        }
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace<T>(string format, T arg0)
-        {
-            Trace(nodeId: -1, format, arg0);
-        }
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace<T>(int nodeId, string format, T arg0)
-        {
-            if (s_trace)
-            {
-                TraceCore(nodeId, string.Format(format, arg0));
-            }
-        }
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace<T0, T1>(string format, T0 arg0, T1 arg1)
-        {
-            Trace(nodeId: -1, format, arg0, arg1);
-        }
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace<T0, T1>(int nodeId, string format, T0 arg0, T1 arg1)
-        {
-            if (s_trace)
-            {
-                TraceCore(nodeId, string.Format(format, arg0, arg1));
-            }
-        }
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace<T0, T1, T2>(string format, T0 arg0, T1 arg1, T2 arg2)
-        {
-            Trace(nodeId: -1, format, arg0, arg1, arg2);
-        }
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace<T0, T1, T2>(int nodeId, string format, T0 arg0, T1 arg1, T2 arg2)
-        {
-            if (s_trace)
-            {
-                TraceCore(nodeId, string.Format(format, arg0, arg1, arg2));
-            }
-        }
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace(string format, params object[] args)
-        {
-            Trace(nodeId: -1, format, args);
-        }
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace(int nodeId, string format, params object[] args)
-        {
-            if (s_trace)
-            {
-                string message = string.Format(CultureInfo.CurrentCulture, format, args);
-                TraceCore(nodeId, message);
-            }
         }
 
         /// <summary>

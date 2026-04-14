@@ -456,7 +456,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private NodeEngineShutdownReason HandleShutdown(out Exception exception)
         {
-            CommunicationsUtilities.Trace("Shutting down with reason: {0}, and exception: {1}.", _shutdownReason, _shutdownException);
+            CommunicationsUtilities.Trace($"Shutting down with reason: {_shutdownReason}, and exception: {_shutdownException}.");
 
             MSBuildEventSource.Log.OutOfProcNodeShutDownStart();
 
@@ -504,7 +504,7 @@ namespace Microsoft.Build.Execution
                 }
                 catch (Exception ex)
                 {
-                    CommunicationsUtilities.Trace("Failed to restore the original environment: {0}.", ex);
+                    CommunicationsUtilities.Trace($"Failed to restore the original environment: {ex}.");
                 }
                 Traits.UpdateFromEnvironment();
             }

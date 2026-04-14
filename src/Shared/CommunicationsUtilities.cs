@@ -272,15 +272,15 @@ namespace Microsoft.Build.Internal
             // Build handshake options with version in upper bits
             const int handshakeVersion = (int)CommunicationsUtilities.handshakeVersion;
             var options = (int)nodeType | (handshakeVersion << 24);
-            CommunicationsUtilities.Trace("Building handshake for node type {0}, (version {1}): options {2}.", nodeType, handshakeVersion, options);
+            CommunicationsUtilities.Trace($"Building handshake for node type {nodeType}, (version {handshakeVersion}): options {options}.");
 
             // Calculate salt from environment and tools directory
             string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
 
             int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
 
-            CommunicationsUtilities.Trace("Handshake salt is {0}", handshakeSalt);
-            CommunicationsUtilities.Trace("Tools directory root is {0}", toolsDirectory);
+            CommunicationsUtilities.Trace($"Handshake salt is {handshakeSalt}");
+            CommunicationsUtilities.Trace($"Tools directory root is {toolsDirectory}");
 
             // Get session ID if needed (expensive call)
             int sessionId = 0;
@@ -502,7 +502,7 @@ namespace Microsoft.Build.Internal
 
                     byte childVersion = (byte)versionResult.Value;
                     negotiatedPacketVersion = NodePacketTypeExtensions.GetNegotiatedPacketVersion(childVersion);
-                    Trace("Node PacketVersion: {0}, Local: {1}, Negotiated: {2}", childVersion, NodePacketTypeExtensions.PacketVersion, negotiatedPacketVersion);
+                    Trace($"Node PacketVersion: {childVersion}, Local: {NodePacketTypeExtensions.PacketVersion}, Negotiated: {negotiatedPacketVersion}");
 
                     if (!stream.TryReadIntForHandshake(
                             byteToAccept: null,
@@ -791,54 +791,6 @@ namespace Microsoft.Build.Internal
         /// <inheritdoc cref="Trace(string)" />
         public static void Trace(int nodeId, FrameworkCommunicationsUtilities.TraceInterpolatedStringHandler message)
             => FrameworkCommunicationsUtilities.Trace(nodeId, message);
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace<T>(string format, T arg0)
-            => FrameworkCommunicationsUtilities.Trace(format, arg0);
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace<T>(int nodeId, string format, T arg0)
-            => FrameworkCommunicationsUtilities.Trace(nodeId, format, arg0);
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace<T0, T1>(string format, T0 arg0, T1 arg1)
-            => FrameworkCommunicationsUtilities.Trace(format, arg0, arg1);
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace<T0, T1>(int nodeId, string format, T0 arg0, T1 arg1)
-            => FrameworkCommunicationsUtilities.Trace(nodeId, format, arg0, arg1);
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace<T0, T1, T2>(string format, T0 arg0, T1 arg1, T2 arg2)
-            => FrameworkCommunicationsUtilities.Trace(format, arg0, arg1, arg2);
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace<T0, T1, T2>(int nodeId, string format, T0 arg0, T1 arg1, T2 arg2)
-            => FrameworkCommunicationsUtilities.Trace(nodeId, format, arg0, arg1, arg2);
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace(string format, params object[] args)
-            => FrameworkCommunicationsUtilities.Trace(format, args);
-
-        /// <summary>
-        /// Writes trace information to a log file
-        /// </summary>
-        internal static void Trace(int nodeId, string format, params object[] args)
-            => FrameworkCommunicationsUtilities.Trace(nodeId, format, args);
 
         /// <summary>
         /// Gets a hash code for this string.  If strings A and B are such that A.Equals(B), then

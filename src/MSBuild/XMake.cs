@@ -377,7 +377,7 @@ namespace Microsoft.Build.CommandLine
             }
             catch (Exception ex)
             {
-                CommunicationsUtilities.Trace("Unexpected exception during command line parsing. Can not determine if it is allowed to use Server. Fall back to old behavior. Exception: {0}", ex);
+                CommunicationsUtilities.Trace($"Unexpected exception during command line parsing. Can not determine if it is allowed to use Server. Fall back to old behavior. Exception: {ex}");
                 if (KnownTelemetry.PartialBuildTelemetry != null)
                 {
                     KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "ErrorParsingCommandLine";
@@ -2730,12 +2730,12 @@ namespace Microsoft.Build.CommandLine
                 }
                 catch (FormatException ex)
                 {
-                    CommunicationsUtilities.Trace("Invalid node packet version value '{0}': {1}", parameters[parameters.Length - 1], ex.Message);
+                    CommunicationsUtilities.Trace($"Invalid node packet version value '{parameters[parameters.Length - 1]}': {ex.Message}");
                 }
                 catch (OverflowException ex)
                 {
                     // Value too large for byte - log and continue with default
-                    CommunicationsUtilities.Trace("Node packet version value '{0}' out of range: {1}", parameters[parameters.Length - 1], ex.Message);
+                    CommunicationsUtilities.Trace($"Node packet version value '{parameters[parameters.Length - 1]}' out of range: {ex.Message}");
                 }
             }
 

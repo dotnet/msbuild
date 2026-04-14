@@ -10,39 +10,22 @@ namespace Microsoft.Build.Framework.Utilities;
 /// <summary>
 ///  Helper struct to use with custom interpolated string handlers.
 /// </summary>
-internal ref struct StringBuilderHelper
+internal ref struct StringBuilderHelper(int capacity)
 {
-    private StringBuilder? _builder;
-
-    public StringBuilderHelper(int capacity, bool condition)
-    {
-        if (condition)
-        {
-            _builder = StringBuilderCache.Acquire(capacity);
-        }
-    }
+    private StringBuilder? _builder = StringBuilderCache.Acquire(capacity);
 
     public readonly void AppendLiteral(string value)
-        => _builder!.Append(value);
+        => _builder?.Append(value);
 
     public readonly void AppendFormatted<T>(T value)
-        => _builder!.Append(value?.ToString());
+        => _builder?.Append(value?.ToString());
 
     public readonly void AppendFormatted<TValue>(TValue value, string format)
         where TValue : IFormattable
-        => _builder!.Append(value?.ToString(format, formatProvider: null));
+        => _builder?.Append(value?.ToString(format, formatProvider: null));
 
     public string GetFormattedText()
-    {
-        var builder = Interlocked.Exchange(ref _builder, null);
-
-        if (builder is not null)
-        {
-            return StringBuilderCache.GetStringAndRelease(builder);
-        }
-
-        // GetFormattedText() should never be called if the condition passed in was false.
-        FrameworkErrorUtilities.ThrowInternalError("Unreachable code path.");
-        return null;
-    }
+        => Interlocked.Exchange(ref _builder, null) is { } builder
+            ? StringBuilderCache.GetStringAndRelease(builder)
+            : string.Empty;
 }

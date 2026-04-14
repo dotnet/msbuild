@@ -654,7 +654,7 @@ namespace Microsoft.Build.BackEnd
             // when the provider is shut down.
             if (!_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
             {
-                CommunicationsUtilities.Trace("DisconnectFromHost: Node context already removed for key: {0}", nodeKey);
+                CommunicationsUtilities.Trace($"DisconnectFromHost: Node context already removed for key: {nodeKey}");
                 return;
             }
 
@@ -687,7 +687,7 @@ namespace Microsoft.Build.BackEnd
                 return default;
             }
 
-            CommunicationsUtilities.Trace("For a host context of {0}, spawning executable from {1}.", hostContext, nodeLaunchData.MSBuildLocation);
+            CommunicationsUtilities.Trace($"For a host context of {hostContext}, spawning executable from {nodeLaunchData.MSBuildLocation}.");
 
             IList<NodeContext> nodeContexts = GetNodes(
                 nodeLaunchData,
@@ -771,7 +771,7 @@ namespace Microsoft.Build.BackEnd
 
             if (FileSystems.Default.FileExists(appHostPath))
             {
-                CommunicationsUtilities.Trace("For a host context of {0}, using app host from {1}.", hostContext, appHostPath);
+                CommunicationsUtilities.Trace($"For a host context of {hostContext}, using app host from {appHostPath}.");
 
                 IDictionary<string, string> dotnetOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(dotnetHostPath);
 
@@ -793,7 +793,7 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            CommunicationsUtilities.Trace("For a host context of {0}, app host not found at {1}, falling back to dotnet.exe from {2}.", hostContext, appHostPath, resolvedDotnetHostPath);
+            CommunicationsUtilities.Trace($"For a host context of {hostContext}, app host not found at {appHostPath}, falling back to dotnet.exe from {resolvedDotnetHostPath}.");
 
             return new NodeLaunchData(
                 resolvedDotnetHostPath,
