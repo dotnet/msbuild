@@ -46,7 +46,8 @@ namespace Microsoft.Build.Evaluation
                 return null;
             }
 
-            return entry.Instance;
+            // Return a deep clone so target execution mutations don't corrupt the cached original.
+            return entry.Instance.DeepCopy();
         }
 
         /// <summary>

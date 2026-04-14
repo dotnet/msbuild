@@ -183,7 +183,14 @@ namespace Microsoft.Build.Experimental
                 }
 
                 // Connect to server.
-                if (!TryConnectToServer(serverIsAlreadyRunning ? 1_000 : 20_000))
+                int connectTimeout = serverIsAlreadyRunning ? 1_000 : 20_000;
+                string? envTimeout = Environment.GetEnvironmentVariable("MSBUILDSERVERCONNECTTIMEOUT");
+                if (!string.IsNullOrEmpty(envTimeout) && int.TryParse(envTimeout, out int parsedTimeout))
+                {
+                    connectTimeout = parsedTimeout;
+                }
+
+                if (!TryConnectToServer(connectTimeout))
                 {
                     return _exitResult;
                 }

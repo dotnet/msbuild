@@ -311,6 +311,23 @@ namespace Microsoft.Build.CommandLine
 
             int exitCode;
 
+            // SuperFast mode implies server mode for cross-invocation caching.
+            bool isSuperFast = args.Any(a =>
+                a.EndsWith("-superfast", StringComparison.OrdinalIgnoreCase) ||
+                a.EndsWith("-sf", StringComparison.OrdinalIgnoreCase) ||
+                a.StartsWith("-superfast:", StringComparison.OrdinalIgnoreCase) ||
+                a.StartsWith("/superfast", StringComparison.OrdinalIgnoreCase) ||
+                a.StartsWith("-sf:", StringComparison.OrdinalIgnoreCase) ||
+                a.StartsWith("/sf:", StringComparison.OrdinalIgnoreCase));
+
+            if (isSuperFast)
+            {
+                // SuperFast requires server mode for cross-invocation caching of evaluations and graph.
+                Environment.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "1");
+                // Use a short server connect timeout so fallback to in-process is fast.
+                Environment.SetEnvironmentVariable("MSBUILDSERVERCONNECTTIMEOUT", "2000");
+            }
+
             if (
                 Environment.GetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName) == "1" &&
                 !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout &&
@@ -318,9 +335,26 @@ namespace Microsoft.Build.CommandLine
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
-
-                // Use the client app to execute build in msbuild server. Opt-in feature.
-                exitCode = ((s_initialized && MSBuildClientApp.Execute(args, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
+                if (isSuperFast)
+                {
+                    // SuperFast: try server mode, but fall back to in-process if server can't connect.
+                    // Server connection can fail due to version mismatch during development.
+                    // In production (SDK ships with matching MSBuild), this always succeeds.
+                    try
+                    {
+                        exitCode = ((s_initialized && MSBuildClientApp.Execute(args, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
+                    }
+                    catch (Exception)
+                    {
+                        // Server unavailable — fall back to in-process graph build with caching.
+                        exitCode = ((s_initialized && Execute(args) == ExitType.Success) ? 0 : 1);
+                    }
+                }
+                else
+                {
+                    // Use the client app to execute build in msbuild server. Opt-in feature.
+                    exitCode = ((s_initialized && MSBuildClientApp.Execute(args, s_buildCancellationSource.Token) == ExitType.Success) ? 0 : 1);
+                }
             }
             else
             {
