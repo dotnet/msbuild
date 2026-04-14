@@ -74,6 +74,10 @@
   <Project Path="src/MSBuild.Bootstrap/MSBuild.Bootstrap.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="src/MSBuild.Coordinator.UnitTests/MSBuild.Coordinator.UnitTests.csproj" Id="a6947a1c-6f87-47de-a23f-519b9e05af47">
+    <Platform Solution="*|ARM64" Project="arm64" />
+    <Platform Solution="*|x64" Project="x64" />
+  </Project>
   <Project Path="src/MSBuild.Coordinator/MSBuild.Coordinator.csproj" Id="96b6c6a6-8219-4c15-b296-c30c6222ca02">
     <Platform Solution="*|ARM64" Project="arm64" />
     <Platform Solution="*|x64" Project="x64" />
