@@ -106,95 +106,82 @@ namespace Microsoft.Build.UnitTests
             // See logic around showTargetOutputs.
             // In short, this controls whether or not the "Target output items:" part is shown.
             // Traits.Instance is weird, it's not always a singleton, depending on whether or not BuildEnvironmentState.s_runningTests is true.
-            // The s_runningTests check is also not that straightforward.
-            // Calls to ResetInstance_ForUnitTestsOnly (by tests that ran earlier than this test) might end up setting s_runningTests to false.
-            // So the current approach is extremely vulnerable to the order of tests being run, and also for test filters.
-            // When s_runningTests is true, we don't use a singleton, and in this case, one logger shows target outputs while the other doesn't.
-            // When s_runningTests is false, Traits.Instance is truly a singleton and so both see the same value.
-            // To stabilize this specific test, we explicitly set EnableTargetOutputLogging to true so we guarantee that both loggers see the same value.
-            // Long-term, unifying s_runningTests to always be true in unit tests (or even removing it completely, if possible) is the best approach.
-            var initialEnableTargetOutputLogging = Traits.Instance.EnableTargetOutputLogging;
+            // In this case s_runningTests is true.
+            // When s_runningTests is true, we don't use a singleton, and in this case, what matters is the env variable value.
+            // So we set the env variable to 1 and clear at the end of test.
             using var env = TestEnvironment.Create();
-            try
+            env.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "1");
+
+            var binaryLogger = new BinaryLogger();
+
+            binaryLogger.Parameters = _logFile;
+
+            var mockLogFromBuild = new MockLogger();
+
+            var parallelFromBuildText = new StringBuilder();
+            var parallelFromBuild = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromBuildText.Append(t), colorSet: null, colorReset: null);
+            parallelFromBuild.Parameters = "NOPERFORMANCESUMMARY";
+
+            // build and log into binary logger, mock logger and parallel console loggers
+            // no logging on evaluation
+            using (ProjectCollection collection = new())
             {
-                env.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "1");
-                Traits.Instance.EnableTargetOutputLogging = true;
+                Project project = ObjectModelHelpers.CreateInMemoryProject(collection, projectText);
+                project.Build(new ILogger[] { binaryLogger, mockLogFromBuild, parallelFromBuild }).ShouldBeTrue();
+            }
 
-                var binaryLogger = new BinaryLogger();
-
-                binaryLogger.Parameters = _logFile;
-
-                var mockLogFromBuild = new MockLogger();
-
-                var parallelFromBuildText = new StringBuilder();
-                var parallelFromBuild = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromBuildText.Append(t), colorSet: null, colorReset: null);
-                parallelFromBuild.Parameters = "NOPERFORMANCESUMMARY";
-
-                // build and log into binary logger, mock logger and parallel console loggers
-                // no logging on evaluation
-                using (ProjectCollection collection = new())
-                {
-                    Project project = ObjectModelHelpers.CreateInMemoryProject(collection, projectText);
-                    project.Build(new ILogger[] { binaryLogger, mockLogFromBuild, parallelFromBuild }).ShouldBeTrue();
-                }
-
-                string fileToReplay;
-                switch (replayMode)
-                {
-                    case BinlogRoundtripTestReplayMode.NoReplay:
-                        fileToReplay = _logFile;
-                        break;
-                    case BinlogRoundtripTestReplayMode.Structured:
-                    case BinlogRoundtripTestReplayMode.RawEvents:
+            string fileToReplay;
+            switch (replayMode)
+            {
+                case BinlogRoundtripTestReplayMode.NoReplay:
+                    fileToReplay = _logFile;
+                    break;
+                case BinlogRoundtripTestReplayMode.Structured:
+                case BinlogRoundtripTestReplayMode.RawEvents:
+                    {
+                        var logReader = new BinaryLogReplayEventSource();
+                        fileToReplay = _env.ExpectFile(".binlog").Path;
+                        if (replayMode == BinlogRoundtripTestReplayMode.Structured)
                         {
-                            var logReader = new BinaryLogReplayEventSource();
-                            fileToReplay = _env.ExpectFile(".binlog").Path;
-                            if (replayMode == BinlogRoundtripTestReplayMode.Structured)
-                            {
-                                // need dummy handler to force structured replay
-                                logReader.BuildFinished += (_, _) => { };
-                            }
-
-                            BinaryLogger outputBinlog = new BinaryLogger()
-                            {
-                                Parameters = fileToReplay
-                            };
-                            outputBinlog.Initialize(logReader);
-                            logReader.Replay(_logFile);
-                            outputBinlog.Shutdown();
+                            // need dummy handler to force structured replay
+                            logReader.BuildFinished += (_, _) => { };
                         }
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(replayMode), replayMode, null);
-                }
 
-                var mockLogFromPlayback = new MockLogger();
-
-                var parallelFromPlaybackText = new StringBuilder();
-                var parallelFromPlayback = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromPlaybackText.Append(t), colorSet: null, colorReset: null);
-                parallelFromPlayback.Parameters = "NOPERFORMANCESUMMARY";
-
-                var binaryLogReader = new BinaryLogReplayEventSource();
-                mockLogFromPlayback.Initialize(binaryLogReader);
-                parallelFromPlayback.Initialize(binaryLogReader);
-
-                // read the binary log and replay into mockLogger2
-                binaryLogReader.Replay(fileToReplay);
-                mockLogFromPlayback.Shutdown();
-                parallelFromPlayback.Shutdown();
-
-                // the binlog will have more information than recorded by the text log
-                mockLogFromPlayback.FullLog.ShouldContainWithoutWhitespace(mockLogFromBuild.FullLog);
-
-                var parallelExpected = parallelFromBuildText.ToString();
-                var parallelActual = parallelFromPlaybackText.ToString();
-
-                parallelActual.ShouldContainWithoutWhitespace(parallelExpected);
+                        BinaryLogger outputBinlog = new BinaryLogger()
+                        {
+                            Parameters = fileToReplay
+                        };
+                        outputBinlog.Initialize(logReader);
+                        logReader.Replay(_logFile);
+                        outputBinlog.Shutdown();
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(replayMode), replayMode, null);
             }
-            finally
-            {
-                Traits.Instance.EnableTargetOutputLogging = initialEnableTargetOutputLogging;
-            }
+
+            var mockLogFromPlayback = new MockLogger();
+
+            var parallelFromPlaybackText = new StringBuilder();
+            var parallelFromPlayback = new ParallelConsoleLogger(Framework.LoggerVerbosity.Diagnostic, t => parallelFromPlaybackText.Append(t), colorSet: null, colorReset: null);
+            parallelFromPlayback.Parameters = "NOPERFORMANCESUMMARY";
+
+            var binaryLogReader = new BinaryLogReplayEventSource();
+            mockLogFromPlayback.Initialize(binaryLogReader);
+            parallelFromPlayback.Initialize(binaryLogReader);
+
+            // read the binary log and replay into mockLogger2
+            binaryLogReader.Replay(fileToReplay);
+            mockLogFromPlayback.Shutdown();
+            parallelFromPlayback.Shutdown();
+
+            // the binlog will have more information than recorded by the text log
+            mockLogFromPlayback.FullLog.ShouldContainWithoutWhitespace(mockLogFromBuild.FullLog);
+
+            var parallelExpected = parallelFromBuildText.ToString();
+            var parallelActual = parallelFromPlaybackText.ToString();
+
+            parallelActual.ShouldContainWithoutWhitespace(parallelExpected);
         }
 
         /// <summary>
