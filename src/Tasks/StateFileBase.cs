@@ -36,6 +36,10 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Writes the contents of this object out to the specified file.
         /// </summary>
+        /// <remarks>
+        /// Prioritize using the AbsolutePath overload of this method. This method is still used by unenlightened tasks, but new code should use the AbsolutePath overload.
+        /// Delete this method once all tasks have been migrated to the AbsolutePath overload.
+        /// </remarks>
         internal virtual void SerializeCache(string stateFile, TaskLoggingHelper log, bool serializeEmptyState = false)
         {
             try
@@ -65,6 +69,41 @@ namespace Microsoft.Build.Tasks
                 // Not being able to serialize the cache is not an error, but we let the user know anyway.
                 // Don't want to hold up processing just because we couldn't read the file.
                 log.LogWarningWithCodeFromResources("General.CouldNotWriteStateFile", stateFile, e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Writes the contents of this object out to the specified file.
+        /// </summary>
+        internal virtual void SerializeCache(AbsolutePath stateFile, TaskLoggingHelper log, bool serializeEmptyState = false)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(stateFile))
+                {
+                    if (FileSystems.Default.FileExists(stateFile))
+                    {
+                        File.Delete(stateFile);
+                    }
+
+                    if (serializeEmptyState || HasStateToSave)
+                    {
+                        using (var s = new FileStream(stateFile, FileMode.CreateNew))
+                        {
+                            var translator = BinaryTranslator.GetWriteTranslator(s);
+                            translator.Translate(ref _serializedVersion);
+                            Translate(translator);
+                        }
+                    }
+                }
+            }
+            // If there was a problem writing the file (like it's read-only or locked on disk, for
+            // example), then eat the exception and log a warning.  Otherwise, rethrow.
+            catch (Exception e) when (!ExceptionHandling.NotExpectedSerializationException(e))
+            {
+                // Not being able to serialize the cache is not an error, but we let the user know anyway.
+                // Don't want to hold up processing just because we couldn't read the file.
+                log.LogWarningWithCodeFromResources("General.CouldNotWriteStateFile", stateFile.OriginalValue, e.Message);
             }
         }
 
